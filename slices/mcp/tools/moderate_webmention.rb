@@ -1,0 +1,37 @@
+# frozen_string_literal: true
+
+module MCP
+  module Tools
+    class ModerateWebmention < Base
+      APPROVED = Blog::Types::WebmentionStatus["approved"]
+      SPAM = Blog::Types::WebmentionStatus["spam"]
+
+      SCHEMA = {
+        additionalProperties: false,
+        properties: {
+          id: { type: "integer" },
+          verdict: {
+            type: "string",
+            enum: [APPROVED, SPAM],
+            description: "approved shows it on the post; spam hides it",
+          },
+        },
+        required: %w[id verdict],
+      }.freeze
+
+      description "Approve one webmention, so it shows on its blog post, or mark it as spam"
+      input_schema(SCHEMA)
+      scope OAuth::Scope::WRITE
+
+      class << self
+        def call(id:, verdict:, server_context:)
+          case moderate_webmention(server_context).call(id, verdict)
+          in Success(mention) then answer(id: mention.id, status: mention.status)
+          in Failure(:not_found) then refuse("no webmention has the ID #{id}")
+          else refuse("could not moderate the webmention")
+          end
+        end
+      end
+    end
+  end
+end

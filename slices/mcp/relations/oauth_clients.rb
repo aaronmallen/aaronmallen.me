@@ -1,0 +1,44 @@
+# frozen_string_literal: true
+
+module MCP
+  module Relations
+    class OAuthClients < Blog::DB::Relation
+      TABLE_KEY = Sequel.function(:hashtext, "oauth_clients")
+
+      schema :oauth_clients, infer: true do
+        attribute :visitor_hash, Blog::Types::VisitorHash
+      end
+
+      def claim(visitor_hash:, limit:, since:, **attrs)
+        transaction do
+          lock_until_commit(visitor_hash)
+          next unless for_visitor(visitor_hash).registered_since(since).count < limit
+
+          stamped(:create).call(**attrs, visitor_hash:)
+        end
+      end
+
+      def connected = where(revoked_at: nil)
+
+      def for_visitor(visitor_hash) = where(visitor_hash:)
+
+      def holding_live_token(at: Time.now)
+        live = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
+
+        where(id: live.select(:oauth_client_id))
+      end
+
+      def newest_first = order(self[:created_at].desc, self[:id].desc)
+
+      def registered_since(time) = where { created_at >= time }
+
+      def with_client_id(client_id) = where(client_id:)
+
+      private
+
+      def lock_until_commit(visitor_hash)
+        dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, visitor_hash)))
+      end
+    end
+  end
+end

@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+SERVICE="postgres"
+
+if [ "$#" -eq 0 ]; then
+  echo "usage: scripts/util/ensure_postgres <command> [args...]" >&2
+  exit 2
+fi
+
+answering() {
+  command -v pg_isready >/dev/null 2>&1 &&
+    pg_isready --quiet --host localhost --port "${DATABASE_PORT:-5432}"
+}
+
+running() {
+  scripts/util/compose ps --status running --services | grep -qx "$SERVICE"
+}
+
+if ! answering && ! running; then
+  scripts/util/compose up --detach --wait "$SERVICE"
+fi
+
+exec "$@"

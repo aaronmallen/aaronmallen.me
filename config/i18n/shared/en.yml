@@ -1,0 +1,44 @@
+en:
+  date:
+    formats:
+      full: "%A, %B %-d, %Y"
+      long: "%B %-d, %Y"
+      medium: "%b %-d, %Y"
+      short: "%b %-d"
+      weekday: "%A, %B %-d"
+  time:
+    formats:
+      clock: "%H:%M"
+      medium: "%b %-d, %Y, %H:%M"
+  ui:
+    components:
+      main_nav:
+        brand_label: "%{owner}, home"
+        label: "Main"
+        menu_label: "Menu"
+        pages:
+          about: "about"
+          contact: "contact"
+          projects: "projects"
+          writing: "writing"
+        skip_link: "Skip to content"
+      posts:
+        meta:
+          read_time: "%{count} min read"
+        tags:
+          label: "Tags"
+      project_card:
+        separator: " · "
+        stars: "★ %{stars}"
+        stars_label:
+          one: "%{stars} star"
+          other: "%{stars} stars"
+      settings_menu:
+        admin: "Admin"
+        appearance: "Appearance"
+        dark: "Dark"
+        light: "Light"
+        sign_out: "Sign out"
+        toggle_label: "Settings"
+    field_error:
+      invalid: "Check this field."

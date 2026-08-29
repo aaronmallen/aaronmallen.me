@@ -1,0 +1,22 @@
+en:
+  dry_validation:
+    errors:
+      date?: "format"
+      excluded_from?:
+        arg:
+          default: "reserved"
+      filled?: "blank"
+      format?: "format"
+      gt?: "format"
+      included_in?:
+        arg:
+          default: "format"
+      int?: "format"
+      max_size?: "long"
+      rules:
+        edits:
+          max_size?: "many"
+        original:
+          format?: "blank"
+        reason:
+          format?: "blank"

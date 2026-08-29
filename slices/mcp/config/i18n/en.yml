@@ -1,0 +1,28 @@
+en:
+  ui:
+    layouts:
+      application:
+        title: "Connect an app | %{owner}"
+    views:
+      authorizations:
+        new:
+          approve: "Approve"
+          asking: "%{client} is asking to connect."
+          asking_unnamed: "An app that gave no name is asking to connect."
+          cancel: "Cancel"
+          grants: "What it gets"
+          heading: "Approve this app?"
+          returns: "It goes back to %{uri} either way."
+          scopes:
+            read: "Read everything the site keeps: posts, drafts and all, social posts, your journal, tasks, projects, messages, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
+            suggest: "Send you suggested edits to accept or reject"
+            write: "Make any change the admin makes: write, publish and delete posts, send social posts, and change or delete any record"
+        refused:
+          back: "Go back to %{host}"
+          error: "%{description} (%{error})."
+          heading: "Request refused"
+          message: "The app at %{host} sent a request this site cannot take."
+          nothing: "Nothing was approved. The link tells the app why."
+        rejected:
+          heading: "Form expired"
+          message: "Nothing was approved. Start the connection again."

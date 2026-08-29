@@ -1,0 +1,66 @@
+x-database-password: &database-password "${DATABASE_PASSWORD:?run mise run setup:environment}"
+x-database-port: &database-port ${DATABASE_PORT:-5432}
+x-database-user: &database-user ${DATABASE_USER:-postgres}
+x-redis-password: &redis-password "${REDIS_PASSWORD:?run mise run setup:environment}"
+x-redis-port: &redis-port ${REDIS_PORT:-6379}
+x-redis-user: &redis-user ${REDIS_USER:-redis}
+
+name: aaronmallen.me
+
+services:
+  postgres:
+    container_name: aaronmallen.me-postgres
+    environment:
+      POSTGRES_PASSWORD: *database-password
+      POSTGRES_USER: *database-user
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    image: postgres:18
+    ports:
+      - host_ip: 127.0.0.1
+        mode: host
+        target: 5432
+        published: *database-port
+        protocol: tcp
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+  redis:
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server --appendonly yes --user default off --user "$$REDIS_USER" on ">$$REDIS_PASSWORD" "~*" "&*" +@all
+    container_name: aaronmallen.me-redis
+    environment:
+      REDIS_PASSWORD: *redis-password
+      REDIS_PORT: *redis-port
+      REDIS_USER: *redis-user
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          redis-cli --no-auth-warning --user "$$REDIS_USER" --pass "$$REDIS_PASSWORD" ping | grep -q PONG
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    image: redis:8
+    ports:
+      - host_ip: 127.0.0.1
+        mode: host
+        target: 6379
+        published: *redis-port
+        protocol: tcp
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-data:
+    name: aaronmallen.me-postgres-data
+  redis-data:
+    name: aaronmallen.me-redis-data

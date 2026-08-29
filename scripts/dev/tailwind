@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Start the tailwind watcher"
+
+set -e
+
+aube exec tailwindcss -i config/tailwind.css -o app/assets/css/tailwind.css --watch=always

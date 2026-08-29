@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module Projects
+  class Slice < Hanami::Slice
+    import keys: %w[github.client operations.record_projects_sync_outcome], from: :record
+
+    export %w[
+      operations.add_work_entry operations.archive_project operations.delete_work_entry operations.move_project
+      operations.restore_project operations.save_project queries.archived queries.by_id queries.live
+      queries.public_by_tag queries.public_grid queries.work_entries queries.work_entries_between
+    ]
+  end
+end

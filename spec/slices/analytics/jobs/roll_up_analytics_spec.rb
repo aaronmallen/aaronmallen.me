@@ -1,0 +1,272 @@
+# frozen_string_literal: true
+
+require "digest"
+
+RSpec.describe Analytics::Jobs::RollUpAnalytics do
+  let(:day) { Blog::TimeZone.today - 1 }
+  let(:today) { Blog::TimeZone.today }
+  let(:visitor_hash) { Digest::SHA256.hexdigest("203.0.113.7 Mozilla/5.0") }
+
+  def analytics_rollup = Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP
+
+  def countries(on = day) = rollup_repo.countries(from: on, to: on).map(&:to_h)
+
+  def event(*traits, on: day, **) = create(:analytics_event, *traits, occurred_at: noon(on), **)
+
+  def event_repo = Analytics::Slice["repos.analytics_event_repo"]
+
+  def failure = sync_state_repo.failure(analytics_rollup)
+
+  def kept = event_repo.analytics_events.order(:occurred_at, :id).to_a.map(&:id)
+
+  def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
+
+  def paths(on = day) = rollup_repo.top_paths(from: on, to: on).map(&:to_h)
+
+  def referrers(on = day) = rollup_repo.referrers(from: on, to: on).map(&:to_h)
+
+  def roll_up = described_class.new.perform
+
+  def rollup(on, **) = create(:analytics_rollup, day: on, **)
+
+  def rollup_repo = Analytics::Slice["repos.analytics_rollup_repo"]
+
+  def sync_state_repo = Record::Slice["repos.sync_state_repo"]
+
+  describe "yesterday" do
+    it "stores the day's totals" do
+      event(visitor_hash:, read_seconds: 90)
+      event(visitor_hash:, read_seconds: 30)
+      roll_up
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 2, visitors: 1, read_seconds: 120)
+    end
+
+    it "stores the per-path figures" do
+      event(path: "/writing/hello", title: "Hello", visitor_hash:, read_seconds: 90)
+      roll_up
+
+      expect(paths).to eq(
+        [{ path: "/writing/hello", title: "Hello", views: 1, visitors: 1, read_seconds: 90, bounces: 1 }],
+      )
+    end
+
+    it "takes a path's title from its latest titled view" do
+      event(path: "/writing/hello", title: "Old")
+      create(:analytics_event, path: "/writing/hello", title: "New", occurred_at: noon(day) + 60)
+      create(:analytics_event, path: "/writing/hello", title: nil, occurred_at: noon(day) + 120)
+      roll_up
+
+      expect(paths.first).to include(title: "New")
+    end
+
+    it "counts no bounce for a visitor who read a second page" do
+      event(path: "/writing/hello", visitor_hash:)
+      event(path: "/writing/other", visitor_hash:)
+      roll_up
+
+      expect(paths.map { it[:bounces] }).to eq([0, 0])
+    end
+
+    it "stores the referrers, with a direct visit under no host" do
+      event(referrer_host: "news.example")
+      event(:direct)
+      roll_up
+
+      expect(referrers).to contain_exactly({ host: "news.example", views: 1 }, { host: nil, views: 1 })
+    end
+
+    it "stores the countries, with an unknown one under no code" do
+      event(country_code: "JP")
+      event(:unknown_country)
+      roll_up
+
+      expect(countries).to contain_exactly({ country_code: "JP", views: 1 }, { country_code: nil, views: 1 })
+    end
+
+    it "leaves today's events for tomorrow's run" do
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today))
+      roll_up
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 0)
+    end
+
+    it "counts the first moment of the day" do
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(day))
+      roll_up
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 1)
+    end
+
+    it "stores a day with no events" do
+      roll_up
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 0, visitors: 0, read_seconds: 0)
+    end
+  end
+
+  describe "run twice" do
+    before { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP") }
+
+    it "stores the same totals" do
+      2.times { roll_up }
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 1, visitors: 1)
+    end
+
+    it "stores the same rows", :aggregate_failures do
+      roll_up
+      stored = [paths, referrers, countries]
+      roll_up
+
+      expect([paths, referrers, countries]).to eq(stored)
+    end
+  end
+
+  describe "a day an earlier run missed" do
+    it "rolls up the day between the newest rollup and yesterday" do
+      rollup(day - 2)
+      event(on: day - 1)
+      roll_up
+
+      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 1)
+    end
+
+    it "rolls up yesterday in the same run" do
+      rollup(day - 2)
+      event(on: day - 1)
+      event
+      roll_up
+
+      expect(rollup_repo.by_day(day)).to have_attributes(views: 1)
+    end
+
+    it "rolls up a day the events ran dry on" do
+      rollup(day - 2)
+      roll_up
+
+      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 0, visitors: 0)
+    end
+
+    it "fills every day a run that skipped nights left behind" do
+      rollup(day - 3)
+      event(on: day - 2)
+      roll_up
+
+      expect(rollup_repo.days(from: day - 2, to: day).map(&:day)).to eq([day - 2, day - 1, day])
+    end
+
+    it "starts at the oldest event it still holds, not at the newest rollup" do
+      rollup(day - 200)
+      event(on: day - 3)
+      roll_up
+
+      expect(rollup_repo.by_day(day - 100)).to be_nil
+    end
+
+    it "leaves a day it already rolled up alone" do
+      rollup(day - 1, views: 5, visitors: 3)
+      roll_up
+
+      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 5, visitors: 3)
+    end
+  end
+
+  describe "the prune" do
+    it "deletes the events older than 90 days once their day is rolled up" do
+      event(on: today - 91)
+      roll_up
+
+      expect(kept).to be_empty
+    end
+
+    it "keeps the rollups for the days it pruned" do
+      rollup(today - 91, views: 9, visitors: 5)
+      event(on: today - 91)
+      roll_up
+
+      expect(rollup_repo.by_day(today - 91)).to have_attributes(views: 9)
+    end
+
+    it "rolls a day up before the prune takes its events" do
+      event(on: today - 91)
+      roll_up
+
+      expect(rollup_repo.by_day(today - 91)).to have_attributes(views: 1)
+    end
+
+    it "deletes the whole day that falls out of the window" do
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 89) - 1)
+      roll_up
+
+      expect(kept).to be_empty
+    end
+
+    it "keeps the first moment of the day at the edge of the window" do
+      edge = create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 89))
+      roll_up
+
+      expect(kept).to eq([edge.id])
+    end
+
+    it "stops at the first day no run rolled up" do
+      [95, 93].each { rollup(today - it) }
+      events = [95, 94, 93].map { event(on: today - it).id }
+      roll_up
+
+      expect(kept).to eq(events.drop(1))
+    end
+  end
+
+  it "clears an earlier failure once a run gets through" do
+    sync_state_repo.record_failure(analytics_rollup, :rollup_failed)
+    roll_up
+
+    expect(failure).to be_nil
+  end
+
+  describe "a run that breaks" do
+    let(:crash) { -> { raise Sequel::DatabaseError, "PG::UndefinedTable" } }
+
+    def roll_up_failing
+      roll_up
+    rescue Sequel::DatabaseError
+      nil
+    end
+
+    it "leaves the rollup that broke where the operator reads it, message and all" do
+      replace_component("operations.roll_up_analytics", crash)
+      roll_up_failing
+
+      expect(failure).to include(message: "PG::UndefinedTable", reason: "rollup_failed", sync: analytics_rollup)
+    end
+
+    it "tells a prune that broke from a rollup that broke" do
+      replace_component("operations.prune_analytics_events", crash)
+      roll_up_failing
+
+      expect(failure).to include(reason: "prune_failed")
+    end
+
+    it "still fails the run, so the error reaches the log with its backtrace" do
+      replace_component("operations.roll_up_analytics", crash)
+
+      expect { roll_up }.to raise_error(Sequel::DatabaseError, /PG::UndefinedTable/)
+    end
+
+    it "holds the prune back until a day rolls up, so it deletes nothing it hasn't summed" do
+      old = event(on: today - 91)
+      replace_component("operations.roll_up_analytics", crash)
+      roll_up_failing
+
+      expect(kept).to eq([old.id])
+    end
+
+    it "counts the nights it has been failing" do
+      replace_component("operations.roll_up_analytics", crash)
+      2.times { roll_up_failing }
+
+      expect(failure).to include(count: 2)
+    end
+  end
+end

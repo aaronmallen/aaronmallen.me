@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#MISE description="Prepare every database the app and the suite need"
+#MISE alias=["setup:db", "su:db", "su:databases"]
+
+set -e
+
+scripts/db/prepare
+HANAMI_ENV="test" scripts/db/prepare

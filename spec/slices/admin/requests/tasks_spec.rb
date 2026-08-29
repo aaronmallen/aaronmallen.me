@@ -1,0 +1,1745 @@
+# frozen_string_literal: true
+
+RSpec.describe "Admin tasks", type: :request do
+  let(:i18n) { Admin::Slice["i18n"] }
+  let(:page) { Capybara.string(last_response.body) }
+  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
+
+  def capture(title, **params)
+    post "/admin/tasks", { _csrf_token: admin_csrf_token, task: { title: }, **params }
+  end
+
+  def empty_text(filter) = i18n.t(["ui.views.tasks.index.empty", filter].join("."))
+
+  def send_to(path, **params)
+    post path, { _csrf_token: admin_csrf_token, **params }
+  end
+
+  def titles = page.all(".task-title, .li-title").map(&:text)
+
+  def watch_carry_forward
+    allow(repo).to receive(:carry_forward).and_call_original
+    replace_component("repos.task_repo", repo)
+  end
+
+  def watch_finished
+    allow(repo).to receive(:finished).and_call_original
+    replace_component("repos.task_repo", repo)
+  end
+
+  describe "signed in" do
+    before { sign_in_to_admin }
+
+    it "answers with a server error when the day's sprint cannot be rolled" do
+      create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
+      allow(sprint_repo).to receive(:by_id).and_return(nil)
+      replace_component("repos.sprint_repo", sprint_repo)
+      get "/admin/tasks"
+
+      expect(last_response.status).to eq(500)
+    end
+
+    describe "the three lists" do
+      before do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+      end
+
+      {
+        "today" => "Ship the screen",
+        "next" => "Email the accountant",
+        "someday" => "Learn Elixir",
+      }.each do |filter, listed|
+        it "shows only the #{filter} tasks with the #{filter} filter" do
+          get "/admin/tasks", filter: filter
+
+          expect(titles).to eq([listed])
+        end
+
+        it "marks the #{filter} tab as the one you are on" do
+          get "/admin/tasks", filter: filter
+
+          expect(page).to have_css(".subtab.on[aria-current='page']", text: filter)
+        end
+      end
+
+      it "titles the page Tasks" do
+        get "/admin/tasks"
+
+        expect(page).to have_title("Tasks | Admin | #{Blog::Owner.full_name}")
+      end
+
+      it "shows today without a filter" do
+        get "/admin/tasks"
+
+        expect(titles).to eq(["Ship the screen"])
+      end
+
+      it "shows today for a filter it doesn't know" do
+        get "/admin/tasks", filter: "later"
+
+        expect(titles).to eq(["Ship the screen"])
+      end
+
+      it "offers a tab for every list and the archive" do
+        get "/admin/tasks"
+
+        expect(page.all(".subtab span:first-of-type").map(&:text)).to eq(%w[today upcoming next someday completed])
+      end
+
+      it "says nothing arrived in a sprint nothing was carried into" do
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "0 carried in")
+      end
+
+      it "counts every tab whichever is open" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks", filter: "someday"
+
+        expect(page.all(".subtab-count").map(&:text)).to eq(%w[1 0 1 1 1])
+      end
+
+      it "keeps the count off the lists a finished task has left" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "says what the sprint holds in the page sub" do
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "1 open in today · 0 carried in · 0 finished today")
+      end
+
+      it "counts what was finished today in the page sub" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "1 finished today")
+      end
+
+      it "leaves a task finished on an earlier day out of the page sub" do
+        create(:task, :done, completed_at: Blog::TimeZone.day_start(Blog::TimeZone.today) - 60)
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "0 finished today")
+      end
+
+      it "counts a task finished on an earlier day on the completed tab" do
+        create(:task, :done, completed_at: Blog::TimeZone.day_start(Blog::TimeZone.today) - 60)
+        get "/admin/tasks"
+
+        expect(page.all(".subtab-count").map(&:text).last).to eq("1")
+      end
+
+      %w[today upcoming next someday].each do |filter|
+        it "reads no finished task on the #{filter} tab" do
+          watch_finished
+          get "/admin/tasks", filter: filter
+
+          expect(repo).not_to have_received(:finished)
+        end
+      end
+
+      it "reads the finished tasks on the completed tab" do
+        watch_finished
+        get "/admin/tasks", filter: "completed"
+
+        expect(repo).to have_received(:finished)
+      end
+
+      it "dates the sprint in the page sub" do
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "Sprint #{Blog::TimeZone.today.strftime('%B %-d, %Y')}")
+      end
+
+      it "closes the screen with the note on how sprints roll" do
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task-note", exact_text: i18n.t("ui.views.tasks.index.footnote"))
+      end
+
+      {
+        "today" => ["Sprint · #{Blog::TimeZone.today.strftime('%b %-d')}", "the current sprint"],
+        "next" => ["On deck", "queued up, not today"],
+        "someday" => ["Backlog", "maybe, eventually, probably not"],
+      }.each do |filter, (label, blurb)|
+        it "labels the #{filter} card with its own label" do
+          get "/admin/tasks", filter: filter
+
+          expect(page).to have_css(".card-label", exact_text: label)
+        end
+
+        it "blurbs the #{filter} card" do
+          get "/admin/tasks", filter: filter
+
+          expect(page).to have_css(".card-blurb", text: blurb)
+        end
+      end
+
+      it "counts what is open in the card it is showing" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".card-note", exact_text: "1 open")
+      end
+
+      it "marks today as the live card" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css("section.card.card-live")
+      end
+
+      it "leaves the other lists unmarked" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css("section.card.card-live")
+      end
+
+      it "puts the capture field at the foot of the card" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".card-body > *:last-child.task-capture")
+      end
+    end
+
+    it "orders a list by position" do
+      create(:task, title: "second", position: 2)
+      create(:task, title: "first", position: 1)
+      get "/admin/tasks", filter: "next"
+
+      expect(titles).to eq(%w[first second])
+    end
+
+    %w[next someday].each do |filter|
+      it "says something useful when #{filter} holds nothing" do
+        get "/admin/tasks", filter: filter
+
+        expect(page).to have_css(".empty", exact_text: empty_text(filter))
+      end
+    end
+
+    describe "an empty sprint" do
+      def planner(key, **) = i18n.t(["ui.components.tasks.planner", key].join("."), **)
+
+      def pools = page.all(".task-planner .seg-option").map(&:text)
+
+      it "asks what the day is for" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css(".task-planner .card-title", exact_text: planner("ask"))
+      end
+
+      it "heads the planner with the sprint date" do
+        label = planner("label", date: Blog::TimeZone.today.strftime("%b %-d, %Y"))
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css(".task-planner .card-label", exact_text: label)
+      end
+
+      it "says the sprint is empty beside the question" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css(".task-planner .sprint-note", exact_text: planner("empty"))
+      end
+
+      it "carries a field of its own" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css(".task-planner .task-capture input[name='task[title]']")
+      end
+
+      it "lists what is waiting in next" do
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+        get "/admin/tasks", filter: "today"
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "counts both pools on the switch" do
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+        get "/admin/tasks", filter: "today"
+
+        expect(pools).to eq(["next · 1", "someday · 1"])
+      end
+
+      it "offers nothing already finished" do
+        create(:task, :done, title: "Email the accountant")
+        get "/admin/tasks", filter: "today"
+
+        expect(pools).to eq(["next · 0", "someday · 0"])
+      end
+
+      it "lists someday when that pool is asked for" do
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(titles).to eq(["Learn Elixir"])
+      end
+
+      it "keeps the tasks screen when switching pools" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page.all(".task-planner .seg-option").map { it["href"] })
+          .to eq(["/admin/tasks?filter=today&pool=next", "/admin/tasks?filter=today&pool=someday"])
+      end
+
+      it "marks the pool on show" do
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(page).to have_css(".task-planner .seg-option.current", exact_text: "someday · 0")
+      end
+
+      it "shows the type and the tags of a task it offers", :aggregate_failures do
+        chore = create(:task_type, name: "Chore")
+        create(:task, title: "Email the accountant", task_type_id: chore.id, tags: %w[admin])
+        get "/admin/tasks", filter: "today"
+
+        expect(page.all(".task-planner .task-meta .pill").map(&:text)).to eq(%w[Chore])
+        expect(page.all(".task-planner .task-meta .task-tag").map(&:text)).to eq(%w[#admin])
+      end
+
+      it "offers a pull straight into today" do
+        task = create(:task)
+        get "/admin/tasks", filter: "today"
+
+        expect(page.all(".task-planner .li-side form").map { it["action"] })
+          .to eq(["/admin/tasks/#{task.id}/move/today"])
+      end
+
+      it "says which pool is empty" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_next"))
+      end
+
+      it "names the other pool when it is the empty one" do
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_someday"))
+      end
+
+      it "drops the planner once the sprint holds a task", :aggregate_failures do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id, title: "Ship it")
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_no_css(".task-planner")
+        expect(titles).to eq(["Ship it"])
+      end
+
+      it "keeps the planner off the other lists" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-planner")
+      end
+    end
+
+    it "asks for the text and a type to capture a task", :aggregate_failures do
+      get "/admin/tasks", filter: "next"
+
+      expect(page.all(".task-capture-row input:not([type=hidden])").map { it["name"] }).to eq(["task[title]"])
+      expect(page.all(".task-capture-row select").map { it["name"] }).to eq(["task[task_type_id]"])
+    end
+
+    describe "capturing a task" do
+      it "writes it down from one field" do
+        capture("Email the accountant", filter: "next")
+
+        expect(repo.in_list("next").map(&:title)).to eq(["Email the accountant"])
+      end
+
+      it "captures into the list that was open" do
+        capture("Learn Elixir", filter: "someday")
+
+        expect(repo.in_list("someday").map(&:title)).to eq(["Learn Elixir"])
+      end
+
+      it "captures into the current sprint from today" do
+        capture("Ship the screen", filter: "today")
+
+        expect(repo.in_sprint(sprint_repo.on(Blog::TimeZone.today).id).map(&:title)).to eq(["Ship the screen"])
+      end
+
+      it "carries the day's work forward once" do
+        watch_carry_forward
+        capture("Ship the screen", filter: "today")
+
+        expect(repo).to have_received(:carry_forward).once
+      end
+
+      it "carries the day's work forward once when it comes back with the form" do
+        watch_carry_forward
+        capture("", filter: "today")
+
+        expect(repo).to have_received(:carry_forward).once
+      end
+
+      it "comes back to the list that was open" do
+        capture("Learn Elixir", filter: "someday")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
+      end
+
+      it "says so" do
+        capture("Email the accountant", filter: "next")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "Task captured")
+      end
+
+      it "answers 422 for a task with no text" do
+        capture("", filter: "next")
+
+        expect(last_response.status).to eq(422)
+      end
+
+      it "says what is missing" do
+        capture("", filter: "next")
+
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.title.blank"))
+      end
+
+      it "writes nothing for a task with no text" do
+        capture("", filter: "next")
+
+        expect(repo.in_list("next")).to be_empty
+      end
+
+      it "gives it the type the field was set to" do
+        chore = create(:task_type, name: "Chore")
+        capture("Email the accountant", filter: "next", task: { title: "Email the accountant",
+                                                                task_type_id: chore.id.to_s })
+
+        expect(repo.in_list("next").first.task_type_id).to eq(chore.id)
+      end
+
+      it "reads a #tag in the text as a tag" do
+        capture("Email the accountant #admin", filter: "next")
+
+        expect(repo.in_list("next").first.tags.map(&:name)).to eq(["admin"])
+      end
+
+      it "keeps the tag out of the title" do
+        capture("Email the accountant #admin", filter: "next")
+
+        expect(repo.in_list("next").first.title).to eq("Email the accountant")
+      end
+
+      it "reads every #tag in the text" do
+        capture("#admin Email the accountant #money", filter: "next")
+
+        expect(repo.in_list("next").first.tags.map(&:name)).to contain_exactly("admin", "money")
+      end
+
+      it "refuses text that is nothing but tags" do
+        capture("#admin", filter: "next")
+
+        expect(last_response.status).to eq(422)
+      end
+    end
+
+    describe "the shape of a row" do
+      def keys = page.all(".task .task-key").map(&:text)
+
+      {
+        "today" => [:in_sprint],
+        "next" => [],
+        "someday" => [:someday],
+        "completed" => [:done],
+      }.each do |filter, traits|
+        it "leads each #{filter} task with its key" do
+          sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+          tasks = Array.new(2) { create(:task, *traits, sprint_id: (sprint.id if traits.include?(:in_sprint))) }
+          get "/admin/tasks", filter: filter
+
+          expect(keys).to match_array(tasks.map { "##{it.id}" })
+        end
+      end
+
+      it "leads each waiting task on the upcoming tab with its key" do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(keys).to eq(["##{task.id}"])
+      end
+
+      it "strikes through a task that is done" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".task.done .task-title", text: "Filed already")
+      end
+
+      it "marks out the task in progress" do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task.doing")
+      end
+
+      it "says a task is in progress on its meta line" do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task-meta .pill.blue", text: i18n.t("ui.components.tasks.row.in_progress"))
+      end
+
+      it "leaves an open task unmarked", :aggregate_failures do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task").and have_no_css(".task.doing")
+        expect(page).to have_no_css(".task.done")
+      end
+
+      it "says the day and the time a task was finished" do
+        at = Blog::TimeZone.local_time(2026, 9, 18, 11, 20)
+        create(:task, :done, completed_at: at, title: "Filed already")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".task-finished", text: "done Sep 18 · 11:20")
+      end
+
+      it "offers a start on an open task", :aggregate_failures do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css("form[action$='/start']")
+        expect(page).to have_no_css("form[action$='/complete']")
+      end
+
+      it "offers a complete and a stop on the task in progress", :aggregate_failures do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_css("form[action$='/complete']")
+        expect(page.all("form[action$='/stop']").size).to eq(1)
+      end
+
+      it "keeps the delete off the row" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-acts form[action$='/delete']")
+      end
+
+      it "puts the delete in the editor" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-editor form[action$='/delete']")
+      end
+
+      it "opens the editor from the title and from the pen" do
+        task = create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all("label[for='task-#{task.id}-edit']").size).to eq(3)
+      end
+    end
+
+    describe "moving a task" do
+      it "moves it to someday" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/move/someday")
+
+        expect(repo.by_id(task.id).list).to eq("someday")
+      end
+
+      it "joins the current sprint on the way to today" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/move/today")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
+      end
+
+      it "follows the task to the list it went to" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/move/someday")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
+      end
+
+      it "offers the list on either side of the one the task is in" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
+          .to eq(["/admin/tasks/#{repo.in_list('next').first.id}/move/today",
+                  "/admin/tasks/#{repo.in_list('next').first.id}/move/someday"])
+      end
+
+      it "offers only the list to the right from the first one" do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
+          .to eq(["/admin/tasks/#{repo.in_sprint(sprint_repo.on(Blog::TimeZone.today).id).first.id}/move/next"])
+      end
+
+      it "offers only the list to the left from the last one" do
+        create(:task, :someday)
+        get "/admin/tasks", filter: "someday"
+
+        expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
+          .to eq(["/admin/tasks/#{repo.in_list('someday').first.id}/move/next"])
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/move/someday")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "answers 404 for a list that isn't one" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/move/later")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "starting a task" do
+      it "sets it in progress" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/start")
+
+        expect(repo.by_id(task.id).status).to eq("in_progress")
+      end
+
+      it "puts it in today" do
+        task = create(:task, :someday)
+        send_to("/admin/tasks/#{task.id}/start")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
+      end
+
+      it "lands on today" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/start")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=today"))
+      end
+
+      it "offers no start on a task already in progress in today" do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(page).to have_no_css("form[action$='/start']")
+      end
+
+      it "offers start again on a task moved out of today while in progress" do
+        task = create(:task, :in_progress, :in_sprint)
+        send_to("/admin/tasks/#{task.id}/move/someday")
+        get "/admin/tasks", filter: "someday"
+
+        expect(page).to have_css("form[action$='/start']")
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/start")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "stopping a task" do
+      let(:task) do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+      end
+
+      it "takes it out of progress" do
+        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+
+        expect(repo.by_id(task.id).status).to eq("open")
+      end
+
+      it "keeps it in the sprint" do
+        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+
+        expect(repo.by_id(task.id).sprint_id).to eq(task.sprint_id)
+      end
+
+      it "says it stopped" do
+        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "Stopped · it waits in the sprint", visible: :all)
+      end
+
+      it "keeps the list that was open" do
+        send_to("/admin/tasks/#{task.id}/stop", filter: "today")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=today"))
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/stop")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "finishing a task" do
+      it "marks it done" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/complete", filter: "next")
+
+        expect(repo.by_id(task.id).status).to eq("done")
+      end
+
+      it "writes when it was finished" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/complete", filter: "next")
+
+        expect(repo.by_id(task.id).completed_at).not_to be_nil
+      end
+
+      it "opens it again" do
+        task = create(:task, :done)
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "next")
+
+        expect(repo.by_id(task.id).status).to eq("open")
+      end
+
+      it "says it reopened" do
+        task = create(:task, :done)
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "Reopened", visible: :all)
+      end
+
+      it "clears the time when it is opened again" do
+        task = create(:task, :done)
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "next")
+
+        expect(repo.by_id(task.id).completed_at).to be_nil
+      end
+
+      it "offers reopen rather than done on a finished task" do
+        create(:task, :done)
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css("form[action$='/reopen']").and have_no_css("form[action$='/complete']")
+      end
+
+      it "takes it off the list it was in" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to be_empty
+      end
+
+      it "keeps the list that was open" do
+        task = create(:task, :someday)
+        send_to("/admin/tasks/#{task.id}/complete", filter: "someday")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
+      end
+
+      it "comes back to the archive from the archive" do
+        task = create(:task, :done)
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=completed"))
+      end
+
+      it "answers 404 for finishing a task that isn't there" do
+        send_to("/admin/tasks/0/complete")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "answers 404 for opening a task that isn't there" do
+        send_to("/admin/tasks/0/reopen")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "editing a task" do
+      let(:task) { create(:task, title: "Email accountant") }
+
+      def chore = create(:task_type, name: "Chore")
+
+      def edit(**fields)
+        written = { title: "Email the accountant", list: "", note: "", task_type_id: "", tags: "", **fields }
+
+        send_to("/admin/tasks/#{task.id}", filter: "next", task: written)
+      end
+
+      it "rewrites the text" do
+        edit
+
+        expect(repo.by_id(task.id).title).to eq("Email the accountant")
+      end
+
+      it "gives it a type" do
+        added = chore
+        edit(task_type_id: added.id.to_s)
+
+        expect(repo.by_id(task.id).task_type_id).to eq(added.id)
+      end
+
+      it "writes a note on it" do
+        edit(note: "Ring before ten")
+
+        expect(repo.by_id(task.id).note).to eq("Ring before ten")
+      end
+
+      it "reads the note back into the field" do
+        edit(note: "Ring before ten")
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find("textarea[name='task[note]']", visible: :all).text).to eq("Ring before ten")
+      end
+
+      it "leaves the note field empty for a task without one" do
+        task
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find("textarea[name='task[note]']", visible: :all).text).to be_empty
+      end
+
+      it "tags it" do
+        edit(tags: "ruby, admin")
+
+        expect(repo.by_id(task.id).tags.map(&:name)).to eq(%w[admin ruby])
+      end
+
+      it "shows the type on the row" do
+        edit(task_type_id: chore.id.to_s, tags: "ruby")
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task-meta .pill").map(&:text)).to eq(["Chore"])
+      end
+
+      it "shows the tags on the row in their own colour" do
+        edit(tags: "ruby")
+        get "/admin/tasks", filter: "next"
+        hue = Blog::UI::Components::Pill.for_tag_color(repo.by_id(task.id).tags.first.color)
+
+        expect(page).to have_css(".task-meta .task-tag.#{hue}", text: "#ruby")
+      end
+
+      it "draws the type in its own colour, with its own icon" do
+        edit(task_type_id: create(:task_type, name: "Chore", color: "mk-violet", icon: "broom").id.to_s)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-meta .pill.violet i.fa-broom", visible: :all)
+      end
+
+      it "calls a task with no type untyped" do
+        task
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-meta .pill", text: i18n.t("ui.components.tasks.type_tag.untyped"))
+      end
+
+      it "says so" do
+        edit
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "Task saved")
+      end
+
+      it "answers 422 for a task with no text" do
+        edit(title: " ")
+
+        expect(last_response.status).to eq(422)
+      end
+
+      it "leaves the editor open on the task it refused" do
+        edit(title: " ")
+
+        expect(page).to have_css("#task-#{task.id}-edit[checked] ~ .task-editor form[action='/admin/tasks/#{task.id}']")
+      end
+
+      it "writes nothing for a task with no text" do
+        edit(title: " ")
+
+        expect(repo.by_id(task.id).title).to eq("Email accountant")
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0", filter: "next", task: { title: "Anything" })
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "offers every type the editor can set, in the order the types screen put them in" do
+        %w[Chore Admin].each { create(:task_type, name: it) }
+        task
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task-editor select[name='task[task_type_id]'] option", visible: :all).map(&:text))
+          .to eq([i18n.t("ui.components.tasks.editor.no_type"), "Chore", "Admin"])
+      end
+
+      it "holds the title, the note, the type, the list and the tags" do
+        task
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task-editor-form [name^='task[']").map { it["name"] })
+          .to eq(["task[title]", "task[note]", "task[task_type_id]", "task[list]", "task[sprint_on]", "task[tags]"])
+      end
+
+      it "offers the three lists, marking the one the task is in" do
+        task
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find(".task-editor select[name='task[list]'] option[selected]").text).to eq("next")
+      end
+
+      it "reads today back for a task in the sprint" do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page.find(".task-editor select[name='task[list]'] option[selected]").text).to eq("today")
+      end
+
+      it "moves the task to the list it was given" do
+        edit(list: "someday")
+
+        expect(repo.by_id(task.id).list).to eq("someday")
+      end
+
+      it "joins the sprint on the way to today", :aggregate_failures do
+        edit(list: "today")
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(Blog::TimeZone.today).id)
+        expect(repo.by_id(task.id).list).to be_nil
+      end
+
+      it "leaves the task where it is when the list did not change" do
+        edit(list: "next")
+
+        expect(repo.by_id(task.id).list).to eq("next")
+      end
+
+      it "answers 422 for a list that is not one" do
+        edit(list: "later")
+
+        expect(last_response.status).to eq(422)
+      end
+
+      it "closes the editor with a cancel that sends nothing" do
+        task
+        get "/admin/tasks", filter: "next"
+
+        cancel = i18n.t("ui.components.tasks.editor.cancel")
+
+        expect(page).to have_css(".task-editor-foot label[for='task-#{task.id}-edit']", text: cancel)
+      end
+    end
+
+    describe "saving a task from the editor it sits in" do
+      let(:sprint) { create(:sprint, sprint_date: today) }
+
+      def date_field(task) = page.find("#task-#{task.id}-form [name='task[sprint_on]']", visible: :all)
+
+      def held(task)
+        page.all("#task-#{task.id}-form [name^='task[']", visible: :all)
+            .to_h { [it[:name][/\[(\w+)\]/, 1].to_sym, it.value.to_s] }
+      end
+
+      def save(task, filter:, **changes)
+        get "/admin/tasks", filter: filter
+        send_to("/admin/tasks/#{task.id}", filter:, task: { **held(task), **changes })
+      end
+
+      def today = Blog::TimeZone.today
+
+      it "shows the sprint's date in the editor on the today tab" do
+        task = create(:task, :in_sprint, sprint_id: sprint.id)
+        get "/admin/tasks"
+
+        expect(date_field(task).value).to eq(today.iso8601)
+      end
+
+      it "shows the date of the sprint a finished task ran in on the completed tab", :aggregate_failures do
+        task = create(:task, :done, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        get "/admin/tasks", filter: "completed"
+
+        expect(date_field(task).value).to eq((today - 1).iso8601)
+        expect(date_field(task)[:min]).to eq((today - 1).iso8601)
+      end
+
+      it "leaves a sprint task saved from the today tab with nothing changed where it is" do
+        task = create(:task, :in_sprint, :carried, sprint_id: sprint.id)
+        save(task, filter: "today")
+
+        expect(repo.by_id(task.id)).to have_attributes(sprint_id: sprint.id, carried_count: 2)
+      end
+
+      it "leaves a finished task saved from the completed tab on the sprint it ran in" do
+        ran = create(:sprint, sprint_date: today - 1)
+        task = create(:task, :done, :in_sprint, sprint_id: ran.id)
+        save(task, filter: "completed")
+
+        expect(repo.by_id(task.id).sprint_id).to eq(ran.id)
+      end
+
+      it "moves a sprint task to next when next is picked, though the sprint's date comes with it" do
+        task = create(:task, :in_sprint, :carried, sprint_id: sprint.id)
+        save(task, filter: "today", list: "next")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil, carried_count: 0)
+      end
+
+      it "moves a waiting task to someday when someday is picked on the upcoming tab" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1))
+        save(task, filter: "upcoming", list: "someday")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "someday", sprint_id: nil)
+      end
+
+      it "joins today's sprint when today is picked for a next task, though its date is blank" do
+        task = create(:task)
+        save(task, filter: "next", list: "today", sprint_on: "")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
+      end
+
+      it "sends a sprint task to next when its date is cleared" do
+        task = create(:task, :in_sprint, sprint_id: sprint.id)
+        save(task, filter: "today", sprint_on: "")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
+      end
+
+      it "moves a waiting task to the day it was given when only its date changed" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1))
+        save(task, filter: "upcoming", sprint_on: (today + 2).iso8601)
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today + 2).id)
+      end
+    end
+
+    describe "a task that was carried" do
+      let(:yesterday) { create(:sprint, sprint_date: Blog::TimeZone.today - 1) }
+
+      it "says so on the row" do
+        create(:task, :in_sprint, sprint_id: yesterday.id, title: "Ship the screen")
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task-meta .pill.sand", text: "carried ×1")
+      end
+
+      it "says nothing on a task that was never carried" do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_no_css(".task-meta .pill", text: "carried")
+      end
+
+      it "says nothing once it is finished" do
+        create(:task, :carried, :done, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_no_css(".task-meta .pill", text: "carried")
+      end
+
+      it "counts what arrived in the sprint" do
+        2.times { create(:task, :in_sprint, sprint_id: yesterday.id) }
+        get "/admin/tasks"
+
+        expect(page).to have_css(".page-head-sub", text: "2 carried in")
+      end
+    end
+
+    describe "deleting a task" do
+      it "takes it away" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}/delete", filter: "next")
+
+        expect(repo.by_id(task.id)).to be_nil
+      end
+
+      it "asks first" do
+        create(:task, title: "Email the accountant")
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css("form[action$='/delete'][data-confirm]")
+      end
+
+      it "names the task it is about to take away" do
+        create(:task, title: "Email the accountant")
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find("form[action$='/delete']")["data-confirm"]).to include("Email the accountant")
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/delete")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "reordering a task" do
+      before do
+        create(:task, title: "first", position: 1)
+        create(:task, title: "second", position: 2)
+      end
+
+      it "moves a task up past the one above it" do
+        send_to("/admin/tasks/#{repo.in_list('next').last.id}/reorder/up", filter: "next")
+
+        expect(repo.in_list("next").map(&:title)).to eq(%w[second first])
+      end
+
+      it "moves a task down past the one below it" do
+        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/down", filter: "next")
+
+        expect(repo.in_list("next").map(&:title)).to eq(%w[second first])
+      end
+
+      it "holds the caret that has nowhere to go", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+        carets = page.all(".task-order button")
+
+        expect(carets.first).to be_disabled
+        expect(carets.last).to be_disabled
+      end
+
+      it "redirects back to the list at the top rather than failing" do
+        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/up", filter: "next")
+
+        expect(last_response).to be_redirect
+      end
+
+      it "answers 404 for a direction that isn't one" do
+        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/sideways")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/reorder/up")
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "a title holding HTML" do
+      let(:markup) { "<script>alert('x')</script>" }
+
+      before do
+        create(:task, title: markup)
+        get "/admin/tasks", filter: "next"
+      end
+
+      it "reads it back as the text it is" do
+        expect(page).to have_css(".task-title", text: markup)
+      end
+
+      it "escapes it rather than serving it as markup" do
+        expect(last_response.body).to include("&lt;script&gt;alert(&#39;x&#39;)&lt;/script&gt;")
+      end
+
+      it "keeps a quoted title inside the attribute that carries it" do
+        create(:task, title: 'Ask "why"')
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all("form[action$='/delete']").map { it["data-confirm"] })
+          .to include(include('Ask "why"'))
+      end
+    end
+
+    describe "a forged CSRF token" do
+      it "refuses the capture" do
+        post "/admin/tasks", _csrf_token: "forged", task: { title: "Email the accountant" }
+
+        expect(last_response.status).to eq(403)
+      end
+
+      it "writes nothing" do
+        post "/admin/tasks", _csrf_token: "forged", task: { title: "Email the accountant" }
+
+        expect(repo.in_list("next")).to be_empty
+      end
+
+      it "refuses a move" do
+        task = create(:task)
+        post "/admin/tasks/#{task.id}/move/someday", _csrf_token: "forged"
+
+        expect(repo.by_id(task.id).list).to eq("next")
+      end
+    end
+
+    it "carries a token in every form on the page" do
+      create(:task)
+      get "/admin/tasks", filter: "next"
+
+      expect(page.all("main form[method='post']", visible: :all)
+        .map { it.first("input[name='_csrf_token']", visible: :all) })
+        .to all(be_truthy)
+    end
+
+    it "adds no navigation entry" do
+      get "/admin/tasks"
+
+      expect(page).to have_no_css(".tab-strip a[href='/admin/tasks']")
+    end
+
+    describe "searching" do
+      def filters(key) = i18n.t(["ui.components.tasks.filters", key].join("."))
+
+      def index(key) = i18n.t(["ui.views.tasks.index", key].join("."))
+
+      def search(query, **) = get("/admin/tasks", { q: query, filter: "next", ** })
+
+      before do
+        chore = create(:task_type, name: "Chore")
+        create(:task, title: "Email the accountant", task_type_id: chore.id, tags: %w[admin])
+        create(:task, title: "Ship the search", tags: %w[ruby])
+        create(:task, :someday, title: "Learn Elixir", tags: %w[elixir])
+      end
+
+      it "narrows the open list by a word in the title" do
+        search("accountant")
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "leaves the other lists alone" do
+        search("elixir")
+
+        expect(titles).to be_empty
+      end
+
+      it "narrows the list it is given" do
+        search("elixir", filter: "someday")
+
+        expect(titles).to eq(["Learn Elixir"])
+      end
+
+      it "narrows by tag" do
+        search("tag:ruby")
+
+        expect(titles).to eq(["Ship the search"])
+      end
+
+      it "narrows by type" do
+        search("type:chore")
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "searches the words beside a term as text" do
+        search("tag:ruby ship")
+
+        expect(titles).to eq(["Ship the search"])
+      end
+
+      it "says so when nothing in the list matches" do
+        search("nothing here")
+
+        expect(page).to have_css(".empty", exact_text: index("empty.no_match"))
+      end
+
+      it "keeps the query in the field" do
+        search("tag:ruby")
+
+        expect(page).to have_field(filters("search"), with: "tag:ruby")
+      end
+
+      it "carries no label over the field" do
+        search("")
+
+        expect(page).to have_css("label.sr-only[for='tasks-q']")
+      end
+
+      it "spells no query syntax out under the field" do
+        search("")
+
+        expect(page).to have_no_css("form[role='search'] .hint")
+      end
+
+      it "asks for the search the design asks for" do
+        search("")
+
+        expect(page.find_by_id("tasks-q")["placeholder"]).to eq("search · tag:site…")
+      end
+
+      it "shows the whole list again once the query is dropped" do
+        search("")
+
+        expect(titles).to eq(["Email the accountant", "Ship the search"])
+      end
+
+      it "keeps the query on a tab it is carried to" do
+        search("ship")
+
+        expect(page.all(".subtab").map { it["href"] }).to all(include("q=ship"))
+      end
+    end
+
+    describe "the type filter" do
+      let(:chore) { create(:task_type, name: "Chore") }
+
+      before do
+        create(:task, title: "Email the accountant", task_type_id: chore.id)
+        create(:task, title: "Ship the search")
+      end
+
+      it "offers every type beside the search" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all("select[name='type'] option", visible: :all).map(&:text))
+          .to eq([i18n.t("ui.components.tasks.filters.all_types"), "Chore"])
+      end
+
+      it "narrows the visible list to one type" do
+        get "/admin/tasks", filter: "next", type: chore.id.to_s
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "shows everything with no type chosen" do
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to eq(["Email the accountant", "Ship the search"])
+      end
+
+      it "keeps the type on the tab links" do
+        get "/admin/tasks", filter: "next", type: chore.id.to_s
+
+        expect(page.all(".subtab").map { it["href"] }).to all(include("type=#{chore.id}"))
+      end
+
+      it "says so when the type empties the list" do
+        get "/admin/tasks", filter: "someday", type: chore.id.to_s
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.no_match"))
+      end
+    end
+
+    describe "the archive" do
+      def day_heads = page.all(".task-day-date").map(&:text)
+
+      def finished(title, days_ago, hour, **)
+        day = Blog::TimeZone.today
+        at = Blog::TimeZone.local_time(day.year, day.month, day.day, hour) - (days_ago * 86_400)
+
+        create(:task, :done, title:, completed_at: at, **)
+      end
+
+      def index(key, **) = i18n.t(["ui.views.tasks.index", key].join("."), **)
+
+      before do
+        finished("Seed the queue", 2, 9)
+        finished("Move the toggle", 1, 11)
+        finished("Index the activities", 1, 15)
+        finished("Ship the screen", 0, 8)
+      end
+
+      it "groups the finished work by the day it was finished" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(day_heads.size).to eq(3)
+      end
+
+      it "puts the newest day first" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(day_heads.first).to eq(Blog::TimeZone.today.strftime("%B %-d, %Y"))
+      end
+
+      it "puts the newest task first inside a day" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(titles).to eq(["Ship the screen", "Index the activities", "Move the toggle", "Seed the queue"])
+      end
+
+      it "says how long ago each day was and what it holds" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.all(".task-day-count").map(&:text))
+          .to eq(["#{i18n.t('ui.components.tasks.completed_day.today')} · 1",
+                  "#{i18n.t('ui.components.tasks.completed_day.yesterday')} · 2",
+                  "#{i18n.t('ui.components.tasks.completed_day.days_ago', count: 2)} · 1"])
+      end
+
+      it "counts every finished task on the tab" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.all(".subtab-count").last.text).to eq("4")
+      end
+
+      it "files the archive under its own label" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".card-label", exact_text: index("archive"))
+      end
+
+      it "says how many it is showing" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".card-note", exact_text: index("shown", count: 4))
+      end
+
+      it "offers no move out of the archive on a finished task" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css("form[action*='/move/']")
+      end
+
+      it "offers no reordering in the archive" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css(".task-order")
+      end
+
+      it "offers no capture field in the archive" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css(".task-capture")
+      end
+
+      it "narrows the archive by a search" do
+        get "/admin/tasks", filter: "completed", q: "toggle"
+
+        expect(titles).to eq(["Move the toggle"])
+      end
+
+      it "narrows the archive by type" do
+        chore = create(:task_type, name: "Chore")
+        finished("Call the plumber", 0, 12, task_type_id: chore.id)
+        get "/admin/tasks", filter: "completed", type: chore.id.to_s
+
+        expect(titles).to eq(["Call the plumber"])
+      end
+
+      it "blames the filters when they empty it" do
+        get "/admin/tasks", filter: "completed", q: "nothing here"
+
+        expect(page).to have_css(".empty", exact_text: index("empty.completed_no_match"))
+      end
+    end
+
+    describe "an empty archive" do
+      it "says nothing is finished yet" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.completed"))
+      end
+    end
+
+    describe "planning a sprint ahead" do
+      def drop(sprint) = send_to("/admin/tasks/sprints/#{sprint.id}/delete")
+
+      def edit(task, **fields)
+        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, **fields })
+      end
+
+      def plan(on) = send_to("/admin/tasks/sprints", sprint_on: on.to_s)
+
+      def today = Blog::TimeZone.today
+
+      def tomorrow = today + 1
+
+      def upcoming = get("/admin/tasks", filter: "upcoming")
+
+      it "opens a sprint for a day after today" do
+        plan(tomorrow.iso8601)
+
+        expect(sprint_repo.on(tomorrow)).not_to be_nil
+      end
+
+      it "says which day it planned" do
+        plan(tomorrow.iso8601)
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: tomorrow.strftime("%b %-d, %Y"), visible: :all)
+      end
+
+      it "comes back to the upcoming tab" do
+        plan(tomorrow.iso8601)
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=upcoming")
+      end
+
+      it "says so rather than making a second sprint for the same day" do
+        create(:sprint, sprint_date: tomorrow)
+        plan(tomorrow.iso8601)
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "already exists", visible: :all)
+      end
+
+      it "makes no sprint for a day that is over" do
+        plan((today - 1).iso8601)
+
+        expect(sprint_repo.on(today - 1)).to be_nil
+      end
+
+      it "makes no sprint for today" do
+        plan(today.iso8601)
+
+        expect(sprint_repo.on(today)).to be_nil
+      end
+
+      {
+        "today" => -> { today },
+        "a day that is over" => -> { today - 1 },
+      }.each do |named, day|
+        it "asks for a day after today when asked to plan #{named}" do
+          plan(instance_exec(&day).iso8601)
+          follow_redirect!
+
+          expect(page)
+            .to have_css("[data-toast] .toast", exact_text: "Plan a sprint for a day after today", visible: :all)
+        end
+      end
+
+      it "lists each planned sprint with the day it falls on" do
+        create(:sprint, sprint_date: tomorrow)
+        upcoming
+
+        expect(page).to have_css(".card-title", text: tomorrow.strftime("%A, %B %-d"))
+      end
+
+      it "counts the tasks waiting on a planned sprint in the head" do
+        create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow))
+        upcoming
+
+        expect(page).to have_css(".page-head-sub", text: "1 upcoming")
+      end
+
+      it "says nothing is planned when nothing is" do
+        upcoming
+
+        expect(page).to have_css(".empty", text: "No future sprints")
+      end
+
+      it "drops a sprint" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        drop(sprint)
+
+        expect(sprint_repo.on(tomorrow)).to be_nil
+      end
+
+      it "sends the dropped sprint's tasks back to next" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        task = create(:task, :in_sprint, sprint_id: sprint.id)
+        drop(sprint)
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
+      end
+
+      it "says where the dropped sprint's tasks went" do
+        drop(create(:sprint, sprint_date: tomorrow))
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "went back to next", visible: :all)
+      end
+
+      it "keeps the sprint the day is running" do
+        sprint = create(:sprint, sprint_date: today)
+        drop(sprint)
+
+        expect(sprint_repo.on(today)).not_to be_nil
+      end
+
+      it "answers 404 for a sprint nobody opened" do
+        send_to("/admin/tasks/sprints/0/delete")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "captures a task straight into a planned sprint" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        capture("Tomorrow's work", filter: "next", sprint_on: tomorrow.iso8601)
+
+        expect(repo.in_sprint(sprint.id).map(&:title)).to eq(["Tomorrow's work"])
+      end
+
+      it "captures a task into today's sprint for today's date" do
+        capture("Today's work", filter: "next", sprint_on: today.iso8601)
+
+        expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Today's work"])
+      end
+
+      it "lands a task captured onto a sprint on upcoming" do
+        capture("Tomorrow's work", filter: "next", sprint_on: tomorrow.iso8601)
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=upcoming")
+      end
+
+      it "says why it refused a captured task's date it cannot read" do
+        capture("Someday's work", filter: "next", sprint_on: "next week")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "A sprint opens on today", visible: :all)
+      end
+
+      {
+        "the day it was scheduled for" => [-> { tomorrow.iso8601 }, "Scheduled for the"],
+        "that it joined today's sprint" => [-> { today.iso8601 }, "Pulled into today's sprint"],
+        "that it went back to next" => [-> { "" }, "Unscheduled"],
+        "why it refused a day that is over" => [-> { (today - 1).iso8601 }, "A sprint opens on today"],
+      }.each do |named, (asked, toast)|
+        it "says #{named} when a task is scheduled" do
+          task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
+          send_to("/admin/tasks/#{task.id}/schedule", sprint_on: instance_exec(&asked))
+          follow_redirect!
+
+          expect(page).to have_css("[data-toast] .toast", text: toast, visible: :all)
+        end
+      end
+
+      it "pulls a task out of next onto a planned sprint" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        task = create(:task, title: "Email the accountant")
+        send_to("/admin/tasks/#{task.id}/schedule", sprint_on: tomorrow.iso8601)
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint.id)
+      end
+
+      it "keeps a task waiting on a planned sprint out of next" do
+        create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow), title: "Tomorrow's work")
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to be_empty
+      end
+
+      it "drops the trailing space before the mark on a pull chip" do
+        create(:sprint, sprint_date: tomorrow)
+        create(:task, title: "#{'a' * 41} bbb")
+        upcoming
+
+        expect(page).to have_css(".sprint-chips .chip-btn span", exact_text: "#{'a' * 41}…")
+      end
+
+      it "keeps a family emoji whole where it cuts a pull chip" do
+        create(:sprint, sprint_date: tomorrow)
+        create(:task, title: "#{'a' * 41}👩‍👩‍👧‍👦 x")
+        upcoming
+
+        expect(page).to have_css(".sprint-chips .chip-btn span", exact_text: "#{'a' * 41}👩‍👩‍👧‍👦…")
+      end
+
+      it "marks the day a waiting task is scheduled for on its row" do
+        create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow))
+        upcoming
+
+        expect(page).to have_css(".task-meta .pill.orange", text: tomorrow.strftime("%b %-d"))
+      end
+
+      it "schedules a task from its editor" do
+        task = create(:task)
+        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: tomorrow.iso8601 })
+
+        expect(repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(tomorrow).id)
+      end
+
+      it "refuses a date from the editor that the day has passed" do
+        task = create(:task)
+        edit(task, sprint_on: (today - 1).iso8601)
+
+        expect(repo.by_id(task.id).sprint_id).to be_nil
+      end
+
+      it "says why it refused the date rather than saying the task was saved" do
+        edit(create(:task), sprint_on: (today - 1).iso8601)
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "A sprint opens on today", visible: :all)
+      end
+
+      it "says why it refused a captured task's date that the day has passed" do
+        capture("Yesterday's work", filter: "next", sprint_on: (today - 1).iso8601)
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "A sprint opens on today", visible: :all)
+      end
+
+      it "lands a captured task whose date was refused on the tab it is on" do
+        capture("Yesterday's work", filter: "next", sprint_on: (today - 1).iso8601)
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next")
+      end
+
+      it "keeps a captured task whose date was refused" do
+        capture("Yesterday's work", filter: "next", sprint_on: (today - 1).iso8601)
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to include("Yesterday's work")
+      end
+
+      it "unschedules a task from its editor" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow))
+        send_to("/admin/tasks/#{task.id}", filter: "next", task: { title: task.title, sprint_on: "" })
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
+      end
+
+      it "leaves a someday task where it is when its editor carries no date" do
+        task = create(:task, :someday)
+        send_to("/admin/tasks/#{task.id}", filter: "someday", task: { title: task.title, sprint_on: "" })
+
+        expect(repo.by_id(task.id).list).to eq("someday")
+      end
+
+      it "takes over a planned sprint when its day arrives" do
+        sprint = create(:sprint, sprint_date: today)
+        yesterday = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        get "/admin/tasks"
+
+        expect(repo.by_id(yesterday.id).sprint_id).to eq(sprint.id)
+      end
+    end
+  end
+
+  describe "signed out" do
+    let(:task) { create(:task, title: "Email the accountant") }
+
+    it "keeps the list off the screen" do
+      get "/admin/tasks"
+
+      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
+    end
+
+    it "shows no task to anybody who has not signed in" do
+      task
+      get "/admin/tasks"
+
+      expect(last_response.body).not_to include("Email the accountant")
+    end
+
+    {
+      "" => {},
+      "/complete" => {},
+      "/delete" => {},
+      "/move/someday" => {},
+      "/reopen" => {},
+      "/reorder/up" => {},
+      "/start" => {},
+      "/stop" => {},
+    }.each_key do |suffix|
+      it "writes nothing through POST /admin/tasks/:id#{suffix}" do
+        id = task.id
+        post "/admin/tasks/#{id}#{suffix}", task: { title: "Changed" }
+
+        expect(repo.by_id(id)).to have_attributes(title: "Email the accountant", list: "next", status: "open")
+      end
+    end
+
+    it "captures nothing" do
+      post "/admin/tasks", task: { title: "Email the accountant" }
+
+      expect(repo.in_list("next")).to be_empty
+    end
+  end
+end

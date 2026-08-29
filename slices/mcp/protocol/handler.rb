@@ -1,0 +1,213 @@
+# frozen_string_literal: true
+
+require "json"
+
+module MCP
+  module Protocol
+    class Handler
+      BATCH_REFUSAL = JSON.generate(
+        jsonrpc: JsonRpcHandler::Version::V2_0,
+        id: nil,
+        error: {
+          code: JsonRpcHandler::ErrorCode::INVALID_REQUEST,
+          message: "Invalid Request",
+          data: "This server takes one request per POST, not a batch",
+        },
+      )
+      CONTEXT = {
+        accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
+        activity_between: "activity.queries.activity_between",
+        activity_commit_totals: "activity.queries.activity_commit_totals",
+        activity_counts: "activity.queries.activity_counts",
+        activity_counts_by_month: "activity.queries.activity_counts_by_month",
+        add_work_entry: "projects.operations.add_work_entry",
+        all_posts: "posts.queries.all",
+        all_tags: "tags.queries.all",
+        analytics_between: "analytics.queries.summary_between",
+        archive_project: "projects.operations.archive_project",
+        archived_projects: "projects.queries.archived",
+        capture_task: "tasks.operations.capture_task",
+        commits_between: "record.queries.commits_between",
+        commits_last_synced_at: "record.queries.commits_last_synced_at",
+        complete_task: "tasks.operations.complete_task",
+        compose_announcement: "posts.operations.compose_announcement",
+        compose_social_post: "social.operations.compose_social_post",
+        current_sprint: "tasks.operations.current_sprint",
+        dated_posts: "posts.queries.dated_between",
+        delete_journal_entry: "record.operations.delete_journal_entry",
+        delete_post: "posts.operations.delete_post",
+        delete_social_post: "social.operations.delete_social_post",
+        delete_task: "tasks.operations.delete_task",
+        delete_work_entry: "projects.operations.delete_work_entry",
+        drop_sprint: "tasks.operations.drop_sprint",
+        editable_social_post: "social.queries.editable_social_post",
+        find_tasks: "tasks.queries.find_tasks",
+        journal_entries_between: "record.queries.journal_entries_between",
+        journal_entry_by_id: "record.queries.journal_entry_by_id",
+        link_tasks: "tasks.operations.link_tasks",
+        live_projects: "projects.queries.live",
+        mark_message: "contact.operations.mark_message",
+        message_by_id: "contact.queries.by_id",
+        messages_between: "contact.queries.received_between",
+        moderate_webmention: "social.operations.moderate_webmention",
+        move_project: "projects.operations.move_project",
+        move_task: "tasks.operations.move_task",
+        plan_sprint: "tasks.operations.plan_sprint",
+        post_by_id: "posts.queries.by_id",
+        project_by_id: "projects.queries.by_id",
+        queue_commit_import: "record.operations.queue_commit_import",
+        reject_edits: "suggestions.operations.reject_edits",
+        remove_tag: "tags.operations.remove_tag",
+        remove_task_type: "tasks.operations.remove_task_type",
+        reopen_task: "tasks.operations.reopen_task",
+        reorder_task: "tasks.operations.reorder_task",
+        reorder_task_type: "tasks.operations.reorder_task_type",
+        replace_post_edits: "suggestions.operations.replace_post_edits",
+        replace_social_post_edits: "suggestions.operations.replace_social_post_edits",
+        restore_project: "projects.operations.restore_project",
+        save_journal_entry: "record.operations.save_journal_entry",
+        save_post: "posts.operations.save_post",
+        save_post_seo: "posts.operations.save_post_seo",
+        save_project: "projects.operations.save_project",
+        save_tag: "tags.operations.save_tag",
+        save_task: "tasks.operations.save_task",
+        save_task_type: "tasks.operations.save_task_type",
+        schedule_task: "tasks.operations.schedule_task",
+        social_posts_dated_between: "social.queries.social_posts_dated_between",
+        sprints_between: "tasks.queries.sprints_between",
+        start_task: "tasks.operations.start_task",
+        suggestion_by_id: "suggestions.queries.by_id",
+        suggestions_between: "suggestions.queries.created_between",
+        sync_failures: "record.queries.sync_failures",
+        tag_usage: "tags.queries.usage",
+        task_by_id: "tasks.queries.task_by_id",
+        task_counts_by_type: "tasks.queries.task_counts_by_type",
+        task_types: "tasks.queries.task_types",
+        tasks_in_sprint: "tasks.queries.tasks_in_sprint",
+        unlink_task: "tasks.operations.unlink_task",
+        unsent_social_posts: "social.queries.unsent_social_posts",
+        update_journal_entry: "record.operations.update_journal_entry",
+        update_webmention_settings: "social.operations.update_webmention_settings",
+        webmention_settings: "social.queries.webmention_settings",
+        webmentions_received_in: "social.queries.webmentions_received_in",
+        work_entries_between: "projects.queries.work_entries_between",
+      }.freeze
+      INSTRUCTIONS = [
+        "Read everything %s's site keeps: posts, social posts, webmentions, the journal, commits, tasks, sprints,",
+        "projects, work history, tags, messages, suggestions, analytics, settings and the whole activity feed.",
+        "Suggest edits to a post or social post for the owner to accept or reject in the admin. Make any change the",
+        "admin makes, publishing, sending and deleting included. A published post or a sent social post cannot be",
+        "called back. The tool list holds only what this connection was granted",
+      ].join(" ").freeze
+      PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
+      TITLE = "%s's writing"
+      TOOLS = [
+        Tools::AcceptSuggestionEdits,
+        Tools::AddWorkEntry,
+        Tools::ArchiveProject,
+        Tools::CaptureTask,
+        Tools::CompleteTask,
+        Tools::ComposeAnnouncement,
+        Tools::CreateJournalEntry,
+        Tools::CreatePost,
+        Tools::CreateSocialPost,
+        Tools::DeleteJournalEntry,
+        Tools::DeletePost,
+        Tools::DeleteSocialPost,
+        Tools::DeleteTask,
+        Tools::DeleteWorkEntry,
+        Tools::DropSprint,
+        Tools::ImportCommits,
+        Tools::LinkTasks,
+        Tools::ListCommits,
+        Tools::ListJournalEntries,
+        Tools::ListMessages,
+        Tools::ListPosts,
+        Tools::ListProjects,
+        Tools::ListSocialPosts,
+        Tools::ListSprints,
+        Tools::ListSuggestions,
+        Tools::ListTags,
+        Tools::ListTaskTypes,
+        Tools::ListTasks,
+        Tools::ListWebmentions,
+        Tools::ListWorkEntries,
+        Tools::MarkMessage,
+        Tools::ModerateWebmention,
+        Tools::MoveProject,
+        Tools::MoveTask,
+        Tools::PlanSprint,
+        Tools::PublishPost,
+        Tools::ReadActivity,
+        Tools::ReadAnalytics,
+        Tools::ReadCurrentSprint,
+        Tools::ReadJournalEntry,
+        Tools::ReadMessage,
+        Tools::ReadPost,
+        Tools::ReadSocialPost,
+        Tools::ReadSyncState,
+        Tools::ReadTask,
+        Tools::ReadWebmentionSettings,
+        Tools::RejectSuggestionEdits,
+        Tools::RemoveTag,
+        Tools::RemoveTaskType,
+        Tools::ReopenTask,
+        Tools::ReorderTask,
+        Tools::ReorderTaskType,
+        Tools::RestoreProject,
+        Tools::SaveProject,
+        Tools::SaveTag,
+        Tools::SaveTask,
+        Tools::SaveTaskType,
+        Tools::ScheduleTask,
+        Tools::SendSocialPost,
+        Tools::StartTask,
+        Tools::SuggestEdits,
+        Tools::SummarizeActivity,
+        Tools::UnlinkTask,
+        Tools::UpdateJournalEntry,
+        Tools::UpdatePost,
+        Tools::UpdateSocialPost,
+        Tools::UpdateWebmentionSettings,
+        Tools::WritePostSeo,
+      ].freeze
+      VERSION = "1.0.0"
+
+      include Deps["settings", honeybadger: "honeybadger.agent", **CONTEXT]
+
+      def call(payload, scopes:) = batch?(payload) ? BATCH_REFUSAL : server(scopes).handle_json(payload)
+
+      private
+
+      def batch?(payload)
+        JSON.parse(payload).is_a?(Array)
+      rescue JSON::ParserError
+        false
+      end
+
+      def context = CONTEXT.keys.to_h { [it, public_send(it)] }
+
+      def name = Blog::Types::Normalized::Host.call(settings.site[:url])
+
+      def owner = settings.owner[:name]
+
+      def report(error, _context)
+        honeybadger.notify(error) unless error.is_a?(Server::RequestHandlerError)
+      end
+
+      def server(scopes)
+        ScopedServer.new(
+          configuration: Configuration.new(exception_reporter: method(:report)),
+          instructions: format(INSTRUCTIONS, owner),
+          name:,
+          prompts: PROMPTS,
+          scopes:,
+          server_context: context,
+          title: format(TITLE, owner),
+          tools: TOOLS,
+          version: VERSION,
+        )
+      end
+    end
+  end
+end

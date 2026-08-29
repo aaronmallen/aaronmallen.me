@@ -1,0 +1,17 @@
+analytics_salt: development-analytics-salt-not-a-real-secret-do-not-use-this-in-production
+app_secret: development-app-secret-not-a-real-secret-do-not-use-this-in-production
+database:
+  name: <%= ENV.fetch("DATABASE_NAME", "blog_development").to_json %>
+  host: localhost
+  max_connections: <%= ENV.fetch("DATABASE_MAX_CONNECTIONS", 12).to_json %>
+  password: <%= ENV["DATABASE_PASSWORD"].to_json %>
+  port: <%= ENV.fetch("DATABASE_PORT", 5432).to_json %>
+  user: <%= ENV["DATABASE_USER"].to_json %>
+redis:
+  db: 1
+  host: localhost
+  password: <%= ENV["REDIS_PASSWORD"].to_json %>
+  port: <%= ENV.fetch("REDIS_PORT", 6379).to_json %>
+  username: <%= ENV["REDIS_USER"].to_json %>
+site:
+  url: http://localhost:2300

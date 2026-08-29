@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#MISE description="Run the browser tests for the project"
+#MISE alias=["tb"]
+
+set -e
+
+scripts/assets/build
+scripts/util/ensure_postgres bundle exec rspec --require spec_helper --tag browser "$@"

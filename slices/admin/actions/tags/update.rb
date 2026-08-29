@@ -1,0 +1,44 @@
+# frozen_string_literal: true
+
+module Admin
+  module Actions
+    module Tags
+      class Update < Action
+        RECOLOURED = "tags_page.toasts.recoloured"
+        RENAMED = "tags_page.toasts.renamed"
+
+        include Deps[
+          build_tags_page: "operations.build_tags_page",
+          index_view: "ui.views.tags.index",
+          save_tag: "tags.operations.save_tag",
+        ]
+
+        def handle(request, response)
+          id = record_id(request)
+          params = Blog::Types::Fields[request.params[:tag]]
+
+          case save_tag.call(params, id:)
+          in Success(_) then saved(response, params)
+          in Failure(:not_found) then halt 404
+          in Failure[:invalid, errors] then invalid(response, id, params, errors)
+          else halt 500
+          end
+        end
+
+        private
+
+        def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
+
+        def invalid(response, id, params, errors)
+          response.status = 422
+          response.render(index_view, **build_tags_page.call(editing: editing(id, params, errors)))
+        end
+
+        def saved(response, params)
+          toast(response, Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED)
+          response.redirect_to(routes.path(:admin_tags))
+        end
+      end
+    end
+  end
+end

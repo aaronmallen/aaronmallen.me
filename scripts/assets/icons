@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+#MISE description="Rebuild the list of Font Awesome Free solid icons from the installed package"
+
+set -e
+
+ruby -rjson -e '
+  icons = JSON.parse(File.read(ARGV[0]))
+  solid = icons.select do |_, icon|
+    icon.dig("familyStylesByLicense", "free").to_a.include?("family" => "classic", "style" => "solid")
+  end
+  File.write(ARGV[1], solid.keys.sort.join("\n") << "\n")
+' node_modules/@fortawesome/fontawesome-free/metadata/icon-families.json config/solid_icons.txt

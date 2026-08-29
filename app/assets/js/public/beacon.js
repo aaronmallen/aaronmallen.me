@@ -1,0 +1,54 @@
+const MAX_READ_SECONDS = 20 * 60;
+const TYPE = "application/json";
+
+const mintToken = () =>
+  Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+
+const originOf = (url) => {
+  try {
+    return new URL(url).origin;
+  } catch {
+    return undefined;
+  }
+};
+
+export function setupBeacon() {
+  const endpoint = document.body.dataset.beacon;
+  if (!endpoint || !navigator.sendBeacon) return;
+
+  const path = location.pathname;
+  const viewToken = mintToken();
+  let opened = Date.now();
+  let read = 0;
+  let left = false;
+
+  const send = (visit) => {
+    const body = JSON.stringify({ path, view_token: viewToken, ...visit });
+
+    return navigator.sendBeacon(endpoint, new Blob([body], { type: TYPE }));
+  };
+
+  const leave = () => {
+    if (left) return;
+    left = true;
+    read += Math.ceil((Date.now() - opened) / 1000);
+    send({ kind: "read", read_seconds: Math.min(read, MAX_READ_SECONDS) });
+  };
+
+  const readAgain = () => {
+    if (!left) return;
+    left = false;
+    opened = Date.now();
+  };
+
+  addEventListener("pagehide", leave);
+  addEventListener("pageshow", (event) => {
+    if (event.persisted) readAgain();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") leave();
+    else readAgain();
+  });
+
+  send({ kind: "view", title: document.title, referrer: originOf(document.referrer) });
+}

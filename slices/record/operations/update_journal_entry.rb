@@ -1,0 +1,36 @@
+# frozen_string_literal: true
+
+module Record
+  module Operations
+    class UpdateJournalEntry < Blog::Operation
+      include Deps[contract: "contracts.journal_edit_contract", journal_entry_repo: "repos.journal_entry_repo"]
+
+      def call(id, params)
+        step find(id)
+        attributes = step validate(params)
+        step persist(id, attributes)
+      end
+
+      private
+
+      def find(id) = journal_entry_repo.by_id(id) ? Success(id) : Failure(:not_found)
+
+      def form(params) = { body: params[:body], tags: params[:tags] }
+
+      def invalid = Failure([:invalid, { body: [Contracts::JournalEntryContract::BLANK] }])
+
+      def persist(id, attributes)
+        transaction do
+          journal_entry_repo.update(id, **attributes.except(:tags))
+          journal_entry_repo.replace_tags(id, attributes.fetch(:tags))
+        end
+
+        Success(journal_entry_repo.by_id(id))
+      rescue ROM::SQL::CheckConstraintError
+        invalid
+      end
+
+      def validate(params) = validated(contract.call(form(params)))
+    end
+  end
+end

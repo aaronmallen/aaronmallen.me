@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Start the development server"
+
+set -e
+
+scripts/util/ensure_postgres bundle exec hanami server --config .config/config.ru --guardfile .config/Guardfile

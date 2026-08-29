@@ -1,0 +1,116 @@
+# frozen_string_literal: true
+
+ENV["FERRUM_INTERMITTENT_ATTEMPTS"] ||= "1"
+
+require "axe/configuration"
+require "capybara/cuprite"
+require_relative "admin_session"
+require_relative "features"
+
+module Spec
+  module Browser
+    class RequestGate
+      HOLD_TIMEOUT = 5
+
+      Hold = Data.define(:arrived, :released) do
+        def release = released.push(true)
+
+        def wait_for_arrival
+          arrived.pop(timeout: HOLD_TIMEOUT) or raise "no request arrived to hold within #{HOLD_TIMEOUT}s"
+        end
+      end
+
+      def initialize(app)
+        @app = app
+        reset
+      end
+
+      def answered(path) = @answered[path]
+
+      def call(env)
+        path = env[Rack::PATH_INFO]
+        @counts[path] += 1
+        @holds.delete(path)&.then do |hold|
+          hold.arrived.push(true)
+          hold.released.pop(timeout: HOLD_TIMEOUT)
+        end
+        @app.call(env).tap { @answered[path] += 1 }
+      end
+
+      def count(path) = @counts[path]
+
+      def hold(path)
+        @holds[path] = Hold.new(arrived: Thread::Queue.new, released: Thread::Queue.new)
+      end
+
+      def reset
+        @answered = Hash.new(0)
+        @counts = Hash.new(0)
+        @holds = {}
+      end
+    end
+
+    def admin_session_cookie = Spec::AdminSession.cookie
+
+    def cookie(name)
+      page.driver.cookies[name]&.value
+    end
+
+    def emulate_color_scheme(scheme)
+      page.driver.browser.page.command(
+        "Emulation.setEmulatedMedia",
+        features: [{ name: "prefers-color-scheme", value: scheme }],
+      )
+    end
+
+    def forge_form(action)
+      execute_script(<<~JS)
+        const form = document.querySelector("form[method='post'][action='#{action}']");
+        form.querySelector("input[name='#{Blog::UI::Components::Form::TOKEN_FIELD}']").value = "forged";
+        form.submit();
+      JS
+      assert_selector "h1", text: "Form expired"
+    end
+
+    def request_gate = Capybara.app
+
+    def show(screen)
+      screen.respond_to?(:call) ? instance_exec(&screen) : visit(screen)
+    end
+
+    def sign_in_to_admin
+      page.driver.set_cookie(
+        Blog::SessionCookie::KEY,
+        admin_session_cookie,
+        domain: page.server.host,
+        path: Blog::SessionCookie::PATH,
+      )
+    end
+  end
+end
+
+Capybara.app = Spec::Browser::RequestGate.new(Capybara.app)
+Capybara.javascript_driver = :cuprite
+Capybara.server = :puma, { Silent: true }
+
+Capybara.register_driver :cuprite do |app|
+  Capybara::Cuprite::Driver.new(
+    app,
+    headless: true,
+    process_timeout: 30,
+    timeout: 10,
+    url_allowlist: [%r{\Ahttp://#{Regexp.escape(Capybara.server_host)}:}],
+    window_size: [1280, 800],
+  )
+end
+
+RSpec.configure do |config|
+  config.define_derived_metadata(file_path: %r{/spec/(slices/[^/]+/)?browser/}) do |metadata|
+    metadata[:browser] = true
+    metadata[:js] = true
+  end
+
+  config.include Spec::Browser, :browser
+
+  config.after(:each, :browser) { request_gate.reset }
+end

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Migrate the database this environment names and dump its schema"
+
+set -e
+
+scripts/util/db-command migrate

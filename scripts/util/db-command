@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+scripts/util/ensure_postgres bundle exec hanami db "$@" --skip-test-db

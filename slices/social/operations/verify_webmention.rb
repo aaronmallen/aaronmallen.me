@@ -1,0 +1,76 @@
+# frozen_string_literal: true
+
+module Social
+  module Operations
+    class VerifyWebmention < Blog::Operation
+      GONE_STATUSES = [404, 410].freeze
+      OK_STATUSES = (200..299)
+      PUBLISHED = Blog::Types::PostStatus["published"]
+
+      include Deps["webmentions.client", post_by_id: "posts.queries.by_id", webmention_repo: "repos.webmention_repo"]
+
+      def call(source:, target:, post_id:)
+        settings = webmention_repo.settings
+        post = step eligible(post_id, source, settings)
+        response = step fetch(post, source)
+        page = Webmentions::Source.new(url: response.url, target:, html: response.body)
+        step linking(page, post, source)
+
+        store(page, post, source, settings)
+      end
+
+      private
+
+      def approved?(author_url, source, settings)
+        settings.auto_approve_known_authors && domain(source) == domain(author_url) &&
+          webmention_repo.known_author?(author_url)
+      end
+
+      def domain(url) = Blog::Types::Normalized::Host.call(url) { nil }
+
+      def eligible(post_id, source, settings)
+        return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
+        return Failure(:not_receiving) unless settings.receive
+
+        post = post_by_id.call(post_id)
+        return Failure(:not_a_post) unless post&.status == PUBLISHED && post.webmentions_enabled
+
+        Success(post)
+      end
+
+      def fetch(post, source)
+        response = client.fetch(source)
+        return forget(post, source, :source_gone) if GONE_STATUSES.include?(response.status)
+        return Failure(:fetch_failed) unless OK_STATUSES.cover?(response.status)
+
+        Success(response)
+      rescue Webmentions::Client::Refused
+        Failure(:source_refused)
+      rescue Webmentions::Client::Error
+        Failure(:fetch_failed)
+      end
+
+      def forget(post, source, reason)
+        webmention_repo.delete_by_source(post.id, source)
+        Failure(reason)
+      end
+
+      def linking(page, post, source)
+        page.links_to? ? Success(page) : forget(post, source, :no_link)
+      end
+
+      def status(author_url, source, settings)
+        approved?(author_url, source, settings) ? Repos::WebmentionRepo::APPROVED : Repos::WebmentionRepo::PENDING
+      end
+
+      def store(page, post, source, settings)
+        author = page.author
+        webmention_repo.store(
+          post_id: post.id, source_url: source, author_name: author[:name], author_url: author[:url],
+          type: page.type, excerpt: page.excerpt, received_at: Time.now,
+          status: status(author[:url], source, settings),
+        )
+      end
+    end
+  end
+end

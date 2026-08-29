@@ -1,0 +1,78 @@
+plugins:
+  - rubocop-capybara
+  - rubocop-i18n
+  - rubocop-ordered_methods
+  - rubocop-performance
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 4
+
+I18n/GetText:
+  Enabled: false
+
+Metrics/BlockLength:
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+  AllowedMethods:
+    - change
+    - create_table
+    - down
+    - migration
+    - up
+
+Metrics/ClassLength:
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Metrics/MethodLength:
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Metrics/ModuleLength:
+  CountAsOne:
+    - array
+    - hash
+    - heredoc
+    - method_call
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+RSpec/SpecFilePathFormat:
+  CustomTransform:
+    GitHub: github
+    GitHubProvider: github_provider
+    OAuth: oauth
+    OAuthClientRepo: oauth_client_repo
+    OAuthCodeRepo: oauth_code_repo
+    OAuthTokenRepo: oauth_token_repo
+
+Style/Documentation:
+  Enabled: false
+
+Style/NumericPredicate:
+  Exclude:
+    - ../config/db/migrate/**/*.rb
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: diff_comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: diff_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: diff_comma

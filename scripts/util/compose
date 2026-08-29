@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+set -e
+
+docker compose -f ./.config/compose.yml "$@"

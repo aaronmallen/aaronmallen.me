@@ -1,0 +1,91 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Components
+      module Tasks
+        class Controls < Component
+          LEFT = "fa-solid fa-arrow-left"
+          LISTS = {
+            Blog::Types::TaskFilter["today"] => ".lists.today",
+            Blog::Types::TaskFilter["next"] => ".lists.next",
+            Blog::Types::TaskFilter["someday"] => ".lists.someday",
+          }.freeze
+          ORIGIN = Blog::Types::TaskOrigin["tasks"]
+          PLACES = Blog::Types::TaskFilter.values.freeze
+          RIGHT = "fa-solid fa-arrow-right"
+
+          prop :task, Blog::Types::Instance(ROM::Struct)
+          prop :filter, Blog::Types::String
+          prop :origin, Blog::Types::String, default: ORIGIN
+
+          def view_template
+            @task.done? ? reopen : progress
+            moves unless @task.done?
+          end
+
+          private
+
+          def change(route, icon, label, variant: nil)
+            Form(action: path(route, id: @task.id)) do
+              origin_fields
+              Button(type: "submit", variant:, small: true, title: label, aria: { label: }) do
+                i(class: icon, aria: { hidden: "true" })
+              end
+            end
+          end
+
+          def complete
+            Form(action: path(:admin_complete_task, id: @task.id)) do
+              origin_fields
+              Button(type: "submit", variant: :pri, small: true) do
+                i(class: "fa-solid fa-check", aria: { hidden: "true" })
+                span { t(".complete") }
+              end
+            end
+          end
+
+          def move(place, icon)
+            label = t(".move", list: t(LISTS.fetch(place)))
+
+            Form(action: path(:admin_move_task, id: @task.id, filter: place)) do
+              origin_field
+              Button(type: "submit", small: true, title: label, aria: { label: }) do
+                i(class: icon, aria: { hidden: "true" })
+              end
+            end
+          end
+
+          def moves
+            here = PLACES.index(@task.place)
+
+            move(PLACES[here - 1], LEFT) if here.positive?
+            move(PLACES[here + 1], RIGHT) if here < PLACES.size - 1
+          end
+
+          def origin_field = input(type: "hidden", name: "origin", value: @origin)
+
+          def origin_fields
+            input(type: "hidden", name: "filter", value: @filter)
+            origin_field
+          end
+
+          def progress
+            return start unless running?
+
+            complete
+            stop
+          end
+
+          def reopen = change(:admin_reopen_task, "fa-solid fa-rotate-left", t(".reopen"))
+
+          def running? = @task.in_progress? && @task.in_sprint?
+
+          def start = change(:admin_start_task, "fa-solid fa-play", t(".start"))
+
+          def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"))
+        end
+      end
+    end
+  end
+end

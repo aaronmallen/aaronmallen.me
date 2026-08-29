@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+#MISE description="Write the values the app and its containers need to `.env`"
+#MISE alias=["setup:env", "su:env", "su:environment"]
+
+set -e
+
+ENV_FILE=".env"
+
+if [ ! -f "$ENV_FILE" ]; then
+  : >"$ENV_FILE"
+  echo "Created ${ENV_FILE}. Copy what else you need from .env.example."
+fi
+
+ensure_var() {
+  key="$1"
+  value="$2"
+
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    return 0
+  fi
+
+  if [ -s "$ENV_FILE" ] && [ -n "$(tail -c 1 "$ENV_FILE")" ]; then
+    echo "" >>"$ENV_FILE"
+  fi
+
+  echo "${key}=${value}" >>"$ENV_FILE"
+  export "${key}=${value}"
+}
+
+ensure_secret() {
+  key="$1"
+  size="${2:-32}"
+
+  if grep -q "^${key}=" "$ENV_FILE"; then
+    return 0
+  fi
+
+  ensure_var "${key}" "$(openssl rand -hex "${size}")"
+}
+
+ensure_secret "ANALYTICS_SALT" 64
+ensure_secret "APP_SECRET" 64
+ensure_var "COMPOSE_FILE" "./.config/compose.yml"
+ensure_secret "DATABASE_PASSWORD"
+ensure_var "DATABASE_USER" "postgres"
+ensure_secret "REDIS_PASSWORD"
+ensure_var "REDIS_USER" "redis"

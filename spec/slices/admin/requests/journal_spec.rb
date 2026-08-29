@@ -1,0 +1,540 @@
+# frozen_string_literal: true
+
+RSpec.describe "Admin journal", type: :request do
+  let(:page) { Capybara.string(last_response.body) }
+  let(:i18n) { Admin::Slice["i18n"] }
+  let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+  let(:today) { Blog::TimeZone.today }
+  let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
+
+  def bodies = page.all(".journal-entry-body").map(&:text)
+
+  def day_bodies(date) = page.all(".journal-day:has(time[datetime='#{date.iso8601}']) .journal-entry-body").map(&:text)
+
+  def day_dates = page.all(".journal-day-date").map { it["datetime"] }
+
+  def entry = repo.by_day.flat_map(&:last).first
+
+  def save(**fields)
+    post "/admin/journal", _csrf_token: admin_csrf_token, entry: fields
+  end
+
+  describe "signed in" do
+    before { sign_in_to_admin }
+
+    describe "the page" do
+      before { get "/admin/journal" }
+
+      it "says journal is where you are" do
+        expect(page).to have_css(".ctx-where", text: %r{Daily\s+/\s+journal})
+      end
+
+      it "shows the feather icon in the palette" do
+        expect(page).to have_css("#command-palette-journal i.fa-feather", visible: :all)
+      end
+
+      it "renders the heading" do
+        expect(page).to have_css(".page-head h1", text: "Journal")
+      end
+
+      it "puts a lock before the sub-line" do
+        expect(page).to have_css(".page-head-sub i.fa-lock:first-child")
+      end
+
+      it "lays out the filters beside the content" do
+        expect(page).to have_css(".split > .journal-rail + .journal-main")
+      end
+
+      it "searches with a get form" do
+        expect(page).to have_css("form[method='get'][action='/admin/journal'] input[type='search'][name='q']")
+      end
+
+      it "labels the search with its placeholder" do
+        expect(page).to have_field("Search", placeholder: "grep entries…")
+      end
+
+      it "defaults the entry date to today" do
+        expect(page).to have_field("Entry date", type: "date", with: today.iso8601)
+      end
+
+      it "stops the entry date at today" do
+        expect(page).to have_css("#journal-entry-date[max='#{today.iso8601}']")
+      end
+
+      it "sends the entry date with the new entry" do
+        expect(page).to have_css("input[name='entry[entry_date]'][form='journal-entry']")
+      end
+
+      it "posts the new entry form with the CSRF token", :aggregate_failures do
+        expect(page).to have_css("form#journal-entry[method='post'][action='/admin/journal']")
+        expect(page).to have_css("form#journal-entry input[name='_csrf_token']", visible: :hidden)
+      end
+
+      it "titles the new entry card Today" do
+        expect(page).to have_css("#journal-entry h2.card-title", exact_text: "Today")
+      end
+
+      it "gives the script today and its label" do
+        expect(page).to have_css("#journal-entry[data-today='#{today.iso8601}'][data-today-label='Today']")
+      end
+
+      it "renders a five row textarea" do
+        expect(page).to have_field("Entry", type: "textarea", with: "",
+                                            placeholder: "Unfiltered. Nobody is reading this but you.")
+      end
+
+      it "sets the textarea to five rows" do
+        expect(page).to have_css("textarea[name='entry[body]'][rows='5']")
+      end
+
+      it "shows the word count in the card head" do
+        expect(page).to have_css("#journal-entry .card-side [data-journal-words]", exact_text: "0 words")
+      end
+
+      it "gives the script the word templates" do
+        words = page.find("[data-journal-words]")
+
+        expect([words["data-one"], words["data-other"]]).to eq(i18n.t("ui.components.journal.new_entry.words").values)
+      end
+
+      it "disables Save entry while the entry is empty" do
+        expect(page).to have_button("Save entry", disabled: true)
+      end
+
+      it "shows an empty state without entries" do
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.journal.index.empty"))
+      end
+
+      it "shows the streak with no days" do
+        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 0 of the last 30 days")
+      end
+    end
+
+    describe "with entries" do
+      it "counts every entry and word in the sub-line" do
+        create(:journal_entry, body: "one two three")
+        create(:journal_entry, body: "four", entry_date: today - 40)
+        get "/admin/journal"
+
+        sub = "Private · never rendered on the public site · 2 entries · 4 words"
+
+        expect(page).to have_css(".page-head-sub", exact_text: sub)
+      end
+
+      it "counts one entry and one word" do
+        create(:journal_entry, body: "one")
+        get "/admin/journal"
+
+        expect(page).to have_css(".page-head-sub", text: "1 entry · 1 word")
+      end
+
+      it "groups entries by day, newest day first" do
+        create(:journal_entry, entry_date: today - 3, body: "older")
+        create(:journal_entry, entry_date: today, body: "newer")
+        get "/admin/journal"
+
+        expect(day_dates).to eq([today.iso8601, (today - 3).iso8601])
+      end
+
+      it "shows the full date in each day heading" do
+        create(:journal_entry, entry_date: Date.new(2026, 9, 3))
+        get "/admin/journal"
+
+        expect(page).to have_css("h2.journal-day-head time.journal-day-date", exact_text: "Thursday, September 3, 2026")
+      end
+
+      { 0 => "Today", 1 => "Yesterday", 3 => "3 days ago" }.each do |days, label|
+        it "labels a day #{days} days back #{label}" do
+          create(:journal_entry, entry_date: today - days)
+          get "/admin/journal"
+
+          expect(page).to have_css(".journal-day-head .journal-day-rule + .journal-day-ago", exact_text: label)
+        end
+      end
+
+      it "shows each entry's time, private pill and body", :aggregate_failures do
+        create(:journal_entry, entry_time: "21:05", body: "walked")
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-entry-head time", exact_text: "21:05")
+        expect(page).to have_css(".journal-entry-head .pill.sand", exact_text: "private")
+        expect(bodies).to eq(["walked"])
+      end
+
+      it "shows each tag beside the private pill, in the colour its tag carries" do
+        %w[mk-green mk-violet].zip(%w[health ruby]) { |color, name| create(:tag, name:, color:) }
+        create(:journal_entry, body: "walked", tags: %w[health ruby])
+        get "/admin/journal"
+
+        expect(page.all(".journal-entry-head .pill.green, .journal-entry-head .pill.violet").map(&:text))
+          .to eq(%w[health ruby])
+      end
+
+      it "shows no tag pill on an entry without tags" do
+        create(:journal_entry, body: "walked")
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-entry-head .pill", count: 1)
+      end
+
+      it "keeps the line breaks in a body" do
+        create(:journal_entry, body: "first\nsecond")
+        get "/admin/journal"
+
+        expect(page.find(".journal-entry-body").native.inner_html).to eq("first\nsecond")
+      end
+
+      it "counts the streak over the last 30 days, today included" do
+        2.times { create(:journal_entry, entry_date: today) }
+        create(:journal_entry, entry_date: today - 29)
+        create(:journal_entry, entry_date: today - 30)
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 2 of the last 30 days")
+      end
+    end
+
+    describe "searching" do
+      before do
+        create(:journal_entry, body: "Rode my BIKE to the lake")
+        create(:journal_entry, body: "Stayed in")
+      end
+
+      it "narrows entries by text, ignoring case" do
+        get "/admin/journal", q: "bike"
+
+        expect(bodies).to eq(["Rode my BIKE to the lake"])
+      end
+
+      it "keeps the search in the field" do
+        get "/admin/journal", q: "bike"
+
+        expect(page).to have_field("Search", with: "bike")
+      end
+
+      it "counts every entry in the sub-line while searching" do
+        get "/admin/journal", q: "bike"
+
+        expect(page).to have_css(".page-head-sub", text: "2 entries")
+      end
+
+      it "says when nothing matches" do
+        get "/admin/journal", q: "swim"
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.journal.index.no_match"))
+      end
+
+      it "lists every entry for a search that isn't text" do
+        get "/admin/journal", q: { nested: "bike" }
+
+        expect(bodies.size).to eq(2)
+      end
+    end
+
+    describe "saving an entry" do
+      it "saves it under today with the time of saving", :aggregate_failures do
+        before = Blog::TimeZone.local(Time.now - 1)
+        save(body: "walked", entry_date: today.iso8601)
+        entry = repo.by_day.to_h.fetch(today).first
+
+        expect(entry).to have_attributes(body: "walked", entry_date: today)
+        expect(entry.entry_time.strftime("%H:%M:%S")).to be >= before.strftime("%H:%M:%S")
+      end
+
+      it "returns to the journal with the toast", :aggregate_failures do
+        save(body: "walked", entry_date: today.iso8601)
+        follow_redirect!
+
+        expect(last_request.path).to eq("/admin/journal")
+        expect(toast).to eq("Journal entry saved · private")
+      end
+
+      it "lists the new entry under its day" do
+        save(body: "walked", entry_date: today.iso8601)
+        follow_redirect!
+
+        expect(day_bodies(today)).to eq(["walked"])
+      end
+
+      it "files a backdated entry under the chosen date with the time of saving", :aggregate_failures do
+        now = Blog::TimeZone.local(Time.now)
+        save(body: "remembered", entry_date: (today - 4).iso8601)
+        entry = repo.by_day.to_h.fetch(today - 4).first
+
+        expect(entry.body).to eq("remembered")
+        expect(entry.entry_time.strftime("%H:%M")).to eq(now.strftime("%H:%M")).or eq((now + 60).strftime("%H:%M"))
+      end
+
+      it "saves under today without an entry date" do
+        save(body: "walked")
+
+        expect(repo.by_day.map(&:first)).to eq([today])
+      end
+
+      it "saves the tags, folded to one case" do
+        save(body: "walked", entry_date: today.iso8601, tags: "Ruby, health")
+
+        expect(entry.tags.map(&:name)).to eq(%w[health ruby])
+      end
+
+      it "saves an entry with no tags" do
+        save(body: "walked", entry_date: today.iso8601)
+
+        expect(entry.tags).to eq([])
+      end
+    end
+
+    describe "invalid input" do
+      def message(key) = i18n.t(key, scope: "ui.components.journal.field_error")
+
+      it "answers 422 and saves nothing for a blank entry" do
+        save(body: " \n ", entry_date: today.iso8601)
+
+        expect([last_response.status, repo.count]).to eq([422, 0])
+      end
+
+      it "shows the body error next to the textarea", :aggregate_failures do
+        save(body: "  ", entry_date: today.iso8601)
+
+        expect(page).to have_css("#journal-body-error.field-error", exact_text: message("body.blank"))
+        expect(page).to have_css("#journal-body[aria-invalid='true'][aria-describedby='journal-body-error']")
+      end
+
+      it "rejects a future date and keeps what was typed", :aggregate_failures do
+        save(body: "tomorrow", entry_date: (today + 1).iso8601)
+
+        expect(page).to have_css("#journal-entry-date-error", exact_text: message("entry_date.future"))
+        expect(page).to have_field("Entry", with: "tomorrow")
+        expect(repo.count).to eq(0)
+      end
+
+      it "rejects a date it can't read" do
+        save(body: "walked", entry_date: "2026-02-30")
+
+        expect(page).to have_css("#journal-entry-date-error", exact_text: message("entry_date.format"))
+      end
+
+      it "rejects a tag it can't use and keeps what was typed", :aggregate_failures do
+        save(body: "walked", entry_date: today.iso8601, tags: "a/b")
+
+        expect(page).to have_css("#journal-tags-error", exact_text: message("tags.format"))
+        expect(page).to have_field("Tags", with: "a/b")
+        expect(repo.count).to eq(0)
+      end
+
+      it "keeps the chosen date and titles the card with it", :aggregate_failures do
+        save(body: "", entry_date: "2026-09-03")
+
+        expect(page).to have_field("Entry date", with: "2026-09-03")
+        expect(page).to have_css("#journal-entry h2.card-title", exact_text: "Thursday, September 3, 2026")
+      end
+
+      it "rejects a save without a CSRF token" do
+        post "/admin/journal", entry: { body: "walked" }
+
+        expect([last_response.status, repo.count]).to eq([403, 0])
+      end
+    end
+
+    describe "each entry" do
+      before do
+        create(:journal_entry, body: "walked")
+        get "/admin/journal"
+      end
+
+      it "puts Edit and Delete in the entry's header", :aggregate_failures do
+        actions = page.find(".journal-entry-head .journal-entry-actions")
+
+        expect(actions).to have_button("Edit", type: "button", class: "btn", exact: true)
+        expect(actions).to have_button("Delete", type: "button", class: "warn", exact: true)
+      end
+
+      it "posts the delete form with the CSRF token and the confirmation", :aggregate_failures do
+        form = page.find("form[action='/admin/journal/#{entry.id}/delete'][method='post']")
+
+        expect(form["data-confirm"]).to eq(i18n.t("ui.components.journal.entry.confirm_delete"))
+        expect(form).to have_field("_csrf_token", type: "hidden")
+      end
+
+      it "hides an edit form holding the entry's text", :aggregate_failures do
+        form = page.find("form[action='/admin/journal/#{entry.id}'][method='post'][hidden]", visible: :hidden)
+
+        expect(form).to have_field("Entry text", type: "textarea", with: "walked", visible: :hidden)
+        expect(form).to have_field("_csrf_token", type: "hidden")
+      end
+
+      it "holds the entry's tags in the edit form, joined by commas" do
+        create(:journal_entry, body: "read", tags: %w[ruby health])
+        get "/admin/journal"
+        form = page.find("form[action='/admin/journal/#{entry.id}']", visible: :hidden)
+
+        expect(form).to have_field("Tags", with: "health, ruby", visible: :hidden)
+      end
+
+      it "gives the edit form Save and Cancel", :aggregate_failures do
+        form = page.find("form[action='/admin/journal/#{entry.id}']", visible: :hidden)
+
+        expect(form).to have_button("Save", type: "submit", visible: :hidden)
+        expect(form).to have_button("Cancel", type: "button", visible: :hidden)
+      end
+    end
+
+    describe "editing an entry" do
+      before { create(:journal_entry, entry_date: today - 3, entry_time: "21:05", body: "before") }
+
+      def edit(id = entry.id, **fields)
+        post "/admin/journal/#{id}", _csrf_token: admin_csrf_token, entry: fields
+      end
+
+      it "changes the body and keeps the date and time", :aggregate_failures do
+        edit(body: "after", entry_date: today.iso8601, entry_time: "08:00")
+        saved = repo.by_id(entry.id)
+
+        expect(saved).to have_attributes(body: "after", entry_date: today - 3)
+        expect(saved.entry_time.strftime("%H:%M")).to eq("21:05")
+      end
+
+      it "changes the tags, folded to one case" do
+        edit(body: "after", tags: "Ruby, Health")
+
+        expect(repo.by_id(entry.id).tags.map(&:name)).to eq(%w[health ruby])
+      end
+
+      it "returns to the journal with the toast", :aggregate_failures do
+        edit(body: "after")
+        follow_redirect!
+
+        expect(last_request.path).to eq("/admin/journal")
+        expect(toast).to eq("Entry updated")
+      end
+
+      [" ", "", "\n\t "].each do |body|
+        it "answers 422 and keeps the old body for #{body.inspect}" do
+          edit(body:)
+
+          expect([last_response.status, repo.by_id(entry.id).body]).to eq([422, "before"])
+        end
+      end
+
+      it "reopens the edit form with the textarea marked invalid" do
+        edit(body: "  ")
+        id = "journal-edit-#{entry.id}-body"
+        form = page.find("form[action='/admin/journal/#{entry.id}']:not([hidden])")
+
+        expect(form).to have_css("textarea##{id}[aria-invalid='true'][aria-describedby='#{id}-error']")
+      end
+
+      it "shows the blank error under the textarea" do
+        edit(body: "  ")
+
+        message = i18n.t("ui.components.journal.field_error.body.blank")
+
+        expect(page).to have_css("#journal-edit-#{entry.id}-body-error.field-error", exact_text: message)
+      end
+
+      it "hides the saved text while the edit form is open" do
+        edit(body: "  ")
+
+        expect(page).to have_css(".journal-entry-body[hidden]", visible: :hidden, exact_text: "before")
+      end
+
+      it "leaves the new entry form alone on a rejected edit" do
+        edit(body: "  ")
+
+        expect(page).to have_no_css("#journal-body-error")
+      end
+
+      it "answers 404 for an entry that doesn't exist" do
+        edit(0, body: "after")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "rejects an edit without a CSRF token" do
+        post "/admin/journal/#{entry.id}", entry: { body: "after" }
+
+        expect([last_response.status, repo.by_id(entry.id).body]).to eq([403, "before"])
+      end
+    end
+
+    describe "deleting an entry" do
+      before { create(:journal_entry, body: "one two") }
+
+      def delete_entry(id = entry.id) = post "/admin/journal/#{id}/delete", _csrf_token: admin_csrf_token
+
+      it "removes the entry" do
+        delete_entry
+
+        expect(repo.count).to eq(0)
+      end
+
+      it "returns to the journal with the toast", :aggregate_failures do
+        delete_entry
+        follow_redirect!
+
+        expect(last_request.path).to eq("/admin/journal")
+        expect(toast).to eq("Entry deleted")
+      end
+
+      it "updates the counts and the streak", :aggregate_failures do
+        create(:journal_entry, entry_date: today - 1, body: "three")
+        delete_entry
+        follow_redirect!
+
+        expect(page).to have_css(".page-head-sub", text: "1 entry · 1 word")
+        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 1 of the last 30 days")
+      end
+
+      it "answers 404 for an entry that doesn't exist" do
+        delete_entry(0)
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "rejects a delete without a CSRF token" do
+        post "/admin/journal/#{entry.id}/delete"
+
+        expect([last_response.status, repo.count]).to eq([403, 1])
+      end
+    end
+  end
+
+  describe "signed out" do
+    it "redirects the journal to sign-in" do
+      get "/admin/journal"
+
+      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
+    end
+
+    it "saves nothing" do
+      post "/admin/journal", entry: { body: "walked" }
+
+      expect(repo.count).to eq(0)
+    end
+
+    it "changes nothing" do
+      entry = create(:journal_entry, body: "before")
+      post "/admin/journal/#{entry.id}", entry: { body: "after" }
+      post "/admin/journal/#{entry.id}/delete"
+
+      expect(repo.by_id(entry.id).body).to eq("before")
+    end
+  end
+
+  describe "the public site" do
+    before do
+      create(:journal_entry, body: "a private journal line", tags: %w[ruby])
+      create(:post, :published, slug: "hello", tags: %w[ruby])
+    end
+
+    %w[
+      / /writing /writing/hello /writing/tags/ruby /writing.atom /writing/tags/ruby.atom /about /projects /contact
+    ].each do |path|
+      it "renders no journal entry on #{path}" do
+        get path
+
+        expect(last_response.body).not_to include("a private journal line")
+      end
+    end
+  end
+end

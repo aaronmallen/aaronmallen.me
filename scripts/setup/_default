@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+#MISE description="Setup the development environment"
+#MISE alias=["su"]
+
+set -e
+
+scripts/setup/environment
+mise run setup:dependencies
+mise run setup:databases

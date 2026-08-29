@@ -1,0 +1,41 @@
+<%- require File.expand_path("../lib/blog/time_zone", File.dirname(__FILE__)) -%>
+:concurrency: 5
+production:
+  :concurrency: 10
+:queues:
+  - default
+:scheduler:
+  :schedule:
+    import_commits:
+      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Record::Jobs::ImportCommits
+    publish_due_posts:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Posts::Jobs::PublishDuePosts
+    reap_expired_credentials:
+      cron: "0 5 * * * <%= Blog::TimeZone::NAME %>"
+      class: MCP::Jobs::ReapExpiredCredentials
+    reap_sync_states:
+      cron: "0 4 * * * <%= Blog::TimeZone::NAME %>"
+      class: Record::Jobs::ReapSyncStates
+    reap_webmention_receipts:
+      cron: "15 5 * * * <%= Blog::TimeZone::NAME %>"
+      class: Social::Jobs::ReapWebmentionReceipts
+    refresh_country_database:
+      cron: "0 3 * * 3 <%= Blog::TimeZone::NAME %>"
+      class: Analytics::Jobs::RefreshCountryDatabase
+    refresh_projects:
+      cron: "0 2 * * * <%= Blog::TimeZone::NAME %>"
+      class: Projects::Jobs::RefreshProjects
+    refresh_social_engagement:
+      cron: "0 */4 * * * <%= Blog::TimeZone::NAME %>"
+      class: Social::Jobs::RefreshSocialEngagement
+    roll_over_sprint:
+      cron: "0 0 * * * <%= Blog::TimeZone::NAME %>"
+      class: Tasks::Jobs::RollOverSprint
+    roll_up_analytics:
+      cron: "0 1 * * * <%= Blog::TimeZone::NAME %>"
+      class: Analytics::Jobs::RollUpAnalytics
+    send_due_social_posts:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Social::Jobs::SendDueSocialPosts

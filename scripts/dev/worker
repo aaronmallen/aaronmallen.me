@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Start the development worker"
+
+set -e
+
+bundle exec sidekiq --environment "${HANAMI_ENV:-${APP_ENV:-${RACK_ENV:-development}}}" --require ./config/sidekiq.rb

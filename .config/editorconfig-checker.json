@@ -1,0 +1,11 @@
+{
+  "Exclude": [
+    "^\\.idea/",
+    "^\\.mise/",
+    "^\\.mise-data/",
+    "^config/db/structure\\.sql$",
+    "^coverage/",
+    "^log/",
+    "^tmp/"
+  ]
+}

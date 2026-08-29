@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+#MISE description="Install all tool and dependencies for the project"
+#MISE alias=["setup:deps", "su:deps", "su:dependencies"]
+
+set -e
+
+mise trust >/dev/null 2>&1
+mise install
+bundle install
+aube install

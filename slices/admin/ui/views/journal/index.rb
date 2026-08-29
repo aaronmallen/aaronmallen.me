@@ -1,0 +1,78 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Views
+      module Journal
+        class Index < View
+          include Components::Journal
+
+          BLANK_ENTRY = {
+            body: Dry::Core::Constants::EMPTY_STRING,
+            entry_date: nil,
+            tags: Dry::Core::Constants::EMPTY_STRING,
+          }.freeze
+          SEPARATOR = " · "
+
+          def initialize(
+            days:, entries:, streak:, today:, words:, editing: nil, errors: Dry::Core::Constants::EMPTY_HASH,
+            search: Dry::Core::Constants::EMPTY_STRING, values: BLANK_ENTRY
+          )
+            super()
+            @days = days
+            @editing = editing
+            @entries = entries
+            @errors = errors
+            @search = search
+            @streak = streak
+            @today = today
+            @values = values
+            @words = words
+          end
+
+          def view_template
+            PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock")
+
+            Split do
+              Filters(search:, entry_date: entry_date.iso8601, today: @today, streak: @streak, errors: @errors)
+              div(class: "journal-main") do
+                new_entry
+                days
+              end
+            end
+          end
+
+          private
+
+          def body = @values[:body]
+
+          def days
+            return Empty { t(search.empty? ? ".empty" : ".no_match") } if @days.empty?
+
+            @days.each { |(date, entries)| Day(date:, entries:, today: @today, editing: @editing) }
+          end
+
+          def entry_date = @values[:entry_date] || @today
+
+          def new_entry
+            NewEntry(
+              values: { body:, tags: @values[:tags] }, date: entry_date, errors: @errors, today: @today,
+              word_count: Blog::Figures.words(body),
+            )
+          end
+
+          def search = @search.strip
+
+          def sub
+            [
+              t(".private"),
+              t(".never_public"),
+              t(".entries", count: @entries),
+              t(".words", count: @words),
+            ].join(SEPARATOR)
+          end
+        end
+      end
+    end
+  end
+end

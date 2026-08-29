@@ -1,0 +1,28 @@
+# frozen_string_literal: true
+
+require "erb"
+require "sidekiq"
+require "yaml"
+
+Sidekiq.testing!(:fake)
+Sidekiq.default_configuration.logger.level = Logger::WARN
+
+module Spec
+  module SidekiqConfig
+    def sidekiq_config(environment = :development)
+      path = Hanami.app.root.join("config/sidekiq.yml.erb")
+      template = ERB.new(File.read(path), trim_mode: "-")
+      template.filename = path.to_s
+      config = YAML.safe_load(template.result, permitted_classes: [Symbol], aliases: true).transform_keys(&:to_sym)
+
+      config.merge(config.delete(environment.to_sym) || {})
+    end
+
+    def sidekiq_schedule(name) = sidekiq_config.dig(:scheduler, :schedule, name)
+  end
+end
+
+RSpec.configure do |config|
+  config.before { Sidekiq::Job.clear_all }
+  config.include Spec::SidekiqConfig
+end

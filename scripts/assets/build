@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Build the CSS and JS assets once"
+
+set -e
+
+aube exec tailwindcss -i config/tailwind.css -o app/assets/css/tailwind.css
+bundle exec hanami assets compile

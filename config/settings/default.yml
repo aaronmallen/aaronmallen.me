@@ -1,0 +1,35 @@
+analytics:
+  throttle_limit: <%= ENV["ANALYTICS_THROTTLE_LIMIT"].to_json %>
+  throttle_window_minutes: <%= ENV["ANALYTICS_THROTTLE_WINDOW_MINUTES"].to_json %>
+bluesky:
+  app_password: <%= ENV["BLUESKY_APP_PASSWORD"].to_json %>
+  handle: aaronmallen.dev
+  profile_url: https://bsky.app/profile/aaronmallen.dev
+client_registration:
+  throttle_limit: <%= ENV["CLIENT_REGISTRATION_THROTTLE_LIMIT"].to_json %>
+  throttle_window_minutes: <%= ENV["CLIENT_REGISTRATION_THROTTLE_WINDOW_MINUTES"].to_json %>
+contact:
+  throttle_limit: <%= ENV["CONTACT_THROTTLE_LIMIT"].to_json %>
+  throttle_window_minutes: <%= ENV["CONTACT_THROTTLE_WINDOW_MINUTES"].to_json %>
+github:
+  api_token: <%= ENV["GITHUB_API_TOKEN"].to_json %>
+  client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>
+  client_secret: <%= ENV["GITHUB_CLIENT_SECRET"].to_json %>
+  profile_url: https://github.com/aaronmallen
+honeybadger:
+  api_key: <%= ENV["HONEYBADGER_API_KEY"].to_json %>
+  report_data: <%= ENV["HONEYBADGER_REPORT_DATA"].to_json %>
+mastodon:
+  access_token: <%= ENV["MASTODON_ACCESS_TOKEN"].to_json %>
+  profile_url: https://ruby.social/@aaronmallen
+  url: https://ruby.social
+maxmind:
+  account_id: <%= ENV["MAXMIND_ACCOUNT_ID"].to_json %>
+  license_key: <%= ENV["MAXMIND_LICENSE_KEY"].to_json %>
+owner:
+  github_id: <%= ENV.fetch("OWNER_GITHUB_ID", 931094) %>
+  name: Aaron Allen
+webmentions:
+  throttle_limit: <%= ENV["WEBMENTIONS_THROTTLE_LIMIT"].to_json %>
+  throttle_window_minutes: <%= ENV["WEBMENTIONS_THROTTLE_WINDOW_MINUTES"].to_json %>
+  total_throttle_limit: <%= ENV["WEBMENTIONS_TOTAL_THROTTLE_LIMIT"].to_json %>

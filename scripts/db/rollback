@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Rollback database migrations"
+
+set -e
+
+scripts/util/db-command rollback "$@"

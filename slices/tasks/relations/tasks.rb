@@ -1,0 +1,87 @@
+# frozen_string_literal: true
+
+module Tasks
+  module Relations
+    class Tasks < Blog::DB::Relation
+      COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
+      CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
+      DONE = Blog::Types::TaskStatus["done"]
+
+      schema :tasks, infer: true do
+        associations do
+          belongs_to :sprint
+          has_many :task_links, as: :incoming_links, foreign_key: :to_task_id
+          has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id
+          has_many :task_tags
+          has_many :tags, through: :task_tags, view: :in_name_order
+        end
+      end
+
+      def carry_into(sprint_id)
+        stamped(:update, result: :many).call(carried_count: Sequel[:carried_count] + 1, sprint_id:).size
+      end
+
+      def count_by_type
+        typed = unordered.exclude(task_type_id: nil)
+
+        typed.select(:task_type_id) { integer.count(id).as(:count) }.group(:task_type_id)
+      end
+
+      def done = where(status: DONE)
+
+      def finished_counts(day)
+        done.unordered.select do
+          [integer.count(id).as(:total), integer.count(id).filter(COMPLETED_ON => day).as(:on_day)]
+        end
+      end
+
+      def for_sprint(sprint_id) = where(sprint_id:)
+
+      def in_list(list) = where(list:)
+
+      def in_order = order(self[:position].asc, self[:id].asc)
+
+      def last_position = unordered.max(:position).to_i
+
+      def linkable_from(id) = exclude(id:).exclude(id: task_links.partner_ids(id).dataset)
+
+      def matching(text)
+        pattern = "%#{dataset.escape_like(text)}%"
+
+        where(Sequel.ilike(:title, pattern) | Sequel.ilike(:note, pattern))
+      end
+
+      def newest_finished = order(self[:completed_at].desc, self[:id].desc)
+
+      def newest_first = order(Sequel.function(:coalesce, :completed_at, :created_at).desc, self[:id].desc)
+
+      def of_types(type_ids) = type_ids.reduce(self) { |found, ids| found.where(task_type_id: ids) }
+
+      def open = exclude(status: DONE)
+
+      def open_first = order(Sequel.case({ { status: DONE } => 1 }, 0), self[:position].asc, self[:id].asc)
+
+      def tagged(names) = where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+
+      def titled(text) = where(Sequel.ilike(:title, "%#{dataset.escape_like(text)}%"))
+
+      def touched_between(first, last)
+        days = Range.new(first, last)
+
+        where(Sequel.|({ CREATED_ON => days }, { COMPLETED_ON => days }))
+      end
+
+      def unfinished_in(sprint_ids) = where(sprint_id: sprint_ids).open
+
+      private
+
+      def holding_every(names)
+        owner = task_tags[:task_id].qualified
+        name = tags[:name].qualified
+        matched = task_tags.unordered.join(:tag).where(name => names)
+
+        matched.group(owner).having(Sequel.function(:count, name).distinct => names.length).select(owner)
+      end
+    end
+  end
+end

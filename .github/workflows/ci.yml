@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  cancel-in-progress: true
+  group: ci-${{ github.ref }}
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_PASSWORD: &database-password postgres
+  DATABASE_USER: &database-user postgres
+  GEM_HOME: ${{ runner.temp }}/gems
+  REDIS_PASSWORD: redis
+
+jobs:
+  check:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        env:
+          POSTGRES_PASSWORD: *database-password
+          POSTGRES_USER: *database-user
+        image: postgres:18
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Install the pinned tools
+        uses: jdx/mise-action@v4
+
+      - name: Restore the gems
+        uses: actions/cache@v6
+        with:
+          key: gems-${{ runner.os }}-${{ hashFiles('Gemfile.lock', '.config/mise.lock') }}
+          path: ${{ runner.temp }}/gems
+          restore-keys: gems-${{ runner.os }}-
+
+      - name: Install the dependencies
+        run: |
+          echo "$GEM_HOME/bin" >>"$GITHUB_PATH"
+          mise run setup:dependencies
+
+      - name: Install the Postgres 18 client
+        run: |
+          key=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          sudo install -d "$(dirname "$key")"
+          sudo curl -fsSL -o "$key" https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=$key] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes postgresql-client-18
+          echo /usr/lib/postgresql/18/bin >>"$GITHUB_PATH"
+
+      - name: Build the test database from the migrations
+        env:
+          HANAMI_ENV: test
+        run: |
+          mise run db:create
+          mise run db:migrate
+
+      - name: Check the schema dump matches the migrations
+        run: git diff --exit-code config/db/structure.sql
+
+      - name: Lint
+        run: mise run lint
+
+      - name: Test
+        run: mise run test

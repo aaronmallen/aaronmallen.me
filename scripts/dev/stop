@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Stop the development environment"
+
+set -e
+
+pitchfork stop --local
+scripts/util/compose down

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Format all javascript files"
+#MISE alias=["fmt:javascript", "fmt:js", "format:js"]
+
+set -e
+
+biome check --write --config-path .config app/assets/js config/assets.js

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Start the asset watcher"
+
+set -e
+
+bundle exec hanami assets watch

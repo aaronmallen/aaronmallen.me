@@ -1,0 +1,33 @@
+[daemons.assets]
+auto = ["start", "stop"]
+mise = true
+run = "mise run dev:assets"
+
+[daemons.postgres]
+auto = ["start"]
+mise = true
+oneshot = true
+run = "scripts/util/compose up --detach --wait postgres"
+
+[daemons.redis]
+auto = ["start"]
+mise = true
+oneshot = true
+run = "scripts/util/compose up --detach --wait redis"
+
+[daemons.server]
+auto = ["start", "stop"]
+depends = ["assets", "postgres", "redis", "tailwind"]
+mise = true
+run = "mise run dev:server"
+
+[daemons.tailwind]
+auto = ["start", "stop"]
+mise = true
+run = "mise run dev:tailwind"
+
+[daemons.worker]
+auto = ["start", "stop"]
+depends = ["postgres", "redis"]
+mise = true
+run = "mise run dev:worker"

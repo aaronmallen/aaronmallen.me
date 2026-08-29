@@ -1,0 +1,27 @@
+import { setupAutosubmit } from "./autosubmit.js";
+import { setupCommitImports } from "./commits.js";
+import { setupConfirms } from "./confirm.js";
+import { setupJournals } from "./journal.js";
+import { setupPalette } from "./palette.js";
+import { setupPostEditors } from "./post_editor.js";
+import { setupPostPreviews } from "./post_preview.js";
+import { setupPostSyndication } from "./post_syndication.js";
+import { setupProjectEditors } from "./project_editor.js";
+import { setupSocialComposers } from "./social_composer.js";
+import { setupTaskKeys } from "./task_key.js";
+import { setupToasts } from "./toast.js";
+import { setupWorkForms } from "./work_form.js";
+
+setupAutosubmit();
+setupCommitImports();
+setupConfirms();
+setupJournals();
+setupPalette();
+setupPostEditors();
+setupPostPreviews();
+setupPostSyndication();
+setupProjectEditors();
+setupSocialComposers();
+setupTaskKeys();
+setupToasts();
+setupWorkForms();

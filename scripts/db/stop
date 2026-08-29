@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Stop the Postgres container"
+
+set -e
+
+scripts/util/compose down postgres

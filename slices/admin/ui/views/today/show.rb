@@ -1,0 +1,115 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Views
+      module Today
+        class Show < View
+          include Components::Tasks
+
+          SEPARATOR = " · "
+
+          def initialize(
+            commits:, commit_totals:, entries:, journaled:, posts:, queue:, social:, sprint:, sync_failures:,
+            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
+          )
+            super()
+            @commits = commits
+            @counts = { commit_totals:, journaled: }
+            @journal = { body:, entries:, errors:, word_count: Blog::Figures.words(body) }
+            @publishing = { posts:, queue:, social: }
+            @sprint = sprint
+            @sync_failures = sync_failures
+            @webmentions = webmentions
+          end
+
+          def view_template
+            content_for(:title, t(".heading"))
+
+            PageHead(title: l(@sprint[:date], format: :weekday), sub:) { head_actions }
+
+            SyncFailures(failures: @sync_failures)
+
+            Grid(columns: 4) { stats }
+
+            SprintPanel(**@sprint)
+
+            Grid(columns: 2) do
+              SideStack { main_cards }
+              SideStack { side_cards }
+            end
+          end
+
+          private
+
+          def commits_note = t(".commits_note", **@counts[:commit_totals])
+
+          def head_actions
+            a(class: "btn", href: path(:admin_clients)) { t(".clients") }
+            sign_out_form
+          end
+
+          def main_cards
+            TodayJournalCard(**@journal)
+            CommitsCard(**@commits)
+          end
+
+          def posts = @publishing[:posts]
+
+          def queue = @publishing[:queue]
+
+          def queue_stat
+            note = queue[:next_up] ? t(".queue_note", title: queue[:next_up]) : t(".queue_note_empty")
+
+            Stat(key: t(".queue"), value: queue[:count], change: note)
+          end
+
+          def side_cards
+            Components::Webmentions::PendingCard(**@webmentions) if @webmentions[:count].positive?
+            ShipsNextCard(posts: posts[:scheduled], social_posts: social[:scheduled], summaries: social[:summaries])
+            DraftsCard(posts: posts[:drafts], counts: posts[:draft_counts])
+          end
+
+          def sign_out_form
+            Form(action: path(:admin_sign_out)) do
+              Button(type: "submit") { t(".sign_out") }
+            end
+          end
+
+          def social = @publishing[:social]
+
+          def sprint_done = sprint_tasks.count(&:done?)
+
+          def sprint_open = sprint_tasks.size - sprint_done
+
+          def sprint_stat
+            note = sprint_tasks.empty? ? t(".sprint_empty") : t(".sprint_open", count: sprint_open)
+
+            Stat(key: t(".sprint"), value: sprint_value, change: note, down: sprint_tasks.empty?)
+          end
+
+          def sprint_tasks = @sprint[:tasks]
+
+          def sprint_value = t(".sprint_value", done: sprint_done, total: sprint_tasks.size)
+
+          def stats
+            sprint_stat
+            Stat(key: t(".journaled"), value: @counts[:journaled], change: t(".journaled_note"))
+            Stat(key: t(".commits"), value: @commits[:entries].size, change: commits_note)
+            Stat(key: t(".webmentions"), value: @webmentions[:count], change: t(".webmentions_note"))
+            queue_stat
+          end
+
+          def sub
+            [
+              t(".sub_tasks", done: sprint_done, total: sprint_tasks.size),
+              t(".sub_commits", count: @commits[:entries].size),
+              t(".sub_entries", count: @journal[:entries].size),
+              t(".sub_scheduled", count: queue[:today]),
+            ].join(SEPARATOR)
+          end
+        end
+      end
+    end
+  end
+end

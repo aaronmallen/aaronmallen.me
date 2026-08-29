@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Stop the Redis container"
+
+set -e
+
+scripts/util/compose down redis

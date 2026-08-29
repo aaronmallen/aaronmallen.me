@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Lint all javascript files"
+#MISE alias=["l:javascript", "l:js", "lint:js"]
+
+set -e
+
+biome check --error-on-warnings --config-path .config app/assets/js config/assets.js

@@ -1,0 +1,48 @@
+# frozen_string_literal: true
+
+module MCP
+  module Tools
+    class ListWorkEntries < Base
+      SCHEMA = {
+        additionalProperties: false,
+        properties: {
+          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
+          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
+        },
+        required: %w[from to],
+      }.freeze
+
+      description "List the roles on /projects, the work entries, that overlap a range, in the order the page " \
+                  "shows them. A role runs by year, from from_year through to_year, and a role with no to_year " \
+                  "is one still held. Give from and to as YYYY-MM-DD; a role counts when any year it covers " \
+                  "falls inside the range"
+      input_schema(SCHEMA)
+      scope OAuth::Scope::READ
+
+      class << self
+        def call(from:, to:, server_context:)
+          first = Blog::TimeZone.parse_day(from)
+          last = Blog::TimeZone.parse_day(to)
+          return refuse("give from and to as days, such as 2026-01-01") unless first && last
+          return refuse("from comes after to") if first > last
+
+          entries = work_entries_between(server_context).call(from: first, to: last)
+
+          answer(from: first.iso8601, to: last.iso8601, work_entries: entries.map { summary(it) })
+        end
+
+        def summary(entry)
+          {
+            id: entry.id,
+            org: entry.org,
+            role: entry.role,
+            blurb: entry.blurb,
+            from_year: entry.from_year,
+            to_year: entry.to_year,
+            current: entry.current?,
+          }
+        end
+      end
+    end
+  end
+end

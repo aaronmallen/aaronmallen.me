@@ -1,0 +1,1192 @@
+en:
+  activity_page:
+    statuses:
+      posted: "posted"
+      published: "published"
+    sub_lines:
+      commit: "%{repo} · %{sha} · +%{additions}/−%{deletions}"
+      journal: "private entry"
+      post: "%{link} · %{status} · %{views}"
+      social: "%{status} · %{networks}"
+      task: "done"
+      task_typed: "done · %{type}"
+      webmention: "on %{link}"
+      webmention_excerpt: "on %{link} · %{excerpt}"
+    views:
+      one: "%{count} view"
+      other: "%{count} views"
+  clients_page:
+    toasts:
+      revoked: "Access revoked · that client has to sign in again"
+  journal_page:
+    toasts:
+      deleted: "Entry deleted"
+      saved: "Journal entry saved · private"
+      updated: "Entry updated"
+  messages_page:
+    toasts:
+      read: "Marked read"
+      spam: "Marked as spam"
+      unread: "Moved back to unread"
+  post_form:
+    toasts:
+      applied:
+        zero: "Nothing applied · every edit went stale"
+        one: "Suggestion applied"
+        other: "%{count} suggestions applied"
+      deleted: "Post deleted"
+      drafted: "Draft saved"
+      published: "Published"
+      rejected:
+        zero: "Nothing to reject"
+        one: "Suggestion rejected"
+        other: "%{count} suggestions rejected"
+      saved: "Saved"
+      scheduled: "Scheduled for %{date}"
+  projects_page:
+    toasts:
+      archived: "Archived · removed from /projects"
+      created: "Project created"
+      not_started: "Not archived · its start month has not come yet"
+      restored: "Restored to /projects"
+      role_added: "Role added to /projects"
+      role_removed: "Role removed from /projects"
+      saved: "Project saved"
+  social:
+    networks:
+      bluesky: "Bluesky"
+      mastodon: "Mastodon"
+  social_page:
+    toasts:
+      drafted: "Draft saved"
+      kept: "Already posted · nothing was removed"
+      queued: "Queued for %{networks}"
+      removed: "Removed from queue"
+      scheduled: "Scheduled for %{date} at %{time}"
+      sent: "Already posted · nothing was saved"
+  social_suggestions:
+    toasts:
+      applied:
+        zero: "Nothing applied · every edit went stale"
+        one: "Suggestion applied"
+        other: "%{count} suggestions applied"
+      over_limit: "Not applied · part %{part} would pass the %{network} limit of %{limit}"
+      rejected:
+        zero: "Nothing to reject"
+        one: "Suggestion rejected"
+        other: "%{count} suggestions rejected"
+      sent: "Already posted · nothing was applied"
+  tags_page:
+    toasts:
+      added: "Tag added"
+      in_use:
+        one: "Kept · %{count} record still carries it"
+        other: "Kept · %{count} records still carry it"
+      recoloured: "Tag recoloured"
+      removed: "Tag removed"
+      renamed: "Tag renamed"
+  task_types_page:
+    toasts:
+      added: "Type added"
+      in_use:
+        one: "Kept · %{count} task still carries it"
+        other: "Kept · %{count} tasks still carry it"
+      removed: "Type removed"
+      renamed: "Type renamed"
+  tasks_page:
+    toasts:
+      blank: "Write the task down first"
+      captured: "Task captured"
+      completed: "Done"
+      deleted: "Task deleted"
+      linked: "Tasks linked"
+      moved: "Moved"
+      pulled_in: "Pulled into today's sprint"
+      reopened: "Reopened"
+      saved: "Task saved"
+      scheduled: "Scheduled for the %{date} sprint"
+      sprint_ahead: "Plan a sprint for a day after today"
+      sprint_dropped: "Sprint dropped · its tasks went back to next"
+      sprint_invalid: "Pick a day first"
+      sprint_past: "A sprint opens on today or a day after it"
+      sprint_planned: "Sprint planned for %{date}"
+      sprint_started: "That sprint has already started"
+      sprint_taken: "A sprint already exists for %{date}"
+      started: "Started · it is today's work now"
+      stopped: "Stopped · it waits in the sprint"
+      unlinked: "Link removed"
+      unscheduled: "Unscheduled · back in next"
+  today_page:
+    toasts:
+      not_configured: "No GitHub token is set."
+      queued: "Import queued · new commits show on the card shortly"
+  ui:
+    components:
+      activity:
+        day:
+          days_ago:
+            one: "%{count} day ago"
+            other: "%{count} days ago"
+          today: "Today"
+          yesterday: "Yesterday"
+        filters:
+          apply: "Filter"
+          contains: "Contains"
+          contains_hint: "Add tag:ruby to search by tag, or repo:owner/name to search one repo."
+          contains_placeholder: "grep activity…"
+          from: "From"
+          include: "Include"
+          preset: "%{count}d"
+          range: "Range"
+          to: "To"
+          types:
+            commit: "Commits"
+            journal: "Journal"
+            post: "Blog posts"
+            social: "Social"
+            task: "Tasks"
+            webmention: "Webmentions"
+      analytics:
+        chart_card:
+          peak: "peak %{views}"
+          tip: "%{date} · %{views} · %{visitors}"
+          title: "Views per day"
+          views:
+            one: "%{formatted} view"
+            other: "%{formatted} views"
+          visitors:
+            one: "%{formatted} visitor"
+            other: "%{formatted} visitors"
+        pages_card:
+          bounce: "Bounce"
+          empty: "No page views yet."
+          page: "Page"
+          percent: "%{value}%"
+          time: "Avg. time"
+          title: "Top pages"
+          views: "Views"
+      client_row:
+        confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
+        connected: "connected %{time}"
+        last_used: "last used %{time}"
+        never_used: "never used"
+        revoke: "Revoke"
+      commits_card:
+        empty: "Nothing pushed yet today."
+        import: "Import now"
+        importing: "Importing…"
+        label: "Git"
+        never_synced: "Never synced"
+        no_token: "No GitHub token is set, so the import can't run."
+        repos:
+          one: "%{count} repo in 30 days"
+          other: "%{count} repos in 30 days"
+        synced_on: "Last synced %{at}"
+        synced_today: "Last synced today at %{time}"
+        title: "Commits imported today"
+      drafts_card:
+        empty: "No drafts. Suspicious."
+        read_time: "~%{count} min read"
+        title: "Drafts"
+        words:
+          one: "%{count} word"
+          other: "%{count} words"
+      journal:
+        day:
+          days_ago:
+            one: "%{count} day ago"
+            other: "%{count} days ago"
+          today: "Today"
+          yesterday: "Yesterday"
+        entry:
+          body: "Entry text"
+          cancel: "Cancel"
+          confirm_delete: "Delete this entry? You can't undo this."
+          delete: "Delete"
+          edit: "Edit"
+          private: "private"
+          save: "Save"
+          tags: "Tags"
+          tags_placeholder: "ruby, health"
+        field_error:
+          body:
+            blank: "Write something first."
+          entry_date:
+            format: "Enter a date."
+            future: "Pick today or an earlier day."
+          tags:
+            format: "Use lowercase letters, numbers and single dashes in each tag."
+        filters:
+          entry_date: "Entry date"
+          search: "Search"
+          search_placeholder: "grep entries…"
+          streak: "Streak"
+          streak_days: "Wrote on %{written} of the last %{days} days"
+        new_entry:
+          body: "Entry"
+          placeholder: "Unfiltered. Nobody is reading this but you."
+          save: "Save entry"
+          tags: "Tags"
+          tags_placeholder: "ruby, health"
+          today: "Today"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+      message_row:
+        read: "Read"
+        spam: "Spam"
+        unread: "Unread"
+      nav:
+        context_bar:
+          alert: "something needs you"
+          back: "today"
+          jump: "jump"
+          separator: "/"
+          shortcut: "⌘/"
+        groups:
+          daily: "Daily"
+          inbox: "Inbox"
+          insights: "Insights"
+          publish: "Publish"
+          settings: "Settings"
+        palette:
+          add: "Add “{query}” to today's sprint"
+          add_sub: "new task"
+          anywhere: "anywhere"
+          current: "current"
+          escape: "esc"
+          in_list: "in %{list}"
+          label: "Command palette"
+          lists:
+            next: "next"
+            someday: "someday"
+            today: "today's sprint"
+            upcoming: "a planned sprint"
+          move: "move"
+          open: "open"
+          placeholder: "Go anywhere, find a task, or type a new one…"
+          query_label: "Go anywhere, find a task, or type a new one"
+          results:
+            one: "{count} result"
+            other: "{count} results"
+          results_label: "Sections and tasks"
+          tasks: "Tasks"
+          waiting:
+            one: "%{count} waiting"
+            other: "%{count} waiting"
+        sections:
+          activity: "activity"
+          analytics: "analytics"
+          clients: "clients"
+          journal: "journal"
+          messages: "messages"
+          posts: "posts"
+          projects: "projects"
+          social: "social"
+          tags: "tags"
+          task_types: "task types"
+          tasks: "tasks"
+          today: "today"
+          webmentions: "webmentions"
+        slash_button:
+          label: "Open the command palette"
+      posts:
+        delete_form:
+          confirm: "Delete this post? You can't undo it."
+          confirm_webmentions:
+            one: "Delete this post and the %{count} webmention it received? You can't undo it."
+            other: "Delete this post and the %{count} webmentions it received? You can't undo it."
+        editor:
+          all_posts: "All posts"
+          read_time: "~%{count} min read"
+          summary: "Summary"
+          summary_placeholder: "One line. Empty uses the first paragraph."
+          title: "Title"
+          title_placeholder: "Post title"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+        editor_actions:
+          delete: "Delete"
+          publish: "Publish"
+          save: "Save"
+          save_draft: "Save draft"
+          schedule: "Schedule"
+        editor_panes:
+          body: "Body"
+          placeholder: "Write it."
+          preview: "Preview"
+          toolbar: "Formatting"
+          tools:
+            bold: "B"
+            bold_label: "Bold"
+            code: "code"
+            code_label: "Code block"
+            h2: "H2"
+            h2_label: "Heading"
+            italic: "I"
+            italic_label: "Italic"
+            quote: "quote"
+            quote_label: "Quote"
+          view: "Editor view"
+          write: "Write"
+        field_error:
+          canonical_url:
+            format: "Enter a link that starts with http:// or https://."
+          og_image_url:
+            format: "Enter a link that starts with http:// or https://."
+          publish_at:
+            format: "Enter a date and time."
+            skipped: "That time doesn't exist in Chicago: the clocks skip it."
+          slug:
+            blank: "Add a slug with a letter or number in it."
+            format: "Use lowercase letters, numbers and single dashes."
+            locked: "A published post keeps its slug."
+            reserved: "That slug is taken by a site page."
+            taken: "Another post has this slug."
+          syndication_body:
+            announcement_too_long: "The title and link that go out are over the limit for a network you picked."
+            too_long: "The cross-post is over the limit for a network you picked."
+          tags:
+            format: "Use lowercase letters, numbers and single dashes in each tag."
+          title:
+            blank: "Add a title."
+        publishing:
+          heading: "Publishing"
+          hint_later: "Future date: publishing will schedule it."
+          hint_now: "Publishing goes live immediately."
+          publish_at: "Publish time (Chicago)"
+          slug: "Slug"
+          tags: "Tags"
+          tags_placeholder: "ruby, patterns"
+        seo:
+          canonical_url: "Canonical link"
+          canonical_url_note: "Only when this went out somewhere else first. Blank points at this site."
+          canonical_url_placeholder: "https://example.com/the-original"
+          heading: "Social card"
+          og_image_url: "Card image"
+          og_image_url_note: "A link to an image you host. Nothing uploads here."
+          og_image_url_placeholder: "https://example.com/card.png"
+          og_title: "Card title"
+          og_title_note: "Only when the post title reads badly on its own. Blank uses the title."
+          og_title_placeholder: "Post title"
+        suggestions:
+          accept: "Accept"
+          accept_all: "Accept all"
+          dismiss: "Dismiss"
+          heading: "Suggestions"
+          reject: "Reject"
+          reject_all: "Reject all"
+          stale: "stale"
+        syndication:
+          heading: "Syndication"
+          hint: "It goes out within a minute of the post going live."
+          placeholder: "The title and link land here once you name the post."
+          queue: "Queue a cross-post when this goes live"
+          text: "Cross-post text"
+        webmentions:
+          accept: "Accept webmentions"
+          heading: "Webmentions"
+          hint: "Adds the webmention link tag and shows approved replies below the article."
+          received:
+            one: "%{count} received so far"
+            other: "%{count} received so far"
+      projects:
+        editor:
+          all_projects: "All projects"
+          name: "Name"
+          name_placeholder: "project-name"
+          repo_placeholder: "owner/repo"
+        editor_actions:
+          archive: "Archive"
+          create: "Create project"
+          restore: "Restore"
+          save: "Save project"
+        field_error:
+          name:
+            blank: "Add a name."
+          og_image_url:
+            format: "Enter a link that starts with http:// or https://."
+          repo:
+            format: "Name the repository as owner/repo, as octocat/hello-world."
+            taken: "Another project already tracks this repository."
+          started_on:
+            after_archived: "The start month falls after the day this project was archived."
+            format: "Use the year and the month, as 2024-06."
+            future: "Pick this month or one before it."
+          status:
+            format: "Pick a status from the list."
+          tags:
+            format: "Use lowercase letters, numbers and single dashes in each tag."
+          url:
+            format: "Enter a link that starts with http:// or https://."
+        move:
+          down: "Move %{project} down"
+          up: "Move %{project} up"
+        placement:
+          archived_note: "Archived projects drop off the public page automatically, whatever this is set to."
+          featured: "Feature on /projects"
+          heading: "Placement"
+          restore_note: "Restore puts it back on /projects."
+          status: "Status"
+          statuses:
+            active: "active"
+            paused: "paused"
+            wip: "wip"
+          tags: "Tags"
+          tags_placeholder: "ruby, ddd"
+        preview:
+          heading: "Preview"
+          name_placeholder: "project-name"
+          tagline_placeholder: "One sentence about the project."
+          title: "Project card"
+        public_copy:
+          heading: "Public copy"
+          og_image_url: "Card image"
+          og_image_url_note: "A link to an image you host. The first card with one gives /projects its social card."
+          og_image_url_placeholder: "https://example.com/card.png"
+          tagline: "Tagline"
+          tagline_placeholder: "One sentence. What it does and who for."
+          title: "How it reads on /projects"
+        repository:
+          heading: "Source"
+          none: "—"
+          release: "Release"
+          repo: "owner/repo"
+          repo_placeholder: "octocat/hello-world"
+          stars: "Stars"
+          started_on: "Started"
+          started_on_placeholder: "2024-06"
+          sync_note: "Stars and release refresh nightly from the GitHub API."
+          url: "Link"
+          url_note: "Where the card points. Leave it blank to link to the repository."
+          url_placeholder: "https://example.com"
+        row:
+          archive: "Archive"
+          archived_on: "archived %{date}"
+          edit: "Edit"
+          featured: "featured"
+          restore: "Restore"
+          stars:
+            one: "%{stars} star"
+            other: "%{stars} stars"
+        status_pill:
+          active: "active"
+          archived: "archived"
+          paused: "paused"
+          wip: "wip"
+      ships_next_card:
+        empty: "Nothing scheduled."
+        title: "What ships next"
+      social:
+        composer:
+          add: "Add to thread"
+          cancel: "Cancel"
+          editing: "Editing this post"
+          hint_later: "It goes out within a minute of the time you pick."
+          hint_now: "It goes out within a minute."
+          label: "Compose"
+          now: "post now"
+          post_now: "Post now"
+          save_draft: "Save draft"
+          schedule: "schedule"
+          schedule_at: "Send time (Chicago)"
+          schedule_now: "Schedule"
+          title: "One post, both networks"
+          when: "When"
+        counts:
+          bluesky: "Bluesky %{count}/%{limit}"
+          mastodon: "Mastodon %{count}/%{limit}"
+        field_error:
+          parts:
+            blank: "Write something first."
+            too_long: "A part is over the limit for a network you picked."
+          schedule_at:
+            format: "Enter a date and time."
+            skipped: "That time doesn't exist in Chicago: the clocks skip it."
+          targets:
+            blank: "Pick a network."
+            unavailable: "That network has no credentials."
+        part:
+          body: "Post text"
+          placeholder: "Say the thing. It goes out everywhere you pick."
+          remove: "Remove this part"
+        queue:
+          apply: "Filter"
+          drafts: "drafts"
+          empty:
+            drafts: "No drafts yet."
+            posted: "Nothing posted yet."
+            queued: "Nothing waiting."
+          filter: "Show"
+          label: "Queue"
+          posted: "posted"
+          queued: "queued"
+          title: "What's waiting"
+        queue_item:
+          edit: "Edit"
+          failed: "%{network} failed"
+          failure: "%{network}: %{detail}"
+          in_a_moment: "in a moment"
+          in_days:
+            one: "in %{count} day"
+            other: "in %{count} days"
+          in_hours:
+            one: "in %{count} hour"
+            other: "in %{count} hours"
+          in_minutes:
+            one: "in %{count} minute"
+            other: "in %{count} minutes"
+          likes: "Likes"
+          remove: "Remove"
+          replies: "Replies"
+          reposts: "Reposts"
+          retry_queued: "%{error} · retry queued"
+          suggestions:
+            one: "%{count} suggestion"
+            other: "%{count} suggestions"
+        suggestions:
+          accept: "Accept"
+          accept_all: "Accept all"
+          dismiss: "Dismiss"
+          heading: "Suggestions"
+          over_limit: "Over the %{network} limit of %{limit}"
+          part: "Part %{number}"
+          reject: "Reject"
+          reject_all: "Reject all"
+          stale: "stale"
+        targets:
+          label: "Networks"
+      status_pill:
+        approved: "approved"
+        draft: "draft"
+        pending: "pending"
+        posted: "posted"
+        published: "published"
+        scheduled: "scheduled"
+        spam: "spam"
+      swatches:
+        colors:
+          blue: "Blue"
+          green: "Green"
+          orange: "Orange"
+          pink: "Pink"
+          sand: "Sand"
+          violet: "Violet"
+        pick: "Colour it %{color}"
+      sync_failures:
+        line: "%{sync} failed at %{at} · %{reason}"
+        message_line: "%{line} · %{message}"
+        reasons:
+          download_failed: "The download failed"
+          github_failed: "GitHub didn't answer"
+          invalid_database: "The file it sent won't open"
+          missing: "No database on disk"
+          not_configured: "No GitHub token is set"
+          page_limit: "It stopped at the page limit"
+          prune_failed: "The old events wouldn't delete"
+          rate_limited: "GitHub rate limited it"
+          repository_start: "It walked back to the day the repository was made"
+          rollup_failed: "The days wouldn't roll up"
+          unreadable: "The database won't open"
+          write_failed: "The database wouldn't save"
+        repeat_line: "%{sync} failed at %{at} · %{reason} · failing since %{since}"
+        repo_line: "%{sync} failed for %{repo} at %{at} · %{reason}"
+        repo_repeat_line: "%{sync} failed for %{repo} at %{at} · %{reason} · failing since %{since}"
+        state_line: "%{sync} · %{reason}"
+        syncs:
+          analytics_rollup: "Analytics rollup"
+          commits: "Commit import"
+          countries: "Country lookup"
+          country_database: "Country database refresh"
+          projects: "Project refresh"
+      tags:
+        capture:
+          add: "Add tag"
+          label: "Tag name"
+          placeholder: "Name a tag…"
+        field_error:
+          color:
+            format: "Pick one of the six colours."
+          name:
+            blank: "Give the tag a name first."
+            format: "A tag is lowercase words joined by hyphens."
+            taken: "Another tag already holds that name."
+        row:
+          cancel: "Cancel"
+          color: "Colour"
+          confirm_remove: "Remove %{tag}? You can't undo it."
+          edit: "Edit"
+          held:
+            one: "%{count} record carries this tag"
+            other: "%{count} records carry this tag"
+          remove: "Remove"
+          rename: "Rename"
+          save: "Save"
+          unused: "unused · the colour is kept"
+          uses:
+            journal_entries:
+              one: "%{count} journal entry"
+              other: "%{count} journal entries"
+            posts:
+              one: "%{count} post"
+              other: "%{count} posts"
+            projects:
+              one: "%{count} project"
+              other: "%{count} projects"
+            tasks:
+              one: "%{count} task"
+              other: "%{count} tasks"
+      tasks:
+        capture:
+          add: "Add"
+          into: "Add to %{target}…"
+          label: "Task"
+          no_type: "untyped"
+          placeholder: "What needs doing? Use #tags"
+          type: "Type"
+        completed_day:
+          days_ago: "%{count} days ago"
+          today: "Today"
+          yesterday: "Yesterday"
+        controls:
+          complete: "Done"
+          lists:
+            next: "Next"
+            someday: "Someday"
+            today: "Today"
+          move: "Move to %{list}"
+          reopen: "Reopen"
+          start: "Start"
+          stop: "Stop"
+        editor:
+          cancel: "Cancel"
+          confirm_delete: "Delete %{task}? This cannot be undone."
+          delete: "Delete"
+          list: "List"
+          lists:
+            next: "next"
+            someday: "someday"
+            today: "today"
+          no_type: "untyped"
+          note: "Notes"
+          note_placeholder: "What done looks like."
+          save: "Save"
+          tags: "Tags"
+          tags_placeholder: "ruby, admin"
+          title: "Title"
+          type: "Type"
+        field_error:
+          color:
+            format: "Pick one of the six colours."
+          icon:
+            format: "No free solid icon goes by that name."
+          kind:
+            format: "Pick one of the four link types."
+          list:
+            format: "Pick one of the three lists."
+          name:
+            blank: "Give the type a name first."
+            taken: "Another type already holds that name."
+          other_id:
+            format: "Pick a task from the list."
+            missing: "That task is gone. Find another."
+            self: "A task cannot link to itself."
+            taken: "These two tasks are already linked."
+          tags:
+            format: "Tags are lowercase words, separated by commas."
+          task_type_id:
+            format: "Pick a type from the list."
+          title:
+            blank: "Write the task down first."
+        filters:
+          all_types: "all types"
+          apply: "Filter"
+          search: "Search tasks"
+          search_placeholder: "search · tag:site…"
+          type: "Type"
+        link_editor:
+          find: "Find"
+          kind: "Link type"
+          kinds:
+            blocked_by: "is blocked by"
+            blocks: "blocks"
+            duplicates: "duplicates"
+            relates: "relates to"
+          label: "Links"
+          no_match: "No unlinked task matches."
+          places:
+            done: "done"
+            in_progress: "in progress"
+            next: "next"
+            someday: "someday"
+            today: "today"
+          placeholder: "Task number or title…"
+          remove: "Remove the link to %{key}"
+        links:
+          labels:
+            blocked_by: "blocked by"
+            blocks: "blocks"
+            duplicated_by: "duplicated by"
+            duplicates: "duplicates"
+            relates: "relates to"
+        order:
+          down: "Move %{task} down"
+          up: "Move %{task} up"
+        planner:
+          ask: "What do you want to achieve today?"
+          empty: "empty sprint"
+          empty_next: "Nothing in next. Write the first one above."
+          empty_someday: "Nothing in someday. Write the first one above."
+          label: "Sprint · %{date}"
+          note: "One day, one sprint. Put something in it. Anything still open tonight rolls into tomorrow on its own."
+          pools:
+            next: "next · %{count}"
+            someday: "someday · %{count}"
+          pull: "Pull in"
+          pull_from: "Or pull from"
+          pull_task: "Pull %{task} into today"
+          target: "today"
+        row:
+          blocked: "blocked"
+          carried:
+            one: "carried ×%{count}"
+            other: "carried ×%{count}"
+          edit: "Edit"
+          finished: "done %{date} · %{time}"
+          in_progress: "in progress"
+          scheduled: "%{date}"
+        sprint_field:
+          label: "Sprint"
+          ran: "Ran in that day's sprint."
+          running: "Runs in today's sprint."
+          unscheduled: "Unscheduled · lives in a list only."
+          waiting: "Waits until that sprint starts."
+        sprint_panel:
+          all_tasks: "All tasks"
+          clear: "Sprint clear"
+          done: "%{done}/%{total} done"
+          finished:
+            one: "Everything in today's sprint is done · %{count} finished. Add another or pull one from next."
+            other: "Everything in today's sprint is done · %{count} finished. Add another or pull one from next."
+          label: "Sprint · %{date}"
+          pull: "Pull from next"
+          target: "today"
+          title: "Today's sprint"
+        tabs:
+          completed: "completed"
+          label: "Task lists"
+          next: "next"
+          someday: "someday"
+          today: "today"
+          upcoming: "upcoming"
+        task_key:
+          copied: "Task %{key} copied"
+          copy: "Copy task %{key}"
+        type_tag:
+          untyped: "untyped"
+        types:
+          capture:
+            add: "Add type"
+            color: "Colour"
+            gallery: "Browse the free solid icons"
+            icon: "Icon"
+            icon_placeholder: "Icon, such as broom"
+            label: "Type name"
+            placeholder: "Name a type…"
+          order:
+            down: "Move %{type} down"
+            up: "Move %{type} up"
+          row:
+            confirm_remove: "Remove %{type}? This cannot be undone."
+            held:
+              one: "%{count} task carries this type. Move it off first."
+              other: "%{count} tasks carry this type. Move them off first."
+            icon: "Icon"
+            icon_placeholder: "No icon"
+            name: "Type name"
+            remove: "Remove"
+            save: "Save"
+            tasks:
+              one: "%{count} task"
+              other: "%{count} tasks"
+        upcoming_sprints:
+          confirm_drop: "Drop the sprint for %{date}? Its tasks go back to Next."
+          count:
+            one: "%{count} planned"
+            other: "%{count} planned"
+          date: "Sprint day"
+          drop: "Drop"
+          empty: "Nothing scheduled for this day yet."
+          in_days: "In %{count} days"
+          label: "Plan ahead"
+          none: "No future sprints. Open one above to load tomorrow before tomorrow asks."
+          note: "A future sprint starts automatically on its date, absorbing anything you leave unfinished the day before."
+          open: "Open sprint"
+          planned:
+            one: "%{count} planned"
+            other: "%{count} planned"
+          pull: "Pull from next"
+          pull_task: "Schedule %{task} into this sprint"
+          title: "New sprint"
+          tomorrow: "Tomorrow"
+      today_journal_card:
+        body: "Entry"
+        label: "Private"
+        placeholder: "What happened? Only you will ever read this."
+        private: "private"
+        save: "Save entry"
+        title: "Journal"
+        today: "%{count} today"
+        words:
+          one: "%{count} word"
+          other: "%{count} words"
+      webmentions:
+        pending_card:
+          pending: "%{count} pending"
+          review: "Review"
+          title: "Webmentions pending"
+          types:
+            like: "like"
+            mention: "mention"
+            reply: "reply"
+            repost: "repost"
+        posts_card:
+          disabled: "off"
+          empty: "No posts yet."
+          enabled: "on"
+          title: "Per post"
+        row:
+          approve: "Approve"
+          no_content: "no content · like only"
+          spam: "Spam"
+          types:
+            like: "like"
+            mention: "mention"
+            reply: "reply"
+            repost: "repost"
+        settings_card:
+          accept_bridgy: "Accept Mastodon + Bluesky replies from Bridgy"
+          auto_approve: "Auto-approve known authors"
+          enable_on_new_posts: "Enable on new posts by default"
+          endpoint: "Endpoint: POST %{path}"
+          receive: "Receive webmentions"
+          save: "Save"
+          send_on_publish: "Send webmentions on publish"
+          title: "Settings"
+      work_entries:
+        field_error:
+          from_year:
+            blank: "Add the year this started."
+            format: "Use a four digit year, as 2018."
+          org:
+            blank: "Name the organization."
+          role:
+            blank: "Name the role."
+          to_year:
+            before_from: "The end year falls before the start year."
+            format: "Use a four digit year, as 2021."
+        form:
+          add: "Add role"
+          blurb: "Blurb"
+          blurb_placeholder: "One line. What you did there."
+          current_note: "Leave the end year empty for a role you still hold."
+          from: "From"
+          from_placeholder: "2018"
+          heading: "Add"
+          org: "Organization"
+          org_placeholder: "Rackspace"
+          role: "Role or project"
+          role_placeholder: "Software Engineer"
+          title: "A new role"
+          to: "To"
+          to_placeholder: "2021"
+        row:
+          confirm_remove: "Remove %{role} at %{org}? You can't undo this."
+          current: "Present"
+          remove: "Remove"
+          sub: "%{org} · %{from}–%{to}"
+    layouts:
+      application:
+        title: "Admin | %{owner}"
+    views:
+      activity:
+        show:
+          across: "%{events} across %{days}"
+          days:
+            one: "%{count} day"
+            other: "%{count} days"
+          empty: "Nothing in this range with these filters."
+          events:
+            one: "%{count} event"
+            other: "%{count} events"
+          heading: "Activity"
+          span: "%{from} → %{to}"
+      analytics:
+        show:
+          apply: "Apply"
+          change: "%{percent}% vs. previous %{count} days"
+          direct: "direct"
+          geography: "Geography"
+          heading: "Analytics"
+          mentioned_posts: "Webmentions per post"
+          no_countries: "No countries yet."
+          no_mentions: "No mentions yet."
+          no_prior: "no prior period"
+          no_referrers: "No referrers yet."
+          pending: "%{count} pending"
+          per_visit: "%{rate} pages per visit"
+          range: "Range"
+          range_14: "14d"
+          range_30: "30d"
+          range_7: "7d"
+          read: "Avg. read"
+          read_note: "per page view"
+          referrers: "Referrers"
+          sub: "Last %{count} days · self-hosted rollups, no third-party scripts"
+          unknown_country: "unknown"
+          views: "Page views"
+          visitors: "Visitors"
+          webmentions: "Webmentions"
+      clients:
+        index:
+          connected: "Connected clients"
+          empty: "No client has connected yet."
+          heading: "MCP clients"
+          sub:
+            one: "%{count} connected client"
+            other: "%{count} connected clients"
+            zero: "Nothing has connected yet"
+      commits:
+        show:
+          added: "Added"
+          github: "View on GitHub"
+          label: "Git"
+          no_body: "Nothing beyond the subject line."
+          removed: "Removed"
+          sha: "Commit"
+          sub: "%{repo} · %{branch} · %{day} at %{clock}"
+          title: "Message"
+      forms:
+        rejected:
+          heading: "Form expired"
+          message: "Nothing changed. Reload the page and try again."
+      journal:
+        index:
+          empty: "Nothing written yet."
+          entries:
+            one: "%{count} entry"
+            other: "%{count} entries"
+          heading: "Journal"
+          never_public: "never rendered on the public site"
+          no_match: "No entries match."
+          private: "Private"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+      messages:
+        index:
+          apply: "Filter"
+          empty:
+            read: "Nothing read yet."
+            spam: "No spam."
+            unread: "Nothing waiting."
+          filter: "Status"
+          heading: "Messages"
+          inbox: "Inbox"
+          read: "read"
+          spam: "spam"
+          sub:
+            one: "%{count} message"
+            other: "%{count} messages"
+          unread: "unread"
+      posts:
+        index:
+          all: "all"
+          apply: "Filter"
+          draft_count:
+            one: "%{count} draft"
+            other: "%{count} drafts"
+          drafts: "drafts"
+          empty: "No posts"
+          filter: "Status"
+          heading: "Posts"
+          mentions: "@%{count}"
+          mentions_label:
+            one: "%{count} webmention"
+            other: "%{count} webmentions"
+          new_post: "New post"
+          published: "published"
+          published_count: "%{count} published"
+          scheduled: "scheduled"
+          scheduled_count: "%{count} scheduled"
+          views:
+            one: "%{count} view"
+            other: "%{count} views"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
+        new:
+          title: "New post"
+      projects:
+        index:
+          apply: "Filter"
+          archive_note: "Archiving keeps the repo link and history but removes the project from /projects and from the featured grid."
+          archived: "archived"
+          archived_count: "%{count} archived"
+          archived_hint: "hidden from the public page"
+          archived_label: "Archive"
+          archived_title: "Archived projects"
+          empty:
+            archived: "Nothing archived yet."
+            live: "No live projects."
+            work: "No roles yet."
+          featured_count: "%{count} featured on /projects"
+          filter: "Show"
+          heading: "Projects"
+          live: "live"
+          live_count: "%{count} live"
+          live_label: "Public order"
+          live_title: "Shown on /projects"
+          new_project: "New project"
+          stars_count:
+            one: "%{stars} star total"
+            other: "%{stars} stars total"
+          work: "work"
+          work_label: "Work history"
+          work_title: "Shown under Work on /projects"
+        new:
+          title: "New project"
+      sessions:
+        failed:
+          denied: "GitHub sign-in did not finish. Try again."
+          github_failed: "GitHub could not confirm who you are. Try again in a moment."
+          heading: "Sign-in failed"
+          not_configured: "GitHub sign-in is not set up yet."
+          unexpected: "Sign-in did not finish. Try again."
+          wrong_account: "This GitHub account can't sign in here."
+      social:
+        index:
+          cross_posting: "Cross-posting to %{accounts}"
+          heading: "Social"
+          no_accounts: "No network is connected"
+          queued: "%{count} queued"
+      tags:
+        index:
+          apply: "Filter"
+          aside: "Click a tag to rename it, recolour it or take it away."
+          count:
+            one: "%{count} tag · renaming one changes its /writing/tags link and everything that carries it"
+            other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
+          empty: "No tags yet. Name one above."
+          heading: "Tags"
+          label: "Shared"
+          no_match: "Nothing matches %{query}."
+          note: "A tag is kept while anything carries it. Take it off them first, then remove it."
+          search: "Search tags"
+          search_placeholder: "filter tags…"
+          title: "Every tag"
+      task_types:
+        index:
+          back: "Tasks"
+          count:
+            one: "%{count} type"
+            other: "%{count} types"
+          empty: "No types yet. Name one above."
+          heading: "Task types"
+          label: "Tasks"
+          note: "A type is kept while tasks carry it. Move them off it first, then remove it."
+          title: "Types"
+      tasks:
+        index:
+          archive: "Archive"
+          backlog: "Backlog"
+          blurbs:
+            next: "queued up, not today"
+            someday: "maybe, eventually, probably not"
+            today: "the current sprint, the only actionable list"
+          carried_in:
+            one: "%{count} carried in"
+            other: "%{count} carried in"
+          completed: "Completed"
+          empty:
+            completed: "Nothing completed yet."
+            completed_no_match: "Nothing completed matches these filters."
+            next: "Nothing waiting."
+            no_match: "No matches in this list."
+            someday: "Nothing parked."
+          finished_today:
+            one: "%{count} finished today"
+            other: "%{count} finished today"
+          footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
+          heading: "Tasks"
+          next: "Next"
+          on_deck: "On deck"
+          open:
+            one: "%{count} open"
+            other: "%{count} open"
+          open_in_today:
+            one: "%{count} open in today"
+            other: "%{count} open in today"
+          shown:
+            one: "%{count} shown · logged to the activity feed"
+            other: "%{count} shown · logged to the activity feed"
+          someday: "Someday"
+          sprint: "Sprint · %{date}"
+          sprint_on: "Sprint %{date}"
+          today: "Today"
+          types: "Types"
+          upcoming_count:
+            one: "%{count} upcoming"
+            other: "%{count} upcoming"
+      today:
+        show:
+          clients: "MCP clients"
+          commits: "Commits"
+          commits_note: "+%{additions} / −%{deletions}"
+          heading: "Today"
+          journaled: "Journaled"
+          journaled_note: "words, private"
+          queue: "In the queue"
+          queue_note: "next: %{title}"
+          queue_note_empty: "nothing scheduled"
+          sign_out: "Sign out"
+          sprint: "Sprint"
+          sprint_empty: "nothing planned"
+          sprint_open:
+            one: "%{count} still open"
+            other: "%{count} still open"
+          sprint_value: "%{done}/%{total}"
+          sub_commits:
+            one: "%{count} commit"
+            other: "%{count} commits"
+          sub_entries:
+            one: "%{count} journal entry"
+            other: "%{count} journal entries"
+          sub_scheduled:
+            one: "%{count} scheduled today"
+            other: "%{count} scheduled today"
+          sub_tasks: "%{done}/%{total} tasks done"
+          webmentions: "Webmentions"
+          webmentions_note: "awaiting review"
+      webmentions:
+        index:
+          apply: "Filter"
+          approved: "approved"
+          empty:
+            approved: "Nothing approved yet."
+            pending: "Nothing waiting."
+            spam: "No spam."
+          filter: "Status"
+          heading: "Webmentions"
+          inbox: "Inbox"
+          pending: "pending"
+          pending_count: "%{count} pending"
+          shown_count: "%{count} shown on the site"
+          spam: "spam"
+  webmentions_page:
+    toasts:
+      approved: "Approved · now visible on the post"
+      saved: "Settings saved"
+      spam: "Marked as spam"
+      unchanged: "Nothing saved · no setting changed"

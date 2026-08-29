@@ -1,0 +1,148 @@
+en:
+  posts:
+    feed:
+      title: "Writing | %{owner}"
+  tags:
+    feed:
+      title: "Writing tagged %{tag} | %{owner}"
+  ui:
+    components:
+      contact_field_error:
+        body:
+          blank: "Write a message."
+          control: "The message holds a hidden character."
+          long: "Shorten the message."
+        reply_to:
+          blank: "Add an address I can answer."
+          control: "The address holds a hidden character."
+          format: "That is not an email address."
+          long: "That address is too long."
+        subject:
+          blank: "Say what this is about."
+          control: "The subject holds a hidden character."
+          long: "Shorten the subject."
+      footer:
+        and: "and"
+        built_with: "Built with"
+        copyright: "© %{year}"
+        heart_label: "love"
+        location: "· San Antonio, TX"
+        networks:
+          bluesky: "bluesky"
+          github: "github"
+          mastodon: "mastodon"
+      posts:
+        list:
+          read_time: "%{count} min"
+        responses:
+          heading: "Responses"
+          likes:
+            one: "%{count} like"
+            other: "%{count} likes"
+          reposts:
+            one: "%{count} repost"
+            other: "%{count} reposts"
+      work_row:
+        current: "Present"
+        years: "%{from}–%{to}"
+    views:
+      pages:
+        about:
+          career: "Career"
+          cta:
+            body: "Got a pattern to argue about, a project to build together, or a Commander deck to show me? I read everything."
+            heading: "Say hello."
+            links:
+              bluesky: "bluesky"
+              contact: "contact form"
+              github: "github"
+              mastodon: "mastodon"
+          heading: "Hi, I'm Aaron"
+          hobbies:
+            dnd:
+              body: "long campaigns, with the odd turn behind the DM screen."
+              name: "Dungeons & Dragons"
+            games:
+              body: "a lifelong player who still wants to make one."
+              name: "Video games"
+            magic:
+              body: "almost always Commander, with more half-built decks than I'd like to admit."
+              name: "Magic: The Gathering"
+            separator: ": "
+          kicker: "About"
+          lede: "Software engineer in San Antonio, Texas. Ruby at work, and a lot of Rust in the open."
+          prose:
+            away: "Away from the keyboard"
+            open_source:
+              closing: "."
+              hanakai_link: "Hanakai team"
+              heading: "What I work on"
+              projects_link: "projects page"
+              ruby: "In Ruby I focus on Hanami, Dry and ROM as part of the"
+              rust: "Most of my own time goes into Rust: command line tools and the libraries behind them. The full list is on the"
+            quote: "Systems with clear rules pull me in, whether that's a deck, a tabletop game or a codebase."
+            structure: "What keeps me interested is structure: how do you keep a large app easy to read as it grows? For me it starts with clear domain boundaries, so each part of the app owns one piece of the business."
+            work: "My work centers on domain-driven design: code that models the business in the words the business uses."
+          title: "About"
+        contact:
+          count_separator: " / "
+          fields:
+            body: "Message"
+            reference: "Website"
+            reply_to: "Your email"
+            subject: "Subject"
+          heading: "Send me something."
+          kicker: "Contact"
+          lede: "Real messages from real people get an answer, usually within a few days."
+          note: "Goes straight to my inbox. No mailing list, no third party."
+          placeholders:
+            body: "Bugs, better patterns, arguments about service objects. All welcome."
+            reply_to: "you@somewhere.dev"
+            subject: "What's this about?"
+          send: "Send message"
+          sent:
+            body: "It's in my queue. I'll reply to the address you gave. Thanks for writing."
+            heading: "Message sent."
+          throttled:
+            body: "That one did not reach me. Wait a while and send it again."
+            heading: "You have sent enough for now"
+          title: "Contact"
+        index:
+          all_projects: "All projects"
+          all_writing: "All writing"
+          heading: "Writing and projects"
+          no_projects: "Nothing built yet."
+          no_writing: "Nothing written yet."
+          projects: "Projects"
+          writing: "Writing"
+        projects:
+          heading: "Libraries I maintain in the open."
+          kicker: "Projects"
+          lede: "Small, opinionated tools in Rust and Ruby that grew out of problems I hit, most of them about making intent obvious."
+          title: "Projects"
+      posts:
+        index:
+          empty: "Nothing here yet."
+          heading: "Writing"
+          kicker: "Writing · newest first"
+          title: "Writing"
+        show:
+          all_writing: "All writing"
+          back: "Writing"
+          feedback:
+            after: "."
+            before: "Found a typo or want to argue about patterns?"
+            link: "Let me know"
+          networks:
+            bluesky: "Bluesky"
+            mastodon: "Mastodon"
+          next: "Next"
+          pager_label: "More posts"
+          previous: "Previous"
+          syndication: "Also posted on"
+      tags:
+        show:
+          heading: "Tagged %{tag}"
+          projects: "Projects"
+          title: "Tagged %{tag}"
+          writing: "Writing"

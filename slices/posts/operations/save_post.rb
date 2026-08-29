@@ -1,0 +1,92 @@
+# frozen_string_literal: true
+
+module Posts
+  module Operations
+    class SavePost < Blog::Operation
+      include Deps[
+        contract: "contracts.post_contract",
+        post_repo: "repos.post_repo",
+        publish_post: "operations.publish_post",
+      ]
+
+      CARD = %i[syndication_body syndication_enabled syndication_targets webmentions_enabled].freeze
+      DRAFT = Blog::Types::PostIntent["draft"]
+      FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
+      PUBLISH = Blog::Types::PostIntent["publish"]
+      SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
+
+      def call(params, id: nil, intent: DRAFT, now: Time.now)
+        attributes = step validate(params, intent)
+        step persist(id, attributes, intent, now)
+      end
+
+      private
+
+      def create_or_update(post, attributes)
+        fields = attributes.except(:tags)
+        saved = post ? post_repo.update(post.id, fields) : post_repo.create(fields)
+        post_repo.replace_tags(saved.id, attributes.fetch(:tags))
+
+        post_repo.by_id(saved.id)
+      end
+
+      def draft(post, attributes)
+        Success([:drafted, create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["draft"]))])
+      end
+
+      def find(id)
+        return Success(nil) unless id
+
+        post = post_repo.by_id_for_update(id)
+        post ? Success(post) : Failure(:not_found)
+      end
+
+      def form(params)
+        given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD))
+
+        given.merge(slug: PostSlug.derive(slug: given[:slug], title: given[:title]))
+      end
+
+      def invalid(field, code) = Failure([:invalid, { field => [code] }])
+
+      def persist(id, attributes, intent, now)
+        transaction { save(step(find(id)), attributes, intent, now) }
+      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
+        code = SLUG_CONSTRAINTS[post_repo.violated_constraint(e)]
+        raise unless code
+
+        invalid(:slug, code)
+      end
+
+      def publish_now(post, attributes, now)
+        saved = create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["draft"]))
+        Success([:published, step(publish_post.call(saved.id, at: now))])
+      end
+
+      def save(post, attributes, intent, now)
+        return update_published(post, attributes) if post&.status == Blog::Types::PostStatus["published"]
+        return draft(post, attributes) unless intent == PUBLISH
+        return schedule(post, attributes) if attributes[:published_at]&.>(now)
+
+        publish_now(post, attributes, now)
+      end
+
+      def schedule(post, attributes)
+        Success([:scheduled, create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["scheduled"]))])
+      end
+
+      def update_published(post, attributes)
+        saved = create_or_update(post, attributes.except(:published_at))
+        post_repo.after_commit { Social::Jobs::SendWebmentions.once_saved(saved.id) }
+
+        Success([:saved, saved])
+      end
+
+      def validate(params, intent)
+        attributes = step validated(contract.call(form(params), intent:))
+        publish_at = attributes.delete(:publish_at)
+        Success(attributes.merge(published_at: publish_at))
+      end
+    end
+  end
+end
