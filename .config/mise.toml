@@ -3,6 +3,7 @@ _.file = [".env"]
 
 [settings]
 lockfile = true
+ruby.compile = true
 
 [task_config]
 includes = ["scripts"]
