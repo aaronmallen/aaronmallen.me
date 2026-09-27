@@ -11,6 +11,7 @@ module Public
         ]
 
         config.formats.clear.accept :atom
+        answer_any_accept :atom
 
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }

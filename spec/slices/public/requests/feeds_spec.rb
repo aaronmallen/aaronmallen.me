@@ -46,6 +46,19 @@ RSpec.describe "Feeds", type: :request do
       expect(last_response.content_type).to eq("application/atom+xml; charset=utf-8")
     end
 
+    {
+      "a browser" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "a reader that asks for RSS or XML" => "application/rss+xml, application/xml;q=0.9",
+      "a reader that asks for text/xml" => "text/xml",
+    }.each do |who, accept|
+      it "serves Atom to #{who}", :aggregate_failures do
+        get "/writing.atom", {}, "HTTP_ACCEPT" => accept
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.content_type).to eq("application/atom+xml; charset=utf-8")
+      end
+    end
+
     it "lists only published posts, newest first" do
       publish_mixed(tag: "anything")
       get "/writing.atom"
@@ -145,6 +158,14 @@ RSpec.describe "Feeds", type: :request do
 
       expect(last_response.status).to eq(200)
       expect(last_response.content_type).to eq("application/atom+xml; charset=utf-8")
+    end
+
+    it "serves Atom to a browser" do
+      publish("hello", 1, tags: %w[ruby])
+      get "/writing/tags/ruby.atom", {},
+          "HTTP_ACCEPT" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+      expect(last_response.status).to eq(200)
     end
 
     it "lists only published posts with the tag, newest first" do

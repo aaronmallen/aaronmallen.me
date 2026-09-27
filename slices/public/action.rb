@@ -16,9 +16,9 @@ module Public
 
     before :set_cache_policy
 
-    def self.answer_any_accept
+    def self.answer_any_accept(format = :html)
       config.formats.register(
-        :html, Hanami::Action::Mime::TYPES[:html],
+        format, Hanami::Action::Mime::TYPES.fetch(format),
         accept_types: [ANY_MEDIA_TYPE], content_types: ::Rack::Request::FORM_DATA_MEDIA_TYPES,
       )
     end

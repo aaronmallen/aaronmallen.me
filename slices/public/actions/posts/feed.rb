@@ -7,6 +7,7 @@ module Public
         include Deps["settings", atom_feed: "operations.render_atom_feed", published_posts: "posts.queries.published"]
 
         config.formats.clear.accept :atom
+        answer_any_accept :atom
 
         def handle(request, response)
           posts = published_posts.call
