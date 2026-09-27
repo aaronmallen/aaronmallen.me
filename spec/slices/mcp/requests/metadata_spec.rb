@@ -37,6 +37,14 @@ RSpec.describe "OAuth discovery metadata", type: :request do
     end
   end
 
+  it "names the same scopes in both documents" do
+    get "/.well-known/oauth-authorization-server"
+    offered = document["scopes_supported"]
+    get "/.well-known/oauth-protected-resource/mcp"
+
+    expect(document["scopes_supported"]).to eq(offered)
+  end
+
   it "serves the same document at the root well-known path" do
     get "/.well-known/oauth-protected-resource"
     root = document

@@ -32,6 +32,7 @@ module MCP
             bearer_methods_supported: BEARER_METHODS,
             resource: at(issuer, Slice::RESOURCE_PATH),
             resource_name: Blog::Types::Normalized::Host.call(issuer),
+            scopes_supported: Scope::ALL,
           }
         end
 
