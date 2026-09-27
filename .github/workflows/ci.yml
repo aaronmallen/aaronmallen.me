@@ -16,7 +16,6 @@ permissions:
 env:
   DATABASE_PASSWORD: &database-password postgres
   DATABASE_USER: &database-user postgres
-  GEM_HOME: ${{ runner.temp }}/gems
   REDIS_PASSWORD: redis
 
 jobs:
@@ -49,6 +48,8 @@ jobs:
 
       - name: Install the dependencies
         run: |
+          export GEM_HOME="$RUNNER_TEMP/gems"
+          echo "GEM_HOME=$GEM_HOME" >>"$GITHUB_ENV"
           echo "$GEM_HOME/bin" >>"$GITHUB_PATH"
           mise run setup:dependencies
 
