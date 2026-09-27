@@ -50,8 +50,6 @@ module Social
         social_post ? Success(social_post) : Failure(:not_found)
       end
 
-      def idempotency_key(social_post, network, position) = "social-post-#{social_post.id}-#{network}-#{position}"
-
       def refuse(social_post, network, reason, error)
         transaction do
           social_post_repo.record_delivery(social_post.id, network, error:, failed: true)
@@ -63,7 +61,7 @@ module Social
 
       def send_part(social_post, network, client, delivery, part)
         remote = client.post(part.body, reply_to: delivery.remote_ids.last,
-                                        idempotency_key: idempotency_key(social_post, network, part.position))
+                                        idempotency_key: PartKey.new(network:, part:))
 
         social_post_repo.record_delivery(
           social_post.id, network,

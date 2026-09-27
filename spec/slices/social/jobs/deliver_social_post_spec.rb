@@ -36,6 +36,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
   def reloaded(social_post) = social_post_repo.by_id(social_post.id)
 
+  def rkey(social_post, position)
+    part = social_post.parts.find { it.position == position }
+
+    Social::Bluesky::Tid.for(part.id, part.created_at)
+  end
+
   def statuses = SocialNetworks::MASTODON_STATUSES
 
   describe "a post to Mastodon" do
@@ -212,12 +218,25 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         .with(body: { identifier: "ada.example", password: "secret" })).to have_been_made
     end
 
-    it "writes the record to the author's repo under the key for the part" do
+    it "writes the record to the author's repo under the TID for the part" do
       deliver(social_post, "bluesky")
 
       expect(bluesky_writes.first).to include("collection" => "app.bsky.feed.post",
                                               "repo" => SocialNetworks::BLUESKY_DID,
-                                              "rkey" => key(social_post, "bluesky", 1))
+                                              "rkey" => rkey(social_post, 1))
+    end
+
+    it "writes the record under a key Bluesky takes as a TID" do
+      deliver(social_post, "bluesky")
+
+      expect(bluesky_writes.first.fetch("rkey")).to match(/\A[2-7a-j][2-7a-z]{12}\z/)
+    end
+
+    it "writes each post under a key of its own" do
+      other = queued(targets: %w[bluesky], parts: ["go 🎉 https://a.example"])
+      [social_post, other].each { deliver(it, "bluesky") }
+
+      expect(bluesky_writes.map { it.fetch("rkey") }.uniq.size).to eq(2)
     end
 
     it "writes the record with the session token" do
@@ -277,18 +296,18 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "records the AT URI and the bsky.app URL" do
       deliver(social_post, "bluesky")
-      rkey = key(social_post, "bluesky", 1)
+      tid = rkey(social_post, 1)
 
       expect(delivery(social_post, "bluesky")).to have_attributes(
-        remote_ids: [bluesky_uri(rkey)], remote_url: "https://bsky.app/profile/ada.example/post/#{rkey}",
+        remote_ids: [bluesky_uri(tid)], remote_url: "https://bsky.app/profile/ada.example/post/#{tid}",
       )
     end
   end
 
   describe "a thread to Bluesky" do
     let(:social_post) { queued(targets: %w[bluesky], parts: %w[one two three]) }
-    let(:first) { bluesky_uri(key(social_post, "bluesky", 1)) }
-    let(:second) { bluesky_uri(key(social_post, "bluesky", 2)) }
+    let(:first) { bluesky_uri(rkey(social_post, 1)) }
+    let(:second) { bluesky_uri(rkey(social_post, 2)) }
 
     before do
       stub_bluesky
@@ -299,7 +318,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     it "looks the parent up by its URI" do
       deliver(social_post, "bluesky")
 
-      query = { collection: "app.bsky.feed.post", repo: SocialNetworks::BLUESKY_DID, rkey: key(social_post, "bluesky", 1) }
+      query = { collection: "app.bsky.feed.post", repo: SocialNetworks::BLUESKY_DID, rkey: rkey(social_post, 1) }
 
       expect(a_request(:get, bluesky_url("com.atproto.repo.getRecord")).with(query:)).to have_been_made
     end
@@ -315,6 +334,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       deliver(social_post, "bluesky")
 
       expect(bluesky_writes[2].dig("record", "reply", "root")).to eq("cid" => "cid-root", "uri" => first)
+    end
+
+    it "writes each part under a key of its own" do
+      deliver(social_post, "bluesky")
+
+      expect(bluesky_writes.map { it.fetch("rkey") }.uniq.size).to eq(3)
     end
 
     it "records every part" do
@@ -344,7 +369,24 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       refused(social_post, "bluesky")
 
       expect(delivery(social_post, "bluesky").error)
-        .to eq("Bluesky answered 401 for com.atproto.server.createSession")
+        .to eq("Bluesky answered 401 for com.atproto.server.createSession: AuthenticationRequired")
+    end
+
+    it "keeps the error and the message Bluesky gives for a refused write" do
+      stub_bluesky_session
+      stub_request(:post, write_url).to_return(**json_response(status: 400, error: "Invalid", message: "Bad key"))
+      refused(social_post, "bluesky")
+
+      expect(delivery(social_post, "bluesky").error)
+        .to eq("Bluesky answered 400 for com.atproto.repo.putRecord: Invalid: Bad key")
+    end
+
+    it "keeps only the status when Bluesky gives no reason" do
+      stub_bluesky_session
+      stub_request(:post, write_url).to_return(status: 502)
+      refused(social_post, "bluesky")
+
+      expect(delivery(social_post, "bluesky").error).to eq("Bluesky answered 502 for com.atproto.repo.putRecord")
     end
 
     it "keeps the error when the session comes back without a token" do
@@ -393,12 +435,31 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a retry to Bluesky" do
+    let(:social_post) { queued(targets: %w[bluesky], parts: %w[one two]) }
+
+    before do
+      stub_bluesky_session
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
+      stub_request(:post, bluesky_url("com.atproto.repo.putRecord")).to_return(status: 500)
+    end
+
+    it "writes the part again under the key the failed try sent" do
+      refused(social_post, "bluesky")
+      stub_bluesky_writes
+      deliver(social_post, "bluesky")
+
+      expect(a_request(:post, bluesky_url("com.atproto.repo.putRecord"))
+        .with(body: hash_including("rkey" => rkey(social_post, 1)))).to have_been_made.twice
+    end
+  end
+
   describe "one network of two failing" do
     let(:social_post) { queued(targets: %w[mastodon bluesky], parts: %w[one two]) }
 
     before do
       stub_bluesky
-      stub_bluesky_parent(bluesky_uri(key(social_post, "bluesky", 1)))
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
       stub_request(:post, statuses).to_return(status: 503)
     end
 
@@ -557,8 +618,8 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     before do
       stub_bluesky
-      stub_bluesky_parent(bluesky_uri(key(social_post, "bluesky", 1)))
-      stub_bluesky_parent(bluesky_uri(key(social_post, "bluesky", 2)))
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 2)))
       stub_mastodon("1", "2", "3")
     end
 

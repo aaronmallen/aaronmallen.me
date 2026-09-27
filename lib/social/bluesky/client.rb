@@ -18,7 +18,6 @@ module Social
       LIMIT = 300
       MAX_BYTES = 3000
       PUT_RECORD = "com.atproto.repo.putRecord"
-      RKEY_UNSAFE = /[^a-zA-Z0-9.\-_~:]/
       TOO_MANY_REQUESTS = 429
       XRPC_PATH = "/xrpc"
 
@@ -73,9 +72,9 @@ module Social
       end
 
       def error_message(nsid, response)
-        return "Bluesky answered #{response.status} for #{nsid}" unless response.success?
+        return "Bluesky answered #{nsid} with #{response.body.class} instead of JSON" if response.success?
 
-        "Bluesky answered #{nsid} with #{response.body.class} instead of JSON"
+        ["Bluesky answered #{response.status} for #{nsid}", *reason(response.body)].join(": ")
       end
 
       def facets(text)
@@ -93,6 +92,12 @@ module Social
 
       def query(connection, nsid, token: nil, **params)
         request(connection, :get, nsid, params, token)
+      end
+
+      def reason(body)
+        return [] unless body.is_a?(Hash)
+
+        body.values_at("error", "message").map { it.to_s.strip }.reject(&:empty?)
       end
 
       def record(text, reply_to, session)
@@ -129,7 +134,7 @@ module Social
         raise Error, "Bluesky request #{nsid} failed: #{e.message}"
       end
 
-      def rkey(key) = key.to_s.gsub(RKEY_UNSAFE, "-")
+      def rkey(key) = Tid.for(key.part.id, key.part.created_at)
 
       def sign_in
         body = procedure(pds, "com.atproto.server.createSession", identifier: handle, password:)
