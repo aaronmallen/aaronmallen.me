@@ -333,7 +333,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     {
       "a name that resolves to a private address" => ["10.1.2.3"],
       "a name with one private address among public ones" => [Resolver::PUBLIC, "10.1.2.3"],
-      "a scoped link-local address" => ["fe80::1%lo0"],
+      "a scoped link-local address" => ["fe80::1%1"],
     }.each do |what, addresses|
       it "sends nothing to #{what}" do
         resolves("ada.example", *addresses)
@@ -395,7 +395,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
         [
           interface("2600:1700:abcd:1::10", "ffff:ffff:ffff:ffff::"),
           interface("203.0.113.10", "255.255.255.0"),
-          interface("fe80::1%lo0", "ffff:ffff:ffff:ffff::"),
+          interface("fe80::1%1", "ffff:ffff:ffff:ffff::"),
           interface("198.51.100.7"),
           interface(nil),
         ],
