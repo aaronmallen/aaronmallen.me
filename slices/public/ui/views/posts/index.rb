@@ -14,7 +14,6 @@ module Public
 
           def view_template
             content_for(:title, t(".title"))
-            content_for(:feed, path(:writing_feed))
 
             section(class: "writing") do
               h1(class: "sr-only") { t(".heading") }

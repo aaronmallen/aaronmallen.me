@@ -4,6 +4,10 @@ RSpec.describe "Writing", type: :request do
   let(:i18n) { Public::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
 
+  def feed_links
+    page.all("head link[rel='alternate'][type='application/atom+xml']", visible: :all).map { [it[:href], it[:title]] }
+  end
+
   def feedback_line = "#{show_copy('feedback.before')} #{show_copy('feedback.link')}#{show_copy('feedback.after')}"
 
   def index_copy(key) = i18n.t(key, scope: "ui.views.posts.index")
@@ -123,13 +127,10 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_no_css(".writing p.eyebrow")
     end
 
-    it "links the feed in the head" do
+    it "links the feed in the head once" do
       get "/writing"
 
-      expect(page).to have_css(
-        "head link[rel='alternate'][type='application/atom+xml'][href='/writing.atom'][title='Writing | Aaron Allen']",
-        visible: :all,
-      )
+      expect(feed_links).to eq([["/writing.atom", "Writing | Aaron Allen"]])
     end
   end
 
@@ -165,6 +166,13 @@ RSpec.describe "Writing", type: :request do
 
       expect(page.all("header .post-meta a.post-tag").map { it[:href] })
         .to eq(%w[/writing/tags/hanami /writing/tags/ruby])
+    end
+
+    it "links the writing feed in the head" do
+      publish("hello", 1)
+      get "/writing/hello"
+
+      expect(feed_links).to eq([["/writing.atom", "Writing | Aaron Allen"]])
     end
 
     it "titles the page with the post" do

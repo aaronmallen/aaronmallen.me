@@ -49,6 +49,11 @@ module Public
           content_for(:tags).to_a.each { meta(property: "article:tag", content: it) }
         end
 
+        def render_feed_link
+          super
+          link(rel: "alternate", type: FEED_TYPE, title: writing_feed_title, href: path(:writing_feed))
+        end
+
         def render_head
           super
           link(rel: "canonical", href: page_url)
@@ -77,6 +82,8 @@ module Public
           meta(name: "twitter:description", content: page_description) if page_description
           meta(name: "twitter:image", content: page_image) if page_image
         end
+
+        def writing_feed_title = t(".writing_feed", owner: Blog::Owner.full_name)
       end
     end
   end

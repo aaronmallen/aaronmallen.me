@@ -3,6 +3,10 @@
 RSpec.describe "Tags", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
+  def feed_links
+    page.all("head link[rel='alternate'][type='application/atom+xml']", visible: :all).map { [it[:href], it[:title]] }
+  end
+
   def publish(slug, minutes_ago, **attrs)
     create(:post, :published, slug:, title: slug.capitalize, published_at: Time.now - (minutes_ago * 60), **attrs)
   end
@@ -48,13 +52,12 @@ RSpec.describe "Tags", type: :request do
     expect(page).to have_title("Tagged ruby | Aaron Allen")
   end
 
-  it "links its own feed in the head" do
+  it "links its own feed, then the writing feed, in the head" do
     publish("hello", 1, tags: %w[ruby])
     get "/writing/tags/ruby"
 
-    link = page.find("head link[rel='alternate'][type='application/atom+xml']", visible: :all)
-
-    expect([link[:href], link[:title]]).to eq(["/writing/tags/ruby.atom", "Tagged ruby | Aaron Allen"])
+    expect(feed_links)
+      .to eq([["/writing/tags/ruby.atom", "Tagged ruby | Aaron Allen"], ["/writing.atom", "Writing | Aaron Allen"]])
   end
 
   it "finds a tag with a dash in it" do
@@ -189,11 +192,11 @@ RSpec.describe "Tags", type: :request do
       expect(page).to have_no_css(".entries")
     end
 
-    it "leaves the feed link out when no post carries the tag" do
+    it "links only the writing feed when no post carries the tag" do
       create(:project, name: "sai", tags: %w[ruby])
       get "/writing/tags/ruby"
 
-      expect(page).to have_no_css("head link[rel='alternate']", visible: :all)
+      expect(feed_links).to eq([["/writing.atom", "Writing | Aaron Allen"]])
     end
 
     it "lists the projects the way the projects page does" do

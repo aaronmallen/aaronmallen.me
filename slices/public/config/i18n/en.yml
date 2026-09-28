@@ -45,6 +45,9 @@ en:
       work_row:
         current: "Present"
         years: "%{from}–%{to}"
+    layouts:
+      application:
+        writing_feed: "Writing | %{owner}"
     views:
       pages:
         about:

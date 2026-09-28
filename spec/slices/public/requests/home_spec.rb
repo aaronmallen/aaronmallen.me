@@ -4,6 +4,10 @@ RSpec.describe "Home", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Public::Slice["i18n"] }
 
+  def feed_links
+    page.all("head link[rel='alternate'][type='application/atom+xml']", visible: :all).map { [it[:href], it[:title]] }
+  end
+
   def publish(slug, minutes_ago, **attrs)
     create(:post, :published, slug:, title: slug.capitalize, published_at: Time.now - (minutes_ago * 60), **attrs)
   end
@@ -109,5 +113,11 @@ RSpec.describe "Home", type: :request do
     get "/"
 
     expect(page).to have_title("Aaron Allen")
+  end
+
+  it "links the writing feed in the head" do
+    get "/"
+
+    expect(feed_links).to eq([["/writing.atom", "Writing | Aaron Allen"]])
   end
 end

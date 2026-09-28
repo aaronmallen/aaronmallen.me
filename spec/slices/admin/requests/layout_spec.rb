@@ -51,6 +51,10 @@ RSpec.describe "Admin layout", type: :request do
       expect(reads).to have(1).item
     end
 
+    it "links no feed" do
+      expect(page).to have_no_css("head link[rel='alternate']", visible: :all)
+    end
+
     it "loads the site styles and scripts", :aggregate_failures do
       expect(page).to have_css("link[rel='stylesheet'][href*='app']", visible: :all)
       expect(page).to have_css("script[src*='app']", visible: :all)
