@@ -68,6 +68,7 @@ one.
 | [0061][0061] | Narrow a requested scope to known names and withhold every tool a token lacks | ![Active][active] | 2026-09-28 |
 | [0062][0062] | Send every kind in the activity feed to a client holding read | ![Active][active] | 2026-09-28 |
 | [0063][0063] | Apply a suggested edit only where its text appears once, under its owner's lock | ![Active][active] | 2026-09-28 |
+| [0064][0064] | Close a task as done or canceled under one completed_at | ![Active][active] | 2026-09-28 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -132,5 +133,6 @@ one.
 [0061]: 0061-narrow-a-requested-scope-to-known-names-and-withhold-every-tool-a-token-lacks.md
 [0062]: 0062-send-every-kind-in-the-activity-feed-to-a-client-holding-read.md
 [0063]: 0063-apply-a-suggested-edit-only-where-its-text-appears-once-under-its-owners-lock.md
+[0064]: 0064-close-a-task-as-done-or-canceled-under-one-completed-at.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [writing ADRs]: ../writing-adrs.md
