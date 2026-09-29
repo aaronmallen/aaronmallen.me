@@ -30,8 +30,6 @@ RSpec.describe "MCP task tools", type: :request do
 
   def today = Blog::TimeZone.today
 
-  def types = Tasks::Slice["repos.task_type_repo"]
-
   describe "list_tasks" do
     it "lists tasks in every status when it names none" do
       create(:task, title: "open")
@@ -63,14 +61,14 @@ RSpec.describe "MCP task tools", type: :request do
       def entry = content.fetch("tasks").first
 
       before do
-        chore = create(:task_type, name: "Chore")
-        done = create(:task, :done, title: "finished", task_type_id: chore.id, tags: %w[admin], completed_at: at(today))
+        done = create(:task, :done, title: "finished", tags: %w[admin], completed_at: at(today))
         create(:task_link, from_task_id: create(:task, title: "blocker").id, to_task_id: done.id)
         call_tool("list_tasks", statuses: %w[done])
       end
 
-      it "carries its type and tags" do
-        expect(entry).to include("task_type" => "Chore", "tags" => %w[admin])
+      it "carries its tags and no type", :aggregate_failures do
+        expect(entry).to include("tags" => %w[admin])
+        expect(entry.keys.grep(/type/)).to be_empty
       end
 
       it "carries a link stored on the other task" do
@@ -170,17 +168,6 @@ RSpec.describe "MCP task tools", type: :request do
     end
   end
 
-  describe "list_task_types" do
-    it "lists each type with how many tasks carry it" do
-      chore = create(:task_type, name: "Chore", position: 1)
-      create(:task_type, name: "Bug", position: 2)
-      create(:task, task_type_id: chore.id)
-      call_tool("list_task_types")
-
-      expect(content.fetch("task_types").map { it.values_at("name", "tasks") }).to eq([["Chore", 1], ["Bug", 0]])
-    end
-  end
-
   describe "list_sprints" do
     def dates = content.fetch("sprints").map { it.fetch("date") }
 
@@ -261,13 +248,6 @@ RSpec.describe "MCP task tools", type: :request do
       expect(content.fetch("sprint_on")).to eq((today + 3).iso8601)
     end
 
-    it "sets the type it names" do
-      chore = create(:task_type, name: "Chore")
-      call_tool("capture_task", title: "Sweep", task_type_id: chore.id)
-
-      expect(content.fetch("task_type")).to eq("Chore")
-    end
-
     it "refuses a title with nothing in it, as the admin does" do
       call_tool("capture_task", title: "  ")
 
@@ -282,25 +262,18 @@ RSpec.describe "MCP task tools", type: :request do
   end
 
   describe "save_task" do
-    let(:chore) { create(:task_type, name: "Chore") }
-    let(:task) { create(:task, title: "Draft", note: "the plan", task_type_id: chore.id, tags: %w[admin]) }
+    let(:task) { create(:task, title: "Draft", note: "the plan", tags: %w[admin]) }
 
     it "keeps every field it leaves out" do
       call_tool("save_task", id: task.id, title: "Final")
 
-      expect(content).to include("title" => "Final", "note" => "the plan", "task_type" => "Chore", "tags" => %w[admin])
+      expect(content).to include("title" => "Final", "note" => "the plan", "tags" => %w[admin])
     end
 
     it "replaces the whole set of tags" do
       call_tool("save_task", id: task.id, tags: %w[site ruby])
 
       expect(tasks.by_id(task.id).tags.map(&:name)).to contain_exactly("site", "ruby")
-    end
-
-    it "clears the type on null" do
-      call_tool("save_task", id: task.id, task_type_id: nil)
-
-      expect(tasks.by_id(task.id).task_type_id).to be_nil
     end
 
     it "moves the task to the list it names" do
@@ -515,75 +488,6 @@ RSpec.describe "MCP task tools", type: :request do
       call_tool("unlink_task", id: task.id, other_id: other.id)
 
       expect(message).to eq("task #{task.id} has no link to task #{other.id}")
-    end
-  end
-
-  describe "save_task_type" do
-    it "adds a type" do
-      call_tool("save_task_type", name: "Chore", color: "mk-blue", icon: "broom")
-
-      expect(types.all.map { [it.name, it.color, it.icon] }).to eq([%w[Chore mk-blue broom]])
-    end
-
-    it "renames a type and keeps its colour" do
-      chore = create(:task_type, name: "Chore", color: "mk-green")
-      call_tool("save_task_type", id: chore.id, name: "Errand")
-
-      expect(content).to include("name" => "Errand", "color" => "mk-green")
-    end
-
-    it "clears the icon on an empty string" do
-      chore = create(:task_type, name: "Chore", icon: "broom")
-      call_tool("save_task_type", id: chore.id, name: "Chore", icon: "")
-
-      expect(types.by_id(chore.id).icon).to be_nil
-    end
-
-    it "refuses a name another type holds, as the admin does" do
-      create(:task_type, name: "Chore")
-      call_tool("save_task_type", name: "Chore")
-
-      expect(message).to eq("name: another type already holds that name")
-    end
-
-    it "refuses an icon it does not know" do
-      call_tool("save_task_type", name: "Chore", icon: "not-an-icon")
-
-      expect(message).to eq("icon: no free solid icon goes by that name")
-    end
-
-    it "refuses a type that is not there" do
-      call_tool("save_task_type", id: 999_999, name: "Ghost")
-
-      expect(message).to eq("no task type has the ID 999999")
-    end
-  end
-
-  describe "reorder_task_type" do
-    it "moves a type past the one above it" do
-      create(:task_type, name: "Chore", position: 1)
-      bug = create(:task_type, name: "Bug", position: 2)
-      call_tool("reorder_task_type", id: bug.id, direction: "up")
-
-      expect(types.all.map(&:name)).to eq(%w[Bug Chore])
-    end
-  end
-
-  describe "remove_task_type" do
-    it "removes a type no task carries" do
-      chore = create(:task_type)
-      call_tool("remove_task_type", id: chore.id)
-
-      expect(types.by_id(chore.id)).to be_nil
-    end
-
-    it "keeps a type a task still carries, as the admin does", :aggregate_failures do
-      chore = create(:task_type)
-      create(:task, task_type_id: chore.id)
-      call_tool("remove_task_type", id: chore.id)
-
-      expect(message).to eq("kept: 1 task still carries it")
-      expect(types.by_id(chore.id)).not_to be_nil
     end
   end
 

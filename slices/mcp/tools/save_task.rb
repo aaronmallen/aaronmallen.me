@@ -14,7 +14,6 @@ module MCP
             description: "a sprint day as YYYY-MM-DD to schedule it for, or an empty string to send it back to next",
           },
           tags: { type: "array", items: { type: "string" }, description: "the whole set of tags, lowercase words" },
-          task_type_id: { type: %w[integer null], description: "a task type ID, or null for no type" },
           title: { type: "string" },
         },
         required: ["id"],
@@ -47,7 +46,6 @@ module MCP
             note: fields.fetch(:note, task.note),
             sprint_on: fields[:sprint_on],
             tags: tag_text(fields.fetch(:tags, task.tags.map(&:name))),
-            task_type_id: fields.fetch(:task_type_id, task.task_type_id)&.to_s,
             title: fields.fetch(:title, task.title),
           }
         end

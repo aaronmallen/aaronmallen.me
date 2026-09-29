@@ -14,7 +14,6 @@ module Admin
             :pools,
             Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))),
           )
-          prop :task_types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
@@ -25,7 +24,7 @@ module Admin
 
           def capture
             Capture(
-              filter: TODAY, types: @task_types, values: Dry::Core::Constants::EMPTY_HASH,
+              filter: TODAY, values: Dry::Core::Constants::EMPTY_HASH,
               errors: Dry::Core::Constants::EMPTY_HASH, autofocus: false, origin: ORIGIN, scope: "sprint",
               target: t(".target"),
             )
@@ -57,7 +56,7 @@ module Admin
           end
 
           def planner
-            Planner(date: @date, origin: ORIGIN, pool: @pool, pools: @pools, task_types: @task_types)
+            Planner(date: @date, origin: ORIGIN, pool: @pool, pools: @pools)
           end
 
           def progress
@@ -67,7 +66,7 @@ module Admin
           end
 
           def row(task)
-            Row(task:, filter: TODAY, today: @date, types: @task_types, origin: ORIGIN, scheduled: @date)
+            Row(task:, filter: TODAY, today: @date, origin: ORIGIN, scheduled: @date)
           end
 
           def rows

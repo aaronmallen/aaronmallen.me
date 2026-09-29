@@ -298,12 +298,11 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css(".task-planner .seg-option.current", exact_text: "someday · 0")
       end
 
-      it "shows the type and the tags of a task it offers", :aggregate_failures do
-        chore = create(:task_type, name: "Chore")
-        create(:task, title: "Email the accountant", task_type_id: chore.id, tags: %w[admin])
+      it "shows the tags of a task it offers, and no type", :aggregate_failures do
+        create(:task, title: "Email the accountant", tags: %w[admin])
         get "/admin/tasks", filter: "today"
 
-        expect(page.all(".task-planner .task-meta .pill").map(&:text)).to eq(%w[Chore])
+        expect(page).to have_no_css(".task-planner .task-meta .pill")
         expect(page.all(".task-planner .task-meta .task-tag").map(&:text)).to eq(%w[#admin])
       end
 
@@ -450,13 +449,6 @@ RSpec.describe "Admin tasks", type: :request do
         capture("", filter: "next")
 
         expect(repo.in_list("next")).to be_empty
-      end
-
-      it "gives it the type the field was set to" do
-        chore = create(:task_type, name: "Chore")
-        capture("Email the accountant", filter: "next", task_type_id: chore.id.to_s)
-
-        expect(repo.in_list("next").first.task_type_id).to eq(chore.id)
       end
 
       it "keeps a #word in the title" do
@@ -1013,10 +1005,8 @@ RSpec.describe "Admin tasks", type: :request do
     describe "editing a task" do
       let(:task) { create(:task, title: "Email accountant") }
 
-      def chore = create(:task_type, name: "Chore")
-
       def edit(**fields)
-        written = { title: "Email the accountant", list: "", note: "", task_type_id: "", tags: "", **fields }
+        written = { title: "Email the accountant", list: "", note: "", tags: "", **fields }
 
         send_to("/admin/tasks/#{task.id}", filter: "next", task: written)
       end
@@ -1025,13 +1015,6 @@ RSpec.describe "Admin tasks", type: :request do
         edit
 
         expect(repo.by_id(task.id).title).to eq("Email the accountant")
-      end
-
-      it "gives it a type" do
-        added = chore
-        edit(task_type_id: added.id.to_s)
-
-        expect(repo.by_id(task.id).task_type_id).to eq(added.id)
       end
 
       it "writes a note on it" do
@@ -1060,13 +1043,6 @@ RSpec.describe "Admin tasks", type: :request do
         expect(repo.by_id(task.id).tags.map(&:name)).to eq(%w[admin ruby])
       end
 
-      it "shows the type on the row" do
-        edit(task_type_id: chore.id.to_s, tags: "ruby")
-        get "/admin/tasks", filter: "next"
-
-        expect(page.all(".task-meta .pill").map(&:text)).to eq(["Chore"])
-      end
-
       it "shows the tags on the row in their own colour" do
         edit(tags: "ruby")
         get "/admin/tasks", filter: "next"
@@ -1075,18 +1051,18 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css(".task-meta .task-tag.#{hue}", text: "#ruby")
       end
 
-      it "draws the type in its own colour, with its own icon" do
-        edit(task_type_id: create(:task_type, name: "Chore", color: "mk-violet", icon: "broom").id.to_s)
-        get "/admin/tasks", filter: "next"
-
-        expect(page).to have_css(".task-meta .pill.violet i.fa-broom", visible: :all)
-      end
-
-      it "calls a task with no type untyped" do
+      it "draws no type on the row" do
         task
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_css(".task-meta .pill", text: i18n.t("ui.components.tasks.type_tag.untyped"))
+        expect(page).to have_no_css(".task-meta .pill")
+      end
+
+      it "draws the key in no colour" do
+        edit(tags: "ruby")
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find(".task .task-key")["class"]).to eq("task-key")
       end
 
       it "says so" do
@@ -1120,21 +1096,12 @@ RSpec.describe "Admin tasks", type: :request do
         expect(last_response.status).to eq(404)
       end
 
-      it "offers every type the editor can set, in the order the types screen put them in" do
-        %w[Chore Admin].each { create(:task_type, name: it) }
-        task
-        get "/admin/tasks", filter: "next"
-
-        expect(page.all(".task-editor select[name='task[task_type_id]'] option", visible: :all).map(&:text))
-          .to eq([i18n.t("ui.components.tasks.editor.no_type"), "Chore", "Admin"])
-      end
-
-      it "holds the title, the note, the type, the list and the tags" do
+      it "holds the title, the note, the list and the tags" do
         task
         get "/admin/tasks", filter: "next"
 
         expect(page.all(".task-editor-form [name^='task[']").map { it["name"] })
-          .to eq(["task[title]", "task[note]", "task[task_type_id]", "task[list]", "task[sprint_on]", "task[tags]"])
+          .to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
       end
 
       it "offers the three lists, marking the one the task is in" do
@@ -1444,8 +1411,7 @@ RSpec.describe "Admin tasks", type: :request do
       def search(query, **) = get("/admin/tasks", { q: query, filter: "next", ** })
 
       before do
-        chore = create(:task_type, name: "Chore")
-        create(:task, title: "Email the accountant", task_type_id: chore.id, tags: %w[admin])
+        create(:task, title: "Email the accountant", tags: %w[admin])
         create(:task, title: "Ship the search", tags: %w[ruby])
         create(:task, :someday, title: "Learn Elixir", tags: %w[elixir])
       end
@@ -1474,10 +1440,10 @@ RSpec.describe "Admin tasks", type: :request do
         expect(titles).to eq(["Ship the search"])
       end
 
-      it "narrows by type" do
+      it "reads type: as plain text" do
         search("type:chore")
 
-        expect(titles).to eq(["Email the accountant"])
+        expect(titles).to be_empty
       end
 
       it "searches the words beside a term as text" do
@@ -1529,43 +1495,34 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
-    describe "the type filter" do
-      let(:chore) { create(:task_type, name: "Chore") }
-
+    describe "the filters beside the search" do
       before do
-        create(:task, title: "Email the accountant", task_type_id: chore.id)
+        create(:task, title: "Email the accountant")
         create(:task, title: "Ship the search")
       end
 
-      it "offers every type beside the search" do
+      it "offers no type select" do
         get "/admin/tasks", filter: "next"
 
-        expect(page.all("select[name='type'] option", visible: :all).map(&:text))
-          .to eq([i18n.t("ui.components.tasks.filters.all_types"), "Chore"])
+        expect(page).to have_no_select("type", visible: :all)
       end
 
-      it "narrows the visible list to one type" do
-        get "/admin/tasks", filter: "next", type: chore.id.to_s
-
-        expect(titles).to eq(["Email the accountant"])
-      end
-
-      it "shows everything with no type chosen" do
+      it "offers no link to a types screen" do
         get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_link(href: "/admin/tasks/types")
+      end
+
+      it "ignores a type left in the address" do
+        get "/admin/tasks", filter: "next", type: "1"
 
         expect(titles).to eq(["Email the accountant", "Ship the search"])
       end
 
-      it "keeps the type on the tab links" do
-        get "/admin/tasks", filter: "next", type: chore.id.to_s
+      it "answers 404 where the types screen was" do
+        get "/admin/tasks/types"
 
-        expect(page.all(".subtab").map { it["href"] }).to all(include("type=#{chore.id}"))
-      end
-
-      it "says so when the type empties the list" do
-        get "/admin/tasks", filter: "someday", type: chore.id.to_s
-
-        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.no_match"))
+        expect(last_response.status).to eq(404)
       end
     end
 
@@ -1655,14 +1612,6 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "completed", q: "toggle"
 
         expect(titles).to eq(["Move the toggle"])
-      end
-
-      it "narrows the archive by type" do
-        chore = create(:task_type, name: "Chore")
-        finished("Call the plumber", 0, 12, task_type_id: chore.id)
-        get "/admin/tasks", filter: "completed", type: chore.id.to_s
-
-        expect(titles).to eq(["Call the plumber"])
       end
 
       it "blames the filters when they empty it" do

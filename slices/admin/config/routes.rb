@@ -71,14 +71,6 @@ module Admin
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
-    get "/tasks/types", to: "task_types.index", as: :task_types
-    post "/tasks/types", to: "task_types.create", as: :create_task_type
-    post "/tasks/types/:id", to: "task_types.update", as: :update_task_type, id: ID
-    post "/tasks/types/:id/delete", to: "task_types.destroy", as: :delete_task_type, id: ID
-    post(
-      "/tasks/types/:id/reorder/:direction",
-      to: "task_types.reorder", as: :reorder_task_type, id: ID, direction: TASK_MOVE,
-    )
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post "/webmentions/:id/approve", to: "webmentions.approve", as: :approve_webmention, id: ID

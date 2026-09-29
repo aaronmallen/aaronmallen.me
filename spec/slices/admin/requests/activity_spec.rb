@@ -130,14 +130,7 @@ RSpec.describe "Admin activity", type: :request do
         expect(day_names(today - 1)).to eq(["clear the gutters"])
       end
 
-      it "says it is done and names its type" do
-        create(:task, :done, task_type_id: create(:task_type, name: "Chore").id, completed_at: at(16))
-        visit_activity
-
-        expect(event_subs).to eq(["done · Chore"])
-      end
-
-      it "says only that a task with no type is done" do
+      it "says only that it is done" do
         create(:task, :done, completed_at: at(16))
         visit_activity
 

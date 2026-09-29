@@ -11,7 +11,6 @@ module Admin
           TITLE_LIMIT = 42
 
           prop :planned, Blog::Types::Array.of(Blog::Types::Hash)
-          prop :task_types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
           prop :waiting, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :linking, Blog::Types::Hash.optional, default: nil
@@ -83,7 +82,7 @@ module Admin
 
             tasks.each do |task|
               Row(
-                task:, filter: NEXT, tab: TAB, today: @today, types: @task_types, linking: @linking,
+                task:, filter: NEXT, tab: TAB, today: @today, linking: @linking,
                 scheduled: sprint.sprint_date,
               )
             end

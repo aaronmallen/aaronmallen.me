@@ -82,15 +82,9 @@ module Admin
         when JOURNAL then i18n.t("activity_page.sub_lines.journal")
         when POST then post_line(row, views)
         when SOCIAL then social_line(row)
-        when TASK then task_line(row)
+        when TASK then i18n.t("activity_page.sub_lines.task")
         when WEBMENTION then webmention_line(row)
         end
-      end
-
-      def task_line(row)
-        return i18n.t("activity_page.sub_lines.task") unless row.task_type
-
-        i18n.t("activity_page.sub_lines.task_typed", type: row.task_type)
       end
 
       def view_count(row, views) = i18n.t("activity_page.views", count: views.fetch(row.link, 0))

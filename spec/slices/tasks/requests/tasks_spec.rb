@@ -13,31 +13,31 @@ RSpec.describe "Tasks", type: :request do
 
   describe "capturing a task" do
     it "answers 422 for a form with no title field" do
-      send_to("/admin/tasks", filter: "next", task: { task_type_id: "" })
+      send_to("/admin/tasks", filter: "next", task: { note: "" })
 
       expect(last_response.status).to eq(422)
     end
 
     it "writes nothing for a form with no title field" do
-      send_to("/admin/tasks", filter: "next", task: { task_type_id: "" })
+      send_to("/admin/tasks", filter: "next", task: { note: "" })
 
       expect(repo.in_list("next")).to be_empty
     end
 
-    it "leaves a task untyped when its type is gone" do
-      send_to("/admin/tasks", filter: "next", task: { title: "Email the accountant", task_type_id: "999999" })
+    it "ignores a type left over from an older form" do
+      send_to("/admin/tasks", filter: "next", task: { title: "Email the accountant", task_type_id: "1" })
 
-      expect(repo.in_list("next").map(&:task_type_id)).to eq([nil])
+      expect(repo.in_list("next").map(&:title)).to eq(["Email the accountant"])
     end
   end
 
   describe "editing a task" do
-    it "leaves a task untyped when its type is gone" do
-      task = create(:task, task_type_id: create(:task_type).id)
-      fields = { title: task.title, list: "", note: "", tags: "", task_type_id: "999999" }
+    it "ignores a type left over from an older form" do
+      task = create(:task)
+      fields = { title: "Email the accountant", list: "", note: "", tags: "", task_type_id: "1" }
       send_to("/admin/tasks/#{task.id}", filter: "next", task: fields)
 
-      expect(repo.by_id(task.id).task_type_id).to be_nil
+      expect(repo.by_id(task.id).title).to eq("Email the accountant")
     end
   end
 

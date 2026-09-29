@@ -3,14 +3,13 @@
 module Tasks
   module Operations
     class SaveTask < Blog::Operation
-      FIELDS = %i[list note tags task_type_id title].freeze
+      FIELDS = %i[list note tags title].freeze
 
       include Deps[
         contract: "contracts.task_contract",
         move_task: "operations.move_task",
         schedule_task: "operations.schedule_task",
         task_repo: "repos.task_repo",
-        task_type_repo: "repos.task_type_repo",
       ]
 
       def call(id, params)
@@ -43,13 +42,9 @@ module Tasks
       end
 
       def rewrite(task, fields)
-        task_repo.update(
-          task.id, note: fields[:note], title: fields[:title], task_type_id: type_id(fields[:task_type_id]),
-        )
+        task_repo.update(task.id, note: fields[:note], title: fields[:title])
         task_repo.replace_tags(task.id, fields[:tags])
       end
-
-      def type_id(value) = value && task_type_repo.by_id(value)&.id
 
       def validate(params) = validated(contract.call(form(params)))
     end

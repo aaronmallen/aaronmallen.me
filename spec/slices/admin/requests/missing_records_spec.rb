@@ -25,9 +25,6 @@ RSpec.describe "Admin records that are gone", type: :request do
     "/tasks/#{missing}/start" => {},
     "/tasks/#{missing}/stop" => {},
     "/tasks/sprints/#{missing}/delete" => {},
-    "/tasks/types/#{missing}" => { type: { name: "chore" } },
-    "/tasks/types/#{missing}/delete" => {},
-    "/tasks/types/#{missing}/reorder/up" => {},
     "/webmentions/#{missing}/approve" => {},
     "/webmentions/#{missing}/spam" => {},
   }.each do |path, params|

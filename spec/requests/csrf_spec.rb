@@ -54,7 +54,7 @@ RSpec.describe "CSRF protection", type: :request do
     before { sign_in_to_admin }
 
     %w[
-      /admin /admin/journal /admin/posts/new /admin/projects/new /admin/tags /admin/tasks /admin/tasks/types
+      /admin /admin/journal /admin/posts/new /admin/projects/new /admin/tags /admin/tasks
     ].each do |path|
       it "carries the session's token once in every POST form on #{path}" do
         get path

@@ -9,7 +9,6 @@ en:
       post: "%{link} · %{status} · %{views}"
       social: "%{status} · %{networks}"
       task: "done"
-      task_typed: "done · %{type}"
       webmention: "on %{link}"
       webmention_excerpt: "on %{link} · %{excerpt}"
     views:
@@ -85,14 +84,6 @@ en:
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
-  task_types_page:
-    toasts:
-      added: "Type added"
-      in_use:
-        one: "Kept · %{count} task still carries it"
-        other: "Kept · %{count} tasks still carry it"
-      removed: "Type removed"
-      renamed: "Type renamed"
   tasks_page:
     toasts:
       blank: "Write the task down first"
@@ -287,7 +278,6 @@ en:
           projects: "projects"
           social: "social"
           tags: "tags"
-          task_types: "task types"
           tasks: "tasks"
           today: "today"
           webmentions: "webmentions"
@@ -645,8 +635,6 @@ en:
           add: "Add"
           into: "Add to %{target}…"
           label: "Task"
-          no_type: "untyped"
-          type: "Type"
         closed:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
@@ -692,26 +680,17 @@ en:
             next: "next"
             someday: "someday"
             today: "today"
-          no_type: "untyped"
           note: "Notes"
           note_placeholder: "What done looks like."
           save: "Save"
           tags: "Tags"
           tags_placeholder: "ruby, admin"
           title: "Title"
-          type: "Type"
         field_error:
-          color:
-            format: "Pick one of the six colours."
-          icon:
-            format: "No free solid icon goes by that name."
           kind:
             format: "Pick one of the four link types."
           list:
             format: "Pick one of the three lists."
-          name:
-            blank: "Give the type a name first."
-            taken: "Another type already holds that name."
           other_id:
             format: "Pick a task from the list."
             missing: "That task is gone. Find another."
@@ -719,16 +698,12 @@ en:
             taken: "These two tasks are already linked."
           tags:
             format: "Tags are lowercase words, separated by commas."
-          task_type_id:
-            format: "Pick a type from the list."
           title:
             blank: "Write the task down first."
         filters:
-          all_types: "all types"
           apply: "Filter"
           search: "Search tasks"
           search_placeholder: "search · tag:site…"
-          type: "Type"
         link_editor:
           find: "Find"
           kind: "Link type"
@@ -807,33 +782,6 @@ en:
         task_key:
           copied: "Task %{key} copied"
           copy: "Copy task %{key}"
-        type_tag:
-          untyped: "untyped"
-        types:
-          capture:
-            add: "Add type"
-            color: "Colour"
-            gallery: "Browse the free solid icons"
-            icon: "Icon"
-            icon_placeholder: "Icon, such as broom"
-            label: "Type name"
-            placeholder: "Name a type…"
-          order:
-            down: "Move %{type} down"
-            up: "Move %{type} up"
-          row:
-            confirm_remove: "Remove %{type}? This cannot be undone."
-            held:
-              one: "%{count} task carries this type. Move it off first."
-              other: "%{count} tasks carry this type. Move them off first."
-            icon: "Icon"
-            icon_placeholder: "No icon"
-            name: "Type name"
-            remove: "Remove"
-            save: "Save"
-            tasks:
-              one: "%{count} task"
-              other: "%{count} tasks"
         upcoming_sprints:
           confirm_drop: "Drop the sprint for %{date}? Its tasks go back to Next."
           count:
@@ -1110,17 +1058,6 @@ en:
           search: "Search tags"
           search_placeholder: "filter tags…"
           title: "Every tag"
-      task_types:
-        index:
-          back: "Tasks"
-          count:
-            one: "%{count} type"
-            other: "%{count} types"
-          empty: "No types yet. Name one above."
-          heading: "Task types"
-          label: "Tasks"
-          note: "A type is kept while tasks carry it. Move them off it first, then remove it."
-          title: "Types"
       tasks:
         index:
           archive: "Archive"
@@ -1159,7 +1096,6 @@ en:
           sprint: "Sprint · %{date}"
           sprint_on: "Sprint %{date}"
           today: "Today"
-          types: "Types"
           upcoming_count:
             one: "%{count} upcoming"
             other: "%{count} upcoming"

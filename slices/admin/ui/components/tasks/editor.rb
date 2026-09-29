@@ -10,14 +10,12 @@ module Admin
             Blog::Types::TaskFilter["next"] => ".lists.next",
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
-          NONE = ""
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
           TAG_SEPARATOR = ", "
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :today, Blog::Types::Date
-          prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :toggle, Blog::Types::String
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :origin, Blog::Types::String, default: ORIGIN
@@ -65,7 +63,6 @@ module Admin
               title_field
               note_field
               pair
-              sprint_field
               tags_field
             end
           end
@@ -116,8 +113,8 @@ module Admin
 
           def pair
             div(class: "task-editor-pair") do
-              type_field
               list_field
+              sprint_field
             end
           end
 
@@ -139,22 +136,6 @@ module Admin
           def title = editing? ? @editing[:title] : @task.title
 
           def title_field = field(:title, ".title", title)
-
-          def type_field
-            Field(label: t(".type"), id: FieldError.id_for(:task_type_id, scope)) do
-              Select(
-                **FieldError.control_attributes(:task_type_id, errors, scope),
-                name: "task[task_type_id]",
-                options: type_options,
-                selected: type_id,
-              )
-              FieldError(field: :task_type_id, errors:, scope:)
-            end
-          end
-
-          def type_id = editing? ? @editing[:task_type_id] : @task.task_type_id.to_s
-
-          def type_options = { NONE => t(".no_type") }.merge(@types.to_h { [it.id.to_s, it.name] })
         end
       end
     end

@@ -28,7 +28,6 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
-          prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :linking, Blog::Types::Hash.optional, default: nil
 
           def view_template
@@ -74,7 +73,7 @@ module Admin
           def key(task) = "#{PREFIX}#{task.id}"
 
           def key_badge(task)
-            span(class: ["task-key", Blog::UI::Components::Pill.for_tag_color(type_of(task)&.color)&.to_s]) { key(task) }
+            span(class: "task-key") { key(task) }
           end
 
           def kind_select
@@ -88,7 +87,7 @@ module Admin
           def link_row(link)
             div(class: "task-link-row") do
               span(class: "task-link-label") { t(Links.label_key(link)) }
-              TaskKey(task: link.task, type: type_of(link.task))
+              TaskKey(task: link.task)
               span(class: "task-link-title") { link.task.title }
               span(class: "task-link-place") { place(link.task) }
               unlink_form(link)
@@ -130,8 +129,6 @@ module Admin
 
             div(class: "task-link-targets") { found.each { target(it) } }
           end
-
-          def type_of(task) = @types.find { it.id == task.task_type_id }
 
           def unlink_form(link)
             label = t(".remove", key: key(link.task))

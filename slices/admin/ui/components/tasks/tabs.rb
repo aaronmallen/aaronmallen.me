@@ -5,7 +5,6 @@ module Admin
     module Components
       module Tasks
         class Tabs < Component
-          ALL_TYPES = "all"
           ICONS = {
             Blog::Types::TaskTab["today"] => "fa-solid fa-sun",
             Blog::Types::TaskTab["upcoming"] => "fa-regular fa-calendar",
@@ -23,7 +22,6 @@ module Admin
           prop :counts, Blog::Types::Hash
           prop :tab, Blog::Types::String
           prop :query, Blog::Types::String
-          prop :type, Blog::Types::String
 
           def view_template
             nav(class: "subtabs", aria: { label: t(".label") }) do
@@ -46,7 +44,6 @@ module Admin
           def params(name)
             found = { filter: name }
             found[:q] = @query unless @query.empty?
-            found[:type] = @type unless @type == ALL_TYPES
             found
           end
 

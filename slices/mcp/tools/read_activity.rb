@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ReadActivity < Base
       CAP = 200
-      FIELDS = %i[link repo sha additions deletions status targets excerpt task_type].freeze
+      FIELDS = %i[link repo sha additions deletions status targets excerpt].freeze
       KINDS = Blog::Types::ActivityKind.values
       TIME_FORMAT = "%H:%M"
 
@@ -34,7 +34,7 @@ module MCP
                   "posted social posts, approved webmentions, done tasks but never canceled ones, projects, " \
                   "sprints and suggestions. " \
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
-                  "deletions, status, targets, excerpt and task_type its kind holds. " \
+                  "deletions, status, targets and excerpt its kind holds. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                   "One answer carries about #{CAP} rows, rounded out to the end of a day. Past that, partial " \
                   "comes back true and continue_to holds the day to send as to when you ask for the next " \

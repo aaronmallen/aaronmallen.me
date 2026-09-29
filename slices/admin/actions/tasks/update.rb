@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Tasks
       class Update < Action
-        FIELDS = %i[list note tags task_type_id title].freeze
+        FIELDS = %i[list note tags title].freeze
         PAST = "tasks_page.toasts.sprint_past"
         SAVED = "tasks_page.toasts.saved"
 

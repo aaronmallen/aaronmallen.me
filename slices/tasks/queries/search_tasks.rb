@@ -5,7 +5,7 @@ module Tasks
     class SearchTasks
       include Deps[task_repo: "repos.task_repo"]
 
-      def call(tags:, text:, types:) = task_repo.search(tags:, text:, types:)
+      def call(tags:, text:) = task_repo.search(tags:, text:)
     end
   end
 end

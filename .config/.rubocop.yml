@@ -49,6 +49,13 @@ Metrics/ModuleLength:
 Metrics/ParameterLists:
   CountKeywordArgs: false
 
+RSpec/DescribeClass:
+  IgnoredMetadata:
+    type:
+      - feature
+      - migration
+      - request
+
 RSpec/SpecFilePathFormat:
   CustomTransform:
     GitHub: github

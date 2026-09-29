@@ -12,9 +12,8 @@ module Blog
       "https" => ->(uri) { !uri.hostname.to_s.empty? },
     }.freeze
     SLUG_FORMAT = /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/
-    SOLID_ICONS = File.expand_path("../../config/solid_icons.txt", __dir__)
     URL_FORMAT = %r{https?://[^\s/?#]+(?:[/?#]\S*)?}
-    private_constant :REDIRECT_HOSTS, :SLUG_FORMAT, :SOLID_ICONS, :URL_FORMAT
+    private_constant :REDIRECT_HOSTS, :SLUG_FORMAT, :URL_FORMAT
 
     module Normalizers
       Repo = Types::Any.constructor { |value| value.to_s.strip.downcase }
@@ -111,7 +110,6 @@ module Blog
     TaskOrigin = Types::String.enum("tasks", "today")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
     TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
-    TaskTypeIcon = Types::String.enum(*File.readlines(SOLID_ICONS, chomp: true))
     TaskView = Types::String.enum("today", "upcoming", "next", "someday")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)
@@ -147,18 +145,15 @@ module Blog
         text.to_s.unicode_normalize(:nfkd).gsub(/\p{M}/, "").downcase.gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end.constrained(format: SLUG_FORMAT)
       Tag = Types::Tag.constructor { |text| Normalizers::Tag[text] }
-      TaskType = Types::String.constructor { |text| Normalizers::Tag[text] }
       Url = Types::Url.constructor { |url| Normalizers::Url[url] }
     end
 
     module Nullable
-      Id = Types::Id.optional.constructor { |value| OptionalText[value] }
       ProjectLiveStatus = Types::ProjectLiveStatus.optional.constructor { |value| OptionalText[value] }
       Repo = Types::Repo.optional.constructor { |value| OptionalText[value] }
       Slug = Types::Slug.optional.constructor { |value| OptionalText[value] }
       TagColor = Types::TagColor.optional.constructor { |value| OptionalText[value] }
       TaskFilter = Types::TaskFilter.optional.constructor { |value| OptionalText[value] }
-      TaskTypeIcon = Types::TaskTypeIcon.optional.constructor { |value| OptionalText[value] }
       Url = Types::Url.optional.constructor { |value| OptionalText[value] }
     end
   end

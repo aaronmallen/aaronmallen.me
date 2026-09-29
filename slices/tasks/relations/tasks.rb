@@ -23,12 +23,6 @@ module Tasks
 
       def closed = where(status: CLOSED)
 
-      def count_by_type
-        typed = unordered.exclude(task_type_id: nil)
-
-        typed.select(:task_type_id) { integer.count(id).as(:count) }.group(:task_type_id)
-      end
-
       def finished_counts(day)
         closed.unordered.select do
           [integer.count(id).as(:total), integer.count(id).filter(COMPLETED_ON => day).as(:on_day)]
@@ -54,8 +48,6 @@ module Tasks
       def newest_finished = order(self[:completed_at].desc, self[:id].desc)
 
       def newest_first = order(Sequel.function(:coalesce, :completed_at, :created_at).desc, self[:id].desc)
-
-      def of_types(type_ids) = type_ids.reduce(self) { |found, ids| found.where(task_type_id: ids) }
 
       def open = exclude(status: CLOSED)
 

@@ -5,11 +5,8 @@ module Admin
     module Components
       module Tasks
         class Capture < Component
-          NONE = ""
-
           prop :filter, Blog::Types::String
           prop :target, Blog::Types::String
-          prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :values, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
           prop :autofocus, Blog::Types::Bool, default: true
@@ -21,7 +18,6 @@ module Admin
               Form(action: path(:admin_tasks), class: "task-capture-row") do
                 hidden_fields
                 field
-                type_field
                 add
               end
               FieldError(field: :title, errors: @errors, scope: @scope)
@@ -52,15 +48,6 @@ module Admin
             input(type: "hidden", name: "filter", value: @filter)
             input(type: "hidden", name: "origin", value: @origin) if @origin
           end
-
-          def type_field
-            id = FieldError.id_for(:task_type_id, @scope)
-
-            label(class: "sr-only", for: id) { t(".type") }
-            Select(id:, name: "task[task_type_id]", options: type_options, selected: @values[:task_type_id])
-          end
-
-          def type_options = { NONE => t(".no_type") }.merge(@types.to_h { [it.id.to_s, it.name] })
         end
       end
     end

@@ -21,9 +21,7 @@ module MCP
         private
 
         def listed(sprint, server_context)
-          types = type_names(server_context)
-
-          tasks_in_sprint(server_context).call(sprint.id).map { task_entry(it, types, sprint.sprint_date) }
+          tasks_in_sprint(server_context).call(sprint.id).map { task_entry(it, sprint.sprint_date) }
         end
       end
     end

@@ -14,7 +14,6 @@ module Admin
         %i[webmentions inbox fa-at admin_webmentions].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
-        %i[task_types settings fa-sliders admin_task_types].freeze,
         %i[tags settings fa-tag admin_tags].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
       ].freeze

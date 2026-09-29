@@ -6,7 +6,6 @@ module Admin
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
         open_tasks_in_list: "tasks.queries.open_tasks_in_list",
-        task_types: "tasks.queries.task_types",
         tasks_in_sprint: "tasks.queries.tasks_in_sprint",
       ]
 
@@ -17,7 +16,6 @@ module Admin
           date: Blog::TimeZone.today(now),
           pool: Blog::Types::TaskListParam[pool],
           pools: pools,
-          task_types: task_types.call,
           tasks: tasks_in_sprint.call(sprint.id),
         }
       end

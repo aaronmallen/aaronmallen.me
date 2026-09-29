@@ -15,7 +15,7 @@ module Activity
       MATCHED = Sequel.function(:count, Sequel[:tags][:name]).distinct
       MONTH_FORMAT = "YYYY-MM"
       OWNER_SEPARATOR = "/"
-      SEARCHED = %i[excerpt link name repo sha status task_type].freeze
+      SEARCHED = %i[excerpt link name repo sha status].freeze
       TASK = Blog::Types::ActivityKind["task"]
       TAGGED = { JOURNAL => %i[journal_entry_tags journal_entry_id], TASK => %i[task_tags task_id] }.freeze
       TARGET_SEPARATOR = " "

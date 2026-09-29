@@ -67,11 +67,10 @@ module Tasks
 
       def replace_tags(id, names) = task_tags.replace(id, tags.claim(names).values_at(*names))
 
-      def search(tags:, text:, types:)
+      def search(tags:, text:)
         found = with_details
         found = found.matching(text) unless text.empty?
         found = found.tagged(tags) unless tags.empty?
-        found = found.of_types(named_types(types)) unless types.empty?
 
         found.in_order.to_a
       end
@@ -87,8 +86,6 @@ module Tasks
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
       private
-
-      def named_types(names) = names.map { task_types.named(it).ids }
 
       def with_details = tasks.combine(:tags, incoming_links: :from_task, outgoing_links: :to_task)
     end

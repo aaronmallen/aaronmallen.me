@@ -12,17 +12,13 @@ module MCP
       LISTS = Blog::Types::TaskFilter.values.freeze
       NO_SPRINT = "no sprint has the ID %s"
       NO_TASK = "no task has the ID %s"
-      NO_TYPE = "no task type has the ID %s"
       SEPARATOR = ","
       SPRINT_PAST = "a sprint opens on today or a day after it"
       UNSAVED = "could not save the change"
 
       COMPLAINTS = {
-        color: { Blog::Contract::FORMAT => "pick one of the six colours" },
-        icon: { Blog::Contract::FORMAT => "no free solid icon goes by that name" },
         kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
         list: { Blog::Contract::FORMAT => "pick one of the three lists" },
-        name: { "blank" => "give the type a name first", "taken" => "another type already holds that name" },
         other_id: {
           Blog::Contract::FORMAT => "pick a task by its ID",
           "missing" => "that task is gone, so find another",
@@ -30,7 +26,6 @@ module MCP
           "taken" => "these two tasks are already linked",
         },
         tags: { Blog::Contract::FORMAT => "tags are lowercase words" },
-        task_type_id: { Blog::Contract::FORMAT => "pick a type by its ID" },
         title: { "blank" => "write the task down first" },
       }.freeze
 
@@ -67,8 +62,6 @@ module MCP
 
         def no_task(id) = refuse(format(NO_TASK, id))
 
-        def no_type(id) = refuse(format(NO_TYPE, id))
-
         def plan_sprint(server_context) = server_context.fetch(:plan_sprint)
 
         def reason(field, code)
@@ -77,17 +70,11 @@ module MCP
           COMPLAINTS.fetch(field, Dry::Core::Constants::EMPTY_HASH).fetch(code, code)
         end
 
-        def remove_task_type(server_context) = server_context.fetch(:remove_task_type)
-
         def reopen_task(server_context) = server_context.fetch(:reopen_task)
 
         def reorder_task(server_context) = server_context.fetch(:reorder_task)
 
-        def reorder_task_type(server_context) = server_context.fetch(:reorder_task_type)
-
         def save_task(server_context) = server_context.fetch(:save_task)
-
-        def save_task_type(server_context) = server_context.fetch(:save_task_type)
 
         def schedule_task(server_context) = server_context.fetch(:schedule_task)
 
@@ -114,14 +101,12 @@ module MCP
         def task_answer(id, server_context, **extra)
           task = task_by_id(server_context).call(id)
 
-          answer(task_entry(task, type_names(server_context)).merge(extra))
+          answer(task_entry(task).merge(extra))
         end
 
         def task_by_id(server_context) = server_context.fetch(:task_by_id)
 
-        def task_counts_by_type(server_context) = server_context.fetch(:task_counts_by_type)
-
-        def task_entry(task, types, sprint_on = task.sprint&.sprint_date)
+        def task_entry(task, sprint_on = task.sprint&.sprint_date)
           {
             id: task.id,
             title: task.title,
@@ -129,12 +114,8 @@ module MCP
             status: task.status,
             list: task.list,
             sprint_on: sprint_on&.iso8601,
-            task_type: types[task.task_type_id],
-            task_type_id: task.task_type_id,
           }.merge(ties(task), times(task))
         end
-
-        def task_types(server_context) = server_context.fetch(:task_types)
 
         def tasks_in_sprint(server_context) = server_context.fetch(:tasks_in_sprint)
 
@@ -149,10 +130,6 @@ module MCP
             completed_at: stamp(task.completed_at),
           }
         end
-
-        def type_entry(type) = { id: type.id, name: type.name, color: type.color, icon: type.icon }
-
-        def type_names(server_context) = task_types(server_context).call.to_h { [it.id, it.name] }
 
         def unlink_task(server_context) = server_context.fetch(:unlink_task)
 

@@ -7,7 +7,6 @@ module Admin
         class Index < View
           include Components::Tasks
 
-          ALL_TYPES = "all"
           BLURBS = {
             Blog::Types::TaskFilter["today"] => ".blurbs.today",
             Blog::Types::TaskFilter["next"] => ".blurbs.next",
@@ -36,8 +35,7 @@ module Admin
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
           def initialize(
-            counts:, editing:, filters:, linking:, planned:, pool:, pools:, tab:, task_types:, tasks:, today:,
-            waiting:
+            counts:, editing:, filters:, linking:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:
           )
             super()
             @counts = counts
@@ -45,15 +43,13 @@ module Admin
             @editors = { editing:, linking: }
             @plan = { planned:, pool:, pools:, waiting: }
             @tab = tab
-            @task_types = task_types
             @tasks = tasks
             @today = today
           end
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
-              Filters(tab: @tab, types: @task_types, **@filters)
-              types_link
+              Filters(tab: @tab, **@filters)
               CreateButton()
             end
             Tabs(counts: @counts, tab: @tab, **@filters)
@@ -85,12 +81,12 @@ module Admin
           def completed? = @tab == COMPLETED
 
           def day(date, tasks)
-            CompletedDay(date:, tasks:, today: @today, types: @task_types, **@editors)
+            CompletedDay(date:, tasks:, today: @today, **@editors)
           end
 
           def days = @days ||= @tasks.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
 
-          def filtering? = !@filters[:query].empty? || @filters[:type] != ALL_TYPES
+          def filtering? = !@filters[:query].empty?
 
           def label = t(LABELS.fetch(@tab), date: l(@today, format: :short))
 
@@ -110,7 +106,7 @@ module Admin
           end
 
           def planner
-            Planner(date: @today, pool: @plan[:pool], pools: @plan[:pools], task_types: @task_types)
+            Planner(date: @today, pool: @plan[:pool], pools: @plan[:pools])
           end
 
           def planning? = today? && @tasks.empty? && !filtering?
@@ -121,7 +117,7 @@ module Admin
             last = @tasks.size - 1
             @tasks.each_with_index do |task, index|
               Row(
-                task:, filter: @tab, today: @today, types: @task_types, first: index.zero?, last: index == last,
+                task:, filter: @tab, today: @today, first: index.zero?, last: index == last,
                 scheduled:, **@editors,
               )
             end
@@ -141,16 +137,9 @@ module Admin
 
           def today? = @tab == TODAY
 
-          def types_link
-            a(class: "btn", href: path(:admin_task_types)) do
-              i(class: "fa-solid fa-sliders", aria: { hidden: "true" })
-              span { t(".types") }
-            end
-          end
-
           def upcoming
             UpcomingSprints(
-              linking: @editors[:linking], planned: @plan[:planned], task_types: @task_types, today: @today,
+              linking: @editors[:linking], planned: @plan[:planned], today: @today,
               waiting: @plan[:waiting],
             )
           end

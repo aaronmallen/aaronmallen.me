@@ -1685,10 +1685,6 @@
   &.done .task-title {
     @apply text-ink-muted line-through;
   }
-
-  &.done .task-key {
-    @apply border-line bg-ground text-ink-muted;
-  }
 }
 
 @utility task-key {
@@ -1697,43 +1693,6 @@
 
   @media (width < 43.75rem) {
     @apply mt-0 min-h-tap min-w-tap;
-  }
-
-  &.green,
-  &.pink,
-  &.blue,
-  &.violet,
-  &.sand,
-  &.orange {
-    --hue: currentColor;
-    border-color: color-mix(in oklab, var(--hue) 38%, var(--color-line));
-    background-color: color-mix(in oklab, var(--hue) 12%, transparent);
-  }
-
-  &.green {
-    @apply text-mk-green-text;
-  }
-
-  &.pink {
-    @apply text-mk-pink-text;
-  }
-
-  &.blue {
-    @apply text-mk-blue;
-  }
-
-  &.violet {
-    @apply text-mk-violet;
-  }
-
-  &.sand {
-    --hue: var(--color-mk-sand);
-    @apply text-mk-sand-text;
-  }
-
-  &.orange {
-    --hue: var(--color-mk-orange);
-    @apply text-mk-orange-text;
   }
 }
 

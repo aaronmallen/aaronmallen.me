@@ -31,7 +31,6 @@ RSpec.describe "Admin screens", type: :feature do
       "social editor" => "/admin/social?edit=#{social_post.id}",
       "tags" => "/admin/tags",
       "task links" => "/admin/tasks?link=#{task.id}",
-      "task types" => "/admin/tasks/types",
       "tasks" => "/admin/tasks",
       "tasks archive" => "/admin/tasks?filter=completed",
       "tasks next" => "/admin/tasks?filter=next",
@@ -59,7 +58,6 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def seed_tasks
-    create(:task_type, name: "Chore", color: "mk-orange")
     task
     create(:task, :in_progress, title: "Ship the phone layout")
     create(:task, :done, title: "Something finished a while ago")

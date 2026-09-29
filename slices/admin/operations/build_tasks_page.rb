@@ -5,10 +5,9 @@ module Admin
     class BuildTasksPage < Blog::Operation
       include Dry::Core::Constants
 
-      ALL_TYPES = "all"
       CARRIED = :carried_in
       COMPLETED = Blog::Types::TaskTab["completed"]
-      FIELDS = %i[tag type].freeze
+      FIELDS = %i[tag].freeze
       FINISHED_TODAY = :finished_today
       NEXT = Blog::Types::TaskFilter["next"]
       TODAY = Blog::Types::TaskTab["today"]
@@ -22,15 +21,12 @@ module Admin
         list_tasks: "tasks.queries.list_tasks",
         search_tasks: "tasks.queries.search_tasks",
         sprints_after: "tasks.queries.sprints_after",
-        task_types: "tasks.queries.task_types",
       ]
 
-      def call(
-        tab: TODAY, editing: nil, linking: nil, pool: nil, query: nil, type: nil, now: Time.now
-      )
+      def call(tab: TODAY, editing: nil, linking: nil, pool: nil, query: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
         open = open_lists(sprint)
-        filters = { query: Blog::Types::TrimmedText[query], type: type_of(type) }
+        filters = { query: Blog::Types::TrimmedText[query] }
 
         {
           editing:, filters:, linking: link_picker(linking), tab:, tasks: filtered(listed(tab, open), filters),
@@ -51,7 +47,7 @@ module Admin
       def filtered(tasks, filters)
         found = matching(filters[:query])
 
-        tasks.select { (found.nil? || found.include?(it.id)) && of_type?(it, filters[:type]) }
+        found.nil? ? tasks : tasks.select { found.include?(it.id) }
       end
 
       def link_picker(linking)
@@ -70,8 +66,6 @@ module Admin
         search_tasks.call(**SearchQuery.parse(query, fields: FIELDS)).to_set(&:id)
       end
 
-      def of_type?(task, type) = type == ALL_TYPES || task.task_type_id.to_s == type
-
       def open_lists(sprint) = list_tasks.call(sprint:).transform_values { |tasks| tasks.reject(&:closed?) }
 
       def planned(tasks, today)
@@ -88,13 +82,10 @@ module Admin
           planned: planned(open.fetch(UPCOMING), today),
           pool: Blog::Types::TaskListParam[pool],
           pools: pools(open),
-          task_types: task_types.call,
           today:,
           waiting: open.fetch(NEXT),
         }
       end
-
-      def type_of(given) = Blog::Types::TrimmedText[given].empty? ? ALL_TYPES : given
     end
   end
 end

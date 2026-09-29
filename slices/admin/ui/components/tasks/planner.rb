@@ -23,7 +23,6 @@ module Admin
             :pools,
             Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))),
           )
-          prop :task_types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :origin, Blog::Types::String, default: FROM_TASKS
 
           def view_template
@@ -42,7 +41,7 @@ module Admin
           def capture
             Capture(
               autofocus: false, errors: Dry::Core::Constants::EMPTY_HASH, filter: TODAY, origin: @origin,
-              scope: "planner", target: t(".target"), types: @task_types, values: Dry::Core::Constants::EMPTY_HASH,
+              scope: "planner", target: t(".target"), values: Dry::Core::Constants::EMPTY_HASH,
             )
           end
 
@@ -50,7 +49,6 @@ module Admin
 
           def meta(task)
             p(class: "task-meta") do
-              TypeTag(type: type_of(task))
               task.tags.each { tag(it) }
             end
           end
@@ -116,8 +114,6 @@ module Admin
           def tag(tag)
             span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
           end
-
-          def type_of(task) = @task_types.find { it.id == task.task_type_id }
         end
       end
     end

@@ -10,7 +10,6 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :today, Blog::Types::Date
-          prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linking, Blog::Types::Hash.optional, default: nil
           prop :first, Blog::Types::Bool, default: false
@@ -22,14 +21,14 @@ module Admin
 
           def view_template
             div(class: classes) do
-              TaskKey(task: @task, type:)
+              TaskKey(task: @task)
               toggle
               task_title
               meta
               side
-              Links(links: @task.links, types: @types) unless @task.links.empty?
+              Links(links: @task.links) unless @task.links.empty?
               Editor(
-                task: @task, filter: @filter, types: @types, editing: @editing, toggle: toggle_id, origin: @origin,
+                task: @task, filter: @filter, editing: @editing, toggle: toggle_id, origin: @origin,
                 scheduled: @scheduled, today: @today,
               ) { link_editor }
             end
@@ -69,14 +68,13 @@ module Admin
           end
 
           def link_editor
-            LinkEditor(task: @task, tab: @tab || @filter, origin: @origin, types: @types, linking:)
+            LinkEditor(task: @task, tab: @tab || @filter, origin: @origin, linking:)
           end
 
           def linking = (@linking if @linking&.fetch(:id) == @task.id)
 
           def meta
             p(class: "task-meta") do
-              TypeTag(type:)
               blocked if blocked?
               in_progress if @task.in_progress?
               scheduled_pill if waiting?
@@ -121,8 +119,6 @@ module Admin
           end
 
           def toggle_id = "task-#{@task.id}-edit"
-
-          def type = @types.find { it.id == @task.task_type_id }
 
           def waiting? = !@scheduled.nil? && @scheduled > @today && !@task.closed?
         end

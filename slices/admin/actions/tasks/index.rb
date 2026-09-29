@@ -11,7 +11,6 @@ module Admin
 
           page = build_tasks_page.call(
             tab:, linking: linking(request), pool: request.params[:pool], query: request.params[:q],
-            type: request.params[:type],
           )
 
           case page

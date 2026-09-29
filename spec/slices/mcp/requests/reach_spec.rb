@@ -12,7 +12,6 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.build_projects_page" => "builds the admin's projects screen; list_projects reads the same",
       "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",
       "admin.operations.build_tags_page" => "builds the admin's tags screen; list_tags reads the same tags",
-      "admin.operations.build_task_types_page" => "builds the admin's task types screen; list_task_types reads them",
       "admin.operations.build_tasks_page" => "builds the admin's tasks screen; list_tasks reads the same tasks",
       "admin.operations.count_network_lengths" => "counts characters as the admin types; compose checks the limits",
       "admin.operations.count_unread_messages" => "counts the admin menu's badge; list_messages reads the messages",

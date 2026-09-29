@@ -16,7 +16,6 @@ module MCP
           },
           sprint_on: { type: "string", description: "a sprint day to schedule it for, as YYYY-MM-DD" },
           tags: { type: "array", items: { type: "string" }, description: "tags for the task, lowercase words" },
-          task_type_id: { type: "integer", description: "a task type ID from list_task_types" },
           title: { type: "string", description: "the task" },
         },
         required: ["title"],
@@ -28,8 +27,8 @@ module MCP
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(title:, server_context:, list: NEXT, sprint_on: nil, tags: NO_TAGS, task_type_id: nil)
-          fields = { title:, tags: tag_text(tags), task_type_id: task_type_id&.to_s }
+        def call(title:, server_context:, list: NEXT, sprint_on: nil, tags: NO_TAGS)
+          fields = { title:, tags: tag_text(tags) }
 
           case capture_task(server_context).call(fields, filter: list, sprint_on:)
           in Success[_, task, *] then task_answer(task.id, server_context)

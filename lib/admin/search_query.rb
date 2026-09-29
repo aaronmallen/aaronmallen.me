@@ -5,7 +5,6 @@ module Admin
     FIELDS = {
       repo: [:repos, Blog::Types::Normalized::Repo],
       tag: [:tags, Blog::Types::Normalized::Tag],
-      type: [:types, Blog::Types::Normalized::TaskType],
     }.freeze
     SPACE = " "
     WHITESPACE = /\s+/

@@ -7,7 +7,6 @@ module Tasks
         required(:title).value(Blog::Types::TrimmedText, :filled?)
         required(:list).maybe(Blog::Types::Nullable::TaskFilter)
         required(:note).value(Blog::Types::TrimmedText)
-        required(:task_type_id).maybe(Blog::Types::Nullable::Id)
         required(:tags).value(Blog::Types::TagList)
       end
 

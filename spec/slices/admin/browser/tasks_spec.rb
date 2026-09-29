@@ -281,7 +281,6 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "editing a task" do
     before do
-      create(:task_type, name: "Chore")
       visit "/admin/tasks?filter=next"
       open_editor("Email the accountant")
     end

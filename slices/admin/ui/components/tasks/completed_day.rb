@@ -11,7 +11,6 @@ module Admin
           prop :date, Blog::Types::Date
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
-          prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linking, Blog::Types::Hash.optional, default: nil
 
@@ -42,7 +41,7 @@ module Admin
 
           def row(task)
             Row(
-              task:, filter: COMPLETED, today: @today, types: @types, editing: @editing, linking: @linking,
+              task:, filter: COMPLETED, today: @today, editing: @editing, linking: @linking,
               ordered: false, scheduled: task.sprint&.sprint_date,
             )
           end

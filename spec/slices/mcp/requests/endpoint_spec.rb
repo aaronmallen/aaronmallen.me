@@ -67,7 +67,7 @@ RSpec.describe "MCP endpoint", type: :request do
   def read_tools
     %w[
       compose_announcement list_commits list_journal_entries list_messages list_posts list_projects list_social_posts
-      list_sprints list_suggestions list_tags list_task_types list_tasks list_webmentions list_work_entries
+      list_sprints list_suggestions list_tags list_tasks list_webmentions list_work_entries
       read_activity read_analytics read_current_sprint read_journal_entry read_message read_post read_social_post
       read_sync_state read_task read_webmention_settings summarize_activity
     ]
@@ -112,8 +112,8 @@ RSpec.describe "MCP endpoint", type: :request do
       accept_suggestion_edits add_work_entry archive_project cancel_task capture_task complete_task create_journal_entry
       create_post create_social_post delete_journal_entry delete_post delete_social_post delete_task delete_work_entry
       drop_sprint import_commits link_tasks mark_message moderate_webmention move_project move_task plan_sprint
-      publish_post reject_suggestion_edits remove_tag remove_task_type reopen_task reorder_task reorder_task_type
-      restore_project save_project save_tag save_task save_task_type schedule_task send_social_post start_task
+      publish_post reject_suggestion_edits remove_tag reopen_task reorder_task
+      restore_project save_project save_tag save_task schedule_task send_social_post start_task
       unlink_task update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
     ]
   end
@@ -530,12 +530,12 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(entries).to contain_exactly(include("kind" => "journal", "name" => "wrote the tool"))
     end
 
-    it "gives a finished task its type" do
-      type = create(:task_type, name: "Chore")
-      create(:task, :done, completed_at: at(16), title: "Clear the inbox", task_type_id: type.id)
+    it "sends a finished task with no type", :aggregate_failures do
+      create(:task, :done, completed_at: at(16), title: "Clear the inbox")
       read_activity
 
-      expect(entries.first).to include("kind" => "task", "name" => "Clear the inbox", "task_type" => "Chore")
+      expect(entries.first).to include("kind" => "task", "name" => "Clear the inbox")
+      expect(entries.first).not_to have_key("task_type")
     end
 
     it "leaves a canceled task out" do
@@ -1922,7 +1922,6 @@ RSpec.describe "MCP endpoint", type: :request do
         "list_sprints" => {},
         "list_suggestions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_tags" => {},
-        "list_task_types" => {},
         "list_tasks" => {},
         "list_webmentions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_work_entries" => { from: "2026-01-01", to: "2026-12-31" },
@@ -1944,15 +1943,12 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_webmention_settings" => {},
         "reject_suggestion_edits" => { suggestion_id: 1 },
         "remove_tag" => { id: 1 },
-        "remove_task_type" => { id: 1 },
         "reopen_task" => { id: 1 },
         "reorder_task" => { id: 1, direction: "up" },
-        "reorder_task_type" => { id: 1, direction: "up" },
         "restore_project" => { id: 1 },
         "save_project" => { id: 1 },
         "save_tag" => { id: 1 },
         "save_task" => { id: 1 },
-        "save_task_type" => { name: "Chore" },
         "schedule_task" => { id: 1, sprint_on: "" },
         "send_social_post" => { id: 1 },
         "start_task" => { id: 1 },

@@ -18,7 +18,7 @@ module MCP
         },
       }.freeze
 
-      description "List tasks in any status, newest first, each with its type, tags, links both ways, sprint day " \
+      description "List tasks in any status, newest first, each with its tags, links both ways, sprint day " \
                   "and completed time. A task sits in the window when it was created or finished on a day " \
                   "inside it; leave from or to out to leave that end open, and both out to list every task"
       input_schema(SCHEMA)
@@ -35,10 +35,9 @@ module MCP
         private
 
         def listed(statuses, first, last, server_context)
-          types = type_names(server_context)
           tasks = find_tasks(server_context).call(statuses:, from: first, to: last)
 
-          answer(count: tasks.length, tasks: tasks.map { task_entry(it, types) })
+          answer(count: tasks.length, tasks: tasks.map { task_entry(it) })
         end
       end
     end

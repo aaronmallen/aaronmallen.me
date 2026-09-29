@@ -677,8 +677,7 @@ RSpec.describe "Translations", type: :request do
       create(:webmention, post: target, received_at: at(8))
       create(:commit, commit_date: today)
       create(:journal_entry, entry_date: today - 3)
-      create(:task, :done, task_type_id: create(:task_type).id, completed_at: at(16))
-      create(:task, :done, completed_at: at(17))
+      create(:task, :done, completed_at: at(16))
       create(:project)
       create(:sprint, sprint_date: today)
       Suggestions::Slice["repos.suggestion_repo"]
@@ -901,7 +900,6 @@ RSpec.describe "Translations", type: :request do
 
     before do
       sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
-      create(:task_type, name: "Chore")
       create(:task, :in_sprint, sprint_id: sprint.id)
       create(:task, :carried, :in_progress, :in_sprint, sprint_id: sprint.id)
       create(:task, :in_sprint, sprint: create(:sprint, sprint_date: Blog::TimeZone.today + 1))
@@ -932,7 +930,7 @@ RSpec.describe "Translations", type: :request do
     end
 
     it "renders the editor errors without a missing translation", :aggregate_failures do
-      fields = { title: " ", list: "later", task_type_id: "abc", tags: "a b/c" }
+      fields = { title: " ", list: "later", tags: "a b/c" }
       post "/admin/tasks/#{task.id}", _csrf_token: admin_csrf_token, filter: "next", task: fields
 
       expect(last_response.status).to eq(422)
@@ -1043,68 +1041,6 @@ RSpec.describe "Translations", type: :request do
         expect(last_response).to be_ok
         expect(last_response.body).not_to include("translation_missing")
       end
-    end
-  end
-
-  describe "with task types" do
-    let(:type) { Tasks::Slice["repos.task_type_repo"].all.find { it.name == "Chore" } }
-
-    before do
-      %w[Chore Errand].each { create(:task_type, name: it) }
-      sign_in_to_admin
-    end
-
-    it "renders /admin/tasks/types without a missing translation", :aggregate_failures do
-      create(:task, task_type_id: type.id)
-      get "/admin/tasks/types"
-
-      expect(last_response).to be_ok
-      expect(last_response.body).not_to include("translation_missing")
-    end
-
-    it "renders the add error without a missing translation", :aggregate_failures do
-      post "/admin/tasks/types", _csrf_token: admin_csrf_token, type: { name: " " }
-
-      expect(last_response.status).to eq(422)
-      expect(last_response.body).not_to include("translation_missing")
-    end
-
-    it "renders the rename error without a missing translation", :aggregate_failures do
-      post "/admin/tasks/types/#{type.id}", _csrf_token: admin_csrf_token, type: { name: "Errand" }
-
-      expect(last_response.status).to eq(422)
-      expect(last_response.body).not_to include("translation_missing")
-    end
-
-    {
-      "" => { type: { name: "Renamed" } },
-      "/delete" => {},
-    }.each do |suffix, params|
-      it "renders the toast for POST /admin/tasks/types/:id#{suffix} without a missing translation" do
-        post "/admin/tasks/types/#{type.id}#{suffix}", { _csrf_token: admin_csrf_token, **params }
-        follow_redirect!
-
-        expect(last_response.body).to include("data-toast").and(not_include("translation_missing"))
-      end
-    end
-
-    it "renders the refusal toast without a missing translation" do
-      create(:task, task_type_id: type.id)
-      post "/admin/tasks/types/#{type.id}/delete", _csrf_token: admin_csrf_token
-      follow_redirect!
-
-      expect(last_response.body).to include("data-toast").and(not_include("translation_missing"))
-    end
-  end
-
-  describe "with no task type" do
-    before { sign_in_to_admin }
-
-    it "renders the empty /admin/tasks/types without a missing translation", :aggregate_failures do
-      get "/admin/tasks/types"
-
-      expect(last_response).to be_ok
-      expect(last_response.body).not_to include("translation_missing")
     end
   end
 
