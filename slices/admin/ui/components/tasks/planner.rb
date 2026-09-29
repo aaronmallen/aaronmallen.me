@@ -7,6 +7,7 @@ module Admin
         class Planner < Component
           FROM_TASKS = Blog::Types::TaskOrigin["tasks"]
 
+          prop :counts, Blog::Types::Hash
           prop :date, Blog::Types::Date
           prop :pool, Blog::Types::String
           prop(
@@ -20,7 +21,7 @@ module Admin
               Card(label: t(".label", date: l(@date, format: :medium)), title: t(".ask")) do |card|
                 card.side { span(class: "sprint-note") { t(".empty") } }
                 p(class: "task-planner-note") { t(".note") }
-                Pools(origin: @origin, pool: @pool, pools: @pools)
+                Pools(counts: @counts, origin: @origin, pool: @pool, pools: @pools)
               end
             end
           end

@@ -63,7 +63,7 @@ module Admin
 
           def archive
             Card(label: t(".archive"), title: t(".completed")) do |card|
-              card.side { span(class: "card-note") { t(".shown", count: @tasks.size) } }
+              card.side { span(class: "card-note") { t(".shown", count: @tasks.rows.size) } }
               next Empty { t(filtering? ? ".empty.completed_no_match" : ".empty.completed") } if days.empty?
 
               days.each { |(date, tasks)| day(date, tasks) }
@@ -86,7 +86,7 @@ module Admin
             CompletedDay(date:, tasks:, today: @today)
           end
 
-          def days = @days ||= @tasks.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
+          def days = @days ||= @tasks.rows.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
 
           def external? = @tab == EXTERNAL
 
@@ -106,25 +106,32 @@ module Admin
           end
 
           def open_note
-            counts = [t(".open", count: @tasks.size)]
+            counts = [t(".open", count: filtering? ? @tasks.rows.size : @counts.fetch(@tab))]
             counts << t(".carried_in", count: carried) if today? && carried.positive?
 
             counts.join(SEPARATOR)
           end
 
+          def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
+
           def planner
-            Planner(date: @today, pool: @plan[:pool], pools: @plan[:pools])
+            Planner(counts: @counts, date: @today, pool: @plan[:pool], pools: @plan[:pools])
           end
 
-          def planning? = today? && @tasks.empty? && !filtering?
+          def planning? = today? && @tasks.rows.empty? && !filtering?
+
+          def row(task, index)
+            first = index.zero? && @tasks.previous_number.nil?
+            last = index == @tasks.rows.size - 1 && !@tasks.more
+
+            Row(task:, filter: @tab, today: @today, first:, last:, page: @tasks.number, scheduled:)
+          end
 
           def rows
-            return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.empty?
+            return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.rows.empty?
 
-            last = @tasks.size - 1
-            @tasks.each_with_index do |task, index|
-              Row(task:, filter: @tab, today: @today, first: index.zero?, last: index == last, scheduled:)
-            end
+            @tasks.rows.each_with_index { |task, index| row(task, index) }
+            Pager(page: @tasks, route: :admin_tasks, params: pager_params)
           end
 
           def scheduled = (@today if today?)

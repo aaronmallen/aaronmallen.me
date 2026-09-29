@@ -15,6 +15,7 @@ module Admin
           prop :first, Blog::Types::Bool, default: false
           prop :origin, Blog::Types::String, default: Blog::Types::TaskOrigin["tasks"]
           prop :last, Blog::Types::Bool, default: false
+          prop :page, Blog::Types::Integer, default: 1
 
           def view_template
             div(class: "task-order") { CARETS.each { caret(*it) } }
@@ -28,6 +29,7 @@ module Admin
             Form(action: path(:admin_reorder_task, id: @task.id, direction:)) do
               input(type: "hidden", name: "filter", value: @filter)
               input(type: "hidden", name: "origin", value: @origin)
+              input(type: "hidden", name: "page", value: @page) if @page > 1
               Button(type: "submit", disabled: held?(direction), class: "task-caret", aria: { label: }) do
                 i(class: icon, aria: { hidden: "true" })
               end

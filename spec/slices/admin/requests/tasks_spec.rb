@@ -1854,6 +1854,120 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "paging a pool" do
+      def carets = page.all(".task-order button")
+
+      def listed(title) = repo.in_list("next").find { it.title == title }
+
+      def next_titles = repo.in_list("next").reject(&:closed?).map(&:title)
+
+      def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]
+
+      before do
+        lower_page_size(:admin, to: 2)
+        create(:task, title: "first", position: 10)
+        create(:task, :done, title: "finished", position: 15)
+        create(:task, title: "second", position: 20)
+        create(:task, :someday, title: "elsewhere", position: 25)
+        create(:task, title: "third", position: 30)
+      end
+
+      it "shows the first page of open tasks and links to the next", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to eq(%w[first second])
+        expect(pager_link("next")).to eq("/admin/tasks?filter=next&page=2")
+        expect(page).to have_no_css("nav.pager a[rel='prev']")
+      end
+
+      it "shows the next page and links back", :aggregate_failures do
+        get "/admin/tasks", filter: "next", page: 2
+
+        expect(titles).to eq(%w[third])
+        expect(pager_link("prev")).to eq("/admin/tasks?filter=next")
+        expect(page).to have_no_css("nav.pager a[rel='next']")
+      end
+
+      it "keeps the search on the pager" do
+        get "/admin/tasks", filter: "next", q: "i"
+
+        expect(pager_link("next")).to eq("/admin/tasks?filter=next&q=i&page=2")
+      end
+
+      it "counts the whole pool on its tab and card", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find("a.subtab[href='/admin/tasks?filter=next'] .subtab-count").text).to eq("3")
+        expect(page).to have_css(".card-note", exact_text: "3 open")
+      end
+
+      it "answers 404 for a page past the end" do
+        get "/admin/tasks", filter: "next", page: 3
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "pages today's sprint", :aggregate_failures do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        %w[one two three].each { create(:task, :in_sprint, sprint_id: sprint.id, title: it) }
+        get "/admin/tasks", filter: "today", page: 2
+
+        expect(titles).to eq(%w[three])
+        expect(pager_link("prev")).to eq("/admin/tasks?filter=today")
+      end
+
+      it "lets the last task on a page move down and holds the first", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+
+        expect(carets.first).to be_disabled
+        expect(carets.last).not_to be_disabled
+      end
+
+      it "lets the first task on a later page move up and holds the last", :aggregate_failures do
+        get "/admin/tasks", filter: "next", page: 2
+
+        expect(carets.first).not_to be_disabled
+        expect(carets.last).to be_disabled
+      end
+
+      it "swaps the last task on a page with the first on the next" do
+        send_to("/admin/tasks/#{listed('second').id}/reorder/down", filter: "next")
+
+        expect(next_titles).to eq(%w[first third second])
+      end
+
+      it "swaps the first task on a page with the last on the page before" do
+        send_to("/admin/tasks/#{listed('third').id}/reorder/up", filter: "next", page: 2)
+
+        expect(next_titles).to eq(%w[first third second])
+      end
+
+      it "sends the move from a later page back to that page" do
+        send_to("/admin/tasks/#{listed('third').id}/reorder/up", filter: "next", page: 2)
+
+        expect(last_response.location).to eq("/admin/tasks?filter=next&page=2")
+      end
+
+      it "carries the page on the move" do
+        get "/admin/tasks", filter: "next", page: 2
+
+        expect(page).to have_css(".task-order input[name='page'][value='2']", visible: :all)
+      end
+
+      it "opens a task from a later page in its dialog" do
+        get "/admin/tasks", filter: "next", page: 2
+
+        expect(page).to have_css("a.task-title[data-task-open][href^='/admin/tasks/#{listed('third').id}?']")
+      end
+
+      it "counts each whole pool in the planner of an empty sprint", :aggregate_failures do
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find("[data-pool='next']").text).to eq("next · 3")
+        expect(page.all("[data-pool-panel='next'] .li-title", visible: :all).map(&:text)).to eq(%w[first second])
+      end
+    end
+
     describe "a title holding HTML" do
       let(:markup) { "<script>alert('x')</script>" }
 

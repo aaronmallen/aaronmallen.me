@@ -70,9 +70,23 @@ module Tasks
 
       def next_position = tasks.last_position + 1
 
+      def open_after(task) = beside(task).following(task).limit(1).one
+
+      def open_before(task) = beside(task).preceding(task).limit(1).one
+
+      def open_counts(sprint_id, planned_ids)
+        tasks.open_counts(sprint_id, planned_ids).one.to_h.transform_keys(&:to_s)
+      end
+
       def open_in_list(list) = with_details.in_list(list).open.in_order.to_a
 
+      def open_in_list_page(list, page) = page.fill(with_details.in_list(list).open.in_order.paged(page).to_a)
+
       def open_in_sprint(sprint_id) = with_details.for_sprint(sprint_id).open.in_order.to_a
+
+      def open_in_sprint_page(sprint_id, page)
+        page.fill(with_details.for_sprint(sprint_id).open.in_order.paged(page).to_a)
+      end
 
       def release_sprint(sprint_id)
         held = tasks.for_sprint(sprint_id)
@@ -106,6 +120,8 @@ module Tasks
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
       private
+
+      def beside(task) = (task.listed? ? tasks.in_list(task.list) : tasks.for_sprint(task.sprint_id)).open
 
       def pause(held) = held.in_progress.stamped(:update, result: :many).call(status: OPEN)
 

@@ -18,27 +18,31 @@ module Admin
         finished_task_counts: "tasks.queries.finished_task_counts",
         list_finished_tasks: "tasks.queries.list_finished_tasks",
         list_tasks: "tasks.queries.list_tasks",
+        open_task_counts: "tasks.queries.open_task_counts",
+        planned_tasks: "tasks.queries.planned_tasks",
         search_tasks: "tasks.queries.search_tasks",
         sprints_after: "tasks.queries.sprints_after",
       ]
 
-      def call(tab: TODAY, pool: nil, query: nil, now: Time.now)
+      def call(page:, tab: TODAY, pool: nil, query: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
-        open = open_lists(sprint)
+        today = Blog::TimeZone.today(now)
+        planned = sprints_after.call(today)
+        tasks = step listed(tab, sprint, planned, page)
         filters = { query: Blog::Types::TrimmedText[query] }
 
         {
-          filters:, tab:, tasks: filtered(listed(tab, open), filters),
-          **screen(open, sprint, pool, Blog::TimeZone.today(now)),
+          counts: counts(sprint, planned, today), filters:, pool: Blog::Types::TaskListParam[pool], tab:,
+          tasks: filtered(tasks, filters), today:, **plan(tab, tasks, planned, page),
         }
       end
 
       private
 
-      def counts(open, sprint, today)
+      def counts(sprint, planned, today)
         finished = finished_task_counts.call(today)
 
-        open.transform_values(&:size).merge(
+        open_task_counts.call(sprint:, planned:).merge(
           COMPLETED => finished.fetch(:total), FINISHED_TODAY => finished.fetch(:on_day), CARRIED => sprint.carried_in,
         )
       end
@@ -46,10 +50,20 @@ module Admin
       def filtered(tasks, filters)
         found = matching(filters[:query])
 
-        found.nil? ? tasks : tasks.select { found.include?(it.id) }
+        found.nil? ? tasks : tasks.with(rows: tasks.rows.select { found.include?(it.id) })
       end
 
-      def listed(tab, open) = tab == COMPLETED ? list_finished_tasks.call : open.fetch(tab)
+      def first_page(page) = Blog::Page.new(number: 1, size: page.size)
+
+      def listed(tab, sprint, planned, page)
+        tasks = case tab
+                when COMPLETED then whole(list_finished_tasks.call)
+                when UPCOMING then whole(planned_tasks.call(planned))
+                else list_tasks.call(tab, sprint:, page:)
+                end
+
+        tasks.past_end? ? Failure(:past_end) : Success(tasks)
+      end
 
       def matching(query)
         return nil if query.empty?
@@ -57,26 +71,25 @@ module Admin
         search_tasks.call(**SearchQuery.parse(query, fields: FIELDS)).to_set(&:id)
       end
 
-      def open_lists(sprint) = list_tasks.call(sprint:).transform_values { |tasks| tasks.reject(&:closed?) }
-
-      def planned(tasks, today)
-        held = tasks.group_by(&:sprint_id)
-
-        sprints_after.call(today).map { { sprint: it, tasks: held.fetch(it.id, EMPTY_ARRAY) } }
-      end
-
-      def pools(open) = Blog::Types::TaskList.values.to_h { [it, open.fetch(it)] }
-
-      def screen(open, sprint, pool, today)
+      def plan(tab, tasks, planned, page)
         {
-          counts: counts(open, sprint, today),
-          planned: planned(open.fetch(UPCOMING), today),
-          pool: Blog::Types::TaskListParam[pool],
-          pools: pools(open),
-          today:,
-          waiting: open.fetch(NEXT),
+          planned: tab == UPCOMING ? scheduled(tasks.rows, planned) : EMPTY_ARRAY,
+          pools: tab == TODAY && tasks.rows.empty? ? pools(page) : EMPTY_HASH,
+          waiting: tab == UPCOMING ? list_tasks.call(NEXT, sprint: nil, page: first_page(page)).rows : EMPTY_ARRAY,
         }
       end
+
+      def pools(page)
+        Blog::Types::TaskList.values.to_h { [it, list_tasks.call(it, sprint: nil, page: first_page(page)).rows] }
+      end
+
+      def scheduled(tasks, planned)
+        held = tasks.group_by(&:sprint_id)
+
+        planned.map { { sprint: it, tasks: held.fetch(it.id, EMPTY_ARRAY) } }
+      end
+
+      def whole(rows) = Blog::Paged.new(rows:, number: 1, more: false)
     end
   end
 end

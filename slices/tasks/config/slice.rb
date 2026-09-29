@@ -15,8 +15,9 @@ module Tasks
       operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.start_task operations.unlink_task
       queries.find_tasks queries.finished_task_counts queries.link_targets queries.list_finished_tasks
-      queries.list_tasks queries.open_tasks queries.open_tasks_in_list queries.search_tasks queries.sprints_after
-      queries.sprints_between queries.task_by_id queries.task_comments queries.tasks_in_sprint
+      queries.list_tasks queries.open_task_counts queries.open_tasks queries.open_tasks_in_list queries.planned_tasks
+      queries.search_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
+      queries.tasks_in_sprint
     ]
   end
 end

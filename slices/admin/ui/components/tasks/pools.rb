@@ -18,6 +18,7 @@ module Admin
           }.freeze
           TODAY = Blog::Types::TaskFilter["today"]
 
+          prop :counts, Blog::Types::Hash
           prop :origin, Blog::Types::String
           prop :pool, Blog::Types::String
           prop(
@@ -55,7 +56,7 @@ module Admin
 
             a(class: ["seg-option", ("current" if current)], href: pool_path(list),
               aria: { current: ("true" if current) }, data: { pool: list }) do
-              t(LISTS.fetch(list), count: @pools.fetch(list).size)
+              t(LISTS.fetch(list), count: @counts.fetch(list))
             end
           end
 

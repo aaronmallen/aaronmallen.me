@@ -14,6 +14,7 @@ module Admin
           prop :last, Blog::Types::Bool, default: false
           prop :ordered, Blog::Types::Bool, default: true
           prop :origin, Blog::Types::String, default: ORIGIN
+          prop :page, Blog::Types::Integer, default: 1
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
 
@@ -88,7 +89,7 @@ module Admin
 
           def side
             div(class: "task-acts") do
-              Order(task: @task, filter: @filter, first: @first, last: @last, origin: @origin) if @ordered
+              Order(task: @task, filter: @filter, first: @first, last: @last, origin: @origin, page: @page) if @ordered
               Controls(task: @task, filter: @filter, origin: @origin)
               edit
             end

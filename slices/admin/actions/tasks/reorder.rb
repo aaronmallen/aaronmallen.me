@@ -10,7 +10,7 @@ module Admin
         def handle(request, response)
           case reorder_task.call(record_id(request), request.params[:direction])
           in Success(_) | Failure(:not_moved)
-            response.redirect_to(tasks_path(request))
+            response.redirect_to(tasks_path(request, page: task_page(request)))
           in Failure(:not_found)
             halt 404
           else halt 500

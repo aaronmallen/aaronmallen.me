@@ -11,11 +11,13 @@ module Admin
 
       def call(now: Time.now, pool: nil)
         sprint = step current_sprint.call(now:)
+        pools = self.pools
 
         {
+          counts: pools.transform_values(&:size),
           date: Blog::TimeZone.today(now),
           pool: Blog::Types::TaskListParam[pool],
-          pools: pools,
+          pools:,
           tasks: tasks_in_sprint.call(sprint.id),
         }
       end

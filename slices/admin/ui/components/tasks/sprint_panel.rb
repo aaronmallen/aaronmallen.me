@@ -8,6 +8,7 @@ module Admin
           ORIGIN = Blog::Types::TaskOrigin["today"]
           TODAY = Blog::Types::TaskFilter["today"]
 
+          prop :counts, Blog::Types::Hash
           prop :date, Blog::Types::Date
           prop :pool, Blog::Types::String
           prop(
@@ -48,10 +49,10 @@ module Admin
           end
 
           def planner
-            Planner(date: @date, origin: ORIGIN, pool: @pool, pools: @pools)
+            Planner(counts: @counts, date: @date, origin: ORIGIN, pool: @pool, pools: @pools)
           end
 
-          def pools = Pools(origin: ORIGIN, pool: @pool, pools: @pools)
+          def pools = Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
 
           def progress
             span(class: "sprint-progress") do

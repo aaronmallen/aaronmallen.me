@@ -7,6 +7,7 @@ module Tasks
       CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
       CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
+      LISTS = Blog::Types::TaskList.values.freeze
 
       schema :tasks, infer: true do
         associations do
@@ -31,6 +32,11 @@ module Tasks
         end
       end
 
+      def following(task)
+        where(Sequel.|(Sequel[:position] > task.position, Sequel.&({ position: task.position }, Sequel[:id] > task.id)))
+          .in_order
+      end
+
       def for_sprint(sprint_id) = where(sprint_id:)
 
       def in_list(list) = where(list:)
@@ -42,6 +48,8 @@ module Tasks
       def last_position = unordered.max(:position).to_i
 
       def linkable_from(id) = exclude(id:).exclude(id: task_links.partner_ids(id).dataset)
+
+      def list_counts = select_append { LISTS.map { integer.count(id).filter(list: it).as(it.to_sym) } }
 
       def matching(text)
         pattern = "%#{dataset.escape_like(text)}%"
@@ -55,7 +63,23 @@ module Tasks
 
       def open = exclude(status: CLOSED)
 
+      def open_counts(sprint_id, planned_ids)
+        counted = open.unordered.select do
+          [
+            integer.count(id).filter(sprint_id:).as(:today),
+            integer.count(id).filter(sprint_id: planned_ids).as(:upcoming),
+          ]
+        end
+
+        counted.list_counts
+      end
+
       def open_first = order(Sequel.case({ { status: CLOSED } => 1 }, 0), self[:position].asc, self[:id].asc)
+
+      def preceding(task)
+        where(Sequel.|(Sequel[:position] < task.position, Sequel.&({ position: task.position }, Sequel[:id] < task.id)))
+          .order(self[:position].desc, self[:id].desc)
+      end
 
       def sourced = where(id: task_sources.task_ids)
 
