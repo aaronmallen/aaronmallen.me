@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
+amended: ["#63"]
 tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, systemd]
 ---
 
@@ -32,6 +33,10 @@ The site runs on the Pi in the office and Cloudflare publishes it through a tunn
 - The tunnel connects out from the Pi, so no port opens on the home network and Cloudflare ends TLS.
 - The Pi builds its own releases. A timer sees a new git tag, builds it in its own release directory while the old
   one serves, migrates, points `current` at it and restarts both units. Rolling back points `current` back.
+- After it restarts the units, a deploy or a rollback reports the live tag to Honeybadger, a step #63 added. It
+  posts to `https://api.honeybadger.io/v1/deploys` with `HONEYBADGER_API_KEY` from the shared `.env`, and names the
+  tag as the revision, `production` as the environment, the repository and the Pi user. A report that fails logs a
+  warning and the deploy goes on, since the release is already live.
 
 The code follows from this. `config/settings/production.yml` reads the visitor address from `CF-Connecting-IP` and
 trusts only the loopback, where `cloudflared` connects. `config/puma.rb` listens on the loopback by default. Only
