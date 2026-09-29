@@ -9,7 +9,7 @@ module Record
       class Error < StandardError; end
       class RateLimited < StandardError; end
 
-      EMPTY_STATUSES = [404].freeze
+      EMPTY_STATUSES = [404, 410].freeze
       GRAPHQL_PATH = "/graphql"
       RATE_LIMITED_ERROR = "RATE_LIMITED"
       RATE_LIMIT_STATUSES = [403, 429].freeze

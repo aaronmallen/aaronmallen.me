@@ -50,6 +50,7 @@ RSpec.describe "MCP reach", type: :request do
       "record.operations.import_commits" => "the import job runs it; import_commits queues that job",
       "record.operations.reap_sync_states" => "a background job reaps old sync states",
       "record.operations.record_country_sync_outcome" => "the country database job records how it went",
+      "record.operations.record_issue_sync_outcome" => "the issue sync job records how it went",
       "record.operations.record_projects_sync_outcome" => "the projects job records how it went",
       "record.operations.record_rollup_sync_outcome" => "the roll up job records how it went",
       "record.operations.record_sync_outcome" => "each sync job records how it went; read_sync_state reads it",

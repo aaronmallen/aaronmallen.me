@@ -7,6 +7,7 @@ module Record
       COMMITS = "commits"
       COUNTRY_DATABASE = "country_database"
       FAILURE = "failure"
+      ISSUES = "issues"
       PAGE_LIMIT = "page_limit"
       PROJECTS = "projects"
 

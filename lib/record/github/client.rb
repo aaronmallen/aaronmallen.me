@@ -5,6 +5,8 @@ require "time"
 module Record
   module GitHub
     class Client
+      include Issues
+
       Error = Transport::Error
       RateLimited = Transport::RateLimited
 

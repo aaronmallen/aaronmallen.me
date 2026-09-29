@@ -2,6 +2,8 @@
 
 module GitHubGraphQL
   URL = "https://api.github.com/graphql"
+  ASSIGNED_QUERY = "search(query:"
+  ISSUES_QUERY = "nodes(ids:"
   REFS_QUERY = "refs(refPrefix:"
   REPOS_QUERY = "repositories("
   VIEWER_QUERY = "viewer { id }"
@@ -22,7 +24,29 @@ module GitHubGraphQL
     github_json(data:, errors: [{ message:, type: }])
   end
 
+  def github_issue(id, number: 1, repo: "aaronmallen/aaronmallen.me", assignees: [VIEWER_ID], **fields)
+    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", id:,
+      repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil, title: "Sync my issues",
+      url: "https://github.com/#{repo}/issues/#{number}" }.merge(fields)
+  end
+
+  def github_issue_nodes(*nodes, remaining: 4999)
+    github_json(data: { nodes:, rateLimit: github_rate_limit(remaining:), viewer: { id: VIEWER_ID } })
+  end
+
+  def github_issue_search(*nodes, more: false, remaining: 4999)
+    search = { nodes:, pageInfo: github_page_info(more, "issues-page-2") }
+
+    github_json(data: { rateLimit: github_rate_limit(remaining:), search:, viewer: { id: VIEWER_ID } })
+  end
+
   def github_json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
+
+  def github_missing_issue
+    data = { nodes: [nil], rateLimit: github_rate_limit, viewer: { id: VIEWER_ID } }
+
+    github_errors("NOT_FOUND", "Could not resolve to a node", data:)
+  end
 
   def github_page_info(more, cursor) = { endCursor: more ? cursor : nil, hasNextPage: more }
 
