@@ -13,6 +13,14 @@ RSpec.describe "Admin task page", type: :request do
 
   def label(key, **) = i18n.t(key, scope: "ui.views.tasks.show", **)
 
+  def left_yesterday = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
+
+  def lose_the_roll
+    failing = Tasks::Slice["repos.sprint_repo"]
+    allow(failing).to receive(:by_id).and_return(nil)
+    replace_component("repos.sprint_repo", failing)
+  end
+
   def read(record = task, **) = get("/admin/tasks/#{record.id}", **)
 
   def read_note(note) = read(create(:task, note:))
@@ -131,6 +139,20 @@ RSpec.describe "Admin task page", type: :request do
         read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: day).id))
 
         expect(facts[label(:sprint)]).to eq(day.strftime("%b %-d, %Y"))
+      end
+
+      it "rolls a task left in yesterday's sprint into today's before it shows the day" do
+        read(left_yesterday)
+
+        expect(facts[label(:sprint)]).to eq(Blog::TimeZone.today.strftime("%b %-d, %Y"))
+      end
+
+      it "answers with a server error when the day's sprint cannot be rolled" do
+        task = left_yesterday
+        lose_the_roll
+        read(task)
+
+        expect(last_response.status).to eq(500)
       end
 
       it "says when it is set for no sprint day" do

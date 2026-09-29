@@ -30,10 +30,13 @@ module Admin
         private
 
         def invalid(request, response, id, params, errors)
-          page = build_task_page.call(id, kind: Blog::Types::Text[params[:kind]], errors:) || halt(404)
-
-          response.status = 422
-          response.render(task_view, **page, **return_to(request))
+          case build_task_page.call(id, kind: Blog::Types::Text[params[:kind]], errors:)
+          in Success(page)
+            response.status = 422
+            response.render(task_view, **page, **return_to(request))
+          in Failure(:not_found) then halt 404
+          else halt 500
+          end
         end
       end
     end

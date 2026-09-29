@@ -2,15 +2,18 @@
 
 module Admin
   module Operations
-    class BuildTaskPage
+    class BuildTaskPage < Blog::Operation
       include Dry::Core::Constants
 
-      include Deps[link_targets: "tasks.queries.link_targets", task_by_id: "tasks.queries.task_by_id"]
+      include Deps[
+        current_sprint: "tasks.operations.current_sprint",
+        link_targets: "tasks.queries.link_targets",
+        task_by_id: "tasks.queries.task_by_id",
+      ]
 
       def call(id, query: nil, kind: nil, errors: EMPTY_HASH)
-        task = task_by_id.call(id)
-        return unless task
-
+        step roll
+        task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
         { task:, note_html: note_html(task.note),
@@ -19,11 +22,19 @@ module Admin
 
       private
 
+      def find(id)
+        task = task_by_id.call(id)
+
+        task ? Success(task) : Failure(:not_found)
+      end
+
       def note_html(note)
         html = ::Tasks::Markdown.to_html(note).strip
 
         html unless html.empty?
       end
+
+      def roll = current_sprint.call.alt_map { [:unrolled, it] }
     end
   end
 end

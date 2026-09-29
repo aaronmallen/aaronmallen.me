@@ -1484,6 +1484,13 @@ RSpec.describe "Admin tasks", type: :request do
         send_to("/admin/tasks/#{task.id}", filter:, task: { **held(task), **changes })
       end
 
+      def save_after_the_list_rolls(task)
+        get "/admin/tasks/#{task.id}/edit", filter: "today"
+        fields = held(task)
+        get "/admin/tasks"
+        send_to("/admin/tasks/#{task.id}", filter: "today", task: fields)
+      end
+
       def today = Blog::TimeZone.today
 
       it "shows the sprint's date for a task in today's sprint" do
@@ -1506,6 +1513,37 @@ RSpec.describe "Admin tasks", type: :request do
         save(task, filter: "today")
 
         expect(repo.by_id(task.id)).to have_attributes(sprint_id: sprint.id, carried_count: 2)
+      end
+
+      it "rolls a task left in yesterday's sprint into today's before it fills the date" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        get "/admin/tasks/#{task.id}/edit", filter: "today"
+
+        expect(date_field(task).value).to eq(today.iso8601)
+      end
+
+      it "saves a task opened first on a new day with nothing changed into today's sprint" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        save(task, filter: "today")
+
+        expect(repo.by_id(task.id)).to have_attributes(sprint_id: sprint_repo.on(today).id, list: nil)
+      end
+
+      it "says the task saved, not that its sprint is past, when the list rolls the day while it is open" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        save_after_the_list_rolls(task)
+        follow_redirect!
+
+        expect(Capybara.string(last_response.body)).to have_css("[data-toast]", text: "Task saved")
+      end
+
+      it "answers with a server error when the day's sprint cannot be rolled" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
+        allow(sprint_repo).to receive(:by_id).and_return(nil)
+        replace_component("repos.sprint_repo", sprint_repo)
+        get "/admin/tasks/#{task.id}/edit"
+
+        expect(last_response.status).to eq(500)
       end
 
       it "leaves a finished task saved from the completed tab on the sprint it ran in" do

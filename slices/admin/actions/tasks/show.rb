@@ -8,10 +8,11 @@ module Admin
         include Deps[build_task_page: "operations.build_task_page"]
 
         def handle(request, response)
-          page = build_task_page.call(record_id(request), query: request.params[:link_q])
-          not_found(response) unless page
-
-          response.render(view, **page, **return_to(request))
+          case build_task_page.call(record_id(request), query: request.params[:link_q])
+          in Success(page) then response.render(view, **page, **return_to(request))
+          in Failure(:not_found) then not_found(response)
+          else halt 500
+          end
         end
       end
     end
