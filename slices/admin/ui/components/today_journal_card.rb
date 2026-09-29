@@ -57,7 +57,7 @@ module Admin
 
           article(class: "today-journal-entry") do
             time(class: "today-journal-time", datetime: "#{entry.entry_date.iso8601}T#{clock}") { clock }
-            div(class: "journal-entry-body") { entry.body }
+            Journal::Body(body: entry.body)
           end
         end
 

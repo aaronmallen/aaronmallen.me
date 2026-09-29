@@ -129,6 +129,13 @@ RSpec.describe "MCP record tools", type: :request do
                           [older.id, "2026-03-01", "08:00", "first", []]])
     end
 
+    it "answers the body as the markdown it was written in" do
+      entry_on(1, "08:00", "a **bold** day\n\n- one")
+      call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
+
+      expect(rows.map { it[3] }).to eq(["a **bold** day\n\n- one"])
+    end
+
     it "leaves out an entry past the window" do
       create(:journal_entry, entry_date: Date.new(2026, 4, 1))
       call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
@@ -160,6 +167,13 @@ RSpec.describe "MCP record tools", type: :request do
 
       expect(content).to eq("id" => entry.id, "date" => "2026-03-02", "time" => "09:30", "body" => "a day",
                             "tags" => %w[health ruby])
+    end
+
+    it "answers the body as the markdown it was written in" do
+      entry = create(:journal_entry, body: "a **bold** day\n\n- one")
+      call_tool("read_journal_entry", id: entry.id)
+
+      expect(content.fetch("body")).to eq("a **bold** day\n\n- one")
     end
 
     it "calls an unknown ID an error" do

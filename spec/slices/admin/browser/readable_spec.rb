@@ -73,7 +73,11 @@ RSpec.describe "Admin screens", type: :feature do
     seed_analytics
     seed_tasks
     seed_writing
-    create(:journal_entry, body: "A long entry about the day and everything that went into it")
+    create(
+      :journal_entry,
+      body: "A **long** entry about the day and [everything](https://example.com/day) that went into it\n\n" \
+            "- one\n- two\n\n```\n#{'a_very_long_line_of_code ' * 8}\n```",
+    )
     create(:message, subject: "A question about the site")
     create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
   end

@@ -36,7 +36,7 @@ function setupEntry(entry) {
   });
 
   form.querySelector("[data-journal-cancel]").addEventListener("click", () => {
-    body.value = text.textContent;
+    body.value = form.dataset.journalSource;
     body.removeAttribute("aria-invalid");
     body.removeAttribute("aria-describedby");
     form.querySelector(".field-error")?.remove();

@@ -14,7 +14,7 @@ module Admin
           def view_template
             article(class: "journal-entry", data: { journal_item: "" }) do
               head
-              div(class: "journal-entry-body", hidden: editing?, data: { journal_text: "" }) { @entry.body }
+              Body(body: @entry.body, hidden: editing?, data: { journal_text: "" })
               edit_form
             end
           end
@@ -60,7 +60,7 @@ module Admin
               action: path(:admin_update_journal_entry, id: @entry.id),
               class: "journal-edit",
               hidden: !editing?,
-              data: { journal_edit_form: "" },
+              data: { journal_edit_form: "", journal_source: @entry.body },
             }
           end
 

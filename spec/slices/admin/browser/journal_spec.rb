@@ -161,6 +161,29 @@ RSpec.describe "Admin journal", type: :feature do
     end
   end
 
+  describe "cancelling an edit to a markdown entry" do
+    let(:item) { find(".journal-entry") }
+
+    before do
+      create(:journal_entry, body: "a **bold** day\n\n- one")
+      visit "/admin/journal"
+      item.click_button "Edit"
+      item.fill_in "Entry text", with: "changed my mind"
+      item.click_button "Cancel"
+    end
+
+    it "puts the markdown source back in the textarea" do
+      item.click_button "Edit"
+
+      expect(item).to have_field("Entry text", with: "a **bold** day\n\n- one")
+    end
+
+    it "shows the rendered entry again", :aggregate_failures do
+      expect(item).to have_css(".journal-entry-body strong", exact_text: "bold")
+      expect(item).to have_css(".journal-entry-body li", exact_text: "one")
+    end
+  end
+
   describe "a rejected edit" do
     let(:item) { find(".journal-entry") }
 

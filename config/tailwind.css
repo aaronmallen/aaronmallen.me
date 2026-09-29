@@ -1155,7 +1155,33 @@
 }
 
 @utility journal-entry-body {
-  @apply font-serif text-post whitespace-pre-wrap text-ink;
+  @apply font-serif text-ink;
+
+  &.post-body {
+    @apply mt-0 min-w-0 wrap-anywhere;
+
+    & > p:first-of-type {
+      @apply text-post;
+    }
+  }
+
+  & img {
+    @apply h-auto max-w-full;
+  }
+
+  & pre {
+    @apply whitespace-pre-wrap;
+  }
+
+  & table {
+    @apply w-full table-fixed;
+  }
+
+  & a {
+    @media (width < 43.75rem) {
+      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    }
+  }
 }
 
 @utility journal-entry-actions {

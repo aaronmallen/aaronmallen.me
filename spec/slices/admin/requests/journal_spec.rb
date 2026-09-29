@@ -177,11 +177,42 @@ RSpec.describe "Admin journal", type: :request do
         expect(page).to have_css(".journal-entry-head .pill", count: 1)
       end
 
-      it "keeps the line breaks in a body" do
+      it "renders the body as markdown", :aggregate_failures do
+        create(:journal_entry, body: "a **bold** day\n\n- one\n- two\n\n[the lake](https://example.com/lake)")
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-entry-body strong", exact_text: "bold")
+        expect(page.all(".journal-entry-body ul li").map(&:text)).to eq(%w[one two])
+        expect(page).to have_link("the lake", href: "https://example.com/lake")
+      end
+
+      it "joins lines split by one newline into one paragraph" do
         create(:journal_entry, body: "first\nsecond")
         get "/admin/journal"
 
-        expect(page.find(".journal-entry-body").native.inner_html).to eq("first\nsecond")
+        expect(page.all(".journal-entry-body p").map(&:text)).to eq(["first\nsecond"])
+      end
+
+      it "starts a new paragraph after a blank line" do
+        create(:journal_entry, body: "first\n\nsecond")
+        get "/admin/journal"
+
+        expect(page.all(".journal-entry-body p").map(&:text)).to eq(%w[first second])
+      end
+
+      it "drops raw HTML from a body", :aggregate_failures do
+        create(:journal_entry, body: "<script>alert(1)</script>\n\nsafe <b onclick=\"alert(1)\">text</b>")
+        get "/admin/journal"
+
+        expect(page).to have_no_css(".journal-entry-body script, .journal-entry-body b, .journal-entry-body [onclick]")
+        expect(page.find(".journal-entry-body").native.inner_html).not_to include("alert")
+      end
+
+      it "gives the edit form the markdown source" do
+        create(:journal_entry, body: "a **bold** day")
+        get "/admin/journal"
+
+        expect(page).to have_css("[data-journal-edit-form][data-journal-source='a **bold** day']", visible: :all)
       end
 
       it "counts the streak over the last 30 days, today included" do

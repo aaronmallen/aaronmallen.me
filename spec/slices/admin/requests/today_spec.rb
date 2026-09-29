@@ -30,6 +30,8 @@ RSpec.describe "Admin today", type: :request do
 
   def create_entry(**attributes) = create(:journal_entry, **attributes)
 
+  def entry_body = card("Journal").find(".today-journal-entry .journal-entry-body")
+
   def journaled_stat = page.find(".g-4 .stat", text: "Journaled")
 
   def pending_card = card("Webmentions pending")
@@ -462,11 +464,35 @@ RSpec.describe "Admin today", type: :request do
         expect(page).to have_no_css(".today-journal-entries")
       end
 
-      it "keeps the line breaks in a body" do
+      it "renders the body as markdown", :aggregate_failures do
+        create_entry(entry_date: today, body: "a **bold** day\n\n- one\n- two\n\n[the lake](https://example.com/lake)")
+        get "/admin"
+
+        expect(entry_body).to have_css("strong", exact_text: "bold")
+        expect(entry_body.all("ul li").map(&:text)).to eq(%w[one two])
+        expect(entry_body).to have_link("the lake", href: "https://example.com/lake")
+      end
+
+      it "joins lines split by one newline into one paragraph" do
         create_entry(entry_date: today, body: "first\nsecond")
         get "/admin"
 
-        expect(page.find(".today-journal-entries .journal-entry-body").native.inner_html).to eq("first\nsecond")
+        expect(page.all(".today-journal-entries .journal-entry-body p").map(&:text)).to eq(["first\nsecond"])
+      end
+
+      it "starts a new paragraph after a blank line" do
+        create_entry(entry_date: today, body: "first\n\nsecond")
+        get "/admin"
+
+        expect(page.all(".today-journal-entries .journal-entry-body p").map(&:text)).to eq(%w[first second])
+      end
+
+      it "drops raw HTML from a body", :aggregate_failures do
+        create_entry(entry_date: today, body: "<script>alert(1)</script>\n\nsafe <b onclick=\"alert(1)\">text</b>")
+        get "/admin"
+
+        expect(entry_body).to have_no_css("script, b, [onclick]")
+        expect(entry_body.native.inner_html).not_to include("alert")
       end
     end
 
