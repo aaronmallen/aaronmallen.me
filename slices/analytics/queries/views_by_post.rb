@@ -5,7 +5,7 @@ module Analytics
     class ViewsByPost
       include Deps[rollup_repo: "repos.analytics_rollup_repo"]
 
-      def call = rollup_repo.views_by_post
+      def call(post_ids) = rollup_repo.views_by_post(post_ids)
     end
   end
 end

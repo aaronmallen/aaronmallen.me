@@ -23,6 +23,8 @@ module Tags
           dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)
         end
       end
+
+      def naming(text) = text.empty? ? self : where(Sequel.like(:name, "%#{dataset.escape_like(text)}%"))
     end
   end
 end

@@ -12,6 +12,49 @@ RSpec.describe "Admin messages", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    describe "paging" do
+      before do
+        lower_page_size(:admin, to: 2)
+        %w[First Second Third].each_with_index do |subject, index|
+          create(:message, :read, subject:, received_at: Time.utc(2026, 9, 1 + index))
+        end
+        create(:message, subject: "Waiting")
+      end
+
+      it "shows the newest page and links to older messages", :aggregate_failures do
+        get "/admin/messages", status: "read"
+
+        expect(subjects).to eq(%w[Third Second])
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/messages?status=read&page=2']", text: "Older")
+      end
+
+      it "keeps the filter on a later page", :aggregate_failures do
+        get "/admin/messages", status: "read", page: "2"
+
+        expect(subjects).to eq(%w[First])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/messages?status=read']", text: "Newer")
+        expect(page).to have_css(".seg input[value='read'][checked]")
+      end
+
+      it "counts every message under the filter, not the page" do
+        get "/admin/messages", status: "read"
+
+        expect(page).to have_css(".page-head-sub", exact_text: "3 messages")
+      end
+
+      it "draws no pager when one page holds every message" do
+        get "/admin/messages"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+
+      it "returns 404 for a page past the end" do
+        get "/admin/messages", status: "read", page: "3"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
     describe "the inbox" do
       before do
         create(:message, subject: "Waiting")

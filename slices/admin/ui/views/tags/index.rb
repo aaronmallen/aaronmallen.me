@@ -16,8 +16,9 @@ module Admin
           TITLES = { PUBLIC => ".title.public", PRIVATE => ".title.private" }.freeze
           SEARCH_ID = "tags-q"
 
-          def initialize(editing:, errors:, name:, query:, scope:, tags:, usage:)
+          def initialize(count:, editing:, errors:, name:, query:, scope:, tags:, usage:)
             super()
+            @count = count
             @editing = editing
             @errors = errors
             @name = name
@@ -28,11 +29,12 @@ module Admin
           end
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(COUNTS.fetch(@scope), count: @tags.size)) do
+            PageHead(title: t(".heading"), sub: t(COUNTS.fetch(@scope), count: @count)) do
               switch
               filter_form
             end
             card
+            Pager(page: @tags, route: :admin_tags, params: scope_params(@scope))
             Hint { t(".note") }
           end
 
@@ -60,10 +62,15 @@ module Admin
             end
           end
 
-          def rows
-            return empty if @tags.empty?
+          def row(tag)
+            Row(tag:, uses: @usage.fetch(tag.id, Dry::Core::Constants::EMPTY_HASH), editing: @editing,
+                page: @tags.number)
+          end
 
-            @tags.each { Row(tag: it, uses: @usage.fetch(it.id, Dry::Core::Constants::EMPTY_HASH), editing: @editing) }
+          def rows
+            return empty if @tags.rows.empty?
+
+            @tags.rows.each { row(it) }
           end
 
           def scope_link(scope)
@@ -73,7 +80,9 @@ module Admin
               aria: { current: ("page" if current) }) { t(SCOPES.fetch(scope)) }
           end
 
-          def scope_path(scope) = @query.empty? ? path(:admin_tags, scope:) : path(:admin_tags, scope:, q: @query)
+          def scope_params(scope) = @query.empty? ? { scope: } : { scope:, q: @query }
+
+          def scope_path(scope) = path(:admin_tags, **scope_params(scope))
 
           def switch
             nav(class: "seg", aria: { label: t(".scope") }) { SCOPES.each_key { scope_link(it) } }

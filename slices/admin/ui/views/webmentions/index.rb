@@ -48,10 +48,11 @@ module Admin
 
           def inbox
             Card(title: t(".inbox")) do
-              next Empty { t(EMPTIES.fetch(@filter)) } if @inbox[:mentions].empty?
+              next Empty { t(EMPTIES.fetch(@filter)) } if @inbox[:mentions].rows.empty?
 
-              @inbox[:mentions].each { |mention| row(mention) }
+              @inbox[:mentions].rows.each { |mention| row(mention) }
             end
+            Pager(page: @inbox[:mentions], route: :admin_webmentions, params: { status: @filter })
           end
 
           def row(mention)

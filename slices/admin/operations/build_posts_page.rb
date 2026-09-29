@@ -3,31 +3,29 @@
 module Admin
   module Operations
     class BuildPostsPage
-      ALL = Blog::Types::PostFilter["all"]
-
       include Deps[
-        all_posts: "posts.queries.all",
         post_counts_by_status: "posts.queries.count_by_status",
-        posts_by_status: "posts.queries.by_status",
+        posts_by_filter: "posts.queries.by_filter",
         views_by_post: "analytics.queries.views_by_post",
         webmention_counts_by_post: "social.queries.webmention_counts_by_post",
       ]
 
-      def call(filter: ALL)
+      def call(filter:, page:)
         chosen = Blog::Types::PostFilterParam[filter]
-        posts = chosen == ALL ? all_posts.call : posts_by_status.call(chosen)
+        posts = posts_by_filter.call(chosen, page)
 
-        { counts: post_counts_by_status.call, filter: chosen, posts:, **tallies(posts) }
+        { counts: post_counts_by_status.call, filter: chosen, posts:, **tallies(posts.rows) }
       end
 
       private
 
       def tallies(posts)
-        views = views_by_post.call
+        ids = posts.map(&:id)
+        views = views_by_post.call(ids)
 
         {
-          view_counts: posts.to_h { [it.id, views.fetch(it.id, 0)] },
-          webmention_counts: webmention_counts_by_post.call(posts.map(&:id)),
+          view_counts: ids.to_h { [it, views.fetch(it, 0)] },
+          webmention_counts: webmention_counts_by_post.call(ids),
           word_counts: posts.to_h { [it.id, ::Posts::Markdown.word_count(it.body)] },
         }
       end

@@ -51,6 +51,8 @@ module Social
 
       def normalized_author_url(url) = Blog::Types::Normalized::Url.call(url) { url }.sub(BARE_HOST, '\\1/')
 
+      def page_by_status(status, page) = page.fill(webmentions.with_status(status).newest_first.paged(page).to_a)
+
       def pending(limit:) = webmentions.with_status(PENDING).newest_first.limit(limit).to_a
 
       def pending_count = webmentions.with_status(PENDING).count

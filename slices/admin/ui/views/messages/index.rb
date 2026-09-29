@@ -12,20 +12,22 @@ module Admin
           EMPTIES = { UNREAD => ".empty.unread", READ => ".empty.read", SPAM => ".empty.spam" }.freeze
           FILTERS = { UNREAD => ".unread", READ => ".read", SPAM => ".spam" }.freeze
 
-          def initialize(filter:, messages:)
+          def initialize(count:, filter:, messages:)
             super()
+            @count = count
             @filter = filter
             @messages = messages
           end
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @messages.size)) { filter_form }
+            PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
 
             Card(title: t(".inbox")) do
-              next Empty { t(EMPTIES.fetch(@filter)) } if @messages.empty?
+              next Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
 
-              @messages.each { MessageRow(message: it, filter: @filter) }
+              @messages.rows.each { MessageRow(message: it, filter: @filter) }
             end
+            Pager(page: @messages, route: :admin_messages, params: { status: @filter })
           end
 
           private

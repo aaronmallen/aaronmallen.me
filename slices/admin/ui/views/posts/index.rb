@@ -36,7 +36,7 @@ module Admin
               end
             end
 
-            @posts.empty? ? Empty { t(".empty") } : Card { @posts.each { |post| row(post) } }
+            list
           end
 
           private
@@ -51,6 +51,11 @@ module Admin
           end
 
           def filter_options = FILTERS.transform_values { t(it) }
+
+          def list
+            @posts.rows.empty? ? Empty { t(".empty") } : Card { @posts.rows.each { |post| row(post) } }
+            Pager(page: @posts, route: :admin_posts, params: { status: @filter })
+          end
 
           def mentions(post)
             count = @webmention_counts.fetch(post.id, 0)

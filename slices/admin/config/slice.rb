@@ -39,11 +39,13 @@ module Admin
     ], from: :projects
 
     import keys: %w[
-      operations.compose_announcement operations.delete_post operations.save_post queries.all queries.by_id
-      queries.by_ids queries.by_status queries.count_by_status queries.scheduled
+      operations.compose_announcement operations.delete_post operations.save_post queries.all queries.by_filter
+      queries.by_id queries.by_ids queries.by_status queries.count_by_status queries.scheduled
     ], from: :posts
 
-    import keys: %w[operations.remove_tag operations.save_tag queries.all queries.usage], from: :tags
+    import keys: %w[
+      operations.remove_tag operations.save_tag queries.matching queries.matching_count queries.usage
+    ], from: :tags
 
     import keys: %w[
       networks.all operations.compose_social_post operations.delete_social_post operations.moderate_webmention

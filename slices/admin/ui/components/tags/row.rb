@@ -11,6 +11,7 @@ module Admin
           prop :tag, Blog::Types::Instance(ROM::Struct)
           prop :uses, Blog::Types::Hash
           prop :editing, Blog::Types::Hash.optional, default: nil
+          prop :page, Blog::Types::Integer, default: 1
 
           def view_template
             div(class: "tag-row") do
@@ -38,6 +39,7 @@ module Admin
           def color_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field") do
               scope_field
+              page_field
               input(type: "hidden", name: "tag[name]", value: @tag.name)
               span(class: "f") { t(".color") }
               Swatches(name: "tag[color]", scope:, selected: @tag.color, submit: true)
@@ -73,6 +75,8 @@ module Admin
 
           def name = editing? ? @editing[:name] : @tag.name
 
+          def page_field = @page > 1 && input(type: "hidden", name: "page", value: @page)
+
           def remove
             Form(**remove_attributes) do
               scope_field
@@ -94,6 +98,7 @@ module Admin
           def rename_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field", id: rename_id) do
               scope_field
+              page_field
               label(class: "f", for: FieldError.id_for(:name, scope)) { t(".rename") }
               Input(**FieldError.control_attributes(:name, errors, scope), name: "tag[name]", value: name)
             end

@@ -5,7 +5,7 @@ module Social
     class WebmentionsByStatus
       include Deps[webmention_repo: "repos.webmention_repo"]
 
-      def call(status) = webmention_repo.by_status(status)
+      def call(status, page) = webmention_repo.page_by_status(status, page)
     end
   end
 end

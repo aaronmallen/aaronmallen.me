@@ -23,6 +23,58 @@ RSpec.describe "Admin tags", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    describe "paging" do
+      before do
+        lower_page_size(:admin, to: 2)
+        %w[ruby rust rails elixir go].each { create(:tag, name: it) }
+        create(:tag, :private, name: "rest")
+      end
+
+      it "shows the first page and links to the next", :aggregate_failures do
+        get "/admin/tags"
+
+        expect(names).to eq(%w[#elixir #go])
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/tags?scope=public&page=2']", text: "Older")
+      end
+
+      it "keeps the scope and the search on a later page", :aggregate_failures do
+        get "/admin/tags", q: "r", page: "2"
+
+        expect(names).to eq(%w[#ruby #rust])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/tags?scope=public&q=r']", text: "Newer")
+      end
+
+      it "sends the page it is on with a rename" do
+        get "/admin/tags", page: "2"
+
+        expect(page).to have_css("#tag-#{named('ruby').id}-form input[name='page'][value='2']", visible: :all)
+      end
+
+      it "says why it refused a rename against a row on a later page" do
+        send_to("/admin/tags/#{named('ruby').id}", tag: { name: " " }, page: "2")
+
+        expect(page).to have_css("#tag-#{named('ruby').id}-name-error")
+      end
+
+      it "counts every tag that matches, not the page" do
+        get "/admin/tags", q: "r"
+
+        expect(page).to have_css(".page-head-sub", text: "4 tags")
+      end
+
+      it "draws no pager when one page holds every tag" do
+        get "/admin/tags", scope: "private"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+
+      it "returns 404 for a page past the end" do
+        get "/admin/tags", page: "4"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
     it "is a section of the command palette" do
       get "/admin"
 

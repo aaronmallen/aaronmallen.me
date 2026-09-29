@@ -3,29 +3,33 @@
 module Admin
   module Operations
     class BuildTagsPage
-      include Deps[all_tags: "tags.queries.all", tag_usage: "tags.queries.usage"]
+      NO_ERRORS = Dry::Core::Constants::EMPTY_HASH
 
-      def call(scope:, errors: Dry::Core::Constants::EMPTY_HASH, editing: nil, params: nil, query: nil)
+      include Deps[
+        "settings",
+        matching_tags: "tags.queries.matching",
+        matching_tag_count: "tags.queries.matching_count",
+        tag_usage: "tags.queries.usage",
+      ]
+
+      def call(scope:, page: first_page, errors: NO_ERRORS, editing: nil, params: nil, query: nil)
         text = Blog::Types::TrimmedText[query].downcase
 
         {
+          count: matching_tag_count.call(scope:, text:),
           editing:,
           errors:,
           name: name(params),
           query: text,
           scope:,
-          tags: matching(scope, text),
+          tags: matching_tags.call(scope:, text:, page:),
           usage: tag_usage.call(scope:),
         }
       end
 
       private
 
-      def matching(scope, text)
-        found = all_tags.call(scope:)
-
-        text.empty? ? found : found.select { it.name.include?(text) }
-      end
+      def first_page = Blog::Page.new(number: 1, size: settings.page_size[:admin])
 
       def name(params) = Blog::Types::Text[Blog::Types::Fields[params][:name]]
     end

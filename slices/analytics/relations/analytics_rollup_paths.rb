@@ -31,8 +31,8 @@ module Analytics
 
       def views_by_path = unordered.select(:path) { integer.sum(views).as(:views) }.group(:path)
 
-      def views_by_post
-        joined = unordered.join(:posts, self[:path].is(POST_PATH))
+      def views_by_post(post_ids)
+        joined = unordered.join(:posts, self[:path].is(POST_PATH)).where(POST_ID => post_ids)
 
         joined.select { [integer(POST_ID).as(:post_id), integer.sum(views).as(:views)] }.group(POST_ID)
       end

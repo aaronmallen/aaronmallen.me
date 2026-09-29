@@ -32,8 +32,10 @@ module Analytics
         analytics_rollup_paths.between(from, to).views_by_path.to_a.to_h { [it.path, it.views] }
       end
 
-      def views_by_post(from: Blog::TimeZone.today - (VIEW_DAYS - 1), to: Blog::TimeZone.today)
-        analytics_rollup_paths.between(from, to).views_by_post.to_a.to_h { [it.post_id, it.views] }
+      def views_by_post(post_ids, from: Blog::TimeZone.today - (VIEW_DAYS - 1), to: Blog::TimeZone.today)
+        views = analytics_rollup_paths.between(from, to).views_by_post(post_ids)
+
+        views.to_a.to_h { [it.post_id, it.views] }
       end
 
       private

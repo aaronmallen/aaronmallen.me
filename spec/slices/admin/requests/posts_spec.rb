@@ -8,6 +8,65 @@ RSpec.describe "Admin posts", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    describe "paging" do
+      before do
+        lower_page_size(:admin, to: 2)
+        %w[First Second Third].each_with_index do |title, index|
+          create(:post, :published, title:, slug: title.downcase, published_at: Time.utc(2026, 9, 1 + index, 12))
+        end
+        create(:post, :draft, title: "Draft")
+      end
+
+      it "shows the newest page and links to older posts", :aggregate_failures do
+        get "/admin/posts", status: "published"
+
+        expect(titles).to eq(%w[Third Second])
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/posts?status=published&page=2']", text: "Older")
+        expect(page).to have_no_css("nav.pager a[rel='prev']")
+      end
+
+      it "keeps the filter on a later page", :aggregate_failures do
+        get "/admin/posts", status: "published", page: "2"
+
+        expect(titles).to eq(%w[First])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/posts?status=published']", text: "Newer")
+        expect(page).to have_css(".seg input[value='published'][checked]")
+      end
+
+      it "counts the sub-line from every post, not the page" do
+        get "/admin/posts", status: "published"
+
+        expect(page).to have_css(".page-head-sub", exact_text: "3 published · 1 draft · 0 scheduled")
+      end
+
+      it "counts the views and words of a post on a later page" do
+        day = Blog::TimeZone.today
+        create(:analytics_rollup, day:)
+        create(:analytics_rollup_path, day:, path: "/writing/first", views: 4, visitors: 3, bounces: 1)
+        get "/admin/posts", status: "published", page: "2"
+
+        expect(page).to have_css(".li-sub", text: /\d+ words? · 4 views\z/)
+      end
+
+      it "draws no pager when one page holds every post" do
+        get "/admin/posts", status: "draft"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+
+      it "returns 404 for a page past the end" do
+        get "/admin/posts", status: "published", page: "3"
+
+        expect(last_response).to be_not_found
+      end
+
+      it "returns 404 for a page that is no page" do
+        get "/admin/posts", page: "two"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
     describe "the list" do
       before do
         create(:post, :draft, title: "Draft")

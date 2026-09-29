@@ -18,6 +18,8 @@ module Contact
 
       def count_with_status(status) = messages.with_status(status).count
 
+      def page_by_status(status, page) = page.fill(messages.with_status(status).newest_first.paged(page).to_a)
+
       def received_between(from:, to:, status: nil)
         found = messages.received_since(Blog::TimeZone.day_start(from))
         found = found.received_before(Blog::TimeZone.day_start(to + 1))

@@ -5,7 +5,7 @@ module Contact
     class ByStatus
       include Deps[message_repo: "repos.message_repo"]
 
-      def call(status) = message_repo.by_status(status)
+      def call(status, page) = message_repo.page_by_status(status, page)
     end
   end
 end

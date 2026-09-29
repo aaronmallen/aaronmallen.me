@@ -3,6 +3,7 @@
 module Posts
   module Repos
     class PostRepo < Blog::DB::Repo
+      ALL = Blog::Types::PostFilter["all"]
       TAG_SCOPE = Blog::Types::TagScope["public"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
@@ -10,6 +11,12 @@ module Posts
       commands delete: :by_pk
 
       def all = with_tags.newest_first.to_a
+
+      def by_filter(filter, page)
+        listed = filter == ALL ? with_tags : with_tags.with_status(filter)
+
+        page.fill(listed.newest_first.paged(page).to_a)
+      end
 
       def by_id(id) = with_tags.by_pk(id).one
 

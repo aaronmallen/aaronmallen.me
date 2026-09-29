@@ -11,6 +11,50 @@ RSpec.describe "Admin webmentions", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
+    describe "paging" do
+      before do
+        lower_page_size(:admin, to: 2)
+        %w[Ada Grace Alan].each_with_index do |author_name, index|
+          create(:webmention, :approved, post: target, author_name:, received_at: Time.utc(2026, 9, 1 + index))
+        end
+        create(:webmention, post: target, author_name: "Barbara")
+      end
+
+      it "shows the newest page and links to older mentions", :aggregate_failures do
+        get "/admin/webmentions", status: "approved"
+
+        expect(authors).to eq(%w[Alan Grace])
+        older = "/admin/webmentions?status=approved&page=2"
+        expect(page).to have_css("nav.pager a[rel='next'][href='#{older}']", text: "Older")
+      end
+
+      it "keeps the filter on a later page", :aggregate_failures do
+        get "/admin/webmentions", status: "approved", page: "2"
+
+        expect(authors).to eq(%w[Ada])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/webmentions?status=approved']", text: "Newer")
+        expect(page).to have_css(".seg input[value='approved'][checked]")
+      end
+
+      it "counts from every mention, not the page" do
+        get "/admin/webmentions", status: "approved"
+
+        expect(page).to have_css(".page-head-sub", exact_text: "1 pending · 3 shown on the site")
+      end
+
+      it "draws no pager when one page holds every mention" do
+        get "/admin/webmentions"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+
+      it "returns 404 for a page past the end" do
+        get "/admin/webmentions", status: "approved", page: "3"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
     describe "the inbox" do
       before do
         create(:webmention, :reply, post: target, author_name: "Ada")
