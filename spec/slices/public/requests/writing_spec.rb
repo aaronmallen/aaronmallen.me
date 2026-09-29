@@ -134,6 +134,78 @@ RSpec.describe "Writing", type: :request do
     end
   end
 
+  describe "paging" do
+    def titles = page.all(".entry .entry-title").map(&:text)
+
+    before do
+      lower_page_size(:public, to: 2)
+      %w[first second third fourth fifth].each_with_index { |slug, index| publish(slug, 5 - index) }
+    end
+
+    it "shows the newest page and links to older posts", :aggregate_failures do
+      get "/writing"
+
+      expect(titles).to eq(%w[Fifth Fourth])
+      expect(page).to have_css("nav.pager a[rel='next'][href='/writing?page=2']", text: "Older")
+      expect(page).to have_no_css("nav.pager a[rel='prev']")
+    end
+
+    it "shows the next page and links both ways", :aggregate_failures do
+      get "/writing?page=2"
+
+      expect(titles).to eq(%w[Third Second])
+      expect(page).to have_css("nav.pager a[rel='prev'][href='/writing']", text: "Newer")
+      expect(page).to have_css("nav.pager a[rel='next'][href='/writing?page=3']", text: "Older")
+    end
+
+    it "links only to newer posts from the last page", :aggregate_failures do
+      get "/writing?page=3"
+
+      expect(titles).to eq(%w[First])
+      expect(page).to have_css("nav.pager a[rel='prev'][href='/writing?page=2']")
+      expect(page).to have_no_css("nav.pager a[rel='next']")
+    end
+
+    it "draws no pager when one page holds every post" do
+      lower_page_size(:public, to: 5)
+      get "/writing"
+
+      expect(page).to have_no_css("nav.pager")
+    end
+
+    it "keeps the heading on a later page" do
+      get "/writing?page=2"
+
+      expect(page).to have_css(".writing > h1.sr-only", exact_text: index_copy("heading"))
+    end
+
+    it "names the page in the canonical link" do
+      get "/writing?page=2"
+
+      expect(page.find("link[rel='canonical']", visible: :all)[:href]).to eq("https://aaronmallen.me/writing?page=2")
+    end
+
+    it "returns 404 for a page past the end" do
+      get "/writing?page=4"
+
+      expect(last_response).to be_not_found
+    end
+
+    ["0", "-1", "1.5", "two", "", "2147483648"].each do |number|
+      it "returns 404 for page #{number.inspect}, which is no page" do
+        get "/writing?page=#{number}"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
+    it "returns 404 for a page given as a list" do
+      get "/writing?page[]=2"
+
+      expect(last_response).to be_not_found
+    end
+  end
+
   describe "an article" do
     it "renders a published post", :aggregate_failures do
       publish("hello", 1, body: "the start\n\n## More\n\nthe rest")

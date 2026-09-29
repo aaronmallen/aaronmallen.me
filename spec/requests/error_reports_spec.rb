@@ -31,7 +31,7 @@ RSpec.describe "An error raised in a request", type: :request do
   end
 
   context "when a public action raises" do
-    before { replace_component("posts.queries.published", -> { raise crash }) }
+    before { replace_component("posts.queries.published_page", ->(_page) { raise crash }) }
 
     def read_writing
       get "/writing"

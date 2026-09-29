@@ -34,5 +34,9 @@ module Blog
     end
 
     def path_param(request, name) = ::Rack::Utils.unescape_path(request.params[name])
+
+    def requested_page(request, response, size)
+      Page.new(number: Types::PageParam.call(request.params[:page]) { not_found(response) }, size:)
+    end
   end
 end

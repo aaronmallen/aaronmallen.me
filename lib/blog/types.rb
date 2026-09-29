@@ -63,6 +63,8 @@ module Blog
       text = TrimmedText[value]
       text.empty? ? nil : text
     end
+    PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
+    PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
     PostStatus = Types::String.enum("draft", "scheduled", "published")
     PostFilter = Types::String.enum("all", *PostStatus.values)
     PostFilterParam = PostFilter.fallback(PostFilter.values.first)

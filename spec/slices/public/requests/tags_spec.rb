@@ -166,6 +166,81 @@ RSpec.describe "Tags", type: :request do
     expect(last_response).to be_not_found
   end
 
+  describe "paging" do
+    def titles = page.all(".entry .entry-title").map(&:text)
+
+    before do
+      lower_page_size(:public, to: 2)
+      %w[first second third].each_with_index { |slug, index| publish(slug, 3 - index, tags: %w[ruby]) }
+      publish("elsewhere", 0, tags: %w[rust])
+    end
+
+    it "shows the newest page and links to older posts", :aggregate_failures do
+      get "/writing/tags/ruby"
+
+      expect(titles).to eq(%w[Third Second])
+      expect(page).to have_css("nav.pager a[rel='next'][href='/writing/tags/ruby?page=2']", text: "Older")
+    end
+
+    it "shows the next page and links back to newer posts", :aggregate_failures do
+      get "/writing/tags/ruby?page=2"
+
+      expect(titles).to eq(%w[First])
+      expect(page).to have_css("nav.pager a[rel='prev'][href='/writing/tags/ruby']", text: "Newer")
+      expect(page).to have_no_css("nav.pager a[rel='next']")
+    end
+
+    it "keeps the heading on a later page" do
+      get "/writing/tags/ruby?page=2"
+
+      expect(page).to have_css("h1.page-title", text: "Tagged ruby")
+    end
+
+    it "names the page in the canonical link" do
+      get "/writing/tags/ruby?page=2"
+
+      expect(page.find("link[rel='canonical']", visible: :all)[:href])
+        .to eq("https://aaronmallen.me/writing/tags/ruby?page=2")
+    end
+
+    it "keeps the page when it moves a url to the tag's own address", :aggregate_failures do
+      get "/writing/tags/RUBY?page=2"
+
+      expect(last_response.status).to eq(301)
+      expect(last_response.location).to eq("/writing/tags/ruby?page=2")
+    end
+
+    it "lists the projects on the first page only", :aggregate_failures do
+      create(:project, name: "sai", tags: %w[ruby])
+      get "/writing/tags/ruby"
+      expect(page).to have_css(".projs .proj .n", exact_text: "sai")
+
+      get "/writing/tags/ruby?page=2"
+      expect(Capybara.string(last_response.body)).to have_no_css(".projs")
+    end
+
+    it "returns 404 for a page past the end" do
+      get "/writing/tags/ruby?page=3"
+
+      expect(last_response).to be_not_found
+    end
+
+    it "returns 404 for a later page of a tag only a project carries" do
+      create(:project, name: "sai", tags: %w[go])
+      get "/writing/tags/go?page=2"
+
+      expect(last_response).to be_not_found
+    end
+
+    %w[0 two].each do |number|
+      it "returns 404 for page #{number.inspect}, which is no page" do
+        get "/writing/tags/ruby?page=#{number}"
+
+        expect(last_response).to be_not_found
+      end
+    end
+  end
+
   describe "the sections" do
     describe "a tag on writing and on a project" do
       before do

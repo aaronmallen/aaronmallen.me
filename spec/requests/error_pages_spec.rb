@@ -46,7 +46,7 @@ RSpec.describe "The error pages in production", type: :request do
 
   describe "an error raised in a public action" do
     before do
-      replace_component("posts.queries.published", -> { raise "boom" })
+      replace_component("posts.queries.published_page", ->(_page) { raise "boom" })
       get "/writing"
     end
 

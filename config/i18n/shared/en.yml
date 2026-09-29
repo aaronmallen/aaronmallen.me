@@ -22,6 +22,10 @@ en:
           projects: "projects"
           writing: "writing"
         skip_link: "Skip to content"
+      pager:
+        label: "Pages"
+        newer: "Newer"
+        older: "Older"
       posts:
         meta:
           read_time: "%{count} min read"

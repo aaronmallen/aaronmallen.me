@@ -16,7 +16,7 @@ module Public
 
     import keys: %w[
       queries.latest_published queries.next_published queries.previous_published queries.published
-      queries.published_by_slug queries.published_by_tag
+      queries.published_by_slug queries.published_by_tag queries.published_page queries.published_page_by_tag
     ], from: :posts
 
     import keys: %w[

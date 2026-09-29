@@ -388,6 +388,18 @@
   @apply flex flex-col;
 }
 
+@utility pager {
+  @apply mt-10 flex flex-wrap justify-between gap-x-8 gap-y-4 border-t border-line pt-6;
+}
+
+@utility pager-link {
+  @apply inline-flex items-center gap-1.5 meta no-underline hover:text-accent focus-ring;
+
+  &.next {
+    @apply ml-auto flex-row-reverse;
+  }
+}
+
 @utility entry {
   @apply relative grid gap-x-6 gap-y-2 border-t border-line py-6 first:border-t-0 first:pt-0;
   grid-template-columns: var(--container-entry-meta) minmax(0, 1fr);

@@ -31,6 +31,9 @@ maxmind:
 owner:
   github_id: <%= ENV.fetch("OWNER_GITHUB_ID", 931094) %>
   name: Aaron Allen
+page_size:
+  admin: 100
+  public: 25
 webmentions:
   throttle_limit: <%= ENV["WEBMENTIONS_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["WEBMENTIONS_THROTTLE_WINDOW_MINUTES"].to_json %>

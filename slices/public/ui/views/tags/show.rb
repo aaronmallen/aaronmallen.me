@@ -16,7 +16,8 @@ module Public
 
           def view_template
             content_for(:title, t(".title", tag: @tag))
-            content_for(:feed, path(:tag_feed, tag: @tag)) unless @posts.empty?
+            content_for(:canonical, Blog::Site.url(path(:tag, tag: @tag, **@posts.query)))
+            content_for(:feed, path(:tag_feed, tag: @tag)) unless @posts.rows.empty?
 
             section(class: "tagged") do
               h1(class: "page-title") { t(".heading", tag: @tag) }
@@ -35,10 +36,11 @@ module Public
           end
 
           def writing
-            return if @posts.empty?
+            return if @posts.rows.empty?
 
             h2(class: "tagged-title") { t(".writing") }
-            List(posts: @posts)
+            List(posts: @posts.rows)
+            Pager(page: @posts, route: :tag, params: { tag: @tag })
           end
         end
       end

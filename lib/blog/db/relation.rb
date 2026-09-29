@@ -9,6 +9,8 @@ module Blog
 
       def excluded(columns) = columns.to_h { [it, Sequel[:excluded][it]] }
 
+      def paged(page) = limit(page.limit).offset(page.offset)
+
       def stamped(type, *columns, result: :one)
         timestamps = [*STAMPS.fetch(type), *columns]
 

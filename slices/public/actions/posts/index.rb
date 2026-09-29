@@ -4,10 +4,13 @@ module Public
   module Actions
     module Posts
       class Index < Action
-        include Deps[published_posts: "posts.queries.published"]
+        include Deps["settings", published_page: "posts.queries.published_page"]
 
-        def handle(_request, response)
-          response[:posts] = published_posts.call
+        def handle(request, response)
+          posts = published_page.call(requested_page(request, response, settings.page_size[:public]))
+          not_found(response) if posts.past_end?
+
+          response[:posts] = posts
         end
       end
     end

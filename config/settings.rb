@@ -17,6 +17,7 @@ module Blog
     end
 
     OwnerName = Types::String.constrained(format: /\S/)
+    PageSize = Types::Coercible::Integer.constrained(gt: 0)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
     ThrottleLimit = Types::Coercible::Integer.constrained(gteq: 1)
@@ -90,6 +91,8 @@ module Blog
       github_id: Types::Coercible::Integer.constrained(gt: 0),
       name: OwnerName,
     )
+
+    setting :page_size, constructor: Schema.schema(admin: PageSize, public: PageSize)
 
     setting :proxy, default: {}, constructor: Schema.schema(
       address_header?: Value,

@@ -46,6 +46,10 @@ module Posts
 
       def published_by_tag(tag) = with_tags.published.tagged(tag).newest_first.to_a
 
+      def published_page(page) = page.fill(with_tags.published.newest_first.paged(page).to_a)
+
+      def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
+
       def replace_tags(id, names) = post_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
