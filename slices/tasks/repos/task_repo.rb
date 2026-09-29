@@ -8,6 +8,7 @@ module Tasks
       EXTERNAL = Blog::Types::TaskList["external"]
       KEY = /\A#?(\d{1,9})\z/
       NEXT = Blog::Types::TaskList["next"]
+      OPEN = Blog::Types::TaskStatus["open"]
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
@@ -58,7 +59,12 @@ module Tasks
         found.open_first.limit(limit).to_a
       end
 
-      def move_to_list(id, list) = update(id, list:, sprint_id: nil, carried_count: 0)
+      def move_to_list(id, list)
+        transaction do
+          pause(tasks.by_pk(id))
+          update(id, list:, sprint_id: nil, carried_count: 0)
+        end
+      end
 
       def next_position = tasks.last_position + 1
 
@@ -99,7 +105,12 @@ module Tasks
 
       private
 
-      def release(held, list) = held.stamped(:update, result: :many).call(list:, sprint_id: nil)
+      def pause(held) = held.in_progress.stamped(:update, result: :many).call(status: OPEN)
+
+      def release(held, list)
+        pause(held)
+        held.stamped(:update, result: :many).call(list:, sprint_id: nil)
+      end
 
       def with_details = tasks.combine(:source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
     end

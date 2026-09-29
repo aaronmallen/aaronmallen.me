@@ -77,6 +77,17 @@ RSpec.describe Tasks::Operations::SyncIssues do
     end
   end
 
+  describe "a started issue whose task I moved to a list" do
+    it "leaves the task open while the issue stays started" do
+      task = tracked(:in_progress, state: "started")
+      Tasks::Slice["operations.move_task"].call(task.id, "external")
+      assign(issue("started"))
+      sync
+
+      expect(repo.by_id(task.id)).to have_attributes(list: "external", status: "open")
+    end
+  end
+
   describe "the provider it syncs" do
     it "links a new task to that provider" do
       assign(issue)

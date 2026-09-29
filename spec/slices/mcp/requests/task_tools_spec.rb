@@ -409,6 +409,13 @@ RSpec.describe "MCP task tools", type: :request do
 
       expect(content).to include("list" => nil, "sprint_on" => today.iso8601)
     end
+
+    it "answers with a task in progress open in its new list" do
+      task = create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
+      call_tool("move_task", id: task.id, list: "someday")
+
+      expect(content).to include("list" => "someday", "status" => "open")
+    end
   end
 
   describe "reorder_task" do

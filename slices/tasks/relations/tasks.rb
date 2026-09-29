@@ -6,6 +6,7 @@ module Tasks
       COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
       CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
       CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
+      IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
 
       schema :tasks, infer: true do
         associations do
@@ -35,6 +36,8 @@ module Tasks
       def in_list(list) = where(list:)
 
       def in_order = order(self[:position].asc, self[:id].asc)
+
+      def in_progress = where(status: IN_PROGRESS)
 
       def last_position = unordered.max(:position).to_i
 

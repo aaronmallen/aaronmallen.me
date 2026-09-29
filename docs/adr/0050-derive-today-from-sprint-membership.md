@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, admin, tasks]
 issue: AA-689
-amended: [AA-397, AA-398, "#53"]
+amended: [AA-397, AA-398, "#53", "#81"]
 tags: [tasks, sprints, schema, today, upcoming, rollover, dashboard]
 ---
 
@@ -41,12 +41,18 @@ These moves change membership, and nothing else does:
 - **Schedule ahead.** `ScheduleTask` claims the sprint for that day and sets the task's `sprint_id` with a null list,
   so it waits out of Next. A task in progress goes back to open while it waits.
 - **Clear the date, or move to a list by hand.** The task takes back a list, Next when the date is cleared, and its
-  carry count starts again at zero.
+  carry count starts again at zero. A task in progress goes back to open (#81).
 - **Drop a sprint.** Only one dated ahead. `DropSprint` moves its tasks to Next and deletes it in one transaction,
-  since `tasks.sprint_id` is `ON DELETE RESTRICT`.
+  since `tasks.sprint_id` is `ON DELETE RESTRICT`. A task in progress goes back to open here too (#81).
 - **Roll over.** `CurrentSprint` claims today's sprint and carries every unfinished task from any earlier sprint into
   it. Each carried task's `carried_count` rises by one and the sprint's `carried_in` by the number that arrived
   (AA-397). After days away there is one sprint for today holding the work across the gap, not one per missed day.
+
+A task in progress belongs to Today, so every move that takes a task out of Today and into a list or a later sprint
+sends it back to open, while a move into Today leaves its status alone. `TaskRepo#move_to_list` and
+`TaskRepo#release_sprint` write the rule, so `MoveTask`, `ScheduleTask`, `DropSprint` and the MCP tools that call them
+all follow it. A finished task stays finished. An issue sync still acts only when the provider reports a new state
+(ADR 0068), so a started issue whose task was moved to a list leaves the task open (#81).
 
 Finishing a task writes `status` and `completed_at` and changes no membership, so a finished task keeps the sprint
 it was finished in. Reopening one changes none either, and the next rollover carries a task reopened in an earlier

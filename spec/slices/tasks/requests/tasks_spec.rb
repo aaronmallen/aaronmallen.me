@@ -233,4 +233,60 @@ RSpec.describe "Tasks", type: :request do
       expect(sprints.by_id(repo.by_id(task.id).sprint_id).sprint_date).to eq(today + 2)
     end
   end
+
+  describe "moving a task in progress" do
+    let(:task) { create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id) }
+
+    %w[next someday external].each do |list|
+      it "leaves it open in #{list}" do
+        send_to("/admin/tasks/#{task.id}/move/#{list}")
+
+        expect(repo.by_id(task.id)).to have_attributes(list:, sprint_id: nil, status: "open")
+      end
+    end
+
+    it "leaves it in progress when it goes to today" do
+      listed = create(:task, :in_progress)
+      send_to("/admin/tasks/#{listed.id}/move/today")
+
+      expect(repo.by_id(listed.id)).to have_attributes(list: nil, status: "in_progress")
+    end
+
+    it "leaves a finished task finished" do
+      done = create(:task, :done, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
+      send_to("/admin/tasks/#{done.id}/move/next")
+
+      expect(repo.by_id(done.id).status).to eq("done")
+    end
+  end
+
+  describe "unscheduling a task in progress" do
+    let(:task) { create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id) }
+
+    it "leaves it open in next" do
+      send_to("/admin/tasks/#{task.id}/schedule", sprint_on: "")
+
+      expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil, status: "open")
+    end
+  end
+
+  describe "dropping a sprint that holds a task in progress" do
+    let(:sprint) { create(:sprint, sprint_date: today + 2) }
+
+    def drop = send_to("/admin/tasks/sprints/#{sprint.id}/delete")
+
+    it "leaves it open in next" do
+      task = create(:task, :in_progress, :in_sprint, sprint_id: sprint.id)
+      drop
+
+      expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil, status: "open")
+    end
+
+    it "leaves a finished task finished" do
+      done = create(:task, :done, :in_sprint, sprint_id: sprint.id)
+      drop
+
+      expect(repo.by_id(done.id)).to have_attributes(list: "next", status: "done")
+    end
+  end
 end
