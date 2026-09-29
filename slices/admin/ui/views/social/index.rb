@@ -45,7 +45,7 @@ module Admin
           end
 
           def queue
-            Queue(filter: @filter, items: @items, now: @now, suggestion_counts: @suggestion_counts)
+            Queue(filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
           end
 
           def sub = [cross_posting, t(".queued", count: @queued)].join(SEPARATOR)

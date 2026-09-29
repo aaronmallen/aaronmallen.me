@@ -8,11 +8,11 @@ module Social
 
       include Deps[social_post_repo: "repos.social_post_repo"]
 
-      def call(filter)
+      def call(filter, page)
         case Blog::Types::SocialQueue[filter]
-        when DRAFTS then social_post_repo.drafts
-        when POSTED then social_post_repo.posted
-        else social_post_repo.queued
+        when DRAFTS then social_post_repo.drafts_page(page)
+        when POSTED then social_post_repo.posted_page(page)
+        else social_post_repo.queued_page(page)
         end
       end
     end

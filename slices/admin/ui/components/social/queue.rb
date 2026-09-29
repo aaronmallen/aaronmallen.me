@@ -13,16 +13,17 @@ module Admin
           FILTERS = { QUEUED => ".queued", POSTED => ".posted", DRAFTS => ".drafts" }.freeze
 
           prop :filter, Blog::Types::String
-          prop :items, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :now, Blog::Types::Time
+          prop :page, Blog::Types::Instance(Blog::Paged)
           prop :suggestion_counts, Blog::Types::Hash
 
           def view_template
             Card(label: t(".label"), title: t(".title")) do |card|
               card.side { filter_form }
-              next Empty { t(EMPTIES.fetch(@filter)) } if @items.empty?
+              next Empty { t(EMPTIES.fetch(@filter)) } if @page.rows.empty?
 
-              @items.each { QueueItem(social_post: it, filter: @filter, now: @now, suggestions: count(it)) }
+              @page.rows.each { QueueItem(social_post: it, filter: @filter, now: @now, suggestions: count(it)) }
+              Pager(page: @page, route: :admin_social, params: { filter: @filter })
             end
           end
 

@@ -5,14 +5,18 @@ module Admin
     module Social
       class Index < Action
         include Deps[
+          "settings",
           build_social_page: "operations.build_social_page",
           editable_social_post: "social.queries.editable_social_post",
         ]
 
         def handle(request, response)
           filter = Blog::Types::SocialQueueParam[request.params[:filter]]
+          page = requested_page(request, response, settings.page_size[:admin])
+          social_page = build_social_page.call(filter:, page:, editing: editing(request))
+          not_found(response) if social_page[:items].past_end?
 
-          response.render(view, **build_social_page.call(filter:, editing: editing(request)))
+          response.render(view, **social_page)
         end
 
         private

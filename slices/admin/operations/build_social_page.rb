@@ -16,17 +16,18 @@ module Admin
         list_social_accounts: "operations.list_social_accounts",
         open_suggestion_counts: "suggestions.queries.open_counts_for_social_posts",
         review_social_edits: "operations.review_social_edits",
+        settings: "settings",
         social_post_counts_by_status: "social.queries.social_post_counts_by_status",
         social_posts_by_filter: "social.queries.social_posts_by_filter",
       ]
 
       def call(
-        filter: Blog::Types::SocialQueue["queued"], params: nil, editing: nil,
+        filter: Blog::Types::SocialQueue["queued"], page: nil, params: nil, editing: nil,
         errors: EMPTY_HASH, now: Time.now
       )
-        items = social_posts_by_filter.call(filter)
+        items = social_posts_by_filter.call(filter, page || first_page)
 
-        { filter:, items:, now:, **queue(items), **composer(params, editing, errors) }
+        { filter:, items:, now:, **queue(items.rows), **composer(params, editing, errors) }
       end
 
       private
@@ -43,6 +44,8 @@ module Admin
           values:,
         }
       end
+
+      def first_page = Blog::Page.new(number: 1, size: settings.page_size[:admin])
 
       def open_counts(items)
         unsent = items.reject { it.status == Blog::Types::SocialPostStatus["posted"] }

@@ -410,6 +410,97 @@ RSpec.describe "Admin social", type: :request do
       end
     end
 
+    describe "paging" do
+      def fill_queue
+        { "third" => 3, "first" => 1, "second" => 2 }.each do |text, hours|
+          make("scheduled", text, Time.now + (hours * 3600))
+        end
+        make("draft", "a draft")
+      end
+
+      def loaded_ids(table, &)
+        counting(&).grep(/FROM "#{table}"/).flat_map { it[/IN \(([^)]*)\)/, 1].to_s.split(", ").map(&:to_i) }
+      end
+
+      def make(status, text, at = nil)
+        repo.create_with_parts(parts: [text], targets: %w[mastodon], status:, posted_at: at)
+      end
+
+      def texts = page.all(".sq-part").map(&:text)
+
+      before { lower_page_size(:admin, to: 2) }
+
+      it "shows the ones due soonest and links to the next page", :aggregate_failures do
+        fill_queue
+        get "/admin/social"
+
+        expect(texts).to eq(%w[first second])
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/social?filter=queued&page=2']")
+        expect(page).to have_no_css("nav.pager a[rel='prev']")
+      end
+
+      it "keeps the oldest first order on the next page", :aggregate_failures do
+        fill_queue
+        get "/admin/social", filter: "queued", page: "2"
+
+        expect(texts).to eq(%w[third])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/social?filter=queued']")
+        expect(page).to have_no_css("nav.pager a[rel='next']")
+      end
+
+      it "counts every queued post, not one page" do
+        fill_queue
+        get "/admin/social", filter: "queued", page: "2"
+
+        expect(page).to have_css(".page-head-sub", text: "3 queued")
+      end
+
+      it "loads parts and deliveries for the posts on the page only", :aggregate_failures do
+        fill_queue
+        on_page = repo.queued.first(2).map(&:id)
+
+        expect(loaded_ids("social_post_parts") { get "/admin/social" }).to match_array(on_page)
+        expect(loaded_ids("social_post_deliveries") { get "/admin/social" }).to match_array(on_page)
+      end
+
+      it "returns 404 for a page past the end" do
+        fill_queue
+        get "/admin/social", filter: "queued", page: "3"
+
+        expect(last_response).to be_not_found
+      end
+
+      it "returns 404 for page 0, which is no page" do
+        get "/admin/social", page: "0"
+
+        expect(last_response).to be_not_found
+      end
+
+      it "pages drafts newest first", :aggregate_failures do
+        %w[old middle new].each { make("draft", it) }
+        get "/admin/social", filter: "drafts", page: "2"
+
+        expect(texts).to eq(%w[old])
+        expect(page).to have_css("nav.pager a[rel='prev'][href='/admin/social?filter=drafts']")
+      end
+
+      it "pages posted newest first", :aggregate_failures do
+        %w[old middle new].each_with_index { |text, index| make("posted", text, Time.utc(2026, 9, 1 + index)) }
+        get "/admin/social", filter: "posted"
+
+        expect(texts).to eq(%w[new middle])
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/social?filter=posted&page=2']")
+      end
+
+      it "draws no pager when one page holds every post", :aggregate_failures do
+        make("posted", "only", Time.utc(2026, 9, 1))
+        get "/admin/social", filter: "posted"
+
+        expect(texts).to eq(%w[only])
+        expect(page).to have_no_css("nav.pager")
+      end
+    end
+
     describe "removing an item" do
       def item(status, posted_at: nil)
         repo.create_with_parts(parts: %w[bye], targets: %w[mastodon], status:, posted_at:)

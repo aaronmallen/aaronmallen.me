@@ -45,6 +45,8 @@ module Social
 
       def drafts = with_children.with_status(DRAFT).newest_first.to_a
 
+      def drafts_page(page) = page_of(social_posts.with_status(DRAFT).newest_first, page)
+
       def due_scheduled(time) = with_children.due_at(time).oldest_first.to_a
 
       def editable(id) = with_children.unposted.unclaimed.by_pk(id).one
@@ -53,11 +55,13 @@ module Social
 
       def mark_posted(id, at: Time.now) = social_posts.mark_posted(id, at:)
 
-      def posted = with_children.with_status(POSTED).newest_first.to_a
+      def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
 
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a
 
       def queued = with_children.with_status(SCHEDULED).oldest_first.to_a
+
+      def queued_page(page) = page_of(social_posts.with_status(SCHEDULED).oldest_first, page)
 
       def record_delivery(social_post_id, network, **attrs)
         social_post_deliveries.record(social_post_id:, network:, **attrs)
@@ -97,6 +101,12 @@ module Social
       end
 
       def lock_unclaimed(id) = unposted(id).lock.one && unclaimed(id).exist?
+
+      def page_of(listed, page)
+        ids = page.fill(listed.paged(page).pluck(:id))
+
+        ids.with(rows: listed.where(id: ids.rows).combine(:parts, :deliveries).to_a)
+      end
 
       def unclaimed(id) = unposted(id).unclaimed
 
