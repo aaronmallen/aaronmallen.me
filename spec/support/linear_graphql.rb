@@ -32,7 +32,7 @@ module LinearGraphQL
 
   def linear_issue(id, key: "ABC-1", state: "unstarted", assignee: VIEWER_ID, **fields)
     { assignee: assignee && { id: assignee }, comments: { nodes: [] }, description: "Keep them in step", id:,
-      identifier: key, state: { type: state }, title: "Sync my issues", trashed: nil,
+      identifier: key, labels: { nodes: [] }, state: { type: state }, title: "Sync my issues", trashed: nil,
       url: "https://linear.app/aaronmallen/issue/#{key.downcase}/sync-my-issues" }.merge(fields)
   end
 

@@ -18,6 +18,8 @@ RSpec.describe Record::GitHub::Client do
 
   def known(**) = github_issue("I_known", number: 7, **)
 
+  def labeled(*names) = known(labels: { nodes: names.map { { name: it } } })
+
   def many_urls = (1..101).to_h { ["I_#{it}", "https://github.com/aaronmallen/aaronmallen.me/issues/#{it}"] }
 
   def stub_assigned(*responses) = stub_github(GitHubGraphQL::ASSIGNED_QUERY, *responses)
@@ -48,7 +50,7 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", comments: [], id: "I_one", reference: "someorg/tool#4", remote_state: "open",
+      { body: "It broke", comments: [], id: "I_one", labels: [], reference: "someorg/tool#4", remote_state: "open",
         repo: "someorg/tool", title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
     end
 
@@ -102,6 +104,19 @@ RSpec.describe Record::GitHub::Client do
       expect(github_request("comments(first: 100)")).to have_been_made
     end
 
+    it "lists each issue's label names" do
+      stub_assigned(github_issue_search(labeled("bug", "p1")))
+
+      expect(assigned.items.first[:labels]).to eq(%w[bug p1])
+    end
+
+    it "asks for the first 50 labels of each issue" do
+      stub_assigned(github_issue_search)
+      assigned
+
+      expect(github_request("labels(first: 50) { nodes { name } }")).to have_been_made
+    end
+
     it "records the rate limit it spent" do
       stub_assigned(github_issue_search(remaining: 4321))
       assigned
@@ -112,8 +127,8 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the issues already imported" do
     let(:still_mine) do
-      { body: "Edited", comments: [], id: "I_known", reference: "aaronmallen/aaronmallen.me#7", remote_state: "open",
-        repo: "aaronmallen/aaronmallen.me", title: "Renamed", url: known_url }
+      { body: "Edited", comments: [], id: "I_known", labels: [], reference: "aaronmallen/aaronmallen.me#7",
+        remote_state: "open", repo: "aaronmallen/aaronmallen.me", title: "Renamed", url: known_url }
     end
 
     it "reports an open issue still assigned to me, with its title and body" do
@@ -126,6 +141,12 @@ RSpec.describe Record::GitHub::Client do
       stub_known(discussed(github_comment("IC_1")))
 
       expect(check.first[:comments].map { it[:id] }).to eq(%w[IC_1])
+    end
+
+    it "reports each issue's label names" do
+      stub_known(labeled("record"))
+
+      expect(check.first[:labels]).to eq(%w[record])
     end
 
     it "reports an issue closed as completed" do

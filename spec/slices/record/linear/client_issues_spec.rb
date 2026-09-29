@@ -16,6 +16,8 @@ RSpec.describe Record::Linear::Client do
 
   def known_url = "https://linear.app/aaronmallen/issue/abc-7/sync-my-issues"
 
+  def labeled(*nodes) = known(labels: { nodes: })
+
   def many_urls = (1..26).to_h { ["issue-#{it}", "https://linear.app/aaronmallen/issue/abc-#{it}"] }
 
   def stub_assigned(*, **) = stub_linear(LinearGraphQL::ASSIGNED_QUERY, *, **)
@@ -24,8 +26,8 @@ RSpec.describe Record::Linear::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", comments: [], id: "issue-one", key: "ABC-4", reference: "ABC-4", remote_state: "open",
-        title: "Fix it", url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
+      { body: "It broke", comments: [], id: "issue-one", key: "ABC-4", labels: [], reference: "ABC-4",
+        remote_state: "open", title: "Fix it", url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
     end
 
     it "lists each one with its id, key, reference, title, description and URL" do
@@ -86,6 +88,25 @@ RSpec.describe Record::Linear::Client do
       expect(linear_request("comments(first: 100)")).to have_been_made
     end
 
+    it "lists each issue's label names" do
+      stub_assigned(linear_assigned(labeled({ name: "Bug" }, { name: "p1" })))
+
+      expect(assigned.items.first[:labels]).to eq(%w[Bug p1])
+    end
+
+    it "names a label in a group by its own name alone" do
+      stub_assigned(linear_assigned(labeled({ name: "Bug", parent: { name: "Type" } })))
+
+      expect(assigned.items.first[:labels]).to eq(%w[Bug])
+    end
+
+    it "asks for the first 50 labels of each issue" do
+      stub_assigned(linear_assigned)
+      assigned
+
+      expect(linear_request("labels(first: 50) { nodes { name } }")).to have_been_made
+    end
+
     it "asks for 25 issues a page, so the query stays under Linear's complexity limit" do
       stub_assigned(linear_assigned)
       assigned
@@ -122,7 +143,7 @@ RSpec.describe Record::Linear::Client do
     it "reports an issue still assigned to me, with its title and description" do
       stub_known(known(title: "Renamed", description: "Edited"))
 
-      renamed = { body: "Edited", comments: [], id: "issue-known", key: "ABC-7", reference: "ABC-7",
+      renamed = { body: "Edited", comments: [], id: "issue-known", key: "ABC-7", labels: [], reference: "ABC-7",
                   remote_state: "open", title: "Renamed", url: known_url }
 
       expect(check).to eq([renamed])
@@ -132,6 +153,12 @@ RSpec.describe Record::Linear::Client do
       stub_known(discussed(linear_comment("comment-1")))
 
       expect(check.first[:comments].map { it[:id] }).to eq(%w[comment-1])
+    end
+
+    it "reports each issue's label names" do
+      stub_known(labeled({ name: "record" }))
+
+      expect(check.first[:labels]).to eq(%w[record])
     end
 
     {

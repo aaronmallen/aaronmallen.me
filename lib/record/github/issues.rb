@@ -7,6 +7,7 @@ module Record
         ASSIGNED_SEARCH = "is:issue is:open assignee:@me sort:created-asc"
         MAX_ASSIGNEES = 10
         MAX_COMMENTS = 100
+        MAX_LABELS = 50
         PAGE_SIZE = 100
 
         FIELDS = <<~GRAPHQL.freeze
@@ -15,6 +16,7 @@ module Record
             repository { nameWithOwner }
             assignees(first: #{MAX_ASSIGNEES}) { nodes { id } }
             comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt author { login } } }
+            labels(first: #{MAX_LABELS}) { nodes { name } }
           }
         GRAPHQL
 
@@ -79,7 +81,7 @@ module Record
 
         {
           body: node["body"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), reference: "#{repo}##{node.fetch('number')}",
+          id: node.fetch("id"), labels: labels(node), reference: "#{repo}##{node.fetch('number')}",
           remote_state: remote_state(node, viewer), repo:, title: node.fetch("title"), url: node.fetch("url"),
         }
       end
@@ -92,6 +94,8 @@ module Record
           node&.key?("id") ? issue(node, viewer) : vanished(id, urls.fetch(id))
         end
       end
+
+      def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
 
       def moved_to(url)
         found = URL.match(url)

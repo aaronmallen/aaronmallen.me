@@ -6,11 +6,13 @@ module Record
       module Queries
         CLOSED_TYPES = '["completed", "canceled"]'
         MAX_COMMENTS = 100
+        MAX_LABELS = 50
         PAGE_SIZE = 25
 
         FIELDS = <<~GRAPHQL.freeze
           id identifier url title description trashed state { type } assignee { id }
           comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt user { displayName } } }
+          labels(first: #{MAX_LABELS}) { nodes { name } }
         GRAPHQL
 
         ASSIGNED = <<~GRAPHQL.freeze
@@ -91,7 +93,7 @@ module Record
 
         {
           body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), key:, reference: key,
+          id: node.fetch("id"), key:, labels: labels(node), reference: key,
           remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
         }
       end
@@ -102,6 +104,8 @@ module Record
 
         data.dig("issues", "nodes").to_a.to_h { [it.fetch("id"), issue(it, viewer)] }
       end
+
+      def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
 
       def remote_state(node, viewer)
         return DELETED if node["trashed"]
