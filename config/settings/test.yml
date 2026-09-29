@@ -1,5 +1,9 @@
 analytics_salt: test-analytics-salt-not-a-real-secret-do-not-use-this-one-in-production
 app_secret: test-app-secret-not-a-real-secret-do-not-use-this-one-in-production
+bluesky:
+  app_password: null
+  handle: aaronmallen.dev
+  profile_url: https://bsky.app/profile/aaronmallen.dev
 database:
   name: <%= "#{ENV.fetch("DATABASE_NAME", "blog")}_test".to_json %>
   host: localhost
@@ -7,6 +11,22 @@ database:
   password: <%= ENV["DATABASE_PASSWORD"].to_json %>
   port: <%= ENV.fetch("DATABASE_PORT", 5432).to_json %>
   user: <%= ENV["DATABASE_USER"].to_json %>
+github:
+  api_token: null
+  client_id: null
+  client_secret: null
+  profile_url: https://github.com/aaronmallen
+honeybadger:
+  api_key: null
+linear:
+  api_keys: []
+mastodon:
+  access_token: null
+  profile_url: https://ruby.social/@aaronmallen
+  url: https://ruby.social
+maxmind:
+  account_id: null
+  license_key: null
 redis:
   db: 2
   host: localhost
