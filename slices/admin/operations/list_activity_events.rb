@@ -16,6 +16,7 @@ module Admin
       }.freeze
       MARKDOWN = [JOURNAL, COMMENT].freeze
       NAME_LIMIT = 120
+      OCCURRED_ON = :occurred_on.to_proc
       POST = Blog::Types::ActivityKind["post"]
       SHA_LENGTH = 7
       SOCIAL = Blog::Types::ActivityKind["social"]
@@ -31,11 +32,23 @@ module Admin
         views_by_path: "analytics.queries.views_by_path",
       ]
 
-      def call(from:, to:, types:, text:, repos: EMPTY_ARRAY, tags: EMPTY_ARRAY)
-        rows = activity_between.call(from:, to:, types:, repos:, text:, tags:)
-        views = rows.any? { it.type == POST } ? views_by_path.call : EMPTY_HASH
+      def call(from:, day:, size:, **filters)
+        found = page(from, day, size, filters)
+        views = found.rows.any? { it.type == POST } ? views_by_path.call : EMPTY_HASH
 
-        rows.map { event(it, views) }
+        found.with(rows: found.rows.map { event(it, views) })
+      end
+
+      def newer_day(from:, to:, day:, size:, **filters)
+        return if day >= to
+
+        start = to
+        loop do
+          older = page(from, start, size, filters).continue_to
+          return start if older.nil? || older <= day
+
+          start = older
+        end
       end
 
       private
@@ -68,6 +81,12 @@ module Admin
 
       def networks(targets)
         targets.to_a.map { i18n.t(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
+      end
+
+      def page(from, to, size, filters)
+        Blog::DayCursor.page(from, to, size:, day: OCCURRED_ON) do |first, last, limit|
+          activity_between.call(from: first, to: last, limit:, **filters)
+        end
       end
 
       def post_line(row, views)

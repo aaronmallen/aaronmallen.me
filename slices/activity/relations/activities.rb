@@ -41,6 +41,8 @@ module Activity
 
       def counts_by_type = unordered.select(:type) { integer.count(source_id).as(:count) }.group(:type)
 
+      def day_count = unordered.dataset.select(:occurred_on).distinct.count
+
       def in_repo(names)
         where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), Sequel.&(*names.map { named_repo(it) })))
       end

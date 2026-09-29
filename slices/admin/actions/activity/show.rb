@@ -12,7 +12,7 @@ module Admin
           response.render(
             view,
             **build_activity_page.call(
-              from: params[:from], to: params[:to], types: params[:types], query: params[:q],
+              from: params[:from], to: params[:to], types: params[:types], query: params[:q], day: params[:day],
             ),
           )
         end

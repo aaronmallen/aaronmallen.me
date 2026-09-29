@@ -30,6 +30,10 @@ module Activity
         tallied.map(&:month).uniq.sort.reverse.to_h { [it, month_counts(tallied, it, types)] }
       end
 
+      def day_count(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
+        narrowed(from:, to:, types:, repos:, text:, tags:).day_count
+      end
+
       private
 
       def blank?(value) = value.to_s.strip.empty?

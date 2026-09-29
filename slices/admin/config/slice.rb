@@ -14,7 +14,7 @@ module Admin
 
     config.actions.sessions = Blog::SessionCookie.store
 
-    import keys: %w[queries.activity_between queries.activity_counts], from: :activity
+    import keys: %w[queries.activity_between queries.activity_counts queries.activity_day_count], from: :activity
 
     import keys: %w[
       queries.country_counts queries.country_database_failure queries.referrer_counts queries.rollup_for_day

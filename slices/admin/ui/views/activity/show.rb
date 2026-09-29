@@ -9,10 +9,13 @@ module Admin
 
           SEPARATOR = " · "
 
-          def initialize(events:, filters:)
+          def initialize(events:, filters:, totals:, older:, newer:)
             super()
             @events = events
             @filters = filters
+            @totals = totals
+            @older = older
+            @newer = newer
           end
 
           def view_template
@@ -20,7 +23,10 @@ module Admin
 
             Split do
               Filters(**@filters)
-              div(class: "activity-main") { timeline }
+              div(class: "activity-main") do
+                timeline
+                DayPager(older: @older, newer: @newer, **@filters.slice(:from, :to, :types, :text))
+              end
             end
           end
 
@@ -37,7 +43,7 @@ module Admin
           def sub
             [
               t(".span", from: date(@filters[:from]), to: date(@filters[:to])),
-              t(".across", events: t(".events", count: @events.size), days: t(".days", count: days.size)),
+              t(".across", events: t(".events", count: @totals[:events]), days: t(".days", count: @totals[:days])),
             ].join(SEPARATOR)
           end
 

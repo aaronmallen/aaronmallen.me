@@ -310,6 +310,132 @@ RSpec.describe "Admin activity", type: :request do
       end
     end
 
+    describe "paging" do
+      let(:range) { { from: (today - 29).iso8601, to: today.iso8601 } }
+
+      def back_from_third_page
+        lower_page_size(:admin, to: 1)
+        visit_activity(range)
+        2.times { follow(older_href) }
+        follow(newer_href)
+      end
+
+      def follow(href) = get(href)
+
+      def newer_href = page.find("a.pager-link[rel='prev']")[:href]
+
+      def older_href = page.find("a.pager-link[rel='next']")[:href]
+
+      def page = Capybara.string(last_response.body)
+
+      before do
+        lower_page_size(:admin, to: 2)
+        create(:commit, commit_date: today, message: "today")
+        create(:commit, commit_date: today - 1, message: "yesterday one")
+        create(:commit, commit_date: today - 1, message: "yesterday two")
+        create(:commit, commit_date: today - 3, message: "three days ago")
+        create(:commit, commit_date: today - 20, message: "twenty days ago")
+      end
+
+      it "stops near the page size and finishes the day it is on" do
+        visit_activity(range)
+
+        expect(page.all(".activity-day-date").map { it["datetime"] }).to eq([today.iso8601, (today - 1).iso8601])
+      end
+
+      it "shows the rest of the range on the older page" do
+        visit_activity(range)
+        follow(older_href)
+
+        expect(event_names).to eq(["three days ago", "twenty days ago"])
+      end
+
+      it "keeps the range on the older page", :aggregate_failures do
+        visit_activity(range)
+        follow(older_href)
+
+        expect(page).to have_css("#activity-from[value='#{range[:from]}']")
+        expect(page).to have_css("#activity-to[value='#{range[:to]}']")
+      end
+
+      it "keeps the filters on the older page" do
+        visit_activity(range.merge(q: "o"))
+
+        expect(older_href).to include("q=o")
+      end
+
+      it "offers no newer link on the first page" do
+        visit_activity(range)
+
+        expect(page).to have_no_css("a.pager-link[rel='prev']")
+      end
+
+      it "offers no older link on the last page" do
+        visit_activity(range)
+        follow(older_href)
+
+        expect(page).to have_no_css("a.pager-link[rel='next']")
+      end
+
+      it "links back to the newer page" do
+        visit_activity(range)
+        first_page = event_names
+        follow(older_href)
+        follow(newer_href)
+
+        expect(event_names).to eq(first_page)
+      end
+
+      it "leaves the day off the link back to the first page" do
+        visit_activity(range)
+        follow(older_href)
+
+        expect(newer_href).not_to include("day=")
+      end
+
+      it "links from the third page back to the page in between" do
+        back_from_third_page
+
+        expect(event_names).to contain_exactly("yesterday one", "yesterday two")
+      end
+
+      it "links from the page in between back to the first" do
+        back_from_third_page
+
+        expect(newer_href).not_to include("day=")
+      end
+
+      it "counts every event in the range, not one page" do
+        visit_activity(range)
+
+        expect(page).to have_css(".page-head-sub", text: "5 events across 4 days")
+      end
+
+      it "counts every event in the rail, not one page" do
+        visit_activity(range)
+
+        expect(count_for("commit")).to eq("5")
+      end
+
+      it "starts at the end of the range for a day outside it" do
+        visit_activity(range.merge(day: (today + 3).iso8601))
+
+        expect(event_names).to include("today")
+      end
+
+      it "starts at the end of the range for a day that is not a date" do
+        visit_activity(range.merge(day: "soon"))
+
+        expect(event_names).to include("today")
+      end
+
+      it "keeps the paging links working with scripts off" do
+        visit_activity(range)
+
+        expect(page).to have_css("nav.pager a.pager-link[rel='next'][href^='/admin/activity?']", text: "Older")
+      end
+    end
+
     describe "the presets" do
       it "marks 7d active by default" do
         visit_activity

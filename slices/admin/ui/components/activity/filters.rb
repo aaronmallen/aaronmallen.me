@@ -12,6 +12,15 @@ module Admin
           LABELS = TYPES.to_h { [it, ".types.#{it}"] }.freeze
           UNCHECKED = "0"
 
+          def self.query(from:, to:, types:, text:)
+            {
+              from: from.iso8601,
+              to: to.iso8601,
+              types: TYPES.to_h { [it, types.include?(it) ? CHECKED : UNCHECKED] },
+              q: text,
+            }
+          end
+
           prop :counts, Blog::Types::Hash
           prop :from, Blog::Types::Date
           prop :types, Blog::Types::Array.of(Blog::Types::String)
@@ -70,12 +79,7 @@ module Admin
           def preset_current?(days) = @to == @today && @from == @today - (days - 1)
 
           def preset_path(days)
-            query = {
-              from: (@today - (days - 1)).iso8601,
-              to: @today.iso8601,
-              types: TYPES.to_h { [it, @types.include?(it) ? CHECKED : UNCHECKED] },
-              q: @text,
-            }
+            query = self.class.query(from: @today - (days - 1), to: @today, types: @types, text: @text)
 
             "#{path(:admin_activity)}?#{Rack::Utils.build_nested_query(query)}"
           end
