@@ -51,6 +51,15 @@ module Admin
             ["task", ("done" if @task.closed?), ("canceled" if @task.canceled?), ("doing" if @task.in_progress?)]
           end
 
+          def edit
+            href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)
+            label = t(".edit")
+
+            a(class: "btn sm", href:, title: label, aria: { label: }, data: { task_open_edit: true }) do
+              i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
+            end
+          end
+
           def in_progress
             Pill(color: :blue) do
               i(class: "fa-solid fa-circle-play", aria: { hidden: "true" })
@@ -81,15 +90,18 @@ module Admin
             div(class: "task-acts") do
               Order(task: @task, filter: @filter, first: @first, last: @last, origin: @origin) if @ordered
               Controls(task: @task, filter: @filter, origin: @origin)
+              edit
             end
           end
+
+          def tab = @tab || @filter
 
           def tag(tag)
             span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
           end
 
           def task_title
-            href = path(:admin_task, id: @task.id, filter: @tab || @filter, origin: @origin)
+            href = path(:admin_task, id: @task.id, filter: tab, origin: @origin)
 
             a(class: "task-title", href:, data: { task_open: true }) do
               @task.title

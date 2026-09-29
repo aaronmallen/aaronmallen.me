@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
-amended: ["#41"]
+amended: ["#41", "#90"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -28,7 +28,8 @@ form POST.
 ## Decision
 
 Each task has two pages of its own: `GET /admin/tasks/:id` to read it and `GET /admin/tasks/:id/edit` to edit
-it. Both are full admin pages, and a row's title links to the read page.
+it. Both are full admin pages. A row's title links to the read page, and a pen at the end of the row, which #90
+added, links straight to the edit page.
 
 A script in `app/assets/js/admin` takes the click on those links, fetches the page with a `GET`, and swaps the
 task's part of the page into a native `dialog`: the read page into the panel, the edit page into the task modal.

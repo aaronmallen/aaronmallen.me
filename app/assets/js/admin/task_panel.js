@@ -144,9 +144,10 @@ function setupPanel(panel, modal) {
       event.preventDefault();
       dialog.close();
     } else if (link.hasAttribute("data-task-open-edit")) {
-      if (dialog !== panel) return;
+      if (dialog && dialog !== panel) return;
 
       event.preventDefault();
+      if (!dialog) opener = link;
       visit(link.href, edit);
     } else {
       event.preventDefault();

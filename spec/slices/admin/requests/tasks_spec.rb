@@ -920,6 +920,47 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "the edit link on a row" do
+      def pen = page.find(".task .task-acts > :last-child")
+
+      it "ends the row's buttons with a pen to the task's edit page", :aggregate_failures do
+        task = create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(pen).to match_css("a.btn[data-task-open-edit]")
+        expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=next&origin=tasks")
+      end
+
+      it "names the pen for screen readers and hides its icon", :aggregate_failures do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(pen).to match_css("[aria-label='Edit'][title='Edit']")
+        expect(pen).to have_css("i.fa-pen-to-square[aria-hidden='true']", visible: :all)
+      end
+
+      it "sends a waiting task's pen back to the upcoming tab" do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=upcoming&origin=tasks")
+      end
+
+      it "sends an archived task's pen back to the archive" do
+        task = create(:task, :done)
+        get "/admin/tasks", filter: "completed"
+
+        expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=completed&origin=tasks")
+      end
+
+      it "leaves the pen off the read page's actions" do
+        task = create(:task)
+        get "/admin/tasks/#{task.id}", filter: "next"
+
+        expect(page).to have_no_css(".task-read-acts .fa-pen-to-square", visible: :all)
+      end
+    end
+
     describe "moving a task" do
       it "moves it to someday" do
         task = create(:task)

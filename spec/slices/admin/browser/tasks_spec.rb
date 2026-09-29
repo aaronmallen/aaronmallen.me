@@ -950,6 +950,87 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "editing from a row's pen" do
+    def pen = find(".task", text: "Email the accountant").find("a[data-task-open-edit]")
+
+    def pen_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
+
+    before do
+      pen.click
+      modal.assert_selector("[data-task-edit]")
+    end
+
+    it "opens the modal filled with the task and never opens the panel", :aggregate_failures do
+      expect(modal).to have_field("task[title]", with: "Email the accountant")
+      expect(page).to have_no_css("dialog#task-panel[open]")
+      expect(evaluate_script("document.querySelector('[data-task-panel-body]').childElementCount")).to eq(0)
+    end
+
+    it "saves what I change and reloads the list", :aggregate_failures do
+      fill_in("task[tags]", with: "admin")
+      click_button("Save")
+
+      expect(page).to have_css(".toast", text: "Task saved")
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
+    end
+
+    it "hands focus back to the pen when the modal closes on Cancel", :aggregate_failures do
+      modal.click_link(translate("ui.views.tasks.edit.cancel"))
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+      expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
+    end
+
+    it "hands focus back to the pen when the modal closes on Escape", :aggregate_failures do
+      modal.send_keys(:escape)
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+      expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
+    end
+  end
+
+  describe "editing from a row's pen with scripts off" do
+    before do
+      scripts_off
+      find(".task", text: "Email the accountant").find("a[data-task-open-edit]").click
+    end
+
+    after { scripts_on }
+
+    it "opens the edit page" do
+      expect(page).to have_css("h1", exact_text: "Email the accountant").and have_field("task[title]")
+    end
+
+    it "comes back to the row's list on save", :aggregate_failures do
+      fill_in("task[tags]", with: "admin")
+      click_button("Save")
+
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
+    end
+  end
+
+  describe "a row's buttons on a phone" do
+    before { page.driver.resize(375, 800) }
+
+    def pen_box = evaluate_script(<<~JS)
+      (r => ({ right: r.right, width: r.width, height: r.height }))(
+        document.querySelector(".task a[data-task-open-edit]").getBoundingClientRect()
+      )
+    JS
+
+    it "fit without scrolling the page sideways", :aggregate_failures do
+      expect(pen_box["right"]).to be <= 375
+      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+    end
+
+    it "give the pen a tap square", :aggregate_failures do
+      expect(pen_box["width"]).to be >= 44
+      expect(pen_box["height"]).to be >= 44
+    end
+  end
+
   describe "linking tasks" do
     let(:task) { repo.all_open.find { it.title == "Email the accountant" } }
     let(:other) { repo.all_open.find { it.title == "Learn Elixir" } }

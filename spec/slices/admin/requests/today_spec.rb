@@ -1298,6 +1298,15 @@ RSpec.describe "Admin today", type: :request do
         expect(panel).to have_css(".card-label", text: "Sprint · #{Blog::TimeZone.today.strftime('%b %-d')}")
       end
 
+      it "ends each task's buttons with a pen that edits it and comes back to Today", :aggregate_failures do
+        task = create(:task, :in_sprint, sprint_id: sprint.id)
+        get "/admin"
+        pen = panel.find(".task .task-acts > :last-child")
+
+        expect(pen).to match_css("a[data-task-open-edit][aria-label='Edit']")
+        expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=today&origin=today")
+      end
+
       it "lists the open tasks" do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"

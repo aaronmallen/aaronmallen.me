@@ -743,6 +743,7 @@ en:
           carried:
             one: "carried ×%{count}"
             other: "carried ×%{count}"
+          edit: "Edit"
           in_progress: "in progress"
           scheduled: "%{date}"
         sprint_field:
