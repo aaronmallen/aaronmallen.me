@@ -13,7 +13,6 @@ module Admin
           prop :planned, Blog::Types::Array.of(Blog::Types::Hash)
           prop :today, Blog::Types::Date
           prop :waiting, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-          prop :linking, Blog::Types::Hash.optional, default: nil
 
           def view_template
             plan_card
@@ -81,10 +80,7 @@ module Admin
             return Empty { t(".empty") } if tasks.empty?
 
             tasks.each do |task|
-              Row(
-                task:, filter: NEXT, tab: TAB, today: @today, linking: @linking,
-                scheduled: sprint.sprint_date,
-              )
+              Row(task:, filter: NEXT, tab: TAB, today: @today, scheduled: sprint.sprint_date)
             end
           end
 

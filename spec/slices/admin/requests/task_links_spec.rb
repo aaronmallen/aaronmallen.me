@@ -13,7 +13,7 @@ RSpec.describe "Admin task links", type: :request do
     end
   end
 
-  def find_link(query, id: task.id) = get("/admin/tasks", filter: "next", link: id, link_q: query)
+  def find_link(query, id: task.id) = get("/admin/tasks/#{id}", filter: "next", link_q: query)
 
   def link(kind: "blocks", other_id: other.id)
     send_to("/admin/tasks/#{task.id}/links", filter: "next", link: { kind:, other_id: other_id.to_s })
@@ -192,31 +192,10 @@ RSpec.describe "Admin task links", type: :request do
       expect(page).to have_css(".task-link-editor", text: i18n.t("ui.components.tasks.link_editor.no_match"))
     end
 
-    it "opens the editor on the task it is finding for" do
-      find_link("migration")
-
-      expect(page).to have_css("#task-#{task.id}-edit[checked]")
-    end
-
-    it "keeps the other editors shut" do
-      find_link("migration")
-
-      expect(page).to have_no_css("#task-#{other.id}-edit[checked]")
-    end
-
     it "keeps the query in the field" do
       find_link("migration")
 
       expect(page.find("#task-#{task.id}-link-other-id").value).to eq("migration")
-    end
-
-    it "finds through a plain GET form" do
-      get "/admin/tasks", filter: "next"
-
-      expect(page).to have_css(
-        "form.task-link-find[method='get'][action='/admin/tasks'] input[name='link'][value='#{task.id}']",
-        visible: :all,
-      )
     end
 
     it "posts the link from each match with the type picked beside it", :aggregate_failures do
@@ -230,15 +209,15 @@ RSpec.describe "Admin task links", type: :request do
 
     it "finds for a task waiting on the upcoming tab", :aggregate_failures do
       waiting = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
-      get "/admin/tasks", filter: "upcoming", link: waiting.id, link_q: "migration"
+      get "/admin/tasks/#{waiting.id}", filter: "upcoming", link_q: "migration"
 
-      expect(page).to have_css("#task-#{waiting.id}-edit[checked]")
+      expect(page).to have_css("#task-#{waiting.id}-link-other-id")
       expect(targets).to eq(["##{other.id}"])
     end
 
     it "sends the find on the upcoming tab back to that tab" do
       waiting = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
-      get "/admin/tasks", filter: "upcoming"
+      get "/admin/tasks/#{waiting.id}", filter: "upcoming"
 
       form = page.find("#task-#{waiting.id}-link-other-id", visible: :all).ancestor("form")
 
@@ -246,7 +225,7 @@ RSpec.describe "Admin task links", type: :request do
     end
 
     it "offers the four types" do
-      get "/admin/tasks", filter: "next"
+      get "/admin/tasks/#{task.id}", filter: "next"
       options = page.find("#task-#{task.id}-link-kind").all("option").map(&:value)
 
       expect(options).to eq(%w[blocks blocked_by relates duplicates])
@@ -298,12 +277,13 @@ RSpec.describe "Admin task links", type: :request do
       expect(chips("Ship the links")).to eq([[link_label(:blocks), "##{other.id}", "Write the migration"]])
     end
 
-    it "comes back to the upcoming tab with the error beside a waiting task" do
+    it "shows a waiting task's page with the error, keeping the upcoming tab", :aggregate_failures do
       waiting = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
       send_to("/admin/tasks/#{waiting.id}/links", filter: "upcoming",
                                                   link: { kind: "blocks", other_id: waiting.id.to_s })
 
       expect(page).to have_css("#task-#{waiting.id}-link-other-id-error")
+      expect(page.find(".page-head-actions a", text: "Tasks")["href"]).to eq("/admin/tasks?filter=upcoming")
     end
 
     it "comes back to Today when it was added there" do
@@ -334,8 +314,8 @@ RSpec.describe "Admin task links", type: :request do
           .to eq(i18n.t("ui.components.tasks.field_error.other_id.taken"))
       end
 
-      it "leaves the editor open with the type that was picked", :aggregate_failures do
-        expect(page).to have_css("#task-#{task.id}-edit[checked]")
+      it "shows the task's page with the type that was picked", :aggregate_failures do
+        expect(page).to have_css("[data-task-read='#{task.id}']")
         expect(page.find("#task-#{task.id}-link-kind option[selected]").value).to eq("blocks")
       end
 
@@ -387,10 +367,10 @@ RSpec.describe "Admin task links", type: :request do
       send_to("/admin/tasks/#{id}/links/#{other_id}/delete", filter: "next")
     end
 
-    it "offers a remove on each link in the editor" do
-      get "/admin/tasks", filter: "next"
+    it "offers a remove on each link on the task's page" do
+      get "/admin/tasks/#{task.id}", filter: "next"
 
-      expect(row("Ship the links"))
+      expect(page)
         .to have_css(".task-link-row form[action='/admin/tasks/#{task.id}/links/#{other.id}/delete']")
     end
 

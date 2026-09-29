@@ -666,34 +666,6 @@ en:
         create_dialog:
           cancel: "Cancel"
           title: "New task"
-        create_form:
-          list: "List"
-          lists:
-            next: "next"
-            someday: "someday"
-            today: "today"
-          note: "Notes"
-          note_placeholder: "What done looks like."
-          save: "Create task"
-          tags: "Tags"
-          tags_placeholder: "ruby, admin"
-          title: "Title"
-        editor:
-          cancel: "Cancel"
-          confirm_delete: "Delete %{task}? This cannot be undone."
-          delete: "Delete"
-          list: "List"
-          lists:
-            external: "external"
-            next: "next"
-            someday: "someday"
-            today: "today"
-          note: "Notes"
-          note_placeholder: "What done looks like."
-          save: "Save"
-          tags: "Tags"
-          tags_placeholder: "ruby, admin"
-          title: "Title"
         field_error:
           kind:
             format: "Pick one of the four link types."
@@ -763,7 +735,6 @@ en:
           carried:
             one: "carried ×%{count}"
             other: "carried ×%{count}"
-          edit: "Edit"
           in_progress: "in progress"
           scheduled: "%{date}"
         sprint_field:
@@ -793,6 +764,20 @@ en:
           upcoming: "upcoming"
         sync_button:
           label: "Sync issues"
+        task_form:
+          list: "List"
+          lists:
+            external: "external"
+            next: "next"
+            someday: "someday"
+            today: "today"
+          note: "Notes"
+          note_placeholder: "What done looks like."
+          save: "Create task"
+          tags: "Tags"
+          tags_placeholder: "ruby, admin"
+          title: "Title"
+          update: "Save"
         task_key:
           copied: "Task %{key} copied"
           copy: "Copy task %{key}"
@@ -1117,6 +1102,14 @@ en:
           upcoming_count:
             one: "%{count} upcoming"
             other: "%{count} upcoming"
+        edit:
+          back: "Task"
+          cancel: "Cancel"
+          confirm_delete: "Delete %{task}? This cannot be undone."
+          delete: "Delete"
+          label: "Tasks"
+          sub: "Editing task %{key}"
+          title: "Edit the task"
         new:
           back: "Tasks"
           heading: "New task"
@@ -1133,6 +1126,7 @@ en:
             zero: "never"
           completed: "Completed"
           created: "Created"
+          edit: "Edit"
           links: "Links"
           note: "Note"
           note_label: "Task"

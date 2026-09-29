@@ -20,13 +20,17 @@ RSpec.describe "Admin tasks", type: :feature do
     translate("ui.components.tasks.controls.move", list: named)
   end
 
-  def open_editor(title) = find(".task", text: title).find(".task-title").click
+  def open_editor(title)
+    open_task(title)
+    click_link(translate("ui.views.tasks.show.edit"))
+  end
+
+  def open_task(title) = find(".task", text: title).find(".task-title").click
 
   def tag_task(title, tags)
     open_editor(title)
-    row = find(".task", text: title)
-    row.fill_in("task[tags]", with: tags)
-    row.click_button("Save")
+    fill_in("task[tags]", with: tags)
+    click_button("Save")
   end
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
@@ -326,40 +330,64 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "editing a task" do
-    before do
-      visit "/admin/tasks?filter=next"
-      open_editor("Email the accountant")
+  describe "opening a task" do
+    before { open_task("Email the accountant") }
+
+    it "shows its page" do
+      task = repo.in_list("next").find { it.title == "Email the accountant" }
+
+      expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=next&origin=tasks")
     end
 
-    it "opens the form under the task" do
+    it "heads the page with the title" do
+      expect(page).to have_css("h1", exact_text: "Email the accountant")
+    end
+  end
+
+  describe "editing a task" do
+    before { open_editor("Email the accountant") }
+
+    it "opens the form filled with the task" do
       expect(page).to have_field("task[title]", with: "Email the accountant")
     end
 
-    it "saves what I change" do
-      row = find(".task", text: "Email the accountant")
-      row.fill_in("task[tags]", with: "admin")
-      row.click_button("Save")
+    it "saves what I change and comes back to the list", :aggregate_failures do
+      fill_in("task[tags]", with: "admin")
+      click_button("Save")
 
-      expect(page).to have_css(".task-meta .task-tag", text: "#admin")
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
     end
 
     it "moves the task through the list field" do
-      row = find(".task", text: "Email the accountant")
-      row.select("someday", from: "task[list]")
-      row.click_button("Save")
+      select("someday", from: "task[list]")
+      click_button("Save")
       find(".subtab", text: "someday").click
 
       expect(page).to have_css(".task-title", text: "Email the accountant")
     end
 
-    it "closes without saving what I typed", :aggregate_failures do
-      row = find(".task", text: "Email the accountant")
-      row.fill_in("task[title]", with: "Something else")
-      row.find(".task-editor-foot label", text: translate("ui.components.tasks.editor.cancel")).click
+    it "keeps what I typed and says what went wrong when the save fails", :aggregate_failures do
+      fill_in("task[title]", with: " ")
+      fill_in("task[tags]", with: "not_a_tag")
+      click_button("Save")
 
-      expect(page).to have_css(".task-title", text: "Email the accountant")
-      expect(page).to have_no_field("task[title]", with: "Something else")
+      expect(page).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
+      expect(page).to have_field("task[tags]", with: "not_a_tag")
+    end
+
+    it "goes back to the task's page on Cancel without saving", :aggregate_failures do
+      fill_in("task[title]", with: "Something else")
+      click_link(translate("ui.views.tasks.edit.cancel"))
+
+      expect(page).to have_css("h1", exact_text: "Email the accountant")
+      expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+    end
+
+    it "fits a phone without scrolling the page sideways" do
+      page.driver.resize(375, 800)
+
+      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
     end
   end
 
@@ -372,9 +400,9 @@ RSpec.describe "Admin tasks", type: :feature do
     def editor(name, **) = translate(["ui.components.tasks.link_editor", name].join("."), **)
 
     def find_task(query)
-      open_editor("Email the accountant")
-      row("Email the accountant").fill_in(editor(:label), with: query)
-      row("Email the accountant").click_button(editor(:find))
+      open_task("Email the accountant")
+      fill_in(editor(:label), with: query)
+      click_button(editor(:find))
     end
 
     def key(task) = "##{task.id}"
@@ -430,9 +458,9 @@ RSpec.describe "Admin tasks", type: :feature do
         visit "/admin/tasks?filter=next"
       end
 
-      it "removes it from the editor", :aggregate_failures do
-        open_editor("Email the accountant")
-        row("Email the accountant").click_button(editor(:remove, key: key(other)))
+      it "removes it from the task's page", :aggregate_failures do
+        open_task("Email the accountant")
+        click_button(editor(:remove, key: key(other)))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.unlinked"))
         expect(row("Email the accountant")).to have_no_css(".task-link")
@@ -492,25 +520,23 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "deleting a task" do
-    let(:row) { find(".task", text: "Email the accountant") }
-
     before { open_editor("Email the accountant") }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { row.click_button("Delete") }
+      message = dismiss_confirm { click_button("Delete") }
 
-      expect(message).to eq(translate("ui.components.tasks.editor.confirm_delete", task: "Email the accountant"))
+      expect(message).to eq(translate("ui.views.tasks.edit.confirm_delete", task: "Email the accountant"))
     end
 
-    it "keeps the task listed when I don't confirm", :aggregate_failures do
-      dismiss_confirm { row.click_button("Delete") }
+    it "keeps the task when I don't confirm", :aggregate_failures do
+      dismiss_confirm { click_button("Delete") }
 
       expect(page).to have_no_css(".toast")
-      expect(page).to have_css(".task-title", text: "Email the accountant")
+      expect(page).to have_field("task[title]", with: "Email the accountant")
     end
 
     it "deletes once I confirm" do
-      accept_confirm { row.click_button("Delete") }
+      accept_confirm { click_button("Delete") }
 
       expect(page).to have_css(".toast", text: "Task deleted")
     end

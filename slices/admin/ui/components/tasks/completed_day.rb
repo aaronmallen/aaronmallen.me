@@ -11,8 +11,6 @@ module Admin
           prop :date, Blog::Types::Date
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
-          prop :editing, Blog::Types::Hash.optional, default: nil
-          prop :linking, Blog::Types::Hash.optional, default: nil
 
           def view_template
             section(class: "task-day") do
@@ -40,10 +38,7 @@ module Admin
           def days_ago = (@today - @date).to_i
 
           def row(task)
-            Row(
-              task:, filter: COMPLETED, today: @today, editing: @editing, linking: @linking,
-              ordered: false, scheduled: task.sprint&.sprint_date,
-            )
+            Row(task:, filter: COMPLETED, today: @today, ordered: false, scheduled: task.sprint&.sprint_date)
           end
         end
       end

@@ -39,13 +39,10 @@ module Admin
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
-          def initialize(
-            counts:, editing:, filters:, linking:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:
-          )
+          def initialize(counts:, filters:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:)
             super()
             @counts = counts
             @filters = filters
-            @editors = { editing:, linking: }
             @plan = { planned:, pool:, pools:, waiting: }
             @tab = tab
             @tasks = tasks
@@ -86,7 +83,7 @@ module Admin
           def completed? = @tab == COMPLETED
 
           def day(date, tasks)
-            CompletedDay(date:, tasks:, today: @today, **@editors)
+            CompletedDay(date:, tasks:, today: @today)
           end
 
           def days = @days ||= @tasks.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
@@ -126,10 +123,7 @@ module Admin
 
             last = @tasks.size - 1
             @tasks.each_with_index do |task, index|
-              Row(
-                task:, filter: @tab, today: @today, first: index.zero?, last: index == last,
-                scheduled:, **@editors,
-              )
+              Row(task:, filter: @tab, today: @today, first: index.zero?, last: index == last, scheduled:)
             end
           end
 
@@ -148,10 +142,7 @@ module Admin
           def today? = @tab == TODAY
 
           def upcoming
-            UpcomingSprints(
-              linking: @editors[:linking], planned: @plan[:planned], today: @today,
-              waiting: @plan[:waiting],
-            )
+            UpcomingSprints(planned: @plan[:planned], today: @today, waiting: @plan[:waiting])
           end
 
           def upcoming? = @tab == UPCOMING

@@ -27,13 +27,13 @@ module Admin
 
           def view_template
             article(class: "task-read", data: { task_read: @task.id }) do
-              PageHead(title: @task.title, sub: t(".sub", key:)) { back }
+              head
               meta
               div(class: "task-read-acts") { Controls(task: @task, filter: @filter, origin: @origin, moves: false) }
               note
               facts
               Card(label: t(".related"), title: t(".links")) do
-                LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking, page: true)
+                LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
               end
             end
           end
@@ -49,6 +49,13 @@ module Admin
 
           def back_path = today? ? path(:admin_root) : path(:admin_tasks, filter: @filter)
 
+          def edit
+            a(class: "btn", href: path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)) do
+              i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
+              span { t(".edit") }
+            end
+          end
+
           def fact(label_key, value)
             div(class: "task-fact") do
               dt { t(label_key) }
@@ -63,6 +70,13 @@ module Admin
               fact(".completed", stamp(@task.completed_at)) if @task.completed_at
               fact(".sprint", sprint_day)
               fact(".carried", t(".carried_count", count: @task.carried_count))
+            end
+          end
+
+          def head
+            PageHead(title: @task.title, sub: t(".sub", key:)) do
+              back
+              edit
             end
           end
 

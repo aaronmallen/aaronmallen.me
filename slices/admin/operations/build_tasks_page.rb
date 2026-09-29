@@ -16,20 +16,19 @@ module Admin
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
         finished_task_counts: "tasks.queries.finished_task_counts",
-        link_targets: "tasks.queries.link_targets",
         list_finished_tasks: "tasks.queries.list_finished_tasks",
         list_tasks: "tasks.queries.list_tasks",
         search_tasks: "tasks.queries.search_tasks",
         sprints_after: "tasks.queries.sprints_after",
       ]
 
-      def call(tab: TODAY, editing: nil, linking: nil, pool: nil, query: nil, now: Time.now)
+      def call(tab: TODAY, pool: nil, query: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
         open = open_lists(sprint)
         filters = { query: Blog::Types::TrimmedText[query] }
 
         {
-          editing:, filters:, linking: link_picker(linking), tab:, tasks: filtered(listed(tab, open), filters),
+          filters:, tab:, tasks: filtered(listed(tab, open), filters),
           **screen(open, sprint, pool, Blog::TimeZone.today(now)),
         }
       end
@@ -48,14 +47,6 @@ module Admin
         found = matching(filters[:query])
 
         found.nil? ? tasks : tasks.select { found.include?(it.id) }
-      end
-
-      def link_picker(linking)
-        return nil if linking.nil?
-
-        query = linking.fetch(:query, EMPTY_STRING)
-
-        { errors: EMPTY_HASH, kind: nil, **linking, query:, targets: link_targets.call(linking.fetch(:id), query) }
       end
 
       def listed(tab, open) = tab == COMPLETED ? list_finished_tasks.call : open.fetch(tab)

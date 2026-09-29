@@ -328,30 +328,30 @@ RSpec.describe "Admin tasks", type: :request do
           .to eq(["/admin/tasks/#{imported.id}/move/today"])
       end
 
-      it "offers external in the editor, marked as the list it is in", :aggregate_failures do
-        get "/admin/tasks", filter: "external"
+      it "offers external in the edit form, marked as the list it is in", :aggregate_failures do
+        get "/admin/tasks/#{imported.id}/edit", filter: "external"
 
         expect(editor_lists).to eq(%w[today next someday external])
         expect(page.find("#task-#{imported.id}-form option[selected]").text).to eq("external")
       end
 
-      it "keeps external out of the editor of a task written by hand" do
-        get "/admin/tasks", filter: "next"
+      it "keeps external out of the edit form of a task written by hand" do
+        get "/admin/tasks/#{repo.in_list('next').first.id}/edit", filter: "next"
 
-        expect(page.all(".task-editor select[name='task[list]'] option").map(&:text).uniq)
+        expect(page.all(".task-form select[name='task[list]'] option").map(&:text))
           .to eq(%w[today next someday])
       end
 
       it "saves its tags and keeps it on external", :aggregate_failures do
-        get "/admin/tasks", filter: "external"
+        get "/admin/tasks/#{imported.id}/edit", filter: "external"
         send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "tags" => "site, bug" })
 
         expect(repo.by_id(imported.id).tags.map(&:name)).to contain_exactly("site", "bug")
         expect(repo.by_id(imported.id).list).to eq("external")
       end
 
-      it "moves it to next through the editor" do
-        get "/admin/tasks", filter: "external"
+      it "moves it to next through the edit form" do
+        get "/admin/tasks/#{imported.id}/edit", filter: "external"
         send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "list" => "next" })
 
         expect(repo.by_id(imported.id).list).to eq("next")
@@ -360,7 +360,7 @@ RSpec.describe "Admin tasks", type: :request do
       it "names external as the place of a linked task" do
         other = create(:task, title: "Write the post")
         repo.link(other.id, imported.id, "relates")
-        get "/admin/tasks", filter: "next"
+        get "/admin/tasks/#{other.id}", filter: "next"
 
         expect(page).to have_css(".task-link-place", exact_text: "external")
       end
@@ -824,18 +824,33 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_no_css(".task-acts form[action$='/delete']")
       end
 
-      it "puts the delete in the editor" do
+      it "renders no edit form on a row" do
         create(:task)
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_css(".task-editor form[action$='/delete']")
+        expect(page).to have_no_css(".task form[action$='/delete'], .task [name^='task[']")
       end
 
-      it "opens the editor from the title and from the pen" do
-        task = create(:task)
+      it "links the title to the task's page, keeping the list it sits in" do
+        task = create(:task, title: "Email the accountant")
         get "/admin/tasks", filter: "next"
 
-        expect(page.all("label[for='task-#{task.id}-edit']").size).to eq(3)
+        expect(page.find(".task a.task-title", text: "Email the accountant")["href"])
+          .to eq("/admin/tasks/#{task.id}?filter=next&origin=tasks")
+      end
+
+      it "links a waiting task's title back to the upcoming tab" do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(page.find(".task a.task-title")["href"]).to eq("/admin/tasks/#{task.id}?filter=upcoming&origin=tasks")
+      end
+
+      it "links an archived task's title back to the archive" do
+        task = create(:task, :done)
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.find(".task a.task-title")["href"]).to eq("/admin/tasks/#{task.id}?filter=completed&origin=tasks")
       end
     end
 
@@ -1205,9 +1220,107 @@ RSpec.describe "Admin tasks", type: :request do
       it "names a canceled task's place in the link editor" do
         task = create(:task, title: "Still on")
         create(:task, :canceled, title: "Dropped")
-        get "/admin/tasks", filter: "next", link: task.id, link_q: "Dropped"
+        get "/admin/tasks/#{task.id}", filter: "next", link_q: "Dropped"
 
         expect(page).to have_css(".task-link-target .task-link-place", exact_text: "canceled")
+      end
+    end
+
+    describe "the edit page" do
+      let(:task) { create(:task, title: "Email accountant", note: "Ring before ten", tags: %w[ruby admin]) }
+
+      def fields = page.all("#task-#{task.id}-form [name^='task[']").map { it["name"] }
+
+      def open_edit(**params) = get("/admin/tasks/#{task.id}/edit", params)
+
+      it "answers 200" do
+        open_edit
+
+        expect(last_response.status).to eq(200)
+      end
+
+      it "answers 404 for a task that isn't there" do
+        get "/admin/tasks/0/edit"
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "heads the page with the title" do
+        open_edit
+
+        expect(page).to have_css("h1.page-head-title", exact_text: "Email accountant")
+      end
+
+      it "posts to the task's update" do
+        open_edit
+
+        expect(page).to have_css("form#task-#{task.id}-form[method='post'][action='/admin/tasks/#{task.id}']")
+      end
+
+      it "holds the same fields as the new task page" do
+        open_edit
+
+        expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+      end
+
+      it "fills the fields with the task", :aggregate_failures do
+        open_edit
+
+        expect(page).to have_field("task[title]", with: "Email accountant")
+        expect(page.find("textarea[name='task[note]']").text).to eq("Ring before ten")
+        expect(page).to have_select("task[list]", selected: "next")
+        expect(page).to have_field("task[tags]", with: "admin, ruby")
+      end
+
+      it "leaves the note field empty for a task without one" do
+        task = create(:task)
+        get "/admin/tasks/#{task.id}/edit"
+
+        expect(page.find("textarea[name='task[note]']").text).to be_empty
+      end
+
+      it "reads today back for a task in the sprint" do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks/#{task.id}/edit"
+
+        expect(page).to have_select("task[list]", selected: "today")
+      end
+
+      it "carries where the task was opened into the form", :aggregate_failures do
+        open_edit(filter: "upcoming", origin: "today")
+        form = page.find("#task-#{task.id}-form")
+
+        expect(form.find("input[name='filter']", visible: :all).value).to eq("upcoming")
+        expect(form.find("input[name='origin']", visible: :all).value).to eq("today")
+      end
+
+      it "leads Cancel and the back button to the task's page", :aggregate_failures do
+        open_edit(filter: "next", origin: "tasks")
+        read = "/admin/tasks/#{task.id}?filter=next&origin=tasks"
+
+        expect(page.find(".task-form-foot a", text: i18n.t("ui.views.tasks.edit.cancel"))["href"]).to eq(read)
+        expect(page.find(".page-head-actions a", text: i18n.t("ui.views.tasks.edit.back"))["href"]).to eq(read)
+      end
+
+      it "offers a delete that asks first, naming the task", :aggregate_failures do
+        open_edit
+        form = page.find("form#task-#{task.id}-delete[action='/admin/tasks/#{task.id}/delete']")
+
+        expect(form["data-confirm"]).to include("Email accountant")
+        expect(page).to have_css("button[form='task-#{task.id}-delete']", text: i18n.t("ui.views.tasks.edit.delete"))
+      end
+
+      it "wraps the form in a part a dialog can lift" do
+        open_edit
+
+        expect(page).to have_css("main [data-task-edit='#{task.id}'] form#task-#{task.id}-form")
+      end
+
+      it "is linked from the task's page as Edit" do
+        get "/admin/tasks/#{task.id}", filter: "next", origin: "tasks"
+
+        expect(page.find("a", exact_text: i18n.t("ui.views.tasks.show.edit"))["href"])
+          .to eq("/admin/tasks/#{task.id}/edit?filter=next&origin=tasks")
       end
     end
 
@@ -1230,20 +1343,6 @@ RSpec.describe "Admin tasks", type: :request do
         edit(note: "Ring before ten")
 
         expect(repo.by_id(task.id).note).to eq("Ring before ten")
-      end
-
-      it "reads the note back into the field" do
-        edit(note: "Ring before ten")
-        get "/admin/tasks", filter: "next"
-
-        expect(page.find(".task-editor textarea[name='task[note]']", visible: :all).text).to eq("Ring before ten")
-      end
-
-      it "leaves the note field empty for a task without one" do
-        task
-        get "/admin/tasks", filter: "next"
-
-        expect(page.find(".task-editor textarea[name='task[note]']", visible: :all).text).to be_empty
       end
 
       it "tags it" do
@@ -1281,50 +1380,22 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css("[data-toast]", text: "Task saved")
       end
 
-      it "answers 422 for a task with no text" do
-        edit(title: " ")
+      it "comes back to the list it was opened from" do
+        edit
 
-        expect(last_response.status).to eq(422)
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=next"))
       end
 
-      it "leaves the editor open on the task it refused" do
-        edit(title: " ")
+      it "comes back to Today when it was opened there" do
+        send_to("/admin/tasks/#{task.id}", filter: "today", origin: "today", task: { title: "Email the accountant" })
 
-        expect(page).to have_css("#task-#{task.id}-edit[checked] ~ .task-editor form[action='/admin/tasks/#{task.id}']")
-      end
-
-      it "writes nothing for a task with no text" do
-        edit(title: " ")
-
-        expect(repo.by_id(task.id).title).to eq("Email accountant")
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
       end
 
       it "answers 404 for a task that isn't there" do
         send_to("/admin/tasks/0", filter: "next", task: { title: "Anything" })
 
         expect(last_response.status).to eq(404)
-      end
-
-      it "holds the title, the note, the list and the tags" do
-        task
-        get "/admin/tasks", filter: "next"
-
-        expect(page.all(".task-editor-form [name^='task[']").map { it["name"] })
-          .to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
-      end
-
-      it "offers the three lists, marking the one the task is in" do
-        task
-        get "/admin/tasks", filter: "next"
-
-        expect(page.find(".task-editor select[name='task[list]'] option[selected]").text).to eq("next")
-      end
-
-      it "reads today back for a task in the sprint" do
-        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
-        get "/admin/tasks"
-
-        expect(page.find(".task-editor select[name='task[list]'] option[selected]").text).to eq("today")
       end
 
       it "moves the task to the list it was given" do
@@ -1351,18 +1422,54 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(last_response.status).to eq(422)
       end
+    end
 
-      it "closes the editor with a cancel that sends nothing" do
-        task
-        get "/admin/tasks", filter: "next"
+    describe "a failed edit" do
+      let(:task) { create(:task, title: "Email accountant") }
 
-        cancel = i18n.t("ui.components.tasks.editor.cancel")
+      before do
+        send_to(
+          "/admin/tasks/#{task.id}",
+          filter: "someday", origin: "tasks",
+          task: { title: " ", note: "Ring before ten", list: "someday", tags: "not_a_tag", sprint_on: "" },
+        )
+      end
 
-        expect(page).to have_css(".task-editor-foot label[for='task-#{task.id}-edit']", text: cancel)
+      it "answers 422" do
+        expect(last_response.status).to eq(422)
+      end
+
+      it "shows the edit page for the task it refused" do
+        expect(page).to have_css("main [data-task-edit='#{task.id}'] form[action='/admin/tasks/#{task.id}']")
+      end
+
+      it "says what went wrong beside the fields", :aggregate_failures do
+        expect(page.find("#task-#{task.id}-title-error"))
+          .to have_text(i18n.t("ui.components.tasks.field_error.title.blank"))
+        expect(page.find("#task-#{task.id}-tags-error"))
+          .to have_text(i18n.t("ui.components.tasks.field_error.tags.format"))
+      end
+
+      it "keeps what was typed", :aggregate_failures do
+        expect(page).to have_field("task[title]", with: " ")
+        expect(page.find("textarea[name='task[note]']").text).to eq("Ring before ten")
+        expect(page).to have_select("task[list]", selected: "someday")
+        expect(page).to have_field("task[tags]", with: "not_a_tag")
+      end
+
+      it "keeps where the task was opened", :aggregate_failures do
+        form = page.find("#task-#{task.id}-form")
+
+        expect(form.find("input[name='filter']", visible: :all).value).to eq("someday")
+        expect(form.find("input[name='origin']", visible: :all).value).to eq("tasks")
+      end
+
+      it "writes nothing" do
+        expect(repo.by_id(task.id)).to have_attributes(title: "Email accountant", note: task.note, list: "next")
       end
     end
 
-    describe "saving a task from the editor it sits in" do
+    describe "saving a task from its edit page" do
       let(:sprint) { create(:sprint, sprint_date: today) }
 
       def date_field(task) = page.find("#task-#{task.id}-form [name='task[sprint_on]']", visible: :all)
@@ -1373,22 +1480,22 @@ RSpec.describe "Admin tasks", type: :request do
       end
 
       def save(task, filter:, **changes)
-        get "/admin/tasks", filter: filter
+        get "/admin/tasks/#{task.id}/edit", filter: filter
         send_to("/admin/tasks/#{task.id}", filter:, task: { **held(task), **changes })
       end
 
       def today = Blog::TimeZone.today
 
-      it "shows the sprint's date in the editor on the today tab" do
+      it "shows the sprint's date for a task in today's sprint" do
         task = create(:task, :in_sprint, sprint_id: sprint.id)
-        get "/admin/tasks"
+        get "/admin/tasks/#{task.id}/edit"
 
         expect(date_field(task).value).to eq(today.iso8601)
       end
 
-      it "shows the date of the sprint a finished task ran in on the completed tab", :aggregate_failures do
+      it "shows the date of the sprint a finished task ran in", :aggregate_failures do
         task = create(:task, :done, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
-        get "/admin/tasks", filter: "completed"
+        get "/admin/tasks/#{task.id}/edit", filter: "completed"
 
         expect(date_field(task).value).to eq((today - 1).iso8601)
         expect(date_field(task)[:min]).to eq((today - 1).iso8601)
@@ -1493,15 +1600,15 @@ RSpec.describe "Admin tasks", type: :request do
       end
 
       it "asks first" do
-        create(:task, title: "Email the accountant")
-        get "/admin/tasks", filter: "next"
+        task = create(:task, title: "Email the accountant")
+        get "/admin/tasks/#{task.id}/edit", filter: "next"
 
         expect(page).to have_css("form[action$='/delete'][data-confirm]")
       end
 
       it "names the task it is about to take away" do
-        create(:task, title: "Email the accountant")
-        get "/admin/tasks", filter: "next"
+        task = create(:task, title: "Email the accountant")
+        get "/admin/tasks/#{task.id}/edit", filter: "next"
 
         expect(page.find("form[action$='/delete']")["data-confirm"]).to include("Email the accountant")
       end
@@ -1575,8 +1682,7 @@ RSpec.describe "Admin tasks", type: :request do
       end
 
       it "keeps a quoted title inside the attribute that carries it" do
-        create(:task, title: 'Ask "why"')
-        get "/admin/tasks", filter: "next"
+        get "/admin/tasks/#{create(:task, title: 'Ask "why"').id}/edit", filter: "next"
 
         expect(page.all("form[action$='/delete']").map { it["data-confirm"] })
           .to include(include('Ask "why"'))

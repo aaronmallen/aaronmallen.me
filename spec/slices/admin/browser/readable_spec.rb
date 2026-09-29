@@ -40,7 +40,7 @@ RSpec.describe "Admin screens", type: :feature do
       "tags" => "/admin/tags",
       "task" => "/admin/tasks/#{task.id}",
       "task link search" => "/admin/tasks/#{task.id}?link_q=finished",
-      "task links" => "/admin/tasks?link=#{task.id}",
+      "task editor" => "/admin/tasks/#{task.id}/edit",
       "tasks" => "/admin/tasks",
       "tasks archive" => "/admin/tasks?filter=completed",
       "tasks next" => "/admin/tasks?filter=next",

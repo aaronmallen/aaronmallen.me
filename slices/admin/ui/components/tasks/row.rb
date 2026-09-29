@@ -10,8 +10,6 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :today, Blog::Types::Date
-          prop :editing, Blog::Types::Hash.optional, default: nil
-          prop :linking, Blog::Types::Hash.optional, default: nil
           prop :first, Blog::Types::Bool, default: false
           prop :last, Blog::Types::Bool, default: false
           prop :ordered, Blog::Types::Bool, default: true
@@ -22,15 +20,10 @@ module Admin
           def view_template
             div(class: classes) do
               TaskKey(task: @task)
-              toggle
               task_title
               meta
               side
               Links(links: @task.links) unless @task.links.empty?
-              Editor(
-                task: @task, filter: @filter, editing: @editing, toggle: toggle_id, origin: @origin,
-                scheduled: @scheduled, today: @today,
-              ) { link_editor }
             end
           end
 
@@ -58,20 +51,12 @@ module Admin
             ["task", ("done" if @task.closed?), ("canceled" if @task.canceled?), ("doing" if @task.in_progress?)]
           end
 
-          def editing? = @editing&.fetch(:id) == @task.id || !linking.nil?
-
           def in_progress
             Pill(color: :blue) do
               i(class: "fa-solid fa-circle-play", aria: { hidden: "true" })
               span { t(".in_progress") }
             end
           end
-
-          def link_editor
-            LinkEditor(task: @task, tab: @tab || @filter, origin: @origin, linking:)
-          end
-
-          def linking = (@linking if @linking&.fetch(:id) == @task.id)
 
           def meta
             p(class: "task-meta") do
@@ -82,13 +67,6 @@ module Admin
               SourceLink(source: @task.source)
               @task.tags.each { tag(it) }
               Closed(task: @task) if @task.closed?
-            end
-          end
-
-          def pen
-            label(class: "btn sm task-pen", for: toggle_id, title: t(".edit")) do
-              i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
-              span(class: "sr-only") { t(".edit") }
             end
           end
 
@@ -103,7 +81,6 @@ module Admin
             div(class: "task-acts") do
               Order(task: @task, filter: @filter, first: @first, last: @last, origin: @origin) if @ordered
               Controls(task: @task, filter: @filter, origin: @origin)
-              pen
             end
           end
 
@@ -112,14 +89,10 @@ module Admin
           end
 
           def task_title
-            label(class: "task-title", for: toggle_id) { @task.title }
+            a(class: "task-title", href: path(:admin_task, id: @task.id, filter: @tab || @filter, origin: @origin)) do
+              @task.title
+            end
           end
-
-          def toggle
-            input(type: "checkbox", class: "sr-only task-toggle", id: toggle_id, checked: editing?)
-          end
-
-          def toggle_id = "task-#{@task.id}-edit"
 
           def waiting? = !@scheduled.nil? && @scheduled > @today && !@task.closed?
         end

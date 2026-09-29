@@ -9,22 +9,12 @@ module Admin
         def handle(request, response)
           tab = Blog::Types::TaskTabParam[request.params[:filter]]
 
-          page = build_tasks_page.call(
-            tab:, linking: linking(request), pool: request.params[:pool], query: request.params[:q],
-          )
+          page = build_tasks_page.call(tab:, pool: request.params[:pool], query: request.params[:q])
 
           case page
           in Success(screen) then response.render(view, **screen)
           else halt 500
           end
-        end
-
-        private
-
-        def linking(request)
-          id = Blog::Types::IdParam[request.params[:link]]
-
-          { id:, query: Blog::Types::TrimmedText[request.params[:link_q]] } if id
         end
       end
     end

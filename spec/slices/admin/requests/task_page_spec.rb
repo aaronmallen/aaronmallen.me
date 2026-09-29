@@ -335,7 +335,7 @@ RSpec.describe "Admin task page", type: :request do
       def hidden_fields(form) = form.all("input[type='hidden']", visible: :all).to_h { [it["name"].to_sym, it.value] }
 
       def link(kind: "blocks", other_id: other.id)
-        fields = { filter: "next", origin: "tasks", from: "task", link: { kind:, other_id: other_id.to_s } }
+        fields = { filter: "next", origin: "tasks", link: { kind:, other_id: other_id.to_s } }
         send_to("/admin/tasks/#{task.id}/links", **fields)
       end
 
@@ -388,12 +388,6 @@ RSpec.describe "Admin task page", type: :request do
 
         expect(repo.by_id(task.id).links.map { [it.label, it.task.id] }).to eq([["blocks", other.id]])
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=next"))
-      end
-
-      it "marks the add form as sent from the page" do
-        read
-
-        expect(page).to have_css("form#task-#{task.id}-link-add input[name='from'][value='task']", visible: :all)
       end
 
       it "answers a failed link with 422" do

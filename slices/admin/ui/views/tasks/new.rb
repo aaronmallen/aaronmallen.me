@@ -19,7 +19,7 @@ module Admin
             PageHead(title: t(".heading"), sub: t(".sub")) { back }
 
             Card(label: t(".label"), title: t(".title")) do
-              CreateForm(errors: @errors, scope: SCOPE, today: Blog::TimeZone.today, values: @values, autofocus: true)
+              TaskForm(errors: @errors, scope: SCOPE, today: Blog::TimeZone.today, values: @values, autofocus: true)
             end
           end
 

@@ -18,7 +18,7 @@ module Admin
             dialog(**ATTRIBUTES) do
               div(class: "task-dialog-box") do
                 h2(id: TITLE_ID, class: "card-title") { t(".title") }
-                CreateForm(scope: SCOPE, today: @today) { close }
+                TaskForm(scope: SCOPE, today: @today) { close }
               end
             end
           end

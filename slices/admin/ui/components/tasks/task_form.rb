@@ -4,7 +4,8 @@ module Admin
   module UI
     module Components
       module Tasks
-        class CreateForm < Component
+        class TaskForm < Component
+          EXTERNAL = Blog::Types::TaskFilter["external"]
           LISTS = {
             Blog::Types::TaskFilter["today"] => ".lists.today",
             Blog::Types::TaskFilter["next"] => ".lists.next",
@@ -14,12 +15,15 @@ module Admin
 
           prop :scope, Blog::Types::String
           prop :today, Blog::Types::Date
+          prop :task, Blog::Types::Instance(ROM::Struct).optional, default: nil
           prop :values, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
           prop :errors, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
+          prop :returns, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
           prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template(&)
-            Form(action: path(:admin_create_task), class: "task-create-form") do
+            Form(action:, class: "task-form", id: form_id) do
+              @returns.each { |name, value| input(type: "hidden", name:, value:) }
               title_field
               note_field
               pair
@@ -29,6 +33,8 @@ module Admin
           end
 
           private
+
+          def action = @task ? path(:admin_update_task, id: @task.id) : path(:admin_create_task)
 
           def field(name, label_key, **)
             Field(label: t(label_key), id: FieldError.id_for(name, @scope)) do
@@ -40,26 +46,30 @@ module Admin
           end
 
           def foot
-            div(class: "task-create-foot") do
+            div(class: "task-form-foot") do
               yield if block_given?
               Button(variant: :pri, type: "submit", small: true) do
-                i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-                span { t(".save") }
+                i(class: @task ? "fa-regular fa-floppy-disk" : "fa-solid fa-plus", aria: { hidden: "true" })
+                span { t(@task ? ".update" : ".save") }
               end
             end
           end
+
+          def form_id = ("task-#{@task.id}-form" if @task)
 
           def list_field
             Field(label: t(".list"), id: FieldError.id_for(:list, @scope)) do
               Select(
                 **FieldError.control_attributes(:list, @errors, @scope),
                 name: "task[list]",
-                options: LISTS.transform_values { t(it) },
+                options: lists.transform_values { t(it) },
                 selected: @values.fetch(:list, NEXT),
               )
               FieldError(field: :list, errors: @errors, scope: @scope)
             end
           end
+
+          def lists = @task&.place == EXTERNAL ? LISTS.merge(EXTERNAL => ".lists.external") : LISTS
 
           def note_field
             Field(label: t(".note"), id: FieldError.id_for(:note, @scope)) do
@@ -75,7 +85,7 @@ module Admin
           end
 
           def pair
-            div(class: "task-editor-pair") do
+            div(class: "task-form-pair") do
               list_field
               SprintField(scope: @scope, scheduled:, today: @today)
             end

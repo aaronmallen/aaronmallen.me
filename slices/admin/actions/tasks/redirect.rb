@@ -5,12 +5,9 @@ module Admin
   module Actions
     module Tasks
       module Redirect
-        FROM_TASK = "task"
         FROM_TODAY = Blog::Types::TaskOrigin["today"]
 
         private
-
-        def from_task?(request) = request.params[:from] == FROM_TASK
 
         def from_today?(request) = Blog::Types::TaskOriginParam[request.params[:origin]] == FROM_TODAY
 

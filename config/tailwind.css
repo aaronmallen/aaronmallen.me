@@ -1696,18 +1696,8 @@
   }
 }
 
-@utility task-toggle {
-  &:checked ~ .task-editor {
-    @apply flex;
-  }
-
-  &:focus-visible ~ .task-title {
-    @apply underline;
-  }
-}
-
 @utility task-title {
-  @apply col-start-2 row-start-1 min-w-0 cursor-pointer font-display text-li font-semibold text-ink hover:text-accent;
+  @apply col-start-2 row-start-1 min-w-0 font-display text-li font-semibold text-ink no-underline hover:text-accent focus-ring;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -1764,10 +1754,6 @@
   @media (width < 43.75rem) {
     @apply col-start-2 row-span-1 row-start-3 flex-wrap gap-2;
   }
-}
-
-@utility task-pen {
-  @apply cursor-pointer px-2 py-1;
 }
 
 @utility task-links {
@@ -2021,36 +2007,20 @@
   }
 }
 
-@utility task-editor {
-  @apply col-start-2 row-start-4 hidden w-full flex-col gap-3 rounded-card border border-line bg-ground p-3.5;
-
-  @media (width < 43.75rem) {
-    @apply row-start-5;
-  }
-}
-
-@utility task-editor-form {
+@utility task-form {
   @apply flex flex-col gap-3;
 }
 
-@utility task-editor-pair {
+@utility task-form-pair {
   @apply grid gap-3 sm:grid-cols-2;
 }
 
-@utility task-editor-foot {
-  @apply flex flex-wrap items-center gap-2;
-
-  & > form:first-child {
-    @apply mr-auto;
-  }
-}
-
-@utility task-create-form {
-  @apply flex flex-col gap-3;
-}
-
-@utility task-create-foot {
+@utility task-form-foot {
   @apply flex flex-wrap items-center justify-end gap-2;
+}
+
+@utility task-form-delete {
+  @apply mr-auto;
 }
 
 @utility task-dialog {
