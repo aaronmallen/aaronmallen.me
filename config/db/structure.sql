@@ -1866,10 +1866,24 @@ CREATE UNIQUE INDEX analytics_rollup_referrers_day_host_index ON public.analytic
 
 
 --
+-- Name: commits_commit_date_commit_time_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX commits_commit_date_commit_time_id_index ON public.commits USING btree (commit_date, commit_time, id);
+
+
+--
 -- Name: commits_commit_date_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX commits_commit_date_index ON public.commits USING btree (commit_date);
+
+
+--
+-- Name: journal_entries_entry_date_entry_time_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX journal_entries_entry_date_entry_time_id_index ON public.journal_entries USING btree (entry_date, entry_time, id);
 
 
 --
@@ -1884,6 +1898,13 @@ CREATE INDEX journal_entries_entry_date_index ON public.journal_entries USING bt
 --
 
 CREATE INDEX journal_entry_tags_tag_id_index ON public.journal_entry_tags USING btree (tag_id);
+
+
+--
+-- Name: messages_received_at_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX messages_received_at_id_index ON public.messages USING btree (received_at, id);
 
 
 --
@@ -2199,6 +2220,13 @@ CREATE INDEX tasks_completed_on_index ON public.tasks USING btree ((((completed_
 --
 
 CREATE INDEX tasks_list_position_index ON public.tasks USING btree (list, "position");
+
+
+--
+-- Name: tasks_newest_first_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tasks_newest_first_index ON public.tasks USING btree (COALESCE(completed_at, created_at), id);
 
 
 --
@@ -2558,4 +2586,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260929000048_hold_tag_joins_to_their_scope.rb'),
 ('20260929000049_add_visitors_to_referrer_and_country_rollups.rb'),
 ('20260929000050_create_task_comments.rb'),
-('20260929000051_add_task_comments_to_activities.rb');
+('20260929000051_add_task_comments_to_activities.rb'),
+('20260929000052_add_paging_sort_indexes.rb');
