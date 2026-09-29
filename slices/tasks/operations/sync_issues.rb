@@ -7,6 +7,7 @@ module Tasks
       EXTERNAL = Blog::Types::TaskList["external"]
       OPEN = Blog::Types::TaskSourceState["open"]
       STARTED = Blog::Types::TaskSourceState["started"]
+      VISIBLE = /[[:^space:]]/
 
       include Deps[
         cancel_task: "operations.cancel_task",
@@ -28,7 +29,11 @@ module Tasks
 
       private
 
-      def copy(issue) = { title: issue[:title], note: issue[:body] }.transform_values { it&.delete("\0") }
+      def copy(issue)
+        title, note = issue.values_at(:title, :body).map { it&.delete("\0") }
+
+        { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
+      end
 
       def fetch(provider, client, known)
         return Failure(:not_configured) unless client.configured?

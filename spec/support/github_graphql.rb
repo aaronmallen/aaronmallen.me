@@ -25,7 +25,7 @@ module GitHubGraphQL
   end
 
   def github_issue(id, number: 1, repo: "aaronmallen/aaronmallen.me", assignees: [VIEWER_ID], **fields)
-    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", id:,
+    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", id:, number:,
       repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil, title: "Sync my issues",
       url: "https://github.com/#{repo}/issues/#{number}" }.merge(fields)
   end

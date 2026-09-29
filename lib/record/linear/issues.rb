@@ -78,8 +78,10 @@ module Record
       end
 
       def issue(node, viewer)
+        key = node.fetch("identifier")
+
         {
-          body: node["description"].to_s, id: node.fetch("id"), key: node.fetch("identifier"),
+          body: node["description"].to_s, id: node.fetch("id"), key:, reference: key,
           remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
         }
       end

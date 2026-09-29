@@ -10,7 +10,7 @@ module Record
 
         FIELDS = <<~GRAPHQL.freeze
           ... on Issue {
-            id url title body state stateReason
+            id number url title body state stateReason
             repository { nameWithOwner }
             assignees(first: #{MAX_ASSIGNEES}) { nodes { id } }
           }
@@ -68,9 +68,11 @@ module Record
       private
 
       def issue(node, viewer)
+        repo = node.dig("repository", "nameWithOwner")
+
         {
-          body: node["body"].to_s, id: node.fetch("id"), remote_state: remote_state(node, viewer),
-          repo: node.dig("repository", "nameWithOwner"), title: node.fetch("title"), url: node.fetch("url"),
+          body: node["body"].to_s, id: node.fetch("id"), reference: "#{repo}##{node.fetch('number')}",
+          remote_state: remote_state(node, viewer), repo:, title: node.fetch("title"), url: node.fetch("url"),
         }
       end
 

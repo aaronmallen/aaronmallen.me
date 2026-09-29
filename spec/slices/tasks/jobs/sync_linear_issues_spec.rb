@@ -115,6 +115,33 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "an issue whose title is blank once cleaned" do
+    it "imports with its key as the title" do
+      stub_assigned(issue(title: "\u0000 \u0000"))
+      sync
+
+      expect(imported.title).to eq("ABC-1")
+    end
+
+    it "keeps that title while the issue's title stays blank" do
+      stub_assigned(issue(title: "\u0000"))
+      sync
+      stub_assigned(issue(title: " \u0000 ", description: "New body"))
+      sync
+
+      expect(imported).to have_attributes(note: "New body", title: "ABC-1")
+    end
+
+    it "takes a real title once the issue has one" do
+      stub_assigned(issue(title: "\u0000"))
+      sync
+      stub_assigned(issue(title: "Sync Linear"))
+      sync
+
+      expect(imported.title).to eq("Sync Linear")
+    end
+  end
+
   describe "an issue that moves between states" do
     it "puts its task in progress when it starts" do
       task = tracked

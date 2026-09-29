@@ -129,6 +129,35 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "an issue whose title is blank once cleaned" do
+    let(:reference) { "aaronmallen/aaronmallen.me#7" }
+
+    it "imports with its reference as the title" do
+      stub_assigned(issue(title: "\u0000 \u0000"))
+      sync
+
+      expect(imported.title).to eq(reference)
+    end
+
+    it "keeps that title while the issue's title stays blank" do
+      stub_assigned(issue(title: "\u0000"))
+      sync
+      stub_assigned(issue(title: " \u0000 ", body: "New body"))
+      sync
+
+      expect(imported).to have_attributes(note: "New body", title: reference)
+    end
+
+    it "takes a real title once the issue has one" do
+      stub_assigned(issue(title: "\u0000"))
+      sync
+      stub_assigned(issue(title: "Sync my issues"))
+      sync
+
+      expect(imported.title).to eq("Sync my issues")
+    end
+  end
+
   describe "an issue closed on GitHub" do
     it "marks the task done when it closed as completed" do
       task = tracked

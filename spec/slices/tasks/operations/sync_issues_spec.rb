@@ -10,7 +10,7 @@ RSpec.describe Tasks::Operations::SyncIssues do
   def imported = repo.by_source("linear", "L_one")
 
   def issue(remote_state = "open", **)
-    { body: "Keep them in step", id: "L_one", remote_state:, title: "Sync my issues", url:, ** }
+    { body: "Keep them in step", id: "L_one", reference: "ABC-1", remote_state:, title: "Sync my issues", url:, ** }
   end
 
   def sync = Tasks::Slice["operations.sync_issues"].call(provider: "linear", client:)
