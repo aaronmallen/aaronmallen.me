@@ -8,6 +8,7 @@ module Admin
           include Components::Tasks
 
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
+          KICKER_SEPARATOR = " · "
           PREFIX = "#"
           STATUSES = {
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle", ".statuses.open"],
@@ -76,13 +77,15 @@ module Admin
           end
 
           def head
-            PageHead(title: @task.title, sub: t(".sub", key:)) do
+            PageHead(title: @task.title, kicker:) do
               back
               edit
             end
           end
 
           def key = PREFIX + @task.id.to_s
+
+          def kicker = [key, reference].compact.join(KICKER_SEPARATOR)
 
           def meta
             p(class: "task-meta task-read-meta") do
@@ -100,6 +103,8 @@ module Admin
               div(class: "task-body post-body") { raw(safe(@note_html)) }
             end
           end
+
+          def reference = @task.source && Structs::TaskSourceReference.for(@task.source).key
 
           def sprint_day
             sprint = @task.sprint

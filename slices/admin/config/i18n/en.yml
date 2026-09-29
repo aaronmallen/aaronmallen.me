@@ -1159,7 +1159,6 @@ en:
             done: "done"
             in_progress: "in progress"
             open: "open"
-          sub: "Task %{key}"
           unscheduled: "not set"
           updated: "Updated"
       today:

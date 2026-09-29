@@ -61,6 +61,43 @@ RSpec.describe "Admin task page", type: :request do
       expect(page).to have_css(".page-head h1", exact_text: "Ship the read page")
     end
 
+    describe "the kicker" do
+      def kicker_text = page.find(".page-head .page-head-kicker").text
+
+      it "sits above the title" do
+        read
+
+        expect(page).to have_css(".page-head .page-head-kicker + h1.page-head-title")
+      end
+
+      it "shows the key alone on a task typed in the admin" do
+        read
+
+        expect(kicker_text).to eq("##{task.id}")
+      end
+
+      it "adds the GitHub reference on a task synced from GitHub" do
+        create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
+        read
+
+        expect(kicker_text).to eq("##{task.id} · aaronmallen/aaronmallen.me#42")
+      end
+
+      it "adds the issue key on a task synced from Linear" do
+        url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
+        create(:task_source, task:, provider: "linear", remote_id: "lin-1", url:)
+        read
+
+        expect(kicker_text).to eq("##{task.id} · ABC-123")
+      end
+
+      it "draws no key line under the title" do
+        read
+
+        expect(page).to have_no_css(".page-head .page-head-sub")
+      end
+    end
+
     it "titles the tab with the task" do
       read
 
