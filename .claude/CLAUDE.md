@@ -1,7 +1,8 @@
 # aaronmallen.me
 
-My personal website and blog. Nothing is deployed yet, but the app is built: a public blog (`slices/public`), an
-admin behind GitHub sign-in (`slices/admin`), and an MCP server for proofreading drafts (`slices/mcp`).
+My personal website and blog, live at aaronmallen.me: a public blog (`slices/public`), an admin behind GitHub
+sign-in (`slices/admin`), and an MCP server for proofreading drafts (`slices/mcp`). Schema changes need a new
+migration; never edit one that has shipped.
 
 ## Stack
 
