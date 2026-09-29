@@ -19,6 +19,11 @@ RSpec.describe "Admin activity", type: :request do
 
   def event_subs = page.all(".activity-event-sub").map(&:text)
 
+  def follow_event(name, params = {})
+    visit_activity(params)
+    get(page.find("a.activity-event", text: name)[:href].split("#").first)
+  end
+
   def icon_for(type)
     {
       "comment" => "comment", "commit" => "code-commit", "journal" => "feather", "post" => "file-lines",
@@ -725,7 +730,18 @@ RSpec.describe "Admin activity", type: :request do
         create(:journal_entry, entry_date: today - 1, body: "walked the dog")
         visit_activity
 
-        expect(page).to have_css("a.activity-event[href='/admin/journal#day-#{today - 1}']", text: "walked the dog")
+        expect(page).to have_css(
+          "a.activity-event[href='/admin/journal?to=#{today - 1}#day-#{today - 1}']", text: "walked the dog",
+        )
+      end
+
+      it "opens a journal entry past the journal's first page on the page that holds it" do
+        lower_page_size(:admin, to: 1)
+        create(:journal_entry, entry_date: today - 1)
+        create(:journal_entry, entry_date: today - 3, body: "walked the dog")
+        follow_event("walked the dog", day: today - 3)
+
+        expect(last_response.body).to include("walked the dog")
       end
 
       it "opens a social post in the queue" do

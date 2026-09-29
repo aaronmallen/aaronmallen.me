@@ -45,7 +45,7 @@ module Admin
             case @event.type
             when COMMIT then path(:admin_commit, id: @event.source_id)
             when POST then path(:admin_edit_post, id: @event.source_id)
-            when JOURNAL then "#{path(:admin_journal)}##{Journal::Day.anchor(@event.occurred_on)}"
+            when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
             when SOCIAL then path(:admin_social, filter: POSTED)
             when TASK, COMMENT then task_href
             when WEBMENTION then path(:admin_webmentions)
