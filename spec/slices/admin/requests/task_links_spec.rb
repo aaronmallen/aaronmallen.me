@@ -49,10 +49,36 @@ RSpec.describe "Admin task links", type: :request do
       expect(chips("Ship the links")).to eq([[link_label(:blocks), "##{other.id}", "Write the migration"]])
     end
 
-    it "reads the reverse on the task that is blocked" do
+    describe "on the task that is blocked" do
+      def chip = row("Write the migration").find(".task-link")
+
+      before { get "/admin/tasks", filter: "next" }
+
+      it "reads the reverse with the blocker's key and no title", :aggregate_failures do
+        expect([chip.find(".task-link-label").text, chip.find(".task-key").text])
+          .to eq([link_label(:blocked_by), "##{task.id}"])
+        expect(chip).to have_no_css(".task-link-title")
+      end
+
+      it "names the blocker's title for a screen reader" do
+        expect(chip.find(".sr-only").text).to eq("Ship the links")
+      end
+
+      it "gives the blocker's title as a tooltip" do
+        expect(chip["title"]).to eq("Ship the links")
+      end
+
+      it "still shows the blocker's title on the task's page" do
+        get "/admin/tasks/#{other.id}", filter: "next"
+
+        expect(page.find(".task-link-row").find(".task-link-title").text).to eq("Ship the links")
+      end
+    end
+
+    it "gives no tooltip to a chip that shows its title" do
       get "/admin/tasks", filter: "next"
 
-      expect(chips("Write the migration")).to eq([[link_label(:blocked_by), "##{task.id}", "Ship the links"]])
+      expect(row("Ship the links").find(".task-link")["title"]).to be_nil
     end
 
     it "draws the other task's key as a badge that copies it" do
