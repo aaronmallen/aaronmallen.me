@@ -12,6 +12,7 @@ module Analytics
       operations.hash_visitor operations.record_visit queries.country_counts queries.country_database_failure
       queries.referrer_counts queries.rollup_for_day queries.rollups_between queries.summary_between
       queries.summary_for_day queries.top_paths queries.view_totals queries.views_by_path queries.views_by_post
+      queries.visitors_for_day
     ]
   end
 end

@@ -11,8 +11,8 @@ module Admin
           SEPARATOR = " · "
 
           def initialize(
-            commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, webmentions:,
-            body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
+            commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, visitors:,
+            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
           )
             super()
             @commits = commits
@@ -21,6 +21,7 @@ module Admin
             @publishing = { posts:, queue:, social: }
             @sprint = sprint
             @sync_failures = sync_failures
+            @visitors = visitors
             @webmentions = webmentions
           end
 
@@ -104,6 +105,7 @@ module Admin
             Stat(key: t(".commits"), value: @commits[:entries].size, change: commits_note)
             Stat(key: t(".webmentions"), value: @webmentions[:count], change: t(".webmentions_note"))
             queue_stat
+            Stat(key: t(".visitors"), value: @visitors)
           end
 
           def sub

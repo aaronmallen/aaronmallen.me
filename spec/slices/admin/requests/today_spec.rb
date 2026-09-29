@@ -46,6 +46,12 @@ RSpec.describe "Admin today", type: :request do
 
   def titles(title) = card(title).all(".li-title").map(&:text)
 
+  def visit_site(visitor, at: Time.now)
+    create(:analytics_event, visitor_hash: Digest::SHA256.hexdigest(visitor), occurred_at: at)
+  end
+
+  def visitors_stat = page.find(".g-4 .stat", text: "Unique visitors")
+
   def webmentions_stat = page.find(".g-4 .stat", text: "Webmentions")
 
   def with_token
@@ -343,6 +349,43 @@ RSpec.describe "Admin today", type: :request do
       end
     end
 
+    describe "the Unique visitors stat" do
+      it "sits right after In the queue in the one stat grid" do
+        get "/admin"
+
+        expect(page.all(".g-4 > .stat > .stat-key").map(&:text).last(2)).to eq(["In the queue", "Unique visitors"])
+      end
+
+      it "counts each visitor once", :aggregate_failures do
+        2.times { visit_site("first") }
+        visit_site("second")
+        get "/admin"
+
+        expect(visitors_stat).to have_css(".stat-key", exact_text: "Unique visitors")
+        expect(visitors_stat).to have_css(".stat-value", exact_text: "2")
+      end
+
+      it "leaves out visits from before today" do
+        visit_site("today")
+        visit_site("yesterday", at: Blog::TimeZone.day_start(today) - 1)
+        get "/admin"
+
+        expect(visitors_stat).to have_css(".stat-value", exact_text: "1")
+      end
+
+      it "reads zero without a visit today" do
+        get "/admin"
+
+        expect(visitors_stat).to have_css(".stat-value", exact_text: "0")
+      end
+
+      it "links nowhere" do
+        get "/admin"
+
+        expect(visitors_stat).to have_no_css("a")
+      end
+    end
+
     describe "the Webmentions stat" do
       it "counts the pending mentions the same as the card and the palette", :aggregate_failures do
         4.times { create(:webmention) }
@@ -432,7 +475,8 @@ RSpec.describe "Admin today", type: :request do
       create_entry(entry_date: today, body: "one two three")
       get "/admin"
 
-      expect(page.all(".g-4 .stat-key").map(&:text)).to eq(["Sprint", "Commits", "Webmentions", "In the queue"])
+      expect(page.all(".g-4 .stat-key").map(&:text))
+        .to eq(["Sprint", "Commits", "Webmentions", "In the queue", "Unique visitors"])
     end
 
     describe "today's entries" do

@@ -33,6 +33,8 @@ module Analytics
           countries: window.counts_by(:country_code).to_a,
         )
       end
+
+      def visitors_on(day) = analytics_events.on_day(day).visitor_count
     end
   end
 end

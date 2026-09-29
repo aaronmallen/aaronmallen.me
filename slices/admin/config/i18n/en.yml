@@ -1174,6 +1174,7 @@ en:
             one: "%{count} scheduled today"
             other: "%{count} scheduled today"
           sub_tasks: "%{done}/%{total} tasks done"
+          visitors: "Unique visitors"
           webmentions: "Webmentions"
           webmentions_note: "awaiting review"
       webmentions:

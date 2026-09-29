@@ -15,6 +15,7 @@ module Analytics
           integer.coalesce(integer.sum(read_seconds), 0).as(:read_seconds),
         ]
       end
+      VISITORS = Sequel.function(:count, :visitor_hash).distinct
 
       schema :analytics_events, infer: true
 
@@ -62,6 +63,8 @@ module Analytics
       def since(time) = where { occurred_at >= time }
 
       def totals = unordered.select(&TOTALS)
+
+      def visitor_count = unordered.dataset.get(VISITORS)
 
       private
 

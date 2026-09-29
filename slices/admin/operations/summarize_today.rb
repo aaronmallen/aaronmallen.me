@@ -23,22 +23,20 @@ module Admin
         recent_commit_repos: "record.queries.recent_commit_repos",
         scheduled_posts: "posts.queries.scheduled",
         sync_failures: "record.queries.sync_failures",
+        visitors_for_day: "analytics.queries.visitors_for_day",
       ]
 
       def call(now: Time.now, pool: nil)
-        scheduled = scheduled_posts.call
-        social = social_queue
         sprint = step summarize_sprint.call(now:, pool:)
 
         {
+          **publishing(now),
           commits: commits(now),
           commit_totals: commit_totals_today.call(now:),
           entries: journal_entries_today.call(now:),
-          posts: posts(scheduled),
-          queue: queue(scheduled, social, now),
-          social:,
           sprint:,
           sync_failures: failures,
+          visitors: visitors_for_day.call(Blog::TimeZone.today(now)),
           webmentions:,
         }
       end
@@ -75,6 +73,13 @@ module Admin
         drafts = posts_by_status.call(DRAFT)
 
         { scheduled:, drafts:, draft_counts: draft_counts(drafts) }
+      end
+
+      def publishing(now)
+        scheduled = scheduled_posts.call
+        social = social_queue
+
+        { posts: posts(scheduled), queue: queue(scheduled, social, now), social: }
       end
 
       def queue(scheduled, social, now)
