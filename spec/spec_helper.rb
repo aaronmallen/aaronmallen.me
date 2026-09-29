@@ -9,9 +9,9 @@ SimpleCov.start do
   skip "/spec/"
   skip "/tmp/"
 
-  add_group "lib/blog", "lib/blog/"
+  group "lib/blog", "lib/blog/"
   Dir.children(File.join(root, "slices")).sort.each do |slice|
-    add_group(slice) do |file|
+    group(slice) do |file|
       file.filename.start_with?(File.join(root, "slices", slice, ""), File.join(root, "lib", slice, ""))
     end
   end
