@@ -1,5 +1,5 @@
 ---
-description: Draft a request for comment and file it in Linear.
+description: Draft a request for comment and file it as a GitHub issue.
 name: write-rfc
 ---
 
@@ -8,7 +8,7 @@ name: write-rfc
 An RFC argues for an approach before anyone commits to it. Write one when the choice crosses component boundaries,
 changes something other code already leans on, or has two defensible answers.
 
-An RFC is an issue in Linear, labelled `rfc`.
+An RFC is a GitHub issue, labelled `rfc`.
 
 ## 1. Read the rules
 
@@ -47,17 +47,18 @@ Present the draft and take the edits. An RFC should be readable by somebody who 
 
 ## 4. File it
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-Create the issue with `save_issue`:
+File the issue:
 
-- `team`: `Personal`
-- `project`: `Site Refactor`
-- `labels`: `["rfc"]`
-- `title`: `RFC: <what it proposes>`
-- `description`: the body from step 2
+- **Title:** `RFC: <what it proposes>`.
+- **Body:** the draft from step 2.
+- **Labels:** `rfc`, plus an area label for each slice it touches.
+
+The repository is public. Keep hostnames and details of the home network out of the RFC.
 
 ## 5. Hand off
 
-Print the issue key and its URL, then: `settle the RFC, then invoke /plan <key>`.
+Print the issue number and its URL, then: `settle the RFC, then invoke /plan <number>`.
+
+[issues]: .claude/issues.md

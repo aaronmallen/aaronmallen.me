@@ -1,11 +1,11 @@
 ---
-description: Draft a product spec and file it in Linear.
+description: Draft a product spec and file it as a GitHub issue.
 name: write-spec
 ---
 
 # Write a spec
 
-A spec says what we are building and how a reader knows it works. It is an issue in Linear, labelled `spec`,
+A spec says what we are building and how a reader knows it works. It is a GitHub issue, labelled `spec`,
 and the work hangs off it as sub-issues.
 
 ## 1. Read the rules
@@ -44,18 +44,18 @@ Present the draft and take the edits. Do not file anything until the user says s
 
 ## 4. File it
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-Create the issue with `save_issue`:
+File the issue:
 
-- `team`: `Personal`
-- `project`: `Site Refactor`
-- `labels`: `["spec"]`
-- `title`: the spec title, with no `Spec:` prefix
-- `description`: the body from step 2
-- `milestone`: only when the spec matches a milestone that already exists. Do not make a new one.
+- **Title:** the spec title, with no `Spec:` prefix.
+- **Body:** the draft from step 2.
+- **Labels:** `spec`, plus an area label for each slice it touches.
+- **Milestone:** only when the spec matches a milestone that already exists. Do not make a new one.
+- **Parent:** when the spec splits a larger one, make it a sub-issue of that spec.
 
 ## 5. Hand off
 
-Print the issue key and its URL, then: `invoke /plan <key> when you are ready`.
+Print the issue number and its URL, then: `invoke /plan <number> when you are ready`.
+
+[issues]: .claude/issues.md

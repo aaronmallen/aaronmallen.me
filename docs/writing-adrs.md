@@ -30,7 +30,7 @@ diff.
 ## Status
 
 A record is `active` the day it lands. We do not commit decisions we have not made, so there is no status for a
-record still under discussion. That argument happens before the commit, usually in the Linear spec.
+record still under discussion. That argument happens before the commit, usually in the spec on GitHub.
 
 | Status | Badge | Meaning |
 | --- | --- | --- |
@@ -93,7 +93,7 @@ Every record opens with front matter. Leave out any key you have nothing to put 
 | `area` | The parts of the codebase the decision lands in. Every value names a place the tree holds today: the commit scopes `app`, `assets`, `config`, `db` and `lib`, or the name of a directory under `slices/`. A decision that binds every slice names every slice. |
 | `supersedes` | The numbers of the records this one replaces. |
 | `superseded-by` | The number of the record that replaced this one. |
-| `issue` | The Linear issue that asked for the record, like `AA-213`. |
+| `issue` | The issue that asked for the record: a GitHub number like `#12`, or a Linear key like `AA-213` for records from before the move. |
 | `amended` | The issues that changed the record after it landed, in the order they did. |
 | `tags` | Anything worth searching on later. |
 
@@ -108,7 +108,7 @@ happened. "Journal storage" does not.
 Write in the present tense and the active voice: "We keep journal records in the admin slice". The
 [writing rules][rules] apply here as they do everywhere else.
 
-Take the reasoning from the Linear spec and issue that asked for the record, and from the code. Never invent a reason
+Take the reasoning from the spec and issue that asked for the record, and from the code. Never invent a reason
 or an alternative nobody weighed.
 
 Say what it costs. A record with no consequences worth naming is either a decision that did not matter or a record

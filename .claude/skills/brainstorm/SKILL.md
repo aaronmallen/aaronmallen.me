@@ -9,12 +9,11 @@ Turn a rough idea into a spec, or split a spec that grew too big.
 
 ## 1. Work out the mode
 
-The user gives you either a rough idea or a Linear issue key.
+The user gives you either a rough idea or an issue number.
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-A key such as `AA-12` means split an existing spec. Read it with `get_issue` and find the seams: the parts
+A number such as `#12` means split an existing spec. Read it and find the seams: the parts
 that ship on their own, the parts that wait.
 
 A rough idea means start from nothing. Send the idea to the **brainstormer** agent. It reads
@@ -40,6 +39,8 @@ Then ask with `AskUserQuestion` so the user picks one.
 
 ## 4. Write the spec
 
-Invoke `/write-spec` with the approach the user picked. That files the spec in Linear and prints the key.
+Invoke `/write-spec` with the approach the user picked. That files the spec on GitHub and prints its number.
 
-Splitting a large spec means one `/write-spec` per piece, each one filed under the original.
+Splitting a large spec means one `/write-spec` per piece, each one filed as a sub-issue of the original.
+
+[issues]: .claude/issues.md

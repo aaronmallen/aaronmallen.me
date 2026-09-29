@@ -1,5 +1,5 @@
 ---
-description: Draft one issue and file it in Linear.
+description: Draft one issue and file it on GitHub.
 name: write-issue
 ---
 
@@ -36,18 +36,17 @@ Rules for the body:
 
 ## 3. File it
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-Create the issue with `save_issue`:
+File the issue:
 
-- `team`: `Personal`
-- `project`: `Site Refactor`
-- `labels`: one type from `bug`, `chore`, `enhancement`, `fix`, `optimization`, `release`, `spike`
-- `parentId`: the spec's key, when the issue came from one
-- `priority`: `1` urgent, `2` high, `3` medium, `4` low
-- `title`: the code that lands, not the outcome for a user
+- **Title:** the code that lands, not the outcome for a user.
+- **Labels:** one type from `bug`, `chore`, `enhancement`, `fix`, `optimization`, `release`, `spike`, an area
+  label for each slice it touches, and one priority from `p0` to `p4`.
+- **Parent:** when the issue came from a spec, make it a sub-issue of that spec.
 
 ## 4. Hand off
 
-Print the issue key and its URL, then: `invoke /implement <key> when you are ready`.
+Print the issue number and its URL, then: `invoke /implement <number> when you are ready`.
+
+[issues]: .claude/issues.md

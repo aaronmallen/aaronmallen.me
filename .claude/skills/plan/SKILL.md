@@ -9,12 +9,9 @@ Take a spec and work out what to build first.
 
 ## 1. Read the spec
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-```text
-get_issue AA-###
-```
+Read the spec by its number.
 
 Pull out the acceptance criteria, the parts of the codebase the work touches, and anything that reads like a
 decision rather than a task.
@@ -42,25 +39,25 @@ implemented, not now.
 
 ## 4. File the issues
 
-One `save_issue` per issue, each with:
+File each issue, then make it a sub-issue of the spec so the work hangs off it. Each one gets:
 
-- `team`: `Personal`
-- `project`: `Site Refactor`
-- `parentId`: the spec's key, so the work hangs off the spec
-- `labels`: one type from `bug`, `chore`, `enhancement`, `fix`, `optimization`, `release`, `spike`
-- `milestone`: the spec's milestone, when it has one
-- `priority`: `2` for work the rest waits on, `3` for the body of it, `4` for polish
-- `description`: the shape in `/write-issue`
+- **Labels:** one type from `bug`, `chore`, `enhancement`, `fix`, `optimization`, `release`, `spike`, an area
+  label for each slice it touches, and a priority: `p1` for work the rest waits on, `p2` for the body of it, `p3`
+  for polish.
+- **Milestone:** the spec's, when it has one.
+- **Body:** the shape in `/write-issue`.
 
-Then set `blockedBy` on the issues that have to wait. Order comes from those relations, not from the order you
-filed them in.
+Then mark each issue that has to wait as blocked by the issues it waits on, and give it the `blocked` label. Order
+comes from those relations, not from the order you filed them in.
 
 Title an issue after the code that lands, not the outcome for a user. `Render posts from Markdown with Rouge`, not
 `Make posts look nice`.
 
 ## 5. Report
 
-Give the user the spec key, the issue keys with titles, and what blocks what. Say which issues can be worked in
+Give the user the spec number, the issue numbers with titles, and what blocks what. Say which issues can be worked in
 any order.
 
-Then: `invoke /implement <key> when you are ready`, naming the first unblocked issue.
+Then: `invoke /implement <number> when you are ready`, naming the first unblocked issue.
+
+[issues]: .claude/issues.md

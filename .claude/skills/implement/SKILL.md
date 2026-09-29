@@ -5,23 +5,20 @@ name: implement
 
 # Implement
 
-Take one Linear issue from open to committed.
+Take one issue from open to committed.
 
 ## 1. Read the issue
 
-Use the claude.ai Linear connector (`claude_ai_Linear`) for every Linear call here, and file under the
-`Site Refactor` project in the `Personal` team. Never use `linear-complish`: that is a different workspace.
+Issues live on GitHub. Work from [`.claude/issues.md`][issues] for every command and label here.
 
-```text
-get_issue AA-###
-```
+Read the issue by its number.
 
 Read the story for the why and the criteria for the what. Every criterion has to hold when you are done.
 
 Read the code the issue touches before you change any of it. Read the tests too. A test name states the intent,
 so read it before you call any behaviour a bug.
 
-Then set the issue to `In Progress` with `save_issue`.
+Then add the `in progress` label.
 
 ## 2. Write the code
 
@@ -56,10 +53,13 @@ Invoke `/commit`.
 
 ## 6. Close it
 
-Set the issue to `Done` with `save_issue`.
+Close the issue as completed and take `in progress` off it. Take `blocked` off every issue it blocked that has no
+other open blocker.
 
-Then check the parent spec. Read its sub-issues with `list_issues` and `parentId`. When none of them is still
-open, set the spec to `Done` too.
+Then check the parent spec. Read its sub-issues. When none of them is still open, close the spec as completed
+too.
 
-If a step failed and you could not fix it, leave the issue `In Progress` and tell the user what stopped you. Do
+If a step failed and you could not fix it, leave the issue open and `in progress` and tell the user what stopped you. Do
 not mark work done that is not.
+
+[issues]: .claude/issues.md
