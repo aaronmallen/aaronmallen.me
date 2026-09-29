@@ -62,6 +62,8 @@ RSpec.describe "MCP reach", type: :request do
       "social.operations.refresh_social_engagement" => "a background job refreshes likes and replies",
       "social.operations.send_webmentions" => "a background job sends a post's webmentions after it saves",
       "social.operations.verify_webmention" => "a background job checks a received webmention's source",
+      "tasks.operations.queue_issue_sync" => "the admin's sync button queues the issue sync job",
+      "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
     }
   end
 

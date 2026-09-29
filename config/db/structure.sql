@@ -228,6 +228,20 @@ CREATE TYPE public.task_source_provider AS ENUM (
 
 
 --
+-- Name: task_source_state; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.task_source_state AS ENUM (
+    'open',
+    'completed',
+    'not_planned',
+    'unassigned',
+    'moved',
+    'deleted'
+);
+
+
+--
 -- Name: task_status; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -1275,7 +1289,8 @@ CREATE TABLE public.task_sources (
     remote_id text NOT NULL,
     url text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL
 );
 
 
@@ -2405,4 +2420,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260928000039_convert_task_types_to_tags.rb'),
 ('20260928000040_create_task_sources.rb'),
 ('20260928000041_add_external_to_task_list.rb'),
-('20260928000042_add_issues_to_sync_name.rb');
+('20260928000042_add_issues_to_sync_name.rb'),
+('20260928000043_add_remote_state_to_task_sources.rb');

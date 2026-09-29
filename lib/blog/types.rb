@@ -111,6 +111,7 @@ module Blog
     TaskPool = Types::String.enum("next", "someday")
     TaskPoolParam = TaskPool.fallback(TaskPool.values.first)
     TaskSourceProvider = Types::String.enum("github")
+    TaskSourceState = Types::String.enum("open", "completed", "not_planned", "unassigned", "moved", "deleted")
     TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
     TaskView = Types::String.enum("today", "upcoming", "next", "someday")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
