@@ -5,6 +5,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-29
+
 ### Added
 
 - Cancel a task from its row, its page or the new `cancel_task` MCP tool. A canceled task leaves the open lists,
@@ -71,7 +73,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/aaronmallen/aaronmallen.me/releases/tag/1.0.0
