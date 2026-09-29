@@ -114,6 +114,25 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  describe "a task imported from Linear" do
+    let!(:source) do
+      url = "https://linear.app/acme/issue/ABC-123/fix-the-feed"
+      create(:task_source, provider: "linear", remote_id: "lin_1", remote_state: "started", url:)
+    end
+
+    it "is found by its provider and its id there" do
+      expect(repo.by_source("linear", "lin_1").id).to eq(source.task_id)
+    end
+
+    it "carries the started state it was saved with when read" do
+      expect(Tasks::Slice["queries.task_by_id"].call(source.task_id).source.remote_state).to eq("started")
+    end
+
+    it "shares an id with a GitHub issue without a clash" do
+      expect(create(:task_source, remote_id: "lin_1").provider).to eq("github")
+    end
+  end
+
   describe "opening a canceled task again" do
     let(:task) { create(:task, :canceled) }
 

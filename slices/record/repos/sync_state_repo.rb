@@ -8,6 +8,7 @@ module Record
       COUNTRY_DATABASE = "country_database"
       FAILURE = "failure"
       ISSUES = "issues"
+      LINEAR_ISSUES = "linear_issues"
       PAGE_LIMIT = "page_limit"
       PROJECTS = "projects"
 

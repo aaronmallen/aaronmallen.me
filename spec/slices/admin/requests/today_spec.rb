@@ -607,12 +607,19 @@ RSpec.describe "Admin today", type: :request do
 
       def dead_maxmind_key = Dry::Monads::Failure([:download_failed, "MaxMind answered 401 for GeoLite2-Country"])
 
+      def fail_both_issue_syncs
+        sync_issues_with(bad_gateway("GraphQL"))
+        record_linear_issue_sync_outcome(Dry::Monads::Failure(:linear_failed))
+      end
+
       def fail_twice(reason, repo: nil)
         record_commit_failure(reason, at: first_failed_at, repo:)
         record_commit_failure(reason, repo:)
       end
 
       def failed_at = Time.utc(2026, 1, 7, 15, 30)
+
+      def failed_syncs = failure_lines.map { it.split(" failed at ").first }
 
       def failure_lines = page.all(".sync-failures .sync-failure").map(&:text)
 
@@ -629,6 +636,10 @@ RSpec.describe "Admin today", type: :request do
 
       def record_commit_failure(reason, at: failed_at, message: nil, repo: nil)
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, reason, at:, message:, repo:)
+      end
+
+      def record_linear_issue_sync_outcome(result)
+        Record::Slice["operations.record_linear_issue_sync_outcome"].call(result)
       end
 
       def refresh_country_database_with(result)
@@ -713,6 +724,21 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(failure_lines.first).to match(bad_gateway_line("Issue sync", "GraphQL"))
+      end
+
+      it "reports a failed Linear issue sync apart from a failed GitHub one" do
+        fail_both_issue_syncs
+        get "/admin"
+
+        expect(failed_syncs).to eq(["Issue sync", "Linear issue sync"])
+      end
+
+      it "clears a Linear issue sync failure without clearing GitHub's" do
+        fail_both_issue_syncs
+        record_linear_issue_sync_outcome(Dry::Monads::Success(nil))
+        get "/admin"
+
+        expect(failure_lines).to contain_exactly(bad_gateway_line("Issue sync", "GraphQL"))
       end
 
       it "reports the nightly analytics rollup the same way" do

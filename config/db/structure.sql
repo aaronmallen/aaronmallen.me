@@ -159,7 +159,8 @@ CREATE TYPE public.sync_name AS ENUM (
     'commits',
     'country_database',
     'projects',
-    'issues'
+    'issues',
+    'linear_issues'
 );
 
 
@@ -223,7 +224,8 @@ CREATE TYPE public.task_list AS ENUM (
 --
 
 CREATE TYPE public.task_source_provider AS ENUM (
-    'github'
+    'github',
+    'linear'
 );
 
 
@@ -237,7 +239,8 @@ CREATE TYPE public.task_source_state AS ENUM (
     'not_planned',
     'unassigned',
     'moved',
-    'deleted'
+    'deleted',
+    'started'
 );
 
 
@@ -2421,4 +2424,7 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260928000040_create_task_sources.rb'),
 ('20260928000041_add_external_to_task_list.rb'),
 ('20260928000042_add_issues_to_sync_name.rb'),
-('20260928000043_add_remote_state_to_task_sources.rb');
+('20260928000043_add_remote_state_to_task_sources.rb'),
+('20260928000044_add_linear_to_task_source_provider.rb'),
+('20260928000045_add_started_to_task_source_state.rb'),
+('20260928000046_add_linear_issues_to_sync_name.rb');
