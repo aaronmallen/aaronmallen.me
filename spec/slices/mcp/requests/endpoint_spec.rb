@@ -109,10 +109,10 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def write_tools
     %w[
-      accept_suggestion_edits add_work_entry archive_project cancel_task capture_task complete_task create_journal_entry
-      create_post create_social_post delete_journal_entry delete_post delete_social_post delete_task delete_work_entry
-      drop_sprint import_commits link_tasks mark_message moderate_webmention move_project move_task plan_sprint
-      publish_post reject_suggestion_edits remove_tag reopen_task reorder_task
+      accept_suggestion_edits add_task_comment add_work_entry archive_project cancel_task capture_task complete_task
+      create_journal_entry create_post create_social_post delete_journal_entry delete_post delete_social_post
+      delete_task delete_work_entry drop_sprint import_commits link_tasks mark_message moderate_webmention
+      move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag reopen_task reorder_task
       restore_project save_project save_tag save_task schedule_task send_social_post start_task
       unlink_task update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
     ]
@@ -1903,6 +1903,7 @@ RSpec.describe "MCP endpoint", type: :request do
     def enough_for(name)
       {
         "accept_suggestion_edits" => { suggestion_id: 1 },
+        "add_task_comment" => { id: 1, body: "Blocked on review" },
         "add_work_entry" => { org: "Acme", role: "Engineer", from_year: 2019 },
         "archive_project" => { id: 1 },
         "cancel_task" => { id: 1 },

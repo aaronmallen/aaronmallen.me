@@ -10,6 +10,7 @@ module MCP
       CONTROL = "holds a control character"
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
       LISTS = Blog::Types::TaskFilter.values.freeze
+      LOCAL = "local"
       NO_SPRINT = "no sprint has the ID %s"
       NO_TASK = "no task has the ID %s"
       SEPARATOR = ","
@@ -17,6 +18,7 @@ module MCP
       UNSAVED = "could not save the change"
 
       COMPLAINTS = {
+        body: { "blank" => "write the comment first" },
         kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
         list: { Blog::Contract::FORMAT => "pick one of the four lists" },
         other_id: {
@@ -32,9 +34,22 @@ module MCP
       class << self
         private
 
+        def add_task_comment(server_context) = server_context.fetch(:add_task_comment)
+
         def cancel_task(server_context) = server_context.fetch(:cancel_task)
 
         def capture_task(server_context) = server_context.fetch(:capture_task)
+
+        def comment_entry(comment)
+          {
+            id: comment.id,
+            body: comment.body,
+            author: comment.remote_id ? comment.author : Blog::Owner.full_name,
+            source: comment.provider || LOCAL,
+            url: comment.url,
+            created_at: stamp(comment.created_at),
+          }
+        end
 
         def complaint(errors)
           errors.map { |field, (code)| "#{field}: #{reason(field, code)}" }.join("; ")
@@ -101,10 +116,14 @@ module MCP
         def task_answer(id, server_context, **extra)
           task = task_by_id(server_context).call(id)
 
-          answer(task_entry(task).merge(extra))
+          comments = task_comments(server_context).call(id).map { comment_entry(it) }
+
+          answer(task_entry(task).merge(comments:, **extra))
         end
 
         def task_by_id(server_context) = server_context.fetch(:task_by_id)
+
+        def task_comments(server_context) = server_context.fetch(:task_comments)
 
         def task_entry(task, sprint_on = task.sprint&.sprint_date)
           {

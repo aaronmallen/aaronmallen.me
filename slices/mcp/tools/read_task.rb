@@ -5,7 +5,8 @@ module MCP
     class ReadTask < TaskTool
       SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
 
-      description "Read one task: its title, note, status, list or sprint day, tags and links both ways"
+      description "Read one task: its title, note, status, list or sprint day, tags, links both ways and its " \
+                  "comments, oldest first"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 

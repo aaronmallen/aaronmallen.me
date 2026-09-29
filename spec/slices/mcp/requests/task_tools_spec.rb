@@ -18,6 +18,11 @@ RSpec.describe "MCP task tools", type: :request do
 
   def listed_titles = content.fetch("tasks").map { it.fetch("title") }
 
+  def local_entry(body, time)
+    { "body" => body, "author" => Blog::Owner.full_name, "source" => "local", "url" => nil,
+      "created_at" => time.utc.iso8601 }
+  end
+
   def message = result.fetch("content").first.fetch("text")
 
   def refused? = result["isError"] == true
@@ -165,6 +170,91 @@ RSpec.describe "MCP task tools", type: :request do
       call_tool("read_task", id: 999_999)
 
       expect(message).to eq("no task has the ID 999999")
+    end
+
+    describe "comments" do
+      let(:task) { create(:task) }
+
+      def comments = content.fetch("comments")
+
+      it "carries none when the task has none" do
+        call_tool("read_task", id: task.id)
+
+        expect(comments).to eq([])
+      end
+
+      it "lists them oldest first" do
+        create(:task_comment, task_id: task.id, body: "second", created_at: at(today, 14))
+        create(:task_comment, task_id: task.id, body: "first", created_at: at(today, 9))
+        call_tool("read_task", id: task.id)
+
+        expect(comments.map { it.fetch("body") }).to eq(%w[first second])
+      end
+
+      it "leaves out another task's comments" do
+        create(:task_comment, body: "elsewhere")
+        call_tool("read_task", id: task.id)
+
+        expect(comments).to be_empty
+      end
+
+      it "names the owner as the author of a local comment" do
+        create(:task_comment, task_id: task.id, body: "mine", created_at: at(today, 9))
+        call_tool("read_task", id: task.id)
+
+        expect(comments.first).to include(local_entry("mine", at(today, 9)))
+      end
+
+      it "names the provider, author and link of a synced comment" do
+        synced = create(:task_comment, :synced, task_id: task.id, author: "octocat")
+        call_tool("read_task", id: task.id)
+
+        expect(comments.first).to include("author" => "octocat", "source" => "github", "url" => synced.url)
+      end
+    end
+  end
+
+  describe "add_task_comment" do
+    let(:task) { create(:task) }
+
+    def stored = Tasks::Slice["repos.task_comment_repo"].for_task(task.id)
+
+    it "adds a local comment to the task" do
+      call_tool("add_task_comment", id: task.id, body: "Blocked on review")
+
+      expect(stored.map { [it.body, it.remote_id] }).to eq([["Blocked on review", nil]])
+    end
+
+    it "answers with the comment, trimmed" do
+      call_tool("add_task_comment", id: task.id, body: "  Blocked on review  ")
+
+      expect(content).to eq({ "id" => stored.first.id, **local_entry("Blocked on review", stored.first.created_at) })
+    end
+
+    it "shows the comment when the task is read" do
+      call_tool("add_task_comment", id: task.id, body: "Blocked on review")
+      call_tool("read_task", id: task.id)
+
+      expect(content.fetch("comments").map { it.fetch("body") }).to eq(["Blocked on review"])
+    end
+
+    it "refuses an empty body and adds nothing", :aggregate_failures do
+      call_tool("add_task_comment", id: task.id, body: "   ")
+
+      expect([refused?, message]).to eq([true, "body: write the comment first"])
+      expect(stored).to be_empty
+    end
+
+    it "refuses a body holding a control character" do
+      call_tool("add_task_comment", id: task.id, body: "bad\u0000body")
+
+      expect(message).to eq("body: holds a control character")
+    end
+
+    it "refuses a task that is not there", :aggregate_failures do
+      call_tool("add_task_comment", id: 999_999, body: "Hello")
+
+      expect([refused?, message]).to eq([true, "no task has the ID 999999"])
     end
   end
 

@@ -20,6 +20,7 @@ module MCP
         activity_commit_totals: "activity.queries.activity_commit_totals",
         activity_counts: "activity.queries.activity_counts",
         activity_counts_by_month: "activity.queries.activity_counts_by_month",
+        add_task_comment: "tasks.operations.add_task_comment",
         add_work_entry: "projects.operations.add_work_entry",
         all_posts: "posts.queries.all",
         all_tags: "tags.queries.all",
@@ -79,6 +80,7 @@ module MCP
         sync_failures: "record.queries.sync_failures",
         tag_usage: "tags.queries.usage",
         task_by_id: "tasks.queries.task_by_id",
+        task_comments: "tasks.queries.task_comments",
         tasks_in_sprint: "tasks.queries.tasks_in_sprint",
         unlink_task: "tasks.operations.unlink_task",
         unsent_social_posts: "social.queries.unsent_social_posts",
@@ -99,6 +101,7 @@ module MCP
       TITLE = "%s's writing"
       TOOLS = [
         Tools::AcceptSuggestionEdits,
+        Tools::AddTaskComment,
         Tools::AddWorkEntry,
         Tools::ArchiveProject,
         Tools::CancelTask,
