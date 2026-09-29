@@ -5,7 +5,7 @@ require "dry/monads"
 module MCP
   module Tools
     module DayWindow
-      CAP = 200
+      CAP = 100
       DAYS = { type: "string", description: "a day, as YYYY-MM-DD" }.freeze
       PAGING_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                     "One answer carries about #{CAP} rows, newest first, rounded out to the end of a day. " \
@@ -25,15 +25,11 @@ module MCP
         Success([first, last])
       end
 
-      def page(first, last, day:)
-        head = yield(first, last, CAP + 1)
-        return { rows: head, partial: false } if head.length <= CAP
+      def page(first, last, day:, &)
+        found = Blog::DayCursor.page(first, last, size: CAP, day:, &)
+        return { rows: found.rows, partial: false } unless found.partial?
 
-        boundary = day.call(head[CAP - 1])
-        rows = head.take_while { day.call(it) > boundary } + yield(boundary, boundary, nil)
-        return { rows:, partial: false } unless boundary > first && yield(first, boundary - 1, 1).any?
-
-        { rows:, partial: true, continue_to: (boundary - 1).iso8601 }
+        { rows: found.rows, partial: true, continue_to: found.continue_to.iso8601 }
       end
     end
   end

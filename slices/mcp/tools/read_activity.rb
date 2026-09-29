@@ -3,7 +3,6 @@
 module MCP
   module Tools
     class ReadActivity < Base
-      CAP = 200
       FIELDS = %i[link repo sha additions deletions status targets excerpt task_id].freeze
       KINDS = Blog::Types::ActivityKind.values
       TIME_FORMAT = "%H:%M"
@@ -40,31 +39,20 @@ module MCP
                   "task's title. " \
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
                   "deletions, status, targets, excerpt and task_id its kind holds. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
-                  "One answer carries about #{CAP} rows, rounded out to the end of a day. Past that, partial " \
-                  "comes back true and continue_to holds the day to send as to when you ask for the next " \
-                  "window. A year runs to far more than one answer, so walk it a month at a time, newest first"
+                  "#{DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
+                  "a time, newest first"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, **filters)
-          first = Blog::TimeZone.parse_day(from)
-          last = Blog::TimeZone.parse_day(to)
-          return refuse("give from and to as days, such as 2026-01-01") unless first && last
-          return refuse("from comes after to") if first > last
-
-          window(first, last, filters, server_context)
+          case DayWindow.days(from, to)
+          in Success[first, last] then window(first, last, filters, server_context)
+          in Failure(message) then refuse(message)
+          end
         end
 
         private
-
-        def answer_for(first, last, rows, partial:)
-          payload = { from: first.iso8601, to: last.iso8601, count: rows.length, partial: }
-          payload[:continue_to] = (rows.last.occurred_on - 1).iso8601 if partial
-
-          answer(payload.merge(activity: rows.map { entry(it) }))
-        end
 
         def entry(row)
           {
@@ -75,7 +63,7 @@ module MCP
           }.merge(row.to_h.slice(*FIELDS).compact)
         end
 
-        def found(first, last, filters, server_context, limit: nil)
+        def found(first, last, filters, server_context, limit:)
           activity_between(server_context).call(
             from: first,
             to: last,
@@ -93,18 +81,14 @@ module MCP
           asked.empty? ? KINDS : asked
         end
 
-        def older?(first, boundary, filters, server_context)
-          boundary > first && found(first, boundary - 1, filters, server_context, limit: 1).any?
-        end
-
         def window(first, last, filters, server_context)
-          head = found(first, last, filters, server_context, limit: CAP + 1)
-          return answer_for(first, last, head, partial: false) if head.length <= CAP
+          page = DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
+            found(from, to, filters, server_context, limit:)
+          end
+          rows = page.fetch(:rows)
+          payload = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
 
-          boundary = head[CAP - 1].occurred_on
-          rounded = head.take_while { it.occurred_on > boundary } + found(boundary, boundary, filters, server_context)
-
-          answer_for(first, last, rounded, partial: older?(first, boundary, filters, server_context))
+          answer(payload.merge(activity: rows.map { entry(it) }))
         end
       end
     end
