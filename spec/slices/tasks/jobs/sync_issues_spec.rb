@@ -103,6 +103,32 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "an issue with a NUL byte in its title or body" do
+    it "imports as a task without the byte" do
+      stub_assigned(issue(title: "Sync\u0000 my issues", body: "Keep\u0000 them in step"))
+      sync
+
+      expect(imported).to have_attributes(note: "Keep them in step", title: "Sync my issues")
+    end
+
+    it "takes a later change as usual" do
+      stub_assigned(issue(title: "Sync\u0000 my issues", body: "Keep\u0000 them in step"))
+      sync
+      stub_assigned(issue(title: "Sync\u0000 every issue", body: "Keep\u0000 them all in step"))
+      sync
+
+      expect(imported).to have_attributes(note: "Keep them all in step", title: "Sync every issue")
+    end
+
+    it "leaves the task untouched while the issue stays the same" do
+      task = tracked(title: "Sync my issues", note: "Keep them in step", updated_at: Time.now - 3600)
+      stub_assigned(issue(title: "Sync\u0000 my issues", body: "Keep\u0000 them in step"))
+      sync
+
+      expect(repo.by_id(task.id).updated_at).to be_within(1).of(task.updated_at)
+    end
+  end
+
   describe "an issue closed on GitHub" do
     it "marks the task done when it closed as completed" do
       task = tracked

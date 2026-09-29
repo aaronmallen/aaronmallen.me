@@ -29,6 +29,8 @@ module Tasks
 
       private
 
+      def copy(issue) = { title: issue[:title], note: issue[:body] }.transform_values { it&.delete("\0") }
+
       def fetch(known)
         return Failure(:not_configured) unless client.configured?
 
@@ -55,8 +57,7 @@ module Tasks
 
       def import(issue)
         transaction do
-          task = task_repo.create(title: issue[:title], note: issue[:body], list: EXTERNAL,
-                                  position: task_repo.next_position)
+          task = task_repo.create(**copy(issue), list: EXTERNAL, position: task_repo.next_position)
           task_source_repo.create(task_id: task.id, provider: GITHUB, remote_id: issue[:id], url: issue[:url],
                                   remote_state: OPEN)
         end
@@ -69,9 +70,10 @@ module Tasks
       end
 
       def rewrite(task, issue)
-        return if !issue.key?(:title) || (task.title == issue[:title] && task.note == issue[:body])
+        return unless issue.key?(:title)
 
-        task_repo.update(task.id, title: issue[:title], note: issue[:body])
+        fields = copy(issue)
+        task_repo.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
       end
 
       def settle(task, state, now)
