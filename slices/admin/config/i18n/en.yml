@@ -89,6 +89,9 @@ en:
       canceled: "Canceled"
       captured: "Task captured"
       closed: "That task is closed already"
+      comment_added: "Comment added"
+      comment_deleted: "Comment deleted"
+      comment_saved: "Comment saved"
       completed: "Done"
       deleted: "Task deleted"
       issue_sync:
@@ -647,6 +650,19 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
           done_at: "done %{date} · %{time}"
+        comments:
+          add: "Add comment"
+          add_label: "New comment"
+          confirm_delete: "Delete this comment?"
+          delete: "Delete comment"
+          edit: "Edit"
+          edit_label: "Comment"
+          empty: "No comments yet."
+          label: "Talk"
+          save: "Save"
+          title: "Comments"
+          unknown_author: "unknown"
+          view: "View"
         completed_day:
           days_ago: "%{count} days ago"
           today: "Today"
@@ -672,6 +688,9 @@ en:
           edit_title: "Edit the task"
           title: "New task"
         field_error:
+          body:
+            blank: "Write the comment first."
+            control: "Take out the control characters."
           kind:
             format: "Pick one of the four link types."
           list:

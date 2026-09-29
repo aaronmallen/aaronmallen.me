@@ -31,6 +31,8 @@ module Tasks
 
       def detailed(id) = with_details.combine(:sprint).by_pk(id).one
 
+      def exist?(id) = tasks.by_pk(id).exist?
+
       def filtered(statuses:, from:, to:)
         found = with_details.combine(:sprint)
         found = found.where(status: statuses) unless statuses.empty?

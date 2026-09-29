@@ -7,6 +7,7 @@ module Admin
         class FieldError < Blog::UI::FieldError
           SCOPE = "task"
           MESSAGES = {
+            body: { "blank" => ".body.blank", "control" => ".body.control" },
             kind: { "format" => ".kind.format" },
             other_id: {
               "format" => ".other_id.format", "missing" => ".other_id.missing", "self" => ".other_id.self",

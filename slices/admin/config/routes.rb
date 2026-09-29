@@ -61,6 +61,15 @@ module Admin
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID
     post "/tasks/:id/cancel", to: "tasks.cancel", as: :cancel_task, id: ID
+    post "/tasks/:id/comments", to: "tasks.create_comment", as: :create_task_comment, id: ID
+    post(
+      "/tasks/:id/comments/:comment_id",
+      to: "tasks.update_comment", as: :update_task_comment, id: ID, comment_id: ID,
+    )
+    post(
+      "/tasks/:id/comments/:comment_id/delete",
+      to: "tasks.destroy_comment", as: :delete_task_comment, id: ID, comment_id: ID,
+    )
     post "/tasks/:id/complete", to: "tasks.complete", as: :complete_task, id: ID
     post "/tasks/:id/delete", to: "tasks.destroy", as: :delete_task, id: ID
     post "/tasks/:id/links", to: "tasks.link", as: :link_task, id: ID

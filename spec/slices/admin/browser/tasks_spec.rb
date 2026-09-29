@@ -668,6 +668,93 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "commenting from the panel" do
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:comments) { Tasks::Slice["relations.task_comments"] }
+
+    def bodies = comments.to_a.map { it[:body] }
+
+    def comment_on(scope) = scope.find(".task-comment", text: "Sent the forms")
+
+    describe "with none yet" do
+      before { open_task("Email the accountant") }
+
+      it "adds a comment and comes back to the list", :aggregate_failures do
+        panel.fill_in(translate("ui.components.tasks.comments.add_label"), with: "Sent the **forms**")
+        panel.click_button(translate("ui.components.tasks.comments.add"))
+
+        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_added"))
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+        expect(bodies).to eq(["Sent the **forms**"])
+      end
+    end
+
+    describe "with a comment" do
+      before do
+        create(:task_comment, task_id: task.id, body: "Sent the forms")
+        open_task("Email the accountant")
+      end
+
+      it "edits it", :aggregate_failures do
+        comment_on(panel).find("summary", text: translate("ui.components.tasks.comments.edit")).click
+        comment_on(panel).fill_in(translate("ui.components.tasks.comments.edit_label"), with: "Sent the forms twice")
+        comment_on(panel).click_button(translate("ui.components.tasks.comments.save"))
+
+        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_saved"))
+        expect(bodies).to eq(["Sent the forms twice"])
+      end
+
+      it "deletes it once asked", :aggregate_failures do
+        comment_on(panel).click_button(translate("ui.components.tasks.comments.delete"))
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+
+        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_deleted"))
+        expect(bodies).to be_empty
+      end
+    end
+  end
+
+  describe "commenting with scripts off" do
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:comments) { Tasks::Slice["relations.task_comments"] }
+
+    def bodies = comments.to_a.map { it[:body] }
+
+    def comment_on = find(".task-comment", text: "Sent the forms")
+
+    before do
+      create(:task_comment, task_id: task.id, body: "Sent the forms")
+      scripts_off
+      find(".task", text: "Email the accountant").find(".task-title").click
+    end
+
+    after { scripts_on }
+
+    it "adds a comment", :aggregate_failures do
+      fill_in(translate("ui.components.tasks.comments.add_label"), with: "Called them")
+      click_button(translate("ui.components.tasks.comments.add"))
+
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(bodies).to eq(["Sent the forms", "Called them"])
+    end
+
+    it "edits a comment", :aggregate_failures do
+      comment_on.find("summary").click
+      comment_on.fill_in(translate("ui.components.tasks.comments.edit_label"), with: "Sent the forms twice")
+      comment_on.click_button(translate("ui.components.tasks.comments.save"))
+
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(bodies).to eq(["Sent the forms twice"])
+    end
+
+    it "deletes a comment", :aggregate_failures do
+      comment_on.click_button(translate("ui.components.tasks.comments.delete"))
+
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(bodies).to be_empty
+    end
+  end
+
   describe "opening a task with scripts off" do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
 

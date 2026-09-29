@@ -1880,6 +1880,72 @@
   }
 }
 
+@utility task-comments {
+  & > .card-body {
+    @apply flex flex-col gap-3;
+  }
+}
+
+@utility task-comment-list {
+  @apply flex flex-col;
+}
+
+@utility task-comment {
+  @apply flex min-w-0 flex-col gap-1.5 border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility task-comment-head {
+  @apply flex min-w-0 flex-wrap items-center gap-2;
+}
+
+@utility task-comment-author {
+  @apply inline-flex items-center gap-1 text-li text-ink;
+}
+
+@utility task-comment-time {
+  @apply meta;
+}
+
+@utility task-comment-acts {
+  @apply ml-auto flex flex-wrap items-start justify-end gap-1;
+
+  &:has(> .task-comment-edit[open]) {
+    @apply basis-full;
+  }
+}
+
+@utility task-comment-edit {
+  @apply flex flex-col items-end gap-2;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &[open] {
+    @apply flex-1;
+  }
+
+  & > form {
+    @apply flex w-full flex-col items-end gap-2;
+  }
+
+  & .field {
+    @apply w-full;
+  }
+}
+
+@utility task-comment-form {
+  @apply flex flex-col items-end gap-2;
+
+  & .field {
+    @apply w-full;
+  }
+}
+
 @utility subtabs {
   @apply mb-4 flex flex-wrap gap-2;
 

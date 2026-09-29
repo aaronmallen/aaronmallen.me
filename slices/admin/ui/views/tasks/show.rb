@@ -17,11 +17,13 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
           }.freeze
 
-          def initialize(task:, note_html:, linking:, filter:, origin:)
+          def initialize(task:, note_html:, linking:, comments:, commenting:, filter:, origin:)
             super()
             @task = task
             @note_html = note_html
             @linking = linking
+            @comments = comments
+            @commenting = commenting
             @filter = filter
             @origin = origin
           end
@@ -33,9 +35,8 @@ module Admin
               div(class: "task-read-acts") { Controls(task: @task, filter: @filter, origin: @origin, moves: false) }
               note
               facts
-              Card(label: t(".related"), title: t(".links")) do
-                LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
-              end
+              links
+              Comments(task: @task, comments: @comments, commenting: @commenting, tab: @filter, origin: @origin)
             end
           end
 
@@ -86,6 +87,12 @@ module Admin
           def key = PREFIX + @task.id.to_s
 
           def kicker = [key, reference].compact.join(KICKER_SEPARATOR)
+
+          def links
+            Card(label: t(".related"), title: t(".links")) do
+              LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
+            end
+          end
 
           def meta
             p(class: "task-meta task-read-meta") do

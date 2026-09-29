@@ -9,14 +9,15 @@ module Admin
         current_sprint: "tasks.operations.current_sprint",
         link_targets: "tasks.queries.link_targets",
         task_by_id: "tasks.queries.task_by_id",
+        task_comments: "tasks.queries.task_comments",
       ]
 
-      def call(id, query: nil, kind: nil, errors: EMPTY_HASH)
+      def call(id, query: nil, kind: nil, errors: EMPTY_HASH, commenting: EMPTY_HASH)
         step roll
         task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
-        { task:, note_html: note_html(task.note),
+        { task:, note_html: note_html(task.note), comments: task_comments.call(id), commenting:,
           linking: { errors:, kind:, query:, targets: link_targets.call(id, query) } }
       end
 
