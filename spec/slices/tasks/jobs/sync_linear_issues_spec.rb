@@ -13,6 +13,10 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     stub_known
   end
 
+  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
+
+  def discussed(*nodes, **) = issue(comments: { nodes: }, **)
+
   def failure(name = Record::Repos::SyncStateRepo::LINEAR_ISSUES) = sync_state_repo.failure(name)
 
   def imported = repo.by_source("linear", "L_one")
@@ -112,6 +116,88 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(repo.by_id(task.id)).to have_attributes(note: "New body", title: "New")
+    end
+  end
+
+  describe "an issue's comments" do
+    let(:at) { Time.utc(2026, 9, 28, 12) }
+
+    def copied(id, author:, at:)
+      { author:, body: "Looks good", created_at: at, provider: "linear", remote_id: id,
+        url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-#{id}" }
+    end
+
+    def remote(comment) = comment.to_h.slice(:author, :body, :created_at, :provider, :remote_id, :url)
+
+    def rows = Tasks::Slice["relations.task_comments"]
+
+    def sync_twice(first, second)
+      stub_assigned(first)
+      sync
+      stub_assigned(second)
+      sync
+    end
+
+    it "arrive on its task with author, body, time and link" do
+      stub_assigned(discussed(linear_comment("c1", at:), linear_comment("c2", author: "sam", at: at + 60)))
+      sync
+
+      expect(comments.map { remote(it) })
+        .to eq([copied("c1", author: "aaron", at:), copied("c2", author: "sam", at: at + 60)])
+    end
+
+    it "arrive on a task already tracked" do
+      task = tracked
+      stub_assigned(discussed(linear_comment("c1")))
+      sync
+
+      expect(comments(task).map(&:remote_id)).to eq(%w[c1])
+    end
+
+    it "add no rows and change nothing when synced again unchanged", :aggregate_failures do
+      stub_assigned(discussed(linear_comment("c1"), linear_comment("c2")))
+      before = sync.then { comments.map(&:to_h) }
+      sync
+
+      expect(comments.map(&:to_h)).to eq(before)
+      expect(rows.count).to eq(2)
+    end
+
+    it "take an edit made on Linear" do
+      sync_twice(discussed(linear_comment("c1")), discussed(linear_comment("c1", body: "Edited")))
+
+      expect(comments.map(&:body)).to eq(%w[Edited])
+    end
+
+    it "lose one deleted on Linear" do
+      sync_twice(discussed(linear_comment("c1"), linear_comment("c2")), discussed(linear_comment("c2")))
+
+      expect(comments.map(&:remote_id)).to eq(%w[c2])
+    end
+
+    it "reach a tracked issue Linear reports through the check by id" do
+      task = tracked
+      stub_known(discussed(linear_comment("c1"), state: "started"))
+      sync
+
+      expect(comments(task).map(&:remote_id)).to eq(%w[c1])
+    end
+
+    it "leave my own comments alone" do
+      task = tracked
+      mine = create(:task_comment, task_id: task.id)
+      stub_assigned(discussed(linear_comment("c1")))
+      sync
+
+      expect(comments(task).map(&:id)).to include(mine.id)
+    end
+
+    it "stop coming to a task I finished" do
+      task = tracked(:done)
+      stub_assigned(discussed(linear_comment("c1")))
+      sync
+
+      expect(comments(task)).to be_empty
     end
   end
 

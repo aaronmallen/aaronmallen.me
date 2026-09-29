@@ -5,9 +5,13 @@ module Record
     module Issues
       module Queries
         CLOSED_TYPES = '["completed", "canceled"]'
-        PAGE_SIZE = 100
+        MAX_COMMENTS = 100
+        PAGE_SIZE = 25
 
-        FIELDS = "id identifier url title description trashed state { type } assignee { id }"
+        FIELDS = <<~GRAPHQL.freeze
+          id identifier url title description trashed state { type } assignee { id }
+          comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt user { displayName } } }
+        GRAPHQL
 
         ASSIGNED = <<~GRAPHQL.freeze
           query($cursor: String) {
@@ -44,7 +48,7 @@ module Record
       STARTED = Blog::Types::TaskSourceState["started"]
       UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
 
-      ID_BATCH_SIZE = 100
+      ID_BATCH_SIZE = 25
       STATE_TYPES = {
         "backlog" => OPEN, "canceled" => NOT_PLANNED, "completed" => COMPLETED, "started" => STARTED,
         "triage" => OPEN, "unstarted" => OPEN,
@@ -77,11 +81,17 @@ module Record
         end
       end
 
+      def comment(node)
+        { author: node.dig("user", "displayName"), body: node["body"].to_s,
+          created_at: Time.iso8601(node.fetch("createdAt")), id: node.fetch("id"), url: node.fetch("url") }
+      end
+
       def issue(node, viewer)
         key = node.fetch("identifier")
 
         {
-          body: node["description"].to_s, id: node.fetch("id"), key:, reference: key,
+          body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
+          id: node.fetch("id"), key:, reference: key,
           remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
         }
       end

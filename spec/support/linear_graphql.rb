@@ -21,13 +21,18 @@ module LinearGraphQL
     linear_json(data: { viewer: { assignedIssues: page, id: viewer } })
   end
 
+  def linear_comment(id, body: "Looks good", author: "aaron", at: Time.now - 600)
+    { body:, createdAt: at.utc.iso8601(3), id:, user: author && { displayName: author },
+      url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-#{id}" }
+  end
+
   def linear_errors(code, message = "Linear said no", status: 400)
     linear_json(errors: [{ extensions: { code: }, message: }]).merge(status:)
   end
 
   def linear_issue(id, key: "ABC-1", state: "unstarted", assignee: VIEWER_ID, **fields)
-    { assignee: assignee && { id: assignee }, description: "Keep them in step", id:, identifier: key,
-      state: { type: state }, title: "Sync my issues", trashed: nil,
+    { assignee: assignee && { id: assignee }, comments: { nodes: [] }, description: "Keep them in step", id:,
+      identifier: key, state: { type: state }, title: "Sync my issues", trashed: nil,
       url: "https://linear.app/aaronmallen/issue/#{key.downcase}/sync-my-issues" }.merge(fields)
   end
 

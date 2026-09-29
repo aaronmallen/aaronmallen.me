@@ -10,11 +10,13 @@ RSpec.describe Record::Linear::Client do
 
   def check(urls = { "issue-known" => known_url }) = client.issues(urls)
 
+  def discussed(*nodes) = known(comments: { nodes: })
+
   def known(**) = linear_issue("issue-known", key: "ABC-7", **)
 
   def known_url = "https://linear.app/aaronmallen/issue/abc-7/sync-my-issues"
 
-  def many_urls = (1..101).to_h { ["issue-#{it}", "https://linear.app/aaronmallen/issue/abc-#{it}"] }
+  def many_urls = (1..26).to_h { ["issue-#{it}", "https://linear.app/aaronmallen/issue/abc-#{it}"] }
 
   def stub_assigned(*, **) = stub_linear(LinearGraphQL::ASSIGNED_QUERY, *, **)
 
@@ -22,8 +24,8 @@ RSpec.describe Record::Linear::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", id: "issue-one", key: "ABC-4", reference: "ABC-4", remote_state: "open", title: "Fix it",
-        url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
+      { body: "It broke", comments: [], id: "issue-one", key: "ABC-4", reference: "ABC-4", remote_state: "open",
+        title: "Fix it", url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
     end
 
     it "lists each one with its id, key, reference, title, description and URL" do
@@ -61,6 +63,36 @@ RSpec.describe Record::Linear::Client do
       expect(linear_request(LinearGraphQL::ASSIGNED_QUERY, key: LinearGraphQL::KEY)).to have_been_made
     end
 
+    it "lists each issue's comments with author, body, time and URL" do
+      at = Time.utc(2026, 9, 28, 12)
+      stub_assigned(linear_assigned(discussed(linear_comment("comment-1", at:))))
+
+      comment = { author: "aaron", body: "Looks good", created_at: at, id: "comment-1",
+                  url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-comment-1" }
+
+      expect(assigned.items.first[:comments]).to eq([comment])
+    end
+
+    it "leaves the author empty for a comment no user wrote" do
+      stub_assigned(linear_assigned(discussed(linear_comment("comment-1", author: nil))))
+
+      expect(assigned.items.first[:comments].first[:author]).to be_nil
+    end
+
+    it "asks for the first 100 comments of each issue" do
+      stub_assigned(linear_assigned)
+      assigned
+
+      expect(linear_request("comments(first: 100)")).to have_been_made
+    end
+
+    it "asks for 25 issues a page, so the query stays under Linear's complexity limit" do
+      stub_assigned(linear_assigned)
+      assigned
+
+      expect(linear_request("first: 25")).to have_been_made
+    end
+
     it "reports a started issue as started" do
       stub_assigned(linear_assigned(linear_issue("issue-one", state: "started")))
 
@@ -90,10 +122,16 @@ RSpec.describe Record::Linear::Client do
     it "reports an issue still assigned to me, with its title and description" do
       stub_known(known(title: "Renamed", description: "Edited"))
 
-      renamed = { body: "Edited", id: "issue-known", key: "ABC-7", reference: "ABC-7", remote_state: "open",
-                  title: "Renamed", url: known_url }
+      renamed = { body: "Edited", comments: [], id: "issue-known", key: "ABC-7", reference: "ABC-7",
+                  remote_state: "open", title: "Renamed", url: known_url }
 
       expect(check).to eq([renamed])
+    end
+
+    it "reports each issue's comments" do
+      stub_known(discussed(linear_comment("comment-1")))
+
+      expect(check.first[:comments].map { it[:id] }).to eq(%w[comment-1])
     end
 
     {
@@ -151,7 +189,7 @@ RSpec.describe Record::Linear::Client do
       expect { check }.to raise_error(Record::Linear::Client::Error, /no viewer/)
     end
 
-    it "asks for a hundred ids at a time", :aggregate_failures do
+    it "asks for 25 ids at a time", :aggregate_failures do
       stub_linear(LinearGraphQL::ISSUES_QUERY) do |request|
         linear_issues(*JSON.parse(request.body).dig("variables", "ids").map { linear_issue(it) })
       end
