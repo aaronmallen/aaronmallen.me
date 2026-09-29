@@ -3,6 +3,8 @@
 module Projects
   module Repos
     class ProjectRepo < Blog::DB::Repo
+      TAG_SCOPE = Blog::Types::TagScope["public"]
+
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
 
@@ -18,7 +20,7 @@ module Projects
 
       def public_grid(limit = nil) = with_tags.live.featured_first.limit(limit).to_a
 
-      def replace_tags(id, names) = project_tags.replace(id, tags.claim(names).values_at(*names))
+      def replace_tags(id, names) = project_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def swap_positions(one, two)
         transaction do

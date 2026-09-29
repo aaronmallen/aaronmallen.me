@@ -4,6 +4,7 @@ module Record
   module Repos
     class JournalEntryRepo < Blog::DB::Repo
       STREAK_DAYS = 30
+      TAG_SCOPE = Blog::Types::TagScope["private"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
@@ -26,7 +27,9 @@ module Record
 
       def count = journal_entries.count
 
-      def replace_tags(id, names) = journal_entry_tags.replace(id, tags.claim(names).values_at(*names))
+      def replace_tags(id, names)
+        journal_entry_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
+      end
 
       def streak(now: Time.now)
         today = Blog::TimeZone.today(now)

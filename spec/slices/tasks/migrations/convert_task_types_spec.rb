@@ -30,7 +30,7 @@ RSpec.describe "Converting task types to tags", type: :migration do
   end
 
   describe "a type whose name a tag holds" do
-    let!(:tag) { create(:tag, name: "chore", color: "mk-sand") }
+    let!(:tag_id) { db[:tags].insert(name: "chore", color: "mk-sand") }
 
     before do
       type_task("Chore")
@@ -42,7 +42,7 @@ RSpec.describe "Converting task types to tags", type: :migration do
     end
 
     it "keeps the tag as it was" do
-      expect(db[:tags].where(name: "chore").select_map(%i[id color])).to eq([[tag.id, "mk-sand"]])
+      expect(db[:tags].where(name: "chore").select_map(%i[id color])).to eq([[tag_id, "mk-sand"]])
     end
   end
 

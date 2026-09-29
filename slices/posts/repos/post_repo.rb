@@ -3,6 +3,8 @@
 module Posts
   module Repos
     class PostRepo < Blog::DB::Repo
+      TAG_SCOPE = Blog::Types::TagScope["public"]
+
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
       commands delete: :by_pk
@@ -44,7 +46,7 @@ module Posts
 
       def published_by_tag(tag) = with_tags.published.tagged(tag).newest_first.to_a
 
-      def replace_tags(id, names) = post_tags.replace(id, tags.claim(names).values_at(*names))
+      def replace_tags(id, names) = post_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
 

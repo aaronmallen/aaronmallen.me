@@ -8,6 +8,7 @@ module Tasks
       EXTERNAL = Blog::Types::TaskList["external"]
       KEY = /\A#?(\d{1,9})\z/
       NEXT = Blog::Types::TaskList["next"]
+      TAG_SCOPE = Blog::Types::TagScope["private"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
@@ -74,7 +75,7 @@ module Tasks
         end
       end
 
-      def replace_tags(id, names) = task_tags.replace(id, tags.claim(names).values_at(*names))
+      def replace_tags(id, names) = task_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def return_to_list(id) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT)
 

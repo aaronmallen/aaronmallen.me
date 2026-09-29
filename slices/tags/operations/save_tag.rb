@@ -3,6 +3,7 @@
 module Tags
   module Operations
     class SaveTag < Blog::Operation
+      SCOPE = Blog::Types::TagScope["public"]
       TAKEN = "taken"
 
       include Deps[contract: "contracts.tag_contract", tag_repo: "repos.tag_repo"]
@@ -30,7 +31,7 @@ module Tags
         Failure([:invalid, { name: [TAKEN] }])
       end
 
-      def store(fields) = tag_repo.create(color: tag_repo.next_color, **fields.compact)
+      def store(fields) = tag_repo.create(scope: SCOPE, color: tag_repo.next_color(scope: SCOPE), **fields.compact)
 
       def validate(params) = validated(contract.call(form(params)))
     end

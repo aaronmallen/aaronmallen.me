@@ -11,7 +11,7 @@ module Tags
 
       def by_id(id) = tags.by_pk(id).one
 
-      def next_color = tags.next_color
+      def next_color(scope:) = tags.next_color(scope:)
 
       def usage
         by_kind = tags.counts_by_kind

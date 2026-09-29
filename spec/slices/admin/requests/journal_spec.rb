@@ -162,7 +162,7 @@ RSpec.describe "Admin journal", type: :request do
       end
 
       it "shows each tag beside the private pill, in the colour its tag carries" do
-        %w[mk-green mk-violet].zip(%w[health ruby]) { |color, name| create(:tag, name:, color:) }
+        %w[mk-green mk-violet].zip(%w[health ruby]) { |color, name| create(:tag, :private, name:, color:) }
         create(:journal_entry, body: "walked", tags: %w[health ruby])
         get "/admin/journal"
 

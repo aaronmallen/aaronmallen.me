@@ -54,11 +54,12 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "counts each kind a tag is on" do
+        create(:project, tags: %w[ruby])
         create(:task, tags: %w[ruby])
         create(:journal_entry, tags: %w[ruby])
         get "/admin/tags"
 
-        expect(page).to have_css(".tag-uses", text: "1 post · 1 journal entry · 1 task")
+        expect(page.all(".tag-uses").map(&:text)).to include("1 post · 1 project", "1 journal entry · 1 task")
       end
 
       it "says a tag nothing carries is unused" do

@@ -100,6 +100,7 @@ module Blog
     TagList = Types::Array.of(Types::String).constructor do |tags|
       tags.to_s.split(",").map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end
+    TagScope = Types::String.enum("public", "private")
     TaskFilter = Types::String.enum("today", "next", "someday", "external")
     TaskFilterParam = TaskFilter.fallback(TaskFilter.values.first)
     TaskLinkType = Types::String.enum("blocks", "relates", "duplicates")

@@ -99,6 +99,14 @@ RSpec.describe "Tags", type: :request do
     expect(last_response).to be_not_found
   end
 
+  it "returns 404 for a tag only a task or journal entry carries" do
+    create(:task, tags: %w[rust])
+    create(:journal_entry, tags: %w[rust])
+    get "/writing/tags/rust"
+
+    expect(last_response).to be_not_found
+  end
+
   it "serves the site's not found page for a tag nothing carries", :aggregate_failures do
     get "/writing/tags/rust"
 
