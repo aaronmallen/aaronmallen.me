@@ -22,7 +22,7 @@ export function setupDialogs() {
       dialog.hidden = true;
     });
     dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
+      if (event.target === dialog && dialog.dataset.dialog !== "static") dialog.close();
     });
 
     for (const close of dialog.querySelectorAll("[data-dialog-close]")) {

@@ -668,6 +668,7 @@ en:
           label: "Create Task"
         create_dialog:
           cancel: "Cancel"
+          close: "Close"
           edit_title: "Edit the task"
           title: "New task"
         field_error:

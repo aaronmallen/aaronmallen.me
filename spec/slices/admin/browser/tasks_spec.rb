@@ -25,6 +25,8 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def modal = find("dialog#task-create[open]")
 
+  def modal_x = "button[aria-label='#{translate('ui.components.tasks.create_dialog.close')}']"
+
   def move_to(list)
     named = translate(["ui.components.tasks.controls.lists", list].join("."))
 
@@ -110,6 +112,25 @@ RSpec.describe "Admin tasks", type: :feature do
 
     it "shuts on Cancel" do
       within("dialog#task-create") { click_button("Cancel") }
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+    end
+
+    it "stays open with what I typed on a click outside", :aggregate_failures do
+      fill_in("task[title]", with: "Half a thought")
+      page.driver.browser.mouse.click(x: 10, y: 700)
+
+      expect(modal).to have_field("task[title]", with: "Half a thought")
+    end
+
+    it "shuts on the X" do
+      modal.find(modal_x).click
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+    end
+
+    it "shuts on Escape" do
+      modal.send_keys(:escape)
 
       expect(page).to have_no_css("dialog#task-create[open]")
     end
@@ -865,6 +886,32 @@ RSpec.describe "Admin tasks", type: :feature do
       expect(page).to have_no_css("dialog#task-create[open]")
       expect(active).to eq("Email the accountant")
       expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+    end
+
+    it "keeps the X after the swap to the edit form" do
+      expect(modal).to have_css(modal_x)
+    end
+
+    it "keeps the X after a failed save swaps the form again" do
+      fail_save
+
+      expect(modal).to have_css(modal_x)
+    end
+
+    it "closes on the X without saving and hands focus back to the row", :aggregate_failures do
+      fill_in("task[title]", with: "Something else")
+      modal.find(modal_x).click
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+      expect(active).to eq("Email the accountant")
+      expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+    end
+
+    it "gives the Create Task dialog back its X once closed" do
+      modal.send_keys(:escape)
+      click_link("Create Task")
+
+      expect(modal).to have_css(modal_x)
     end
 
     it "gives the Create Task dialog back its own form once closed", :aggregate_failures do
