@@ -141,6 +141,9 @@ module Blog
       rescue URI::Error
         Dry::Core::Constants::EMPTY_STRING
       end.constrained(format: %r{\A[^\s/?#@]+\z})
+      LabelTag = Types::Tag.constructor do |label|
+        Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
+      end
       Networks = Types::Array.of(Types::NetworkName).constructor do |names|
         found = [*names].map(&:to_s)
 

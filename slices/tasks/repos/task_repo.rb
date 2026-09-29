@@ -15,6 +15,8 @@ module Tasks
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
       commands delete: :by_pk
 
+      def add_tags(id, names) = task_tags.add(id, tags.in_scope(TAG_SCOPE).by_names(names).pluck(:id))
+
       def all_open = tasks.open.in_order.to_a
 
       def by_id(id) = with_details.by_pk(id).one

@@ -94,6 +94,46 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "a new issue with labels" do
+    before { create(:tag, :private, name: "bug-fix") }
+
+    def labeled(*names) = issue(labels: { nodes: names.map { { name: it } } })
+
+    it "imports with the private tags its labels name" do
+      create(:tag, :private, name: "needs-review")
+      stub_assigned(labeled("Bug Fix", "needs review", "BugFix"))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "needs-review")
+    end
+
+    it "adds no tag and creates none for a label no private tag matches", :aggregate_failures do
+      create(:tag, name: "area-api")
+      stub_assigned(labeled("area/api", "Someday"))
+
+      expect { sync }.not_to(change { Tags::Slice["relations.tags"].count })
+      expect(imported.tags).to be_empty
+    end
+
+    it "keeps a tag I removed off on the next sync" do
+      stub_assigned(labeled("Bug Fix"))
+      sync
+      repo.replace_tags(imported.id, [])
+      sync
+
+      expect(imported.tags).to be_empty
+    end
+
+    it "adds no tag for a label added after import" do
+      stub_assigned(labeled)
+      sync
+      stub_assigned(labeled("Bug Fix"))
+      sync
+
+      expect(imported.tags).to be_empty
+    end
+  end
+
   describe "issues in every workspace I hold a key for" do
     before do
       connect_linear(LinearGraphQL::KEY, "lin_api_two")
