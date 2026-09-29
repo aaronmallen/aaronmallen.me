@@ -434,6 +434,10 @@ RSpec.describe "Admin today", type: :request do
         expect(page).to have_css("#today-journal-entry textarea[name='entry[body]'][rows='4']")
       end
 
+      it "renders an empty tags field under the textarea" do
+        expect(page).to have_css("#today-journal-entry textarea ~ input[name='entry[tags]'][value='']")
+      end
+
       it "puts a lock and the word count in the footer", :aggregate_failures do
         expect(card("Journal")).to have_css(".today-journal-foot i.fa-lock")
         expect(card("Journal")).to have_css(".today-journal-foot .journal-words", exact_text: "private · 0 words")
@@ -1103,6 +1107,25 @@ RSpec.describe "Admin today", type: :request do
 
         expect(page).to have_field("Entry", with: "")
       end
+
+      it "saves the tags, folded to one case" do
+        save(body: "walked", tags: "Ruby, health")
+
+        expect(repo.today.first.tags.map(&:name)).to eq(%w[health ruby])
+      end
+
+      it "saves an entry with no tags" do
+        save(body: "walked")
+
+        expect(repo.today.first.tags).to eq([])
+      end
+
+      it "clears the tags field" do
+        save(body: "walked", tags: "ruby")
+        follow_redirect!
+
+        expect(page).to have_css("#today-journal-entry input[name='entry[tags]'][value='']")
+      end
     end
 
     describe "a rejected entry" do
@@ -1118,6 +1141,27 @@ RSpec.describe "Admin today", type: :request do
 
         expect(page).to have_css("#journal-body-error.field-error", exact_text: message)
         expect(page).to have_css("#journal-body[aria-invalid='true'][aria-describedby='journal-body-error']")
+      end
+
+      it "keeps the typed tags after a blank entry" do
+        save(body: "  ", tags: "ruby, health")
+
+        expect(page).to have_css("#today-journal-entry input[name='entry[tags]'][value='ruby, health']")
+      end
+
+      it "rejects a tag it can't use and saves nothing" do
+        save(body: "walked", tags: "a/b")
+
+        expect([last_response.status, repo.count]).to eq([422, 0])
+      end
+
+      it "shows the tags error and keeps what was typed", :aggregate_failures do
+        save(body: "walked", tags: "a/b")
+        message = i18n.t("ui.components.journal.field_error.tags.format")
+
+        expect(page).to have_css("#journal-tags-error.field-error", exact_text: message)
+        expect(page).to have_css("#journal-tags[aria-invalid='true'][name='entry[tags]'][value='a/b']")
+        expect(page).to have_field("Entry", with: "walked")
       end
 
       it "stays on Today with the post cards", :aggregate_failures do

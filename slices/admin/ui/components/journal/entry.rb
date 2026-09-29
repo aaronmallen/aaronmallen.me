@@ -83,7 +83,6 @@ module Admin
             header(class: "journal-entry-head") do
               clock = l(@entry.entry_time, format: :clock)
               time(datetime: "#{@date.iso8601}T#{clock}") { clock }
-              Pill(color: :sand) { t(".private") }
               @entry.tags.each { |tag| Pill(color: Blog::UI::Components::Pill.for_tag_color(tag.color)) { tag.name } }
               actions
             end

@@ -170,16 +170,15 @@ RSpec.describe "Admin journal", type: :request do
         end
       end
 
-      it "shows each entry's time, private pill and body", :aggregate_failures do
+      it "shows each entry's time and body", :aggregate_failures do
         create(:journal_entry, entry_time: "21:05", body: "walked")
         get "/admin/journal"
 
         expect(page).to have_css(".journal-entry-head time", exact_text: "21:05")
-        expect(page).to have_css(".journal-entry-head .pill.sand", exact_text: "private")
         expect(bodies).to eq(["walked"])
       end
 
-      it "shows each tag beside the private pill, in the colour its tag carries" do
+      it "shows each tag in the colour its tag carries" do
         %w[mk-green mk-violet].zip(%w[health ruby]) { |color, name| create(:tag, :private, name:, color:) }
         create(:journal_entry, body: "walked", tags: %w[health ruby])
         get "/admin/journal"
@@ -192,7 +191,7 @@ RSpec.describe "Admin journal", type: :request do
         create(:journal_entry, body: "walked")
         get "/admin/journal"
 
-        expect(page).to have_css(".journal-entry-head .pill", count: 1)
+        expect(page).to have_no_css(".journal-entry-head .pill")
       end
 
       it "renders the body as markdown", :aggregate_failures do

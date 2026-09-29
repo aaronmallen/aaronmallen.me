@@ -204,7 +204,6 @@ en:
           confirm_delete: "Delete this entry? You can't undo this."
           delete: "Delete"
           edit: "Edit"
-          private: "private"
           save: "Save"
           tags: "Tags"
           tags_placeholder: "ruby, health"
@@ -813,6 +812,8 @@ en:
         placeholder: "What happened? Only you will ever read this."
         private: "private"
         save: "Save entry"
+        tags: "Tags"
+        tags_placeholder: "ruby, health"
         title: "Journal"
         today: "%{count} today"
         words:

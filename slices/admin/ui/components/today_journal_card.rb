@@ -11,6 +11,7 @@ module Admin
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :body, Blog::Types::String
         prop :errors, Blog::Types::Hash
+        prop :tags, Blog::Types::String
         prop :word_count, Blog::Types::Integer
 
         def view_template
@@ -42,6 +43,7 @@ module Admin
         def entry_form
           Form(**form_attributes) do
             body_field
+            tags_field
             foot
           end
         end
@@ -87,6 +89,17 @@ module Admin
             i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
             span { t(".save") }
           end
+        end
+
+        def tags_field
+          label(class: "sr-only", for: Journal::FieldError.id_for(:tags)) { t(".tags") }
+          Input(
+            **Journal::FieldError.control_attributes(:tags, @errors),
+            name: "entry[tags]",
+            value: @tags,
+            placeholder: t(".tags_placeholder"),
+          )
+          Journal::FieldError(field: :tags, errors: @errors)
         end
       end
     end

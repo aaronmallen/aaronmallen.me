@@ -13,12 +13,13 @@ module Admin
 
           def initialize(
             commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, visitors:,
-            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
+            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH,
+            tags: Dry::Core::Constants::EMPTY_STRING
           )
             super()
             @commits = commits
             @commit_totals = commit_totals
-            @journal = { body:, entries:, errors:, word_count: Blog::Figures.words(body) }
+            @journal = { body:, entries:, errors:, tags:, word_count: Blog::Figures.words(body) }
             @publishing = { posts:, queue:, social: }
             @sprint = sprint
             @sync_failures = sync_failures
