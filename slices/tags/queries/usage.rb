@@ -5,7 +5,7 @@ module Tags
     class Usage
       include Deps[tag_repo: "repos.tag_repo"]
 
-      def call = tag_repo.usage
+      def call(scope:) = tag_repo.usage(scope:)
     end
   end
 end

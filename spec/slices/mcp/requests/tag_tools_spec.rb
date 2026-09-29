@@ -42,6 +42,13 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(named("ruby")).to include("count" => 3, "by_kind" => { "posts" => 1, "projects" => 2 })
     end
 
+    it "counts a private tag by its private kinds" do
+      create(:task, tags: %w[chores])
+      call_tool("list_tags")
+
+      expect(named("chores")).to include("count" => 1, "by_kind" => { "tasks" => 1 })
+    end
+
     it "counts a tag nothing carries as zero" do
       expect(named("unused")).to include("count" => 0, "by_kind" => {})
     end
@@ -69,6 +76,13 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(tag_repo.by_id(tag.id)).to have_attributes(name: "crystal", color: "mk-pink")
     end
 
+    it "recolours a private tag" do
+      tag = create(:tag, :private, name: "chores", color: "mk-pink")
+      call_tool("save_tag", id: tag.id, color: "mk-green")
+
+      expect(tag_repo.by_id(tag.id)).to have_attributes(name: "chores", color: "mk-green")
+    end
+
     it "refuses a name another tag holds, with the reason the admin gives", :aggregate_failures do
       create(:tag, name: "ruby")
       call_tool("save_tag", name: "ruby")
@@ -93,6 +107,13 @@ RSpec.describe "MCP tag tools", type: :request do
   describe "remove_tag" do
     it "removes a tag nothing carries" do
       tag = create(:tag)
+      call_tool("remove_tag", id: tag.id)
+
+      expect(tag_repo.all).to be_empty
+    end
+
+    it "removes a private tag nothing carries" do
+      tag = create(:tag, :private)
       call_tool("remove_tag", id: tag.id)
 
       expect(tag_repo.all).to be_empty

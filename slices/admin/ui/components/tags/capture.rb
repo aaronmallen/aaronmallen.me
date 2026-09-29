@@ -9,10 +9,12 @@ module Admin
 
           prop :name, Blog::Types::String
           prop :errors, Blog::Types::Hash
+          prop :tag_scope, Blog::Types::TagScope
 
           def view_template
             div(class: "tag-capture") do
               Form(action: path(:admin_create_tag), class: "tag-capture-row") do
+                input(type: "hidden", name: "scope", value: @tag_scope)
                 name_field
                 Button(variant: :pri, type: "submit") { t(".add") }
               end

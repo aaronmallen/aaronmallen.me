@@ -11,11 +11,17 @@ module Tags
         journal_entries: :journal_entry_tags,
         tasks: :task_tags,
       }.freeze
+      KINDS = {
+        Blog::Types::TagScope["public"] => %i[posts projects],
+        Blog::Types::TagScope["private"] => %i[journal_entries tasks],
+      }.freeze
 
       schema :tags, infer: true
 
-      def counts_by_kind
-        JOINS.transform_values { dataset.db[it].group_and_count(:tag_id).as_hash(:tag_id, :count) }
+      def counts_by_kind(scope)
+        JOINS.slice(*KINDS.fetch(scope)).transform_values do |join|
+          dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)
+        end
       end
     end
   end

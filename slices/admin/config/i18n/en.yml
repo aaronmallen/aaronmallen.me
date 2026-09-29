@@ -1047,16 +1047,28 @@ en:
           apply: "Filter"
           aside: "Click a tag to rename it, recolour it or take it away."
           count:
-            one: "%{count} tag · renaming one changes its /writing/tags link and everything that carries it"
-            other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
+            private:
+              one: "%{count} tag · only you see these, on tasks and the journal"
+              other: "%{count} tags · only you see these, on tasks and the journal"
+            public:
+              one: "%{count} tag · renaming one changes its /writing/tags link and everything that carries it"
+              other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
           empty: "No tags yet. Name one above."
           heading: "Tags"
-          label: "Shared"
+          label:
+            private: "Private"
+            public: "Public"
           no_match: "Nothing matches %{query}."
           note: "A tag is kept while anything carries it. Take it off them first, then remove it."
+          scope: "Tag scope"
+          scopes:
+            private: "Private"
+            public: "Public"
           search: "Search tags"
           search_placeholder: "filter tags…"
-          title: "Every tag"
+          title:
+            private: "Task and journal tags"
+            public: "Post and project tags"
       tasks:
         index:
           archive: "Archive"

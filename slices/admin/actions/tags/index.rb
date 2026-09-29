@@ -7,7 +7,9 @@ module Admin
         include Deps[build_tags_page: "operations.build_tags_page"]
 
         def handle(request, response)
-          response.render(view, **build_tags_page.call(query: request.params[:q]))
+          scope = Blog::Types::TagScopeParam[request.params[:scope]]
+
+          response.render(view, **build_tags_page.call(scope:, query: request.params[:q]))
         end
       end
     end

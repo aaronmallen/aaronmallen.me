@@ -6,7 +6,7 @@ RSpec.describe "Admin tags", type: :request do
   let(:post_repo) { Posts::Slice["repos.post_repo"] }
   let(:repo) { Tags::Slice["repos.tag_repo"] }
 
-  def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name:, ** })
+  def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
 
   def message(key) = i18n.t(["ui.components.tags.field_error.name", key].join("."))
 
@@ -53,13 +53,20 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css(".tag-uses", text: "1 post", count: 2)
       end
 
-      it "counts each kind a tag is on" do
+      it "counts each public kind a public tag is on" do
         create(:project, tags: %w[ruby])
         create(:task, tags: %w[ruby])
-        create(:journal_entry, tags: %w[ruby])
         get "/admin/tags"
 
-        expect(page.all(".tag-uses").map(&:text)).to include("1 post · 1 project", "1 journal entry · 1 task")
+        expect(page.find(".tag-row", text: "#ruby").find(".tag-uses").text).to eq("1 post · 1 project")
+      end
+
+      it "counts each private kind a private tag is on" do
+        create(:task, tags: %w[ruby])
+        create(:journal_entry, tags: %w[ruby])
+        get "/admin/tags", scope: "private"
+
+        expect(page.find(".tag-uses").text).to eq("1 journal entry · 1 task")
       end
 
       it "says a tag nothing carries is unused" do
@@ -79,6 +86,68 @@ RSpec.describe "Admin tags", type: :request do
         get "/admin/tags", q: "elixir"
 
         expect(page).to have_css(".empty", text: "elixir")
+      end
+    end
+
+    describe "the scope switch" do
+      before do
+        create(:post, tags: %w[ruby])
+        create(:task, tags: %w[chores])
+      end
+
+      it "opens on the public tags" do
+        get "/admin/tags"
+
+        expect(names).to eq(%w[#ruby])
+      end
+
+      it "lists only private tags on the private tab" do
+        get "/admin/tags", scope: "private"
+
+        expect(names).to eq(%w[#chores])
+      end
+
+      it "falls back to the public tags for a scope it does not know" do
+        get "/admin/tags", scope: "secret"
+
+        expect(names).to eq(%w[#ruby])
+      end
+
+      it "links to each tab, so it works with scripts off", :aggregate_failures do
+        get "/admin/tags"
+
+        expect(page).to have_link("Public", href: "/admin/tags?scope=public")
+        expect(page).to have_link("Private", href: "/admin/tags?scope=private")
+      end
+
+      it "marks the tab it is on" do
+        get "/admin/tags", scope: "private"
+
+        expect(page).to have_css("a.seg-option.current[aria-current='page']", text: "Private")
+      end
+
+      it "keeps the search when it switches" do
+        get "/admin/tags", q: "ch"
+
+        expect(page).to have_link("Private", href: "/admin/tags?scope=private&q=ch")
+      end
+
+      it "searches inside the chosen scope" do
+        get "/admin/tags", scope: "private", q: "r"
+
+        expect(names).to eq(%w[#chores])
+      end
+
+      it "keeps the scope in the search form" do
+        get "/admin/tags", scope: "private"
+
+        expect(page).to have_css("form[role='search'] input[name='scope'][value='private']", visible: :all)
+      end
+
+      it "counts only the tags on the tab" do
+        get "/admin/tags", scope: "private"
+
+        expect(page).to have_css(".page-head-sub", text: "1 tag")
       end
     end
 
@@ -154,6 +223,45 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css(".field-error", text: message("taken"))
       end
 
+      it "adds a public tag from the public tab" do
+        add("ruby")
+
+        expect(named("ruby").scope).to eq("public")
+      end
+
+      it "adds a private tag from the private tab" do
+        add("ruby", scope: "private")
+
+        expect(named("ruby").scope).to eq("private")
+      end
+
+      it "goes back to the tab it added from" do
+        add("ruby", scope: "private")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=private")
+      end
+
+      it "takes a name the other scope holds", :aggregate_failures do
+        create(:tag, name: "ruby")
+        add("ruby", scope: "private")
+
+        expect(repo.all.map { [it.name, it.scope] }).to contain_exactly(%w[ruby public], %w[ruby private])
+      end
+
+      it "says why it refused a name the same private scope holds" do
+        create(:tag, :private, name: "ruby")
+        add("ruby", scope: "private")
+
+        expect(page).to have_css(".field-error", text: message("taken"))
+      end
+
+      it "keeps the private tab after a refusal" do
+        create(:tag, :private, name: "ruby")
+        add("ruby", scope: "private")
+
+        expect(page).to have_css("a.seg-option.current", text: "Private")
+      end
+
       it "keeps what was typed after a refusal" do
         create(:tag, name: "ruby")
         add("ruby")
@@ -195,6 +303,40 @@ RSpec.describe "Admin tags", type: :request do
         send_to("/admin/tags/#{tag.id}", tag: { name: " " })
 
         expect(page).to have_css("#tag-#{tag.id}-name-error")
+      end
+
+      it "renames a private tag from the private tab" do
+        tag = create(:tag, :private, name: "chores")
+        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
+
+        expect(repo.by_id(tag.id).name).to eq("errands")
+      end
+
+      it "goes back to the tab it renamed from" do
+        tag = create(:tag, :private, name: "chores")
+        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
+
+        expect(last_response.location).to end_with("/admin/tags?scope=private")
+      end
+
+      it "takes a name the other scope holds" do
+        create(:tag, :private, name: "hanami")
+        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+
+        expect(repo.by_id(tag.id).name).to eq("hanami")
+      end
+
+      it "says why it refused a name the same scope holds" do
+        create(:tag, name: "hanami")
+        send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
+
+        expect(page).to have_css(".field-error", text: message("taken"))
+      end
+
+      it "answers 404 for a tag from the other scope" do
+        send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "hanami" })
+
+        expect(last_response.status).to eq(404)
       end
 
       it "answers 404 for a tag that isn't there" do
@@ -241,6 +383,20 @@ RSpec.describe "Admin tags", type: :request do
         get "/admin/tags"
 
         expect(page).to have_css(".tag-editor button[name='tag[color]'][value='mk-blue'][aria-pressed='true']")
+      end
+
+      it "leaves the tag of the same name in the other scope alone" do
+        twin = create(:tag, :private, name: "ruby", color: "mk-blue")
+        send_to("/admin/tags/#{twin.id}", scope: "private", tag: { name: "ruby", color: "mk-orange" })
+
+        expect(repo.by_id(tag.id).color).to eq("mk-blue")
+      end
+
+      it "carries the scope on every form in the row" do
+        create(:tag, :private, name: "chores")
+        get "/admin/tags", scope: "private"
+
+        expect(page.all(".tag-row form input[name='scope']", visible: :all).map(&:value).uniq).to eq(%w[private])
       end
 
       it "refuses a colour that is not one of the six" do
@@ -307,6 +463,34 @@ RSpec.describe "Admin tags", type: :request do
         get "/admin/tags"
 
         expect(page.find("form[action$='/delete']")["title"]).to include("1 record carries this tag")
+      end
+
+      it "takes away a private tag from the private tab" do
+        chores = create(:tag, :private, name: "chores")
+        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+
+        expect(repo.by_id(chores.id)).to be_nil
+      end
+
+      it "goes back to the tab it removed from" do
+        chores = create(:tag, :private, name: "chores")
+        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=private")
+      end
+
+      it "answers 404 for a tag from the other scope" do
+        send_to("/admin/tags/#{tag.id}/delete", scope: "private")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "keeps a private tag a task carries" do
+        create(:task, tags: %w[chores])
+        chores = repo.all.find { it.name == "chores" }
+        send_to("/admin/tags/#{chores.id}/delete", scope: "private")
+
+        expect(repo.by_id(chores.id)).not_to be_nil
       end
 
       it "answers 404 for a tag that isn't there" do

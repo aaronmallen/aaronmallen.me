@@ -5,7 +5,7 @@ module Tags
     class All
       include Deps[tag_repo: "repos.tag_repo"]
 
-      def call = tag_repo.all
+      def call(scope:) = tag_repo.all_in(scope)
     end
   end
 end

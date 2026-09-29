@@ -16,11 +16,12 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:tag]]
+          scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
-          case save_tag.call(params, id:)
-          in Success(_) then saved(response, params)
+          case save_tag.call(params, scope:, id:)
+          in Success(_) then saved(response, scope, params)
           in Failure(:not_found) then halt 404
-          in Failure[:invalid, errors] then invalid(response, id, params, errors)
+          in Failure[:invalid, errors] then invalid(response, scope, editing(id, params, errors))
           else halt 500
           end
         end
@@ -29,14 +30,14 @@ module Admin
 
         def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
 
-        def invalid(response, id, params, errors)
+        def invalid(response, scope, editing)
           response.status = 422
-          response.render(index_view, **build_tags_page.call(editing: editing(id, params, errors)))
+          response.render(index_view, **build_tags_page.call(scope:, editing:))
         end
 
-        def saved(response, params)
+        def saved(response, scope, params)
           toast(response, Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED)
-          response.redirect_to(routes.path(:admin_tags))
+          response.redirect_to(routes.path(:admin_tags, scope:))
         end
       end
     end

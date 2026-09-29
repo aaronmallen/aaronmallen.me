@@ -10,19 +10,21 @@ module Admin
         include Deps[remove_tag: "tags.operations.remove_tag"]
 
         def handle(request, response)
-          case remove_tag.call(record_id(request))
-          in Success(_) then done(response, REMOVED)
+          scope = Blog::Types::TagScopeParam[request.params[:scope]]
+
+          case remove_tag.call(record_id(request), scope:)
+          in Success(_) then done(response, scope, REMOVED)
           in Failure(:not_found) then halt 404
-          in Failure[:in_use, held] then done(response, IN_USE, count: held)
+          in Failure[:in_use, held] then done(response, scope, IN_USE, count: held)
           else halt 500
           end
         end
 
         private
 
-        def done(response, key, **)
+        def done(response, scope, key, **)
           toast(response, key, **)
-          response.redirect_to(routes.path(:admin_tags))
+          response.redirect_to(routes.path(:admin_tags, scope:))
         end
       end
     end

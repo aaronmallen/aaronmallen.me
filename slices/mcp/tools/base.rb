@@ -70,6 +70,14 @@ module MCP
 
         def editable_social_post(server_context) = server_context.fetch(:editable_social_post)
 
+        def every_tag(server_context)
+          Blog::Types::TagScope.values.flat_map { all_tags(server_context).call(scope: it) }.sort_by(&:name)
+        end
+
+        def every_tag_usage(server_context)
+          Blog::Types::TagScope.values.map { tag_usage(server_context).call(scope: it) }.reduce(:merge)
+        end
+
         def journal_entries_between(server_context) = server_context.fetch(:journal_entries_between)
 
         def journal_entry_by_id(server_context) = server_context.fetch(:journal_entry_by_id)

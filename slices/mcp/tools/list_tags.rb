@@ -12,8 +12,8 @@ module MCP
 
       class << self
         def call(server_context:)
-          usage = tag_usage(server_context).call
-          tags = all_tags(server_context).call
+          usage = every_tag_usage(server_context)
+          tags = every_tag(server_context)
 
           answer(tags: tags.map { summary(it, usage.fetch(it.id, Dry::Core::Constants::EMPTY_HASH)) })
         end

@@ -3,35 +3,34 @@
 module Tags
   module Operations
     class SaveTag < Blog::Operation
-      SCOPE = Blog::Types::TagScope["public"]
       TAKEN = "taken"
 
       include Deps[contract: "contracts.tag_contract", tag_repo: "repos.tag_repo"]
 
-      def call(params, id: nil)
-        step find(id)
+      def call(params, scope:, id: nil)
+        step find(id, scope)
         fields = step validate(params)
 
-        step persist(id, fields)
+        step persist(id, scope, fields)
       end
 
       private
 
-      def find(id)
+      def find(id, scope)
         return Success(nil) unless id
 
-        tag_repo.by_id(id) ? Success(id) : Failure(:not_found)
+        tag_repo.find_in(scope, id) ? Success(id) : Failure(:not_found)
       end
 
       def form(params) = { color: params[:color], name: params[:name] }
 
-      def persist(id, fields)
-        Success(transaction { id ? tag_repo.update(id, **fields.compact) : store(fields) })
+      def persist(id, scope, fields)
+        Success(transaction { id ? tag_repo.update(id, **fields.compact) : store(scope, fields) })
       rescue ROM::SQL::UniqueConstraintError
         Failure([:invalid, { name: [TAKEN] }])
       end
 
-      def store(fields) = tag_repo.create(scope: SCOPE, color: tag_repo.next_color(scope: SCOPE), **fields.compact)
+      def store(scope, fields) = tag_repo.create(scope:, color: tag_repo.next_color(scope:), **fields.compact)
 
       def validate(params) = validated(contract.call(form(params)))
     end

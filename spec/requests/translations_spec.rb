@@ -152,12 +152,20 @@ RSpec.describe "Translations", type: :request do
     end
 
     it "renders the removed toast without a missing translation" do
-      Tags::Slice["operations.save_tag"].call({ name: "hanami" })
+      Tags::Slice["operations.save_tag"].call({ name: "hanami" }, scope: "public")
       spare = Tags::Slice["repos.tag_repo"].all.find { it.name == "hanami" }
       post "/admin/tags/#{spare.id}/delete", _csrf_token: admin_csrf_token
       follow_redirect!
 
       expect(last_response.body).to include("data-toast").and(not_include("translation_missing"))
+    end
+
+    %w[public private].each do |scope|
+      it "renders the #{scope} tab without a missing translation" do
+        get("/admin/tags", scope:)
+
+        expect(last_response.body).not_to include("translation_missing")
+      end
     end
 
     it "renders every field error without a missing translation", :aggregate_failures do

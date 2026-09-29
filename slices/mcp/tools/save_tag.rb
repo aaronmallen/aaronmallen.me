@@ -3,6 +3,7 @@
 module MCP
   module Tools
     class SaveTag < Base
+      NEW_SCOPE = Blog::Types::TagScope["public"]
       UNSAVED = "could not save the tag"
 
       MESSAGES = {
@@ -31,10 +32,11 @@ module MCP
 
       class << self
         def call(server_context:, id: nil, name: nil, color: nil)
-          current = id && all_tags(server_context).call.find { it.id == id }
+          current = id && every_tag(server_context).find { it.id == id }
           return refuse("no tag has the ID #{id}") if id && current.nil?
 
-          saved(save_tag(server_context).call({ name: name || current&.name, color: }, id:), id)
+          scope = current&.scope || NEW_SCOPE
+          saved(save_tag(server_context).call({ name: name || current&.name, color: }, scope:, id:), id)
         end
 
         private

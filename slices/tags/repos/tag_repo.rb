@@ -9,12 +9,16 @@ module Tags
 
       def all = tags.in_name_order.to_a
 
+      def all_in(scope) = tags.in_scope(scope).in_name_order.to_a
+
       def by_id(id) = tags.by_pk(id).one
+
+      def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one
 
       def next_color(scope:) = tags.next_color(scope:)
 
-      def usage
-        by_kind = tags.counts_by_kind
+      def usage(scope:)
+        by_kind = tags.counts_by_kind(scope)
 
         by_kind.values.flat_map(&:keys).uniq.to_h do |id|
           [id, by_kind.filter_map { |kind, counts| [kind, counts[id]] if counts[id] }.to_h]

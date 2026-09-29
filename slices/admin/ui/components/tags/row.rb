@@ -37,6 +37,7 @@ module Admin
 
           def color_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field") do
+              scope_field
               input(type: "hidden", name: "tag[name]", value: @tag.name)
               span(class: "f") { t(".color") }
               Swatches(name: "tag[color]", scope:, selected: @tag.color, submit: true)
@@ -76,6 +77,7 @@ module Admin
 
           def remove
             Form(**remove_attributes) do
+              scope_field
               Button(variant: :warn, type: "submit", small: true, disabled: held?) do
                 i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
                 span { t(".remove") }
@@ -93,6 +95,7 @@ module Admin
 
           def rename_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field", id: rename_id) do
+              scope_field
               label(class: "f", for: FieldError.id_for(:name, scope)) { t(".rename") }
               Input(**FieldError.control_attributes(:name, errors, scope), name: "tag[name]", value: name)
             end
@@ -108,6 +111,8 @@ module Admin
           end
 
           def scope = "tag-#{@tag.id}"
+
+          def scope_field = input(type: "hidden", name: "scope", value: @tag.scope)
 
           def toggle_id = "tag-#{@tag.id}-edit"
 

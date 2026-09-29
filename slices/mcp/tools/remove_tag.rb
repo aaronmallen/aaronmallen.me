@@ -13,7 +13,10 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          case remove_tag(server_context).call(id)
+          tag = every_tag(server_context).find { it.id == id }
+          return refuse("no tag has the ID #{id}") unless tag
+
+          case remove_tag(server_context).call(id, scope: tag.scope)
           in Success(_) then answer(id:, removed: true)
           in Failure[:in_use, held] then refuse(kept(held))
           in Failure(:not_found) then refuse("no tag has the ID #{id}")
