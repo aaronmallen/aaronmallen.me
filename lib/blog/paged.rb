@@ -2,7 +2,11 @@
 
 module Blog
   Paged = Data.define(:rows, :number, :more) do
+    def newer_query = previous_number && Page.query(previous_number)
+
     def next_number = more ? number + 1 : nil
+
+    def older_query = next_number && Page.query(next_number)
 
     def past_end? = rows.empty? && number > 1
 

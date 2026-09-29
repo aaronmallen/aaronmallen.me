@@ -18,16 +18,24 @@ module Record
         (limit ? found.limit(limit) : found).to_a
       end
 
-      def by_day(tags: EMPTY_ARRAY, text: EMPTY_STRING)
-        entries = with_tags.newest_first
-        entries = entries.matching(text) unless text.empty?
-        entries = entries.tagged(tags) unless tags.empty?
-        entries.to_a.group_by(&:entry_date).to_a
+      def by_day(size:, to: nil, **search)
+        entries = searched(with_tags, **search)
+        oldest = entries.unordered.min(:entry_date)
+        return Blog::DayCursor::Page.new(rows: EMPTY_ARRAY, continue_to: nil) unless oldest
+
+        Blog::DayCursor.page(oldest, to, size:, day: :entry_date.to_proc) do |low, high, limit|
+          found = entries.between(low, high).newest_first
+          (limit ? found.limit(limit) : found).to_a
+        end
       end
 
       def by_id(id) = with_tags.by_pk(id).one
 
       def count = journal_entries.count
+
+      def days_after(day, limit:, **search)
+        searched(journal_entries, **search).later_than(day).oldest_first.limit(limit).pluck(:entry_date)
+      end
 
       def replace_tags(id, names)
         journal_entry_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
@@ -44,6 +52,12 @@ module Record
       def word_count = journal_entries.word_total
 
       private
+
+      def searched(entries, tags: EMPTY_ARRAY, text: EMPTY_STRING)
+        entries = entries.matching(text) unless text.empty?
+        entries = entries.tagged(tags) unless tags.empty?
+        entries
+      end
 
       def with_tags = journal_entries.combine(:tags)
     end

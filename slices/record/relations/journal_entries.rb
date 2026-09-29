@@ -16,9 +16,13 @@ module Record
 
       def days_written = unordered.distinct.select(:entry_date).count
 
+      def later_than(day) = where { entry_date > day }
+
       def matching(text) = where(Sequel.ilike(:body, "%#{dataset.escape_like(text)}%"))
 
       def newest_first = order(self[:entry_date].desc, self[:entry_time].desc, self[:id].desc)
+
+      def oldest_first = order(self[:entry_date].asc, self[:entry_time].asc, self[:id].asc)
 
       def on(date) = where(entry_date: date)
 

@@ -13,7 +13,9 @@ RSpec.describe "Admin journal", type: :request do
 
   def day_dates = page.all(".journal-day-date").map { it["datetime"] }
 
-  def entry = repo.by_day.flat_map(&:last).first
+  def entries = repo.between(from: today - 30, to: today)
+
+  def entry = entries.first
 
   def save(**fields)
     post "/admin/journal", _csrf_token: admin_csrf_token, entry: fields
@@ -330,11 +332,103 @@ RSpec.describe "Admin journal", type: :request do
       end
     end
 
+    describe "paging" do
+      def pager_href(rel) = page.find("nav.pager a[rel='#{rel}']")["href"]
+
+      before do
+        lower_page_size(:admin, to: 2)
+        { 0 => 1, 1 => 2, 2 => 1, 3 => 1, 5 => 1 }.each do |days, count|
+          count.times { |index| create(:journal_entry, entry_date: today - days, body: "d#{days}e#{index}") }
+        end
+      end
+
+      it "stops near the page size and finishes the day it is on" do
+        get "/admin/journal"
+
+        expect(day_dates).to eq([today, today - 1].map(&:iso8601))
+      end
+
+      it "shows every entry of the last day on the page" do
+        get "/admin/journal"
+
+        expect(day_bodies(today - 1)).to contain_exactly("d1e0", "d1e1")
+      end
+
+      it "links to older entries from the first page", :aggregate_failures do
+        get "/admin/journal"
+
+        expect(pager_href("next")).to eq("/admin/journal?to=#{(today - 2).iso8601}")
+        expect(page).to have_no_css("nav.pager a[rel='prev']")
+      end
+
+      it "shows the older days behind the link" do
+        get "/admin/journal", to: (today - 2).iso8601
+
+        expect(day_dates).to eq([today - 2, today - 3].map(&:iso8601))
+      end
+
+      it "links back to the newest page when a page or less is newer" do
+        get "/admin/journal", to: (today - 1).iso8601
+
+        expect(pager_href("prev")).to eq("/admin/journal")
+      end
+
+      it "links back a page's worth of entries when more are newer" do
+        get "/admin/journal", to: (today - 2).iso8601
+
+        expect(pager_href("prev")).to eq("/admin/journal?to=#{(today - 1).iso8601}")
+      end
+
+      it "links to no older page from the oldest day", :aggregate_failures do
+        get "/admin/journal", to: (today - 5).iso8601
+
+        expect(day_dates).to eq([(today - 5).iso8601])
+        expect(page).to have_no_css("nav.pager a[rel='next']")
+      end
+
+      it "keeps the search in the links" do
+        get "/admin/journal", q: "d"
+
+        expect(pager_href("next")).to eq("/admin/journal?q=d&to=#{(today - 2).iso8601}")
+      end
+
+      it "pages the entries a search finds" do
+        get "/admin/journal", q: "e1"
+
+        expect(bodies).to eq(["d1e1"])
+      end
+
+      it "counts every entry and word in the sub-line" do
+        get "/admin/journal"
+
+        expect(page).to have_css(".page-head-sub", text: "6 entries · 6 words")
+      end
+
+      it "counts the streak over every entry" do
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 5 of the last 30 days")
+      end
+
+      it "reads a day it can't parse as the newest page" do
+        get "/admin/journal", to: "soon"
+
+        expect(day_dates).to eq([today, today - 1].map(&:iso8601))
+      end
+
+      it "draws no pager when one page holds every entry" do
+        lower_page_size(:admin, to: 10)
+        get "/admin/journal"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+    end
+
     describe "saving an entry" do
       it "saves it under today with the time of saving", :aggregate_failures do
         before = Blog::TimeZone.local(Time.now - 1)
         save(body: "walked", entry_date: today.iso8601)
-        entry = repo.by_day.to_h.fetch(today).first
+        entry = repo.today.first
 
         expect(entry).to have_attributes(body: "walked", entry_date: today)
         expect(entry.entry_time.strftime("%H:%M:%S")).to be >= before.strftime("%H:%M:%S")
@@ -358,7 +452,7 @@ RSpec.describe "Admin journal", type: :request do
       it "files a backdated entry under the chosen date with the time of saving", :aggregate_failures do
         now = Blog::TimeZone.local(Time.now)
         save(body: "remembered", entry_date: (today - 4).iso8601)
-        entry = repo.by_day.to_h.fetch(today - 4).first
+        entry = entries.find { it.entry_date == today - 4 }
 
         expect(entry.body).to eq("remembered")
         expect(entry.entry_time.strftime("%H:%M")).to eq(now.strftime("%H:%M")).or eq((now + 60).strftime("%H:%M"))
@@ -367,7 +461,7 @@ RSpec.describe "Admin journal", type: :request do
       it "saves under today without an entry date" do
         save(body: "walked")
 
-        expect(repo.by_day.map(&:first)).to eq([today])
+        expect(entries.map(&:entry_date)).to eq([today])
       end
 
       it "saves the tags, folded to one case" do

@@ -47,9 +47,10 @@ module Admin
           def body = @values[:body]
 
           def days
-            return Empty { t(search.empty? ? ".empty" : ".no_match") } if @days.empty?
+            return Empty { t(search.empty? ? ".empty" : ".no_match") } if @days.rows.empty?
 
-            @days.each { |(date, entries)| Day(date:, entries:, today: @today, editing: @editing) }
+            @days.rows.each { |(date, entries)| Day(date:, entries:, today: @today, editing: @editing) }
+            Pager(page: @days, route: :admin_journal, params: search.empty? ? {} : { q: search })
           end
 
           def entry_date = @values[:entry_date] || @today
