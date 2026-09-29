@@ -4,11 +4,12 @@ module Admin
   module Operations
     class SummarizeAnalytics
       KEYS = { countries: :country_code, paths: :path, referrers: :host }.freeze
+      RANKS = { countries: :visitors, paths: :views, referrers: :visitors }.freeze
       SIDE_ROWS = 6
       SUMS = {
-        countries: %i[views].freeze,
+        countries: %i[views visitors].freeze,
         paths: %i[views visitors read_seconds bounces].freeze,
-        referrers: %i[views].freeze,
+        referrers: %i[views visitors].freeze,
       }.freeze
       TOP_PATHS = 10
       TOTALS = %i[views visitors read_seconds].freeze
@@ -66,9 +67,10 @@ module Admin
 
       def ranked(name, rolled, today)
         key = KEYS.fetch(name)
+        rank = RANKS.fetch(name)
         so_far = today ? today.public_send(name) : Dry::Core::Constants::EMPTY_ARRAY
 
-        combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { [-it[:views], it[key].to_s] }
+        combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
       end
 
       def series(from, to, today)
@@ -77,6 +79,8 @@ module Admin
 
         (from..to).map { { day: it, **found.fetch(it, ZERO_DAY) } }
       end
+
+      def standing(row, rank, key) = [row[rank] ? 0 : 1, -row[rank].to_i, -row[:views], row[key].to_s]
 
       def stats(totals, before)
         views = totals.fetch(:views)
@@ -89,6 +93,8 @@ module Admin
         }
       end
 
+      def sum(held, found) = held && found ? held + found : held || found
+
       def totals(from, to, today)
         found = view_totals.call(from:, to:).to_h
         return found unless today
@@ -96,7 +102,7 @@ module Admin
         TOTALS.to_h { [it, found.fetch(it) + today.totals.public_send(it)] }
       end
 
-      def totals_of(held, row, fields) = fields.to_h { [it, held[it] + row[it]] }
+      def totals_of(held, row, fields) = fields.to_h { [it, sum(held[it], row[it])] }
 
       def unrolled(day) = rollup_for_day.call(day) ? nil : summary_for_day.call(day)
 

@@ -44,7 +44,7 @@ module Admin
           end
 
           def countries
-            @countries.map { { count: it[:views], label: it[:country_code] || t(".unknown_country") } }
+            @countries.map { { count: it[:visitors], label: it[:country_code] || t(".unknown_country") } }
           end
 
           def mentioned_posts
@@ -64,7 +64,7 @@ module Admin
 
           def read_time = @stats.fetch(:read_time)
 
-          def referrers = @referrers.map { { count: it[:views], label: it[:host] || t(".direct") } }
+          def referrers = @referrers.map { { count: it[:visitors], label: it[:host] || t(".direct") } }
 
           def side_cards
             MeterCard(color: :blue, empty: t(".no_referrers"), rows: referrers, title: t(".referrers"))

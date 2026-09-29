@@ -24,7 +24,7 @@ module Admin
 
           def bar(entry)
             span(class: ["meter", @color.to_s]) do
-              span(class: "meter-fill", style: "width: #{Blog::Figures.share(entry[:count], top)}%")
+              span(class: "meter-fill", style: "width: #{Blog::Figures.share(entry[:count].to_i, top)}%")
             end
           end
 
@@ -32,11 +32,11 @@ module Admin
             div(class: "meter-row") do
               span(class: "meter-name") { entry[:label] }
               bar(entry)
-              span(class: "meter-count") { Blog::Figures.count(entry[:count]) }
+              span(class: "meter-count") { Blog::Figures.count(entry[:count]) if entry[:count] }
             end
           end
 
-          def top = @top ||= @rows.map { it[:count] }.max.to_i
+          def top = @top ||= @rows.filter_map { it[:count] }.max.to_i
         end
       end
     end

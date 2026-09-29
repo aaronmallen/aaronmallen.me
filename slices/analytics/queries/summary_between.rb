@@ -4,10 +4,11 @@ module Analytics
   module Queries
     class SummaryBetween
       KEYS = { countries: :country_code, paths: :path, referrers: :host }.freeze
+      RANKS = { countries: :visitors, paths: :views, referrers: :visitors }.freeze
       SUMS = {
-        countries: %i[views].freeze,
+        countries: %i[views visitors].freeze,
         paths: %i[views visitors read_seconds bounces].freeze,
-        referrers: %i[views].freeze,
+        referrers: %i[views visitors].freeze,
       }.freeze
       TOTALS = %i[views visitors read_seconds].freeze
       ZERO_DAY = { views: 0, visitors: 0 }.freeze
@@ -31,7 +32,7 @@ module Analytics
       def combine(rows, key, fields)
         rows.each_with_object({}) do |row, found|
           held = found[row[key]]
-          found[row[key]] = held ? held.merge(row, fields.to_h { [it, held[it] + row[it]] }) : row
+          found[row[key]] = held ? held.merge(row, fields.to_h { [it, sum(held[it], row[it])] }) : row
         end.values
       end
 
@@ -44,10 +45,15 @@ module Analytics
 
       def ranked(name, rolled, live)
         key = KEYS.fetch(name)
+        rank = RANKS.fetch(name)
         so_far = live ? live.public_send(name) : Dry::Core::Constants::EMPTY_ARRAY
 
-        combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { [-it[:views], it[key].to_s] }
+        combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
       end
+
+      def standing(row, rank, key) = [row[rank] ? 0 : 1, -row[rank].to_i, -row[:views], row[key].to_s]
+
+      def sum(held, found) = held && found ? held + found : held || found
 
       def totals(from, to, live)
         found = rollup_repo.totals(from:, to:).to_h

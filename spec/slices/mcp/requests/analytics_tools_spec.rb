@@ -65,6 +65,48 @@ RSpec.describe "MCP analytics tools", type: :request do
       expect(read.fetch("countries").map { it.values_at("country_code", "views") }).to eq([["US", 7], ["DE", 3]])
     end
 
+    it "ranks the referrers by visitors over the range" do
+      day = roll_up(today - 1, views: 20, visitors: 10).day
+      create(:analytics_rollup_referrer, day:, host: "busy.example", views: 9, visitors: 2)
+      create(:analytics_rollup_referrer, day:, host: "wide.example", views: 5, visitors: 4)
+
+      expect(read.fetch("referrers").map { it.values_at("host", "views", "visitors") })
+        .to eq([["wide.example", 5, 4], ["busy.example", 9, 2]])
+    end
+
+    it "ranks the countries by visitors over the range" do
+      day = roll_up(today - 1, views: 20, visitors: 10).day
+      create(:analytics_rollup_country, day:, country_code: "DE", views: 9, visitors: 2)
+      create(:analytics_rollup_country, day:, country_code: "US", views: 5, visitors: 4)
+
+      expect(read.fetch("countries").map { it.values_at("country_code", "views", "visitors") })
+        .to eq([["US", 5, 4], ["DE", 9, 2]])
+    end
+
+    describe "a range that reaches past the event window" do
+      before do
+        older = roll_up(today - 5, views: 20, visitors: 10).day
+        newer = roll_up(today - 1, views: 20, visitors: 10).day
+        create(:analytics_rollup_referrer, day: older, host: "news.example", views: 6)
+        create(:analytics_rollup_referrer, day: newer, host: "news.example", views: 2, visitors: 1)
+        create(:analytics_rollup_referrer, day: older, host: "old.example", views: 9)
+        create(:analytics_rollup_country, day: older, country_code: "US", views: 6)
+        create(:analytics_event, referrer_host: "news.example", country_code: "US")
+      end
+
+      it "sums the visitors of the days that counted them" do
+        expect(read.fetch("referrers").first).to include("host" => "news.example", "views" => 9, "visitors" => 2)
+      end
+
+      it "gives no visitors for a referrer with no counted day, after the ones with a count" do
+        expect(read.fetch("referrers").last).to include("host" => "old.example", "views" => 9, "visitors" => nil)
+      end
+
+      it "adds today's visitors to a country with no counted day" do
+        expect(read.fetch("countries")).to eq([{ "country_code" => "US", "views" => 7, "visitors" => 1 }])
+      end
+    end
+
     it "counts today from the visits before they roll up" do
       create(:analytics_event, path: "/writing/today", referrer_host: "news.example", country_code: "US")
 

@@ -77,7 +77,8 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       event(:direct)
       roll_up
 
-      expect(referrers).to contain_exactly({ host: "news.example", views: 1 }, { host: nil, views: 1 })
+      expect(referrers.map { it.values_at(:host, :views, :visitors) })
+        .to contain_exactly(["news.example", 1, 1], [nil, 1, 1])
     end
 
     it "stores the countries, with an unknown one under no code" do
@@ -85,7 +86,8 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       event(:unknown_country)
       roll_up
 
-      expect(countries).to contain_exactly({ country_code: "JP", views: 1 }, { country_code: nil, views: 1 })
+      expect(countries.map { it.values_at(:country_code, :views, :visitors) })
+        .to contain_exactly(["JP", 1, 1], [nil, 1, 1])
     end
 
     it "stores each referrer's distinct visitors" do

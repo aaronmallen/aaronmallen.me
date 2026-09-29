@@ -16,8 +16,11 @@ module MCP
       }.freeze
 
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
-                  "visitors day by day, and the top #{TOP} paths, referrers and countries by views. " \
+                  "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
+                  "visitors, each with its views and visitors. " \
                   "Visitors add up day by day, so one reader on two days counts twice. " \
+                  "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
+                  "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range"
       input_schema(SCHEMA)

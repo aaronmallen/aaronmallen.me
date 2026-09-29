@@ -7,13 +7,13 @@ module Analytics
 
       def by_day(day) = analytics_rollups.by_pk(day).one
 
-      def countries(from:, to:) = analytics_rollup_countries.between(from, to).top_by_views.to_a
+      def countries(from:, to:) = analytics_rollup_countries.between(from, to).top_by_visitors.to_a
 
       def days(from:, to:) = analytics_rollups.between(from, to).oldest_first.to_a
 
       def newest_day = analytics_rollups.newest_day
 
-      def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_views.to_a
+      def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_visitors.to_a
 
       def store(summary)
         transaction do

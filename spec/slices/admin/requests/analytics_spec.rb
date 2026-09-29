@@ -154,10 +154,10 @@ RSpec.describe "Admin analytics", type: :request do
           :analytics_rollup_path,
           day: today, path: "/writing/hello", title: "Hello", views: 8, visitors: 6, read_seconds: 480, bounces: 3,
         )
-        create(:analytics_rollup_referrer, day: today, host: "news.example", views: 7)
-        create(:analytics_rollup_referrer, :direct, day: today, views: 5)
-        create(:analytics_rollup_country, day: today, country_code: "US", views: 9)
-        create(:analytics_rollup_country, :unknown, day: today, views: 3)
+        create(:analytics_rollup_referrer, day: today, host: "news.example", views: 7, visitors: 2)
+        create(:analytics_rollup_referrer, :direct, day: today, views: 5, visitors: 5)
+        create(:analytics_rollup_country, day: today, country_code: "US", views: 9, visitors: 3)
+        create(:analytics_rollup_country, :unknown, day: today, views: 3, visitors: 3)
         get "/admin/analytics"
       end
 
@@ -173,9 +173,30 @@ RSpec.describe "Admin analytics", type: :request do
         expect(meter_card("Referrers")).to have_css(".meter-name", text: "direct")
       end
 
+      it "ranks the referrers by visitors" do
+        expect(meter_card("Referrers").all(".meter-name").map(&:text)).to eq(%w[direct news.example])
+      end
+
+      it "counts each referrer's visitors" do
+        expect(meter_card("Referrers").all(".meter-count").map(&:text)).to eq(%w[5 2])
+      end
+
       it "scales each referrer against the top one" do
         expect(meter_card("Referrers").all(".meter-fill").map { it[:style] })
-          .to eq(["width: 100%", "width: 71%"])
+          .to eq(["width: 100%", "width: 40%"])
+      end
+
+      it "ranks the countries by visitors, then views" do
+        expect(meter_card("Geography").all(".meter-name").map(&:text)).to eq(%w[US unknown])
+      end
+
+      it "counts each country's visitors" do
+        expect(meter_card("Geography").all(".meter-count").map(&:text)).to eq(%w[3 3])
+      end
+
+      it "still counts views for the top pages and the total", :aggregate_failures do
+        expect(page.first("tbody .tbl-c.num")).to have_text("8")
+        expect(stat("Page views")).to have_css(".stat-value", exact_text: "12")
       end
 
       it "names a country with no code as unknown" do
@@ -185,6 +206,35 @@ RSpec.describe "Admin analytics", type: :request do
       it "colors the referrer and geography meters apart", :aggregate_failures do
         expect(meter_card("Referrers")).to have_css(".meter.blue")
         expect(meter_card("Geography")).to have_css(".meter.violet")
+      end
+    end
+
+    describe "with a range that reaches past the event window" do
+      before do
+        create(:analytics_rollup, day: today - 5, views: 20, visitors: 10, read_seconds: 0)
+        create(:analytics_rollup, day: today - 1, views: 20, visitors: 10, read_seconds: 0)
+        create(:analytics_rollup_referrer, day: today - 5, host: "news.example", views: 6)
+        create(:analytics_rollup_referrer, day: today - 1, host: "news.example", views: 2, visitors: 1)
+        create(:analytics_rollup_referrer, day: today - 5, host: "old.example", views: 9)
+        create(:analytics_rollup_country, day: today - 5, country_code: "DE", views: 4)
+        create(:analytics_event, referrer_host: "news.example", country_code: "US")
+        get "/admin/analytics"
+      end
+
+      it "answers with the page" do
+        expect(last_response).to be_ok
+      end
+
+      it "ranks a referrer with no counted day last" do
+        expect(meter_card("Referrers").all(".meter-name").map(&:text)).to eq(%w[news.example old.example])
+      end
+
+      it "sums the visitors of the days that counted them and shows none for the rest" do
+        expect(meter_card("Referrers").all(".meter-count").map(&:text)).to eq(["2", ""])
+      end
+
+      it "leaves the bar empty for a row with no visitor figure" do
+        expect(meter_card("Geography").all(".meter-fill").map { it[:style] }).to eq(["width: 100%", "width: 0%"])
       end
     end
 
