@@ -42,3 +42,6 @@ production:
     sync_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
+    sync_linear_issues:
+      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Tasks::Jobs::SyncLinearIssues

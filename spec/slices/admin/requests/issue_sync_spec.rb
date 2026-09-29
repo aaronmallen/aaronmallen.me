@@ -79,6 +79,41 @@ RSpec.describe "Admin issue sync", type: :request do
     end
   end
 
+  describe "signed in with a Linear key and no GitHub token" do
+    before do
+      disconnect_github
+      connect_linear(LinearGraphQL::KEY)
+      sign_in_to_admin
+    end
+
+    it "queues the Linear sync alone", :aggregate_failures do
+      sync
+
+      expect([Tasks::Jobs::SyncLinearIssues.jobs.size, enqueued.size]).to eq([1, 0])
+    end
+
+    it "says the sync is queued" do
+      sync
+      follow_redirect!
+
+      expect(toast).to eq(i18n.t("tasks_page.toasts.issue_sync.queued"))
+    end
+  end
+
+  describe "signed in with a token and a Linear key" do
+    before do
+      sign_in_to_admin
+      connect_github_token
+      connect_linear(LinearGraphQL::KEY)
+    end
+
+    it "queues both syncs" do
+      sync
+
+      expect([Tasks::Jobs::SyncLinearIssues.jobs.size, enqueued.size]).to eq([1, 1])
+    end
+  end
+
   describe "signed out" do
     it "queues nothing" do
       post "/admin/tasks/issues/sync"

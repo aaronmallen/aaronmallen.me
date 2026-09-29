@@ -741,6 +741,15 @@ RSpec.describe "Admin today", type: :request do
         expect(failure_lines).to contain_exactly(bad_gateway_line("Issue sync", "GraphQL"))
       end
 
+      it "reports a failed Linear job under Linear" do
+        connect_linear(LinearGraphQL::KEY)
+        sync = instance_double(Tasks::Operations::SyncIssues, call: Dry::Monads::Failure(:linear_failed))
+        Tasks::Jobs::SyncLinearIssues.new(sync_issues: sync).perform
+        get "/admin"
+
+        expect(failed_syncs).to eq(["Linear issue sync"])
+      end
+
       it "reports the nightly analytics rollup the same way" do
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP, :rollup_failed, at: failed_at)
         get "/admin"

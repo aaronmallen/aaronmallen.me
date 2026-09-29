@@ -2,7 +2,9 @@
 
 module Tasks
   class Slice < Hanami::Slice
-    import keys: %w[github.client operations.record_issue_sync_outcome], from: :record
+    import keys: %w[
+      github.client linear.client operations.record_issue_sync_outcome operations.record_linear_issue_sync_outcome
+    ], from: :record
 
     export %w[
       operations.cancel_task operations.capture_task operations.complete_task operations.current_sprint

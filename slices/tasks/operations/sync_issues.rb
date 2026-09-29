@@ -23,7 +23,7 @@ module Tasks
         fresh, held = assigned.partition { !known.key?(it[:id]) }
 
         [*held, *checked].each { follow(known.fetch(it[:id]), it, now) }
-        fresh.each { import(provider, it) }.size
+        fresh.each { import(provider, it, now) }.size
       end
 
       private
@@ -54,11 +54,11 @@ module Tasks
         end
       end
 
-      def import(provider, issue)
+      def import(provider, issue, now)
         transaction do
           task = task_repo.create(**copy(issue), list: EXTERNAL, position: task_repo.next_position)
-          task_source_repo.create(task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url],
-                                  remote_state: OPEN)
+          source = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
+          follow(task_source_repo.create(**source), issue, now)
         end
       end
 

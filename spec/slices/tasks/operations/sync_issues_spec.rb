@@ -22,6 +22,16 @@ RSpec.describe Tasks::Operations::SyncIssues do
     repo.by_id(task.id)
   end
 
+  describe "a new issue that has already started" do
+    it "arrives with its task in progress", :aggregate_failures do
+      assign(issue("started"))
+      sync
+
+      expect(imported).to have_attributes(list: nil, status: "in_progress")
+      expect(imported.source.remote_state).to eq("started")
+    end
+  end
+
   describe "an issue that starts" do
     it "puts its task in progress", :aggregate_failures do
       task = tracked
