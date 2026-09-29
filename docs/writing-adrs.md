@@ -42,43 +42,40 @@ The status appears twice: in the front matter, where you can search it, and as a
 can see it. Keep the two in step.
 
 Superseding takes three edits to the old record: the `status`, the `superseded-by` key, and the badge, whose
-`XXXX` becomes the number of the record that replaced it. The new record lists the old one under `supersedes`.
-
-No record is superseded yet, and none will be until the site deploys. Until then we correct the record that turned
-out wrong.
+`XXXX` becomes the number of the record that replaced it. Its row in the [index][adr] takes the same badge. The new
+record lists the old one under `supersedes`, and the old record lists the new one's issue under `amended`. #33 did
+all of this when ADR 0069 superseded ADR 0048.
 
 ## Editing a record that landed
 
-Nothing has deployed, and the history squashes to one commit. A reader opening the repository meets every record
-at once, in no order, so two records about one decision read as a contradiction rather than as a history. Until
-the site deploys, correct in place any record that no longer matches what we do, whatever changed, including the
-decision. Migrations already work this way: correct the original, never write a corrective one.
+The site has run since 1.0.0 on 2026-09-27. A record that landed describes something that shipped, and a reader
+needs to know it was once true, so we never rewrite the decision in a shipped record. Migrations follow the same
+rule: we never edit one that has shipped, and a change takes a new migration.
 
 Three kinds of change come up, and each has one answer.
 
-**A name went stale.** Correct it. `Admin::Operations::ListTabs` became `ListSections`, and a record naming a class
-nobody can find is worse than a record somebody edited. A moved file and a dead link go the same way. Only the
-words change. Whatever the record decided, it still decides.
+**A name went stale.** Correct it in place. `Admin::Operations::ListTabs` became `ListSections`, and a record naming
+a class nobody can find is worse than a record somebody edited. A moved file and a dead link go the same way. Only
+the words change. Whatever the record decided, it still decides.
 
-**A fact belongs beside one already in the record.** Add it there. The note on how a nested Phlex kit finds its
-render methods sits in ADR 0002's section on slice directories, and anywhere else nobody would find it. Add a fact
-only where a decision already in the record explains it. A fact that needs its own context is a new record.
+**A detail changed, and the decision stands.** Amend the record in place. Change the sentence the detail lives in,
+or add the new fact beside the decision that explains it, and leave the rest alone. #37 replaced the row editor
+ADR 0055 described with a task dialog, and the record now says so where it names the scripts that call `fetch`. A
+fact that needs its own context is a new record.
 
-**The decision was wrong.** Correct the record, decision and all. Rewrite the context, the decision, the
-alternatives and the consequences until they say what we do now and why, and keep every reason from the old text
-that still holds. The record keeps its number and its `created` day. The approach we left goes in
-`## Alternatives`, with the reason it lost, since the wrong turns are half of why the current shape is what it is.
-AA-422 corrected ADR 0001 that way: it now says the app is sliced by feature, it keeps the audience split as the
-alternative that lost, and it carries the privacy reasoning both versions rested on.
+**The decision changed.** Supersede the record. Write a new one that says what we do now, why, and what changed,
+and give the old one the three edits in [Status](#status). Leave the rest of the old record as it stands: its
+context, decision and consequences say what was true while it held. ADR 0069 now says how we read GitHub, and ADR
+0048 still says how we read it before #33.
 
-Supersession starts the day the site deploys. A record then describes something that really shipped, and a reader
-needs to know it once was true, so from that day a wrong decision gets a new record and the old one gets the three
-edits above. Before it, nothing shipped, so nothing is superseded.
+If the title still states what we do, the decision stands. If it does not, the decision changed.
 
-Every edit names the issue behind it. Put that issue in `amended`, and when you add a fact, say so where you add
-it, the way ADR 0002 does: "AA-370 added this section and AA-414 the note on nested kits". A reader can then tell
-a later fact from the original, and the record does not quietly become something nobody decided. A corrected
-record needs this most, since `amended` is the only trace left of the turn it took.
+Every edit names the issue behind it. Put that issue in `amended`, after the ones already there, and name it where
+you changed the text, the way ADR 0055 does: "#37 replaced the row editor that opened from a checkbox". A reader can
+then tell a later fact from the original, and the record does not quietly become something nobody decided.
+
+Before launch we corrected records in place, decision and all, since nothing had shipped. The records written then
+keep the shape those corrections gave them.
 
 ## Front matter
 
@@ -89,7 +86,7 @@ Every record opens with front matter. Leave out any key you have nothing to put 
 | `id` | The record's number, quoted, so the padding survives YAML. |
 | `title` | The title from the heading, without the `ADR NNNN:` part. |
 | `status` | `active`, `deprecated` or `superseded`. |
-| `created` | Before launch, the launch day, 2026-09-28. After it, the day the record landed. Either way it never changes, whatever later happens to the record. |
+| `created` | The day the record landed, such as 2026-09-29 for ADR 0068. Records from before launch carry 2026-09-28. It never changes, whatever later happens to the record. |
 | `area` | The parts of the codebase the decision lands in. Every value names a place the tree holds today: the commit scopes `app`, `assets`, `config`, `db` and `lib`, or the name of a directory under `slices/`. A decision that binds every slice names every slice. |
 | `supersedes` | The numbers of the records this one replaces. |
 | `superseded-by` | The number of the record that replaced this one. |
@@ -121,15 +118,13 @@ Then add a row to the [index][adr].
 
 ## Numbers
 
-Until the site launches on 2026-09-28, the numbers follow the order a reader needs, not the order we wrote the
-records: the stack and platform first, then data rules, then app-wide patterns (sign-in, operations, contracts,
-views, CSS, testing), then one block per feature. A new record takes its place in that order, and every record
-after it moves up one, with every citation of it. A record folded into another closes its gap the same way, so the
-set has no gaps. Every record's `created` is the launch day.
+Before launch, the numbers followed the order a reader needs, not the order we wrote the records: the stack and
+platform first, then data rules, then app-wide patterns (sign-in, operations, contracts, views, CSS, testing), then
+one block per feature. A new record took its place in that order and moved every record after it up one. Every
+record from then carries 2026-09-28 as its `created` day.
 
-After launch, a new record takes the number after the highest one in the [index][adr], and no number moves again.
-A number is never reused. Correcting one record into another leaves a gap, and the gap stays; a new record taking
-the number would answer to every citation of the old one.
+Since launch, a new record takes the number after the highest one in the [index][adr], and no number moves again.
+A number is never reused: a new record taking it would answer to every citation of the old one.
 
 ## The template
 
