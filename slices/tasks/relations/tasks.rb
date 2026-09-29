@@ -14,6 +14,7 @@ module Tasks
           has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id
           has_many :task_tags
           has_many :tags, through: :task_tags, view: :in_name_order
+          has_one :task_sources, as: :source
         end
       end
 
@@ -53,6 +54,8 @@ module Tasks
 
       def open_first = order(Sequel.case({ { status: CLOSED } => 1 }, 0), self[:position].asc, self[:id].asc)
 
+      def sourced = where(id: task_sources.task_ids)
+
       def tagged(names) = where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
 
       def titled(text) = where(Sequel.ilike(:title, "%#{dataset.escape_like(text)}%"))
@@ -64,6 +67,8 @@ module Tasks
       end
 
       def unfinished_in(sprint_ids) = where(sprint_id: sprint_ids).open
+
+      def unsourced = exclude(id: task_sources.task_ids)
 
       private
 

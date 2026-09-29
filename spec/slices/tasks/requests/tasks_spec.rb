@@ -83,6 +83,37 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  describe "a task imported from GitHub" do
+    let!(:source) { create(:task_source, remote_id: "I_kwDOAbc", url: "https://github.com/aaronmallen/blog/issues/7") }
+    let(:task_by_id) { Tasks::Slice["queries.task_by_id"] }
+
+    it "carries its source URL when read" do
+      expect(task_by_id.call(source.task_id).source.url).to eq("https://github.com/aaronmallen/blog/issues/7")
+    end
+
+    it "carries no source when it was made by hand" do
+      expect(task_by_id.call(create(:task).id).source).to be_nil
+    end
+
+    it "is found by its provider and its id there" do
+      expect(repo.by_source("github", "I_kwDOAbc").id).to eq(source.task_id)
+    end
+
+    it "finds nothing for an issue that never imported" do
+      expect(repo.by_source("github", "I_missing")).to be_nil
+    end
+
+    it "is refused by Postgres a second source for the same issue" do
+      expect { create(:task_source, remote_id: source.remote_id) }.to raise_error(ROM::SQL::UniqueConstraintError)
+    end
+
+    it "loses its source when the task is deleted" do
+      Tasks::Slice["operations.delete_task"].call(source.task_id)
+
+      expect(Tasks::Slice["relations.task_sources"].where(id: source.id).count).to eq(0)
+    end
+  end
+
   describe "opening a canceled task again" do
     let(:task) { create(:task, :canceled) }
 

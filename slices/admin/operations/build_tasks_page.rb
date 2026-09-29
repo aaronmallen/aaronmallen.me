@@ -74,13 +74,13 @@ module Admin
         sprints_after.call(today).map { { sprint: it, tasks: held.fetch(it.id, EMPTY_ARRAY) } }
       end
 
-      def pools(open) = Blog::Types::TaskList.values.to_h { [it, open.fetch(it)] }
+      def pools(open) = Blog::Types::TaskPool.values.to_h { [it, open.fetch(it)] }
 
       def screen(open, sprint, pool, today)
         {
           counts: counts(open, sprint, today),
           planned: planned(open.fetch(UPCOMING), today),
-          pool: Blog::Types::TaskListParam[pool],
+          pool: Blog::Types::TaskPoolParam[pool],
           pools: pools(open),
           today:,
           waiting: open.fetch(NEXT),

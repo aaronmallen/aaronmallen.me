@@ -3,8 +3,6 @@
 module Tasks
   module Operations
     class DropSprint < Blog::Operation
-      NEXT = Blog::Types::TaskList["next"]
-
       include Deps[sprint_repo: "repos.sprint_repo", task_repo: "repos.task_repo"]
 
       def call(id, now: Time.now)
@@ -20,7 +18,7 @@ module Tasks
 
       def drop(sprint)
         transaction do
-          task_repo.release_sprint(sprint.id, list: NEXT)
+          task_repo.release_sprint(sprint.id)
           sprint_repo.delete(sprint.id)
         end
 

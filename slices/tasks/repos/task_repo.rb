@@ -5,7 +5,9 @@ module Tasks
     class TaskRepo < Blog::DB::Repo
       CANCELED = Blog::Types::TaskStatus["canceled"]
       DONE = Blog::Types::TaskStatus["done"]
+      EXTERNAL = Blog::Types::TaskList["external"]
       KEY = /\A#?(\d{1,9})\z/
+      NEXT = Blog::Types::TaskList["next"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
@@ -14,6 +16,8 @@ module Tasks
       def all_open = tasks.open.in_order.to_a
 
       def by_id(id) = with_details.by_pk(id).one
+
+      def by_source(provider, remote_id) = with_details.where(id: task_sources.at(provider, remote_id).task_ids).one
 
       def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
@@ -61,11 +65,18 @@ module Tasks
 
       def open_in_sprint(sprint_id) = with_details.for_sprint(sprint_id).open.in_order.to_a
 
-      def release_sprint(sprint_id, list:)
-        tasks.for_sprint(sprint_id).stamped(:update, result: :many).call(list:, sprint_id: nil)
+      def release_sprint(sprint_id)
+        held = tasks.for_sprint(sprint_id)
+
+        transaction do
+          release(held.sourced, EXTERNAL)
+          release(held.unsourced, NEXT)
+        end
       end
 
       def replace_tags(id, names) = task_tags.replace(id, tags.claim(names).values_at(*names))
+
+      def return_to_list(id) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT)
 
       def search(tags:, text:)
         found = with_details
@@ -87,7 +98,9 @@ module Tasks
 
       private
 
-      def with_details = tasks.combine(:tags, incoming_links: :from_task, outgoing_links: :to_task)
+      def release(held, list) = held.stamped(:update, result: :many).call(list:, sprint_id: nil)
+
+      def with_details = tasks.combine(:source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
     end
   end
 end

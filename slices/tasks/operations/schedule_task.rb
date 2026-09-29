@@ -3,7 +3,6 @@
 module Tasks
   module Operations
     class ScheduleTask < Blog::Operation
-      NEXT = Blog::Types::TaskList["next"]
       OPEN = Blog::Types::TaskStatus["open"]
 
       include Deps[
@@ -59,7 +58,7 @@ module Tasks
         join(task, day, now)
       end
 
-      def unschedule(task) = task.in_sprint? ? task_repo.move_to_list(task.id, NEXT) : task
+      def unschedule(task) = task.in_sprint? ? task_repo.return_to_list(task.id) : task
 
       def waiting(task) = task.in_progress? ? { status: OPEN } : Dry::Core::Constants::EMPTY_HASH
     end

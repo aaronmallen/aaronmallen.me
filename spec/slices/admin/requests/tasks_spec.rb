@@ -1228,6 +1228,13 @@ RSpec.describe "Admin tasks", type: :request do
         expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
       end
 
+      it "sends a sprint task with a source to external when its date is cleared" do
+        task = create(:task_source, task: create(:task, :in_sprint, sprint_id: sprint.id)).task
+        save(task, filter: "today", sprint_on: "")
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "external", sprint_id: nil)
+      end
+
       it "moves a waiting task to the day it was given when only its date changed" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1))
         save(task, filter: "upcoming", sprint_on: (today + 2).iso8601)
@@ -1729,6 +1736,23 @@ RSpec.describe "Admin tasks", type: :request do
         drop(sprint)
 
         expect(repo.by_id(task.id)).to have_attributes(list: "next", sprint_id: nil)
+      end
+
+      it "sends the dropped sprint's tasks with a source back to external" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        task = create(:task_source, task: create(:task, :in_sprint, sprint_id: sprint.id)).task
+        drop(sprint)
+
+        expect(repo.by_id(task.id)).to have_attributes(list: "external", sprint_id: nil)
+      end
+
+      it "sends a task with no source back to next beside one with a source" do
+        sprint = create(:sprint, sprint_date: tomorrow)
+        create(:task_source, task: create(:task, :in_sprint, sprint_id: sprint.id))
+        task = create(:task, :in_sprint, sprint_id: sprint.id)
+        drop(sprint)
+
+        expect(repo.by_id(task.id).list).to eq("next")
       end
 
       it "says where the dropped sprint's tasks went" do
