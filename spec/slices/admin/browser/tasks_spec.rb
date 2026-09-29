@@ -437,6 +437,85 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "creating a task from Today" do
+    let(:today) { Blog::TimeZone.today }
+
+    before do
+      visit "/admin"
+      click_link("Create Task")
+    end
+
+    it "opens the dialog on Today", :aggregate_failures do
+      expect(modal).to have_select("task[list]", selected: "today")
+      expect(page).to have_current_path("/admin")
+    end
+
+    describe "saving it" do
+      before do
+        within(modal) do
+          fill_in("task[title]", with: "Ship the screen")
+          click_button("Create task")
+        end
+      end
+
+      it "comes back to Today with the task in the sprint", :aggregate_failures do
+        expect(page).to have_css(".sprint-panel .task-title", text: "Ship the screen")
+        expect(page).to have_current_path("/admin")
+      end
+
+      it "puts the task in today's sprint" do
+        page.assert_selector(".sprint-panel .task-title", text: "Ship the screen")
+
+        expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Ship the screen"])
+      end
+    end
+
+    it "fits a phone without scrolling the page sideways", :aggregate_failures do
+      page.driver.resize(375, 800)
+
+      expect(modal).to have_field("task[title]")
+      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+    end
+  end
+
+  describe "creating a task from Today with scripts off" do
+    before do
+      page.driver.browser.page.disable_javascript
+      visit "/admin"
+      click_link("Create Task")
+    end
+
+    after { scripts_on }
+
+    it "leads to the new task page", :aggregate_failures do
+      expect(page).to have_current_path("/admin/tasks/new?origin=today")
+      expect(page).to have_select("task[list]", selected: "today")
+    end
+
+    it "comes back to Today after the save", :aggregate_failures do
+      fill_in("task[title]", with: "Ship the screen")
+      click_button("Create task")
+
+      expect(page).to have_current_path("/admin")
+      expect(page).to have_css(".sprint-panel .task-title", text: "Ship the screen")
+    end
+  end
+
+  describe "pulling a task into Today's sprint while it holds tasks" do
+    before do
+      sprint = sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today)
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
+      visit "/admin"
+      find(".sprint-panel .task-planner-pull .li", text: "Email the accountant").click_button("Pull in")
+    end
+
+    it "adds it to the sprint and stays on Today", :aggregate_failures do
+      expect(page).to have_current_path("/admin")
+      expect(page).to have_css(".sprint-panel .task-title", text: "Email the accountant")
+      expect(page).to have_css(".sprint-panel .task-title", text: "Ship it")
+    end
+  end
+
   describe "opening a task from the archive" do
     before do
       create(:task, :done, title: "Filed the taxes")

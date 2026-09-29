@@ -11,7 +11,9 @@ module Admin
             Blog::Types::TaskFilter["next"] => ".lists.next",
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
+          FROM_TODAY = Blog::Types::TaskOrigin["today"]
           NEXT = Blog::Types::TaskFilter["next"]
+          TODAY = Blog::Types::TaskFilter["today"]
 
           prop :scope, Blog::Types::String
           prop :today, Blog::Types::Date
@@ -35,6 +37,8 @@ module Admin
           private
 
           def action = @task ? path(:admin_update_task, id: @task.id) : path(:admin_create_task)
+
+          def default_list = @returns[:origin] == FROM_TODAY ? TODAY : NEXT
 
           def field(name, label_key, **)
             Field(label: t(label_key), id: FieldError.id_for(name, @scope)) do
@@ -63,7 +67,7 @@ module Admin
                 **FieldError.control_attributes(:list, @errors, @scope),
                 name: "task[list]",
                 options: lists.transform_values { t(it) },
-                selected: @values.fetch(:list, NEXT),
+                selected: @values.fetch(:list) { default_list },
               )
               FieldError(field: :list, errors: @errors, scope: @scope)
             end

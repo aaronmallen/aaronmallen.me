@@ -1659,34 +1659,6 @@
   @apply flex flex-wrap items-center gap-2 meta;
 }
 
-@utility task-capture {
-  @apply flex flex-col pb-4;
-}
-
-@utility task-capture-row {
-  @apply flex items-center gap-2;
-
-  & .inp {
-    @apply flex-1;
-  }
-
-  & select.inp {
-    @apply w-auto max-w-36 flex-none;
-  }
-
-  @media (width < 43.75rem) {
-    @apply flex-wrap;
-
-    &:has(select, .swatch-set) .inp:not(select, [list]) {
-      @apply basis-full;
-    }
-
-    & select.inp {
-      @apply max-w-none flex-1;
-    }
-  }
-}
-
 @utility task-planner {
   & > .card {
     border-color: color-mix(in oklab, var(--color-mk-green) 38%, var(--color-line));
@@ -2315,10 +2287,6 @@
 
 @utility sprint-foot {
   @apply flex flex-wrap items-end gap-3;
-
-  & > .task-capture {
-    @apply flex-1 basis-64 pb-0;
-  }
 }
 
 @utility sprint-plan {

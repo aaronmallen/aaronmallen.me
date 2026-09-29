@@ -4,10 +4,12 @@ module Admin
   module Actions
     module Tasks
       class New < Action
-        def handle(_request, response)
-          response.render(
-            view, errors: Dry::Core::Constants::EMPTY_HASH, values: Dry::Core::Constants::EMPTY_HASH,
-          )
+        include Redirect
+
+        def handle(request, response)
+          empty = Dry::Core::Constants::EMPTY_HASH
+
+          response.render(view, errors: empty, origin: task_origin(request), values: empty)
         end
       end
     end

@@ -7,6 +7,7 @@ module Admin
         class Show < View
           include Components::Tasks
 
+          ORIGIN = Blog::Types::TaskOrigin["today"]
           QUEUE_KINDS = { posts: ".queue_posts", social_posts: ".queue_social_posts" }.freeze
           SEPARATOR = " · "
 
@@ -27,6 +28,7 @@ module Admin
 
           def view_template
             content_for(:title, t(".heading"))
+            content_for(:task_origin, ORIGIN)
 
             PageHead(title: l(@sprint[:date], format: :weekday), sub:) { head_actions }
 
@@ -47,6 +49,7 @@ module Admin
           def commits_note = t(".commits_note", **@commit_totals)
 
           def head_actions
+            CreateButton(origin: ORIGIN)
             a(class: "btn", href: path(:admin_clients)) { t(".clients") }
             sign_out_form
           end

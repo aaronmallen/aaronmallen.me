@@ -5,19 +5,7 @@ module Admin
     module Components
       module Tasks
         class Planner < Component
-          EMPTY_POOLS = {
-            Blog::Types::TaskList["next"] => ".empty_next",
-            Blog::Types::TaskList["someday"] => ".empty_someday",
-            Blog::Types::TaskList["external"] => ".empty_external",
-          }.freeze
           FROM_TASKS = Blog::Types::TaskOrigin["tasks"]
-          FROM_TODAY = Blog::Types::TaskOrigin["today"]
-          POOLS = {
-            Blog::Types::TaskList["next"] => ".pools.next",
-            Blog::Types::TaskList["someday"] => ".pools.someday",
-            Blog::Types::TaskList["external"] => ".pools.external",
-          }.freeze
-          TODAY = Blog::Types::TaskFilter["today"]
 
           prop :date, Blog::Types::Date
           prop :pool, Blog::Types::String
@@ -32,90 +20,9 @@ module Admin
               Card(label: t(".label", date: l(@date, format: :medium)), title: t(".ask")) do |card|
                 card.side { span(class: "sprint-note") { t(".empty") } }
                 p(class: "task-planner-note") { t(".note") }
-                capture if from_today?
-                pull
+                Pools(origin: @origin, pool: @pool, pools: @pools)
               end
             end
-          end
-
-          private
-
-          def capture
-            Capture(
-              autofocus: false, errors: Dry::Core::Constants::EMPTY_HASH, filter: TODAY, origin: @origin,
-              scope: "planner", target: t(".target"), values: Dry::Core::Constants::EMPTY_HASH,
-            )
-          end
-
-          def from_today? = @origin == FROM_TODAY
-
-          def meta(task)
-            p(class: "task-meta") do
-              SourceLink(source: task.source)
-              task.tags.each { tag(it) }
-            end
-          end
-
-          def pool_link(list)
-            current = list == @pool
-
-            a(class: ["seg-option", ("current" if current)], href: pool_path(list),
-              aria: { current: ("true" if current) }) do
-              t(POOLS.fetch(list), count: @pools.fetch(list).size)
-            end
-          end
-
-          def pool_path(list)
-            query = from_today? ? { pool: list } : { filter: TODAY, pool: list }
-
-            path(from_today? ? :admin_root : :admin_tasks, **query)
-          end
-
-          def pull
-            div(class: "task-planner-pull") do
-              header(class: "card-head") do
-                div { span(class: "card-label") { t(".pull_from") } }
-                div(class: "card-side") { switch }
-              end
-              rows
-            end
-          end
-
-          def pull_form(task)
-            Form(action: path(:admin_move_task, id: task.id, filter: TODAY)) do
-              input(type: "hidden", name: "origin", value: @origin)
-              Button(variant: :pri, type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
-                i(class: "fa-solid fa-arrow-turn-up", aria: { hidden: "true" })
-                span { t(".pull") }
-              end
-            end
-          end
-
-          def row(task)
-            div(class: "li") do
-              div(class: "li-main") do
-                span(class: "li-title") { task.title }
-                meta(task)
-              end
-              div(class: "li-side") { pull_form(task) }
-            end
-          end
-
-          def rows
-            waiting = @pools.fetch(@pool)
-            return Empty { t(EMPTY_POOLS.fetch(@pool)) } if waiting.empty?
-
-            div(class: "task-planner-list") { waiting.each { row(it) } }
-          end
-
-          def switch
-            div(class: "seg", role: "group", aria: { label: t(".pull_from") }) do
-              POOLS.each_key { pool_link(it) }
-            end
-          end
-
-          def tag(tag)
-            span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
           end
         end
       end

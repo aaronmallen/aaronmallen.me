@@ -4,7 +4,6 @@ module Admin
   module Actions
     module Tasks
       class Create < Action
-        BLANK = "tasks_page.toasts.blank"
         CAPTURED = "tasks_page.toasts.captured"
         FIELDS = %i[list note sprint_on tags title].freeze
         PAST = "tasks_page.toasts.sprint_past"
@@ -31,21 +30,16 @@ module Admin
 
         private
 
-        def blank(request, response)
-          toast(response, BLANK)
-          response.redirect_to(tasks_path(request))
-        end
-
         def done(request, response, key, filter:)
           toast(response, key)
           response.redirect_to(tasks_path(request, filter:))
         end
 
         def invalid(request, response, params, errors)
-          return blank(request, response) if from_today?(request)
+          values = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }
 
           response.status = 422
-          response.render(new_view, errors:, values: FIELDS.to_h { [it, Blog::Types::Text[params[it]]] })
+          response.render(new_view, errors:, origin: task_origin(request), values:)
         end
       end
     end

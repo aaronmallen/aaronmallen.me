@@ -954,11 +954,16 @@ RSpec.describe "Translations", type: :request do
       end
     end
 
-    it "renders the blank capture toast from Today without a missing translation" do
-      post "/admin/tasks", _csrf_token: admin_csrf_token, filter: "today", origin: "today", task: { title: " " }
-      follow_redirect!
+    it "renders a refused task from Today without a missing translation" do
+      post "/admin/tasks", _csrf_token: admin_csrf_token, origin: "today", task: { title: " ", list: "today" }
 
-      expect(last_response.body).to include("data-toast").and(not_include("translation_missing"))
+      expect(last_response.body).to include("field-error").and(not_include("translation_missing"))
+    end
+
+    it "renders the new task page from Today without a missing translation" do
+      get "/admin/tasks/new", origin: "today"
+
+      expect(last_response.body).not_to include("translation_missing")
     end
 
     {

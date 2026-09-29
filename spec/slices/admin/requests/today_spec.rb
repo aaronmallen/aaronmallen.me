@@ -1137,6 +1137,12 @@ RSpec.describe "Admin today", type: :request do
     end
 
     describe "the sprint" do
+      def create_from_today(title)
+        post "/admin/tasks", _csrf_token: admin_csrf_token, origin: "today", task: { title:, list: "today" }
+      end
+
+      def dialog = page.find("dialog#task-create", visible: :all)
+
       def lose_the_roll
         failing = sprint_repo
         allow(failing).to receive(:by_id).and_return(nil)
@@ -1153,10 +1159,15 @@ RSpec.describe "Admin today", type: :request do
 
       def planner(key, **) = i18n.t(["ui.components.tasks.planner", key].join("."), **)
 
-      def quick_add(title)
-        fields = { _csrf_token: admin_csrf_token, filter: "today", origin: "today", task: { title: } }
+      def pool_note(key, **) = i18n.t(["ui.components.tasks.pools", key].join("."), **)
 
-        post "/admin/tasks", fields
+      def pull_under_sprint
+        plan("Ship the panel")
+        task = create(:task, title: "Email the accountant")
+        get "/admin"
+        form = panel.find(".task-planner-pull form")
+        post form[:action], _csrf_token: admin_csrf_token, origin: form.find("[name='origin']", visible: :all).value
+        task
       end
 
       def sprint = @sprint ||= create(:sprint, sprint_date: today)
@@ -1284,11 +1295,38 @@ RSpec.describe "Admin today", type: :request do
         expect(panel).to have_css(".empty", text: "1 finished")
       end
 
-      it "still offers the quick add when everything is done" do
-        plan("Ship the panel", done: 1)
+      it "offers no capture row beside the sprint's tasks" do
+        plan("Ship the panel")
         get "/admin"
 
-        expect(panel).to have_css(".sprint-foot .task-capture input[name='task[title]']")
+        expect(panel).to have_no_field("task[title]")
+      end
+
+      it "offers the pools under the sprint's tasks" do
+        plan("Ship the panel")
+        create(:task, title: "Email the accountant")
+        get "/admin"
+
+        expect(panel.find(".task-planner-pull")).to have_css(".li-title", exact_text: "Email the accountant")
+      end
+
+      it "keeps Today when switching the pool under the sprint's tasks" do
+        plan("Ship the panel")
+        get "/admin"
+
+        expect(panel.all(".seg-option").map { it["href"] }).to eq(%w[next someday external].map { "/admin?pool=#{it}" })
+      end
+
+      it "adds a task pulled from the pools under the sprint's tasks to today's sprint" do
+        task = pull_under_sprint
+
+        expect(task_repo.in_sprint(sprint.id).map(&:id)).to contain_exactly(task.id, anything)
+      end
+
+      it "comes back to Today after pulling from the pools under the sprint's tasks" do
+        pull_under_sprint
+
+        expect(last_response.headers["location"]).to eq("/admin")
       end
 
       it "offers the planner when the sprint holds nothing" do
@@ -1304,10 +1342,10 @@ RSpec.describe "Admin today", type: :request do
         expect(panel).to have_css(".task-planner .card-label", exact_text: label)
       end
 
-      it "offers a quick add with the planner" do
+      it "offers no capture row with the planner" do
         get "/admin"
 
-        expect(panel).to have_css(".task-capture input[name='task[title]']")
+        expect(panel).to have_no_field("task[title]")
       end
 
       it "counts every pool the planner can pull from" do
@@ -1335,7 +1373,7 @@ RSpec.describe "Admin today", type: :request do
       it "says which pool is empty" do
         get "/admin"
 
-        expect(panel).to have_css(".empty", exact_text: planner("empty_next"))
+        expect(panel).to have_css(".empty", exact_text: pool_note("empty.next"))
       end
 
       it "comes back to Today after pulling a task in" do
@@ -1389,14 +1427,35 @@ RSpec.describe "Admin today", type: :request do
         expect(last_response.status).to eq(500)
       end
 
-      it "writes a task from the quick add straight into today" do
-        quick_add("Ship the panel")
+      it "offers the Create Task button, with a page to fall back on", :aggregate_failures do
+        get "/admin"
+        button = page.find(".page-head-actions a", text: "Create Task")
+
+        expect(button["href"]).to eq("/admin/tasks/new?origin=today")
+        expect(button["data-dialog-open"]).to eq("task-create")
+      end
+
+      it "puts the Create Task dialog on Today" do
+        get "/admin"
+
+        expect(dialog).to have_css("form[action='/admin/tasks']", visible: :all)
+      end
+
+      it "starts the dialog on today's list", :aggregate_failures do
+        get "/admin"
+
+        expect(dialog).to have_select("task[list]", selected: "today", visible: :all)
+        expect(dialog).to have_field("origin", type: :hidden, with: "today")
+      end
+
+      it "writes a task from the dialog straight into today" do
+        create_from_today("Ship the panel")
 
         expect(task_repo.in_sprint(sprint_repo.on(Blog::TimeZone.today).id).map(&:title)).to eq(["Ship the panel"])
       end
 
-      it "comes back to Today after the quick add" do
-        quick_add("Ship the panel")
+      it "comes back to Today after creating a task" do
+        create_from_today("Ship the panel")
 
         expect(last_response.headers["location"]).to eq("/admin")
       end
@@ -1409,11 +1468,19 @@ RSpec.describe "Admin today", type: :request do
         expect(last_response.headers["location"]).to eq("/admin")
       end
 
-      it "says what is missing when the quick add carries no title" do
-        quick_add("")
-        follow_redirect!
+      it "says what is missing when a task from Today carries no title", :aggregate_failures do
+        create_from_today("")
 
-        expect(page).to have_css("[data-toast] .toast", text: "Write the task down first", visible: :all)
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.title.blank"))
+      end
+
+      it "keeps the way back to Today when a task from Today carries no title", :aggregate_failures do
+        create_from_today("")
+        form = page.find("main form.task-form")
+
+        expect(form).to have_field("origin", type: :hidden, with: "today")
+        expect(form).to have_select("task[list]", selected: "today")
       end
     end
   end

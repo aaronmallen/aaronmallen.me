@@ -22,19 +22,10 @@ module Admin
 
           private
 
-          def capture
-            Capture(
-              filter: TODAY, values: Dry::Core::Constants::EMPTY_HASH,
-              errors: Dry::Core::Constants::EMPTY_HASH, autofocus: false, origin: ORIGIN, scope: "sprint",
-              target: t(".target"),
-            )
-          end
-
           def done = @tasks.count(&:closed?)
 
           def foot
             div(class: "sprint-foot") do
-              capture
               a(class: "btn gh", href: path(:admin_tasks)) do
                 i(class: "fa-solid fa-list-check", aria: { hidden: "true" })
                 span { t(open.empty? ? ".pull" : ".all_tasks") }
@@ -51,6 +42,7 @@ module Admin
               card.side { span(class: "sprint-note") { t(".done", done:, total: @tasks.size) } }
               progress
               rows
+              pools
               foot
             end
           end
@@ -58,6 +50,8 @@ module Admin
           def planner
             Planner(date: @date, origin: ORIGIN, pool: @pool, pools: @pools)
           end
+
+          def pools = Pools(origin: ORIGIN, pool: @pool, pools: @pools)
 
           def progress
             span(class: "sprint-progress") do

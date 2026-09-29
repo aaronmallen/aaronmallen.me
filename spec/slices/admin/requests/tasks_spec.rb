@@ -385,6 +385,8 @@ RSpec.describe "Admin tasks", type: :request do
     describe "an empty sprint" do
       def planner(key, **) = i18n.t(["ui.components.tasks.planner", key].join("."), **)
 
+      def pool_note(key, **) = i18n.t(["ui.components.tasks.pools", key].join("."), **)
+
       def pools = page.all(".task-planner .seg-option").map(&:text)
 
       it "asks what the day is for" do
@@ -476,19 +478,19 @@ RSpec.describe "Admin tasks", type: :request do
       it "says which pool is empty" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_next"))
+        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.next"))
       end
 
       it "names the other pool when it is the empty one" do
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_someday"))
+        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.someday"))
       end
 
       it "names external when it is the empty one" do
         get "/admin/tasks", filter: "today", pool: "external"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_external"))
+        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.external"))
       end
 
       it "drops the planner once the sprint holds a task", :aggregate_failures do
@@ -582,6 +584,24 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "the new task page from Today" do
+      def form = page.find("main form[action='/admin/tasks']")
+
+      before { get "/admin/tasks/new", origin: "today" }
+
+      it "puts a new task in today's sprint unless told otherwise" do
+        expect(form).to have_select("task[list]", selected: "today")
+      end
+
+      it "sends the task back to Today" do
+        expect(form).to have_field("origin", type: :hidden, with: "today")
+      end
+
+      it "leads back to Today" do
+        expect(page.find(".page-head-actions a", text: "Today")["href"]).to eq("/admin")
+      end
+    end
+
     describe "the dialog" do
       def fields = page.all("dialog#task-create [name^='task[']", visible: :all).map { it["name"] }
 
@@ -593,6 +613,14 @@ RSpec.describe "Admin tasks", type: :request do
 
       it "holds the same fields as the new task page" do
         expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+      end
+
+      it "starts on next away from Today", :aggregate_failures do
+        get "/admin/tasks", filter: "someday"
+        dialog = page.find("dialog#task-create", visible: :all)
+
+        expect(dialog).to have_select("task[list]", selected: "next", visible: :all)
+        expect(dialog).to have_no_field("origin", type: :hidden)
       end
     end
 

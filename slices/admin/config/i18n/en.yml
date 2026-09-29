@@ -86,7 +86,6 @@ en:
       renamed: "Tag renamed"
   tasks_page:
     toasts:
-      blank: "Write the task down first"
       canceled: "Canceled"
       captured: "Task captured"
       closed: "That task is closed already"
@@ -638,10 +637,6 @@ en:
               one: "%{count} task"
               other: "%{count} tasks"
       tasks:
-        capture:
-          add: "Add"
-          into: "Add to %{target}…"
-          label: "Task"
         closed:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
@@ -720,19 +715,20 @@ en:
         planner:
           ask: "What do you want to achieve today?"
           empty: "empty sprint"
-          empty_external: "Nothing in external. Sync issues from the External tab."
-          empty_next: "Nothing in next. Write the first one above."
-          empty_someday: "Nothing in someday. Write the first one above."
           label: "Sprint · %{date}"
           note: "One day, one sprint. Put something in it. Anything still open tonight rolls into tomorrow on its own."
-          pools:
+        pools:
+          empty:
+            external: "Nothing in external. Sync issues from the External tab."
+            next: "Nothing in next yet."
+            someday: "Nothing in someday yet."
+          lists:
             external: "external · %{count}"
             next: "next · %{count}"
             someday: "someday · %{count}"
           pull: "Pull in"
           pull_from: "Or pull from"
           pull_task: "Pull %{task} into today"
-          target: "today"
         row:
           blocked: "blocked"
           carried:
@@ -755,7 +751,6 @@ en:
             other: "Everything in today's sprint is done · %{count} finished. Add another or pull one from next."
           label: "Sprint · %{date}"
           pull: "Pull from next"
-          target: "today"
           title: "Today's sprint"
         tabs:
           completed: "completed"
@@ -1114,7 +1109,8 @@ en:
           sub: "Editing task %{key}"
           title: "Edit the task"
         new:
-          back: "Tasks"
+          back_tasks: "Tasks"
+          back_today: "Today"
           heading: "New task"
           label: "Tasks"
           sub: "Title, notes, list, sprint and tags in one go."
