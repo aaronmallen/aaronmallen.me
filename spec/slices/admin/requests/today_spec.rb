@@ -655,7 +655,7 @@ RSpec.describe "Admin today", type: :request do
       end
 
       def repo_streak_line
-        "Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · GitHub rate limited it · " \
+        "Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · It hit the rate limit · " \
           "failing since Dec 20, 2025"
       end
 
@@ -688,7 +688,7 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(page).to have_css(".sync-failures .sync-failure i.fa-triangle-exclamation")
-        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · GitHub rate limited it"])
+        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
       it "tells another failure from a rate limit" do
@@ -716,21 +716,21 @@ RSpec.describe "Admin today", type: :request do
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited, at: failed_at)
         get "/admin"
 
-        expect(failure_lines).to eq(["Issue sync failed at Jan 7, 2026, 09:30 · GitHub rate limited it"])
+        expect(failure_lines).to eq(["GitHub issue sync failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
       it "reads what GitHub answered off a failed issue sync" do
         sync_issues_with(bad_gateway("GraphQL"))
         get "/admin"
 
-        expect(failure_lines.first).to match(bad_gateway_line("Issue sync", "GraphQL"))
+        expect(failure_lines.first).to match(bad_gateway_line("GitHub issue sync", "GraphQL"))
       end
 
       it "reports a failed Linear issue sync apart from a failed GitHub one" do
         fail_both_issue_syncs
         get "/admin"
 
-        expect(failed_syncs).to eq(["Issue sync", "Linear issue sync"])
+        expect(failed_syncs).to eq(["GitHub issue sync", "Linear issue sync"])
       end
 
       it "clears a Linear issue sync failure without clearing GitHub's" do
@@ -738,7 +738,7 @@ RSpec.describe "Admin today", type: :request do
         record_linear_issue_sync_outcome(Dry::Monads::Success(nil))
         get "/admin"
 
-        expect(failure_lines).to contain_exactly(bad_gateway_line("Issue sync", "GraphQL"))
+        expect(failure_lines).to contain_exactly(bad_gateway_line("GitHub issue sync", "GraphQL"))
       end
 
       it "reports a failed Linear job under Linear" do
@@ -748,6 +748,21 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(failed_syncs).to eq(["Linear issue sync"])
+      end
+
+      it "says Linear didn't answer when a Linear sync fails" do
+        record_linear_issue_sync_outcome(Dry::Monads::Failure([:linear_failed, "Linear answered 502 for GraphQL"]))
+        get "/admin"
+
+        expect(failure_lines.first)
+          .to match(/\ALinear issue sync failed at .+ · Linear didn't answer · Linear answered 502 for GraphQL\z/)
+      end
+
+      it "reports a Linear rate limit under Linear" do
+        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::LINEAR_ISSUES, :rate_limited, at: failed_at)
+        get "/admin"
+
+        expect(failure_lines).to eq(["Linear issue sync failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
       it "reports the nightly analytics rollup the same way" do
@@ -769,7 +784,7 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(failure_lines)
-          .to eq(["Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · GitHub rate limited it"])
+          .to eq(["Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
       it "leaves a repository the page limit stopped unreported" do
@@ -778,7 +793,7 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(failure_lines)
-          .to eq(["Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · GitHub rate limited it"])
+          .to eq(["Commit import failed for aaronmallen/one at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
       it "links nowhere for a repository the page limit stopped", :aggregate_failures do

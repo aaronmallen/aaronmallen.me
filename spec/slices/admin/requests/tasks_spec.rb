@@ -221,7 +221,16 @@ RSpec.describe "Admin tasks", type: :request do
             .to_h { [it["name"][/\Atask\[(\w+)\]\z/, 1], it.value] }
       end
 
+      def import_linear
+        task = create(:task, :external, title: "Ship the release")
+        create(:task_source, task:, provider: "linear", remote_id: "lin-1", url: linear_url)
+      end
+
       def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/42"
+
+      def linear_link = page.find(".task .task-meta a.task-source", text: "ABC-123")
+
+      def linear_url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
 
       before do
         create(:task, title: "Email the accountant")
@@ -258,8 +267,8 @@ RSpec.describe "Admin tasks", type: :request do
       it "labels and blurbs the card", :aggregate_failures do
         get "/admin/tasks", filter: "external"
 
-        expect(page).to have_css(".card-label", exact_text: "From GitHub")
-        expect(page).to have_css(".card-blurb", text: "open GitHub issues assigned to you")
+        expect(page).to have_css(".card-label", exact_text: "From GitHub and Linear")
+        expect(page).to have_css(".card-blurb", text: "open GitHub and Linear issues assigned to you")
       end
 
       it "says something useful when nothing is imported" do
@@ -275,6 +284,35 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(link["href"]).to eq(issue_url)
         expect(link.text).to eq("aaronmallen/aaronmallen.me#42")
+      end
+
+      it "marks a GitHub issue with GitHub's icon" do
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_css(".task-source i.fa-brands.fa-github", visible: :all)
+      end
+
+      it "links a Linear row to its issue by its key" do
+        import_linear
+        get "/admin/tasks", filter: "external"
+
+        expect(linear_link["href"]).to eq(linear_url)
+      end
+
+      it "marks a Linear issue with a Font Awesome Free solid icon", :aggregate_failures do
+        import_linear
+        get "/admin/tasks", filter: "external"
+
+        expect(linear_link).to have_css("i.fa-solid.fa-circle-half-stroke[aria-hidden='true']", visible: :all)
+        expect(linear_link).to have_no_css("i.fa-github", visible: :all)
+      end
+
+      it "leaves the GitHub row as it was beside a Linear one", :aggregate_failures do
+        import_linear
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
+        expect(page).to have_link("ABC-123", href: linear_url)
       end
 
       it "leaves the issue link off a task written by hand" do
@@ -486,6 +524,14 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "today", pool: "external"
 
         expect(page).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
+      end
+
+      it "links a Linear issue by its key" do
+        url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
+        create(:task_source, task: create(:task, :external), provider: "linear", remote_id: "lin-1", url:)
+        get "/admin/tasks", filter: "today", pool: "external"
+
+        expect(page).to have_link("ABC-123", href: url)
       end
 
       it "pulls one into today's sprint", :aggregate_failures do
