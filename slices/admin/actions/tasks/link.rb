@@ -8,9 +8,11 @@ module Admin
 
         include Redirect
         include Deps[
+          build_task_page: "operations.build_task_page",
           build_tasks_page: "operations.build_tasks_page",
           index_view: "ui.views.tasks.index",
           link_tasks: "tasks.operations.link_tasks",
+          task_view: "ui.views.tasks.show",
         ]
 
         def handle(request, response)
@@ -31,12 +33,21 @@ module Admin
 
         def invalid(request, response, id, params, errors)
           response.status = 422
-          linking = { errors:, id:, kind: Blog::Types::Text[params[:kind]] }
+          kind = Blog::Types::Text[params[:kind]]
+          return invalid_on_task(request, response, id, kind, errors) if from_task?(request)
+
+          linking = { errors:, id:, kind: }
 
           case build_tasks_page.call(tab: task_tab(request), linking:)
           in Success(screen) then response.render(index_view, **screen)
           else halt 500
           end
+        end
+
+        def invalid_on_task(request, response, id, kind, errors)
+          page = build_task_page.call(id, kind:, errors:) || halt(404)
+
+          response.render(task_view, **page, **return_to(request))
         end
       end
     end

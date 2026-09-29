@@ -19,10 +19,11 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :origin, Blog::Types::String, default: ORIGIN
+          prop :moves, Blog::Types::Bool, default: true
 
           def view_template
             @task.closed? ? reopen : progress
-            moves unless @task.closed?
+            moves if @moves && !@task.closed?
           end
 
           private

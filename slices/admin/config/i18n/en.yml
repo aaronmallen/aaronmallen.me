@@ -1123,6 +1123,29 @@ en:
           label: "Tasks"
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
+        show:
+          back_tasks: "Tasks"
+          back_today: "Today"
+          carried: "Carried over"
+          carried_count:
+            one: "once"
+            other: "%{count} times"
+            zero: "never"
+          completed: "Completed"
+          created: "Created"
+          links: "Links"
+          note: "Note"
+          note_label: "Task"
+          related: "Related"
+          sprint: "Sprint day"
+          statuses:
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            open: "open"
+          sub: "Task %{key}"
+          unscheduled: "not set"
+          updated: "Updated"
       today:
         show:
           clients: "MCP clients"

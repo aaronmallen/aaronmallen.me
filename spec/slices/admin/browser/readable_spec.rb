@@ -5,7 +5,15 @@ RSpec.describe "Admin screens", type: :feature do
   let(:draft) { create(:post, :draft, title: "A draft in progress") }
   let(:project) { create(:project, name: "aaronmallen.me", tagline: "This website") }
   let(:social_post) { create(:social_post, :draft) }
-  let(:task) { create(:task, title: "Email the accountant about the quarterly filing") }
+  let(:task) do
+    create(
+      :task, :carried,
+      title: "Email the accountant about the quarterly filing",
+      note: "some context\n\n- one\n- two\n\n<details><summary>More</summary>\n\nhidden detail</details>\n\n" \
+            "```\n#{'a_very_long_line_of_code ' * 8}\n```",
+      tags: %w[site],
+    )
+  end
 
   def screens
     {
@@ -30,6 +38,8 @@ RSpec.describe "Admin screens", type: :feature do
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
       "tags" => "/admin/tags",
+      "task" => "/admin/tasks/#{task.id}",
+      "task link search" => "/admin/tasks/#{task.id}?link_q=finished",
       "task links" => "/admin/tasks?link=#{task.id}",
       "tasks" => "/admin/tasks",
       "tasks archive" => "/admin/tasks?filter=completed",
@@ -59,7 +69,9 @@ RSpec.describe "Admin screens", type: :feature do
 
   def seed_tasks
     task
-    create(:task, :in_progress, title: "Ship the phone layout")
+    create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
+    running = create(:task, :in_progress, title: "Ship the phone layout")
+    create(:task_link, from_task_id: task.id, to_task_id: running.id)
     create(:task, :done, title: "Something finished a while ago")
   end
 

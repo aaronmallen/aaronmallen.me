@@ -23,6 +23,7 @@ module Admin
           BY_STATUS = [
             Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["in_progress"],
           ].freeze
+          FROM_TASK = "task"
           PREFIX = "#"
           TODAY = Blog::Types::TaskFilter["today"]
 
@@ -30,6 +31,7 @@ module Admin
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
           prop :linking, Blog::Types::Hash.optional, default: nil
+          prop :page, Blog::Types::Bool, default: false
 
           def view_template
             div(class: "task-link-editor") do
@@ -59,9 +61,9 @@ module Admin
           end
 
           def find_form
-            Form(method: "get", action: path(:admin_tasks), class: "task-link-find") do
-              input(type: "hidden", name: "filter", value: @tab)
-              input(type: "hidden", name: "link", value: @task.id)
+            Form(method: "get", action: find_path, class: "task-link-find") do
+              return_fields
+              input(type: "hidden", name: "link", value: @task.id) unless @page
               kind_select
               Input(
                 **FieldError.control_attributes(:other_id, errors, scope),
@@ -70,6 +72,8 @@ module Admin
               Button(type: "submit", small: true) { t(".find") }
             end
           end
+
+          def find_path = @page ? path(:admin_task, id: @task.id) : path(:admin_tasks)
 
           def key(task) = "#{PREFIX}#{task.id}"
 
@@ -89,10 +93,16 @@ module Admin
             div(class: "task-link-row") do
               span(class: "task-link-label") { t(Links.label_key(link)) }
               TaskKey(task: link.task)
-              span(class: "task-link-title") { link.task.title }
+              link_title(link.task)
               span(class: "task-link-place") { place(link.task) }
               unlink_form(link)
             end
+          end
+
+          def link_title(task)
+            return span(class: "task-link-title") { task.title } unless @page
+
+            a(class: "task-link-title", href: task_path(task)) { task.title }
           end
 
           def links
@@ -108,6 +118,7 @@ module Admin
           def return_fields
             input(type: "hidden", name: "filter", value: @tab)
             input(type: "hidden", name: "origin", value: @origin)
+            input(type: "hidden", name: "from", value: FROM_TASK) if @page
           end
 
           def scope = "task-#{@task.id}-link"
@@ -130,6 +141,8 @@ module Admin
 
             div(class: "task-link-targets") { found.each { target(it) } }
           end
+
+          def task_path(task) = path(:admin_task, id: task.id, filter: @tab, origin: @origin)
 
           def unlink_form(link)
             label = t(".remove", key: key(link.task))

@@ -1748,6 +1748,10 @@
 
 @utility task-source {
   @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent hover:underline focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
 }
 
 @utility task-finished {
@@ -1822,6 +1826,20 @@
 
   & .task-link-title {
     @apply flex-1;
+  }
+
+  & a.task-link-title {
+    @apply no-underline hover:text-accent hover:underline focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply block min-h-tap basis-full content-center;
+    }
+  }
+
+  &:has(> a.task-link-title) {
+    @media (width < 43.75rem) {
+      @apply flex-wrap;
+    }
   }
 }
 
@@ -1926,6 +1944,65 @@
 
 @utility task-note {
   @apply mt-3.5 meta;
+}
+
+@utility task-read {
+  @apply flex min-w-0 flex-col gap-4;
+}
+
+@utility task-read-meta {
+  @apply col-auto row-auto;
+}
+
+@utility task-read-acts {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+@utility task-body {
+  &.post-body {
+    @apply mt-0 min-w-0 wrap-anywhere;
+
+    & > p:first-of-type {
+      @apply text-post;
+    }
+  }
+
+  & img {
+    @apply h-auto max-w-full;
+  }
+
+  & pre {
+    @apply whitespace-pre-wrap;
+  }
+
+  & table {
+    @apply w-full table-fixed;
+  }
+
+  & summary {
+    @apply cursor-pointer;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
+}
+
+@utility task-facts {
+  @apply grid gap-x-6 gap-y-3;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+}
+
+@utility task-fact {
+  @apply flex flex-col gap-0.5;
+
+  & dt {
+    @apply meta;
+  }
+
+  & dd {
+    @apply text-li text-ink;
+  }
 }
 
 @utility task-order {

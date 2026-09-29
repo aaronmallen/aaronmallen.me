@@ -65,7 +65,7 @@ module Admin
       operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.start_task operations.unlink_task queries.finished_task_counts
       queries.link_targets queries.list_finished_tasks queries.list_tasks queries.open_tasks
-      queries.open_tasks_in_list queries.search_tasks queries.sprints_after queries.tasks_in_sprint
+      queries.open_tasks_in_list queries.search_tasks queries.sprints_after queries.task_by_id queries.tasks_in_sprint
     ], from: :tasks
 
     import keys: %w[operations.revoke_client queries.connected_clients], from: :mcp

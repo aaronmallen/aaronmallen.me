@@ -5,11 +5,18 @@ module Admin
   module Actions
     module Tasks
       module Redirect
+        FROM_TASK = "task"
         FROM_TODAY = Blog::Types::TaskOrigin["today"]
 
         private
 
+        def from_task?(request) = request.params[:from] == FROM_TASK
+
         def from_today?(request) = Blog::Types::TaskOriginParam[request.params[:origin]] == FROM_TODAY
+
+        def return_to(request) = { filter: task_tab(request), origin: task_origin(request) }
+
+        def task_origin(request) = Blog::Types::TaskOriginParam[request.params[:origin]]
 
         def task_tab(request) = Blog::Types::TaskTabParam[request.params[:filter]]
 
