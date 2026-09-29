@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, admin, tasks]
 issue: AA-689
-amended: [AA-397, AA-398]
+amended: [AA-397, AA-398, "#53"]
 tags: [tasks, sprints, schema, today, upcoming, rollover, dashboard]
 ---
 
@@ -54,8 +54,10 @@ sprint.
 
 Every screen that shows Today claims today's sprint as it loads, as AA-358 asked, so a missed midnight job never
 leaves Today stale. The Tasks screen does it in `Admin::Operations::BuildTasksPage` and the `/admin` dashboard in
-`Admin::Operations::SummarizeSprint`, both through `CurrentSprint`. Rollover also runs from
-`Tasks::Jobs::RollOverSprint` at midnight in the site's time zone and from every write that puts a task in Today.
+`Admin::Operations::SummarizeSprint`, both through `CurrentSprint`. A task's read and edit pages do it too, in
+`Admin::Operations::BuildTaskPage` and `Admin::Actions::Tasks::Edit`, so a task opened from a link on a new day shows
+today's sprint and saves unchanged (#53). Rollover also runs from `Tasks::Jobs::RollOverSprint` at midnight in the
+site's time zone and from every write that puts a task in Today.
 
 The relations, repos and operations belong to `slices/tasks`, and `slices/admin` holds the screens and reaches them
 through exports.
