@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, lib, tasks]
 issue: "#38"
+amended: ["#52"]
 tags: [tasks, markdown, html, sanitize, security, commonmarker]
 ---
 
@@ -49,6 +50,10 @@ disabled checkbox a task list writes. The result:
 
 Dropping `class`, `id` and `style` keeps a note out of the admin's CSS and ids: a note cannot pin itself over the
 page with a utility class or claim the id a `dialog` or `label` looks up.
+
+Once the note is clean, `Tasks::Markdown` gives each task-list checkbox an `aria-label` of its item's text,
+leaving out any list nested under it, so a screen reader and axe can name the box (#52). The label comes from the
+cleaned HTML, so it holds only text that survived the cleaning, and a note cannot set one of its own.
 
 The stored note does not change. We clean it each time it renders.
 
