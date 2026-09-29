@@ -5,4 +5,4 @@
 set -e
 
 scripts/db/prepare
-HANAMI_ENV="test" scripts/db/prepare
+scripts/test/prepare
