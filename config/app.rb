@@ -12,6 +12,7 @@ require "blog/extensions/hanami/router/node/extension"
 require "blog/extensions/hanami/router/trie/extension"
 require "blog/params_guard"
 require "blog/providers/honeybadger_provider"
+require "blog/version"
 
 module Blog
   class App < Hanami::App

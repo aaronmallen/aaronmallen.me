@@ -164,7 +164,6 @@ module MCP
         Tools::UpdateWebmentionSettings,
         Tools::WritePostSeo,
       ].freeze
-      VERSION = "1.0.0"
 
       include Deps["settings", honeybadger: "honeybadger.agent", **CONTEXT]
 
@@ -198,7 +197,7 @@ module MCP
           server_context: context,
           title: format(TITLE, owner),
           tools: TOOLS,
-          version: VERSION,
+          version: Blog::Version::CURRENT,
         )
       end
     end

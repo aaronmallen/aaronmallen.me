@@ -264,6 +264,13 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(result.dig("serverInfo", "name")).to eq("aaronmallen.me")
     end
 
+    it "reports the version the app read at boot" do
+      rpc("initialize",
+          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+
+      expect(result.dig("serverInfo", "version")).to eq(Blog::Version::CURRENT)
+    end
+
     it "tells the client it reads every record and makes every admin write" do
       rpc("initialize",
           { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
