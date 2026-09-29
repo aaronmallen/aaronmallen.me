@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+#MISE description="Create or migrate the test database, without seeding it or dumping its schema"
+#MISE alias=["tp"]
+
+set -e
+
+HANAMI_ENV="test" HANAMI_CLI_DB_COMMAND_RE_RUN_IN_TEST="true" scripts/util/ensure_postgres bundle exec hanami db prepare

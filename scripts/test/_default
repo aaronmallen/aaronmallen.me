@@ -5,4 +5,5 @@
 set -e
 
 scripts/assets/build
+scripts/test/prepare
 scripts/util/ensure_postgres bundle exec rspec --require spec_helper "$@"
