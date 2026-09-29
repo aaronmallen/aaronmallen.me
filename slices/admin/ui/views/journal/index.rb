@@ -16,18 +16,18 @@ module Admin
 
           def initialize(
             days:, entries:, streak:, today:, words:, editing: nil, errors: Dry::Core::Constants::EMPTY_HASH,
-            search: Dry::Core::Constants::EMPTY_STRING, values: BLANK_ENTRY
+            search: Dry::Core::Constants::EMPTY_STRING, values: BLANK_ENTRY, writing: false
           )
             super()
+            @counts = { entries:, words: }
             @days = days
             @editing = editing
-            @entries = entries
             @errors = errors
             @search = search
             @streak = streak
             @today = today
             @values = values
-            @words = words
+            @writing = writing
           end
 
           def view_template
@@ -57,7 +57,7 @@ module Admin
           def new_entry
             NewEntry(
               values: { body:, tags: @values[:tags] }, date: entry_date, errors: @errors, today: @today,
-              word_count: Blog::Figures.words(body),
+              word_count: Blog::Figures.words(body), autofocus: @writing,
             )
           end
 
@@ -67,8 +67,8 @@ module Admin
             [
               t(".private"),
               t(".never_public"),
-              t(".entries", count: @entries),
-              t(".words", count: @words),
+              t(".entries", count: @counts[:entries]),
+              t(".words", count: @counts[:words]),
             ].join(SEPARATOR)
           end
         end

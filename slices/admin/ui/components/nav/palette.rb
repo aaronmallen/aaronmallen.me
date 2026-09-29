@@ -5,7 +5,7 @@ module Admin
     module Components
       module Nav
         class Palette < Component
-          CREATE_GROUP = "command-palette-group-create"
+          ACTIONS_GROUP = "command-palette-group-actions"
           DIALOG_ID = "command-palette"
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘/" }.freeze
           LIST_ID = "command-palette-list"
@@ -37,11 +37,15 @@ module Admin
 
           private
 
-          def create_group
-            row_group(CREATE_GROUP, t(".create")) do
+          def action_group
+            row_group(ACTIONS_GROUP, t(".actions")) do
               PaletteRow(
                 id: "command-palette-create-task", icon: "fa-plus", label: t(".create_task"),
-                text: t(".create_text"), href: path(:admin_new_task), dialog: Tasks::CreateDialog::ID,
+                text: t(".create_task_text"), href: path(:admin_new_task), dialog: Tasks::CreateDialog::ID,
+              )
+              PaletteRow(
+                id: "command-palette-create-journal-entry", icon: "fa-pen", label: t(".create_journal_entry"),
+                text: t(".create_journal_entry_text"), href: path(:admin_journal, write: Blog::Constants::CHECKED),
               )
             end
           end
@@ -80,7 +84,7 @@ module Admin
                   sections.each { section_row(it) }
                 end
               end
-              create_group
+              action_group
               task_group
             end
           end

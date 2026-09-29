@@ -13,6 +13,7 @@ module Admin
           prop :errors, Blog::Types::Hash
           prop :today, Blog::Types::Date
           prop :word_count, Blog::Types::Integer
+          prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template
             Form(id: FORM_ID, action: path(:admin_create_journal_entry), data: form_data) do
@@ -34,6 +35,7 @@ module Admin
               **FieldError.control_attributes(:body, @errors),
               name: "entry[body]",
               rows: ROWS,
+              autofocus: @autofocus,
               placeholder: t(".placeholder"),
               data: { journal_body: "" },
             }

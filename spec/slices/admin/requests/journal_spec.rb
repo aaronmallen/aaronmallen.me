@@ -108,6 +108,24 @@ RSpec.describe "Admin journal", type: :request do
       it "shows the streak with no days" do
         expect(page).to have_css(".journal-streak", exact_text: "Wrote on 0 of the last 30 days")
       end
+
+      it "leaves the entry field unfocused" do
+        expect(page).to have_no_css("textarea[name='entry[body]'][autofocus]")
+      end
+
+      it "offers a palette row that opens the page ready to write" do
+        expect(page).to have_css(
+          "#command-palette-create-journal-entry[data-palette-href='/admin/journal?write=1']", visible: :all,
+        )
+      end
+    end
+
+    describe "the page, opened to write" do
+      before { get "/admin/journal", write: "1" }
+
+      it "focuses the entry field" do
+        expect(page).to have_css("#journal-entry textarea[name='entry[body]'][autofocus]")
+      end
     end
 
     describe "with entries" do

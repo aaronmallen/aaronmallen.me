@@ -113,6 +113,18 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "the Actions group" do
+    before { open_palette }
+
+    it "holds Create task and Create journal entry", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-actions']") do
+        expect(page).to have_css(".pal-g", text: /actions/i)
+        expect(page).to have_css("#command-palette-create-task", text: "Create task")
+        expect(page).to have_css("#command-palette-create-journal-entry", text: "Create journal entry")
+      end
+    end
+  end
+
   describe "the Create task command" do
     before { open_palette }
 
@@ -220,6 +232,38 @@ RSpec.describe "Admin command palette", type: :feature do
       it "says so" do
         expect(page).to have_css("[data-toast]", text: "Task captured")
       end
+    end
+  end
+
+  describe "the Create journal entry command" do
+    before { open_palette }
+
+    it "is found by what it does" do
+      query.send_keys(*"write in the journal".chars)
+
+      expect(active).to eq("command-palette-create-journal-entry")
+    end
+
+    it "drops out when the query does not match" do
+      query.send_keys(*"mess".chars)
+
+      expect(page).to have_no_css("#command-palette-create-journal-entry")
+    end
+  end
+
+  describe "running the Create journal entry command" do
+    before do
+      visit "/admin/posts"
+      open_palette
+      query.send_keys(*"journal entry".chars, :enter)
+    end
+
+    it "opens the journal page" do
+      expect(page).to have_current_path("/admin/journal?write=1")
+    end
+
+    it "puts the cursor in the entry field" do
+      expect(page).to have_css("#journal-entry textarea[name='entry[body]']:focus")
     end
   end
 

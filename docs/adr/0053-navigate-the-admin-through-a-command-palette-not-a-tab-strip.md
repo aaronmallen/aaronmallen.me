@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17"]
+amended: ["#17", "#87"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -37,12 +37,16 @@ request and draws three parts from what it returns:
 - `Nav::ContextBar` shows the group and section you are on, a link back to Today on every other screen, and a jump
   button. The jump button carries a dot when any section has something waiting.
 - `Nav::Palette` is a modal `dialog`. With an empty query it lists every section under its group, with the count
-  of what waits there. A query filters the sections, searches unfinished tasks, and offers to add the query to
-  Today as a task through a hidden form that posts to the tasks route.
+  of what waits there, then an Actions group. A query filters the sections and the actions alike, and searches
+  unfinished tasks.
 - `Nav::SlashButton` floats in the corner and opens the palette with a tap.
 
 `app/assets/js/admin/palette.js` opens the palette on `/` from anywhere outside a field, and on `⌘/` or `Ctrl+/`
 from anywhere at all.
+
+The Actions group holds two rows. "Create task" shuts the palette and opens the new task dialog on the page you
+are on, and goes to `/admin/tasks/new` when that page has no dialog. "Create journal entry" goes to
+`/admin/journal?write=1`, which draws the entry field with `autofocus`, so the cursor lands in it without a script.
 
 A section is a row in `Admin::Operations::ListSections::ALL`: its name, group, icon and route, in the order the
 palette lists them. A new section joins by adding its row and the locale keys `Structs::Section` reads for it. A row
@@ -64,8 +68,8 @@ Every signed-in admin page pays for the palette. `ListSections` counts unread me
 and `BuildNavigation` loads every open task through `tasks.queries.open_tasks` so the palette can search them,
 though it shows five at most.
 
-One dialog does two jobs. It holds navigation and the form that adds a task to Today, so a change to either touches
-the other's markup and script.
+One dialog does two jobs. It holds navigation and the actions, so a change to either touches the other's markup and
+script.
 
 `/` belongs to the admin. Any admin screen that wants the key for itself, outside a field, has to take it back from
 `palette.js`.

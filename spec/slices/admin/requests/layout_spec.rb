@@ -39,7 +39,7 @@ RSpec.describe "Admin layout", type: :request do
     end
 
     it "offers only the sections whose features exist" do
-      sections = page.all("[data-palette-option][data-palette-href]:not([data-palette-dialog])")
+      sections = page.all("[data-palette-group]:not([aria-labelledby$='-actions']) [data-palette-option]")
 
       expect(sections.map { it["data-palette-href"] })
         .to eq(%w[/admin /admin/tasks /admin/journal /admin/posts /admin/social /admin/projects /admin/messages

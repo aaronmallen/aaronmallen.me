@@ -8,8 +8,9 @@ module Admin
 
         def handle(request, response)
           search = Blog::Types::Text[request.params[:q]]
+          writing = Blog::Types::Checkbox[request.params[:write]]
 
-          response.render(view, **summarize_journal.call(search:), search:)
+          response.render(view, **summarize_journal.call(search:), search:, writing:)
         end
       end
     end
