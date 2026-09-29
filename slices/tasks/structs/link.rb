@@ -4,7 +4,7 @@ module Tasks
   module Structs
     class Link < Data.define(:direction, :task, :type)
       BLOCKS = Blog::Types::TaskLinkType["blocks"]
-      DONE = Blog::Types::TaskStatus["done"]
+      CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze
       LABELS = {
         BLOCKS => { outgoing: "blocks", incoming: "blocked_by" },
         Blog::Types::TaskLinkType["duplicates"] => { outgoing: "duplicates", incoming: "duplicated_by" },
@@ -16,7 +16,7 @@ module Tasks
 
       def self.outgoing(row) = new(direction: :outgoing, task: row.to_task, type: row.type)
 
-      def blocker? = direction == :incoming && type == BLOCKS && task.status != DONE
+      def blocker? = direction == :incoming && type == BLOCKS && !CLOSED.include?(task.status)
 
       def incoming? = direction == :incoming
 

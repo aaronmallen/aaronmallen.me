@@ -138,6 +138,14 @@ RSpec.describe "MCP task tools", type: :request do
 
         expect(content).to include("blocked" => true, "links" => [include("label" => "blocked_by")])
       end
+
+      it "stops blocking once the blocker is canceled" do
+        freed = create(:task, title: "freed")
+        create(:task_link, from_task_id: create(:task, :canceled).id, to_task_id: freed.id)
+        call_tool("read_task", id: freed.id)
+
+        expect(content).to include("blocked" => false)
+      end
     end
 
     it "names the sprint day of a task in a sprint" do

@@ -99,6 +99,20 @@ RSpec.describe "Admin task links", type: :request do
       expect(pill?("Ship the links")).to be(false)
     end
 
+    it "goes once the blocker is canceled" do
+      send_to("/admin/tasks/#{other.id}/cancel", filter: "next")
+      get "/admin/tasks", filter: "next"
+
+      expect(pill?("Ship the links")).to be(false)
+    end
+
+    it "stays while one blocker is canceled and another is open" do
+      create(:task_link, from_task_id: create(:task, :canceled, title: "Drop the migration").id, to_task_id: task.id)
+      get "/admin/tasks", filter: "next"
+
+      expect(pill?("Ship the links")).to be(true)
+    end
+
     it "stays off a relates link" do
       links.where(from_task_id: other.id).update(type: "relates")
       get "/admin/tasks", filter: "next"

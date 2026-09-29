@@ -215,6 +215,34 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "canceling a task" do
+    let(:mark) { translate("ui.components.tasks.closed.canceled") }
+
+    before do
+      find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.cancel"))
+      find(".toast", text: "Canceled")
+      find(".subtab", text: "completed").click
+    end
+
+    it "files it under completed with its canceled mark" do
+      expect(find(".task.canceled", text: "Email the accountant")).to have_css(".task-meta .pill", text: mark)
+    end
+
+    describe "reopening it" do
+      before do
+        find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.reopen"))
+        find(".toast", text: "Reopened")
+        find(".subtab", text: "next").click
+      end
+
+      it "puts it back on its list as open", :aggregate_failures do
+        expect(page).to have_css(".task-title", text: "Email the accountant")
+        expect(find(".task", text: "Email the accountant")).to have_no_css(".task-meta .pill", text: mark)
+        expect(repo.all_open.map(&:title)).to include("Email the accountant")
+      end
+    end
+  end
+
   describe "editing a task" do
     before do
       create(:task_type, name: "Chore")
@@ -339,6 +367,15 @@ RSpec.describe "Admin tasks", type: :feature do
         row("Email the accountant").click_button(translate("ui.components.tasks.controls.complete"))
 
         expect(page).to have_css(".toast", text: "Done")
+      end
+
+      it "loses the blocked pill once the blocker is canceled" do
+        visit "/admin/tasks?filter=someday"
+        row("Learn Elixir").click_button(translate("ui.components.tasks.controls.cancel"))
+        find(".toast", text: "Canceled")
+        find(".subtab", text: "next").click
+
+        expect(row("Email the accountant")).to have_no_css(".task-meta .pill.pink")
       end
 
       it "loses the blocked pill once the blocker is done" do
