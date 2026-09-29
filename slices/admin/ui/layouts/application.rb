@@ -28,6 +28,7 @@ module Admin
           ContextBar(current: navigation.current, alert: navigation.alert?) if navigation
           main(id: "main", class: "adm-main", &)
           Toast(message: toast_message) if toast_message
+          Footer()
           render_palette(navigation) if navigation
         end
 

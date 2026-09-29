@@ -236,6 +236,8 @@ RSpec.describe "Admin command palette", type: :feature do
   end
 
   describe "on a phone" do
+    def edge(selector, side) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().#{side}")
+
     before do
       page.driver.resize(375, 800)
       visit "/admin"
@@ -247,6 +249,12 @@ RSpec.describe "Admin command palette", type: :feature do
 
     it "does not scroll the page sideways" do
       expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+    end
+
+    it "keeps the button off the footer at the foot of the page" do
+      execute_script("window.scrollTo(0, document.documentElement.scrollHeight)")
+
+      expect(edge(".adm-footer-version", :bottom)).to be <= edge(".slash", :top)
     end
 
     describe "tapping it" do

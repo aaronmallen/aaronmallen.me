@@ -966,10 +966,18 @@
 
 @utility adm-main {
   @apply mx-auto w-full max-w-admin flex-1 px-admin-gutter py-8;
+}
+
+@utility adm-footer {
+  @apply mx-auto w-full max-w-admin px-admin-gutter pb-8;
 
   @media (width < 43.75rem) {
     @apply pb-20;
   }
+}
+
+@utility adm-footer-version {
+  @apply border-t border-line pt-4 meta;
 }
 
 @utility page-head {

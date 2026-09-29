@@ -56,6 +56,11 @@ RSpec.describe "Admin layout", type: :request do
       expect(page).to have_no_css("head link[rel='alternate']", visible: :all)
     end
 
+    it "shows the app version in the footer as plain text", :aggregate_failures do
+      expect(page).to have_css("main#main ~ footer.adm-footer", text: "Version #{Blog::Version::CURRENT}")
+      expect(page).to have_no_css("footer.adm-footer a")
+    end
+
     it "loads the site styles and scripts", :aggregate_failures do
       expect(page).to have_css("link[rel='stylesheet'][href*='app']", visible: :all)
       expect(page).to have_css("script[src*='app']", visible: :all)
@@ -80,6 +85,10 @@ RSpec.describe "Admin layout", type: :request do
     it "renders no context bar and no palette", :aggregate_failures do
       expect(page).to have_no_css(".ctx-bar")
       expect(page).to have_no_css("dialog#command-palette", visible: :all)
+    end
+
+    it "shows the app version in the footer" do
+      expect(page).to have_css("footer.adm-footer", text: "Version #{Blog::Version::CURRENT}")
     end
 
     it "offers only the theme options in the settings menu" do

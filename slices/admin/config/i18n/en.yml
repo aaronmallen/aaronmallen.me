@@ -186,6 +186,8 @@ en:
         words:
           one: "%{count} word"
           other: "%{count} words"
+      footer:
+        version: "Version %{version}"
       journal:
         day:
           days_ago:
