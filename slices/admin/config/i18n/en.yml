@@ -1149,11 +1149,14 @@ en:
           commits: "Commits"
           commits_note: "+%{additions} / −%{deletions}"
           heading: "Today"
-          journaled: "Journaled"
-          journaled_note: "words, private"
           queue: "In the queue"
-          queue_note: "next: %{title}"
           queue_note_empty: "nothing scheduled"
+          queue_posts:
+            one: "%{count} post"
+            other: "%{count} posts"
+          queue_social_posts:
+            one: "%{count} social post"
+            other: "%{count} social posts"
           sign_out: "Sign out"
           sprint: "Sprint"
           sprint_empty: "nothing planned"

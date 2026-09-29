@@ -16,7 +16,6 @@ module Admin
         commits_today: "record.queries.commits_today",
         country_database_failure: "analytics.queries.country_database_failure",
         journal_entries_today: "record.queries.journal_entries_today",
-        journal_words_on: "record.queries.journal_words_on",
         pending_webmention_count: "social.queries.pending_webmention_count",
         pending_webmentions: "social.queries.pending_webmentions",
         posts_by_status: "posts.queries.by_status",
@@ -34,13 +33,13 @@ module Admin
         {
           commits: commits(now),
           commit_totals: commit_totals_today.call(now:),
+          entries: journal_entries_today.call(now:),
           posts: posts(scheduled),
           queue: queue(scheduled, social, now),
           social:,
           sprint:,
           sync_failures: failures,
           webmentions:,
-          **journal(now),
         }
       end
 
@@ -66,20 +65,10 @@ module Admin
         drafts.to_h { [it.id, { read_time: it.read_time, words: ::Posts::Markdown.word_count(it.body) }] }
       end
 
-      def due(scheduled, social)
-        scheduled.map { [it.published_at, it.title] } +
-          social[:scheduled].map { [it.posted_at, social[:summaries].fetch(it.id)] }
-      end
+      def due(scheduled, social) = scheduled.map(&:published_at) + social[:scheduled].map(&:posted_at)
 
       def failures
         sync_failures.call + [countries_failure].compact
-      end
-
-      def journal(now)
-        {
-          entries: journal_entries_today.call(now:),
-          journaled: journal_words_on.call(Blog::TimeZone.today(now)),
-        }
       end
 
       def posts(scheduled)
@@ -94,8 +83,9 @@ module Admin
 
         {
           count: pending.size,
-          next_up: pending.min_by(&:first)&.last,
-          today: pending.count { Blog::TimeZone.today(it.first) == today },
+          posts: scheduled.size,
+          social_posts: social[:scheduled].size,
+          today: pending.count { Blog::TimeZone.today(it) == today },
         }
       end
 

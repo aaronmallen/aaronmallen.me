@@ -36,7 +36,7 @@ module Record
 
       def today(now: Time.now) = with_tags.on(Blog::TimeZone.today(now)).newest_first.to_a
 
-      def word_count(date: nil) = (date ? journal_entries.on(date) : journal_entries).word_total
+      def word_count = journal_entries.word_total
 
       private
 

@@ -73,9 +73,8 @@ RSpec.describe "Admin today journal card", type: :feature do
       expect(page).to have_button("Save entry", disabled: true)
     end
 
-    it "counts the entry in the card head and the stat", :aggregate_failures do
+    it "counts the entry in the card head" do
       expect(page).to have_css(".card-side .journal-words", exact_text: "1 today")
-      expect(page).to have_css(".g-4 .stat .stat-value", exact_text: "4")
     end
   end
 end

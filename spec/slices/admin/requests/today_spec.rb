@@ -32,8 +32,6 @@ RSpec.describe "Admin today", type: :request do
 
   def entry_body = card("Journal").find(".today-journal-entry .journal-entry-body")
 
-  def journaled_stat = page.find(".g-4 .stat", text: "Journaled")
-
   def pending_card = card("Webmentions pending")
 
   def queue_stat = page.find(".g-4 .stat", text: "In the queue")
@@ -190,20 +188,37 @@ RSpec.describe "Admin today", type: :request do
         expect(queue_stat).to have_css(".stat-value", exact_text: "0")
       end
 
-      it "names the blog post due first" do
-        create(:post, :scheduled, title: "Blog", published_at: Time.now + 60)
-        schedule_social("Social", at: Time.now + 120)
+      it "counts each kind of queued item", :aggregate_failures do
+        2.times { |index| create(:post, :scheduled, published_at: Time.now + (60 * (index + 1))) }
+        schedule_social("Social")
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-change", exact_text: "next: Blog")
+        expect(queue_stat).to have_css(".stat-value", exact_text: "3")
+        expect(queue_stat).to have_css(".stat-change", exact_text: "2 posts · 1 social post")
       end
 
-      it "names the social post due first" do
-        create(:post, :scheduled, title: "Blog", published_at: Time.now + 120)
-        schedule_social("Social", at: Time.now + 60)
+      it "leaves posts out with only social posts queued" do
+        schedule_social("First", at: Time.now + 60)
+        schedule_social("Second", at: Time.now + 120)
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-change", exact_text: "next: Social")
+        expect(queue_stat).to have_css(".stat-change", exact_text: "2 social posts")
+      end
+
+      it "counts one post in the singular" do
+        create(:post, :scheduled, published_at: Time.now + 60)
+        get "/admin"
+
+        expect(queue_stat).to have_css(".stat-change", exact_text: "1 post")
+      end
+
+      it "leaves every queued title out of the tile", :aggregate_failures do
+        create(:post, :scheduled, title: "Launch notes", published_at: Time.now + 60)
+        schedule_social("Thread opener", at: Time.now + 120)
+        get "/admin"
+
+        expect(queue_stat).to have_no_text("Launch notes")
+        expect(queue_stat).to have_no_text("Thread opener")
       end
 
       it "reads nothing scheduled with an empty queue" do
@@ -413,29 +428,11 @@ RSpec.describe "Admin today", type: :request do
       end
     end
 
-    describe "the Journaled stat" do
-      before do
-        create_entry(entry_date: today, body: "one two three")
-        create_entry(entry_date: today, body: "four")
-        create_entry(entry_date: today - 1, body: "five six")
-        get "/admin"
-      end
-
-      it "sums today's words", :aggregate_failures do
-        expect(journaled_stat).to have_css(".stat-key", exact_text: "Journaled")
-        expect(journaled_stat).to have_css(".stat-value", exact_text: "4")
-      end
-
-      it "notes that the words are private" do
-        expect(journaled_stat).to have_css(".stat-change", exact_text: "words, private")
-      end
-    end
-
-    it "reads zero journaled words without entries today" do
-      create_entry(entry_date: today - 1, body: "five six")
+    it "shows no Journaled tile" do
+      create_entry(entry_date: today, body: "one two three")
       get "/admin"
 
-      expect(page).to have_css(".g-4 .stat .stat-value", exact_text: "0")
+      expect(page.all(".g-4 .stat-key").map(&:text)).to eq(["Sprint", "Commits", "Webmentions", "In the queue"])
     end
 
     describe "today's entries" do

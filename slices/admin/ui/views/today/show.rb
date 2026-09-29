@@ -7,15 +7,16 @@ module Admin
         class Show < View
           include Components::Tasks
 
+          QUEUE_KINDS = { posts: ".queue_posts", social_posts: ".queue_social_posts" }.freeze
           SEPARATOR = " · "
 
           def initialize(
-            commits:, commit_totals:, entries:, journaled:, posts:, queue:, social:, sprint:, sync_failures:,
-            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
+            commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, webmentions:,
+            body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH
           )
             super()
             @commits = commits
-            @counts = { commit_totals:, journaled: }
+            @commit_totals = commit_totals
             @journal = { body:, entries:, errors:, word_count: Blog::Figures.words(body) }
             @publishing = { posts:, queue:, social: }
             @sprint = sprint
@@ -42,7 +43,7 @@ module Admin
 
           private
 
-          def commits_note = t(".commits_note", **@counts[:commit_totals])
+          def commits_note = t(".commits_note", **@commit_totals)
 
           def head_actions
             a(class: "btn", href: path(:admin_clients)) { t(".clients") }
@@ -58,8 +59,14 @@ module Admin
 
           def queue = @publishing[:queue]
 
+          def queue_kinds
+            waiting = QUEUE_KINDS.select { |kind, _key| queue[kind].positive? }
+
+            waiting.map { |kind, key| t(key, count: queue[kind]) }.join(SEPARATOR)
+          end
+
           def queue_stat
-            note = queue[:next_up] ? t(".queue_note", title: queue[:next_up]) : t(".queue_note_empty")
+            note = queue[:count].zero? ? t(".queue_note_empty") : queue_kinds
 
             Stat(key: t(".queue"), value: queue[:count], change: note)
           end
@@ -94,7 +101,6 @@ module Admin
 
           def stats
             sprint_stat
-            Stat(key: t(".journaled"), value: @counts[:journaled], change: t(".journaled_note"))
             Stat(key: t(".commits"), value: @commits[:entries].size, change: commits_note)
             Stat(key: t(".webmentions"), value: @webmentions[:count], change: t(".webmentions_note"))
             queue_stat
