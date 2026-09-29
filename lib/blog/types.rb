@@ -110,7 +110,7 @@ module Blog
     TaskMove = Types::String.enum("up", "down")
     TaskOrigin = Types::String.enum("tasks", "today")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
-    TaskStatus = Types::String.enum("open", "in_progress", "done")
+    TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
     TaskTypeIcon = Types::String.enum(*File.readlines(SOLID_ICONS, chomp: true))
     TaskView = Types::String.enum("today", "upcoming", "next", "someday")
     TaskTab = Types::String.enum(*TaskView.values, "completed")

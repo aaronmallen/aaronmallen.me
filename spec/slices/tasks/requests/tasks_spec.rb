@@ -41,6 +41,97 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  describe "canceling a task" do
+    let(:cancel_task) { Tasks::Slice["operations.cancel_task"] }
+
+    it "marks it canceled" do
+      task = create(:task)
+      cancel_task.call(task.id)
+
+      expect(repo.by_id(task.id).status).to eq("canceled")
+    end
+
+    it "writes when it was closed" do
+      task = create(:task, :in_progress)
+      at = Time.now.round
+      cancel_task.call(task.id, at:)
+
+      expect(repo.by_id(task.id).completed_at).to eq(at)
+    end
+
+    it "refuses a task already done" do
+      expect(cancel_task.call(create(:task, :done).id).failure).to eq(:closed)
+    end
+
+    it "refuses a task already canceled" do
+      expect(cancel_task.call(create(:task, :canceled).id).failure).to eq(:closed)
+    end
+
+    it "refuses a task that isn't there" do
+      expect(cancel_task.call(0).failure).to eq(:not_found)
+    end
+
+    it "leaves a done task done" do
+      task = create(:task, :done)
+      cancel_task.call(task.id)
+
+      expect(repo.by_id(task.id).status).to eq("done")
+    end
+
+    it "is refused by Postgres without a close time" do
+      expect { create(:task, status: "canceled") }.to raise_error(ROM::SQL::CheckConstraintError)
+    end
+  end
+
+  describe "opening a canceled task again" do
+    let(:task) { create(:task, :canceled) }
+
+    it "reopens it" do
+      send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+
+      expect(repo.by_id(task.id).status).to eq("open")
+    end
+
+    it "clears the close time" do
+      send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+
+      expect(repo.by_id(task.id).completed_at).to be_nil
+    end
+
+    it "clears the close time when it is started" do
+      send_to("/admin/tasks/#{task.id}/start", filter: "completed")
+
+      expect(repo.by_id(task.id)).to have_attributes(status: "in_progress", completed_at: nil)
+    end
+  end
+
+  describe "a canceled task among the finished ones" do
+    let(:page) { Capybara.string(last_response.body) }
+
+    before do
+      create(:task, :done, title: "Filed already")
+      create(:task, :canceled, title: "Dropped")
+    end
+
+    it "lists it on the completed tab" do
+      get "/admin/tasks", filter: "completed"
+
+      expect(page.all(".task-title").map(&:text)).to contain_exactly("Filed already", "Dropped")
+    end
+
+    it "counts it on the completed tab" do
+      get "/admin/tasks"
+
+      expect(page.all(".subtab-count").map(&:text).last).to eq("2")
+    end
+
+    it "counts it as closed today in the page sub" do
+      get "/admin/tasks"
+
+      expect(page).to have_css(".page-head-sub", text: "2 finished today")
+    end
+  end
+
   describe "reordering a task in today's sprint" do
     let(:sprint) { create(:sprint, sprint_date: today) }
 
@@ -69,6 +160,13 @@ RSpec.describe "Tasks", type: :request do
       send_to("/admin/tasks/#{done.id}/reorder/up", filter: "today")
 
       expect(last_response).to be_redirect
+    end
+
+    it "leaves a canceled task where it is" do
+      canceled = create(:task, :canceled, :in_sprint, sprint_id: sprint.id, title: "canceled", position: 3)
+      send_to("/admin/tasks/#{canceled.id}/reorder/up", filter: "today")
+
+      expect(today_titles).to eq(%w[first second canceled])
     end
   end
 

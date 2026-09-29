@@ -30,6 +30,20 @@ RSpec.describe Tasks::Jobs::RollOverSprint do
     expect(task_repo.by_id(task.id).sprint_id).to eq(yesterday.id)
   end
 
+  it "leaves a canceled task in the sprint it was canceled in" do
+    task = create(:task, :canceled, :in_sprint, sprint_id: yesterday.id)
+    job.perform
+
+    expect(task_repo.by_id(task.id).sprint_id).to eq(yesterday.id)
+  end
+
+  it "counts no arrival for a canceled task" do
+    create(:task, :canceled, :in_sprint, sprint_id: yesterday.id)
+    job.perform
+
+    expect(sprint_repo.on(today).carried_in).to eq(0)
+  end
+
   it "starts one sprint when it runs twice" do
     2.times { job.perform }
 

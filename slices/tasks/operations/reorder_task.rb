@@ -25,7 +25,7 @@ module Tasks
       end
 
       def neighbour(task, offset)
-        return Failure(:not_moved) if task.done?
+        return Failure(:not_moved) if task.closed?
 
         beside = beside(task)
         index = beside.index { it.id == task.id } + offset

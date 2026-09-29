@@ -62,6 +62,7 @@ RSpec.describe "MCP reach", type: :request do
       "social.operations.refresh_social_engagement" => "a background job refreshes likes and replies",
       "social.operations.send_webmentions" => "a background job sends a post's webmentions after it saves",
       "social.operations.verify_webmention" => "a background job checks a received webmention's source",
+      "tasks.operations.cancel_task" => "waits on the cancel_task tool, which #5 adds",
     }
   end
 

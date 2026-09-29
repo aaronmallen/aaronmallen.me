@@ -5,7 +5,7 @@ module Tasks
     class Tasks < Blog::DB::Relation
       COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
       CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
-      DONE = Blog::Types::TaskStatus["done"]
+      CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
 
       schema :tasks, infer: true do
         associations do
@@ -21,16 +21,16 @@ module Tasks
         stamped(:update, result: :many).call(carried_count: Sequel[:carried_count] + 1, sprint_id:).size
       end
 
+      def closed = where(status: CLOSED)
+
       def count_by_type
         typed = unordered.exclude(task_type_id: nil)
 
         typed.select(:task_type_id) { integer.count(id).as(:count) }.group(:task_type_id)
       end
 
-      def done = where(status: DONE)
-
       def finished_counts(day)
-        done.unordered.select do
+        closed.unordered.select do
           [integer.count(id).as(:total), integer.count(id).filter(COMPLETED_ON => day).as(:on_day)]
         end
       end
@@ -57,9 +57,9 @@ module Tasks
 
       def of_types(type_ids) = type_ids.reduce(self) { |found, ids| found.where(task_type_id: ids) }
 
-      def open = exclude(status: DONE)
+      def open = exclude(status: CLOSED)
 
-      def open_first = order(Sequel.case({ { status: DONE } => 1 }, 0), self[:position].asc, self[:id].asc)
+      def open_first = order(Sequel.case({ { status: CLOSED } => 1 }, 0), self[:position].asc, self[:id].asc)
 
       def tagged(names) = where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
 

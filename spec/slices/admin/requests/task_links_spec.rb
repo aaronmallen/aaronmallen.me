@@ -165,6 +165,13 @@ RSpec.describe "Admin task links", type: :request do
       expect(targets).to be_empty
     end
 
+    it "offers a canceled task after an open one" do
+      canceled = create(:task, :canceled, title: "Drop the migration", position: 1)
+      find_link("migration")
+
+      expect(targets).to eq(["##{other.id}", "##{canceled.id}"])
+    end
+
     it "says when nothing matches" do
       find_link("nothing like it")
 

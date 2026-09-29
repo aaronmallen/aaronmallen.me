@@ -223,7 +223,8 @@ CREATE TYPE public.task_list AS ENUM (
 CREATE TYPE public.task_status AS ENUM (
     'open',
     'in_progress',
-    'done'
+    'done',
+    'canceled'
 );
 
 
@@ -489,7 +490,7 @@ CREATE TABLE public.tasks (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
-    CONSTRAINT tasks_completed_at_check CHECK (((status = 'done'::public.task_status) = (completed_at IS NOT NULL))),
+    CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
     CONSTRAINT tasks_position_check CHECK (("position" > 0))
 );
@@ -626,7 +627,7 @@ UNION ALL
     task_types.name AS task_type
    FROM (public.tasks
      LEFT JOIN public.task_types ON ((task_types.id = tasks.task_type_id)))
-  WHERE (tasks.completed_at IS NOT NULL)
+  WHERE (tasks.status = 'done'::public.task_status)
 UNION ALL
  SELECT 'project'::text AS type,
     projects.id AS source_id,
@@ -2398,4 +2399,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260928000032_create_oauth_tokens.rb'),
 ('20260928000033_create_suggestions.rb'),
 ('20260928000034_create_suggestion_edits.rb'),
-('20260928000035_create_activities_view.rb');
+('20260928000035_create_activities_view.rb'),
+('20260928000036_add_canceled_to_task_status.rb'),
+('20260928000037_close_canceled_tasks.rb');

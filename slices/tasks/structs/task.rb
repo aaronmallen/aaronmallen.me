@@ -5,6 +5,10 @@ module Tasks
     class Task < Blog::DB::Struct
       def blocked? = links.any?(&:blocker?)
 
+      def canceled? = status == Blog::Types::TaskStatus["canceled"]
+
+      def closed? = done? || canceled?
+
       def done? = status == Blog::Types::TaskStatus["done"]
 
       def in_progress? = status == Blog::Types::TaskStatus["in_progress"]

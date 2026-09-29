@@ -3,6 +3,7 @@
 module Tasks
   module Repos
     class TaskRepo < Blog::DB::Repo
+      CANCELED = Blog::Types::TaskStatus["canceled"]
       DONE = Blog::Types::TaskStatus["done"]
       KEY = /\A#?(\d{1,9})\z/
 
@@ -13,6 +14,8 @@ module Tasks
       def all_open = tasks.open.in_order.to_a
 
       def by_id(id) = with_details.by_pk(id).one
+
+      def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
       def carry_forward(sprint_id)
         tasks.unfinished_in(sprints.before_sprint(sprint_id).ids).carry_into(sprint_id)
@@ -30,7 +33,7 @@ module Tasks
         found.newest_first.to_a
       end
 
-      def finished = with_details.combine(:sprint).done.newest_finished.to_a
+      def finished = with_details.combine(:sprint).closed.newest_finished.to_a
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
 

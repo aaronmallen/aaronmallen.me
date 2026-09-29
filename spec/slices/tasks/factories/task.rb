@@ -6,6 +6,11 @@ Spec::DB::Factories.define(:task) do |f|
   f.status "open"
   f.sequence(:position) { |n| n }
 
+  f.trait :canceled do |t|
+    t.status "canceled"
+    t.completed_at { Time.now }
+  end
+
   f.trait :carried do |t|
     t.carried_count 2
   end

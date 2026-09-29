@@ -144,6 +144,13 @@ RSpec.describe "Admin activity", type: :request do
         expect(event_subs).to eq(["done"])
       end
 
+      it "leaves out a canceled task" do
+        create(:task, :canceled, title: "clear the gutters", completed_at: at(16))
+        visit_activity
+
+        expect(event_names).to be_empty
+      end
+
       it "leaves out a task that is still open" do
         create(:task, title: "clear the gutters")
         visit_activity
