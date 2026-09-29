@@ -33,6 +33,7 @@ owner:
   name: Aaron Allen
 page_size:
   admin: 100
+  mcp: 100
   public: 25
 webmentions:
   throttle_limit: <%= ENV["WEBMENTIONS_THROTTLE_LIMIT"].to_json %>

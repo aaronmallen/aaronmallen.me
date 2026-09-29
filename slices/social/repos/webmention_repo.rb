@@ -63,10 +63,10 @@ module Social
 
       def received_count(post_id) = webmentions.for_post(post_id).count
 
-      def received_in(from:, to:, status: nil)
+      def received_in(from:, to:, page:, status: nil)
         days = in_days(from, to)
 
-        (status ? days.with_status(status) : days).newest_first.to_a
+        page.fill((status ? days.with_status(status) : days).newest_first.paged(page).to_a)
       end
 
       def settings = stored_settings || created_settings

@@ -15,6 +15,7 @@ module MCP
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
+          page: Paging::PAGE,
           status: STATUS,
           to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
         },
@@ -24,24 +25,29 @@ module MCP
       description "List the messages people sent through the contact form over a range, newest first: " \
                   "the ID, subject, reply address, status and when it came in. " \
                   "Read one with read_message for its body. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(from:, to:, server_context:, status: nil)
+        def call(from:, to:, server_context:, status: nil, page: 1)
           case days(from, to)
-          in Success(range) then listed(range, status, server_context)
+          in Success(range) then listed(range, status, page(page, server_context), server_context)
           in Failure(message) then refuse(message)
           end
         end
 
         private
 
-        def listed(range, status, server_context)
-          found = messages_between(server_context).call(from: range.first, to: range.last, status:)
+        def listed(range, status, page, server_context)
+          found = messages_between(server_context).call(from: range.first, to: range.last, page:, status:)
 
-          answer(from: range.first.iso8601, to: range.last.iso8601, messages: found.map { summary(it) })
+          answer(
+            from: range.first.iso8601,
+            to: range.last.iso8601,
+            messages: found.rows.map { summary(it) },
+            **Paging.fields(found),
+          )
         end
 
         def summary(message)

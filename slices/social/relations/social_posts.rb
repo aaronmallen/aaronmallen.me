@@ -4,6 +4,7 @@ module Social
   module Relations
     class SocialPosts < Blog::DB::Relation
       DATED = Sequel.function(:coalesce, Sequel[:social_posts][:posted_at], Sequel[:social_posts][:created_at])
+      DRAFT = Blog::Types::SocialPostStatus["draft"]
       POSTED = Blog::Types::SocialPostStatus["posted"]
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
@@ -21,6 +22,18 @@ module Social
       def due_at(time) = with_status(SCHEDULED).where { posted_at <= time }
 
       def for_post(post_id) = where(post_id:)
+
+      def in_unsent_order
+        draft = { status: DRAFT }
+
+        order(
+          Sequel.case({ draft => 0 }, 1),
+          Sequel.case({ draft => self[:posted_at] }, nil).desc,
+          Sequel.case({ draft => self[:id] }, nil).desc,
+          self[:posted_at].asc,
+          self[:id].asc,
+        )
+      end
 
       def mark_posted(id, at:) = by_pk(id).unposted.stamped(:update).call(status: POSTED, posted_at: at)
 

@@ -5,7 +5,7 @@ module Tasks
     class SprintsBetween
       include Deps[sprint_repo: "repos.sprint_repo"]
 
-      def call(from:, to:) = sprint_repo.between(from, to)
+      def call(from:, to:, page:) = sprint_repo.between(from, to, page)
     end
   end
 end

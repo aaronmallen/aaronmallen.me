@@ -20,12 +20,12 @@ module Contact
 
       def page_by_status(status, page) = page.fill(messages.with_status(status).newest_first.paged(page).to_a)
 
-      def received_between(from:, to:, status: nil)
+      def received_between(from:, to:, page:, status: nil)
         found = messages.received_since(Blog::TimeZone.day_start(from))
         found = found.received_before(Blog::TimeZone.day_start(to + 1))
         found = found.with_status(status) if status
 
-        found.newest_first.to_a
+        page.fill(found.newest_first.paged(page).to_a)
       end
     end
   end

@@ -33,12 +33,12 @@ module Tasks
 
       def exist?(id) = tasks.by_pk(id).exist?
 
-      def filtered(statuses:, from:, to:)
+      def filtered(statuses:, from:, to:, page:)
         found = with_details.combine(:sprint)
         found = found.where(status: statuses) unless statuses.empty?
         found = found.touched_between(from, to) if from || to
 
-        found.newest_first.to_a
+        page.fill(found.newest_first.paged(page).to_a)
       end
 
       def finished = with_details.combine(:sprint).closed.newest_finished.to_a

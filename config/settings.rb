@@ -92,7 +92,7 @@ module Blog
       name: OwnerName,
     )
 
-    setting :page_size, constructor: Schema.schema(admin: PageSize, public: PageSize)
+    setting :page_size, constructor: Schema.schema(admin: PageSize, mcp: PageSize, public: PageSize)
 
     setting :proxy, default: {}, constructor: Schema.schema(
       address_header?: Value,

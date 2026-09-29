@@ -5,7 +5,7 @@ module Posts
     class DatedBetween
       include Deps[post_repo: "repos.post_repo"]
 
-      def call(from:, to:) = post_repo.dated_between(from:, to:)
+      def call(from:, to:, page:) = post_repo.dated_between(from:, to:, page:)
     end
   end
 end

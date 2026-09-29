@@ -16,11 +16,11 @@ module Suggestions
 
       def by_id(id) = with_edits.by_pk(id).one
 
-      def created_between(from:, to:)
+      def created_between(from:, to:, page:)
         found = with_edits.created_since(Blog::TimeZone.day_start(from))
         found = found.created_before(Blog::TimeZone.day_start(to + 1))
 
-        found.newest_first.to_a
+        page.fill(found.newest_first.paged(page).to_a)
       end
 
       def for_post(post_id) = latest(with_edits.for_post(post_id))

@@ -5,7 +5,7 @@ module Tasks
     class FindTasks
       include Deps[task_repo: "repos.task_repo"]
 
-      def call(statuses:, from:, to:) = task_repo.filtered(statuses:, from:, to:)
+      def call(statuses:, from:, to:, page:) = task_repo.filtered(statuses:, from:, to:, page:)
     end
   end
 end

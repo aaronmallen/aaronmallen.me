@@ -7,6 +7,7 @@ module MCP
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
+          page: Paging::PAGE,
           status: {
             type: "string",
             enum: Blog::Types::WebmentionStatus.values,
@@ -19,20 +20,26 @@ module MCP
 
       description "List the webmentions received over a range of days, newest first: each with the blog post it " \
                   "names, its type, its status, its source and author, and its excerpt. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(from:, to:, server_context:, status: nil)
+        def call(from:, to:, server_context:, status: nil, page: 1)
           first = Blog::TimeZone.parse_day(from)
           last = Blog::TimeZone.parse_day(to)
           return refuse("give from and to as days, such as 2026-01-01") unless first && last
           return refuse("from comes after to") if first > last
 
-          found = webmentions_received_in(server_context).call(from: first, to: last, status:)
+          requested = page(page, server_context)
+          found = webmentions_received_in(server_context).call(from: first, to: last, page: requested, status:)
 
-          answer(from: first.iso8601, to: last.iso8601, webmentions: found.map { entry(it) })
+          answer(
+            from: first.iso8601,
+            to: last.iso8601,
+            webmentions: found.rows.map { entry(it) },
+            **Paging.fields(found),
+          )
         end
 
         private

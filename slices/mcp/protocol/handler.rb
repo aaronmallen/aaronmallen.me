@@ -22,7 +22,6 @@ module MCP
         activity_counts_by_month: "activity.queries.activity_counts_by_month",
         add_task_comment: "tasks.operations.add_task_comment",
         add_work_entry: "projects.operations.add_work_entry",
-        all_posts: "posts.queries.all",
         all_tags: "tags.queries.all",
         analytics_between: "analytics.queries.summary_between",
         archive_project: "projects.operations.archive_project",
@@ -49,6 +48,7 @@ module MCP
         link_tasks: "tasks.operations.link_tasks",
         live_projects: "projects.queries.live",
         mark_message: "contact.operations.mark_message",
+        matching_tags: "tags.queries.matching",
         message_by_id: "contact.queries.by_id",
         messages_between: "contact.queries.received_between",
         moderate_webmention: "social.operations.moderate_webmention",
@@ -180,7 +180,7 @@ module MCP
         false
       end
 
-      def context = CONTEXT.keys.to_h { [it, public_send(it)] }
+      def context = CONTEXT.keys.to_h { [it, public_send(it)] }.merge(page_size: settings.page_size[:mcp])
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
 

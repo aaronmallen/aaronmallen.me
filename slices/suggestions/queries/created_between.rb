@@ -5,7 +5,7 @@ module Suggestions
     class CreatedBetween
       include Deps[suggestion_repo: "repos.suggestion_repo"]
 
-      def call(from:, to:) = suggestion_repo.created_between(from:, to:)
+      def call(from:, to:, page:) = suggestion_repo.created_between(from:, to:, page:)
     end
   end
 end

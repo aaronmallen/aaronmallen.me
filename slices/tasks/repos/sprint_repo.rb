@@ -7,7 +7,7 @@ module Tasks
 
       def after(date) = sprints.dated_after(date).in_date_order.to_a
 
-      def between(first, last) = sprints.dated_between(first, last).in_date_order.to_a
+      def between(first, last, page) = page.fill(sprints.dated_between(first, last).in_date_order.paged(page).to_a)
 
       def by_id(id) = sprints.by_pk(id).one
 

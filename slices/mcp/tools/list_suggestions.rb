@@ -12,6 +12,7 @@ module MCP
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
+          page: Paging::PAGE,
           to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
         },
         required: %w[from to],
@@ -22,14 +23,14 @@ module MCP
                   "and its status. A pending edit waits on the author, a stale one no longer matches the text, " \
                   "and accepted and rejected ones are settled. Accept or reject open edits with " \
                   "accept_suggestion_edits and reject_suggestion_edits. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(from:, to:, server_context:)
+        def call(from:, to:, server_context:, page: 1)
           case days(from, to)
-          in Success(range) then listed(range, server_context)
+          in Success(range) then listed(range, page(page, server_context), server_context)
           in Failure(message) then refuse(message)
           end
         end
@@ -47,10 +48,15 @@ module MCP
           }
         end
 
-        def listed(range, server_context)
-          found = suggestions_between(server_context).call(from: range.first, to: range.last)
+        def listed(range, page, server_context)
+          found = suggestions_between(server_context).call(from: range.first, to: range.last, page:)
 
-          answer(from: range.first.iso8601, to: range.last.iso8601, suggestions: found.map { summary(it) })
+          answer(
+            from: range.first.iso8601,
+            to: range.last.iso8601,
+            suggestions: found.rows.map { summary(it) },
+            **Paging.fields(found),
+          )
         end
 
         def summary(suggestion)

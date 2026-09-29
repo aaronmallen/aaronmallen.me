@@ -33,10 +33,10 @@ module Social
         by_id(social_post.id)
       end
 
-      def dated_between(from:, to:)
-        days = with_children.dated_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
+      def dated_between(from:, to:, page:)
+        days = social_posts.dated_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
 
-        days.newest_dated_first.to_a
+        page_of(days.newest_dated_first, page)
       end
 
       def delete_unposted(id)
@@ -80,6 +80,8 @@ module Social
       def syndication_urls(post_id)
         social_post_deliveries.syndicated_for_post(post_id).to_a.to_h { [it.network, it.remote_url] }
       end
+
+      def unsent_page(page) = page_of(social_posts.unposted.in_unsent_order, page)
 
       def update_with_parts(id, parts:, **attrs)
         transaction do

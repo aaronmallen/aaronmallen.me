@@ -34,8 +34,6 @@ module MCP
 
         def add_work_entry(server_context) = server_context.fetch(:add_work_entry)
 
-        def all_posts(server_context) = server_context.fetch(:all_posts)
-
         def all_tags(server_context) = server_context.fetch(:all_tags)
 
         def analytics_between(server_context) = server_context.fetch(:analytics_between)
@@ -91,6 +89,8 @@ module MCP
 
         def mark_message(server_context) = server_context.fetch(:mark_message)
 
+        def matching_tags(server_context) = server_context.fetch(:matching_tags)
+
         def message_by_id(server_context) = server_context.fetch(:message_by_id)
 
         def messages_between(server_context) = server_context.fetch(:messages_between)
@@ -98,6 +98,8 @@ module MCP
         def moderate_webmention(server_context) = server_context.fetch(:moderate_webmention)
 
         def move_project(server_context) = server_context.fetch(:move_project)
+
+        def page(number, server_context) = Blog::Page.new(number:, size: server_context.fetch(:page_size))
 
         def post_by_id(server_context) = server_context.fetch(:post_by_id)
 

@@ -32,8 +32,8 @@ module MCP
     import keys: %w[operations.mark_message queries.by_id queries.received_between], from: :contact
 
     import keys: %w[
-      operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.all
-      queries.by_id queries.dated_between
+      operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id
+      queries.dated_between
     ], from: :posts
 
     import keys: %w[
@@ -61,7 +61,7 @@ module MCP
       operations.replace_social_post_edits queries.by_id queries.created_between
     ], from: :suggestions
 
-    import keys: %w[operations.remove_tag operations.save_tag queries.all queries.usage], from: :tags
+    import keys: %w[operations.remove_tag operations.save_tag queries.all queries.matching queries.usage], from: :tags
 
     import keys: %w[
       operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task

@@ -12,6 +12,7 @@ module MCP
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day a blog post's publish time may fall on, as YYYY-MM-DD" },
+          page: Paging::PAGE,
           to: { type: "string", description: "the last day a blog post's publish time may fall on, as YYYY-MM-DD" },
         },
       }.freeze
@@ -20,20 +21,18 @@ module MCP
                   "Each blog post says whether it is a draft and when it goes out or went out. " \
                   "Give from, to or both as YYYY-MM-DD, in Chicago time, to keep only the blog posts whose " \
                   "publish time falls inside those days; a post with no publish time then drops out. " \
-                  "The range leaves the social posts alone"
+                  "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
+                  "page of each. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **range)
+        def call(server_context:, page: 1, **range)
           days = range.transform_values { Blog::TimeZone.parse_day(it) }
           return refuse("give from and to as days, such as 2026-01-01") if days.value?(nil)
           return refuse("from comes after to") if backwards?(days)
 
-          answer(
-            posts: posts(days, server_context).map { summary(it) },
-            social_posts: unsent_social_posts(server_context).call.map { preview(it) },
-          )
+          listed(days, page(page, server_context), server_context)
         end
 
         private
@@ -50,10 +49,15 @@ module MCP
           Blog::Truncation.cut(body, keep: PREVIEW_LENGTH)
         end
 
-        def posts(days, server_context)
-          return all_posts(server_context).call if days.empty?
+        def listed(days, page, server_context)
+          posts = dated_posts(server_context).call(from: days[:from], to: days[:to], page:)
+          social_posts = unsent_social_posts(server_context).call(page)
 
-          dated_posts(server_context).call(from: days[:from], to: days[:to])
+          answer(
+            posts: posts.rows.map { summary(it) },
+            social_posts: social_posts.rows.map { preview(it) },
+            **Paging.fields(posts, social_posts),
+          )
         end
 
         def preview(social_post)
