@@ -179,6 +179,9 @@ en:
         synced_on: "Last synced %{at}"
         synced_today: "Last synced today at %{time}"
         title: "Commits imported today"
+      confirm_dialog:
+        accept: "Yes"
+        decline: "No"
       drafts_card:
         empty: "No drafts. Suspicious."
         read_time: "~%{count} min read"
@@ -649,6 +652,7 @@ en:
           yesterday: "Yesterday"
         controls:
           cancel: "Cancel"
+          confirm_cancel: "Cancel %{task}? It moves to completed."
           complete: "Done"
           lists:
             next: "Next"

@@ -6,6 +6,13 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def active = evaluate_script("document.activeElement.textContent.trim()")
 
+  def cancel_task(scope)
+    scope.click_button(translate("ui.components.tasks.controls.cancel"))
+    confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+  end
+
+  def confirm_dialog = find("dialog#confirm-dialog[open]")
+
   def create_task(title, list: "next", **fields)
     click_link("Create Task")
     within("dialog#task-create") do
@@ -321,7 +328,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:mark) { translate("ui.components.tasks.closed.canceled") }
 
     before do
-      find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.cancel"))
+      cancel_task(find(".task", text: "Email the accountant"))
       find(".toast", text: "Canceled")
       find(".subtab", text: "completed").click
     end
@@ -342,6 +349,129 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(find(".task", text: "Email the accountant")).to have_no_css(".task-meta .pill", text: mark)
         expect(repo.all_open.map(&:title)).to include("Email the accountant")
       end
+    end
+  end
+
+  describe "confirming a cancel" do
+    let(:cancel) { translate("ui.components.tasks.controls.cancel") }
+    let(:message) { translate("ui.components.tasks.controls.confirm_cancel", task: "Email the accountant") }
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+
+    def focused_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
+
+    def row(title) = find(".task-title", exact_text: title).ancestor(".task")
+
+    def still_open? = repo.all_open.map(&:title).include?("Email the accountant")
+
+    describe "from a row" do
+      before { row("Email the accountant").click_button(cancel) }
+
+      it "asks in the styled dialog" do
+        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      end
+
+      it "keeps the task open when I say no", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css(".toast")
+        expect(still_open?).to be(true)
+      end
+
+      it "hands focus back to the cancel button when I say no", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(focused_label).to eq(cancel)
+      end
+
+      it "keeps the task open on Escape and hands focus back", :aggregate_failures do
+        confirm_dialog.send_keys(:escape)
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(focused_label).to eq(cancel)
+        expect(still_open?).to be(true)
+      end
+
+      it "cancels the task when I say yes", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+
+        expect(page).to have_css(".toast", text: "Canceled")
+        expect(still_open?).to be(false)
+      end
+    end
+
+    describe "from the task page" do
+      before do
+        visit "/admin/tasks/#{task.id}?filter=next&origin=tasks"
+        find(".task-read-acts").click_button(cancel)
+      end
+
+      it "asks in the styled dialog" do
+        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      end
+
+      it "cancels the task when I say yes", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+
+        expect(page).to have_css(".toast", text: "Canceled")
+        expect(still_open?).to be(false)
+      end
+    end
+
+    describe "from the panel" do
+      before do
+        open_task("Email the accountant")
+        panel.click_button(cancel)
+      end
+
+      it "asks in the styled dialog over the panel" do
+        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      end
+
+      it "keeps the panel and the task open on Escape, with focus on the cancel button", :aggregate_failures do
+        confirm_dialog.send_keys(:escape)
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]").and have_css("dialog#task-panel[open]")
+        expect(focused_label).to eq(cancel)
+        expect(still_open?).to be(true)
+      end
+    end
+
+    describe "on a page without the styled dialog" do
+      before { execute_script("document.getElementById('confirm-dialog').remove()") }
+
+      it "asks with the browser's confirm" do
+        asked = dismiss_confirm { row("Email the accountant").click_button(cancel) }
+
+        expect(asked).to eq(message)
+      end
+    end
+
+    describe "with scripts off" do
+      before { scripts_off }
+
+      after { scripts_on }
+
+      it "still cancels the task with a plain post", :aggregate_failures do
+        find(".task", text: "Email the accountant").click_button(cancel)
+
+        expect(page).to have_no_css(".task-title", text: "Email the accountant")
+        expect(still_open?).to be(false)
+      end
+    end
+  end
+
+  describe "dropping a sprint" do
+    before do
+      create(:sprint, sprint_date: Blog::TimeZone.today + 2)
+      visit "/admin/tasks?filter=upcoming"
+    end
+
+    it "still asks with the browser's confirm" do
+      asked = dismiss_confirm { click_button(translate("ui.components.tasks.upcoming_sprints.drop")) }
+
+      expect(asked).to start_with("Drop the sprint for")
     end
   end
 
@@ -386,7 +516,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "comes back to the list after an action in the panel", :aggregate_failures do
-      panel.click_button(translate("ui.components.tasks.controls.cancel"))
+      cancel_task(panel)
 
       expect(page).to have_css(".toast", text: "Canceled").and have_no_css("dialog#task-panel[open]")
       expect(page).to have_current_path("/admin/tasks?filter=next")
@@ -807,7 +937,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "loses the blocked pill once the blocker is canceled" do
         visit "/admin/tasks?filter=someday"
-        row("Learn Elixir").click_button(translate("ui.components.tasks.controls.cancel"))
+        cancel_task(row("Learn Elixir"))
         find(".toast", text: "Canceled")
         find(".subtab", text: "next").click
 

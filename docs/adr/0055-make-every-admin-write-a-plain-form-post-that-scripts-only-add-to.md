@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41"]
+amended: ["#37", "#41", "#80"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -34,7 +34,10 @@ form. They never replace its submit, except in the task modal, where #41 lets a 
 - **Filters** submit on change through `autosubmit.js`, and each carries a submit button inside `noscript`, as
   `Admin::UI::Views::Posts::Index` does.
 - **Deletes** are real forms with `data-confirm`, and `confirm.js` stops the submit only when the operator says
-  no.
+  no. It asks through the browser's `confirm` unless the form opts in with `data-confirm-styled`, as canceling a
+  task does since #80. Then it asks in `Admin::UI::Components::ConfirmDialog`, which the admin layout draws, and
+  falls back to the browser's `confirm` when the page lacks it. Esc or No keeps the form from posting and hands
+  focus back to the button that asked. With scripts off either form posts without asking.
 - **`fetch` is for reads.** The two previews call it, `post_preview.js` (AA-229) and `post_syndication.js`
   (AA-336). Both post the unsaved form and swap in HTML while the operator types, and neither stores anything.
   A task's read and edit pages load into dialogs the same way, as [ADR 0071][0071] records. #37 replaced the

@@ -2098,6 +2098,14 @@
   @apply flex w-full max-w-palette flex-col gap-3 rounded-card border border-line bg-ground-sunk p-4 shadow-palette;
 }
 
+@utility confirm-dialog-message {
+  @apply m-0 text-ink;
+}
+
+@utility confirm-dialog-foot {
+  @apply flex flex-wrap items-center justify-end gap-2;
+}
+
 @utility task-panel {
   @apply fixed inset-y-0 left-0 m-0 h-full max-h-full w-full max-w-palette overflow-x-hidden overflow-y-auto;
   @apply border-0 border-r border-line bg-ground p-0 shadow-palette;

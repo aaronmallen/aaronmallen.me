@@ -28,10 +28,14 @@ module Admin
 
           private
 
-          def cancel = change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"))
+          def cancel
+            data = { confirm: t(".confirm_cancel", task: @task.title), confirm_styled: true }
 
-          def change(route, icon, label, variant: nil)
-            Form(action: path(route, id: @task.id)) do
+            change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"), data:)
+          end
+
+          def change(route, icon, label, variant: nil, data: nil)
+            Form(action: path(route, id: @task.id), data:) do
               origin_fields
               Button(type: "submit", variant:, small: true, title: label, aria: { label: }) do
                 i(class: icon, aria: { hidden: "true" })
