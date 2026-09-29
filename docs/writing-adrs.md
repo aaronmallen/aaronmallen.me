@@ -88,10 +88,10 @@ Every record opens with front matter. Leave out any key you have nothing to put 
 | `status` | `active`, `deprecated` or `superseded`. |
 | `created` | The day the record landed, such as 2026-09-29 for ADR 0068. Records from before launch carry 2026-09-28. It never changes, whatever later happens to the record. |
 | `area` | The parts of the codebase the decision lands in. Every value names a place the tree holds today: the commit scopes `app`, `assets`, `config`, `db` and `lib`, or the name of a directory under `slices/`. A decision that binds every slice names every slice. |
-| `supersedes` | The numbers of the records this one replaces. |
-| `superseded-by` | The number of the record that replaced this one. |
-| `issue` | The issue that asked for the record: a GitHub number like `#12`, or a Linear key like `AA-213` for records from before the move. |
-| `amended` | The issues that changed the record after it landed, in the order they did. |
+| `supersedes` | The numbers of the records this one replaces, each quoted like `id`: `["0048"]`. |
+| `superseded-by` | The number of the record that replaced this one, quoted like `id`. |
+| `issue` | The issue that asked for the record: a quoted GitHub number like `"#12"`, or a Linear key like `AA-213` for records from before the move. Quote every `#` number, since YAML reads an unquoted `#` as the start of a comment. |
+| `amended` | The issues that changed the record after it landed, in the order they did. Quote each `#` number, as in `issue`: `["#37"]`. |
 | `tags` | Anything worth searching on later. |
 
 ## How to write one
@@ -137,7 +137,7 @@ created: YYYY-MM-DD
 area: []
 supersedes: []
 superseded-by:
-issue: AA-000
+issue: "#00"
 tags: []
 ---
 
