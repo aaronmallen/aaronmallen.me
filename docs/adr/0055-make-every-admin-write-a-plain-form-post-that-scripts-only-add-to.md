@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37"]
+amended: ["#37", "#41"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -23,7 +23,7 @@ sends the values with `fetch` and patches the page with the reply.
 ## Decision
 
 Every admin write is an HTML form that posts to the server, and the server answers with a page. Scripts add to a
-form. They never replace its submit.
+form. They never replace its submit, except in the task modal, where #41 lets a script send the same form.
 
 - **Routes.** Every create, update and delete in `slices/admin/config/routes.rb` is a `post`, and an update or a
   delete names itself in the path, such as `post "/posts/:id/delete"`. `Blog::UI::Components::Form` takes only
@@ -38,7 +38,9 @@ form. They never replace its submit.
 - **`fetch` is for reads.** The two previews call it, `post_preview.js` (AA-229) and `post_syndication.js`
   (AA-336). Both post the unsaved form and swap in HTML while the operator types, and neither stores anything.
   A task's read and edit pages load into dialogs the same way, as [ADR 0071][0071] records. #37 replaced the
-  row editor that opened from a checkbox, and the claim that only the previews call `fetch`.
+  row editor that opened from a checkbox, and the claim that only the previews call `fetch`. #41 added the one
+  write: the task modal sends its edit form through `fetch` so a failed save stays in the modal. The form still
+  posts in full with scripts off, and ADR 0071 records the cost.
 
 We leave `config.actions.method_override` at Hanami's default, on. No form sends `_method`.
 
@@ -60,7 +62,7 @@ Each write works the same way, and the request specs drive the forms with rack-t
 failed write keeps what the operator typed, since the server renders it back.
 
 Every write reloads the page. The previews and the task dialogs are the only places that pay for a script to avoid
-a reload, and they do it only to read.
+a reload. All but one only read: the task modal writes, so a failed save can keep it open (#41).
 
 Four places break the rule today, and each fails with scripts off:
 

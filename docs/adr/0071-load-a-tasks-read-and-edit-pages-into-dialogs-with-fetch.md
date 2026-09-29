@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
+amended: ["#41"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -38,7 +39,10 @@ Every form inside the swapped HTML stays a plain POST under ADR 0055. An action 
 page the task was opened from, through the `origin` the forms carry. A failed save answers 422 with the edit
 page.
 
-`fetch` stays a read. It loads the post previews and the task pages, and stores nothing.
+One write goes through `fetch`, which #41 added. In the modal, the script sends the edit form's own fields to the
+form's own action. A 422 swaps the edit page's form into the modal, errors and all. A redirect loads the page the
+modal opened on, and the toast the redirect set shows there. Any other answer, or a failed request, falls back to
+posting the form. With scripts off, the form posts as before, and the server needs no second way to answer.
 
 ## Alternatives
 
@@ -50,6 +54,10 @@ and form on each page load. It also gives no task an address of its own.
 **A `?task=` param and a full reload.** The list page reads the param and draws the panel open. It lost because
 the tasks page, `/admin` and the archive would each have to read the param, load the task and draw the panel, and
 every open, and every click on a linked task, reloads the whole list and loses the operator's place.
+
+**A failed save that leaves the modal for the full edit page.** Every save stays a plain POST, and the 422 page
+shows the errors. #37 chose it, and #41 turned it down, since spec #36 asks for a failed save to show its errors in
+the modal.
 
 ## Consequences
 
@@ -66,7 +74,11 @@ The setup functions in `app.js` bind once, to what the page held at load. Contro
 the copying task key and `confirm.js` on a delete, do nothing until the script binds them again or they listen on
 the document.
 
-A failed save leaves the modal for the full edit page, since the save is a plain POST and the server answers with
-a page. Showing the errors in the modal would take a write through `fetch`, which ADR 0055 rules out.
+A failed save keeps the operator in the modal, but only because the script reads the page the server renders for
+a plain POST. A change to that page's markup can break the modal while the page itself still works.
+
+The script cannot read where a redirect points without following it, and following it spends the toast. It sets
+`redirect: "manual"` and loads the page it is on instead. That page and the redirect's target agree for every
+list a row draws on, except that the reload keeps a search or a pool the redirect would drop.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
