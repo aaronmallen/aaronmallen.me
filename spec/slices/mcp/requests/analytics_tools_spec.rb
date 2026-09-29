@@ -71,6 +71,23 @@ RSpec.describe "MCP analytics tools", type: :request do
       expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/today])
     end
 
+    describe "today's visitors" do
+      before do
+        visitor_hash = "a" * 64
+        2.times { create(:analytics_event, referrer_host: "news.example", country_code: "US", visitor_hash:) }
+        create(:analytics_event, referrer_host: "blog.example", country_code: "US", visitor_hash:)
+      end
+
+      it "counts a visitor once under each referrer they came from" do
+        expect(read.fetch("referrers").map { it.values_at("host", "views", "visitors") })
+          .to eq([["news.example", 2, 1], ["blog.example", 1, 1]])
+      end
+
+      it "counts a visitor once under their country" do
+        expect(read.fetch("countries").map { it.values_at("country_code", "views", "visitors") }).to eq([["US", 3, 1]])
+      end
+    end
+
     it "puts today's visits on today" do
       create(:analytics_event)
 

@@ -31,6 +31,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def rollup_repo = Analytics::Slice["repos.analytics_rollup_repo"]
 
+  def stored_visitors(table, key, on = day)
+    rollup_repo.public_send(table).on(on).order(key).to_a.to_h { [it[key], it.visitors] }
+  end
+
   def sync_state_repo = Record::Slice["repos.sync_state_repo"]
 
   describe "yesterday" do
@@ -82,6 +86,33 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       roll_up
 
       expect(countries).to contain_exactly({ country_code: "JP", views: 1 }, { country_code: nil, views: 1 })
+    end
+
+    it "stores each referrer's distinct visitors" do
+      2.times { event(referrer_host: "news.example", visitor_hash:) }
+      event(referrer_host: "news.example")
+      event(:direct, visitor_hash:)
+      roll_up
+
+      expect(stored_visitors(:analytics_rollup_referrers, :host)).to eq("news.example" => 2, nil => 1)
+    end
+
+    it "stores each country's distinct visitors" do
+      2.times { event(country_code: "JP", visitor_hash:) }
+      event(country_code: "JP")
+      event(:unknown_country, visitor_hash:)
+      roll_up
+
+      expect(stored_visitors(:analytics_rollup_countries, :country_code)).to eq("JP" => 2, nil => 1)
+    end
+
+    it "counts a visitor who came from two hosts once under each" do
+      event(referrer_host: "news.example", visitor_hash:)
+      event(referrer_host: "blog.example", visitor_hash:)
+      event(referrer_host: "blog.example", visitor_hash:)
+      roll_up
+
+      expect(stored_visitors(:analytics_rollup_referrers, :host)).to eq("blog.example" => 1, "news.example" => 1)
     end
 
     it "leaves today's events for tomorrow's run" do

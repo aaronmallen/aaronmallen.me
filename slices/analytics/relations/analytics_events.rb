@@ -29,7 +29,11 @@ module Analytics
       end
 
       def counts_by(column, as: column)
-        unordered.select(self[column].as(as)) { integer.count(id).as(:views) }.group(column)
+        figures = unordered.select(self[column].as(as)) do
+          [integer.count(id).as(:views), integer.count(visitor_hash).distinct.as(:visitors)]
+        end
+
+        figures.group(column)
       end
 
       def for_view(view_token) = where(view_token:)

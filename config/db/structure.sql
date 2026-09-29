@@ -741,7 +741,9 @@ CREATE TABLE public.analytics_rollup_countries (
     views integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT analytics_rollup_countries_views_check CHECK ((views >= 0))
+    visitors integer,
+    CONSTRAINT analytics_rollup_countries_views_check CHECK ((views >= 0)),
+    CONSTRAINT analytics_rollup_countries_visitors_check CHECK (((visitors >= 0) AND (visitors <= views)))
 );
 
 
@@ -804,7 +806,9 @@ CREATE TABLE public.analytics_rollup_referrers (
     views integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT analytics_rollup_referrers_views_check CHECK ((views >= 0))
+    visitors integer,
+    CONSTRAINT analytics_rollup_referrers_views_check CHECK ((views >= 0)),
+    CONSTRAINT analytics_rollup_referrers_visitors_check CHECK (((visitors >= 0) AND (visitors <= views)))
 );
 
 
@@ -2456,4 +2460,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260928000045_add_started_to_task_source_state.rb'),
 ('20260928000046_add_linear_issues_to_sync_name.rb'),
 ('20260929000047_add_scope_to_tags.rb'),
-('20260929000048_hold_tag_joins_to_their_scope.rb');
+('20260929000048_hold_tag_joins_to_their_scope.rb'),
+('20260929000049_add_visitors_to_referrer_and_country_rollups.rb');
