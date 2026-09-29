@@ -1,6 +1,7 @@
 import { setupAutosubmit } from "./autosubmit.js";
 import { setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
+import { setupDialogs } from "./dialog.js";
 import { setupJournals } from "./journal.js";
 import { setupPalette } from "./palette.js";
 import { setupPostEditors } from "./post_editor.js";
@@ -15,6 +16,7 @@ import { setupWorkForms } from "./work_form.js";
 setupAutosubmit();
 setupCommitImports();
 setupConfirms();
+setupDialogs();
 setupJournals();
 setupPalette();
 setupPostEditors();

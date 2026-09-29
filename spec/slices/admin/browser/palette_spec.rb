@@ -67,7 +67,7 @@ RSpec.describe "Admin command palette", type: :feature do
 
   describe "typing a slash into a field" do
     before do
-      visit "/admin/tasks"
+      visit "/admin/tasks/new"
       fill_in("task[title]", with: "half/day")
     end
 
@@ -105,27 +105,25 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "announces how many rows are left" do
-      expect(page).to have_css("[data-palette-status]", text: "2 results", visible: :all)
+      expect(page).to have_css("[data-palette-status]", text: "1 result", visible: :all)
     end
 
-    it "offers to write the query down as a task" do
-      expect(page).to have_css("#command-palette-add", text: "Add “mess” to today's sprint")
+    it "offers no row that writes the query down as a task" do
+      expect(page).to have_no_css(".pal-r", text: "mess”")
     end
   end
 
-  describe "typing a query with dollar signs" do
+  describe "the Create task command" do
     before { open_palette }
 
-    it "shows a double dollar as typed" do
-      query.send_keys(*"Pay $$ bill".chars)
-
-      expect(page).to have_css("#command-palette-add", text: "Add “Pay $$ bill” to today's sprint")
+    it "is on the list before you type" do
+      expect(page).to have_css("#command-palette-create-task", text: "Create task")
     end
 
-    it "shows a dollar and ampersand as typed" do
-      query.send_keys(*"x$&y".chars)
+    it "is found by what it does" do
+      query.send_keys(*"new task".chars)
 
-      expect(page).to have_css("#command-palette-add", text: "Add “x$&y” to today's sprint")
+      expect(active).to eq("command-palette-create-task")
     end
   end
 
@@ -190,18 +188,38 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
-  describe "pressing enter on the row that writes" do
+  describe "running the Create task command" do
     before do
+      visit "/admin/posts"
       open_palette
-      query.send_keys(*"Call the plumber".chars, :end, :enter)
+      query.send_keys(*"create task".chars, :enter)
     end
 
-    it "writes the task down in today's sprint" do
-      expect(page).to have_css(".task-title", text: "Call the plumber")
+    it "shuts the palette" do
+      expect(page).to have_no_css("dialog#command-palette[open]")
     end
 
-    it "says so" do
-      expect(page).to have_css("[data-toast]", text: "Task captured")
+    it "opens the new task dialog on the page you are on", :aggregate_failures do
+      expect(page).to have_css("dialog#task-create[open]")
+      expect(page).to have_current_path("/admin/posts")
+    end
+
+    describe "saving the dialog" do
+      before do
+        within("dialog#task-create") do
+          fill_in("task[title]", with: "Call the plumber")
+          select("today", from: "task[list]")
+          click_button("Create task")
+        end
+      end
+
+      it "writes the task down in the list it names" do
+        expect(page).to have_css(".task-title", text: "Call the plumber")
+      end
+
+      it "says so" do
+        expect(page).to have_css("[data-toast]", text: "Task captured")
+      end
     end
   end
 

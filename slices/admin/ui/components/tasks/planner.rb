@@ -24,16 +24,14 @@ module Admin
             Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))),
           )
           prop :task_types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-          prop :errors, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
           prop :origin, Blog::Types::String, default: FROM_TASKS
-          prop :values, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
 
           def view_template
             div(class: "task-planner") do
               Card(label: t(".label", date: l(@date, format: :medium)), title: t(".ask")) do |card|
                 card.side { span(class: "sprint-note") { t(".empty") } }
                 p(class: "task-planner-note") { t(".note") }
-                capture
+                capture if from_today?
                 pull
               end
             end
@@ -43,8 +41,8 @@ module Admin
 
           def capture
             Capture(
-              autofocus: !from_today?, errors: @errors, filter: TODAY, origin: @origin,
-              scope: "planner", target: t(".target"), types: @task_types, values: @values,
+              autofocus: false, errors: Dry::Core::Constants::EMPTY_HASH, filter: TODAY, origin: @origin,
+              scope: "planner", target: t(".target"), types: @task_types, values: Dry::Core::Constants::EMPTY_HASH,
             )
           end
 

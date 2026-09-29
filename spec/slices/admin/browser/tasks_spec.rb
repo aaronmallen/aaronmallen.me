@@ -4,6 +4,16 @@ RSpec.describe "Admin tasks", type: :feature do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
   let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
 
+  def create_task(title, list: "next", **fields)
+    click_link("Create Task")
+    within("dialog#task-create") do
+      fill_in("task[title]", with: title)
+      select(list, from: "task[list]")
+      fields.each { |name, value| fill_in("task[#{name}]", with: value) }
+      click_button("Create task")
+    end
+  end
+
   def move_to(list)
     named = translate(["ui.components.tasks.controls.lists", list].join("."))
 
@@ -42,22 +52,50 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "capturing a task" do
-    before do
-      fill_in("task[title]", with: "Call the plumber")
-      find_field("task[title]").send_keys(:enter)
+  describe "the Create Task button" do
+    before { click_link("Create Task") }
+
+    it "opens the dialog on the page you are on", :aggregate_failures do
+      expect(page).to have_css("dialog#task-create[open]")
+      expect(page).to have_current_path("/admin/tasks?filter=next")
     end
 
-    it "writes it down on Enter alone" do
-      expect(page).to have_css(".task-title", text: "Call the plumber")
+    it "puts the cursor in the title" do
+      expect(evaluate_script("document.activeElement.name")).to eq("task[title]")
+    end
+
+    it "shuts on Cancel" do
+      within("dialog#task-create") { click_button("Cancel") }
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+    end
+
+    it "fits a phone without scrolling the page sideways", :aggregate_failures do
+      page.driver.resize(375, 800)
+
+      expect(page).to have_css("dialog#task-create[open]")
+      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+    end
+  end
+
+  describe "creating a task from the dialog" do
+    let(:created) { repo.in_list("someday").find { it.title == "Call the #plumber" } }
+
+    before { create_task("Call the #plumber", list: "someday", note: "the sink leaks", tags: "home, chores") }
+
+    it "files it in the list it names" do
+      expect(page).to have_css(".task-title", text: "Call the #plumber")
     end
 
     it "says so" do
       expect(page).to have_css("[data-toast]", text: "Task captured")
     end
 
-    it "leaves the field ready for the next one" do
-      expect(page).to have_css(".task-title", text: "Call the plumber").and have_field("task[title]", with: "")
+    it "keeps the note, the #word in the title and the tags", :aggregate_failures do
+      page.assert_selector(".task-title", text: "Call the #plumber")
+
+      expect(created.note).to eq("the sink leaks")
+      expect(created.tags.map(&:name)).to contain_exactly("home", "chores")
     end
   end
 
@@ -148,17 +186,15 @@ RSpec.describe "Admin tasks", type: :feature do
       expect(page).to have_css(".task-planner .card-title", text: translate("ui.components.tasks.planner.ask"))
     end
 
-    it "takes the answer into the sprint", :aggregate_failures do
-      fill_in("task[title]", with: "Ship the screen")
-      find_field("task[title]").send_keys(:enter)
+    it "takes a new task into the sprint", :aggregate_failures do
+      create_task("Ship the screen", list: "today")
 
       expect(page).to have_css(".task-title", text: "Ship the screen")
       expect(repo.in_sprint(sprint_repo.on(Blog::TimeZone.today).id).map(&:title)).to eq(["Ship the screen"])
     end
 
     it "drops the planner once the sprint holds a task" do
-      fill_in("task[title]", with: "Ship the screen")
-      find_field("task[title]").send_keys(:enter)
+      create_task("Ship the screen", list: "today")
 
       expect(page).to have_css(".task-title", text: "Ship the screen").and have_no_css(".task-planner")
     end

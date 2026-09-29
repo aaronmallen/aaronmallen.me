@@ -5,7 +5,7 @@ module Admin
     module Components
       module Nav
         class Palette < Component
-          ADD_ID = "command-palette-add"
+          CREATE_GROUP = "command-palette-group-create"
           DIALOG_ID = "command-palette"
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘/" }.freeze
           LIST_ID = "command-palette-list"
@@ -16,7 +16,6 @@ module Admin
             Blog::Types::TaskView["upcoming"] => ".lists.upcoming",
           }.freeze
           TASKS_GROUP = "command-palette-group-tasks"
-          TODAY = Blog::Types::TaskFilter["today"]
 
           prop :sections, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
           prop(
@@ -32,20 +31,17 @@ module Admin
                 status
                 footer
               end
-              capture_form
             end
           end
 
           private
 
-          def add_row
-            PaletteRow(id: ADD_ID, icon: "fa-plus", add: t(".add"), sub: t(".add_sub"), hidden: true)
-          end
-
-          def capture_form
-            Form(action: path(:admin_create_task), hidden: true, data: { palette_form: true }) do
-              input(type: "hidden", name: "filter", value: TODAY)
-              input(type: "hidden", name: "task[title]", data: { palette_title: true })
+          def create_group
+            row_group(CREATE_GROUP, t(".create")) do
+              PaletteRow(
+                id: "command-palette-create-task", icon: "fa-plus", label: t(".create_task"),
+                text: t(".create_text"), href: path(:admin_new_task), dialog: Tasks::CreateDialog::ID,
+              )
             end
           end
 
@@ -83,8 +79,8 @@ module Admin
                   sections.each { section_row(it) }
                 end
               end
+              create_group
               task_group
-              add_row
             end
           end
 

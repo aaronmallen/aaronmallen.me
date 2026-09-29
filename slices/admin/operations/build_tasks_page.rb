@@ -26,16 +26,14 @@ module Admin
       ]
 
       def call(
-        tab: TODAY, params: nil, errors: EMPTY_HASH, editing: nil, linking: nil, pool: nil, query: nil,
-        type: nil, now: Time.now
+        tab: TODAY, editing: nil, linking: nil, pool: nil, query: nil, type: nil, now: Time.now
       )
         sprint = step current_sprint.call(now:)
         open = open_lists(sprint)
         filters = { query: Blog::Types::TrimmedText[query], type: type_of(type) }
 
         {
-          capture: { errors:, values: values(params) }, editing:, filters:, linking: link_picker(linking), tab:,
-          tasks: filtered(listed(tab, open), filters),
+          editing:, filters:, linking: link_picker(linking), tab:, tasks: filtered(listed(tab, open), filters),
           **screen(open, sprint, pool, Blog::TimeZone.today(now)),
         }
       end
@@ -97,12 +95,6 @@ module Admin
       end
 
       def type_of(given) = Blog::Types::TrimmedText[given].empty? ? ALL_TYPES : given
-
-      def values(params)
-        fields = Blog::Types::Fields[params]
-
-        { title: Blog::Types::Text[fields[:title]], task_type_id: Blog::Types::Text[fields[:task_type_id]] }
-      end
     end
   end
 end

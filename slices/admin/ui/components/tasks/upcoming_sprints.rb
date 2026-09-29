@@ -24,15 +24,6 @@ module Admin
 
           private
 
-          def capture_for(sprint)
-            {
-              autofocus: false, errors: Dry::Core::Constants::EMPTY_HASH, filter: NEXT,
-              scope: "sprint-#{sprint.id}", sprint_on: sprint.sprint_date.iso8601,
-              target: l(sprint.sprint_date, format: :short), types: @task_types,
-              values: Dry::Core::Constants::EMPTY_HASH,
-            }
-          end
-
           def chip(task, sprint)
             Form(action: path(:admin_schedule_task, id: task.id)) do
               input(type: "hidden", name: "sprint_on", value: sprint.sprint_date.iso8601)
@@ -106,7 +97,6 @@ module Admin
             Card(label: relative(sprint.sprint_date), title: l(sprint.sprint_date, format: :weekday)) do |card|
               card.side { sprint_side(sprint, open) }
               rows(sprint, open)
-              Capture(**capture_for(sprint))
               chips(sprint)
             end
           end

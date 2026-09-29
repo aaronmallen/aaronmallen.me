@@ -1,6 +1,7 @@
+import { openDialog } from "./dialog.js";
+
 const COUNT = "{count}";
 const OPTION = "[data-palette-option]";
-const QUERY = "{query}";
 const SHOWN = "[data-palette-option]:not([hidden])";
 const SLASH_CODES = ["Slash", "NumpadDivide"];
 const TASK_LIMIT = 5;
@@ -16,12 +17,8 @@ function setupDialog(dialog) {
   const query = dialog.querySelector("[data-palette-query]");
   const list = dialog.querySelector("[data-palette-list]");
   const status = dialog.querySelector("[data-palette-status]");
-  const addLabel = dialog.querySelector("[data-palette-add-label]");
-  const form = dialog.querySelector("[data-palette-form]");
-  const title = dialog.querySelector("[data-palette-title]");
   const options = [...dialog.querySelectorAll(OPTION)];
   const groups = [...dialog.querySelectorAll("[data-palette-group]")];
-  const addTemplate = dialog.querySelector("[data-palette-add]").dataset.paletteAdd;
 
   const shown = () => options.filter((option) => !option.hidden);
   const active = () => options.find((option) => option.getAttribute("aria-selected") === "true");
@@ -55,7 +52,6 @@ function setupDialog(dialog) {
       option.hidden = !visible;
     }
 
-    addLabel.textContent = addTemplate.replace(QUERY, () => query.value.trim());
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
     const visible = shown();
@@ -75,10 +71,11 @@ function setupDialog(dialog) {
     const option = active();
     if (!option) return;
 
-    if (!option.hasAttribute("data-palette-add")) return window.location.assign(option.dataset.paletteHref);
+    const target = option.dataset.paletteDialog;
+    if (!target) return window.location.assign(option.dataset.paletteHref);
 
-    title.value = query.value.trim();
-    form.requestSubmit();
+    dialog.close();
+    if (!openDialog(target)) window.location.assign(option.dataset.paletteHref);
   };
 
   const open = () => {
@@ -125,7 +122,6 @@ function setupDialog(dialog) {
 }
 
 function matches(option, text) {
-  if (option.hasAttribute("data-palette-add")) return text !== "";
   if (option.hasAttribute("data-palette-task")) return text !== "" && option.dataset.paletteText.includes(text);
 
   return text === "" || option.dataset.paletteText.includes(text);

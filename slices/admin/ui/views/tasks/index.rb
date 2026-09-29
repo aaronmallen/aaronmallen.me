@@ -36,11 +36,10 @@ module Admin
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
           def initialize(
-            capture:, counts:, editing:, filters:, linking:, planned:, pool:, pools:, tab:, task_types:, tasks:,
-            today:, waiting:
+            counts:, editing:, filters:, linking:, planned:, pool:, pools:, tab:, task_types:, tasks:, today:,
+            waiting:
           )
             super()
-            @capture = capture
             @counts = counts
             @filters = filters
             @editors = { editing:, linking: }
@@ -55,6 +54,7 @@ module Admin
             PageHead(title: t(".heading"), sub:) do
               Filters(tab: @tab, types: @task_types, **@filters)
               types_link
+              CreateButton()
             end
             Tabs(counts: @counts, tab: @tab, **@filters)
             body
@@ -99,7 +99,6 @@ module Admin
               card.side { span(class: "card-note") { open_note } }
               p(class: "card-blurb") { t(BLURBS.fetch(@tab)) }
               rows
-              Capture(filter: @tab, types: @task_types, **@capture)
             end
           end
 
@@ -111,10 +110,7 @@ module Admin
           end
 
           def planner
-            Planner(
-              date: @today, errors: @capture[:errors], pool: @plan[:pool], pools: @plan[:pools],
-              task_types: @task_types, values: @capture[:values],
-            )
+            Planner(date: @today, pool: @plan[:pool], pools: @plan[:pools], task_types: @task_types)
           end
 
           def planning? = today? && @tasks.empty? && !filtering?

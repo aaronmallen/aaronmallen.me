@@ -4,8 +4,6 @@ module Tasks
   module Operations
     class CaptureTask < Blog::Operation
       NEXT = Blog::Types::TaskFilter["next"]
-      SEPARATOR = ","
-      TAG = /(?:\A|\s)#([a-z0-9]+(?:-[a-z0-9]+)*)(?![a-z0-9-])/i
       TODAY = Blog::Types::TaskFilter["today"]
 
       include Deps[
@@ -32,18 +30,12 @@ module Tasks
         { list: Blog::Types::TaskList[filter], sprint_id: nil }
       end
 
-      def split(text)
-        return [text, Dry::Core::Constants::EMPTY_ARRAY] unless text.is_a?(String)
-
-        [Blog::Whitespace.squish(text.gsub(TAG, " ")), text.scan(TAG).flatten]
-      end
-
       def type_id(value) = value && task_type_repo.by_id(value)&.id
 
       def validate(params)
-        title, tags = split(params[:title])
         result = contract.call(
-          title:, list: "", note: "", tags: tags.join(SEPARATOR), task_type_id: params[:task_type_id],
+          title: params[:title], list: "", note: params[:note], tags: params[:tags],
+          task_type_id: params[:task_type_id],
         )
 
         validated(result)
@@ -54,7 +46,7 @@ module Tasks
 
         transaction do
           task = task_repo.create(
-            title: fields[:title], task_type_id: type_id(fields[:task_type_id]),
+            title: fields[:title], note: fields[:note], task_type_id: type_id(fields[:task_type_id]),
             position: task_repo.next_position, **placed,
           )
           task_repo.replace_tags(task.id, fields[:tags])

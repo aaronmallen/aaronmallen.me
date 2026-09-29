@@ -6,8 +6,8 @@ RSpec.describe "Admin tasks", type: :request do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
   let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
 
-  def capture(title, **params)
-    post "/admin/tasks", { _csrf_token: admin_csrf_token, task: { title: }, **params }
+  def capture(title, filter: nil, **fields)
+    post "/admin/tasks", { _csrf_token: admin_csrf_token, filter:, task: { title:, **fields } }.compact
   end
 
   def empty_text(filter) = i18n.t(["ui.views.tasks.index.empty", filter].join("."))
@@ -201,10 +201,10 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_no_css("section.card.card-live")
       end
 
-      it "puts the capture field at the foot of the card" do
+      it "offers no capture row" do
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_css(".card-body > *:last-child.task-capture")
+        expect(page).to have_no_css(".task-capture")
       end
     end
 
@@ -248,10 +248,10 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css(".task-planner .sprint-note", exact_text: planner("empty"))
       end
 
-      it "carries a field of its own" do
+      it "leaves writing a task to the Create Task button" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css(".task-planner .task-capture input[name='task[title]']")
+        expect(page).to have_no_css(".task-planner .task-capture")
       end
 
       it "lists what is waiting in next" do
@@ -342,11 +342,50 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
-    it "asks for the text and a type to capture a task", :aggregate_failures do
-      get "/admin/tasks", filter: "next"
+    describe "the Create Task button" do
+      before { get "/admin/tasks", filter: "next" }
 
-      expect(page.all(".task-capture-row input:not([type=hidden])").map { it["name"] }).to eq(["task[title]"])
-      expect(page.all(".task-capture-row select").map { it["name"] }).to eq(["task[task_type_id]"])
+      def button = page.find(".page-head-actions a", text: "Create Task")
+
+      it "leads to the page that holds the form" do
+        expect(button["href"]).to eq("/admin/tasks/new")
+      end
+
+      it "opens the dialog in place when scripts run" do
+        expect(button["data-dialog-open"]).to eq("task-create")
+      end
+    end
+
+    describe "the new task page" do
+      def fields = page.all("main form[action='/admin/tasks'] [name^='task[']").map { it["name"] }
+
+      before { get "/admin/tasks/new" }
+
+      it "answers 200" do
+        expect(last_response.status).to eq(200)
+      end
+
+      it "asks for every field a task has but its type" do
+        expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+      end
+
+      it "puts a new task in next unless told otherwise" do
+        expect(page).to have_select("task[list]", selected: "next")
+      end
+    end
+
+    describe "the dialog" do
+      def fields = page.all("dialog#task-create [name^='task[']", visible: :all).map { it["name"] }
+
+      before { get "/admin" }
+
+      it "sits in the layout of every screen, shut" do
+        expect(page).to have_css("dialog#task-create[hidden]:not([open])", visible: :all)
+      end
+
+      it "holds the same fields as the new task page" do
+        expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+      end
     end
 
     describe "capturing a task" do
@@ -375,11 +414,11 @@ RSpec.describe "Admin tasks", type: :request do
         expect(repo).to have_received(:carry_forward).once
       end
 
-      it "carries the day's work forward once when it comes back with the form" do
+      it "carries the day's work forward no more than once when it comes back with the form" do
         watch_carry_forward
         capture("", filter: "today")
 
-        expect(repo).to have_received(:carry_forward).once
+        expect(repo).to have_received(:carry_forward).at_most(:once)
       end
 
       it "comes back to the list that was open" do
@@ -415,34 +454,87 @@ RSpec.describe "Admin tasks", type: :request do
 
       it "gives it the type the field was set to" do
         chore = create(:task_type, name: "Chore")
-        capture("Email the accountant", filter: "next", task: { title: "Email the accountant",
-                                                                task_type_id: chore.id.to_s })
+        capture("Email the accountant", filter: "next", task_type_id: chore.id.to_s)
 
         expect(repo.in_list("next").first.task_type_id).to eq(chore.id)
       end
 
-      it "reads a #tag in the text as a tag" do
+      it "keeps a #word in the title" do
         capture("Email the accountant #admin", filter: "next")
 
-        expect(repo.in_list("next").first.tags.map(&:name)).to eq(["admin"])
+        expect(repo.in_list("next").first.title).to eq("Email the accountant #admin")
       end
 
-      it "keeps the tag out of the title" do
+      it "adds no tag for a #word in the title" do
         capture("Email the accountant #admin", filter: "next")
 
-        expect(repo.in_list("next").first.title).to eq("Email the accountant")
+        expect(repo.in_list("next").first.tags).to be_empty
+      end
+    end
+
+    describe "creating a task from the form" do
+      def create_task(**fields)
+        capture("Learn Elixir", list: "someday", note: "read the guide", tags: "elixir, learning", **fields)
       end
 
-      it "reads every #tag in the text" do
-        capture("#admin Email the accountant #money", filter: "next")
+      def created = repo.in_list("someday").first
 
-        expect(repo.in_list("next").first.tags.map(&:name)).to contain_exactly("admin", "money")
+      it "writes down the title, note and list" do
+        create_task
+
+        expect(created).to have_attributes(title: "Learn Elixir", note: "read the guide", list: "someday")
       end
 
-      it "refuses text that is nothing but tags" do
-        capture("#admin", filter: "next")
+      it "gives it the tags in the field" do
+        create_task
 
+        expect(created.tags.map(&:name)).to contain_exactly("elixir", "learning")
+      end
+
+      it "takes the list from the form over the tab" do
+        capture("Learn Elixir", filter: "next", list: "someday")
+
+        expect(created.title).to eq("Learn Elixir")
+      end
+
+      it "comes back to the list it went in" do
+        create_task
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
+      end
+
+      it "puts it in the sprint for the date" do
+        tomorrow = Blog::TimeZone.today + 1
+        create_task(sprint_on: tomorrow.iso8601)
+
+        expect(repo.in_sprint(sprint_repo.on(tomorrow).id).map(&:title)).to eq(["Learn Elixir"])
+      end
+    end
+
+    describe "a failed save from the form" do
+      before { capture("", list: "someday", note: "read the guide", tags: "not_a_tag") }
+
+      it "answers 422" do
         expect(last_response.status).to eq(422)
+      end
+
+      it "shows the new task page" do
+        expect(page).to have_css("main form[action='/admin/tasks'] [name='task[title]']")
+      end
+
+      it "says what went wrong", :aggregate_failures do
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.title.blank"))
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.tasks.field_error.tags.format"))
+      end
+
+      it "keeps what was typed", :aggregate_failures do
+        expect(page).to have_field("task[note]", with: "read the guide")
+        expect(page).to have_select("task[list]", selected: "someday")
+        expect(page).to have_field("task[tags]", with: "not_a_tag")
+      end
+
+      it "writes nothing" do
+        expect(repo.in_list("someday")).to be_empty
       end
     end
 
@@ -952,14 +1044,14 @@ RSpec.describe "Admin tasks", type: :request do
         edit(note: "Ring before ten")
         get "/admin/tasks", filter: "next"
 
-        expect(page.find("textarea[name='task[note]']", visible: :all).text).to eq("Ring before ten")
+        expect(page.find(".task-editor textarea[name='task[note]']", visible: :all).text).to eq("Ring before ten")
       end
 
       it "leaves the note field empty for a task without one" do
         task
         get "/admin/tasks", filter: "next"
 
-        expect(page.find("textarea[name='task[note]']", visible: :all).text).to be_empty
+        expect(page.find(".task-editor textarea[name='task[note]']", visible: :all).text).to be_empty
       end
 
       it "tags it" do

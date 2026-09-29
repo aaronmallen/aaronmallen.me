@@ -252,9 +252,10 @@ en:
           publish: "Publish"
           settings: "Settings"
         palette:
-          add: "Add “{query}” to today's sprint"
-          add_sub: "new task"
           anywhere: "anywhere"
+          create: "Create"
+          create_task: "Create task"
+          create_text: "create task, new task, add task"
           current: "current"
           escape: "esc"
           in_list: "in %{list}"
@@ -266,8 +267,8 @@ en:
             upcoming: "a planned sprint"
           move: "move"
           open: "open"
-          placeholder: "Go anywhere, find a task, or type a new one…"
-          query_label: "Go anywhere, find a task, or type a new one"
+          placeholder: "Go anywhere, find a task, or create one…"
+          query_label: "Go anywhere, find a task, or create one"
           results:
             one: "{count} result"
             other: "{count} results"
@@ -645,7 +646,6 @@ en:
           into: "Add to %{target}…"
           label: "Task"
           no_type: "untyped"
-          placeholder: "What needs doing? Use #tags"
           type: "Type"
         closed:
           canceled: "canceled"
@@ -666,6 +666,23 @@ en:
           reopen: "Reopen"
           start: "Start"
           stop: "Stop"
+        create_button:
+          label: "Create Task"
+        create_dialog:
+          cancel: "Cancel"
+          title: "New task"
+        create_form:
+          list: "List"
+          lists:
+            next: "next"
+            someday: "someday"
+            today: "today"
+          note: "Notes"
+          note_placeholder: "What done looks like."
+          save: "Create task"
+          tags: "Tags"
+          tags_placeholder: "ruby, admin"
+          title: "Title"
         editor:
           cancel: "Cancel"
           confirm_delete: "Delete %{task}? This cannot be undone."
@@ -1146,6 +1163,12 @@ en:
           upcoming_count:
             one: "%{count} upcoming"
             other: "%{count} upcoming"
+        new:
+          back: "Tasks"
+          heading: "New task"
+          label: "Tasks"
+          sub: "Title, notes, list, sprint and tags in one go."
+          title: "Create a task"
       today:
         show:
           clients: "MCP clients"

@@ -12,7 +12,7 @@ module Admin
           prop :sub, Blog::Types::String.optional, default: nil
           prop :warn, Blog::Types::Bool, default: false
           prop :href, Blog::Types::String.optional, default: nil
-          prop :add, Blog::Types::String.optional, default: nil
+          prop :dialog, Blog::Types::String.optional, default: nil
           prop :task, Blog::Types::Bool, default: false
           prop :hidden, Blog::Types::Bool, default: false
 
@@ -21,11 +21,11 @@ module Admin
               id: @id, class: "pal-r", role: "option", hidden: @hidden, aria: { selected: "false" },
               data: {
                 palette_option: true, palette_text: @text, palette_href: @href,
-                palette_add: @add, palette_task: (true if @task),
+                palette_dialog: @dialog, palette_task: (true if @task),
               },
             ) do
               i(class: ["fa-solid", @icon, "pal-r-icon"], aria: { hidden: "true" })
-              span(class: "pal-r-label", data: { palette_add_label: (true if @add) }) { @label }
+              span(class: "pal-r-label") { @label }
               span(class: ["pal-r-sub", ("warn" if @warn)]) { @sub } if @sub
             end
           end

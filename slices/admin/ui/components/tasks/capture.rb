@@ -8,14 +8,13 @@ module Admin
           NONE = ""
 
           prop :filter, Blog::Types::String
+          prop :target, Blog::Types::String
           prop :types, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :values, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
           prop :autofocus, Blog::Types::Bool, default: true
           prop :origin, Blog::Types::String.optional, default: nil
           prop :scope, Blog::Types::String, default: FieldError::SCOPE
-          prop :sprint_on, Blog::Types::String.optional, default: nil
-          prop :target, Blog::Types::String.optional, default: nil
 
           def view_template
             div(class: "task-capture") do
@@ -44,7 +43,7 @@ module Admin
               autocomplete: "off",
               autofocus: @autofocus,
               name: "task[title]",
-              placeholder:,
+              placeholder: t(".into", target: @target),
               value: @values[:title],
             )
           end
@@ -52,10 +51,7 @@ module Admin
           def hidden_fields
             input(type: "hidden", name: "filter", value: @filter)
             input(type: "hidden", name: "origin", value: @origin) if @origin
-            input(type: "hidden", name: "sprint_on", value: @sprint_on) if @sprint_on
           end
-
-          def placeholder = @target ? t(".into", target: @target) : t(".placeholder")
 
           def type_field
             id = FieldError.id_for(:task_type_id, @scope)

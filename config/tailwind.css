@@ -2005,6 +2005,36 @@
   }
 }
 
+@utility task-create-form {
+  @apply flex flex-col gap-3;
+}
+
+@utility task-create-foot {
+  @apply flex flex-wrap items-center justify-end gap-2;
+}
+
+@utility task-dialog {
+  @apply fixed inset-0 m-0 h-full max-h-full w-full max-w-full items-start justify-center overflow-y-auto border-0;
+  @apply bg-transparent px-5 pt-[8vh] pb-5;
+
+  &[open] {
+    @apply flex;
+  }
+
+  &::backdrop {
+    background: color-mix(in oklab, var(--color-ground) 72%, transparent);
+    backdrop-filter: blur(3px);
+  }
+
+  @media (width < 43.75rem) {
+    @apply px-4 pt-4;
+  }
+}
+
+@utility task-dialog-box {
+  @apply flex w-full max-w-palette flex-col gap-3 rounded-card border border-line bg-ground-sunk p-4 shadow-palette;
+}
+
 @utility swatches {
   @apply flex items-center gap-1.5;
 }

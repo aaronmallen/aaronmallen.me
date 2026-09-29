@@ -225,10 +225,28 @@ RSpec.describe "MCP task tools", type: :request do
   end
 
   describe "capture_task" do
-    it "captures a task into next, reading a #word as a tag" do
+    it "captures a task into next" do
+      call_tool("capture_task", title: "Email the accountant")
+
+      expect(content).to include("title" => "Email the accountant", "list" => "next")
+    end
+
+    it "applies the tags it is given" do
+      call_tool("capture_task", title: "Email the accountant", tags: %w[admin money])
+
+      expect(content.fetch("tags")).to contain_exactly("admin", "money")
+    end
+
+    it "keeps a #word in the title and adds no tag for it" do
       call_tool("capture_task", title: "Email the accountant #admin")
 
-      expect(content).to include("title" => "Email the accountant", "tags" => %w[admin], "list" => "next")
+      expect(content).to include("title" => "Email the accountant #admin", "tags" => [])
+    end
+
+    it "refuses a tag that is not a lowercase word" do
+      call_tool("capture_task", title: "Email the accountant", tags: ["not_a_tag"])
+
+      expect(message).to eq("tags: tags are lowercase words")
     end
 
     it "captures a task into today's sprint" do
