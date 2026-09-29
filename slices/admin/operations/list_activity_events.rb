@@ -49,8 +49,13 @@ module Admin
           occurred_on: row.occurred_on,
           occurred_at: row.occurred_at,
           name: shortened(display_name(row)),
+          name_html: name_html(row),
           sub_line: sub_line(row, views),
         )
+      end
+
+      def name_html(row)
+        InlineMarkdown.to_html(row.name, keep: NAME_LIMIT) if row.type == JOURNAL
       end
 
       def networks(targets)

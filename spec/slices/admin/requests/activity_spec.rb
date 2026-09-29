@@ -580,6 +580,75 @@ RSpec.describe "Admin activity", type: :request do
       end
     end
 
+    describe "a journal row's markdown" do
+      def name_html = page.find(".activity-event-name").native.inner_html
+
+      def visit_entry(body)
+        create(:journal_entry, entry_date: today, body:)
+        visit_activity
+      end
+
+      it "formats bold, italic and code", :aggregate_failures do
+        visit_entry("a **bold**, _italic_ and `code` day")
+
+        expect(page).to have_css(".activity-event-name strong", text: "bold")
+        expect(page).to have_css(".activity-event-name em", text: "italic")
+        expect(page).to have_css(".activity-event-name code", text: "code")
+      end
+
+      it "shows a link as its text", :aggregate_failures do
+        visit_entry("read [the docs](https://example.com/docs) today")
+
+        expect(event_names).to eq(["read the docs today"])
+        expect(page).to have_no_css("a.activity-event a")
+      end
+
+      it "flattens a heading, a list and paragraphs into one line" do
+        visit_entry("# Morning\n\n- one\n- two\n\nwalked\nthe dog\n\n> and rested")
+
+        expect(event_names).to eq(["Morning one two walked the dog and rested"])
+      end
+
+      it "cuts at the visible text and closes the mark it opened" do
+        visit_entry("**#{(%w[bold] * 40).join(' ')}**")
+
+        expect(name_html).to eq("<strong>#{(%w[bold] * 24).join(' ')}</strong>…")
+      end
+
+      it "closes every mark it opened when the cut falls inside two" do
+        visit_entry("**bold _and #{(%w[long] * 30).join(' ')}_**")
+
+        expect(name_html).to end_with("</em></strong>…")
+      end
+
+      it "leaves a link's address out of the count" do
+        visit_entry("[docs](https://example.com/#{'a' * 200}) walked")
+
+        expect(event_names).to eq(["docs walked"])
+      end
+
+      it "drops raw HTML", :aggregate_failures do
+        visit_entry("a <script>alert(1)</script> <b>bold</b> <img src=x onerror=alert(2)> day")
+
+        expect(page).to have_no_css(".activity-event-name script, .activity-event-name b, .activity-event-name img")
+        expect(event_names).to eq(["a alert(1) bold day"])
+      end
+
+      it "escapes text that reads like HTML" do
+        visit_entry("`<b>not bold</b>`")
+
+        expect(page).to have_css(".activity-event-name code", text: "<b>not bold</b>")
+      end
+
+      it "leaves the markdown in other kinds alone", :aggregate_failures do
+        create(:commit, commit_date: today, message: "add **the** view")
+        visit_activity
+
+        expect(event_names).to eq(["add **the** view"])
+        expect(page).to have_no_css(".activity-event-name strong")
+      end
+    end
+
     describe "a long name" do
       before do
         create(:journal_entry, entry_date: today, body: "walked #{'the dog ' * 40}")

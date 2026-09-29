@@ -1289,6 +1289,10 @@
   &.prose {
     @apply font-serif font-normal;
   }
+
+  & code {
+    @apply rounded-code px-1 text-[0.875em];
+  }
 }
 
 @utility activity-event-sub {

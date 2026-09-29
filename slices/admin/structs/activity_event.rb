@@ -2,7 +2,7 @@
 
 module Admin
   module Structs
-    class ActivityEvent < Data.define(:type, :source_id, :occurred_on, :occurred_at, :name, :sub_line)
+    class ActivityEvent < Data.define(:type, :source_id, :occurred_on, :occurred_at, :name, :name_html, :sub_line)
       KINDS = %w[commit post journal social task webmention].map { Blog::Types::ActivityKind[it] }.freeze
     end
   end

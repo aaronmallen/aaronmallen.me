@@ -50,9 +50,11 @@ module Admin
             end
           end
 
+          def name = @event.name_html ? raw(safe(@event.name_html)) : plain(@event.name)
+
           def named
             div(class: "activity-event-main") do
-              span(class: ["activity-event-name", ("prose" if type.prose)]) { @event.name }
+              span(class: ["activity-event-name", ("prose" if type.prose)]) { name }
               span(class: "activity-event-sub") { @event.sub_line }
             end
           end
