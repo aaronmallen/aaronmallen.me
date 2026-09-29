@@ -36,7 +36,7 @@ module Blog
     private_constant :Normalizers
 
     ActivityKind = Types::String.enum(
-      "commit", "post", "journal", "social", "task", "webmention", "project", "sprint", "suggestion",
+      "commit", "post", "journal", "social", "task", "webmention", "project", "sprint", "suggestion", "comment",
     )
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)

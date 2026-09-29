@@ -7,6 +7,7 @@ module Admin
         class Event < Component
           Type = Data.define(:icon, :color, :prose)
 
+          COMMENT = Blog::Types::ActivityKind["comment"]
           COMMIT = Blog::Types::ActivityKind["commit"]
           JOURNAL = Blog::Types::ActivityKind["journal"]
           POST = Blog::Types::ActivityKind["post"]
@@ -19,6 +20,7 @@ module Admin
             JOURNAL => Type.new(icon: "fa-feather", color: :sand, prose: true),
             SOCIAL => Type.new(icon: "fa-paper-plane", color: :blue, prose: true),
             TASK => Type.new(icon: "fa-circle-check", color: :orange, prose: false),
+            COMMENT => Type.new(icon: "fa-comment", color: :orange, prose: true),
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
           }.freeze
           POSTED = Blog::Types::SocialQueue["posted"]
@@ -45,7 +47,7 @@ module Admin
             when POST then path(:admin_edit_post, id: @event.source_id)
             when JOURNAL then "#{path(:admin_journal)}##{Journal::Day.anchor(@event.occurred_on)}"
             when SOCIAL then path(:admin_social, filter: POSTED)
-            when TASK then path(:admin_tasks)
+            when TASK, COMMENT then task_href
             when WEBMENTION then path(:admin_webmentions)
             end
           end
@@ -67,6 +69,12 @@ module Admin
 
           def stamp
             time(class: "activity-event-time", datetime: "#{@event.occurred_on.iso8601}T#{clock}") { clock }
+          end
+
+          def task_href
+            return path(:admin_tasks) if @event.type == TASK
+
+            "#{path(:admin_task, id: @event.task_id)}#task-comment-#{@event.source_id}"
           end
 
           def type = TYPES.fetch(@event.type)

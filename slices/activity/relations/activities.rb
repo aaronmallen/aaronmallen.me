@@ -3,6 +3,7 @@
 module Activity
   module Relations
     class Activities < Blog::DB::Relation
+      COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]
       COMMIT_TOTALS = proc do
         [
@@ -17,7 +18,11 @@ module Activity
       OWNER_SEPARATOR = "/"
       SEARCHED = %i[excerpt link name repo sha status].freeze
       TASK = Blog::Types::ActivityKind["task"]
-      TAGGED = { JOURNAL => %i[journal_entry_tags journal_entry_id], TASK => %i[task_tags task_id] }.freeze
+      TAGGED = {
+        JOURNAL => %i[source_id journal_entry_tags journal_entry_id],
+        TASK => %i[source_id task_tags task_id],
+        COMMENT => %i[task_id task_tags task_id],
+      }.freeze
       TARGET_SEPARATOR = " "
 
       schema :activities, infer: true
@@ -54,7 +59,7 @@ module Activity
       def tagged(names)
         folded = names.map { it.to_s.downcase }.uniq
 
-        where(Sequel.|(*TAGGED.map { |type, (table, key)| owners_tagged(type, table, key, folded) }))
+        where(Sequel.|(*TAGGED.map { |type, (owner, table, key)| owners_tagged(type, owner, table, key, folded) }))
       end
 
       def with_types(types) = where(type: types)
@@ -70,8 +75,8 @@ module Activity
 
       def owned_name = Sequel.function(:split_part, Sequel[:repo], OWNER_SEPARATOR, 2)
 
-      def owners_tagged(type, table, key, names)
-        Sequel[type:] & Sequel[source_id: tag_owners(table, key, names)]
+      def owners_tagged(type, owner, table, key, names)
+        Sequel[type:] & Sequel[owner => tag_owners(table, key, names)]
       end
 
       def tag_owners(table, key, names)

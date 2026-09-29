@@ -20,8 +20,10 @@ RSpec.describe "Admin activity", type: :request do
   def event_subs = page.all(".activity-event-sub").map(&:text)
 
   def icon_for(type)
-    { "commit" => "code-commit", "journal" => "feather", "post" => "file-lines", "social" => "paper-plane",
-      "task" => "circle-check", "webmention" => "at" }.fetch(type)
+    {
+      "comment" => "comment", "commit" => "code-commit", "journal" => "feather", "post" => "file-lines",
+      "social" => "paper-plane", "task" => "circle-check", "webmention" => "at",
+    }.fetch(type)
   end
 
   def visit_activity(params = {}) = get("/admin/activity", params)
@@ -69,7 +71,7 @@ RSpec.describe "Admin activity", type: :request do
       end
 
       it "checks every type" do
-        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 6, visible: :all)
+        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 7, visible: :all)
       end
 
       it "submits the filters as a get" do
@@ -157,6 +159,94 @@ RSpec.describe "Admin activity", type: :request do
         visit_activity
 
         expect(count_for("task")).to eq("1")
+      end
+    end
+
+    describe "comments" do
+      let(:task) { create(:task, title: "clear the gutters", tags: %w[home]) }
+
+      def comment(*traits, **attrs) = create(:task_comment, *traits, task_id: task.id, created_at: at(10), **attrs)
+
+      it "shows a local comment on the day it was made" do
+        comment(body: "bought a ladder", created_at: at(10, on: today - 1))
+        visit_activity
+
+        expect(day_names(today - 1)).to eq(["bought a ladder"])
+      end
+
+      it "shows a synced comment too" do
+        comment(:synced, body: "from the issue")
+        visit_activity
+
+        expect(event_names).to eq(["from the issue"])
+      end
+
+      it "names the task it is on" do
+        comment
+        visit_activity
+
+        expect(event_subs).to eq(["on clear the gutters"])
+      end
+
+      it "shows a comment on a task that is still open" do
+        comment(body: "bought a ladder")
+        visit_activity
+
+        expect(event_names).to eq(["bought a ladder"])
+      end
+
+      it "opens the comment on its task" do
+        made = comment(body: "bought a ladder")
+        visit_activity
+
+        expect(page).to have_css(
+          "a.activity-event[href='/admin/tasks/#{task.id}#task-comment-#{made.id}']", text: "bought a ladder",
+        )
+      end
+
+      it "sets the comment's markdown as inline text" do
+        comment(body: "bought a **ladder**")
+        visit_activity
+
+        expect(page).to have_css(".activity-event-name.prose strong", text: "ladder")
+      end
+
+      it "counts the comments in the range" do
+        comment
+        comment(:synced)
+        comment(created_at: at(10, on: today - 30))
+        visit_activity
+
+        expect(count_for("comment")).to eq("2")
+      end
+
+      it "finds a comment by its task's title" do
+        comment(body: "bought a ladder")
+        visit_activity(q: "gutters")
+
+        expect(event_names).to eq(["bought a ladder"])
+      end
+
+      it "finds a comment by its task's tags" do
+        comment(body: "bought a ladder")
+        create(:task_comment, body: "elsewhere", created_at: at(10))
+        visit_activity(q: "tag:home")
+
+        expect(event_names).to eq(["bought a ladder"])
+      end
+
+      it "leaves out a comment whose task carries another tag" do
+        comment(body: "bought a ladder")
+        visit_activity(q: "tag:work")
+
+        expect(event_names).to be_empty
+      end
+
+      it "drops the comments when their type is unchecked" do
+        comment
+        visit_activity(types: { comment: "0", task: "1" })
+
+        expect(event_names).to be_empty
       end
     end
 

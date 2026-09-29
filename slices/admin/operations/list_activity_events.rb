@@ -5,8 +5,16 @@ module Admin
     class ListActivityEvents
       include Dry::Core::Constants
 
+      COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]
       JOURNAL = Blog::Types::ActivityKind["journal"]
+      TASK = Blog::Types::ActivityKind["task"]
+      LINES = {
+        COMMENT => "activity_page.sub_lines.comment",
+        JOURNAL => "activity_page.sub_lines.journal",
+        TASK => "activity_page.sub_lines.task",
+      }.freeze
+      MARKDOWN = [JOURNAL, COMMENT].freeze
       NAME_LIMIT = 120
       POST = Blog::Types::ActivityKind["post"]
       SHA_LENGTH = 7
@@ -15,7 +23,6 @@ module Admin
         Blog::Types::PostStatus["published"] => "activity_page.statuses.published",
         Blog::Types::SocialPostStatus["posted"] => "activity_page.statuses.posted",
       }.freeze
-      TASK = Blog::Types::ActivityKind["task"]
       WEBMENTION = Blog::Types::ActivityKind["webmention"]
 
       include Deps[
@@ -51,11 +58,12 @@ module Admin
           name: shortened(display_name(row)),
           name_html: name_html(row),
           sub_line: sub_line(row, views),
+          task_id: row.task_id,
         )
       end
 
       def name_html(row)
-        InlineMarkdown.to_html(row.name, keep: NAME_LIMIT) if row.type == JOURNAL
+        InlineMarkdown.to_html(row.name, keep: NAME_LIMIT) if MARKDOWN.include?(row.type)
       end
 
       def networks(targets)
@@ -84,11 +92,10 @@ module Admin
       def sub_line(row, views)
         case row.type
         when COMMIT then commit_line(row)
-        when JOURNAL then i18n.t("activity_page.sub_lines.journal")
         when POST then post_line(row, views)
         when SOCIAL then social_line(row)
-        when TASK then i18n.t("activity_page.sub_lines.task")
         when WEBMENTION then webmention_line(row)
+        else i18n.t(LINES.fetch(row.type), task: row.excerpt)
         end
       end
 

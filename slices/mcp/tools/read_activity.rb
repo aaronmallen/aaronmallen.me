@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ReadActivity < Base
       CAP = 200
-      FIELDS = %i[link repo sha additions deletions status targets excerpt].freeze
+      FIELDS = %i[link repo sha additions deletions status targets excerpt task_id].freeze
       KINDS = Blog::Types::ActivityKind.values
       TIME_FORMAT = "%H:%M"
 
@@ -22,7 +22,11 @@ module MCP
             items: { type: "string" },
             description: "repository names, with or without the owner; a name narrows commits and nothing else",
           },
-          tags: { type: "array", items: { type: "string" }, description: "tag names on journal entries and tasks" },
+          tags: {
+            type: "array",
+            items: { type: "string" },
+            description: "tag names on journal entries and tasks; a comment carries its task's tags",
+          },
           text: { type: "string", description: "free text to match against the row" },
           to: { type: "string", description: "the last day of the window, as YYYY-MM-DD" },
         },
@@ -31,10 +35,11 @@ module MCP
 
       description "Read one window of the activity feed, newest first, every kind in it: commits with their " \
                   "whole message, repository, sha and lines added and deleted, published posts, journal entries, " \
-                  "posted social posts, approved webmentions, done tasks but never canceled ones, projects, " \
-                  "sprints and suggestions. " \
+                  "posted social posts, approved webmentions, done tasks but never canceled ones, comments on " \
+                  "tasks, projects, sprints and suggestions. A comment's name is its text and its excerpt the " \
+                  "task's title. " \
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
-                  "deletions, status, targets and excerpt its kind holds. " \
+                  "deletions, status, targets, excerpt and task_id its kind holds. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                   "One answer carries about #{CAP} rows, rounded out to the end of a day. Past that, partial " \
                   "comes back true and continue_to holds the day to send as to when you ask for the next " \

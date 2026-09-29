@@ -464,6 +464,10 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def entries = content.fetch("activity")
 
+    def finish_with_comment
+      create(:task_comment, task_id: create(:task, :done, completed_at: at(16)).id, created_at: at(10))
+    end
+
     def kinds = entries.map { it.fetch("kind") }
 
     def month_ago = today - 30
@@ -497,7 +501,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:journal_entry, entry_date: today)
       create(:social_post, :posted, posted_at: at(12))
       create(:webmention, :approved, post_id: article.id, received_at: at(8))
-      create(:task, :done, completed_at: at(16))
+      finish_with_comment
       planning(article)
     end
 
@@ -551,6 +555,54 @@ RSpec.describe "MCP endpoint", type: :request do
       read_activity
 
       expect(names).to eq(["Clear the inbox"])
+    end
+
+    describe "a comment on a task" do
+      let(:task) { create(:task, title: "Clear the inbox", tags: %w[home]) }
+
+      def comment(*traits, **attrs) = create(:task_comment, *traits, task_id: task.id, created_at: at(10), **attrs)
+
+      it "sends a local comment with its text, its task's title and its task's id" do
+        comment(body: "Down to ten")
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "comment", "name" => "Down to ten", "excerpt" => "Clear the inbox", "task_id" => task.id),
+        )
+      end
+
+      it "sends a synced comment with its link" do
+        synced = comment(:synced, body: "From the issue")
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "comment", "name" => "From the issue", "link" => synced.url),
+        )
+      end
+
+      it "narrows to comments" do
+        comment
+        create(:task, :done, completed_at: at(16))
+        read_activity(kinds: %w[comment])
+
+        expect(kinds).to eq(%w[comment])
+      end
+
+      it "matches a comment by its task's tags" do
+        comment(body: "Down to ten")
+        create(:task_comment, body: "Elsewhere", created_at: at(10))
+        read_activity(tags: %w[home])
+
+        expect(names).to eq(["Down to ten"])
+      end
+
+      it "matches a comment by its text" do
+        comment(body: "Down to ten")
+        comment(body: "Still full")
+        read_activity(text: "down to")
+
+        expect(names).to eq(["Down to ten"])
+      end
     end
 
     it "sends every kind the feed holds" do
@@ -883,6 +935,15 @@ RSpec.describe "MCP endpoint", type: :request do
         winter
 
         expect(months).to eq("2026-02" => none.merge("task" => 1))
+      end
+
+      it "counts local and synced comments in the month each was made" do
+        task = create(:task)
+        create(:task_comment, task_id: task.id, created_at: at(10, on: Date.new(2026, 1, 12)))
+        create(:task_comment, :synced, task_id: task.id, created_at: at(10, on: Date.new(2026, 2, 3)))
+        winter
+
+        expect(months).to eq("2026-02" => none.merge("comment" => 1), "2026-01" => none.merge("comment" => 1))
       end
 
       it "puts the newest month first" do

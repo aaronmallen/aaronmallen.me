@@ -109,6 +109,8 @@ RSpec.describe "MCP reach", type: :request do
     public_send(seeder) if respond_to?(seeder)
   end
 
+  def seed_comment = create(:task_comment, created_at: at(10))
+
   def seed_commit = create(:commit, commit_date: today)
 
   def seed_journal = create(:journal_entry, entry_date: today)

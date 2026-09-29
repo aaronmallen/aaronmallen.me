@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -46,6 +46,11 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
 - Each read narrows by kind, by repo for commits, by text over the name and sub-line columns, and by tag. The view
   carries no tags, so `Activity::Relations::Activities#tagged` reaches `journal_entry_tags` and `task_tags` by
   source id through its private `tag_owners`, and a row of any other kind never matches a tag.
+- Task comments, local and synced, join as the `comment` kind (#75), through
+  `config/db/migrate/20260929000051_add_task_comments_to_activities.rb`. The view gains a `task_id` column, set on
+  task and comment rows, so a comment matches its task's tags, links to its task and names the task's title in its
+  excerpt. A comment lands on the day of its `created_at`, whether or not its task is done. The Activity screen
+  shows comments with the six kinds above.
 
 A new content kind joins by giving its table an index on its day, adding a branch to the view's migration, and
 adding its name to `Blog::Types::ActivityKind`. It shows on the Activity screen only once it joins
