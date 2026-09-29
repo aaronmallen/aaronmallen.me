@@ -20,6 +20,16 @@ RSpec.describe "An error raised in a request", type: :request do
     expect(agent.config[:"request.filter_keys"]).to eq(Blog::Providers::HoneybadgerProvider::FILTER_KEYS)
   end
 
+  it "reports the release the app runs" do
+    expect(agent.config[:revision]).to eq(Blog::Version::CURRENT)
+  end
+
+  it "builds its options with the release the app runs" do
+    options = Blog::Providers::HoneybadgerProvider.options(Hanami.app["settings"], Hanami.env)
+
+    expect(options[:revision]).to eq(Blog::Version::CURRENT)
+  end
+
   context "when a public action raises" do
     before { replace_component("posts.queries.published", -> { raise crash }) }
 

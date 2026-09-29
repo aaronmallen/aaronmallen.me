@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/version"
 require "honeybadger/ruby"
 require "sidekiq"
 require "sidekiq/job_retry"
@@ -55,6 +56,7 @@ module Blog
             filter_keys: FILTER_KEYS,
             ignore: IGNORE,
             report_data: report_data?(found, env),
+            revision: Blog::Version::CURRENT,
           }
         end
 
@@ -63,8 +65,13 @@ module Blog
         def apply(config, chosen)
           config.api_key = chosen[:api_key]
           config.env = chosen[:env]
-          config.exceptions.ignore = chosen[:ignore]
           config.report_data = chosen[:report_data]
+          config.revision = chosen[:revision]
+          apply_sections(config, chosen)
+        end
+
+        def apply_sections(config, chosen)
+          config.exceptions.ignore = chosen[:ignore]
           config.request.filter_keys = chosen[:filter_keys]
           config.sidekiq.attempt_threshold = chosen[:attempt_threshold]
         end
