@@ -80,6 +80,7 @@ one.
 | [0073][0073] | Read the app version from the git tag at boot | ![Active][active] | 2026-09-29 |
 | [0074][0074] | Split tags into a public and a private scope | ![Active][active] | 2026-09-29 |
 | [0075][0075] | Keep local and synced task comments in one table keyed by remote id | ![Active][active] | 2026-09-29 |
+| [0076][0076] | Page flat lists by number and day-grouped lists by whole day | ![Active][active] | 2026-09-29 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -156,6 +157,7 @@ one.
 [0073]: 0073-read-the-app-version-from-the-git-tag-at-boot.md
 [0074]: 0074-split-tags-into-a-public-and-a-private-scope.md
 [0075]: 0075-keep-local-and-synced-task-comments-in-one-table-keyed-by-remote-id.md
+[0076]: 0076-page-flat-lists-by-number-and-day-grouped-lists-by-whole-day.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
