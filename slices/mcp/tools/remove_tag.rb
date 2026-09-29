@@ -5,18 +5,20 @@ module MCP
     class RemoveTag < Base
       UNREMOVED = "could not remove the tag"
 
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = {
+        additionalProperties: false,
+        properties: { id: { type: "integer" }, scope: TAG_SCOPE },
+        required: %w[id scope],
+      }.freeze
 
-      description "Remove one tag for good. A tag any record still carries stays; list_tags says which do"
+      description "Remove one tag for good from its scope. Public tags go on posts and projects; private tags go " \
+                  "on journal entries and tasks. A tag any record still carries stays; list_tags says which do"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(id:, server_context:)
-          tag = every_tag(server_context).find { it.id == id }
-          return refuse("no tag has the ID #{id}") unless tag
-
-          case remove_tag(server_context).call(id, scope: tag.scope)
+        def call(id:, scope:, server_context:)
+          case remove_tag(server_context).call(id, scope:)
           in Success(_) then answer(id:, removed: true)
           in Failure[:in_use, held] then refuse(kept(held))
           in Failure(:not_found) then refuse("no tag has the ID #{id}")

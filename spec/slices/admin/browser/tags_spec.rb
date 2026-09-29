@@ -36,7 +36,7 @@ RSpec.describe "Admin tags", type: :feature do
     it "recolours the tag on a swatch click" do
       find(".tag-editor .swatch.orange").click
 
-      expect(repo.all.find { it.name == "ruby" }.color).to eq("mk-orange")
+      expect(repo.all_in("public").find { it.name == "ruby" }.color).to eq("mk-orange")
     end
 
     it "shuts again on cancel" do

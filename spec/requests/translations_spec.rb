@@ -130,7 +130,7 @@ RSpec.describe "Translations", type: :request do
   end
 
   describe "the tags screen" do
-    let(:tag) { Tags::Slice["repos.tag_repo"].all.find { it.name == "ruby" } }
+    let(:tag) { Tags::Slice["repos.tag_repo"].all_in("public").find { it.name == "ruby" } }
 
     before do
       create(:post, :published, tags: %w[ruby])
@@ -153,7 +153,7 @@ RSpec.describe "Translations", type: :request do
 
     it "renders the removed toast without a missing translation" do
       Tags::Slice["operations.save_tag"].call({ name: "hanami" }, scope: "public")
-      spare = Tags::Slice["repos.tag_repo"].all.find { it.name == "hanami" }
+      spare = Tags::Slice["repos.tag_repo"].all_in("public").find { it.name == "hanami" }
       post "/admin/tags/#{spare.id}/delete", _csrf_token: admin_csrf_token
       follow_redirect!
 

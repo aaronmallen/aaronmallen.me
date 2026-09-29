@@ -8,13 +8,17 @@ RSpec.describe "Admin tags", type: :request do
 
   def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
 
+  def every_tag = Blog::Types::TagScope.values.flat_map { repo.all_in(it) }
+
   def message(key) = i18n.t(["ui.components.tags.field_error.name", key].join("."))
 
-  def named(name) = repo.all.find { it.name == name }
+  def named(name) = every_tag.find { it.name == name }
 
   def names = page.all(".tag-name").map(&:text)
 
   def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
+
+  def stored(id) = every_tag.find { it.id == id }
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -161,7 +165,7 @@ RSpec.describe "Admin tags", type: :request do
       it "stores it" do
         add("ruby")
 
-        expect(repo.all.map(&:name)).to eq(%w[ruby])
+        expect(every_tag.map(&:name)).to eq(%w[ruby])
       end
 
       it "says so" do
@@ -174,7 +178,7 @@ RSpec.describe "Admin tags", type: :request do
       it "folds the name to one case" do
         add("Ruby")
 
-        expect(repo.all.map(&:name)).to eq(%w[ruby])
+        expect(every_tag.map(&:name)).to eq(%w[ruby])
       end
 
       it "gives it one of the six colours without being asked" do
@@ -186,7 +190,7 @@ RSpec.describe "Admin tags", type: :request do
       it "spreads the colours over the tags it is given" do
         %w[one two three four five six].each { add(it) }
 
-        expect(repo.all.map(&:color).uniq).to match_array(Blog::Types::TagColor.values)
+        expect(every_tag.map(&:color).uniq).to match_array(Blog::Types::TagColor.values)
       end
 
       it "refuses a blank name" do
@@ -212,7 +216,7 @@ RSpec.describe "Admin tags", type: :request do
           add(name)
 
           expect(page).to have_css(".field-error", text: message("format"))
-          expect(repo.all).to be_empty
+          expect(every_tag).to be_empty
         end
       end
 
@@ -245,7 +249,7 @@ RSpec.describe "Admin tags", type: :request do
         create(:tag, name: "ruby")
         add("ruby", scope: "private")
 
-        expect(repo.all.map { [it.name, it.scope] }).to contain_exactly(%w[ruby public], %w[ruby private])
+        expect(every_tag.map { [it.name, it.scope] }).to contain_exactly(%w[ruby public], %w[ruby private])
       end
 
       it "says why it refused a name the same private scope holds" do
@@ -276,7 +280,7 @@ RSpec.describe "Admin tags", type: :request do
       it "rewrites the name" do
         send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
 
-        expect(repo.by_id(tag.id).name).to eq("hanami")
+        expect(stored(tag.id).name).to eq("hanami")
       end
 
       it "says so" do
@@ -309,7 +313,7 @@ RSpec.describe "Admin tags", type: :request do
         tag = create(:tag, :private, name: "chores")
         send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
 
-        expect(repo.by_id(tag.id).name).to eq("errands")
+        expect(stored(tag.id).name).to eq("errands")
       end
 
       it "goes back to the tab it renamed from" do
@@ -323,7 +327,7 @@ RSpec.describe "Admin tags", type: :request do
         create(:tag, :private, name: "hanami")
         send_to("/admin/tags/#{tag.id}", tag: { name: "hanami" })
 
-        expect(repo.by_id(tag.id).name).to eq("hanami")
+        expect(stored(tag.id).name).to eq("hanami")
       end
 
       it "says why it refused a name the same scope holds" do
@@ -352,7 +356,7 @@ RSpec.describe "Admin tags", type: :request do
       it "stores the colour that was clicked" do
         send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
 
-        expect(repo.by_id(tag.id).color).to eq("mk-orange")
+        expect(stored(tag.id).color).to eq("mk-orange")
       end
 
       it "says so" do
@@ -365,7 +369,7 @@ RSpec.describe "Admin tags", type: :request do
       it "keeps the name it already held" do
         send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "mk-orange" })
 
-        expect(repo.by_id(tag.id).name).to eq("ruby")
+        expect(stored(tag.id).name).to eq("ruby")
       end
 
       it "offers a swatch for each colour on the row" do
@@ -389,7 +393,7 @@ RSpec.describe "Admin tags", type: :request do
         twin = create(:tag, :private, name: "ruby", color: "mk-blue")
         send_to("/admin/tags/#{twin.id}", scope: "private", tag: { name: "ruby", color: "mk-orange" })
 
-        expect(repo.by_id(tag.id).color).to eq("mk-blue")
+        expect(stored(tag.id).color).to eq("mk-blue")
       end
 
       it "carries the scope on every form in the row" do
@@ -402,7 +406,7 @@ RSpec.describe "Admin tags", type: :request do
       it "refuses a colour that is not one of the six" do
         send_to("/admin/tags/#{tag.id}", tag: { name: tag.name, color: "papaya" })
 
-        expect(repo.by_id(tag.id).color).to eq("mk-blue")
+        expect(stored(tag.id).color).to eq("mk-blue")
       end
     end
 
@@ -412,7 +416,7 @@ RSpec.describe "Admin tags", type: :request do
       it "takes away a tag nothing carries" do
         send_to("/admin/tags/#{tag.id}/delete")
 
-        expect(repo.by_id(tag.id)).to be_nil
+        expect(stored(tag.id)).to be_nil
       end
 
       it "says so" do
@@ -469,7 +473,7 @@ RSpec.describe "Admin tags", type: :request do
         chores = create(:tag, :private, name: "chores")
         send_to("/admin/tags/#{chores.id}/delete", scope: "private")
 
-        expect(repo.by_id(chores.id)).to be_nil
+        expect(stored(chores.id)).to be_nil
       end
 
       it "goes back to the tab it removed from" do
@@ -487,10 +491,10 @@ RSpec.describe "Admin tags", type: :request do
 
       it "keeps a private tag a task carries" do
         create(:task, tags: %w[chores])
-        chores = repo.all.find { it.name == "chores" }
+        chores = every_tag.find { it.name == "chores" }
         send_to("/admin/tags/#{chores.id}/delete", scope: "private")
 
-        expect(repo.by_id(chores.id)).not_to be_nil
+        expect(stored(chores.id)).not_to be_nil
       end
 
       it "answers 404 for a tag that isn't there" do
@@ -510,21 +514,21 @@ RSpec.describe "Admin tags", type: :request do
       it "writes nothing" do
         post "/admin/tags", _csrf_token: "forged", tag: { name: "ruby" }
 
-        expect(repo.all).to be_empty
+        expect(every_tag).to be_empty
       end
 
       it "refuses the rename" do
         tag = create(:tag, name: "ruby")
         post "/admin/tags/#{tag.id}", _csrf_token: "forged", tag: { name: "hanami" }
 
-        expect(repo.by_id(tag.id).name).to eq("ruby")
+        expect(stored(tag.id).name).to eq("ruby")
       end
 
       it "refuses the removal" do
         tag = create(:tag, name: "ruby")
         post "/admin/tags/#{tag.id}/delete", _csrf_token: "forged"
 
-        expect(repo.by_id(tag.id)).not_to be_nil
+        expect(stored(tag.id)).not_to be_nil
       end
     end
   end
@@ -548,7 +552,7 @@ RSpec.describe "Admin tags", type: :request do
     it "adds nothing" do
       post "/admin/tags", tag: { name: "ruby" }
 
-      expect(repo.all).to be_empty
+      expect(every_tag).to be_empty
     end
 
     {
@@ -559,7 +563,7 @@ RSpec.describe "Admin tags", type: :request do
         id = tag.id
         post "/admin/tags/#{id}#{suffix}", params
 
-        expect(repo.by_id(id)).to have_attributes(name: "ruby")
+        expect(stored(id)).to have_attributes(name: "ruby")
       end
     end
   end

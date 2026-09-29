@@ -3,7 +3,6 @@
 module MCP
   module Tools
     class SaveTag < Base
-      NEW_SCOPE = Blog::Types::TagScope["public"]
       UNSAVED = "could not save the tag"
 
       MESSAGES = {
@@ -21,31 +20,35 @@ module MCP
           color: { type: "string", enum: Blog::Types::TagColor.values },
           id: { type: "integer", description: "the tag to rename or recolour; leave it out to add a new one" },
           name: { type: "string", description: "lowercase words joined by hyphens" },
+          scope: TAG_SCOPE,
         },
+        required: ["scope"],
       }.freeze
 
-      description "Add a tag, or rename or recolour one when you give its id. A new tag needs a name and " \
-                  "takes the least used colour unless you give one. On a change, a field you leave out keeps " \
-                  "what it has, and a rename follows the tag onto every record that carries it"
+      description "Add a tag to a scope, or rename or recolour one in it when you give its id. Public tags go on " \
+                  "posts and projects; private tags go on journal entries and tasks. A new tag needs a name and " \
+                  "takes the least used colour in its scope unless you give one. On a change, a field you leave " \
+                  "out keeps what it has, and a rename follows the tag onto every record that carries it"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(server_context:, id: nil, name: nil, color: nil)
-          current = id && every_tag(server_context).find { it.id == id }
-          return refuse("no tag has the ID #{id}") if id && current.nil?
+        def call(scope:, server_context:, id: nil, name: nil, color: nil)
+          current = id && all_tags(server_context).call(scope:).find { it.id == id }
+          return refuse(missing(id)) if id && current.nil?
 
-          scope = current&.scope || NEW_SCOPE
           saved(save_tag(server_context).call({ name: name || current&.name, color: }, scope:, id:), id)
         end
 
         private
 
+        def missing(id) = "no tag has the ID #{id}"
+
         def saved(result, id)
           case result
           in Success(tag) then answer(id: tag.id, name: tag.name, color: tag.color)
           in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
-          in Failure(:not_found) then refuse("no tag has the ID #{id}")
+          in Failure(:not_found) then refuse(missing(id))
           else refuse(UNSAVED)
           end
         end

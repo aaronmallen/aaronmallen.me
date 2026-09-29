@@ -6,6 +6,11 @@ require "json"
 module MCP
   module Tools
     class Base < Tool
+      TAG_SCOPE = {
+        type: "string",
+        enum: Blog::Types::TagScope.values,
+        description: "public holds the tags on posts and projects; private holds those on journal entries and tasks",
+      }.freeze
       TEXT = "text"
 
       extend Dry::Monads[:result]
