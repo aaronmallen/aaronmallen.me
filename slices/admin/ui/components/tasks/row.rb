@@ -21,7 +21,7 @@ module Admin
           prop :tab, Blog::Types::String.optional, default: nil
 
           def view_template
-            div(class: ["task", ("done" if @task.done?), ("doing" if @task.in_progress?)]) do
+            div(class: classes) do
               TaskKey(task: @task, type:)
               toggle
               task_title
@@ -44,7 +44,7 @@ module Admin
             end
           end
 
-          def blocked? = !@task.done? && @task.blocked?
+          def blocked? = !@task.closed? && @task.blocked?
 
           def carried
             Pill(color: :sand) do
@@ -53,19 +53,13 @@ module Admin
             end
           end
 
-          def carried? = !@task.done? && @task.carried_count.positive?
+          def carried? = !@task.closed? && @task.carried_count.positive?
 
-          def editing? = @editing&.fetch(:id) == @task.id || !linking.nil?
-
-          def finished
-            at = Blog::TimeZone.local(@task.completed_at)
-
-            span(class: "task-finished") do
-              t(".finished", date: l(at.to_date, format: :short), time: l(at, format: :clock))
-            end
+          def classes
+            ["task", ("done" if @task.closed?), ("canceled" if @task.canceled?), ("doing" if @task.in_progress?)]
           end
 
-          def finished? = @task.done? && !@task.completed_at.nil?
+          def editing? = @editing&.fetch(:id) == @task.id || !linking.nil?
 
           def in_progress
             Pill(color: :blue) do
@@ -88,7 +82,7 @@ module Admin
               scheduled_pill if waiting?
               carried if carried?
               @task.tags.each { tag(it) }
-              finished if finished?
+              Closed(task: @task) if @task.closed?
             end
           end
 
@@ -130,7 +124,7 @@ module Admin
 
           def type = @types.find { it.id == @task.task_type_id }
 
-          def waiting? = !@scheduled.nil? && @scheduled > @today && !@task.done?
+          def waiting? = !@scheduled.nil? && @scheduled > @today && !@task.closed?
         end
       end
     end

@@ -74,7 +74,7 @@ module Admin
 
       def of_type?(task, type) = type == ALL_TYPES || task.task_type_id.to_s == type
 
-      def open_lists(sprint) = list_tasks.call(sprint:).transform_values { |tasks| tasks.reject(&:done?) }
+      def open_lists(sprint) = list_tasks.call(sprint:).transform_values { |tasks| tasks.reject(&:closed?) }
 
       def planned(tasks, today)
         held = tasks.group_by(&:sprint_id)

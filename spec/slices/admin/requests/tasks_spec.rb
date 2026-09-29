@@ -766,6 +766,158 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "canceling a task" do
+      def cancel(task, filter: "next") = send_to("/admin/tasks/#{task.id}/cancel", filter:)
+
+      it "offers a cancel on an open task" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css("form[action$='/cancel']")
+      end
+
+      it "offers a cancel on the task in progress" do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks"
+
+        expect(page).to have_css("form[action$='/cancel']")
+      end
+
+      it "marks it canceled" do
+        task = create(:task)
+        cancel(task)
+
+        expect(repo.by_id(task.id).status).to eq("canceled")
+      end
+
+      it "writes when it was closed" do
+        task = create(:task)
+        cancel(task)
+
+        expect(repo.by_id(task.id).completed_at).not_to be_nil
+      end
+
+      it "says it canceled" do
+        task = create(:task)
+        cancel(task)
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "Canceled", visible: :all)
+      end
+
+      it "keeps the list that was open" do
+        task = create(:task, :someday)
+        cancel(task, filter: "someday")
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=someday"))
+      end
+
+      it "takes it off the list it was in" do
+        create(:task, :canceled, title: "Dropped")
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to be_empty
+      end
+
+      it "moves it to the completed tab" do
+        create(:task, :canceled, title: "Dropped")
+        get "/admin/tasks", filter: "completed"
+
+        expect(titles).to eq(["Dropped"])
+      end
+
+      it "marks it canceled on the completed tab" do
+        create(:task, :canceled, title: "Dropped")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".task.canceled .task-meta .pill", text: "canceled")
+      end
+
+      it "says the day and the time it was canceled" do
+        at = Blog::TimeZone.local_time(2026, 9, 18, 11, 20)
+        create(:task, :canceled, completed_at: at, title: "Dropped")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".task-finished", exact_text: "canceled Sep 18 · 11:20")
+      end
+
+      it "leaves the canceled mark off a task that is done" do
+        create(:task, :done, title: "Filed already")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css(".task.canceled")
+      end
+
+      it "offers reopen and nothing else that moves it", :aggregate_failures do
+        create(:task, :canceled)
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css("form[action$='/reopen']")
+        expect(page).to have_no_css("form[action$='/cancel'], form[action$='/complete'], form[action*='/move/']")
+      end
+
+      it "opens it again" do
+        task = create(:task, :canceled)
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+
+        expect(repo.by_id(task.id)).to have_attributes(status: "open", completed_at: nil)
+      end
+
+      it "puts it back on its list once opened again" do
+        task = create(:task, :canceled, title: "Dropped")
+        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+        get "/admin/tasks", filter: "next"
+
+        expect(titles).to eq(["Dropped"])
+      end
+
+      it "leaves a task that is done as it was" do
+        task = create(:task, :done)
+        cancel(task)
+
+        expect(repo.by_id(task.id).status).to eq("done")
+      end
+
+      it "says a task that is done is closed already" do
+        task = create(:task, :done)
+        cancel(task, filter: "completed")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "That task is closed already", visible: :all)
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/cancel")
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "leaves a canceled task out of a planned sprint's card" do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today + 1)
+        create(:task, :in_sprint, sprint:, title: "Still on")
+        create(:task, :canceled, :in_sprint, sprint:, title: "Dropped")
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(titles).to eq(["Still on"])
+      end
+
+      it "leaves a canceled task out of a planned sprint's count" do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today + 1)
+        create(:task, :canceled, :in_sprint, sprint:)
+        get "/admin/tasks", filter: "upcoming"
+
+        expect(page).to have_css(".sprint-note", exact_text: "0 planned")
+      end
+
+      it "names a canceled task's place in the link editor" do
+        task = create(:task, title: "Still on")
+        create(:task, :canceled, title: "Dropped")
+        get "/admin/tasks", filter: "next", link: task.id, link_q: "Dropped"
+
+        expect(page).to have_css(".task-link-target .task-link-place", exact_text: "canceled")
+      end
+    end
+
     describe "editing a task" do
       let(:task) { create(:task, title: "Email accountant") }
 

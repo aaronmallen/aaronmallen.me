@@ -12,7 +12,7 @@ module Admin
             "duplicated_by" => "fa-regular fa-clone",
             "relates" => "fa-solid fa-link",
           }.freeze
-          DONE = Blog::Types::TaskStatus["done"]
+          CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze
           LABELS = "ui.components.tasks.links.labels"
 
           prop :links, Blog::Types::Array.of(Blog::Types::Instance(Data))
@@ -35,7 +35,9 @@ module Admin
             end
           end
 
-          def chip_class(link) = ["task-link", ("blocker" if link.blocker?), ("done" if link.task.status == DONE)]
+          def chip_class(link)
+            ["task-link", ("blocker" if link.blocker?), ("done" if CLOSED.include?(link.task.status))]
+          end
 
           def type_of(task) = @types.find { it.id == task.task_type_id }
         end

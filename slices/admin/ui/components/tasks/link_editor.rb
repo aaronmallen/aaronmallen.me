@@ -12,13 +12,16 @@ module Admin
             Blog::Types::TaskLinkKind["duplicates"] => ".kinds.duplicates",
           }.freeze
           PLACES = {
+            Blog::Types::TaskStatus["canceled"] => ".places.canceled",
             Blog::Types::TaskStatus["done"] => ".places.done",
             Blog::Types::TaskStatus["in_progress"] => ".places.in_progress",
             Blog::Types::TaskFilter["today"] => ".places.today",
             Blog::Types::TaskFilter["next"] => ".places.next",
             Blog::Types::TaskFilter["someday"] => ".places.someday",
           }.freeze
-          BY_STATUS = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["in_progress"]].freeze
+          BY_STATUS = [
+            Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["in_progress"],
+          ].freeze
           PREFIX = "#"
           TODAY = Blog::Types::TaskFilter["today"]
 

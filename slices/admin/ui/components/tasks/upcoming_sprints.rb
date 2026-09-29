@@ -101,7 +101,7 @@ module Admin
           def shorten(title) = Blog::Truncation.cut(title, keep: TITLE_LIMIT)
 
           def sprint_card(sprint, tasks)
-            open = tasks.reject(&:done?)
+            open = tasks.reject(&:closed?)
 
             Card(label: relative(sprint.sprint_date), title: l(sprint.sprint_date, format: :weekday)) do |card|
               card.side { sprint_side(sprint, open) }

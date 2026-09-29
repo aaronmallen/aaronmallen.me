@@ -57,6 +57,7 @@ module Admin
     get "/tasks", to: "tasks.index", as: :tasks
     post "/tasks", to: "tasks.create", as: :create_task
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID
+    post "/tasks/:id/cancel", to: "tasks.cancel", as: :cancel_task, id: ID
     post "/tasks/:id/complete", to: "tasks.complete", as: :complete_task, id: ID
     post "/tasks/:id/delete", to: "tasks.destroy", as: :delete_task, id: ID
     post "/tasks/:id/links", to: "tasks.link", as: :link_task, id: ID

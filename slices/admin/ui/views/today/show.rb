@@ -78,7 +78,7 @@ module Admin
 
           def social = @publishing[:social]
 
-          def sprint_done = sprint_tasks.count(&:done?)
+          def sprint_done = sprint_tasks.count(&:closed?)
 
           def sprint_open = sprint_tasks.size - sprint_done
 

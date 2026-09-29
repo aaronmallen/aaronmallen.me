@@ -20,11 +20,13 @@ module Admin
           prop :origin, Blog::Types::String, default: ORIGIN
 
           def view_template
-            @task.done? ? reopen : progress
-            moves unless @task.done?
+            @task.closed? ? reopen : progress
+            moves unless @task.closed?
           end
 
           private
+
+          def cancel = change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"))
 
           def change(route, icon, label, variant: nil)
             Form(action: path(route, id: @task.id)) do
@@ -71,13 +73,16 @@ module Admin
           end
 
           def progress
-            return start unless running?
-
-            complete
-            stop
+            running? ? running : start
+            cancel
           end
 
           def reopen = change(:admin_reopen_task, "fa-solid fa-rotate-left", t(".reopen"))
+
+          def running
+            complete
+            stop
+          end
 
           def running? = @task.in_progress? && @task.in_sprint?
 

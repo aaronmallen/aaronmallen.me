@@ -31,7 +31,7 @@ module Admin
             )
           end
 
-          def done = @tasks.count(&:done?)
+          def done = @tasks.count(&:closed?)
 
           def foot
             div(class: "sprint-foot") do
@@ -45,7 +45,7 @@ module Admin
 
           def label = t(".label", date: l(@date, format: :short))
 
-          def open = @open ||= @tasks.reject(&:done?)
+          def open = @open ||= @tasks.reject(&:closed?)
 
           def panel
             Card(label:, title: t(open.empty? ? ".clear" : ".title")) do |card|

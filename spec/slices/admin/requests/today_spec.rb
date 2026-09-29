@@ -1056,6 +1056,23 @@ RSpec.describe "Admin today", type: :request do
         expect(page.all(".g-4 .stat .stat-key").map(&:text).first).to eq("Sprint")
       end
 
+      it "leaves a canceled task out of what is still open", :aggregate_failures do
+        plan("Ship the panel", "Read the design")
+        create(:task, :canceled, :in_sprint, sprint_id: sprint.id, title: "Dropped")
+        get "/admin"
+
+        expect(panel.all(".task-title").map(&:text)).to contain_exactly("Ship the panel", "Read the design")
+        expect(sprint_stat).to have_css(".stat-change", text: "2 still open")
+      end
+
+      it "calls the sprint clear when what is left was canceled" do
+        plan("Ship the panel", done: 1)
+        create(:task, :canceled, :in_sprint, sprint_id: sprint.id)
+        get "/admin"
+
+        expect(panel).to have_css(".card-title", text: "Sprint clear")
+      end
+
       it "reads the stat as done over total" do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"
