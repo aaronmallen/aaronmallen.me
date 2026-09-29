@@ -190,6 +190,20 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "clicking a tag" do
+    before do
+      create(:task, title: "Fix the feed", tags: %w[site])
+      create(:task, title: "Email the plumber", tags: %w[home])
+      visit "/admin/tasks?filter=next"
+      find(".task", text: "Fix the feed").click_link("#site")
+    end
+
+    it "opens the list showing only tasks with that tag", :aggregate_failures do
+      expect(page).to have_current_path("/admin/tasks?filter=next&q=tag:site")
+      expect(all(".task-title").map(&:text)).to eq(["Fix the feed"])
+    end
+  end
+
   def watch_clipboard
     page.execute_script(<<~JS)
       window.copiedKeys = [];
@@ -349,7 +363,7 @@ RSpec.describe "Admin tasks", type: :feature do
       tag_task("Fix the feed", "site")
 
       expect(page).to have_current_path("/admin/tasks?filter=external")
-      expect(find(".task", text: "Fix the feed")).to have_css(".task-tag", text: "#site")
+      expect(find(".task", text: "Fix the feed")).to have_css(".tag", text: "#site")
     end
 
     describe "pulled in from the planner" do
@@ -932,7 +946,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_css(".toast", text: "Task saved")
       expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
     end
 
     it "moves the task through the list field" do
@@ -1059,7 +1073,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_css(".toast", text: "Task saved")
       expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
     end
 
     it "hands focus back to the pen when the modal closes on Cancel", :aggregate_failures do
@@ -1094,7 +1108,7 @@ RSpec.describe "Admin tasks", type: :feature do
       click_button("Save")
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
+      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
     end
   end
 

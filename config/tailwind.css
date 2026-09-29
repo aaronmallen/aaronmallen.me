@@ -1163,7 +1163,7 @@
 }
 
 @utility journal-entry-head {
-  @apply mb-2 flex items-center gap-2 meta;
+  @apply mb-2 flex flex-wrap items-center gap-2 meta;
 }
 
 @utility journal-entry-body {
@@ -1730,34 +1730,6 @@
   @apply col-start-2 row-start-2 flex flex-wrap items-center gap-x-2 gap-y-1.5;
 }
 
-@utility task-tag {
-  @apply font-mono text-badge whitespace-nowrap text-ink-muted;
-
-  &.green {
-    @apply text-mk-green-text;
-  }
-
-  &.pink {
-    @apply text-mk-pink-text;
-  }
-
-  &.blue {
-    @apply text-mk-blue;
-  }
-
-  &.violet {
-    @apply text-mk-violet;
-  }
-
-  &.sand {
-    @apply text-mk-sand-text;
-  }
-
-  &.orange {
-    @apply text-mk-orange-text;
-  }
-}
-
 @utility task-source {
   @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent hover:underline focus-ring;
 
@@ -2254,6 +2226,42 @@
   }
 }
 
+@utility tag {
+  @apply font-mono text-badge whitespace-nowrap text-ink-muted no-underline;
+
+  &:is(a) {
+    @apply hover:underline focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    }
+  }
+
+  &.green {
+    @apply text-mk-green-text;
+  }
+
+  &.pink {
+    @apply text-mk-pink-text;
+  }
+
+  &.blue {
+    @apply text-mk-blue;
+  }
+
+  &.violet {
+    @apply text-mk-violet;
+  }
+
+  &.sand {
+    @apply text-mk-sand-text;
+  }
+
+  &.orange {
+    @apply text-mk-orange-text;
+  }
+}
+
 @utility tag-capture {
   @apply flex flex-col pb-4;
 }
@@ -2301,28 +2309,8 @@
     @apply flex min-h-tap items-center;
   }
 
-  &.green {
-    @apply text-mk-green-text;
-  }
-
-  &.pink {
-    @apply text-mk-pink-text;
-  }
-
-  &.blue {
-    @apply text-mk-blue;
-  }
-
-  &.violet {
-    @apply text-mk-violet;
-  }
-
-  &.sand {
-    @apply text-mk-sand-text;
-  }
-
-  &.orange {
-    @apply text-mk-orange-text;
+  & > .tag {
+    @apply text-li;
   }
 }
 

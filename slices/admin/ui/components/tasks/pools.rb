@@ -39,10 +39,10 @@ module Admin
 
           def from_today? = @origin == FROM_TODAY
 
-          def meta(task)
+          def meta(task, list)
             p(class: "task-meta") do
               SourceLink(source: task.source)
-              task.tags.each { tag(it) }
+              task.tags.each { Tag(tag: it, href: tag_path(it, list)) }
             end
           end
 
@@ -80,7 +80,7 @@ module Admin
             div(class: "li") do
               div(class: "li-main") do
                 span(class: "li-title") { task.title }
-                meta(task)
+                meta(task, list)
               end
               div(class: "li-side") { pull_form(task, list) }
             end
@@ -99,9 +99,7 @@ module Admin
             end
           end
 
-          def tag(tag)
-            span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
-          end
+          def tag_path(tag, list) = path(:admin_tasks, filter: list, q: "tag:#{tag.name}")
         end
       end
     end

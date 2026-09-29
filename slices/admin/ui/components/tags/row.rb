@@ -15,7 +15,7 @@ module Admin
           def view_template
             div(class: "tag-row") do
               input(type: "checkbox", class: "sr-only tag-toggle", id: toggle_id, checked: editing?)
-              label(class: ["tag-name", hue], for: toggle_id) { "##{@tag.name}" }
+              label(class: "tag-name", for: toggle_id) { Tag(tag: @tag) }
               p(class: "tag-uses") { uses }
               acts
               editor
@@ -70,8 +70,6 @@ module Admin
           def held = @uses.values.sum
 
           def held? = held.positive?
-
-          def hue = Blog::UI::Components::Pill.for_tag_color(@tag.color)&.to_s
 
           def name = editing? ? @editing[:name] : @tag.name
 

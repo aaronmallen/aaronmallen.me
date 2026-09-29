@@ -263,6 +263,20 @@ RSpec.describe "Admin journal", type: :feature do
     end
   end
 
+  describe "clicking a tag" do
+    before do
+      create(:journal_entry, body: "Rode to work", tags: %w[bike])
+      create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
+      visit "/admin/journal"
+      find(".journal-entry", text: "Rode to work").click_link("#bike")
+    end
+
+    it "opens the journal showing only entries with that tag", :aggregate_failures do
+      expect(page).to have_current_path("/admin/journal?q=tag:bike")
+      expect(all(".journal-entry-body").map(&:text)).to eq(["Rode to work"])
+    end
+  end
+
   describe "on a narrow screen" do
     before do
       page.driver.resize(375, 800)

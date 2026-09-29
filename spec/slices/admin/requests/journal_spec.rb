@@ -178,17 +178,24 @@ RSpec.describe "Admin journal", type: :request do
         expect(bodies).to eq(["walked"])
       end
 
-      it "shows each tag in the colour its tag carries" do
+      it "shows each tag as its name in the colour its tag carries" do
         %w[mk-green mk-violet].zip(%w[health ruby]) { |color, name| create(:tag, :private, name:, color:) }
         create(:journal_entry, body: "walked", tags: %w[health ruby])
         get "/admin/journal"
 
-        expect(page.all(".journal-entry-head .pill.green, .journal-entry-head .pill.violet").map(&:text))
-          .to eq(%w[health ruby])
+        expect(page.all(".journal-entry-head .tag.green, .journal-entry-head .tag.violet").map(&:text))
+          .to eq(%w[#health #ruby])
       end
 
-      it "shows no tag pill on an entry without tags" do
-        create(:journal_entry, body: "walked")
+      it "links each tag to the journal searched by that tag" do
+        create(:journal_entry, body: "walked", tags: %w[health])
+        get "/admin/journal"
+
+        expect(page).to have_link("#health", href: "/admin/journal?q=tag:health")
+      end
+
+      it "shows no tag as a pill" do
+        create(:journal_entry, body: "walked", tags: %w[health ruby])
         get "/admin/journal"
 
         expect(page).to have_no_css(".journal-entry-head .pill")

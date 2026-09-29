@@ -74,7 +74,7 @@ module Admin
               scheduled_pill if waiting?
               carried if carried?
               SourceLink(source: @task.source)
-              @task.tags.each { tag(it) }
+              tags
               Closed(task: @task) if @task.closed?
             end
           end
@@ -96,9 +96,9 @@ module Admin
 
           def tab = @tab || @filter
 
-          def tag(tag)
-            span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
-          end
+          def tag_path(tag) = path(:admin_tasks, filter: tab, q: "tag:#{tag.name}")
+
+          def tags = @task.tags.each { Tag(tag: it, href: tag_path(it)) }
 
           def task_title
             href = path(:admin_task, id: @task.id, filter: tab, origin: @origin)

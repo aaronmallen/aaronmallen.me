@@ -99,7 +99,7 @@ module Admin
               TaskKey(task: @task)
               status
               SourceLink(source: @task.source)
-              @task.tags.each { tag(it) }
+              @task.tags.each { Tag(tag: it, href: tag_path(it)) }
             end
           end
 
@@ -130,9 +130,7 @@ module Admin
             end
           end
 
-          def tag(tag)
-            span(class: ["task-tag", Blog::UI::Components::Pill.for_tag_color(tag.color)&.to_s]) { "##{tag.name}" }
-          end
+          def tag_path(tag) = path(:admin_tasks, filter: @filter, q: "tag:#{tag.name}")
 
           def today? = @origin == FROM_TODAY
         end

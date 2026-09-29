@@ -48,7 +48,13 @@ RSpec.describe "Admin tags", type: :request do
         hue = Blog::UI::Components::Pill.for_tag_color(named("ruby").color)
         get "/admin/tags"
 
-        expect(page).to have_css(".tag-name.#{hue}", text: "#ruby")
+        expect(page).to have_css(".tag-name .tag.#{hue}", text: "#ruby")
+      end
+
+      it "links no tag anywhere" do
+        get "/admin/tags"
+
+        expect(page).to have_no_css(".tag-row a.tag")
       end
 
       it "says what carries a tag" do

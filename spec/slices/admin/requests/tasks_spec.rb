@@ -502,7 +502,14 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "today"
 
         expect(page).to have_no_css(".task-planner .task-meta .pill")
-        expect(page.all(".task-planner .task-meta .task-tag").map(&:text)).to eq(%w[#admin])
+        expect(page.all(".task-planner .task-meta .tag").map(&:text)).to eq(%w[#admin])
+      end
+
+      it "links a tag on a task it offers to that list searched by the tag" do
+        create(:task, title: "Email the accountant", list: "someday", tags: %w[admin])
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(page).to have_link("#admin", href: "/admin/tasks?filter=someday&q=tag:admin")
       end
 
       it "offers a pull straight into today" do
@@ -1493,7 +1500,14 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "next"
         hue = Blog::UI::Components::Pill.for_tag_color(repo.by_id(task.id).tags.first.color)
 
-        expect(page).to have_css(".task-meta .task-tag.#{hue}", text: "#ruby")
+        expect(page).to have_css(".task-meta .tag.#{hue}", text: "#ruby")
+      end
+
+      it "links a tag on the row to its list searched by that tag" do
+        edit(tags: "ruby")
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_link("#ruby", href: "/admin/tasks?filter=next&q=tag:ruby")
       end
 
       it "draws no type on the row" do

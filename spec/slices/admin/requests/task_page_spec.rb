@@ -126,7 +126,13 @@ RSpec.describe "Admin task page", type: :request do
     it "shows the tags" do
       read(create(:task, tags: %w[site admin]))
 
-      expect(page.all(".task-read-meta .task-tag").map(&:text)).to contain_exactly("#site", "#admin")
+      expect(page.all(".task-read-meta .tag").map(&:text)).to contain_exactly("#site", "#admin")
+    end
+
+    it "links each tag to the list it came from searched by that tag" do
+      read(create(:task, tags: %w[site]), filter: "someday")
+
+      expect(page).to have_link("#site", href: "/admin/tasks?filter=someday&q=tag:site")
     end
 
     it "shows the GitHub issue it came from" do
