@@ -3,6 +3,8 @@
 module Record
   module Repos
     class JournalEntryRepo < Blog::DB::Repo
+      include Dry::Core::Constants
+
       STREAK_DAYS = 30
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
@@ -16,10 +18,10 @@ module Record
         (limit ? found.limit(limit) : found).to_a
       end
 
-      def by_day(search: nil)
-        query = search.to_s.strip
+      def by_day(tags: EMPTY_ARRAY, text: EMPTY_STRING)
         entries = with_tags.newest_first
-        entries = entries.matching(query) unless query.empty?
+        entries = entries.matching(text) unless text.empty?
+        entries = entries.tagged(tags) unless tags.empty?
         entries.to_a.group_by(&:entry_date).to_a
       end
 

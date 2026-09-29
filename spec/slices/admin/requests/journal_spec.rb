@@ -279,6 +279,50 @@ RSpec.describe "Admin journal", type: :request do
       end
     end
 
+    describe "searching by tag" do
+      before do
+        create(:journal_entry, body: "Rode to work", tags: %w[bike commute])
+        create(:journal_entry, body: "Fixed a flat", tags: %w[bike])
+        create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
+      end
+
+      it "narrows entries to the tag" do
+        get "/admin/journal", q: "tag:bike"
+
+        expect(bodies).to contain_exactly("Rode to work", "Fixed a flat")
+      end
+
+      it "reads the tag in any case" do
+        get "/admin/journal", q: "tag:BIKE"
+
+        expect(bodies).to contain_exactly("Rode to work", "Fixed a flat")
+      end
+
+      it "narrows to entries that carry every tag" do
+        get "/admin/journal", q: "tag:bike tag:commute"
+
+        expect(bodies).to eq(["Rode to work"])
+      end
+
+      it "searches the words beside the tag as text" do
+        get "/admin/journal", q: "tag:bike flat"
+
+        expect(bodies).to eq(["Fixed a flat"])
+      end
+
+      it "keeps the query in the field" do
+        get "/admin/journal", q: "tag:bike flat"
+
+        expect(page).to have_field("Search", with: "tag:bike flat")
+      end
+
+      it "says when no entry carries the tag" do
+        get "/admin/journal", q: "tag:swim"
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.journal.index.no_match"))
+      end
+    end
+
     describe "saving an entry" do
       it "saves it under today with the time of saving", :aggregate_failures do
         before = Blog::TimeZone.local(Time.now - 1)
