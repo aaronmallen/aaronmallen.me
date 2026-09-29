@@ -967,6 +967,36 @@ RSpec.describe "Admin tasks", type: :request do
           .to eq(["/admin/tasks/#{repo.in_list('someday').first.id}/move/next"])
       end
 
+      it "asks before an in-progress task leaves today" do
+        create(:task, :in_progress, :in_sprint, title: "Ship the screen",
+                                                sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find(".task-acts form[action$='/move/next']")["data-confirm"])
+          .to eq(i18n.t("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next"))
+      end
+
+      it "asks in the styled dialog before an in-progress task leaves today" do
+        create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find(".task-acts form[action$='/move/next']")["data-confirm-styled"]).not_to be_nil
+      end
+
+      it "moves an open task out of today without asking" do
+        create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find(".task-acts form[action$='/move/next']")["data-confirm"]).to be_nil
+      end
+
+      it "moves a task into today without asking" do
+        create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find(".task-acts form[action$='/move/today']")["data-confirm"]).to be_nil
+      end
+
       it "answers 404 for a task that isn't there" do
         send_to("/admin/tasks/0/move/someday")
 

@@ -512,6 +512,72 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "moving an in-progress task out of today" do
+    let(:message) { translate("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next") }
+    let(:sprint) { sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today) }
+    let(:task) { repo.all_open.find { it.title == "Ship the screen" } }
+
+    def row(title) = find(".task-title", exact_text: title).ancestor(".task")
+
+    before { create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen") }
+
+    describe "from a row on the tasks page" do
+      before do
+        visit "/admin/tasks?filter=today"
+        row("Ship the screen").click_button(move_to("next"))
+      end
+
+      it "asks in the styled dialog" do
+        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      end
+
+      it "keeps the task in today and in progress when I say no", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(task).to have_attributes(list: nil, sprint_id: sprint.id, status: "in_progress")
+      end
+
+      it "moves it to next as open when I say yes", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+        expect(task).to have_attributes(list: "next", sprint_id: nil, status: "open")
+      end
+    end
+
+    describe "from a row on Today" do
+      before do
+        visit "/admin"
+        row("Ship the screen").click_button(move_to("next"))
+      end
+
+      it "asks in the styled dialog" do
+        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      end
+
+      it "moves it to next as open when I say yes", :aggregate_failures do
+        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+
+        expect(page).to have_no_css(".task-title", exact_text: "Ship the screen")
+        expect(task).to have_attributes(list: "next", status: "open")
+      end
+    end
+
+    describe "an open task" do
+      before do
+        create(:task, :in_sprint, sprint_id: sprint.id, title: "Water the plants")
+        visit "/admin/tasks?filter=today"
+        row("Water the plants").click_button(move_to("next"))
+      end
+
+      it "moves without asking", :aggregate_failures do
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+      end
+    end
+  end
+
   describe "dropping a sprint" do
     before do
       create(:sprint, sprint_date: Blog::TimeZone.today + 2)

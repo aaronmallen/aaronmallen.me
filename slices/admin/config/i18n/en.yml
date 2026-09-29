@@ -654,6 +654,7 @@ en:
         controls:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."
+          confirm_move: "Move %{task} to %{list}? It stops and goes back to open."
           complete: "Done"
           lists:
             next: "Next"

@@ -54,14 +54,19 @@ module Admin
           end
 
           def move(place, icon)
-            label = t(".move", list: t(LISTS.fetch(place)))
+            list = t(LISTS.fetch(place))
+            label = t(".move", list:)
 
-            Form(action: path(:admin_move_task, id: @task.id, filter: place)) do
+            Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do
               origin_field
               Button(type: "submit", small: true, title: label, aria: { label: }) do
                 i(class: icon, aria: { hidden: "true" })
               end
             end
+          end
+
+          def move_confirm(list)
+            { confirm: t(".confirm_move", task: @task.title, list:), confirm_styled: true } if running?
           end
 
           def moves
