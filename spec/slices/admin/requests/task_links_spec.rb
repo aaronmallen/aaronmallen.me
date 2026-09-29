@@ -13,7 +13,13 @@ RSpec.describe "Admin task links", type: :request do
     end
   end
 
+  def find_label = "ui.components.tasks.link_editor.find"
+
   def find_link(query, id: task.id) = get("/admin/tasks/#{id}", filter: "next", link_q: query)
+
+  def find_link_as(kind, query)
+    send_to("/admin/tasks/#{task.id}/links", filter: "next", link_find: "1", link_q: query, link: { kind: })
+  end
 
   def link(kind: "blocks", other_id: other.id)
     send_to("/admin/tasks/#{task.id}/links", filter: "next", link: { kind:, other_id: other_id.to_s })
@@ -219,9 +225,53 @@ RSpec.describe "Admin task links", type: :request do
       waiting = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id)
       get "/admin/tasks/#{waiting.id}", filter: "upcoming"
 
-      form = page.find("#task-#{waiting.id}-link-other-id", visible: :all).ancestor("form")
+      form = page.find("#task-#{waiting.id}-link-other-id")["form"]
 
-      expect(form.find("input[name='filter']", visible: :all).value).to eq("upcoming")
+      expect(page.find("form##{form} input[name='filter']", visible: :all).value).to eq("upcoming")
+    end
+
+    it "sends the find and the type from the form that adds the link", :aggregate_failures do
+      get "/admin/tasks/#{task.id}", filter: "next"
+      form = "task-#{task.id}-link-add"
+
+      expect(page).to have_css("input#task-#{task.id}-link-other-id[form='#{form}'][name='link_q']")
+      expect(page).to have_css("button[form='#{form}'][name='link_find']", text: i18n.t(find_label))
+      expect(page).to have_css("select[form='#{form}'][name='link[kind]']")
+    end
+
+    describe "a find with a type picked" do
+      def found = "/admin/tasks/#{task.id}?filter=next&origin=tasks&link_kind=blocked_by&link_q=migration"
+
+      before { find_link_as("blocked_by", " migration ") }
+
+      it "comes back to the task's page with the query and the type" do
+        expect(last_response).to be_redirect.and have_attributes(location: end_with(found))
+      end
+
+      it "keeps the type picked", :aggregate_failures do
+        follow_redirect!
+
+        expect(page.find("#task-#{task.id}-link-kind option[selected]").value).to eq("blocked_by")
+        expect(targets).to eq(["##{other.id}"])
+      end
+
+      it "writes nothing" do
+        expect(links.to_a).to be_empty
+      end
+
+      it "adds the link with that type from a match" do
+        follow_redirect!
+        link(kind: page.find("#task-#{task.id}-link-kind option[selected]").value)
+
+        expect(links.to_a.map { it.to_h.values_at(:from_task_id, :to_task_id, :type) })
+          .to eq([[other.id, task.id, "blocks"]])
+      end
+    end
+
+    it "falls back to the first type for one outside the four" do
+      get "/admin/tasks/#{task.id}", filter: "next", link_q: "migration", link_kind: "follows"
+
+      expect(page).to have_no_css("#task-#{task.id}-link-kind option[selected]")
     end
 
     it "offers the four types" do

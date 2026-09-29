@@ -17,17 +17,24 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:link]]
 
-          case link_tasks.call(id, params)
-          in Success(_)
-            toast(response, LINKED)
-            response.redirect_to(tasks_path(request))
-          in Failure(:not_found) then halt 404
-          in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
-          else halt 500
+          if request.params[:link_find]
+            find(request, response, id, params)
+          else
+            link(request, response, id, params)
           end
         end
 
         private
+
+        def find(request, response, id, params)
+          response.redirect_to(
+            routes.path(
+              :admin_task,
+              id:, **return_to(request).compact,
+              link_kind: Blog::Types::Text[params[:kind]], link_q: Blog::Types::TrimmedText[request.params[:link_q]],
+            ),
+          )
+        end
 
         def invalid(request, response, id, params, errors)
           case build_task_page.call(id, kind: Blog::Types::Text[params[:kind]], errors:)
@@ -35,6 +42,17 @@ module Admin
             response.status = 422
             response.render(task_view, **page, **return_to(request))
           in Failure(:not_found) then halt 404
+          else halt 500
+          end
+        end
+
+        def link(request, response, id, params)
+          case link_tasks.call(id, params)
+          in Success(_)
+            toast(response, LINKED)
+            response.redirect_to(tasks_path(request))
+          in Failure(:not_found) then halt 404
+          in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
           else halt 500
           end
         end

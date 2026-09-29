@@ -36,7 +36,7 @@ module Admin
               Field(label: t(".label"), id: query_id) do
                 links unless @task.links.empty?
                 add_form
-                find_form
+                find_row
                 field_errors
                 targets if searched?
               end
@@ -58,15 +58,17 @@ module Admin
             FieldError(field: :other_id, errors:, scope:)
           end
 
-          def find_form
-            Form(method: "get", action: path(:admin_task, id: @task.id), class: "task-link-find") do
-              return_fields
+          def find_row
+            div(class: "task-link-find") do
               kind_select
               Input(
                 **FieldError.control_attributes(:other_id, errors, scope),
-                type: "search", name: "link_q", value: query, placeholder: t(".placeholder"),
+                type: "search", name: "link_q", form: add_form_id, value: query, placeholder: t(".placeholder"),
               )
-              Button(type: "submit", small: true) { t(".find") }
+              Button(
+                type: "submit", small: true, form: add_form_id, name: "link_find", value: "1",
+                data: { task_find: task_path(@task) },
+              ) { t(".find") }
             end
           end
 

@@ -4,6 +4,7 @@ import { setupTaskKeys } from "./task_key.js";
 
 const EDIT = "[data-task-edit]";
 const FIELD = "input:not([type=hidden]), textarea, select";
+const FIND = "[data-task-find]";
 const INVALID = "[aria-invalid='true']";
 const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
 const READ = "[data-task-read]";
@@ -18,6 +19,15 @@ export function setupTaskPanel() {
 function bind(root) {
   setupConfirms(root);
   setupTaskKeys(root);
+}
+
+function findUrl(form, button) {
+  const data = new FormData(form);
+  const url = new URL(button.dataset.taskFind, window.location.href);
+
+  url.searchParams.set("link_kind", data.get("link[kind]") ?? "");
+  url.searchParams.set("link_q", data.get("link_q") ?? "");
+  return url.href;
 }
 
 function here() {
@@ -146,13 +156,11 @@ function setupPanel(panel, modal) {
   });
 
   panel.addEventListener("submit", (event) => {
-    const form = event.target;
-    if (form.method !== "get") return;
+    const find = event.submitter?.closest(FIND);
+    if (!find) return;
 
     event.preventDefault();
-    const url = new URL(form.action);
-    url.search = new URLSearchParams(new FormData(form)).toString();
-    visit(url.href, (href, ticket) => read(href, ticket, true));
+    visit(findUrl(event.target, find), (href, ticket) => read(href, ticket, true));
   });
 
   panel.addEventListener("close", () => opener?.focus());

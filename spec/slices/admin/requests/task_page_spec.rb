@@ -394,9 +394,10 @@ RSpec.describe "Admin task page", type: :request do
 
       it "finds tasks to link through a GET to the page itself", :aggregate_failures do
         other
-        read(task, link_q: "migration")
+        send_to("/admin/tasks/#{task.id}/links", link_find: "1", link_q: "migration")
 
-        expect(page).to have_css("form.task-link-find[method='get'][action='/admin/tasks/#{task.id}']")
+        expect(last_response.location).to start_with("/admin/tasks/#{task.id}?")
+        follow_redirect!
         expect(targets).to eq(["##{other.id}"])
       end
 

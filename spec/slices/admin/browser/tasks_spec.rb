@@ -673,7 +673,18 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def key(task) = "##{task.id}"
 
+    def kind(name) = translate(["ui.components.tasks.link_editor.kinds", name].join("."))
+
+    def kind_select = find("#task-#{task.id}-link-kind")
+
     def pick(title) = find(".task-link-target", text: title).click
+
+    def pick_kind_and_find(query)
+      kind_select.select(kind(:blocked_by))
+      fill_in(editor(:label), with: query)
+      click_button(editor(:find))
+      find(".task-link-target", text: "Learn Elixir")
+    end
 
     def row(title) = find(".task-title", exact_text: title).ancestor(".task")
 
@@ -702,6 +713,47 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "saves one blocks link from the other task", :aggregate_failures do
         expect(page).to have_css(".toast")
+        expect(stored).to eq([[other.id, task.id, "blocks"]])
+      end
+    end
+
+    describe "a type picked before the find in the panel" do
+      before do
+        open_task("Email the accountant")
+        pick_kind_and_find("elixir")
+      end
+
+      it "stays picked once the matches load", :aggregate_failures do
+        expect(panel).to have_css(".task-link-target", text: "Learn Elixir")
+        expect(kind_select.value).to eq("blocked_by")
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+      end
+
+      it "adds the link with that type" do
+        pick("Learn Elixir")
+        find(".toast", text: translate("tasks_page.toasts.linked"))
+
+        expect(stored).to eq([[other.id, task.id, "blocks"]])
+      end
+    end
+
+    describe "a type picked before the find with scripts off" do
+      before do
+        scripts_off
+        find(".task", text: "Email the accountant").find(".task-title").click
+        pick_kind_and_find("elixir")
+      end
+
+      after { scripts_on }
+
+      it "stays picked once the page comes back" do
+        expect(kind_select.value).to eq("blocked_by")
+      end
+
+      it "adds the link with that type" do
+        pick("Learn Elixir")
+        find(".toast", text: translate("tasks_page.toasts.linked"), visible: :all)
+
         expect(stored).to eq([[other.id, task.id, "blocks"]])
       end
     end
