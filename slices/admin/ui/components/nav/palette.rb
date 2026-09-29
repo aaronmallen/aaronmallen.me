@@ -10,6 +10,7 @@ module Admin
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘/" }.freeze
           LIST_ID = "command-palette-list"
           LISTS = {
+            Blog::Types::TaskView["external"] => ".lists.external",
             Blog::Types::TaskView["next"] => ".lists.next",
             Blog::Types::TaskView["someday"] => ".lists.someday",
             Blog::Types::TaskView["today"] => ".lists.today",

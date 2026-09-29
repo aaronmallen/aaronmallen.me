@@ -87,7 +87,8 @@ RSpec.describe "Admin tasks", type: :request do
       it "offers a tab for every list and the archive" do
         get "/admin/tasks"
 
-        expect(page.all(".subtab span:first-of-type").map(&:text)).to eq(%w[today upcoming next someday completed])
+        expect(page.all(".subtab span:first-of-type").map(&:text)).to eq(%w[today upcoming next someday external
+                                                                            completed])
       end
 
       it "says nothing arrived in a sprint nothing was carried into" do
@@ -100,7 +101,7 @@ RSpec.describe "Admin tasks", type: :request do
         create(:task, :done, title: "Filed already")
         get "/admin/tasks", filter: "someday"
 
-        expect(page.all(".subtab-count").map(&:text)).to eq(%w[1 0 1 1 1])
+        expect(page.all(".subtab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
       end
 
       it "keeps the count off the lists a finished task has left" do
@@ -208,6 +209,125 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "the external list" do
+      let!(:imported) do
+        create(:task_source, task: create(:task, :external, title: "Fix the feed", tags: %w[site]), url: issue_url).task
+      end
+
+      def editor_lists = page.all("#task-#{imported.id}-form select[name='task[list]'] option").map(&:text)
+
+      def held
+        page.all("#task-#{imported.id}-form [name^='task[']", visible: :all)
+            .to_h { [it["name"][/\Atask\[(\w+)\]\z/, 1], it.value] }
+      end
+
+      def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/42"
+
+      before do
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+      end
+
+      it "lists only the imported open tasks on the external tab" do
+        create(:task_source, task: create(:task, :external, :done, title: "Shipped already"))
+        get "/admin/tasks", filter: "external"
+
+        expect(titles).to eq(["Fix the feed"])
+      end
+
+      %w[next someday].each do |filter|
+        it "keeps the imported tasks off #{filter}" do
+          get "/admin/tasks", filter: filter
+
+          expect(titles).not_to include("Fix the feed")
+        end
+      end
+
+      it "marks the external tab as the one you are on" do
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_css(".subtab.on[aria-current='page']", text: "external")
+      end
+
+      it "counts the imported tasks on their tab" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find(".subtab", text: "external").find(".subtab-count").text).to eq("1")
+      end
+
+      it "labels and blurbs the card", :aggregate_failures do
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_css(".card-label", exact_text: "From GitHub")
+        expect(page).to have_css(".card-blurb", text: "open GitHub issues assigned to you")
+      end
+
+      it "says something useful when nothing is imported" do
+        repo.delete(imported.id)
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_css(".empty", exact_text: empty_text("external"))
+      end
+
+      it "links the row to its issue", :aggregate_failures do
+        get "/admin/tasks", filter: "external"
+        link = page.find(".task .task-meta a.task-source")
+
+        expect(link["href"]).to eq(issue_url)
+        expect(link.text).to eq("aaronmallen/aaronmallen.me#42")
+      end
+
+      it "leaves the issue link off a task written by hand" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-source")
+      end
+
+      it "offers one move, into today" do
+        get "/admin/tasks", filter: "external"
+
+        expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
+          .to eq(["/admin/tasks/#{imported.id}/move/today"])
+      end
+
+      it "offers external in the editor, marked as the list it is in", :aggregate_failures do
+        get "/admin/tasks", filter: "external"
+
+        expect(editor_lists).to eq(%w[today next someday external])
+        expect(page.find("#task-#{imported.id}-form option[selected]").text).to eq("external")
+      end
+
+      it "keeps external out of the editor of a task written by hand" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.all(".task-editor select[name='task[list]'] option").map(&:text).uniq)
+          .to eq(%w[today next someday])
+      end
+
+      it "saves its tags and keeps it on external", :aggregate_failures do
+        get "/admin/tasks", filter: "external"
+        send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "tags" => "site, bug" })
+
+        expect(repo.by_id(imported.id).tags.map(&:name)).to contain_exactly("site", "bug")
+        expect(repo.by_id(imported.id).list).to eq("external")
+      end
+
+      it "moves it to next through the editor" do
+        get "/admin/tasks", filter: "external"
+        send_to("/admin/tasks/#{imported.id}", filter: "external", task: { **held, "list" => "next" })
+
+        expect(repo.by_id(imported.id).list).to eq("next")
+      end
+
+      it "names external as the place of a linked task" do
+        other = create(:task, title: "Write the post")
+        repo.link(other.id, imported.id, "relates")
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-link-place", exact_text: "external")
+      end
+    end
+
     it "orders a list by position" do
       create(:task, title: "second", position: 2)
       create(:task, title: "first", position: 1)
@@ -262,19 +382,20 @@ RSpec.describe "Admin tasks", type: :request do
         expect(titles).to eq(["Email the accountant"])
       end
 
-      it "counts both pools on the switch" do
+      it "counts every pool on the switch" do
         create(:task, title: "Email the accountant")
         create(:task, :someday, title: "Learn Elixir")
+        create(:task_source, task: create(:task, :external, title: "Fix the feed"))
         get "/admin/tasks", filter: "today"
 
-        expect(pools).to eq(["next · 1", "someday · 1"])
+        expect(pools).to eq(["next · 1", "someday · 1", "external · 1"])
       end
 
       it "offers nothing already finished" do
         create(:task, :done, title: "Email the accountant")
         get "/admin/tasks", filter: "today"
 
-        expect(pools).to eq(["next · 0", "someday · 0"])
+        expect(pools).to eq(["next · 0", "someday · 0", "external · 0"])
       end
 
       it "lists someday when that pool is asked for" do
@@ -289,7 +410,7 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "today"
 
         expect(page.all(".task-planner .seg-option").map { it["href"] })
-          .to eq(["/admin/tasks?filter=today&pool=next", "/admin/tasks?filter=today&pool=someday"])
+          .to eq(%w[next someday external].map { "/admin/tasks?filter=today&pool=#{it}" })
       end
 
       it "marks the pool on show" do
@@ -326,6 +447,12 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_someday"))
       end
 
+      it "names external when it is the empty one" do
+        get "/admin/tasks", filter: "today", pool: "external"
+
+        expect(page).to have_css(".task-planner .empty", exact_text: planner("empty_external"))
+      end
+
       it "drops the planner once the sprint holds a task", :aggregate_failures do
         create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id, title: "Ship it")
         get "/admin/tasks", filter: "today"
@@ -338,6 +465,42 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page).to have_no_css(".task-planner")
+      end
+    end
+
+    describe "the external pool of an empty sprint" do
+      let!(:task) do
+        create(:task_source, task: create(:task, :external, title: "Fix the feed"), url: issue_url).task
+      end
+
+      def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/42"
+
+      it "lists the imported tasks" do
+        create(:task, title: "Email the accountant")
+        get "/admin/tasks", filter: "today", pool: "external"
+
+        expect(titles).to eq(["Fix the feed"])
+      end
+
+      it "links each one to its issue" do
+        get "/admin/tasks", filter: "today", pool: "external"
+
+        expect(page).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
+      end
+
+      it "pulls one into today's sprint", :aggregate_failures do
+        send_to("/admin/tasks/#{task.id}/move/today", origin: "tasks")
+        get "/admin/tasks", filter: "today"
+
+        expect(repo.by_id(task.id)).to have_attributes(list: nil, sprint_id: sprint_repo.on(Blog::TimeZone.today).id)
+        expect(page).to have_css(".task", text: "Fix the feed")
+      end
+
+      it "keeps the issue link on the task once it is in the sprint" do
+        send_to("/admin/tasks/#{task.id}/move/today", origin: "tasks")
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find(".task .task-meta a.task-source")["href"]).to eq(issue_url)
       end
     end
 
@@ -1759,7 +1922,7 @@ RSpec.describe "Admin tasks", type: :request do
         drop(create(:sprint, sprint_date: tomorrow))
         follow_redirect!
 
-        expect(page).to have_css("[data-toast] .toast", text: "went back to next", visible: :all)
+        expect(page).to have_css("[data-toast] .toast", text: "went back to their lists", visible: :all)
       end
 
       it "keeps the sprint the day is running" do
@@ -1804,7 +1967,7 @@ RSpec.describe "Admin tasks", type: :request do
       {
         "the day it was scheduled for" => [-> { tomorrow.iso8601 }, "Scheduled for the"],
         "that it joined today's sprint" => [-> { today.iso8601 }, "Pulled into today's sprint"],
-        "that it went back to next" => [-> { "" }, "Unscheduled"],
+        "that it went back to next" => [-> { "" }, "Unscheduled · back in next"],
         "why it refused a day that is over" => [-> { (today - 1).iso8601 }, "A sprint opens on today"],
       }.each do |named, (asked, toast)|
         it "says #{named} when a task is scheduled" do
@@ -1814,6 +1977,15 @@ RSpec.describe "Admin tasks", type: :request do
 
           expect(page).to have_css("[data-toast] .toast", text: toast, visible: :all)
         end
+      end
+
+      it "says an imported task went back to external when its date is cleared" do
+        task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 2))
+        create(:task_source, task:)
+        send_to("/admin/tasks/#{task.id}/schedule", sprint_on: "")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", text: "Unscheduled · back in external", visible: :all)
       end
 
       it "pulls a task out of next onto a planned sprint" do

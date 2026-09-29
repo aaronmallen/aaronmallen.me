@@ -18,6 +18,7 @@ module Admin
             Blog::Types::TaskFilter["today"] => ".places.today",
             Blog::Types::TaskFilter["next"] => ".places.next",
             Blog::Types::TaskFilter["someday"] => ".places.someday",
+            Blog::Types::TaskFilter["external"] => ".places.external",
           }.freeze
           BY_STATUS = [
             Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["in_progress"],

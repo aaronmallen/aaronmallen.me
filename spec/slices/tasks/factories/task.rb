@@ -20,6 +20,10 @@ Spec::DB::Factories.define(:task) do |f|
     t.completed_at { Time.now }
   end
 
+  f.trait :external do |t|
+    t.list "external"
+  end
+
   f.trait :in_progress do |t|
     t.status "in_progress"
   end

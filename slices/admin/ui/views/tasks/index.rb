@@ -11,18 +11,22 @@ module Admin
             Blog::Types::TaskFilter["today"] => ".blurbs.today",
             Blog::Types::TaskFilter["next"] => ".blurbs.next",
             Blog::Types::TaskFilter["someday"] => ".blurbs.someday",
+            Blog::Types::TaskFilter["external"] => ".blurbs.external",
           }.freeze
           CARRIED = :carried_in
           COMPLETED = Blog::Types::TaskTab["completed"]
+          EXTERNAL = Blog::Types::TaskTab["external"]
           EMPTY = {
             Blog::Types::TaskList["next"] => ".empty.next",
             Blog::Types::TaskList["someday"] => ".empty.someday",
+            Blog::Types::TaskList["external"] => ".empty.external",
           }.freeze
           FINISHED_TODAY = :finished_today
           LABELS = {
             Blog::Types::TaskFilter["today"] => ".sprint",
             Blog::Types::TaskFilter["next"] => ".on_deck",
             Blog::Types::TaskFilter["someday"] => ".backlog",
+            Blog::Types::TaskFilter["external"] => ".imported",
           }.freeze
           LIVE = { class: "card-live" }.freeze
           SEPARATOR = " · "
@@ -30,6 +34,7 @@ module Admin
             Blog::Types::TaskFilter["today"] => ".today",
             Blog::Types::TaskFilter["next"] => ".next",
             Blog::Types::TaskFilter["someday"] => ".someday",
+            Blog::Types::TaskFilter["external"] => ".external",
           }.freeze
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -86,13 +91,18 @@ module Admin
 
           def days = @days ||= @tasks.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
 
+          def external? = @tab == EXTERNAL
+
           def filtering? = !@filters[:query].empty?
 
           def label = t(LABELS.fetch(@tab), date: l(@today, format: :short))
 
           def list
             Card(label:, title: t(TITLES.fetch(@tab)), **(today? ? LIVE : Dry::Core::Constants::EMPTY_HASH)) do |card|
-              card.side { span(class: "card-note") { open_note } }
+              card.side do
+                span(class: "card-note") { open_note }
+                SyncButton() if external?
+              end
               p(class: "card-blurb") { t(BLURBS.fetch(@tab)) }
               rows
             end

@@ -12,7 +12,7 @@ module MCP
         required: %w[id list],
       }.freeze
 
-      description "Move one task to next, someday or today's sprint"
+      description "Move one task to next, someday, external or today's sprint"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 

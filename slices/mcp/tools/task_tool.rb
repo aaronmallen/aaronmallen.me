@@ -18,7 +18,7 @@ module MCP
 
       COMPLAINTS = {
         kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
-        list: { Blog::Contract::FORMAT => "pick one of the three lists" },
+        list: { Blog::Contract::FORMAT => "pick one of the four lists" },
         other_id: {
           Blog::Contract::FORMAT => "pick a task by its ID",
           "missing" => "that task is gone, so find another",

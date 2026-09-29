@@ -92,6 +92,9 @@ en:
       closed: "That task is closed already"
       completed: "Done"
       deleted: "Task deleted"
+      issue_sync:
+        not_configured: "No GitHub token is set."
+        queued: "Sync queued · new issues show on external shortly"
       linked: "Tasks linked"
       moved: "Moved"
       pulled_in: "Pulled into today's sprint"
@@ -99,7 +102,7 @@ en:
       saved: "Task saved"
       scheduled: "Scheduled for the %{date} sprint"
       sprint_ahead: "Plan a sprint for a day after today"
-      sprint_dropped: "Sprint dropped · its tasks went back to next"
+      sprint_dropped: "Sprint dropped · its tasks went back to their lists"
       sprint_invalid: "Pick a day first"
       sprint_past: "A sprint opens on today or a day after it"
       sprint_planned: "Sprint planned for %{date}"
@@ -108,7 +111,7 @@ en:
       started: "Started · it is today's work now"
       stopped: "Stopped · it waits in the sprint"
       unlinked: "Link removed"
-      unscheduled: "Unscheduled · back in next"
+      unscheduled: "Unscheduled · back in %{list}"
   today_page:
     toasts:
       not_configured: "No GitHub token is set."
@@ -252,6 +255,7 @@ en:
           in_list: "in %{list}"
           label: "Command palette"
           lists:
+            external: "external"
             next: "next"
             someday: "someday"
             today: "today's sprint"
@@ -592,6 +596,7 @@ en:
           commits: "Commit import"
           countries: "Country lookup"
           country_database: "Country database refresh"
+          issues: "Issue sync"
           projects: "Project refresh"
       tags:
         capture:
@@ -677,6 +682,7 @@ en:
           delete: "Delete"
           list: "List"
           lists:
+            external: "external"
             next: "next"
             someday: "someday"
             today: "today"
@@ -690,7 +696,7 @@ en:
           kind:
             format: "Pick one of the four link types."
           list:
-            format: "Pick one of the three lists."
+            format: "Pick one of the lists."
           other_id:
             format: "Pick a task from the list."
             missing: "That task is gone. Find another."
@@ -717,6 +723,7 @@ en:
           places:
             canceled: "canceled"
             done: "done"
+            external: "external"
             in_progress: "in progress"
             next: "next"
             someday: "someday"
@@ -736,11 +743,13 @@ en:
         planner:
           ask: "What do you want to achieve today?"
           empty: "empty sprint"
+          empty_external: "Nothing in external. Sync issues from the External tab."
           empty_next: "Nothing in next. Write the first one above."
           empty_someday: "Nothing in someday. Write the first one above."
           label: "Sprint · %{date}"
           note: "One day, one sprint. Put something in it. Anything still open tonight rolls into tomorrow on its own."
           pools:
+            external: "external · %{count}"
             next: "next · %{count}"
             someday: "someday · %{count}"
           pull: "Pull in"
@@ -774,16 +783,19 @@ en:
           title: "Today's sprint"
         tabs:
           completed: "completed"
+          external: "external"
           label: "Task lists"
           next: "next"
           someday: "someday"
           today: "today"
           upcoming: "upcoming"
+        sync_button:
+          label: "Sync issues"
         task_key:
           copied: "Task %{key} copied"
           copy: "Copy task %{key}"
         upcoming_sprints:
-          confirm_drop: "Drop the sprint for %{date}? Its tasks go back to Next."
+          confirm_drop: "Drop the sprint for %{date}? Its tasks go back to their lists."
           count:
             one: "%{count} planned"
             other: "%{count} planned"
@@ -1063,6 +1075,7 @@ en:
           archive: "Archive"
           backlog: "Backlog"
           blurbs:
+            external: "open GitHub issues assigned to you"
             next: "queued up, not today"
             someday: "maybe, eventually, probably not"
             today: "the current sprint, the only actionable list"
@@ -1073,6 +1086,7 @@ en:
           empty:
             completed: "Nothing completed yet."
             completed_no_match: "Nothing completed matches these filters."
+            external: "No open issues assigned to you."
             next: "Nothing waiting."
             no_match: "No matches in this list."
             someday: "Nothing parked."
@@ -1080,7 +1094,9 @@ en:
             one: "%{count} finished today"
             other: "%{count} finished today"
           footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
+          external: "External"
           heading: "Tasks"
+          imported: "From GitHub"
           next: "Next"
           on_deck: "On deck"
           open:

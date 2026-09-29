@@ -14,7 +14,7 @@ module Admin
 
         {
           date: Blog::TimeZone.today(now),
-          pool: Blog::Types::TaskPoolParam[pool],
+          pool: Blog::Types::TaskListParam[pool],
           pools: pools,
           tasks: tasks_in_sprint.call(sprint.id),
         }
@@ -22,7 +22,7 @@ module Admin
 
       private
 
-      def pools = Blog::Types::TaskPool.values.to_h { [it, open_tasks_in_list.call(it)] }
+      def pools = Blog::Types::TaskList.values.to_h { [it, open_tasks_in_list.call(it)] }
     end
   end
 end

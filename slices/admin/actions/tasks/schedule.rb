@@ -15,7 +15,7 @@ module Admin
 
         def handle(request, response)
           case schedule_task.call(record_id(request), request.params[:sprint_on])
-          in Success[:unscheduled, *] then done(request, response, UNSCHEDULED)
+          in Success[:unscheduled, task] then done(request, response, UNSCHEDULED, list: task.list)
           in Success[:pulled_in, *] then done(request, response, PULLED_IN)
           in Success[:scheduled, _, day] then done(request, response, SCHEDULED, date: i18n.l(day, format: :medium))
           in Failure(:past) | Failure(:invalid) then done(request, response, PAST)

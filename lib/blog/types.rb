@@ -100,20 +100,19 @@ module Blog
     TagList = Types::Array.of(Types::String).constructor do |tags|
       tags.to_s.split(",").map { Normalizers::Tag[it] }.reject(&:empty?).uniq
     end
-    TaskFilter = Types::String.enum("today", "next", "someday")
+    TaskFilter = Types::String.enum("today", "next", "someday", "external")
     TaskFilterParam = TaskFilter.fallback(TaskFilter.values.first)
     TaskLinkType = Types::String.enum("blocks", "relates", "duplicates")
     TaskLinkKind = Types::String.enum(*TaskLinkType.values, "blocked_by")
     TaskList = Types::String.enum("next", "someday", "external")
+    TaskListParam = TaskList.fallback(TaskList.values.first)
     TaskMove = Types::String.enum("up", "down")
     TaskOrigin = Types::String.enum("tasks", "today")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
-    TaskPool = Types::String.enum("next", "someday")
-    TaskPoolParam = TaskPool.fallback(TaskPool.values.first)
     TaskSourceProvider = Types::String.enum("github")
     TaskSourceState = Types::String.enum("open", "completed", "not_planned", "unassigned", "moved", "deleted")
     TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
-    TaskView = Types::String.enum("today", "upcoming", "next", "someday")
+    TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)
     Text = Types::String.constructor { |value| value.is_a?(::String) ? value : Dry::Core::Constants::EMPTY_STRING }

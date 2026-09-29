@@ -15,6 +15,7 @@ module Admin
             Blog::Types::TaskTab["upcoming"] => ".upcoming",
             Blog::Types::TaskTab["next"] => ".next",
             Blog::Types::TaskTab["someday"] => ".someday",
+            Blog::Types::TaskTab["external"] => ".external",
             Blog::Types::TaskTab["completed"] => ".completed",
           }.freeze
           NAMES = Blog::Types::TaskTab.values.freeze

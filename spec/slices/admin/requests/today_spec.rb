@@ -653,6 +653,11 @@ RSpec.describe "Admin today", type: :request do
           "GitHub answered 502"
       end
 
+      def sync_issues_with(result)
+        sync = instance_double(Tasks::Operations::SyncIssues, call: result)
+        Tasks::Jobs::SyncIssues.new(sync_issues: sync).perform
+      end
+
       def sync_state_repo = Record::Slice["repos.sync_state_repo"]
 
       def with_country_database(failure)
@@ -694,6 +699,20 @@ RSpec.describe "Admin today", type: :request do
         get "/admin"
 
         expect(failure_lines).to eq(["Project refresh failed at Jan 7, 2026, 09:30 · GitHub didn't answer"])
+      end
+
+      it "reports the issue sync the same way" do
+        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited, at: failed_at)
+        get "/admin"
+
+        expect(failure_lines).to eq(["Issue sync failed at Jan 7, 2026, 09:30 · GitHub rate limited it"])
+      end
+
+      it "reads what GitHub answered off a failed issue sync" do
+        sync_issues_with(bad_gateway("GraphQL"))
+        get "/admin"
+
+        expect(failure_lines.first).to match(bad_gateway_line("Issue sync", "GraphQL"))
       end
 
       it "reports the nightly analytics rollup the same way" do
@@ -1174,18 +1193,18 @@ RSpec.describe "Admin today", type: :request do
         expect(panel).to have_css(".task-capture input[name='task[title]']")
       end
 
-      it "counts both pools the planner can pull from" do
+      it "counts every pool the planner can pull from" do
         create(:task, title: "Email the accountant")
         create(:task, :someday, title: "Learn Elixir")
         get "/admin"
 
-        expect(panel.all(".seg-option").map(&:text)).to eq(["next · 1", "someday · 1"])
+        expect(panel.all(".seg-option").map(&:text)).to eq(["next · 1", "someday · 1", "external · 0"])
       end
 
       it "keeps Today when switching the pool" do
         get "/admin"
 
-        expect(panel.all(".seg-option").map { it["href"] }).to eq(["/admin?pool=next", "/admin?pool=someday"])
+        expect(panel.all(".seg-option").map { it["href"] }).to eq(%w[next someday external].map { "/admin?pool=#{it}" })
       end
 
       it "pulls from someday when that pool is asked for" do

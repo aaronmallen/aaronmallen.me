@@ -8,12 +8,14 @@ module Admin
           EMPTY_POOLS = {
             Blog::Types::TaskList["next"] => ".empty_next",
             Blog::Types::TaskList["someday"] => ".empty_someday",
+            Blog::Types::TaskList["external"] => ".empty_external",
           }.freeze
           FROM_TASKS = Blog::Types::TaskOrigin["tasks"]
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           POOLS = {
             Blog::Types::TaskList["next"] => ".pools.next",
             Blog::Types::TaskList["someday"] => ".pools.someday",
+            Blog::Types::TaskList["external"] => ".pools.external",
           }.freeze
           TODAY = Blog::Types::TaskFilter["today"]
 
@@ -49,6 +51,7 @@ module Admin
 
           def meta(task)
             p(class: "task-meta") do
+              SourceLink(source: task.source)
               task.tags.each { tag(it) }
             end
           end

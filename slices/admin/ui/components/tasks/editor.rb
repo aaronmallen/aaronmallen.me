@@ -10,6 +10,7 @@ module Admin
             Blog::Types::TaskFilter["next"] => ".lists.next",
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
+          EXTERNAL = Blog::Types::TaskFilter["external"]
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
           TAG_SEPARATOR = ", "
 
@@ -89,12 +90,14 @@ module Admin
               Select(
                 **FieldError.control_attributes(:list, errors, scope),
                 name: "task[list]",
-                options: LISTS.transform_values { t(it) },
+                options: lists.transform_values { t(it) },
                 selected: list,
               )
               FieldError(field: :list, errors:, scope:)
             end
           end
+
+          def lists = @task.place == EXTERNAL ? LISTS.merge(EXTERNAL => ".lists.external") : LISTS
 
           def note = editing? ? @editing[:note] : @task.note
 

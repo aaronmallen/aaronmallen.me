@@ -69,6 +69,7 @@ module Admin
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID
+    post "/tasks/issues/sync", to: "issues.sync", as: :sync_issues
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions

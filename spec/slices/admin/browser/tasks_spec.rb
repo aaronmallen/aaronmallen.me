@@ -22,6 +22,13 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def open_editor(title) = find(".task", text: title).find(".task-title").click
 
+  def tag_task(title, tags)
+    open_editor(title)
+    row = find(".task", text: title)
+    row.fill_in("task[tags]", with: tags)
+    row.click_button("Save")
+  end
+
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   before do
@@ -48,7 +55,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "counts each list on its own tab" do
-      expect(page.all(".subtab-count").map(&:text)).to eq(%w[0 0 1 1 0])
+      expect(page.all(".subtab-count").map(&:text)).to eq(%w[0 0 1 1 0 0])
     end
   end
 
@@ -224,6 +231,46 @@ RSpec.describe "Admin tasks", type: :feature do
         find(".subtab", text: "next").click
 
         expect(page).to have_no_css(".task-title", text: "Email the accountant")
+      end
+    end
+  end
+
+  describe "an imported task" do
+    let(:issue_url) { "https://github.com/aaronmallen/aaronmallen.me/issues/42" }
+
+    before do
+      create(:task_source, task: create(:task, :external, title: "Fix the feed"), url: issue_url)
+      find(".subtab", text: "external").click
+    end
+
+    it "shows on the external tab with a link to its issue", :aggregate_failures do
+      expect(page).to have_current_path("/admin/tasks?filter=external")
+      expect(find(".task", text: "Fix the feed")).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
+    end
+
+    it "takes a tag from the editor and stays on external", :aggregate_failures do
+      tag_task("Fix the feed", "site")
+
+      expect(page).to have_current_path("/admin/tasks?filter=external")
+      expect(find(".task", text: "Fix the feed")).to have_css(".task-tag", text: "#site")
+    end
+
+    describe "pulled in from the planner" do
+      before do
+        visit "/admin/tasks?filter=today"
+        find(".task-planner .seg-option", exact_text: "external · 1").click
+        find(".task-planner .li", text: "Fix the feed").click_button("Pull in")
+      end
+
+      it "lands in today, still linked to its issue", :aggregate_failures do
+        expect(page).to have_current_path("/admin/tasks?filter=today")
+        expect(find(".task", text: "Fix the feed")).to have_link(href: issue_url)
+      end
+
+      it "leaves external" do
+        find(".subtab", text: "external").click
+
+        expect(page).to have_no_css(".task-title", text: "Fix the feed")
       end
     end
   end

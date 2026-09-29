@@ -1746,6 +1746,10 @@
   }
 }
 
+@utility task-source {
+  @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent hover:underline focus-ring;
+}
+
 @utility task-finished {
   @apply font-mono text-badge whitespace-nowrap text-ink-muted;
 }

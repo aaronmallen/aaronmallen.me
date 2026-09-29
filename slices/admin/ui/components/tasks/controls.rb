@@ -5,6 +5,7 @@ module Admin
     module Components
       module Tasks
         class Controls < Component
+          EXTERNAL = Blog::Types::TaskFilter["external"]
           LEFT = "fa-solid fa-arrow-left"
           LISTS = {
             Blog::Types::TaskFilter["today"] => ".lists.today",
@@ -12,7 +13,7 @@ module Admin
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
-          PLACES = Blog::Types::TaskFilter.values.freeze
+          PLACES = LISTS.keys.freeze
           RIGHT = "fa-solid fa-arrow-right"
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -59,6 +60,8 @@ module Admin
           end
 
           def moves
+            return move(PLACES.first, LEFT) if @task.place == EXTERNAL
+
             here = PLACES.index(@task.place)
 
             move(PLACES[here - 1], LEFT) if here.positive?

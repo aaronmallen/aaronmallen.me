@@ -79,6 +79,7 @@ module Admin
               in_progress if @task.in_progress?
               scheduled_pill if waiting?
               carried if carried?
+              SourceLink(source: @task.source)
               @task.tags.each { tag(it) }
               Closed(task: @task) if @task.closed?
             end
