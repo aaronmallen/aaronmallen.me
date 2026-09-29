@@ -37,7 +37,14 @@ module Record
       end
       private_constant :Queries
 
-      CLOSE_REASONS = { "COMPLETED" => :completed, "DUPLICATE" => :not_planned, "NOT_PLANNED" => :not_planned }.freeze
+      COMPLETED = Blog::Types::TaskSourceState["completed"]
+      DELETED = Blog::Types::TaskSourceState["deleted"]
+      MOVED = Blog::Types::TaskSourceState["moved"]
+      NOT_PLANNED = Blog::Types::TaskSourceState["not_planned"]
+      OPEN = Blog::Types::TaskSourceState["open"]
+      UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
+
+      CLOSE_REASONS = { "COMPLETED" => COMPLETED, "DUPLICATE" => NOT_PLANNED, "NOT_PLANNED" => NOT_PLANNED }.freeze
       ID_BATCH_SIZE = 100
       URL = %r{\Ahttps://github\.com/(?<repo>[^/]+/[^/]+)/issues/(?<number>\d+)\z}
 
@@ -61,14 +68,9 @@ module Record
       private
 
       def issue(node, viewer)
-        closed = node.fetch("state") == "CLOSED"
-
         {
-          assigned: node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer },
-          body: node["body"].to_s, id: node.fetch("id"),
-          reason: closed ? CLOSE_REASONS.fetch(node["stateReason"], :completed) : nil,
-          repo: node.dig("repository", "nameWithOwner"), state: closed ? :closed : :open, title: node.fetch("title"),
-          url: node.fetch("url"),
+          body: node["body"].to_s, id: node.fetch("id"), remote_state: remote_state(node, viewer),
+          repo: node.dig("repository", "nameWithOwner"), title: node.fetch("title"), url: node.fetch("url"),
         }
       end
 
@@ -87,11 +89,18 @@ module Record
         found && transport.get("/repos/#{found[:repo]}/issues/#{found[:number]}")&.fetch("html_url", nil)
       end
 
+      def remote_state(node, viewer)
+        return UNASSIGNED unless node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer }
+        return OPEN unless node.fetch("state") == "CLOSED"
+
+        CLOSE_REASONS.fetch(node["stateReason"], COMPLETED)
+      end
+
       def vanished(id, url)
         found_at = moved_to(url)
-        return { id:, state: :deleted, url: } if found_at.nil? || found_at == url
+        return { id:, remote_state: DELETED, url: } if found_at.nil? || found_at == url
 
-        { id:, moved_to: found_at, state: :moved, url: }
+        { id:, moved_to: found_at, remote_state: MOVED, url: }
       end
     end
   end

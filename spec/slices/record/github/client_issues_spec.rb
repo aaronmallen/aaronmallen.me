@@ -46,8 +46,8 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { assigned: true, body: "It broke", id: "I_one", reason: nil, repo: "someorg/tool", state: :open,
-        title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
+      { body: "It broke", id: "I_one", remote_state: "open", repo: "someorg/tool", title: "Fix it",
+        url: "https://github.com/someorg/tool/issues/4" }
     end
 
     it "lists each one with its id, title, body, URL and repository" do
@@ -87,8 +87,8 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the issues already imported" do
     let(:still_mine) do
-      { assigned: true, body: "Edited", id: "I_known", reason: nil, repo: "aaronmallen/aaronmallen.me", state: :open,
-        title: "Renamed", url: known_url }
+      { body: "Edited", id: "I_known", remote_state: "open", repo: "aaronmallen/aaronmallen.me", title: "Renamed",
+        url: known_url }
     end
 
     it "reports an open issue still assigned to me, with its title and body" do
@@ -100,50 +100,50 @@ RSpec.describe Record::GitHub::Client do
     it "reports an issue closed as completed" do
       closed_as("COMPLETED")
 
-      expect(check.first).to include(reason: :completed, state: :closed)
+      expect(check.first).to include(remote_state: "completed")
     end
 
     it "reports an issue closed as not planned" do
       closed_as("NOT_PLANNED")
 
-      expect(check.first).to include(reason: :not_planned, state: :closed)
+      expect(check.first).to include(remote_state: "not_planned")
     end
 
     it "reports an issue closed as a duplicate as not planned" do
       closed_as("DUPLICATE")
 
-      expect(check.first).to include(reason: :not_planned, state: :closed)
+      expect(check.first).to include(remote_state: "not_planned")
     end
 
     it "reports an issue closed with no reason as completed" do
       closed_as(nil)
 
-      expect(check.first).to include(reason: :completed, state: :closed)
+      expect(check.first).to include(remote_state: "completed")
     end
 
     it "reports an issue taken off me" do
       stub_known(known(assignees: ["MDQ6VXNlcjE="]))
 
-      expect(check.first).to include(assigned: false, state: :open)
+      expect(check.first).to include(remote_state: "unassigned")
     end
 
     it "reports an issue moved to another repository, with where it went" do
       stub_missing
       stub_moved
 
-      expect(check).to eq([{ id: "I_known", moved_to: moved_url, state: :moved, url: known_url }])
+      expect(check).to eq([{ id: "I_known", moved_to: moved_url, remote_state: "moved", url: known_url }])
     end
 
     it "reports a deleted issue" do
       stub_vanished({ status: 410 })
 
-      expect(check).to eq([{ id: "I_known", state: :deleted, url: known_url }])
+      expect(check).to eq([{ id: "I_known", remote_state: "deleted", url: known_url }])
     end
 
     it "reports an issue I can no longer see as deleted" do
       stub_vanished({ status: 404 })
 
-      expect(check).to eq([{ id: "I_known", state: :deleted, url: known_url }])
+      expect(check).to eq([{ id: "I_known", remote_state: "deleted", url: known_url }])
     end
 
     it "fails rather than call an issue deleted when GitHub refuses the check" do

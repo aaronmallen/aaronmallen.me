@@ -6,8 +6,8 @@ require "time"
 module Record
   module GitHub
     class Transport
-      class Error < StandardError; end
-      class RateLimited < StandardError; end
+      class Error < Record::Error; end
+      class RateLimited < Record::RateLimited; end
 
       EMPTY_STATUSES = [404, 410].freeze
       GRAPHQL_PATH = "/graphql"

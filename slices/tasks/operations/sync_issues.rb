@@ -5,62 +5,67 @@ module Tasks
     class SyncIssues < Blog::Operation
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       EXTERNAL = Blog::Types::TaskList["external"]
-      GITHUB = Blog::Types::TaskSourceProvider["github"]
       OPEN = Blog::Types::TaskSourceState["open"]
-      UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
+      STARTED = Blog::Types::TaskSourceState["started"]
 
       include Deps[
         cancel_task: "operations.cancel_task",
-        client: "record.github.client",
         complete_task: "operations.complete_task",
         reopen_task: "operations.reopen_task",
+        start_task: "operations.start_task",
         task_repo: "repos.task_repo",
         task_source_repo: "repos.task_source_repo",
       ]
 
-      def call(now: Time.now)
-        known = tracked
-        assigned, checked = step fetch(known)
+      def call(provider:, client:, now: Time.now)
+        known = tracked(provider)
+        assigned, checked = step fetch(provider, client, known)
         fresh, held = assigned.partition { !known.key?(it[:id]) }
 
         [*held, *checked].each { follow(known.fetch(it[:id]), it, now) }
-        fresh.each { import(it) }.size
+        fresh.each { import(provider, it) }.size
       end
 
       private
 
       def copy(issue) = { title: issue[:title], note: issue[:body] }.transform_values { it&.delete("\0") }
 
-      def fetch(known)
+      def fetch(provider, client, known)
         return Failure(:not_configured) unless client.configured?
 
         assigned = client.assigned_issues.items
         unseen = known.except(*assigned.map { it[:id] }).transform_values(&:url)
 
         Success([assigned, client.issues(unseen)])
-      rescue Record::GitHub::Client::RateLimited
+      rescue Record::RateLimited
         Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error => e
-        Failure([:github_failed, e.message])
+      rescue Record::Error => e
+        Failure([:"#{provider}_failed", e.message])
       end
 
       def follow(source, issue, now)
-        state = state_of(issue)
+        state = issue.fetch(:remote_state)
         task = task_repo.by_id(source.task_id)
 
         transaction do
-          settle(task, state, now) unless state == source.remote_state
+          settle(task, state, source.remote_state, now) unless state == source.remote_state
           rewrite(task, issue)
           restamp(source, state, issue[:url])
         end
       end
 
-      def import(issue)
+      def import(provider, issue)
         transaction do
           task = task_repo.create(**copy(issue), list: EXTERNAL, position: task_repo.next_position)
-          task_source_repo.create(task_id: task.id, provider: GITHUB, remote_id: issue[:id], url: issue[:url],
+          task_source_repo.create(task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url],
                                   remote_state: OPEN)
         end
+      end
+
+      def reopen(task, was)
+        return unless task.closed? || (was == STARTED && task.in_progress?)
+
+        reopen_task.call(task.id)
       end
 
       def restamp(source, state, url)
@@ -76,24 +81,16 @@ module Tasks
         task_repo.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
       end
 
-      def settle(task, state, now)
+      def settle(task, state, was, now)
         case state
-        when OPEN then task.closed? && reopen_task.call(task.id)
+        when OPEN then reopen(task, was)
+        when STARTED then task.in_progress? || start_task.call(task.id)
         when COMPLETED then task.done? || complete_task.call(task.id, at: now)
         else task.closed? || cancel_task.call(task.id, at: now)
         end
       end
 
-      def state_of(issue)
-        case issue
-        in { state: :moved | :deleted => gone } then Blog::Types::TaskSourceState[gone.to_s]
-        in { assigned: false } then UNASSIGNED
-        in { state: :closed, reason: } then Blog::Types::TaskSourceState[reason.to_s]
-        else OPEN
-        end
-      end
-
-      def tracked = task_source_repo.still_there(GITHUB).to_h { [it.remote_id, it] }
+      def tracked(provider) = task_source_repo.still_there(provider).to_h { [it.remote_id, it] }
     end
   end
 end
