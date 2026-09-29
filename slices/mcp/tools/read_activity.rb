@@ -31,7 +31,8 @@ module MCP
 
       description "Read one window of the activity feed, newest first, every kind in it: commits with their " \
                   "whole message, repository, sha and lines added and deleted, published posts, journal entries, " \
-                  "posted social posts, approved webmentions, finished tasks, projects, sprints and suggestions. " \
+                  "posted social posts, approved webmentions, done tasks but never canceled ones, projects, " \
+                  "sprints and suggestions. " \
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
                   "deletions, status, targets, excerpt and task_type its kind holds. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the window. " \

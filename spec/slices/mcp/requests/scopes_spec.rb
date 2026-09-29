@@ -11,12 +11,13 @@ RSpec.describe "MCP tool scopes", type: :request do
       ],
       "suggest" => %w[suggest_edits],
       "write" => %w[
-        accept_suggestion_edits add_work_entry archive_project capture_task complete_task create_journal_entry
-        create_post create_social_post delete_journal_entry delete_post delete_social_post delete_task delete_work_entry
-        drop_sprint import_commits link_tasks mark_message moderate_webmention move_project move_task plan_sprint
-        publish_post reject_suggestion_edits remove_tag remove_task_type reopen_task reorder_task reorder_task_type
-        restore_project save_project save_tag save_task save_task_type schedule_task send_social_post start_task
-        unlink_task update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
+        accept_suggestion_edits add_work_entry archive_project cancel_task capture_task complete_task
+        create_journal_entry create_post create_social_post delete_journal_entry delete_post delete_social_post
+        delete_task delete_work_entry drop_sprint import_commits link_tasks mark_message moderate_webmention
+        move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag remove_task_type reopen_task
+        reorder_task reorder_task_type restore_project save_project save_tag save_task save_task_type schedule_task
+        send_social_post start_task unlink_task update_journal_entry update_post update_social_post
+        update_webmention_settings write_post_seo
       ],
     }
   end

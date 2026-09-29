@@ -37,6 +37,8 @@ module MCP
       class << self
         private
 
+        def cancel_task(server_context) = server_context.fetch(:cancel_task)
+
         def capture_task(server_context) = server_context.fetch(:capture_task)
 
         def complaint(errors)

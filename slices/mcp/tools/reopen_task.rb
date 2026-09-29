@@ -5,7 +5,7 @@ module MCP
     class ReopenTask < TaskTool
       SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
 
-      description "Reopen one task, done or started: it goes back to open where it sits"
+      description "Reopen one task, done, canceled or started: it goes back to open where it sits"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 

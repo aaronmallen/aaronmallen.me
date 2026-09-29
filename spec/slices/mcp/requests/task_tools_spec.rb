@@ -42,6 +42,14 @@ RSpec.describe "MCP task tools", type: :request do
       expect(listed_titles).to contain_exactly("open", "started", "finished")
     end
 
+    it "tells a canceled task from a done one" do
+      create(:task, :done, title: "finished")
+      create(:task, :canceled, title: "dropped")
+      call_tool("list_tasks", statuses: %w[canceled])
+
+      expect(content.fetch("tasks")).to contain_exactly(include("title" => "dropped", "status" => "canceled"))
+    end
+
     it "narrows to the statuses it names" do
       create(:task, title: "open")
       create(:task, :in_progress, title: "started")
@@ -138,6 +146,13 @@ RSpec.describe "MCP task tools", type: :request do
       call_tool("read_task", id: task.id)
 
       expect(content.fetch("sprint_on")).to eq((today + 2).iso8601)
+    end
+
+    it "shows a canceled task as canceled, with the time it closed" do
+      task = create(:task, :canceled, completed_at: at(today))
+      call_tool("read_task", id: task.id)
+
+      expect(content).to include("status" => "canceled", "completed_at" => at(today).utc.iso8601)
     end
 
     it "refuses a task that is not there" do
@@ -321,7 +336,34 @@ RSpec.describe "MCP task tools", type: :request do
       expect(content).to include("status" => "open", "completed_at" => nil)
     end
 
-    %w[start_task complete_task reopen_task delete_task].each do |name|
+    it "reopens a canceled task" do
+      task = create(:task, :canceled)
+      call_tool("reopen_task", id: task.id)
+
+      expect(content).to include("status" => "open", "completed_at" => nil)
+    end
+
+    { "open" => [], "in_progress" => [:in_progress] }.each do |status, traits|
+      it "cancels a task that is #{status}", :aggregate_failures do
+        task = create(:task, *traits)
+        call_tool("cancel_task", id: task.id)
+
+        expect(content.fetch("status")).to eq("canceled")
+        expect(content.fetch("completed_at")).not_to be_nil
+      end
+    end
+
+    %i[done canceled].each do |status|
+      it "refuses to cancel a task that is #{status}", :aggregate_failures do
+        task = create(:task, status, completed_at: at(today - 1))
+        call_tool("cancel_task", id: task.id)
+
+        expect(message).to eq("task #{task.id} is already done or canceled")
+        expect(tasks.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: at(today - 1))
+      end
+    end
+
+    %w[start_task complete_task reopen_task cancel_task delete_task].each do |name|
       it "refuses #{name} on a task that is not there", :aggregate_failures do
         call_tool(name, id: 999_999)
 

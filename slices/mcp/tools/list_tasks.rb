@@ -12,7 +12,7 @@ module MCP
           statuses: {
             type: "array",
             items: { type: "string", enum: STATUSES },
-            description: "open, in_progress (started) or done; every status when you leave it out",
+            description: "open, in_progress (started), done or canceled; every status when you leave it out",
           },
           to: { type: "string", description: "the last day of the window, as YYYY-MM-DD" },
         },

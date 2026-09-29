@@ -64,8 +64,8 @@ module MCP
     import keys: %w[operations.remove_tag operations.save_tag queries.all queries.usage], from: :tags
 
     import keys: %w[
-      operations.capture_task operations.complete_task operations.current_sprint operations.delete_task
-      operations.drop_sprint operations.link_tasks operations.move_task operations.plan_sprint
+      operations.cancel_task operations.capture_task operations.complete_task operations.current_sprint
+      operations.delete_task operations.drop_sprint operations.link_tasks operations.move_task operations.plan_sprint
       operations.remove_task_type operations.reopen_task operations.reorder_task operations.reorder_task_type
       operations.save_task operations.save_task_type operations.schedule_task operations.start_task
       operations.unlink_task queries.find_tasks queries.sprints_between queries.task_by_id

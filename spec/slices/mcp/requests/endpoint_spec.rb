@@ -109,12 +109,12 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def write_tools
     %w[
-      accept_suggestion_edits add_work_entry archive_project capture_task complete_task create_journal_entry create_post
-      create_social_post delete_journal_entry delete_post delete_social_post delete_task delete_work_entry drop_sprint
-      import_commits link_tasks mark_message moderate_webmention move_project move_task plan_sprint publish_post
-      reject_suggestion_edits remove_tag remove_task_type reopen_task reorder_task reorder_task_type restore_project
-      save_project save_tag save_task save_task_type schedule_task send_social_post start_task unlink_task
-      update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
+      accept_suggestion_edits add_work_entry archive_project cancel_task capture_task complete_task create_journal_entry
+      create_post create_social_post delete_journal_entry delete_post delete_social_post delete_task delete_work_entry
+      drop_sprint import_commits link_tasks mark_message moderate_webmention move_project move_task plan_sprint
+      publish_post reject_suggestion_edits remove_tag remove_task_type reopen_task reorder_task reorder_task_type
+      restore_project save_project save_tag save_task save_task_type schedule_task send_social_post start_task
+      unlink_task update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
     ]
   end
 
@@ -536,6 +536,14 @@ RSpec.describe "MCP endpoint", type: :request do
       read_activity
 
       expect(entries.first).to include("kind" => "task", "name" => "Clear the inbox", "task_type" => "Chore")
+    end
+
+    it "leaves a canceled task out" do
+      create(:task, :done, completed_at: at(16), title: "Clear the inbox")
+      create(:task, :canceled, completed_at: at(17), title: "Drop the idea")
+      read_activity
+
+      expect(names).to eq(["Clear the inbox"])
     end
 
     it "sends every kind the feed holds" do
@@ -1649,6 +1657,11 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(prompt_text).to include("list_tasks with the statuses open and in_progress")
     end
 
+    it "asks for the canceled tasks and counts them apart from the done ones", :aggregate_failures do
+      expect(prompt_text).to include("list_tasks with the status canceled and from 2026-01-01 and to 2026-03-31")
+      expect(prompt_text).to include("report them apart from the done ones")
+    end
+
     it "names only tools the server offers" do
       named = named_tools
       rpc("tools/list")
@@ -1885,6 +1898,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "accept_suggestion_edits" => { suggestion_id: 1 },
         "add_work_entry" => { org: "Acme", role: "Engineer", from_year: 2019 },
         "archive_project" => { id: 1 },
+        "cancel_task" => { id: 1 },
         "capture_task" => { title: "Email the accountant" },
         "complete_task" => { id: 1 },
         "compose_announcement" => { id: 1 },

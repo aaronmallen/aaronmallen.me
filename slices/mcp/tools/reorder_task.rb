@@ -10,7 +10,7 @@ module MCP
       }.freeze
 
       description "Move one open task a place up or down among the open tasks in its list or sprint. " \
-                  "At either end, or once done, it stays put and moved comes back false"
+                  "At either end, or once done or canceled, it stays put and moved comes back false"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
