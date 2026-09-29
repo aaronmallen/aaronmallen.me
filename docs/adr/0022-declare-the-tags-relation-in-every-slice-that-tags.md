@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809]
+amended: [AA-809, "#76"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -37,7 +37,8 @@ join relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and name
 
 A tagging repo writes tags itself, as `post_tags.replace(id, tags.claim(names).values_at(*names))` in
 `PostRepo#replace_tags` does, and the same in the project, journal entry and task repos. `claim` inserts each
-missing name with the least used colour and does nothing for a name that exists.
+missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope
+(ADR 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones.
 
 `tags` is the one table several slices write, and the one exception to reaching another slice only through its
 exports.
@@ -56,7 +57,8 @@ One schema block has five copies, kept in step only by the mixin. A scope added 
 `Blog::DB::Tags` leaves the other four behind, which is the cost the record on exports names.
 
 A new tagged kind needs a tags relation and a join relation in its own slice, a `replace_tags` repo method, and a
-`JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it.
+`JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its join
+table holds a `tag_scope` column pinned to that scope (ADR 0074).
 
 A tag that `claim` writes runs none of `Tags::Contracts::TagContract`. Its name passes only the tagged record's
 contract, through `Blog::Types::TagList` and the `tag_slugs` rule, and the `tag_name` domain in Postgres.

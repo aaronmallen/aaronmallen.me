@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, activity, admin, mcp, tasks]
 issue: "#17"
+amended: ["#76"]
 tags: [tasks, tags, task-types, schema, migrations, admin, mcp, activity]
 ---
 
@@ -58,6 +59,9 @@ tag also takes the least used colour, as `claim` gives it, not the colour its ty
 
 Tags share one namespace across posts, projects, the journal and tasks (ADR 0022). The new tags list on the tags
 screen beside the others, and a type that merges into a post's tag leaves that tag naming posts and tasks alike.
+
+Since #76, tags split into a public scope for posts and projects and a private scope for tasks and the journal
+(ADR 0074). A tag that named posts and tasks alike became two rows, one in each scope.
 
 Finding the tasks of one kind goes through the `tag:` search term, not a filter on the tasks page.
 
