@@ -3,6 +3,7 @@
 module Tasks
   module Operations
     class SyncIssues < Blog::Operation
+      COMMENT_FIELDS = %i[author body url].freeze
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       EXTERNAL = Blog::Types::TaskList["external"]
       OPEN = Blog::Types::TaskSourceState["open"]
@@ -14,6 +15,7 @@ module Tasks
         complete_task: "operations.complete_task",
         reopen_task: "operations.reopen_task",
         start_task: "operations.start_task",
+        task_comment_repo: "repos.task_comment_repo",
         task_repo: "repos.task_repo",
         task_source_repo: "repos.task_source_repo",
       ]
@@ -34,6 +36,18 @@ module Tasks
 
         { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
       end
+
+      def discuss(source, issue)
+        return unless listening?(source, issue)
+
+        fresh = heard(issue)
+        held = held(source, fresh.keys)
+
+        fresh.each_value { keep(held[it[:remote_id]], source, it) }
+        drop(held.except(*fresh.keys).values)
+      end
+
+      def drop(gone) = gone.empty? || task_comment_repo.delete_synced(gone.map(&:id))
 
       def fetch(provider, client, known)
         return Failure(:not_configured) unless client.configured?
@@ -56,7 +70,14 @@ module Tasks
           settle(task, state, source.remote_state, now) unless state == source.remote_state
           rewrite(task, issue)
           restamp(source, state, issue[:url])
+          discuss(source, issue)
         end
+      end
+
+      def heard(issue) = issue.fetch(:comments).filter_map { said(it) }.to_h { [it[:remote_id], it] }
+
+      def held(source, remote_ids)
+        task_comment_repo.synced(source.task_id, source.provider, remote_ids).to_h { [it.remote_id, it] }
       end
 
       def import(provider, issue, now)
@@ -66,6 +87,15 @@ module Tasks
           follow(task_source_repo.create(**source), issue, now)
         end
       end
+
+      def keep(held, source, comment)
+        return task_comment_repo.create(**comment, task_id: source.task_id, provider: source.provider) unless held
+
+        changes = { **comment.slice(*COMMENT_FIELDS), task_id: source.task_id }
+        task_comment_repo.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
+      end
+
+      def listening?(source, issue) = issue.key?(:comments) && !task_repo.by_id(source.task_id).closed?
 
       def reopen(task, was)
         return unless task.closed? || (was == STARTED && task.in_progress?)
@@ -84,6 +114,14 @@ module Tasks
 
         fields = copy(issue)
         task_repo.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
+      end
+
+      def said(comment)
+        body = comment[:body]&.delete("\0")
+        return unless body&.match?(VISIBLE)
+
+        { author: comment[:author], body:, created_at: comment[:created_at], remote_id: comment.fetch(:id),
+          url: comment.fetch(:url) }
       end
 
       def settle(task, state, was, now)

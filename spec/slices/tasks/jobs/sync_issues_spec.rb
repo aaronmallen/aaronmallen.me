@@ -15,6 +15,10 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def api = "https://api.github.com"
 
+  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
+
+  def discussed(*nodes, **) = issue(comments: { nodes: }, **)
+
   def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::ISSUES)
 
   def imported(id = "I_seven") = repo.by_source("github", id)
@@ -155,6 +159,114 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(imported.title).to eq("Sync my issues")
+    end
+  end
+
+  describe "an issue's comments" do
+    let(:at) { Time.utc(2026, 9, 28, 12) }
+
+    def copied(id, author:, at:)
+      { author:, body: "Looks good", created_at: at, provider: "github", remote_id: id,
+        url: "https://github.com/aaronmallen/aaronmallen.me/issues/7#issuecomment-#{id.delete_prefix('IC_')}" }
+    end
+
+    def remote(comment) = comment.to_h.slice(:author, :body, :created_at, :provider, :remote_id, :url)
+
+    def sync_twice(first, second)
+      stub_assigned(first)
+      sync
+      stub_assigned(second)
+      sync
+    end
+
+    it "arrive on its task with author, body, time and link" do
+      stub_assigned(discussed(github_comment("IC_1", at:), github_comment("IC_2", author: "hubot", at: at + 60)))
+      sync
+
+      expect(comments.map { remote(it) })
+        .to eq([copied("IC_1", author: "octocat", at:), copied("IC_2", author: "hubot", at: at + 60)])
+    end
+
+    it "arrive on a task already tracked" do
+      task = tracked
+      stub_assigned(discussed(github_comment("IC_1")))
+      sync
+
+      expect(comments(task).map(&:remote_id)).to eq(%w[IC_1])
+    end
+
+    it "add no rows and change nothing when synced again unchanged", :aggregate_failures do
+      stub_assigned(discussed(github_comment("IC_1"), github_comment("IC_2")))
+      before = sync.then { comments.map(&:to_h) }
+      sync
+
+      expect(comments.map(&:to_h)).to eq(before)
+      expect(Tasks::Slice["relations.task_comments"].count).to eq(2)
+    end
+
+    it "take an edit made on GitHub" do
+      sync_twice(discussed(github_comment("IC_1")), discussed(github_comment("IC_1", body: "Edited")))
+
+      expect(comments.map(&:body)).to eq(%w[Edited])
+    end
+
+    it "lose one deleted on GitHub" do
+      sync_twice(discussed(github_comment("IC_1"), github_comment("IC_2")), discussed(github_comment("IC_2")))
+
+      expect(comments.map(&:remote_id)).to eq(%w[IC_2])
+    end
+
+    it "leave my own comments alone" do
+      task = tracked
+      mine = create(:task_comment, task_id: task.id)
+      stub_assigned(discussed(github_comment("IC_1")))
+      sync
+
+      expect(comments(task).map(&:id)).to include(mine.id)
+    end
+
+    it "skip a comment with nothing to show once cleaned" do
+      stub_assigned(discussed(github_comment("IC_1", body: "\u0000 "), github_comment("IC_2", body: "Fine\u0000")))
+      sync
+
+      expect(comments.map { [it.remote_id, it.body] }).to eq([%w[IC_2 Fine]])
+    end
+
+    it "stop coming to a task I finished" do
+      task = tracked(:done)
+      stub_assigned(discussed(github_comment("IC_1")))
+      sync
+
+      expect(comments(task)).to be_empty
+    end
+
+    it "stop coming to a canceled task" do
+      task = tracked(:canceled, state: "not_planned")
+      stub_known(discussed(github_comment("IC_1"), state: "CLOSED", stateReason: "NOT_PLANNED"))
+      sync
+
+      expect(comments(task)).to be_empty
+    end
+
+    it "stop coming once the issue is taken off me and its task canceled" do
+      task = tracked
+      stub_known(discussed(github_comment("IC_1"), assignees: ["MDQ6VXNlcjE="]))
+      sync
+
+      expect(comments(task)).to be_empty
+    end
+
+    context "when GitHub rate limits the run part way" do
+      before { stub_github(GitHubGraphQL::ISSUES_QUERY, github_rate_limited) }
+
+      it "save nothing", :aggregate_failures do
+        tracked
+        stub_assigned(github_issue("I_eight", number: 8, comments: { nodes: [github_comment("IC_1")] }))
+        sync
+
+        expect(failure).to include(reason: "rate_limited")
+        expect(Tasks::Slice["relations.task_comments"].count).to eq(0)
+      end
     end
   end
 
@@ -307,6 +419,15 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       2.times { sync }
 
       expect(Tasks::Slice["relations.task_sources"].count).to eq(2)
+    end
+
+    it "moves the issue's comments to the new task" do
+      create(:task_comment, :synced, task_id: tracked(:canceled, state: "moved").id, remote_id: "IC_1")
+      stub_assigned(github_issue("I_three", repo: "aaronmallen/elsewhere", number: 3,
+                                            comments: { nodes: [github_comment("IC_1")] }))
+      sync
+
+      expect(comments(imported("I_three")).map(&:remote_id)).to eq(%w[IC_1])
     end
 
     it "imports nothing when the moved issue is no longer mine" do

@@ -6,6 +6,7 @@ module Record
       module Queries
         ASSIGNED_SEARCH = "is:issue is:open assignee:@me sort:created-asc"
         MAX_ASSIGNEES = 10
+        MAX_COMMENTS = 100
         PAGE_SIZE = 100
 
         FIELDS = <<~GRAPHQL.freeze
@@ -13,6 +14,7 @@ module Record
             id number url title body state stateReason
             repository { nameWithOwner }
             assignees(first: #{MAX_ASSIGNEES}) { nodes { id } }
+            comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt author { login } } }
           }
         GRAPHQL
 
@@ -67,11 +69,17 @@ module Record
 
       private
 
+      def comment(node)
+        { author: node.dig("author", "login"), body: node["body"].to_s,
+          created_at: Time.iso8601(node.fetch("createdAt")), id: node.fetch("id"), url: node.fetch("url") }
+      end
+
       def issue(node, viewer)
         repo = node.dig("repository", "nameWithOwner")
 
         {
-          body: node["body"].to_s, id: node.fetch("id"), reference: "#{repo}##{node.fetch('number')}",
+          body: node["body"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
+          id: node.fetch("id"), reference: "#{repo}##{node.fetch('number')}",
           remote_state: remote_state(node, viewer), repo:, title: node.fetch("title"), url: node.fetch("url"),
         }
       end

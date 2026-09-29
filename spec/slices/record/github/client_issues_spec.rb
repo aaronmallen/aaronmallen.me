@@ -14,6 +14,8 @@ RSpec.describe Record::GitHub::Client do
 
   def closed_as(reason) = stub_known(known(state: "CLOSED", stateReason: reason))
 
+  def discussed(*nodes) = known(comments: { nodes: })
+
   def known(**) = github_issue("I_known", number: 7, **)
 
   def many_urls = (1..101).to_h { ["I_#{it}", "https://github.com/aaronmallen/aaronmallen.me/issues/#{it}"] }
@@ -46,8 +48,8 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", id: "I_one", reference: "someorg/tool#4", remote_state: "open", repo: "someorg/tool",
-        title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
+      { body: "It broke", comments: [], id: "I_one", reference: "someorg/tool#4", remote_state: "open",
+        repo: "someorg/tool", title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
     end
 
     it "lists each one with its id, reference, title, body, URL and repository" do
@@ -77,6 +79,29 @@ RSpec.describe Record::GitHub::Client do
       expect(assigned.items.map { it[:id] }).to eq(%w[I_one])
     end
 
+    it "lists each issue's comments with author, body, time and URL" do
+      at = Time.utc(2026, 9, 28, 12)
+      stub_assigned(github_issue_search(discussed(github_comment("IC_1", at:))))
+
+      comment = { author: "octocat", body: "Looks good", created_at: at, id: "IC_1",
+                  url: "#{known_url}#issuecomment-1" }
+
+      expect(assigned.items.first[:comments]).to eq([comment])
+    end
+
+    it "leaves the author empty for a deleted account" do
+      stub_assigned(github_issue_search(discussed(github_comment("IC_1", author: nil))))
+
+      expect(assigned.items.first[:comments].first[:author]).to be_nil
+    end
+
+    it "asks for the first 100 comments of each issue" do
+      stub_assigned(github_issue_search)
+      assigned
+
+      expect(github_request("comments(first: 100)")).to have_been_made
+    end
+
     it "records the rate limit it spent" do
       stub_assigned(github_issue_search(remaining: 4321))
       assigned
@@ -87,7 +112,7 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the issues already imported" do
     let(:still_mine) do
-      { body: "Edited", id: "I_known", reference: "aaronmallen/aaronmallen.me#7", remote_state: "open",
+      { body: "Edited", comments: [], id: "I_known", reference: "aaronmallen/aaronmallen.me#7", remote_state: "open",
         repo: "aaronmallen/aaronmallen.me", title: "Renamed", url: known_url }
     end
 
@@ -95,6 +120,12 @@ RSpec.describe Record::GitHub::Client do
       stub_known(known(title: "Renamed", body: "Edited"))
 
       expect(check).to eq([still_mine])
+    end
+
+    it "reports each issue's comments" do
+      stub_known(discussed(github_comment("IC_1")))
+
+      expect(check.first[:comments].map { it[:id] }).to eq(%w[IC_1])
     end
 
     it "reports an issue closed as completed" do

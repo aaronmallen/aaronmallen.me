@@ -15,6 +15,11 @@ module GitHubGraphQL
     { name:, target: { history: { pageInfo: github_page_info(more, "#{name}-page-2"), nodes: commits } } }
   end
 
+  def github_comment(id, body: "Looks good", author: "octocat", at: Time.now - 600)
+    { author: author && { login: author }, body:, createdAt: github_time(at), id:,
+      url: "https://github.com/aaronmallen/aaronmallen.me/issues/7#issuecomment-#{id.delete_prefix('IC_')}" }
+  end
+
   def github_commit(sha, at:, committed: at, message: "admin: add the importer", additions: 12, deletions: 3)
     { additions:, authoredDate: github_time(at), committedDate: github_time(committed), deletions:, message:,
       oid: sha }
@@ -25,8 +30,8 @@ module GitHubGraphQL
   end
 
   def github_issue(id, number: 1, repo: "aaronmallen/aaronmallen.me", assignees: [VIEWER_ID], **fields)
-    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", id:, number:,
-      repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil, title: "Sync my issues",
+    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", comments: { nodes: [] }, id:,
+      number:, repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil, title: "Sync my issues",
       url: "https://github.com/#{repo}/issues/#{number}" }.merge(fields)
   end
 
