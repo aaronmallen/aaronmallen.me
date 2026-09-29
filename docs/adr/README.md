@@ -71,6 +71,7 @@ one.
 | [0064][0064] | Close a task as done or canceled under one completed_at | ![Active][active] | 2026-09-28 |
 | [0065][0065] | Label a task with tags alone | ![Active][active] | 2026-09-28 |
 | [0066][0066] | Keep an imported task's origin in a task_sources table | ![Active][active] | 2026-09-28 |
+| [0067][0067] | Park an imported task on an external list | ![Active][active] | 2026-09-28 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -138,5 +139,6 @@ one.
 [0064]: 0064-close-a-task-as-done-or-canceled-under-one-completed-at.md
 [0066]: 0066-keep-an-imported-tasks-origin-in-a-task-sources-table.md
 [0065]: 0065-label-a-task-with-tags-alone.md
+[0067]: 0067-park-an-imported-task-on-an-external-list.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [writing ADRs]: ../writing-adrs.md
