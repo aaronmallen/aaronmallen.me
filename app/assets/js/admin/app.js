@@ -10,6 +10,7 @@ import { setupPostSyndication } from "./post_syndication.js";
 import { setupProjectEditors } from "./project_editor.js";
 import { setupSocialComposers } from "./social_composer.js";
 import { setupTaskKeys } from "./task_key.js";
+import { setupTaskPanel } from "./task_panel.js";
 import { setupToasts } from "./toast.js";
 import { setupWorkForms } from "./work_form.js";
 
@@ -25,5 +26,6 @@ setupPostSyndication();
 setupProjectEditors();
 setupSocialComposers();
 setupTaskKeys();
+setupTaskPanel();
 setupToasts();
 setupWorkForms();

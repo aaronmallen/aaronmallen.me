@@ -95,7 +95,7 @@ module Admin
           end
 
           def link_title(task)
-            a(class: "task-link-title", href: task_path(task)) { task.title }
+            a(class: "task-link-title", href: task_path(task), data: { task_open: true }) { task.title }
           end
 
           def links

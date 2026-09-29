@@ -17,8 +17,10 @@ module Admin
           def view_template
             dialog(**ATTRIBUTES) do
               div(class: "task-dialog-box") do
-                h2(id: TITLE_ID, class: "card-title") { t(".title") }
-                TaskForm(scope: SCOPE, today: @today) { close }
+                h2(id: TITLE_ID, class: "card-title", data: { task_modal_title: t(".edit_title") }) { t(".title") }
+                div(data: { task_modal_body: true }) do
+                  TaskForm(scope: SCOPE, today: @today) { close }
+                end
               end
             end
           end

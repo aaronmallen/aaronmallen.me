@@ -15,7 +15,22 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
-  def screens
+  def dialogs = { "task modal" => -> { open_modal }, "task panel" => -> { open_panel } }
+
+  def open_modal
+    open_panel
+    find("dialog#task-panel .btn", text: "Edit").click
+    find("dialog#task-create[open] [data-task-edit]")
+  end
+
+  def open_panel
+    visit "/admin/tasks?filter=next"
+    find(".task-title", text: task.title).click
+    find("dialog#task-panel[open] h1", text: task.title)
+    settle("#task-panel")
+  end
+
+  def pages
     {
       "activity" => "/admin/activity",
       "analytics" => "/admin/analytics",
@@ -49,6 +64,8 @@ RSpec.describe "Admin screens", type: :feature do
       "webmentions" => "/admin/webmentions",
     }
   end
+
+  def screens = pages.merge(dialogs)
 
   def seed
     seed_analytics

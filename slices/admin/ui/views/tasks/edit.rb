@@ -57,7 +57,7 @@ module Admin
               i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
               span { t(".delete") }
             end
-            a(class: "btn sm gh", href: task_path) { t(".cancel") }
+            a(class: "btn sm gh", href: task_path, data: { task_close: true }) { t(".cancel") }
           end
 
           def key = PREFIX + @task.id.to_s

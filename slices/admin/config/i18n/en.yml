@@ -665,6 +665,7 @@ en:
           label: "Create Task"
         create_dialog:
           cancel: "Cancel"
+          edit_title: "Edit the task"
           title: "New task"
         field_error:
           kind:
@@ -714,6 +715,8 @@ en:
         order:
           down: "Move %{task} down"
           up: "Move %{task} up"
+        panel:
+          label: "Task"
         planner:
           ask: "What do you want to achieve today?"
           empty: "empty sprint"

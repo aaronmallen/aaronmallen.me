@@ -17,7 +17,9 @@ RSpec.shared_examples "accessible screens" do
     show(screen)
     evaluate_script(<<~JS)
       (() => {
-        const stops = [...document.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]')]
+        const modal = document.querySelector('dialog:modal');
+        const scope = modal ?? document;
+        const stops = [...scope.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]')]
           .filter((el) => el.tabIndex >= 0 && !el.disabled && el.type !== 'hidden')
           .filter((el) => el.checkVisibility({ opacityProperty: true, visibilityProperty: true }))
           .filter((el) => {
@@ -29,7 +31,7 @@ RSpec.shared_examples "accessible screens" do
 
         const top = document.createElement('span');
         top.tabIndex = -1;
-        document.body.prepend(top);
+        (modal ?? document.body).prepend(top);
         top.focus();
 
         return stops;

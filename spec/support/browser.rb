@@ -74,6 +74,13 @@ module Spec
 
     def request_gate = Capybara.app
 
+    def settle(selector)
+      evaluate_async_script(<<~JS, selector)
+        const done = arguments[arguments.length - 1];
+        Promise.all(document.querySelector(arguments[0]).getAnimations().map((a) => a.finished)).then(() => done(true));
+      JS
+    end
+
     def show(screen)
       screen.respond_to?(:call) ? instance_exec(&screen) : visit(screen)
     end

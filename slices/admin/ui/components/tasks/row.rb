@@ -89,7 +89,9 @@ module Admin
           end
 
           def task_title
-            a(class: "task-title", href: path(:admin_task, id: @task.id, filter: @tab || @filter, origin: @origin)) do
+            href = path(:admin_task, id: @task.id, filter: @tab || @filter, origin: @origin)
+
+            a(class: "task-title", href:, data: { task_open: true }) do
               @task.title
             end
           end

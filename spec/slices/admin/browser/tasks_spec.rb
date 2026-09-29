@@ -4,6 +4,8 @@ RSpec.describe "Admin tasks", type: :feature do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
   let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
 
+  def active = evaluate_script("document.activeElement.textContent.trim()")
+
   def create_task(title, list: "next", **fields)
     click_link("Create Task")
     within("dialog#task-create") do
@@ -14,6 +16,8 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  def modal = find("dialog#task-create[open]")
+
   def move_to(list)
     named = translate(["ui.components.tasks.controls.lists", list].join("."))
 
@@ -22,10 +26,24 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def open_editor(title)
     open_task(title)
-    click_link(translate("ui.views.tasks.show.edit"))
+    panel.click_link(translate("ui.views.tasks.show.edit"))
+    modal.assert_selector("[data-task-edit]")
   end
 
-  def open_task(title) = find(".task", text: title).find(".task-title").click
+  def open_task(title)
+    find(".task", text: title).find(".task-title").click
+    panel.assert_selector("h1", exact_text: title)
+    settle("#task-panel")
+  end
+
+  def panel = find("dialog#task-panel[open]")
+
+  def scripts_off
+    page.driver.browser.page.disable_javascript
+    visit "/admin/tasks?filter=next"
+  end
+
+  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
 
   def tag_task(title, tags)
     open_editor(title)
@@ -136,18 +154,18 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  def watch_clipboard
+    page.execute_script(<<~JS)
+      window.copiedKeys = [];
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: (text) => { window.copiedKeys.push(text); return Promise.resolve(); } },
+      });
+    JS
+  end
+
   describe "the key" do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { "##{task.id}" }
-
-    def watch_clipboard
-      page.execute_script(<<~JS)
-        window.copiedKeys = [];
-        Object.defineProperty(navigator, "clipboard", {
-          value: { writeText: (text) => { window.copiedKeys.push(text); return Promise.resolve(); } },
-        });
-      JS
-    end
 
     describe "clicking it" do
       before do
@@ -162,12 +180,9 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     describe "with scripts off" do
-      before do
-        page.driver.browser.page.disable_javascript
-        visit "/admin/tasks?filter=next"
-      end
+      before { scripts_off }
 
-      after { page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false) }
+      after { scripts_on }
 
       it "still shows the key" do
         expect(find(".task", text: "Email the accountant")).to have_css(".task-key", exact_text: key)
@@ -331,30 +346,130 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "opening a task" do
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:key) { "##{task.id}" }
+
+    def sideways?(selector) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{selector})")
+
     before { open_task("Email the accountant") }
 
-    it "shows its page" do
-      task = repo.in_list("next").find { it.title == "Email the accountant" }
-
-      expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=next&origin=tasks")
+    it "shows it in the panel and stays on the list", :aggregate_failures do
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(panel).to have_css(".task-key", exact_text: key)
     end
 
-    it "heads the page with the title" do
+    it "closes on Escape and hands focus back to the row", :aggregate_failures do
+      panel.send_keys(:escape)
+
+      expect(page).to have_no_css("dialog#task-panel[open]")
+      expect(active).to eq("Email the accountant")
+    end
+
+    it "closes on a click outside and hands focus back to the row", :aggregate_failures do
+      page.driver.browser.mouse.click(x: 1200, y: 400)
+
+      expect(page).to have_no_css("dialog#task-panel[open]")
+      expect(active).to eq("Email the accountant")
+    end
+
+    it "closes on the back button" do
+      panel.click_link(translate("ui.views.tasks.show.back_tasks"))
+
+      expect(page).to have_no_css("dialog#task-panel[open]").and have_current_path("/admin/tasks?filter=next")
+    end
+
+    it "copies the key from the panel" do
+      watch_clipboard
+      panel.find(".task-key").click
+
+      expect(page).to have_css(".toast", text: translate("ui.components.tasks.task_key.copied", key:))
+    end
+
+    it "comes back to the list after an action in the panel", :aggregate_failures do
+      panel.click_button(translate("ui.components.tasks.controls.cancel"))
+
+      expect(page).to have_css(".toast", text: "Canceled").and have_no_css("dialog#task-panel[open]")
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+    end
+
+    it "spans a phone with no sideways scroll", :aggregate_failures do
+      page.driver.resize(375, 800)
+
+      expect(evaluate_script("document.querySelector('#task-panel').getBoundingClientRect().width")).to eq(375)
+      expect(sideways?("document.querySelector('#task-panel')")).to be(false)
+      expect(sideways?("document.documentElement")).to be(false)
+    end
+  end
+
+  describe "opening a task with scripts off" do
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+
+    before do
+      scripts_off
+      find(".task", text: "Email the accountant").find(".task-title").click
+    end
+
+    after { scripts_on }
+
+    it "opens its page", :aggregate_failures do
+      expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=next&origin=tasks")
       expect(page).to have_css("h1", exact_text: "Email the accountant")
+    end
+  end
+
+  describe "opening a task from Today" do
+    before do
+      sprint = sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today)
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
+      visit "/admin"
+      open_task("Ship it")
+    end
+
+    it "shows it in the panel and stays on Today" do
+      expect(page).to have_current_path("/admin")
+    end
+
+    it "comes back to Today after an action in the panel", :aggregate_failures do
+      panel.click_button(translate("ui.components.tasks.controls.start"))
+
+      expect(page).to have_css(".toast", text: "Started")
+      expect(page).to have_current_path("/admin")
+    end
+  end
+
+  describe "opening a task from the archive" do
+    before do
+      create(:task, :done, title: "Filed the taxes")
+      visit "/admin/tasks?filter=completed"
+      open_task("Filed the taxes")
+    end
+
+    it "shows it in the panel and stays on the archive" do
+      expect(page).to have_current_path("/admin/tasks?filter=completed")
+    end
+
+    it "comes back to the archive after an action in the panel", :aggregate_failures do
+      panel.click_button(translate("ui.components.tasks.controls.reopen"))
+
+      expect(page).to have_css(".toast", text: "Reopened")
+      expect(page).to have_current_path("/admin/tasks?filter=completed")
     end
   end
 
   describe "editing a task" do
     before { open_editor("Email the accountant") }
 
-    it "opens the form filled with the task" do
-      expect(page).to have_field("task[title]", with: "Email the accountant")
+    it "closes the panel and opens the modal filled with the task", :aggregate_failures do
+      expect(page).to have_no_css("dialog#task-panel[open]")
+      expect(modal).to have_field("task[title]", with: "Email the accountant")
+      expect(modal).to have_css(".card-title", exact_text: translate("ui.components.tasks.create_dialog.edit_title"))
     end
 
     it "saves what I change and comes back to the list", :aggregate_failures do
       fill_in("task[tags]", with: "admin")
       click_button("Save")
 
+      expect(page).to have_css(".toast", text: "Task saved")
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .task-tag", text: "#admin")
     end
@@ -367,27 +482,71 @@ RSpec.describe "Admin tasks", type: :feature do
       expect(page).to have_css(".task-title", text: "Email the accountant")
     end
 
-    it "keeps what I typed and says what went wrong when the save fails", :aggregate_failures do
-      fill_in("task[title]", with: " ")
-      fill_in("task[tags]", with: "not_a_tag")
-      click_button("Save")
+    def fail_save = save_with(title: " ", tags: "not_a_tag")
 
-      expect(page).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
-      expect(page).to have_field("task[tags]", with: "not_a_tag")
+    def save_with(**fields)
+      fields.each { |name, value| fill_in("task[#{name}]", with: value) }
+      click_button("Save")
     end
 
-    it "goes back to the task's page on Cancel without saving", :aggregate_failures do
-      fill_in("task[title]", with: "Something else")
-      click_link(translate("ui.views.tasks.edit.cancel"))
+    it "keeps what I typed and says what went wrong in the modal when the save fails", :aggregate_failures do
+      fail_save
 
-      expect(page).to have_css("h1", exact_text: "Email the accountant")
+      expect(modal).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
+      expect(modal).to have_field("task[tags]", with: "not_a_tag")
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+    end
+
+    it "saves once the errors are fixed" do
+      fail_save
+      modal.assert_selector(".field-error", count: 2)
+      save_with(title: "Email the bookkeeper", tags: "")
+
+      expect(page).to have_css(".task-title", text: "Email the bookkeeper")
+    end
+
+    it "closes on Cancel without saving and hands focus back to the row", :aggregate_failures do
+      fill_in("task[title]", with: "Something else")
+      modal.click_link(translate("ui.views.tasks.edit.cancel"))
+
+      expect(page).to have_no_css("dialog#task-create[open]")
+      expect(active).to eq("Email the accountant")
       expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+    end
+
+    it "gives the Create Task dialog back its own form once closed", :aggregate_failures do
+      modal.send_keys(:escape)
+      click_link("Create Task")
+
+      expect(modal).to have_css(".card-title", exact_text: translate("ui.components.tasks.create_dialog.title"))
+      expect(modal).to have_field("task[title]", with: "")
     end
 
     it "fits a phone without scrolling the page sideways" do
       page.driver.resize(375, 800)
 
       expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+    end
+  end
+
+  describe "editing a task with scripts off" do
+    before do
+      scripts_off
+      find(".task", text: "Email the accountant").find(".task-title").click
+      click_link(translate("ui.views.tasks.show.edit"))
+    end
+
+    after { scripts_on }
+
+    it "opens the edit page" do
+      expect(page).to have_css("h1", exact_text: "Email the accountant").and have_field("task[title]")
+    end
+
+    it "shows what went wrong on the page when the save fails" do
+      fill_in("task[title]", with: " ")
+      click_button("Save")
+
+      expect(page).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
     end
   end
 
@@ -456,6 +615,14 @@ RSpec.describe "Admin tasks", type: :feature do
       before do
         blocker
         visit "/admin/tasks?filter=next"
+      end
+
+      it "shows the linked task in the panel when I click it", :aggregate_failures do
+        open_task("Email the accountant")
+        panel.click_link("Learn Elixir")
+
+        expect(panel).to have_css("h1", exact_text: "Learn Elixir")
+        expect(page).to have_current_path("/admin/tasks?filter=next")
       end
 
       it "removes it from the task's page", :aggregate_failures do

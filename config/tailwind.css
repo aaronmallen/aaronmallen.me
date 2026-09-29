@@ -163,6 +163,14 @@
   --spacing-toast: 26px;
   --shadow-toast: 0 16px 44px rgb(0 0 0 / 40%);
   --shadow-palette: 0 30px 80px rgb(0 0 0 / 50%);
+
+  --animate-task-panel-in: task-panel-in 180ms ease-out;
+
+  @keyframes task-panel-in {
+    from {
+      translate: -100% 0;
+    }
+  }
 }
 
 @utility icon-button {
@@ -2043,6 +2051,32 @@
 
 @utility task-dialog-box {
   @apply flex w-full max-w-palette flex-col gap-3 rounded-card border border-line bg-ground-sunk p-4 shadow-palette;
+}
+
+@utility task-panel {
+  @apply fixed inset-y-0 left-0 m-0 h-full max-h-full w-full max-w-palette overflow-x-hidden overflow-y-auto;
+  @apply border-0 border-r border-line bg-ground p-0 shadow-palette;
+
+  &[open] {
+    @apply motion-safe:animate-task-panel-in;
+  }
+
+  &::backdrop {
+    background: color-mix(in oklab, var(--color-ground) 72%, transparent);
+    backdrop-filter: blur(3px);
+  }
+
+  @media (width < 43.75rem) {
+    @apply max-w-full border-r-0;
+  }
+}
+
+@utility task-panel-body {
+  @apply min-h-full p-5 outline-none;
+
+  @media (width < 43.75rem) {
+    @apply p-4;
+  }
 }
 
 @utility swatches {
