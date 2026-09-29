@@ -57,8 +57,6 @@ module Tasks
         where(Sequel.ilike(:title, pattern) | Sequel.ilike(:note, pattern))
       end
 
-      def newest_finished = order(self[:completed_at].desc, self[:id].desc)
-
       def newest_first = order(Sequel.function(:coalesce, :completed_at, :created_at).desc, self[:id].desc)
 
       def open = exclude(status: CLOSED)
@@ -79,6 +77,12 @@ module Tasks
       def preceding(task)
         where(Sequel.|(Sequel[:position] < task.position, Sequel.&({ position: task.position }, Sequel[:id] < task.id)))
           .order(self[:position].desc, self[:id].desc)
+      end
+
+      def searched(tags: [], text: "")
+        found = self
+        found = found.matching(text) unless text.empty?
+        tags.empty? ? found : found.tagged(tags)
       end
 
       def sourced = where(id: task_sources.task_ids)

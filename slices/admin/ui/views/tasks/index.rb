@@ -64,10 +64,15 @@ module Admin
           def archive
             Card(label: t(".archive"), title: t(".completed")) do |card|
               card.side { span(class: "card-note") { t(".shown", count: @tasks.rows.size) } }
-              next Empty { t(filtering? ? ".empty.completed_no_match" : ".empty.completed") } if days.empty?
-
-              days.each { |(date, tasks)| day(date, tasks) }
+              archived
             end
+          end
+
+          def archived
+            return Empty { t(filtering? ? ".empty.completed_no_match" : ".empty.completed") } if days.empty?
+
+            days.each { |(date, tasks)| day(date, tasks) }
+            pager
           end
 
           def body
@@ -112,6 +117,8 @@ module Admin
             counts.join(SEPARATOR)
           end
 
+          def pager = Pager(page: @tasks, route: :admin_tasks, params: pager_params)
+
           def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
 
           def planner
@@ -131,7 +138,7 @@ module Admin
             return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.rows.empty?
 
             @tasks.rows.each_with_index { |task, index| row(task, index) }
-            Pager(page: @tasks, route: :admin_tasks, params: pager_params)
+            pager
           end
 
           def scheduled = (@today if today?)

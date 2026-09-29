@@ -7,8 +7,10 @@ module Tasks
 
       include Deps[task_repo: "repos.task_repo"]
 
-      def call(filter, sprint:, page:)
-        filter == TODAY ? task_repo.open_in_sprint_page(sprint.id, page) : task_repo.open_in_list_page(filter, page)
+      def call(filter, sprint:, page:, **search)
+        return task_repo.open_in_sprint_page(sprint.id, page, **search) if filter == TODAY
+
+        task_repo.open_in_list_page(filter, page, **search)
       end
     end
   end

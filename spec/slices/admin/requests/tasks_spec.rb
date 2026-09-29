@@ -1888,12 +1888,6 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_no_css("nav.pager a[rel='next']")
       end
 
-      it "keeps the search on the pager" do
-        get "/admin/tasks", filter: "next", q: "i"
-
-        expect(pager_link("next")).to eq("/admin/tasks?filter=next&q=i&page=2")
-      end
-
       it "counts the whole pool on its tab and card", :aggregate_failures do
         get "/admin/tasks", filter: "next"
 
@@ -2120,6 +2114,47 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "searching past the first page" do
+      def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]
+
+      def search(query, **) = get("/admin/tasks", { q: query, filter: "next", ** })
+
+      before do
+        lower_page_size(:admin, to: 2)
+        create(:task, title: "Email the accountant", position: 10)
+        create(:task, title: "Ship the search", position: 20)
+        create(:task, title: "Ship the docs", position: 30)
+        create(:task, title: "Ship the fix", position: 40)
+      end
+
+      it "finds a match that sits past the first page of the list" do
+        search("fix")
+
+        expect(titles).to eq(["Ship the fix"])
+      end
+
+      it "pages the matches", :aggregate_failures do
+        search("ship")
+
+        expect(titles).to eq(["Ship the search", "Ship the docs"])
+        expect(pager_link("next")).to eq("/admin/tasks?filter=next&q=ship&page=2")
+      end
+
+      it "keeps the query on the next page", :aggregate_failures do
+        search("ship", page: 2)
+
+        expect(titles).to eq(["Ship the fix"])
+        expect(pager_link("prev")).to eq("/admin/tasks?filter=next&q=ship")
+        expect(page).to have_field(i18n.t("ui.components.tasks.filters.search"), with: "ship")
+      end
+
+      it "answers 404 for a page of matches past the end" do
+        search("ship", page: 3)
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
     describe "the filters beside the search" do
       before do
         create(:task, title: "Email the accountant")
@@ -2243,6 +2278,69 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "completed", q: "nothing here"
 
         expect(page).to have_css(".empty", exact_text: index("empty.completed_no_match"))
+      end
+
+      it "offers no pager when every finished task fits" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css("nav.pager")
+      end
+    end
+
+    describe "paging the archive" do
+      def finished(title, days_ago)
+        create(:task, :done, title:, completed_at: Time.now - (days_ago * 86_400))
+      end
+
+      def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]
+
+      before do
+        lower_page_size(:admin, to: 2)
+        finished("Seed the queue", 3)
+        finished("Move the toggle", 2)
+        finished("Index the activities", 1)
+        finished("Ship the screen", 0)
+      end
+
+      it "shows the most recently closed tasks first and links to older ones", :aggregate_failures do
+        get "/admin/tasks", filter: "completed"
+
+        expect(titles).to eq(["Ship the screen", "Index the activities"])
+        expect(pager_link("next")).to eq("/admin/tasks?filter=completed&page=2")
+        expect(page).to have_no_css("nav.pager a[rel='prev']")
+      end
+
+      it "shows the older tasks on the next page and links back", :aggregate_failures do
+        get "/admin/tasks", filter: "completed", page: 2
+
+        expect(titles).to eq(["Move the toggle", "Seed the queue"])
+        expect(pager_link("prev")).to eq("/admin/tasks?filter=completed")
+        expect(page).to have_no_css("nav.pager a[rel='next']")
+      end
+
+      it "still counts every finished task on the tab" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.all(".subtab-count").last.text).to eq("4")
+      end
+
+      it "answers 404 for a page past the end" do
+        get "/admin/tasks", filter: "completed", page: 3
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "pages the matches of a search and keeps the query", :aggregate_failures do
+        get "/admin/tasks", filter: "completed", q: "the", page: 2
+
+        expect(titles).to eq(["Move the toggle", "Seed the queue"])
+        expect(pager_link("prev")).to eq("/admin/tasks?filter=completed&q=the")
+      end
+
+      it "finds a match past the first page" do
+        get "/admin/tasks", filter: "completed", q: "seed"
+
+        expect(titles).to eq(["Seed the queue"])
       end
     end
 

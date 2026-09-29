@@ -20,7 +20,6 @@ module Admin
         list_tasks: "tasks.queries.list_tasks",
         open_task_counts: "tasks.queries.open_task_counts",
         planned_tasks: "tasks.queries.planned_tasks",
-        search_tasks: "tasks.queries.search_tasks",
         sprints_after: "tasks.queries.sprints_after",
       ]
 
@@ -28,12 +27,12 @@ module Admin
         sprint = step current_sprint.call(now:)
         today = Blog::TimeZone.today(now)
         planned = sprints_after.call(today)
-        tasks = step listed(tab, sprint, planned, page)
         filters = { query: Blog::Types::TrimmedText[query] }
+        tasks = step listed(tab, sprint, planned, page, SearchQuery.parse(filters[:query], fields: FIELDS))
 
         {
-          counts: counts(sprint, planned, today), filters:, pool: Blog::Types::TaskListParam[pool], tab:,
-          tasks: filtered(tasks, filters), today:, **plan(tab, tasks, planned, page),
+          counts: counts(sprint, planned, today), filters:, pool: Blog::Types::TaskListParam[pool], tab:, tasks:,
+          today:, **plan(tab, tasks, planned, page),
         }
       end
 
@@ -47,28 +46,16 @@ module Admin
         )
       end
 
-      def filtered(tasks, filters)
-        found = matching(filters[:query])
-
-        found.nil? ? tasks : tasks.with(rows: tasks.rows.select { found.include?(it.id) })
-      end
-
       def first_page(page) = Blog::Page.new(number: 1, size: page.size)
 
-      def listed(tab, sprint, planned, page)
+      def listed(tab, sprint, planned, page, search)
         tasks = case tab
-                when COMPLETED then whole(list_finished_tasks.call)
-                when UPCOMING then whole(planned_tasks.call(planned))
-                else list_tasks.call(tab, sprint:, page:)
+                when COMPLETED then list_finished_tasks.call(page:, **search)
+                when UPCOMING then whole(planned_tasks.call(planned, **search))
+                else list_tasks.call(tab, sprint:, page:, **search)
                 end
 
         tasks.past_end? ? Failure(:past_end) : Success(tasks)
-      end
-
-      def matching(query)
-        return nil if query.empty?
-
-        search_tasks.call(**SearchQuery.parse(query, fields: FIELDS)).to_set(&:id)
       end
 
       def plan(tab, tasks, planned, page)

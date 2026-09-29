@@ -41,7 +41,9 @@ module Tasks
         page.fill(found.newest_first.paged(page).to_a)
       end
 
-      def finished = with_details.combine(:sprint).closed.newest_finished.to_a
+      def finished(page, **search)
+        page.fill(with_details.combine(:sprint).closed.searched(**search).newest_first.paged(page).to_a)
+      end
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
 
@@ -80,12 +82,14 @@ module Tasks
 
       def open_in_list(list) = with_details.in_list(list).open.in_order.to_a
 
-      def open_in_list_page(list, page) = page.fill(with_details.in_list(list).open.in_order.paged(page).to_a)
+      def open_in_list_page(list, page, **search)
+        page.fill(with_details.in_list(list).open.searched(**search).in_order.paged(page).to_a)
+      end
 
-      def open_in_sprint(sprint_id) = with_details.for_sprint(sprint_id).open.in_order.to_a
+      def open_in_sprint(sprint_id, **search) = with_details.for_sprint(sprint_id).open.searched(**search).in_order.to_a
 
-      def open_in_sprint_page(sprint_id, page)
-        page.fill(with_details.for_sprint(sprint_id).open.in_order.paged(page).to_a)
+      def open_in_sprint_page(sprint_id, page, **search)
+        page.fill(with_details.for_sprint(sprint_id).open.searched(**search).in_order.paged(page).to_a)
       end
 
       def release_sprint(sprint_id)
@@ -100,14 +104,6 @@ module Tasks
       def replace_tags(id, names) = task_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def return_to_list(id) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT)
-
-      def search(tags:, text:)
-        found = with_details
-        found = found.matching(text) unless text.empty?
-        found = found.tagged(tags) unless tags.empty?
-
-        found.in_order.to_a
-      end
 
       def swap_positions(one, two)
         transaction do
