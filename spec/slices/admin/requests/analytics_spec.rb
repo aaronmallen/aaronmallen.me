@@ -209,6 +209,32 @@ RSpec.describe "Admin analytics", type: :request do
       end
     end
 
+    describe "with more paths, referrers and countries than a list holds" do
+      let(:codes) { %w[AU BR CA DE ES FR GB IN JP MX US] }
+
+      before do
+        create(:analytics_rollup, day: today, views: 500, visitors: 300, read_seconds: 0)
+        11.times do |n|
+          create(:analytics_rollup_path, day: today, path: "/writing/post-#{n}", views: n + 1, visitors: 1, bounces: 0)
+          create(:analytics_rollup_referrer, day: today, host: "site-#{n}.example", views: 30 - n, visitors: n + 1)
+          create(:analytics_rollup_country, day: today, country_code: codes[n], views: 30 - n, visitors: n + 1)
+        end
+        get "/admin/analytics"
+      end
+
+      it "lists the top 10 paths by views" do
+        expect(page.all(".tbl-path").map(&:text)).to eq(10.downto(1).map { "/writing/post-#{it}" })
+      end
+
+      it "lists the top 10 referrers by visitors" do
+        expect(meter_card("Referrers").all(".meter-name").map(&:text)).to eq(10.downto(1).map { "site-#{it}.example" })
+      end
+
+      it "lists the top 10 countries by visitors" do
+        expect(meter_card("Geography").all(".meter-name").map(&:text)).to eq(codes.drop(1).reverse)
+      end
+    end
+
     describe "with a range that reaches past the event window" do
       before do
         create(:analytics_rollup, day: today - 5, views: 20, visitors: 10, read_seconds: 0)
@@ -276,12 +302,12 @@ RSpec.describe "Admin analytics", type: :request do
 
     describe "with more mentioned posts than the card holds" do
       before do
-        8.times { |n| create(:webmention, post: create(:post, :published, title: "Post #{n}")) }
+        11.times { |n| create(:webmention, post: create(:post, :published, title: "Post #{n}")) }
         get "/admin/analytics"
       end
 
       it "lists only as many posts as the other side cards" do
-        expect(meter_card("Webmentions per post").all(".meter-name").size).to eq(6)
+        expect(meter_card("Webmentions per post").all(".meter-name").size).to eq(10)
       end
     end
 

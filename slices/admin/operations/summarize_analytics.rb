@@ -5,13 +5,12 @@ module Admin
     class SummarizeAnalytics
       KEYS = { countries: :country_code, paths: :path, referrers: :host }.freeze
       RANKS = { countries: :visitors, paths: :views, referrers: :visitors }.freeze
-      SIDE_ROWS = 6
       SUMS = {
         countries: %i[views visitors].freeze,
         paths: %i[views visitors read_seconds bounces].freeze,
         referrers: %i[views visitors].freeze,
       }.freeze
-      TOP_PATHS = 10
+      TOP_ROWS = 10
       TOTALS = %i[views visitors read_seconds].freeze
       ZERO_DAY = { views: 0, visitors: 0 }.freeze
 
@@ -50,16 +49,16 @@ module Admin
       def mentioned_posts(counts)
         rows = posts_by_ids.call(counts.keys).map { { count: counts.fetch(it.id), title: it.title } }
 
-        rows.sort_by { [-it[:count], it[:title]] }.take(SIDE_ROWS)
+        rows.sort_by { [-it[:count], it[:title]] }.take(TOP_ROWS)
       end
 
       def period(from, to)
         today = unrolled(to)
 
         {
-          countries: ranked(:countries, country_counts.call(from:, to:), today).take(SIDE_ROWS),
-          paths: ranked(:paths, top_paths.call(from:, to:), today).take(TOP_PATHS),
-          referrers: ranked(:referrers, referrer_counts.call(from:, to:), today).take(SIDE_ROWS),
+          countries: ranked(:countries, country_counts.call(from:, to:), today).take(TOP_ROWS),
+          paths: ranked(:paths, top_paths.call(from:, to:), today).take(TOP_ROWS),
+          referrers: ranked(:referrers, referrer_counts.call(from:, to:), today).take(TOP_ROWS),
           series: series(from, to, today),
           totals: totals(from, to, today),
         }
