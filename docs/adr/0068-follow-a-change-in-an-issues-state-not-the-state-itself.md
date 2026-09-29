@@ -5,7 +5,8 @@ status: active
 created: 2026-09-29
 area: [db, tasks]
 issue: "#33"
-tags: [tasks, imports, github, sync, schema, enums]
+amended: ["#43"]
+tags: [tasks, imports, github, linear, sync, schema, enums]
 ---
 
 # ADR 0068: Follow a change in an issue's state, not the state itself
@@ -34,6 +35,9 @@ matches, the task keeps whatever status the operator gave it.
 
 A row at `moved` or `deleted` has nothing left on GitHub to follow, so the sync stops reading it.
 
+Issue #43 added this note: ADR 0070 holds this rule for every provider, not GitHub alone. Each provider's client
+works out `remote_state`, Linear's mapping lives in that record, and `task_source_state` gains `started` for it.
+
 ## Alternatives
 
 **Match the issue on every run.** No stored state: an open issue means an open task. It lost because it reopens a
@@ -53,6 +57,7 @@ When GitHub does change, it wins. A task the operator canceled goes to done when
 The rule covers status alone. The sync copies an issue's title and body whenever they differ from the task's, so an
 edit to an imported task's title or note lasts only until the next run.
 
-A new state GitHub can report needs a value in `task_source_state`, which takes a migration of its own.
+A new state GitHub, or any provider ADR 0070 adds, can report needs a value in `task_source_state`, which takes a
+migration of its own.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

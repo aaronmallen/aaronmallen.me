@@ -5,7 +5,8 @@ status: active
 created: 2026-09-28
 area: [db, tasks]
 issue: "#9"
-tags: [tasks, schema, imports, github, providers, enums, constraints]
+amended: ["#43"]
+tags: [tasks, schema, imports, github, linear, providers, enums, constraints]
 ---
 
 # ADR 0066: Keep an imported task's origin in a task_sources table
@@ -28,7 +29,8 @@ sync in another slice reaches the rows only through what tasks exports (ADR 0003
 A row holds the task, the provider, the issue's id on that provider and the issue's URL. `provider` takes a new
 Postgres enum, since the providers form a closed set (ADR 0015). It holds `github` alone, and a new provider adds a
 value. A unique index on provider and id means Postgres, not the sync, refuses a second import of one issue. A row
-goes when its task does.
+goes when its task does. #43 added this note: ADR 0070 adds `linear` as the second provider, and shares one sync
+across both.
 
 ## Alternatives
 
