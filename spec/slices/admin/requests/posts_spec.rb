@@ -140,13 +140,25 @@ RSpec.describe "Admin posts", type: :request do
       expect(page).to have_css(".li-sub", exact_text: "/writing/hello · Sep 1, 2026 · 1 word · 0 views")
     end
 
-    it "shows the tags as pills, each in the colour its tag carries" do
-      create(:tag, name: "ruby", color: "mk-green")
-      create(:tag, name: "hanami", color: "mk-sand")
-      create(:post, tags: %w[ruby hanami])
-      get "/admin/posts"
+    describe "tags" do
+      before do
+        create(:tag, name: "ruby", color: "mk-green")
+        create(:tag, name: "hanami", color: "mk-sand")
+        create(:post, tags: %w[ruby hanami])
+        get "/admin/posts"
+      end
 
-      expect(page.all(".li-side .pill.sand, .li-side .pill.green").map(&:text)).to eq(%w[hanami ruby])
+      it "shows each tag in the colour it carries" do
+        expect(page.all(".li-side .post-tag.sand, .li-side .post-tag.green").map(&:text)).to eq(%w[hanami ruby])
+      end
+
+      it "links each tag to its public page" do
+        expect(page.all(".li-side a.post-tag").map { it[:href] }).to eq(%w[/writing/tags/hanami /writing/tags/ruby])
+      end
+
+      it "draws no tag as a pill" do
+        expect(page).to have_no_css(".li-side .pill.green, .li-side .pill.sand")
+      end
     end
 
     it "counts the mentions a post received in a pill" do

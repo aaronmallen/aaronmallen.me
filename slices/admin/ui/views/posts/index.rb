@@ -5,6 +5,8 @@ module Admin
     module Views
       module Posts
         class Index < View
+          include Components::Posts
+
           ALL = Blog::Types::PostFilter["all"]
           DRAFT = Blog::Types::PostStatus["draft"]
           PUBLISHED = Blog::Types::PostStatus["published"]
@@ -62,7 +64,7 @@ module Admin
 
           def row(post)
             ListItem(title: post.title, href: path(:admin_edit_post, id: post.id), sub: row_sub(post)) do
-              post.tags.each { |tag| Pill(color: Blog::UI::Components::Pill.for_tag_color(tag.color)) { tag.name } }
+              Tags(tags: post.tags)
               mentions(post)
               StatusPill(status: post.status)
             end
