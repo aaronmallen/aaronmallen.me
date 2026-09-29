@@ -12,12 +12,13 @@ module Public
 
       include Deps["routes", "settings"]
 
-      def call(posts, title:, url:, feed_url:)
+      def call(posts, title:, html:, feed:, params: {})
         xml = Builder::XmlMarkup.new(indent: 2)
         xml.instruct!(:xml, version: "1.0", encoding: "UTF-8")
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
-          feed_head(xml, posts, title:, url:, feed_url:)
-          posts.each { entry(xml, it) }
+          feed_head(xml, posts, title:, html:, params:)
+          feed_links(xml, posts, html:, feed:, params:)
+          posts.rows.each { entry(xml, it) }
         end
       end
 
@@ -47,16 +48,24 @@ module Public
         xml.updated(timestamp(post.changed_at))
       end
 
-      def feed_head(xml, posts, title:, url:, feed_url:)
-        xml.id(url)
+      def feed_head(xml, posts, title:, html:, params:)
+        xml.id(url(html, params))
         xml.title(title)
-        xml.updated(timestamp(posts.map(&:changed_at).max || Time.now))
-        xml.link(rel: "alternate", type: HTML_TYPE, href: url)
-        xml.link(rel: "self", type: MEDIA_TYPE, href: feed_url)
+        xml.updated(timestamp(posts.rows.map(&:changed_at).max || Time.now))
         xml.author { xml.name(settings.owner[:name]) }
       end
 
+      def feed_links(xml, posts, html:, feed:, params:)
+        xml.link(rel: "alternate", type: HTML_TYPE, href: url(html, params, posts.number))
+        xml.link(rel: "self", type: MEDIA_TYPE, href: url(feed, params, posts.number))
+        { "next" => posts.next_number, "previous" => posts.previous_number }.each do |rel, number|
+          xml.link(rel:, type: MEDIA_TYPE, href: url(feed, params, number)) if number
+        end
+      end
+
       def timestamp(time) = time.utc.iso8601
+
+      def url(route, params, number = 1) = routes.url(route, **params, **Blog::Page.query(number)).to_s
     end
   end
 end

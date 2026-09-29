@@ -5,6 +5,8 @@ RSpec.describe "Feeds", type: :request do
 
   def entry_ids = feed.xpath("/feed/entry/id").map(&:text)
 
+  def post_urls(*slugs) = slugs.map { "https://aaronmallen.me/writing/#{it}" }
+
   def publish(slug, minutes_ago, **attrs)
     create(:post, :published, slug:, title: slug.capitalize, published_at: Time.now - (minutes_ago * 60), **attrs)
   end
@@ -219,6 +221,86 @@ RSpec.describe "Feeds", type: :request do
     end
   end
 
+  it "carries the newest 25 posts" do
+    26.times { publish("post-#{it}", it) }
+    get "/writing.atom"
+
+    expect(entry_ids).to eq(Array.new(25) { "https://aaronmallen.me/writing/post-#{it}" })
+  end
+
+  describe "paging" do
+    def link(rel) = feed.at_xpath("/feed/link[@rel='#{rel}']")&.[](:href)
+
+    def links = %w[self alternate next previous].to_h { [it, link(it)] }
+
+    before do
+      lower_page_size(:public, to: 2)
+      %w[first second third fourth fifth].each_with_index { |slug, index| publish(slug, 5 - index, tags: %w[ruby]) }
+    end
+
+    {
+      "/writing.atom" => ["https://aaronmallen.me/writing", "https://aaronmallen.me/writing.atom"],
+      "/writing/tags/ruby.atom" => ["https://aaronmallen.me/writing/tags/ruby",
+                                    "https://aaronmallen.me/writing/tags/ruby.atom"],
+    }.each do |path, (html, atom)|
+      describe path do
+        it "carries the newest page and links to older posts", :aggregate_failures do
+          get path
+
+          expect(entry_ids).to eq(post_urls("fifth", "fourth"))
+          expect(links).to eq("self" => atom, "alternate" => html, "next" => "#{atom}?page=2", "previous" => nil)
+        end
+
+        it "names the next page and links both ways", :aggregate_failures do
+          get "#{path}?page=2"
+
+          expect(entry_ids).to eq(post_urls("third", "second"))
+          expect(links).to eq("self" => "#{atom}?page=2", "alternate" => "#{html}?page=2",
+                              "next" => "#{atom}?page=3", "previous" => atom)
+        end
+
+        it "links only to newer posts from the last page", :aggregate_failures do
+          get "#{path}?page=3"
+
+          expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/first])
+          expect(links).to eq("self" => "#{atom}?page=3", "alternate" => "#{html}?page=3",
+                              "next" => nil, "previous" => "#{atom}?page=2")
+        end
+
+        it "keeps one feed id on every page" do
+          get "#{path}?page=2"
+
+          expect(value("/feed/id")).to eq(html)
+        end
+
+        it "serves valid Atom on a later page" do
+          get "#{path}?page=2"
+
+          expect(last_response.body).to be_valid_atom
+        end
+
+        it "links no other page when one page holds every post" do
+          lower_page_size(:public, to: 5)
+          get path
+
+          expect(links.values_at("next", "previous")).to eq([nil, nil])
+        end
+
+        it "returns 404 for a page past the end" do
+          get "#{path}?page=4"
+
+          expect(last_response).to be_not_found
+        end
+
+        it "returns 404 for a page that is no page" do
+          get "#{path}?page=two"
+
+          expect(last_response).to be_not_found
+        end
+      end
+    end
+  end
+
   describe "a reader polling again" do
     let(:post_repo) { Posts::Slice["repos.post_repo"] }
     let(:yesterday) { Time.now - (24 * 60 * 60) }
@@ -307,6 +389,51 @@ RSpec.describe "Feeds", type: :request do
           expect(last_response.status).to eq(200)
           expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
         end
+      end
+    end
+
+    %w[/writing.atom?page=2 /writing/tags/ruby.atom?page=2].each do |path|
+      describe "#{path} at one post a page" do
+        before do
+          lower_page_size(:public, to: 1)
+          get path
+        end
+
+        it "answers 304 to a reader that sends the time back" do
+          poll(path, last_modified: validators[:last_modified])
+
+          expect(last_response.status).to eq(304)
+        end
+
+        it "answers 304 to a reader that sends the ETag back" do
+          poll(path, etag: validators[:etag])
+
+          expect(last_response.status).to eq(304)
+        end
+
+        it "answers 200 once a newer post pushes another onto the page", :aggregate_failures do
+          sent = validators
+          publish("newest", 0, tags: %w[ruby])
+          poll(path, **sent)
+
+          expect(last_response.status).to eq(200)
+          expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
+        end
+      end
+    end
+
+    describe "the last page at one post a page" do
+      before do
+        lower_page_size(:public, to: 1)
+        get "/writing.atom?page=2"
+      end
+
+      it "answers 200 once an older page appears" do
+        sent = validators
+        publish("oldest", 3 * 24 * 60)
+        poll("/writing.atom?page=2", etag: sent[:etag])
+
+        expect(last_response.status).to eq(200)
       end
     end
   end

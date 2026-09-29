@@ -34,13 +34,13 @@ module Public
     end
 
     def feed_etag(posts)
-      versions = posts.map { "#{it.id}@#{it.changed_at.utc.iso8601(6)}" }
-      %(W/"#{Digest::SHA256.hexdigest(versions.join(','))}")
+      versions = posts.rows.map { "#{it.id}@#{it.changed_at.utc.iso8601(6)}" }
+      %(W/"#{Digest::SHA256.hexdigest([posts.more, *versions].join(','))}")
     end
 
     def halt_if_feed_unchanged(request, response, posts)
       etag = feed_etag(posts)
-      last_modified = posts.map(&:changed_at).max
+      last_modified = posts.rows.map(&:changed_at).max
       response.headers[LAST_MODIFIED] = last_modified.httpdate if last_modified
       return response.fresh(etag:) if request.get_header(IF_NONE_MATCH)
 

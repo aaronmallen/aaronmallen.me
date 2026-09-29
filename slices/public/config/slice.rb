@@ -15,8 +15,8 @@ module Public
     import keys: %w[queries.public_by_tag queries.public_grid queries.work_entries], from: :projects
 
     import keys: %w[
-      queries.latest_published queries.next_published queries.previous_published queries.published
-      queries.published_by_slug queries.published_by_tag queries.published_page queries.published_page_by_tag
+      queries.latest_published queries.next_published queries.previous_published
+      queries.published_by_slug queries.published_page queries.published_page_by_tag
     ], from: :posts
 
     import keys: %w[

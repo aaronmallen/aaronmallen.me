@@ -7,7 +7,7 @@ module Public
         include Deps[
           "settings",
           atom_feed: "operations.render_atom_feed",
-          published_posts_by_tag: "posts.queries.published_by_tag",
+          published_page_by_tag: "posts.queries.published_page_by_tag",
         ]
 
         config.formats.clear.accept :atom
@@ -15,8 +15,8 @@ module Public
 
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }
-          posts = published_posts_by_tag.call(tag)
-          halt 404 if posts.empty?
+          posts = published_page_by_tag.call(tag, requested_page(request, response, settings.page_size[:public]))
+          halt 404 if posts.rows.empty?
           halt_if_feed_unchanged(request, response, posts)
 
           response.body = render_feed(posts, tag)
@@ -28,8 +28,9 @@ module Public
           atom_feed.call(
             posts,
             title: t(".title", tag:, owner: settings.owner[:name]),
-            url: routes.url(:tag, tag:).to_s,
-            feed_url: routes.url(:tag_feed, tag:).to_s,
+            html: :tag,
+            feed: :tag_feed,
+            params: { tag: },
           )
         end
       end

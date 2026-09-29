@@ -44,8 +44,6 @@ module Posts
 
       def published_by_slug(slug) = with_tags.published.with_slug(slug).one
 
-      def published_by_tag(tag) = with_tags.published.tagged(tag).newest_first.to_a
-
       def published_page(page) = page.fill(with_tags.published.newest_first.paged(page).to_a)
 
       def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
