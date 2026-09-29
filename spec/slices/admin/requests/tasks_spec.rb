@@ -396,6 +396,8 @@ RSpec.describe "Admin tasks", type: :request do
 
       def pool_note(key, **) = i18n.t(["ui.components.tasks.pools", key].join("."), **)
 
+      def pool_panels(selector) = page.all(".task-planner #{selector}", visible: :all).map { it["data-pool-panel"] }
+
       def pools = page.all(".task-planner .seg-option").map(&:text)
 
       it "asks what the day is for" do
@@ -460,6 +462,33 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(page.all(".task-planner .seg-option").map { it["href"] })
           .to eq(%w[next someday external].map { "/admin/tasks?filter=today&pool=#{it}" })
+      end
+
+      it "renders every pool" do
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(pool_panels("[data-pool-panel]")).to eq(%w[next someday external])
+      end
+
+      it "hides every pool but the chosen one" do
+        get "/admin/tasks", filter: "today", pool: "someday"
+
+        expect(pool_panels("[data-pool-panel][hidden]")).to eq(%w[next external])
+      end
+
+      it "names the pool each pull comes from" do
+        create(:task, title: "Email the accountant")
+        create(:task, :someday, title: "Learn Elixir")
+        get "/admin/tasks", filter: "today"
+
+        expect(page.all(".task-planner form [name='pool']", visible: :all).map(&:value)).to eq(%w[next someday])
+      end
+
+      it "returns to the pool a task was pulled from" do
+        task = create(:task, :someday)
+        send_to("/admin/tasks/#{task.id}/move/today", filter: "today", origin: "tasks", pool: "someday")
+
+        expect(last_response.headers["location"]).to eq("/admin/tasks?filter=today&pool=someday")
       end
 
       it "marks the pool on show" do

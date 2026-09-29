@@ -17,10 +17,11 @@ module Admin
 
         def task_tab(request) = Blog::Types::TaskTabParam[request.params[:filter]]
 
-        def tasks_path(request, filter: nil)
-          return routes.path(:admin_root) if from_today?(request)
+        def tasks_path(request, filter: nil, pool: nil)
+          query = pool ? { pool: } : {}
+          return routes.path(:admin_root, **query) if from_today?(request)
 
-          routes.path(:admin_tasks, filter: filter || task_tab(request))
+          routes.path(:admin_tasks, filter: filter || task_tab(request), **query)
         end
       end
     end

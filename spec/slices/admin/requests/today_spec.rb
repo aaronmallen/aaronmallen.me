@@ -1166,7 +1166,8 @@ RSpec.describe "Admin today", type: :request do
         task = create(:task, title: "Email the accountant")
         get "/admin"
         form = panel.find(".task-planner-pull form")
-        post form[:action], _csrf_token: admin_csrf_token, origin: form.find("[name='origin']", visible: :all).value
+        fields = %w[origin pool].to_h { [it, form.find("[name='#{it}']", visible: :all).value] }
+        post form[:action], _csrf_token: admin_csrf_token, **fields
         task
       end
 
@@ -1344,7 +1345,21 @@ RSpec.describe "Admin today", type: :request do
       it "comes back to Today after pulling from the pools under the sprint's tasks" do
         pull_under_sprint
 
-        expect(last_response.headers["location"]).to eq("/admin")
+        expect(last_response.headers["location"]).to eq("/admin?pool=next")
+      end
+
+      it "comes back to the pool a task was pulled from" do
+        task = create(:task, :someday)
+        post "/admin/tasks/#{task.id}/move/today", _csrf_token: admin_csrf_token, origin: "today", pool: "someday"
+
+        expect(last_response.headers["location"]).to eq("/admin?pool=someday")
+      end
+
+      it "renders every pool and hides all but the chosen one" do
+        get "/admin", pool: "external"
+
+        expect(panel.all("[data-pool-panel]:not([hidden])", visible: :all).map { it["data-pool-panel"] })
+          .to eq(%w[external])
       end
 
       it "offers the planner when the sprint holds nothing" do

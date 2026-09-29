@@ -26,12 +26,12 @@ module Admin
           )
 
           def view_template
-            div(class: "task-planner-pull") do
+            div(class: "task-planner-pull", data: { pools: "" }) do
               header(class: "card-head") do
                 div { span(class: "card-label") { t(".pull_from") } }
                 div(class: "card-side") { switch }
               end
-              rows
+              LISTS.each_key { pool(it) }
             end
           end
 
@@ -46,11 +46,15 @@ module Admin
             end
           end
 
+          def pool(list)
+            div(data: { pool_panel: list }, hidden: list != @pool) { rows(list) }
+          end
+
           def pool_link(list)
             current = list == @pool
 
             a(class: ["seg-option", ("current" if current)], href: pool_path(list),
-              aria: { current: ("true" if current) }) do
+              aria: { current: ("true" if current) }, data: { pool: list }) do
               t(LISTS.fetch(list), count: @pools.fetch(list).size)
             end
           end
@@ -61,9 +65,10 @@ module Admin
             path(from_today? ? :admin_root : :admin_tasks, **query)
           end
 
-          def pull_form(task)
+          def pull_form(task, list)
             Form(action: path(:admin_move_task, id: task.id, filter: TODAY)) do
               input(type: "hidden", name: "origin", value: @origin)
+              input(type: "hidden", name: "pool", value: list)
               Button(variant: :pri, type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
                 i(class: "fa-solid fa-arrow-turn-up", aria: { hidden: "true" })
                 span { t(".pull") }
@@ -71,21 +76,21 @@ module Admin
             end
           end
 
-          def row(task)
+          def row(task, list)
             div(class: "li") do
               div(class: "li-main") do
                 span(class: "li-title") { task.title }
                 meta(task)
               end
-              div(class: "li-side") { pull_form(task) }
+              div(class: "li-side") { pull_form(task, list) }
             end
           end
 
-          def rows
-            waiting = @pools.fetch(@pool)
-            return Empty { t(EMPTY.fetch(@pool)) } if waiting.empty?
+          def rows(list)
+            waiting = @pools.fetch(list)
+            return Empty { t(EMPTY.fetch(list)) } if waiting.empty?
 
-            div(class: "task-planner-list") { waiting.each { row(it) } }
+            div(class: "task-planner-list") { waiting.each { row(it, list) } }
           end
 
           def switch

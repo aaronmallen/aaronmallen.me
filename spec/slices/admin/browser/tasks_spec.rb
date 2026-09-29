@@ -52,6 +52,14 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
 
+  def scroll_down
+    execute_script(<<~JS)
+      document.querySelector("[data-pools] .seg").scrollIntoView({ block: "center" });
+      window.poolsLoaded = true;
+      window.poolsScroll = window.scrollY;
+    JS
+  end
+
   def tag_task(title, tags)
     open_editor(title)
     fill_in("task[tags]", with: tags)
@@ -233,7 +241,11 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     describe "switching the pool to someday" do
-      before { find(".task-planner .seg-option", exact_text: "someday · 1").click }
+      before do
+        page.driver.resize(1024, 400)
+        scroll_down
+        find(".task-planner .seg-option", exact_text: "someday · 1").click
+      end
 
       it "stays on the tasks screen" do
         expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
@@ -243,13 +255,51 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
         expect(page).to have_no_css(".task-planner .li-title", text: "Email the accountant")
       end
+
+      it "marks someday as the pool on show" do
+        expect(page).to have_css(".task-planner .seg-option.current[aria-current='true']", exact_text: "someday · 1")
+      end
+
+      it "switches without loading the page", :aggregate_failures do
+        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
+        expect(evaluate_script("window.poolsLoaded")).to be(true)
+        expect(evaluate_script("window.scrollY > 0 && window.scrollY === window.poolsScroll")).to be(true)
+      end
+
+      it "opens someday again on reload" do
+        refresh
+
+        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
+      end
+
+      it "returns to someday after pulling from it" do
+        find(".task-planner .li", text: "Learn Elixir").click_button("Pull in")
+
+        expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
+      end
+    end
+
+    describe "switching the pool with scripts off" do
+      before do
+        page.driver.browser.page.disable_javascript
+        visit "/admin/tasks?filter=today"
+        find(".task-planner .seg-option", exact_text: "someday · 1").click
+      end
+
+      after { scripts_on }
+
+      it "loads someday from the link", :aggregate_failures do
+        expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
+        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
+        expect(page).to have_no_css(".task-planner .li-title", text: "Email the accountant")
+      end
     end
 
     describe "pulling from next" do
       before { find(".task-planner .li", text: "Email the accountant").click_button("Pull in") }
 
       it "lands the task in today", :aggregate_failures do
-        expect(page).to have_current_path("/admin/tasks?filter=today")
+        expect(page).to have_current_path("/admin/tasks?filter=today&pool=next")
         expect(page).to have_css(".task-title", text: "Email the accountant")
       end
 
@@ -289,7 +339,7 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "lands in today, still linked to its issue", :aggregate_failures do
-        expect(page).to have_current_path("/admin/tasks?filter=today")
+        expect(page).to have_current_path("/admin/tasks?filter=today&pool=external")
         expect(find(".task", text: "Fix the feed")).to have_link(href: issue_url)
       end
 
@@ -640,7 +690,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "adds it to the sprint and stays on Today", :aggregate_failures do
-      expect(page).to have_current_path("/admin")
+      expect(page).to have_current_path("/admin?pool=next")
       expect(page).to have_css(".sprint-panel .task-title", text: "Email the accountant")
       expect(page).to have_css(".sprint-panel .task-title", text: "Ship it")
     end

@@ -11,11 +11,12 @@ module Admin
 
         def handle(request, response)
           filter = request.params[:filter]
+          pool = request.params[:pool]&.then { Blog::Types::TaskListParam[it] }
 
           case move_task.call(record_id(request), filter)
           in Success(_)
             toast(response, MOVED)
-            response.redirect_to(tasks_path(request, filter:))
+            response.redirect_to(tasks_path(request, filter:, pool:))
           in Failure(:not_found)
             halt 404
           else halt 500
