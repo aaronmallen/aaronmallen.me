@@ -106,7 +106,7 @@ module Admin
 
           def stats
             sprint_stat
-            Stat(key: t(".commits"), value: @commits[:entries].size, change: commits_note)
+            Stat(key: t(".commits"), value: @commit_totals[:commits], change: commits_note)
             Stat(key: t(".webmentions"), value: @webmentions[:count], change: t(".webmentions_note"))
             queue_stat
             Stat(key: t(".visitors"), value: @visitors)
@@ -115,7 +115,7 @@ module Admin
           def sub
             [
               t(".sub_tasks", done: sprint_done, total: sprint_tasks.size),
-              t(".sub_commits", count: @commits[:entries].size),
+              t(".sub_commits", count: @commit_totals[:commits]),
               t(".sub_entries", count: @journal[:entries].size),
               t(".sub_scheduled", count: queue[:today]),
             ].join(SEPARATOR)

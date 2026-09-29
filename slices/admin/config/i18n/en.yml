@@ -172,6 +172,7 @@ en:
         never_used: "never used"
         revoke: "Revoke"
       commits_card:
+        activity: "All of today's commits"
         empty: "Nothing pushed yet today."
         import: "Import now"
         importing: "Importing…"

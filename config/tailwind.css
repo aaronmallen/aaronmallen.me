@@ -1359,6 +1359,10 @@
   @apply mt-4 flex flex-col gap-3 border-t border-line pt-4;
 }
 
+@utility commits-foot {
+  @apply mt-4 flex;
+}
+
 @utility commit {
   @apply grid items-baseline gap-3;
   grid-template-columns: auto minmax(0, 1fr) auto;

@@ -3,6 +3,7 @@
 module Admin
   module Operations
     class SummarizeToday < Blog::Operation
+      COMMIT_LIMIT = 10
       COUNTRIES = "countries"
       DRAFT = Blog::Types::PostStatus["draft"]
       PENDING_MENTIONS = 3
@@ -45,7 +46,7 @@ module Admin
 
       def commits(now)
         {
-          entries: commits_today.call(now:),
+          entries: commits_today.call(now:, limit: COMMIT_LIMIT),
           last_synced_at: commits_last_synced_at.call,
           repos: recent_commit_repos.call(now:).size,
           today: Blog::TimeZone.today(now),

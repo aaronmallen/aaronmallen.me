@@ -5,7 +5,7 @@ module Record
     class CommitsToday
       include Deps[commit_repo: "repos.commit_repo"]
 
-      def call(now: Time.now) = commit_repo.today(now:)
+      def call(now: Time.now, limit: nil) = commit_repo.today(now:, limit:)
     end
   end
 end

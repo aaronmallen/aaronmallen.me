@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
+require "rack/utils"
+
 module Admin
   module UI
     module Components
       class CommitsCard < Component
+        COMMIT = Blog::Types::ActivityKind["commit"]
         SEPARATOR = " · "
         SHA_LENGTH = 7
 
@@ -24,6 +27,21 @@ module Admin
 
         private
 
+        def activity_link
+          div(class: "commits-foot") do
+            a(class: "btn gh sm", href: activity_path) do
+              i(class: "fa-solid fa-timeline", aria: { hidden: "true" })
+              span { t(".activity") }
+            end
+          end
+        end
+
+        def activity_path
+          query = { from: @today.iso8601, to: @today.iso8601, types: { COMMIT => Blog::Constants::CHECKED } }
+
+          "#{path(:admin_activity)}?#{Rack::Utils.build_nested_query(query)}"
+        end
+
         def button_label(state, icon, text, hidden: false)
           span(class: "btn-label", data: { "commits_#{state}": "" }, hidden:) do
             i(class: icon, aria: { hidden: "true" })
@@ -42,6 +60,7 @@ module Admin
           return Empty { t(".empty") } if @entries.empty?
 
           div(class: "commits") { @entries.each { entry_row(it) } }
+          activity_link
         end
 
         def entry_main(commit)

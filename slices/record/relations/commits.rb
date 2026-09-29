@@ -10,10 +10,13 @@ module Record
         ]
       end
       OWNER_SEPARATOR = "/"
+      TALLY = proc { integer.count(id).as(:commits) }
 
       schema :commits, infer: true
 
       def between(from, to) = where(commit_date: from..to)
+
+      def day_totals = line_totals.select_append(&TALLY)
 
       def in_repos(names) = where(Sequel.|(*names.map { named_repo(it) }))
 

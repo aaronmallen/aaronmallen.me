@@ -595,6 +595,44 @@ RSpec.describe "Admin today", type: :request do
 
         expect(commits_card).to have_css(".empty", exact_text: i18n.t("ui.components.commits_card.empty"))
       end
+
+      it "leaves out the activity link without commits today" do
+        get "/admin"
+
+        expect(commits_card).to have_no_link(i18n.t("ui.components.commits_card.activity"))
+      end
+    end
+
+    describe "the commits card on a busy day" do
+      before do
+        12.times do |hour|
+          create_commit(commit_date: today, commit_time: format("%02d:00", hour + 8), message: "at #{hour + 8}")
+        end
+        get "/admin"
+      end
+
+      it "lists only the 10 latest commits" do
+        expect(commits_card.all(".commit-message").map(&:text)).to eq((10..19).to_a.reverse.map { "at #{it}" })
+      end
+
+      it "links under the list to today's commits in activity", :aggregate_failures do
+        link = commits_card.find(".commits + .commits-foot a")
+
+        expect(link.text).to eq(i18n.t("ui.components.commits_card.activity"))
+        expect(link[:href]).to eq("/admin/activity?from=#{today}&to=#{today}&types%5Bcommit%5D=1")
+      end
+
+      it "opens the activity page with every commit from today", :aggregate_failures do
+        get commits_card.find(".commits-foot a")[:href]
+
+        expect(last_response).to be_ok
+        expect(last_response.body).to include("at 8", "at 19")
+      end
+
+      it "still counts every commit from today", :aggregate_failures do
+        expect(commits_stat).to have_css(".stat-value", exact_text: "12")
+        expect(page).to have_text("12 commits")
+      end
     end
 
     describe "the commits sub-line" do
