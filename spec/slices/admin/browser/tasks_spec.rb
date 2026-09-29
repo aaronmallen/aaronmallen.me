@@ -456,6 +456,34 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "reading a note with links" do
+    def link_box = evaluate_script(<<~JS)
+      (() => {
+        const link = document.querySelector('#task-panel .task-body a');
+        const box = link.getBoundingClientRect();
+        return { display: getComputedStyle(link).display, height: box.height, width: box.width };
+      })()
+    JS
+
+    before do
+      create(:task, title: "Read the guide", note: "start with [the guide](https://example.com) today")
+      visit "/admin/tasks?filter=next"
+      open_task("Read the guide")
+    end
+
+    it "keeps a link inline with its sentence on a wide screen", :aggregate_failures do
+      expect(link_box["display"]).to eq("inline")
+      expect(link_box["height"]).to be < 44
+    end
+
+    it "gives a link a tap square on a phone", :aggregate_failures do
+      page.driver.resize(375, 800)
+
+      expect(link_box["height"]).to be >= 44
+      expect(link_box["width"]).to be >= 44
+    end
+  end
+
   describe "editing a task" do
     before { open_editor("Email the accountant") }
 

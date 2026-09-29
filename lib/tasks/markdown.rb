@@ -5,11 +5,14 @@ require "sanitize"
 
 module Tasks
   module Markdown
+    ARIA_LABEL = "aria-label"
+    BOX = "input[type='checkbox']"
     CHECKBOX = "checkbox"
     DROPPED_ATTRIBUTES = %w[class id style tabindex].freeze
     IMG = "img"
     INPUT = "input"
     OPTIONS = { extension: { header_ids: nil, tagfilter: false }, render: { hardbreaks: false, unsafe: true } }.freeze
+    ITEM_TEXT = "node()[not(self::ul or self::ol)]"
     PLUGINS = { syntax_highlighter: nil }.freeze
     RELAXED = Sanitize::Config::RELAXED
 
@@ -36,7 +39,23 @@ module Tasks
 
     class << self
       def to_html(markdown)
-        Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE)
+        label_boxes(Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE))
+      end
+
+      private
+
+      def item_text(box) = box.parent.xpath(ITEM_TEXT).map(&:text).join.split.join(" ")
+
+      def label_boxes(html)
+        fragment = Nokogiri::HTML5.fragment(html)
+        boxes = fragment.css(BOX)
+        return html if boxes.empty?
+
+        boxes.each do |box|
+          text = item_text(box)
+          box[ARIA_LABEL] = text unless text.empty?
+        end
+        fragment.to_html
       end
     end
   end

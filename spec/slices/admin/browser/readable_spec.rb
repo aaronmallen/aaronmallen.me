@@ -9,7 +9,9 @@ RSpec.describe "Admin screens", type: :feature do
     create(
       :task, :carried,
       title: "Email the accountant about the quarterly filing",
-      note: "some context\n\n- one\n- two\n\n<details><summary>More</summary>\n\nhidden detail</details>\n\n" \
+      note: "some context from [the filing guide](https://example.com/guide), read [first](/admin)\n\n" \
+            "- one\n- two\n\n- [ ] call the accountant\n- [x] find the forms\n\n" \
+            "<details><summary>More</summary>\n\nhidden detail</details>\n\n" \
             "```\n#{'a_very_long_line_of_code ' * 8}\n```",
       tags: %w[site],
     )

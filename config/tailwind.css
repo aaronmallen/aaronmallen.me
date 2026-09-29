@@ -1980,6 +1980,41 @@
       @apply min-h-tap;
     }
   }
+
+  & a {
+    @media (width < 43.75rem) {
+      @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+    }
+  }
+
+  & li:has(> input[type="checkbox"]) {
+    @apply list-none;
+  }
+
+  & input[type="checkbox"] {
+    @apply relative mr-1 inline-block size-check appearance-none align-middle;
+
+    @media (width < 43.75rem) {
+      @apply size-tap;
+    }
+
+    &::before {
+      @apply absolute inset-0 m-auto size-check rounded-sm border border-line bg-ground content-[''];
+    }
+
+    &::after {
+      @apply absolute inset-0 m-auto hidden h-[9px] w-[5px] -translate-y-px rotate-45 border-r-2 border-b-2;
+      @apply border-ground content-[''];
+    }
+
+    &:checked::before {
+      @apply border-mk-green bg-mk-green;
+    }
+
+    &:checked::after {
+      @apply block;
+    }
+  }
 }
 
 @utility task-facts {

@@ -263,6 +263,13 @@ RSpec.describe "Admin task page", type: :request do
         expect(body).to have_css("input[type='checkbox'][checked]", count: 1)
       end
 
+      it "names each task-list checkbox for its item, leaving out the items under it" do
+        read_note("- [x] call [the accountant](https://x.com)\n  - [ ] find the forms\n\n1. [ ] a loose\n\n   one")
+
+        expect(body.all("input[type='checkbox']").map { it["aria-label"] })
+          .to eq(["call the accountant", "find the forms", "a loose one"])
+      end
+
       it "strips every other input" do
         read_note('<input type="text" name="x"><input type="checkbox"><input type="hidden" value="y">')
 
