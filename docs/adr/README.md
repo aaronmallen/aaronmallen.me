@@ -75,6 +75,7 @@ one.
 | [0068][0068] | Follow a change in an issue's state, not the state itself | ![Active][active] | 2026-09-29 |
 | [0069][0069] | Read GitHub over GraphQL, and keep REST for project reads and the issue move check | ![Active][active] | 2026-09-29 |
 | [0070][0070] | Share one issue sync across providers, and run each provider as its own job | ![Active][active] | 2026-09-29 |
+| [0071][0071] | Load a task's read and edit pages into dialogs with fetch | ![Active][active] | 2026-09-29 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -146,6 +147,7 @@ one.
 [0068]: 0068-follow-a-change-in-an-issues-state-not-the-state-itself.md
 [0069]: 0069-read-github-over-graphql-and-keep-rest-for-project-reads-and-the-issue-move-check.md
 [0070]: 0070-share-one-issue-sync-across-providers-and-run-each-provider-as-its-own-job.md
+[0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

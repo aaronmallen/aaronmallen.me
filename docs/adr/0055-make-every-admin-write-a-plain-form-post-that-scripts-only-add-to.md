@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
+amended: ["#37"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -34,9 +35,10 @@ form. They never replace its submit.
   `Admin::UI::Views::Posts::Index` does.
 - **Deletes** are real forms with `data-confirm`, and `confirm.js` stops the submit only when the operator says
   no.
-- **Row editors** open from a checkbox and CSS, as `Admin::UI::Components::Tasks::Row` does, with no script.
-- **`fetch` is for reads.** Only the two previews call it, `post_preview.js` (AA-229) and `post_syndication.js`
+- **`fetch` is for reads.** The two previews call it, `post_preview.js` (AA-229) and `post_syndication.js`
   (AA-336). Both post the unsaved form and swap in HTML while the operator types, and neither stores anything.
+  A task's read and edit pages load into dialogs the same way, as [ADR 0071][0071] records. #37 replaced the
+  row editor that opened from a checkbox, and the claim that only the previews call `fetch`.
 
 We leave `config.actions.method_override` at Hanami's default, on. No form sends `_method`.
 
@@ -57,7 +59,8 @@ reason written down.
 Each write works the same way, and the request specs drive the forms with rack-test, which runs no script. A
 failed write keeps what the operator typed, since the server renders it back.
 
-Every write reloads the page. The previews are the only place that pays for a script to avoid it.
+Every write reloads the page. The previews and the task dialogs are the only places that pay for a script to avoid
+a reload, and they do it only to read.
 
 Four places break the rule today, and each fails with scripts off:
 
@@ -72,4 +75,5 @@ Four places break the rule today, and each fails with scripts off:
 
 Method override costs a middleware on every request and gives nothing, since no form fakes a verb.
 
+[0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
