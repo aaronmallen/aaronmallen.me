@@ -2,6 +2,7 @@
 
 require "capybara"
 require "database_cleaner/sequel"
+require_relative "locks"
 
 RSpec.configure do |config|
   databases = nil
@@ -18,12 +19,17 @@ RSpec.configure do |config|
       name = db.opts[:database]
       raise "#{name} does not end in _test, so the suite will not empty it" unless name.end_with?("_test")
 
-      DatabaseCleaner[:sequel, db: db].clean_with :truncation, except: ["schema_migrations"]
+      Spec::DB::Locks.hold_suite(db)
+      Spec::DB::Locks.within_timeout(db) do
+        DatabaseCleaner[:sequel, db: db].clean_with :truncation, except: ["schema_migrations"]
+      end
     end
   end
 
+  truncating = ->(example) { example.metadata[:js] || example.metadata[:commits] }
+
   config.prepend_before do |example|
-    strategy = example.metadata[:js] || example.metadata[:commits] ? :truncation : :transaction
+    strategy = truncating.call(example) ? :truncation : :transaction
 
     all_databases.call.each do |db|
       DatabaseCleaner[:sequel, db: db].strategy = strategy
@@ -35,7 +41,8 @@ RSpec.configure do |config|
     Capybara.reset_sessions! if example.metadata[:js]
   ensure
     all_databases.call.each do |db|
-      DatabaseCleaner[:sequel, db: db].clean
+      cleaner = DatabaseCleaner[:sequel, db: db]
+      truncating.call(example) ? Spec::DB::Locks.within_timeout(db) { cleaner.clean } : cleaner.clean
     end
   end
 end
