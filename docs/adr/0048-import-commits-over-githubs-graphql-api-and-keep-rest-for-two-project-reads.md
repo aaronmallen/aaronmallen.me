@@ -1,17 +1,18 @@
 ---
 id: "0048"
 title: Import commits over GitHub's GraphQL API and keep REST for two project reads
-status: active
+status: superseded
 created: 2026-09-28
 area: [lib, record, projects]
+superseded-by: "0069"
 issue: AA-687
-amended: [AA-793, AA-813, AA-821, AA-823]
+amended: [AA-793, AA-813, AA-821, AA-823, "#33"]
 tags: [github, graphql, rest, commits, import, rate-limit]
 ---
 
 # ADR 0048: Import commits over GitHub's GraphQL API and keep REST for two project reads
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -80,4 +81,4 @@ listing that goes mid-read.
 
 Drop `ownerAffiliations` and GitHub says nothing: the import runs on and skips every org repo.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange

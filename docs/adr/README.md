@@ -52,7 +52,7 @@ one.
 | [0045][0045] | Count visitors with a daily hash and no cookies | ![Active][active] | 2026-09-28 |
 | [0046][0046] | Let the garbage collector take a superseded MaxMind reader | ![Active][active] | 2026-09-28 |
 | [0047][0047] | Keep every sync's state in record's sync_states table, keyed by kind, sync and repo | ![Active][active] | 2026-09-28 |
-| [0048][0048] | Import commits over GitHub's GraphQL API and keep REST for two project reads | ![Active][active] | 2026-09-28 |
+| [0048][0048] | Import commits over GitHub's GraphQL API and keep REST for two project reads | ![Superseded][superseded-0069] | 2026-09-28 |
 | [0049][0049] | Walk each repo's commits in one job that queues itself | ![Active][active] | 2026-09-28 |
 | [0050][0050] | Derive Today from sprint membership | ![Active][active] | 2026-09-28 |
 | [0051][0051] | Store a task link once and derive its reverse on read | ![Active][active] | 2026-09-28 |
@@ -72,6 +72,8 @@ one.
 | [0065][0065] | Label a task with tags alone | ![Active][active] | 2026-09-28 |
 | [0066][0066] | Keep an imported task's origin in a task_sources table | ![Active][active] | 2026-09-28 |
 | [0067][0067] | Park an imported task on an external list | ![Active][active] | 2026-09-28 |
+| [0068][0068] | Follow a change in an issue's state, not the state itself | ![Active][active] | 2026-09-29 |
+| [0069][0069] | Read GitHub over GraphQL, and keep REST for project reads and the issue move check | ![Active][active] | 2026-09-29 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -137,8 +139,11 @@ one.
 [0062]: 0062-send-every-kind-in-the-activity-feed-to-a-client-holding-read.md
 [0063]: 0063-apply-a-suggested-edit-only-where-its-text-appears-once-under-its-owners-lock.md
 [0064]: 0064-close-a-task-as-done-or-canceled-under-one-completed-at.md
-[0066]: 0066-keep-an-imported-tasks-origin-in-a-task-sources-table.md
 [0065]: 0065-label-a-task-with-tags-alone.md
+[0066]: 0066-keep-an-imported-tasks-origin-in-a-task-sources-table.md
 [0067]: 0067-park-an-imported-task-on-an-external-list.md
+[0068]: 0068-follow-a-change-in-an-issues-state-not-the-state-itself.md
+[0069]: 0069-read-github-over-graphql-and-keep-rest-for-project-reads-and-the-issue-move-check.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
