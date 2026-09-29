@@ -11,7 +11,8 @@ module Admin
           ICONS = { GITHUB => "fa-brands fa-github", LINEAR => "fa-solid fa-circle-half-stroke" }.freeze
           ISSUE_PATH = "/issues/"
           ISSUE_SEPARATOR = "#"
-          LINEAR_KEY = %r{/issue/([^/]+)}
+          LINEAR_ISSUE = %r{\A/([^/]+)/issue/([^/]+)}
+          LINEAR_SEPARATOR = "/"
 
           prop :source, Blog::Types::Instance(ROM::Struct).optional
 
@@ -28,9 +29,9 @@ module Admin
 
           def github_name = path.delete_prefix("/").sub(ISSUE_PATH, ISSUE_SEPARATOR)
 
-          def linear_key = path[LINEAR_KEY, 1]
+          def linear_name = path.match(LINEAR_ISSUE)&.captures&.join(LINEAR_SEPARATOR)
 
-          def name = @source.provider == LINEAR ? linear_key : github_name
+          def name = @source.provider == LINEAR ? linear_name : github_name
 
           def path = URI(@source.url).path
         end

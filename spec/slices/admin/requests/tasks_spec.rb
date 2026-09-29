@@ -228,7 +228,7 @@ RSpec.describe "Admin tasks", type: :request do
 
       def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/42"
 
-      def linear_link = page.find(".task .task-meta a.task-source", text: "ABC-123")
+      def linear_link = page.find(".task .task-meta a.task-source", exact_text: "acme/ABC-123")
 
       def linear_url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
 
@@ -292,11 +292,20 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_css(".task-source i.fa-brands.fa-github", visible: :all)
       end
 
-      it "links a Linear row to its issue by its key" do
+      it "links a Linear row to its issue by its workspace and key" do
         import_linear
         get "/admin/tasks", filter: "external"
 
         expect(linear_link["href"]).to eq(linear_url)
+      end
+
+      it "names each Linear issue's own workspace" do
+        import_linear
+        url = "https://linear.app/globex/issue/ABC-124/write-the-notes"
+        create(:task_source, task: create(:task, :external), provider: "linear", remote_id: "lin-2", url:)
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_link("globex/ABC-124", href: url)
       end
 
       it "marks a Linear issue with a Font Awesome Free solid icon", :aggregate_failures do
@@ -312,7 +321,7 @@ RSpec.describe "Admin tasks", type: :request do
         get "/admin/tasks", filter: "external"
 
         expect(page).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
-        expect(page).to have_link("ABC-123", href: linear_url)
+        expect(page).to have_link("acme/ABC-123", href: linear_url)
       end
 
       it "leaves the issue link off a task written by hand" do
@@ -528,12 +537,12 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
       end
 
-      it "links a Linear issue by its key" do
+      it "links a Linear issue by its workspace and key" do
         url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
         create(:task_source, task: create(:task, :external), provider: "linear", remote_id: "lin-1", url:)
         get "/admin/tasks", filter: "today", pool: "external"
 
-        expect(page).to have_link("ABC-123", href: url)
+        expect(page).to have_link("acme/ABC-123", href: url)
       end
 
       it "pulls one into today's sprint", :aggregate_failures do

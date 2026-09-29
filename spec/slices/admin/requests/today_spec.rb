@@ -1323,6 +1323,24 @@ RSpec.describe "Admin today", type: :request do
         expect(task_repo.in_sprint(sprint.id).map(&:id)).to contain_exactly(task.id, anything)
       end
 
+      it "links a GitHub issue in the external pool under the sprint's tasks" do
+        plan("Ship the panel")
+        url = "https://github.com/aaronmallen/aaronmallen.me/issues/42"
+        create(:task_source, task: create(:task, :external), url:)
+        get "/admin", pool: "external"
+
+        expect(panel.find(".task-planner-pull")).to have_link("aaronmallen/aaronmallen.me#42", href: url)
+      end
+
+      it "links a Linear issue by its workspace in the external pool under the sprint's tasks" do
+        plan("Ship the panel")
+        url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
+        create(:task_source, task: create(:task, :external), provider: "linear", remote_id: "lin-1", url:)
+        get "/admin", pool: "external"
+
+        expect(panel.find(".task-planner-pull")).to have_link("acme/ABC-123", href: url)
+      end
+
       it "comes back to Today after pulling from the pools under the sprint's tasks" do
         pull_under_sprint
 

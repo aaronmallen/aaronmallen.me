@@ -104,7 +104,7 @@ RSpec.describe "Admin task page", type: :request do
       create(:task_source, task:, provider: "linear", remote_id: "lin-1", url:)
       read
 
-      expect(page).to have_link("ABC-123", href: url)
+      expect(page).to have_link("acme/ABC-123", href: url)
     end
 
     it "shows no source on a task typed in the admin" do
