@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, posts, projects, public]
 issue: AA-665
-amended: [AA-561, AA-562, AA-809]
+amended: [AA-561, AA-562, AA-809, "#17"]
 tags: [types, constants, enums, dry-types, kernel]
 ---
 
@@ -37,8 +37,8 @@ single slice owns.
 **A name with one reader does not exist.** A format regex goes into the `constrained(format:)` that reads it, and a
 normalizer with one reader becomes a `constructor` block. A normalizer with two readers becomes an unconstrained type in
 the private `Normalizers` module, and each type built on it applies its own constraint last. The types that share a
-normalizer do not share a constraint: `Normalized::TaskType` folds a name the way `Normalized::Tag` does and takes none
-of the tag's slug format.
+normalizer do not share a constraint: `Normalized::Host` reads a URL through the normalizer `Normalized::Url` uses and
+takes its own host format, not the URL's.
 
 **An enum's values are written once.** The enum holds them as literals, and everything else reads them back.
 `TagColor.values` stands where `TAG_COLORS` stood, each enum's `*Param` fallback takes the first value of its own

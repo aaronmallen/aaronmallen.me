@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826]
+amended: [AA-792, AA-824, AA-826, "#17"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -32,7 +32,7 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
 
 - `config/db/migrate/20260928000035_create_activities_view.rb` builds it. Each row carries its kind, its source id,
   the site day and time it happened, a name, a link, and the parts of its sub-line: repo, sha, line counts, status,
-  networks, excerpt and task type. The view returns values, and Ruby composes the line through i18n (AA-333).
+  networks and excerpt. The view returns values, and Ruby composes the line through i18n (AA-333).
 - Commits, journal entries and sprints store a day. The other tables store an instant, and each has an index on
   its site day, so a date range narrows every branch of the union (AA-260). A project and a suggestion land on the
   day of their `created_at`, and a sprint at midnight on its `sprint_date`, since it holds no time.

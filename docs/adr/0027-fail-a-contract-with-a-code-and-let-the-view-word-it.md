@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-662
+amended: ["#17"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -38,8 +39,7 @@ Codes come from three places:
   contracts.
 - An operation that hears of a clash from Postgres returns the same shape, `taken`, `locked`, `self` or
   `missing`: `slices/posts/operations/save_post.rb`, `slices/projects/operations/save_project.rb`,
-  `slices/tags/operations/save_tag.rb`, `slices/tasks/operations/save_task_type.rb` and
-  `slices/tasks/operations/link_tasks.rb`.
+  `slices/tags/operations/save_tag.rb` and `slices/tasks/operations/link_tasks.rb`.
 
 `Blog::Operation#validated` hands the codes up as `Failure([:invalid, errors])`, and they become copy in three
 places:

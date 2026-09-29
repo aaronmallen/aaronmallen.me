@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, config, db, lib, admin, public, tasks]
 issue: AA-685
-amended: [AA-801]
+amended: [AA-801, "#17"]
 tags: [icons, font-awesome, svg, css, tailwind, accessibility, enums]
 ---
 
@@ -32,7 +32,7 @@ Every icon is an `<i>` with a Font Awesome Free class from the solid, regular or
 `lib` and `slices` name one, and no view draws an icon as an SVG.
 
 - **Labels.** An icon beside text, or inside a control that carries its own `aria-label`, is `aria-hidden`, as in
-  `Admin::UI::Components::Tasks::TypeTag` and the caret buttons in `Tasks::Order`. An icon that stands alone takes
+  `Admin::UI::Components::StatusPill` and the caret buttons in `Tasks::Order`. An icon that stands alone takes
   `role: "img"` and an `aria-label` from its slice's `config/i18n`, as the heart in
   `Public::UI::Components::Footer` does.
 - **Task types store an optional solid name.** `task_types.icon` is nullable text holding a Font Awesome Free
@@ -40,6 +40,9 @@ Every icon is an `<i>` with a Font Awesome Free class from the solid, regular or
   `Blog::Types::TaskTypeIcon` checks the name against a checked-in list of every Free solid name, which
   `mise run assets:icons` builds from the installed package's metadata. After upgrading Font Awesome, run the task
   again and commit the list.
+
+  ADR 0065 retires task types, and `task_types.icon` and `TypeTag` go with them. `Blog::Types::TaskTypeIcon`, the
+  list and `mise run assets:icons` then serve nothing. #17 added this note.
 - **Hiding goes through `--fa-display`.** Font Awesome's CSS sits outside Tailwind's layers, so its
   `display: var(--fa-display, inline-block)` beats any utility. A utility that hides an icon sets
   `--fa-display: none`, as the main nav's toggle icons and `settings-menu-check` do in `config/tailwind.css`.
@@ -66,8 +69,7 @@ later.
 
 A new icon costs one class name from the handoff.
 
-Swapping the set touches every view that names a class, and a migration for `task_types.icon`, since stored rows
-hold Font Awesome names.
+Swapping the set touches every view that names a class.
 
 The icon list is a copy. Upgrading the package leaves it as it was until someone reruns `mise run assets:icons`,
 so a new icon fails the check and a dropped one still passes it.

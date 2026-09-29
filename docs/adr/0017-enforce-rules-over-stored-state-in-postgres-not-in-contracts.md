@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816]
+amended: [AA-816, "#17"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -53,16 +53,14 @@ raises again.
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
 | `task_links_pair_key` | unique index | `Tasks::Operations::LinkTasks` | `other_id: taken` |
 | `task_links_to_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
-| `task_types_name_key` | unique index | `Tasks::Operations::SaveTaskType` | `name: taken` |
 
 The trigger raises with `ERRCODE = 'check_violation'`, so ROM reports it as a `CheckConstraintError` and the
 operation reads it like any other name.
 
 Two more shapes follow the same stance. `session_validity` and `webmention_settings` hold one row each, held there
-by `CHECK (id = 1)`, and their repos address it by that id. Every tag join, `tasks.sprint_id` and
-`tasks.task_type_id` hold their parent with `ON DELETE RESTRICT`. `RemoveTag` and `RemoveTaskType` count the
-joins first, but only so the refusal can say how many rows hold the parent, a count the database error drops. The
-foreign key stays the rule.
+by `CHECK (id = 1)`, and their repos address it by that id. Every tag join and `tasks.sprint_id` hold their parent
+with `ON DELETE RESTRICT`. `RemoveTag` counts the joins first, but only so the refusal can say how many rows hold
+the parent, a count the database error drops. The foreign key stays the rule.
 
 ## Alternatives
 
@@ -76,9 +74,9 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the ten names has a spec
-that would fail: the posts request spec, the operation specs for tags, task types and task links, and the admin
-request specs for the post and project editors. A new mapped name needs one too.
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the nine names has a spec
+that would fail: the posts request spec, the operation specs for tags and task links, and the admin request specs
+for the post and project editors. A new mapped name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

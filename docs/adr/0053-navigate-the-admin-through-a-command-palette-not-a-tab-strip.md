@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
+amended: ["#17"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -51,7 +52,7 @@ whose route does not exist drops out.
 
 **Keep the tab strip.** It shows every section at once, holds a badge, and works without JavaScript. It lost because
 the design replaced it and answered each cost above. Tasks, tags and task types then joined as palette rows
-rather than as more tabs.
+rather than as more tabs, and #17 took the task types row out again (ADR 0065).
 
 ## Consequences
 

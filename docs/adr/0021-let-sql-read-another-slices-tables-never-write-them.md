@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, posts, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824]
+amended: [AA-792, AA-809, AA-824, "#17"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -31,7 +31,7 @@ cross today:
 
 - **The `activities` view**, built in `config/db/migrate/20260928000035_create_activities_view.rb` and read by
   `slices/activity/relations/activities.rb`, unions `commits`, `journal_entries`, `posts`, `social_posts`,
-  `social_post_parts`, `webmentions`, `tasks`, `task_types`, `sprints`, `projects` and `suggestions`, which
+  `social_post_parts`, `webmentions`, `tasks`, `sprints`, `projects` and `suggestions`, which
   `record`, `posts`, `social`, `tasks`, `projects` and `suggestions` own. AA-824 added the last three tables. The
   record on the activities view holds why one view beats merging rows in Ruby.
 - **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags` and

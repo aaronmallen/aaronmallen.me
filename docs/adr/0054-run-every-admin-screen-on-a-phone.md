@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, admin, public, mcp]
 issue: AA-346
-amended: [AA-539, AA-765, AA-835]
+amended: [AA-539, AA-765, AA-835, "#17"]
 tags: [admin, layout, responsive, accessibility, design]
 ---
 
@@ -81,7 +81,7 @@ what a thumb hits, and the admin is touched more than it is pointed at.
 **Rows are taller on a phone.** A task row carries its title, its meta line and a row of 44px controls, so fewer
 rows fit a screen. That is the price of every one of them being tappable.
 
-**The colour swatches are large.** Six 44px squares are the loudest thing on the task types card. They are
+**The colour swatches are large.** Six 44px squares are the loudest thing in a tag's open editor. They are
 controls, and they take the same square as every other control.
 
 **The palette button floats over the column.** The handoff's 46px rail spends an eighth of a 390px screen, so the

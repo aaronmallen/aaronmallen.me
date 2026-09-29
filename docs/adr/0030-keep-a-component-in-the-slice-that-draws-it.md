@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-672
-amended: [AA-783, AA-809]
+amended: [AA-783, AA-809, "#17"]
 tags: [phlex, components, kit, ui, slices, kernel]
 ---
 
@@ -36,12 +36,14 @@ owns. No spec checks the rule.
 
 A slice reaches the shared kit through its base classes: `Blog::UI::Component` and `Blog::UI::View` include
 `Blog::UI::Components`. A kit does not nest. `Phlex::Kit#const_added` gives a nested module a kit of its own and
-includes a component into the module that holds it, so `Components::Tasks::Types::Row` gets the methods of
-`Types` and none of `Tasks`. Two things follow:
+includes a component into the module that holds it, so a component in `Components::Tasks::Types` would get the
+methods of `Types` and none of `Tasks`. The task types screen kept its rows there until #17 retired task types
+(ADR 0065). Two things follow:
 
 - A slice reaches a nested kernel kit by including it in its own module of that name, as
   `slices/admin/ui/components/posts.rb` includes `Blog::UI::Components::Posts`.
-- A nested component calls a component a level up through the parent kit: `Tasks::TypeTag(type: @type)`.
+- A nested component calls a component a level up through the parent kit, as `Tasks::Types::Row` drew
+  `Tasks::TypeTag(type: @type)`.
 
 ## Alternatives
 

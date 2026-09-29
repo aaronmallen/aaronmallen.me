@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib]
 issue: AA-609
-amended: [AA-758, AA-801, AA-819]
+amended: [AA-758, AA-801, AA-819, "#17"]
 tags: [postgres, schema, enums, domains, constraints, types]
 ---
 
@@ -39,8 +39,8 @@ alphabetical because Today lists sync failures in that order, and a comment in
 
 One fact the UI draws belongs to the schema. `tag_color` holds the six `mk-*` theme tokens. AA-371 stored the
 token rather than a hex value, because the theme resolves each token through `light-dark()`, so a stored token
-reads in both themes. AA-801 took the task type icon out of the schema: it is text checked against every Font
-Awesome Free solid name (ADR 0033).
+reads in both themes. AA-801 took the task type icon out of the schema, and #17 retired task types with their
+icons (ADR 0065).
 
 `Blog::Types` keeps a Ruby enum for 11 of the 16 sets, and relations and operations take their values from it
 (`slices/posts/relations/posts.rb`).
