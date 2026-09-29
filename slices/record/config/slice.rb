@@ -7,7 +7,7 @@ module Record
     config.shared_app_component_keys += %w[http]
 
     export %w[
-      github.client operations.delete_journal_entry operations.queue_commit_import
+      github.client linear.client operations.delete_journal_entry operations.queue_commit_import
       operations.record_country_sync_outcome operations.record_issue_sync_outcome
       operations.record_linear_issue_sync_outcome operations.record_projects_sync_outcome
       operations.record_rollup_sync_outcome operations.save_journal_entry operations.update_journal_entry

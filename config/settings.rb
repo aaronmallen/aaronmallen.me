@@ -12,6 +12,10 @@ module Blog
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
 
+    ApiKeys = Types::Array.constructor do |value|
+      (value.is_a?(::Array) ? value : value.to_s.split(",")).map { it.to_s.strip }.reject(&:empty?)
+    end
+
     OwnerName = Types::String.constrained(format: /\S/)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
@@ -75,6 +79,8 @@ module Blog
       api_key?: Value,
       report_data?: Types::Params::Bool.optional,
     )
+
+    setting :linear, default: {}, constructor: Schema.schema(api_keys?: ApiKeys.default([].freeze))
 
     setting :mastodon, default: {}, constructor: Schema.schema(access_token?: Value, profile_url?: Value, url?: Value)
 
