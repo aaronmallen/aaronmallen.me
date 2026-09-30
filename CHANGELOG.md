@@ -5,6 +5,58 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-29
+
+### Added
+
+- Tasks take comments. The task page lists them oldest first as Markdown, and a form under them adds one. A comment
+  written here can be edited or deleted. GitHub and Linear issue comments sync onto their tasks, show their author
+  and a link back, and cannot be changed here. The new `add_task_comment` MCP tool adds one, and `read_task` and every
+  tool that changes a task answer with the task's comments. Comments show in the activity feed.
+- An imported issue's labels tag its task once, when the sync creates it. A label adds only a private tag that
+  already exists, and a later sync never adds a tag back or reads a new label.
+- Tags come in two kinds: public for posts and projects, private for tasks and the journal. The same name can live
+  in each with its own color, and the tags page has a tab for each. Tags a task or journal entry used turn private,
+  and a tag both sides used splits into a public and a private copy.
+- Search the journal by tag with `tag:name`. An entry must carry every tag named.
+- The Today journal card takes tags beside the body.
+- The command palette has a Create journal entry row, which opens the journal with the cursor in the entry field.
+- Each task row ends with a pen that opens the task's edit dialog in one click.
+- Honeybadger names the release behind each error.
+
+### Changed
+
+- Long lists page. `/writing` and tag pages show 25 posts a page, and the Atom feeds carry the newest 25 with next
+  and previous links. The admin posts, messages, webmentions, tags, social and task lists show 100 a page, and the
+  finished tasks list no longer loads every task. The journal and the activity feed page by whole days, and an event
+  in the activity feed opens the journal page that holds its day. Task search now finds matches on every page, and
+  tab counts cover the whole list.
+- The MCP list tools (`list_posts`, `list_social_posts`, `list_tasks`, `list_messages`, `list_webmentions`,
+  `list_suggestions`, `list_sprints` and `list_tags`) answer 100 rows at a time and take a `page`. A partial answer
+  names the `next_page` to ask for. `read_activity`, `list_commits` and `list_journal_entries` stop near 100 rows, down
+  from 200.
+- The `list_tags`, `save_tag` and `remove_tag` MCP tools need a `scope` of `public` or `private`. A call without one
+  fails.
+- Moving an in-progress task out of Today, by hand, by unscheduling it, by dropping its sprint or through the MCP
+  `move_task` tool, sets it back to open. The move arrow on a running task asks first.
+- Canceling a task asks first, in a dialog.
+- Tags in the admin read as `#name` in their color. A task tag opens the task list searched by that tag, a journal
+  tag the journal, and a tag on the posts list its public tag page. The journal no longer shows a Private pill.
+- The referrer and country cards rank by visitors and show them. Days rolled up before this release have no visitor
+  count, and those rows show none. The paths, referrer, country and webmentions cards show up to 10 rows.
+- The Today commits card lists the 10 latest commits and links to the rest on the activity page.
+- The tasks page switches pools without a reload, and pulling a task in returns to the pool it came from.
+- A task's page shows its number above the title, with the GitHub `owner/repo#number` or the Linear key for a
+  synced task.
+- A blocked-by chip on a task row shows only the blocker's number. The title shows on hover and to screen readers.
+- The issue sync asks Linear for 25 issues at a time, not 100, and stops at 250 assigned issues per workspace, down
+  from 1,000.
+
+### Fixed
+
+- A click outside the task dialog no longer closes it and throws away what you typed. It closes on Esc, Cancel or a
+  new X button.
+
 ## [1.1.0] - 2026-09-29
 
 ### Added
@@ -73,7 +125,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...HEAD
+[1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.0...1.0.1
