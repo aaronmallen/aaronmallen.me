@@ -4,6 +4,7 @@ module Contact
   module Repos
     class MessageRepo < Blog::DB::Repo
       SPAM = Blog::Types::MessageStatus["spam"]
+      UNREAD = Blog::Types::MessageStatus["unread"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
@@ -12,8 +13,10 @@ module Contact
 
       def by_status(status) = messages.with_status(status).newest_first.to_a
 
-      def claim(visitor_hash:, limit:, since:, **attrs)
-        messages.claim(visitor_hash:, limit:, since:, **attrs)
+      def claim(visitor_hash:, limit:, since:, status: UNREAD, **attrs)
+        marked_spam_at = spam_marked_at(status, Time.now)
+
+        messages.claim(visitor_hash:, limit:, since:, **attrs, status:, marked_spam_at:)
       end
 
       def count_from_visitor_since(visitor_hash, time) = messages.for_visitor(visitor_hash).received_since(time).count
@@ -23,7 +26,10 @@ module Contact
       def delete_spam_marked_before(time) = messages.marked_spam_before(time).delete
 
       def mark(message, status, at: Time.now)
-        update(message.id, status:, marked_spam_at: status == SPAM ? message.marked_spam_at || at : nil)
+        transaction do
+          status == SPAM ? spam_senders.flag(message.reply_to, at:) : spam_senders.by_reply_to(message.reply_to).delete
+          update(message.id, status:, marked_spam_at: spam_marked_at(status, message.marked_spam_at || at))
+        end
       end
 
       def page_by_status(status, page) = page.fill(messages.with_status(status).newest_first.paged(page).to_a)
@@ -35,6 +41,12 @@ module Contact
 
         page.fill(found.newest_first.paged(page).to_a)
       end
+
+      def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD
+
+      private
+
+      def spam_marked_at(status, at) = (at if status == SPAM)
     end
   end
 end

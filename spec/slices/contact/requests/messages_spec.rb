@@ -58,6 +58,92 @@ RSpec.describe "Contact messages", type: :request do
     end
   end
 
+  describe "a sender marked as spam" do
+    def admin_mark(message, status)
+      sign_in_to_admin
+      post("/admin/messages/#{message.id}/mark/#{status}", _csrf_token: admin_csrf_token)
+    end
+
+    def arrived = message_repo.messages.order(:id).to_a.last
+
+    def mcp_mark(message, status) = mcp_call("mark_message", id: message.id, status:)
+
+    def reap_after(days)
+      later = Time.now + (days * 24 * 60 * 60)
+      allow(Time).to receive(:now).and_return(later)
+      Contact::Jobs::ReapSpamMessages.new.perform
+    end
+
+    it "files their next message as spam when the admin marked them" do
+      admin_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      send_message
+
+      expect(arrived.status).to eq("spam")
+    end
+
+    it "files their next message as spam when MCP marked them" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      send_message
+
+      expect(arrived.status).to eq("spam")
+    end
+
+    it "matches the address in any letter case" do
+      mcp_mark(create(:message, reply_to: "Ada@Example.COM"), "spam")
+      send_message(reply_to: "aDA@example.com")
+
+      expect(arrived.status).to eq("spam")
+    end
+
+    it "tells the sender the same as anyone else" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      send_message
+
+      expect(last_response.status).to eq(302)
+    end
+
+    it "files a message from another address as unread" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      send_message(reply_to: "grace@example.com")
+
+      expect(arrived.status).to eq("unread")
+    end
+
+    it "lets the reaper delete their next message in time" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      send_message
+
+      expect { reap_after(31) }.to change { message_repo.messages.count }.from(2).to(0)
+    end
+
+    it "files their next message as spam after the reaper deletes the one that marked them" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      reap_after(31)
+      send_message
+
+      expect(arrived.status).to eq("spam")
+    end
+
+    { "read" => :mcp_mark, "unread" => :admin_mark }.each do |status, marker|
+      it "files their next message as unread once a message from them is marked #{status}" do
+        mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+        send_message
+        send(marker, arrived, status)
+        send_message
+
+        expect(arrived.status).to eq("unread")
+      end
+    end
+
+    it "files their next message as spam when a neighbour is marked read" do
+      mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+      mcp_mark(create(:message, reply_to: "grace@example.com"), "read")
+      send_message
+
+      expect(arrived.status).to eq("spam")
+    end
+  end
+
   describe "two messages from one sender that both pass the count before the lock", :commits do
     def database = Contact::Slice["db.rom"].gateways[:default].connection
 

@@ -17,8 +17,9 @@ module Contact
       private
 
       def claim(attributes, visitor_hash:)
+        status = message_repo.sender_status(attributes[:reply_to])
         message = message_repo.claim(
-          **attributes, visitor_hash:, limit: settings.contact[:throttle_limit], since: window_opened_at,
+          **attributes, status:, visitor_hash:, limit: settings.contact[:throttle_limit], since: window_opened_at,
         )
 
         message ? Success(message) : Failure([:throttled])
