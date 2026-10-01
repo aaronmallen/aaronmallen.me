@@ -17,9 +17,9 @@ RSpec.describe Tasks::Operations::SyncIssues do
 
   def sync = Tasks::Slice["operations.sync_issues"].call(provider: "linear", client:)
 
-  def tracked(*traits, state: "open")
+  def tracked(*traits, state: "open", checked_at: nil)
     task = create(:task, *traits, list: "external", title: "Sync my issues", note: "Keep them in step")
-    create(:task_source, provider: "linear", remote_id: "L_one", url:, remote_state: state, task:)
+    create(:task_source, provider: "linear", remote_id: "L_one", url:, remote_state: state, checked_at:, task:)
 
     repo.by_id(task.id)
   end
@@ -122,6 +122,24 @@ RSpec.describe Tasks::Operations::SyncIssues do
       sync
 
       expect(repo).to have_received(:by_id).once
+    end
+  end
+
+  describe "an issue checked an hour ago" do
+    %w[completed not_planned unassigned].each do |state|
+      it "stays out of the run while #{state}" do
+        tracked(:canceled, state:, checked_at: Time.now - 3600)
+        sync
+
+        expect(client.asked).to eq({})
+      end
+    end
+
+    it "is asked about again while started" do
+      tracked(:in_progress, state: "started", checked_at: Time.now - 3600)
+      sync
+
+      expect(client.asked).to eq("L_one" => url)
     end
   end
 

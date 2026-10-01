@@ -43,10 +43,10 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def sync = described_class.new.perform
 
-  def tracked(*traits, state: "open", **)
+  def tracked(*traits, state: "open", checked_at: nil, **)
     task = create(:task, *traits, list: "external", **)
 
-    create(:task_source, remote_id: "I_seven", url:, remote_state: state, task:)
+    create(:task_source, remote_id: "I_seven", url:, remote_state: state, checked_at:, task:)
       .then { repo.by_id(it.task_id) }
   end
 
@@ -359,6 +359,45 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(repo.by_id(task.id).status).to eq("open")
+    end
+  end
+
+  describe "a closed issue" do
+    let(:day) { 24 * 60 * 60 }
+
+    def checks = github_request(GitHubGraphQL::ISSUES_QUERY)
+
+    it "is checked once, then left alone for a day" do
+      tracked(:done, state: "completed")
+      stub_known(issue(state: "CLOSED", stateReason: "COMPLETED"))
+      2.times { sync }
+
+      expect(checks).to have_been_made.once
+    end
+
+    it "is checked again once a day has passed", :aggregate_failures do
+      task = tracked(:done, state: "completed", checked_at: Time.now - day - 60)
+      stub_known(issue(state: "CLOSED", stateReason: "COMPLETED"))
+      sync
+
+      expect(checks).to have_been_made.once
+      expect(repo.by_id(task.id).source.checked_at).to be_within(5).of(Time.now)
+    end
+
+    it "moves its task back when reopened upstream" do
+      task = tracked(:done, state: "completed", checked_at: Time.now - day)
+      stub_known(issue)
+      sync
+
+      expect(repo.by_id(task.id).status).to eq("open")
+    end
+
+    it "is checked every run while open" do
+      tracked
+      stub_known(issue)
+      2.times { sync }
+
+      expect(checks).to have_been_made.twice
     end
   end
 

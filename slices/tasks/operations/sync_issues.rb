@@ -3,6 +3,8 @@
 module Tasks
   module Operations
     class SyncIssues < Blog::Operation
+      CHECK_CLOSED_EVERY = 24 * 60 * 60
+      CLOSED = %w[completed not_planned unassigned].map { Blog::Types::TaskSourceState[it] }.freeze
       COMMENT_FIELDS = %i[author body url].freeze
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       EXTERNAL = Blog::Types::TaskList["external"]
@@ -23,7 +25,7 @@ module Tasks
 
       def call(provider:, client:, now: Time.now)
         known = tracked(provider)
-        assigned, checked = step fetch(provider, client, known)
+        assigned, checked = step fetch(provider, client, known, now)
         fresh, held = assigned.partition { !known.key?(it[:id]) }
 
         [*held, *checked].each { follow(known.fetch(it[:id]), it, now) }
@@ -52,13 +54,16 @@ module Tasks
 
       def drop(gone) = gone.empty? || task_comment_repo.delete_synced(gone.map(&:id))
 
-      def fetch(provider, client, known)
+      def due?(source, now)
+        !CLOSED.include?(source.remote_state) || source.checked_at.nil? || source.checked_at <= now - CHECK_CLOSED_EVERY
+      end
+
+      def fetch(provider, client, known, now)
         return Failure(:not_configured) unless client.configured?
 
         assigned = client.assigned_issues.items
-        unseen = known.except(*assigned.map { it[:id] }).transform_values(&:url)
 
-        Success([assigned, client.issues(unseen)])
+        Success([assigned, client.issues(unseen(known, assigned, now))])
       rescue Record::RateLimited
         Failure(:rate_limited)
       rescue Record::Error => e
@@ -72,7 +77,7 @@ module Tasks
         transaction do
           task = settle(task, state, source.remote_state, now) unless state == source.remote_state
           rewrite(task, issue)
-          restamp(source, state, issue[:url])
+          restamp(source, state, issue[:url], now)
           discuss(source, task, issue)
         end
       end
@@ -107,10 +112,11 @@ module Tasks
         reopen_task.call(task.id)
       end
 
-      def restamp(source, state, url)
-        return if source.remote_state == state && source.url == url
+      def restamp(source, state, url, now)
+        checked_at = now if CLOSED.include?(state)
+        return if [source.remote_state, source.url, source.checked_at] == [state, url, checked_at]
 
-        task_source_repo.update(source.id, remote_state: state, url:)
+        task_source_repo.update(source.id, remote_state: state, url:, checked_at:)
       end
 
       def rewrite(task, issue)
@@ -142,6 +148,10 @@ module Tasks
       end
 
       def tracked(provider) = task_source_repo.still_there(provider).to_h { [it.remote_id, it] }
+
+      def unseen(known, assigned, now)
+        known.except(*assigned.map { it[:id] }).values.select { due?(it, now) }.to_h { [it.remote_id, it.url] }
+      end
     end
   end
 end

@@ -1591,7 +1591,8 @@ CREATE TABLE public.task_sources (
     url text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL
+    remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL,
+    checked_at timestamp with time zone
 );
 
 
@@ -2977,4 +2978,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261001000062_create_spam_senders.rb'),
 ('20261001000063_add_spam_reason_to_webmentions.rb'),
 ('20261001000064_add_month_visitor_hash_and_create_analytics_rollup_reach.rb'),
-('20261001000065_add_access_token_id_to_oauth_tokens.rb');
+('20261001000065_add_access_token_id_to_oauth_tokens.rb'),
+('20261001000067_add_checked_at_to_task_sources.rb');
