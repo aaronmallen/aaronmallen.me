@@ -3,7 +3,7 @@ id: "0089"
 title: Build every API response with Alba serializers
 status: active
 created: 2026-10-01
-area: [lib, mcp]
+area: [lib, api, mcp]
 issue: "#155"
 tags: [api, mcp, json, serializers, alba, dependencies, journal, tasks]
 ---
@@ -28,8 +28,8 @@ We build every API response with [Alba] serializers.
 
 - `Blog::Serializer` in `lib/blog/serializer.rb` includes `Alba::Resource`. It holds whatever every serializer in
   the app shares, so a later slice that serves JSON starts from it.
-- `Api::Serializer < Blog::Serializer` in the `api` slice holds what the API alone needs.
-- Each resource gets its own serializer in `slices/api/serializers`, a subclass of `Api::Serializer`: journal
+- `API::Serializer < Blog::Serializer` in the `api` slice holds what the API alone needs.
+- Each resource gets its own serializer in `slices/api/serializers`, a subclass of `API::Serializer`: journal
   entries, tasks, task comments and sprints first (#152), the rest as each resource moves.
 
 An MCP tool for a resource on the API does not build its own hash. It gets its JSON from the same serializer,

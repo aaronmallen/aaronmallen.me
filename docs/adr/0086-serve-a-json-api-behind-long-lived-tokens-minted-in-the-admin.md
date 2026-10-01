@@ -3,7 +3,7 @@ id: "0086"
 title: Serve a JSON API behind long-lived tokens minted in the admin
 status: active
 created: 2026-10-01
-area: [config, db, admin, mcp]
+area: [config, db, admin, api, mcp]
 issue: "#153"
 tags: [api, auth, tokens, cli, mcp, oauth, journal, tasks]
 ---

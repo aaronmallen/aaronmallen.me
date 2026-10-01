@@ -3,7 +3,7 @@ id: "0088"
 title: Hold the layer the API and MCP share in the api slice, and call it in process
 status: active
 created: 2026-10-01
-area: [mcp]
+area: [api, mcp]
 issue: "#154"
 tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
 ---
