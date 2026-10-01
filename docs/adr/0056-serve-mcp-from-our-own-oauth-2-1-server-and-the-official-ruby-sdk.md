@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, mcp, admin]
 issue: AA-262
-amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824]
+amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153"]
 tags: [mcp, auth, oauth, github, tokens, claude, scopes]
 ---
 
@@ -78,10 +78,12 @@ internals, such as imports, reaps, rollups, delivery, sign in and OAuth, have no
 but it adds a vendor account, and the admin's safety would then rest on that vendor.
 
 **A separate MCP service** talking to the site over a new internal API. Kept apart from the app, but it means two
-things to deploy and an extra API, which is too much for one user.
+things to deploy and an extra API, which is too much for one user. #153 added an API for a CLI, in the same app
+beside this slice, as [ADR 0086][0086] records.
 
 **A secret token from settings**, for Claude Code only. Much simpler auth, but claude.ai and desktop connectors
-expect OAuth.
+expect OAuth. #153 gave the API long-lived tokens minted in the admin, and they do not open MCP
+([ADR 0086][0086]).
 
 **A local stdio server.** No public endpoint, but it only sees the local database, not the drafts on the live site.
 
@@ -135,7 +137,11 @@ alone, and that alone reads the journal, private commits and contact messages.
 Every admin operation needs a tool, and the tool list grows with the admin. A spec fails when an operation or an
 activity kind lands with no tool, and a job or internal left without one goes on its exempt list with a reason.
 
+Since #153 the rule asks for a tool and an endpoint, for each resource once it moves to the API
+([ADR 0086][0086]).
+
 Three tables sit in a presentation slice, so a reader after every table in the site has to open `slices/mcp` as
 well as the feature slices. No presentation slice holds a table beyond those three and the admin's one.
 
+[0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
