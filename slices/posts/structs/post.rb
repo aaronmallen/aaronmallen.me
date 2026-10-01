@@ -3,6 +3,8 @@
 module Posts
   module Structs
     class Post < Blog::DB::Struct
+      def body_html = document.html
+
       def canonical_url = written(:canonical_url)
 
       def changed_at = [published_at, updated_at].compact.max
@@ -11,13 +13,15 @@ module Posts
 
       def og_title = written(:og_title)
 
-      def read_time = @read_time ||= Markdown.read_time(body)
+      def read_time = document.read_time
 
-      def summary = written_summary || Markdown.first_paragraph(body)
+      def summary = written_summary || document.first_paragraph
 
       def written_summary = written(:summary)
 
       private
+
+      def document = @document ||= Markdown::Document.new(body)
 
       def written(field)
         given = self[field].to_s.strip

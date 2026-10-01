@@ -31,7 +31,7 @@ module Public
         private
 
         def expose_body(response, post)
-          response[:body_html] = ::Posts::Markdown.to_html(post.body)
+          response[:body_html] = post.body_html
           response[:edits] = edits_for_post.call(post.id)
         end
 

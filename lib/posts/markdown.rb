@@ -14,38 +14,11 @@ module Posts
     WORDS_PER_MINUTE = 220
 
     class << self
-      def first_paragraph(markdown)
-        paragraph = parse(markdown).find { it.type == :paragraph }
-        return unless paragraph
-
-        text = paragraph.walk.map { |node| inline_text(node) }.join.strip
-        text unless text.empty?
-      end
-
-      def read_time(markdown) = [1, word_count(markdown).fdiv(WORDS_PER_MINUTE).round].max
+      def read_time(markdown) = Document.new(markdown).read_time
 
       def to_html(markdown) = Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS)
 
-      def word_count(markdown) = plain_text(markdown).split.size
-
-      private
-
-      def inline_text(node)
-        return " " if BREAK_NODES.include?(node.type)
-
-        TEXT_NODES.include?(node.type) ? node.string_content : Blog::Constants::EMPTY_STRING
-      end
-
-      def parse(markdown) = Commonmarker.parse(markdown, options: OPTIONS)
-
-      def plain_text(markdown)
-        text = +""
-        parse(markdown).walk do |node|
-          text << " " unless INLINE_NODES.include?(node.type)
-          text << node.string_content if TEXT_NODES.include?(node.type)
-        end
-        text
-      end
+      def word_count(markdown) = Document.new(markdown).word_count
     end
   end
 end

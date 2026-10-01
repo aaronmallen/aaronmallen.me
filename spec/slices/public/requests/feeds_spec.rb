@@ -20,6 +20,8 @@ RSpec.describe "Feeds", type: :request do
 
   def value(xpath) = feed.at_xpath(xpath)&.text
 
+  def watch_markdown = %i[parse to_html].each { allow(Commonmarker).to receive(it).and_call_original }
+
   describe "/writing.atom" do
     it "serves valid Atom", :aggregate_failures do
       publish("hello", 1, tags: %w[ruby], body: "the <start> & more\n\n```ruby\nputs 1\n```")
@@ -124,6 +126,14 @@ RSpec.describe "Feeds", type: :request do
 
     it "has the rendered body as HTML content" do
       expect(Capybara.string(entry.at_xpath("content[@type='html']").text)).to have_css("p em", text: "start")
+    end
+
+    it "parses the body once for the summary and the content", :aggregate_failures do
+      watch_markdown
+      get "/writing.atom"
+
+      expect(Commonmarker).to have_received(:parse).once
+      expect(Commonmarker).not_to have_received(:to_html)
     end
   end
 
@@ -432,8 +442,6 @@ RSpec.describe "Feeds", type: :request do
 
     def validators = { etag: last_response.headers["ETag"], last_modified: last_response.headers["Last-Modified"] }
 
-    def watch_markdown = allow(Posts::Markdown).to receive(:to_html).and_call_original
-
     it "names the newest post change as the time the feed last changed" do
       get "/writing.atom"
 
@@ -471,11 +479,12 @@ RSpec.describe "Feeds", type: :request do
           expect(last_response.headers.to_h.slice("etag", "vary")).to eq("etag" => sent[:etag], "vary" => "Cookie")
         end
 
-        it "renders no Markdown for a 304" do
+        it "renders no Markdown for a 304", :aggregate_failures do
           watch_markdown
           poll(path, **validators)
 
-          expect(Posts::Markdown).not_to have_received(:to_html)
+          expect(Commonmarker).not_to have_received(:parse)
+          expect(Commonmarker).not_to have_received(:to_html)
         end
 
         it "answers 200 with the new entry once another post is published", :aggregate_failures do

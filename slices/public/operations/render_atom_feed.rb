@@ -62,7 +62,7 @@ module Public
       def entry_body(xml, post, edits)
         summary = post.summary
         xml.summary(summary) if summary
-        xml.content(::Posts::Markdown.to_html(post.body) + notes(edits.fetch(post.id, NO_EDITS)), type: "html")
+        xml.content(post.body_html + notes(edits.fetch(post.id, NO_EDITS)), type: "html")
       end
 
       def entry_dates(xml, post, changed_at)
