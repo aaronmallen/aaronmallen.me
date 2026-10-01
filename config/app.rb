@@ -20,6 +20,7 @@ module Blog
       inflections.acronym "CLI", "GitHub", "MCP", "OAuth", "PKCE", "UI", "URI"
     end
 
+    config.actions.method_override = false
     config.actions.view_name_inference_base = "ui.views"
 
     config.logger.filters |= %w[_csrf_token client_secret code_challenge code_verifier refresh_token]

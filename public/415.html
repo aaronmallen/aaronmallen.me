@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Not accepted | Aaron Allen</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --ground: light-dark(#f2f1ea, #272822);
+        --ink: light-dark(#26271f, #f8f8f2);
+        --ink-muted: light-dark(#5f6055, #a8a391);
+        --line: light-dark(#cfcec2, #3b3a32);
+        --accent: light-dark(#b3105a, #ff6e9c);
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--ground);
+        color: var(--ink);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+      }
+
+      header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--line);
+      }
+
+      header a {
+        color: var(--ink);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 40rem;
+        box-sizing: border-box;
+        margin: 0 auto;
+        padding: 4rem 1.5rem;
+      }
+
+      .status {
+        margin: 0;
+        color: var(--accent);
+        font-family: ui-monospace, Menlo, Consolas, monospace;
+      }
+
+      h1 {
+        margin: 0.5rem 0 1rem;
+        font-size: 2.25rem;
+        line-height: 1.2;
+      }
+
+      p {
+        color: var(--ink-muted);
+      }
+
+      main a {
+        color: var(--accent);
+      }
+
+      @media (width < 43.75rem) {
+        a {
+          display: inline-flex;
+          align-items: center;
+          min-height: 44px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="/">Aaron Allen</a>
+    </header>
+    <main>
+      <p class="status">415</p>
+      <h1>Not accepted</h1>
+      <p>The site does not take files at this address.</p>
+      <p><a href="/">Go to the home page</a></p>
+    </main>
+  </body>
+</html>

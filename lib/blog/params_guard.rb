@@ -5,9 +5,15 @@ require "rack"
 
 module Blog
   class ParamsGuard
-    BAD_REQUEST_PAGE = "/400"
+    BAD_REQUEST = 400
+    BODY_LIMIT = 1024 * 1024
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
+    MULTIPART = "multipart/form-data"
     PUBLIC = "public"
+    TOO_LARGE = 413
+    UNSUPPORTED = 415
+    UPLOAD_LIMIT = 25 * 1024 * 1024
+    UPLOAD_PATH = "/admin/photos"
 
     def initialize(app)
       @app = app
@@ -15,20 +21,32 @@ module Blog
     end
 
     def call(env)
-      return @app.call(env) if readable?(::Rack::Request.new(env))
+      status = refusal(::Rack::Request.new(env))
+      return @app.call(env) unless status
 
-      @errors_app.call(env.merge(::Rack::PATH_INFO => BAD_REQUEST_PAGE))
+      @errors_app.call(env.merge(::Rack::PATH_INFO => "/#{status}"))
     end
 
     private
 
     def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
+    def limit(request) = upload?(request) ? UPLOAD_LIMIT : BODY_LIMIT
+
     def readable?(request)
       [::Rack::Utils.unescape_path(request.path_info), request.GET, form(request)].all? { utf8?(it) }
     rescue ::Rack::BadRequest
       false
     end
+
+    def refusal(request)
+      if request.content_length.to_i > limit(request) then TOO_LARGE
+      elsif request.media_type == MULTIPART && !upload?(request) then UNSUPPORTED
+      elsif !readable?(request) then BAD_REQUEST
+      end
+    end
+
+    def upload?(request) = request.post? && request.path_info == UPLOAD_PATH
 
     def utf8?(value)
       case value

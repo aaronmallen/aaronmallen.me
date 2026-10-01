@@ -44,6 +44,18 @@ RSpec.describe "The error pages in production", type: :request do
     it_behaves_like "a page of the site", 400
   end
 
+  describe "a body too large to read" do
+    before { post "/contact", "message[body]=#{'a' * Blog::ParamsGuard::BODY_LIMIT}" }
+
+    it_behaves_like "a page of the site", 413
+  end
+
+  describe "a multipart body where the site takes no files" do
+    before { post "/contact", "photo" => Rack::Test::UploadedFile.new(StringIO.new("a"), original_filename: "a.jpg") }
+
+    it_behaves_like "a page of the site", 415
+  end
+
   describe "an error raised in a public action" do
     before do
       replace_component("posts.queries.published_page", ->(_page) { raise "boom" })

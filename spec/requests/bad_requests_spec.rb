@@ -67,12 +67,6 @@ RSpec.describe "A request the site cannot read", type: :request do
     it_behaves_like "a bad request"
   end
 
-  describe "a form body over Rack's limit" do
-    before { post "/contact", "message[body]=#{'a' * Rack::Utils.default_query_parser.bytesize_limit}", form }
-
-    it_behaves_like "a bad request"
-  end
-
   describe "a client that asks for JSON" do
     before { get "/", {}, "QUERY_STRING" => "a=%", "HTTP_ACCEPT" => "application/json" }
 
