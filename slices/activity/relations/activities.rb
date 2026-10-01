@@ -16,6 +16,7 @@ module Activity
       MATCHED = Sequel.function(:count, Sequel[:tags][:name]).distinct
       MONTH_FORMAT = "YYYY-MM"
       OWNER_SEPARATOR = "/"
+      POST = Blog::Types::ActivityKind["post"]
       SEARCHED = %i[excerpt link name repo sha status].freeze
       TASK = Blog::Types::ActivityKind["task"]
       TAGGED = {
@@ -23,6 +24,8 @@ module Activity
         TASK => %i[source_id task_tags task_id],
         COMMENT => %i[task_id task_tags task_id],
       }.freeze
+      LISTED = { **TAGGED, POST => %i[source_id post_tags post_id] }.freeze
+      TAG_NAME = Sequel.cast(Sequel[:tags][:name], :text)
       TARGET_SEPARATOR = " "
 
       schema :activities, infer: true
@@ -64,6 +67,12 @@ module Activity
         where(Sequel.|(*TAGGED.map { |type, (owner, table, key)| owners_tagged(type, owner, table, key, folded) }))
       end
 
+      def with_tags
+        lists = LISTED.to_h { |type, (owner, table, key)| [Sequel[type:], tag_names(owner, table, key)] }
+
+        select_append(ROM::SQL::Attribute[ROM::Types::Any].meta(sql_expr: Sequel.case(lists, nil)).as(:tags))
+      end
+
       def with_types(types) = where(type: types)
 
       private
@@ -79,6 +88,12 @@ module Activity
 
       def owners_tagged(type, owner, table, key, names)
         Sequel[type:] & Sequel[owner => tag_owners(table, key, names)]
+      end
+
+      def tag_names(owner, table, key)
+        taggings = dataset.db[table].join(:tags, id: :tag_id).where(Sequel[table][key] => Sequel[:activities][owner])
+
+        taggings.select(Sequel.function(:array_agg, TAG_NAME).order(TAG_NAME))
       end
 
       def tag_owners(table, key, names)

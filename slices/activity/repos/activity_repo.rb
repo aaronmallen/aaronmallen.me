@@ -7,7 +7,7 @@ module Activity
       TYPES = Blog::Types::ActivityKind.values
 
       def between(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE, limit: nil)
-        found = narrowed(from:, to:, types:, repos:, text:, tags:).newest_first
+        found = narrowed(from:, to:, types:, repos:, text:, tags:).newest_first.with_tags
 
         (limit ? found.limit(limit) : found).to_a
       end

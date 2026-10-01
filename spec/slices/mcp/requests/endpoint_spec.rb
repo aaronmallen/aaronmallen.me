@@ -517,6 +517,11 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def scopes = "read"
 
+    def statements_to_read
+      issued
+      counting { read_activity }.size
+    end
+
     def suggest_on(post_id, on: today)
       suggestion_repo.replace_for_post(post_id, [typo])
       Suggestions::Slice["db.rom"].relations[:suggestions].update(created_at: at(9, on:))
@@ -625,6 +630,13 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity(tags: %w[home])
 
         expect(names).to eq(["Down to ten"])
+      end
+
+      it "gives a comment its task's tags" do
+        comment(body: "Down to ten")
+        read_activity
+
+        expect(entries).to contain_exactly(include("kind" => "comment", "tags" => %w[home]))
       end
 
       it "matches a comment by its text" do
@@ -788,6 +800,44 @@ RSpec.describe "MCP endpoint", type: :request do
       read_activity(tags: %w[Site])
 
       expect(names).to eq(["about the site"])
+    end
+
+    it "gives a journal entry its tags" do
+      create(:journal_entry, entry_date: today, body: "slept well", tags: %w[health])
+      read_activity
+
+      expect(entries).to contain_exactly(include("kind" => "journal", "tags" => %w[health]))
+    end
+
+    it "gives a finished task its tags" do
+      create(:task, :done, completed_at: at(16), tags: %w[home errands])
+      read_activity
+
+      expect(entries).to contain_exactly(include("kind" => "task", "tags" => %w[errands home]))
+    end
+
+    it "gives a published post its tags" do
+      create(:post, :published, published_at: at(9), tags: %w[ruby])
+      read_activity
+
+      expect(entries).to contain_exactly(include("kind" => "post", "tags" => %w[ruby]))
+    end
+
+    it "leaves tags off a row that has none" do
+      create(:journal_entry, entry_date: today)
+      create(:commit, commit_date: today)
+      read_activity
+
+      expect(entries).to all(satisfy { !it.key?("tags") })
+    end
+
+    it "reads the tags of the whole window in the same statements as one row" do
+      create(:journal_entry, entry_date: today, tags: %w[health])
+      one = statements_to_read
+      create(:journal_entry, entry_date: today - 1, tags: %w[work])
+      create(:task, :done, completed_at: at(16), tags: %w[home])
+
+      expect(statements_to_read).to eq(one)
     end
 
     it "narrows to the text it is given" do

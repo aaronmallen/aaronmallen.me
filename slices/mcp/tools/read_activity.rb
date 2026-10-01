@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class ReadActivity < Base
-      FIELDS = %i[link repo sha additions deletions status targets excerpt task_id].freeze
+      FIELDS = %i[link repo sha additions deletions status targets excerpt task_id tags].freeze
       KINDS = Blog::Types::ActivityKind.values
       TIME_FORMAT = "%H:%M"
 
@@ -38,7 +38,7 @@ module MCP
                   "tasks, projects, sprints and suggestions. A comment's name is its text and its excerpt the " \
                   "task's title. " \
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
-                  "deletions, status, targets, excerpt and task_id its kind holds. " \
+                  "deletions, status, targets, excerpt, task_id and tags its kind holds. " \
                   "#{DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
                   "a time, newest first"
       input_schema(SCHEMA)
