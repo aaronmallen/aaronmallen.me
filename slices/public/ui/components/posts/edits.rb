@@ -10,7 +10,7 @@ module Public
           def view_template
             return if @edits.empty?
 
-            days = @edits.group_by { Blog::TimeZone.today(it.created_at) }.values
+            days = ::Posts::EditDays.group(@edits).values
 
             section(class: "post-edits", aria: { label: t(".label") }) do
               days.each { |edits| day(edits, updated: edits.equal?(days.last)) }

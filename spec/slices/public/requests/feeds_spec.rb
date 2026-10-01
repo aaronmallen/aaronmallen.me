@@ -123,6 +123,89 @@ RSpec.describe "Feeds", type: :request do
     end
   end
 
+  describe "an entry for a post with notes" do
+    let(:post_record) { create(:post, :published, slug: "hello", body: "the start") }
+
+    def content = Capybara.string(feed.at_xpath("/feed/entry/content").text)
+
+    def edit(note, at:) = create(:post_edit, post: post_record, note:, created_at: at, updated_at: at)
+
+    it "ends with the notes after the body", :aggregate_failures do
+      edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+      get "/writing.atom"
+
+      expect(content.all("body > *").map(&:tag_name)).to eq(%w[p section])
+      expect(content.find(".post-edit").text(normalize_ws: true)).to eq("Edit Sep 7, 2026: fixed the numbers")
+    end
+
+    it "dates a note by the site's day, not UTC's" do
+      edit("late night fix", at: Time.utc(2026, 9, 8, 3))
+      get "/writing.atom"
+
+      expect(content.find(".post-edit-date")).to have_text("Edit Sep 7, 2026:")
+    end
+
+    describe "notes from two days" do
+      before do
+        edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+        edit("fixed a link", at: Time.utc(2026, 9, 7, 15))
+        edit("fixed a typo", at: Time.utc(2026, 9, 9, 12))
+        get "/writing.atom"
+      end
+
+      it "shows each date once, oldest first" do
+        expect(content.all(".post-edit-date").map(&:text)).to eq(["Edit Sep 7, 2026:", "Edit Sep 9, 2026:"])
+      end
+
+      it "lists one day's notes under its date, oldest first" do
+        expect(content.all(".post-edit-item").map { it.text.strip }).to eq(["fixed the numbers", "fixed a link"])
+      end
+
+      it "shows a day's single note on its own" do
+        expect(content.find(".post-edit-note").text.strip).to eq("fixed a typo")
+      end
+    end
+
+    it "renders the note's Markdown", :aggregate_failures do
+      edit("fixed `count` and [the link](https://example.com/docs)", at: Time.utc(2026, 9, 7, 12))
+      get "/writing.atom"
+
+      expect(content).to have_css(".post-edit-note code", text: "count")
+      expect(content).to have_link("the link", href: "https://example.com/docs")
+    end
+
+    it "escapes raw HTML in a note" do
+      edit("fixed <script>alert(1)</script> it", at: Time.utc(2026, 9, 7, 12))
+      get "/writing.atom"
+
+      expect(content).to have_no_css(".post-edit-note script")
+    end
+
+    it "serves valid Atom" do
+      edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+      get "/writing.atom"
+
+      expect(last_response.body).to be_valid_atom
+    end
+
+    it "leaves the notes off another post's entry" do
+      edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+      publish("other", 0, body: "the other")
+      get "/writing.atom"
+
+      other = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/other']/content")
+
+      expect(other.text).to eq(Posts::Markdown.to_html("the other"))
+    end
+  end
+
+  it "keeps the body alone as the content of a post with no notes" do
+    publish("hello", 1, body: "the *start*")
+    get "/writing.atom"
+
+    expect(feed.at_xpath("/feed/entry/content").text).to eq(Posts::Markdown.to_html("the *start*"))
+  end
+
   it "has the summary the post carries" do
     publish("hello", 1, summary: "What it is about", body: "the start")
     get "/writing.atom"
