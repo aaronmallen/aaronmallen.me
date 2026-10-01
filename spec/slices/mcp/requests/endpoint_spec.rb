@@ -1113,6 +1113,18 @@ RSpec.describe "MCP endpoint", type: :request do
         expect(message).to eq("from comes after to")
       end
 
+      it "refuses a range longer than 366 days" do
+        summarize(from: today - 366)
+
+        expect(message).to eq("give a range of 366 days or fewer")
+      end
+
+      it "counts a range of 366 days" do
+        summarize(from: today - 365)
+
+        expect(content).to include("from" => (today - 365).iso8601)
+      end
+
       it "refuses a call naming no range" do
         call_tool("summarize_activity")
 

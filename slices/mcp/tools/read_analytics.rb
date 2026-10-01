@@ -45,7 +45,8 @@ module MCP
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. " \
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
+                  "#{LONGEST_RANGE} days. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, and " \
                   "its devices, with no top paths. A page's referrers and countries always give visitors. A page " \
@@ -77,6 +78,7 @@ module MCP
           return refuse(SINCE_REFUSAL) if since && !at
 
           case days(from, to)
+          in Success(range) if too_long?(range.first, range.last) then refuse_long_range
           in Success(range) then read(range, at, path, server_context)
           in Failure(message) then refuse(message)
           end

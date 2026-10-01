@@ -190,6 +190,20 @@ RSpec.describe "MCP analytics tools", type: :request do
     it "refuses a range that runs backwards" do
       expect(mcp_text("read_analytics", from: today.iso8601, to: (today - 1).iso8601)).to eq("from comes after to")
     end
+
+    it "refuses a range longer than 366 days" do
+      expect(mcp_text("read_analytics", from: (today - 366).iso8601, to: today.iso8601))
+        .to eq("give a range of 366 days or fewer")
+    end
+
+    it "refuses a range longer than 366 days with a path" do
+      expect(mcp_text("read_analytics", from: (today - 366).iso8601, to: today.iso8601, path: "/"))
+        .to eq("give a range of 366 days or fewer")
+    end
+
+    it "reads a range of 366 days" do
+      expect(read(from: today - 365).fetch("days").size).to eq(366)
+    end
   end
 
   describe "read_analytics reach" do
