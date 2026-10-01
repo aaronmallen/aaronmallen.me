@@ -2,12 +2,20 @@
 
 require "blog/concurrency"
 require "cgi"
+require "sequel"
 require "uri"
 
 module Blog
   module Providers
     module DBProvider
       SPARE_CONNECTIONS = 1
+      VALIDATE_EVERY_CHECKOUT = -1
+      VALIDATED_CONNECTIONS = :validated_connections
+
+      Sequel::Database.register_extension(VALIDATED_CONNECTIONS) do |db|
+        db.extension(:connection_validator)
+        db.pool.connection_validation_timeout = VALIDATE_EVERY_CHECKOUT
+      end
 
       class << self
         def configure(config, settings)
@@ -18,7 +26,7 @@ module Blog
             gateway.connection_options(max_connections: max_connections(settings))
 
             gateway.adapter :sql do |sql|
-              sql.extension :date_arithmetic
+              sql.extension :date_arithmetic, VALIDATED_CONNECTIONS
             end
           end
         end
