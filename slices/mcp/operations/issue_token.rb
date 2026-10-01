@@ -98,7 +98,7 @@ module MCP
       end
 
       def settle(client, record, description)
-        granted = transaction { grant(client, record) if yield }
+        granted = transaction { grant(client, record) if client_repo.connected_by_id_for_update(client.id) && yield }
 
         granted || replay(record.oauth_client_id, description)
       end

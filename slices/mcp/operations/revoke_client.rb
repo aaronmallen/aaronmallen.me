@@ -10,9 +10,10 @@ module MCP
       ]
 
       def call(id)
-        client = step find(id)
-
-        transaction { cut_off(client) }
+        transaction do
+          client = step find(id)
+          cut_off(client)
+        end
       end
 
       private
@@ -24,7 +25,7 @@ module MCP
       end
 
       def find(id)
-        client = client_repo.connected_by_id(id)
+        client = client_repo.connected_by_id_for_update(id)
         client ? Success(client) : Failure(:not_found)
       end
     end

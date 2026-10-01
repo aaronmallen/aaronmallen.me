@@ -15,6 +15,8 @@ module MCP
 
       def connected_by_id(id) = oauth_clients.connected.by_pk(id).one
 
+      def connected_by_id_for_update(id) = oauth_clients.connected.by_pk(id).lock.one
+
       def count_from_visitor_since(visitor_hash, time)
         oauth_clients.for_visitor(visitor_hash).registered_since(time).count
       end

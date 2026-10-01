@@ -397,6 +397,58 @@ RSpec.describe "OAuth token", type: :request do
     end
   end
 
+  describe "a revoke that lands during a grant", :commits do
+    let(:code_repo) { MCP::Slice["repos.oauth_code_repo"] }
+    let(:token_repo) { MCP::Slice["repos.oauth_token_repo"] }
+
+    def database = MCP::Slice["db.rom"].gateways[:default].connection
+
+    def revoke_after(key, repo, spend)
+      revoking = nil
+      allow(repo).to(receive(spend).and_wrap_original do |original, *args, **options|
+        original.call(*args, **options).tap do
+          revoking = Thread.new { MCP::Slice["operations.revoke_client"].call(client.id) }
+          wait_until_blocked
+        end
+      end)
+      replace_component(key, repo)
+      yield
+      revoking.value
+    end
+
+    def wait_until_blocked
+      here = database[:pg_stat_activity].where(datname: Sequel.function(:current_database)).select(:pid)
+      waiting = database[:pg_locks].where(granted: false, pid: here)
+      Timeout.timeout(5) { sleep(0.01) until waiting.any? }
+    end
+
+    it "leaves no live token behind a code exchange" do
+      code
+      revoke_after("repos.oauth_code_repo", code_repo, :burn) { exchange }
+
+      expect(tokens.live.count).to eq(0)
+    end
+
+    it "leaves no live token behind a refresh" do
+      exchange
+      token = document.fetch("refresh_token")
+      revoke_after("repos.oauth_token_repo", token_repo, :revoke) { refresh(token) }
+
+      expect(tokens.live.count).to eq(0)
+    end
+  end
+
+  describe "a client the operator revoked" do
+    before do
+      exchange
+      MCP::Slice["operations.revoke_client"].call(client.id)
+    end
+
+    it "connects again once the operator approves it" do
+      expect(exchange_response(code: authorization_code).status).to eq(200)
+    end
+  end
+
   it "refuses a grant type it does not run" do
     post "/oauth/token", grant_type: "client_credentials"
 
