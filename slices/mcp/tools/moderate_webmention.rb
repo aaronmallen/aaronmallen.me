@@ -4,6 +4,7 @@ module MCP
   module Tools
     class ModerateWebmention < Base
       APPROVED = Blog::Types::WebmentionStatus["approved"]
+      IGNORED = Blog::Types::WebmentionStatus["ignored"]
       SPAM = Blog::Types::WebmentionStatus["spam"]
 
       SCHEMA = {
@@ -12,14 +13,16 @@ module MCP
           id: { type: "integer" },
           verdict: {
             type: "string",
-            enum: [APPROVED, SPAM],
-            description: "approved shows it on the post; spam hides it",
+            enum: [APPROVED, IGNORED, SPAM],
+            description:
+              "approved shows it on the post; ignored hides it and leaves its author alone; " \
+              "spam hides it and ends auto-approval for its author",
           },
         },
         required: %w[id verdict],
       }.freeze
 
-      description "Approve one webmention, so it shows on its blog post, or mark it as spam"
+      description "Approve one webmention, so it shows on its blog post, or hide it as ignored or spam"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 

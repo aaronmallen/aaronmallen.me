@@ -343,6 +343,14 @@ RSpec.describe "MCP social tools", type: :request do
       expect(listed.map { it.fetch("id") }).to eq([spam.id])
     end
 
+    it "narrows to the ignored ones" do
+      create(:webmention, :spam, received_at: at(Date.new(2026, 3, 2)))
+      ignored = create(:webmention, :ignored, received_at: at(Date.new(2026, 3, 3)))
+      call_tool("list_webmentions", **range, status: "ignored")
+
+      expect(listed.map { it.fetch("id") }).to eq([ignored.id])
+    end
+
     it "gives what each one says and where it came from" do
       mention = create(:webmention, :reply, received_at: at(Date.new(2026, 3, 2)), excerpt: "Nice post")
       call_tool("list_webmentions", **range)
@@ -370,6 +378,12 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("moderate_webmention", id: mention.id, verdict: "spam")
 
       expect(webmention_repo.by_status("spam").map(&:id)).to eq([mention.id])
+    end
+
+    it "marks one as ignored" do
+      call_tool("moderate_webmention", id: mention.id, verdict: "ignored")
+
+      expect(webmention_repo.by_status("ignored").map(&:id)).to eq([mention.id])
     end
 
     it "refuses a verdict it does not know" do
