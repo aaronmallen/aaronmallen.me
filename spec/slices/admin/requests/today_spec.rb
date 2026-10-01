@@ -776,6 +776,7 @@ RSpec.describe "Admin today", type: :request do
       end
 
       def sync_issues_with(result)
+        with_token
         sync = instance_double(Tasks::Operations::SyncIssues, call: result)
         Tasks::Jobs::SyncIssues.new(sync_issues: sync).perform
       end

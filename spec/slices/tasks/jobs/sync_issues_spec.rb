@@ -543,12 +543,16 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(failure).to be_nil
       expect(repo.by_id(task.id).status).to eq("done")
     end
+  end
 
-    it "records a missing token as not configured" do
-      disconnect_github
+  describe "with no GitHub token" do
+    before { disconnect_github }
+
+    it "asks GitHub for nothing and records nothing", :aggregate_failures do
       sync
 
-      expect(failure).to include(reason: "not_configured")
+      expect(a_request(:any, %r{\A#{api}/})).not_to have_been_made
+      expect(failure).to be_nil
     end
   end
 

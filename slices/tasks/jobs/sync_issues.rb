@@ -15,6 +15,8 @@ module Tasks
       sidekiq_options retry: false
 
       def perform
+        return unless client.configured?
+
         result = task_source_repo.with_sync_lock(PROVIDER) { sync_issues.call(provider: PROVIDER, client:) }
 
         case result
