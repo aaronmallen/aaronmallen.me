@@ -91,6 +91,7 @@ one.
 | [0084][0084] | Keep edit notes in a post_edits table and require one under the post's lock | ![Active][active] | 2026-09-30 |
 | [0085][0085] | Reorder tasks by drag and save the order through fetch | ![Active][active] | 2026-10-01 |
 | [0086][0086] | Serve a JSON API behind long-lived tokens minted in the admin | ![Active][active] | 2026-10-01 |
+| [0087][0087] | Widen what analytics keeps with a monthly hash, and roll up each page's breakdowns | ![Active][active] | 2026-10-01 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -178,6 +179,7 @@ one.
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
+[0087]: 0087-widen-what-analytics-keeps-with-a-monthly-hash-and-roll-up-each-pages-breakdowns.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

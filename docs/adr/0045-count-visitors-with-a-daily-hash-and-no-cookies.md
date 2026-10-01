@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, public, admin, assets, db]
 issue: AA-613
-amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714]
+amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210"]
 tags: [analytics, privacy, beacon, retention, geoip, throttle]
 ---
 
@@ -56,6 +56,10 @@ weekly job refreshes it with a license key from settings. We keep raw events for
 The nightly rollup builds every day that has none, rebuilding each day whole (AA-485), and the prune stops at the
 first day with no rollup. The dashboard reads today from raw events.
 
+**What #210 added.** [ADR 0087][0087] widens what we keep: a second visitor hash salted by the calendar month, a
+`ref` source, the referring path from our own site, scroll milestones and a device class in place of the user
+agent. Each page's breakdowns roll up and stay forever.
+
 ## Alternatives
 
 **Server-side only.** Rack middleware records every request with the same daily hash. It counts visitors without
@@ -101,4 +105,5 @@ day's count, where a visitor counts twice.
 
 Adding an analytics cookie or storing addresses breaks this record and needs a new one.
 
+[0087]: 0087-widen-what-analytics-keeps-with-a-monthly-hash-and-roll-up-each-pages-breakdowns.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
