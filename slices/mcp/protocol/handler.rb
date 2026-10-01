@@ -78,6 +78,7 @@ module MCP
         suggestion_by_id: "suggestions.queries.by_id",
         suggestions_between: "suggestions.queries.created_between",
         sync_failures: "record.queries.sync_failures",
+        tag_by_id: "tags.queries.by_id",
         tag_usage: "tags.queries.usage",
         task_by_id: "tasks.queries.task_by_id",
         task_comments: "tasks.queries.task_comments",

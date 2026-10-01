@@ -12,9 +12,10 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          return no_task(id) if task_by_id(server_context).call(id).nil?
+          task = task_by_id(server_context).call(id)
+          return no_task(id) if task.nil?
 
-          task_answer(id, server_context)
+          task_reply(task, server_context)
         end
       end
     end

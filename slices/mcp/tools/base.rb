@@ -137,6 +137,8 @@ module MCP
 
         def sync_failures(server_context) = server_context.fetch(:sync_failures)
 
+        def tag_by_id(server_context) = server_context.fetch(:tag_by_id)
+
         def tag_usage(server_context) = server_context.fetch(:tag_usage)
 
         def unsent_social_posts(server_context) = server_context.fetch(:unsent_social_posts)

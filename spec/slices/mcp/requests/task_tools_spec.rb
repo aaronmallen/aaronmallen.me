@@ -166,6 +166,13 @@ RSpec.describe "MCP task tools", type: :request do
       expect(content).to include("status" => "canceled", "completed_at" => at(today).utc.iso8601)
     end
 
+    it "loads the task once" do
+      task = create(:task)
+      reads = counting { call_tool("read_task", id: task.id) }
+
+      expect(reads.grep(/FROM "tasks" WHERE \("tasks"."id" = #{task.id}\)/)).to have(1).item
+    end
+
     it "refuses a task that is not there" do
       call_tool("read_task", id: 999_999)
 

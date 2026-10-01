@@ -61,7 +61,9 @@ module MCP
       operations.replace_social_post_edits queries.by_id queries.created_between
     ], from: :suggestions
 
-    import keys: %w[operations.remove_tag operations.save_tag queries.all queries.matching queries.usage], from: :tags
+    import keys: %w[
+      operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.usage
+    ], from: :tags
 
     import keys: %w[
       operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task

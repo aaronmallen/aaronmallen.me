@@ -114,11 +114,7 @@ module MCP
         def tag_text(names) = names.join(SEPARATOR)
 
         def task_answer(id, server_context, **extra)
-          task = task_by_id(server_context).call(id)
-
-          comments = task_comments(server_context).call(id).map { comment_entry(it) }
-
-          answer(task_entry(task).merge(comments:, **extra))
+          task_reply(task_by_id(server_context).call(id), server_context, **extra)
         end
 
         def task_by_id(server_context) = server_context.fetch(:task_by_id)
@@ -134,6 +130,12 @@ module MCP
             list: task.list,
             sprint_on: sprint_on&.iso8601,
           }.merge(ties(task), times(task))
+        end
+
+        def task_reply(task, server_context, **extra)
+          comments = task_comments(server_context).call(task.id).map { comment_entry(it) }
+
+          answer(task_entry(task).merge(comments:, **extra))
         end
 
         def tasks_in_sprint(server_context) = server_context.fetch(:tasks_in_sprint)

@@ -34,7 +34,7 @@ module MCP
 
       class << self
         def call(scope:, server_context:, id: nil, name: nil, color: nil)
-          current = id && all_tags(server_context).call(scope:).find { it.id == id }
+          current = id && tag_by_id(server_context).call(id, scope:)
           return refuse(missing(id)) if id && current.nil?
 
           saved(save_tag(server_context).call({ name: name || current&.name, color: }, scope:, id:), id)

@@ -147,6 +147,14 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(tag_repo.find_in("private", tag.id)).to have_attributes(name: "chores", color: "mk-green")
     end
 
+    it "loads only the tag it changes" do
+      tag = create(:tag, name: "ruby")
+      create(:tag, name: "elixir")
+      reads = counting { call_tool("save_tag", scope: "public", id: tag.id, color: "mk-green") }.grep(/FROM "tags"/)
+
+      expect(reads).to have_at_least(1).item.and all(include(%("tags"."id" = #{tag.id})))
+    end
+
     it "refuses a tag from the other scope as not found", :aggregate_failures do
       tag = create(:tag, :private, name: "chores", color: "mk-pink")
       call_tool("save_tag", scope: "public", id: tag.id, name: "errands")
