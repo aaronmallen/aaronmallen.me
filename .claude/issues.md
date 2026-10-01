@@ -1,8 +1,8 @@
 # Issues
 
 Issues live on GitHub in [`aaronmallen/aaronmallen.me`][repo]. Every skill that reads or files an issue works from
-the commands below, through `gh`. The repository is public, so anything you file is public: keep hostnames,
-secrets and details of the home network out of it.
+the commands below, through `gh`. The repository is public, so anything you file is public: [redact](#redact) it
+first.
 
 Refer to an issue as `#12`. Linear keys such as `AA-213` belong to closed work from before the move, and stay as
 plain text.
@@ -48,6 +48,17 @@ gh issue create --title '<title>' --body-file <path> --assignee aaronmallen \
 ```
 
 It prints the issue's URL. The number is the last part of it. Always assign `aaronmallen`.
+
+## Redact
+
+Before you file, swap each of these for `[redacted]`:
+
+- hostnames
+- secrets and tokens
+- details of the home network, IP addresses among them
+- device names
+- email addresses
+- other people's names
 
 ## Read an issue
 

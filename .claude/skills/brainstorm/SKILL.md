@@ -41,6 +41,11 @@ Then ask with `AskUserQuestion` so the user picks one.
 
 Invoke `/write-spec` with the approach the user picked. That files the spec on GitHub and prints its number.
 
-Splitting a large spec means one `/write-spec` per piece, each one filed as a sub-issue of the original.
+Pass on the session too: the user's prompt, word for word, and each question you asked with its answer.
+`/write-spec` ends the spec with them. Leave out the brainstormer's report and the approaches you offered. Pass them
+as they stand: `/write-spec` redacts them before it files, by the list in [`.claude/issues.md`][issues].
+
+Splitting a large spec means one `/write-spec` per piece, each one filed as a sub-issue of the original. Pass the
+same prompt and questions to each piece.
 
 [issues]: .claude/issues.md
