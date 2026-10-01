@@ -431,63 +431,36 @@ RSpec.describe Social::Jobs::VerifyWebmention do
   end
 
   describe "the time it takes" do
-    def answer(socket)
-      socket.gets("\r\n\r\n")
-      yield socket
-    rescue IOError, SystemCallError
-      nil
-    ensure
-      socket.close
-    end
-
     def budget = 0.5
 
-    before do
-      stub_const("Social::Webmentions::Client::BLOCKED_RANGES", [])
-      stub_const("Social::Webmentions::Client::BUDGET", budget)
-      stub_const("Social::Webmentions::Client::PORTS", 1..65_535)
-      allow(Socket).to receive(:getifaddrs).and_return([])
-    end
+    def gives_up_in(&) = elapsed(described_class::SourceUnreachable, &)
 
-    after do
-      servers.each do |server, thread|
-        thread.kill.join
-        server.close
-      end
-    end
-
-    def elapsed
-      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      yield
-    rescue described_class::SourceUnreachable
-      Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
-    end
-
-    def serve(&)
-      server = TCPServer.new("127.0.0.1", 0)
-      servers << [server, Thread.new { loop { answer(server.accept, &) } }]
-      "http://127.0.0.1:#{server.addr[1]}/notes/1"
-    end
-
-    def servers = @servers ||= []
-
-    def trickle(opening)
-      serve do |socket|
-        socket.write(opening)
-
-        loop do
-          socket.write("x")
-          sleep(budget / 10)
-        end
-      end
-    end
+    before { shorten_webmention_budget(budget) }
 
     it "gives up within the budget on a body that trickles in" do
-      expect(elapsed { verify(source: trickle("HTTP/1.1 200 OK\r\n\r\n")) }).to be < budget * 2
+      expect(gives_up_in { verify(source: trickle("HTTP/1.1 200 OK\r\n\r\n", every: budget / 10)) }).to be < budget * 2
     end
 
     it "gives up within the budget on headers that trickle in" do
-      expect(elapsed { verify(source: trickle("HTTP/1.1 200 OK\r\nX-Slow: ")) }).to be < budget * 2
+      expect(gives_up_in { verify(source: trickle("HTTP/1.1 200 OK\r\nX-Slow: ", every: budget / 10)) })
+        .to be < budget * 2
+    end
+
+    it "gives up within the budget on a site that never answers" do
+      expect(gives_up_in { verify(source: serve { sleep }) }).to be < budget * 2
+    end
+
+    it "gives up within the budget on a handshake that never finishes" do
+      expect(gives_up_in { verify(source: serve { sleep }.sub("http:", "https:")) }).to be < budget * 2
+    end
+
+    it "gives up within the budget on a connection that never opens" do
+      resolves("stalled.example", "192.0.2.1")
+      WebMock.disable_net_connect!(allow_localhost: true, allow: "stalled.example")
+
+      expect(gives_up_in { verify(source: "http://stalled.example/notes/1") }).to be < budget * 2
+    ensure
+      WebMock.disable_net_connect!(allow_localhost: true)
     end
 
     it "counts every redirect against the one budget" do

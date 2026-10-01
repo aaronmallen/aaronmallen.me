@@ -313,6 +313,13 @@ RSpec.describe Social::Jobs::SendWebmentions do
       expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
     end
 
+    it "raises within the budget when the endpoint answers too slowly" do
+      shorten_webmention_budget(0.5)
+      stub_page(target, endpoint: trickle("HTTP/1.1 202 Accepted\r\n\r\n", every: 0.05, path: "/webmention"))
+
+      expect(elapsed(described_class::EndpointUnreachable) { send_for(post_with(target)) }).to be < 1
+    end
+
     it "raises when the connection fails" do
       stub_page(target, endpoint:)
       stub_request(:post, endpoint).to_raise(Faraday::ConnectionFailed.new("connection refused"))

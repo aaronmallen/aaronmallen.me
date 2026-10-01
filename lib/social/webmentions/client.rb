@@ -3,7 +3,6 @@
 require "faraday"
 require "ipaddr"
 require "socket"
-require "timeout"
 
 module Social
   module Webmentions
@@ -31,16 +30,16 @@ module Social
         @connection = connection
       end
 
-      def fetch(url) = within(url) { follow(url) }
+      def fetch(url) = follow(url, Deadline.after(BUDGET))
 
-      def post(url, **params) = within(url) { request(:post, url, params) }
+      def post(url, **params) = request(:post, url, Deadline.after(BUDGET), params)
 
       private
 
       attr_reader :connection
 
-      def addresses(host)
-        Addrinfo.getaddrinfo(host, nil, nil, :STREAM).map(&:ip_address)
+      def addresses(host, deadline)
+        Addrinfo.getaddrinfo(host, nil, nil, :STREAM, timeout: deadline.left).map(&:ip_address)
       rescue SocketError
         Blog::Constants::EMPTY_ARRAY
       end
@@ -52,10 +51,10 @@ module Social
         false
       end
 
-      def checked(url, uri, host)
+      def checked(url, uri, host, deadline)
         raise Refused, "#{url} names port #{uri.port}, which is not a web port" unless PORTS.include?(uri.port)
 
-        found = addresses(host)
+        found = addresses(host, deadline)
         raise Error, "#{url} names a host we could not resolve" if found.empty?
         raise Refused, "#{url} resolves to an address we do not reach" unless found.all? { allowed?(it) }
 
@@ -64,11 +63,11 @@ module Social
 
       def declared_over?(env) = env.response_headers["content-length"].to_i > MAX_BODY
 
-      def follow(url)
+      def follow(url, deadline)
         at = url
 
         (MAX_REDIRECTS + 1).times do
-          response = request(:get, at)
+          response = request(:get, at, deadline)
           return response unless redirect?(response)
 
           at = redirect_url(at, response)
@@ -84,18 +83,20 @@ module Social
         interface.netmask&.ip? ? ip.mask(interface.netmask.ip_address) : ip
       end
 
-      def pin(request, target, on_data)
-        request.options.context = { address: target.address }
+      def overdue(url) = "#{url} took longer than #{BUDGET} seconds"
+
+      def pin(request, target, deadline, on_data)
+        request.options.context = { address: target.address, deadline: }
         request.options.on_data = on_data
       end
 
-      def reachable(url)
+      def reachable(url, deadline)
         uri = URI.parse(url)
         host = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
         raise Refused, "#{url} is not an http URL with a host" unless uri.is_a?(URI::HTTP) && !host.empty?
         raise Refused, "#{url} names a host we do not leave the machine for" if BLOCKED_NAMES.match?(host)
 
-        Target.new(address: checked(url, uri, host), uri:)
+        Target.new(address: checked(url, uri, host, deadline), uri:)
       rescue URI::InvalidURIError => e
         raise Refused, "#{url} does not parse as a URL: #{e.message}"
       end
@@ -128,18 +129,13 @@ module Social
 
       def refused = BLOCKED_RANGES + Socket.getifaddrs.select { it.addr&.ip? }.map { network(it) }
 
-      def request(verb, url, *body)
-        target = reachable(url)
+      def request(verb, url, deadline, *body)
+        raise Error, overdue(url) if deadline.passed?
 
-        read(url) { |on_data| connection.public_send(verb, target.uri, *body) { pin(it, target, on_data) } }
+        target = reachable(url, deadline)
+        read(url) { |on_data| connection.public_send(verb, target.uri, *body) { pin(it, target, deadline, on_data) } }
       rescue Faraday::Error => e
-        raise Error, "#{verb.upcase} #{url} failed: #{e.message}"
-      end
-
-      def within(url, &)
-        Timeout.timeout(BUDGET, &)
-      rescue Timeout::Error
-        raise Error, "#{url} took longer than #{BUDGET} seconds"
+        raise Error, deadline.passed? ? overdue(url) : "#{verb.upcase} #{url} failed: #{e.message}"
       end
     end
   end
