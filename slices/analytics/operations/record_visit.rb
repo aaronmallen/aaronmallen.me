@@ -51,9 +51,9 @@ module Analytics
         }
       end
 
-      def read(visit, visitor_hash)
+      def read(visit, visitor_hashes)
         matched = event_repo.record_read_seconds(
-          visitor_hash:,
+          visitor_hashes:,
           view_token: visit[:view_token],
           read_seconds: [visit[:read_seconds], MAX_READ_SECONDS].min,
         )
@@ -71,7 +71,7 @@ module Analytics
       end
 
       def store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
-        return read(visit, hashes.fetch(:visitor_hash)) if read?(visit)
+        return read(visit, view_hashes(hashes, address:, user_agent:)) if read?(visit)
 
         view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end
@@ -99,6 +99,12 @@ module Analytics
         )
 
         event ? Success(event) : Failure(:throttled)
+      end
+
+      def view_hashes(hashes, address:, user_agent:)
+        yesterday = Blog::TimeZone.day_start(Blog::TimeZone.today - 1)
+
+        [hashes.fetch(:visitor_hash), hash_visitor.call(address:, user_agent:, at: yesterday)]
       end
 
       def visitor_hashes(address:, user_agent:)

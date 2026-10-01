@@ -37,8 +37,8 @@ RSpec.describe "Visits", type: :request do
 
   def month = Date.new(Blog::TimeZone.today.year, Blog::TimeZone.today.month, 1)
 
-  def read(seconds, name: "first", path: "/writing/hello")
-    beacon({ kind: "read", path:, read_seconds: seconds, view_token: token(name) })
+  def read(seconds, name: "first", path: "/writing/hello", **)
+    beacon({ kind: "read", path:, read_seconds: seconds, view_token: token(name) }, **)
   end
 
   def roll_up_tomorrow
@@ -203,20 +203,74 @@ RSpec.describe "Visits", type: :request do
     end
   end
 
+  describe "a read sent after midnight for a view from before it" do
+    def across_midnight(day = Blog::TimeZone.today, after: 600)
+      allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(day) - 600)
+      view
+      allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(day) + after)
+      read(42)
+    end
+
+    it "accepts the beacon" do
+      across_midnight
+
+      expect(last_response.status).to eq(202)
+    end
+
+    it "stores the read time on the view" do
+      across_midnight
+
+      expect(stored.first).to have_attributes(read_seconds: 42)
+    end
+
+    it "stores the read time late into the next day" do
+      across_midnight(after: 20 * 3_600)
+
+      expect(stored.first).to have_attributes(read_seconds: 42)
+    end
+
+    it "stores the read time after a day the clocks went forward" do
+      across_midnight(Date.new(2027, 3, 15))
+
+      expect(stored.first).to have_attributes(read_seconds: 42)
+    end
+
+    it "stores the read time after a day the clocks went back" do
+      across_midnight(Date.new(2027, 11, 8))
+
+      expect(stored.first).to have_attributes(read_seconds: 42)
+    end
+  end
+
   describe "a read that matches no view" do
     before { view }
 
-    it "turns the beacon away once the salt day has turned" do
-      allow(Time).to receive(:now).and_return(Time.now + 86_400)
+    it "turns the beacon away once two salt days have turned" do
+      allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(Blog::TimeZone.today + 2))
       read(42)
 
       expect(last_response.status).to eq(400)
     end
 
-    it "keeps the view with no read time once the salt day has turned" do
-      allow(Time).to receive(:now).and_return(Time.now + 86_400)
+    it "keeps the view with no read time once two salt days have turned" do
+      allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(Blog::TimeZone.today + 2))
       read(42)
 
+      expect(stored.first).to have_attributes(read_seconds: 0)
+    end
+
+    it "turns away a read under an unknown view token", :aggregate_failures do
+      read(42, name: "second")
+
+      expect(last_response.status).to eq(400)
+      expect(stored.first).to have_attributes(read_seconds: 0)
+    end
+
+    it "turns away a read from another browser on the same address after midnight", :aggregate_failures do
+      allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(Blog::TimeZone.today + 1))
+      read(42, agent: "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/130.0")
+
+      expect(last_response.status).to eq(400)
       expect(stored.first).to have_attributes(read_seconds: 0)
     end
 

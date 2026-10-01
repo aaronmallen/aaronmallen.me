@@ -34,8 +34,8 @@ module Analytics
         [{ path: nil, reach: window.reach }, *window.reach_by_path.to_a.map(&:to_h)]
       end
 
-      def record_read_seconds(visitor_hash:, view_token:, read_seconds:)
-        analytics_events.for_visitor(visitor_hash).for_view(view_token).record_read_seconds(read_seconds)
+      def record_read_seconds(visitor_hashes:, view_token:, read_seconds:)
+        analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_read_seconds(read_seconds)
       end
 
       def summary_for(day)
