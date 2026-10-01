@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Media", type: :request do
-  let(:key) { "a1b2c3.jpg" }
+  let(:key) { "#{'a1b2c3d4' * 4}.jpg" }
   let(:missing) { "<Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message></Error>" }
   let(:page) { Capybara.string(last_response.body) }
   let(:path) { "/media/#{key}" }
@@ -61,8 +61,40 @@ RSpec.describe "Media", type: :request do
       expect(last_response.body).to be_empty
     end
 
-    it "lets no cache keep it" do
-      expect(cache_control).to be_nil
+    it "lets every cache keep it for a minute" do
+      expect(cache_control).to eq("public, max-age=60")
+    end
+
+    it "does not key on the cookie" do
+      expect(last_response.headers["Vary"]).to be_nil
+    end
+  end
+
+  describe "a key that is not a photo key" do
+    before { connect_media_store }
+
+    %W[a1b2c3.jpg #{'A1B2C3D4' * 4}.jpg #{'a1b2c3d4' * 4}.svg #{'a1b2c3d4' * 4}.jpg.png ..%2Fsecret.jpg].each do |bad|
+      it "answers #{bad} with an empty 404 and never asks the store", :aggregate_failures do
+        store = stub_request(:any, /store\.example/)
+        get "/media/#{bad}"
+
+        expect(last_response.status).to eq(404)
+        expect(last_response.body).to be_empty
+        expect(store).not_to have_been_requested
+      end
+    end
+
+    it "lets every cache keep the 404 for a minute" do
+      get "/media/a1b2c3.jpg"
+
+      expect(cache_control).to eq("public, max-age=60")
+    end
+
+    it "lets every cache keep the 404 when the operator asks for it" do
+      sign_in_to_admin
+      get "/media/a1b2c3.jpg"
+
+      expect(cache_control).to eq("public, max-age=60")
     end
   end
 
@@ -77,6 +109,7 @@ RSpec.describe "Media", type: :request do
 
       expect(last_response.status).to eq(404)
       expect(last_response.body).to be_empty
+      expect(cache_control).to eq("public, max-age=60")
     end
 
     it "still loads a post that uses the photo", :aggregate_failures do

@@ -19,6 +19,7 @@ module Media
     HEADER_SIZE = 64
     HEIC_BRANDS = %w[heic heim heis heix hevc hevm hevs hevx].freeze
     HEIF_BRANDS = %w[mif1 msf1].freeze
+    KEY = /\A[0-9a-f]{32}\.(?:gif|jpg|png|webp)\z/
     SIGNATURES = {
       "\xFF\xD8\xFF".b => JPEG,
       "\x89PNG\r\n\x1A\n".b => PNG,
