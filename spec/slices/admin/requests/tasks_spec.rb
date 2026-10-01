@@ -1818,62 +1818,60 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
-    describe "reordering a task" do
+    describe "the grip" do
+      def grips = page.all("[data-task-grip]", visible: :all)
+
       before do
         create(:task, title: "first", position: 1)
         create(:task, title: "second", position: 2)
       end
 
-      it "moves a task up past the one above it" do
-        send_to("/admin/tasks/#{repo.in_list('next').last.id}/reorder/up", filter: "next")
-
-        expect(repo.in_list("next").map(&:title)).to eq(%w[second first])
-      end
-
-      it "moves a task down past the one below it" do
-        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/down", filter: "next")
-
-        expect(repo.in_list("next").map(&:title)).to eq(%w[second first])
-      end
-
-      it "holds the caret that has nowhere to go", :aggregate_failures do
+      it "shows on each open row in place of the carets", :aggregate_failures do
         get "/admin/tasks", filter: "next"
-        carets = page.all(".task-order button")
 
-        expect(carets.first).to be_disabled
-        expect(carets.last).to be_disabled
+        expect(grips.size).to eq(2)
+        expect(page).to have_no_css(".task-order, .task-caret, form[action*='/reorder/']", visible: :all)
       end
 
-      it "redirects back to the list at the top rather than failing" do
-        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/up", filter: "next")
+      it "posts to the place route with the page's token", :aggregate_failures do
+        get "/admin/tasks", filter: "next"
+        task = repo.in_list("next").first
 
-        expect(last_response).to be_redirect
+        expect(grips.first["data-task-grip"]).to eq("/admin/tasks/#{task.id}/place")
+        expect(grips.first["data-task-token"]).not_to be_empty
       end
 
-      it "answers 404 for a direction that isn't one" do
-        send_to("/admin/tasks/#{repo.in_list('next').first.id}/reorder/sideways")
+      it "names the task it moves" do
+        get "/admin/tasks", filter: "next"
 
-        expect(last_response.status).to eq(404)
+        expect(grips.first["aria-label"]).to eq("Reorder first")
       end
 
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/reorder/up")
+      it "waits hidden for the script that drives it" do
+        get "/admin/tasks", filter: "next"
 
-        expect(last_response.status).to eq(404)
+        expect(grips).to all(match_css("[hidden]"))
       end
 
-      it "moves a task up past one that shares its position" do
-        create(:task, title: "tied", position: 2)
-        send_to("/admin/tasks/#{repo.in_list('next').last.id}/reorder/up", filter: "next")
+      it "groups each row by its list" do
+        get "/admin/tasks", filter: "next"
 
-        expect(repo.in_list("next").map(&:title)).to eq(%w[first tied second])
+        expect(page.all(".task[data-task-order='next']").size).to eq(2)
       end
 
-      it "moves a task down past one that shares its position" do
-        create(:task, title: "tied", position: 2)
-        send_to("/admin/tasks/#{repo.in_list('next')[1].id}/reorder/down", filter: "next")
+      it "groups a sprint's rows by the sprint" do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today + 2)
+        create(:task, :in_sprint, sprint_id: sprint.id, title: "planned")
+        get "/admin/tasks", filter: "upcoming"
 
-        expect(repo.in_list("next").map(&:title)).to eq(%w[first tied second])
+        expect(page).to have_css(".task[data-task-order='#{sprint.id}']", text: "planned")
+      end
+
+      it "hides with a search active", :aggregate_failures do
+        get "/admin/tasks", filter: "next", q: "first"
+
+        expect(grips).to be_empty
+        expect(page).to have_no_css("[data-task-order]")
       end
     end
 
@@ -1989,11 +1987,9 @@ RSpec.describe "Admin tasks", type: :request do
     end
 
     describe "paging a pool" do
-      def carets = page.all(".task-order button")
+      def leads = page.all("[data-task-grip]", visible: :all).map { it["data-task-lead"] }
 
       def listed(title) = repo.in_list("next").find { it.title == title }
-
-      def next_titles = repo.in_list("next").reject(&:closed?).map(&:title)
 
       def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]
 
@@ -2044,42 +2040,24 @@ RSpec.describe "Admin tasks", type: :request do
         expect(pager_link("prev")).to eq("/admin/tasks?filter=today")
       end
 
-      it "lets the last task on a page move down and holds the first", :aggregate_failures do
+      it "gives a grip on the first page nothing to follow at the top" do
         get "/admin/tasks", filter: "next"
 
-        expect(carets.first).to be_disabled
-        expect(carets.last).not_to be_disabled
+        expect(leads).to eq([nil, nil])
       end
 
-      it "lets the first task on a later page move up and holds the last", :aggregate_failures do
+      it "has a grip on a later page follow the last task on the page before" do
         get "/admin/tasks", filter: "next", page: 2
 
-        expect(carets.first).not_to be_disabled
-        expect(carets.last).to be_disabled
+        expect(leads).to eq([listed("second").id.to_s])
       end
 
-      it "swaps the last task on a page with the first on the next" do
-        send_to("/admin/tasks/#{listed('second').id}/reorder/down", filter: "next")
+      it "leads today's sprint from its own page before", :aggregate_failures do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        %w[one two three].each { create(:task, :in_sprint, sprint_id: sprint.id, title: it) }
+        get "/admin/tasks", filter: "today", page: 2
 
-        expect(next_titles).to eq(%w[first third second])
-      end
-
-      it "swaps the first task on a page with the last on the page before" do
-        send_to("/admin/tasks/#{listed('third').id}/reorder/up", filter: "next", page: 2)
-
-        expect(next_titles).to eq(%w[first third second])
-      end
-
-      it "sends the move from a later page back to that page" do
-        send_to("/admin/tasks/#{listed('third').id}/reorder/up", filter: "next", page: 2)
-
-        expect(last_response.location).to eq("/admin/tasks?filter=next&page=2")
-      end
-
-      it "carries the page on the move" do
-        get "/admin/tasks", filter: "next", page: 2
-
-        expect(page).to have_css(".task-order input[name='page'][value='2']", visible: :all)
+        expect(leads).to eq([repo.all_open.find { it.title == "two" }.id.to_s])
       end
 
       it "opens a task from a later page in its dialog" do
@@ -2393,7 +2371,7 @@ RSpec.describe "Admin tasks", type: :request do
       it "offers no reordering in the archive" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_no_css(".task-order")
+        expect(page).to have_no_css("[data-task-grip]", visible: :all)
       end
 
       it "offers no capture field in the archive" do
@@ -2801,7 +2779,6 @@ RSpec.describe "Admin tasks", type: :request do
       "/move/someday" => {},
       "/place" => {},
       "/reopen" => {},
-      "/reorder/up" => {},
       "/start" => {},
       "/stop" => {},
     }.each_key do |suffix|

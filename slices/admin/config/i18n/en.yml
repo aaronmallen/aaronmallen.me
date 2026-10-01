@@ -792,6 +792,9 @@ en:
           apply: "Filter"
           search: "Search tasks"
           search_placeholder: "search · tag:site…"
+        grip:
+          failed: "Couldn't save the new order"
+          label: "Reorder %{task}"
         link_editor:
           find: "Find"
           kind: "Link type"
@@ -819,9 +822,6 @@ en:
             duplicated_by: "duplicated by"
             duplicates: "duplicates"
             relates: "relates to"
-        order:
-          down: "Move %{task} down"
-          up: "Move %{task} up"
         panel:
           label: "Task"
         planner:

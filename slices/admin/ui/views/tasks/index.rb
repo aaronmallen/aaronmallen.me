@@ -39,10 +39,11 @@ module Admin
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
-          def initialize(counts:, filters:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:)
+          def initialize(counts:, filters:, lead:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:)
             super()
             @counts = counts
             @filters = filters
+            @lead = lead
             @plan = { planned:, pool:, pools:, waiting: }
             @tab = tab
             @tasks = tasks
@@ -127,17 +128,14 @@ module Admin
 
           def planning? = today? && @tasks.rows.empty? && !filtering?
 
-          def row(task, index)
-            first = index.zero? && @tasks.previous_number.nil?
-            last = index == @tasks.rows.size - 1 && !@tasks.more
-
-            Row(task:, filter: @tab, today: @today, first:, last:, page: @tasks.number, scheduled:)
+          def row(task)
+            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:)
           end
 
           def rows
             return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.rows.empty?
 
-            @tasks.rows.each_with_index { |task, index| row(task, index) }
+            @tasks.rows.each { row(it) }
             pager
           end
 

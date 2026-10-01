@@ -239,44 +239,6 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
-  describe "reordering a task in today's sprint" do
-    let(:sprint) { create(:sprint, sprint_date: today) }
-
-    def today_titles = repo.in_sprint(sprint.id).map(&:title)
-
-    before do
-      create(:task, :in_sprint, sprint_id: sprint.id, title: "first", position: 1)
-      create(:task, :in_sprint, sprint_id: sprint.id, title: "second", position: 2)
-    end
-
-    it "moves it past the task beside it in the sprint" do
-      send_to("/admin/tasks/#{repo.in_sprint(sprint.id).last.id}/reorder/up", filter: "today")
-
-      expect(today_titles).to eq(%w[second first])
-    end
-
-    it "leaves a finished task where it is" do
-      done = create(:task, :done, :in_sprint, sprint_id: sprint.id, title: "done", position: 3)
-      send_to("/admin/tasks/#{done.id}/reorder/up", filter: "today")
-
-      expect(today_titles).to eq(%w[first second done])
-    end
-
-    it "comes back to the list for a finished task rather than failing" do
-      done = create(:task, :done, :in_sprint, sprint_id: sprint.id, position: 3)
-      send_to("/admin/tasks/#{done.id}/reorder/up", filter: "today")
-
-      expect(last_response).to be_redirect
-    end
-
-    it "leaves a canceled task where it is" do
-      canceled = create(:task, :canceled, :in_sprint, sprint_id: sprint.id, title: "canceled", position: 3)
-      send_to("/admin/tasks/#{canceled.id}/reorder/up", filter: "today")
-
-      expect(today_titles).to eq(%w[first second canceled])
-    end
-  end
-
   describe "placing a task in today's sprint" do
     let(:sprint) { create(:sprint, sprint_date: today) }
 

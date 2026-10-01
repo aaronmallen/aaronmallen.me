@@ -536,6 +536,28 @@ RSpec.describe "MCP task tools", type: :request do
 
       expect(content.fetch("moved")).to be(false)
     end
+
+    {
+      "a finished task" => :done,
+      "a canceled task" => :canceled,
+    }.each do |kind, trait|
+      it "leaves #{kind} where it is", :aggregate_failures do
+        closed = create(:task, trait, title: "closed", position: 3)
+        call_tool("reorder_task", id: closed.id, direction: "up")
+
+        expect(content.fetch("moved")).to be(false)
+        expect(tasks.in_list("next").map(&:title)).to eq(%w[first second closed])
+      end
+    end
+
+    it "moves a task past the one beside it in a sprint" do
+      sprint = create(:sprint, sprint_date: today)
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "sprint one", position: 3)
+      later = create(:task, :in_sprint, sprint_id: sprint.id, title: "sprint two", position: 4)
+      call_tool("reorder_task", id: later.id, direction: "up")
+
+      expect(tasks.in_sprint(sprint.id).map(&:title)).to eq(["sprint two", "sprint one"])
+    end
   end
 
   describe "delete_task" do

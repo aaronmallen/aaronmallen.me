@@ -23,7 +23,6 @@ RSpec.describe "Admin records that are gone", type: :request do
     "/tasks/#{missing}/move/today" => {},
     "/tasks/#{missing}/place" => {},
     "/tasks/#{missing}/reopen" => {},
-    "/tasks/#{missing}/reorder/up" => {},
     "/tasks/#{missing}/schedule" => {},
     "/tasks/#{missing}/start" => {},
     "/tasks/#{missing}/stop" => {},

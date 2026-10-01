@@ -2177,19 +2177,15 @@
   }
 }
 
-@utility task-order {
-  @apply flex flex-col;
-
-  @media (width < 43.75rem) {
-    @apply flex-row;
-  }
+@utility task-grip {
+  @apply cursor-grab touch-none border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
 }
 
-@utility task-caret {
-  @apply border-transparent bg-transparent px-1.5 py-0 text-icon leading-[0.7] disabled:opacity-30;
+@utility task-dragging {
+  @apply relative z-10 bg-ground-sunk opacity-80;
 
-  @media (width < 43.75rem) {
-    @apply leading-none;
+  & .task-grip {
+    @apply cursor-grabbing;
   }
 }
 
@@ -2920,6 +2916,14 @@
 
 @utility toast-icon {
   @apply text-mk-green;
+}
+
+@utility toast-failed {
+  @apply border-l-mk-pink;
+
+  & .toast-icon {
+    @apply text-mk-pink;
+  }
 }
 
 @layer base {

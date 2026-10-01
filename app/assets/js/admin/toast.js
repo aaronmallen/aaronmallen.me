@@ -6,16 +6,16 @@ export function setupToasts() {
   }
 }
 
-export function showToast(message) {
+export function showToast(message, { failed = false } = {}) {
   const region = document.createElement("div");
   const toast = document.createElement("div");
   const icon = document.createElement("i");
   const text = document.createElement("span");
 
   region.setAttribute("role", "status");
-  toast.className = "toast";
+  toast.className = failed ? "toast toast-failed" : "toast";
   toast.hidden = true;
-  icon.className = "fa-solid fa-check toast-icon";
+  icon.className = `fa-solid ${failed ? "fa-triangle-exclamation" : "fa-check"} toast-icon`;
   icon.setAttribute("aria-hidden", "true");
   text.textContent = message;
 

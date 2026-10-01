@@ -12,6 +12,7 @@ module Admin
       NEXT = Blog::Types::TaskFilter["next"]
       TODAY = Blog::Types::TaskTab["today"]
       UPCOMING = Blog::Types::TaskTab["upcoming"]
+      UNORDERED = [COMPLETED, UPCOMING].freeze
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
@@ -31,8 +32,8 @@ module Admin
         tasks = step listed(tab, sprint, planned, page, SearchQuery.parse(filters[:query], fields: FIELDS))
 
         {
-          counts: counts(sprint, planned, today), filters:, pool: Blog::Types::TaskListParam[pool], tab:, tasks:,
-          today:, **plan(tab, tasks, planned, page),
+          counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,
+          pool: Blog::Types::TaskListParam[pool], today:, **plan(tab, tasks, planned, page),
         }
       end
 
@@ -47,6 +48,12 @@ module Admin
       end
 
       def first_page(page) = Blog::Page.new(number: 1, size: page.size)
+
+      def lead(tab, sprint, page, filters)
+        return if page.number == 1 || UNORDERED.include?(tab) || !filters[:query].empty?
+
+        list_tasks.call(tab, sprint:, page: Blog::Page.new(number: page.number - 1, size: page.size)).rows.last&.id
+      end
 
       def listed(tab, sprint, planned, page, search)
         tasks = case tab

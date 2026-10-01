@@ -10,16 +10,14 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :today, Blog::Types::Date
-          prop :first, Blog::Types::Bool, default: false
-          prop :last, Blog::Types::Bool, default: false
+          prop :lead, Blog::Types::Integer.optional, default: nil
           prop :ordered, Blog::Types::Bool, default: true
           prop :origin, Blog::Types::String, default: ORIGIN
-          prop :page, Blog::Types::Integer, default: 1
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
 
           def view_template
-            div(class: classes) do
+            div(class: classes, data: order) do
               TaskKey(task: @task)
               task_title
               meta
@@ -80,6 +78,12 @@ module Admin
             end
           end
 
+          def order
+            { task_id: @task.id, task_order: @task.list || @task.sprint_id } if ordered?
+          end
+
+          def ordered? = @ordered && !@task.closed?
+
           def scheduled_pill
             Pill(color: :orange) do
               i(class: "fa-regular fa-calendar", aria: { hidden: "true" })
@@ -89,7 +93,7 @@ module Admin
 
           def side
             div(class: "task-acts") do
-              Order(task: @task, filter: @filter, first: @first, last: @last, origin: @origin, page: @page) if @ordered
+              Grip(task: @task, lead: @lead) if ordered?
               Controls(task: @task, filter: @filter, origin: @origin)
               edit
             end

@@ -7,7 +7,6 @@ module Admin
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
-    TASK_MOVE = Regexp.union(Blog::Types::TaskMove.values)
 
     use(*Admin::Slice.config.actions.sessions.middleware)
 
@@ -87,7 +86,6 @@ module Admin
     post "/tasks/:id/move/:filter", to: "tasks.move", as: :move_task, id: ID, filter: TASK_FILTER
     post "/tasks/:id/place", to: "tasks.place", as: :place_task, id: ID
     post "/tasks/:id/reopen", to: "tasks.reopen", as: :reopen_task, id: ID
-    post "/tasks/:id/reorder/:direction", to: "tasks.reorder", as: :reorder_task, id: ID, direction: TASK_MOVE
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID

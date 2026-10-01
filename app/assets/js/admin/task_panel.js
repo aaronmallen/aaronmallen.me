@@ -2,6 +2,7 @@ import { setupConfirms } from "./confirm.js";
 import { openDialog } from "./dialog.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupTaskKeys } from "./task_key.js";
+import { setupTaskOrder } from "./task_order.js";
 
 const EDIT = "[data-task-edit]";
 const FIELD = "input:not([type=hidden]), textarea, select";
@@ -21,6 +22,7 @@ function bind(root) {
   setupConfirms(root);
   setupMarkdownEditors(root);
   setupTaskKeys(root);
+  setupTaskOrder(root);
 }
 
 function findUrl(form, button) {
