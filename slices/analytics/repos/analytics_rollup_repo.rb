@@ -8,6 +8,7 @@ module Analytics
         analytics_rollup_referrers: :referrers,
         analytics_rollup_countries: :countries,
         analytics_rollup_sources: :sources,
+        analytics_rollup_devices: :devices,
         analytics_rollup_page_referrers: :page_referrers,
         analytics_rollup_page_countries: :page_countries,
       }.freeze
@@ -18,6 +19,10 @@ module Analytics
       def countries(from:, to:) = analytics_rollup_countries.between(from, to).top_by_visitors.to_a
 
       def days(from:, to:) = analytics_rollups.between(from, to).oldest_first.to_a
+
+      def devices(from:, to:, path: nil)
+        analytics_rollup_devices.between(from, to).for_path(path).top_by_visitors.to_a
+      end
 
       def newest_day = analytics_rollups.newest_day
 

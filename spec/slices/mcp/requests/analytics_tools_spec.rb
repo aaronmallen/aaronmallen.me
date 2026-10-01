@@ -340,6 +340,66 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
   end
 
+  describe "read_analytics devices" do
+    def figures(rows) = rows.map { it.values_at("device_class", "views", "visitors") }
+
+    def read_devices(from: today - 6, to: today, **)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("devices")
+    end
+
+    def roll_up_device(day, device_class, path: nil, views: 5, visitors: 3)
+      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_repo"].by_day(day)
+      create(:analytics_rollup_device, day:, path:, device_class:, views:, visitors:)
+    end
+
+    it "ranks the site's device classes by visitors over the range" do
+      roll_up_device(today - 2, "mobile", views: 9, visitors: 2)
+      roll_up_device(today - 1, "in-app", views: 4, visitors: 3)
+      roll_up_device(today - 1, "mobile", views: 1, visitors: 1)
+
+      expect(figures(read_devices)).to eq([["mobile", 10, 3], ["in-app", 4, 3]])
+    end
+
+    it "reads the site's device classes apart from each page's" do
+      roll_up_device(today - 1, "desktop", visitors: 2)
+      roll_up_device(today - 1, "desktop", path: "/writing/hello", views: 40, visitors: 30)
+
+      expect(figures(read_devices)).to eq([["desktop", 5, 2]])
+    end
+
+    it "gives one page's device classes with a path" do
+      roll_up_device(today - 1, "tablet", path: "/writing/hello", views: 4, visitors: 2)
+      roll_up_device(today - 1, "desktop", path: "/writing/other")
+      roll_up_device(today - 1, "desktop")
+
+      expect(figures(read_devices(path: "/writing/hello"))).to eq([["tablet", 4, 2]])
+    end
+
+    describe "today, before it rolls up" do
+      before do
+        reader = Digest::SHA256.hexdigest("reader")
+        2.times { create(:analytics_event, path: "/writing/hello", device_class: "in-app", visitor_hash: reader) }
+        create(:analytics_event, path: "/writing/other", device_class: "in-app")
+        create(:analytics_event, path: "/writing/other")
+      end
+
+      it "counts the site's device classes from the visits" do
+        expect(figures(read_devices)).to eq([["in-app", 3, 2]])
+      end
+
+      it "counts one page's device classes from the visits" do
+        expect(figures(read_devices(path: "/writing/hello"))).to eq([["in-app", 2, 1]])
+      end
+    end
+
+    it "keeps a page's device classes past the 90 days of raw visits" do
+      old = today - 200
+      roll_up_device(old, "mobile", path: "/writing/hello")
+
+      expect(figures(read_devices(from: old, to: old, path: "/writing/hello"))).to eq([["mobile", 5, 3]])
+    end
+  end
+
   describe "read_analytics with a path" do
     def late_evening(day) = Blog::TimeZone.day_start(day) + (23 * 3_600) + 1_800
 
@@ -380,7 +440,7 @@ RSpec.describe "MCP analytics tools", type: :request do
 
     it "leaves out the site's top lists" do
       expect(read_page("/writing/hello").keys)
-        .to eq(%w[from to time_zone path totals days referrers countries sources hours read_spread])
+        .to eq(%w[from to time_zone path totals days referrers countries sources devices hours read_spread])
     end
 
     describe "the page's referrers and countries" do

@@ -10,7 +10,7 @@ module MCP
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       PAGE_RANKED = %i[referrers countries].freeze
-      RANKED = %i[paths referrers countries sources].freeze
+      RANKED = %i[paths referrers countries sources devices].freeze
       RAW_REFUSAL = "hours, since and read_spread read raw visits, which the site keeps for 90 days; start from " \
                     "or since inside them to get these. The daily counts still hold"
       SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
@@ -34,6 +34,10 @@ module MCP
                   "to a link that carries ?#{Analytics::Ref::KEY}=<source> counts under that source, so the " \
                   "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
                   "hand-typed tags count too. sources leaves out visits with no tag. " \
+                  "devices gives views and visitors by device class, ranked by visitors: one of " \
+                  "#{Analytics::Device::CLASSES.join(', ')}, worked out from the user agent when the view came in. " \
+                  "in-app means a browser inside another app, such as Mastodon, Bluesky or Reddit, which often " \
+                  "sends no referrer. Views from before the site kept a class are left out. " \
                   "Totals also give reach, which counts each reader once per Chicago calendar month and adds up " \
                   "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
@@ -43,10 +47,10 @@ module MCP
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
-                  "day, and its top #{TOP} referrers, countries and sources by visitors, each with its views, " \
-                  "with no top paths. A page's referrers and countries always give visitors. A page nobody " \
-                  "visited reads as zeros. For a published post's path, since_publish numbers each day of the " \
-                  "range from the Chicago day the post went out, which is day 1. " \
+                  "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, and " \
+                  "its devices, with no top paths. A page's referrers and countries always give visitors. A page " \
+                  "nobody visited reads as zeros. For a published post's path, since_publish numbers each day of " \
+                  "the range from the Chicago day the post went out, which is day 1. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
                   "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
                   "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \
@@ -76,7 +80,15 @@ module MCP
 
         private
 
+        def breakdowns(range, path, server_context)
+          { sources: sources(range, path, server_context), devices: devices(range, path, server_context) }
+        end
+
         def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
+
+        def devices(range, path, server_context)
+          devices_between(server_context).call(from: range.first, to: range.last, path:)
+        end
 
         def numbered(days, first)
           days.map do |found|
@@ -86,7 +98,7 @@ module MCP
         end
 
         def page_ranked(found, range, path, server_context)
-          { **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] }, sources: sources(range, path, server_context) }
+          { **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] }, **breakdowns(range, path, server_context) }
         end
 
         def page_summary(path, range, at, server_context)
@@ -114,7 +126,7 @@ module MCP
         def ranked(range, server_context)
           found = analytics_between(server_context).call(from: range.first, to: range.last)
 
-          found.merge(sources: sources(range, nil, server_context))
+          found.merge(breakdowns(range, nil, server_context))
         end
 
         def raw(range, at, path, server_context)

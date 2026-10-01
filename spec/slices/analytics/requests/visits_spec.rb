@@ -78,6 +78,45 @@ RSpec.describe "Visit counting", type: :request do
       end
     end
 
+    describe "the device class" do
+      def view_from(user_agent)
+        beacon({ kind: "view", path: "/writing/hello", view_token: token("first") }, agent: user_agent)
+      end
+
+      iphone = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)"
+      ipad = "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)"
+      android = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0"
+      webview = "Mozilla/5.0 (Linux; Android 14; Pixel 8; wv) AppleWebKit/537.36 Version/4.0 Chrome/129.0.0.0"
+
+      [
+        ["Chrome on a Mac", "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36", "desktop"],
+        ["Firefox on Windows", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Firefox/131.0", "desktop"],
+        ["Safari on an iPhone", "#{iphone} Version/18.0 Mobile/15E148 Safari/604.1", "mobile"],
+        ["Chrome on an Android phone", "#{android} Mobile Safari/537.36", "mobile"],
+        ["Safari on an iPad", "#{ipad} Version/18.0 Mobile/15E148 Safari/604.1", "tablet"],
+        ["Chrome on an Android tablet", "#{android} Safari/537.36", "tablet"],
+        ["the Mastodon app", "#{iphone} Mobile/15E148 Mastodon/2.6", "in-app"],
+        ["the Bluesky app", "#{webview} Mobile Safari/537.36 Bluesky/1.92", "in-app"],
+        ["the Reddit app", "#{iphone} Mobile/15E148 Reddit/Version_2024.40.0/Build_123", "in-app"],
+        ["the Facebook app", "#{iphone} Mobile/15E148 [FBAN/FBIOS;FBAV/480.0.0.0]", "in-app"],
+        ["the Instagram app", "#{webview} Mobile Safari/537.36 Instagram 350.0.0.0 Android", "in-app"],
+        ["an Android web view", "#{webview} Mobile Safari/537.36", "in-app"],
+        ["an iOS web view", "#{iphone} Mobile/15E148", "in-app"],
+      ].each do |named, user_agent, device_class|
+        it "stores #{named} as #{device_class}" do
+          view_from(user_agent)
+
+          expect(stored.map(&:device_class)).to eq([device_class])
+        end
+      end
+
+      it "stores no part of the user agent" do
+        view
+
+        expect(stored.first.to_h.values.grep(String).grep(/Mozilla|Chrome/)).to be_empty
+      end
+    end
+
     it "keeps no title when the page sent a blank one" do
       view(title: "   ")
 

@@ -40,6 +40,7 @@ module MCP
         delete_social_post: "social.operations.delete_social_post",
         delete_task: "api.endpoints.delete_task",
         delete_work_entry: "projects.operations.delete_work_entry",
+        devices_between: "analytics.queries.devices_between",
         drop_sprint: "api.endpoints.drop_sprint",
         editable_social_post: "social.queries.editable_social_post",
         hourly_between: "analytics.queries.hourly_between",

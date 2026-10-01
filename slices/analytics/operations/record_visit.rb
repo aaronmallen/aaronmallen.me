@@ -30,7 +30,7 @@ module Analytics
         address_hash = hash_visitor.call(address:)
         step within_limit(address_hash) if read?(visit)
         hashes = visitor_hashes(address:, user_agent:)
-        step store(visit, hashes:, address_hash:, address:, base_url:)
+        step store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end
 
       private
@@ -42,11 +42,12 @@ module Analytics
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }
 
-      def origin(visit, address:, base_url:)
+      def origin(visit, address:, user_agent:, base_url:)
         {
           referrer_host: referrer_host(visit[:referrer], base_url),
           country_code: countries.code(address),
           source: Ref.source(visit[Contracts::VisitContract::REF]),
+          device_class: Device.classify(user_agent),
         }
       end
 
@@ -69,10 +70,10 @@ module Analytics
         found unless found.nil? || found == host(base_url)
       end
 
-      def store(visit, hashes:, address_hash:, address:, base_url:)
+      def store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
         return read(visit, hashes.fetch(:visitor_hash)) if read?(visit)
 
-        view(visit, hashes:, address_hash:, address:, base_url:)
+        view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end
 
       def title(value)
@@ -85,13 +86,13 @@ module Analytics
         result.success? ? Success(result.to_h) : Failure(:malformed)
       end
 
-      def view(visit, hashes:, address_hash:, address:, base_url:)
+      def view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
         event = event_repo.claim(
           path: visit[:path],
           title: title(visit[:title]),
           **hashes,
           address_hash:,
-          **origin(visit, address:, base_url:),
+          **origin(visit, address:, user_agent:, base_url:),
           view_token: visit[:view_token],
           limit: settings.analytics[:throttle_limit],
           since: window_opened_at,

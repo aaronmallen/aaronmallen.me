@@ -11,6 +11,12 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def countries(on = day) = rollup_repo.countries(from: on, to: on).map(&:to_h)
 
+  def devices_of(path, on = day)
+    rows = rollup_repo.analytics_rollup_devices.on(on).for_path(path).order(:device_class).to_a
+
+    rows.map { it.to_h.values_at(:device_class, :views, :visitors) }
+  end
+
   def event(*traits, on: day, **) = create(:analytics_event, *traits, occurred_at: noon(on), **)
 
   def event_repo = Analytics::Slice["repos.analytics_event_repo"]
@@ -175,6 +181,28 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       it "stores each page apart", :aggregate_failures do
         expect(page_rows(:analytics_rollup_page_referrers, :host, "/writing/other")).to eq([["news.example", 1, 1]])
         expect(page_rows(:analytics_rollup_page_countries, :country_code, "/writing/other")).to eq([["JP", 1, 1]])
+      end
+    end
+
+    describe "the devices" do
+      before do
+        event(path: "/writing/hello", device_class: "in-app", visitor_hash:)
+        event(path: "/writing/other", device_class: "in-app", visitor_hash:)
+        event(path: "/writing/other", device_class: "desktop")
+        event(path: "/writing/other")
+        roll_up
+      end
+
+      it "stores the whole site's under no path, each reader once" do
+        expect(devices_of(nil)).to eq([["desktop", 1, 1], ["in-app", 2, 1]])
+      end
+
+      it "stores each page's under its own path" do
+        expect(devices_of("/writing/hello")).to eq([["in-app", 1, 1]])
+      end
+
+      it "leaves out the views with no class" do
+        expect(devices_of("/writing/other")).to eq([["desktop", 1, 1], ["in-app", 1, 1]])
       end
     end
 

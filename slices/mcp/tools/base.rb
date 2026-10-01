@@ -69,6 +69,8 @@ module MCP
 
         def delete_work_entry(server_context) = server_context.fetch(:delete_work_entry)
 
+        def devices_between(server_context) = server_context.fetch(:devices_between)
+
         def editable_social_post(server_context) = server_context.fetch(:editable_social_post)
 
         def every_tag(server_context)

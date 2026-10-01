@@ -48,6 +48,7 @@ module Analytics
           referrers: window.counts_by(:referrer_host, as: :host).to_a,
           countries: window.counts_by(:country_code).to_a,
           sources: by_page(window.known(:source), :source),
+          devices: by_page(window.known(:device_class), :device_class),
           **page_origins(window),
         )
       end
