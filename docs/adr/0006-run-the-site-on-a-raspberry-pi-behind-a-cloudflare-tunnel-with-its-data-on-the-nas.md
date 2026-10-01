@@ -5,8 +5,8 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-277
-amended: ["#63"]
-tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, systemd]
+amended: ["#63", "#132"]
+tags: [deploy, raspberry-pi, cloudflare, tunnel, nas, postgres, redis, s3, systemd]
 ---
 
 # ADR 0006: Run the site on a Raspberry Pi behind a Cloudflare Tunnel, with its data on the NAS
@@ -30,6 +30,8 @@ The site runs on the Pi in the office and Cloudflare publishes it through a tunn
 
 - Puma and Sidekiq run on the Pi as systemd units, with no containers and no registry.
 - Postgres and Redis stay on the NAS, one hop away on the LAN.
+- Photos sit in an S3 store on the NAS, a fact #132 added. It has no public route, so the Pi fetches each photo
+  and serves it, as [ADR 0080][0080] says.
 - The tunnel connects out from the Pi, so no port opens on the home network and Cloudflare ends TLS.
 - The Pi builds its own releases. A timer sees a new git tag, builds it in its own release directory while the old
   one serves, migrates, points `current` at it and restarts both units. Rolling back points `current` back.
@@ -80,4 +82,5 @@ call `hanami db migrate` itself. The MaxMind database sits in `tmp/maxmind` unde
 (`lib/analytics/providers/geo_provider.rb`), so each release starts without it until AA-307 moves it to a directory
 the releases share.
 
+[0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
