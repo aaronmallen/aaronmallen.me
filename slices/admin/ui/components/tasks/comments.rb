@@ -5,6 +5,9 @@ module Admin
     module Components
       module Tasks
         class Comments < Component
+          EDITOR_HEIGHT = "120px"
+          RENDERER = Blog::Types::MarkdownRenderer["tasks"]
+
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :comments, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :commenting, Blog::Types::Hash
@@ -51,10 +54,8 @@ module Admin
             errors = errors_for(id)
             value = mine?(id) ? @commenting[:body] : saved
 
-            Field(label:, id: FieldError.id_for(:body, scope)) do
-              Textarea(
-                **FieldError.control_attributes(:body, errors, scope), name: "comment[body]", rows: 3, value:,
-              )
+            Field(label:) do
+              MarkdownEditor(**FieldError.control_attributes(:body, errors, scope), **editor_props(label, value))
               FieldError(field: :body, errors:, scope:)
             end
           end
@@ -80,6 +81,10 @@ module Admin
                 Button(variant: :pri, type: "submit", small: true) { t(".save") }
               end
             end
+          end
+
+          def editor_props(label, value)
+            { name: "comment[body]", value: value.to_s, height: EDITOR_HEIGHT, renderer: RENDERER, label: }
           end
 
           def errors_for(id) = mine?(id) ? @commenting[:errors] : Blog::Constants::EMPTY_HASH

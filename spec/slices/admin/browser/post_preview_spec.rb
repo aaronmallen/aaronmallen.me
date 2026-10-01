@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin post preview", type: :feature do
-  let(:preview) { find("[data-editor-preview]", visible: :all) }
+  let(:preview) { find("[data-post-editor] [data-editor-preview]", visible: :all) }
   let(:preview_path) { "/admin/posts/preview" }
 
   def previews = request_gate.count(preview_path)

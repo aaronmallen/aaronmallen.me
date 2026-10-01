@@ -170,7 +170,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "renders the post in the preview", :aggregate_failures do
-        preview = page.find(".preview", visible: :all)
+        preview = page.find("[data-post-editor] .preview", visible: :all)
 
         expect(preview).to have_css("h2.preview-title", exact_text: "Hello", visible: :all)
         expect(preview).to have_css(".post-meta time", exact_text: "Sep 7, 2030", visible: :all)

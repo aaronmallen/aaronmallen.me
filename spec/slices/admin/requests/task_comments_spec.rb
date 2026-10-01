@@ -12,6 +12,8 @@ RSpec.describe "Admin task comments", type: :request do
 
   def bodies = comments.order(:id).to_a.map { it[:body] }
 
+  def comment_box = page.find(".task-comment-form [data-markdown-editor]")
+
   def comment_on_page(comment) = page.find("[data-task-comment='#{comment.id}']")
 
   def delete(comment) = send_to("/admin/tasks/#{task.id}/comments/#{comment.id}/delete", filter: "next")
@@ -105,6 +107,34 @@ RSpec.describe "Admin task comments", type: :request do
 
         expect(comment_on_page(comment)).to have_css(
           "form[action='/admin/tasks/#{task.id}/comments/#{comment.id}'] textarea[name='comment[body]']", visible: :all,
+        )
+      end
+
+      it "gives the comment box the toolbar and the body", :aggregate_failures do
+        read
+
+        expect(comment_box).to have_css("[role='toolbar']")
+        expect(comment_box).to have_css("textarea[name='comment[body]']#task-#{task.id}-comment-body")
+      end
+
+      it "previews the comment box through the task renderer" do
+        read
+
+        expect(comment_box).to have_css("[data-editor-preview='/admin/markdown/preview/tasks']", visible: :all)
+      end
+
+      it "sets the comment box's own height" do
+        read
+
+        expect(comment_box["style"]).to eq("--edit-height: 120px")
+      end
+
+      it "gives each comment's edit box its own editor" do
+        comment = create(:task_comment, task_id: task.id)
+        read
+
+        expect(comment_on_page(comment)).to have_css(
+          "[data-markdown-editor] textarea#task-#{task.id}-comment-#{comment.id}-body", visible: :all,
         )
       end
 

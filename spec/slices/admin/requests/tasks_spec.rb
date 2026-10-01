@@ -1416,6 +1416,15 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page).to have_field("task[tags]", with: "admin, ruby")
       end
 
+      it "gives the note the Markdown editor with the task preview", :aggregate_failures do
+        open_edit
+        editor = page.find("[data-markdown-editor]:has(textarea[name='task[note]'])")
+
+        expect(editor).to have_css("[role='toolbar']")
+        expect(editor).to have_css("[data-editor-preview='/admin/markdown/preview/tasks']", visible: :all)
+        expect(editor["style"]).to eq("--edit-height: 160px")
+      end
+
       it "leaves the note field empty for a task without one" do
         task = create(:task)
         get "/admin/tasks/#{task.id}/edit"

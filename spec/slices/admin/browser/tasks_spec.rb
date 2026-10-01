@@ -769,6 +769,84 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "writing Markdown in a task" do
+    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
+
+    def add_label = translate("ui.components.tasks.comments.add_label")
+
+    def bold(editor) = editor.find("[role='toolbar'] button[aria-label='Bold']").click
+
+    def editor(scope, label) = scope.find_field(label).ancestor("[data-markdown-editor]")
+
+    def write_and_preview(editor, label, text)
+      editor.fill_in(label, with: text)
+      editor.find(".seg-option", text: translate("ui.components.markdown_editor.preview")).click
+    end
+
+    shared_examples "a comment editor" do
+      it "inserts a snippet from the toolbar" do
+        bold(editor(scope, add_label))
+
+        expect(scope.find_field(add_label).value).to eq("**bold**")
+      end
+
+      it "previews the comment through the task renderer", :aggregate_failures do
+        box = editor(scope, add_label)
+        write_and_preview(box, add_label, unsafe)
+
+        expect(box).to have_css(".preview details summary", text: "M")
+        expect(box).to have_no_css(".preview script", visible: :all)
+        expect(evaluate_script("window.ran")).to be_nil
+      end
+    end
+
+    describe "in the panel" do
+      before { open_task("Email the accountant") }
+
+      it_behaves_like "a comment editor" do
+        let(:scope) { panel }
+      end
+    end
+
+    describe "on the task page" do
+      before { visit "/admin/tasks/#{task.id}" }
+
+      it_behaves_like "a comment editor" do
+        let(:scope) { page }
+      end
+    end
+
+    describe "the note in the editor dialog" do
+      def note_label = translate("ui.components.tasks.task_form.note")
+
+      before { open_editor("Email the accountant") }
+
+      it "inserts a snippet from the toolbar" do
+        bold(editor(modal, note_label))
+
+        expect(modal.find_field(note_label).value).to eq("**bold**")
+      end
+
+      it "previews the note through the task renderer", :aggregate_failures do
+        box = editor(modal, note_label)
+        write_and_preview(box, note_label, "<script>window.ran = true</script>\n\nsay **why**")
+
+        expect(box).to have_css(".preview strong", exact_text: "why")
+        expect(box).to have_no_css(".preview script", visible: :all)
+      end
+
+      it "saves the note it formats" do
+        bold(editor(modal, note_label))
+        modal.click_button("Save")
+
+        page.assert_no_selector("dialog#task-create[open]")
+
+        expect(repo.by_id(task.id).note).to eq("**bold**")
+      end
+    end
+  end
+
   describe "opening a task with scripts off" do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
 

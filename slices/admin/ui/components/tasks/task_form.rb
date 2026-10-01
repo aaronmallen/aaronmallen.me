@@ -13,6 +13,8 @@ module Admin
           }.freeze
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           NEXT = Blog::Types::TaskFilter["next"]
+          NOTE_HEIGHT = "160px"
+          RENDERER = Blog::Types::MarkdownRenderer["tasks"]
           TODAY = Blog::Types::TaskFilter["today"]
 
           prop :scope, Blog::Types::String
@@ -76,13 +78,17 @@ module Admin
           def lists = @task&.place == EXTERNAL ? LISTS.merge(EXTERNAL => ".lists.external") : LISTS
 
           def note_field
-            Field(label: t(".note"), id: FieldError.id_for(:note, @scope)) do
-              Textarea(
+            label = t(".note")
+
+            Field(label:) do
+              MarkdownEditor(
                 **FieldError.control_attributes(:note, @errors, @scope),
                 name: "task[note]",
+                value: @values[:note].to_s,
+                height: NOTE_HEIGHT,
+                renderer: RENDERER,
+                label:,
                 placeholder: t(".note_placeholder"),
-                rows: 3,
-                value: @values[:note],
               )
               FieldError(field: :note, errors: @errors, scope: @scope)
             end
