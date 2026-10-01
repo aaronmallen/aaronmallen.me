@@ -21,6 +21,10 @@ RSpec.describe "Content security policy", type: :request do
     it "loads fonts from the site alone" do
       expect(directive("font-src")).to eq("font-src 'self'")
     end
+
+    it "loads the web manifest from the site alone" do
+      expect(directive("manifest-src")).to eq("manifest-src 'self'")
+    end
   end
 
   describe "an admin page" do
@@ -31,6 +35,18 @@ RSpec.describe "Content security policy", type: :request do
 
     it "loads fonts from the site alone" do
       expect(directive("font-src")).to eq("font-src 'self'")
+    end
+
+    it "loads the web manifest from the site alone" do
+      expect(directive("manifest-src")).to eq("manifest-src 'self'")
+    end
+  end
+
+  describe "an MCP screen" do
+    before { get "/oauth/authorize" }
+
+    it "loads the web manifest from the site alone" do
+      expect(directive("manifest-src")).to eq("manifest-src 'self'")
     end
   end
 end

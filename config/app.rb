@@ -5,6 +5,7 @@ require "hanami-settings-stores"
 require "honeybadger/rack/error_notifier"
 require "json"
 require "phlex-hanami"
+require "rack/static"
 require "blog/extensions/dry/logger/filter/extension"
 require "blog/extensions/hanami/cli/db/postgres/extension" if defined?(Hanami::CLI)
 require "blog/extensions/hanami/providers/routes/extension"
@@ -20,6 +21,7 @@ module Blog
       inflections.acronym "CLI", "GitHub", "MCP", "OAuth", "PKCE", "UI", "URI"
     end
 
+    config.actions.content_security_policy[:manifest_src] = "'self'"
     config.actions.method_override = false
     config.actions.view_name_inference_base = "ui.views"
 
@@ -28,6 +30,7 @@ module Blog
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier
     config.middleware.use ParamsGuard
+    config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
 
     config.settings_store = Hanami::Settings::CompositeStore.new(
       Hanami::Settings::FileStore.new(config.root.join("config/settings/#{Hanami.env}.yml")),

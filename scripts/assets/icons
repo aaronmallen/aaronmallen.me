@@ -17,3 +17,4 @@ for size in 16 32 48; do
 done
 
 magick "$tmp/16.png" "$tmp/32.png" "$tmp/48.png" -strip "$images/favicon.ico"
+cp "$images/favicon.ico" public/favicon.ico
