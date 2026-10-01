@@ -12,8 +12,10 @@ module Social
       LINK_SELECTOR = "a[href]"
       OK_STATUSES = (200..299)
       PUBLISHED = Blog::Types::PostStatus["published"]
+      REJECTED = :rejected
       REL = "webmention"
       REL_PARAM = /rel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^;\s]+))/i
+      RETRY_STATUSES = (500..599)
       SENT = :sent
       SKIPPED = :skipped
       private_constant :ENDPOINT_SELECTOR, :HEADER_LINK, :LINK_SCHEMES, :LINK_SELECTOR, :REL, :REL_PARAM
@@ -42,19 +44,21 @@ module Social
       end
 
       def announce(post, source, links)
-        outcomes = (links | post.webmention_targets.to_a).map { deliver(source, it) }
-        return Failure(:send_failed) if outcomes.include?(FAILED)
+        outcomes = (links | post.webmention_targets.to_a).to_h { [it, deliver(source, it)] }
+        unsent = outcomes.filter_map { |target, outcome| target if outcome == FAILED }
+        record_post_webmentions.call(post.id, targets: links | unsent)
+        return Failure(:send_failed) if unsent.any?
 
-        record_post_webmentions.call(post.id, targets: links)
-        Success(outcomes.count(SENT))
+        Success(outcomes.values.count(SENT))
       end
 
       def deliver(source, target)
         endpoint = endpoint_for(target)
         return SKIPPED unless endpoint
 
-        response = client.post(endpoint, source:, target:)
-        OK_STATUSES.cover?(response.status) ? SENT : FAILED
+        outcome(client.post(endpoint, source:, target:).status)
+      rescue Webmentions::Client::Refused
+        REJECTED
       rescue Webmentions::Client::Error
         FAILED
       end
@@ -104,6 +108,12 @@ module Social
         html = ::Posts::Markdown.to_html(post.body)
 
         Nokogiri::HTML5.parse(html).css(LINK_SELECTOR).filter_map { elsewhere(source, it["href"]) }.uniq
+      end
+
+      def outcome(status)
+        return SENT if OK_STATUSES.cover?(status)
+
+        RETRY_STATUSES.cover?(status) ? FAILED : REJECTED
       end
 
       def resolve(response, href)

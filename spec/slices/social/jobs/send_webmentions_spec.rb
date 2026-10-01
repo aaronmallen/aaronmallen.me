@@ -252,33 +252,90 @@ RSpec.describe Social::Jobs::SendWebmentions do
     end
   end
 
-  describe "an endpoint that refuses the send" do
-    it "raises so Sidekiq tries again" do
-      stub_target(target, endpoint, status: 500)
+  describe "an endpoint that turns the send away for good" do
+    {
+      "answers 400" => ->(page, url) { stub_target(page, url, status: 400) },
+      "answers 410" => ->(page, url) { stub_target(page, url, status: 410) },
+      "sits on a private address" => ->(page, _url) { stub_page(page, endpoint: "http://127.0.0.1/webmention") },
+    }.each do |what, stub|
+      it "finishes without a retry when the endpoint #{what}" do
+        instance_exec(target, endpoint, &stub)
+
+        expect { send_for(post_with(target)) }.not_to raise_error
+      end
+    end
+
+    it "never posts to a private address" do
+      stub_page(target, endpoint: "http://127.0.0.1/webmention")
+      send_for(post_with(target))
+
+      expect(a_request(:post, "http://127.0.0.1/webmention")).not_to have_been_made
+    end
+
+    it "still sends to the other links once", :aggregate_failures do
+      stub_target(target, endpoint, status: 400)
+      stub_target(other, other_endpoint)
+
+      expect { send_for(post_with(target, other)) }.not_to raise_error
+      expect(a_request(:post, other_endpoint)).to have_been_made.once
+    end
+
+    it "remembers the links the post has" do
+      stub_target(target, endpoint, status: 400)
+      stub_target(other, other_endpoint)
+      post = post_with(target, other)
+      send_for(post)
+
+      expect(targets_of(post)).to eq([target, other])
+    end
+
+    it "forgets a removed link whose endpoint turned it away" do
+      stub_target(target, endpoint)
+      stub_target(other, other_endpoint, status: 400)
+      post = post_with(target, webmention_targets: [other])
+      send_for(post)
+
+      expect(targets_of(post)).to eq([target])
+    end
+  end
+
+  describe "an endpoint that fails for now" do
+    it "raises so Sidekiq tries again on a 5xx" do
+      stub_target(target, endpoint, status: 503)
 
       expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
     end
 
-    it "raises when the endpoint can't be reached" do
+    it "raises when the endpoint times out" do
       stub_page(target, endpoint:)
       stub_request(:post, endpoint).to_timeout
 
       expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
     end
 
-    it "raises when the endpoint sits on a private address", :aggregate_failures do
-      stub_page(target, endpoint: "http://127.0.0.1/webmention")
+    it "raises when the connection fails" do
+      stub_page(target, endpoint:)
+      stub_request(:post, endpoint).to_raise(Faraday::ConnectionFailed.new("connection refused"))
 
       expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
-      expect(a_request(:post, "http://127.0.0.1/webmention")).not_to have_been_made
     end
 
-    it "remembers nothing, so the next try sends again" do
+    it "still remembers the links the post has" do
       stub_target(target, endpoint, status: 500)
-      post = post_with(target)
+      stub_target(other, other_endpoint)
+      post = post_with(target, other)
       send_retrying(post)
 
-      expect(targets_of(post)).to be_empty
+      expect(targets_of(post)).to eq([target, other])
+    end
+
+    it "keeps a removed link whose endpoint failed, so the next try tells it" do
+      stub_target(target, endpoint)
+      stub_target(other, other_endpoint, status: 500)
+      post = post_with(target, webmention_targets: [other])
+      send_retrying(post)
+
+      expect(targets_of(post)).to eq([target, other])
     end
   end
 
