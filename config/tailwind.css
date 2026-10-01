@@ -2816,6 +2816,63 @@
   }
 }
 
+@utility person-search {
+  @apply mt-2 flex flex-col gap-1;
+
+  &[hidden] {
+    @apply hidden;
+  }
+}
+
+@utility person-search-box {
+  @apply relative flex items-center;
+
+  & > i {
+    @apply pointer-events-none absolute left-2.5 text-badge text-ink-muted;
+  }
+
+  & > .inp {
+    @apply pl-8;
+  }
+}
+
+@utility person-search-results {
+  @apply overflow-y-auto rounded-card border border-line bg-ground-sunk p-1;
+  max-height: min(40vh, 280px);
+}
+
+@utility person-search-result {
+  @apply flex cursor-pointer items-center gap-x-3 rounded-btn px-2.5 py-2 text-ink;
+
+  &[aria-selected="true"] {
+    @apply bg-wash;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility person-search-note {
+  @apply cursor-default font-mono text-badge text-ink-muted;
+}
+
+@utility person-search-avatar {
+  @apply size-8 shrink-0 rounded-full bg-wash object-cover;
+}
+
+@utility person-search-name {
+  @apply min-w-0 truncate font-mono text-input;
+}
+
+@utility person-search-handle {
+  @apply ml-auto min-w-0 truncate font-mono text-badge text-ink-muted;
+
+  :where(.person-search-result[aria-selected="true"]) > & {
+    @apply text-ink;
+  }
+}
+
 @utility compose-part-foot {
   @apply flex flex-wrap items-center justify-between gap-3;
 }

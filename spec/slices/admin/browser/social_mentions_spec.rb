@@ -288,6 +288,13 @@ RSpec.describe "Admin social mentions", type: :feature do
 
     def add_new(text = "hi @Ada Lovelace") = type(text, :enter)
 
+    def find_zed
+      stub_bluesky_search("zed", { displayName: "Zed Shaw", handle: "zed.bsky.social" })
+      type "hi @zed", :enter
+      dialog.find_by_id("person-bluesky-search").send_keys("zed")
+      dialog.find("#person-bluesky-results [role='option']", text: "Zed Shaw")
+    end
+
     before do
       create(:person, name: "Grace Hopper", key: "grace-hopper")
       connect_social_networks
@@ -320,6 +327,21 @@ RSpec.describe "Admin social mentions", type: :feature do
       type "hi @zed", :enter
 
       expect(dialog).to have_field("person[name]", with: "zed")
+    end
+
+    it "fills the name from a picked account over what followed the @", :aggregate_failures do
+      find_zed.click
+
+      expect(dialog).to have_field("person[name]", with: "Zed Shaw")
+      expect(dialog).to have_field("person[bluesky_handle]", with: "zed.bsky.social")
+    end
+
+    it "shuts the results on Escape and keeps the dialog open", :aggregate_failures do
+      find_zed
+      dialog.find_by_id("person-bluesky-search").send_keys(:escape)
+
+      expect(page).to have_no_css("#person-bluesky-results", visible: :visible)
+      expect(page).to have_css("dialog#person-dialog[open]")
     end
 
     it "fills the key from the name" do

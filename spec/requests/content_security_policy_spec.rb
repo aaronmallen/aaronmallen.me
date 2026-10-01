@@ -40,6 +40,10 @@ RSpec.describe "Content security policy", type: :request do
     it "loads the web manifest from the site alone" do
       expect(directive("manifest-src")).to eq("manifest-src 'self'")
     end
+
+    it "loads images from any HTTPS host, so account avatars show in people search" do
+      expect(directive("img-src").split).to include("https:")
+    end
   end
 
   describe "an MCP screen" do

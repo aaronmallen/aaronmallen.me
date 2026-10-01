@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [admin, social]
 issue: "#120"
-amended: ["#225"]
+amended: ["#225", "#226"]
 tags: [social, mentions, mastodon, bluesky, delivery, directory, did]
 ---
 
@@ -37,9 +37,11 @@ check before delivery and the preview measure and show the expanded text for eac
 
 A token that names nobody in the directory is refused when the post is saved.
 
-The directory is a table in the social slice. The operator fills it in by hand from the admin, with whichever handles
-a person has, through one people form that the people page and the composer's `@` list both show. We store each
-person's Bluesky DID, resolved from their handle when the person is saved, and never look it up at send time.
+The directory is a table in the social slice. The operator fills it in from the admin, with whichever handles a
+person has, through one people form that the people page and the composer's `@` list both show. Each handle field
+can search its network for accounts, and picking one fills the handle, and the name when the operator has not typed
+one. A pick only fills the form, and nothing joins the directory until the operator saves. We store each person's
+Bluesky DID, resolved from their handle when the person is saved, and never look it up at send time.
 
 ## Alternatives
 
@@ -60,6 +62,12 @@ edit still names text in one body (ADR 0063). The `@` dropdown inserts the token
 the `@`. A good save adds the person to the dropdown and puts their token in place of what the operator typed, and
 the post stays as it was whether the operator saves or cancels. With scripts off a plain **Add New** link under the
 post leads to the people page, and the post is lost on the way there.
+
+Since #226, search asks Bluesky's public actor search and the Mastodon instance the site posts from, which resolves
+accounts on other instances. A network with no credentials shows no search box, and one that fails or rate limits
+shows an error in the results and leaves the field as it was. Search needs scripts, so with scripts off the operator
+types each handle. Avatars load straight from each network over HTTPS, which the admin's content security policy
+already allows.
 
 What the operator types is no longer what a network receives. Everything that measures or shows a post has to
 expand the token first, and anything new that reads `body` for a network has to do the same.

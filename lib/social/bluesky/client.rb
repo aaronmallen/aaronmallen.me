@@ -20,6 +20,7 @@ module Social
       PUT_RECORD = "com.atproto.repo.putRecord"
       REFUSED = 400
       RESOLVE_HANDLE = "com.atproto.identity.resolveHandle"
+      SEARCH_ACTORS = "app.bsky.actor.searchActorsTypeahead"
       TOO_MANY_REQUESTS = 429
       XRPC_PATH = "/xrpc"
 
@@ -66,6 +67,8 @@ module Social
       rescue Refused
         nil
       end
+
+      def search(text, limit:) = Actors.accounts(query(public_api, SEARCH_ACTORS, q: text, limit:))
 
       def within_limit?(text) = count(text) <= LIMIT && text.to_s.bytesize <= MAX_BYTES
 

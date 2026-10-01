@@ -1,3 +1,4 @@
+import { fillField } from "./person_field.js";
 import { setupPersonForms } from "./person_form.js";
 
 const FIELD = "input:not([type=hidden]), textarea, select";
@@ -105,8 +106,5 @@ function person(html) {
 }
 
 function prefill(field, name) {
-  if (!field || name === "") return;
-
-  field.value = name;
-  field.dispatchEvent(new Event("input", { bubbles: true }));
+  if (field && name !== "") fillField(field, name);
 }

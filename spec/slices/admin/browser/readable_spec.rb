@@ -112,7 +112,21 @@ RSpec.describe "Admin screens", type: :feature do
 
   def person = @person ||= create(:person, :bluesky, name: "Ada Lovelace", key: "ada-lovelace")
 
-  def screens = pages.merge(people, composers, dialogs, journal_editors)
+  def person_search
+    {
+      "person search" => lambda do
+        connect_social_networks
+        stub_bluesky_search("ada",
+                            { avatar: "https://cdn.bsky.app/a.jpg", displayName: "Ada Lovelace",
+                              handle: "ada.bsky.social" })
+        visit "/admin/people/new"
+        find_by_id("person-bluesky-search").send_keys("ada")
+        find("#person-bluesky-results [role='option']", text: "Ada Lovelace")
+      end,
+    }
+  end
+
+  def screens = pages.merge(people, person_search, composers, dialogs, journal_editors)
 
   def seed
     seed_analytics

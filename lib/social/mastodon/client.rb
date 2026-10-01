@@ -12,6 +12,7 @@ module Social
       LIMIT = 500
       MENTION = /@(\w[\w.-]*)@[\w-]+(?:\.[\w-]+)+/
       RESERVED_PER_URL = 23
+      SEARCH_PATH = "/api/v2/search"
       STATUSES_PATH = "/api/v1/statuses"
       TOO_MANY_REQUESTS = 429
       VISIBILITY = "public"
@@ -52,11 +53,24 @@ module Social
         RemotePost.new(id: id.to_s, url: body["url"].to_s)
       end
 
+      def search(text, limit:)
+        body = request(:get, SEARCH_PATH, q: text, type: "accounts", resolve: true, limit:)
+
+        body["accounts"].to_a.map { account(it) }
+      end
+
       def within_limit?(text) = count(text) <= LIMIT
 
       private
 
       attr_reader :connection
+
+      def account(found)
+        acct = found["acct"].to_s
+        handle = acct.include?("@") ? acct : "#{acct}@#{connection.url_prefix.host}"
+
+        Account.new(avatar: found["avatar"], handle: "@#{handle}", name: found["display_name"].to_s.strip)
+      end
 
       def countable(text)
         text.to_s.gsub(Links::PATTERN) { shrink(Regexp.last_match(0)) }.gsub(MENTION, "@\\1")

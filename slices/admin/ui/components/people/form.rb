@@ -14,10 +14,12 @@ module Admin
             mastodon_handle: %w[.mastodon_handle .mastodon_handle_placeholder],
             bluesky_handle: %w[.bluesky_handle .bluesky_handle_placeholder],
           }.freeze
+          SEARCHES = { mastodon_handle: "mastodon", bluesky_handle: "bluesky" }.freeze
 
           prop :person, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
+          prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
             render Blog::UI::Components::Form.new(action: form_action, data: { person_form: @person ? EDIT : NEW }) do
@@ -64,11 +66,17 @@ module Admin
                 data: { person_field: name },
               )
               FieldError(field: name, errors: @errors)
+              search(name)
               yield if block_given?
             end
           end
 
           def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
+
+          def search(name)
+            network = SEARCHES[name]
+            Search(network:) if @searchable.include?(network)
+          end
         end
       end
     end

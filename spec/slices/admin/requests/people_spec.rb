@@ -269,6 +269,140 @@ RSpec.describe "Admin people", type: :request do
       end
     end
 
+    describe "searching for accounts" do
+      let(:ada) { { avatar: "https://cdn.bsky.app/ada.jpg", displayName: "Ada Lovelace", handle: "ada.bsky.social" } }
+      let(:grace) do
+        { acct: "grace@hachyderm.io", avatar: "https://files.example/grace.png", display_name: "Grace Hopper" }
+      end
+
+      def results = page.all("[data-person-pick]").map { [it["data-person-pick"], it["data-person-pick-name"]] }
+
+      def search(network, query) = get("/admin/people/search/#{network}", q: query)
+
+      before { connect_social_networks }
+
+      it "lists Bluesky accounts with avatar, name and handle", :aggregate_failures do
+        stub_bluesky_search("ada", ada)
+        search("bluesky", "ada")
+
+        expect(results).to eq([["ada.bsky.social", "Ada Lovelace"]])
+        expect(page).to have_css("[role='option'] img[src='https://cdn.bsky.app/ada.jpg'][alt='']")
+        expect(page).to have_css("[role='option'] .person-search-handle", text: "ada.bsky.social")
+      end
+
+      it "answers with rows and no layout" do
+        stub_bluesky_search("ada", ada)
+        search("bluesky", "ada")
+
+        expect(last_response.body).not_to include("<html")
+      end
+
+      it "lists Mastodon accounts on other instances as @user@instance" do
+        stub_mastodon_search("grace", grace)
+        search("mastodon", "grace")
+
+        expect(results).to eq([["@grace@hachyderm.io", "Grace Hopper"]])
+      end
+
+      it "names a Mastodon account on the site's own instance with that instance" do
+        stub_mastodon_search("ada", { acct: "ada", avatar: "https://ruby.social/ada.png", display_name: "Ada" })
+        search("mastodon", "ada")
+
+        expect(results).to eq([["@ada@ruby.social", "Ada"]])
+      end
+
+      it "shows the handle where an account has no display name" do
+        stub_bluesky_search("ada", ada.merge(displayName: ""))
+        search("bluesky", "ada")
+
+        expect(page.find(".person-search-name").text).to eq("ada.bsky.social")
+      end
+
+      it "draws no avatar from an address that is not HTTPS" do
+        stub_bluesky_search("ada", ada.merge(avatar: "http://cdn.example/ada.jpg"))
+        search("bluesky", "ada")
+
+        expect(page).to have_no_css("img")
+      end
+
+      it "says so when nothing matches", :aggregate_failures do
+        stub_bluesky_search("nobody")
+        search("bluesky", "nobody")
+
+        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "No accounts match")
+        expect(results).to be_empty
+      end
+
+      it "asks no network for a query shorter than two characters", :aggregate_failures do
+        search("bluesky", " a ")
+
+        expect(last_response).to be_ok
+        expect(a_request(:get, /searchActorsTypeahead/)).not_to have_been_made
+      end
+
+      it "shows an error row when the network fails", :aggregate_failures do
+        stub_bluesky_search("ada", status: 502)
+        search("bluesky", "ada")
+
+        expect(last_response.status).to eq(502)
+        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "Bluesky did not answer")
+      end
+
+      it "shows an error row when the network times out" do
+        stub_request(:get, SocialNetworks::MASTODON_SEARCH).with(query: hash_including({})).to_timeout
+        search("mastodon", "grace")
+
+        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "Mastodon did not answer")
+      end
+
+      it "shows an error row when the network rate limits", :aggregate_failures do
+        stub_mastodon_search("grace", status: 429)
+        search("mastodon", "grace")
+
+        expect(last_response.status).to eq(429)
+        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "too many searches")
+      end
+
+      it "answers 404 for a network with no credentials" do
+        connect_social_networks(bluesky: {})
+        search("bluesky", "ada")
+
+        expect(last_response).to be_not_found
+      end
+
+      it "answers 404 for a network it does not know" do
+        search("myspace", "ada")
+
+        expect(last_response).to be_not_found
+      end
+
+      it "gives each handle field a search box" do
+        get "/admin/people/new"
+
+        expect(page.all("[data-person-search]", visible: :all).map { it["data-person-search"] })
+          .to eq(%w[mastodon bluesky])
+      end
+
+      it "gives the editor the same search boxes" do
+        get "/admin/people/#{create(:person).id}/edit"
+
+        expect(page).to have_css("[data-person-search]", visible: :all, count: 2)
+      end
+
+      it "shows no search box for a network with no credentials" do
+        connect_social_networks(mastodon: {})
+        get "/admin/people/new"
+
+        expect(page.all("[data-person-search]", visible: :all).map { it["data-person-search"] }).to eq(%w[bluesky])
+      end
+
+      it "hides the search boxes until scripts show them" do
+        get "/admin/people/new"
+
+        expect(page).to have_css("[data-person-search][hidden]", visible: :all, count: 2)
+      end
+    end
+
     describe "editing a person" do
       let(:person) do
         create(:person, :bluesky, name: "Ada", key: "ada", mastodon_handle: nil, bluesky_handle: "ada.bsky.social")

@@ -4,6 +4,7 @@ module SocialNetworks
   BLUESKY_DID = "did:plc:ada"
   BLUESKY_PDS = "https://bsky.social/xrpc"
   BLUESKY_PUBLIC = "https://public.api.bsky.app/xrpc"
+  MASTODON_SEARCH = "https://ruby.social/api/v2/search"
   MASTODON_STATUSES = "https://ruby.social/api/v1/statuses"
 
   def bluesky_uri(rkey) = "at://#{BLUESKY_DID}/app.bsky.feed.post/#{rkey}"
@@ -33,6 +34,12 @@ module SocialNetworks
       .to_return(**json_response(cid: "cid-#{uri.split('/').last}", uri:, value: { reply: root && { root: } }.compact))
   end
 
+  def stub_bluesky_search(query, *actors, status: 200)
+    stub_request(:get, "#{BLUESKY_PUBLIC}/app.bsky.actor.searchActorsTypeahead")
+      .with(query: hash_including("q" => query))
+      .to_return(**json_response(status:, actors:))
+  end
+
   def stub_bluesky_session(**body)
     session = { accessJwt: "jwt", did: BLUESKY_DID, handle: "ada.example", **body }.compact
 
@@ -56,6 +63,12 @@ module SocialNetworks
   def stub_mastodon_engagement(id, likes: 0, replies: 0, reposts: 0)
     stub_request(:get, "#{MASTODON_STATUSES}/#{id}")
       .to_return(**json_response(id:, favourites_count: likes, replies_count: replies, reblogs_count: reposts))
+  end
+
+  def stub_mastodon_search(query, *accounts, status: 200)
+    stub_request(:get, MASTODON_SEARCH)
+      .with(query: hash_including("q" => query, "type" => "accounts", "resolve" => "true"))
+      .to_return(**json_response(status:, accounts:))
   end
 end
 

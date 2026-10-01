@@ -6,6 +6,7 @@ module Admin
     ID = /\d+/
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
+    NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
 
     use(*Admin::Slice.config.actions.sessions.middleware)
@@ -28,6 +29,7 @@ module Admin
     get "/people", to: "people.index", as: :people
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person
+    get "/people/search/:network", to: "people.search", as: :search_people, network: NETWORK
     get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
     post "/people/:id", to: "people.update", as: :update_person, id: ID
     post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID

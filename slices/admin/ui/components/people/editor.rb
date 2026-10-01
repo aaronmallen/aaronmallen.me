@@ -8,6 +8,7 @@ module Admin
           prop :person, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
+          prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
             a(class: "btn gh sm editor-back", href: path(:admin_people)) do
@@ -16,7 +17,7 @@ module Admin
             end
 
             PageHead(title: @person ? @person.name : t(".new_person"), sub: t(".sub"))
-            Card { render Form.new(person: @person, values: @values, errors: @errors) }
+            Card { render Form.new(person: @person, values: @values, errors: @errors, searchable: @searchable) }
             delete_form if @person
           end
 
