@@ -23,9 +23,9 @@ module Social
       def by_status(status) = webmentions.with_status(status).newest_first.to_a
 
       def claim_receipt(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
-        claimed = webmention_receipts.claim(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
+        receipt = webmention_receipts.claim(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)&.first
 
-        claimed ? Success(claimed.first) : Failure(:throttled)
+        receipt ? Success(receipt) : Failure(:throttled)
       end
 
       def count_by_post(post_ids) = tallied(webmentions.for_posts(post_ids).counts_by(:post_id), :post_id)

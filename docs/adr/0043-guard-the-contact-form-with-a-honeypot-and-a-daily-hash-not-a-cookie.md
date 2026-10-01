@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle]
 ---
 
@@ -68,6 +68,12 @@ beacon and `/webmention` take the same shape (AA-717): `AnalyticsEvents#claim` l
 `WebmentionReceipts#claim` locks the whole table, since it also caps every sender together. Inside that lock the
 receipt's conditional upsert decides only the dedupe.
 
+**A webmention sent again inside the window gets 429.** A receipt keys on the post and the source, and the upsert
+stamps it again only once it falls outside the window. So the same pair sent again inside the window writes nothing
+and queues no verify fetch, and `WebmentionRepo#claim_receipt` reads the empty upsert as `Failure(:throttled)`. The
+sender gets 429, not 202, so it knows to try later instead of thinking its edit or delete went through. After the
+window the pair counts as a first send: 202 and a verify job (#204).
+
 **A throttled person and a caught bot see different pages.** The bot is told it worked. The person gets 429, the
 contact page, and a line saying they have sent enough for now. It never names the limit.
 
@@ -124,6 +130,9 @@ stops a browser on another site's page, not a script, since a post with neither 
 Only stored rows count, so a bot that fills the honeypot leaves no trace at all.
 
 The lock holds the whole table, so a flood makes every sender wait its turn.
+
+A site that edits or deletes a post soon after it sent the first webmention has to send again once the window
+closes. Until then the stored mention shows the first version.
 
 The day the public slice grows an action that acts for a signed-in visitor, this record breaks and needs a new one.
 

@@ -51,12 +51,12 @@ module Social
 
       def queue(source_url, target_url, post, visitor_hash)
         limits = settings.webmentions
-        receipt = step webmention_repo.claim_receipt(
+        step webmention_repo.claim_receipt(
           post_id: post.id, source_url: source_url.to_s, visitor_hash:, since: window_opened_at,
           limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit],
         )
 
-        Jobs::VerifyWebmention.perform_async(source_url.to_s, target_url.to_s, post.id) if receipt
+        Jobs::VerifyWebmention.perform_async(source_url.to_s, target_url.to_s, post.id)
       end
 
       def url(value)

@@ -197,18 +197,43 @@ RSpec.describe "Webmentions", type: :request do
     end
   end
 
-  describe "the same pair sent again" do
+  describe "the same pair sent again inside the window" do
     it "queues one verification" do
       3.times { notify }
 
       expect(Social::Jobs::VerifyWebmention.jobs).to have(1).item
     end
 
-    it "accepts the repeat all the same" do
+    it "refuses the repeat" do
       notify
       notify
 
+      expect(last_response.status).to eq(429)
+    end
+
+    it "answers the repeat with nothing to read" do
+      notify
+      notify
+
+      expect(last_response.body).to be_empty
+    end
+  end
+
+  describe "the same pair sent again after the window" do
+    let(:window) { Hanami.app["settings"].webmentions[:throttle_window_minutes] * 60 }
+
+    before do
+      notify
+      allow(Time).to receive(:now).and_return(Time.now + window + 60)
+      notify
+    end
+
+    it "accepts the repeat" do
       expect(last_response.status).to eq(202)
+    end
+
+    it "queues a second verification" do
+      expect(Social::Jobs::VerifyWebmention.jobs).to have(2).items
     end
   end
 
