@@ -47,7 +47,7 @@ RSpec.describe "MCP reach", type: :request do
       "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",
       "mcp.operations.issue_token" => "OAuth: a client trades a code or a refresh token",
       "mcp.operations.issue_tokens" => "OAuth: mints the tokens issue_token hands out",
-      "mcp.operations.reap_expired_credentials" => "a background job reaps expired OAuth codes and tokens",
+      "mcp.operations.reap_expired_credentials" => "a background job reaps spent OAuth codes, tokens and idle clients",
       "mcp.operations.register_client" => "OAuth: a client registers itself",
       "mcp.operations.revoke_client" => "OAuth: the owner cuts off a client in the admin, which no client should do",
       "posts.operations.record_post_webmentions" => "the webmention delivery job records what it sent",

@@ -22,10 +22,12 @@ module MCP
 
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
-      def holding_live_token(at: Time.now)
-        live = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
+      def holding_live_token(at: Time.now) = where(id: live_tokens(at).select(:oauth_client_id))
 
-        where(id: live.select(:oauth_client_id))
+      def idle(since:, at: Time.now)
+        exclude(id: live_tokens(at).select(:oauth_client_id))
+          .exclude(id: live_codes(at).select(:oauth_client_id))
+          .where { coalesce(last_used_at, created_at) < since }
       end
 
       def newest_first = order(self[:created_at].desc, self[:id].desc)
@@ -35,6 +37,10 @@ module MCP
       def with_client_id(client_id) = where(client_id:)
 
       private
+
+      def live_codes(at) = dataset.db[:oauth_codes].where(used_at: nil).where { expires_at > at }
+
+      def live_tokens(at) = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
 
       def lock_until_commit(visitor_hash)
         dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, visitor_hash)))

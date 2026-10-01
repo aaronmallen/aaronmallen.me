@@ -4,9 +4,13 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
   let(:client) { mcp_create(:oauth_client) }
   let(:verifier) { MCP::OAuth::Secret.generate }
 
+  def clients = MCP::Slice["db.rom"].relations[:oauth_clients]
+
   def code_row(*traits) = mcp_create(:oauth_code, *traits, oauth_client_id: client.id)
 
   def codes = MCP::Slice["db.rom"].relations[:oauth_codes]
+
+  def days_ago(days) = Time.now - (days * 24 * 60 * 60)
 
   def mcp_create(name, *, **) = Spec::DB::Factories[:mcp].create(name, *, **)
 
@@ -102,6 +106,71 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
       mcp_refresh(client, spent)
 
       expect(tokens.live.count).to eq(0)
+    end
+  end
+
+  describe "clients" do
+    def idle_client(**) = mcp_create(:oauth_client, created_at: days_ago(91), **)
+
+    it "deletes a client that registered over 90 days ago and never connected" do
+      idle = idle_client
+      reap
+
+      expect(clients.by_pk(idle.id).count).to eq(0)
+    end
+
+    it "deletes a client that last connected over 90 days ago and holds no live token" do
+      idle = idle_client(last_used_at: days_ago(91))
+      mcp_create(:oauth_token, :refresh, :expired, oauth_client_id: idle.id)
+      reap
+
+      expect(clients.by_pk(idle.id).count).to eq(0)
+    end
+
+    it "deletes an idle client whose only unexpired token is revoked" do
+      idle = idle_client
+      revoked = mcp_create(:oauth_token, :refresh, :revoked, oauth_client_id: idle.id)
+      reap
+
+      expect([clients.by_pk(idle.id).count, tokens.by_pk(revoked.id).count]).to eq([0, 0])
+    end
+
+    it "keeps a client that registered inside 90 days" do
+      fresh = mcp_create(:oauth_client, created_at: days_ago(89))
+      reap
+
+      expect(clients.by_pk(fresh.id).count).to eq(1)
+    end
+
+    it "keeps a client that connected inside 90 days" do
+      used = idle_client(last_used_at: days_ago(89))
+      reap
+
+      expect(clients.by_pk(used.id).count).to eq(1)
+    end
+
+    it "keeps an idle client holding a live access token" do
+      held = idle_client(last_used_at: days_ago(91))
+      mcp_create(:oauth_token, oauth_client_id: held.id)
+      reap
+
+      expect(clients.by_pk(held.id).count).to eq(1)
+    end
+
+    it "keeps an idle client holding a live refresh token" do
+      held = idle_client(last_used_at: days_ago(91))
+      mcp_create(:oauth_token, :refresh, oauth_client_id: held.id)
+      reap
+
+      expect(clients.by_pk(held.id).count).to eq(1)
+    end
+
+    it "keeps an idle client the owner has just approved" do
+      approved = idle_client
+      code = mcp_authorization_code(approved, verifier:)
+      reap
+
+      expect(mcp_exchange(approved, code, verifier:)).to include("access_token")
     end
   end
 

@@ -21,6 +21,13 @@ module MCP
         oauth_clients.for_visitor(visitor_hash).registered_since(time).count
       end
 
+      def delete_idle(since:, at: Time.now)
+        transaction do
+          locked = oauth_clients.idle(since:, at:).lock.pluck(:id)
+          oauth_clients.idle(since:, at:).where(id: locked).delete
+        end
+      end
+
       def touch_last_used(id, at: Time.now) = update(id, last_used_at: at)
     end
   end
