@@ -1,12 +1,13 @@
+# auto_register: false
 # frozen_string_literal: true
 
-module MCP
-  module Tools
+module API
+  module Endpoints
     module JournalEntries
       BLANK = "blank"
       FORMAT = Blog::Contract::FORMAT
+      ID = { type: "integer" }.freeze
       TAG_SEPARATOR = ","
-      TIME_FORMAT = "%H:%M"
 
       COMPLAINTS = {
         [:body, BLANK] => "body needs a character that is not a space",
@@ -24,20 +25,11 @@ module MCP
 
       module_function
 
-      def complaint(errors)
-        errors.flat_map { |field, tokens| tokens.map { COMPLAINTS.fetch([field, it]) { "#{field} #{it}" } } }
-              .join("; ")
+      def complaints(errors)
+        errors.to_h { |field, tokens| [field, tokens.map { COMPLAINTS.fetch([field, it]) { "#{field} #{it}" } }] }
       end
 
-      def fields(entry)
-        {
-          id: entry.id,
-          date: entry.entry_date.iso8601,
-          time: entry.entry_time.strftime(TIME_FORMAT),
-          body: entry.body,
-          tags: entry.tags.map(&:name),
-        }
-      end
+      def missing(id) = "no journal entry has the ID #{id}"
 
       def tag_list(tags) = Array(tags).join(TAG_SEPARATOR)
     end

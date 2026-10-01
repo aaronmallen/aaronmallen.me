@@ -100,7 +100,7 @@ RSpec.describe "MCP reach", type: :request do
 
   def reached(object = MCP::Slice["protocol.handler"], seen = Set.new)
     object.instance_variables.map { object.instance_variable_get(it) }.each do |dependency|
-      next unless dependency.class.name.to_s.include?("::Operations::") && seen.add?(dependency.class)
+      next unless walked?(dependency) && seen.add?(dependency.class)
 
       reached(dependency, seen)
     end
@@ -145,6 +145,8 @@ RSpec.describe "MCP reach", type: :request do
   def today = Blog::TimeZone.today
 
   def typo = { original: "teh", replacement: "the", reason: "typo" }
+
+  def walked?(dependency) = dependency.class.name.to_s.match?(/::(Endpoints|Operations)::/)
 
   it "reaches every operation from a tool unless the operation is exempt" do
     unreached = operations - reached_keys - exempt.keys

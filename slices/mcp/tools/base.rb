@@ -63,8 +63,6 @@ module MCP
           Success(first..last)
         end
 
-        def delete_journal_entry(server_context) = server_context.fetch(:delete_journal_entry)
-
         def delete_post(server_context) = server_context.fetch(:delete_post)
 
         def delete_social_post(server_context) = server_context.fetch(:delete_social_post)
@@ -81,9 +79,12 @@ module MCP
           Blog::Types::TagScope.values.map { tag_usage(server_context).call(scope: it) }.reduce(:merge)
         end
 
-        def journal_entries_between(server_context) = server_context.fetch(:journal_entries_between)
-
-        def journal_entry_by_id(server_context) = server_context.fetch(:journal_entry_by_id)
+        def hand_over(endpoint, input, server_context)
+          case server_context.fetch(endpoint).call(input)
+          in Success(payload) then answer(payload)
+          in Failure(refusal) then refuse(refusal.message)
+          end
+        end
 
         def live_projects(server_context) = server_context.fetch(:live_projects)
 
@@ -119,8 +120,6 @@ module MCP
 
         def restore_project(server_context) = server_context.fetch(:restore_project)
 
-        def save_journal_entry(server_context) = server_context.fetch(:save_journal_entry)
-
         def save_post(server_context) = server_context.fetch(:save_post)
 
         def save_post_seo(server_context) = server_context.fetch(:save_post_seo)
@@ -142,8 +141,6 @@ module MCP
         def tag_usage(server_context) = server_context.fetch(:tag_usage)
 
         def unsent_social_posts(server_context) = server_context.fetch(:unsent_social_posts)
-
-        def update_journal_entry(server_context) = server_context.fetch(:update_journal_entry)
 
         def update_webmention_settings(server_context) = server_context.fetch(:update_webmention_settings)
 

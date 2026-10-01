@@ -584,6 +584,7 @@ DEPENDENCIES
   hanami-webconsole (~> 3)!
   honeybadger (~> 6)
   i18n (~> 1)
+  json_schemer (~> 2)
   maxmind-db (~> 1)
   mcp (~> 1.5)
   nokogiri (~> 1)

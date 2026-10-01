@@ -23,6 +23,11 @@ module MCP
     import keys: %w[auth.session_reader], from: :admin
 
     import keys: %w[
+      endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.list_journal_entries
+      endpoints.read_journal_entry endpoints.update_journal_entry
+    ], from: :api
+
+    import keys: %w[
       queries.activity_between queries.activity_commit_totals queries.activity_counts
       queries.activity_counts_by_month
     ], from: :activity
@@ -45,9 +50,7 @@ module MCP
     import keys: %w[operations.find_visitor_address], from: :public
 
     import keys: %w[
-      operations.delete_journal_entry operations.queue_commit_import operations.save_journal_entry
-      operations.update_journal_entry queries.commits_between queries.commits_last_synced_at
-      queries.journal_entries_between queries.journal_entry_by_id queries.sync_failures
+      operations.queue_commit_import queries.commits_between queries.commits_last_synced_at queries.sync_failures
     ], from: :record
 
     import keys: %w[

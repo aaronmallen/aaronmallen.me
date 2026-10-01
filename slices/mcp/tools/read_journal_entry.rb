@@ -3,19 +3,12 @@
 module MCP
   module Tools
     class ReadJournalEntry < Base
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
-
       description "Read one journal entry: its date, time, body and tags"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::ReadJournalEntry::SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(id:, server_context:)
-          entry = journal_entry_by_id(server_context).call(id)
-          return refuse("no journal entry has the ID #{id}") if entry.nil?
-
-          answer(JournalEntries.fields(entry))
-        end
+        def call(server_context:, **input) = hand_over(:read_journal_entry, input, server_context)
       end
     end
   end
