@@ -7,6 +7,8 @@ RSpec.describe Tasks::Operations::SyncIssues do
 
   def assign(*issues) = client.assigned.concat(issues)
 
+  def comment = { author: "octocat", body: "Still on it", created_at: Time.now, id: "LC_1", url: "#{url}#c1" }
+
   def imported = repo.by_source("linear", "L_one")
 
   def issue(remote_state = "open", **)
@@ -85,6 +87,41 @@ RSpec.describe Tasks::Operations::SyncIssues do
       sync
 
       expect(repo.by_id(task.id)).to have_attributes(list: "external", status: "open")
+    end
+  end
+
+  describe "an issue's comments" do
+    def heard(task) = Tasks::Slice["queries.task_comments"].call(task.id).map(&:remote_id)
+
+    it "reach a task its issue reopens" do
+      task = tracked(:done, state: "completed")
+      assign(issue(comments: [comment]))
+      sync
+
+      expect(heard(task)).to eq(%w[LC_1])
+    end
+
+    it "stop at a task its issue cancels" do
+      task = tracked
+      assign(issue("not_planned", comments: [comment]))
+      sync
+
+      expect(heard(task)).to be_empty
+    end
+  end
+
+  describe "a run" do
+    before do
+      tracked
+      allow(repo).to receive(:by_id).and_call_original
+      replace_component("repos.task_repo", repo)
+    end
+
+    it "loads each followed task once" do
+      assign(issue(comments: [comment]))
+      sync
+
+      expect(repo).to have_received(:by_id).once
     end
   end
 

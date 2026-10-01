@@ -32,14 +32,16 @@ module Tasks
 
       private
 
+      def close(task, now) = task.closed? ? Success(task) : cancel_task.call(task.id, at: now)
+
       def copy(issue)
         title, note = issue.values_at(:title, :body).map { it&.delete("\0") }
 
         { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
       end
 
-      def discuss(source, issue)
-        return unless listening?(source, issue)
+      def discuss(source, task, issue)
+        return unless listening?(task, issue)
 
         fresh = heard(issue)
         held = held(source, fresh.keys)
@@ -68,10 +70,10 @@ module Tasks
         task = task_repo.by_id(source.task_id)
 
         transaction do
-          settle(task, state, source.remote_state, now) unless state == source.remote_state
+          task = settle(task, state, source.remote_state, now) unless state == source.remote_state
           rewrite(task, issue)
           restamp(source, state, issue[:url])
-          discuss(source, issue)
+          discuss(source, task, issue)
         end
       end
 
@@ -97,10 +99,10 @@ module Tasks
         task_comment_repo.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
       end
 
-      def listening?(source, issue) = issue.key?(:comments) && !task_repo.by_id(source.task_id).closed?
+      def listening?(task, issue) = issue.key?(:comments) && !task.closed?
 
       def reopen(task, was)
-        return unless task.closed? || (was == STARTED && task.in_progress?)
+        return Success(task) unless task.closed? || (was == STARTED && task.in_progress?)
 
         reopen_task.call(task.id)
       end
@@ -129,10 +131,10 @@ module Tasks
       def settle(task, state, was, now)
         case state
         when OPEN then reopen(task, was)
-        when STARTED then task.in_progress? || start_task.call(task.id)
-        when COMPLETED then task.done? || complete_task.call(task.id, at: now)
-        else task.closed? || cancel_task.call(task.id, at: now)
-        end
+        when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id)
+        when COMPLETED then task.done? ? Success(task) : complete_task.call(task.id, at: now)
+        else close(task, now)
+        end.value_or(task)
       end
 
       def tags(issue)
