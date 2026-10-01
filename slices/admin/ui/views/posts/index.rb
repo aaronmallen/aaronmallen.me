@@ -17,12 +17,13 @@ module Admin
           MENTION_COLOR = :pink
           SEPARATOR = " · "
 
-          def initialize(counts:, filter:, posts:, view_counts:, webmention_counts:, word_counts:)
+          def initialize(counts:, filter:, posts:, view_counts:, visitor_counts:, webmention_counts:, word_counts:)
             super()
             @counts = counts
             @filter = filter
             @posts = posts
             @view_counts = view_counts
+            @visitor_counts = visitor_counts
             @webmention_counts = webmention_counts
             @word_counts = word_counts
           end
@@ -79,7 +80,8 @@ module Admin
             date = l(Blog::TimeZone.today(post.published_at || post.updated_at), format: :medium)
             words = t(".words", count: @word_counts.fetch(post.id))
             views = t(".views", count: @view_counts.fetch(post.id))
-            [path(:post, slug: post.slug), date, words, views].join(SEPARATOR)
+            visitors = t(".visitors", count: @visitor_counts.fetch(post.id))
+            [path(:post, slug: post.slug), date, words, views, visitors].join(SEPARATOR)
           end
 
           def sub

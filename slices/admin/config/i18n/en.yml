@@ -1145,6 +1145,9 @@ en:
           views:
             one: "%{count} view"
             other: "%{count} views"
+          visitors:
+            one: "%{count} visitor"
+            other: "%{count} visitors"
           words:
             one: "%{count} word"
             other: "%{count} words"

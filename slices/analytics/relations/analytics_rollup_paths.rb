@@ -13,6 +13,9 @@ module Analytics
       end
       NEWEST_FIRST = Sequel.desc(:day)
       POST_ID = Sequel[:posts][:id]
+      POST_FIGURES = proc do
+        [integer(POST_ID).as(:post_id), integer.sum(views).as(:views), integer.sum(visitors).as(:visitors)]
+      end
       POST_PATH = Sequel.join(["#{Blog::Site::WRITING}/", Sequel[:posts][:slug]])
       RECENT_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
       TITLED = Sequel.~(title: nil)
@@ -36,7 +39,7 @@ module Analytics
       def views_by_post(post_ids)
         joined = unordered.join(:posts, self[:path].is(POST_PATH)).where(POST_ID => post_ids)
 
-        joined.select { [integer(POST_ID).as(:post_id), integer.sum(views).as(:views)] }.group(POST_ID)
+        joined.select(&POST_FIGURES).group(POST_ID)
       end
     end
   end
