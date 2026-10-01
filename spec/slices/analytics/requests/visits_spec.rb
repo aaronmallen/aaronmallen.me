@@ -6,6 +6,8 @@ RSpec.describe "Visit counting", type: :request do
   let(:agent) { "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
   let(:event_repo) { Analytics::Slice["repos.analytics_event_repo"] }
 
+  before { create(:post, :published, slug: "hello") }
+
   def beacon(visit, agent: self.agent)
     post "/pulse", visit.to_json, "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent,
                                   "REMOTE_ADDR" => "203.0.113.7"

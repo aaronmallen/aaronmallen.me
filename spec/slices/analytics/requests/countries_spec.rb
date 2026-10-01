@@ -7,7 +7,7 @@ RSpec.describe "Country lookup", type: :request do
   before { use_country_database }
 
   def country_of(address)
-    visit = { kind: "view", path: "/writing/hello", title: "Hello" }.to_json
+    visit = { kind: "view", path: "/about", title: "About" }.to_json
     post "/pulse", visit, "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent, "REMOTE_ADDR" => address
 
     event_repo.analytics_events.order(:id).to_a.last&.country_code

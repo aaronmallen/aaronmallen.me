@@ -17,7 +17,7 @@ RSpec.describe "Visitor address", type: :request do
   def address(**headers)
     post(
       "/pulse",
-      { kind: "view", path: "/writing/hello", title: "Hello" }.to_json,
+      { kind: "view", path: "/about", title: "About" }.to_json,
       "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent, "REMOTE_ADDR" => proxy, **headers,
     )
     looked_up.last

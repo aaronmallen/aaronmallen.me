@@ -8,6 +8,8 @@ RSpec.describe "Visits", type: :request do
   let(:event_repo) { Analytics::Slice["repos.analytics_event_repo"] }
   let(:loopback) { "127.0.0.1" }
 
+  before { create(:post, :published, slug: "hello", title: "Hello", tags: %w[ruby]) }
+
   def assets
     page = Capybara.string(last_response.body)
     sources = page.all("script[src]", visible: :all).map { it[:src] }
@@ -272,6 +274,59 @@ RSpec.describe "Visits", type: :request do
 
         expect(last_response.status).to eq(202)
       end
+
+      it "stores #{path}" do
+        beacon({ kind: "view", path: })
+
+        expect(stored.map(&:path)).to eq([path])
+      end
+    end
+
+    it "stores a tag only a project carries" do
+      create(:project, name: "sai", tags: %w[go])
+      beacon({ kind: "view", path: "/writing/tags/go" })
+
+      expect(stored.map(&:path)).to eq(["/writing/tags/go"])
+    end
+  end
+
+  describe "a path the router answers that names nothing on the site" do
+    before { create(:post, :draft, slug: "unfinished", tags: %w[secret]) }
+
+    {
+      "a post that does not exist" => "/writing/nothing-here",
+      "a draft" => "/writing/unfinished",
+      "a slug no post can take" => "/writing/Not%20A%20Slug",
+      "a tag that does not exist" => "/writing/tags/nothing-here",
+      "a tag only a draft carries" => "/writing/tags/secret",
+      "a tag in another case than its own" => "/writing/tags/Ruby",
+    }.each do |named, path|
+      it "accepts the beacon for #{named}" do
+        beacon({ kind: "view", path: })
+
+        expect(last_response.status).to eq(202)
+      end
+
+      it "stores nothing for #{named}" do
+        beacon({ kind: "view", path: })
+
+        expect(stored).to be_empty
+      end
+    end
+
+    it "turns away a malformed beacon as it would for a real page" do
+      beacon({ kind: "click", path: "/writing/nothing-here" })
+
+      expect(last_response.status).to eq(400)
+    end
+
+    it "accepts the beacon past the limit and stores nothing", :aggregate_failures do
+      lower_throttle_limit(:analytics, to: 1)
+      2.times { view }
+      beacon({ kind: "view", path: "/writing/nothing-here" })
+
+      expect(last_response.status).to eq(202)
+      expect(stored).to have(1).item
     end
   end
 

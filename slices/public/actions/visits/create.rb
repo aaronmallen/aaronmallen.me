@@ -14,8 +14,10 @@ module Public
         THROTTLED = 429
 
         include Deps[
+          "operations.find_page",
           "operations.find_visitor_address",
           record_visit: "analytics.operations.record_visit",
+          visit_contract: "analytics.contracts.visit_contract",
         ]
 
         config.formats.clear.accept :json
@@ -50,19 +52,23 @@ module Public
           response.body = Blog::Constants::EMPTY_STRING
         end
 
-        def routable?(visit) = visit.is_a?(Hash) && routable_path?(visit["path"].to_s)
+        def route_for(visit)
+          path = visit["path"].to_s if visit.is_a?(Hash)
+          return unless path && PLAIN_PATH.match?(path)
 
-        def routable_path?(path)
-          PLAIN_PATH.match?(path) && Slice.router.recognize(path).routable?
+          route = Slice.router.recognize(path)
+          route if route.routable?
         rescue URI::Error
-          false
+          nil
         end
 
         def signed_in?(request) = session_reader.call(request).signed_in?
 
         def status_for(request)
           visit = payload(request)
-          return REJECTED unless routable?(visit)
+          route = route_for(visit)
+          return REJECTED unless route
+          return uncounted(visit) unless find_page.call(route.params)
 
           case outcome(request, visit)
           in Success(_) then ACCEPTED
@@ -70,6 +76,8 @@ module Public
           else REJECTED
           end
         end
+
+        def uncounted(visit) = visit_contract.call(visit).success? ? ACCEPTED : REJECTED
       end
     end
   end
