@@ -15,6 +15,8 @@ module Posts
 
       def for_post(post_id) = where(post_id:)
 
+      def for_posts(post_ids) = where(post_id: post_ids)
+
       def oldest_first = order(self[:created_at].asc, self[:id].asc)
     end
   end

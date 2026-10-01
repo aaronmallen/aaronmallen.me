@@ -9,8 +9,9 @@ module Public
       LANGUAGE = "en"
       MEDIA_TYPE = "application/atom+xml"
       NAMESPACE = "http://www.w3.org/2005/Atom"
+      NO_EDITS = Blog::Constants::EMPTY_ARRAY
 
-      include Deps["i18n", "routes", "settings", edits_for_post: "posts.queries.edits_for_post"]
+      include Deps["i18n", "routes", "settings", edits_for_posts: "posts.queries.edits_for_posts"]
 
       def call(version, title:, html:, feed:, params: {})
         xml = Builder::XmlMarkup.new(indent: 2)
@@ -18,7 +19,8 @@ module Public
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
           feed_head(xml, version, title:, html:, params:)
           feed_links(xml, version.posts, html:, feed:, params:)
-          version.posts.rows.each { entry(xml, it, version.changed_at(it)) }
+          edits = edits_for_posts.call(version.posts.rows.map(&:id))
+          version.posts.rows.each { entry(xml, it, version.changed_at(it), edits) }
         end
       end
 
@@ -44,7 +46,7 @@ module Public
         end
       end
 
-      def entry(xml, post, changed_at)
+      def entry(xml, post, changed_at, edits)
         url = routes.url(:post, slug: post.slug).to_s
 
         xml.entry do
@@ -53,14 +55,14 @@ module Public
           xml.link(rel: "alternate", type: HTML_TYPE, href: url)
           entry_dates(xml, post, changed_at)
           post.tags.each { xml.category(term: it.name) }
-          entry_body(xml, post)
+          entry_body(xml, post, edits)
         end
       end
 
-      def entry_body(xml, post)
+      def entry_body(xml, post, edits)
         summary = post.summary
         xml.summary(summary) if summary
-        xml.content(::Posts::Markdown.to_html(post.body) + notes(post), type: "html")
+        xml.content(::Posts::Markdown.to_html(post.body) + notes(edits.fetch(post.id, NO_EDITS)), type: "html")
       end
 
       def entry_dates(xml, post, changed_at)
@@ -85,8 +87,7 @@ module Public
 
       def markdown(edit) = ::Posts::Markdown.to_html(edit.note)
 
-      def notes(post)
-        edits = edits_for_post.call(post.id)
+      def notes(edits)
         return Blog::Constants::EMPTY_STRING if edits.empty?
 
         html = Builder::XmlMarkup.new

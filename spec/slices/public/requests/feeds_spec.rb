@@ -197,6 +197,23 @@ RSpec.describe "Feeds", type: :request do
 
       expect(other.text).to eq(Posts::Markdown.to_html("the other"))
     end
+
+    it "loads the notes for the whole page in one query" do
+      edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+      2.times { |n| create(:post_edit, post: publish("other#{n}", n), note: "fixed #{n}") }
+
+      notes = counting { get "/writing.atom" }.grep(/FROM "post_edits"/).grep_v(/GROUP BY/)
+
+      expect(notes).to have(1).item
+    end
+
+    it "issues the same statements for three posts with notes as for one" do
+      edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+      one = counting { get "/writing.atom" }.size
+      2.times { |n| create(:post_edit, post: publish("other#{n}", n), note: "fixed #{n}") }
+
+      expect(counting { get "/writing.atom" }).to have(one).items
+    end
   end
 
   it "keeps the body alone as the content of a post with no notes" do
