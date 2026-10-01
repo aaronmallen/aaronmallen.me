@@ -289,6 +289,7 @@ CREATE DOMAIN public.visitor_hash AS text
 CREATE TYPE public.webmention_status AS ENUM (
     'pending',
     'approved',
+    'ignored',
     'spam'
 );
 
@@ -2587,4 +2588,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260929000049_add_visitors_to_referrer_and_country_rollups.rb'),
 ('20260929000050_create_task_comments.rb'),
 ('20260929000051_add_task_comments_to_activities.rb'),
-('20260929000052_add_paging_sort_indexes.rb');
+('20260929000052_add_paging_sort_indexes.rb'),
+('20260930000053_add_ignored_to_webmention_status.rb');

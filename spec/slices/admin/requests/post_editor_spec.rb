@@ -410,6 +410,15 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_css(".hint", text: "2 received so far")
       end
 
+      it "counts an ignored mention as received" do
+        post = create(:post)
+        create(:webmention, :approved, post: post)
+        create(:webmention, :ignored, post: post)
+        get "/admin/posts/#{post.id}/edit"
+
+        expect(page).to have_css(".hint", text: "2 received so far")
+      end
+
       it "counts one mention in the singular" do
         post = create(:post)
         create(:webmention, post: post)

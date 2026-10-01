@@ -229,6 +229,15 @@ RSpec.describe "Admin posts", type: :request do
       expect(page).to have_css(".li-side .pill.pink span[aria-hidden='true']", exact_text: "@2")
     end
 
+    it "counts an ignored mention as received" do
+      post = create(:post)
+      create(:webmention, :approved, post: post)
+      create(:webmention, :ignored, post: post)
+      get "/admin/posts"
+
+      expect(page).to have_css(".li-side .pill.pink span[aria-hidden='true']", exact_text: "@2")
+    end
+
     it "names the mention count for a screen reader" do
       post = create(:post)
       create(:webmention, post: post)

@@ -4,6 +4,7 @@ module Social
   module Operations
     class ModerateWebmention < Blog::Operation
       APPROVED = Blog::Types::WebmentionStatus["approved"]
+      IGNORED = Blog::Types::WebmentionStatus["ignored"]
 
       include Deps[webmention_repo: "repos.webmention_repo"]
 
@@ -16,7 +17,11 @@ module Social
       def found(mention) = mention ? Success(mention) : Failure(:not_found)
 
       def moderated(id, verdict)
-        verdict == APPROVED ? webmention_repo.approve(id) : webmention_repo.mark_spam(id)
+        case verdict
+        when APPROVED then webmention_repo.approve(id)
+        when IGNORED then webmention_repo.ignore(id)
+        else webmention_repo.mark_spam(id)
+        end
       end
     end
   end

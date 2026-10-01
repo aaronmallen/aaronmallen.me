@@ -519,6 +519,13 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       expect(stored.status).to eq("spam")
     end
 
+    it "leaves a mention already ignored alone when the text changed" do
+      webmention_repo.ignore(stored.id)
+      resend("Second")
+
+      expect(stored).to have_attributes(status: "ignored", excerpt: "Second")
+    end
+
     it "leaves a mention already approved alone when it says the same thing" do
       webmention_repo.approve(stored.id)
       resend("First")
@@ -596,6 +603,21 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       verify_page(entry(author: "https://ada.example/about"))
 
       expect(stored.status).to eq("pending")
+    end
+
+    it "leaves an author waiting whose only mention has been ignored" do
+      create(:webmention, :ignored, post: create(:post, :published), author_url: "https://grace.example/about")
+      stub_source(entry(author: "https://grace.example/about"), url: "https://grace.example/notes/1")
+      verify(source: "https://grace.example/notes/1")
+
+      expect(stored("https://grace.example/notes/1").status).to eq("pending")
+    end
+
+    it "still approves a known author once one of their mentions has been ignored" do
+      create(:webmention, :ignored, post: create(:post, :published), author_url: "https://ada.example/about")
+      verify_page(entry(author: "https://ada.example/about"))
+
+      expect(stored.status).to eq("approved")
     end
 
     it "leaves a known author waiting once auto-approve is off" do

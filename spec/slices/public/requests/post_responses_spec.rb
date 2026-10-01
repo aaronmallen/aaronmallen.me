@@ -68,6 +68,15 @@ RSpec.describe "Post responses", type: :request do
       expect(page).to have_no_text("Pending").and have_no_text("Spam")
     end
 
+    it "leaves out ignored replies and mentions", :aggregate_failures do
+      mention(:ignored, :reply, author_name: "Ignored reply")
+      mention(:ignored, :mention, author_name: "Ignored mention")
+      get "/writing/hello"
+
+      expect(page).to have_no_css(".post-responses")
+      expect(page).to have_no_text("Ignored reply").and have_no_text("Ignored mention")
+    end
+
     it "renders nothing when the post has no approved mentions", :aggregate_failures do
       post_record
       get "/writing/hello"
@@ -116,6 +125,15 @@ RSpec.describe "Post responses", type: :request do
       get "/writing/hello"
 
       expect(page).to have_no_css(".post-responses")
+    end
+
+    it "leaves out ignored likes and reposts" do
+      mention(:approved, :like)
+      mention(:ignored, :like)
+      mention(:ignored, :repost)
+      get "/writing/hello"
+
+      expect(page.find(".post-response-counts")).to have_text("1 like").and have_no_text("repost")
     end
   end
 

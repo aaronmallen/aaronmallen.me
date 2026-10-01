@@ -63,6 +63,7 @@ RSpec.describe "Activity", type: :request do
       mention(:approved, author: "Ada")
       mention(author: "Pending")
       mention(:spam, author: "Buy now")
+      mention(:ignored, author: "Ignored")
     end
 
     it "shows only the approved one" do
@@ -82,6 +83,12 @@ RSpec.describe "Activity", type: :request do
       expect(event_names).to be_empty
 
       visit_activity(q: "buy now")
+      expect(event_names).to be_empty
+    end
+
+    it "finds no ignored one by its text" do
+      visit_activity(q: "ignored says")
+
       expect(event_names).to be_empty
     end
   end

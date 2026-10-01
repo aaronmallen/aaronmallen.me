@@ -300,6 +300,23 @@ RSpec.describe "Admin analytics", type: :request do
       end
     end
 
+    describe "with an ignored webmention" do
+      before do
+        hello = create(:post, :published, title: "Hello")
+        create(:webmention, :approved, post: hello, received_at: Blog::TimeZone.day_start(today))
+        create(:webmention, :ignored, post: hello, received_at: Blog::TimeZone.day_start(today))
+        get "/admin/analytics"
+      end
+
+      it "counts it as received" do
+        expect(stat("Webmentions")).to have_css(".stat-value", exact_text: "2")
+      end
+
+      it "counts it against its post" do
+        expect(meter_card("Webmentions per post").all(".meter-count").map(&:text)).to eq(%w[2])
+      end
+    end
+
     describe "with more mentioned posts than the card holds" do
       before do
         11.times { |n| create(:webmention, post: create(:post, :published, title: "Post #{n}")) }

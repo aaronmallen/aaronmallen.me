@@ -130,7 +130,7 @@ module Blog
     Uuid = Types::String.constrained(format: /\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     UuidParam = Uuid.optional.fallback(nil)
     VisitorHash = Types::String.constrained(format: /\A[0-9a-f]{64}\z/)
-    WebmentionStatus = Types::String.enum("pending", "approved", "spam")
+    WebmentionStatus = Types::String.enum("pending", "approved", "ignored", "spam")
     WebmentionStatusParam = WebmentionStatus.fallback(WebmentionStatus.values.first)
     WebmentionType = Types::String.enum("reply", "like", "repost", "mention")
     Year = Types::String.constrained(format: /\A[1-9]\d{3}\z/)

@@ -18,6 +18,10 @@ Spec::DB::Factories.define(:webmention) do |f|
     t.status "spam"
   end
 
+  f.trait :ignored do |t|
+    t.status "ignored"
+  end
+
   f.trait :like do |t|
     t.type "like"
     t.excerpt nil

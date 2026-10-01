@@ -8,6 +8,7 @@ module Social
       APPROVED = Blog::Types::WebmentionStatus["approved"]
       BARE_HOST = %r{\A(https?://[^/?#]+)\z}
       COUNTED_TYPES = [Blog::Types::WebmentionType["like"], Blog::Types::WebmentionType["repost"]].freeze
+      IGNORED = Blog::Types::WebmentionStatus["ignored"]
       LISTED_TYPES = [Blog::Types::WebmentionType["reply"], Blog::Types::WebmentionType["mention"]].freeze
       PENDING = Blog::Types::WebmentionStatus["pending"]
       RESENT_FIELDS = %i[author_name author_url excerpt type].freeze
@@ -42,6 +43,8 @@ module Social
       def delete_by_source(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).delete
 
       def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
+
+      def ignore(id) = update(id, status: IGNORED)
 
       def known_author?(author_url) = webmentions.by_author_url(normalized_author_url(author_url)).known_author?
 
