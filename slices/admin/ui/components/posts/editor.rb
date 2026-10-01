@@ -64,13 +64,7 @@ module Admin
           def panes_and_sidebar
             div(class: "editor") do
               body_editor
-              SideStack do
-                Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
-                Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)
-                Seo(values: @values, errors: @errors)
-                Syndication(errors: @errors, **@syndication)
-                Webmentions(**@webmentions)
-              end
+              SideStack { sidebar }
             end
           end
 
@@ -83,6 +77,15 @@ module Admin
           end
 
           def scheduling? = @preview[:time] > @now
+
+          def sidebar
+            Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
+            EditNote(value: @values[:edit_note], errors: @errors) if published?
+            Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)
+            Seo(values: @values, errors: @errors)
+            Syndication(errors: @errors, **@syndication)
+            Webmentions(**@webmentions)
+          end
 
           def slug = ::Posts::PostSlug.derive(slug: @values[:slug], title: @values[:title])
 

@@ -373,6 +373,10 @@ en:
           confirm_webmentions:
             one: "Delete this post and the %{count} webmention it received? You can't undo it."
             other: "Delete this post and the %{count} webmentions it received? You can't undo it."
+        edit_note:
+          hint: "Needed when you change the body. Readers see it on the post."
+          label: "What changed and why"
+          placeholder: "Fixed the benchmark numbers; the first run used a debug build."
         editor:
           all_posts: "All posts"
           body: "Body"
@@ -394,6 +398,10 @@ en:
         field_error:
           canonical_url:
             format: "Enter a link that starts with http:// or https://."
+          edit_note:
+            blank: "Say what changed and why. A published post needs a note when its body changes."
+            control: "Take out the control characters."
+            long: "Keep the note to 500 characters or fewer."
           og_image_url:
             format: "Enter a link that starts with http:// or https://."
           publish_at:

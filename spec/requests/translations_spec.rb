@@ -881,7 +881,7 @@ RSpec.describe "Translations", type: :request do
   end
 
   it "renders the saved toast without a missing translation" do
-    published = create(:post, :published, slug: "hello")
+    published = create(:post, :published, slug: "hello", body: "")
     sign_in_to_admin
     post "/admin/posts/#{published.id}", _csrf_token: admin_csrf_token, intent: "save", post: { title: "Hello" }
     follow_redirect!

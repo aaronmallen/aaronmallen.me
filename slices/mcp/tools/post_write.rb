@@ -28,6 +28,10 @@ module MCP
 
       FIELD_COMPLAINTS = {
         canonical_url: { Blog::Contract::FORMAT => URL },
+        edit_note: {
+          "blank" => "is needed when the body of a published post changes: say what changed and why",
+          "long" => "runs over 500 characters",
+        },
         og_image_url: { Blog::Contract::FORMAT => URL },
         publish_at: { Blog::Contract::FORMAT => "needs a time as YYYY-MM-DDTHH:MM, in Chicago time" },
         slug: {

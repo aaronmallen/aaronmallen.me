@@ -8,6 +8,11 @@ module Admin
           SCOPE = "post"
           MESSAGES = {
             canonical_url: { "format" => ".canonical_url.format" },
+            edit_note: {
+              "blank" => ".edit_note.blank",
+              "control" => ".edit_note.control",
+              "long" => ".edit_note.long",
+            },
             og_image_url: { "format" => ".og_image_url.format" },
             publish_at: { "format" => ".publish_at.format", "skipped" => ".publish_at.skipped" },
             slug: {

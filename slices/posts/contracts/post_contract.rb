@@ -5,6 +5,7 @@ module Posts
     class PostContract < PostSeoContract
       ANNOUNCEMENT_TOO_LONG = "announcement_too_long"
       BLANK = "blank"
+      EDIT_NOTE_LIMIT = 500
       PUBLISH = Blog::Types::PostIntent["publish"]
       TOO_LONG = "too_long"
 
@@ -21,6 +22,7 @@ module Posts
         optional(:syndication_enabled).value(Blog::Types::Checkbox)
         optional(:syndication_targets).value(Blog::Types::Normalized::Networks)
         optional(:webmentions_enabled).value(Blog::Types::Checkbox)
+        optional(:edit_note).value(Blog::Types::TrimmedText, max_size?: EDIT_NOTE_LIMIT)
       end
 
       rule(:slug, :title) do
@@ -31,6 +33,7 @@ module Posts
       rule(:summary).validate(:without_controls)
       rule(:body).validate(:without_controls)
       rule(:syndication_body).validate(:without_controls)
+      rule(:edit_note).validate(:without_controls)
       rule(:tags).validate(:tag_slugs)
 
       rule(:publish_at) do

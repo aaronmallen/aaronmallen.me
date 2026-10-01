@@ -6,13 +6,16 @@ module Posts
       include Deps[
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.post_contract",
+        post_edit_repo: "repos.post_edit_repo",
         post_repo: "repos.post_repo",
         publish_post: "operations.publish_post",
       ]
 
+      BLANK = "blank"
       CARD = %i[syndication_body syndication_enabled syndication_targets webmentions_enabled].freeze
       DRAFT = Blog::Types::PostIntent["draft"]
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
+      NOTE = :edit_note
       PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
       PUBLISH = Blog::Types::PostIntent["publish"]
       SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
@@ -27,7 +30,7 @@ module Posts
       def claim(post) = claim_photos.call(PHOTO_OWNER, post.id, post.body, post.og_image_url)
 
       def create_or_update(post, attributes)
-        fields = attributes.except(:tags)
+        fields = attributes.except(:tags, NOTE)
         saved = post ? post_repo.update(post.id, fields) : post_repo.create(fields)
         post_repo.replace_tags(saved.id, attributes.fetch(:tags))
         claim(saved)
@@ -39,6 +42,8 @@ module Posts
         Success([:drafted, create_or_update(post, attributes.merge(status: Blog::Types::PostStatus["draft"]))])
       end
 
+      def edited?(post, attributes) = lines(post.body) != lines(attributes[:body])
+
       def find(id)
         return Success(nil) unless id
 
@@ -47,12 +52,14 @@ module Posts
       end
 
       def form(params)
-        given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD))
+        given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD, NOTE))
 
         given.merge(slug: PostSlug.derive(slug: given[:slug], title: given[:title]))
       end
 
       def invalid(field, code) = Failure([:invalid, { field => [code] }])
+
+      def lines(text) = text.encode(universal_newline: true)
 
       def persist(id, attributes, intent, now)
         transaction { save(step(find(id)), attributes, intent, now) }
@@ -81,7 +88,12 @@ module Posts
       end
 
       def update_published(post, attributes)
+        edited = edited?(post, attributes)
+        note = attributes[NOTE].to_s
+        return invalid(NOTE, BLANK) if edited && note.empty?
+
         saved = create_or_update(post, attributes.except(:published_at))
+        post_edit_repo.create(post_id: saved.id, note:) if edited
         post_repo.after_commit { Social::Jobs::SendWebmentions.once_saved(saved.id) }
 
         Success([:saved, saved])

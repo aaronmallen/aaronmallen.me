@@ -16,6 +16,10 @@ RSpec.describe "MCP post tools", type: :request do
     Capybara.string(last_response.body).find(".field-error").text
   end
 
+  def admin_save_published(post, **fields)
+    admin_save("/admin/posts/#{post.id}", intent: "save", title: post.title, slug: post.slug, body: post.body, **fields)
+  end
+
   def announced = { syndication_body: "In my own words", syndication_enabled: true, syndication_targets: %w[mastodon] }
 
   def call_tool(name, **arguments)
@@ -219,11 +223,35 @@ RSpec.describe "MCP post tools", type: :request do
       expect(Blog::TimeZone.input_value(stored(scheduled.id).published_at)).to eq(future(5))
     end
 
-    it "edits a published post and keeps it published" do
+    it "edits a published post with an edit note and keeps it published", :aggregate_failures do
       published = create(:post, :published)
-      call_tool("update_post", id: published.id, body: "fixed")
+      call_tool("update_post", id: published.id, body: "fixed", edit_note: "fixed the numbers")
 
       expect(stored(published.id)).to have_attributes(body: "fixed", status: "published")
+      expect(Posts::Slice["repos.post_edit_repo"].for_post(published.id).map(&:note)).to eq(["fixed the numbers"])
+    end
+
+    it "refuses a body change on a published post without an edit note, as the admin does", :aggregate_failures do
+      published = create(:post, :published, title: "Hello", slug: "hello", body: "one")
+      call_tool("update_post", id: published.id, body: "two")
+
+      expect(message).to eq("edit_note is needed when the body of a published post changes: say what changed and why")
+      expect(stored(published.id).body).to eq("one")
+      expect(admin_save_published(published, body: "two")).to eq(admin_error(:edit_note, "blank"))
+    end
+
+    it "refuses an edit note over 500 characters" do
+      published = create(:post, :published)
+      call_tool("update_post", id: published.id, body: "fixed", edit_note: "a" * 501)
+
+      expect(message).to eq("edit_note runs over 500 characters")
+    end
+
+    it "changes the tags of a published post with no edit note" do
+      published = create(:post, :published)
+      call_tool("update_post", id: published.id, tags: %w[ruby])
+
+      expect(stored(published.id).tags.map(&:name)).to eq(%w[ruby])
     end
 
     it "keeps a published post's time" do
@@ -238,8 +266,7 @@ RSpec.describe "MCP post tools", type: :request do
       call_tool("update_post", id: published.id, slug: "goodbye")
 
       expect(message).to eq("slug cannot change once the post is published")
-      expect(admin_save("/admin/posts/#{published.id}", intent: "save", title: "Hello", slug: "goodbye"))
-        .to eq(admin_error(:slug, "locked"))
+      expect(admin_save_published(published, slug: "goodbye")).to eq(admin_error(:slug, "locked"))
     end
 
     it "leaves the post as it stands when it refuses" do

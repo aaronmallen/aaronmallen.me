@@ -16,6 +16,10 @@ RSpec.describe "Admin post editor", type: :request do
 
   def field_error = page.find(".field-error").text
 
+  def note_box = "[data-markdown-editor] textarea[name='post[edit_note]']"
+
+  def post_edit_repo = Posts::Slice["repos.post_edit_repo"]
+
   def save(path = "/admin/posts", intent: "draft", **fields)
     post path, _csrf_token: admin_csrf_token, intent:, post: fields
   end
@@ -32,6 +36,10 @@ RSpec.describe "Admin post editor", type: :request do
 
       it "titles the page New post" do
         expect(page).to have_title("New post | Admin | #{Blog::Owner.full_name}")
+      end
+
+      it "shows no edit note box" do
+        expect(page).to have_no_css(note_box)
       end
 
       it "links back to the posts list" do
@@ -193,6 +201,10 @@ RSpec.describe "Admin post editor", type: :request do
       it "says publishing will schedule it" do
         expect(page).to have_css(".hint:not([hidden])", text: i18n.t("ui.components.posts.publishing.hint_later"))
       end
+
+      it "shows no edit note box" do
+        expect(page).to have_no_css(note_box)
+      end
     end
 
     describe "editing a published post" do
@@ -219,6 +231,12 @@ RSpec.describe "Admin post editor", type: :request do
       it "shows no publishing hint" do
         expect(page).to have_no_css(".hint[data-editor-now], .hint[data-editor-later]", visible: :all)
       end
+
+      it "asks what changed and why in the shared Markdown editor", :aggregate_failures do
+        expect(page).to have_css(".card-label", exact_text: "What changed and why")
+        expect(page).to have_css(".card #{note_box}#post-edit_note")
+        expect(page).to have_field("What changed and why", with: "")
+      end
     end
 
     describe "editing a post" do
@@ -227,6 +245,13 @@ RSpec.describe "Admin post editor", type: :request do
         get "/admin/posts/#{post.id}/edit"
 
         expect(page).to have_css(".page-head-sub", exact_text: "/writing/hello · 700 words · ~3 min read")
+      end
+
+      it "shows no edit note box on a draft" do
+        post = create(:post, :draft)
+        get "/admin/posts/#{post.id}/edit"
+
+        expect(page).to have_no_css(note_box)
       end
 
       it "uses the slugified title as the slug placeholder" do
@@ -323,6 +348,13 @@ RSpec.describe "Admin post editor", type: :request do
 
         expect(last_request.path).to eq("/admin/posts")
         expect(toast).to eq("Post deleted")
+      end
+
+      it "takes the post's edit notes with it" do
+        create(:post_edit, post: article)
+        remove
+
+        expect(post_edit_repo.for_post(article.id)).to be_empty
       end
 
       it "takes the post's webmentions with it" do
@@ -450,7 +482,8 @@ RSpec.describe "Admin post editor", type: :request do
 
       it "turns the flag off on a published post" do
         post = create(:post, :published, slug: "hello", webmentions_enabled: true)
-        save("/admin/posts/#{post.id}", intent: "save", title: "Hello", slug: "hello", webmentions_enabled: "0")
+        save("/admin/posts/#{post.id}", intent: "save", title: "Hello", slug: "hello", body: post.body,
+                                        webmentions_enabled: "0")
 
         expect(post_repo.by_id(post.id)).to have_attributes(status: "published", webmentions_enabled: false)
       end
@@ -710,6 +743,23 @@ RSpec.describe "Admin post editor", type: :request do
         expect(post_repo.all.last).to have_attributes(status: "draft", published_at: Time.utc(2030, 9, 7, 15, 30))
       end
 
+      it "changes the body of a draft with no note", :aggregate_failures do
+        draft = create(:post, :draft, slug: "hello", body: "one")
+        save("/admin/posts/#{draft.id}", title: "Hello", slug: "hello", body: "two")
+
+        expect(post_repo.by_id(draft.id).body).to eq("two")
+        expect(post_edit_repo.for_post(draft.id)).to be_empty
+      end
+
+      it "changes the body of a scheduled post with no note", :aggregate_failures do
+        scheduled = create(:post, :scheduled, slug: "hello", body: "one")
+        publish_at = Blog::TimeZone.input_value(scheduled.published_at)
+        save("/admin/posts/#{scheduled.id}", intent: "publish", title: "Hello", slug: "hello", body: "two", publish_at:)
+
+        expect(post_repo.by_id(scheduled.id)).to have_attributes(status: "scheduled", body: "two")
+        expect(post_edit_repo.for_post(scheduled.id)).to be_empty
+      end
+
       it "turns a scheduled post back into a draft" do
         scheduled = create(:post, :scheduled, slug: "hello")
         save("/admin/posts/#{scheduled.id}", title: "Hello", slug: "hello")
@@ -772,27 +822,102 @@ RSpec.describe "Admin post editor", type: :request do
     end
 
     describe "saving a published post" do
-      let(:published) { create(:post, :published, title: "Hello", slug: "hello", published_at: Time.utc(2026, 9, 1)) }
+      let(:published) do
+        create(:post, :published, title: "Hello", slug: "hello", body: "one", published_at: Time.utc(2026, 9, 1))
+      end
+
+      def note_error(code) = i18n.t(code, scope: "ui.components.posts.field_error.edit_note")
+
+      def save_published(**fields)
+        save("/admin/posts/#{published.id}", intent: "save", title: "Hello", slug: "hello", body: "one", **fields)
+      end
 
       it "saves it and keeps it published at its time" do
-        save("/admin/posts/#{published.id}", intent: "save", title: "Changed", slug: "hello", publish_at: "")
+        save_published(title: "Changed", publish_at: "")
 
         expect(post_repo.by_id(published.id))
           .to have_attributes(title: "Changed", status: "published", published_at: Time.utc(2026, 9, 1))
       end
 
       it "shows the saved toast" do
-        save("/admin/posts/#{published.id}", intent: "save", title: "Changed", slug: "hello")
+        save_published(title: "Changed")
         follow_redirect!
 
         expect(toast).to eq("Saved")
       end
 
       it "rejects a slug change and changes nothing", :aggregate_failures do
-        save("/admin/posts/#{published.id}", intent: "save", title: "Changed", slug: "goodbye")
+        save_published(title: "Changed", slug: "goodbye")
 
         expect(field_error).to eq(i18n.t("ui.components.posts.field_error.slug.locked"))
         expect(post_repo.by_id(published.id)).to have_attributes(title: "Hello", slug: "hello")
+      end
+
+      it "refuses a body change with no note and changes nothing", :aggregate_failures do
+        save_published(body: "two", edit_note: "  ")
+
+        expect([last_response.status, field_error]).to eq([422, note_error("blank")])
+        expect(post_repo.by_id(published.id).body).to eq("one")
+        expect(post_edit_repo.for_post(published.id)).to be_empty
+      end
+
+      it "shows the note error under the note box" do
+        save_published(body: "two")
+
+        expect(page).to have_css("#post-edit_note[aria-invalid='true'][aria-describedby='post-edit_note-error']")
+      end
+
+      it "saves a body change with its note", :aggregate_failures do
+        save_published(body: "two", edit_note: "fixed the `numbers`")
+
+        expect(post_repo.by_id(published.id)).to have_attributes(body: "two", status: "published")
+        expect(post_edit_repo.for_post(published.id).map(&:note)).to eq(["fixed the `numbers`"])
+      end
+
+      it "saves a change to the tags and social card with no note", :aggregate_failures do
+        save_published(tags: "ruby", **card)
+
+        expect(post_repo.by_id(published.id)).to have_attributes(**card)
+        expect(post_repo.by_id(published.id).tags.map(&:name)).to eq(%w[ruby])
+        expect(post_edit_repo.for_post(published.id)).to be_empty
+      end
+
+      it "keeps no note when the body stays the same" do
+        save_published(title: "Changed", edit_note: "Nothing to say")
+
+        expect(post_edit_repo.for_post(published.id)).to be_empty
+      end
+
+      it "reads a body sent back with Windows line endings as the same body" do
+        published = create(:post, :published, slug: "lines", body: "one\ntwo")
+        save("/admin/posts/#{published.id}", intent: "save", title: "Lines", slug: "lines", body: "one\r\ntwo")
+
+        expect(last_response).to be_redirect
+      end
+
+      it "refuses a note over 500 characters", :aggregate_failures do
+        save_published(body: "two", edit_note: "a" * 501)
+
+        expect(field_error).to eq(note_error("long"))
+        expect(post_repo.by_id(published.id).body).to eq("one")
+      end
+
+      it "takes a note of 500 characters" do
+        save_published(body: "two", edit_note: "a" * 500)
+
+        expect(post_edit_repo.for_post(published.id).map { it.note.size }).to eq([500])
+      end
+
+      it "refuses a note with a control character" do
+        save_published(body: "two", edit_note: "a\u0007b")
+
+        expect(field_error).to eq(note_error("control"))
+      end
+
+      it "keeps the note as typed after a failed save" do
+        save_published(title: "  ", body: "two", edit_note: "Fixed a typo")
+
+        expect(page).to have_field("What changed and why", with: "Fixed a typo")
       end
     end
 

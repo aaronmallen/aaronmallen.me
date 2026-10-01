@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77"]
+amended: [AA-816, "#17", "#77", "#143"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -36,6 +36,10 @@ start month in the future. A Postgres domain may hold the same rule as a floor u
 
 A rule over what is stored lives in Postgres, as a unique index, a `CHECK`, a trigger, a foreign key or a
 singleton row. Nothing in Ruby checks it first.
+
+One rule breaks this, as [ADR 0084][0084] records and #143 built. `Posts::Operations::SavePost` asks for an edit
+note when the body of a published post changes. It checks in Ruby, after it locks the post's row, so the race above
+cannot reach it, but the rule binds only callers that go through `SavePost`.
 
 When a user can break such a rule from a form, the operation turns the refusal into a field error. It rescues
 `ROM::SQL::UniqueConstraintError`, `CheckConstraintError` or `ForeignKeyConstraintError`, asks
@@ -95,4 +99,5 @@ nothing maps that error, so the request answers 500.
 
 A reader cannot learn every rule from the contract. The ones over stored state are in `config/db/structure.sql`.
 
+[0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

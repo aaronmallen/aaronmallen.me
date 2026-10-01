@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildPostEditor
-      FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
+      FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url edit_note].freeze
       SEO = %i[og_title og_image_url canonical_url].freeze
       TAG_SEPARATOR = ", "
 
@@ -108,6 +108,7 @@ module Admin
           body: post.body,
           publish_at: publish_at(post),
           **seo_from_post(post),
+          edit_note: Blog::Constants::EMPTY_STRING,
         }
       end
 
