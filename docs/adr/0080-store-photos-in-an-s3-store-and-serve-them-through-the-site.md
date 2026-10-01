@@ -3,8 +3,9 @@ id: "0080"
 title: Store photos in an S3 store and serve them through the site
 status: active
 created: 2026-09-30
-area: [config, public]
+area: [config, media, public]
 issue: "#132"
+amended: ["#137"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 

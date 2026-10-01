@@ -3,8 +3,9 @@ id: "0081"
 title: Process every upload with libvips on the server
 status: active
 created: 2026-09-30
-area: [admin]
+area: [admin, media]
 issue: "#133"
+amended: ["#137"]
 tags: [media, photos, uploads, libvips, libheif, heic, metadata, privacy, gps]
 ---
 

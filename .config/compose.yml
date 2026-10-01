@@ -1,6 +1,9 @@
 x-database-password: &database-password "${DATABASE_PASSWORD:?run mise run setup:environment}"
 x-database-port: &database-port ${DATABASE_PORT:-5432}
 x-database-user: &database-user ${DATABASE_USER:-postgres}
+x-media-store-access-key: &media-store-access-key "${MEDIA_STORE_ACCESS_KEY:?run mise run setup:environment}"
+x-media-store-port: &media-store-port ${MEDIA_STORE_PORT:-9000}
+x-media-store-secret-key: &media-store-secret-key "${MEDIA_STORE_SECRET_KEY:?run mise run setup:environment}"
 x-redis-password: &redis-password "${REDIS_PASSWORD:?run mise run setup:environment}"
 x-redis-port: &redis-port ${REDIS_PORT:-6379}
 x-redis-user: &redis-user ${REDIS_USER:-redis}
@@ -28,6 +31,45 @@ services:
         protocol: tcp
     volumes:
       - postgres-data:/var/lib/postgresql
+
+  media-store:
+    container_name: aaronmallen.me-media-store
+    environment:
+      RUSTFS_ACCESS_KEY: *media-store-access-key
+      RUSTFS_SECRET_KEY: *media-store-secret-key
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    image: rustfs/rustfs:1.0.0
+    ports:
+      - host_ip: 127.0.0.1
+        mode: host
+        target: 9000
+        published: *media-store-port
+        protocol: tcp
+    volumes:
+      - media-store-data:/data
+
+  media-store-bucket:
+    command:
+      - sh
+      - -c
+      - >-
+        status=$$(curl -sS -o /dev/null -w "%{http_code}" -X PUT --aws-sigv4 aws:amz:us-east-1:s3 --user "$$RUSTFS_ACCESS_KEY:$$RUSTFS_SECRET_KEY" http://media-store:9000/blog-development) && case "$$status" in 200|409) ;; *) echo "creating the bucket answered $$status" >&2; exit 1 ;; esac
+    container_name: aaronmallen.me-media-store-bucket
+    depends_on:
+      media-store:
+        condition: service_healthy
+    entrypoint: []
+    environment:
+      RUSTFS_ACCESS_KEY: *media-store-access-key
+      RUSTFS_SECRET_KEY: *media-store-secret-key
+    image: rustfs/rustfs:1.0.0
+    profiles:
+      - setup
 
   redis:
     command:
@@ -60,6 +102,8 @@ services:
       - redis-data:/data
 
 volumes:
+  media-store-data:
+    name: aaronmallen.me-media-store-data
   postgres-data:
     name: aaronmallen.me-postgres-data
   redis-data:

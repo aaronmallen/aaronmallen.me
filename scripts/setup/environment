@@ -43,5 +43,7 @@ ensure_secret "APP_SECRET" 64
 ensure_var "COMPOSE_FILE" "./.config/compose.yml"
 ensure_secret "DATABASE_PASSWORD"
 ensure_var "DATABASE_USER" "postgres"
+ensure_var "MEDIA_STORE_ACCESS_KEY" "blog"
+ensure_secret "MEDIA_STORE_SECRET_KEY"
 ensure_secret "REDIS_PASSWORD"
 ensure_var "REDIS_USER" "redis"

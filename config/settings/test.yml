@@ -27,6 +27,11 @@ mastodon:
 maxmind:
   account_id: null
   license_key: null
+media_store:
+  access_key: null
+  bucket: null
+  endpoint: null
+  secret_key: null
 redis:
   db: 2
   host: localhost

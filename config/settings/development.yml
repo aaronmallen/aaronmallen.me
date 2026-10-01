@@ -7,6 +7,12 @@ database:
   password: <%= ENV["DATABASE_PASSWORD"].to_json %>
   port: <%= ENV.fetch("DATABASE_PORT", 5432).to_json %>
   user: <%= ENV["DATABASE_USER"].to_json %>
+media_store:
+  access_key: <%= ENV["MEDIA_STORE_ACCESS_KEY"].to_json %>
+  bucket: blog-development
+  endpoint: <%= "http://localhost:#{ENV.fetch("MEDIA_STORE_PORT", 9000)}".to_json %>
+  path_style: true
+  secret_key: <%= ENV["MEDIA_STORE_SECRET_KEY"].to_json %>
 redis:
   db: 1
   host: localhost

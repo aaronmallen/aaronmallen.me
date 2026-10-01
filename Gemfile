@@ -21,6 +21,7 @@ source "https://gem.coop/@hanami" do
   gem "hanami-router", "~> 3"
 end
 
+gem "aws-sdk-s3", "~> 1"
 gem "builder", "~> 3"
 gem "commonmarker", "~> 2"
 gem "faraday", "~> 2"

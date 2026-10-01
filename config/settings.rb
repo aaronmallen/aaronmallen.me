@@ -7,6 +7,7 @@ module Blog
     DEFAULT_ANALYTICS_THROTTLE_LIMIT = 120
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
+    DEFAULT_MEDIA_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
@@ -86,6 +87,15 @@ module Blog
     setting :mastodon, default: {}, constructor: Schema.schema(access_token?: Value, profile_url?: Value, url?: Value)
 
     setting :maxmind, default: {}, constructor: Schema.schema(account_id?: Value, license_key?: Value)
+
+    setting :media_store, default: {}, constructor: Schema.schema(
+      access_key?: Value,
+      bucket?: Value,
+      endpoint?: Value,
+      path_style?: unless_set(Types::Params::Bool, false),
+      region?: unless_set(Types::String, DEFAULT_MEDIA_STORE_REGION),
+      secret_key?: Value,
+    )
 
     setting :owner, default: {}, constructor: Schema.schema(
       github_id: Types::Coercible::Integer.constrained(gt: 0),

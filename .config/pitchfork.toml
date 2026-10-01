@@ -3,6 +3,12 @@ auto = ["start", "stop"]
 mise = true
 run = "mise run dev:assets"
 
+[daemons.media-store]
+auto = ["start"]
+mise = true
+oneshot = true
+run = "scripts/util/compose run --rm media-store-bucket"
+
 [daemons.postgres]
 auto = ["start"]
 mise = true
@@ -17,7 +23,7 @@ run = "scripts/util/compose up --detach --wait redis"
 
 [daemons.server]
 auto = ["start", "stop"]
-depends = ["assets", "postgres", "redis", "tailwind"]
+depends = ["assets", "media-store", "postgres", "redis", "tailwind"]
 mise = true
 run = "mise run dev:server"
 
@@ -28,6 +34,6 @@ run = "mise run dev:tailwind"
 
 [daemons.worker]
 auto = ["start", "stop"]
-depends = ["postgres", "redis"]
+depends = ["media-store", "postgres", "redis"]
 mise = true
 run = "mise run dev:worker"
