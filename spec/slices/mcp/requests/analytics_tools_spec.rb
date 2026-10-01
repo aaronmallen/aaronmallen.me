@@ -136,6 +136,39 @@ RSpec.describe "MCP analytics tools", type: :request do
       expect(read.fetch("days").last).to eq("day" => today.iso8601, "views" => 1, "visitors" => 1)
     end
 
+    describe "earlier days not rolled up yet" do
+      def noon(day) = Blog::TimeZone.day_start(day) + (12 * 3_600)
+
+      before do
+        roll_up(today - 3, views: 4, visitors: 2)
+        create(:analytics_event, path: "/writing/rolled", occurred_at: noon(today - 3))
+        create(:analytics_event, path: "/writing/early", referrer_host: "old.example", occurred_at: noon(today - 2))
+        2.times { create(:analytics_event, path: "/writing/late", country_code: "DE", occurred_at: noon(today - 1)) }
+      end
+
+      it "counts every unrolled day in the totals" do
+        expect(read.fetch("totals")).to eq("views" => 7, "visitors" => 5, "read_seconds" => 166)
+      end
+
+      it "puts each unrolled day's visits on that day" do
+        expect(read.fetch("days").last(3).map { it.values_at("views", "visitors") }).to eq([[1, 1], [2, 2], [0, 0]])
+      end
+
+      it "reads a rolled up day from its rollup" do
+        expect(read.fetch("days")[-4]).to eq("day" => (today - 3).iso8601, "views" => 4, "visitors" => 2)
+      end
+
+      it "ranks the paths of every unrolled day and none of a rolled up day's events" do
+        expect(read.fetch("paths").map { it.fetch("path") }).to eq(%w[/writing/late /writing/early])
+      end
+
+      it "gives the referrers and countries of every unrolled day", :aggregate_failures do
+        expect(read.fetch("referrers").map { it.values_at("host", "views") })
+          .to eq([["news.example", 2], ["old.example", 1]])
+        expect(read.fetch("countries").map { it.values_at("country_code", "views") }).to eq([["DE", 2], ["US", 1]])
+      end
+    end
+
     it "sends no more than the top #{MCP::Tools::ReadAnalytics::TOP} paths" do
       day = roll_up(today - 1, views: 100, visitors: 50).day
       (MCP::Tools::ReadAnalytics::TOP + 1).times do

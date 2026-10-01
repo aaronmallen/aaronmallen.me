@@ -17,9 +17,9 @@ module Admin
     import keys: %w[queries.activity_between queries.activity_counts queries.activity_day_count], from: :activity
 
     import keys: %w[
-      queries.country_counts queries.country_database_failure queries.referrer_counts queries.rollup_for_day
-      queries.rollups_between queries.summary_for_day queries.top_paths queries.view_totals queries.views_by_path
-      queries.views_by_post queries.visitors_for_day
+      queries.country_counts queries.country_database_failure queries.referrer_counts queries.rollups_between
+      queries.top_paths queries.unrolled_summaries queries.view_totals queries.views_by_path queries.views_by_post
+      queries.visitors_for_day
     ], from: :analytics
 
     import keys: %w[operations.mint_token operations.revoke_token queries.live_tokens], from: :api

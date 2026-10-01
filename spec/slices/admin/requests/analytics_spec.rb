@@ -147,6 +147,39 @@ RSpec.describe "Admin analytics", type: :request do
       end
     end
 
+    describe "with earlier days not rolled up yet" do
+      def noon(day) = Blog::TimeZone.day_start(day) + (12 * 3_600)
+
+      before do
+        create(:analytics_rollup, day: today - 3, views: 4, visitors: 2, read_seconds: 40)
+        create(:analytics_event, path: "/writing/rolled", occurred_at: noon(today - 3))
+        create(:analytics_event, path: "/writing/hello", title: "Hello", read_seconds: 60, occurred_at: noon(today - 2))
+        2.times { create(:analytics_event, path: "/writing/late", occurred_at: noon(today - 1)) }
+        get "/admin/analytics"
+      end
+
+      it "counts every unrolled day's raw events in the totals" do
+        expect(stat("Page views")).to have_css(".stat-value", exact_text: "7")
+      end
+
+      it "counts each unrolled day's raw events on its own day in the chart" do
+        expect(tips.last(3).map { it.split(" · ", 2).last })
+          .to eq(["1 view · 1 visitor", "2 views · 2 visitors", "0 views · 0 visitors"])
+      end
+
+      it "reads a rolled up day from its rollup" do
+        expect(tips[-4]).to eq("#{(today - 3).strftime('%b %-d')} · 4 views · 2 visitors")
+      end
+
+      it "lists an unrolled day's paths in the top pages" do
+        expect(page).to have_css(".tbl-title", text: "Hello")
+      end
+
+      it "leaves out the raw events of a rolled up day" do
+        expect(page).to have_no_css(".tbl-path", text: "/writing/rolled")
+      end
+    end
+
     describe "with paths, referrers and countries" do
       before do
         create(:analytics_rollup, day: today, views: 12, visitors: 8, read_seconds: 600)

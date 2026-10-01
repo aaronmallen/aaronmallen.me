@@ -13,10 +13,10 @@ module Analytics
       TOTALS = %i[views visitors read_seconds].freeze
       ZERO_DAY = { views: 0, visitors: 0 }.freeze
 
-      include Deps[event_repo: "repos.analytics_event_repo", rollup_repo: "repos.analytics_rollup_repo"]
+      include Deps[rollup_repo: "repos.analytics_rollup_repo", unrolled_summaries: "queries.unrolled_summaries"]
 
       def call(from:, to:)
-        live = unrolled(from, to)
+        live = unrolled_summaries.call(from:, to:)
 
         {
           countries: ranked(:countries, rollup_repo.countries(from:, to:), live),
@@ -38,7 +38,7 @@ module Analytics
 
       def days(from, to, live)
         found = rollup_repo.days(from:, to:).to_h { [it.day, { views: it.views, visitors: it.visitors }] }
-        found[live.day] = live.totals.to_h.slice(*ZERO_DAY.keys) if live
+        live.each { found[it.day] = it.totals.to_h.slice(*ZERO_DAY.keys) }
 
         (from..to).map { { day: it, **found.fetch(it, ZERO_DAY) } }
       end
@@ -46,7 +46,7 @@ module Analytics
       def ranked(name, rolled, live)
         key = KEYS.fetch(name)
         rank = RANKS.fetch(name)
-        so_far = live ? live.public_send(name) : Blog::Constants::EMPTY_ARRAY
+        so_far = live.flat_map { it.public_send(name) }
 
         combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
       end
@@ -57,16 +57,8 @@ module Analytics
 
       def totals(from, to, live)
         found = rollup_repo.totals(from:, to:).to_h
-        return found unless live
 
-        TOTALS.to_h { [it, found.fetch(it) + live.totals.public_send(it)] }
-      end
-
-      def unrolled(from, to)
-        today = Blog::TimeZone.today
-        return unless (from..to).cover?(today) && rollup_repo.by_day(today).nil?
-
-        event_repo.summary_for(today)
+        TOTALS.to_h { |key| [key, live.sum(found.fetch(key)) { it.totals.public_send(key) }] }
       end
     end
   end

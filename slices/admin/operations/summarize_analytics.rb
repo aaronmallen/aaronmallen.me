@@ -19,10 +19,9 @@ module Admin
         pending_webmention_count: "social.queries.pending_webmention_count",
         posts_by_ids: "posts.queries.by_ids",
         referrer_counts: "analytics.queries.referrer_counts",
-        rollup_for_day: "analytics.queries.rollup_for_day",
         rollups_between: "analytics.queries.rollups_between",
-        summary_for_day: "analytics.queries.summary_for_day",
         top_paths: "analytics.queries.top_paths",
+        unrolled_summaries: "analytics.queries.unrolled_summaries",
         view_totals: "analytics.queries.view_totals",
         webmentions_received_between: "social.queries.webmentions_received_between",
         webmentions_received_by_post: "social.queries.webmentions_received_by_post",
@@ -53,28 +52,28 @@ module Admin
       end
 
       def period(from, to)
-        today = unrolled(to)
+        live = unrolled_summaries.call(from:, to:)
 
         {
-          countries: ranked(:countries, country_counts.call(from:, to:), today).take(TOP_ROWS),
-          paths: ranked(:paths, top_paths.call(from:, to:), today).take(TOP_ROWS),
-          referrers: ranked(:referrers, referrer_counts.call(from:, to:), today).take(TOP_ROWS),
-          series: series(from, to, today),
-          totals: totals(from, to, today),
+          countries: ranked(:countries, country_counts.call(from:, to:), live).take(TOP_ROWS),
+          paths: ranked(:paths, top_paths.call(from:, to:), live).take(TOP_ROWS),
+          referrers: ranked(:referrers, referrer_counts.call(from:, to:), live).take(TOP_ROWS),
+          series: series(from, to, live),
+          totals: totals(from, to, live),
         }
       end
 
-      def ranked(name, rolled, today)
+      def ranked(name, rolled, live)
         key = KEYS.fetch(name)
         rank = RANKS.fetch(name)
-        so_far = today ? today.public_send(name) : Blog::Constants::EMPTY_ARRAY
+        so_far = live.flat_map { it.public_send(name) }
 
         combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
       end
 
-      def series(from, to, today)
+      def series(from, to, live)
         found = rollups_between.call(from:, to:).to_h { [it.day, { views: it.views, visitors: it.visitors }] }
-        found[to] = today.totals.to_h.slice(*ZERO_DAY.keys) if today
+        live.each { found[it.day] = it.totals.to_h.slice(*ZERO_DAY.keys) }
 
         (from..to).map { { day: it, **found.fetch(it, ZERO_DAY) } }
       end
@@ -94,16 +93,13 @@ module Admin
 
       def sum(held, found) = held && found ? held + found : held || found
 
-      def totals(from, to, today)
+      def totals(from, to, live)
         found = view_totals.call(from:, to:).to_h
-        return found unless today
 
-        TOTALS.to_h { [it, found.fetch(it) + today.totals.public_send(it)] }
+        TOTALS.to_h { |key| [key, live.sum(found.fetch(key)) { it.totals.public_send(key) }] }
       end
 
       def totals_of(held, row, fields) = fields.to_h { [it, sum(held[it], row[it])] }
-
-      def unrolled(day) = rollup_for_day.call(day) ? nil : summary_for_day.call(day)
 
       def webmentions(from, to)
         {
