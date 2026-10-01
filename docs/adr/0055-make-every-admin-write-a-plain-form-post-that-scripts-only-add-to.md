@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135"]
+amended: ["#37", "#41", "#80", "#135", "#148"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -23,8 +23,8 @@ sends the values with `fetch` and patches the page with the reply.
 ## Decision
 
 Every admin write is an HTML form that posts to the server, and the server answers with a page. Scripts add to a
-form. They never replace its submit, except in the task modal, where #41 lets a script send the same form, and
-in photo uploads, which #135 sends through `fetch` alone.
+form. They never replace its submit, except in the task modal, where #41 lets a script send the same form, in
+photo uploads, which #135 sends through `fetch` alone, and in task order, which #148 saves through `fetch` alone.
 
 - **Routes.** Every create, update and delete in `slices/admin/config/routes.rb` is a `post`, and an update or a
   delete names itself in the path, such as `post "/posts/:id/delete"`. `Blog::UI::Components::Form` takes only
@@ -46,7 +46,9 @@ in photo uploads, which #135 sends through `fetch` alone.
   write: the task modal sends its edit form through `fetch` so a failed save stays in the modal. The form still
   posts in full with scripts off, and ADR 0071 records the cost. #135 added a second write: the Markdown editor
   uploads a photo through `fetch` and inserts the URL it gets back. It has no form to fall back on, so uploads
-  need scripts, as [ADR 0083][0083] records.
+  need scripts, as [ADR 0083][0083] records. #148 added a third: a task dragged to a new place, or moved with
+  Alt+Up and Alt+Down, saves its order through `fetch`. The carets that posted a form are gone from task rows, so
+  task order needs scripts, as [ADR 0085][0085] records.
 
 We leave `config.actions.method_override` at Hanami's default, on. No form sends `_method`.
 
@@ -67,11 +69,12 @@ reason written down.
 Each write works the same way, and the request specs drive the forms with rack-test, which runs no script. A
 failed write keeps what the operator typed, since the server renders it back.
 
-Every write reloads the page. The previews, the task dialogs and photo uploads are the only places that pay for a
-script to avoid a reload. Two of them write: the task modal, so a failed save can keep it open (#41), and the photo
-upload, so the photo lands at the cursor (#135).
+Every write reloads the page. The previews, the task dialogs, photo uploads and task order are the only places that
+pay for a script to avoid a reload. Three of them write: the task modal, so a failed save can keep it open (#41),
+the photo upload, so the photo lands at the cursor (#135), and task order, so a task moves any number of places in
+one drop (#148).
 
-Five places break the rule today, and each fails with scripts off:
+Six places break the rule today, and each fails with scripts off:
 
 - A journal entry's Edit and Delete in `Admin::UI::Components::Journal::Entry` are `Button`s, which default to
   `type: "button"`, and only `journal.js` makes them act. Without it the entry cannot be edited or deleted.
@@ -83,9 +86,12 @@ Five places break the rule today, and each fails with scripts off:
   palette holds that cost.
 - The Markdown editor takes a photo only through a script (#135), so with scripts off it takes none. ADR 0083
   holds that cost.
+- Task rows change order only through a script (#148), so with scripts off the admin cannot reorder tasks.
+  ADR 0085 holds that cost.
 
 Method override costs a middleware on every request and gives nothing, since no form fakes a verb.
 
 [0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
 [0083]: 0083-upload-photos-by-fetch-from-the-markdown-editor.md
+[0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
