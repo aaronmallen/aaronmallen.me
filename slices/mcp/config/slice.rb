@@ -36,13 +36,13 @@ module MCP
       queries.activity_counts_by_month
     ], from: :activity
 
-    import keys: %w[operations.hash_visitor queries.summary_between], from: :analytics
+    import keys: %w[operations.hash_visitor queries.page_between queries.summary_between], from: :analytics
 
     import keys: %w[operations.mark_message queries.by_id queries.received_between], from: :contact
 
     import keys: %w[
       operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id
-      queries.dated_between
+      queries.dated_between queries.published_by_slug
     ], from: :posts
 
     import keys: %w[

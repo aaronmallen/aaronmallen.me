@@ -13,6 +13,8 @@ module Analytics
 
       def newest_day = analytics_rollups.newest_day
 
+      def page_days(path:, from:, to:) = analytics_rollup_paths.between(from, to).for_path(path).to_a
+
       def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_visitors.to_a
 
       def store(summary)

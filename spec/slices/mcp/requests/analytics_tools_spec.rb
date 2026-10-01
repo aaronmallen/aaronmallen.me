@@ -187,4 +187,86 @@ RSpec.describe "MCP analytics tools", type: :request do
       expect(mcp_text("read_analytics", from: today.iso8601, to: (today - 1).iso8601)).to eq("from comes after to")
     end
   end
+
+  describe "read_analytics with a path" do
+    def late_evening(day) = Blog::TimeZone.day_start(day) + (23 * 3_600) + 1_800
+
+    def page_day(views) = { "views" => views, "visitors" => [views - 1, 0].max, "read_seconds" => views * 10 }
+
+    def read_page(path, from: today - 6, to: today)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, path:)
+    end
+
+    def roll_up_page(day, path, views:)
+      roll_up(day, views: 50, visitors: 20)
+      create(:analytics_rollup_path, day:, path:, views:, visitors: views - 1, read_seconds: views * 10, bounces: 0)
+    end
+
+    it "gives the totals of that page only" do
+      roll_up_page(today - 2, "/writing/hello", views: 4)
+      create(:analytics_rollup_path, day: today - 2, path: "/writing/other", views: 9, visitors: 9, bounces: 0)
+      roll_up_page(today - 1, "/writing/hello", views: 6)
+
+      expect(read_page("/writing/hello").fetch("totals")).to eq("views" => 10, "visitors" => 8, "read_seconds" => 100)
+    end
+
+    it "gives the page's days, oldest first, with zero on a quiet day" do
+      roll_up_page(today - 1, "/writing/hello", views: 4)
+      days = { 2 => 0, 1 => 4 }.map { |ago, views| { "day" => (today - ago).iso8601, **page_day(views) } }
+
+      expect(read_page("/writing/hello", from: today - 2, to: today - 1).fetch("days")).to eq(days)
+    end
+
+    it "counts the page's visits before they roll up" do
+      2.times { create(:analytics_event, path: "/writing/hello", read_seconds: 30) }
+      create(:analytics_event, path: "/writing/other")
+
+      expect(read_page("/writing/hello").fetch("days").last)
+        .to eq("day" => today.iso8601, "views" => 2, "visitors" => 2, "read_seconds" => 60)
+    end
+
+    it "leaves out the site's top lists" do
+      expect(read_page("/writing/hello").keys).to eq(%w[from to path totals days])
+    end
+
+    it "answers an unknown path with zeros" do
+      roll_up_page(today - 1, "/writing/hello", views: 4)
+
+      expect(read_page("/nowhere").fetch("totals")).to eq("views" => 0, "visitors" => 0, "read_seconds" => 0)
+    end
+
+    it "gives no since_publish for a page that is not a post" do
+      roll_up_page(today - 1, "/about", views: 4)
+
+      expect(read_page("/about")).not_to have_key("since_publish")
+    end
+
+    it "gives no since_publish for a draft's path" do
+      create(:post, :draft, slug: "unsent")
+
+      expect(read_page("/writing/unsent")).not_to have_key("since_publish")
+    end
+
+    describe "a published post" do
+      before do
+        create(:post, :published, slug: "part-two", published_at: late_evening(today - 3))
+        roll_up_page(today - 3, "/writing/part-two", views: 4)
+        roll_up_page(today - 2, "/writing/part-two", views: 8)
+      end
+
+      it "numbers the days from the Chicago day it went out" do
+        series = [
+          { "day" => 1, "date" => (today - 3).iso8601, **page_day(4) },
+          { "day" => 2, "date" => (today - 2).iso8601, **page_day(8) },
+        ]
+
+        expect(read_page("/writing/part-two", from: today - 5, to: today - 2).fetch("since_publish")).to eq(series)
+      end
+
+      it "keeps counting from day 1 when the range starts later" do
+        expect(read_page("/writing/part-two", from: today - 2, to: today - 2).fetch("since_publish").first)
+          .to include("day" => 2, "date" => (today - 2).iso8601)
+      end
+    end
+  end
 end

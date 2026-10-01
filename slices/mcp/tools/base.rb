@@ -102,9 +102,13 @@ module MCP
 
         def page(number, server_context) = Blog::Page.new(number:, size: server_context.fetch(:page_size))
 
+        def page_between(server_context) = server_context.fetch(:page_between)
+
         def post_by_id(server_context) = server_context.fetch(:post_by_id)
 
         def project_by_id(server_context) = server_context.fetch(:project_by_id)
+
+        def published_post_by_slug(server_context) = server_context.fetch(:published_post_by_slug)
 
         def queue_commit_import(server_context) = server_context.fetch(:queue_commit_import)
 

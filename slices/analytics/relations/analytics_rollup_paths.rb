@@ -21,6 +21,8 @@ module Analytics
 
       def between(from, to) = where(day: from..to)
 
+      def for_path(path) = where(path:)
+
       def on(day) = where(day:)
 
       def top_by_views
