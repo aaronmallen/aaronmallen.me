@@ -4,6 +4,7 @@ module Posts
   module Repos
     class PostRepo < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
+      SUMMARY = %i[id title slug webmentions_enabled].freeze
       TAG_SCOPE = Blog::Types::TagScope["public"]
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
@@ -60,6 +61,8 @@ module Posts
       def replace_tags(id, names) = post_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def scheduled = with_tags.scheduled.oldest_first.to_a
+
+      def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
 

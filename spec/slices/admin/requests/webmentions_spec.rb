@@ -366,6 +366,39 @@ RSpec.describe "Admin webmentions", type: :request do
 
         expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.webmentions.posts_card.empty"))
       end
+
+      it "lists the newest post first" do
+        create(:post, :published, title: "Older", published_at: Time.utc(2026, 9, 1))
+        create(:post, :published, title: "Newer", published_at: Time.utc(2026, 9, 2))
+        get "/admin/webmentions"
+
+        expect(page.all(".li-title").map(&:text)).to eq(%w[Newer Older])
+      end
+    end
+
+    describe "loading posts" do
+      before do
+        create(:webmention, post: target)
+        create(:post, title: "Quiet")
+      end
+
+      it "reads no post bodies" do
+        statements = counting { get "/admin/webmentions" }
+
+        expect(statements.grep(/"body"/)).to be_empty
+      end
+
+      it "reads no post tags" do
+        statements = counting { get "/admin/webmentions" }
+
+        expect(statements.grep(/FROM "post_tags"|FROM "tags"/)).to be_empty
+      end
+
+      it "reads the posts once" do
+        statements = counting { get "/admin/webmentions" }
+
+        expect(statements.grep(/FROM "posts"/)).to have(1).item
+      end
     end
 
     describe "the palette row" do

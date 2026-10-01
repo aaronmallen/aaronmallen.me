@@ -16,7 +16,7 @@ module Posts
       queries.by_filter queries.by_id queries.by_ids queries.by_status queries.count_by_status queries.dated_between
       queries.edited_at queries.edits_for_post queries.edits_for_posts queries.edits_newest_first
       queries.last_deleted_at queries.latest_published queries.next_published queries.previous_published
-      queries.published_by_slug queries.published_page queries.published_page_by_tag queries.scheduled
+      queries.published_by_slug queries.published_page queries.published_page_by_tag queries.scheduled queries.summaries
     ]
   end
 end
