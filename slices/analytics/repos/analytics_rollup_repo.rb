@@ -15,6 +15,8 @@ module Analytics
 
       def page_days(path:, from:, to:) = analytics_rollup_paths.between(from, to).for_path(path).to_a
 
+      def reach_in(month) = analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
+
       def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_visitors.to_a
 
       def store(summary)
@@ -24,6 +26,13 @@ module Analytics
         end
 
         by_day(summary.day)
+      end
+
+      def store_reach(month, rows)
+        transaction do
+          analytics_rollup_reach.in_month(month).delete
+          analytics_rollup_reach.stamped(:create, result: :many).call(rows.map { { month:, **it } })
+        end
       end
 
       def top_paths(from:, to:) = analytics_rollup_paths.between(from, to).top_by_views.to_a

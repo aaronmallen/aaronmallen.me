@@ -25,6 +25,10 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
+                  "Totals also give reach, which counts each reader once per Chicago calendar month and adds up " \
+                  "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
+                  "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
+                  "the 90 days of raw visits. " \
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
@@ -64,7 +68,7 @@ module MCP
             to: range.last.iso8601,
             time_zone: Blog::TimeZone::NAME,
             path:,
-            totals: found.fetch(:totals),
+            totals: totals(found, range, server_context, path:),
             days: dated(days),
             **since_publish(post_at(path, server_context), days),
           )
@@ -89,10 +93,16 @@ module MCP
             from: range.first.iso8601,
             to: range.last.iso8601,
             time_zone: Blog::TimeZone::NAME,
-            totals: found.fetch(:totals),
+            totals: totals(found, range, server_context),
             days: dated(found.fetch(:days)),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
           )
+        end
+
+        def totals(found, range, server_context, path: nil)
+          reach = reach_between(server_context).call(from: range.first, to: range.last, path:)
+
+          found.fetch(:totals).merge(reach:)
         end
       end
     end

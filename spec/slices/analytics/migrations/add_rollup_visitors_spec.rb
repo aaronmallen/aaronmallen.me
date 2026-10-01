@@ -13,7 +13,14 @@ RSpec.describe "Adding visitors to the referrer and country rollups", type: :mig
   def event(visitor, host, country)
     occurred_at = Blog::TimeZone.day_start(recent) + 60
 
-    create(:analytics_event, visitor_hash: visitor * 64, referrer_host: host, country_code: country, occurred_at:)
+    db[:analytics_events].insert(
+      path: "/writing/hello",
+      visitor_hash: visitor * 64,
+      address_hash: visitor * 64,
+      referrer_host: host,
+      country_code: country,
+      occurred_at:,
+    )
   end
 
   def migrate(target = nil)

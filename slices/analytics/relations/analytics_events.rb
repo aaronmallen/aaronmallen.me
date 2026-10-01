@@ -5,6 +5,7 @@ module Analytics
     class AnalyticsEvents < Blog::DB::Relation
       LATEST_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
       NEWEST_FIRST = Sequel.desc(:occurred_at)
+      REACH = Sequel.function(:count, :month_visitor_hash).distinct
       SINGLE_VIEW = Sequel.expr(Sequel.function(:count).* => 1)
       TABLE_KEY = Sequel.function(:hashtext, "analytics_events")
       TITLED = Sequel.~(title: nil)
@@ -18,6 +19,10 @@ module Analytics
       VISITORS = Sequel.function(:count, :visitor_hash).distinct
 
       schema :analytics_events, infer: true
+
+      def between_days(from, to)
+        since(Blog::TimeZone.day_start(from)).occurred_before(Blog::TimeZone.day_start(to + 1))
+      end
 
       def claim(address_hash:, limit:, since:, **attrs)
         transaction do
@@ -36,6 +41,8 @@ module Analytics
         figures.group(column)
       end
 
+      def for_path(path) = where(path:)
+
       def for_view(view_token) = where(view_token:)
 
       def for_visitor(visitor_hash) = where(visitor_hash:)
@@ -48,7 +55,7 @@ module Analytics
 
       def oldest_occurred_at = unordered.dataset.min(:occurred_at)
 
-      def on_day(day) = since(Blog::TimeZone.day_start(day)).occurred_before(Blog::TimeZone.day_start(day + 1))
+      def on_day(day) = between_days(day, day)
 
       def paths
         bouncers = bounced
@@ -56,6 +63,10 @@ module Analytics
 
         figures.select_append { integer.count(id).filter(visitor_hash: bouncers).as(:bounces) }.group(:path)
       end
+
+      def reach = unordered.dataset.get(REACH)
+
+      def reach_by_path = unordered.select(:path) { integer.count(month_visitor_hash).distinct.as(:reach) }.group(:path)
 
       def record_read_seconds(read_seconds)
         newest = newest_first.limit(1).dataset.select(:id)

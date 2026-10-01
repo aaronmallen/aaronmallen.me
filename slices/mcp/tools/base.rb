@@ -112,6 +112,8 @@ module MCP
 
         def queue_commit_import(server_context) = server_context.fetch(:queue_commit_import)
 
+        def reach_between(server_context) = server_context.fetch(:reach_between)
+
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
         def reject_edits(server_context) = server_context.fetch(:reject_edits)

@@ -14,7 +14,7 @@ RSpec.describe "MCP analytics tools", type: :request do
       roll_up(today - 1, views: 10, visitors: 4)
       roll_up(today - 2, views: 5, visitors: 2)
 
-      expect(read.fetch("totals")).to eq("views" => 15, "visitors" => 6, "read_seconds" => 150)
+      expect(read.fetch("totals")).to eq("views" => 15, "visitors" => 6, "read_seconds" => 150, "reach" => 0)
     end
 
     it "leaves out the days outside the range" do
@@ -147,7 +147,7 @@ RSpec.describe "MCP analytics tools", type: :request do
       end
 
       it "counts every unrolled day in the totals" do
-        expect(read.fetch("totals")).to eq("views" => 7, "visitors" => 5, "read_seconds" => 166)
+        expect(read.fetch("totals")).to eq("views" => 7, "visitors" => 5, "read_seconds" => 166, "reach" => 0)
       end
 
       it "puts each unrolled day's visits on that day" do
@@ -192,6 +192,88 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
   end
 
+  describe "read_analytics reach" do
+    let(:address) { "203.0.113.7" }
+    let(:agent) { "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
+    let(:month) { Date.new(today.year, today.month, 1) }
+    let(:old_month) { Date.new((today - 150).year, (today - 150).month, 1) }
+
+    def hashed(at, period = Analytics::Operations::HashVisitor::DAY)
+      Analytics::Slice["operations.hash_visitor"].call(address:, user_agent: agent, at:, period:)
+    end
+
+    def noon(day) = Blog::TimeZone.day_start(day) + (12 * 3_600)
+
+    def read_reach(from, to, **) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("totals")
+
+    def view(day, path: "/writing/hello")
+      at = noon(day)
+      month_visitor_hash = hashed(at, Analytics::Operations::HashVisitor::MONTH)
+
+      create(:analytics_event, path:, visitor_hash: hashed(at), month_visitor_hash:, occurred_at: at)
+    end
+
+    it "counts a reader on two days in one month as two visitors and one reach" do
+      [month - 3, month - 2].each { view(it) }
+
+      expect(read_reach(month - 3, month - 2)).to include("visitors" => 2, "reach" => 1)
+    end
+
+    it "counts a reader on the last day of one month and the first of the next as two reach" do
+      [month - 1, month].each { view(it) }
+
+      expect(read_reach(month - 1, month)).to include("visitors" => 2, "reach" => 2)
+    end
+
+    it "counts a reader of two pages once for the site" do
+      view(month, path: "/writing/hello")
+      view(month, path: "/writing/other")
+
+      expect(read_reach(month, today)).to include("views" => 2, "reach" => 1)
+    end
+
+    it "counts the reach of one page alone" do
+      view(month, path: "/writing/hello")
+      create(:analytics_event, path: "/writing/other", occurred_at: noon(month))
+
+      expect(read_reach(month, today, path: "/writing/hello")).to include("reach" => 1)
+    end
+
+    it "reads a whole month past the raw visits from its rollup" do
+      create(:analytics_rollup_reach, month: old_month, reach: 7)
+      create(:analytics_rollup_reach, month: old_month, path: "/writing/hello", reach: 3)
+
+      expect(read_reach(old_month, old_month.next_month - 1)).to include("reach" => 7)
+    end
+
+    it "reads one page's reach for a whole month past the raw visits" do
+      create(:analytics_rollup_reach, month: old_month, reach: 7)
+      create(:analytics_rollup_reach, month: old_month, path: "/writing/hello", reach: 3)
+
+      expect(read_reach(old_month, old_month.next_month - 1, path: "/writing/hello")).to include("reach" => 3)
+    end
+
+    it "counts no reach for a page nobody read in a rolled up month" do
+      create(:analytics_rollup_reach, month: old_month, reach: 7)
+
+      expect(read_reach(old_month, old_month.next_month - 1, path: "/nowhere")).to include("reach" => 0)
+    end
+
+    it "adds the rolled up months to the months the raw visits still hold" do
+      rolled = (old_month..(today - 89)).map { Date.new(it.year, it.month, 1) }.uniq
+      rolled.each { create(:analytics_rollup_reach, month: it, reach: 7) }
+      view(month)
+
+      expect(read_reach(old_month, today)).to include("reach" => (7 * rolled.size) + 1)
+    end
+
+    it "gives no reach for part of a month past the raw visits" do
+      create(:analytics_rollup_reach, month: old_month, reach: 7)
+
+      expect(read_reach(old_month + 1, old_month.next_month - 1)).to include("reach" => nil)
+    end
+  end
+
   describe "read_analytics with a path" do
     def late_evening(day) = Blog::TimeZone.day_start(day) + (23 * 3_600) + 1_800
 
@@ -211,7 +293,8 @@ RSpec.describe "MCP analytics tools", type: :request do
       create(:analytics_rollup_path, day: today - 2, path: "/writing/other", views: 9, visitors: 9, bounces: 0)
       roll_up_page(today - 1, "/writing/hello", views: 6)
 
-      expect(read_page("/writing/hello").fetch("totals")).to eq("views" => 10, "visitors" => 8, "read_seconds" => 100)
+      expect(read_page("/writing/hello").fetch("totals"))
+        .to eq("views" => 10, "visitors" => 8, "read_seconds" => 100, "reach" => 0)
     end
 
     it "gives the page's days, oldest first, with zero on a quiet day" do
@@ -236,7 +319,8 @@ RSpec.describe "MCP analytics tools", type: :request do
     it "answers an unknown path with zeros" do
       roll_up_page(today - 1, "/writing/hello", views: 4)
 
-      expect(read_page("/nowhere").fetch("totals")).to eq("views" => 0, "visitors" => 0, "read_seconds" => 0)
+      expect(read_page("/nowhere").fetch("totals")).to eq("views" => 0, "visitors" => 0, "read_seconds" => 0,
+                                                          "reach" => 0)
     end
 
     it "gives no since_publish for a page that is not a post" do

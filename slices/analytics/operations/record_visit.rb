@@ -29,8 +29,8 @@ module Analytics
 
         address_hash = hash_visitor.call(address:)
         step within_limit(address_hash) if read?(visit)
-        visitor_hash = hash_visitor.call(address:, user_agent:)
-        step store(visit, visitor_hash:, address_hash:, address:, base_url:)
+        hashes = visitor_hashes(address:, user_agent:)
+        step store(visit, hashes:, address_hash:, address:, base_url:)
       end
 
       private
@@ -61,10 +61,10 @@ module Analytics
         found unless found.nil? || found == host(base_url)
       end
 
-      def store(visit, visitor_hash:, address_hash:, address:, base_url:)
-        return read(visit, visitor_hash) if read?(visit)
+      def store(visit, hashes:, address_hash:, address:, base_url:)
+        return read(visit, hashes.fetch(:visitor_hash)) if read?(visit)
 
-        view(visit, visitor_hash:, address_hash:, address:, base_url:)
+        view(visit, hashes:, address_hash:, address:, base_url:)
       end
 
       def title(value)
@@ -77,11 +77,11 @@ module Analytics
         result.success? ? Success(result.to_h) : Failure(:malformed)
       end
 
-      def view(visit, visitor_hash:, address_hash:, address:, base_url:)
+      def view(visit, hashes:, address_hash:, address:, base_url:)
         event = event_repo.claim(
           path: visit[:path],
           title: title(visit[:title]),
-          visitor_hash:,
+          **hashes,
           address_hash:,
           referrer_host: referrer_host(visit[:referrer], base_url),
           country_code: countries.code(address),
@@ -91,6 +91,13 @@ module Analytics
         )
 
         event ? Success(event) : Failure(:throttled)
+      end
+
+      def visitor_hashes(address:, user_agent:)
+        {
+          visitor_hash: hash_visitor.call(address:, user_agent:),
+          month_visitor_hash: hash_visitor.call(address:, user_agent:, period: HashVisitor::MONTH),
+        }
       end
 
       def window_opened_at

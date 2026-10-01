@@ -9,6 +9,8 @@ module Analytics
         analytics_events.claim(address_hash:, limit:, since:, **attrs)
       end
 
+      def complete_from(kept_days) = [oldest_day, Blog::TimeZone.today - (kept_days - 1)].compact.min
+
       def count_from_address_since(address_hash, time) = analytics_events.from_address(address_hash).since(time).count
 
       def delete_before(time) = analytics_events.occurred_before(time).delete
@@ -16,6 +18,18 @@ module Analytics
       def oldest_day
         occurred_at = analytics_events.oldest_occurred_at
         Blog::TimeZone.today(occurred_at) if occurred_at
+      end
+
+      def reach_between(from:, to:, path: nil)
+        window = analytics_events.between_days(from, to)
+
+        (path ? window.for_path(path) : window).reach
+      end
+
+      def reach_by_path(from:, to:)
+        window = analytics_events.between_days(from, to)
+
+        [{ path: nil, reach: window.reach }, *window.reach_by_path.to_a.map(&:to_h)]
       end
 
       def record_read_seconds(visitor_hash:, view_token:, read_seconds:)

@@ -19,6 +19,8 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def kept = event_repo.analytics_events.order(:occurred_at, :id).to_a.map(&:id)
 
+  def month_of(on) = Date.new(on.year, on.month, 1)
+
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
   def paths(on = day) = rollup_repo.top_paths(from: on, to: on).map(&:to_h)
@@ -135,6 +137,43 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       roll_up
 
       expect(rollup_repo.by_day(day)).to have_attributes(views: 0, visitors: 0, read_seconds: 0)
+    end
+  end
+
+  describe "the month's reach" do
+    let(:month) { month_of(day) }
+    let(:reader) { "a" * 64 }
+
+    it "counts each reader once for the month so far, site-wide and for each path" do
+      event(on: month, path: "/writing/hello", month_visitor_hash: reader)
+      event(path: "/writing/other", month_visitor_hash: reader)
+      event(path: "/writing/other", month_visitor_hash: "b" * 64)
+      roll_up
+
+      expect(rollup_repo.reach_in(month)).to eq(nil => 2, "/writing/hello" => 1, "/writing/other" => 2)
+    end
+
+    it "leaves a reader from the month before out of this month" do
+      event(on: month - 1, month_visitor_hash: reader)
+      event(month_visitor_hash: "b" * 64)
+      roll_up
+
+      expect(rollup_repo.reach_in(month)).to include(nil => 1)
+    end
+
+    it "stores the same reach run twice" do
+      event(month_visitor_hash: reader)
+      2.times { roll_up }
+
+      expect(rollup_repo.reach_in(month)).to include(nil => 1)
+    end
+
+    it "stores no reach for a month whose start the raw visits no longer hold" do
+      old = ((today - 120)..(today - 95)).find { it.mday != 1 }
+      event(on: old)
+      roll_up
+
+      expect(rollup_repo.reach_in(month_of(old))).to be_empty
     end
   end
 

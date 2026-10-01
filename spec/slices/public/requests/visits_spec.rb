@@ -35,6 +35,8 @@ RSpec.describe "Visits", type: :request do
     )
   end
 
+  def month = Date.new(Blog::TimeZone.today.year, Blog::TimeZone.today.month, 1)
+
   def read(seconds, name: "first", path: "/writing/hello")
     beacon({ kind: "read", path:, read_seconds: seconds, view_token: token(name) })
   end
@@ -108,6 +110,26 @@ RSpec.describe "Visits", type: :request do
       forged("203.0.113.1")
 
       expect(stored.first.country_code).to eq("US")
+    end
+
+    it "stores a monthly visitor hash beside the daily one", :aggregate_failures do
+      view
+
+      expect(stored.first.month_visitor_hash).to match(/\A\h{64}\z/)
+      expect(stored.first.month_visitor_hash).not_to eq(stored.first.visitor_hash)
+    end
+
+    it "gives a reader on two days in one month two daily hashes and one monthly hash", :aggregate_failures do
+      [month - 3, month - 2].each { view_at(it) }
+
+      expect(stored.map(&:visitor_hash).uniq).to have(2).items
+      expect(stored.map(&:month_visitor_hash).uniq).to have(1).item
+    end
+
+    it "gives a reader a new monthly hash once the Chicago month turns" do
+      [month - 1, month].each { view_at(it) }
+
+      expect(stored.map(&:month_visitor_hash).uniq).to have(2).items
     end
 
     it "gives another browser another visitor hash" do
@@ -573,4 +595,9 @@ RSpec.describe "Visits", type: :request do
   def token(name) = Digest::SHA256.hexdigest("view-#{name}")[0, 32]
 
   def view(**) = beacon({ kind: "view", path: "/writing/hello", title: "Hello", view_token: token("first") }, **)
+
+  def view_at(day)
+    allow(Time).to receive(:now).and_return(Blog::TimeZone.day_start(day) + (12 * 3_600))
+    view
+  end
 end

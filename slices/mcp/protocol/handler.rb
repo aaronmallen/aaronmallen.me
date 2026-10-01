@@ -60,6 +60,7 @@ module MCP
         project_by_id: "projects.queries.by_id",
         published_post_by_slug: "posts.queries.published_by_slug",
         queue_commit_import: "record.operations.queue_commit_import",
+        reach_between: "analytics.queries.reach_between",
         read_current_sprint: "api.endpoints.read_current_sprint",
         read_journal_entry: "api.endpoints.read_journal_entry",
         read_task: "api.endpoints.read_task",
