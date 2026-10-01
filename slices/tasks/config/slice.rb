@@ -4,6 +4,8 @@ module Tasks
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/tasks"), namespace: Tasks)
 
+    import keys: %w[operations.claim_photos operations.release_photos], from: :media
+
     import keys: %w[
       github.client linear.client operations.record_issue_sync_outcome operations.record_linear_issue_sync_outcome
     ], from: :record

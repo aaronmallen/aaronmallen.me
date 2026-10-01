@@ -3,9 +3,13 @@
 module Posts
   module Operations
     class RevisePostBody
-      include Deps[post_repo: "repos.post_repo"]
+      PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
 
-      def call(id, body:) = post_repo.update(id, body:)
+      include Deps[claim_photos: "media.operations.claim_photos", post_repo: "repos.post_repo"]
+
+      def call(id, body:)
+        post_repo.update(id, body:).tap { claim_photos.call(PHOTO_OWNER, id, it.body, it.og_image_url) }
+      end
     end
   end
 end

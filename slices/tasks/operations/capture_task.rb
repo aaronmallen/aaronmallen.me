@@ -4,9 +4,11 @@ module Tasks
   module Operations
     class CaptureTask < Blog::Operation
       NEXT = Blog::Types::TaskFilter["next"]
+      PHOTO_OWNER = Blog::Types::PhotoOwner["task"]
       TODAY = Blog::Types::TaskFilter["today"]
 
       include Deps[
+        claim_photos: "media.operations.claim_photos",
         contract: "contracts.task_contract",
         current_sprint: "operations.current_sprint",
         schedule_task: "operations.schedule_task",
@@ -41,6 +43,7 @@ module Tasks
             title: fields[:title], note: fields[:note], position: task_repo.next_position, **placed,
           )
           task_repo.replace_tags(task.id, fields[:tags])
+          claim_photos.call(PHOTO_OWNER, task.id, task.note)
           task
         end
       end

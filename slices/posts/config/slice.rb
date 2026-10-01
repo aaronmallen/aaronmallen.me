@@ -4,6 +4,8 @@ module Posts
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/posts"), namespace: Posts)
 
+    import keys: %w[operations.claim_photos operations.release_photos], from: :media
+
     import keys: %w[networks.all], from: :social
 
     export %w[

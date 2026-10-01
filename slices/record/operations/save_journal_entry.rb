@@ -3,9 +3,14 @@
 module Record
   module Operations
     class SaveJournalEntry < Blog::Operation
+      PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
       TIME_FORMAT = "%H:%M:%S"
 
-      include Deps[contract: "contracts.journal_entry_contract", journal_entry_repo: "repos.journal_entry_repo"]
+      include Deps[
+        claim_photos: "media.operations.claim_photos",
+        contract: "contracts.journal_entry_contract",
+        journal_entry_repo: "repos.journal_entry_repo",
+      ]
 
       def call(params, now: Time.now)
         attributes = step validate(params, now)
@@ -20,12 +25,7 @@ module Record
 
       def persist(attributes, now)
         time = Blog::TimeZone.local(now).strftime(TIME_FORMAT)
-
-        id = transaction do
-          entry = journal_entry_repo.create(**attributes.except(:tags), entry_time: time)
-          journal_entry_repo.replace_tags(entry.id, attributes.fetch(:tags))
-          entry.id
-        end
+        id = transaction { write(attributes, time).id }
 
         Success(journal_entry_repo.by_id(id))
       rescue ROM::SQL::CheckConstraintError
@@ -36,6 +36,13 @@ module Record
         today = Blog::TimeZone.today(now)
         attributes = step validated(contract.call(form(params), today:))
         Success(attributes.merge(entry_date: attributes[:entry_date] || today))
+      end
+
+      def write(attributes, time)
+        entry = journal_entry_repo.create(**attributes.except(:tags), entry_time: time)
+        journal_entry_repo.replace_tags(entry.id, attributes.fetch(:tags))
+        claim_photos.call(PHOTO_OWNER, entry.id, entry.body)
+        entry
       end
     end
   end

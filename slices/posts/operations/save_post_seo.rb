@@ -3,14 +3,20 @@
 module Posts
   module Operations
     class SavePostSeo < Blog::Operation
-      include Deps[contract: "contracts.post_seo_contract", post_repo: "repos.post_repo"]
+      include Deps[
+        claim_photos: "media.operations.claim_photos",
+        contract: "contracts.post_seo_contract",
+        post_repo: "repos.post_repo",
+      ]
 
       FIELDS = %i[canonical_url og_image_url og_title].freeze
+      PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
 
       def call(id, params)
         transaction do
           post = step find(id)
-          post_repo.update(id, step(validate(post, params)))
+          saved = post_repo.update(id, step(validate(post, params)))
+          claim_photos.call(PHOTO_OWNER, id, saved.body, saved.og_image_url)
         end
 
         post_repo.by_id(id)

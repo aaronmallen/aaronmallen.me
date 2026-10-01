@@ -39,6 +39,9 @@ production:
     send_due_social_posts:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Social::Jobs::SendDueSocialPosts
+    sweep_photos:
+      cron: "30 5 * * * <%= Blog::TimeZone::NAME %>"
+      class: Media::Jobs::SweepPhotos
     sync_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues

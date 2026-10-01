@@ -6,6 +6,8 @@ module Record
 
     config.shared_app_component_keys += %w[http]
 
+    import keys: %w[operations.claim_photos operations.release_photos], from: :media
+
     export %w[
       github.client linear.client operations.delete_journal_entry operations.queue_commit_import
       operations.record_country_sync_outcome operations.record_issue_sync_outcome

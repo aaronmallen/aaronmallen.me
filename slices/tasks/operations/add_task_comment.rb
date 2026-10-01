@@ -3,7 +3,10 @@
 module Tasks
   module Operations
     class AddTaskComment < Blog::Operation
+      PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
+
       include Deps[
+        claim_photos: "media.operations.claim_photos",
         contract: "contracts.task_comment_contract",
         task_comment_repo: "repos.task_comment_repo",
         task_repo: "repos.task_repo",
@@ -13,7 +16,11 @@ module Tasks
         step find(task_id)
         fields = step validate(params)
 
-        task_comment_repo.create(task_id:, body: fields[:body])
+        transaction do
+          comment = task_comment_repo.create(task_id:, body: fields[:body])
+          claim_photos.call(PHOTO_OWNER, comment.id, comment.body)
+          comment
+        end
       end
 
       private

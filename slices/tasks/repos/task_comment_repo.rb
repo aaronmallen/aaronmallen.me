@@ -12,6 +12,8 @@ module Tasks
 
       def for_task(task_id) = task_comments.for_task(task_id).oldest_first.to_a
 
+      def ids_for_task(task_id) = task_comments.for_task(task_id).pluck(:id)
+
       def local?(task_id, id) = local(task_id, id).exist?
 
       def synced(task_id, provider, remote_ids)

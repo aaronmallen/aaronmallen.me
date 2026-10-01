@@ -3,7 +3,13 @@
 module Record
   module Operations
     class UpdateJournalEntry < Blog::Operation
-      include Deps[contract: "contracts.journal_edit_contract", journal_entry_repo: "repos.journal_entry_repo"]
+      PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
+
+      include Deps[
+        claim_photos: "media.operations.claim_photos",
+        contract: "contracts.journal_edit_contract",
+        journal_entry_repo: "repos.journal_entry_repo",
+      ]
 
       def call(id, params)
         step find(id)
@@ -23,6 +29,7 @@ module Record
         transaction do
           journal_entry_repo.update(id, **attributes.except(:tags))
           journal_entry_repo.replace_tags(id, attributes.fetch(:tags))
+          claim_photos.call(PHOTO_OWNER, id, attributes[:body])
         end
 
         Success(journal_entry_repo.by_id(id))

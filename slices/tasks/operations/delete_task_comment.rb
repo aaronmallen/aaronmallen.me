@@ -3,10 +3,16 @@
 module Tasks
   module Operations
     class DeleteTaskComment < Blog::Operation
-      include Deps[task_comment_repo: "repos.task_comment_repo"]
+      PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
+
+      include Deps[release_photos: "media.operations.release_photos", task_comment_repo: "repos.task_comment_repo"]
 
       def call(task_id, id)
-        step removed(task_comment_repo.delete_local(task_id, id))
+        transaction do
+          count = step removed(task_comment_repo.delete_local(task_id, id))
+          release_photos.call(PHOTO_OWNER, id)
+          count
+        end
       end
 
       private

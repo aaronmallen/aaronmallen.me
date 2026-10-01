@@ -4,6 +4,7 @@ module Posts
   module Operations
     class SavePost < Blog::Operation
       include Deps[
+        claim_photos: "media.operations.claim_photos",
         contract: "contracts.post_contract",
         post_repo: "repos.post_repo",
         publish_post: "operations.publish_post",
@@ -12,6 +13,7 @@ module Posts
       CARD = %i[syndication_body syndication_enabled syndication_targets webmentions_enabled].freeze
       DRAFT = Blog::Types::PostIntent["draft"]
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
+      PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
       PUBLISH = Blog::Types::PostIntent["publish"]
       SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
 
@@ -22,10 +24,13 @@ module Posts
 
       private
 
+      def claim(post) = claim_photos.call(PHOTO_OWNER, post.id, post.body, post.og_image_url)
+
       def create_or_update(post, attributes)
         fields = attributes.except(:tags)
         saved = post ? post_repo.update(post.id, fields) : post_repo.create(fields)
         post_repo.replace_tags(saved.id, attributes.fetch(:tags))
+        claim(saved)
 
         post_repo.by_id(saved.id)
       end

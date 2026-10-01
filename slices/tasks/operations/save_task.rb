@@ -4,8 +4,10 @@ module Tasks
   module Operations
     class SaveTask < Blog::Operation
       FIELDS = %i[list note tags title].freeze
+      PHOTO_OWNER = Blog::Types::PhotoOwner["task"]
 
       include Deps[
+        claim_photos: "media.operations.claim_photos",
         contract: "contracts.task_contract",
         move_task: "operations.move_task",
         schedule_task: "operations.schedule_task",
@@ -44,6 +46,7 @@ module Tasks
       def rewrite(task, fields)
         task_repo.update(task.id, note: fields[:note], title: fields[:title])
         task_repo.replace_tags(task.id, fields[:tags])
+        claim_photos.call(PHOTO_OWNER, task.id, fields[:note])
       end
 
       def validate(params) = validated(contract.call(form(params)))

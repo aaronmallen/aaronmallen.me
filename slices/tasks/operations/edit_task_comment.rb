@@ -3,13 +3,22 @@
 module Tasks
   module Operations
     class EditTaskComment < Blog::Operation
-      include Deps[contract: "contracts.task_comment_contract", task_comment_repo: "repos.task_comment_repo"]
+      PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
+
+      include Deps[
+        claim_photos: "media.operations.claim_photos",
+        contract: "contracts.task_comment_contract",
+        task_comment_repo: "repos.task_comment_repo",
+      ]
 
       def call(task_id, id, params)
         step find(task_id, id)
         fields = step validate(params)
 
-        task_comment_repo.update(id, body: fields[:body])
+        transaction do
+          claim_photos.call(PHOTO_OWNER, id, fields[:body])
+          task_comment_repo.update(id, body: fields[:body])
+        end
       end
 
       private
