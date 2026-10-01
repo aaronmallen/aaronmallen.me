@@ -49,6 +49,7 @@ en:
         other: "%{count} suggestions applied"
       deleted: "Post deleted"
       drafted: "Draft saved"
+      live: "Not applied · the post is published"
       note_saved: "Note saved"
       published: "Published"
       rejected:

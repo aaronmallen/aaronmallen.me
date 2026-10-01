@@ -5,6 +5,7 @@ module Admin
     module Posts
       class AcceptSuggestions < Action
         APPLIED = "post_form.toasts.applied"
+        LIVE = "post_form.toasts.live"
 
         include Deps[
           accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
@@ -24,12 +25,10 @@ module Admin
 
         def accept(response, suggestion, edit_id)
           case accept_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
-          in Success(accepted:)
-            toast(response, APPLIED, count: accepted.length)
-          in Failure(:stale)
-            toast(response, APPLIED, count: 0)
-          in Failure(:not_found)
-            nil
+          in Success(accepted:) then toast(response, APPLIED, count: accepted.length)
+          in Failure(:stale) then toast(response, APPLIED, count: 0)
+          in Failure(:published) then toast(response, LIVE)
+          in Failure(:not_found) then nil
           else halt 500
           end
         end

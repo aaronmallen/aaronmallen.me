@@ -1453,6 +1453,34 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(message).to eq("no blog post has the ID 404")
     end
 
+    it "refuses a published blog post" do
+      post = create(:post, :published, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+
+      expect(message).to eq("blog post #{post.id} is published; suggest edits only on a draft or scheduled post")
+    end
+
+    it "marks a published blog post an error" do
+      post = create(:post, :published, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+
+      expect(result.fetch("isError")).to be(true)
+    end
+
+    it "stores nothing for a published blog post" do
+      post = create(:post, :published, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+
+      expect(suggestion_repo.for_post(post.id)).to be_nil
+    end
+
+    it "stores edits for a scheduled blog post" do
+      post = create(:post, :scheduled, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
+
+      expect(suggestion_repo.for_post(post.id).edits.map(&:status)).to eq(["pending"])
+    end
+
     it "calls an unknown social post an error" do
       call_tool("suggest_edits", target: "social_post", id: 404, edits: [typo])
 

@@ -7,6 +7,7 @@ module MCP
       FIRST_PART = 1
       LONG = "long"
       POST = "post"
+      PUBLISHED = "blog post %s is published; suggest edits only on a draft or scheduled post"
       SOCIAL_POST = "social_post"
       UNSTORED = "could not store the edits"
 
@@ -52,8 +53,8 @@ module MCP
         required: %w[target id edits],
       }.freeze
 
-      description "Suggest grammar and spelling edits for one blog post or unsent social post; " \
-                  "they wait for the author to accept or reject and change nothing on their own, " \
+      description "Suggest grammar and spelling edits for one draft or scheduled blog post or unsent social " \
+                  "post; they wait for the author to accept or reject and change nothing on their own, " \
                   "and a new set replaces the edits still waiting on that post"
       input_schema(SCHEMA)
       scope OAuth::Scope::SUGGEST
@@ -80,7 +81,10 @@ module MCP
 
           unnumbered = edits.map { it.except(:part) }
 
-          stored(replace_post_edits(server_context).call(id, edits: unnumbered), POST)
+          case replace_post_edits(server_context).call(id, edits: unnumbered)
+          in Failure(:published) then refuse(format(PUBLISHED, id))
+          in result then stored(result, POST)
+          end
         end
 
         def for_social_post(id, edits, server_context)

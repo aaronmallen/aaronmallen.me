@@ -462,6 +462,99 @@ RSpec.describe "Admin post suggestions", type: :request do
       end
     end
 
+    describe "a published post" do
+      let(:article) { create(:post, :published, body: "teh cat sat") }
+
+      before { suggest(article, typo) }
+
+      it "hides the card" do
+        open_editor(article)
+
+        expect(page).to have_no_css(".card-label", text: "Suggestions")
+      end
+
+      it "offers no decision" do
+        open_editor(article)
+
+        expect(page).to have_no_css("form[action^='/admin/posts/#{article.id}/suggestions']", visible: :all)
+      end
+
+      it "keeps the edit note box under the body" do
+        open_editor(article)
+
+        expect(page).to have_css(".editor-main > [data-markdown-editor]:has(#post-body[data-post-body]) + .card")
+      end
+
+      it "keeps the edit note dialog" do
+        open_editor(article)
+
+        expect(page).to have_css("form[data-post-editor] dialog[data-edit-note-dialog]", visible: :all)
+      end
+
+      it "refuses to accept an edit", :aggregate_failures do
+        accept(article, edit_id: first_edit_id(article))
+
+        expect(statuses(article)).to eq(%w[pending])
+        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+      end
+
+      it "refuses Accept all", :aggregate_failures do
+        accept(article)
+
+        expect(statuses(article)).to eq(%w[pending])
+        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+      end
+
+      it "says why nothing was applied" do
+        accept(article)
+        follow_redirect!
+
+        expect(toast).to eq("Not applied · the post is published")
+      end
+
+      it "returns to the editor" do
+        accept(article)
+
+        expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit")
+      end
+    end
+
+    describe "a post that publishes while this Accept waits on it" do
+      let(:article) { create(:post, :scheduled, body: "teh cat sat") }
+
+      before do
+        suggest(article, typo)
+        inner = Suggestions::Slice["posts.operations.lock_post"]
+        publishing = ->(id) { post_repo.publish(id, at: Time.now).then { inner.call(id) } }
+        replace_component("posts.operations.lock_post", publishing)
+      end
+
+      it "leaves the body alone", :aggregate_failures do
+        accept(article)
+
+        expect(statuses(article)).to eq(%w[pending])
+        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+      end
+    end
+
+    describe "a scheduled post" do
+      let(:article) { create(:post, :scheduled, body: "teh cat sat") }
+
+      before { suggest(article, typo) }
+
+      it "shows the card" do
+        open_editor(article)
+
+        expect(page).to have_css(".card-label", text: "Suggestions")
+      end
+
+      it "applies an edit" do
+        accept(article, edit_id: first_edit_id(article))
+
+        expect(post_repo.by_id(article.id).body).to eq("the cat sat")
+      end
+    end
+
     describe "a request that goes nowhere" do
       let(:article) { create(:post, :draft, body: "teh cat sat") }
 

@@ -65,7 +65,7 @@ module Admin
       def seo_from_post(post) = SEO.to_h { [it, post.public_send(it).to_s] }
 
       def suggestions(post)
-        suggestion = suggestion_for_post.call(post.id) if post
+        suggestion = suggestion_for_post.call(post.id) if post && post.status != PUBLISHED
 
         {
           post_id: post&.id,

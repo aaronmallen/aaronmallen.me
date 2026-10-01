@@ -106,6 +106,31 @@ RSpec.describe "MCP suggestion tools", type: :request do
         .to eq("the social post under suggestion #{suggestion.id} has been sent")
     end
 
+    it "refuses a published post" do
+      post = create(:post, :published, body: "teh cat sat")
+      suggestion = suggest(post, edit("teh", "the"))
+
+      expect(mcp_text("accept_suggestion_edits", suggestion_id: suggestion.id))
+        .to eq("the blog post under suggestion #{suggestion.id} is published; its edits can no longer apply")
+    end
+
+    it "leaves a published post alone", :aggregate_failures do
+      post = create(:post, :published, body: "teh cat sat")
+      suggestion = suggest(post, edit("teh", "the"))
+      mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
+
+      expect(post_body(post.id)).to eq("teh cat sat")
+      expect(statuses(suggestion)).to eq(%w[pending])
+    end
+
+    it "writes into a scheduled post" do
+      post = create(:post, :scheduled, body: "teh cat sat")
+      suggestion = suggest(post, edit("teh", "the"))
+      mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
+
+      expect(post_body(post.id)).to eq("the cat sat")
+    end
+
     it "refuses when no pending edit is left" do
       post = create(:post, :draft, body: "teh cat sat")
       suggestion = suggest(post, edit("teh", "the"))
