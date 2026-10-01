@@ -12,6 +12,7 @@ module Analytics
         ]
       end
       LATEST_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
+      MEDIAN_READ = Sequel.function(:percentile_cont, 0.5).within_group(:read_seconds)
       NEWEST_FIRST = Sequel.desc(:occurred_at)
       REACH = Sequel.function(:count, :month_visitor_hash).distinct
       SINGLE_VIEW = Sequel.expr(Sequel.function(:count).* => 1)
@@ -78,6 +79,8 @@ module Analytics
 
       def reach_by_path = unordered.select(:path) { integer.count(month_visitor_hash).distinct.as(:reach) }.group(:path)
 
+      def read_median = unordered.exclude(read_seconds: 0).dataset.get(MEDIAN_READ)
+
       def record_read_seconds(read_seconds)
         newest = newest_first.limit(1).dataset.select(:id)
         raised = Sequel.function(:greatest, :read_seconds, read_seconds)
@@ -88,6 +91,12 @@ module Analytics
       def since(time) = where { occurred_at >= time }
 
       def totals = unordered.select(&TOTALS)
+
+      def views_by_read_floor(floors)
+        floor = Sequel.case(floors.reverse.map { [Sequel[:read_seconds] >= it, it] }, floors.first)
+
+        unordered.dataset.group_and_count(floor.as(:floor)).to_h { [it.fetch(:floor), it.fetch(:count)] }
+      end
 
       def visitor_count = unordered.dataset.get(VISITORS)
 

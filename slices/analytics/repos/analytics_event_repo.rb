@@ -17,6 +17,8 @@ module Analytics
 
       def hours_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).hourly.to_a
 
+      def median_read_seconds(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).read_median
+
       def oldest_day
         occurred_at = analytics_events.oldest_occurred_at
         Blog::TimeZone.today(occurred_at) if occurred_at
@@ -49,6 +51,10 @@ module Analytics
       end
 
       def totals_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).totals.one
+
+      def views_by_read_floor(from:, to:, floors:, path: nil)
+        scoped(analytics_events.between(from, to), path).views_by_read_floor(floors)
+      end
 
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 

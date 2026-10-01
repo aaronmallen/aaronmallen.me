@@ -64,6 +64,7 @@ module MCP
         reach_between: "analytics.queries.reach_between",
         read_current_sprint: "api.endpoints.read_current_sprint",
         read_journal_entry: "api.endpoints.read_journal_entry",
+        read_spread_between: "analytics.queries.read_spread_between",
         read_task: "api.endpoints.read_task",
         reject_edits: "suggestions.operations.reject_edits",
         remove_tag: "tags.operations.remove_tag",

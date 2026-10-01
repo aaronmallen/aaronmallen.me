@@ -313,7 +313,7 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days hours])
+      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days hours read_spread])
     end
 
     it "answers an unknown path with zeros" do
@@ -470,6 +470,80 @@ RSpec.describe "MCP analytics tools", type: :request do
 
         expect(read_raw(from: old, to: day, since: at(8).iso8601).fetch("hours").length).to eq(1)
       end
+    end
+  end
+
+  describe "read_analytics read_spread" do
+    let(:day) { today - 1 }
+
+    def read_spread(from: day, to: day, **)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("read_spread")
+    end
+
+    def view(read_seconds, path: "/writing/hello", hour: 9)
+      occurred_at = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
+      create(:analytics_event, path:, read_seconds:, occurred_at:)
+    end
+
+    def views(spread) = spread.fetch("buckets").to_h { [[it.fetch("from"), it.fetch("to")], it.fetch("views")] }
+
+    it "counts each view under the bucket its read time falls in" do
+      [0, 0, 5, 9, 10, 45, 90, 200, 400, 1_200].each { view(it) }
+
+      expect(views(read_spread)).to eq(
+        [0, 0] => 2, [1, 9] => 2, [10, 29] => 1, [30, 59] => 1, [60, 119] => 1, [120, 299] => 1,
+        [300, 599] => 1, [600, 1_200] => 1,
+      )
+    end
+
+    it "keeps the views with no read out of the median" do
+      [0, 0, 0, 10, 20, 90].each { view(it) }
+
+      expect(read_spread.fetch("median")).to eq(20.0)
+    end
+
+    it "gives the middle of the two middle reads for an even count" do
+      [10, 20, 30, 41].each { view(it) }
+
+      expect(read_spread.fetch("median")).to eq(25.0)
+    end
+
+    it "gives no median when no view read", :aggregate_failures do
+      2.times { view(0) }
+
+      expect(read_spread.fetch("median")).to be_nil
+      expect(views(read_spread).fetch([0, 0])).to eq(2)
+    end
+
+    it "spreads one page alone" do
+      view(30)
+      view(300, path: "/writing/other")
+
+      expect(read_spread(path: "/writing/hello").fetch("median")).to eq(30.0)
+    end
+
+    it "counts only the views from since" do
+      view(30)
+      view(300, hour: 15)
+
+      since = Blog::TimeZone.local_time(day.year, day.month, day.day, 12, 0).iso8601
+
+      expect(read_spread(since:).fetch("median")).to eq(300.0)
+    end
+
+    it "leaves out the days outside the range" do
+      view(30)
+
+      expect(read_spread(from: today, to: today).fetch("buckets").sum { it.fetch("views") }).to eq(0)
+    end
+
+    it "refuses a range older than the raw visits and still gives the days", :aggregate_failures do
+      roll_up(today - 120, views: 9, visitors: 4)
+      answer = mcp_answer("read_analytics", from: (today - 120).iso8601, to: today.iso8601)
+
+      expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+      expect(answer).not_to have_key("read_spread")
+      expect(answer.fetch("totals")).to include("views" => 9)
     end
   end
 end

@@ -116,6 +116,8 @@ module MCP
 
         def reach_between(server_context) = server_context.fetch(:reach_between)
 
+        def read_spread_between(server_context) = server_context.fetch(:read_spread_between)
+
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
         def reject_edits(server_context) = server_context.fetch(:reject_edits)
