@@ -1069,7 +1069,8 @@ CREATE TABLE public.oauth_codes (
     expires_at timestamp with time zone NOT NULL,
     used_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    redirect_uri_sent boolean DEFAULT true NOT NULL
 );
 
 
@@ -2888,4 +2889,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260930000057_create_post_edits.rb'),
 ('20261001000058_create_api_tokens.rb'),
 ('20261001000059_create_post_deletions.rb'),
-('20261001000060_add_marked_spam_at_to_messages.rb');
+('20261001000060_add_marked_spam_at_to_messages.rb'),
+('20261001000061_add_redirect_uri_sent_to_oauth_codes.rb');

@@ -144,6 +144,30 @@ RSpec.describe "OAuth token", type: :request do
     end
   end
 
+  describe "a code a client asked for without a redirect URI" do
+    def authorization_params = super.except(:redirect_uri)
+
+    it "grants tokens to an exchange that also leaves it out" do
+      expect(exchange_response(redirect_uri: nil).status).to eq(200)
+    end
+
+    it "grants tokens to an exchange that names the URI it fell back to" do
+      expect(exchange_response.status).to eq(200)
+    end
+
+    it "refuses another redirect URI" do
+      exchange(redirect_uri: "https://elsewhere.example/callback")
+
+      expect(document["error"]).to eq("invalid_grant")
+    end
+
+    it "issues no token when it refuses" do
+      exchange(redirect_uri: "https://elsewhere.example/callback")
+
+      expect(tokens.count).to eq(0)
+    end
+  end
+
   describe "a code exchange it refuses" do
     it "refuses a second exchange of the same code" do
       exchange
@@ -184,7 +208,7 @@ RSpec.describe "OAuth token", type: :request do
       expect(document["error"]).to eq("invalid_grant")
     end
 
-    it "refuses a missing redirect URI" do
+    it "refuses a missing redirect URI when the client sent one to be authorized" do
       exchange(redirect_uri: nil)
 
       expect(document["error"]).to eq("invalid_grant")

@@ -49,7 +49,7 @@ module MCP
       end
 
       def check_grant(code, request)
-        return refuse(UNUSABLE_REDIRECT_URI) unless request[:redirect_uri] == code.redirect_uri
+        return refuse(UNUSABLE_REDIRECT_URI) unless redirect_uri_matches?(code, request[:redirect_uri])
         return refuse(UNUSABLE_VERIFIER) unless OAuth::PKCE.matches?(code.code_challenge, request[:code_verifier])
 
         Success(code)
@@ -82,6 +82,10 @@ module MCP
 
       def grant(client, record)
         issue_tokens.call(oauth_client_id: client.id, resource: record.resource, scopes: record.scopes)
+      end
+
+      def redirect_uri_matches?(code, redirect_uri)
+        redirect_uri.nil? ? !code.redirect_uri_sent : redirect_uri == code.redirect_uri
       end
 
       def refuse(description, error: INVALID_GRANT) = Failure([REJECT, { error:, error_description: description }])

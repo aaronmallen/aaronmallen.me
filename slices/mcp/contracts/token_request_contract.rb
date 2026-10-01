@@ -7,7 +7,7 @@ module MCP
       MISSING = "missing"
       REFRESH_TOKEN = "refresh_token"
       NEEDED = {
-        AUTHORIZATION_CODE => %i[code code_verifier redirect_uri],
+        AUTHORIZATION_CODE => %i[code code_verifier],
         REFRESH_TOKEN => %i[refresh_token],
       }.freeze
 

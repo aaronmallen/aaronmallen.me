@@ -98,6 +98,7 @@ module MCP
             expires_at: Time.now + CODE_LIFETIME,
             oauth_client_id: client.id,
             redirect_uri:,
+            redirect_uri_sent: !request[:redirect_uri].nil?,
             resource: request[:resource] || OAuth::Metadata.protected_resource(issuer)[:resource],
             scopes:,
           )

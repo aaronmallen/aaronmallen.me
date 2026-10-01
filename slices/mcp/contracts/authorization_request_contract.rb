@@ -13,6 +13,7 @@ module MCP
         required(:response_type).filled(:string, included_in?: OAuth::Metadata::RESPONSE_TYPES)
         required(:code_challenge).filled(:string, format?: OAuth::PKCE::SHAPE)
         optional(:code_challenge_method).value(UNCOERCED) { nil? | eql?(OAuth::PKCE::METHOD) }
+        optional(:redirect_uri).value(UNCOERCED)
         optional(:resource).value(UNCOERCED)
         optional(:scope).maybe(:string, format?: SCOPE)
         optional(:state).value(UNCOERCED) { nil? | format?(STATE) }
