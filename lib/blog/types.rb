@@ -149,6 +149,7 @@ module Blog
       LabelTag = Types::Tag.constructor do |label|
         Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end
+      Lines = Types::String.constructor { |text| TrimmedText[text].gsub(/\r\n?/, "\n") }
       Networks = Types::Array.of(Types::NetworkName).constructor do |names|
         found = [*names].map(&:to_s)
 

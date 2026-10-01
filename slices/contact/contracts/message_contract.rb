@@ -10,7 +10,7 @@ module Contact
           Blog::Types::TrimmedText, :filled?, max_size?: MessageLimits::MAX_REPLY_TO, format?: EMAIL,
         )
         required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: MessageLimits::MAX_SUBJECT)
-        required(:body).value(Blog::Types::TrimmedText, :filled?, max_size?: MessageLimits::MAX_BODY)
+        required(:body).value(Blog::Types::Normalized::Lines, :filled?, max_size?: MessageLimits::MAX_BODY)
       end
 
       rule(:reply_to).validate(:without_controls)

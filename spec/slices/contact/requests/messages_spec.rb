@@ -6,6 +6,8 @@ RSpec.describe "Contact messages", type: :request do
   let(:message_repo) { Contact::Slice["repos.message_repo"] }
   let(:sender) { Analytics::Slice["operations.hash_visitor"].call(address: "127.0.0.1") }
 
+  def crlf_lines = Array.new(Contact::MessageLimits::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
+
   def send_message(**changes) = post("/contact", message: fields.merge(changes))
 
   def stored = message_repo.by_status(Blog::Types::MessageStatus["unread"])
@@ -27,6 +29,24 @@ RSpec.describe "Contact messages", type: :request do
       send_message(body: "a" * Contact::MessageLimits::MAX_BODY)
 
       expect(last_response.status).to eq(302)
+    end
+
+    it "is stored with a body at the cap as the counter counts it, with the browser's line breaks" do
+      send_message(body: "#{crlf_lines}a")
+
+      expect(last_response.status).to eq(302)
+    end
+
+    it "is refused with a body over the cap once its line breaks fold" do
+      send_message(body: "#{crlf_lines}aa")
+
+      expect(last_response.status).to eq(422)
+    end
+
+    it "is stored with every line break in the body as a newline" do
+      send_message(body: "About\r\nthe\rbeacon\n")
+
+      expect(stored.first.body).to eq("About\nthe\nbeacon")
     end
 
     it "is refused with a subject over the cap" do
