@@ -13,10 +13,13 @@ module MCP
         held = { oauth_client_id:, resource:, scopes: }
 
         transaction do
+          access_token, access = issue(Repos::OAuthTokenRepo::ACCESS, ACCESS_LIFETIME, **held)
+          refresh_token, = issue(Repos::OAuthTokenRepo::REFRESH, REFRESH_LIFETIME, access_token_id: access.id, **held)
+
           {
-            access_token: issue(Repos::OAuthTokenRepo::ACCESS, ACCESS_LIFETIME, **held),
+            access_token:,
             expires_in: ACCESS_LIFETIME,
-            refresh_token: issue(Repos::OAuthTokenRepo::REFRESH, REFRESH_LIFETIME, **held),
+            refresh_token:,
             scope: scopes.join(OAuth::Scope::SEPARATOR),
             token_type: BEARER,
           }
@@ -26,9 +29,9 @@ module MCP
       private
 
       def issue(type, lifetime, **held)
-        OAuth::Secret.generate.tap do |token|
-          token_repo.issue(token:, type:, expires_at: Time.now + lifetime, **held)
-        end
+        token = OAuth::Secret.generate
+
+        [token, token_repo.issue(token:, type:, expires_at: Time.now + lifetime, **held)]
       end
     end
   end

@@ -240,6 +240,37 @@ RSpec.describe "MCP endpoint", type: :request do
     end
   end
 
+  describe "a refresh" do
+    def rotate(token)
+      post "/oauth/token", { client_id: client.client_id, grant_type: "refresh_token", refresh_token: token, resource: }
+      document
+    end
+
+    it "refuses the access token issued with the refresh token it spent" do
+      token = access_token
+      rotate(refresh_token)
+      rpc("tools/list", authorization: "Bearer #{token}")
+
+      expect(last_response.status).to eq(401)
+    end
+
+    it "answers the access token it hands out" do
+      token = rotate(refresh_token).fetch("access_token")
+      rpc("tools/list", authorization: "Bearer #{token}")
+
+      expect(last_response.status).to eq(200)
+    end
+
+    it "keeps another pair the client holds working" do
+      spent = refresh_token
+      other = connect.fetch("access_token")
+      rotate(spent)
+      rpc("tools/list", authorization: "Bearer #{other}")
+
+      expect(last_response.status).to eq(200)
+    end
+  end
+
   describe "a client that asks without naming a resource" do
     def resource = nil
 

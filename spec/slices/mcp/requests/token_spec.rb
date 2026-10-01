@@ -289,6 +289,25 @@ RSpec.describe "OAuth token", type: :request do
       expect(tokens.with_digest(digest).one[:revoked_at]).not_to be_nil
     end
 
+    it "revokes the access token issued with the refresh token it was given" do
+      digest = MCP::OAuth::Secret.digest(granted.fetch("access_token"))
+
+      expect(tokens.with_digest(digest).one[:revoked_at]).not_to be_nil
+    end
+
+    it "leaves the access token it hands out live" do
+      digest = MCP::OAuth::Secret.digest(document.fetch("access_token"))
+
+      expect(tokens.with_digest(digest).one[:revoked_at]).to be_nil
+    end
+
+    it "ties the new refresh token to the new access token" do
+      access = tokens.with_digest(MCP::OAuth::Secret.digest(document.fetch("access_token"))).one
+      refresh = tokens.with_digest(MCP::OAuth::Secret.digest(document.fetch("refresh_token"))).one
+
+      expect(refresh[:access_token_id]).to eq(access[:id])
+    end
+
     it "refuses the refresh token a second time" do
       refresh(granted.fetch("refresh_token"))
 
@@ -299,6 +318,52 @@ RSpec.describe "OAuth token", type: :request do
       refresh(granted.fetch("refresh_token"))
 
       expect(tokens.to_a.map { it[:revoked_at] }).to all(be_truthy)
+    end
+  end
+
+  describe "refreshing one of two pairs a client holds" do
+    let(:other) do
+      exchange(code: authorization_code)
+      document
+    end
+
+    def live?(token) = tokens.with_digest(MCP::OAuth::Secret.digest(token)).one[:revoked_at].nil?
+
+    before do
+      other
+      exchange
+      refresh(document.fetch("refresh_token"))
+    end
+
+    it "leaves the other access token live" do
+      expect(live?(other.fetch("access_token"))).to be(true)
+    end
+
+    it "leaves the other refresh token live" do
+      expect(live?(other.fetch("refresh_token"))).to be(true)
+    end
+  end
+
+  describe "refreshing a pair issued before tokens were tied together" do
+    let(:granted) do
+      exchange
+      document
+    end
+
+    before do
+      granted
+      tokens.update(access_token_id: nil)
+      refresh(granted.fetch("refresh_token"))
+    end
+
+    it "rotates the refresh token" do
+      expect(last_response.status).to eq(200)
+    end
+
+    it "leaves the old access token to expire on its own" do
+      digest = MCP::OAuth::Secret.digest(granted.fetch("access_token"))
+
+      expect(tokens.with_digest(digest).one[:revoked_at]).to be_nil
     end
   end
 

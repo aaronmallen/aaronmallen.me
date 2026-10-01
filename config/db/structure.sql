@@ -1104,7 +1104,8 @@ CREATE TABLE public.oauth_tokens (
     expires_at timestamp with time zone NOT NULL,
     revoked_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    access_token_id integer
 );
 
 
@@ -2214,6 +2215,13 @@ CREATE INDEX oauth_codes_oauth_client_id_index ON public.oauth_codes USING btree
 
 
 --
+-- Name: oauth_tokens_access_token_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX oauth_tokens_access_token_id_index ON public.oauth_tokens USING btree (access_token_id);
+
+
+--
 -- Name: oauth_tokens_expires_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2668,6 +2676,14 @@ ALTER TABLE ONLY public.oauth_codes
 
 
 --
+-- Name: oauth_tokens oauth_tokens_access_token_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.oauth_tokens
+    ADD CONSTRAINT oauth_tokens_access_token_id_fkey FOREIGN KEY (access_token_id) REFERENCES public.oauth_tokens(id) ON DELETE SET NULL;
+
+
+--
 -- Name: oauth_tokens oauth_tokens_oauth_client_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2913,4 +2929,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261001000060_add_marked_spam_at_to_messages.rb'),
 ('20261001000061_add_redirect_uri_sent_to_oauth_codes.rb'),
 ('20261001000062_create_spam_senders.rb'),
-('20261001000063_add_spam_reason_to_webmentions.rb');
+('20261001000063_add_spam_reason_to_webmentions.rb'),
+('20261001000065_add_access_token_id_to_oauth_tokens.rb');
