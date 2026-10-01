@@ -60,6 +60,8 @@ module Analytics
 
       def hourly = unordered.select(&HOURLY).group { HOUR }.order(:hour)
 
+      def known(column) = exclude(column => nil)
+
       def newest_first = order(self[:occurred_at].desc, self[:id].desc)
 
       def occurred_before(time) = where { occurred_at < time }
@@ -67,6 +69,8 @@ module Analytics
       def oldest_occurred_at = unordered.dataset.min(:occurred_at)
 
       def on_day(day) = between_days(day, day)
+
+      def page_counts_by(column) = counts_by(column).select_append(:path).group_append(:path)
 
       def paths
         bouncers = bounced

@@ -42,6 +42,14 @@ module Analytics
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }
 
+      def origin(visit, address:, base_url:)
+        {
+          referrer_host: referrer_host(visit[:referrer], base_url),
+          country_code: countries.code(address),
+          source: Ref.source(visit[Contracts::VisitContract::REF]),
+        }
+      end
+
       def read(visit, visitor_hash)
         matched = event_repo.record_read_seconds(
           visitor_hash:,
@@ -83,8 +91,7 @@ module Analytics
           title: title(visit[:title]),
           **hashes,
           address_hash:,
-          referrer_host: referrer_host(visit[:referrer], base_url),
-          country_code: countries.code(address),
+          **origin(visit, address:, base_url:),
           view_token: visit[:view_token],
           limit: settings.analytics[:throttle_limit],
           since: window_opened_at,

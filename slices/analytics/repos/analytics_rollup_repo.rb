@@ -19,6 +19,10 @@ module Analytics
 
       def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_visitors.to_a
 
+      def sources(from:, to:, path: nil)
+        analytics_rollup_sources.between(from, to).for_path(path).top_by_visitors.to_a
+      end
+
       def store(summary)
         transaction do
           analytics_rollups.command(:store).call(day: summary.day, **summary.totals.to_h)
@@ -62,6 +66,7 @@ module Analytics
         replace(analytics_rollup_paths, summary.day, summary.paths)
         replace(analytics_rollup_referrers, summary.day, summary.referrers)
         replace(analytics_rollup_countries, summary.day, summary.countries)
+        replace(analytics_rollup_sources, summary.day, summary.sources)
       end
     end
   end

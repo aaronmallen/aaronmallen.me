@@ -46,6 +46,38 @@ RSpec.describe "Visit counting", type: :request do
       expect(counting { view }.grep(/\ASELECT count\(\*\).*address_hash/i)).to have(1).item
     end
 
+    it "stores the ref the page was tagged with as its source" do
+      view(ref: "reddit")
+
+      expect(stored.first.source).to eq("reddit")
+    end
+
+    it "stores a hand-typed ref in lower case" do
+      view(ref: " Mastodon ")
+
+      expect(stored.first.source).to eq("mastodon")
+    end
+
+    it "stores no source for a view with no ref" do
+      view
+
+      expect(stored.first.source).to be_nil
+    end
+
+    [
+      ["a ref with spaces in it", "news letter"],
+      ["a ref with markup", "<b>x</b>"],
+      ["a ref past #{Analytics::Ref::MAX_SOURCE} characters", "a" * (Analytics::Ref::MAX_SOURCE + 1)],
+      ["a blank ref", "  "],
+      ["a null ref", nil],
+    ].each do |named, ref|
+      it "drops #{named} and still stores the view" do
+        view(ref:)
+
+        expect(stored.map(&:source)).to eq([nil])
+      end
+    end
+
     it "keeps no title when the page sent a blank one" do
       view(title: "   ")
 

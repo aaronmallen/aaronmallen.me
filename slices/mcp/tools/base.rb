@@ -140,6 +140,8 @@ module MCP
 
         def social_posts_dated_between(server_context) = server_context.fetch(:social_posts_dated_between)
 
+        def sources_between(server_context) = server_context.fetch(:sources_between)
+
         def suggestion_by_id(server_context) = server_context.fetch(:suggestion_by_id)
 
         def suggestions_between(server_context) = server_context.fetch(:suggestions_between)

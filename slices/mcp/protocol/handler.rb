@@ -80,6 +80,7 @@ module MCP
         save_task: "api.endpoints.save_task",
         schedule_task: "api.endpoints.schedule_task",
         social_posts_dated_between: "social.queries.social_posts_dated_between",
+        sources_between: "analytics.queries.sources_between",
         start_task: "api.endpoints.start_task",
         suggestion_by_id: "suggestions.queries.by_id",
         suggestions_between: "suggestions.queries.created_between",

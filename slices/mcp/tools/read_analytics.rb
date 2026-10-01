@@ -9,7 +9,7 @@ module MCP
                     "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
-      RANKED = %i[paths referrers countries].freeze
+      RANKED = %i[paths referrers countries sources].freeze
       RAW_REFUSAL = "hours, since and read_spread read raw visits, which the site keeps for 90 days; start from " \
                     "or since inside them to get these. The daily counts still hold"
       SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
@@ -29,6 +29,10 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
+                  "sources gives the top #{TOP} ref tags by visitors, each with its views and visitors: a visit " \
+                  "to a link that carries ?#{Analytics::Ref::KEY}=<source> counts under that source, so the " \
+                  "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
+                  "hand-typed tags count too. sources leaves out visits with no tag. " \
                   "Totals also give reach, which counts each reader once per Chicago calendar month and adds up " \
                   "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
@@ -38,9 +42,9 @@ module MCP
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
-                  "day, with no top lists. A page nobody visited reads as zeros. For a published post's path, " \
-                  "since_publish numbers each day of the range from the Chicago day the post went out, which is " \
-                  "day 1. " \
+                  "day, and the sources that sent readers to it, with no other top lists. A page nobody visited " \
+                  "reads as zeros. For a published post's path, since_publish numbers each day of the range from " \
+                  "the Chicago day the post went out, which is day 1. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
                   "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
                   "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \
@@ -90,6 +94,7 @@ module MCP
             path:,
             totals: totals(found, range, server_context, path:),
             days: dated(days),
+            sources: sources(range, path, server_context),
             **raw(range, at, path, server_context),
             **since_publish(post_at(path, server_context), days),
           )
@@ -98,6 +103,12 @@ module MCP
         def post_at(path, server_context)
           slug = path.delete_prefix("#{Blog::Site::WRITING}/")
           published_post_by_slug(server_context).call(slug) unless slug == path
+        end
+
+        def ranked(range, server_context)
+          found = analytics_between(server_context).call(from: range.first, to: range.last)
+
+          found.merge(sources: sources(range, nil, server_context))
         end
 
         def raw(range, at, path, server_context)
@@ -132,10 +143,14 @@ module MCP
           { since_publish: numbered(days.select { it.fetch(:day) >= first }, first) }
         end
 
+        def sources(range, path, server_context)
+          sources_between(server_context).call(from: range.first, to: range.last, path:).take(TOP)
+        end
+
         def stamped(time) = Blog::TimeZone.local(time).iso8601
 
         def summary(range, at, server_context)
-          found = analytics_between(server_context).call(from: range.first, to: range.last)
+          found = ranked(range, server_context)
 
           answer(
             from: range.first.iso8601,

@@ -33,6 +33,12 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def rollup_repo = Analytics::Slice["repos.analytics_rollup_repo"]
 
+  def sources_of(path, on = day)
+    rows = rollup_repo.analytics_rollup_sources.on(on).for_path(path).order(:source).to_a
+
+    rows.map { it.to_h.values_at(:source, :views, :visitors) }
+  end
+
   def stored_visitors(table, key, on = day)
     rollup_repo.public_send(table).on(on).order(key).to_a.to_h { [it[key], it.visitors] }
   end
@@ -119,6 +125,28 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       expect(stored_visitors(:analytics_rollup_referrers, :host)).to eq("blog.example" => 1, "news.example" => 1)
     end
 
+    describe "the sources" do
+      before do
+        event(path: "/writing/hello", source: "reddit", visitor_hash:)
+        event(path: "/writing/other", source: "reddit", visitor_hash:)
+        event(path: "/writing/other", source: "feed")
+        event(path: "/writing/other")
+        roll_up
+      end
+
+      it "stores the whole site's under no path, each reader once" do
+        expect(sources_of(nil)).to eq([["feed", 1, 1], ["reddit", 2, 1]])
+      end
+
+      it "stores each page's under its own path" do
+        expect(sources_of("/writing/hello")).to eq([["reddit", 1, 1]])
+      end
+
+      it "leaves out the views with no ref" do
+        expect(sources_of("/writing/other")).to eq([["feed", 1, 1], ["reddit", 1, 1]])
+      end
+    end
+
     it "leaves today's events for tomorrow's run" do
       create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today))
       roll_up
@@ -178,7 +206,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
   end
 
   describe "run twice" do
-    before { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP") }
+    before { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP", source: "feed") }
 
     it "stores the same totals" do
       2.times { roll_up }
@@ -188,10 +216,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
     it "stores the same rows", :aggregate_failures do
       roll_up
-      stored = [paths, referrers, countries]
+      stored = [paths, referrers, countries, sources_of(nil)]
       roll_up
 
-      expect([paths, referrers, countries]).to eq(stored)
+      expect([paths, referrers, countries, sources_of(nil)]).to eq(stored)
     end
   end
 

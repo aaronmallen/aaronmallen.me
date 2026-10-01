@@ -274,6 +274,72 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
   end
 
+  describe "read_analytics sources" do
+    def figures(rows) = rows.map { it.values_at("source", "views", "visitors") }
+
+    def read_sources(from: today - 6, to: today, **)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **).fetch("sources")
+    end
+
+    def roll_up_source(day, source, path: nil, views: 5, visitors: 3)
+      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_repo"].by_day(day)
+      create(:analytics_rollup_source, day:, path:, source:, views:, visitors:)
+    end
+
+    it "ranks the site's sources by visitors over the range" do
+      roll_up_source(today - 2, "feed", views: 9, visitors: 2)
+      roll_up_source(today - 1, "reddit", views: 4, visitors: 3)
+      roll_up_source(today - 1, "feed", views: 1, visitors: 1)
+
+      expect(figures(read_sources)).to eq([["feed", 10, 3], ["reddit", 4, 3]])
+    end
+
+    it "reads the site's sources apart from each page's" do
+      roll_up_source(today - 1, "reddit", visitors: 2)
+      roll_up_source(today - 1, "reddit", path: "/writing/hello", views: 40, visitors: 30)
+
+      expect(figures(read_sources)).to eq([["reddit", 5, 2]])
+    end
+
+    it "gives one page's sources with a path" do
+      roll_up_source(today - 1, "reddit", path: "/writing/hello", views: 4, visitors: 2)
+      roll_up_source(today - 1, "feed", path: "/writing/other")
+      roll_up_source(today - 1, "feed")
+
+      expect(figures(read_sources(path: "/writing/hello"))).to eq([["reddit", 4, 2]])
+    end
+
+    describe "today, before it rolls up" do
+      before do
+        reader = Digest::SHA256.hexdigest("reader")
+        2.times { create(:analytics_event, path: "/writing/hello", source: "mastodon", visitor_hash: reader) }
+        create(:analytics_event, path: "/writing/other", source: "mastodon")
+        create(:analytics_event, path: "/writing/other")
+      end
+
+      it "counts the site's sources from the visits" do
+        expect(figures(read_sources)).to eq([["mastodon", 3, 2]])
+      end
+
+      it "counts one page's sources from the visits" do
+        expect(figures(read_sources(path: "/writing/hello"))).to eq([["mastodon", 2, 1]])
+      end
+    end
+
+    it "keeps a page's sources past the 90 days of raw visits" do
+      old = today - 200
+      roll_up_source(old, "bluesky", path: "/writing/hello")
+
+      expect(figures(read_sources(from: old, to: old, path: "/writing/hello"))).to eq([["bluesky", 5, 3]])
+    end
+
+    it "gives no sources when no visit carried a ref" do
+      create(:analytics_event)
+
+      expect(read_sources).to eq([])
+    end
+  end
+
   describe "read_analytics with a path" do
     def late_evening(day) = Blog::TimeZone.day_start(day) + (23 * 3_600) + 1_800
 
@@ -313,7 +379,7 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days hours read_spread])
+      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days sources hours read_spread])
     end
 
     it "answers an unknown path with zeros" do

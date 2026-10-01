@@ -80,6 +80,18 @@ RSpec.describe "Analytics beacon", type: :feature do
     expect(wait_for { events.first }.title).to eq(page.title)
   end
 
+  it "stores the ref of a tagged link as the source, apart from the path" do
+    visit "/writing?ref=reddit"
+
+    expect(recorded("/writing")).to have_attributes(path: "/writing", source: "reddit")
+  end
+
+  it "stores no source for a ref that is no plain token" do
+    visit "/about?ref=%20"
+
+    expect(recorded("/about").source).to be_nil
+  end
+
   it "sends only the origin of a referrer too long to store" do
     visit_from("https://news.example/#{'a' * 2100}", path: "/writing")
 

@@ -13,10 +13,11 @@ const originOf = (url) => {
 };
 
 export function setupBeacon() {
-  const endpoint = document.body.dataset.beacon;
+  const { beacon: endpoint, beaconRef: refKey } = document.body.dataset;
   if (!endpoint || !navigator.sendBeacon) return;
 
   const path = location.pathname;
+  const ref = refKey && new URLSearchParams(location.search).get(refKey);
   const viewToken = mintToken();
   let opened = Date.now();
   let read = 0;
@@ -50,5 +51,5 @@ export function setupBeacon() {
     else readAgain();
   });
 
-  send({ kind: "view", title: document.title, referrer: originOf(document.referrer) });
+  send({ kind: "view", title: document.title, referrer: originOf(document.referrer), ...(ref && { [refKey]: ref }) });
 }

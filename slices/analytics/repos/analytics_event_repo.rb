@@ -47,6 +47,7 @@ module Analytics
           paths: window.paths.to_a,
           referrers: window.counts_by(:referrer_host, as: :host).to_a,
           countries: window.counts_by(:country_code).to_a,
+          sources: by_page(window.known(:source), :source),
         )
       end
 
@@ -59,6 +60,12 @@ module Analytics
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 
       private
+
+      def by_page(window, column)
+        site = window.counts_by(column).to_a.map { { path: nil, **it.to_h } }
+
+        site + window.page_counts_by(column).to_a.map(&:to_h)
+      end
 
       def scoped(window, path) = path ? window.for_path(path) : window
     end
