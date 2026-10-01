@@ -126,7 +126,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
   night and roll up analytics.
 
 [Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...HEAD
-[1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
+[1.2.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.0...1.0.1
