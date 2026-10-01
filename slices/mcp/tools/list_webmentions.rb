@@ -20,6 +20,7 @@ module MCP
 
       description "List the webmentions received over a range of days, newest first: each with the blog post it " \
                   "names, its type, its status, its source and author, its excerpt, and the reason given for spam. " \
+                  "Days and received_at run on #{Blog::TimeZone::NAME} time, and the answer names it as time_zone. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
@@ -37,6 +38,7 @@ module MCP
           answer(
             from: first.iso8601,
             to: last.iso8601,
+            time_zone: Blog::TimeZone::NAME,
             webmentions: found.rows.map { entry(it) },
             **Paging.fields(found),
           )
@@ -54,7 +56,7 @@ module MCP
             author_name: mention.author_name,
             author_url: mention.author_url,
             excerpt: mention.excerpt,
-            received_at: mention.received_at.utc.iso8601,
+            received_at: Blog::TimeZone.local(mention.received_at).iso8601,
             **spam_reason(mention),
           }
         end

@@ -3,6 +3,12 @@
 module MCP
   module Tools
     class ReadAnalytics < Base
+      DEFINITIONS = "A view is one page load. A visitor is a hash of the address and user agent that changes " \
+                    "each day and sets no cookie, so visitors add up day by day and one reader on two days counts " \
+                    "twice. A bounce is a visitor with one view that day across the whole site. read_seconds is " \
+                    "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
+                    "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
+                    "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RANKED = %i[paths referrers countries].freeze
       TOP = 25
 
@@ -19,14 +25,14 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
-                  "Visitors add up day by day, so one reader on two days counts twice. " \
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, with no top lists. A page nobody visited reads as zeros. For a published post's path, " \
-                  "since_publish numbers each day of the range from the Chicago day the post went out, which is day 1"
+                  "since_publish numbers each day of the range from the Chicago day the post went out, which is " \
+                  "day 1. #{DEFINITIONS}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -56,6 +62,7 @@ module MCP
           answer(
             from: range.first.iso8601,
             to: range.last.iso8601,
+            time_zone: Blog::TimeZone::NAME,
             path:,
             totals: found.fetch(:totals),
             days: dated(days),
@@ -81,6 +88,7 @@ module MCP
           answer(
             from: range.first.iso8601,
             to: range.last.iso8601,
+            time_zone: Blog::TimeZone::NAME,
             totals: found.fetch(:totals),
             days: dated(found.fetch(:days)),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },

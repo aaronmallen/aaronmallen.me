@@ -385,6 +385,19 @@ RSpec.describe "MCP social tools", type: :request do
       expect(listed.first).not_to have_key("spam_reason")
     end
 
+    it "names the time zone its days run on" do
+      call_tool("list_webmentions", **range)
+
+      expect(content.fetch("time_zone")).to eq("America/Chicago")
+    end
+
+    it "gives received_at in Chicago time with its offset, on the day it lists it under" do
+      create(:webmention, received_at: Blog::TimeZone.local_time(2026, 3, 31, 23, 30))
+      call_tool("list_webmentions", **range)
+
+      expect(listed.map { it.fetch("received_at") }).to eq(["2026-03-31T23:30:00-05:00"])
+    end
+
     it "refuses a range that runs backwards" do
       call_tool("list_webmentions", from: "2026-03-31", to: "2026-03-01")
 

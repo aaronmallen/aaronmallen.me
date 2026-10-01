@@ -178,6 +178,10 @@ RSpec.describe "MCP analytics tools", type: :request do
       expect(read.fetch("paths").length).to eq(MCP::Tools::ReadAnalytics::TOP)
     end
 
+    it "names the time zone its days run on" do
+      expect(read.fetch("time_zone")).to eq("America/Chicago")
+    end
+
     it "refuses a day it cannot read" do
       expect(mcp_text("read_analytics", from: "last week", to: today.iso8601))
         .to eq("give from and to as days, such as 2026-01-01")
@@ -226,7 +230,7 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys).to eq(%w[from to path totals days])
+      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days])
     end
 
     it "answers an unknown path with zeros" do
