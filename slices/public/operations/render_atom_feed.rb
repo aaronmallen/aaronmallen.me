@@ -10,6 +10,7 @@ module Public
       MEDIA_TYPE = "application/atom+xml"
       NAMESPACE = "http://www.w3.org/2005/Atom"
       NO_EDITS = Blog::Constants::EMPTY_ARRAY
+      REF = "feed"
 
       include Deps["i18n", "routes", "settings", edits_for_posts: "posts.queries.edits_for_posts"]
 
@@ -51,7 +52,7 @@ module Public
         xml.entry do
           xml.id(url)
           xml.title(post.title)
-          xml.link(rel: "alternate", type: HTML_TYPE, href: url)
+          xml.link(rel: "alternate", type: HTML_TYPE, href: ::Analytics::Ref.tag(url, REF))
           entry_dates(xml, post, changed_at)
           post.tags.each { xml.category(term: it.name) }
           entry_body(xml, post, edits)

@@ -714,6 +714,83 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a post that links to the site" do
+    let(:post_url) { "https://aaronmallen.me/writing/hello" }
+
+    before { stub_bluesky }
+
+    def bluesky_text(social_post)
+      deliver(social_post, "bluesky")
+
+      bluesky_writes.first.dig("record", "text")
+    end
+
+    def mastodon_text(social_post)
+      sent = []
+      stub_request(:post, statuses).to_return do |request|
+        sent << JSON.parse(request.body).fetch("status")
+        json_response(id: "1", url: "https://ruby.social/@ada/1")
+      end
+      deliver(social_post, "mastodon")
+
+      sent.first
+    end
+
+    it "tags the link for each network", :aggregate_failures do
+      social_post = queued(targets: %w[mastodon bluesky], parts: ["read #{post_url}."])
+
+      expect(mastodon_text(social_post)).to eq("read #{post_url}?ref=mastodon.")
+      expect(bluesky_text(social_post)).to eq("read #{post_url}?ref=bluesky.")
+    end
+
+    it "marks the tagged link with a Bluesky facet" do
+      expect(facets_for("see #{post_url}")).to eq([facet("#{post_url}?ref=bluesky", 4, 52)])
+    end
+
+    it "keeps the stored text untagged" do
+      social_post = queued(targets: %w[mastodon bluesky], parts: ["read #{post_url}"])
+      mastodon_text(social_post)
+      bluesky_text(social_post)
+
+      expect(reloaded(social_post).parts.map(&:body)).to eq(["read #{post_url}"])
+    end
+
+    it "leaves links to other sites as written" do
+      expect(mastodon_text(queued(parts: ["see https://example.com/post and #{post_url}"])))
+        .to eq("see https://example.com/post and #{post_url}?ref=mastodon")
+    end
+
+    {
+      "no path" => ["https://aaronmallen.me", "https://aaronmallen.me/?ref=mastodon"],
+      "a query" => ["https://aaronmallen.me/writing?page=2", "https://aaronmallen.me/writing?page=2&ref=mastodon"],
+      "a fragment" => ["https://aaronmallen.me/writing/hello#end", "https://aaronmallen.me/writing/hello?ref=mastodon#end"],
+      "a ref of its own" => ["https://aaronmallen.me/writing/hello?ref=talk", "https://aaronmallen.me/writing/hello?ref=talk"],
+    }.each do |what, (written, sent)|
+      it "tags a link with #{what} as #{sent}" do
+        expect(mastodon_text(queued(parts: ["see #{written}"]))).to eq("see #{sent}")
+      end
+    end
+
+    it "keeps a mention after a tagged link marked over the right bytes" do
+      create(:person, key: "ada", bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada-lovelace")
+
+      expect(facets_for("#{post_url} @{ada}").last).to include("index" => { "byteEnd" => 65, "byteStart" => 49 })
+    end
+
+    it "refuses a part the tag pushes over the limit" do
+      social_post = queued(targets: %w[bluesky], parts: ["#{'a' * (299 - post_url.size)} #{post_url}"])
+      deliver(social_post, "bluesky")
+
+      expect(delivery(social_post,
+                      "bluesky")).to have_attributes(failed: true, error: "Part 1 is over the bluesky limit")
+    end
+
+    it "sends a part the tag brings right up to the limit" do
+      expect(bluesky_text(queued(targets: %w[bluesky], parts: ["#{'a' * (287 - post_url.size)} #{post_url}"])))
+        .to end_with("?ref=bluesky")
+    end
+  end
+
   describe "a network with no credentials" do
     {
       "nothing set" => {},

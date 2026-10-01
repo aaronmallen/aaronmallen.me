@@ -8,6 +8,7 @@ module Social
       SEND_FAILED = :send_failed
 
       include Deps[
+        "settings",
         mention_directory: "queries.mention_directory",
         networks: "networks.all",
         social_post_repo: "repos.social_post_repo",
@@ -50,9 +51,10 @@ module Social
       end
 
       def expanded(social_post, network)
-        directory = mention_directory.call(social_post.parts.map(&:body))
+        bodies = social_post.parts.map { tagged(it.body, network) }
+        directory = mention_directory.call(bodies)
 
-        social_post.parts.map { directory.expand(it.body, network) }
+        bodies.map { directory.expand(it, network) }
       end
 
       def found(social_post_id)
@@ -103,6 +105,10 @@ module Social
         deliveries = social_post.deliveries.to_h { [it.network, it] }
 
         social_post.targets.all? { done?(deliveries[it], social_post.parts.size) }
+      end
+
+      def tagged(body, network)
+        Links.new(body).map { settings.owns?(it) ? ::Analytics::Ref.tag(it, network) : it }
       end
 
       def targeted(social_post_id, network)

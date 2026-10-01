@@ -101,9 +101,13 @@ RSpec.describe "Feeds", type: :request do
       get "/writing.atom"
     end
 
-    it "has the title and a link to the article" do
+    it "has the title and a link to the article tagged as from the feed" do
       expect([entry.at_xpath("title").text, entry.at_xpath("link[@rel='alternate']")[:href]])
-        .to eq(["Hello", "https://aaronmallen.me/writing/hello"])
+        .to eq(["Hello", "https://aaronmallen.me/writing/hello?ref=feed"])
+    end
+
+    it "keeps the untagged article url as its id" do
+      expect(entry.at_xpath("id").text).to eq("https://aaronmallen.me/writing/hello")
     end
 
     it "has the publish and update times" do

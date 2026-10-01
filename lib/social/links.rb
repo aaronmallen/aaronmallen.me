@@ -25,6 +25,14 @@ module Social
       @text = text.to_s
     end
 
+    def map
+      @text.gsub(PATTERN) do |match|
+        url = self.class.trim(match)
+
+        yield(url) + match.delete_prefix(url)
+      end
+    end
+
     def to_a
       found = []
       at = 0
