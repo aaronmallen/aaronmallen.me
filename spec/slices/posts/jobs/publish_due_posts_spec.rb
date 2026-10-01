@@ -17,6 +17,16 @@ RSpec.describe Posts::Jobs::PublishDuePosts do
     perform
   end
 
+  def perform_with_failures(*broken)
+    publish_post = Posts::Slice["operations.publish_post"]
+    allow(publish_post).to(receive(:call).and_wrap_original do |publish, id, **options|
+      failure = broken.find { it.first.id == id }
+      failure ? raise(failure.last) : publish.call(id, **options)
+    end)
+    replace_component("operations.publish_post", publish_post)
+    perform
+  end
+
   def published_ids = queued.map { it["args"].first }
 
   def queued = [Social::Jobs::SyndicatePost, Social::Jobs::SendWebmentions].flat_map(&:jobs)
@@ -104,5 +114,55 @@ RSpec.describe Posts::Jobs::PublishDuePosts do
     perform_with_edit_after_select([moved], published_at: later)
 
     expect([moved, kept].map { reloaded(it).status }).to eq(%w[scheduled published])
+  end
+
+  describe "a post that raises" do
+    let(:agent) { Hanami.app["honeybadger.agent"] }
+    let(:crash) { RuntimeError.new("the post broke") }
+    let(:other_crash) { RuntimeError.new("another post broke") }
+
+    def first_due = due(published_at: Time.now.round - 120)
+
+    def perform_past(*)
+      perform_with_failures(*)
+    rescue RuntimeError
+      nil
+    end
+
+    before { allow(agent).to receive(:notify) }
+
+    it "publishes every other due post" do
+      kept = [due, due]
+      perform_past([first_due, crash])
+
+      expect(kept.map { reloaded(it).status }).to all(eq("published"))
+    end
+
+    it "leaves the post that raised scheduled" do
+      broken = first_due
+      perform_past([broken, crash])
+
+      expect(reloaded(broken).status).to eq("scheduled")
+    end
+
+    it "fails the job with what the post raised" do
+      expect { perform_with_failures([first_due, crash]) }.to raise_error(crash)
+    end
+
+    it "fails the job with what the first post raised when two raise" do
+      expect { perform_with_failures([first_due, crash], [due, other_crash]) }.to raise_error(crash)
+    end
+
+    it "leaves the one error it raises for Sidekiq to report" do
+      perform_past([first_due, crash])
+
+      expect(agent).not_to have_received(:notify)
+    end
+
+    it "tells Honeybadger what each other post raised" do
+      perform_past([first_due, crash], [due, other_crash])
+
+      expect(agent).to have_received(:notify).with(other_crash).once
+    end
   end
 end
