@@ -150,6 +150,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   before do
     seed
+    connect_media_store
     sign_in_to_admin
   end
 

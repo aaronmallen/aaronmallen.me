@@ -29,7 +29,7 @@ module Admin
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template(&)
-          div(class: "edit", style: "--edit-height: #{@height}", data: { markdown_editor: "" }) do
+          div(class: "edit", style: "--edit-height: #{@height}", data: editor_data) do
             pane_head
             write_pane
             preview_pane(&)
@@ -43,11 +43,23 @@ module Admin
           mix(own, @attributes)
         end
 
+        def editor_data
+          return { markdown_editor: "" } unless uploads?
+
+          { markdown_editor: "", editor_upload: path(:admin_create_photo), editor_upload_failed: t(".upload.failed"),
+            editor_uploading: t(".upload.uploading") }
+        end
+
         def pane_head
           div(class: "edit-pane-head") do
             SegmentedControl(label: t(".view"), name: view_name, options: view_options, selected:)
             toolbar
           end
+        end
+
+        def pick_attributes
+          { class: "toolbar-button", type: "button", aria: { label: t(".upload.label") },
+            data: { editor_pick: "" } }
         end
 
         def preview_data
@@ -71,12 +83,24 @@ module Admin
                 t(text_key)
               end
             end
+            upload_button if uploads?
           end
         end
 
         def toolbar_attributes
           { class: "toolbar", role: "toolbar", aria: { label: t(".toolbar") },
             data: { editor_view: WRITE }, hidden: selected != WRITE }
+        end
+
+        def upload_button
+          button(**pick_attributes) { t(".upload.button") }
+          input(type: "file", accept: "image/*", multiple: true, hidden: true, data: { editor_file: "" })
+        end
+
+        def uploads?
+          return @uploads if defined?(@uploads)
+
+          @uploads = slice["media.store.client"].configured?
         end
 
         def view_name = @view_name || "#{@id}-view"
@@ -87,6 +111,7 @@ module Admin
           div(class: "edit-pane", data: { editor_view: WRITE }, hidden: selected != WRITE) do
             label(class: "sr-only", for: @id) { @label }
             textarea(**body_attributes) { @value }
+            p(class: "edit-alert", role: "alert", data: { editor_alert: "" }) if uploads?
           end
         end
       end

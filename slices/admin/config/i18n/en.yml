@@ -264,6 +264,11 @@ en:
           italic_label: "Italic"
           quote: "quote"
           quote_label: "Quote"
+        upload:
+          button: "photo"
+          failed: "The photo did not upload. Try again."
+          label: "Add a photo"
+          uploading: "Uploading"
         view: "Editor view"
         write: "Write"
       message_row:

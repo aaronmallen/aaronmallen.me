@@ -1518,6 +1518,10 @@
   @apply placeholder:text-ink-muted focus:outline-2 focus:-outline-offset-2 focus:outline-mk-blue;
 }
 
+@utility edit-alert {
+  @apply field-error not-empty:border-t not-empty:border-line not-empty:px-5 not-empty:py-2.5;
+}
+
 @utility sg-edits {
   @apply flex flex-col gap-3;
 }
