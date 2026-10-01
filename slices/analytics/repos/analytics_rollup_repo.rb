@@ -12,6 +12,7 @@ module Analytics
         analytics_rollup_page_referrers: :page_referrers,
         analytics_rollup_page_countries: :page_countries,
       }.freeze
+      TOP_ROWS = 100
       VIEW_DAYS = 90
 
       def by_day(day) = analytics_rollups.by_pk(day).one
@@ -38,7 +39,9 @@ module Analytics
 
       def reach_in(month) = analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
 
-      def referrers(from:, to:) = analytics_rollup_referrers.between(from, to).top_by_visitors.to_a
+      def referrers(from:, to:)
+        analytics_rollup_referrers.between(from, to).top_by_visitors.limit(TOP_ROWS).to_a
+      end
 
       def sources(from:, to:, path: nil)
         analytics_rollup_sources.between(from, to).for_path(path).top_by_visitors.to_a
@@ -60,7 +63,7 @@ module Analytics
         end
       end
 
-      def top_paths(from:, to:) = analytics_rollup_paths.between(from, to).top_by_views.to_a
+      def top_paths(from:, to:) = analytics_rollup_paths.between(from, to).top_by_views.limit(TOP_ROWS).to_a
 
       def totals(from:, to:) = analytics_rollups.between(from, to).totals.one
 

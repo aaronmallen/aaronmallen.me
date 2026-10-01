@@ -10,6 +10,7 @@ module Analytics
         paths: %i[views visitors read_seconds bounces].freeze,
         referrers: %i[views visitors].freeze,
       }.freeze
+      TOP_ROWS = Repos::AnalyticsRollupRepo::TOP_ROWS
       TOTALS = %i[views visitors read_seconds].freeze
       ZERO_DAY = { views: 0, visitors: 0 }.freeze
 
@@ -21,8 +22,8 @@ module Analytics
         {
           countries: ranked(:countries, rollup_repo.countries(from:, to:), live),
           days: days(from, to, live),
-          paths: ranked(:paths, rollup_repo.top_paths(from:, to:), live),
-          referrers: ranked(:referrers, rollup_repo.referrers(from:, to:), live),
+          paths: ranked(:paths, rollup_repo.top_paths(from:, to:), live).take(TOP_ROWS),
+          referrers: ranked(:referrers, rollup_repo.referrers(from:, to:), live).take(TOP_ROWS),
           totals: totals(from, to, live),
         }
       end
