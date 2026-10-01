@@ -6,7 +6,9 @@ module Admin
   module Auth
     class SessionReader
       def call(request)
-        Session.new(request.env[Rack::RACK_SESSION] || read_cookie(request.cookies[Blog::SessionCookie::KEY]))
+        request.env[Session::REQUEST_KEY] ||= Session.new(
+          request.env[Rack::RACK_SESSION] || read_cookie(request.cookies[Blog::SessionCookie::KEY]),
+        )
       end
 
       private

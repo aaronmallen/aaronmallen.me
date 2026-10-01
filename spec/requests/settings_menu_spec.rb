@@ -62,6 +62,14 @@ RSpec.describe "Settings menu", type: :request do
       expect(panel).to have_button("Sign out", visible: :all)
     end
 
+    it "reads the session cookie once for the action and the layout" do
+      secrets = Array(Admin::Slice.config.actions.sessions.options.first.fetch(:secrets))
+      allow(Rack::Session::Encryptor).to receive(:new).and_call_original
+      get "/about"
+
+      expect(Rack::Session::Encryptor).to have_received(:new).exactly(secrets.size).times
+    end
+
     it "sets no cookie on a public page" do
       get "/about"
 
