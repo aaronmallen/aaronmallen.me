@@ -18,6 +18,8 @@ module Tags
 
       schema :tags, infer: true
 
+      def count_uses(id, scope) = JOINS.values_at(*KINDS.fetch(scope)).sum { dataset.db[it].where(tag_id: id).count }
+
       def counts_by_kind(scope)
         JOINS.slice(*KINDS.fetch(scope)).transform_values do |join|
           dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)

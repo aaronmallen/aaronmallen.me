@@ -505,6 +505,22 @@ RSpec.describe "Admin tags", type: :request do
         expect(named("ruby")).not_to be_nil
       end
 
+      it "takes away a tag while other tags are in use" do
+        create(:post, tags: %w[rails])
+        send_to("/admin/tags/#{tag.id}/delete")
+
+        expect(stored(tag.id)).to be_nil
+      end
+
+      it "counts only the records that carry the tag" do
+        2.times { create(:post, tags: %w[ruby]) }
+        create(:post, tags: %w[rails])
+        send_to("/admin/tags/#{named('ruby').id}/delete")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "Kept · 2 records still carry it")
+      end
+
       it "says how many records kept it" do
         2.times { create(:post, tags: %w[ruby]) }
         send_to("/admin/tags/#{named('ruby').id}/delete")

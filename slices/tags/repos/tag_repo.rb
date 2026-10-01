@@ -11,6 +11,8 @@ module Tags
 
       def count_matching(scope, text) = matching(scope, text).count
 
+      def count_uses(tag) = tags.count_uses(tag.id, tag.scope)
+
       def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one
 
       def next_color(scope:) = tags.next_color(scope:)

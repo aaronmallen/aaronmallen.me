@@ -21,7 +21,7 @@ module Tags
       end
 
       def unused(tag)
-        held = tag_repo.usage(scope: tag.scope).fetch(tag.id, Blog::Constants::EMPTY_HASH).values.sum
+        held = tag_repo.count_uses(tag)
 
         held.zero? ? Success(tag) : Failure([:in_use, held])
       end
