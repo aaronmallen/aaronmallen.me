@@ -6,7 +6,10 @@ module Public
     ANY_MEDIA_TYPE = "*/*"
     FORBIDDEN = 403
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
+    OK = 200
+    PERSONAL_COOKIES = [Blog::SessionCookie::KEY, Blog::UI::Layouts::Application::THEME_COOKIE].freeze
     SAME_ORIGIN_FETCHES = %w[none same-origin].freeze
+    SHARED_CACHE_LIFETIME = 300
 
     include Deps[session_reader: "admin.auth.session_reader", version_atom_feed: "operations.version_atom_feed"]
 
@@ -20,6 +23,8 @@ module Public
         accept_types: [ANY_MEDIA_TYPE], content_types: ::Rack::Request::FORM_DATA_MEDIA_TYPES,
       )
     end
+
+    def self.share_with_caches = after(:share_with_caches)
 
     private
 
@@ -48,6 +53,13 @@ module Public
 
     def set_cache_policy(request, response)
       forbid_caching(request, response) if session_reader.call(request).signed_in?
+    end
+
+    def share_with_caches(request, response)
+      return unless response.status == OK && !response.headers.key?(CACHE_CONTROL)
+      return if request.cookies.keys.intersect?(PERSONAL_COOKIES)
+
+      response.cache_control(:public, max_age: 0, s_maxage: SHARED_CACHE_LIFETIME)
     end
 
     def version_feed_or_halt(request, response, posts)

@@ -6,6 +6,8 @@ module Public
       class Projects < Action
         include Deps[public_project_grid: "projects.queries.public_grid"]
 
+        share_with_caches
+
         def handle(_request, response)
           response[:projects] = public_project_grid.call
         end

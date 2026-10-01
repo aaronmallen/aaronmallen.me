@@ -20,6 +20,10 @@ RSpec.describe "The error pages in production", type: :request do
       expect(page).to have_title(Blog::Owner.full_name).and have_css("header a[href='/']", text: Blog::Owner.full_name)
     end
 
+    it "keeps it from a shared cache" do
+      expect(last_response.headers["Cache-Control"]).to be_nil
+    end
+
     it "links home" do
       expect(page).to have_css("main a[href='/']")
     end

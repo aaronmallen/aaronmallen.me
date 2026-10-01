@@ -14,6 +14,8 @@ module Public
           syndication_urls: "social.queries.syndication_urls",
         ]
 
+        share_with_caches
+
         def handle(request, response)
           slug = Blog::Types::Slug.call(path_param(request, :slug)) { not_found(response) }
           post = published_post_by_slug.call(slug)

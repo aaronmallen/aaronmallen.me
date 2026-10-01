@@ -6,6 +6,8 @@ module Public
       class About < Action
         include Deps[all_work_entries: "projects.queries.work_entries"]
 
+        share_with_caches
+
         def handle(_request, response)
           response[:work_entries] = all_work_entries.call
         end

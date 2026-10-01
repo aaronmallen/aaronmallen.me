@@ -5,6 +5,10 @@ RSpec.describe "Cache headers", type: :request do
 
   def page = Capybara.string(last_response.body)
 
+  def shared = "public, max-age=0, s-maxage=300"
+
+  def shared_paths(slug) = ["/", "/about", "/projects", "/writing", "/writing/#{slug}", "/writing/tags/ruby"]
+
   def vary = last_response.headers["Vary"]
 
   describe "a public page the operator asked for" do
@@ -52,8 +56,8 @@ RSpec.describe "Cache headers", type: :request do
       expect(page).to have_no_css("form[action='/admin/sign-out']", visible: :all)
     end
 
-    it "leaves a cache free to store it" do
-      expect(cache_control).to be_nil
+    it "lets a shared cache keep it for five minutes" do
+      expect(cache_control).to eq(shared)
     end
 
     it "keys on the cookie" do
@@ -71,7 +75,7 @@ RSpec.describe "Cache headers", type: :request do
       expect(page).to have_no_css("form[action='/admin/sign-out']", visible: :all)
     end
 
-    it "leaves a cache free to store it" do
+    it "keeps it from a shared cache" do
       expect(cache_control).to be_nil
     end
   end
@@ -83,7 +87,89 @@ RSpec.describe "Cache headers", type: :request do
       get "/"
     end
 
-    it "leaves a cache free to store it" do
+    it "lets a shared cache keep it" do
+      expect(cache_control).to eq(shared)
+    end
+  end
+
+  describe "a public page a visitor with a saved theme asked for" do
+    before do
+      set_cookie "#{Blog::UI::Layouts::Application::THEME_COOKIE}=dark"
+      get "/"
+    end
+
+    it "keeps it from a shared cache" do
+      expect(cache_control).to be_nil
+    end
+  end
+
+  describe "the public pages a visitor asked for" do
+    let(:article) { create(:post, :published, tags: ["ruby"]) }
+
+    it "lets a shared cache keep each one", :aggregate_failures do
+      shared_paths(article.slug).each do |path|
+        get path
+
+        expect([path, last_response.status, cache_control]).to eq([path, 200, shared])
+      end
+    end
+
+    it "shows an edit to a post on the next request", :aggregate_failures do
+      get "/writing/#{article.slug}"
+      Posts::Slice["repos.post_repo"].update(article.id, title: "Edited")
+      get "/writing/#{article.slug}"
+
+      expect(page).to have_css("h1", text: "Edited")
+      expect(cache_control).to eq(shared)
+    end
+  end
+
+  describe "the public pages the operator asked for" do
+    let(:article) { create(:post, :published, tags: ["ruby"]) }
+
+    before { sign_in_to_admin }
+
+    it "tells every cache not to store any of them", :aggregate_failures do
+      [*shared_paths(article.slug), "/contact"].each do |path|
+        get path
+
+        expect([path, cache_control]).to eq([path, "private, no-store"])
+      end
+    end
+  end
+
+  describe "the contact page a visitor asked for" do
+    before { get "/contact" }
+
+    it "tells every cache not to store it" do
+      expect(cache_control).to eq("private, no-store")
+    end
+  end
+
+  describe "a public page that is not there" do
+    it "keeps a missing post from a shared cache", :aggregate_failures do
+      get "/writing/no-such-post"
+
+      expect(last_response.status).to eq(404)
+      expect(cache_control).to be_nil
+    end
+
+    it "keeps a missing tag from a shared cache", :aggregate_failures do
+      get "/writing/tags/nothing"
+
+      expect(last_response.status).to eq(404)
+      expect(cache_control).to be_nil
+    end
+  end
+
+  describe "a tag page at another spelling" do
+    before do
+      create(:post, :published, tags: ["ruby"])
+      get "/writing/tags/Ruby"
+    end
+
+    it "keeps the redirect from a shared cache", :aggregate_failures do
+      expect(last_response.status).to eq(301)
       expect(cache_control).to be_nil
     end
   end

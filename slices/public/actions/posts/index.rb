@@ -6,6 +6,8 @@ module Public
       class Index < Action
         include Deps["settings", published_page: "posts.queries.published_page"]
 
+        share_with_caches
+
         def handle(request, response)
           posts = published_page.call(requested_page(request, response, settings.page_size[:public]))
           not_found(response) if posts.past_end?

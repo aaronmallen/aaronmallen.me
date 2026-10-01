@@ -12,6 +12,8 @@ module Public
           public_project_grid: "projects.queries.public_grid",
         ]
 
+        share_with_caches
+
         def handle(_request, response)
           response[:posts] = latest_published_posts.call(POSTS)
           response[:projects] = public_project_grid.call(PROJECTS)

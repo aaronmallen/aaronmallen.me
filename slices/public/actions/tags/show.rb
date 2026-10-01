@@ -12,6 +12,8 @@ module Public
           published_page_by_tag: "posts.queries.published_page_by_tag",
         ]
 
+        share_with_caches
+
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { not_found(response) }
           page = requested_page(request, response, settings.page_size[:public])
