@@ -2705,6 +2705,22 @@ RSpec.describe "Admin tasks", type: :request do
         expect(repo.by_id(task.id).sprint_id).to be_nil
       end
 
+      it "leaves the task as it was when it refuses a date the day has passed" do
+        task = create(:task, title: "Email the accountant", tags: %w[admin])
+        edit(task, title: "Call the accountant", tags: "", sprint_on: (today - 1).iso8601)
+
+        kept = repo.by_id(task.id)
+
+        expect([kept.title, kept.tags.map(&:name)]).to eq(["Email the accountant", %w[admin]])
+      end
+
+      it "leaves the task as it was when it refuses a date it cannot read" do
+        task = create(:task, title: "Email the accountant")
+        edit(task, title: "Call the accountant", sprint_on: "next week")
+
+        expect(repo.by_id(task.id).title).to eq("Email the accountant")
+      end
+
       it "says why it refused the date rather than saying the task was saved" do
         edit(create(:task), sprint_on: (today - 1).iso8601)
         follow_redirect!
@@ -2725,11 +2741,23 @@ RSpec.describe "Admin tasks", type: :request do
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next")
       end
 
-      it "keeps a captured task whose date was refused" do
+      it "captures nothing when it refuses a date the day has passed" do
         capture("Yesterday's work", filter: "next", sprint_on: (today - 1).iso8601)
-        get "/admin/tasks", filter: "next"
 
-        expect(titles).to include("Yesterday's work")
+        expect(repo.all_open).to be_empty
+      end
+
+      it "captures nothing when it refuses a date it cannot read" do
+        capture("Someday's work", filter: "next", sprint_on: "next week")
+
+        expect(repo.all_open).to be_empty
+      end
+
+      it "captures one task when a refused capture is sent again with a good date" do
+        capture("Tomorrow's work", filter: "next", sprint_on: (today - 1).iso8601)
+        capture("Tomorrow's work", filter: "next", sprint_on: tomorrow.iso8601)
+
+        expect(repo.all_open.map(&:title)).to eq(["Tomorrow's work"])
       end
 
       it "unschedules a task from its editor" do

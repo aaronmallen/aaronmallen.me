@@ -349,6 +349,18 @@ RSpec.describe "MCP task tools", type: :request do
 
       expect(message).to eq("a sprint opens on today or a day after it")
     end
+
+    it "captures nothing when it refuses the sprint day" do
+      call_tool("capture_task", title: "Too late", sprint_on: (today - 1).iso8601)
+
+      expect(tasks.all_open).to be_empty
+    end
+
+    it "captures nothing for a sprint day it cannot read" do
+      call_tool("capture_task", title: "Someday", sprint_on: "next week")
+
+      expect(tasks.all_open).to be_empty
+    end
   end
 
   describe "save_task" do
@@ -392,6 +404,24 @@ RSpec.describe "MCP task tools", type: :request do
 
     it "leaves the task alone when it refuses" do
       call_tool("save_task", id: task.id, title: "")
+
+      expect(tasks.by_id(task.id).title).to eq("Draft")
+    end
+
+    it "schedules the task for a later sprint" do
+      call_tool("save_task", id: task.id, sprint_on: (today + 2).iso8601)
+
+      expect(content.fetch("sprint_on")).to eq((today + 2).iso8601)
+    end
+
+    it "leaves the task alone when it refuses the sprint day" do
+      call_tool("save_task", id: task.id, title: "Final", sprint_on: (today - 1).iso8601)
+
+      expect(tasks.by_id(task.id).title).to eq("Draft")
+    end
+
+    it "leaves the task alone for a sprint day it cannot read" do
+      call_tool("save_task", id: task.id, title: "Final", sprint_on: "next week")
 
       expect(tasks.by_id(task.id).title).to eq("Draft")
     end

@@ -17,11 +17,13 @@ module Tasks
       def call(id, params)
         task = step find(id)
         fields = step validate(params)
-        saved = persist(task, fields)
-        return saved if moves?(task, fields[:list]) || params[:sprint_on].nil?
 
-        step schedule_task.call(id, params[:sprint_on])
-        task_repo.by_id(id)
+        transaction do
+          persist(task, fields)
+          step schedule_task.call(id, params[:sprint_on]) if schedules?(task, fields, params[:sprint_on])
+
+          task_repo.by_id(id)
+        end
       end
 
       private
@@ -35,19 +37,13 @@ module Tasks
       def moves?(task, list) = !list.nil? && list != task.place
 
       def persist(task, fields)
-        transaction do
-          rewrite(task, fields)
-          step move(task, fields[:list])
-
-          task_repo.by_id(task.id)
-        end
-      end
-
-      def rewrite(task, fields)
         task_repo.update(task.id, note: fields[:note], title: fields[:title])
         task_repo.replace_tags(task.id, fields[:tags])
         claim_photos.call(PHOTO_OWNER, task.id, fields[:note])
+        step move(task, fields[:list])
       end
+
+      def schedules?(task, fields, sprint_on) = !(sprint_on.nil? || moves?(task, fields[:list]))
 
       def validate(params) = validated(contract.call(form(params)))
     end

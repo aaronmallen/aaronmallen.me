@@ -17,10 +17,14 @@ module Tasks
 
       def call(params, filter: NEXT, sprint_on: nil)
         fields = step validate(params)
-        task = write(fields, filter)
-        return [:captured, task] if Blog::Types::TrimmedText[sprint_on].empty?
+        placed = placement(filter)
 
-        step schedule_task.call(task.id, sprint_on)
+        transaction do
+          task = write(fields, placed)
+          next [:captured, task] if Blog::Types::TrimmedText[sprint_on].empty?
+
+          step schedule_task.call(task.id, sprint_on)
+        end
       end
 
       private
@@ -35,15 +39,11 @@ module Tasks
         validated(contract.call(title: params[:title], list: "", note: params[:note], tags: params[:tags]))
       end
 
-      def write(fields, filter)
-        placed = placement(filter)
-
-        transaction do
-          task = task_repo.append(title: fields[:title], note: fields[:note], **placed)
-          task_repo.replace_tags(task.id, fields[:tags])
-          claim_photos.call(PHOTO_OWNER, task.id, task.note)
-          task
-        end
+      def write(fields, placed)
+        task = task_repo.append(title: fields[:title], note: fields[:note], **placed)
+        task_repo.replace_tags(task.id, fields[:tags])
+        claim_photos.call(PHOTO_OWNER, task.id, task.note)
+        task
       end
     end
   end
