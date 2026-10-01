@@ -87,6 +87,7 @@ one.
 | [0080][0080] | Store photos in an S3 store and serve them through the site | ![Active][active] | 2026-09-30 |
 | [0081][0081] | Process every upload with libvips on the server | ![Active][active] | 2026-09-30 |
 | [0082][0082] | Tie a photo to the records whose Markdown points to it | ![Active][active] | 2026-09-30 |
+| [0083][0083] | Upload photos by fetch from the Markdown editor | ![Active][active] | 2026-09-30 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -170,6 +171,7 @@ one.
 [0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
 [0081]: 0081-process-every-upload-with-libvips-on-the-server.md
 [0082]: 0082-tie-a-photo-to-the-records-whose-markdown-points-to-it.md
+[0083]: 0083-upload-photos-by-fetch-from-the-markdown-editor.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
