@@ -33,7 +33,7 @@ module Tasks
       end
 
       def held(task)
-        return Dry::Core::Constants::EMPTY_STRING unless task.in_sprint?
+        return Blog::Constants::EMPTY_STRING unless task.in_sprint?
 
         sprint_repo.by_id(task.sprint_id).sprint_date.iso8601
       end
@@ -60,7 +60,7 @@ module Tasks
 
       def unschedule(task) = task.in_sprint? ? task_repo.return_to_list(task.id) : task
 
-      def waiting(task) = task.in_progress? ? { status: OPEN } : Dry::Core::Constants::EMPTY_HASH
+      def waiting(task) = task.in_progress? ? { status: OPEN } : Blog::Constants::EMPTY_HASH
     end
   end
 end

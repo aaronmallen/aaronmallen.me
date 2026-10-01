@@ -43,7 +43,7 @@ module Blog
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
     DateParam = Types::Params::Date.optional.fallback(nil)
-    Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Dry::Core::Constants::EMPTY_HASH }
+    Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0)
     IdParam = Id.optional.fallback(nil)
     LocalTime = Types::Instance(Object).constructor do |value|
@@ -77,16 +77,16 @@ module Blog
     ProjectMove = Types::String.enum("up", "down")
     ProjectStatus = Types::String.enum(*ProjectLiveStatus.values, "archived")
     RedirectUri = Types::String.constructor do |value|
-      next Dry::Core::Constants::EMPTY_STRING unless value.is_a?(::String)
+      next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
 
       trimmed = value.strip
       uri = URI.parse(trimmed)
       host_allowed = REDIRECT_HOSTS[uri.scheme]
       usable = host_allowed && uri.userinfo.nil? && uri.fragment.nil? && host_allowed.call(uri)
 
-      usable ? trimmed : Dry::Core::Constants::EMPTY_STRING
+      usable ? trimmed : Blog::Constants::EMPTY_STRING
     rescue URI::InvalidURIError
-      Dry::Core::Constants::EMPTY_STRING
+      Blog::Constants::EMPTY_STRING
     end.constrained(min_size: 1)
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: Constants::SLUG_RESERVED)
@@ -119,7 +119,7 @@ module Blog
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)
-    Text = Types::String.constructor { |value| value.is_a?(::String) ? value : Dry::Core::Constants::EMPTY_STRING }
+    Text = Types::String.constructor { |value| value.is_a?(::String) ? value : Blog::Constants::EMPTY_STRING }
     TextList = Types::Array.of(Types::String).constructor do |values|
       [*values].map { TrimmedText[it] }.reject(&:empty?)
     end
@@ -139,7 +139,7 @@ module Blog
       Host = Types::String.constructor do |url|
         URI.parse(Normalizers::Url[url]).hostname.to_s.downcase
       rescue URI::Error
-        Dry::Core::Constants::EMPTY_STRING
+        Blog::Constants::EMPTY_STRING
       end.constrained(format: %r{\A[^\s/?#@]+\z})
       LabelTag = Types::Tag.constructor do |label|
         Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")

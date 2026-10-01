@@ -46,7 +46,7 @@ module Analytics
       def ranked(name, rolled, live)
         key = KEYS.fetch(name)
         rank = RANKS.fetch(name)
-        so_far = live ? live.public_send(name) : Dry::Core::Constants::EMPTY_ARRAY
+        so_far = live ? live.public_send(name) : Blog::Constants::EMPTY_ARRAY
 
         combine((rolled + so_far).map(&:to_h), key, SUMS.fetch(name)).sort_by { standing(it, rank, key) }
       end

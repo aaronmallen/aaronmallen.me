@@ -18,7 +18,7 @@ module Record
 
       def query(document, **variables)
         response = connection.post(GRAPHQL_PATH) { it.body = { query: document, variables: } }
-        body = response.body.is_a?(Hash) ? response.body : Dry::Core::Constants::EMPTY_HASH
+        body = response.body.is_a?(Hash) ? response.body : Blog::Constants::EMPTY_HASH
 
         data(response, body)
       rescue Faraday::Error => e

@@ -22,7 +22,7 @@ module Blog
 
     private
 
-    def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Dry::Core::Constants::EMPTY_HASH
+    def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
     def readable?(request)
       [::Rack::Utils.unescape_path(request.path_info), request.GET, form(request)].all? { utf8?(it) }

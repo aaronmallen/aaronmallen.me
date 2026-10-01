@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildTagsPage
-      NO_ERRORS = Dry::Core::Constants::EMPTY_HASH
+      NO_ERRORS = Blog::Constants::EMPTY_HASH
 
       include Deps[
         "settings",

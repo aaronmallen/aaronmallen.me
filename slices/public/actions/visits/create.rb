@@ -47,7 +47,7 @@ module Public
 
         def respond(response, status)
           response.status = status
-          response.body = Dry::Core::Constants::EMPTY_STRING
+          response.body = Blog::Constants::EMPTY_STRING
         end
 
         def routable?(visit) = visit.is_a?(Hash) && routable_path?(visit["path"].to_s)

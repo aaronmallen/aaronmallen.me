@@ -13,7 +13,7 @@ module Admin
           task = task_by_id.call(record_id(request))
           not_found(response) unless task
 
-          response.render(view, task:, errors: Dry::Core::Constants::EMPTY_HASH, values: nil, **return_to(request))
+          response.render(view, task:, errors: Blog::Constants::EMPTY_HASH, values: nil, **return_to(request))
         end
       end
     end

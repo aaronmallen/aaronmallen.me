@@ -13,8 +13,8 @@ module Admin
 
           def initialize(
             commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, visitors:,
-            webmentions:, body: Dry::Core::Constants::EMPTY_STRING, errors: Dry::Core::Constants::EMPTY_HASH,
-            tags: Dry::Core::Constants::EMPTY_STRING
+            webmentions:, body: Blog::Constants::EMPTY_STRING, errors: Blog::Constants::EMPTY_HASH,
+            tags: Blog::Constants::EMPTY_STRING
           )
             super()
             @commits = commits

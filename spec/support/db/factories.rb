@@ -99,7 +99,7 @@ module Spec
       KEYS = { oauth_token: %i[oauth_client], webmention: %i[post] }.freeze
 
       def self.call(name, attrs)
-        KEYS.fetch(name, Dry::Core::Constants::EMPTY_ARRAY).each_with_object(attrs.dup) do |key, linked|
+        KEYS.fetch(name, Blog::Constants::EMPTY_ARRAY).each_with_object(attrs.dup) do |key, linked|
           record = linked.delete(key)
           linked[:"#{key}_id"] = record.id if record
         end

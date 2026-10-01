@@ -8,15 +8,15 @@ module Admin
           include Components::Journal
 
           BLANK_ENTRY = {
-            body: Dry::Core::Constants::EMPTY_STRING,
+            body: Blog::Constants::EMPTY_STRING,
             entry_date: nil,
-            tags: Dry::Core::Constants::EMPTY_STRING,
+            tags: Blog::Constants::EMPTY_STRING,
           }.freeze
           SEPARATOR = " · "
 
           def initialize(
-            days:, entries:, streak:, today:, words:, editing: nil, errors: Dry::Core::Constants::EMPTY_HASH,
-            search: Dry::Core::Constants::EMPTY_STRING, values: BLANK_ENTRY, writing: false
+            days:, entries:, streak:, today:, words:, editing: nil, errors: Blog::Constants::EMPTY_HASH,
+            search: Blog::Constants::EMPTY_STRING, values: BLANK_ENTRY, writing: false
           )
             super()
             @counts = { entries:, words: }

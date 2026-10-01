@@ -29,7 +29,7 @@ module Suggestions
 
       def accept_on_post(post_id, edits)
         post = step found(lock_post.call(post_id))
-        bodies, sifted = sift([post.body], still_pending(edits), Dry::Core::Constants::EMPTY_ARRAY)
+        bodies, sifted = sift([post.body], still_pending(edits), Blog::Constants::EMPTY_ARRAY)
         revise_post_body.call(post.id, body: bodies.first) if sifted.fetch(:accepted).any?
 
         outcome(sifted)

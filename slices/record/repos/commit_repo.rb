@@ -7,7 +7,7 @@ module Record
 
       BACKFILL_KIND = "backfill"
       IMPORT_LOCK = 303_303
-      NONE = Dry::Core::Constants::EMPTY_ARRAY
+      NONE = Blog::Constants::EMPTY_ARRAY
       REPO_DAYS = 30
       SYNC_KIND = "commits"
 

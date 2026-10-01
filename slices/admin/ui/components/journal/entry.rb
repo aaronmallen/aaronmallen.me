@@ -77,7 +77,7 @@ module Admin
 
           def editing? = !@editing.nil?
 
-          def errors = editing? ? @editing[:errors] : Dry::Core::Constants::EMPTY_HASH
+          def errors = editing? ? @editing[:errors] : Blog::Constants::EMPTY_HASH
 
           def head
             header(class: "journal-entry-head") do

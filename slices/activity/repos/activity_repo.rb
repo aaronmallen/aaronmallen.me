@@ -3,7 +3,7 @@
 module Activity
   module Repos
     class ActivityRepo < Blog::DB::Repo
-      NONE = Dry::Core::Constants::EMPTY_ARRAY
+      NONE = Blog::Constants::EMPTY_ARRAY
       TYPES = Blog::Types::ActivityKind.values
 
       def between(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE, limit: nil)

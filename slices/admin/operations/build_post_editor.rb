@@ -18,7 +18,7 @@ module Admin
         webmention_settings: "social.queries.webmention_settings",
       ]
 
-      def call(post: nil, params: nil, errors: Dry::Core::Constants::EMPTY_HASH, view: nil, now: Time.now)
+      def call(post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, view: nil, now: Time.now)
         values = params ? values_from_params(params) : values_from_post(post)
         preview = build_post_preview.call(values:, now:)
 
@@ -43,7 +43,7 @@ module Admin
       end
 
       def publish_at(post)
-        return Dry::Core::Constants::EMPTY_STRING unless post.published_at
+        return Blog::Constants::EMPTY_STRING unless post.published_at
 
         Blog::TimeZone.input_value(post.published_at)
       end
@@ -55,8 +55,8 @@ module Admin
 
         {
           post_id: post&.id,
-          body: post ? post.body : Dry::Core::Constants::EMPTY_STRING,
-          edits: suggestion ? suggestion.open_edits : Dry::Core::Constants::EMPTY_ARRAY,
+          body: post ? post.body : Blog::Constants::EMPTY_STRING,
+          edits: suggestion ? suggestion.open_edits : Blog::Constants::EMPTY_ARRAY,
         }
       end
 
@@ -77,7 +77,7 @@ module Admin
         return Blog::Types::Text[params[:syndication_body]] if params
         return announcement.call(post) if post
 
-        Dry::Core::Constants::EMPTY_STRING
+        Blog::Constants::EMPTY_STRING
       end
 
       def syndication_enabled(post, params)
@@ -96,7 +96,7 @@ module Admin
       def values_from_params(params) = FIELDS.to_h { [it, Blog::Types::Text[params[it]]] }
 
       def values_from_post(post)
-        return FIELDS.to_h { [it, Dry::Core::Constants::EMPTY_STRING] } unless post
+        return FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] } unless post
 
         {
           title: post.title,

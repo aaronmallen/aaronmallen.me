@@ -4,7 +4,7 @@ module MCP
   module Tools
     class CaptureTask < TaskTool
       NEXT = Blog::Types::TaskFilter["next"]
-      NO_TAGS = Dry::Core::Constants::EMPTY_ARRAY
+      NO_TAGS = Blog::Constants::EMPTY_ARRAY
 
       SCHEMA = {
         additionalProperties: false,

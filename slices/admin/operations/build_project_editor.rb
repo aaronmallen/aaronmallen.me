@@ -8,7 +8,7 @@ module Admin
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       TAG_SEPARATOR = ", "
 
-      def call(project: nil, params: nil, errors: Dry::Core::Constants::EMPTY_HASH)
+      def call(project: nil, params: nil, errors: Blog::Constants::EMPTY_HASH)
         values = params ? from_params(params) : from_project(project)
 
         {
@@ -22,8 +22,8 @@ module Admin
       private
 
       def blank_values
-        FIELDS.to_h { [it, Dry::Core::Constants::EMPTY_STRING] }
-              .merge(status: Blog::Types::ProjectLiveStatus["active"], tags: Dry::Core::Constants::EMPTY_STRING)
+        FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] }
+              .merge(status: Blog::Types::ProjectLiveStatus["active"], tags: Blog::Constants::EMPTY_STRING)
       end
 
       def featured(project, params)
@@ -47,7 +47,7 @@ module Admin
       end
 
       def started_on(project)
-        return Dry::Core::Constants::EMPTY_STRING unless project.started_on
+        return Blog::Constants::EMPTY_STRING unless project.started_on
 
         project.started_on.strftime(MONTH_FORMAT)
       end

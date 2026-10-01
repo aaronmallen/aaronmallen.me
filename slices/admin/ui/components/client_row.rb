@@ -17,7 +17,7 @@ module Admin
         def connected = t(".connected", time: l(Blog::TimeZone.local(@client.created_at), format: :medium))
 
         def host
-          Blog::Types::Normalized::Host.call(@client.redirect_uris.first) { Dry::Core::Constants::EMPTY_STRING }
+          Blog::Types::Normalized::Host.call(@client.redirect_uris.first) { Blog::Constants::EMPTY_STRING }
         end
 
         def last_used

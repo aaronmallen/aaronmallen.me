@@ -89,13 +89,13 @@ module Admin
           end
 
           def part_template
-            template(data: { social_part_template: "" }) { part("", Dry::Core::Constants::EMPTY_HASH, true) }
+            template(data: { social_part_template: "" }) { part("", Blog::Constants::EMPTY_HASH, true) }
           end
 
           def parts
             div(class: "compose-parts", data: { social_parts: "" }) do
               @values[:parts].each_with_index do |body, index|
-                part(body, @counts.fetch(index, Dry::Core::Constants::EMPTY_HASH), @values[:parts].size > 1)
+                part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), @values[:parts].size > 1)
               end
             end
             div(class: "compose-add") { add_button }

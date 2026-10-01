@@ -43,7 +43,7 @@ module Social
           found.all? ? found : Array.new(found.size)
         end
 
-        def json(http, headers: Dry::Core::Constants::EMPTY_HASH, **)
+        def json(http, headers: Blog::Constants::EMPTY_HASH, **)
           http.call(headers: HEADERS.merge(headers), **) do |faraday|
             faraday.request :json
             faraday.response :json

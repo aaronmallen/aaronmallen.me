@@ -29,7 +29,7 @@ module Public
         private
 
         def browser_messages
-          MESSAGES.fetch(@field, Dry::Core::Constants::EMPTY_HASH)
+          MESSAGES.fetch(@field, Blog::Constants::EMPTY_HASH)
                   .slice(*BROWSER_CODES)
                   .to_h { |code, key| [code.to_sym, t(key)] }
         end

@@ -136,7 +136,7 @@ module Tasks
       end
 
       def tags(issue)
-        issue.fetch(:labels, Dry::Core::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }.uniq
+        issue.fetch(:labels, Blog::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }.uniq
       end
 
       def tracked(provider) = task_source_repo.still_there(provider).to_h { [it.remote_id, it] }

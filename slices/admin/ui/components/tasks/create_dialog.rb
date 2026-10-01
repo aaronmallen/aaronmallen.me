@@ -45,7 +45,7 @@ module Admin
             end
           end
 
-          def returns = @origin ? { origin: @origin } : Dry::Core::Constants::EMPTY_HASH
+          def returns = @origin ? { origin: @origin } : Blog::Constants::EMPTY_HASH
         end
       end
     end

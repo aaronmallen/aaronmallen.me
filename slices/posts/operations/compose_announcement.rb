@@ -18,7 +18,7 @@ module Posts
       def default(slug:, title:)
         named = Blog::Types::Text[title].strip
 
-        named.empty? ? Dry::Core::Constants::EMPTY_STRING : "#{named}#{SEPARATOR}#{url(slug)}"
+        named.empty? ? Blog::Constants::EMPTY_STRING : "#{named}#{SEPARATOR}#{url(slug)}"
       end
 
       def url(slug) = routes.url(:post, slug:).to_s

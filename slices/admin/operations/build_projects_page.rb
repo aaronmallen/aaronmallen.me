@@ -11,7 +11,7 @@ module Admin
         live_projects: "projects.queries.live",
       ]
 
-      def call(filter: Blog::Types::ProjectFilter["live"], params: nil, errors: Dry::Core::Constants::EMPTY_HASH)
+      def call(filter: Blog::Types::ProjectFilter["live"], params: nil, errors: Blog::Constants::EMPTY_HASH)
         live = live_projects.call
         archived = archived_projects.call
 
@@ -43,7 +43,7 @@ module Admin
       end
 
       def work_entries(filter)
-        return Dry::Core::Constants::EMPTY_ARRAY unless filter == Blog::Types::ProjectFilter["work"]
+        return Blog::Constants::EMPTY_ARRAY unless filter == Blog::Types::ProjectFilter["work"]
 
         all_work_entries.call
       end

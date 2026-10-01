@@ -134,7 +134,7 @@ module Record
 
       def branch(node, repository)
         page = node.dig("target", "history")
-        found = page ? page.fetch("nodes").map { commit_attributes(it) } : Dry::Core::Constants::EMPTY_ARRAY
+        found = page ? page.fetch("nodes").map { commit_attributes(it) } : Blog::Constants::EMPTY_ARRAY
         made = repository["createdAt"]
 
         { commits: found, complete: read_to_end?(page), created_at: made && Time.iso8601(made),
@@ -172,7 +172,7 @@ module Record
 
       def read_to_end?(page) = !page.nil? && !more?(page)
 
-      def repository_nodes(page) = page ? page.fetch("nodes") : Dry::Core::Constants::EMPTY_ARRAY
+      def repository_nodes(page) = page ? page.fetch("nodes") : Blog::Constants::EMPTY_ARRAY
 
       def repository_page(cursor) = transport.query(Queries::REPOSITORIES, cursor:)&.dig("viewer", "repositories")
 

@@ -13,7 +13,7 @@ module Admin
         journal_word_count: "record.queries.journal_word_count",
       ]
 
-      def call(search: Dry::Core::Constants::EMPTY_STRING, to: nil, now: Time.now)
+      def call(search: Blog::Constants::EMPTY_STRING, to: nil, now: Time.now)
         {
           days: journal_days.call(size: settings.page_size[:admin], to:, **SearchQuery.parse(search, fields: FIELDS)),
           entries: journal_entry_count.call,

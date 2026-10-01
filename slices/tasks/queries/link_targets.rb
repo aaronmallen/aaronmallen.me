@@ -9,7 +9,7 @@ module Tasks
 
       def call(id, text)
         query = Blog::Types::TrimmedText[text]
-        return Dry::Core::Constants::EMPTY_ARRAY if query.empty?
+        return Blog::Constants::EMPTY_ARRAY if query.empty?
 
         task_repo.link_targets(id, query, limit: LIMIT)
       end

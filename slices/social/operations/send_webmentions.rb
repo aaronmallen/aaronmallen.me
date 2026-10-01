@@ -98,7 +98,7 @@ module Social
         Nokogiri::HTML5.parse(response.body.to_s).at_css(ENDPOINT_SELECTOR)&.then { resolve(response, it["href"]) }
       end
 
-      def host(url) = Blog::Types::Normalized::Host.call(url) { Dry::Core::Constants::EMPTY_STRING }
+      def host(url) = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
 
       def links_in(post, source)
         html = ::Posts::Markdown.to_html(post.body)

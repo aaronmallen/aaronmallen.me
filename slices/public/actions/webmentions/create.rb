@@ -22,7 +22,7 @@ module Public
           )
 
           response.status = status_for(outcome)
-          response.body = Dry::Core::Constants::EMPTY_STRING
+          response.body = Blog::Constants::EMPTY_STRING
         end
 
         private

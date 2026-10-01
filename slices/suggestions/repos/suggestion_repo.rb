@@ -64,20 +64,20 @@ module Suggestions
       def latest(relation) = relation.newest_first.limit(1).one
 
       def latest_ids_for_social_posts(social_post_ids)
-        return Dry::Core::Constants::EMPTY_HASH if social_post_ids.empty?
+        return Blog::Constants::EMPTY_HASH if social_post_ids.empty?
 
         suggestions.for_social_posts(social_post_ids).latest_ids_by_social_post
       end
 
       def mark(ids, status, from:)
         listed = Array(ids)
-        return Dry::Core::Constants::EMPTY_ARRAY if listed.empty?
+        return Blog::Constants::EMPTY_ARRAY if listed.empty?
 
         suggestion_edits.with_ids(listed).with_status(from).mark(status).sort_by(&:position)
       end
 
       def open_counts(suggestion_ids)
-        return Dry::Core::Constants::EMPTY_HASH if suggestion_ids.empty?
+        return Blog::Constants::EMPTY_HASH if suggestion_ids.empty?
 
         counts = suggestion_edits.for_suggestions(suggestion_ids).with_status(OPEN).counts_by_suggestion
 

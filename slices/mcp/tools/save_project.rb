@@ -64,7 +64,7 @@ module MCP
         end
 
         def kept(project)
-          return Dry::Core::Constants::EMPTY_HASH unless project
+          return Blog::Constants::EMPTY_HASH unless project
 
           {
             featured: project.featured,

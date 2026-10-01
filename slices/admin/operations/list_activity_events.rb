@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class ListActivityEvents
-      include Dry::Core::Constants
+      include Blog::Constants
 
       COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]

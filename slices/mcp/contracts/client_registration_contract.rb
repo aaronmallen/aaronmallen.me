@@ -7,7 +7,7 @@ module MCP
       MAX_REDIRECT_URIS = 10
       MAX_URI = 2048
       REDIRECT_URI = Blog::Types::String.constructor do |value|
-        Blog::Types::RedirectUri.call(value) { Dry::Core::Constants::EMPTY_STRING }
+        Blog::Types::RedirectUri.call(value) { Blog::Constants::EMPTY_STRING }
       end
 
       json do

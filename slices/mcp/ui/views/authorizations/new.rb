@@ -5,7 +5,7 @@ module MCP
     module Views
       module Authorizations
         class New < View
-          include Dry::Core::Constants
+          include Blog::Constants
 
           APPROVE = Operations::Authorize::APPROVE
           CANCEL = Operations::Authorize::CANCEL

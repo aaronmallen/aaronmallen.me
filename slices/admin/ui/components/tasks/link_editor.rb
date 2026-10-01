@@ -51,7 +51,7 @@ module Admin
 
           def add_form_id = "#{scope}-add"
 
-          def errors = @linking ? @linking[:errors] : Dry::Core::Constants::EMPTY_HASH
+          def errors = @linking ? @linking[:errors] : Blog::Constants::EMPTY_HASH
 
           def field_errors
             FieldError(field: :kind, errors:, scope:)
@@ -106,7 +106,7 @@ module Admin
 
           def place(task) = t(PLACES.fetch(BY_STATUS.include?(task.status) ? task.status : task.list || TODAY))
 
-          def query = @linking ? @linking[:query].to_s : Dry::Core::Constants::EMPTY_STRING
+          def query = @linking ? @linking[:query].to_s : Blog::Constants::EMPTY_STRING
 
           def query_id = FieldError.id_for(:other_id, scope)
 
@@ -130,7 +130,7 @@ module Admin
           end
 
           def targets
-            found = @linking.fetch(:targets, Dry::Core::Constants::EMPTY_ARRAY)
+            found = @linking.fetch(:targets, Blog::Constants::EMPTY_ARRAY)
             return Hint { t(".no_match") } if found.empty?
 
             div(class: "task-link-targets") { found.each { target(it) } }

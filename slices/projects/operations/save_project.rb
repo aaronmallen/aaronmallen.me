@@ -59,7 +59,7 @@ module Projects
       def github_url(repo)
         named = Blog::Types::Normalized::Repo.call(repo) { nil }
 
-        named ? format(Blog::Constants::GITHUB_REPO_URL, named) : Dry::Core::Constants::EMPTY_STRING
+        named ? format(Blog::Constants::GITHUB_REPO_URL, named) : Blog::Constants::EMPTY_STRING
       end
 
       def persist(id, attributes)
@@ -71,7 +71,7 @@ module Projects
         Failure([:invalid, { field => [code] }])
       end
 
-      def repo_from(url) = Blog::Types::Normalized::GithubRepo.call(url) { Dry::Core::Constants::EMPTY_STRING }
+      def repo_from(url) = Blog::Types::Normalized::GithubRepo.call(url) { Blog::Constants::EMPTY_STRING }
 
       def save(project, attributes)
         return Success(created(attributes)) unless project

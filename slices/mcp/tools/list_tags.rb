@@ -19,15 +19,15 @@ module MCP
         def call(scope:, server_context:, page: 1)
           usage = tag_usage(server_context).call(scope:)
           requested = page(page, server_context)
-          tags = matching_tags(server_context).call(scope:, text: Dry::Core::Constants::EMPTY_STRING, page: requested)
+          tags = matching_tags(server_context).call(scope:, text: Blog::Constants::EMPTY_STRING, page: requested)
 
           answer(
-            tags: tags.rows.map { summary(it, usage.fetch(it.id, Dry::Core::Constants::EMPTY_HASH)) },
+            tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
             **Paging.fields(tags),
           )
         end
 
-        def summary(tag, held = Dry::Core::Constants::EMPTY_HASH)
+        def summary(tag, held = Blog::Constants::EMPTY_HASH)
           { id: tag.id, name: tag.name, scope: tag.scope, color: tag.color, count: held.values.sum, by_kind: held }
         end
       end

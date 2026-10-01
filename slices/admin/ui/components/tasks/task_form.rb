@@ -18,9 +18,9 @@ module Admin
           prop :scope, Blog::Types::String
           prop :today, Blog::Types::Date
           prop :task, Blog::Types::Instance(ROM::Struct).optional, default: nil
-          prop :values, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
-          prop :errors, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
-          prop :returns, Blog::Types::Hash, default: Dry::Core::Constants::EMPTY_HASH
+          prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :returns, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template(&)

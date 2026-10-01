@@ -42,7 +42,7 @@ module Social
       def addresses(host)
         Addrinfo.getaddrinfo(host, nil, nil, :STREAM).map(&:ip_address)
       rescue SocketError
-        Dry::Core::Constants::EMPTY_ARRAY
+        Blog::Constants::EMPTY_ARRAY
       end
 
       def allowed?(address)
@@ -91,7 +91,7 @@ module Social
 
       def reachable(url)
         uri = URI.parse(url)
-        host = Blog::Types::Normalized::Host.call(url) { Dry::Core::Constants::EMPTY_STRING }
+        host = Blog::Types::Normalized::Host.call(url) { Blog::Constants::EMPTY_STRING }
         raise Refused, "#{url} is not an http URL with a host" unless uri.is_a?(URI::HTTP) && !host.empty?
         raise Refused, "#{url} names a host we do not leave the machine for" if BLOCKED_NAMES.match?(host)
 

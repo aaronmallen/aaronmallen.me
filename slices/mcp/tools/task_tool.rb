@@ -82,7 +82,7 @@ module MCP
         def reason(field, code)
           return CONTROL if code == Blog::Contract::CONTROL
 
-          COMPLAINTS.fetch(field, Dry::Core::Constants::EMPTY_HASH).fetch(code, code)
+          COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
         end
 
         def reopen_task(server_context) = server_context.fetch(:reopen_task)

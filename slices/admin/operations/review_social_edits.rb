@@ -20,7 +20,7 @@ module Admin
 
       def edits(social_post)
         suggestion = suggestion_for_social_post.call(social_post.id) if social_post
-        return Dry::Core::Constants::EMPTY_ARRAY unless suggestion
+        return Blog::Constants::EMPTY_ARRAY unless suggestion
 
         suggestion.open_edits.sort_by { [it.part_number, it.position] }.map { review(social_post, it) }
       end

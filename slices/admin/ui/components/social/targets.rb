@@ -6,7 +6,7 @@ module Admin
       module Social
         class Targets < Component
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
-          prop :errors, Blog::Types::Hash, default: -> { Dry::Core::Constants::EMPTY_HASH }
+          prop :errors, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :name, Blog::Types::String, default: "social[targets][]"
 
           def view_template

@@ -63,7 +63,7 @@ module Admin
           end
 
           def row(tag)
-            Row(tag:, uses: @usage.fetch(tag.id, Dry::Core::Constants::EMPTY_HASH), editing: @editing,
+            Row(tag:, uses: @usage.fetch(tag.id, Blog::Constants::EMPTY_HASH), editing: @editing,
                 page: @tags.number)
           end
 

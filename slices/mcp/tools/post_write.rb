@@ -7,7 +7,7 @@ module MCP
     class PostWrite < Base
       CARD = %i[og_title og_image_url canonical_url].freeze
       CHECKED = Blog::Constants::CHECKED
-      EMPTY = Dry::Core::Constants::EMPTY_STRING
+      EMPTY = Blog::Constants::EMPTY_STRING
       FLAGS = %i[syndication_enabled webmentions_enabled].freeze
       INVALID = "is not valid"
       TAG_SEPARATOR = ", "

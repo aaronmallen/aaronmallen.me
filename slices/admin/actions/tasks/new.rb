@@ -7,7 +7,7 @@ module Admin
         include Redirect
 
         def handle(request, response)
-          empty = Dry::Core::Constants::EMPTY_HASH
+          empty = Blog::Constants::EMPTY_HASH
 
           response.render(view, errors: empty, origin: task_origin(request), values: empty)
         end

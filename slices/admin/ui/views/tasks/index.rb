@@ -100,7 +100,7 @@ module Admin
           def label = t(LABELS.fetch(@tab), date: l(@today, format: :short))
 
           def list
-            Card(label:, title: t(TITLES.fetch(@tab)), **(today? ? LIVE : Dry::Core::Constants::EMPTY_HASH)) do |card|
+            Card(label:, title: t(TITLES.fetch(@tab)), **(today? ? LIVE : Blog::Constants::EMPTY_HASH)) do |card|
               card.side do
                 span(class: "card-note") { open_note }
                 SyncButton() if external?

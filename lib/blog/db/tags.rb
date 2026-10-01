@@ -6,7 +6,7 @@ module Blog
       def by_names(names) = where(name: names)
 
       def claim(names, scope:)
-        return Dry::Core::Constants::EMPTY_HASH if names.empty?
+        return Blog::Constants::EMPTY_HASH if names.empty?
 
         insert_missing(names, scope)
 

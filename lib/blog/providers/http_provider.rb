@@ -16,7 +16,7 @@ module Blog
         end
 
         def call(
-          agent: nil, url: nil, headers: Dry::Core::Constants::EMPTY_HASH, open_timeout: nil, params_encoder: nil,
+          agent: nil, url: nil, headers: Blog::Constants::EMPTY_HASH, open_timeout: nil, params_encoder: nil,
           redirects: MAX_REDIRECTS, timeout: TIMEOUT
         )
           Faraday.new(url:, headers: { "User-Agent" => user_agent(agent) }.merge(headers)) do |faraday|
@@ -37,7 +37,7 @@ module Blog
         def build(settings)
           site = settings.site[:url].to_s
 
-          Connections.new(host: Types::Normalized::Host.call(site) { Dry::Core::Constants::EMPTY_STRING }, site:)
+          Connections.new(host: Types::Normalized::Host.call(site) { Blog::Constants::EMPTY_STRING }, site:)
         end
       end
     end

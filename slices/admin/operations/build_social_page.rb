@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildSocialPage
-      include Dry::Core::Constants
+      include Blog::Constants
 
       DEFAULT_VALUES = {
         mode: Blog::Types::SocialMode["now"],

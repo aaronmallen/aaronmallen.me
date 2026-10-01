@@ -9,7 +9,7 @@ module Posts
       code emph escaped_tag image link spoiler_text strikethrough strong subscript superscript text underline
     ].freeze
     OPTIONS = { extension: { header_ids: nil }, render: { hardbreaks: false } }.freeze
-    PLUGINS = { syntax_highlighter: { theme: Dry::Core::Constants::EMPTY_STRING } }.freeze
+    PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TEXT_NODES = %i[code code_block text].freeze
     WORDS_PER_MINUTE = 220
 
@@ -33,7 +33,7 @@ module Posts
       def inline_text(node)
         return " " if BREAK_NODES.include?(node.type)
 
-        TEXT_NODES.include?(node.type) ? node.string_content : Dry::Core::Constants::EMPTY_STRING
+        TEXT_NODES.include?(node.type) ? node.string_content : Blog::Constants::EMPTY_STRING
       end
 
       def parse(markdown) = Commonmarker.parse(markdown, options: OPTIONS)

@@ -82,7 +82,7 @@ module Admin
             end
           end
 
-          def errors_for(id) = mine?(id) ? @commenting[:errors] : Dry::Core::Constants::EMPTY_HASH
+          def errors_for(id) = mine?(id) ? @commenting[:errors] : Blog::Constants::EMPTY_HASH
 
           def head(comment)
             div(class: "task-comment-head") do

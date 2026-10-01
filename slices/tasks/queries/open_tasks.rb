@@ -12,7 +12,7 @@ module Tasks
         planned = sprint_repo.after(Blog::TimeZone.today(now)).map(&:id)
         found = task_repo.all_open.group_by { view(it, planned) }
 
-        Blog::Types::TaskView.values.to_h { [it, found.fetch(it, Dry::Core::Constants::EMPTY_ARRAY)] }
+        Blog::Types::TaskView.values.to_h { [it, found.fetch(it, Blog::Constants::EMPTY_ARRAY)] }
       end
 
       private

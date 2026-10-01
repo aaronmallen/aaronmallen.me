@@ -12,10 +12,10 @@ module Public
           THROTTLED_ICON = "fa-hourglass-half"
 
           def initialize(
-            errors: Dry::Core::Constants::EMPTY_HASH,
+            errors: Blog::Constants::EMPTY_HASH,
             sent: false,
             throttled: false,
-            values: Dry::Core::Constants::EMPTY_HASH
+            values: Blog::Constants::EMPTY_HASH
           )
             super()
             @errors = errors

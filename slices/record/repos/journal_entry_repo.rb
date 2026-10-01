@@ -3,7 +3,7 @@
 module Record
   module Repos
     class JournalEntryRepo < Blog::DB::Repo
-      include Dry::Core::Constants
+      include Blog::Constants
 
       STREAK_DAYS = 30
       TAG_SCOPE = Blog::Types::TagScope["private"]

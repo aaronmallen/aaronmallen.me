@@ -59,7 +59,7 @@ module Admin
             end
           end
 
-          def errors = editing? ? @editing[:errors] : Dry::Core::Constants::EMPTY_HASH
+          def errors = editing? ? @editing[:errors] : Blog::Constants::EMPTY_HASH
 
           def foot
             div(class: "tag-editor-foot") do

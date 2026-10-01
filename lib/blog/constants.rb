@@ -2,6 +2,8 @@
 
 module Blog
   module Constants
+    include Dry::Core::Constants
+
     ACTIVITY_RANGES = [7, 30, 90].freeze
     CHECKED = "1"
     GAP = :gap

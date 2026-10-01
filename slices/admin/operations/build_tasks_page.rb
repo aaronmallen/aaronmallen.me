@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildTasksPage < Blog::Operation
-      include Dry::Core::Constants
+      include Blog::Constants
 
       CARRIED = :carried_in
       COMPLETED = Blog::Types::TaskTab["completed"]

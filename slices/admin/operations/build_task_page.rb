@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildTaskPage < Blog::Operation
-      include Dry::Core::Constants
+      include Blog::Constants
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",

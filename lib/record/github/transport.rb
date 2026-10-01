@@ -64,7 +64,7 @@ module Record
         raise RateLimited, "GitHub rate limited GraphQL" if rate_limited?(response)
         raise Error, "GitHub answered #{response.status} for GraphQL" unless response.success?
 
-        response.body.is_a?(Hash) ? response.body : Dry::Core::Constants::EMPTY_HASH
+        response.body.is_a?(Hash) ? response.body : Blog::Constants::EMPTY_HASH
       end
 
       def rate_limited?(response)

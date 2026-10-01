@@ -33,7 +33,7 @@ module Blog
 
       def error_id = "#{self.class.id_for(@field, @scope)}-error"
 
-      def message_key(code) = self.class::MESSAGES.fetch(@field, Dry::Core::Constants::EMPTY_HASH).fetch(code, INVALID)
+      def message_key(code) = self.class::MESSAGES.fetch(@field, Blog::Constants::EMPTY_HASH).fetch(code, INVALID)
     end
   end
 end
