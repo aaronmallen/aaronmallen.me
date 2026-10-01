@@ -17,16 +17,16 @@ module Public
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }
           posts = published_page_by_tag.call(tag, requested_page(request, response, settings.page_size[:public]))
           halt 404 if posts.rows.empty?
-          halt_if_feed_unchanged(request, response, posts)
+          version = version_feed_or_halt(request, response, posts)
 
-          response.body = render_feed(posts, tag)
+          response.body = render_feed(version, tag)
         end
 
         private
 
-        def render_feed(posts, tag)
+        def render_feed(version, tag)
           atom_feed.call(
-            posts,
+            version,
             title: t(".title", tag:, owner: settings.owner[:name]),
             html: :tag,
             feed: :tag_feed,

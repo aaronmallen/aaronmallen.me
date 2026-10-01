@@ -16,10 +16,10 @@ module Public
         def handle(request, response)
           posts = published_page.call(requested_page(request, response, settings.page_size[:public]))
           halt 404 if posts.past_end?
-          halt_if_feed_unchanged(request, response, posts)
+          version = version_feed_or_halt(request, response, posts)
 
           response.body = atom_feed.call(
-            posts,
+            version,
             title: t(".title", owner: settings.owner[:name]),
             html: :writing,
             feed: :writing_feed,

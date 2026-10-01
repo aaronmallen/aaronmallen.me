@@ -387,20 +387,31 @@ RSpec.describe "Feeds", type: :request do
   describe "a reader polling again" do
     let(:post_repo) { Posts::Slice["repos.post_repo"] }
     let(:yesterday) { Time.now - (24 * 60 * 60) }
+    let(:note) { create(:post_edit, post: older, note: "fixed a typo", created_at: yesterday, updated_at: yesterday) }
+    let(:older) { post_repo.published_by_slug("older") }
+
+    def older_entry(field) = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/older']/#{field}").text
 
     def poll(path, etag: nil, last_modified: nil)
       headers = { "HTTP_IF_NONE_MATCH" => etag, "HTTP_IF_MODIFIED_SINCE" => last_modified }.compact
       get path, {}, headers
     end
 
-    def validators = { etag: last_response.headers["ETag"], last_modified: last_response.headers["Last-Modified"] }
+    def rename_tag(from, to)
+      tag_repo = Tags::Slice["repos.tag_repo"]
+      tag_repo.update(tag_repo.all_in("public").find { it.name == from }.id, name: to)
+    end
 
-    def watch_markdown = allow(Posts::Markdown).to receive(:to_html).and_call_original
+    def revise_note = Posts::Slice["repos.post_edit_repo"].update(note.id, note: "fixed two typos")
 
     before do
       create(:post, :published, slug: "older", tags: %w[ruby], published_at: yesterday - 60, updated_at: yesterday - 60)
-      create(:post, :published, slug: "hello", tags: %w[ruby], published_at: yesterday, updated_at: yesterday)
+      create(:post, :published, slug: "hello", tags: %w[hanami ruby], published_at: yesterday, updated_at: yesterday)
     end
+
+    def validators = { etag: last_response.headers["ETag"], last_modified: last_response.headers["Last-Modified"] }
+
+    def watch_markdown = allow(Posts::Markdown).to receive(:to_html).and_call_original
 
     it "names the newest post change as the time the feed last changed" do
       get "/writing.atom"
@@ -471,6 +482,74 @@ RSpec.describe "Feeds", type: :request do
 
           expect(last_response.status).to eq(200)
           expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
+        end
+
+        it "answers 200 without a deleted entry to a reader that sends only the time back", :aggregate_failures do
+          sent = validators
+          post_repo.delete(older.id)
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
+        end
+
+        it "answers 200 with the new category once a tag on the page is renamed", :aggregate_failures do
+          sent = validators
+          rename_tag("hanami", "rails")
+          poll(path, etag: sent[:etag])
+
+          expect(last_response.status).to eq(200)
+          expect(feed.xpath("/feed/entry/category").map { it[:term] }).to include("rails")
+        end
+      end
+
+      describe "#{path} with an edit note" do
+        before do
+          note
+          get path
+        end
+
+        it "answers 304 while nothing changes", :aggregate_failures do
+          sent = validators
+          poll(path, etag: sent[:etag])
+          by_etag = last_response.status
+          poll(path, last_modified: sent[:last_modified])
+
+          expect([by_etag, last_response.status]).to eq([304, 304])
+        end
+
+        it "changes the ETag and the time once the note is revised", :aggregate_failures do
+          sent = validators
+          revise_note
+          get path
+
+          expect(validators[:etag]).not_to eq(sent[:etag])
+          expect(Time.httpdate(validators[:last_modified])).to be > Time.httpdate(sent[:last_modified])
+        end
+
+        it "answers 200 with the revised note to a reader that sends the ETag back", :aggregate_failures do
+          sent = validators
+          revise_note
+          poll(path, etag: sent[:etag])
+
+          expect(last_response.status).to eq(200)
+          expect(older_entry("content")).to include("fixed two typos")
+        end
+
+        it "answers 200 with the revised note to a reader that sends only the time back", :aggregate_failures do
+          sent = validators
+          revise_note
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(older_entry("content")).to include("fixed two typos")
+        end
+
+        it "moves the entry's updated time to the revised note" do
+          revise_note
+          get path
+
+          expect(Time.iso8601(older_entry("updated"))).to be > yesterday
         end
       end
     end

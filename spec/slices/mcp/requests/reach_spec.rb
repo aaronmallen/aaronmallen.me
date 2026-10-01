@@ -54,6 +54,7 @@ RSpec.describe "MCP reach", type: :request do
       "projects.operations.refresh_projects" => "a background job refreshes projects from GitHub",
       "public.operations.find_visitor_address" => "reads a visitor's address off a request",
       "public.operations.render_atom_feed" => "renders the public Atom feed",
+      "public.operations.version_atom_feed" => "dates and tags the public Atom feed for a reader polling again",
       "record.operations.backfill_repo_commits" => "a background job walks a repository's history",
       "record.operations.import_commits" => "the import job runs it; import_commits queues that job",
       "record.operations.reap_sync_states" => "a background job reaps old sync states",

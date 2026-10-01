@@ -12,13 +12,13 @@ module Public
 
       include Deps["i18n", "routes", "settings", edits_for_post: "posts.queries.edits_for_post"]
 
-      def call(posts, title:, html:, feed:, params: {})
+      def call(version, title:, html:, feed:, params: {})
         xml = Builder::XmlMarkup.new(indent: 2)
         xml.instruct!(:xml, version: "1.0", encoding: "UTF-8")
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
-          feed_head(xml, posts, title:, html:, params:)
-          feed_links(xml, posts, html:, feed:, params:)
-          posts.rows.each { entry(xml, it) }
+          feed_head(xml, version, title:, html:, params:)
+          feed_links(xml, version.posts, html:, feed:, params:)
+          version.posts.rows.each { entry(xml, it, version.changed_at(it)) }
         end
       end
 
@@ -44,14 +44,14 @@ module Public
         end
       end
 
-      def entry(xml, post)
+      def entry(xml, post, changed_at)
         url = routes.url(:post, slug: post.slug).to_s
 
         xml.entry do
           xml.id(url)
           xml.title(post.title)
           xml.link(rel: "alternate", type: HTML_TYPE, href: url)
-          entry_dates(xml, post)
+          entry_dates(xml, post, changed_at)
           post.tags.each { xml.category(term: it.name) }
           entry_body(xml, post)
         end
@@ -63,15 +63,15 @@ module Public
         xml.content(::Posts::Markdown.to_html(post.body) + notes(post), type: "html")
       end
 
-      def entry_dates(xml, post)
+      def entry_dates(xml, post, changed_at)
         xml.published(timestamp(post.published_at))
-        xml.updated(timestamp(post.changed_at))
+        xml.updated(timestamp(changed_at))
       end
 
-      def feed_head(xml, posts, title:, html:, params:)
+      def feed_head(xml, version, title:, html:, params:)
         xml.id(url(html, params))
         xml.title(title)
-        xml.updated(timestamp(posts.rows.map(&:changed_at).max || Time.now))
+        xml.updated(timestamp(version.updated || Time.now))
         xml.author { xml.name(settings.owner[:name]) }
       end
 

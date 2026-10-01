@@ -1,8 +1,6 @@
 # auto_register: false
 # frozen_string_literal: true
 
-require "digest"
-
 module Public
   class Action < Blog::Action
     ANY_MEDIA_TYPE = "*/*"
@@ -10,7 +8,7 @@ module Public
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
     SAME_ORIGIN_FETCHES = %w[none same-origin].freeze
 
-    include Deps[session_reader: "admin.auth.session_reader"]
+    include Deps[session_reader: "admin.auth.session_reader", version_atom_feed: "operations.version_atom_feed"]
 
     config.formats.accept :html
 
@@ -33,14 +31,9 @@ module Public
       !origin.nil? && origin != Blog::Site.origin
     end
 
-    def feed_etag(posts)
-      versions = posts.rows.map { "#{it.id}@#{it.changed_at.utc.iso8601(6)}" }
-      %(W/"#{Digest::SHA256.hexdigest([posts.more, *versions].join(','))}")
-    end
-
-    def halt_if_feed_unchanged(request, response, posts)
-      etag = feed_etag(posts)
-      last_modified = posts.rows.map(&:changed_at).max
+    def halt_if_feed_unchanged(request, response, version)
+      etag = version.etag
+      last_modified = version.last_modified
       response.headers[LAST_MODIFIED] = last_modified.httpdate if last_modified
       return response.fresh(etag:) if request.get_header(IF_NONE_MATCH)
 
@@ -55,6 +48,12 @@ module Public
 
     def set_cache_policy(request, response)
       forbid_caching(request, response) if session_reader.call(request).signed_in?
+    end
+
+    def version_feed_or_halt(request, response, posts)
+      version = version_atom_feed.call(posts)
+      halt_if_feed_unchanged(request, response, version)
+      version
     end
   end
 end
