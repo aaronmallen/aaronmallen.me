@@ -9,7 +9,6 @@ module MCP
       BAD_WINDOW = "from comes after to"
       CONTROL = "holds a control character"
       LOCAL = "local"
-      NO_SPRINT = "no sprint has the ID %s"
       NO_TASK = "no task has the ID %s"
       UNSAVED = "could not save the change"
 
@@ -44,31 +43,19 @@ module MCP
           errors.map { |field, (code)| "#{field}: #{reason(field, code)}" }.join("; ")
         end
 
-        def current_sprint(server_context) = server_context.fetch(:current_sprint)
-
         def day_or_nil(value) = value && Blog::TimeZone.parse_day(value)
-
-        def drop_sprint(server_context) = server_context.fetch(:drop_sprint)
 
         def link_entry(link) = { label: link.label, id: link.task.id, title: link.task.title, status: link.task.status }
 
         def link_tasks(server_context) = server_context.fetch(:link_tasks)
 
-        def no_sprint(id) = refuse(format(NO_SPRINT, id))
-
         def no_task(id) = refuse(format(NO_TASK, id))
-
-        def plan_sprint(server_context) = server_context.fetch(:plan_sprint)
 
         def reason(field, code)
           return CONTROL if code == Blog::Contract::CONTROL
 
           COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
         end
-
-        def sprint_entry(sprint) = { id: sprint.id, date: sprint.sprint_date.iso8601, carried_in: sprint.carried_in }
-
-        def sprints_between(server_context) = server_context.fetch(:sprints_between)
 
         def stamp(time) = time&.utc&.iso8601
 
@@ -96,8 +83,6 @@ module MCP
 
           answer(task_entry(task).merge(comments:, **extra))
         end
-
-        def tasks_in_sprint(server_context) = server_context.fetch(:tasks_in_sprint)
 
         def ties(task)
           { tags: task.tags.map(&:name), links: task.links.map { link_entry(it) }, blocked: task.blocked? }

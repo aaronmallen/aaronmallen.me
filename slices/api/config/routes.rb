@@ -21,6 +21,11 @@ module API
     post "/tasks/:id/schedule", to: "tasks.schedule"
     post "/tasks/:id/start", to: "tasks.start"
 
+    get "/sprints", to: "sprints.index"
+    post "/sprints", to: "sprints.create"
+    get "/sprints/current", to: "sprints.current"
+    delete "/sprints/:id", to: "sprints.destroy"
+
     get "/token", to: "tokens.show"
   end
 end

@@ -36,6 +36,6 @@ module API
 
     def not_found(message) = Failure(Refusal.not_found(message))
 
-    def serialized(serializer, object) = serializer.new(object).serializable_hash
+    def serialized(serializer, object, **params) = serializer.new(object, params:).serializable_hash
   end
 end

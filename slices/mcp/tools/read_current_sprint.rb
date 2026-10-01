@@ -2,27 +2,14 @@
 
 module MCP
   module Tools
-    class ReadCurrentSprint < TaskTool
-      SCHEMA = { additionalProperties: false }.freeze
-
+    class ReadCurrentSprint < Base
       description "Read today's sprint and every task in it, in order. Opening it starts the sprint when " \
                   "today has none yet and carries in what the day before left open, as the admin does"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::ReadCurrentSprint::SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(server_context:)
-          case current_sprint(server_context).call
-          in Success(sprint) then answer(sprint_entry(sprint).merge(tasks: listed(sprint, server_context)))
-          else refuse("could not open today's sprint")
-          end
-        end
-
-        private
-
-        def listed(sprint, server_context)
-          tasks_in_sprint(server_context).call(sprint.id).map { task_entry(it, sprint.sprint_date) }
-        end
+        def call(server_context:, **input) = hand_over(:read_current_sprint, input, server_context)
       end
     end
   end

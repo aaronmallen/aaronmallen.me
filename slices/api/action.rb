@@ -40,12 +40,16 @@ module API
       halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
     end
 
+    def number(value) = Integer(value, 10, exception: false) || value
+
+    def paged_query(request, *keys)
+      found = query(request, *keys, :page)
+      found.key?(:page) ? found.merge(page: number(found[:page])) : found
+    end
+
     def query(request, *keys) = keys.to_h { [it, request.params[it]] }.compact
 
-    def record_id(request)
-      id = request.params[:id]
-      Integer(id, 10, exception: false) || id
-    end
+    def record_id(request) = number(request.params[:id])
 
     def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: BAD_REQUEST)
 
