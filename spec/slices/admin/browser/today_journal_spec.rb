@@ -56,6 +56,23 @@ RSpec.describe "Admin today journal card", type: :feature do
     end
   end
 
+  describe "the Markdown editor" do
+    let(:editor) { find("#today-journal-entry [data-markdown-editor]") }
+
+    it "inserts a toolbar snippet" do
+      editor.find("[role='toolbar'] button[aria-label='Italic']").click
+
+      expect(find_field("Entry").value).to eq("*italic*")
+    end
+
+    it "previews the entry" do
+      fill_in "Entry", with: "a **bold** day"
+      editor.find(".seg-option", text: "Preview").click
+
+      expect(editor).to have_css(".preview .post-body strong", exact_text: "bold")
+    end
+  end
+
   describe "saving" do
     before do
       fill_in "Entry", with: "walked to the lake"

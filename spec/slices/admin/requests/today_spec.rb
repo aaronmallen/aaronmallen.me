@@ -424,18 +424,20 @@ RSpec.describe "Admin today", type: :request do
         expect(page).to have_css("form#today-journal-entry input[name='_csrf_token']", visible: :hidden)
       end
 
-      it "renders a four row textarea" do
+      it "renders the entry textarea" do
         placeholder = i18n.t("ui.components.today_journal_card.placeholder")
 
         expect(page).to have_field("Entry", type: "textarea", with: "", placeholder:)
       end
 
-      it "sets the textarea to four rows" do
-        expect(page).to have_css("#today-journal-entry textarea[name='entry[body]'][rows='4']")
+      it "draws the entry in the Markdown editor at its own height" do
+        expect(page).to have_css(
+          "#today-journal-entry [data-markdown-editor][style='--edit-height: 160px'] textarea[name='entry[body]']",
+        )
       end
 
-      it "renders an empty tags field under the textarea" do
-        expect(page).to have_css("#today-journal-entry textarea ~ input[name='entry[tags]'][value='']")
+      it "renders an empty tags field under the editor" do
+        expect(page).to have_css("#today-journal-entry .journal-editor ~ input[name='entry[tags]'][value='']")
       end
 
       it "puts a lock and the word count in the footer", :aggregate_failures do

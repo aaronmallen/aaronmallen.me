@@ -26,6 +26,7 @@ module Admin
         prop :preview_path, Blog::Types::String.optional, default: nil
         prop :view, Blog::Types::String.optional, default: nil
         prop :view_name, Blog::Types::String.optional, default: nil
+        prop :attributes, Blog::Types::Hash, :**
 
         def view_template(&)
           div(class: "edit", style: "--edit-height: #{@height}", data: { markdown_editor: "" }) do
@@ -38,7 +39,8 @@ module Admin
         private
 
         def body_attributes
-          { id: @id, class: "edit-body", name: @name, placeholder: @placeholder, data: { editor_body: "" } }
+          own = { id: @id, class: "edit-body", name: @name, placeholder: @placeholder, data: { editor_body: "" } }
+          mix(own, @attributes)
         end
 
         def pane_head

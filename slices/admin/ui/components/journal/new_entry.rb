@@ -5,8 +5,8 @@ module Admin
     module Components
       module Journal
         class NewEntry < Component
+          BODY_HEIGHT = "240px"
           FORM_ID = "journal-entry"
-          ROWS = 5
 
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :date, Blog::Types::Date
@@ -30,21 +30,17 @@ module Admin
 
           def blank? = !@values[:body].match?(/\S/)
 
-          def body_attributes
-            {
-              **FieldError.control_attributes(:body, @errors),
-              name: "entry[body]",
-              rows: ROWS,
-              autofocus: @autofocus,
-              placeholder: t(".placeholder"),
-              data: { journal_body: "" },
-            }
+          def body_field
+            div(class: "journal-editor") { MarkdownEditor(**body_props) }
+            FieldError(field: :body, errors: @errors)
           end
 
-          def body_field
-            label(class: "sr-only", for: FieldError.id_for(:body)) { t(".body") }
-            Textarea(value: @values[:body], **body_attributes)
-            FieldError(field: :body, errors: @errors)
+          def body_props
+            {
+              **FieldError.control_attributes(:body, @errors),
+              name: "entry[body]", value: @values[:body], height: BODY_HEIGHT, renderer: "posts",
+              label: t(".body"), placeholder: t(".placeholder"), autofocus: @autofocus, data: { journal_body: "" },
+            }
           end
 
           def form_data = { journal_entry: "", today: @today.iso8601, today_label: t(".today") }

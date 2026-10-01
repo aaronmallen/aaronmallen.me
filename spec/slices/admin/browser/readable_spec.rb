@@ -19,6 +19,21 @@ RSpec.describe "Admin screens", type: :feature do
 
   def dialogs = { "task modal" => -> { open_modal }, "task panel" => -> { open_panel } }
 
+  def journal_editors
+    {
+      "journal edit" => lambda do
+        visit "/admin/journal"
+        find(".journal-entry").click_button "Edit"
+      end,
+      "journal preview" => lambda do
+        visit "/admin/journal"
+        fill_in "Entry", with: "A **bold** line"
+        find("#journal-entry .seg-option", text: "Preview").click
+        find("#journal-entry .preview strong")
+      end,
+    }
+  end
+
   def open_modal
     open_panel
     find("dialog#task-panel .btn", text: "Edit").click
@@ -67,7 +82,7 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def screens = pages.merge(dialogs)
+  def screens = pages.merge(dialogs, journal_editors)
 
   def seed
     seed_analytics

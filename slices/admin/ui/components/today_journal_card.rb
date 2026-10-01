@@ -4,8 +4,8 @@ module Admin
   module UI
     module Components
       class TodayJournalCard < Component
+        BODY_HEIGHT = "160px"
         FORM_ID = "today-journal-entry"
-        ROWS = 4
         SEPARATOR = " · "
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -24,20 +24,17 @@ module Admin
 
         private
 
-        def body_attributes
-          {
-            **Journal::FieldError.control_attributes(:body, @errors),
-            name: "entry[body]",
-            rows: ROWS,
-            placeholder: t(".placeholder"),
-            data: { journal_body: "" },
-          }
+        def body_field
+          div(class: "journal-editor") { MarkdownEditor(**body_props) }
+          Journal::FieldError(field: :body, errors: @errors)
         end
 
-        def body_field
-          label(class: "sr-only", for: Journal::FieldError.id_for(:body)) { t(".body") }
-          Textarea(value: @body, **body_attributes)
-          Journal::FieldError(field: :body, errors: @errors)
+        def body_props
+          {
+            **Journal::FieldError.control_attributes(:body, @errors),
+            name: "entry[body]", value: @body, height: BODY_HEIGHT, renderer: "posts", label: t(".body"),
+            placeholder: t(".placeholder"), data: { journal_body: "" },
+          }
         end
 
         def entry_form

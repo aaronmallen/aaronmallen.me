@@ -1219,6 +1219,12 @@
   @apply mt-3 flex justify-end gap-2;
 }
 
+@utility journal-editor {
+  & .preview > .post-body {
+    @apply journal-entry-body;
+  }
+}
+
 @utility activity-rail {
   @media (width >= 53.75rem) {
     @apply sticky top-[calc(var(--spacing-ctx-bar)+1rem)] self-start;

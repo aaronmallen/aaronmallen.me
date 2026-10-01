@@ -1,5 +1,6 @@
 const WORDS = /\S+/g;
 const BLANK = /^\s*$/;
+const WRITE = "input[type='radio'][value='write']";
 
 export function setupJournals() {
   for (const form of document.querySelectorAll("form[data-journal-entry]")) {
@@ -40,7 +41,8 @@ function setupEntry(entry) {
     body.removeAttribute("aria-invalid");
     body.removeAttribute("aria-describedby");
     form.querySelector(".field-error")?.remove();
-    renderSave();
+    body.dispatchEvent(new Event("input", { bubbles: true }));
+    showWrite(form);
     setEditing(false);
     edit.focus();
   });
@@ -50,6 +52,14 @@ function setupEntry(entry) {
   remove.querySelector("[data-journal-delete-button]").addEventListener("click", () => {
     if (window.confirm(remove.dataset.confirm)) remove.submit();
   });
+}
+
+function showWrite(form) {
+  const write = form.querySelector(WRITE);
+  if (!write || write.checked) return;
+
+  write.checked = true;
+  write.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
 function setupJournal(form) {

@@ -80,13 +80,21 @@ RSpec.describe "Admin journal", type: :request do
         expect(page).to have_css("#journal-entry[data-today='#{today.iso8601}'][data-today-label='Today']")
       end
 
-      it "renders a five row textarea" do
+      it "renders the entry textarea" do
         expect(page).to have_field("Entry", type: "textarea", with: "",
                                             placeholder: "Unfiltered. Nobody is reading this but you.")
       end
 
-      it "sets the textarea to five rows" do
-        expect(page).to have_css("textarea[name='entry[body]'][rows='5']")
+      it "draws the entry in the Markdown editor at its own height" do
+        expect(page).to have_css(
+          "#journal-entry [data-markdown-editor][style='--edit-height: 240px'] textarea[name='entry[body]']",
+        )
+      end
+
+      it "previews the entry through the post renderer" do
+        expect(page).to have_css(
+          "#journal-entry [data-editor-preview='/admin/markdown/preview/posts']", visible: :hidden,
+        )
       end
 
       it "shows the word count in the card head" do
@@ -554,6 +562,14 @@ RSpec.describe "Admin journal", type: :request do
 
         expect(form).to have_field("Entry text", type: "textarea", with: "walked", visible: :hidden)
         expect(form).to have_field("_csrf_token", type: "hidden")
+      end
+
+      it "draws the edit form's text in the Markdown editor at its own height" do
+        form = page.find("form[action='/admin/journal/#{entry.id}'][method='post']", visible: :hidden)
+
+        expect(form).to have_css(
+          "[data-markdown-editor][style='--edit-height: 200px'] textarea[name='entry[body]']", visible: :hidden,
+        )
       end
 
       it "holds the entry's tags in the edit form, joined by commas" do

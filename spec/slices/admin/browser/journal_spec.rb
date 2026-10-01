@@ -24,7 +24,19 @@ RSpec.describe "Admin journal", type: :feature do
     JS
   end
 
+  def editor(scope = page) = scope.find(".journal-editor [data-markdown-editor]")
+
   def entry_bodies_on(date) = all(".journal-day:has(time[datetime='#{date.iso8601}']) .journal-entry-body").map(&:text)
+
+  def font(selector) = evaluate_script("getComputedStyle(document.querySelector('#{selector}')).fontFamily")
+
+  def scroll_into_a_day
+    execute_script(<<~JS)
+      const day = document.querySelectorAll(".journal-day")[3];
+      const bar = document.querySelector(".ctx-bar").getBoundingClientRect().bottom;
+      window.scrollBy(0, day.getBoundingClientRect().top + (day.offsetHeight / 2) - bar);
+    JS
+  end
 
   def top(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().top")
 
@@ -77,6 +89,38 @@ RSpec.describe "Admin journal", type: :feature do
       find_field("Entry").send_keys(:backspace, :backspace)
 
       expect(page).to have_button("Save entry", disabled: true)
+    end
+  end
+
+  describe "the Markdown editor" do
+    it "inserts a toolbar snippet and counts its words", :aggregate_failures do
+      editor.find("[role='toolbar'] button[aria-label='Bold']").click
+
+      expect(find_field("Entry").value).to eq("**bold**")
+      expect(page).to have_css("[data-journal-words]", exact_text: "1 word")
+      expect(page).to have_button("Save entry", disabled: false)
+    end
+
+    describe "previewing an entry" do
+      let!(:preview) do
+        fill_in "Entry", with: "a **bold** day\n\n- one"
+        editor.find(".seg-option", text: "Preview").click
+        { html: editor.find(".preview .post-body")[:innerHTML], font: font(".journal-editor .preview .post-body") }
+      end
+
+      before do
+        editor.find(".seg-option", text: "Write").click
+        click_button "Save entry"
+        page.assert_selector(".toast", text: "Journal entry saved · private")
+      end
+
+      it "renders the markup the saved entry shows" do
+        expect(find(".journal-entry-body")[:innerHTML]).to eq(preview[:html])
+      end
+
+      it "sets it in the saved entry's typeface" do
+        expect(font(".journal-entry-body")).to eq(preview[:font])
+      end
     end
   end
 
@@ -184,6 +228,31 @@ RSpec.describe "Admin journal", type: :feature do
     end
   end
 
+  describe "previewing an edit" do
+    let(:item) { find(".journal-entry") }
+
+    before do
+      create(:journal_entry, body: "before")
+      visit "/admin/journal"
+      item.click_button "Edit"
+      item.fill_in "Entry text", with: "an *edited* entry"
+      editor(item).find(".seg-option", text: "Preview").click
+    end
+
+    it "previews the edited text" do
+      expect(editor(item)).to have_css(".preview em", exact_text: "edited")
+    end
+
+    it "opens on Write with the saved text after Cancel", :aggregate_failures do
+      item.click_button "Cancel"
+      item.click_button "Edit"
+
+      expect(item).to have_field("Entry text", with: "before")
+      editor(item).find(".seg-option", text: "Preview").click
+      expect(editor(item)).to have_css(".preview p", exact_text: "before")
+    end
+  end
+
   describe "a rejected edit" do
     let(:item) { find(".journal-entry") }
 
@@ -259,6 +328,8 @@ RSpec.describe "Admin journal", type: :feature do
     end
 
     it "sticks a day heading directly below the context bar" do
+      scroll_into_a_day
+
       expect(day_heading_stuck_to_bar?).to be(true)
     end
   end

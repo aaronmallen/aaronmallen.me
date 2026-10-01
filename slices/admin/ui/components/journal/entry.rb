@@ -5,6 +5,7 @@ module Admin
     module Components
       module Journal
         class Entry < Component
+          BODY_HEIGHT = "200px"
           TAG_SEPARATOR = ", "
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
@@ -31,15 +32,16 @@ module Admin
           def body = editing? ? @editing[:body] : @entry.body
 
           def body_field
-            label(class: "sr-only", for: FieldError.id_for(:body, scope)) { t(".body") }
-            Textarea(
-              **FieldError.control_attributes(:body, errors, scope),
-              value: body,
-              name: "entry[body]",
-              rows: NewEntry::ROWS,
-              data: { journal_body: "" },
-            )
+            div(class: "journal-editor") { MarkdownEditor(**body_props) }
             FieldError(field: :body, errors:, scope:)
+          end
+
+          def body_props
+            {
+              **FieldError.control_attributes(:body, errors, scope),
+              name: "entry[body]", value: body, height: BODY_HEIGHT, renderer: "posts", label: t(".body"),
+              data: { journal_body: "" },
+            }
           end
 
           def delete_attributes
