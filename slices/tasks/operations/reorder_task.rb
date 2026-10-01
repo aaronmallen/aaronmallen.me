@@ -10,8 +10,9 @@ module Tasks
       def call(id, direction)
         task = step find(id)
         neighbour = step neighbour(task, direction)
+        after = direction == UP ? task_repo.open_before(neighbour) : neighbour
 
-        task_repo.swap_positions(task, neighbour)
+        step place(task, after)
       end
 
       private
@@ -29,6 +30,8 @@ module Tasks
 
         neighbour ? Success(neighbour) : Failure(:not_moved)
       end
+
+      def place(task, after) = task_repo.place(task, after&.id) ? Success(task.id) : Failure(:not_moved)
     end
   end
 end

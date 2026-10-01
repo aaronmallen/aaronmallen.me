@@ -1861,6 +1861,131 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+
+      it "moves a task up past one that shares its position" do
+        create(:task, title: "tied", position: 2)
+        send_to("/admin/tasks/#{repo.in_list('next').last.id}/reorder/up", filter: "next")
+
+        expect(repo.in_list("next").map(&:title)).to eq(%w[first tied second])
+      end
+
+      it "moves a task down past one that shares its position" do
+        create(:task, title: "tied", position: 2)
+        send_to("/admin/tasks/#{repo.in_list('next')[1].id}/reorder/down", filter: "next")
+
+        expect(repo.in_list("next").map(&:title)).to eq(%w[first tied second])
+      end
+    end
+
+    describe "placing a task" do
+      def listed(title) = repo.in_list("next").find { it.title == title }
+
+      def next_titles = repo.in_list("next").map(&:title)
+
+      def place(title, after = nil)
+        send_to("/admin/tasks/#{listed(title).id}/place", after: after && listed(after).id)
+      end
+
+      before do
+        create(:task, title: "first", position: 1)
+        create(:task, title: "second", position: 2)
+        create(:task, title: "third", position: 3)
+        create(:task, title: "fourth", position: 4)
+      end
+
+      it "puts a task right after the one it follows" do
+        place("first", "third")
+
+        expect(next_titles).to eq(%w[second third first fourth])
+      end
+
+      it "moves a task up past several others" do
+        place("fourth", "first")
+
+        expect(next_titles).to eq(%w[first fourth second third])
+      end
+
+      it "moves a task to the top with nothing to follow" do
+        place("third")
+
+        expect(next_titles).to eq(%w[third first second fourth])
+      end
+
+      it "answers 204 with no page" do
+        place("first", "third")
+
+        expect(last_response).to have_attributes(status: 204, body: "")
+      end
+
+      it "answers 204 for a task left where it was" do
+        place("second", "first")
+
+        expect([last_response.status, next_titles]).to eq([204, %w[first second third fourth]])
+      end
+
+      it "skips a finished task between open ones" do
+        create(:task, :done, title: "finished", position: 5)
+        create(:task, title: "fifth", position: 6)
+        place("fifth", "third")
+
+        expect(repo.open_in_list("next").map(&:title)).to eq(%w[first second third fifth fourth])
+      end
+
+      it "places tasks that share a position" do
+        create(:task, title: "tied", position: 4)
+        place("tied", "first")
+        place("first", "fourth")
+
+        expect(next_titles).to eq(%w[tied second third fourth first])
+      end
+
+      it "keeps a task in its own list" do
+        place("first", "third")
+
+        expect(repo.by_id(listed("first").id)).to have_attributes(list: "next", sprint_id: nil)
+      end
+
+      {
+        "a finished task" => -> { create(:task, :done, title: "finished", position: 5) },
+        "a canceled task" => -> { create(:task, :canceled, title: "canceled", position: 5) },
+      }.each do |kind, make|
+        it "refuses #{kind} with no change", :aggregate_failures do
+          closed = instance_exec(&make)
+          send_to("/admin/tasks/#{closed.id}/place", after: "")
+
+          expect(last_response.status).to eq(422)
+          expect(next_titles).to eq(["first", "second", "third", "fourth", closed.title])
+        end
+      end
+
+      {
+        "a task in another list" => -> { create(:task, :someday, position: 5).id },
+        "a task in a sprint" => -> { create(:task, :in_sprint, position: 5).id },
+        "a finished task" => -> { create(:task, :done, position: 5).id },
+        "the task itself" => -> { listed("first").id },
+        "a task that isn't there" => -> { 999_999 },
+        "an id that isn't one" => -> { "third" },
+      }.each do |kind, after|
+        it "refuses to follow #{kind} with no change", :aggregate_failures do
+          send_to("/admin/tasks/#{listed('first').id}/place", after: instance_exec(&after))
+
+          expect(last_response.status).to eq(422)
+          expect(repo.open_in_list("next").map(&:title)).to eq(%w[first second third fourth])
+        end
+      end
+
+      it "answers 404 for a task that isn't there" do
+        send_to("/admin/tasks/0/place", after: listed("first").id)
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "refuses a forged CSRF token with no change", :aggregate_failures do
+        post "/admin/tasks/#{listed('first').id}/place", _csrf_token: "forged", after: listed("third").id
+
+        expect(last_response.status).to eq(403)
+        expect(next_titles).to eq(%w[first second third fourth])
+      end
     end
 
     describe "paging a pool" do
@@ -2674,6 +2799,7 @@ RSpec.describe "Admin tasks", type: :request do
       "/complete" => {},
       "/delete" => {},
       "/move/someday" => {},
+      "/place" => {},
       "/reopen" => {},
       "/reorder/up" => {},
       "/start" => {},

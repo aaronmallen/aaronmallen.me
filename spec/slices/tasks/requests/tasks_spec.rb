@@ -277,6 +277,47 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  describe "placing a task in today's sprint" do
+    let(:sprint) { create(:sprint, sprint_date: today) }
+
+    def sprinted(title) = repo.in_sprint(sprint.id).find { it.title == title }
+
+    def today_titles = repo.in_sprint(sprint.id).map(&:title)
+
+    before do
+      %w[first second third].each.with_index(1) do |title, position|
+        create(:task, :in_sprint, sprint_id: sprint.id, title:, position:)
+      end
+    end
+
+    it "puts it right after the task it follows" do
+      send_to("/admin/tasks/#{sprinted('first').id}/place", after: sprinted("third").id)
+
+      expect(today_titles).to eq(%w[second third first])
+    end
+
+    it "moves it to the top of the sprint with nothing to follow" do
+      send_to("/admin/tasks/#{sprinted('third').id}/place")
+
+      expect(today_titles).to eq(%w[third first second])
+    end
+
+    it "refuses to follow a task in another sprint with no change", :aggregate_failures do
+      other = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today + 1).id, position: 4)
+      send_to("/admin/tasks/#{sprinted('first').id}/place", after: other.id)
+
+      expect(last_response.status).to eq(422)
+      expect(today_titles).to eq(%w[first second third])
+    end
+
+    it "refuses to follow a task in a list with no change", :aggregate_failures do
+      send_to("/admin/tasks/#{sprinted('first').id}/place", after: create(:task, position: 4).id)
+
+      expect(last_response.status).to eq(422)
+      expect(today_titles).to eq(%w[first second third])
+    end
+  end
+
   describe "scheduling a task in progress for a later day" do
     let(:task) { create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id) }
 

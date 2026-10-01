@@ -21,6 +21,7 @@ RSpec.describe "Admin records that are gone", type: :request do
     "/tasks/#{missing}/delete" => {},
     "/tasks/#{missing}/links" => { link: { key: "T-1", kind: "blocks" } },
     "/tasks/#{missing}/move/today" => {},
+    "/tasks/#{missing}/place" => {},
     "/tasks/#{missing}/reopen" => {},
     "/tasks/#{missing}/reorder/up" => {},
     "/tasks/#{missing}/schedule" => {},

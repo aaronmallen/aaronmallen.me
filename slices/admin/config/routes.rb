@@ -85,6 +85,7 @@ module Admin
     post "/tasks/:id/links", to: "tasks.link", as: :link_task, id: ID
     post "/tasks/:id/links/:other_id/delete", to: "tasks.unlink", as: :unlink_task, id: ID, other_id: ID
     post "/tasks/:id/move/:filter", to: "tasks.move", as: :move_task, id: ID, filter: TASK_FILTER
+    post "/tasks/:id/place", to: "tasks.place", as: :place_task, id: ID
     post "/tasks/:id/reopen", to: "tasks.reopen", as: :reopen_task, id: ID
     post "/tasks/:id/reorder/:direction", to: "tasks.reorder", as: :reorder_task, id: ID, direction: TASK_MOVE
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID

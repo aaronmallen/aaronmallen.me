@@ -518,6 +518,19 @@ RSpec.describe "MCP task tools", type: :request do
       expect(tasks.in_list("next").map(&:title)).to eq(%w[second first])
     end
 
+    it "moves a task past one that shares its position" do
+      tied = create(:task, title: "tied", position: 2)
+      call_tool("reorder_task", id: tied.id, direction: "up")
+
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[first tied second])
+    end
+
+    it "moves a task down past the one below it" do
+      call_tool("reorder_task", id: first.id, direction: "down")
+
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[second first])
+    end
+
     it "says it did not move a task already at the top" do
       call_tool("reorder_task", id: first.id, direction: "up")
 

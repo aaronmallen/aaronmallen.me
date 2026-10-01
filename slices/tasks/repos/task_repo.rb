@@ -99,6 +99,14 @@ module Tasks
         page.fill(with_details.for_sprint(sprint_id).open.searched(**search).in_order.paged(page).to_a)
       end
 
+      def place(task, after_id)
+        transaction do
+          tasks.lock_positions_until_commit
+          moves = Placement.moves(beside(task).in_order.to_a, task.id, after_id)
+          moves&.each { |id, position| update(id, position:) }
+        end
+      end
+
       def release_sprint(sprint_id)
         held = tasks.for_sprint(sprint_id)
 
@@ -111,15 +119,6 @@ module Tasks
       def replace_tags(id, names) = task_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
       def return_to_list(id) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT)
-
-      def swap_positions(one, two)
-        transaction do
-          tasks.lock_positions_until_commit
-          update(one.id, position: next_position)
-          update(two.id, position: one.position)
-          update(one.id, position: two.position)
-        end
-      end
 
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
