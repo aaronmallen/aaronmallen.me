@@ -237,6 +237,14 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_css(".card #{note_box}#post-edit_note")
         expect(page).to have_field("What changed and why", with: "")
       end
+
+      it "puts the note box below the body" do
+        expect(page).to have_css(".editor-main > [data-markdown-editor]:has(#post-body) + .card #{note_box}")
+      end
+
+      it "keeps the note box out of the sidebar" do
+        expect(page).to have_no_css(".side-stack #{note_box}")
+      end
     end
 
     describe "editing a post" do
@@ -867,6 +875,21 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_css("#post-edit_note[aria-invalid='true'][aria-describedby='post-edit_note-error']")
       end
 
+      it "shows the note error below the body", :aggregate_failures do
+        save_published(body: "two")
+
+        expect(page).to have_css(".editor-main #post-edit_note-error", text: note_error("blank"))
+        expect(page).to have_no_css(".side-stack #post-edit_note-error")
+      end
+
+      it "keeps the rest of the form after a missing note", :aggregate_failures do
+        save_published(title: "Changed", body: "two", tags: "ruby")
+
+        expect(page).to have_field("Title", with: "Changed")
+        expect(page).to have_field("Body", with: "two")
+        expect(page).to have_field("Tags", with: "ruby")
+      end
+
       it "saves a body change with its note", :aggregate_failures do
         save_published(body: "two", edit_note: "fixed the `numbers`")
 
@@ -917,7 +940,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "keeps the note as typed after a failed save" do
         save_published(title: "  ", body: "two", edit_note: "Fixed a typo")
 
-        expect(page).to have_field("What changed and why", with: "Fixed a typo")
+        expect(page.find(".editor-main")).to have_field("What changed and why", with: "Fixed a typo")
       end
     end
 

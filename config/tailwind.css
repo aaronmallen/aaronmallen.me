@@ -1505,6 +1505,10 @@
   }
 }
 
+@utility editor-main {
+  @apply flex min-w-0 flex-col gap-4;
+}
+
 @utility edit {
   @apply flex flex-col overflow-hidden rounded-card border border-line bg-ground-sunk;
 }

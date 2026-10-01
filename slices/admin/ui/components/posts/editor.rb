@@ -42,10 +42,6 @@ module Admin
             end
           end
 
-          def body_editor
-            MarkdownEditor(**body_editor_props) { Preview(**@preview) }
-          end
-
           def body_editor_props
             {
               name: "post[body]", value: @values[:body], height: BODY_HEIGHT, renderer: "posts", id: "post-body",
@@ -65,7 +61,10 @@ module Admin
 
           def panes_and_sidebar
             div(class: "editor") do
-              body_editor
+              div(class: "editor-main") do
+                MarkdownEditor(**body_editor_props) { Preview(**@preview) }
+                EditNote(value: @values[:edit_note], errors: @errors) if published?
+              end
               SideStack { sidebar }
             end
           end
@@ -82,7 +81,6 @@ module Admin
 
           def sidebar
             Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
-            EditNote(value: @values[:edit_note], errors: @errors) if published?
             EditNotes(**@notes)
             Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)
             Seo(values: @values, errors: @errors)

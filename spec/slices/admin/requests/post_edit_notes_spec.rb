@@ -55,13 +55,12 @@ RSpec.describe "Admin post edit notes", type: :request do
         expect(card).to have_css(".edit-note-body code", text: "numbers")
       end
 
-      it "sits below the new note box" do
+      it "stays in the sidebar while the new note box sits below the body", :aggregate_failures do
         create(:post_edit, post: article)
         read
 
-        labels = page.all(".card-label").map(&:text)
-
-        expect(labels.index("Edit notes")).to eq(labels.index("What changed and why") + 1)
+        expect(page.find(".side-stack").all(".card-label").map(&:text).first).to eq("Edit notes")
+        expect(page.find(".editor-main").all(".card-label").map(&:text)).to eq(["What changed and why"])
       end
 
       it "is absent when the post has no notes" do
