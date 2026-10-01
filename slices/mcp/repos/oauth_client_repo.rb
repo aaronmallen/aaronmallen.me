@@ -3,8 +3,6 @@
 module MCP
   module Repos
     class OAuthClientRepo < Blog::DB::Repo
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
-
       def claim(visitor_hash:, limit:, since:, **attrs)
         oauth_clients.claim(visitor_hash:, limit:, since:, **attrs)
       end
@@ -28,7 +26,9 @@ module MCP
         end
       end
 
-      def touch_last_used(id, at: Time.now) = update(id, last_used_at: at)
+      def touch_last_used(id, at: Time.now, unless_since: at)
+        oauth_clients.by_pk(id).last_used_before(unless_since).update(last_used_at: at)
+      end
     end
   end
 end

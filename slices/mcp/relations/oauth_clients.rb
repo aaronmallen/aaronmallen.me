@@ -30,6 +30,8 @@ module MCP
           .where { coalesce(last_used_at, created_at) < since }
       end
 
+      def last_used_before(time) = where(Sequel.|({ last_used_at: nil }, Sequel[:last_used_at] < time))
+
       def newest_first = order(self[:created_at].desc, self[:id].desc)
 
       def registered_since(time) = where { created_at >= time }

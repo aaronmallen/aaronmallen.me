@@ -2181,4 +2181,30 @@ RSpec.describe "MCP endpoint", type: :request do
 
     expect(clients.one[:last_used_at]).to be_within(60).of(Time.now)
   end
+
+  it "notes a call when the client last called more than five minutes ago" do
+    issued
+    clients.by_pk(client.id).update(last_used_at: Time.now - (6 * 60))
+    rpc("tools/list")
+
+    expect(clients.one[:last_used_at]).to be_within(60).of(Time.now)
+  end
+
+  it "leaves the last call alone when the client called within five minutes" do
+    issued
+    called = Time.now.floor - (4 * 60)
+    clients.by_pk(client.id).update(last_used_at: called)
+    rpc("tools/list")
+
+    expect(clients.one[:last_used_at]).to eq(called)
+  end
+
+  it "leaves updated_at alone when it notes a call" do
+    issued
+    updated = Time.now.floor - (24 * 60 * 60)
+    clients.by_pk(client.id).update(updated_at: updated)
+    rpc("tools/list")
+
+    expect(clients.one[:updated_at]).to eq(updated)
+  end
 end

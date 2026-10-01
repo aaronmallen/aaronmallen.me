@@ -8,6 +8,7 @@ module MCP
       NO_RESOURCE = "the access token names no resource"
       NO_TOKEN = "this endpoint takes a bearer access token"
       REJECT = :reject
+      TOUCH_EVERY = 5 * 60
       UNKNOWN_CLIENT = "the client this token belongs to is no longer connected"
       UNUSABLE_TOKEN = "the access token is unknown, expired or revoked"
       WRONG_RESOURCE = "the access token was issued for another resource"
@@ -19,7 +20,7 @@ module MCP
         token = step find(value)
         step check_client(token)
         step check_resource(token, issuer)
-        client_repo.touch_last_used(token.oauth_client_id)
+        touch(token)
         token
       end
 
@@ -53,6 +54,11 @@ module MCP
       end
 
       def refuse(description) = Failure([REJECT, { error: INVALID_TOKEN, error_description: description }])
+
+      def touch(token)
+        at = Time.now
+        client_repo.touch_last_used(token.oauth_client_id, at:, unless_since: at - TOUCH_EVERY)
+      end
     end
   end
 end
