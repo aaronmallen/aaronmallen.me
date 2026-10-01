@@ -8,15 +8,22 @@ module Record
       include Deps[commit_repo: "repos.commit_repo"]
 
       def call(repo, branches)
-        seen = Set.new
+        commits = first_sightings(branches)
+        known = commit_repo.known_shas(commits.keys)
 
-        branches.sum { |branch| branch[:commits].count { seen.add?(it[:sha]) && added?(repo, branch[:name], it) } }
+        commits.each_value { |branch, commit| store(repo, branch, commit) }
+        commits.keys.count { !known.include?(it) }
       end
 
       private
 
-      def added?(repo, branch, commit)
-        held = commit_repo.by_sha(commit[:sha])
+      def first_sightings(branches)
+        branches.each_with_object({}) do |branch, found|
+          branch[:commits].each { found[it[:sha]] ||= [branch[:name], it] }
+        end
+      end
+
+      def store(repo, branch, commit)
         at = Blog::TimeZone.local(commit[:authored_at])
 
         commit_repo.import(
@@ -24,7 +31,6 @@ module Record
           additions: commit[:additions], deletions: commit[:deletions],
           commit_date: at.to_date, commit_time: at.strftime(TIME_FORMAT),
         )
-        held.nil?
       end
     end
   end

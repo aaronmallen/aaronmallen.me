@@ -38,6 +38,8 @@ module Record
 
       def import(**attrs) = commits.command(:import).call(attrs)
 
+      def known_shas(shas) = shas.empty? ? Set.new : commits.with_sha(shas).pluck(:sha).to_set
+
       def last_synced_at = sync_states.of_kind(SYNC_KIND).max(:updated_at)
 
       def newest_commit_at = commits.max(:created_at)
