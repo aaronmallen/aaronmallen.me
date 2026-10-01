@@ -3,9 +3,9 @@ id: "0012"
 title: Never retry a scheduled job, and make its next run catch up
 status: active
 created: 2026-09-28
-area: [analytics, config, lib, mcp, posts, projects, record, social, tasks]
+area: [analytics, config, lib, mcp, media, posts, projects, record, social, tasks]
 issue: AA-657
-amended: [AA-823]
+amended: [AA-823, "#140"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -57,7 +57,7 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
 | `RollOverSprint` | Raise |
 | `ImportCommits`, `RefreshProjects` | Record in `sync_states` |
-| `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts` | Drop it |
+| `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos` | Drop it |
 
 `RefreshCountryDatabase` stays quiet on `:not_configured`, since the site may run with no MaxMind key, and
 `ImportCommits` drops `:lock_busy`, since another import holds the lock. An exception none of them catch still

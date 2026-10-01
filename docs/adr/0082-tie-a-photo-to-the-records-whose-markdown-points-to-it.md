@@ -3,8 +3,9 @@ id: "0082"
 title: Tie a photo to the records whose Markdown points to it
 status: active
 created: 2026-09-30
-area: [posts, record, tasks]
+area: [media, posts, record, tasks]
 issue: "#134"
+amended: ["#140"]
 tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
 ---
 
@@ -29,7 +30,8 @@ A photo belongs to the records whose Markdown points to it, and to nothing else.
 - **An upload starts with no owner.** The endpoint stores the photo and hands back its URL, and nothing more.
 - **Saving claims by reference.** Saving a post, journal entry, task or task comment reads the `/media/<key>` URLs
   in its Markdown and makes the record's claims match them: a photo the text now points to gains a claim, and one it
-  no longer points to loses one. A photo can carry claims from many records.
+  no longer points to loses one. A photo can carry claims from many records. #140 added a post's Open Graph image
+  field, so a `/media/<key>` URL there claims too, and a card image can be an upload.
 - **Deleting releases, and the last release deletes.** Deleting a record drops its claims, and deletes from the
   store and the table each photo left with no claim. Deleting a task does the same for its comments.
 - **A sweep takes the rest.** A scheduled job deletes every photo that has no claim and was uploaded over 24 hours
@@ -57,8 +59,8 @@ Deleting a post takes its photos with it. The post's URL is gone, but copies of 
 cached the entry and a site that shows a webmention excerpt both still point to `/media/<key>`, and each of those
 photos now answers with the empty 404 from [ADR 0080][0080].
 
-Only Markdown claims. A photo URL pasted into a post's Open Graph field, or into a social post, holds no claim, and
-the sweep deletes the photo within a day unless some Markdown also points to it.
+Only Markdown and a post's Open Graph field claim. A photo URL pasted into a social post holds no claim, and the
+sweep deletes the photo within a day unless some record also points to it.
 
 An edit that drops a photo from the text leaves it unclaimed, so putting the URL back more than a day later finds
 the photo gone.
