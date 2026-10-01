@@ -12,7 +12,6 @@ module Admin
             "duplicated_by" => "fa-regular fa-clone",
             "relates" => "fa-solid fa-link",
           }.freeze
-          BLOCKED_BY = "blocked_by"
           CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze
           LABELS = "ui.components.tasks.links.labels"
 
@@ -27,23 +26,17 @@ module Admin
           private
 
           def chip(link)
-            span(class: chip_class(link), title: (link.task.title if key_only?(link))) do
+            span(class: chip_class(link), title: link.task.title) do
               i(class: ICONS.fetch(link.label), aria: { hidden: "true" })
               span(class: "task-link-label") { t(self.class.label_key(link)) }
               TaskKey(task: link.task)
-              chip_title(link)
+              span(class: "sr-only") { link.task.title }
             end
           end
 
           def chip_class(link)
             ["task-link", ("blocker" if link.blocker?), ("done" if CLOSED.include?(link.task.status))]
           end
-
-          def chip_title(link)
-            span(class: key_only?(link) ? "sr-only" : "task-link-title") { link.task.title }
-          end
-
-          def key_only?(link) = link.label == BLOCKED_BY
         end
       end
     end

@@ -9,7 +9,7 @@ RSpec.describe "Admin task links", type: :request do
 
   def chips(title)
     row(title).all(".task-link").map do |chip|
-      [chip.find(".task-link-label").text, chip.find(".task-key").text, chip.find(".task-link-title").text]
+      [chip.find(".task-link-label").text, chip.find(".task-key").text, chip["title"]]
     end
   end
 
@@ -43,10 +43,39 @@ RSpec.describe "Admin task links", type: :request do
       create(:task_link, from_task_id: task.id, to_task_id: other.id)
     end
 
-    it "reads the type, the other task's key and its title on the task that blocks" do
+    it "reads the type and the other task's key, with its title as a tooltip, on the task that blocks" do
       get "/admin/tasks", filter: "next"
 
       expect(chips("Ship the links")).to eq([[link_label(:blocks), "##{other.id}", "Write the migration"]])
+    end
+
+    [
+      ["blocks", "blocks", "Ship the links", "Write the migration"],
+      ["duplicates", "duplicates", "Ship the links", "Write the migration"],
+      ["duplicated_by", "duplicates", "Write the migration", "Ship the links"],
+      ["relates", "relates", "Ship the links", "Write the migration"],
+    ].each do |label, type, title, linked|
+      describe "a #{label} chip" do
+        def chip(title) = row(title).find(".task-link")
+
+        before do
+          links.where(from_task_id: task.id).update(type:)
+          get "/admin/tasks", filter: "next"
+        end
+
+        it "shows the key and no title", :aggregate_failures do
+          expect(chip(title).find(".task-link-label").text).to eq(link_label(label))
+          expect(chip(title)).to have_no_css(".task-link-title")
+        end
+
+        it "names the linked title for a screen reader" do
+          expect(chip(title).find(".sr-only").text).to eq(linked)
+        end
+
+        it "gives the linked title as a tooltip" do
+          expect(chip(title)["title"]).to eq(linked)
+        end
+      end
     end
 
     describe "on the task that is blocked" do
@@ -73,12 +102,6 @@ RSpec.describe "Admin task links", type: :request do
 
         expect(page.find(".task-link-row").find(".task-link-title").text).to eq("Ship the links")
       end
-    end
-
-    it "gives no tooltip to a chip that shows its title" do
-      get "/admin/tasks", filter: "next"
-
-      expect(row("Ship the links").find(".task-link")["title"]).to be_nil
     end
 
     it "draws the other task's key as a badge that copies it" do
