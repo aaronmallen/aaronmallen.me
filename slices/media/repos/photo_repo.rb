@@ -7,14 +7,17 @@ module Media
 
       def claim(owner, owner_id, keys)
         photo_claims.for_owners(owner, owner_id).delete
-        ids = keys.empty? ? Blog::Constants::EMPTY_ARRAY : photos.with_keys(keys).pluck(:id)
+        ids = keys.empty? ? Blog::Constants::EMPTY_ARRAY : photos.with_keys(keys).lock(mode: :share).pluck(:id)
         claims = ids.map { { owner:, owner_id:, photo_id: it } }
         photo_claims.command(:create, result: :many).call(claims) unless claims.empty?
 
         ids
       end
 
-      def delete_unclaimed(id) = photos.unclaimed.by_pk(id).delete
+      def delete_unclaimed(id)
+        photos.by_pk(id).lock.one
+        photos.unclaimed.by_pk(id).delete
+      end
 
       def release(owner, owner_ids)
         claims = photo_claims.for_owners(owner, owner_ids)

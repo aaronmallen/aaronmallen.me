@@ -53,4 +53,50 @@ RSpec.describe Media::Jobs::SweepPhotos, type: :request do
 
     expect(keys).to eq([photo.key])
   end
+
+  describe "a sweep and a save that meet on one photo", :commits do
+    let(:gate) { Queue.new }
+    let!(:photo) { uploaded(day * 2) }
+
+    def claimed_ids = Media::Slice["relations.photo_claims"].pluck(:photo_id)
+
+    def database = Media::Slice["db.rom"].gateways[:default].connection
+
+    def meet(first, second)
+      threads = [Thread.new(&first)]
+      wait_at_gate
+      threads << Thread.new(&second)
+      wait_for_lock
+      gate << :go
+      threads.map(&:value)
+    end
+
+    def save = Media::Slice["operations.claim_photos"].call("post", 1, "/media/#{photo.key}")
+
+    def save_holding_open = Media::Slice["repos.photo_repo"].transaction { save.tap { gate.pop } }
+
+    def wait_at_gate = Timeout.timeout(5) { sleep(0.01) until gate.num_waiting.positive? }
+
+    def wait_for_lock
+      waiting = database[:pg_stat_activity].where(datname: Sequel.function(:current_database), wait_event_type: "Lock")
+      Timeout.timeout(5) { sleep(0.01) until waiting.any? }
+    end
+
+    it "keeps a photo a save claims while the sweep waits", :aggregate_failures do
+      meet(-> { save_holding_open }, -> { sweep })
+
+      expect(keys).to eq([photo.key])
+      expect(claimed_ids).to eq([photo.id])
+      expect(a_request(:delete, media_store_url(photo.key))).not_to have_been_made
+    end
+
+    it "lets a save that waits on a sweep claim nothing", :aggregate_failures do
+      stub_request(:delete, media_store_url(photo.key)).to_return { gate.pop && { status: 204 } }
+      _, claimed = meet(-> { sweep }, -> { save })
+
+      expect(claimed).to be_empty
+      expect(keys).to be_empty
+      expect(claimed_ids).to be_empty
+    end
+  end
 end
