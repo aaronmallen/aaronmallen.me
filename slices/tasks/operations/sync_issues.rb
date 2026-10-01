@@ -83,7 +83,7 @@ module Tasks
 
       def import(provider, issue, now)
         transaction do
-          task = task_repo.create(**copy(issue), list: EXTERNAL, position: task_repo.next_position)
+          task = task_repo.append(**copy(issue), list: EXTERNAL)
           task_repo.add_tags(task.id, tags(issue))
           source = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
           follow(task_source_repo.create(**source), issue, now)

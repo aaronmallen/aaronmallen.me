@@ -5,6 +5,8 @@ RSpec.describe "Tasks", type: :request do
   let(:sprints) { Tasks::Slice["repos.sprint_repo"] }
   let(:today) { Blog::TimeZone.today }
 
+  def capture(title) = Tasks::Slice["operations.capture_task"].call({ title:, note: "", tags: "" })
+
   def send_to(path, **params)
     post path, { _csrf_token: admin_csrf_token, **params }
   end
@@ -28,6 +30,61 @@ RSpec.describe "Tasks", type: :request do
       send_to("/admin/tasks", filter: "next", task: { title: "Email the accountant", task_type_id: "1" })
 
       expect(repo.in_list("next").map(&:title)).to eq(["Email the accountant"])
+    end
+  end
+
+  describe "placing a new task" do
+    it "puts a captured task after the ones already in its list" do
+      create(:task, title: "older", position: 1)
+      create(:task, title: "old", position: 2)
+      capture("new")
+
+      expect(repo.in_list("next").map(&:title)).to eq(%w[older old new])
+    end
+  end
+
+  describe "two tasks placed at once", :commits do
+    let(:client) { Spec::IssueClient.new }
+
+    def database = Tasks::Slice["db.rom"].gateways[:default].connection
+
+    def held_by_another_session
+      other = Sequel.connect(database.opts.merge(max_connections: 1))
+      other.get(Sequel.function(:pg_advisory_lock, Sequel.function(:hashtext, "tasks")))
+      yield
+    ensure
+      other&.disconnect
+    end
+
+    def import(id)
+      url = "https://linear.app/acme/issue/#{id}"
+      client.assigned << { body: "", id:, reference: id, remote_state: "open", title: id, url: }
+      Tasks::Slice["operations.sync_issues"].call(provider: "linear", client:)
+    end
+
+    def placed_together(*writes)
+      held_by_another_session do
+        writes.map { Thread.new(&it) }.tap { wait_until_all_wait(writes.size) }
+      end.each(&:join)
+      Tasks::Slice["relations.tasks"].pluck(:position)
+    end
+
+    def wait_until_all_wait(count)
+      here = database[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
+      waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
+      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
+    end
+
+    it "gives two captured tasks different positions" do
+      positions = placed_together(-> { capture("one") }, -> { capture("two") })
+
+      expect(positions.uniq.size).to eq(2)
+    end
+
+    it "gives a captured task and an imported one different positions" do
+      positions = placed_together(-> { capture("one") }, -> { import("L_two") })
+
+      expect(positions.uniq.size).to eq(2)
     end
   end
 

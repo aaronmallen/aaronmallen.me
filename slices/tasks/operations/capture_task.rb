@@ -39,9 +39,7 @@ module Tasks
         placed = placement(filter)
 
         transaction do
-          task = task_repo.create(
-            title: fields[:title], note: fields[:note], position: task_repo.next_position, **placed,
-          )
+          task = task_repo.append(title: fields[:title], note: fields[:note], **placed)
           task_repo.replace_tags(task.id, fields[:tags])
           claim_photos.call(PHOTO_OWNER, task.id, task.note)
           task

@@ -19,6 +19,13 @@ module Tasks
 
       def all_open = tasks.open.in_order.to_a
 
+      def append(**fields)
+        transaction do
+          tasks.lock_positions_until_commit
+          create(**fields, position: next_position)
+        end
+      end
+
       def by_id(id) = with_details.by_pk(id).one
 
       def by_source(provider, remote_id) = with_details.where(id: task_sources.at(provider, remote_id).task_ids).one
@@ -72,8 +79,6 @@ module Tasks
         end
       end
 
-      def next_position = tasks.last_position + 1
-
       def open_after(task) = beside(task).following(task).limit(1).one
 
       def open_before(task) = beside(task).preceding(task).limit(1).one
@@ -109,6 +114,7 @@ module Tasks
 
       def swap_positions(one, two)
         transaction do
+          tasks.lock_positions_until_commit
           update(one.id, position: next_position)
           update(two.id, position: one.position)
           update(one.id, position: two.position)
@@ -120,6 +126,8 @@ module Tasks
       private
 
       def beside(task) = (task.listed? ? tasks.in_list(task.list) : tasks.for_sprint(task.sprint_id)).open
+
+      def next_position = tasks.last_position + 1
 
       def pause(held) = held.in_progress.stamped(:update, result: :many).call(status: OPEN)
 
