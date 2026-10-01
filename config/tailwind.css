@@ -2373,6 +2373,30 @@
   }
 }
 
+@utility token-mint {
+  @apply flex items-center gap-2;
+
+  & .inp {
+    @apply flex-1;
+  }
+
+  @media (width < 43.75rem) {
+    @apply flex-wrap;
+
+    & .inp {
+      @apply basis-full;
+    }
+  }
+}
+
+@utility token-minted {
+  @apply flex flex-col gap-2;
+
+  & .inp {
+    @apply w-full font-mono;
+  }
+}
+
 @utility tags-search {
   @apply w-44;
 }

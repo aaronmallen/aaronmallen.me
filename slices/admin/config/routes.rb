@@ -92,6 +92,9 @@ module Admin
     post "/tasks/issues/sync", to: "issues.sync", as: :sync_issues
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
+    get "/tokens", to: "tokens.index", as: :tokens
+    post "/tokens", to: "tokens.create", as: :create_token
+    post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post "/webmentions/:id/approve", to: "webmentions.approve", as: :approve_webmention, id: ID

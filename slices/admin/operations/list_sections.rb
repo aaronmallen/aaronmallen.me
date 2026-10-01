@@ -17,6 +17,7 @@ module Admin
         %i[tags settings fa-tag admin_tags].freeze,
         %i[people settings fa-address-book admin_people].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
+        %i[tokens settings fa-key admin_tokens].freeze,
       ].freeze
 
       ROOT = :today

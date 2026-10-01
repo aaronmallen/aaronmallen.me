@@ -133,6 +133,10 @@ en:
     toasts:
       not_configured: "No GitHub token is set."
       queued: "Import queued · new commits show on the card shortly"
+  tokens_page:
+    toasts:
+      minted: "Token minted · copy it now"
+      revoked: "Token revoked · the API refuses it now"
   ui:
     components:
       activity:
@@ -331,6 +335,7 @@ en:
           tags: "tags"
           tasks: "tasks"
           today: "today"
+          tokens: "API tokens"
           webmentions: "webmentions"
         slash_button:
           label: "Open the command palette"
@@ -925,6 +930,26 @@ en:
         words:
           one: "%{count} word"
           other: "%{count} words"
+      tokens:
+        field_error:
+          name:
+            blank: "Give the token a name first."
+            control: "A name can't hold control characters."
+            long: "Keep the name to 100 characters."
+        mint:
+          label: "Token name"
+          mint: "Mint token"
+          placeholder: "Name the client that will use it…"
+        minted:
+          hint: "Copy it now. The site keeps only a digest, so this page can't show it again."
+          label: "New API token"
+          title: "Your new token"
+        row:
+          confirm_revoke: "Revoke %{token}? Any client using it loses the API at once."
+          last_used: "last used %{time}"
+          minted: "minted %{time}"
+          never_used: "never used"
+          revoke: "Revoke"
       webmentions:
         pending_card:
           pending: "%{count} pending"
@@ -1312,6 +1337,16 @@ en:
           visitors: "Unique visitors"
           webmentions: "Webmentions"
           webmentions_note: "awaiting review"
+      tokens:
+        index:
+          empty: "No live tokens. Mint one for a client that needs the API."
+          heading: "API tokens"
+          live: "Live tokens"
+          mint: "Mint a token"
+          sub:
+            one: "%{count} live token"
+            other: "%{count} live tokens"
+            zero: "No live tokens"
       webmentions:
         index:
           apply: "Filter"
