@@ -28,7 +28,7 @@ module Analytics
         return nil if signed_in || bot?(user_agent)
 
         address_hash = hash_visitor.call(address:)
-        step within_limit(address_hash)
+        step within_limit(address_hash) if read?(visit)
         visitor_hash = hash_visitor.call(address:, user_agent:)
         step store(visit, visitor_hash:, address_hash:, address:, base_url:)
       end
@@ -52,6 +52,8 @@ module Analytics
         matched.zero? ? Failure(:unknown_visit) : Success(matched)
       end
 
+      def read?(visit) = visit[:kind] == Contracts::VisitContract::READ
+
       def referrer_host(referrer, base_url)
         return if referrer.to_s.length > MAX_REFERRER
 
@@ -60,7 +62,7 @@ module Analytics
       end
 
       def store(visit, visitor_hash:, address_hash:, address:, base_url:)
-        return read(visit, visitor_hash) if visit[:kind] == Contracts::VisitContract::READ
+        return read(visit, visitor_hash) if read?(visit)
 
         view(visit, visitor_hash:, address_hash:, address:, base_url:)
       end

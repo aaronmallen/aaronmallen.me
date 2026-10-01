@@ -42,6 +42,10 @@ RSpec.describe "Visit counting", type: :request do
       expect(stored.first.referrer_host).to be_nil
     end
 
+    it "counts the address's recent events once" do
+      expect(counting { view }.grep(/\ASELECT count\(\*\).*address_hash/i)).to have(1).item
+    end
+
     it "keeps no title when the page sent a blank one" do
       view(title: "   ")
 
@@ -79,6 +83,14 @@ RSpec.describe "Visit counting", type: :request do
 
       expect(stored.map(&:read_seconds)).to eq([0, 0])
     end
+
+    it "is throttled once the address has reached the limit", :aggregate_failures do
+      lower_throttle_limit(:analytics, to: 2)
+      read(42)
+
+      expect(last_response.status).to eq(429)
+      expect(stored.map(&:read_seconds)).to eq([0, 0])
+    end
   end
 
   describe "views from one address that arrive together", :commits do
@@ -88,21 +100,20 @@ RSpec.describe "Visit counting", type: :request do
 
     def checked_together
       lower_throttle_limit(:analytics, to: limit)
-      arrived, release = hold_each_count
+      arrived, release = hold_each_claim
       senders = Array.new(sent) { view_request(it) }.map { |request| Thread.new { request.call } }
       sent.times { arrived.pop(timeout: 5) }
       sent.times { release << :go }
       senders.map(&:value)
     end
 
-    def hold_each_count
+    def hold_each_claim
       arrived = Thread::Queue.new
       release = Thread::Queue.new
-      allow(event_repo).to receive(:count_from_address_since).and_wrap_original do |original, *args|
-        original.call(*args).tap do
-          arrived << true
-          release.pop(timeout: 5)
-        end
+      allow(event_repo).to receive(:claim).and_wrap_original do |original, **attrs|
+        arrived << true
+        release.pop(timeout: 5)
+        original.call(**attrs)
       end
       replace_component("repos.analytics_event_repo", event_repo)
 
