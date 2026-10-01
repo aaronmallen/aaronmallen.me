@@ -9,15 +9,11 @@ module Public
         class Show < View
           include Components::Posts
 
-          NETWORKS = {
-            Blog::Types::NetworkName["bluesky"] => %w[fa-bluesky .networks.bluesky].freeze,
-            Blog::Types::NetworkName["mastodon"] => %w[fa-mastodon .networks.mastodon].freeze,
-          }.freeze
-
-          def initialize(post:, body_html:, previous_post:, next_post:, syndication_urls:, webmentions:)
+          def initialize(post:, body_html:, edits:, previous_post:, next_post:, syndication_urls:, webmentions:)
             super()
             @post = post
             @body_html = body_html
+            @edits = edits
             @previous_post = previous_post
             @next_post = next_post
             @syndication_urls = syndication_urls
@@ -28,11 +24,11 @@ module Public
             page_meta
 
             article(class: "post h-entry") do
-              back_link
               head_row
               div(class: "post-body e-content") { raw(safe(@body_html)) }
+              Edits(edits: @edits)
               feedback_note
-              syndication_row
+              Syndication(urls: @syndication_urls)
               Responses(**@webmentions)
               footer_row
             end
@@ -74,6 +70,7 @@ module Public
           end
 
           def head_row
+            back_link
             header do
               h1(class: "post-title p-name") { @post.title }
               data(class: "u-url", value: path(:post, slug: @post.slug))
@@ -108,24 +105,6 @@ module Public
           end
 
           def stamp(time) = time.utc.iso8601
-
-          def syndication_link(network, url)
-            icon, label_key = NETWORKS[network]
-
-            a(class: "post-syndication-link u-syndication", href: url) do
-              i(class: ["fa-brands", icon], aria: { hidden: "true" })
-              span { t(label_key) }
-            end
-          end
-
-          def syndication_row
-            return if @syndication_urls.empty?
-
-            div(class: "post-syndication") do
-              span { t(".syndication") }
-              @syndication_urls.each { |network, url| syndication_link(network, url) }
-            end
-          end
         end
       end
     end

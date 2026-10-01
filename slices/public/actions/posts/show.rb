@@ -6,6 +6,7 @@ module Public
       class Show < Action
         include Deps[
           counted_webmentions_for_post: "social.queries.counted_webmentions_for_post",
+          edits_for_post: "posts.queries.edits_for_post",
           listed_webmentions_for_post: "social.queries.listed_webmentions_for_post",
           next_published_post: "posts.queries.next_published",
           previous_published_post: "posts.queries.previous_published",
@@ -29,6 +30,7 @@ module Public
 
         def expose_body(response, post)
           response[:body_html] = ::Posts::Markdown.to_html(post.body)
+          response[:edits] = edits_for_post.call(post.id)
         end
 
         def expose_pager(response, post)

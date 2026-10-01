@@ -117,6 +117,23 @@ RSpec.describe "Microformats", type: :request do
     end
   end
 
+  describe "an article with an edit note" do
+    before do
+      target = publish("hello")
+      create(:post_edit, post: target, created_at: Time.utc(2026, 9, 7, 13), updated_at: Time.utc(2026, 9, 7, 13))
+      create(:post_edit, post: target, created_at: Time.utc(2026, 9, 9, 12), updated_at: Time.utc(2026, 9, 9, 12))
+      get "/writing/hello"
+    end
+
+    it "carries one dt-updated" do
+      expect(doc.css("article.h-entry .dt-updated").size).to eq(1)
+    end
+
+    it "dates the update by the newest note" do
+      expect(doc.at_css("article.h-entry time.dt-updated")[:datetime]).to eq("2026-09-09T07:00:00-05:00")
+    end
+  end
+
   describe "an article that went out on social" do
     let(:urls) { { "bluesky" => "https://bsky.example/ada/1", "mastodon" => "https://social.example/@ada/1" } }
 
@@ -189,6 +206,13 @@ RSpec.describe "Microformats", type: :request do
     it "names the same person" do
       expect(card.text).to eq(author.text.strip)
     end
+  end
+
+  it "leaves out dt-updated for an article with no edit note" do
+    publish("hello")
+    get "/writing/hello"
+
+    expect(doc.css(".dt-updated")).to be_empty
   end
 
   it "leaves out the syndication row for an article that has not gone out" do

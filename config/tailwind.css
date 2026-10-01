@@ -692,6 +692,10 @@
   & > .eyebrow {
     @apply mt-12 border-t border-line pt-12;
   }
+
+  & > .post-edits + .eyebrow {
+    @apply mt-6 border-t-0 pt-0;
+  }
 }
 
 @utility post-back {
@@ -755,6 +759,36 @@
 
   & :not(pre) > code {
     @apply rounded-code px-1 text-[0.875em];
+  }
+}
+
+@utility post-edits {
+  @apply mt-12 flex flex-col gap-3 border-t border-line pt-12 meta;
+}
+
+@utility post-edit {
+  @apply flex flex-wrap items-baseline gap-x-2 gap-y-1;
+}
+
+@utility post-edit-date {
+  @apply shrink-0;
+}
+
+@utility post-edit-note {
+  @apply min-w-0 flex-1;
+
+  & > * + * {
+    @apply mt-2;
+  }
+}
+
+@utility post-edit-list {
+  @apply flex basis-full list-disc flex-col gap-1 pl-6;
+}
+
+@utility post-edit-item {
+  & > * + * {
+    @apply mt-2;
   }
 }
 

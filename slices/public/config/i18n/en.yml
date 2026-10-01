@@ -32,6 +32,10 @@ en:
           github: "github"
           mastodon: "mastodon"
       posts:
+        edits:
+          after: ":"
+          before: "Edit"
+          label: "Edits"
         list:
           read_time: "%{count} min"
         responses:
@@ -42,6 +46,11 @@ en:
           reposts:
             one: "%{count} repost"
             other: "%{count} reposts"
+        syndication:
+          heading: "Also posted on"
+          networks:
+            bluesky: "Bluesky"
+            mastodon: "Mastodon"
       work_row:
         current: "Present"
         years: "%{from}–%{to}"
@@ -136,13 +145,9 @@ en:
             after: "."
             before: "Found a typo or want to argue about patterns?"
             link: "Let me know"
-          networks:
-            bluesky: "Bluesky"
-            mastodon: "Mastodon"
           next: "Next"
           pager_label: "More posts"
           previous: "Previous"
-          syndication: "Also posted on"
       tags:
         show:
           heading: "Tagged %{tag}"
