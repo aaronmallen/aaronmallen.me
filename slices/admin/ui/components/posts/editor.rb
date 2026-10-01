@@ -13,6 +13,7 @@ module Admin
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :counts, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :errors, Blog::Types::Hash
+          prop :notes, Blog::Types::Hash
           prop :now, Blog::Types::Time
           prop :preview, Blog::Types::Hash
           prop :suggestions, Blog::Types::Hash
@@ -24,6 +25,7 @@ module Admin
             back_link
             DeleteForm(post: @post, received: @webmentions[:received]) if @post
             SuggestionForms(post_id: @suggestions[:post_id]) if suggestions?
+            EditNoteForms(post_id: @post.id, edits: @notes[:edits]) if @post
 
             Form(action: form_action, data: { post_editor: "", time_zone: Blog::TimeZone::NAME }) do
               page_head
@@ -81,6 +83,7 @@ module Admin
           def sidebar
             Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
             EditNote(value: @values[:edit_note], errors: @errors) if published?
+            EditNotes(**@notes)
             Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)
             Seo(values: @values, errors: @errors)
             Syndication(errors: @errors, **@syndication)

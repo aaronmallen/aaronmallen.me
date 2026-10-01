@@ -41,8 +41,9 @@ module Admin
     ], from: :projects
 
     import keys: %w[
-      operations.compose_announcement operations.delete_post operations.save_post queries.all queries.by_filter
-      queries.by_id queries.by_ids queries.by_status queries.count_by_status queries.scheduled
+      operations.compose_announcement operations.delete_post operations.revise_edit_note operations.save_post
+      queries.all queries.by_filter queries.by_id queries.by_ids queries.by_status queries.count_by_status
+      queries.edits_newest_first queries.scheduled
     ], from: :posts
 
     import keys: %w[

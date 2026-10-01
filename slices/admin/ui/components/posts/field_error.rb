@@ -13,6 +13,7 @@ module Admin
               "control" => ".edit_note.control",
               "long" => ".edit_note.long",
             },
+            note: { "blank" => ".note.blank", "control" => ".edit_note.control", "long" => ".edit_note.long" },
             og_image_url: { "format" => ".og_image_url.format" },
             publish_at: { "format" => ".publish_at.format", "skipped" => ".publish_at.skipped" },
             slug: {

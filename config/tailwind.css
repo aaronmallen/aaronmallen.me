@@ -1588,6 +1588,38 @@
   @apply flex flex-wrap items-center gap-2;
 }
 
+@utility edit-note-list {
+  @apply flex flex-col;
+}
+
+@utility edit-note {
+  @apply flex min-w-0 flex-col gap-1.5 border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility edit-note-time {
+  @apply meta;
+}
+
+@utility edit-note-edit {
+  @apply flex flex-col items-end gap-2;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  & > .form-stack {
+    @apply w-full items-end;
+  }
+
+  & .edit {
+    @apply w-full;
+  }
+}
+
 @utility form-stack {
   @apply flex flex-col gap-4;
 }

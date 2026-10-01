@@ -11,6 +11,7 @@ module Admin
         announcement: "posts.operations.compose_announcement",
         build_post_preview: "operations.build_post_preview",
         count_network_lengths: "operations.count_network_lengths",
+        edits_newest_first: "posts.queries.edits_newest_first",
         list_networks: "operations.list_networks",
         people: "social.queries.people",
         preview_announcement: "operations.preview_announcement",
@@ -19,7 +20,12 @@ module Admin
         webmention_settings: "social.queries.webmention_settings",
       ]
 
-      def call(post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, view: nil, now: Time.now)
+      PUBLISHED = Blog::Types::PostStatus["published"]
+
+      def call(
+        post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, noting: Blog::Constants::EMPTY_HASH, view: nil,
+        now: Time.now
+      )
         values = params ? values_from_params(params) : values_from_post(post)
         preview = build_post_preview.call(values:, now:)
 
@@ -28,6 +34,7 @@ module Admin
           values:,
           counts: counts(values, preview),
           errors:,
+          notes: { edits: edits(post), noting: },
           now:,
           preview:,
           suggestions: suggestions(post),
@@ -41,6 +48,12 @@ module Admin
 
       def counts(values, preview)
         { read_time: preview[:read_time], words: ::Posts::Markdown.word_count(values[:body]) }
+      end
+
+      def edits(post)
+        return Blog::Constants::EMPTY_ARRAY unless post&.status == PUBLISHED
+
+        edits_newest_first.call(post.id)
       end
 
       def publish_at(post)

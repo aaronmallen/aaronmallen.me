@@ -49,6 +49,7 @@ en:
         other: "%{count} suggestions applied"
       deleted: "Post deleted"
       drafted: "Draft saved"
+      note_saved: "Note saved"
       published: "Published"
       rejected:
         zero: "Nothing to reject"
@@ -377,6 +378,11 @@ en:
           hint: "Needed when you change the body. Readers see it on the post."
           label: "What changed and why"
           placeholder: "Fixed the benchmark numbers; the first run used a debug build."
+        edit_notes:
+          edit: "Edit"
+          edit_label: "Note"
+          label: "Edit notes"
+          save: "Save note"
         editor:
           all_posts: "All posts"
           body: "Body"
@@ -402,6 +408,8 @@ en:
             blank: "Say what changed and why. A published post needs a note when its body changes."
             control: "Take out the control characters."
             long: "Keep the note to 500 characters or fewer."
+          note:
+            blank: "Say what changed and why. A note can't be blank."
           og_image_url:
             format: "Enter a link that starts with http:// or https://."
           publish_at:
