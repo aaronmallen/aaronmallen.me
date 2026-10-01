@@ -3,6 +3,8 @@
 module Projects
   module Relations
     class Projects < Blog::DB::Relation
+      TABLE_KEY = Sequel.function(:hashtext, "projects")
+
       schema :projects, infer: true do
         associations do
           has_many :project_tags
@@ -19,6 +21,8 @@ module Projects
       def last_position = unordered.max(:position).to_i
 
       def live = exclude(status: Blog::Types::ProjectStatus["archived"])
+
+      def lock_positions_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
 
       def newest_archived_first = order(Sequel.desc(:archived_on, nulls: :last), self[:id].desc)
 

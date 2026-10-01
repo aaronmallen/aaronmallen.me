@@ -20,17 +20,16 @@ module Projects
 
       def create_or_update(project, attributes)
         fields = attributes.except(:tags)
-        saved = project ? project_repo.update(project.id, fields) : project_repo.create(fields)
+        saved = project ? project_repo.update(project.id, fields) : project_repo.append(**fields)
         project_repo.replace_tags(saved.id, attributes.fetch(:tags))
 
         project_repo.by_id(saved.id)
       end
 
       def created(attributes)
-        position = project_repo.next_position
         status = attributes[:status] || Blog::Types::ProjectLiveStatus["active"]
 
-        create_or_update(nil, attributes.merge(position:, status:))
+        create_or_update(nil, attributes.merge(status:))
       end
 
       def derive(repo, url)
