@@ -164,6 +164,85 @@ RSpec.describe "Visit counting", type: :request do
     end
   end
 
+  describe "a scroll" do
+    def scroll(depth, name: "first", **)
+      beacon({ kind: "scroll", path: "/writing/hello", scroll_depth: depth, view_token: token(name) }, **)
+    end
+
+    it "starts a view at no depth when the page sent none" do
+      view
+
+      expect(stored.first.scroll_depth).to eq(0)
+    end
+
+    it "starts a view at the depth the page showed when it loaded" do
+      view(scroll_depth: 100)
+
+      expect(stored.first.scroll_depth).to eq(100)
+    end
+
+    describe "of a stored view" do
+      before do
+        view
+        view(name: "second")
+      end
+
+      it "stores the depth on the view the beacon names, not the latest of the page" do
+        scroll(50)
+
+        expect(stored.map(&:scroll_depth)).to eq([50, 0])
+      end
+
+      it "keeps the deeper depth when a later one is shallower" do
+        scroll(75)
+        scroll(25)
+
+        expect(stored.first.scroll_depth).to eq(75)
+      end
+
+      it "stores no second event" do
+        scroll(25)
+
+        expect(stored).to have(2).items
+      end
+
+      it "leaves another visitor's view alone" do
+        scroll(50, agent: "Mozilla/5.0 Firefox/140.0")
+
+        expect(stored.map(&:scroll_depth)).to eq([0, 0])
+      end
+
+      [30, 0, 125, nil].each do |depth|
+        it "turns away a depth of #{depth.inspect}", :aggregate_failures do
+          scroll(depth)
+
+          expect(last_response.status).to eq(400)
+          expect(stored.map(&:scroll_depth)).to eq([0, 0])
+        end
+      end
+
+      it "turns away a scroll with no view token" do
+        beacon({ kind: "scroll", path: "/writing/hello", scroll_depth: 50 })
+
+        expect(last_response.status).to eq(400)
+      end
+
+      it "turns away a scroll of a view never stored" do
+        scroll(50, name: "never")
+
+        expect(last_response.status).to eq(400)
+      end
+
+      it "is throttled once the address has reached the limit", :aggregate_failures do
+        lower_throttle_limit(:analytics, to: 2)
+        scroll(50)
+
+        expect(last_response.status).to eq(429)
+        expect(stored.map(&:scroll_depth)).to eq([0, 0])
+      end
+    end
+  end
+
   describe "views from one address that arrive together", :commits do
     let(:limit) { 5 }
     let(:sent) { limit + 3 }

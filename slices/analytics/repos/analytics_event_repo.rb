@@ -38,6 +38,10 @@ module Analytics
         analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_read_seconds(read_seconds)
       end
 
+      def record_scroll_depth(visitor_hashes:, view_token:, scroll_depth:)
+        analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_scroll_depth(scroll_depth)
+      end
+
       def summary_for(day)
         window = analytics_events.on_day(day)
 
@@ -49,7 +53,7 @@ module Analytics
           countries: window.counts_by(:country_code).to_a,
           sources: by_page(window.known(:source), :source),
           devices: by_page(window.known(:device_class), :device_class),
-          **page_origins(window),
+          **page_only(window),
         )
       end
 
@@ -69,10 +73,11 @@ module Analytics
         site + window.page_counts_by(column).to_a.map(&:to_h)
       end
 
-      def page_origins(window)
+      def page_only(window)
         {
           page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
           page_countries: window.page_counts_by(:country_code).to_a.map(&:to_h),
+          scroll_depths: window.known(:scroll_depth).page_counts_by(:scroll_depth).to_a.map(&:to_h),
         }
       end
 

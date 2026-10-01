@@ -11,6 +11,7 @@ module Analytics
         analytics_rollup_devices: :devices,
         analytics_rollup_page_referrers: :page_referrers,
         analytics_rollup_page_countries: :page_countries,
+        analytics_rollup_scroll_depths: :scroll_depths,
       }.freeze
       TOP_ROWS = 100
       VIEW_DAYS = 90
@@ -41,6 +42,10 @@ module Analytics
 
       def referrers(from:, to:)
         analytics_rollup_referrers.between(from, to).top_by_visitors.limit(TOP_ROWS).to_a
+      end
+
+      def scroll_depths(path:, from:, to:)
+        analytics_rollup_scroll_depths.between(from, to).for_path(path).by_depth.to_a
       end
 
       def sources(from:, to:, path: nil)

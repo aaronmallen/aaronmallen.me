@@ -400,6 +400,58 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
   end
 
+  describe "read_analytics scroll" do
+    def read_scroll(path = "/writing/hello", from: today - 6, to: today)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, path:).fetch("scroll")
+    end
+
+    def roll_up_scroll(day, depths, path: "/writing/hello")
+      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_repo"].by_day(day)
+      depths.each do |scroll_depth, views|
+        create(:analytics_rollup_scroll_depth, day:, path:, scroll_depth:, views:, visitors: views)
+      end
+    end
+
+    def shares(scroll) = scroll.fetch("reached").map { it.values_at("depth", "views", "share") }
+
+    it "gives the share of the page's views that reached each depth over the range", :aggregate_failures do
+      roll_up_scroll(today - 2, { 0 => 5, 50 => 5, 100 => 4 })
+      roll_up_scroll(today - 1, { 0 => 5, 25 => 10, 75 => 6, 100 => 5 })
+      roll_up_scroll(today - 1, { 100 => 90 }, path: "/writing/other")
+
+      expect(read_scroll.fetch("views")).to eq(40)
+      expect(shares(read_scroll)).to eq([[25, 30, 0.75], [50, 20, 0.5], [75, 15, 0.375], [100, 9, 0.225]])
+    end
+
+    it "gives no share for a page with no view that tracked scrolling" do
+      expect(read_scroll).to eq(
+        "views" => 0,
+        "reached" => Analytics::Scroll::DEPTHS.map { { "depth" => it, "views" => 0, "share" => nil } },
+      )
+    end
+
+    it "counts today's views from the visits before they roll up" do
+      [0, 25, 100, 100].each { create(:analytics_event, path: "/writing/hello", scroll_depth: it) }
+      create(:analytics_event, path: "/writing/hello", scroll_depth: nil)
+      create(:analytics_event, path: "/writing/other", scroll_depth: 100)
+
+      expect(shares(read_scroll)).to eq([[25, 3, 0.75], [50, 2, 0.5], [75, 2, 0.5], [100, 2, 0.5]])
+    end
+
+    it "keeps a page's shares past the 90 days of raw visits" do
+      old = today - 200
+      roll_up_scroll(old, { 0 => 1, 50 => 2, 100 => 1 })
+
+      expected = [[25, 3, 0.75], [50, 3, 0.75], [75, 1, 0.25], [100, 1, 0.25]]
+
+      expect(shares(read_scroll(from: old, to: old))).to eq(expected)
+    end
+
+    it "leaves scroll out of the site's answer" do
+      expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601)).not_to have_key("scroll")
+    end
+  end
+
   describe "read_analytics with a path" do
     def late_evening(day) = Blog::TimeZone.day_start(day) + (23 * 3_600) + 1_800
 
@@ -440,7 +492,7 @@ RSpec.describe "MCP analytics tools", type: :request do
 
     it "leaves out the site's top lists" do
       expect(read_page("/writing/hello").keys)
-        .to eq(%w[from to time_zone path totals days referrers countries sources devices hours read_spread])
+        .to eq(%w[from to time_zone path totals days referrers countries sources devices scroll hours read_spread])
     end
 
     describe "the page's referrers and countries" do

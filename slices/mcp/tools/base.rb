@@ -140,6 +140,8 @@ module MCP
 
         def save_tag(server_context) = server_context.fetch(:save_tag)
 
+        def scroll_depths_between(server_context) = server_context.fetch(:scroll_depths_between)
+
         def social_posts_dated_between(server_context) = server_context.fetch(:social_posts_dated_between)
 
         def sources_between(server_context) = server_context.fetch(:sources_between)

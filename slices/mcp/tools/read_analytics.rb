@@ -51,6 +51,10 @@ module MCP
                   "its devices, with no top paths. A page's referrers and countries always give visitors. A page " \
                   "nobody visited reads as zeros. For a published post's path, since_publish numbers each day of " \
                   "the range from the Chicago day the post went out, which is day 1. " \
+                  "A page's scroll gives the views that tracked scrolling and, for each depth of " \
+                  "#{Analytics::Scroll::DEPTHS.join(', ')}%, the views that scrolled at least that far and their " \
+                  "share of those views, null when no view tracked it. Scroll depth is kept forever, and views " \
+                  "from before the site tracked it are left out. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
                   "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
                   "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \
@@ -98,7 +102,11 @@ module MCP
         end
 
         def page_ranked(found, range, path, server_context)
-          { **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] }, **breakdowns(range, path, server_context) }
+          {
+            **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
+            **breakdowns(range, path, server_context),
+            scroll: scroll_depths_between(server_context).call(path:, from: range.first, to: range.last),
+          }
         end
 
         def page_summary(path, range, at, server_context)

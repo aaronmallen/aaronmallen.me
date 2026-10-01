@@ -45,6 +45,12 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def rollup_repo = Analytics::Slice["repos.analytics_rollup_repo"]
 
+  def scroll_depths_of(path, on = day)
+    rows = rollup_repo.analytics_rollup_scroll_depths.on(on).for_path(path).order(:scroll_depth).to_a
+
+    rows.map { it.to_h.values_at(:scroll_depth, :views, :visitors) }
+  end
+
   def sources_of(path, on = day)
     rows = rollup_repo.analytics_rollup_sources.on(on).for_path(path).order(:source).to_a
 
@@ -181,6 +187,28 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       it "stores each page apart", :aggregate_failures do
         expect(page_rows(:analytics_rollup_page_referrers, :host, "/writing/other")).to eq([["news.example", 1, 1]])
         expect(page_rows(:analytics_rollup_page_countries, :country_code, "/writing/other")).to eq([["JP", 1, 1]])
+      end
+    end
+
+    describe "the scroll depths" do
+      before do
+        [0, 50, 100].each { event(path: "/writing/hello", scroll_depth: it, visitor_hash:) }
+        event(path: "/writing/hello", scroll_depth: 100)
+        event(path: "/writing/other", scroll_depth: 50, visitor_hash:)
+        event(path: "/writing/old", scroll_depth: nil)
+        roll_up
+      end
+
+      it "stores each page's views at each deepest depth" do
+        expect(scroll_depths_of("/writing/hello")).to eq([[0, 1, 1], [50, 1, 1], [100, 2, 2]])
+      end
+
+      it "stores another page apart" do
+        expect(scroll_depths_of("/writing/other")).to eq([[50, 1, 1]])
+      end
+
+      it "leaves out the views from before the site tracked scrolling" do
+        expect(scroll_depths_of("/writing/old")).to be_empty
       end
     end
 

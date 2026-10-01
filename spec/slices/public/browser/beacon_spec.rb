@@ -118,6 +118,61 @@ RSpec.describe "Analytics beacon", type: :feature do
     expect(events.map(&:path)).to eq(["/writing", "/about"])
   end
 
+  describe "scroll depth" do
+    before { create(:post, :published, slug: "long", body: Faker::Lorem.paragraphs(number: 200).join("\n\n")) }
+
+    def depth = recorded("/writing/long").scroll_depth
+
+    def scroll_through(*shares)
+      evaluate_async_script(<<~JS, shares)
+        const [shares, done] = arguments;
+        const sent = [];
+        const sendBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = (url, body) => {
+          body.text().then((text) => sent.push(JSON.parse(text).scroll_depth));
+          return sendBeacon(url, body);
+        };
+        const frame = () => new Promise((settled) => requestAnimationFrame(() => requestAnimationFrame(settled)));
+        const height = () => document.documentElement.scrollHeight - innerHeight;
+        (async () => {
+          for (const share of shares) {
+            scrollTo(0, height() * share);
+            await frame();
+          }
+          done(sent);
+        })();
+      JS
+    end
+
+    it "starts a long page at no depth" do
+      visit "/writing/long"
+
+      expect(depth).to eq(0)
+    end
+
+    it "starts a page that fits on screen at the full depth" do
+      create(:post, :published, slug: "short", body: "Short")
+      visit "/writing/short"
+
+      expect(recorded("/writing/short").scroll_depth).to eq(100)
+    end
+
+    it "stores the deepest depth the reader reached" do
+      visit "/writing/long"
+      recorded("/writing/long")
+      scroll_through(1)
+
+      expect(wait_for { depth == 100 }).to be(true)
+    end
+
+    it "sends each depth once it is reached and never a shallower one later" do
+      visit "/writing/long"
+      recorded("/writing/long")
+
+      expect(scroll_through(0.6, 1, 0, 0.6)).to eq([50, 100])
+    end
+  end
+
   it "sets no cookie" do
     visit "/writing"
     wait_for { events.first }

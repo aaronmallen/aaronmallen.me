@@ -12,8 +12,9 @@ module Analytics
       contracts.visit_contract operations.hash_visitor operations.record_visit queries.country_counts
       queries.country_database_failure queries.devices_between queries.hourly_between queries.page_between
       queries.reach_between queries.read_spread_between queries.referrer_counts queries.rollups_between
-      queries.sources_between queries.summary_between queries.top_paths queries.unrolled_summaries queries.view_totals
-      queries.views_by_path queries.views_by_post queries.visitors_for_day
+      queries.scroll_depths_between queries.sources_between queries.summary_between queries.top_paths
+      queries.unrolled_summaries queries.view_totals queries.views_by_path queries.views_by_post
+      queries.visitors_for_day
     ]
   end
 end

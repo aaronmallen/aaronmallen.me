@@ -1,8 +1,15 @@
 const MAX_READ_SECONDS = 20 * 60;
+const SCROLL_DEPTHS = [100, 75, 50, 25];
 const TYPE = "application/json";
 
 const mintToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
+
+const depthReached = () => {
+  const seen = (100 * Math.ceil(scrollY + innerHeight)) / document.documentElement.scrollHeight;
+
+  return SCROLL_DEPTHS.find((depth) => seen >= depth) ?? 0;
+};
 
 const originOf = (url) => {
   try {
@@ -22,6 +29,7 @@ export function setupBeacon() {
   let opened = Date.now();
   let read = 0;
   let left = false;
+  let deepest = depthReached();
 
   const send = (visit) => {
     const body = JSON.stringify({ path, view_token: viewToken, ...visit });
@@ -42,6 +50,13 @@ export function setupBeacon() {
     opened = Date.now();
   };
 
+  const scrolled = () => {
+    const depth = depthReached();
+    if (depth <= deepest) return;
+    deepest = depth;
+    send({ kind: "scroll", scroll_depth: depth });
+  };
+
   addEventListener("pagehide", leave);
   addEventListener("pageshow", (event) => {
     if (event.persisted) readAgain();
@@ -51,5 +66,12 @@ export function setupBeacon() {
     else readAgain();
   });
 
-  send({ kind: "view", title: document.title, referrer: originOf(document.referrer), ...(ref && { [refKey]: ref }) });
+  send({
+    kind: "view",
+    title: document.title,
+    referrer: originOf(document.referrer),
+    ...(ref && { [refKey]: ref }),
+    ...(deepest && { scroll_depth: deepest }),
+  });
+  addEventListener("scroll", scrolled, { passive: true });
 }

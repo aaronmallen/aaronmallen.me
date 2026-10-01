@@ -80,6 +80,7 @@ module MCP
         save_tag: "tags.operations.save_tag",
         save_task: "api.endpoints.save_task",
         schedule_task: "api.endpoints.schedule_task",
+        scroll_depths_between: "analytics.queries.scroll_depths_between",
         social_posts_dated_between: "social.queries.social_posts_dated_between",
         sources_between: "analytics.queries.sources_between",
         start_task: "api.endpoints.start_task",

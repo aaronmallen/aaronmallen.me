@@ -28,7 +28,7 @@ module Analytics
         return nil if signed_in || bot?(user_agent)
 
         address_hash = hash_visitor.call(address:)
-        step within_limit(address_hash) if read?(visit)
+        step within_limit(address_hash) unless view?(visit)
         hashes = visitor_hashes(address:, user_agent:)
         step store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end
@@ -70,8 +70,21 @@ module Analytics
         found unless found.nil? || found == host(base_url)
       end
 
+      def scroll(visit, visitor_hashes)
+        matched = event_repo.record_scroll_depth(
+          visitor_hashes:,
+          view_token: visit[:view_token],
+          scroll_depth: visit[:scroll_depth],
+        )
+
+        matched.zero? ? Failure(:unknown_visit) : Success(matched)
+      end
+
+      def scroll?(visit) = visit[:kind] == Contracts::VisitContract::SCROLL
+
       def store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
         return read(visit, view_hashes(hashes, address:, user_agent:)) if read?(visit)
+        return scroll(visit, view_hashes(hashes, address:, user_agent:)) if scroll?(visit)
 
         view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end
@@ -94,12 +107,15 @@ module Analytics
           address_hash:,
           **origin(visit, address:, user_agent:, base_url:),
           view_token: visit[:view_token],
+          **visit.slice(:scroll_depth),
           limit: settings.analytics[:throttle_limit],
           since: window_opened_at,
         )
 
         event ? Success(event) : Failure(:throttled)
       end
+
+      def view?(visit) = visit[:kind] == Contracts::VisitContract::VIEW
 
       def view_hashes(hashes, address:, user_agent:)
         yesterday = Blog::TimeZone.day_start(Blog::TimeZone.today - 1)

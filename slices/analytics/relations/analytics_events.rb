@@ -85,12 +85,9 @@ module Analytics
 
       def read_median = unordered.exclude(read_seconds: 0).dataset.get(MEDIAN_READ)
 
-      def record_read_seconds(read_seconds)
-        newest = newest_first.limit(1).dataset.select(:id)
-        raised = Sequel.function(:greatest, :read_seconds, read_seconds)
+      def record_read_seconds(read_seconds) = raise_newest(:read_seconds, read_seconds)
 
-        unordered.where(id: newest).stamped(:update, result: :many).call(read_seconds: raised).size
-      end
+      def record_scroll_depth(scroll_depth) = raise_newest(:scroll_depth, scroll_depth)
 
       def since(time) = where { occurred_at >= time }
 
@@ -110,6 +107,13 @@ module Analytics
 
       def lock_until_commit(address_hash)
         dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, address_hash)))
+      end
+
+      def raise_newest(column, value)
+        newest = newest_first.limit(1).dataset.select(:id)
+        raised = Sequel.function(:greatest, column, value)
+
+        unordered.where(id: newest).stamped(:update, result: :many).call(column => raised).size
       end
     end
   end
