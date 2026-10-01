@@ -5,6 +5,43 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-30
+
+### Added
+
+- Photos. The Markdown editor takes a photo by drop, paste or its photo button, and puts the link at the cursor once
+  it uploads. The site turns each photo upright, shrinks its long edge to 2560px, strips its metadata, saves HEIC as
+  JPEG and serves it at `/media/<key>`. It refuses a file over 20 MB or 100 megapixels, and any type but JPEG, PNG,
+  WebP, GIF and HEIC. Uploads need scripts on and an S3 store in settings; with no store the editor shows no photo
+  button.
+- A photo lives while a post, its Open Graph image, a journal entry, a task or a task comment points to it. Deleting
+  the last record that points to it deletes the photo, and a sweep at 05:30 each day deletes any photo nothing points
+  to that was uploaded over a day ago.
+- Every Markdown box in the admin, from the journal and the Today journal card to task notes and comments, has the
+  toolbar and preview the post editor has.
+- A change to the body of a published post needs an edit note saying what changed and why. The post page lists the
+  notes by day above the "Found a typo" line, the Atom feed adds them to the foot of each entry, and an Edit notes
+  card in the post editor rewords one. The MCP `update_post` tool takes an `edit_note`. Drafts, scheduled posts and
+  saves that leave the body alone need no note.
+- A People screen holds the people social posts can mention, with their Mastodon and Bluesky handles. Typing @ in
+  the social composer opens a list of them and puts in a `@{key}` token. Each network gets the person's handle there,
+  or their name when they have none, and a preview under each part shows the text each network gets. The counters
+  measure that text, and a token that names nobody fails the save.
+- Webmentions take a third verdict, Ignore, which hides a mention without marking its author as spam. The
+  webmentions page gains an Ignored filter, and the MCP `moderate_webmention` tool takes `ignored`.
+- `mise run setup:dependencies` installs libvips with HEIC support through brew, apt-get, dnf or pacman when Ruby
+  cannot load it, and `mise run test` points to that task when libvips is missing. `mise run dev` starts a RustFS
+  store with its bucket.
+
+### Changed
+
+- Every link chip on a task row shows only the linked task's number, as the blocked-by chip already did. The title
+  shows on hover and to screen readers.
+
+### Fixed
+
+- Hashtags in a post sent to Bluesky work as tags. Before, they went out as plain text.
+
 ## [1.2.0] - 2026-09-29
 
 ### Added
@@ -125,7 +162,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.3.0...HEAD
+[1.3.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
 [1.0.2]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.1...1.0.2
