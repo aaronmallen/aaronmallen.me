@@ -383,6 +383,10 @@ en:
           hint: "Needed when you change the body. Readers see it on the post."
           label: "What changed and why"
           placeholder: "Fixed the benchmark numbers; the first run used a debug build."
+        edit_note_dialog:
+          cancel: "Cancel"
+          save: "Save"
+          title: "What changed and why"
         edit_notes:
           edit: "Edit"
           edit_label: "Note"

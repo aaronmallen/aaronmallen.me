@@ -198,6 +198,10 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_css("button.btn.pri [data-editor-later]:not([hidden])", text: "Schedule")
       end
 
+      it "draws no edit note dialog" do
+        expect(page).to have_no_css("[data-edit-note-dialog]", visible: :all)
+      end
+
       it "says publishing will schedule it" do
         expect(page).to have_css(".hint:not([hidden])", text: i18n.t("ui.components.posts.publishing.hint_later"))
       end
@@ -244,6 +248,17 @@ RSpec.describe "Admin post editor", type: :request do
 
       it "keeps the note box out of the sidebar" do
         expect(page).to have_no_css(".side-stack #{note_box}")
+      end
+
+      it "draws a hidden dialog for the note inside the post form", :aggregate_failures do
+        dialog = page.find("form[data-post-editor] dialog[data-edit-note-dialog][hidden]", visible: :all)
+
+        expect(dialog).to have_button("Cancel", type: "button", visible: :all)
+        expect(dialog).to have_button("Save", type: "button", visible: :all)
+      end
+
+      it "keeps the note box out of the dialog until a script moves it" do
+        expect(page).to have_no_css("dialog #{note_box}", visible: :all)
       end
     end
 

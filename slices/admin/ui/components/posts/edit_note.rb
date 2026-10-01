@@ -12,13 +12,14 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Card(label: t(".label")) do
-              div(class: "form-stack") do
+            Card(label: t(".label"), data: { edit_note: "" }) do
+              div(class: "form-stack", data: { edit_note_field: "" }) do
                 MarkdownEditor(**FieldError.control_attributes(FIELD, @errors), **editor_props)
                 FieldError(field: FIELD, errors: @errors)
                 Hint { t(".hint") }
               end
             end
+            EditNoteDialog()
           end
 
           private

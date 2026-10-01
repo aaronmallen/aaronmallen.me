@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -39,6 +39,12 @@ photo uploads, which #135 sends through `fetch` alone, and in task order, which 
   task does since #80. Then it asks in `Admin::UI::Components::ConfirmDialog`, which the admin layout draws, and
   falls back to the browser's `confirm` when the page lacks it. Esc or No keeps the form from posting and hands
   focus back to the button that asked. With scripts off either form posts without asking.
+- **Edit notes.** Since #231, `edit_note.js` holds back Save on a published post the way `confirm.js` holds back a
+  delete. It moves the note field into a dialog inside the post form, and when the body differs from the one the
+  page loaded with, it asks for the note there. Save in the dialog sends the form again with the same button, and
+  Cancel or Esc keeps it from posting and hands focus back to Save. A note that came back with text or an error stays
+  under the body and the script does not ask. With scripts off the field sits under the body and posts like any
+  other, and the server still decides whether a note is needed, as [ADR 0084][0084] records.
 - **`fetch` is for reads.** The two previews call it, `post_preview.js` (AA-229) and `post_syndication.js`
   (AA-336). Both post the unsaved form and swap in HTML while the operator types, and neither stores anything.
   A task's read and edit pages load into dialogs the same way, as [ADR 0071][0071] records. #37 replaced the
@@ -93,5 +99,6 @@ Method override costs a middleware on every request and gives nothing, since no 
 
 [0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
 [0083]: 0083-upload-photos-by-fetch-from-the-markdown-editor.md
+[0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -7,7 +7,7 @@ export function setupPostEditors() {
 }
 
 function setupPostEditor(form) {
-  const body = form.querySelector("[data-editor-body]");
+  const body = form.querySelector("[data-post-body]");
   const title = form.querySelector("[data-editor-title]");
   const slug = form.querySelector("[data-editor-slug]");
   const publishAt = form.querySelector("[data-editor-publish-at]");
