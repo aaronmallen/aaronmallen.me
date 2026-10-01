@@ -3,6 +3,8 @@
 module Contact
   module Repos
     class MessageRepo < Blog::DB::Repo
+      SPAM = Blog::Types::MessageStatus["spam"]
+
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
 
@@ -17,6 +19,12 @@ module Contact
       def count_from_visitor_since(visitor_hash, time) = messages.for_visitor(visitor_hash).received_since(time).count
 
       def count_with_status(status) = messages.with_status(status).count
+
+      def delete_spam_marked_before(time) = messages.marked_spam_before(time).delete
+
+      def mark(message, status, at: Time.now)
+        update(message.id, status:, marked_spam_at: status == SPAM ? message.marked_spam_at || at : nil)
+      end
 
       def page_by_status(status, page) = page.fill(messages.with_status(status).newest_first.paged(page).to_a)
 

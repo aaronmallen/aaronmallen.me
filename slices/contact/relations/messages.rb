@@ -18,6 +18,8 @@ module Contact
 
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
+      def marked_spam_before(time) = where { marked_spam_at < time }
+
       def newest_first = order(self[:received_at].desc, self[:id].desc)
 
       def received_before(time) = where { received_at < time }

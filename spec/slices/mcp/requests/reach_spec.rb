@@ -40,6 +40,7 @@ RSpec.describe "MCP reach", type: :request do
       "api.operations.mint_token" => "the owner mints an API token in the admin, which no client should do",
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
       "contact.operations.create_message" => "a reader sends a message through the public form",
+      "contact.operations.reap_spam_messages" => "a background job reaps old spam messages",
       "media.operations.upload_photo" => "the admin's Markdown editor uploads photos; MCP takes no uploads",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",

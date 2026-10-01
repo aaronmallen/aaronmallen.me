@@ -15,6 +15,9 @@ production:
     reap_expired_credentials:
       cron: "0 5 * * * <%= Blog::TimeZone::NAME %>"
       class: MCP::Jobs::ReapExpiredCredentials
+    reap_spam_messages:
+      cron: "45 5 * * * <%= Blog::TimeZone::NAME %>"
+      class: Contact::Jobs::ReapSpamMessages
     reap_sync_states:
       cron: "0 4 * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ReapSyncStates

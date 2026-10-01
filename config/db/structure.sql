@@ -996,7 +996,9 @@ CREATE TABLE public.messages (
     visitor_hash public.visitor_hash NOT NULL,
     received_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    marked_spam_at timestamp with time zone,
+    CONSTRAINT messages_marked_spam_at_check CHECK (((status = 'spam'::public.message_status) = (marked_spam_at IS NOT NULL)))
 );
 
 
@@ -2127,6 +2129,13 @@ CREATE INDEX journal_entry_tags_tag_id_index ON public.journal_entry_tags USING 
 
 
 --
+-- Name: messages_marked_spam_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX messages_marked_spam_at_index ON public.messages USING btree (marked_spam_at);
+
+
+--
 -- Name: messages_received_at_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2878,4 +2887,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20260930000056_create_photo_claims.rb'),
 ('20260930000057_create_post_edits.rb'),
 ('20261001000058_create_api_tokens.rb'),
-('20261001000059_create_post_deletions.rb');
+('20261001000059_create_post_deletions.rb'),
+('20261001000060_add_marked_spam_at_to_messages.rb');

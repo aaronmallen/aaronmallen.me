@@ -6,14 +6,14 @@ module Contact
       include Deps[message_repo: "repos.message_repo"]
 
       def call(id, status)
-        step find(id)
+        message = step find(id)
 
-        message_repo.update(id, status:)
+        message_repo.mark(message, status)
       end
 
       private
 
-      def find(id) = message_repo.by_id(id) ? Success(id) : Failure(:not_found)
+      def find(id) = message_repo.by_id(id).then { it ? Success(it) : Failure(:not_found) }
     end
   end
 end
