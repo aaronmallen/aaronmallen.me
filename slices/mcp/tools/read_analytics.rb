@@ -10,6 +10,9 @@ module MCP
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RANKED = %i[paths referrers countries].freeze
+      RAW_REFUSAL = "hours and since read raw visits, which the site keeps for 90 days; start from or since " \
+                    "inside them to get these. The daily counts still hold"
+      SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
       TOP = 25
 
       SCHEMA = {
@@ -17,6 +20,7 @@ module MCP
         properties: {
           from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
           path: { type: "string", description: "one page to read alone, such as #{Blog::Site::WRITING}/hello" },
+          since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
           to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
         },
         required: %w[from to],
@@ -36,14 +40,26 @@ module MCP
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, with no top lists. A page nobody visited reads as zeros. For a published post's path, " \
                   "since_publish numbers each day of the range from the Chicago day the post went out, which is " \
-                  "day 1. #{DEFINITIONS}"
+                  "day 1. " \
+                  "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
+                  "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
+                  "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \
+                  "there, and since gives the views, visitors and seconds read from then to the end of the range, " \
+                  "with the top #{TOP} paths by views for the whole site. A since with no offset reads as " \
+                  "#{Blog::TimeZone::NAME} time. Hours and since read raw visits, kept for 90 days: when the later " \
+                  "of from and since falls before them, the answer leaves out hours and since and says why in " \
+                  "refused, and the daily counts still come back. With a path, hours and since count that page " \
+                  "alone. #{DEFINITIONS}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(from:, to:, server_context:, path: nil)
+        def call(from:, to:, server_context:, path: nil, since: nil)
+          at = Blog::TimeZone.parse_time(since) if since
+          return refuse(SINCE_REFUSAL) if since && !at
+
           case days(from, to)
-          in Success(range) then path ? page_summary(path, range, server_context) : summary(range, server_context)
+          in Success(range) then read(range, at, path, server_context)
           in Failure(message) then refuse(message)
           end
         end
@@ -52,6 +68,15 @@ module MCP
 
         def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
+        def hourly(range, at, path, server_context)
+          start = [Blog::TimeZone.day_start(range.first), at].compact.max
+          found = hourly_between(server_context).call(from: start, to: Blog::TimeZone.day_start(range.last + 1), path:)
+          return { refused: RAW_REFUSAL } unless found
+
+          hours = found.fetch(:hours).map { it.merge(hour: stamped(it.fetch(:hour))) }
+          at ? { hours:, since: since_counts(found, at) } : { hours: }
+        end
+
         def numbered(days, first)
           days.map do |found|
             date = found.fetch(:day)
@@ -59,7 +84,7 @@ module MCP
           end
         end
 
-        def page_summary(path, range, server_context)
+        def page_summary(path, range, at, server_context)
           found = page_between(server_context).call(path:, from: range.first, to: range.last)
           days = found.fetch(:days)
 
@@ -70,6 +95,7 @@ module MCP
             path:,
             totals: totals(found, range, server_context, path:),
             days: dated(days),
+            **hourly(range, at, path, server_context),
             **since_publish(post_at(path, server_context), days),
           )
         end
@@ -79,6 +105,16 @@ module MCP
           published_post_by_slug(server_context).call(slug) unless slug == path
         end
 
+        def read(range, at, path, server_context)
+          path ? page_summary(path, range, at, server_context) : summary(range, at, server_context)
+        end
+
+        def since_counts(found, at)
+          top = found.slice(:paths).transform_values { it.take(TOP) }
+
+          { at: stamped(at), **found.fetch(:totals), **top }
+        end
+
         def since_publish(post, days)
           return {} unless post
 
@@ -86,7 +122,9 @@ module MCP
           { since_publish: numbered(days.select { it.fetch(:day) >= first }, first) }
         end
 
-        def summary(range, server_context)
+        def stamped(time) = Blog::TimeZone.local(time).iso8601
+
+        def summary(range, at, server_context)
           found = analytics_between(server_context).call(from: range.first, to: range.last)
 
           answer(
@@ -95,6 +133,7 @@ module MCP
             time_zone: Blog::TimeZone::NAME,
             totals: totals(found, range, server_context),
             days: dated(found.fetch(:days)),
+            **hourly(range, at, nil, server_context),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
           )
         end

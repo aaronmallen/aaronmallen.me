@@ -42,6 +42,7 @@ module MCP
         delete_work_entry: "projects.operations.delete_work_entry",
         drop_sprint: "api.endpoints.drop_sprint",
         editable_social_post: "social.queries.editable_social_post",
+        hourly_between: "analytics.queries.hourly_between",
         link_tasks: "api.endpoints.link_tasks",
         list_journal_entries: "api.endpoints.list_journal_entries",
         list_sprints: "api.endpoints.list_sprints",

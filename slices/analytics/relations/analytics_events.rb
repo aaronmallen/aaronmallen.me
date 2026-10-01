@@ -3,6 +3,14 @@
 module Analytics
   module Relations
     class AnalyticsEvents < Blog::DB::Relation
+      HOUR = Sequel.function(:date_trunc, "hour", :occurred_at, Blog::TimeZone::NAME)
+      HOURLY = proc do
+        [
+          time.date_trunc("hour", occurred_at, Blog::TimeZone::NAME).as(:hour),
+          integer.count(id).as(:views),
+          integer.count(visitor_hash).distinct.as(:visitors),
+        ]
+      end
       LATEST_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
       NEWEST_FIRST = Sequel.desc(:occurred_at)
       REACH = Sequel.function(:count, :month_visitor_hash).distinct
@@ -20,9 +28,9 @@ module Analytics
 
       schema :analytics_events, infer: true
 
-      def between_days(from, to)
-        since(Blog::TimeZone.day_start(from)).occurred_before(Blog::TimeZone.day_start(to + 1))
-      end
+      def between(from, to) = since(from).occurred_before(to)
+
+      def between_days(from, to) = between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
 
       def claim(address_hash:, limit:, since:, **attrs)
         transaction do
@@ -48,6 +56,8 @@ module Analytics
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
       def from_address(address_hash) = where(address_hash:)
+
+      def hourly = unordered.select(&HOURLY).group { HOUR }.order(:hour)
 
       def newest_first = order(self[:occurred_at].desc, self[:id].desc)
 

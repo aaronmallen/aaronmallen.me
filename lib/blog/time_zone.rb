@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "date"
+require "time"
 require "tzinfo"
 
 module Blog
@@ -31,6 +32,16 @@ module Blog
     def parse_input(value)
       parts = INPUT_PATTERN.match(value.to_s)&.captures&.map(&:to_i)
       local_time(*parts) if parts && valid_clock?(*parts)
+    end
+
+    def parse_time(value)
+      text = value.to_s
+      day = parse_day(text)
+      return day_start(day) if day
+
+      parse_input(text) || Time.iso8601(text)
+    rescue ArgumentError, TZInfo::PeriodNotFound
+      nil
     end
 
     def today(time = Time.now) = local(time).to_date

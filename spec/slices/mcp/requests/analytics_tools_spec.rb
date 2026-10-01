@@ -313,7 +313,7 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days])
+      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days hours])
     end
 
     it "answers an unknown path with zeros" do
@@ -354,6 +354,121 @@ RSpec.describe "MCP analytics tools", type: :request do
       it "keeps counting from day 1 when the range starts later" do
         expect(read_page("/writing/part-two", from: today - 2, to: today - 2).fetch("since_publish").first)
           .to include("day" => 2, "date" => (today - 2).iso8601)
+      end
+    end
+  end
+
+  describe "read_analytics hours and since" do
+    let(:day) { today - 1 }
+
+    def at(hour, minute = 0, on: day) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, minute)
+
+    def hour(time) = Blog::TimeZone.local(time).iso8601
+
+    def read_raw(from: day, to: day, **) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **)
+
+    def view(time, path: "/writing/hello", visitor_hash: nil)
+      attrs = { path:, occurred_at: time, read_seconds: 10 }
+      create(:analytics_event, **attrs, **(visitor_hash ? { visitor_hash: } : {}))
+    end
+
+    it "gives the views and visitors of each Chicago hour that had a view, oldest first" do
+      2.times { view(at(9, 15), visitor_hash: "a" * 64) }
+      [at(9, 45), at(14, 5)].each { view(it) }
+      busy = { "hour" => hour(at(9)), "views" => 3, "visitors" => 2 }
+
+      expect(read_raw.fetch("hours")).to eq([busy, { "hour" => hour(at(14)), "views" => 1, "visitors" => 1 }])
+    end
+
+    it "keeps apart the two hours a clock repeats when daylight saving ends" do
+      fall_back = (today..(today + 366)).find { it.month == 11 && it.sunday? && it.mday <= 7 }
+      [0, 3_600].each { view(at(1, 30, on: fall_back) + it) }
+
+      hours = read_raw(from: fall_back, to: fall_back).fetch("hours").map { it.fetch("hour") }
+
+      expect(hours).to eq(%w[-05:00 -06:00].map { "#{fall_back.iso8601}T01:00:00#{it}" })
+    end
+
+    it "counts one page's hours alone" do
+      view(at(9))
+      view(at(10), path: "/writing/other")
+
+      expect(read_raw(path: "/writing/hello").fetch("hours").map { it.fetch("hour") }).to eq([hour(at(9))])
+    end
+
+    it "gives no since without one" do
+      expect(read_raw).not_to have_key("since")
+    end
+
+    describe "since" do
+      before do
+        view(at(9))
+        2.times { view(at(15), path: "/writing/late") }
+        view(at(16))
+      end
+
+      it "counts only the views from that time" do
+        expect(read_raw(since: at(12).iso8601).fetch("since"))
+          .to include("at" => hour(at(12)), "views" => 3, "visitors" => 3, "read_seconds" => 30)
+      end
+
+      it "starts the hours there" do
+        expect(read_raw(since: at(12).iso8601).fetch("hours").map { it.fetch("hour") })
+          .to eq([hour(at(15)), hour(at(16))])
+      end
+
+      it "ranks the paths viewed since then" do
+        expect(read_raw(since: at(12).iso8601).fetch("since").fetch("paths"))
+          .to eq([{ "path" => "/writing/late", "views" => 2, "visitors" => 2 },
+                  { "path" => "/writing/hello", "views" => 1, "visitors" => 1 }])
+      end
+
+      it "reads a time with no offset as Chicago time" do
+        expect(read_raw(since: "#{day.iso8601}T15:30").fetch("since")).to include("views" => 1)
+      end
+
+      it "counts one page alone, with no paths" do
+        expect(read_raw(since: at(12).iso8601, path: "/writing/hello").fetch("since"))
+          .to eq("at" => hour(at(12)), "views" => 1, "visitors" => 1, "read_seconds" => 10)
+      end
+
+      it "stops at the end of the range" do
+        view(at(9, on: today))
+
+        expect(read_raw(since: at(12).iso8601).fetch("since")).to include("views" => 3)
+      end
+    end
+
+    it "refuses a since it cannot read" do
+      expect(mcp_text("read_analytics", from: day.iso8601, to: day.iso8601, since: "this morning"))
+        .to eq(MCP::Tools::ReadAnalytics::SINCE_REFUSAL)
+    end
+
+    describe "a range older than the raw visits" do
+      let(:old) { today - 120 }
+
+      before { roll_up(old, views: 9, visitors: 4) }
+
+      it "refuses the hours and still gives the days", :aggregate_failures do
+        answer = read_raw(from: old, to: today)
+
+        expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+        expect(answer).not_to have_key("hours")
+        expect(answer.fetch("totals")).to include("views" => 9)
+      end
+
+      it "refuses a since older than the raw visits", :aggregate_failures do
+        answer = read_raw(from: old, to: today, since: Blog::TimeZone.day_start(old).iso8601)
+
+        expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+        expect(answer).not_to have_key("since")
+        expect(answer.fetch("days").first).to include("views" => 9)
+      end
+
+      it "serves the hours from a since inside the raw visits" do
+        view(at(9))
+
+        expect(read_raw(from: old, to: day, since: at(8).iso8601).fetch("hours").length).to eq(1)
       end
     end
   end

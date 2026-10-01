@@ -15,16 +15,16 @@ module Analytics
 
       def delete_before(time) = analytics_events.occurred_before(time).delete
 
+      def hours_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).hourly.to_a
+
       def oldest_day
         occurred_at = analytics_events.oldest_occurred_at
         Blog::TimeZone.today(occurred_at) if occurred_at
       end
 
-      def reach_between(from:, to:, path: nil)
-        window = analytics_events.between_days(from, to)
+      def paths_between(from:, to:) = analytics_events.between(from, to).counts_by(:path).to_a
 
-        (path ? window.for_path(path) : window).reach
-      end
+      def reach_between(from:, to:, path: nil) = scoped(analytics_events.between_days(from, to), path).reach
 
       def reach_by_path(from:, to:)
         window = analytics_events.between_days(from, to)
@@ -48,7 +48,13 @@ module Analytics
         )
       end
 
+      def totals_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).totals.one
+
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
+
+      private
+
+      def scoped(window, path) = path ? window.for_path(path) : window
     end
   end
 end

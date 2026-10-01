@@ -86,6 +86,8 @@ module MCP
           end
         end
 
+        def hourly_between(server_context) = server_context.fetch(:hourly_between)
+
         def live_projects(server_context) = server_context.fetch(:live_projects)
 
         def mark_message(server_context) = server_context.fetch(:mark_message)
