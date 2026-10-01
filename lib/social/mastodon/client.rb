@@ -42,7 +42,7 @@ module Social
 
       def max_bytes = nil
 
-      def post(text, idempotency_key:, reply_to: nil)
+      def post(text, idempotency_key:, reply_to: nil, **)
         body = request(
           :post, STATUSES_PATH, key: idempotency_key,
                                 in_reply_to_id: reply_to, status: text, visibility: VISIBILITY,

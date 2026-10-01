@@ -10,8 +10,9 @@ module Social
       SEND = Blog::Types::SocialIntent["send"]
       TOO_LONG = "too_long"
       UNAVAILABLE = "unavailable"
+      UNKNOWN_MENTION = "unknown_mention"
 
-      include Deps[networks: "networks.all"]
+      include Deps[mention_directory: "queries.mention_directory", networks: "networks.all"]
 
       params do
         required(:parts).value(Blog::Types::TextList, :filled?)
@@ -21,6 +22,10 @@ module Social
       end
 
       rule(:parts).validate(:without_controls)
+
+      rule(:parts) do
+        key.failure(UNKNOWN_MENTION) if mention_directory.call(value).unknown(value).any?
+      end
 
       rule(:schedule_at, :mode) do
         next unless values[:mode] == Blog::Types::SocialMode["schedule"]

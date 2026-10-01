@@ -549,6 +549,7 @@ en:
           parts:
             blank: "Write something first."
             too_long: "A part is over the limit for a network you picked."
+            unknown_mention: "A mention names nobody in the directory."
           schedule_at:
             format: "Enter a date and time."
             skipped: "That time doesn't exist in Chicago: the clocks skip it."

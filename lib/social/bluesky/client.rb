@@ -54,9 +54,9 @@ module Social
 
       def max_bytes = MAX_BYTES
 
-      def post(text, idempotency_key:, reply_to: nil)
+      def post(text, idempotency_key:, mentions: [], reply_to: nil)
         session = sign_in
-        uri = write(record(text, reply_to, session), session, rkey(idempotency_key))
+        uri = write(record(text, mentions, reply_to, session), session, rkey(idempotency_key))
 
         RemotePost.new(id: uri, url: web_url(session.handle, uri))
       end
@@ -105,8 +105,8 @@ module Social
         body.values_at("error", "message").map { it.to_s.strip }.reject(&:empty?)
       end
 
-      def record(text, reply_to, session)
-        facets = Facets.for(text)
+      def record(text, mentions, reply_to, session)
+        facets = Facets.for(text, mentions:)
 
         {
           "$type" => COLLECTION,

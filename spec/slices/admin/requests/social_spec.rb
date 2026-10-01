@@ -223,6 +223,26 @@ RSpec.describe "Admin social", type: :request do
         expect(last_response.status).to eq(422)
       end
 
+      it "rejects a mention of nobody in the directory" do
+        compose(parts: ["hi @{nobody}"])
+
+        expect(page).to have_css(".field-error", text: "names nobody in the directory")
+      end
+
+      it "rejects a mention of someone taken out of the directory" do
+        Social::Slice["repos.person_repo"].delete(create(:person, key: "ada-lovelace").id)
+        compose(parts: ["hi @{ada-lovelace}"])
+
+        expect(repo.queued).to be_empty
+      end
+
+      it "takes a mention of someone in the directory" do
+        create(:person, key: "ada-lovelace")
+        compose(parts: ["hi @{ada-lovelace}"])
+
+        expect(repo.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+      end
+
       it "saves nothing when it refuses" do
         compose(parts: ["a" * 501])
 

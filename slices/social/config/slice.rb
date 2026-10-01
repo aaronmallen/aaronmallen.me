@@ -15,8 +15,9 @@ module Social
       operations.lock_editable_social_post operations.moderate_webmention operations.receive_webmention
       operations.replace_social_post_parts operations.save_person operations.save_social_post
       operations.update_webmention_settings queries.counted_webmentions_for_post queries.editable_social_post
-      queries.listed_webmentions_for_post queries.pending_webmention_count queries.pending_webmentions queries.people
-      queries.person_by_id queries.queued_social_posts queries.received_webmention_count
+      queries.listed_webmentions_for_post queries.mention_directory queries.pending_webmention_count
+      queries.pending_webmentions queries.people queries.person_by_id queries.queued_social_posts
+      queries.received_webmention_count
       queries.social_post_by_id queries.social_post_counts_by_status queries.social_posts_by_filter
       queries.social_posts_dated_between queries.syndication_urls queries.unsent_social_posts
       queries.webmention_counts_by_post queries.webmention_counts_by_status queries.webmention_settings

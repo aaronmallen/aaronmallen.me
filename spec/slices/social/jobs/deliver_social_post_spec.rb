@@ -616,6 +616,104 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a post that mentions people" do
+    let(:people) { Social::Slice["repos.person_repo"] }
+
+    let!(:ada) do
+      create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
+                      bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada-lovelace")
+    end
+
+    def bluesky_record(text)
+      stub_bluesky
+      deliver(queued(targets: %w[bluesky], parts: [text]), "bluesky")
+
+      bluesky_writes.first.fetch("record")
+    end
+
+    def mastodon_status(text) = sent_status(queued(parts: [text]))
+
+    def mention_facet(did, start, finish)
+      {
+        "features" => [{ "$type" => "app.bsky.richtext.facet#mention", "did" => did }],
+        "index" => { "byteEnd" => finish, "byteStart" => start },
+      }
+    end
+
+    def sent_status(social_post)
+      sent = []
+      stub_request(:post, statuses).to_return do |request|
+        sent << JSON.parse(request.body).fetch("status")
+        json_response(id: "1", url: "https://ruby.social/@ada/1")
+      end
+      deliver(social_post, "mastodon")
+
+      sent.first
+    end
+
+    it "sends Mastodon the person's Mastodon handle" do
+      expect(mastodon_status("hi @{ada}!")).to eq("hi @ada@ruby.social!")
+    end
+
+    it "sends Bluesky the person's Bluesky handle" do
+      expect(bluesky_record("hi @{ada}!").fetch("text")).to eq("hi @ada.bsky.social!")
+    end
+
+    it "marks the Bluesky handle with a mention facet naming the stored DID" do
+      expect(bluesky_record("🎉 @{ada}").fetch("facets")).to eq([mention_facet("did:plc:ada-lovelace", 5, 21)])
+    end
+
+    it "keeps mention, link and tag facets apart and in order" do
+      expect(bluesky_record("@{ada} #ruby https://a.example").fetch("facets"))
+        .to eq([mention_facet("did:plc:ada-lovelace", 0, 16), tag_facet("ruby", 17, 22),
+                facet("https://a.example", 23, 40)])
+    end
+
+    it "lets no facet overlap a mention" do
+      facets = bluesky_record("https://a.example/@{ada}").fetch("facets")
+
+      expect(facets).to eq([mention_facet("did:plc:ada-lovelace", 18, 34)])
+    end
+
+    it "names someone with no Bluesky handle and still sends", :aggregate_failures do
+      create(:person, key: "grace", name: "Grace Hopper")
+      record = bluesky_record("thanks @{grace}")
+
+      expect(record.fetch("text")).to eq("thanks Grace Hopper")
+      expect(record).not_to have_key("facets")
+    end
+
+    it "names someone with no Mastodon handle and still sends" do
+      create(:person, :bluesky, key: "grace", name: "Grace Hopper", mastodon_handle: nil)
+
+      expect(mastodon_status("thanks @{grace}")).to eq("thanks Grace Hopper")
+    end
+
+    it "sends a handle changed after the post was queued in its new form" do
+      social_post = queued(parts: ["hi @{ada}"])
+      people.update(ada.id, mastodon_handle: "@ada@hachyderm.io")
+
+      expect(sent_status(social_post)).to eq("hi @ada@hachyderm.io")
+    end
+
+    it "sends the key in place of someone taken out of the directory" do
+      people.delete(ada.id)
+
+      expect(mastodon_status("hi @{ada}")).to eq("hi ada")
+    end
+
+    it "sends empty braces as they are written" do
+      expect(mastodon_status("hi @{}")).to eq("hi @{}")
+    end
+
+    it "measures the limit on the text each network gets" do
+      social_post = queued(targets: %w[bluesky], parts: ["#{'a' * 290} @{ada}"])
+      deliver(social_post, "bluesky")
+
+      expect(delivery(social_post, "bluesky")).to have_attributes(failed: true, error: /over the bluesky limit/)
+    end
+  end
+
   describe "a network with no credentials" do
     {
       "nothing set" => {},

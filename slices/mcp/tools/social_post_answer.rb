@@ -12,6 +12,7 @@ module MCP
         Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
         "too_long" => "has a part over the limit for a network you picked",
         "unavailable" => "names a network that has no credentials",
+        "unknown_mention" => "mentions someone who is not in the directory",
       }.freeze
       FAILED = "failed"
       RETRYING = "retrying"

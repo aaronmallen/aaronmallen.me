@@ -7,7 +7,11 @@ module Social
       OVER_LIMIT = :over_limit
       SEND_FAILED = :send_failed
 
-      include Deps[networks: "networks.all", social_post_repo: "repos.social_post_repo"]
+      include Deps[
+        mention_directory: "queries.mention_directory",
+        networks: "networks.all",
+        social_post_repo: "repos.social_post_repo",
+      ]
 
       operate_on :call, :give_up
 
@@ -15,10 +19,11 @@ module Social
         social_post = step targeted(social_post_id, network)
         client = networks.fetch(network)
         step available(social_post, network, client)
-        step within_limits(social_post, network, client)
+        bodies = expanded(social_post, network)
+        step within_limits(social_post, network, client, bodies)
         delivery = social_post_repo.record_delivery(social_post.id, network, error: nil, failed: false)
 
-        step send_parts(social_post, network, client, delivery)
+        step send_parts(social_post, network, client, delivery, bodies)
       end
 
       def give_up(social_post_id, network)
@@ -44,6 +49,12 @@ module Social
         delivery.failed || delivery.remote_ids.to_a.size >= parts
       end
 
+      def expanded(social_post, network)
+        directory = mention_directory.call(social_post.parts.map(&:body))
+
+        social_post.parts.map { directory.expand(it.body, network) }
+      end
+
       def found(social_post_id)
         social_post = social_post_repo.by_id(social_post_id)
 
@@ -59,8 +70,8 @@ module Social
         Failure(reason)
       end
 
-      def send_part(social_post, network, client, delivery, part)
-        remote = client.post(part.body, reply_to: delivery.remote_ids.last,
+      def send_part(social_post, network, client, delivery, (part, body))
+        remote = client.post(body.text, mentions: body.mentions, reply_to: delivery.remote_ids.last,
                                         idempotency_key: PartKey.new(network:, part:))
 
         social_post_repo.record_delivery(
@@ -70,9 +81,9 @@ module Social
         )
       end
 
-      def send_parts(social_post, network, client, delivery)
-        social_post.parts.drop(delivery.remote_ids.size).each do |part|
-          delivery = send_part(social_post, network, client, delivery, part)
+      def send_parts(social_post, network, client, delivery, bodies)
+        social_post.parts.zip(bodies).drop(delivery.remote_ids.size).each do |sending|
+          delivery = send_part(social_post, network, client, delivery, sending)
         end
 
         Success(settle(social_post.id))
@@ -108,8 +119,8 @@ module Social
         url.empty? ? nil : url
       end
 
-      def within_limits(social_post, network, client)
-        over = social_post.parts.find { !client.within_limit?(it.body) }
+      def within_limits(social_post, network, client, bodies)
+        over = social_post.parts.zip(bodies).find { |_, body| !client.within_limit?(body.text) }&.first
         return Success(social_post) unless over
 
         refuse(social_post, network, OVER_LIMIT, "Part #{over.position} is over the #{network} limit")

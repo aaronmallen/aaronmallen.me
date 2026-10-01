@@ -163,6 +163,19 @@ RSpec.describe "MCP social tools", type: :request do
       expect(message).to eq("parts holds a control character")
     end
 
+    it "refuses a mention of nobody in the directory, as the admin does" do
+      call_tool("create_social_post", parts: ["hi @{nobody}"], targets: %w[mastodon])
+
+      expect(message).to eq("parts mentions someone who is not in the directory")
+    end
+
+    it "saves a mention of someone in the directory" do
+      create(:person, key: "ada-lovelace")
+      call_tool("create_social_post", parts: ["hi @{ada-lovelace}"], targets: %w[mastodon])
+
+      expect(stored(content.fetch("id")).parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+    end
+
     it "saves nothing when it refuses" do
       call_tool("create_social_post", parts: ["  "], targets: %w[mastodon])
 
