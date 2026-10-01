@@ -3,6 +3,34 @@
 module API
   module Serializers
     class Task < Serializer
+      LABELS = %w[blocks blocked_by duplicates duplicated_by relates].freeze
+
+      LINK = Schema.object(
+        {
+          label: { type: "string", enum: LABELS },
+          id: Schema::INTEGER,
+          title: Schema::STRING,
+          status: { type: "string", enum: Blog::Types::TaskStatus.values },
+        },
+      ).freeze
+
+      SCHEMA = Schema.object(
+        {
+          id: Schema::INTEGER,
+          title: Schema::STRING,
+          note: Schema::STRING,
+          status: { type: "string", enum: Blog::Types::TaskStatus.values },
+          list: Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
+          sprint_on: Schema.nullable(Schema::DAY),
+          tags: Schema::TAGS,
+          links: Schema.list(LINK),
+          blocked: Schema::BOOLEAN,
+          carried_count: Schema::INTEGER,
+          created_at: Schema::STAMP,
+          completed_at: Schema.nullable(Schema::STAMP),
+        },
+      ).freeze
+
       attributes :id, :title, :note, :status, :list, :sprint_on, :tags, :links
       attribute :blocked, &:blocked?
       attributes :carried_count, :created_at, :completed_at

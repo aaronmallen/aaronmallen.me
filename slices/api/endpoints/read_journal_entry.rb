@@ -4,6 +4,7 @@ module API
   module Endpoints
     class ReadJournalEntry < Endpoint
       SCHEMA = { additionalProperties: false, properties: { id: JournalEntries::ID }, required: ["id"] }.freeze
+      REPLY = Serializers::JournalEntry.reference
 
       include Deps[journal_entry_by_id: "record.queries.journal_entry_by_id"]
 

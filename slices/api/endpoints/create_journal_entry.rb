@@ -15,6 +15,8 @@ module API
         required: ["body"],
       }.freeze
 
+      REPLY = Serializers::JournalEntry.reference
+
       include Deps[save_journal_entry: "record.operations.save_journal_entry"]
 
       def handle(body:, entry_date: nil, tags: nil)

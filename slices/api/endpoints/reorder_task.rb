@@ -9,6 +9,8 @@ module API
         required: %w[id direction],
       }.freeze
 
+      REPLY = Schema.widen(TaskEndpoint::REPLY, moved: Schema::BOOLEAN).freeze
+
       include Deps[reorder_task: "tasks.operations.reorder_task"]
 
       def handle(id:, direction:)

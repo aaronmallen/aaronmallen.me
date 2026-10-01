@@ -4,6 +4,7 @@ module API
   module Endpoints
     class PlanSprint < Endpoint
       SCHEMA = { additionalProperties: false, properties: { sprint_on: Sprints::DAY }, required: ["sprint_on"] }.freeze
+      REPLY = Serializers::Sprint.reference
 
       include Deps[plan_sprint: "tasks.operations.plan_sprint"]
 

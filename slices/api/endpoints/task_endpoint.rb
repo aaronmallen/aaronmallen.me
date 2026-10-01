@@ -4,6 +4,8 @@
 module API
   module Endpoints
     class TaskEndpoint < Endpoint
+      REPLY = Schema.widen(Serializers::Task::SCHEMA, comments: Schema.list(Serializers::TaskComment.reference)).freeze
+
       include Deps[task_by_id: "tasks.queries.task_by_id", task_comments: "tasks.queries.task_comments"]
 
       private

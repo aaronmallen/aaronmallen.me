@@ -4,6 +4,7 @@ module API
   module Endpoints
     class DeleteTask < Endpoint
       SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      REPLY = Schema.object({ id: Schema::INTEGER, title: Schema::STRING, deleted: Schema::BOOLEAN }).freeze
 
       include Deps[delete_task: "tasks.operations.delete_task"]
 

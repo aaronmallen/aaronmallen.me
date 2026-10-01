@@ -4,6 +4,7 @@ module API
   module Endpoints
     class DeleteJournalEntry < Endpoint
       SCHEMA = { additionalProperties: false, properties: { id: JournalEntries::ID }, required: ["id"] }.freeze
+      REPLY = Schema.object({ id: Schema::INTEGER, deleted: Schema::BOOLEAN }).freeze
 
       include Deps[delete_journal_entry: "record.operations.delete_journal_entry"]
 

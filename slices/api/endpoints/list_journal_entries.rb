@@ -9,6 +9,17 @@ module API
         required: %w[from to],
       }.freeze
 
+      REPLY = Schema.object(
+        {
+          from: Schema::DAY,
+          to: Schema::DAY,
+          count: Schema::INTEGER,
+          partial: Schema::BOOLEAN,
+          entries: Schema.list(Serializers::JournalEntry.reference),
+        },
+        optional: { continue_to: Schema::DAY },
+      ).freeze
+
       include Deps[journal_entries_between: "record.queries.journal_entries_between"]
 
       def handle(from:, to:)

@@ -4,6 +4,7 @@ module API
   module Endpoints
     class ReadCurrentSprint < Endpoint
       SCHEMA = { additionalProperties: false }.freeze
+      REPLY = Schema.widen(Serializers::Sprint::SCHEMA, tasks: Schema.list(Serializers::Task.reference)).freeze
 
       include Deps[current_sprint: "tasks.operations.current_sprint", tasks_in_sprint: "tasks.queries.tasks_in_sprint"]
 

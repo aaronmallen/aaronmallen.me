@@ -15,6 +15,11 @@ module API
         },
       }.freeze
 
+      REPLY = Schema.object(
+        { sprints: Schema.list(Serializers::Sprint.reference), partial: Schema::BOOLEAN },
+        optional: { next_page: Schema::INTEGER },
+      ).freeze
+
       include Deps["settings", sprints_between: "tasks.queries.sprints_between"]
 
       def handle(from: nil, to: nil, page: 1)

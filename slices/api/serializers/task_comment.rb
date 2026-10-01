@@ -5,6 +5,17 @@ module API
     class TaskComment < Serializer
       LOCAL = "local"
 
+      SCHEMA = Schema.object(
+        {
+          id: Schema::INTEGER,
+          body: { type: "string", description: "the comment, in Markdown" },
+          author: Schema.nullable(Schema::STRING),
+          source: { type: "string", enum: [LOCAL, *Blog::Types::TaskSourceProvider.values] },
+          url: Schema.nullable(Schema::STRING),
+          created_at: Schema::STAMP,
+        },
+      ).freeze
+
       attributes :id, :body, :author, :source, :url, :created_at
 
       def author(comment) = comment.remote_id ? comment.author : Blog::Owner.full_name

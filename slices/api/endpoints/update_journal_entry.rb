@@ -15,6 +15,8 @@ module API
         required: ["id"],
       }.freeze
 
+      REPLY = Serializers::JournalEntry.reference
+
       include Deps[
         journal_entry_by_id: "record.queries.journal_entry_by_id",
         update_journal_entry: "record.operations.update_journal_entry",

@@ -21,6 +21,11 @@ module API
         },
       }.freeze
 
+      REPLY = Schema.object(
+        { count: Schema::INTEGER, tasks: Schema.list(Serializers::Task.reference), partial: Schema::BOOLEAN },
+        optional: { next_page: Schema::INTEGER },
+      ).freeze
+
       include Deps["settings", find_tasks: "tasks.queries.find_tasks"]
 
       def handle(from: nil, page: 1, statuses: nil, to: nil)

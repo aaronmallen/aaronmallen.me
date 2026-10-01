@@ -4,6 +4,7 @@ module API
   module Endpoints
     class DropSprint < Endpoint
       SCHEMA = { additionalProperties: false, properties: { id: Sprints::ID }, required: ["id"] }.freeze
+      REPLY = Schema.widen(Serializers::Sprint::SCHEMA, dropped: Schema::BOOLEAN).freeze
 
       include Deps[drop_sprint: "tasks.operations.drop_sprint"]
 

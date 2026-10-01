@@ -30,5 +30,7 @@ module API
     delete "/sprints/:id", to: "sprints.destroy"
 
     get "/token", to: "tokens.show"
+
+    get "/openapi.json", to: "documents.show"
   end
 end

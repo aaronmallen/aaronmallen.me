@@ -12,6 +12,8 @@ module API
         required: %w[id body],
       }.freeze
 
+      REPLY = Serializers::TaskComment.reference
+
       include Deps[add_task_comment: "tasks.operations.add_task_comment"]
 
       def handle(id:, body:)
