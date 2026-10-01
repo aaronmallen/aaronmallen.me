@@ -155,6 +155,60 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "fetching the tasks" do
+    def fetches = request_gate.count("/admin/tasks/palette")
+
+    it "waits until the palette opens" do
+      expect(fetches).to eq(0)
+    end
+
+    describe "opening it twice" do
+      before do
+        2.times do
+          open_palette
+          query.send_keys(*"accountant".chars)
+          page.assert_selector(".pal-r", text: "Email the accountant")
+          query.send_keys(:escape)
+        end
+        open_palette
+        query.send_keys(*"accountant".chars)
+      end
+
+      it "asks once" do
+        expect(fetches).to eq(1)
+      end
+
+      it "draws each task once" do
+        expect(page).to have_css(".pal-r", text: "Email the accountant", count: 1)
+      end
+    end
+  end
+
+  describe "searching more tasks than it shows" do
+    before do
+      6.times { create(:task, title: "Call the plumber #{it}") }
+      open_palette
+      query.send_keys(*"plumber".chars)
+    end
+
+    it "shows five" do
+      expect(page).to have_css(".pal-r", text: "Call the plumber", count: 5)
+    end
+  end
+
+  describe "running a task row" do
+    before do
+      open_palette
+      query.send_keys(*"accountant".chars)
+      page.assert_selector(".pal-r", text: "Email the accountant")
+      query.send_keys(:enter)
+    end
+
+    it "goes to the task's list" do
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+    end
+  end
+
   describe "hovering a row" do
     before do
       open_palette

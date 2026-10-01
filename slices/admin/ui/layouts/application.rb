@@ -40,7 +40,7 @@ module Admin
         end
 
         def render_palette(navigation)
-          Palette(sections: navigation.sections, tasks: navigation.tasks)
+          Palette(sections: navigation.sections)
           Components::Tasks::CreateDialog(today: Blog::TimeZone.today, origin: content_for(:task_origin))
           Components::Tasks::Panel()
           SlashButton()

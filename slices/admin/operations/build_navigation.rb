@@ -3,11 +3,9 @@
 module Admin
   module Operations
     class BuildNavigation
-      include Deps["operations.list_sections", open_tasks: "tasks.queries.open_tasks"]
+      include Deps["operations.list_sections"]
 
-      def call(current_path:)
-        Structs::Navigation.new(sections: list_sections.call(current_path:), tasks: open_tasks.call)
-      end
+      def call(current_path:) = Structs::Navigation.new(sections: list_sections.call(current_path:))
     end
   end
 end

@@ -17,8 +17,11 @@ function setupDialog(dialog) {
   const query = dialog.querySelector("[data-palette-query]");
   const list = dialog.querySelector("[data-palette-list]");
   const status = dialog.querySelector("[data-palette-status]");
-  const options = [...dialog.querySelectorAll(OPTION)];
+  const tasks = dialog.querySelector("[data-palette-tasks]");
+  const row = dialog.querySelector("[data-palette-task-row]");
   const groups = [...dialog.querySelectorAll("[data-palette-group]")];
+  let options = [...dialog.querySelectorAll(OPTION)];
+  let loading = null;
 
   const shown = () => options.filter((option) => !option.hidden);
   const active = () => options.find((option) => option.getAttribute("aria-selected") === "true");
@@ -78,6 +81,20 @@ function setupDialog(dialog) {
     if (!openDialog(target)) window.location.assign(option.dataset.paletteHref);
   };
 
+  const load = () => {
+    if (loading) return;
+
+    loading = fetchTasks(tasks, row)
+      .then((rows) => {
+        tasks.append(...rows);
+        options = [...dialog.querySelectorAll(OPTION)];
+        if (query.value.trim() !== "") filter();
+      })
+      .catch(() => {
+        loading = null;
+      });
+  };
+
   const open = () => {
     if (dialog.open) return;
 
@@ -85,6 +102,7 @@ function setupDialog(dialog) {
     filter();
     dialog.showModal();
     query.focus();
+    load();
   };
 
   for (const trigger of document.querySelectorAll("[data-palette-open]")) {
@@ -119,6 +137,31 @@ function setupDialog(dialog) {
   });
 
   filter();
+}
+
+async function fetchTasks(group, template) {
+  const response = await fetch(group.dataset.paletteTasks, {
+    headers: { Accept: "application/json" },
+    redirect: "manual",
+  });
+  if (!response.ok) throw new Error(`palette tasks answered ${response.status}`);
+
+  const lists = JSON.parse(group.dataset.paletteLists);
+  const { tasks } = await response.json();
+
+  return tasks.map((task) => taskRow(template, task, lists[task.list]));
+}
+
+function taskRow(template, { id, title }, { href, sub }) {
+  const row = template.content.firstElementChild.cloneNode(true);
+
+  row.id = `command-palette-task-${id}`;
+  row.dataset.paletteText = title.toLowerCase();
+  row.dataset.paletteHref = href;
+  row.querySelector(".pal-r-label").textContent = title;
+  row.querySelector(".pal-r-sub").textContent = sub;
+
+  return row;
 }
 
 function matches(option, text) {

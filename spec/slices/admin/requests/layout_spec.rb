@@ -53,6 +53,16 @@ RSpec.describe "Admin layout", type: :request do
       expect(reads).to have(1).item
     end
 
+    it "loads no task to draw a page that lists none" do
+      reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/)
+
+      expect(reads).to be_empty
+    end
+
+    it "points the palette at the route that lists open tasks" do
+      expect(page).to have_css("[data-palette-tasks='/admin/tasks/palette']", visible: :all)
+    end
+
     it "links no feed" do
       expect(page).to have_no_css("head link[rel='alternate']", visible: :all)
     end

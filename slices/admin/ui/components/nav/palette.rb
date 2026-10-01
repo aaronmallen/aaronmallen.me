@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "json"
+
 module Admin
   module UI
     module Components
@@ -19,16 +21,13 @@ module Admin
           TASKS_GROUP = "command-palette-group-tasks"
 
           prop :sections, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
-          prop(
-            :tasks,
-            Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))),
-          )
 
           def view_template
             dialog(id: DIALOG_ID, class: "pal-b", aria: { label: t(".label") }, data: { palette: true }) do
               div(class: "pal") do
                 query_box
                 results
+                task_row
                 status
                 footer
               end
@@ -89,10 +88,10 @@ module Admin
             end
           end
 
-          def row_group(id, heading, &)
-            div(class: "pal-grp", role: "group", aria: { labelledby: id }, data: { palette_group: true }) do
+          def row_group(id, heading, data: Blog::Constants::EMPTY_HASH, &)
+            div(class: "pal-grp", role: "group", aria: { labelledby: id }, data: { palette_group: true, **data }) do
               p(id:, class: "pal-g") { heading }
-              yield
+              yield if block_given?
             end
           end
 
@@ -122,19 +121,22 @@ module Admin
           end
 
           def task_group
-            return if @tasks.values.all?(&:empty?)
+            row_group(
+              TASKS_GROUP, t(".tasks"),
+              data: { palette_tasks: path(:admin_palette_tasks), palette_lists: JSON.generate(task_lists) },
+            )
+          end
 
-            row_group(TASKS_GROUP, t(".tasks")) do
-              @tasks.each { |filter, tasks| tasks.each { task_row(it, filter) } }
+          def task_lists
+            LISTS.to_h do |list, key|
+              [list, { href: path(:admin_tasks, filter: list), sub: t(".in_list", list: t(key)) }]
             end
           end
 
-          def task_row(task, filter)
-            PaletteRow(
-              id: "command-palette-task-#{task.id}", icon: "fa-list-check", label: task.title,
-              text: task.title.downcase, href: path(:admin_tasks, filter:),
-              sub: t(".in_list", list: t(LISTS.fetch(filter))), task: true, hidden: true,
-            )
+          def task_row
+            template(data: { palette_task_row: true }) do
+              PaletteRow(id: "", icon: "fa-list-check", label: "", sub: "", task: true, hidden: true)
+            end
           end
         end
       end
