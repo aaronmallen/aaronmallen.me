@@ -70,7 +70,7 @@ module Analytics
 
       def on_day(day) = between_days(day, day)
 
-      def page_counts_by(column) = counts_by(column).select_append(:path).group_append(:path)
+      def page_counts_by(column, as: column) = counts_by(column, as:).select_append(:path).group_append(:path)
 
       def paths
         bouncers = bounced

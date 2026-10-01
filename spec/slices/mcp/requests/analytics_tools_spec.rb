@@ -379,7 +379,62 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys).to eq(%w[from to time_zone path totals days sources hours read_spread])
+      expect(read_page("/writing/hello").keys)
+        .to eq(%w[from to time_zone path totals days referrers countries sources hours read_spread])
+    end
+
+    describe "the page's referrers and countries" do
+      def counted(answer, list, key) = answer.fetch(list).map { it.values_at(key, "views", "visitors") }
+
+      def origins(path = "/writing/hello", **)
+        answer = read_page(path, **)
+        { referrers: counted(answer, "referrers", "host"), countries: counted(answer, "countries", "country_code") }
+      end
+
+      def roll_up_origin(factory, day, *, path: "/writing/hello", **)
+        roll_up(day, views: 50, visitors: 20) unless Analytics::Slice["repos.analytics_rollup_repo"].by_day(day)
+        create(factory, *, day:, path:, **)
+      end
+
+      it "ranks the page's referrers by visitors over the range, with a direct visit under no host" do
+        roll_up_origin(:analytics_rollup_page_referrer, today - 2, host: "news.example", views: 3, visitors: 2)
+        roll_up_origin(:analytics_rollup_page_referrer, today - 1, host: "news.example", views: 2, visitors: 2)
+        roll_up_origin(:analytics_rollup_page_referrer, today - 1, :direct, views: 9, visitors: 3)
+
+        expect(origins.fetch(:referrers)).to eq([["news.example", 5, 4], [nil, 9, 3]])
+      end
+
+      it "ranks the page's countries by visitors over the range" do
+        roll_up_origin(:analytics_rollup_page_country, today - 1, country_code: "JP", views: 2, visitors: 1)
+        roll_up_origin(:analytics_rollup_page_country, today - 1, country_code: "US", views: 6, visitors: 4)
+
+        expect(origins.fetch(:countries)).to eq([["US", 6, 4], ["JP", 2, 1]])
+      end
+
+      it "leaves out other pages and the whole site's" do
+        roll_up_origin(:analytics_rollup_page_referrer, today - 1, path: "/writing/other")
+        roll_up_origin(:analytics_rollup_page_country, today - 1, path: "/writing/other")
+        create(:analytics_rollup_referrer, day: today - 1, visitors: 5)
+        create(:analytics_rollup_country, day: today - 1, visitors: 5)
+
+        expect(origins).to eq(referrers: [], countries: [])
+      end
+
+      it "counts the page's visits before they roll up" do
+        reader = Digest::SHA256.hexdigest("reader")
+        2.times { create(:analytics_event, path: "/writing/hello", country_code: "JP", visitor_hash: reader) }
+        create(:analytics_event, path: "/writing/other")
+
+        expect(origins).to eq(referrers: [["news.example", 2, 1]], countries: [["JP", 2, 1]])
+      end
+
+      it "keeps the page's referrers and countries past the 90 days of raw visits" do
+        old = today - 200
+        roll_up_origin(:analytics_rollup_page_referrer, old, host: "news.example", views: 5, visitors: 3)
+        roll_up_origin(:analytics_rollup_page_country, old, country_code: "JP", views: 5, visitors: 3)
+
+        expect(origins(from: old, to: old)).to eq(referrers: [["news.example", 5, 3]], countries: [["JP", 5, 3]])
+      end
     end
 
     it "answers an unknown path with zeros" do

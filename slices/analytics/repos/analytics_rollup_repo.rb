@@ -3,6 +3,14 @@
 module Analytics
   module Repos
     class AnalyticsRollupRepo < Blog::DB::Repo
+      ROWS = {
+        analytics_rollup_paths: :paths,
+        analytics_rollup_referrers: :referrers,
+        analytics_rollup_countries: :countries,
+        analytics_rollup_sources: :sources,
+        analytics_rollup_page_referrers: :page_referrers,
+        analytics_rollup_page_countries: :page_countries,
+      }.freeze
       VIEW_DAYS = 90
 
       def by_day(day) = analytics_rollups.by_pk(day).one
@@ -13,7 +21,15 @@ module Analytics
 
       def newest_day = analytics_rollups.newest_day
 
+      def page_countries(path:, from:, to:)
+        analytics_rollup_page_countries.between(from, to).for_path(path).top_by_visitors.to_a
+      end
+
       def page_days(path:, from:, to:) = analytics_rollup_paths.between(from, to).for_path(path).to_a
+
+      def page_referrers(path:, from:, to:)
+        analytics_rollup_page_referrers.between(from, to).for_path(path).top_by_visitors.to_a
+      end
 
       def reach_in(month) = analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
 
@@ -63,10 +79,7 @@ module Analytics
       end
 
       def replace_rows(summary)
-        replace(analytics_rollup_paths, summary.day, summary.paths)
-        replace(analytics_rollup_referrers, summary.day, summary.referrers)
-        replace(analytics_rollup_countries, summary.day, summary.countries)
-        replace(analytics_rollup_sources, summary.day, summary.sources)
+        ROWS.each { |relation, rows| replace(public_send(relation), summary.day, summary.public_send(rows)) }
       end
     end
   end

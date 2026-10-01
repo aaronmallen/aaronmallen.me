@@ -2,6 +2,8 @@
 
 module Analytics
   module Structs
-    AnalyticsSummary = Data.define(:day, :totals, :paths, :referrers, :countries, :sources)
+    AnalyticsSummary = Data.define(
+      :day, :totals, :paths, :referrers, :countries, :sources, :page_referrers, :page_countries,
+    )
   end
 end

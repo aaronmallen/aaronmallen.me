@@ -48,6 +48,7 @@ module Analytics
           referrers: window.counts_by(:referrer_host, as: :host).to_a,
           countries: window.counts_by(:country_code).to_a,
           sources: by_page(window.known(:source), :source),
+          **page_origins(window),
         )
       end
 
@@ -65,6 +66,13 @@ module Analytics
         site = window.counts_by(column).to_a.map { { path: nil, **it.to_h } }
 
         site + window.page_counts_by(column).to_a.map(&:to_h)
+      end
+
+      def page_origins(window)
+        {
+          page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
+          page_countries: window.page_counts_by(:country_code).to_a.map(&:to_h),
+        }
       end
 
       def scoped(window, path) = path ? window.for_path(path) : window

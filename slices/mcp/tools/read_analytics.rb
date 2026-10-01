@@ -9,6 +9,7 @@ module MCP
                     "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
+      PAGE_RANKED = %i[referrers countries].freeze
       RANKED = %i[paths referrers countries sources].freeze
       RAW_REFUSAL = "hours, since and read_spread read raw visits, which the site keeps for 90 days; start from " \
                     "or since inside them to get these. The daily counts still hold"
@@ -42,9 +43,10 @@ module MCP
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
-                  "day, and the sources that sent readers to it, with no other top lists. A page nobody visited " \
-                  "reads as zeros. For a published post's path, since_publish numbers each day of the range from " \
-                  "the Chicago day the post went out, which is day 1. " \
+                  "day, and its top #{TOP} referrers, countries and sources by visitors, each with its views, " \
+                  "with no top paths. A page's referrers and countries always give visitors. A page nobody " \
+                  "visited reads as zeros. For a published post's path, since_publish numbers each day of the " \
+                  "range from the Chicago day the post went out, which is day 1. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
                   "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
                   "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \
@@ -83,6 +85,10 @@ module MCP
           end
         end
 
+        def page_ranked(found, range, path, server_context)
+          { **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] }, sources: sources(range, path, server_context) }
+        end
+
         def page_summary(path, range, at, server_context)
           found = page_between(server_context).call(path:, from: range.first, to: range.last)
           days = found.fetch(:days)
@@ -94,7 +100,7 @@ module MCP
             path:,
             totals: totals(found, range, server_context, path:),
             days: dated(days),
-            sources: sources(range, path, server_context),
+            **page_ranked(found, range, path, server_context),
             **raw(range, at, path, server_context),
             **since_publish(post_at(path, server_context), days),
           )

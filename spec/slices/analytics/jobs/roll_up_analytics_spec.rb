@@ -23,6 +23,12 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def noon(on) = Blog::TimeZone.day_start(on) + (12 * 3_600)
 
+  def page_rows(table, key, path, on = day)
+    rows = rollup_repo.public_send(table).on(on).for_path(path).order(key).to_a
+
+    rows.map { it.to_h.values_at(key, :views, :visitors) }
+  end
+
   def paths(on = day) = rollup_repo.top_paths(from: on, to: on).map(&:to_h)
 
   def referrers(on = day) = rollup_repo.referrers(from: on, to: on).map(&:to_h)
@@ -147,6 +153,31 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       end
     end
 
+    describe "each page's referrers and countries" do
+      before do
+        2.times { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP", visitor_hash:) }
+        event(path: "/writing/hello", referrer_host: "news.example", country_code: "US")
+        event(:direct, :unknown_country, path: "/writing/hello")
+        event(path: "/writing/other", referrer_host: "news.example", country_code: "JP", visitor_hash:)
+        roll_up
+      end
+
+      it "stores a page's referrers, with a direct visit under no host" do
+        expect(page_rows(:analytics_rollup_page_referrers, :host, "/writing/hello"))
+          .to eq([["news.example", 3, 2], [nil, 1, 1]])
+      end
+
+      it "stores a page's countries, with an unknown one under no code" do
+        expect(page_rows(:analytics_rollup_page_countries, :country_code, "/writing/hello"))
+          .to eq([["JP", 2, 1], ["US", 1, 1], [nil, 1, 1]])
+      end
+
+      it "stores each page apart", :aggregate_failures do
+        expect(page_rows(:analytics_rollup_page_referrers, :host, "/writing/other")).to eq([["news.example", 1, 1]])
+        expect(page_rows(:analytics_rollup_page_countries, :country_code, "/writing/other")).to eq([["JP", 1, 1]])
+      end
+    end
+
     it "leaves today's events for tomorrow's run" do
       create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today))
       roll_up
@@ -206,6 +237,13 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
   end
 
   describe "run twice" do
+    def page_origins
+      [
+        page_rows(:analytics_rollup_page_referrers, :host, "/writing/hello"),
+        page_rows(:analytics_rollup_page_countries, :country_code, "/writing/hello"),
+      ]
+    end
+
     before { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP", source: "feed") }
 
     it "stores the same totals" do
@@ -216,10 +254,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
     it "stores the same rows", :aggregate_failures do
       roll_up
-      stored = [paths, referrers, countries, sources_of(nil)]
+      stored = [paths, referrers, countries, sources_of(nil), page_origins]
       roll_up
 
-      expect([paths, referrers, countries, sources_of(nil)]).to eq(stored)
+      expect([paths, referrers, countries, sources_of(nil), page_origins]).to eq(stored)
     end
   end
 
