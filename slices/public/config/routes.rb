@@ -13,6 +13,7 @@ module Public
     get "/about", to: "pages.about", as: :about
     get "/projects", to: "pages.projects", as: :projects
     get "/contact", to: "pages.contact", as: :contact
+    get "/media/:key", to: "media.show", as: :media
     post "/contact", to: "messages.create", as: :message
     post "/pulse", to: "visits.create", as: :visit
     post "/webmention", to: "webmentions.create", as: :webmention
