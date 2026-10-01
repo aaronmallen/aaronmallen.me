@@ -135,14 +135,14 @@ RSpec.describe "Feeds", type: :request do
       get "/writing.atom"
 
       expect(content.all("body > *").map(&:tag_name)).to eq(%w[p section])
-      expect(content.find(".post-edit").text(normalize_ws: true)).to eq("Edit Sep 7, 2026: fixed the numbers")
+      expect(content.find(".post-edit").text(normalize_ws: true)).to eq("Edited Sep 7, 2026 fixed the numbers")
     end
 
     it "dates a note by the site's day, not UTC's" do
       edit("late night fix", at: Time.utc(2026, 9, 8, 3))
       get "/writing.atom"
 
-      expect(content.find(".post-edit-date")).to have_text("Edit Sep 7, 2026:")
+      expect(content.find(".post-edit-date")).to have_text("Edited Sep 7, 2026")
     end
 
     describe "notes from two days" do
@@ -153,8 +153,8 @@ RSpec.describe "Feeds", type: :request do
         get "/writing.atom"
       end
 
-      it "shows each date once, oldest first" do
-        expect(content.all(".post-edit-date").map(&:text)).to eq(["Edit Sep 7, 2026:", "Edit Sep 9, 2026:"])
+      it "shows each date once, newest first" do
+        expect(content.all(".post-edit-date").map(&:text)).to eq(["Edited Sep 9, 2026", "Edited Sep 7, 2026"])
       end
 
       it "lists one day's notes under its date, oldest first" do

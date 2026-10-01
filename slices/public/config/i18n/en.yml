@@ -33,8 +33,7 @@ en:
           mastodon: "mastodon"
       posts:
         edits:
-          after: ":"
-          before: "Edit"
+          edited: "Edited"
           label: "Edits"
         list:
           read_time: "%{count} min"

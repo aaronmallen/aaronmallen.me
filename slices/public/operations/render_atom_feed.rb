@@ -29,9 +29,8 @@ module Public
       def edit_day(html, day, edits)
         html.div(class: "post-edit") do
           html.p(class: "post-edit-date") do
-            html.text!("#{i18n.t('ui.components.posts.edits.before')} ")
+            html.text!("#{i18n.t('ui.components.posts.edits.edited')} ")
             html.time(i18n.l(day, format: :medium), datetime: Blog::TimeZone.local(edits.last.created_at).iso8601)
-            html.text!(i18n.t("ui.components.posts.edits.after"))
           end
           html.text!(" ")
           edit_notes(html, edits)
@@ -92,7 +91,7 @@ module Public
 
         html = Builder::XmlMarkup.new
         html.section(class: "post-edits", "aria-label": i18n.t("ui.components.posts.edits.label")) do
-          ::Posts::EditDays.group(edits).each { |day, day_edits| edit_day(html, day, day_edits) }
+          ::Posts::EditDays.newest_first(edits).each { |day, day_edits| edit_day(html, day, day_edits) }
         end
       end
 

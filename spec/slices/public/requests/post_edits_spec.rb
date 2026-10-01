@@ -7,11 +7,11 @@ RSpec.describe "Post edits", type: :request do
 
   def edit(note, at:) = create(:post_edit, post: post_record, note:, created_at: at, updated_at: at)
 
-  it "shows a note as Edit, its date and the note" do
+  it "shows a note as Edited, its date and the note" do
     edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
     get "/writing/hello"
 
-    expect(page.find(".post-edit").text(normalize_ws: true)).to eq("Edit Sep 7, 2026: fixed the numbers")
+    expect(page.find(".post-edit").text(normalize_ws: true)).to eq("Edited Sep 7, 2026 fixed the numbers")
   end
 
   it "shows the notes above the feedback line" do
@@ -27,7 +27,7 @@ RSpec.describe "Post edits", type: :request do
     edit("late night fix", at: Time.utc(2026, 9, 8, 3))
     get "/writing/hello"
 
-    expect(page.find(".post-edit-date")).to have_text("Edit Sep 7, 2026:")
+    expect(page.find(".post-edit-date")).to have_text("Edited Sep 7, 2026")
   end
 
   describe "two notes from one day" do
@@ -38,7 +38,7 @@ RSpec.describe "Post edits", type: :request do
     end
 
     it "shows the date once" do
-      expect(page.all(".post-edit-date").map(&:text)).to eq(["Edit Sep 7, 2026:"])
+      expect(page.all(".post-edit-date").map(&:text)).to eq(["Edited Sep 7, 2026"])
     end
 
     it "lists the notes under it, oldest first" do
@@ -48,13 +48,21 @@ RSpec.describe "Post edits", type: :request do
     end
   end
 
-  it "shows notes from different days under their own dates, oldest first" do
+  it "shows notes from different days under their own dates, newest first" do
     edit("fixed a link", at: Time.utc(2026, 9, 9, 12))
     edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
     get "/writing/hello"
 
     expect(page.all(".post-edit").map { it.text(normalize_ws: true) })
-      .to eq(["Edit Sep 7, 2026: fixed the numbers", "Edit Sep 9, 2026: fixed a link"])
+      .to eq(["Edited Sep 9, 2026 fixed a link", "Edited Sep 7, 2026 fixed the numbers"])
+  end
+
+  it "puts dt-updated on the newest day's date" do
+    edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
+    edit("fixed a link", at: Time.utc(2026, 9, 9, 12))
+    get "/writing/hello"
+
+    expect(page.all(".post-edit-date time").map { it[:class] }).to eq(["dt-updated", nil])
   end
 
   it "renders the note's Markdown", :aggregate_failures do

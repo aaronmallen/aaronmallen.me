@@ -10,10 +10,10 @@ module Public
           def view_template
             return if @edits.empty?
 
-            days = ::Posts::EditDays.group(@edits).values
+            days = ::Posts::EditDays.newest_first(@edits).map(&:last)
 
             section(class: "post-edits", aria: { label: t(".label") }) do
-              days.each { |edits| day(edits, updated: edits.equal?(days.last)) }
+              days.each { |edits| day(edits, updated: edits.equal?(days.first)) }
             end
           end
 
@@ -21,12 +21,11 @@ module Public
 
           def date(time, updated:)
             p(class: "post-edit-date") do
-              plain t(".before")
+              plain t(".edited")
               whitespace
               time(class: ("dt-updated" if updated), datetime: Blog::TimeZone.local(time).iso8601) do
                 l(Blog::TimeZone.today(time), format: :medium)
               end
-              plain t(".after")
             end
           end
 

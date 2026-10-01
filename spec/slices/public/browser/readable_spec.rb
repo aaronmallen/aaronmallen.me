@@ -23,7 +23,7 @@ RSpec.describe "Public screens", type: :feature do
   before do
     create(:tag, name: "ruby", color: "mk-violet")
     create(:project, name: "sai", tagline: "Terminal colors", tags: %w[ruby])
-    create(
+    post = create(
       :post,
       :published,
       body: <<~MARKDOWN,
@@ -43,6 +43,9 @@ RSpec.describe "Public screens", type: :feature do
       tags: %w[ruby],
       title: "A published post with a fairly long title",
     )
+    create(:post_edit, post:, note: "fixed `code`", created_at: Time.utc(2026, 9, 7, 12))
+    create(:post_edit, post:, note: "fixed a link", created_at: Time.utc(2026, 9, 9, 12))
+    create(:post_edit, post:, note: "fixed a typo", created_at: Time.utc(2026, 9, 9, 15))
   end
 
   it_behaves_like "accessible screens"
