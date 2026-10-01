@@ -22,6 +22,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     }
   end
 
+  def facets_for(text)
+    deliver(queued(targets: %w[bluesky], parts: [text]), "bluesky")
+
+    bluesky_writes.first.dig("record", "facets")
+  end
+
   def key(social_post, network, position) = "social-post-#{social_post.id}-#{network}-#{position}"
 
   def queued(targets: %w[mastodon], parts: %w[one])
@@ -44,6 +50,13 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
   def statuses = SocialNetworks::MASTODON_STATUSES
 
+  def tag_facet(tag, start, finish)
+    {
+      "features" => [{ "$type" => "app.bsky.richtext.facet#tag", "tag" => tag }],
+      "index" => { "byteEnd" => finish, "byteStart" => start },
+    }
+  end
+
   describe "a post to Mastodon" do
     before { stub_mastodon("110") }
 
@@ -53,6 +66,13 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       deliver(social_post, "mastodon")
 
       expect(a_request(:post, statuses).with(body: { status: "hello", visibility: "public" })).to have_been_made
+    end
+
+    it "posts hashtags as they are written" do
+      deliver(queued(parts: ["read #ruby."]), "mastodon")
+
+      expect(a_request(:post, statuses).with(body: { status: "read #ruby.", visibility: "public" }))
+        .to have_been_made
     end
 
     it "sends the token as a bearer token" do
@@ -282,10 +302,55 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         .to eq(%w[https://a.example http://b.example/x])
     end
 
-    it "sends no facets for text without links" do
-      deliver(queued(targets: %w[bluesky], parts: %w[hello]), "bluesky")
+    it "sends no facets for text without links or tags" do
+      deliver(queued(targets: %w[bluesky], parts: ["hello # world"]), "bluesky")
 
       expect(bluesky_writes.first.fetch("record")).not_to have_key("facets")
+    end
+
+    it "marks each hashtag with a tag facet over the hash and the tag" do
+      expect(facets_for("#hanami and #ruby")).to eq([tag_facet("hanami", 0, 7), tag_facet("ruby", 12, 17)])
+    end
+
+    it "counts bytes, not characters, before a tag" do
+      expect(facets_for("go 🎉 café #ruby")).to eq([tag_facet("ruby", 14, 19)])
+    end
+
+    it "starts and ends a tag at any kind of space" do
+      expect(facets_for("go\u{A0}#ruby\u{3000}now")).to eq([tag_facet("ruby", 4, 9)])
+    end
+
+    it "orders tag and link facets by where they start" do
+      expect(facets_for("#ruby https://a.example #hanami"))
+        .to eq([tag_facet("ruby", 0, 5), facet("https://a.example", 6, 23), tag_facet("hanami", 24, 31)])
+    end
+
+    it "marks no tag for a hash inside a link" do
+      expect(facets_for("see https://example.com/#top")).to eq([facet("https://example.com/#top", 4, 28)])
+    end
+
+    it "marks no tag that runs into a link" do
+      expect(facets_for("#see/https://a.example")).to eq([facet("https://a.example", 5, 22)])
+    end
+
+    it "leaves trailing punctuation out of a tag" do
+      expect(facets_for("read #ruby.")).to eq([tag_facet("ruby", 5, 10)])
+    end
+
+    it "marks a tag of 64 characters" do
+      expect(facets_for("##{'a' * 64}")).to eq([tag_facet("a" * 64, 0, 65)])
+    end
+
+    {
+      "a tag of only digits" => "issue #123",
+      "a tag over 64 characters" => "##{'a' * 65}",
+      "a hash in the middle of a word" => "C#sharp",
+    }.each do |what, text|
+      it "marks no tag for #{what}" do
+        deliver(queued(targets: %w[bluesky], parts: [text]), "bluesky")
+
+        expect(bluesky_writes.first.fetch("record")).not_to have_key("facets")
+      end
     end
 
     it "sends no reply for the first part" do

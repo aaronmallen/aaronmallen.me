@@ -14,7 +14,6 @@ module Social
       APP_URL = "https://bsky.app"
       AT_URI = %r{\Aat://([^/]+)/([^/]+)/([^/]+)\z}
       COLLECTION = "app.bsky.feed.post"
-      FACET_LINK = "app.bsky.richtext.facet#link"
       LIMIT = 300
       MAX_BYTES = 3000
       PUT_RECORD = "com.atproto.repo.putRecord"
@@ -77,15 +76,6 @@ module Social
         ["Bluesky answered #{response.status} for #{nsid}", *reason(response.body)].join(": ")
       end
 
-      def facets(text)
-        Links.new(text).to_a.map do |link|
-          {
-            features: [{ "$type" => FACET_LINK, uri: link.url }],
-            index: { byteEnd: link.byte_end, byteStart: link.byte_start },
-          }
-        end
-      end
-
       def procedure(connection, nsid, token: nil, **payload)
         request(connection, :post, nsid, payload, token)
       end
@@ -101,12 +91,12 @@ module Social
       end
 
       def record(text, reply_to, session)
-        links = facets(text)
+        facets = Facets.for(text)
 
         {
           "$type" => COLLECTION,
           createdAt: Time.now.utc.iso8601,
-          facets: links.empty? ? nil : links,
+          facets: facets.empty? ? nil : facets,
           reply: reply_to && reply_ref(reply_to, session),
           text:,
         }.compact
