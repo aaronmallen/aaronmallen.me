@@ -26,6 +26,12 @@ module Admin
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
     post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
+    get "/people", to: "people.index", as: :people
+    post "/people", to: "people.create", as: :create_person
+    get "/people/new", to: "people.new", as: :new_person
+    get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
+    post "/people/:id", to: "people.update", as: :update_person, id: ID
+    post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post
     get "/posts/new", to: "posts.new", as: :new_post

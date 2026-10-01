@@ -176,6 +176,52 @@ RSpec.describe "Translations", type: :request do
     end
   end
 
+  describe "the people screens" do
+    let(:person) { create(:person, :bluesky, name: "Ada Lovelace") }
+
+    before { sign_in_to_admin }
+
+    it "renders every screen without a missing translation", :aggregate_failures do
+      ["/admin/people", "/admin/people/new", "/admin/people/#{person.id}/edit"].each do |path|
+        get path
+
+        expect(last_response).to be_ok
+        expect(last_response.body).not_to include("translation_missing")
+      end
+    end
+
+    it "renders the empty list without a missing translation" do
+      get "/admin/people"
+
+      expect(last_response.body).not_to include("translation_missing")
+    end
+
+    {
+      "every field" => { name: "", key: "Ada L", mastodon_handle: "ada", bluesky_handle: "ada" },
+      "a missing handle" => { name: "Ada", key: "ada", mastodon_handle: "", bluesky_handle: "" },
+    }.each do |named, fields|
+      it "renders the errors for #{named} without a missing translation", :aggregate_failures do
+        post "/admin/people", _csrf_token: admin_csrf_token, person: fields
+
+        expect(last_response.status).to eq(422)
+        expect(last_response.body).not_to include("translation_missing")
+      end
+    end
+
+    {
+      "added" => ["/admin/people", { person: { name: "Grace", key: "grace", mastodon_handle: "@grace@ruby.social" } }],
+      "saved" => ["/admin/people/%<id>s", { person: { name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social" } }],
+      "removed" => ["/admin/people/%<id>s/delete", {}],
+    }.each do |named, (path, params)|
+      it "renders the #{named} toast without a missing translation" do
+        post format(path, id: person.id), { _csrf_token: admin_csrf_token, **params }
+        follow_redirect!
+
+        expect(last_response.body).to include("data-toast").and(not_include("translation_missing"))
+      end
+    end
+  end
+
   it "renders the post delete toast without a missing translation" do
     article = create(:post, :published)
     sign_in_to_admin

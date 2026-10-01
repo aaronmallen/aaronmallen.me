@@ -7,6 +7,8 @@ RSpec.describe "Admin records that are gone", type: :request do
     "/journal/#{missing}" => { entry: { body: "after" } },
     "/journal/#{missing}/delete" => {},
     "/messages/#{missing}/mark/read" => {},
+    "/people/#{missing}" => { person: { name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social" } },
+    "/people/#{missing}/delete" => {},
     "/posts/#{missing}" => { post: { title: "Hello", body: "hi" } },
     "/posts/#{missing}/delete" => {},
     "/projects/#{missing}" => { project: { name: "Blog" } },

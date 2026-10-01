@@ -15,6 +15,7 @@ module Admin
         %i[activity insights fa-timeline admin_activity].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[tags settings fa-tag admin_tags].freeze,
+        %i[people settings fa-address-book admin_people].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
       ].freeze
 

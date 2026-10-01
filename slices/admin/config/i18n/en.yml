@@ -28,6 +28,11 @@ en:
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
+  people_page:
+    toasts:
+      added: "Person added"
+      removed: "Person removed"
+      saved: "Person saved"
   post_form:
     toasts:
       applied:
@@ -305,6 +310,7 @@ en:
           clients: "clients"
           journal: "journal"
           messages: "messages"
+          people: "people"
           posts: "posts"
           projects: "projects"
           social: "social"
@@ -314,6 +320,40 @@ en:
           webmentions: "webmentions"
         slash_button:
           label: "Open the command palette"
+      people:
+        editor:
+          add: "Add person"
+          all_people: "All people"
+          bluesky_handle: "Bluesky handle"
+          bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
+          bluesky_handle_placeholder: "ada.bsky.social"
+          confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
+          delete: "Remove"
+          key: "Key"
+          key_note: "A post mentions them as @{key}. Lowercase words joined by hyphens."
+          key_placeholder: "ada"
+          mastodon_handle: "Mastodon handle"
+          mastodon_handle_placeholder: "@ada@ruby.social"
+          name: "Name"
+          name_placeholder: "Ada Lovelace"
+          new_person: "New person"
+          save: "Save"
+          sub: "Give them a Mastodon handle, a Bluesky handle, or both."
+        field_error:
+          bluesky_handle:
+            format: "A Bluesky handle looks like ada.bsky.social."
+            unreachable: "Bluesky did not answer. Try again in a moment."
+            unresolved: "Bluesky knows no account by that handle."
+          handles:
+            none: "Give them at least one handle."
+          key:
+            blank: "Give them a key first."
+            format: "A key is lowercase words joined by hyphens."
+            taken: "Someone else already holds that key."
+          mastodon_handle:
+            format: "A Mastodon handle looks like @ada@ruby.social."
+          name:
+            blank: "Give them a name first."
       posts:
         delete_form:
           confirm: "Delete this post? You can't undo it."
@@ -1004,6 +1044,18 @@ en:
             one: "%{count} message"
             other: "%{count} messages"
           unread: "unread"
+      people:
+        index:
+          bluesky_handle: "@%{handle}"
+          empty: "Nobody yet. Add the people you mention."
+          heading: "People"
+          new_person: "New person"
+          note: "A social post mentions someone by their key. Each network gets their handle there, or their name where they have none."
+          sub:
+            one: "%{count} person you can mention"
+            other: "%{count} people you can mention"
+            zero: "Nobody to mention yet"
+          token: "@{%{key}}"
       posts:
         index:
           all: "all"

@@ -82,7 +82,17 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def screens = pages.merge(dialogs, journal_editors)
+  def people
+    {
+      "new person" => "/admin/people/new",
+      "people" => "/admin/people",
+      "person editor" => "/admin/people/#{person.id}/edit",
+    }
+  end
+
+  def person = @person ||= create(:person, :bluesky, name: "Ada Lovelace", key: "ada-lovelace")
+
+  def screens = pages.merge(people, dialogs, journal_editors)
 
   def seed
     seed_analytics
@@ -96,6 +106,7 @@ RSpec.describe "Admin screens", type: :feature do
     )
     create(:message, subject: "A question about the site")
     create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
+    person
   end
 
   def seed_analytics

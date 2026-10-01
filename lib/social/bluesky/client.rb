@@ -8,6 +8,7 @@ module Social
     class Client
       class Error < Social::Error; end
       class RateLimited < Error; end
+      class Refused < Error; end
 
       Session = Data.define(:did, :handle, :token)
 
@@ -17,6 +18,8 @@ module Social
       LIMIT = 300
       MAX_BYTES = 3000
       PUT_RECORD = "com.atproto.repo.putRecord"
+      REFUSED = 400
+      RESOLVE_HANDLE = "com.atproto.identity.resolveHandle"
       TOO_MANY_REQUESTS = 429
       XRPC_PATH = "/xrpc"
 
@@ -58,6 +61,12 @@ module Social
         RemotePost.new(id: uri, url: web_url(session.handle, uri))
       end
 
+      def resolve(handle)
+        query(public_api, RESOLVE_HANDLE, handle:)["did"] or raise Error, "Bluesky resolved #{handle} without a DID"
+      rescue Refused
+        nil
+      end
+
       def within_limit?(text) = count(text) <= LIMIT && text.to_s.bytesize <= MAX_BYTES
 
       private
@@ -74,6 +83,12 @@ module Social
         return "Bluesky answered #{nsid} with #{response.body.class} instead of JSON" if response.success?
 
         ["Bluesky answered #{response.status} for #{nsid}", *reason(response.body)].join(": ")
+      end
+
+      def failure(nsid, response)
+        return RateLimited.new("Bluesky rate limited #{nsid}") if response.status == TOO_MANY_REQUESTS
+
+        (response.status == REFUSED ? Refused : Error).new(error_message(nsid, response))
       end
 
       def procedure(connection, nsid, token: nil, **payload)
@@ -117,9 +132,8 @@ module Social
         end
 
         return response.body if response.success? && response.body.is_a?(Hash)
-        raise RateLimited, "Bluesky rate limited #{nsid}" if response.status == TOO_MANY_REQUESTS
 
-        raise Error, error_message(nsid, response)
+        raise failure(nsid, response)
       rescue Faraday::Error => e
         raise Error, "Bluesky request #{nsid} failed: #{e.message}"
       end
