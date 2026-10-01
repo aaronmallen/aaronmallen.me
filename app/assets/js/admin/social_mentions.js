@@ -1,6 +1,12 @@
+import { askForPerson } from "./person_dialog.js";
+import { learn } from "./social_expand.js";
+
+const ADD = "[data-social-mention-add]";
 const BODY = "[data-social-body]";
 const COUNT = "{count}";
 const NAME = "{name}";
+const CHOICE = "[role='option']";
+const GROUP = "[data-social-mention-group]";
 const OPTION = "[data-social-mention]";
 const REFRESH_KEYS = ["ArrowLeft", "ArrowRight", "End", "Home", "PageDown", "PageUp"];
 const SPACE = /^\s/;
@@ -17,16 +23,16 @@ function setupList(form, list) {
   const status = form.querySelector("[data-social-mention-status]");
   const home = list.parentElement;
   const homeNext = list.nextSibling;
-  const options = [...list.querySelectorAll(OPTION)];
-  const groups = [...list.querySelectorAll("[data-social-mention-group]")];
+  const add = list.querySelector(ADD);
+  const choices = () => [...list.querySelectorAll(CHOICE)];
   let body = null;
   let start = 0;
 
-  const shown = () => options.filter((option) => !option.hidden);
-  const active = () => options.find((option) => option.getAttribute("aria-selected") === "true");
+  const shown = () => choices().filter((choice) => !choice.hidden);
+  const active = () => choices().find((choice) => choice.getAttribute("aria-selected") === "true");
 
   const select = (option) => {
-    for (const other of options) other.setAttribute("aria-selected", String(other === option));
+    for (const other of choices()) other.setAttribute("aria-selected", String(other === option));
     if (!option) return body?.removeAttribute("aria-activedescendant");
 
     body?.setAttribute("aria-activedescendant", option.id);
@@ -55,8 +61,9 @@ function setupList(form, list) {
   const filter = (query) => {
     const text = query.toLowerCase();
 
-    for (const option of options) option.hidden = !option.dataset.socialMentionText.includes(text);
-    for (const group of groups) group.hidden = !group.querySelector(`${OPTION}:not([hidden])`);
+    for (const option of list.querySelectorAll(OPTION))
+      option.hidden = !option.dataset.socialMentionText.includes(text);
+    for (const group of list.querySelectorAll(GROUP)) group.hidden = !group.querySelector(`${OPTION}:not([hidden])`);
 
     return shown();
   };
@@ -66,24 +73,54 @@ function setupList(form, list) {
     if (query === null) return close();
 
     const visible = filter(query);
-    if (visible.length === 0) return close();
-
     const keep = active();
     show(textarea);
     start = textarea.selectionStart - query.length - 1;
     select(visible.includes(keep) ? keep : visible[0]);
-    say(status, plural(status, visible.length));
+    say(status, plural(status, visible.length - 1));
+  };
+
+  const mention = (textarea, option, from, to) => {
+    const space = SPACE.test(textarea.value.slice(to)) ? "" : " ";
+
+    textarea.setRangeText(`@{${option.dataset.socialMention}}${space}`, from, to, "end");
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    say(status, status.dataset.socialMentionChosen.replace(NAME, option.dataset.socialMentionName));
+  };
+
+  const place = (option) => {
+    const group = list.querySelector(`[data-social-mention-group="${option.dataset.socialMentionIn}"]`);
+    const name = option.dataset.socialMentionName;
+    const after = [...group.querySelectorAll(OPTION)].find(
+      (other) => other.dataset.socialMentionName.localeCompare(name) > 0,
+    );
+
+    group.insertBefore(option, after ?? null);
+  };
+
+  const invite = (textarea) => {
+    const from = start;
+    const to = textarea.selectionStart;
+
+    close();
+    askForPerson(add.href, textarea.value.slice(from + 1, to)).then((added) => {
+      if (added) {
+        learn(added.people);
+        place(added.option);
+        mention(textarea, added.option, from, to);
+      }
+      textarea.focus();
+    });
   };
 
   const choose = (option) => {
     const textarea = body;
+    if (option === add) return invite(textarea);
+
     const end = textarea.selectionStart;
-    const space = SPACE.test(textarea.value.slice(end)) ? "" : " ";
 
     close();
-    textarea.setRangeText(`@{${option.dataset.socialMention}}${space}`, start, end, "end");
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    say(status, status.dataset.socialMentionChosen.replace(NAME, option.dataset.socialMentionName));
+    mention(textarea, option, start, end);
   };
 
   const move = (step) => {
@@ -138,12 +175,15 @@ function setupList(form, list) {
   list.addEventListener("mousedown", (event) => event.preventDefault());
 
   list.addEventListener("click", (event) => {
-    const option = event.target.closest(OPTION);
-    if (option) choose(option);
+    const option = event.target.closest(CHOICE);
+    if (!option) return;
+
+    event.preventDefault();
+    choose(option);
   });
 
   list.addEventListener("mousemove", (event) => {
-    const option = event.target.closest(OPTION);
+    const option = event.target.closest(CHOICE);
     if (option && option !== active()) select(option);
   });
 }

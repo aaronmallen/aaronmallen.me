@@ -1,3 +1,5 @@
+import { slugify } from "./slug.js";
+
 const WORD = /[\p{L}\p{N}]/u;
 
 export function setupPostEditors() {
@@ -50,15 +52,6 @@ function countWords(text) {
 
 function readMinutes(count, wordsPerMinute) {
   return Math.max(1, Math.round(count / wordsPerMinute));
-}
-
-function slugify(text) {
-  return text
-    .normalize("NFKD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 }
 
 function wallClock(timeZone) {

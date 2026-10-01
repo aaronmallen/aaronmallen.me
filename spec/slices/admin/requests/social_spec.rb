@@ -65,10 +65,32 @@ RSpec.describe "Admin social", type: :request do
         expect(page).to have_css("[data-social-mentions][hidden] [role='option']", text: "Ada Lovelace", visible: :all)
       end
 
-      it "ships no list with nobody in the directory" do
+      it "ships the Add New row last with nobody in the directory", :aggregate_failures do
         get "/admin/social"
 
-        expect(page).to have_no_css("[data-social-mentions]")
+        expect(page.all("[data-social-mentions] [role='option']", visible: :all).map { it.text.strip })
+          .to eq(["Add New"])
+        expect(page).to have_css("[data-social-mentions] a[role='option'][href='/admin/people/new']", visible: :all)
+      end
+
+      it "puts the Add New row after everyone in the directory" do
+        create(:person, name: "Ada Lovelace", key: "ada-lovelace")
+        get "/admin/social"
+
+        expect(page.all("[data-social-mentions] [role='option']", visible: :all).last.text.strip).to eq("Add New")
+      end
+
+      it "links to the people form for a browser with no script" do
+        get "/admin/social"
+
+        expect(page).to have_css("noscript a[href='/admin/people/new']", text: "Add New", visible: :all)
+      end
+
+      it "draws the people dialog outside the composer form", :aggregate_failures do
+        get "/admin/social"
+
+        expect(page).to have_css("dialog#person-dialog[data-person-dialog]", visible: :all)
+        expect(page).to have_no_css("form[data-social-composer] dialog#person-dialog", visible: :all)
       end
     end
 

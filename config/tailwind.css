@@ -2796,6 +2796,14 @@
   }
 }
 
+@utility compose-mention-add {
+  @apply items-center font-mono text-input no-underline;
+
+  :where([data-social-mention-group]:not([hidden])) ~ & {
+    @apply mt-1 rounded-t-none border-t border-line;
+  }
+}
+
 @utility compose-mention-name {
   @apply min-w-0 font-mono text-input;
 }

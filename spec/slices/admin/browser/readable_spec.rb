@@ -27,7 +27,11 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def dialogs = { "task modal" => -> { open_modal }, "task panel" => -> { open_panel } }
+  def dialogs
+    { "person dialog" => -> { open_person_dialog }, "task modal" => -> { open_modal }, "task panel" => lambda {
+      open_panel
+    } }
+  end
 
   def journal_editors
     {
@@ -55,6 +59,12 @@ RSpec.describe "Admin screens", type: :feature do
     find(".task-title", text: task.title).click
     find("dialog#task-panel[open] h1", text: task.title)
     settle("#task-panel")
+  end
+
+  def open_person_dialog
+    visit "/admin/social"
+    find("[data-social-body]").send_keys("@zed", :enter)
+    find("dialog#person-dialog[open] form[data-person-form]")
   end
 
   def pages

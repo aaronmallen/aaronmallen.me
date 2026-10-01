@@ -9,6 +9,12 @@ export function expand(text, network) {
   return text.replace(TOKEN, (_token, key) => names[key] ?? key);
 }
 
+export function learn(people) {
+  const known = handles();
+
+  for (const [network, names] of Object.entries(people)) known[network] = { ...known[network], ...names };
+}
+
 export function mentions(text) {
   return text.search(TOKEN) !== -1;
 }

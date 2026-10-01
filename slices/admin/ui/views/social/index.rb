@@ -32,6 +32,7 @@ module Admin
               end
               SideStack { queue }
             end
+            render Components::People::Dialog.new
           end
 
           private

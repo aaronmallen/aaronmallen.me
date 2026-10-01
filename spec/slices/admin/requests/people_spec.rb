@@ -206,6 +206,69 @@ RSpec.describe "Admin people", type: :request do
       end
     end
 
+    describe "adding a person from the social composer" do
+      def mention(**fields) = send_to("/admin/people", reply: "mention", person: { **blank, **fields })
+
+      it "answers with the new option for the mention list", :aggregate_failures do
+        mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
+
+        expect(last_response.status).to eq(201)
+        expect(page).to have_css(
+          "[role='option'][data-social-mention='ada'][data-social-mention-in='mastodon']", text: "Ada Lovelace",
+        )
+      end
+
+      it "answers with the handles each network shows" do
+        mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
+
+        expect(JSON.parse(page.find("[data-social-people]", visible: :all)["data-social-people"]))
+          .to eq("mastodon" => { "ada" => "@ada@ruby.social" }, "bluesky" => { "ada" => "Ada Lovelace" })
+      end
+
+      it "answers with no layout and no toast", :aggregate_failures do
+        mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
+
+        expect(last_response.body).not_to include("<html")
+        expect(last_response.headers["Set-Cookie"].to_s).not_to include("Person added")
+      end
+
+      it "stores the person" do
+        mention(name: "Ada Lovelace", key: "ada", mastodon_handle: "@ada@ruby.social")
+
+        expect(everyone.map(&:key)).to eq(%w[ada])
+      end
+
+      it "answers a refusal with the form and its errors", :aggregate_failures do
+        mention(name: "Ada", key: "ada")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css("form[data-person-form='new'] #person-handles-error", text: error(:handles, :none))
+      end
+    end
+
+    describe "the form" do
+      def fields(path)
+        get path
+        Capybara.string(last_response.body).all("form[data-person-form] input:not([type=hidden])").map { it[:name] }
+      end
+
+      it "draws the same fields to add and to edit a person" do
+        expect(fields("/admin/people/#{create(:person).id}/edit")).to eq(fields("/admin/people/new"))
+      end
+
+      it "marks the form for a new person so the key can follow the name" do
+        get "/admin/people/new"
+
+        expect(page).to have_css("form[data-person-form='new']")
+      end
+
+      it "marks the form for a stored person so the key stays put" do
+        get "/admin/people/#{create(:person).id}/edit"
+
+        expect(page).to have_css("form[data-person-form='edit']")
+      end
+    end
+
     describe "editing a person" do
       let(:person) do
         create(:person, :bluesky, name: "Ada", key: "ada", mastodon_handle: nil, bluesky_handle: "ada.bsky.social")

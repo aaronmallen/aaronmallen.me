@@ -3,9 +3,13 @@
 RSpec.describe "Admin social mentions", type: :feature do
   def body(index = 0) = all("[data-social-body]")[index]
 
+  def choices = all("#social-mentions [role='option']").map { it.text.strip }
+
   def chosen = find("#social-mentions [aria-selected='true']")
 
   def counts = all("[data-social-count-text]").map(&:text)
+
+  def dialog = find("dialog#person-dialog[open]")
 
   def groups = all(".compose-mention-group").map { it.text.downcase }
 
@@ -72,10 +76,16 @@ RSpec.describe "Admin social mentions", type: :feature do
         expect(groups).to eq(["mastodon only"])
       end
 
-      it "shuts when nobody matches" do
+      it "ends with Add New" do
+        type "@"
+
+        expect(choices.last).to eq("Add New")
+      end
+
+      it "keeps only Add New when nobody matches" do
         type "@zzz"
 
-        expect(page).to have_no_css("[data-social-mentions]", visible: :visible)
+        expect(choices).to eq(["Add New"])
       end
 
       it "stays shut for an @ inside a word" do
@@ -266,10 +276,123 @@ RSpec.describe "Admin social mentions", type: :feature do
       visit "/admin/social"
     end
 
-    it "offers no list" do
+    it "offers Add New" do
       type "@"
 
-      expect(page).to have_no_css("[data-social-mentions]", visible: :all)
+      expect(choices).to eq(["Add New"])
+    end
+  end
+
+  describe "adding someone new" do
+    let(:repo) { Social::Slice["repos.person_repo"] }
+
+    def add_new(text = "hi @Ada Lovelace") = type(text, :enter)
+
+    before do
+      create(:person, name: "Grace Hopper", key: "grace-hopper")
+      connect_social_networks
+      sign_in_to_admin
+      visit "/admin/social"
+    end
+
+    it "opens the dialog on Enter and inserts no token", :aggregate_failures do
+      type "hi @zed", :enter
+
+      expect(dialog).to have_css("form[data-person-form='new']")
+      expect(body.value).to eq("hi @zed")
+    end
+
+    it "opens the dialog on Tab" do
+      type "hi @zed", :tab
+
+      expect(dialog).to have_field("person[name]")
+    end
+
+    it "opens the dialog on a click", :aggregate_failures do
+      type "hi @"
+      find("[data-social-mention-add]").click
+
+      expect(dialog).to have_field("person[name]")
+      expect(body.value).to eq("hi @")
+    end
+
+    it "fills the name from what follows the @" do
+      type "hi @zed", :enter
+
+      expect(dialog).to have_field("person[name]", with: "zed")
+    end
+
+    it "fills the key from the name" do
+      type "hi @zed", :enter
+      dialog.fill_in("person[name]", with: "Zed Shaw")
+
+      expect(dialog).to have_field("person[key]", with: "zed-shaw")
+    end
+
+    it "stops filling the key once I edit it" do
+      type "hi @zed", :enter
+      dialog.fill_in("person[key]", with: "zed")
+      dialog.fill_in("person[name]", with: "Zed Shaw")
+
+      expect(dialog).to have_field("person[key]", with: "zed")
+    end
+
+    it "shows a refusal in the dialog and keeps what I entered", :aggregate_failures do
+      type "hi @zed", :enter
+      dialog.click_button "Add person"
+
+      expect(dialog).to have_css("#person-handles-error")
+      expect(dialog).to have_field("person[name]", with: "zed")
+      expect(body.value).to eq("hi @zed")
+    end
+
+    describe "a good save" do
+      before do
+        type "hi @zed", :enter
+        dialog.fill_in("person[name]", with: "Zed Shaw")
+        dialog.fill_in("person[mastodon_handle]", with: "@zed@ruby.social")
+        dialog.click_button "Add person"
+      end
+
+      it "closes the dialog and stores the person", :aggregate_failures do
+        expect(page).to have_no_css("dialog#person-dialog[open]")
+        expect(repo.all.map(&:key)).to contain_exactly("grace-hopper", "zed-shaw")
+      end
+
+      it "puts their token in place of what I typed" do
+        expect(body.value).to eq("hi @{zed-shaw} ")
+      end
+
+      it "gives the focus back to the text box" do
+        expect(page).to have_css("[data-social-body]:focus")
+      end
+
+      it "adds them to the list without a reload" do
+        type "@"
+
+        expect(names).to eq(["Grace Hopper", "Zed Shaw"])
+      end
+
+      it "previews their handle for each network", :aggregate_failures do
+        expect(preview("mastodon")).to eq("hi @zed@ruby.social")
+        expect(preview("bluesky")).to eq("hi Zed Shaw")
+      end
+    end
+
+    it "keeps the post text after a cancel", :aggregate_failures do
+      type "hi @zed", :enter
+      dialog.find("[data-dialog-close]").click
+
+      expect(page).to have_no_css("dialog#person-dialog[open]")
+      expect(body.value).to eq("hi @zed")
+    end
+
+    it "keeps the post text after Escape", :aggregate_failures do
+      type "hi @zed", :enter
+      dialog.find_field("person[name]").send_keys(:escape)
+
+      expect(page).to have_no_css("dialog#person-dialog[open]")
+      expect(body.value).to eq("hi @zed")
     end
   end
 end

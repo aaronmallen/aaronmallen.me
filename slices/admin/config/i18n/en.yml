@@ -341,23 +341,13 @@ en:
         slash_button:
           label: "Open the command palette"
       people:
+        dialog:
+          close: "Close"
+          title: "New person"
         editor:
-          add: "Add person"
           all_people: "All people"
-          bluesky_handle: "Bluesky handle"
-          bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
-          bluesky_handle_placeholder: "ada.bsky.social"
           confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
-          delete: "Remove"
-          key: "Key"
-          key_note: "A post mentions them as @{key}. Lowercase words joined by hyphens."
-          key_placeholder: "ada"
-          mastodon_handle: "Mastodon handle"
-          mastodon_handle_placeholder: "@ada@ruby.social"
-          name: "Name"
-          name_placeholder: "Ada Lovelace"
           new_person: "New person"
-          save: "Save"
           sub: "Give them a Mastodon handle, a Bluesky handle, or both."
         field_error:
           bluesky_handle:
@@ -374,6 +364,20 @@ en:
             format: "A Mastodon handle looks like @ada@ruby.social."
           name:
             blank: "Give them a name first."
+        form:
+          add: "Add person"
+          bluesky_handle: "Bluesky handle"
+          bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
+          bluesky_handle_placeholder: "ada.bsky.social"
+          delete: "Remove"
+          key: "Key"
+          key_note: "A post mentions them as @{key}. Lowercase words joined by hyphens."
+          key_placeholder: "ada"
+          mastodon_handle: "Mastodon handle"
+          mastodon_handle_placeholder: "@ada@ruby.social"
+          name: "Name"
+          name_placeholder: "Ada Lovelace"
+          save: "Save"
       posts:
         delete_form:
           confirm: "Delete this post? You can't undo it."
@@ -596,6 +600,7 @@ en:
             blank: "Pick a network."
             unavailable: "That network has no credentials."
         mentions:
+          add: "Add New"
           chosen: "Mentioned {name}"
           groups:
             bluesky: "Bluesky only"

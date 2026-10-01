@@ -29,6 +29,21 @@ RSpec.describe "Admin people", type: :feature do
     expect(repo.all.map(&:bluesky_did)).to eq(%w[did:plc:ada])
   end
 
+  it "fills the key from the name of a new person" do
+    visit "/admin/people/new"
+    fill_in("person[name]", with: "Ada Lovelace")
+
+    expect(page).to have_field("person[key]", with: "ada-lovelace")
+  end
+
+  it "leaves a stored person's key alone when the name changes" do
+    person = create(:person, name: "Ada", key: "ada")
+    visit "/admin/people/#{person.id}/edit"
+    fill_in("person[name]", with: "Ada Lovelace")
+
+    expect(page).to have_field("person[key]", with: "ada")
+  end
+
   it "edits a person" do
     person = create(:person, name: "Ada")
     visit "/admin/people/#{person.id}/edit"
