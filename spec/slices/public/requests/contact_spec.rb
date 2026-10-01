@@ -453,6 +453,81 @@ RSpec.describe "Contact", type: :request do
     end
   end
 
+  describe "a run of submissions from many addresses past the total limit" do
+    let(:limit) { 3 }
+
+    before do
+      settings = Hanami.app["settings"]
+      allow(settings).to receive(:contact).and_return(settings.contact.merge(total_throttle_limit: limit))
+      (limit + 1).times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") }
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the total limit" do
+      expect(message_repo.messages.count).to eq(limit)
+    end
+  end
+
+  describe "a run of submissions from many addresses with no total limit set" do
+    before { 21.times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") } }
+
+    it "takes twenty from all senders together and refuses the next", :aggregate_failures do
+      expect(last_response.status).to eq(429)
+      expect(message_repo.messages.count).to eq(20)
+    end
+  end
+
+  describe "a run of submissions from one IPv6 /64 with a new address on each" do
+    let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
+
+    before do
+      (limit + 1).times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}") }
+    end
+
+    it "comes back refused once the limit is reached" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the limit" do
+      expect(message_repo.messages.count).to eq(limit)
+    end
+
+    it "keys the hash on the network rather than the address" do
+      network = Analytics::Slice["operations.hash_visitor"].call(address: "2001:db8:1:2::")
+
+      expect(stored.first.visitor_hash).to eq(network)
+    end
+  end
+
+  describe "a submission from a second IPv6 /64" do
+    let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
+
+    before do
+      limit.times { post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:2::1") }
+      post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:3::1")
+    end
+
+    it "goes through, since the first network spent only its own allowance" do
+      expect(last_response.status).to eq(302)
+    end
+  end
+
+  describe "a submission from an IPv4 address written as IPv6" do
+    let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
+
+    before do
+      limit.times { post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.7") }
+      post("/contact", { message: fields }, "REMOTE_ADDR" => "::ffff:203.0.113.7")
+    end
+
+    it "shares the IPv4 address's allowance" do
+      expect(last_response.status).to eq(429)
+    end
+  end
+
   describe "a submission missing the subject" do
     before { send_message(subject: " ") }
 

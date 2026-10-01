@@ -11,6 +11,7 @@ client_registration:
 contact:
   throttle_limit: <%= ENV["CONTACT_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["CONTACT_THROTTLE_WINDOW_MINUTES"].to_json %>
+  total_throttle_limit: <%= ENV["CONTACT_TOTAL_THROTTLE_LIMIT"].to_json %>
 github:
   api_token: <%= ENV["GITHUB_API_TOKEN"].to_json %>
   client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>

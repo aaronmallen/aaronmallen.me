@@ -13,13 +13,15 @@ module Contact
 
       def by_status(status) = messages.with_status(status).newest_first.to_a
 
-      def claim(visitor_hash:, limit:, since:, status: UNREAD, **attrs)
+      def claim(visitor_hash:, limit:, total_limit:, since:, status: UNREAD, **attrs)
         marked_spam_at = spam_marked_at(status, Time.now)
 
-        messages.claim(visitor_hash:, limit:, since:, **attrs, status:, marked_spam_at:)
+        messages.claim(visitor_hash:, limit:, total_limit:, since:, **attrs, status:, marked_spam_at:)
       end
 
       def count_from_visitor_since(visitor_hash, time) = messages.for_visitor(visitor_hash).received_since(time).count
+
+      def count_since(time) = messages.received_since(time).count
 
       def count_with_status(status) = messages.with_status(status).count
 

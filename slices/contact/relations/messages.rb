@@ -7,10 +7,11 @@ module Contact
 
       schema :messages, infer: true
 
-      def claim(visitor_hash:, limit:, since:, **attrs)
+      def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
         transaction do
-          lock_until_commit(visitor_hash)
-          next unless for_visitor(visitor_hash).received_since(since).count < limit
+          lock_table_until_commit
+          fresh = received_since(since)
+          next unless fresh.for_visitor(visitor_hash).count < limit && fresh.count < total_limit
 
           stamped(:create, :received_at).call(**attrs, visitor_hash:)
         end
@@ -30,9 +31,7 @@ module Contact
 
       private
 
-      def lock_until_commit(visitor_hash)
-        dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, visitor_hash)))
-      end
+      def lock_table_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
     end
   end
 end

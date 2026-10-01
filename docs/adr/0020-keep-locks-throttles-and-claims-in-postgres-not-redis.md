@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, record, contact, mcp, analytics, social, tasks]
 issue: AA-644
-amended: [AA-823]
+amended: [AA-823, "#200"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -70,10 +70,10 @@ fails between the two, the delivery waits `STALLED_AFTER`, fifteen minutes, befo
 delivery that holds an error or has failed is not claimed again.
 
 Each site picks its key by hand, and nothing checks that two sites picked the same one. Postgres keeps the one-key
-and two-key forms apart, so a job lock cannot meet a lock on a sender. The table-wide webmention lock shares the
-one-key space with `IMPORT_LOCK`, and two tables whose names hash alike would share a lock.
+and two-key forms apart, so a job lock cannot meet a lock on a sender. The table-wide webmention and contact locks share
+the one-key space with `IMPORT_LOCK`, and two tables whose names hash alike would share a lock.
 
 A throttle lock on a sender makes a flood wait on itself while every other sender goes straight through. The
-webmention cap across all senders locks the whole table, so a flood there makes every sender wait.
+webmention and contact caps across all senders lock the whole table, so a flood there makes every sender wait.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

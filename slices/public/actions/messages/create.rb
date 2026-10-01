@@ -10,7 +10,7 @@ module Public
         THROTTLED = 429
 
         include Deps[
-          "operations.find_visitor_address",
+          "operations.find_sender_network",
           contact_view: "ui.views.pages.contact",
           create_message: "contact.operations.create_message",
           hash_visitor: "analytics.operations.hash_visitor",
@@ -51,7 +51,7 @@ module Public
           %i[body reply_to subject].to_h { [it, params[it].to_s] }
         end
 
-        def visitor_hash(request) = hash_visitor.call(address: find_visitor_address.call(request))
+        def visitor_hash(request) = hash_visitor.call(address: find_sender_network.call(request))
       end
     end
   end

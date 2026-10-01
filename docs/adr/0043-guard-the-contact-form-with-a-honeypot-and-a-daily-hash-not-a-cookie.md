@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle]
 ---
 
@@ -53,12 +53,20 @@ settings with defaults in `config/settings.rb`, so a file that lost the line thr
 than raising (AA-505). `ThrottleWindow` refuses a window of a day or more. The salt turns at midnight, so a longer
 window would expire without saying so.
 
+**An IPv6 sender is its /64.** One home or phone holds a whole /64, so a hash of the full address hands a script
+2^64 senders. `Public::Operations::FindSenderNetwork` masks an IPv6 address to its /64 and reads a mapped IPv4
+address as IPv4 before `Messages::Create` hashes it. Analytics still hashes the full address (#200).
+
+**A total cap covers every sender together.** `total_throttle_limit`, 20 an hour unless set, stops a script spread
+over many addresses or networks, as `/webmention` already does. Messages filed as spam count toward it: they are
+rows in the inbox like any other, and leaving them out would let a flagged sender flood unchecked (#200).
+
 **A throttle that counts its own rows counts and writes under one advisory lock.** `Contact::Relations::Messages#claim`
-opens a transaction, takes `pg_advisory_xact_lock` on the table and the sender's hash, then counts and inserts
-(AA-490). A row lock would hold nothing, since a sender's first message has no row yet. The beacon and `/webmention`
-take the same shape (AA-717): `AnalyticsEvents#claim` locks on the address hash, and `WebmentionReceipts#claim` locks
-the whole table, since it also caps every sender together. Inside that lock the receipt's conditional upsert decides
-only the dedupe.
+opens a transaction, takes `pg_advisory_xact_lock` on the whole table, since the total cap counts every sender, then
+counts and inserts (AA-490, #200). A row lock would hold nothing, since a sender's first message has no row yet. The
+beacon and `/webmention` take the same shape (AA-717): `AnalyticsEvents#claim` locks on the address hash, and
+`WebmentionReceipts#claim` locks the whole table, since it also caps every sender together. Inside that lock the
+receipt's conditional upsert decides only the dedupe.
 
 **A throttled person and a caught bot see different pages.** The bot is told it worked. The person gets 429, the
 contact page, and a line saying they have sent enough for now. It never names the limit.
@@ -106,14 +114,16 @@ asks whether the next caller should.
 Everyone behind one address shares one allowance, whatever browser they use: an office, a campus, a VPN, a carrier
 NAT. Whoever writes first spends the others' share, and they can only wait.
 
+Everyone in one IPv6 /64 shares one allowance too, which on a shared network can take in strangers.
+
 The honeypot catches a bot that fills every field. One that renders the page skips it, and the throttle is all that
-is left. The throttle stops a repeat, not an attacker: a sender with many addresses passes, and midnight is a fresh
-count whatever the window says. The header check stops a browser on another site's page, not a script, since a post
-with neither header goes through.
+is left. The throttle stops a repeat, not an attacker: a sender with many addresses passes until the total cap
+refuses everyone, real senders included, and midnight is a fresh count whatever the window says. The header check
+stops a browser on another site's page, not a script, since a post with neither header goes through.
 
 Only stored rows count, so a bot that fills the honeypot leaves no trace at all.
 
-The lock holds one sender at a time, so a flood queues on itself and nobody else waits.
+The lock holds the whole table, so a flood makes every sender wait its turn.
 
 The day the public slice grows an action that acts for a signed-in visitor, this record breaks and needs a new one.
 

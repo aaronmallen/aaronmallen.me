@@ -8,7 +8,7 @@ module Contact
       include Deps["settings", contract: "contracts.message_contract", message_repo: "repos.message_repo"]
 
       def call(params, visitor_hash:)
-        step within_limit(visitor_hash)
+        step within_limits(visitor_hash)
         attributes = step validate(params)
 
         step claim(attributes, visitor_hash:)
@@ -17,9 +17,11 @@ module Contact
       private
 
       def claim(attributes, visitor_hash:)
+        limits = settings.contact
         status = message_repo.sender_status(attributes[:reply_to])
         message = message_repo.claim(
-          **attributes, status:, visitor_hash:, limit: settings.contact[:throttle_limit], since: window_opened_at,
+          status:, visitor_hash:, since: window_opened_at,
+          limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit], **attributes,
         )
 
         message ? Success(message) : Failure([:throttled])
@@ -35,10 +37,13 @@ module Contact
         Time.now - (settings.contact[:throttle_window_minutes] * MINUTE)
       end
 
-      def within_limit(visitor_hash)
-        sent = message_repo.count_from_visitor_since(visitor_hash, window_opened_at)
+      def within_limits(visitor_hash)
+        since = window_opened_at
+        limits = settings.contact
+        under = message_repo.count_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
+                message_repo.count_since(since) < limits[:total_throttle_limit]
 
-        sent < settings.contact[:throttle_limit] ? Success(sent) : Failure([:throttled])
+        under ? Success(visitor_hash) : Failure([:throttled])
       end
     end
   end

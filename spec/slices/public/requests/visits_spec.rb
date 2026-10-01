@@ -117,6 +117,12 @@ RSpec.describe "Visits", type: :request do
       expect(stored.map(&:visitor_hash).uniq).to have(2).items
     end
 
+    it "gives two addresses in one IPv6 /64 two visitor hashes, unlike the contact throttle" do
+      %w[2001:db8:1:2::a 2001:db8:1:2::b].each { view(headers: { "REMOTE_ADDR" => it }) }
+
+      expect(stored.map(&:visitor_hash).uniq).to have(2).items
+    end
+
     it "accepts a view whose referrer runs past the cap" do
       beacon({ kind: "view", path: "/writing/hello", referrer: "https://news.example/#{'a' * 2100}" })
 

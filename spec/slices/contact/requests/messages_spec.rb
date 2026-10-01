@@ -135,6 +135,21 @@ RSpec.describe "Contact messages", type: :request do
       end
     end
 
+    context "with the total limit reached by their messages" do
+      before do
+        settings = Hanami.app["settings"]
+        allow(settings).to receive(:contact).and_return(settings.contact.merge(total_throttle_limit: 2))
+        mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
+        send_message
+        send_message(reply_to: "grace@example.com")
+      end
+
+      it "refuses the next sender, since spam counts toward the total", :aggregate_failures do
+        expect(last_response.status).to eq(429)
+        expect(message_repo.messages.count).to eq(2)
+      end
+    end
+
     it "files their next message as spam when a neighbour is marked read" do
       mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
       mcp_mark(create(:message, reply_to: "grace@example.com"), "read")
@@ -144,27 +159,26 @@ RSpec.describe "Contact messages", type: :request do
     end
   end
 
-  describe "two messages from one sender that both pass the count before the lock", :commits do
+  shared_context "with two messages held at the lock" do
     def database = Contact::Slice["db.rom"].gateways[:default].connection
 
     def held_by_another_session
       other = Sequel.connect(database.opts.merge(max_connections: 1))
-      other.get(Sequel.function(:pg_advisory_lock, Sequel.function(:hashtext, "messages"),
-                                Sequel.function(:hashtext, sender)))
+      other.get(Sequel.function(:pg_advisory_lock, Sequel.function(:hashtext, "messages")))
       yield
     ensure
       other&.disconnect
     end
 
-    def send_in_thread
+    def send_in_thread(address)
       Thread.new do
-        Rack::MockRequest.new(app).post("/contact", params: { message: fields }, "REMOTE_ADDR" => "127.0.0.1")
+        Rack::MockRequest.new(app).post("/contact", params: { message: fields }, "REMOTE_ADDR" => address)
       end
     end
 
-    def sent_together
+    def sent_together(addresses)
       senders = held_by_another_session do
-        Array.new(2) { send_in_thread }.tap { wait_until_both_wait }
+        addresses.map { send_in_thread(it) }.tap { wait_until_both_wait }
       end
       senders.map { it.value.status }
     end
@@ -174,15 +188,38 @@ RSpec.describe "Contact messages", type: :request do
       waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
       Timeout.timeout(5) { sleep(0.01) until waiting.count == 2 }
     end
+  end
+
+  describe "two messages from one sender that both pass the count before the lock", :commits do
+    include_context "with two messages held at the lock"
 
     before { lower_throttle_limit(:contact, to: 1) }
 
     it "takes one and refuses the other" do
-      expect(sent_together.tally).to eq(302 => 1, 429 => 1)
+      expect(sent_together(%w[127.0.0.1 127.0.0.1]).tally).to eq(302 => 1, 429 => 1)
     end
 
     it "stores only the one it took" do
-      sent_together
+      sent_together(%w[127.0.0.1 127.0.0.1])
+
+      expect(message_repo.messages.count).to eq(1)
+    end
+  end
+
+  describe "two messages from two senders that both pass the total count before the lock", :commits do
+    include_context "with two messages held at the lock"
+
+    before do
+      settings = Hanami.app["settings"]
+      allow(settings).to receive(:contact).and_return(settings.contact.merge(total_throttle_limit: 1))
+    end
+
+    it "takes one and refuses the other" do
+      expect(sent_together(%w[203.0.113.7 198.51.100.4]).tally).to eq(302 => 1, 429 => 1)
+    end
+
+    it "stores only the one it took" do
+      sent_together(%w[203.0.113.7 198.51.100.4])
 
       expect(message_repo.messages.count).to eq(1)
     end

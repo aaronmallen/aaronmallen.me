@@ -7,6 +7,7 @@ module Blog
     DEFAULT_ANALYTICS_THROTTLE_LIMIT = 120
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
+    DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
     DEFAULT_MEDIA_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
@@ -59,7 +60,10 @@ module Blog
 
     setting :client_registration, default: {}, constructor: throttle(DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT)
 
-    setting :contact, default: {}, constructor: throttle(DEFAULT_CONTACT_THROTTLE_LIMIT)
+    setting :contact, default: {}, constructor: throttle(
+      DEFAULT_CONTACT_THROTTLE_LIMIT,
+      total_throttle_limit?: unless_set(ThrottleLimit, DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT),
+    )
 
     setting :database, default: {}, constructor: Schema.schema(
       name?: Types::String,
