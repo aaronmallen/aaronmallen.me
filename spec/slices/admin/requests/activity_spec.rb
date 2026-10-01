@@ -561,6 +561,18 @@ RSpec.describe "Admin activity", type: :request do
         expect(event_names).not_to include("in two")
       end
 
+      it "keeps the commits of every repo named" do
+        visit_activity(q: "repo:aaronmallen/one repo:aaronmallen/two")
+
+        expect(event_names).to include("in one", "in two")
+      end
+
+      it "leaves the other types alone when it names two repos" do
+        visit_activity(q: "repo:aaronmallen/one repo:aaronmallen/two")
+
+        expect(event_names).to include("walked the dog")
+      end
+
       it "leaves the other types alone" do
         visit_activity(q: "repo:aaronmallen/one")
 

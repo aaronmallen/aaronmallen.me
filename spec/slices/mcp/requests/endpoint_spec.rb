@@ -710,6 +710,23 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(names).to eq(["in blog"])
     end
 
+    it "keeps the commits of every repository it is given" do
+      create(:commit, commit_date: today, repo: "aaronmallen/blog", message: "in blog")
+      create(:commit, commit_date: today, repo: "aaronmallen/site", message: "in site")
+      create(:commit, commit_date: today, repo: "aaronmallen/other", message: "in other")
+      read_activity(repos: %w[aaronmallen/blog site])
+
+      expect(names).to contain_exactly("in blog", "in site")
+    end
+
+    it "keeps what is not a commit when it is given two repositories" do
+      create(:commit, commit_date: today, repo: "aaronmallen/blog", message: "in blog")
+      create(:journal_entry, entry_date: today, body: "walked the dog")
+      read_activity(repos: %w[aaronmallen/blog aaronmallen/site])
+
+      expect(names).to contain_exactly("in blog", "walked the dog")
+    end
+
     it "narrows to a repository named with capitals" do
       create(:commit, commit_date: today, repo: "aaronmallen/blog", message: "in blog")
       create(:commit, commit_date: today, repo: "aaronmallen/site", message: "in site")

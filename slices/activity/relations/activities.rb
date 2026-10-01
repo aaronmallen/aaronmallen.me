@@ -44,7 +44,7 @@ module Activity
       def day_count = unordered.dataset.select(:occurred_on).distinct.count
 
       def in_repo(names)
-        where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), Sequel.&(*names.map { named_repo(it) })))
+        where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), *names.map { named_repo(it) }))
       end
 
       def matching(text)
