@@ -13,7 +13,15 @@ module API
       UNSAVED = "could not save the change"
 
       COMPLAINTS = {
+        body: { "blank" => "write the comment first" },
+        kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
         list: { Blog::Contract::FORMAT => "pick one of the four lists" },
+        other_id: {
+          Blog::Contract::FORMAT => "pick a task by its ID",
+          "missing" => "that task is gone, so find another",
+          "self" => "a task cannot link to itself",
+          "taken" => "these two tasks are already linked",
+        },
         tags: { Blog::Contract::FORMAT => "tags are lowercase words" },
         title: { "blank" => "write the task down first" },
       }.freeze

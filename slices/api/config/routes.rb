@@ -20,6 +20,9 @@ module API
     post "/tasks/:id/reorder", to: "tasks.reorder"
     post "/tasks/:id/schedule", to: "tasks.schedule"
     post "/tasks/:id/start", to: "tasks.start"
+    post "/tasks/:id/comments", to: "task_comments.create"
+    post "/tasks/:id/links", to: "task_links.create"
+    delete "/tasks/:id/links/:other_id", to: "task_links.destroy"
 
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"

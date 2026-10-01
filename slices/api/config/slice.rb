@@ -14,19 +14,21 @@ module API
     ], from: :record
 
     import keys: %w[
-      operations.cancel_task operations.capture_task operations.complete_task operations.current_sprint
-      operations.delete_task operations.drop_sprint operations.move_task operations.plan_sprint operations.reopen_task
-      operations.reorder_task operations.save_task operations.schedule_task operations.start_task queries.find_tasks
-      queries.sprints_between queries.task_by_id queries.task_comments queries.tasks_in_sprint
+      operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
+      operations.current_sprint operations.delete_task operations.drop_sprint operations.link_tasks operations.move_task
+      operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
+      operations.schedule_task operations.start_task operations.unlink_task queries.find_tasks queries.sprints_between
+      queries.task_by_id queries.task_comments queries.tasks_in_sprint
     ], from: :tasks
 
     export %w[
-      endpoints.cancel_task endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry
-      endpoints.delete_journal_entry endpoints.delete_task endpoints.drop_sprint endpoints.list_journal_entries
-      endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.plan_sprint
-      endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
-      endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
-      endpoints.update_journal_entry operations.mint_token operations.revoke_token queries.live_tokens
+      endpoints.add_task_comment endpoints.cancel_task endpoints.capture_task endpoints.complete_task
+      endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.delete_task endpoints.drop_sprint
+      endpoints.link_tasks endpoints.list_journal_entries endpoints.list_sprints endpoints.list_tasks
+      endpoints.move_task endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry
+      endpoints.read_task endpoints.reopen_task endpoints.reorder_task endpoints.save_task endpoints.schedule_task
+      endpoints.start_task endpoints.unlink_task endpoints.update_journal_entry
+      operations.mint_token operations.revoke_token queries.live_tokens
     ]
   end
 end

@@ -2,34 +2,13 @@
 
 module MCP
   module Tools
-    class LinkTasks < TaskTool
-      SCHEMA = {
-        additionalProperties: false,
-        properties: {
-          id: { type: "integer" },
-          kind: {
-            type: "string",
-            enum: Blog::Types::TaskLinkKind.values,
-            description: "how this task stands to the other: it blocks, is blocked_by, relates to or duplicates it",
-          },
-          other_id: { type: "integer" },
-        },
-        required: %w[id kind other_id],
-      }.freeze
-
+    class LinkTasks < Base
       description "Link one task to another. A pair takes one link, whichever way it runs"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::LinkTasks::SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(id:, kind:, other_id:, server_context:)
-          case link_tasks(server_context).call(id, { kind:, other_id: })
-          in Success(*) then task_answer(id, server_context)
-          in Failure(:not_found) then no_task(id)
-          in Failure[:invalid, errors] then refuse(complaint(errors))
-          else unsaved
-          end
-        end
+        def call(server_context:, **input) = hand_over(:link_tasks, input, server_context)
       end
     end
   end

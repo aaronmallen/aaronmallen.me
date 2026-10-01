@@ -23,12 +23,12 @@ module MCP
     import keys: %w[auth.session_reader], from: :admin
 
     import keys: %w[
-      endpoints.cancel_task endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry
-      endpoints.delete_journal_entry endpoints.delete_task endpoints.drop_sprint endpoints.list_journal_entries
-      endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.plan_sprint
-      endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
-      endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
-      endpoints.update_journal_entry
+      endpoints.add_task_comment endpoints.cancel_task endpoints.capture_task endpoints.complete_task
+      endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.delete_task endpoints.drop_sprint
+      endpoints.link_tasks endpoints.list_journal_entries endpoints.list_sprints endpoints.list_tasks
+      endpoints.move_task endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry
+      endpoints.read_task endpoints.reopen_task endpoints.reorder_task endpoints.save_task endpoints.schedule_task
+      endpoints.start_task endpoints.unlink_task endpoints.update_journal_entry
     ], from: :api
 
     import keys: %w[
@@ -71,10 +71,6 @@ module MCP
     import keys: %w[
       operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.usage
     ], from: :tags
-
-    import keys: %w[
-      operations.add_task_comment operations.link_tasks operations.unlink_task queries.task_by_id queries.task_comments
-    ], from: :tasks
 
     export %w[operations.revoke_client queries.connected_clients]
   end
