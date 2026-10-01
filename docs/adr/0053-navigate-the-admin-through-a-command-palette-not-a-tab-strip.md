@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87"]
+amended: ["#17", "#87", "#201"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -64,9 +64,9 @@ The dot and each row's count hold the unread figures, the slash button serves a 
 every section. The combobox AA-372 warned about is ours to keep: `palette.js` owns the focus, the keys and the
 spoken count, and `spec/slices/admin/browser/palette_spec.rb` is what checks them.
 
-Every signed-in admin page pays for the palette. `ListSections` counts unread messages and pending webmentions,
-and `BuildNavigation` loads every open task through `tasks.queries.open_tasks` so the palette can search them,
-though it shows five at most.
+Every signed-in admin page pays for the palette. `ListSections` counts unread messages and pending webmentions.
+`BuildNavigation` loaded every open task so the palette could search them, though it shows five at most, until #201
+moved them to a fetch the palette makes when it opens, as [ADR 0091][0091] records.
 
 One dialog does two jobs. It holds navigation and the actions, so a change to either touches the other's markup and
 script.
@@ -78,4 +78,5 @@ Without JavaScript the admin chrome links to no admin screen but Today. Palette 
 the target in `data-palette-href`, and the jump and slash buttons are `type="button"`, so the site header's public
 links and the way back to Today are all the chrome holds. A section is then reached by typing its address.
 
+[0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

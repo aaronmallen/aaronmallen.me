@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -61,6 +61,8 @@ order, which #148 saves through `fetch` alone.
   person's row for the list, not a redirect and a toast. A 422 swaps the form back in with its errors, and any
   other answer, or a failed request, posts the form. With scripts off a plain **Add New** link under the post
   leads to the people page, and the form posts there as before.
+  #201 added a read that swaps in no HTML: the command palette fetches the open tasks as JSON from
+  `/admin/tasks/palette` when it first opens, as [ADR 0091][0091] records.
 
 We leave `config.actions.method_override` at Hanami's default, on. No form sends `_method`.
 
@@ -108,4 +110,5 @@ Method override costs a middleware on every request and gives nothing, since no 
 [0083]: 0083-upload-photos-by-fetch-from-the-markdown-editor.md
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
+[0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
