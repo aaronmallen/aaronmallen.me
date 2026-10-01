@@ -8,6 +8,7 @@ module Suggestions
 
     import keys: %w[
       networks.all operations.lock_editable_social_post operations.replace_social_post_parts
+      queries.mention_directory
     ], from: :social
 
     export %w[

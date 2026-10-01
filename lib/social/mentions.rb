@@ -23,6 +23,8 @@ module Social
       pieces.each_with_object(Expansion.new(mentions: [], text: +"")) { |piece, expansion| add(expansion, *piece) }
     end
 
+    def handles(network) = @people.transform_values { shown(it.key, network).first }
+
     def unknown(texts) = self.class.keys(texts).reject { @people.key?(it) }
 
     private

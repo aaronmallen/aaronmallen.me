@@ -13,6 +13,7 @@ module Admin
           prop :enabled, Blog::Types::Bool
           prop :errors, Blog::Types::Hash
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
+          prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :preview, Blog::Types::String
 
           def view_template
@@ -43,6 +44,7 @@ module Admin
             Field(label: t(".text"), id: "post-#{FIELD}") do
               Textarea(value: @body, **body_attributes)
               Social::Counts(counts: @counts, networks: @networks)
+              Social::Directory(people: @people)
               FieldError(field: FIELD, errors: @errors)
             end
           end

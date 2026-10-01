@@ -2704,6 +2704,26 @@
   @apply flex flex-wrap items-center justify-between gap-3;
 }
 
+@utility compose-preview {
+  @apply flex flex-col gap-1.5 rounded-card border border-line bg-ground-sunk p-3;
+}
+
+@utility compose-preview-head {
+  @apply font-mono text-label text-mk-orange-text uppercase;
+}
+
+@utility compose-preview-line {
+  @apply flex flex-wrap items-baseline gap-x-3 gap-y-0.5;
+}
+
+@utility compose-preview-network {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility compose-preview-text {
+  @apply min-w-0 font-mono text-input break-words whitespace-pre-wrap text-ink;
+}
+
 @utility compose-counts {
   @apply flex flex-wrap items-center gap-4;
 }

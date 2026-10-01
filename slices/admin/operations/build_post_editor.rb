@@ -12,6 +12,7 @@ module Admin
         build_post_preview: "operations.build_post_preview",
         count_network_lengths: "operations.count_network_lengths",
         list_networks: "operations.list_networks",
+        people: "social.queries.people",
         preview_announcement: "operations.preview_announcement",
         received_webmention_count: "social.queries.received_webmention_count",
         suggestion_for_post: "suggestions.queries.for_post",
@@ -69,6 +70,7 @@ module Admin
           counts: count_network_lengths.call([body.strip.empty? ? preview : body]).first,
           enabled: syndication_enabled(post, params),
           networks: list_networks.call(selected: syndication_targets(post, params)),
+          people: people.call,
           preview:,
         }
       end

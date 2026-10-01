@@ -50,8 +50,9 @@ module Admin
     import keys: %w[
       networks.all operations.compose_social_post operations.delete_person operations.delete_social_post
       operations.moderate_webmention operations.save_person operations.update_webmention_settings
-      queries.editable_social_post queries.pending_webmention_count queries.pending_webmentions queries.people
-      queries.person_by_id queries.queued_social_posts queries.received_webmention_count
+      queries.editable_social_post queries.mention_directory queries.pending_webmention_count
+      queries.pending_webmentions queries.people queries.person_by_id queries.queued_social_posts
+      queries.received_webmention_count
       queries.social_post_by_id queries.social_post_counts_by_status queries.social_posts_by_filter
       queries.webmention_counts_by_post queries.webmention_counts_by_status queries.webmention_settings
       queries.webmentions_by_status queries.webmentions_received_between queries.webmentions_received_by_post

@@ -1,3 +1,5 @@
+import { expand } from "./social_expand.js";
+
 const ENCODER = new TextEncoder();
 const FULL = 100;
 const LINK = /(?<![\w@])https?:\/\/[^\s<>"]*[^\s<>".,;:!?]/gi;
@@ -30,10 +32,12 @@ function graphemes(text) {
   return count;
 }
 
-function renderCount(counter, text, selected) {
+function renderCount(counter, typed, selected) {
+  const network = counter.dataset.socialCount;
+  const text = expand(typed, network);
   const limit = Number(counter.dataset.limit);
-  const count = COUNTS[counter.dataset.socialCount](text);
-  const on = selected.has(counter.dataset.socialCount);
+  const count = COUNTS[network](text);
+  const on = selected.has(network);
   const blown = count > limit || overBytes(counter, text);
   const over = on && blown;
 

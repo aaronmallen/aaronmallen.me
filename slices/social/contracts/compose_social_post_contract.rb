@@ -42,7 +42,10 @@ module Social
         next unless context[:intent] == SEND
 
         parts, targets = values.values_at(:parts, :targets)
-        over = targets.any? { |name| parts.any? { |body| !networks.fetch(name).within_limit?(body) } }
+        directory = mention_directory.call(parts)
+        over = targets.any? do |name|
+          parts.any? { |body| !networks.fetch(name).within_limit?(directory.expand(body, name).text) }
+        end
         key(:parts).failure(TOO_LONG) if over
       end
     end

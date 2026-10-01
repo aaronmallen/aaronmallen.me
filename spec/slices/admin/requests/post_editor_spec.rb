@@ -522,6 +522,15 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 30/500", "Bluesky 43/300"])
       end
 
+      it "counts a mention in the text as each network gets it" do
+        create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
+                        bluesky_did: "did:plc:ada")
+        post = create(:post, syndication_body: "hi @{ada}")
+        get "/admin/posts/#{post.id}/edit"
+
+        expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 7/500", "Bluesky 19/300"])
+      end
+
       it "starts the text with the title and the post's URL" do
         post = create(:post, title: "Hello", slug: "hello")
         get "/admin/posts/#{post.id}/edit"

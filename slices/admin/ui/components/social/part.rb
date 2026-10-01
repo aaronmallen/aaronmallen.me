@@ -17,6 +17,7 @@ module Admin
                 Counts(counts: @counts, networks: @networks)
                 remove_button
               end
+              preview
             end
           end
 
@@ -31,6 +32,24 @@ module Admin
               data: { social_body: "" },
             }
           end
+
+          def preview
+            div(class: "compose-preview", hidden: !previewing?, data: { social_preview: "" }) do
+              p(class: "compose-preview-head") { t(".preview") }
+              @networks.each { preview_line(it) }
+            end
+          end
+
+          def preview_line(network)
+            p(class: "compose-preview-line", hidden: !network.selected, data: { social_preview_line: network.name }) do
+              span(class: "compose-preview-network") { network.label }
+              span(class: "compose-preview-text", data: { social_preview_text: "" }) { preview_text(network) }
+            end
+          end
+
+          def preview_text(network) = @counts.fetch(network.name, Structs::NetworkCount::NONE).text
+
+          def previewing? = @body.match?(::Social::Mentions::TOKEN) && @networks.any?(&:selected)
 
           def remove_button
             Button(

@@ -1,4 +1,5 @@
 import { renderCounts, selectedTargets } from "./social_counts.js";
+import { expand, mentions } from "./social_expand.js";
 import { setupMentions } from "./social_mentions.js";
 
 const SCHEDULE = "schedule";
@@ -56,7 +57,19 @@ function setupComposer(form) {
 }
 
 function renderPart(part, selected, removable) {
+  const text = part.querySelector("[data-social-body]").value;
   part.querySelector("[data-social-remove]").hidden = !removable;
+  renderPreview(part.querySelector("[data-social-preview]"), text, selected);
 
-  return renderCounts(part, part.querySelector("[data-social-body]").value, selected);
+  return renderCounts(part, text, selected);
+}
+
+function renderPreview(preview, text, selected) {
+  preview.hidden = !mentions(text) || selected.size === 0;
+
+  for (const line of preview.querySelectorAll("[data-social-preview-line]")) {
+    const network = line.dataset.socialPreviewLine;
+    line.hidden = !selected.has(network);
+    line.querySelector("[data-social-preview-text]").textContent = expand(text, network);
+  }
 }

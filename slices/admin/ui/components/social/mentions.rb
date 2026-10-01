@@ -20,6 +20,7 @@ module Admin
 
             list
             status
+            Directory(people: @people)
           end
 
           private

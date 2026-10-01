@@ -5,11 +5,15 @@ RSpec.describe "Admin social mentions", type: :feature do
 
   def chosen = find("#social-mentions [aria-selected='true']")
 
+  def counts = all("[data-social-count-text]").map(&:text)
+
   def groups = all(".compose-mention-group").map { it.text.downcase }
 
   def list = find("[data-social-mentions]")
 
   def names = all("[data-social-mention]").map { it.find(".compose-mention-name").text }
+
+  def preview(network) = find("[data-social-preview-line='#{network}'] [data-social-preview-text]").text
 
   def type(*keys, index: 0) = body(index).send_keys(*keys)
 
@@ -176,6 +180,49 @@ RSpec.describe "Admin social mentions", type: :feature do
 
         expect(box["left"]).to be >= 0
         expect(box["right"]).to be <= 375
+      end
+    end
+
+    describe "the counters" do
+      it "counts the handle each network gets" do
+        type "hi @kay", :enter
+
+        expect(counts).to eq(["Mastodon 12/500", "Bluesky 21/300"])
+      end
+
+      it "turns a part pink once its mention runs it over the limit", :aggregate_failures do
+        body.set("@{alan-kay} #{'a' * 285}")
+
+        expect(page).to have_css(".compose-count.over", text: "Bluesky")
+        expect(find("[data-social-send]")).to be_disabled
+      end
+    end
+
+    describe "the preview" do
+      it "stays hidden until a mention is typed" do
+        type "hello"
+
+        expect(page).to have_no_css("[data-social-preview]", visible: :visible)
+      end
+
+      it "shows each network's text with its handle in place", :aggregate_failures do
+        type "hi @ad", :enter
+
+        expect(preview("mastodon")).to match(/\Ahi @person\d+@ruby\.social\z/)
+        expect(preview("bluesky")).to match(/\Ahi @person-\d+\.bsky\.social\z/)
+      end
+
+      it "shows a plain name where the person has no handle" do
+        type "hi @kay", :enter
+
+        expect(preview("mastodon")).to eq("hi Alan Kay")
+      end
+
+      it "drops the line of a network turned off" do
+        type "hi @kay", :enter
+        find(".compose-target", text: "Bluesky").click
+
+        expect(page).to have_no_css("[data-social-preview-line='bluesky']", visible: :visible)
       end
     end
 

@@ -47,6 +47,15 @@ RSpec.describe "Admin post editor", type: :feature do
       expect(counts.last).to eq("Bluesky #{bluesky.count('👍🏽 👨‍👩‍👧 done')}/300")
     end
 
+    it "counts a mention as the handle each network gets" do
+      create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: nil, bluesky_handle: "ada.bsky.social",
+                      bluesky_did: "did:plc:ada")
+      visit "/admin/posts/new"
+      write "hi @{ada}"
+
+      expect(counts).to eq(["Mastodon 15/500", "Bluesky 19/300"])
+    end
+
     it "mutes a network that is off" do
       find(".compose-target", text: "Bluesky").click
 

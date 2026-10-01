@@ -418,6 +418,28 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
     end
 
+    describe "an edit that would pass a network limit once its mentions expand" do
+      let(:social_post) { compose("teh @{ada} #{'a' * 270}", targets: %w[bluesky]) }
+
+      before do
+        create(:person, :bluesky, key: "ada", bluesky_handle: "ada-lovelace.bsky.social")
+        suggest(social_post, typo("teh", "their"))
+      end
+
+      it "says which limit it would pass" do
+        open_item(social_post)
+
+        expect(page).to have_css(".sg-edit .pill", text: "Over the Bluesky limit of 300")
+      end
+
+      it "leaves the part alone", :aggregate_failures do
+        accept(social_post, edit_id: first_edit_id(social_post))
+
+        expect(bodies(social_post)).to eq(["teh @{ada} #{'a' * 270}"])
+        expect(statuses(social_post)).to eq(%w[pending])
+      end
+    end
+
     describe "a part rewritten over the limit between the read and the accept" do
       let(:social_post) { compose("the cat sat") }
 

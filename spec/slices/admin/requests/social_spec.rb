@@ -50,6 +50,14 @@ RSpec.describe "Admin social", type: :request do
         expect(counts.first).to eq("Mastodon 29/500")
       end
 
+      it "counts a mention as the handle each network gets" do
+        create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
+                        bluesky_did: "did:plc:ada")
+        compose(parts: ["hi @{ada}"], targets: %w[])
+
+        expect(counts).to eq(["Mastodon 7/500", "Bluesky 19/300"])
+      end
+
       it "ships the directory as a hidden list of people to mention" do
         create(:person, name: "Ada Lovelace", key: "ada-lovelace")
         get "/admin/social"
@@ -61,6 +69,60 @@ RSpec.describe "Admin social", type: :request do
         get "/admin/social"
 
         expect(page).to have_no_css("[data-social-mentions]")
+      end
+    end
+
+    describe "the preview" do
+      def open_draft(*parts, targets: %w[mastodon bluesky])
+        draft = repo.create_with_parts(parts:, targets:, status: "draft")
+        get "/admin/social", filter: "drafts", edit: draft.id
+      end
+
+      def preview(network) = page.find("[data-social-preview-line='#{network}'] [data-social-preview-text]").text
+
+      before do
+        create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
+                        bluesky_handle: "ada.bsky.social", bluesky_did: "did:plc:ada")
+        create(:person, key: "grace", name: "Grace Hopper", mastodon_handle: "@grace@ruby.social")
+      end
+
+      it "shows each network's handle in place of a mention", :aggregate_failures do
+        open_draft("hi @{ada}")
+
+        expect(preview("mastodon")).to eq("hi @ada@ruby.social")
+        expect(preview("bluesky")).to eq("hi @ada.bsky.social")
+      end
+
+      it "shows a plain name where the person has no handle" do
+        open_draft("hi @{grace}")
+
+        expect(preview("bluesky")).to eq("hi Grace Hopper")
+      end
+
+      it "previews each part on its own" do
+        open_draft("hi @{ada}", "and @{grace}")
+
+        expect(page.all("[data-social-preview-line='mastodon'] [data-social-preview-text]").map(&:text))
+          .to eq(["hi @ada@ruby.social", "and @grace@ruby.social"])
+      end
+
+      it "hides the preview of a part with no mention" do
+        open_draft("hello")
+
+        expect(page).to have_css("[data-social-preview][hidden]", visible: :all)
+      end
+
+      it "hides the line of a network the post skips" do
+        open_draft("hi @{ada}", targets: %w[mastodon])
+
+        expect(page).to have_css("[data-social-preview-line='bluesky'][hidden]", visible: :all)
+      end
+
+      it "ships each network's handles for the counters" do
+        get "/admin/social"
+
+        expect(JSON.parse(page.find("[data-social-people]", visible: :all)["data-social-people"]))
+          .to include("bluesky" => include("ada" => "@ada.bsky.social", "grace" => "Grace Hopper"))
       end
     end
 
@@ -241,6 +303,20 @@ RSpec.describe "Admin social", type: :request do
         compose(parts: ["a" * 301], targets: %w[mastodon bluesky])
 
         expect(last_response.status).to eq(422)
+      end
+
+      it "rejects a part whose mention runs it over the limit once it expands" do
+        create(:person, :bluesky, key: "ada", bluesky_handle: "ada-lovelace.bsky.social")
+        compose(parts: ["@{ada} #{'a' * 280}"], targets: %w[bluesky])
+
+        expect(page).to have_css(".field-error", text: "over the limit")
+      end
+
+      it "takes a part whose mention keeps it under the limit once it expands" do
+        create(:person, :bluesky, key: "ada", bluesky_handle: "ada-lovelace.bsky.social")
+        compose(parts: ["@{ada} #{'a' * 274}"], targets: %w[bluesky])
+
+        expect(repo.queued).to have(1).item
       end
 
       it "rejects a mention of nobody in the directory" do

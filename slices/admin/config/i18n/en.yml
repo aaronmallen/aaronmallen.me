@@ -569,6 +569,7 @@ en:
         part:
           body: "Post text"
           placeholder: "Say the thing. It goes out everywhere you pick."
+          preview: "What each network gets"
           remove: "Remove this part"
         queue:
           apply: "Filter"

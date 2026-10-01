@@ -3,7 +3,11 @@
 module Admin
   module Operations
     class FindOverLimitNetwork
-      include Deps[list_networks: "operations.list_networks", networks: "social.networks.all"]
+      include Deps[
+        list_networks: "operations.list_networks",
+        mention_directory: "social.queries.mention_directory",
+        networks: "social.networks.all",
+      ]
 
       def call(social_post, edit)
         body = part_body(social_post, edit)
@@ -15,8 +19,11 @@ module Admin
       private
 
       def over_limit(body, targets)
+        directory = mention_directory.call([body])
+
         list_networks.call(selected: targets).find do |network|
-          targets.include?(network.name) && !networks.fetch(network.name).within_limit?(body)
+          targets.include?(network.name) &&
+            !networks.fetch(network.name).within_limit?(directory.expand(body, network.name).text)
         end
       end
 
