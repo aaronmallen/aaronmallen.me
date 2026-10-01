@@ -42,6 +42,30 @@ RSpec.describe "Visit counting", type: :request do
       expect(stored.first.referrer_host).to be_nil
     end
 
+    it "keeps the path of a page on the site that sent the reader" do
+      view(referrer: "http://example.org/writing")
+
+      expect(stored.first.referrer_path).to eq("/writing")
+    end
+
+    it "keeps no query with the path of a page on the site" do
+      view(referrer: "http://example.org/writing/hello?ref=reddit")
+
+      expect(stored.first.referrer_path).to eq("/writing/hello")
+    end
+
+    it "keeps no path for a referrer on another site" do
+      view(referrer: "https://news.example/item")
+
+      expect(stored.first.referrer_path).to be_nil
+    end
+
+    it "keeps no path when the site sent only its origin" do
+      view(referrer: "http://example.org")
+
+      expect(stored.first.referrer_path).to be_nil
+    end
+
     it "counts the address's recent events once" do
       expect(counting { view }.grep(/\ASELECT count\(\*\).*address_hash/i)).to have(1).item
     end

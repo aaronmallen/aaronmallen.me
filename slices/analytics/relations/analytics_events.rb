@@ -26,6 +26,7 @@ module Analytics
         ]
       end
       VISITORS = Sequel.function(:count, :visitor_hash).distinct
+      VISITS = Sequel.function(:count).*
 
       schema :analytics_events, infer: true
 
@@ -97,6 +98,13 @@ module Analytics
         floor = Sequel.case(floors.reverse.map { [Sequel[:read_seconds] >= it, it] }, floors.first)
 
         unordered.dataset.group_and_count(floor.as(:floor)).to_h { [it.fetch(:floor), it.fetch(:count)] }
+      end
+
+      def visit_ends(direction)
+        sequence = [Sequel.public_send(direction, :occurred_at), Sequel.public_send(direction, :id)]
+        ends = unordered.dataset.distinct(:visitor_hash).select(:visitor_hash, :path).order(:visitor_hash, *sequence)
+
+        dataset.db.from(ends).select(:path, VISITS.as(:visitors)).group(:path).order(Sequel.desc(:visitors), :path).to_a
       end
 
       def visitor_count = unordered.dataset.get(VISITORS)

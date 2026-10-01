@@ -17,6 +17,12 @@ module Analytics
 
       def hours_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).hourly.to_a
 
+      def internal_referrers_between(from:, to:, path:)
+        window = analytics_events.between(from, to).for_path(path).known(:referrer_path)
+
+        window.counts_by(:referrer_path, as: :path).to_a
+      end
+
       def median_read_seconds(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).read_median
 
       def oldest_day
@@ -62,6 +68,8 @@ module Analytics
       def views_by_read_floor(from:, to:, floors:, path: nil)
         scoped(analytics_events.between(from, to), path).views_by_read_floor(floors)
       end
+
+      def visit_ends_between(from:, to:, direction:) = analytics_events.between(from, to).visit_ends(direction)
 
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 

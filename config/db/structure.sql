@@ -818,6 +818,7 @@ CREATE TABLE public.analytics_events (
     source public.ref_source,
     device_class public.device_class,
     scroll_depth public.scroll_depth DEFAULT 0,
+    referrer_path public.http_path,
     CONSTRAINT analytics_events_read_seconds_check CHECK ((read_seconds >= 0))
 );
 
@@ -3284,4 +3285,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261001000067_add_checked_at_to_task_sources.rb'),
 ('20261001000068_create_analytics_rollup_page_referrers_and_countries.rb'),
 ('20261001000069_add_device_class_and_create_analytics_rollup_devices.rb'),
-('20261001000070_add_scroll_depth_and_create_analytics_rollup_scroll_depths.rb');
+('20261001000070_add_scroll_depth_and_create_analytics_rollup_scroll_depths.rb'),
+('20261001000071_add_referrer_path_to_analytics_events.rb');

@@ -106,6 +106,8 @@ module MCP
 
         def move_project(server_context) = server_context.fetch(:move_project)
 
+        def navigation_between(server_context) = server_context.fetch(:navigation_between)
+
         def page(number, server_context) = Blog::Page.new(number:, size: server_context.fetch(:page_size))
 
         def page_between(server_context) = server_context.fetch(:page_between)

@@ -98,6 +98,18 @@ RSpec.describe "Analytics beacon", type: :feature do
     expect(recorded("/writing")).to have_attributes(referrer_host: "news.example")
   end
 
+  it "stores the path of the page on the site that linked to this one", :aggregate_failures do
+    visit_from("#{page.server.base_url}/writing?ref=reddit", path: "/about")
+
+    expect(recorded("/about")).to have_attributes(referrer_path: "/writing", referrer_host: nil)
+  end
+
+  it "stores only the host of a referrer on another site", :aggregate_failures do
+    visit_from("https://news.example/item?id=1", path: "/about")
+
+    expect(recorded("/about")).to have_attributes(referrer_host: "news.example", referrer_path: nil)
+  end
+
   it "stores the read time when the page is left" do
     visit_both_pages
 

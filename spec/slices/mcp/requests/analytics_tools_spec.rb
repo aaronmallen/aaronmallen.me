@@ -505,8 +505,9 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      expect(read_page("/writing/hello").keys)
-        .to eq(%w[from to time_zone path totals days referrers countries sources devices scroll hours read_spread])
+      keys = %w[from to time_zone path totals days referrers countries sources devices scroll hours read_spread]
+
+      expect(read_page("/writing/hello").keys).to eq([*keys, "internal_referrers"])
     end
 
     describe "the page's referrers and countries" do
@@ -790,6 +791,82 @@ RSpec.describe "MCP analytics tools", type: :request do
 
       expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
       expect(answer).not_to have_key("read_spread")
+      expect(answer.fetch("totals")).to include("views" => 9)
+    end
+  end
+
+  describe "read_analytics navigation" do
+    let(:day) { today - 1 }
+
+    def at(hour) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
+
+    def read_raw(from: day, to: day, **) = mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601, **)
+
+    def view(path, visitor, hour:, referrer_path: nil)
+      create(:analytics_event, path:, visitor_hash: visitor * 64, occurred_at: at(hour), referrer_path:)
+    end
+
+    describe "a page's internal referrers" do
+      before do
+        view("/about", "a", hour: 9, referrer_path: "/writing/new")
+        view("/about", "b", hour: 10, referrer_path: "/writing/new")
+        2.times { view("/about", "c", hour: 11, referrer_path: "/writing/old") }
+        view("/about", "d", hour: 12)
+        view("/writing/other", "e", hour: 12, referrer_path: "/writing/new")
+      end
+
+      it "ranks the pages on the site that sent readers to it by visitors" do
+        expect(read_raw(path: "/about").fetch("internal_referrers"))
+          .to eq([{ "path" => "/writing/new", "views" => 2, "visitors" => 2 },
+                  { "path" => "/writing/old", "views" => 2, "visitors" => 1 }])
+      end
+
+      it "counts only the views from since" do
+        expect(read_raw(path: "/about", since: at(11).iso8601).fetch("internal_referrers"))
+          .to eq([{ "path" => "/writing/old", "views" => 2, "visitors" => 1 }])
+      end
+
+      it "leaves out entry and exit pages", :aggregate_failures do
+        expect(read_raw(path: "/about")).not_to have_key("entry_pages")
+        expect(read_raw(path: "/about")).not_to have_key("exit_pages")
+      end
+    end
+
+    describe "entry and exit pages" do
+      before do
+        view("/writing/new", "a", hour: 9)
+        view("/about", "a", hour: 10, referrer_path: "/writing/new")
+        view("/writing/new", "b", hour: 11)
+        view("/writing/old", "b", hour: 12)
+        view("/about", "c", hour: 13)
+      end
+
+      it "ranks the pages visitors saw first by visitors" do
+        expect(read_raw.fetch("entry_pages"))
+          .to eq([{ "path" => "/writing/new", "visitors" => 2 }, { "path" => "/about", "visitors" => 1 }])
+      end
+
+      it "ranks the pages visitors saw last by visitors" do
+        expect(read_raw.fetch("exit_pages"))
+          .to eq([{ "path" => "/about", "visitors" => 2 }, { "path" => "/writing/old", "visitors" => 1 }])
+      end
+
+      it "starts from since" do
+        expect(read_raw(since: at(11).iso8601).fetch("entry_pages"))
+          .to eq([{ "path" => "/about", "visitors" => 1 }, { "path" => "/writing/new", "visitors" => 1 }])
+      end
+
+      it "leaves out internal referrers" do
+        expect(read_raw).not_to have_key("internal_referrers")
+      end
+    end
+
+    it "refuses a range older than the raw visits and still gives the days", :aggregate_failures do
+      roll_up(today - 120, views: 9, visitors: 4)
+      answer = read_raw(from: today - 120, to: today)
+
+      expect(answer).to include("refused" => MCP::Tools::ReadAnalytics::RAW_REFUSAL)
+      expect(answer.keys).not_to include("entry_pages", "exit_pages")
       expect(answer.fetch("totals")).to include("views" => 9)
     end
   end

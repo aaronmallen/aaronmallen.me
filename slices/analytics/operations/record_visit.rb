@@ -44,7 +44,7 @@ module Analytics
 
       def origin(visit, address:, user_agent:, base_url:)
         {
-          referrer_host: referrer_host(visit[:referrer], base_url),
+          **referrer(visit[:referrer], base_url),
           country_code: countries.code(address),
           source: Ref.source(visit[Contracts::VisitContract::REF]),
           device_class: Device.classify(user_agent),
@@ -63,11 +63,20 @@ module Analytics
 
       def read?(visit) = visit[:kind] == Contracts::VisitContract::READ
 
-      def referrer_host(referrer, base_url)
-        return if referrer.to_s.length > MAX_REFERRER
+      def referrer(url, base_url)
+        return {} if url.to_s.length > MAX_REFERRER
 
-        found = host(referrer)
-        found unless found.nil? || found == host(base_url)
+        found = host(url)
+        return { referrer_host: found } unless found && found == host(base_url)
+
+        { referrer_path: referrer_path(url) }
+      end
+
+      def referrer_path(url)
+        path = URI.parse(url).path
+        path if Contracts::VisitContract::PATH.match?(path)
+      rescue URI::InvalidURIError
+        nil
       end
 
       def scroll(visit, visitor_hashes)

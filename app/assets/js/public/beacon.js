@@ -11,9 +11,11 @@ const depthReached = () => {
   return SCROLL_DEPTHS.find((depth) => seen >= depth) ?? 0;
 };
 
-const originOf = (url) => {
+const referrerOf = (url) => {
   try {
-    return new URL(url).origin;
+    const { origin, pathname } = new URL(url);
+
+    return origin === location.origin ? origin + pathname : origin;
   } catch {
     return undefined;
   }
@@ -69,7 +71,7 @@ export function setupBeacon() {
   send({
     kind: "view",
     title: document.title,
-    referrer: originOf(document.referrer),
+    referrer: referrerOf(document.referrer),
     ...(ref && { [refKey]: ref }),
     ...(deepest && { scroll_depth: deepest }),
   });

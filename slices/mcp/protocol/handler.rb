@@ -56,6 +56,7 @@ module MCP
         moderate_webmention: "social.operations.moderate_webmention",
         move_project: "projects.operations.move_project",
         move_task: "api.endpoints.move_task",
+        navigation_between: "analytics.queries.navigation_between",
         page_between: "analytics.queries.page_between",
         plan_sprint: "api.endpoints.plan_sprint",
         post_by_id: "posts.queries.by_id",
