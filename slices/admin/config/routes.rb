@@ -4,6 +4,7 @@ module Admin
   class Routes < Hanami::Routes
     DIRECTION = Regexp.union(Blog::Types::ProjectMove.values)
     ID = /\d+/
+    MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
     TASK_MOVE = Regexp.union(Blog::Types::TaskMove.values)
@@ -22,6 +23,7 @@ module Admin
     post "/journal", to: "journal.create", as: :create_journal_entry
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID
     post "/journal/:id/delete", to: "journal.destroy", as: :delete_journal_entry, id: ID
+    post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
     post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
     get "/posts", to: "posts.index", as: :posts

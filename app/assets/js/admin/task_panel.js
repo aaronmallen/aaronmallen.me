@@ -1,5 +1,6 @@
 import { setupConfirms } from "./confirm.js";
 import { openDialog } from "./dialog.js";
+import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupTaskKeys } from "./task_key.js";
 
 const EDIT = "[data-task-edit]";
@@ -18,6 +19,7 @@ export function setupTaskPanel() {
 
 function bind(root) {
   setupConfirms(root);
+  setupMarkdownEditors(root);
   setupTaskKeys(root);
 }
 

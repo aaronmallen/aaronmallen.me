@@ -142,7 +142,6 @@
   --container-rail: 248px;
   --spacing-ctx-bar: 2.875rem;
   --container-editor-head: 420px;
-  --spacing-editor: 520px;
   --spacing-preview: 600px;
   --radius-card: 10px;
   --radius-btn: 7px;
@@ -1471,7 +1470,7 @@
 }
 
 @utility edit-pane {
-  @apply flex min-h-editor min-w-0 flex-col;
+  @apply flex min-h-(--edit-height) min-w-0 flex-col;
 }
 
 @utility preview {
@@ -1509,7 +1508,7 @@
 }
 
 @utility edit-body {
-  @apply min-h-editor w-full flex-1 resize-y bg-ground-sunk px-5 py-4.5 font-mono text-editor text-ink;
+  @apply min-h-(--edit-height) w-full flex-1 resize-y bg-ground-sunk px-5 py-4.5 font-mono text-editor text-ink;
   @apply placeholder:text-ink-muted focus:outline-2 focus:-outline-offset-2 focus:outline-mk-blue;
 }
 

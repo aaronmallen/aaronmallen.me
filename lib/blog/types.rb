@@ -54,6 +54,7 @@ module Blog
     rescue TZInfo::PeriodNotFound
       Constants::GAP
     end
+    MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageStatus = Types::String.enum("unread", "read", "spam")
     MessageStatusParam = MessageStatus.fallback(MessageStatus.values.first)
     NetworkName = Types::String.enum("mastodon", "bluesky")

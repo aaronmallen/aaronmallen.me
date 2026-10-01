@@ -237,6 +237,22 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+      markdown_editor:
+        preview: "Preview"
+        toolbar: "Formatting"
+        tools:
+          bold: "B"
+          bold_label: "Bold"
+          code: "code"
+          code_label: "Code block"
+          h2: "H2"
+          h2_label: "Heading"
+          italic: "I"
+          italic_label: "Italic"
+          quote: "quote"
+          quote_label: "Quote"
+        view: "Editor view"
+        write: "Write"
       message_row:
         read: "Read"
         spam: "Spam"
@@ -306,6 +322,8 @@ en:
             other: "Delete this post and the %{count} webmentions it received? You can't undo it."
         editor:
           all_posts: "All posts"
+          body: "Body"
+          placeholder: "Write it."
           read_time: "~%{count} min read"
           summary: "Summary"
           summary_placeholder: "One line. Empty uses the first paragraph."
@@ -320,24 +338,6 @@ en:
           save: "Save"
           save_draft: "Save draft"
           schedule: "Schedule"
-        editor_panes:
-          body: "Body"
-          placeholder: "Write it."
-          preview: "Preview"
-          toolbar: "Formatting"
-          tools:
-            bold: "B"
-            bold_label: "Bold"
-            code: "code"
-            code_label: "Code block"
-            h2: "H2"
-            h2_label: "Heading"
-            italic: "I"
-            italic_label: "Italic"
-            quote: "quote"
-            quote_label: "Quote"
-          view: "Editor view"
-          write: "Write"
         field_error:
           canonical_url:
             format: "Enter a link that starts with http:// or https://."

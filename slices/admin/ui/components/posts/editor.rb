@@ -5,6 +5,7 @@ module Admin
     module Components
       module Posts
         class Editor < Component
+          BODY_HEIGHT = "520px"
           PUBLISHED = Blog::Types::PostStatus["published"]
           SEPARATOR = " · "
 
@@ -39,6 +40,18 @@ module Admin
             end
           end
 
+          def body_editor
+            MarkdownEditor(**body_editor_props) { Preview(**@preview) }
+          end
+
+          def body_editor_props
+            {
+              name: "post[body]", value: @values[:body], height: BODY_HEIGHT, renderer: "posts", id: "post-body",
+              label: t(".body"), placeholder: t(".placeholder"), preview_path: path(:admin_preview_post),
+              view: @view, view_name: "view",
+            }
+          end
+
           def form_action = @post ? path(:admin_update_post, id: @post.id) : path(:admin_create_post)
 
           def page_head
@@ -50,7 +63,7 @@ module Admin
 
           def panes_and_sidebar
             div(class: "editor") do
-              EditorPanes(values: @values, view: @view, preview: @preview)
+              body_editor
               SideStack do
                 Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
                 Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)

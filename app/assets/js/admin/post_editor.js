@@ -1,4 +1,3 @@
-const CHECKED_VIEW = "input[name='view']:checked";
 const WORD = /[\p{L}\p{N}]/u;
 
 export function setupPostEditors() {
@@ -38,38 +37,15 @@ function setupPostEditor(form) {
     for (const element of form.querySelectorAll("[data-editor-later]")) element.hidden = !later;
   };
 
-  const renderView = () => {
-    const view = form.querySelector(CHECKED_VIEW)?.value;
-    if (!view) return;
-
-    for (const panel of form.querySelectorAll("[data-editor-view]")) {
-      panel.hidden = panel.dataset.editorView !== view;
-    }
-  };
-
-  for (const button of form.querySelectorAll("[data-snippet]")) {
-    button.addEventListener("click", () => {
-      insertAtCursor(body, button.dataset.snippet);
-      body.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-  }
-
   body.addEventListener("input", renderCounts);
   title.addEventListener("input", renderSlug);
   slug.addEventListener("input", renderSlug);
   publishAt.addEventListener("input", renderSchedule);
-  form.addEventListener("change", renderView);
   renderSlug();
-  renderView();
 }
 
 function countWords(text) {
   return (text.match(/\S+/g) ?? []).filter((word) => WORD.test(word)).length;
-}
-
-function insertAtCursor(textarea, snippet) {
-  textarea.focus();
-  textarea.setRangeText(snippet, textarea.selectionStart, textarea.selectionEnd, "end");
 }
 
 function readMinutes(count, wordsPerMinute) {
