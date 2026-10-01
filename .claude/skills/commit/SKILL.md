@@ -5,6 +5,9 @@ name: commit
 
 # Commit
 
+The caller may name an issue, say whether this is the issue's last commit, and name a spec the commit closes. With
+no issue, the commit names none.
+
 ## 1. Read the changes
 
 Read the working change the way [`.claude/vcs.md`][vcs] describes. Work out what landed and why. If a change does
@@ -16,6 +19,8 @@ not explain itself, ask before writing the message.
 <scope>: <subject>
 
 <body>
+
+<keywords>
 ```
 
 Wrap the whole message at 72 characters.
@@ -31,6 +36,10 @@ The body is prose in paragraphs. Say what the change does, then say why each dec
 went the way it did. It is not a bulleted changelog. Leave the body out only when the subject tells the whole
 story.
 
+The keywords name the issue, as [`.claude/issues.md`][issues] says under "Reference an issue". The last commit
+for an issue, or its only one, ends with `Closes #<issue>`. Any commit before it ends with `See #<issue>`. When
+the caller names a spec, add `Closes #<spec>` on the next line. With no issue, leave the paragraph out.
+
 ## 3. Commit
 
 Record the change the way [`.claude/vcs.md`][vcs] describes, and pass the message you wrote without rewrapping it.
@@ -38,6 +47,8 @@ Record the change the way [`.claude/vcs.md`][vcs] describes, and pass the messag
 ## 4. One change per commit
 
 If the working copy holds unrelated work, split it before you describe anything. [`.claude/vcs.md`][vcs] says how.
-Describe each half on its own.
+Describe each half on its own. When the halves share an issue, only the one on top closes it, and the one
+under it says `See`.
 
+[issues]: .claude/issues.md
 [vcs]: .claude/vcs.md

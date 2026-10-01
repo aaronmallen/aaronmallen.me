@@ -31,7 +31,7 @@ Read `.claude/CLAUDE.md`, the README and the records in `docs/adr` that cover th
 - **Change only what the issue names.** Anything else you spot goes to the user, not into the diff.
 
 When the issue is the record for a decision, invoke `/write-adr` and stop there. The record lands in its own
-commit, under the code that carries it out.
+commit, under the code that carries it out. That commit says `See #<issue>`, and the code on top closes it.
 
 ## 3. Check it
 
@@ -49,17 +49,18 @@ Invoke `/code-review`. Fix what it finds, or say why a finding stands.
 
 ## 5. Commit
 
-Invoke `/commit`.
+Find the parent spec, if the issue has one, and read its sub-issues. When every other sub-issue is closed or in
+`needs review`, this issue's last commit closes the spec too.
 
-## 6. Close it
+Invoke `/commit` with the issue number, whether this is the issue's last commit, and the spec when this commit
+closes it. Do not close the issue or the spec with `gh`. The commit closes them when the owner pushes.
 
-Close the issue as completed and take `in progress` off it. Take `blocked` off every issue it blocked that has no
-other open blocker.
+## 6. Hand it over
 
-Then check the parent spec. Read its sub-issues. When none of them is still open, close the spec as completed
-too.
+Swap `in progress` for `needs review` on the issue. Then read the issues it blocks, and take `blocked` off each
+one whose blockers are all closed or in `needs review`.
 
-If a step failed and you could not fix it, leave the issue open and `in progress` and tell the user what stopped you. Do
+If a step failed and you could not fix it, leave the issue `in progress` and tell the user what stopped you. Do
 not mark work done that is not.
 
 [issues]: .claude/issues.md
