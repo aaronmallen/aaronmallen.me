@@ -8,37 +8,26 @@ module MCP
       BAD_DAY = "give from and to as days, such as 2026-01-01"
       BAD_WINDOW = "from comes after to"
       CONTROL = "holds a control character"
-      DIRECTIONS = Blog::Types::TaskMove.values.freeze
-      LISTS = Blog::Types::TaskFilter.values.freeze
       LOCAL = "local"
       NO_SPRINT = "no sprint has the ID %s"
       NO_TASK = "no task has the ID %s"
-      SEPARATOR = ","
-      SPRINT_PAST = "a sprint opens on today or a day after it"
       UNSAVED = "could not save the change"
 
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
         kind: { Blog::Contract::FORMAT => "pick one of the four link types" },
-        list: { Blog::Contract::FORMAT => "pick one of the four lists" },
         other_id: {
           Blog::Contract::FORMAT => "pick a task by its ID",
           "missing" => "that task is gone, so find another",
           "self" => "a task cannot link to itself",
           "taken" => "these two tasks are already linked",
         },
-        tags: { Blog::Contract::FORMAT => "tags are lowercase words" },
-        title: { "blank" => "write the task down first" },
       }.freeze
 
       class << self
         private
 
         def add_task_comment(server_context) = server_context.fetch(:add_task_comment)
-
-        def cancel_task(server_context) = server_context.fetch(:cancel_task)
-
-        def capture_task(server_context) = server_context.fetch(:capture_task)
 
         def comment_entry(comment)
           {
@@ -55,23 +44,15 @@ module MCP
           errors.map { |field, (code)| "#{field}: #{reason(field, code)}" }.join("; ")
         end
 
-        def complete_task(server_context) = server_context.fetch(:complete_task)
-
         def current_sprint(server_context) = server_context.fetch(:current_sprint)
 
         def day_or_nil(value) = value && Blog::TimeZone.parse_day(value)
 
-        def delete_task(server_context) = server_context.fetch(:delete_task)
-
         def drop_sprint(server_context) = server_context.fetch(:drop_sprint)
-
-        def find_tasks(server_context) = server_context.fetch(:find_tasks)
 
         def link_entry(link) = { label: link.label, id: link.task.id, title: link.task.title, status: link.task.status }
 
         def link_tasks(server_context) = server_context.fetch(:link_tasks)
-
-        def move_task(server_context) = server_context.fetch(:move_task)
 
         def no_sprint(id) = refuse(format(NO_SPRINT, id))
 
@@ -85,33 +66,11 @@ module MCP
           COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
         end
 
-        def reopen_task(server_context) = server_context.fetch(:reopen_task)
-
-        def reorder_task(server_context) = server_context.fetch(:reorder_task)
-
-        def save_task(server_context) = server_context.fetch(:save_task)
-
-        def schedule_task(server_context) = server_context.fetch(:schedule_task)
-
-        def settled(result, id, server_context)
-          case result
-          in Success(*) then task_answer(id, server_context)
-          in Failure(:not_found) then no_task(id)
-          else unsaved
-          end
-        end
-
         def sprint_entry(sprint) = { id: sprint.id, date: sprint.sprint_date.iso8601, carried_in: sprint.carried_in }
-
-        def sprint_past = refuse(SPRINT_PAST)
 
         def sprints_between(server_context) = server_context.fetch(:sprints_between)
 
         def stamp(time) = time&.utc&.iso8601
-
-        def start_task(server_context) = server_context.fetch(:start_task)
-
-        def tag_text(names) = names.join(SEPARATOR)
 
         def task_answer(id, server_context, **extra)
           task_reply(task_by_id(server_context).call(id), server_context, **extra)

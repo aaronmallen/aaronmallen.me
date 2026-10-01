@@ -13,10 +13,18 @@ module API
       queries.journal_entries_between queries.journal_entry_by_id
     ], from: :record
 
+    import keys: %w[
+      operations.cancel_task operations.capture_task operations.complete_task operations.delete_task
+      operations.move_task operations.reopen_task operations.reorder_task operations.save_task
+      operations.schedule_task operations.start_task queries.find_tasks queries.task_by_id queries.task_comments
+    ], from: :tasks
+
     export %w[
-      endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.list_journal_entries
-      endpoints.read_journal_entry endpoints.update_journal_entry operations.mint_token operations.revoke_token
-      queries.live_tokens
+      endpoints.cancel_task endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry
+      endpoints.delete_journal_entry endpoints.delete_task endpoints.list_journal_entries endpoints.list_tasks
+      endpoints.move_task endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
+      endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
+      endpoints.update_journal_entry operations.mint_token operations.revoke_token queries.live_tokens
     ]
   end
 end

@@ -8,6 +8,19 @@ module API
     patch "/journal_entries/:id", to: "journal_entries.update"
     delete "/journal_entries/:id", to: "journal_entries.destroy"
 
+    get "/tasks", to: "tasks.index"
+    post "/tasks", to: "tasks.create"
+    get "/tasks/:id", to: "tasks.show"
+    patch "/tasks/:id", to: "tasks.update"
+    delete "/tasks/:id", to: "tasks.destroy"
+    post "/tasks/:id/cancel", to: "tasks.cancel"
+    post "/tasks/:id/complete", to: "tasks.complete"
+    post "/tasks/:id/move", to: "tasks.move"
+    post "/tasks/:id/reopen", to: "tasks.reopen"
+    post "/tasks/:id/reorder", to: "tasks.reorder"
+    post "/tasks/:id/schedule", to: "tasks.schedule"
+    post "/tasks/:id/start", to: "tasks.start"
+
     get "/token", to: "tokens.show"
   end
 end

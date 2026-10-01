@@ -2,21 +2,14 @@
 
 module MCP
   module Tools
-    class ReadTask < TaskTool
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
-
+    class ReadTask < Base
       description "Read one task: its title, note, status, list or sprint day, tags, links both ways and its " \
                   "comments, oldest first"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::ReadTask::SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(id:, server_context:)
-          task = task_by_id(server_context).call(id)
-          return no_task(id) if task.nil?
-
-          task_reply(task, server_context)
-        end
+        def call(server_context:, **input) = hand_over(:read_task, input, server_context)
       end
     end
   end

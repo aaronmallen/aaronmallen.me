@@ -2,27 +2,14 @@
 
 module MCP
   module Tools
-    class ReorderTask < TaskTool
-      SCHEMA = {
-        additionalProperties: false,
-        properties: { direction: { type: "string", enum: DIRECTIONS }, id: { type: "integer" } },
-        required: %w[id direction],
-      }.freeze
-
+    class ReorderTask < Base
       description "Move one open task a place up or down among the open tasks in its list or sprint. " \
                   "At either end, or once done or canceled, it stays put and moved comes back false"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::ReorderTask::SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(id:, direction:, server_context:)
-          case reorder_task(server_context).call(id, direction)
-          in Success(*) then task_answer(id, server_context, moved: true)
-          in Failure(:not_moved) then task_answer(id, server_context, moved: false)
-          in Failure(:not_found) then no_task(id)
-          else unsaved
-          end
-        end
+        def call(server_context:, **input) = hand_over(:reorder_task, input, server_context)
       end
     end
   end

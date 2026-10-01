@@ -2,21 +2,13 @@
 
 module MCP
   module Tools
-    class DeleteTask < TaskTool
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
-
+    class DeleteTask < Base
       description "Delete one task and every link to or from it. This cannot be undone"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::DeleteTask::SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(id:, server_context:)
-          case delete_task(server_context).call(id)
-          in Success(task) then answer(id: task.id, title: task.title, deleted: true)
-          in Failure(:not_found) then no_task(id)
-          else unsaved
-          end
-        end
+        def call(server_context:, **input) = hand_over(:delete_task, input, server_context)
       end
     end
   end

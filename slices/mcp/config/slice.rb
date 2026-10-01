@@ -23,8 +23,11 @@ module MCP
     import keys: %w[auth.session_reader], from: :admin
 
     import keys: %w[
-      endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.list_journal_entries
-      endpoints.read_journal_entry endpoints.update_journal_entry
+      endpoints.cancel_task endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry
+      endpoints.delete_journal_entry endpoints.delete_task endpoints.list_journal_entries endpoints.list_tasks
+      endpoints.move_task endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
+      endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
+      endpoints.update_journal_entry
     ], from: :api
 
     import keys: %w[
@@ -69,11 +72,9 @@ module MCP
     ], from: :tags
 
     import keys: %w[
-      operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
-      operations.current_sprint operations.delete_task operations.drop_sprint operations.link_tasks operations.move_task
-      operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
-      operations.schedule_task operations.start_task operations.unlink_task queries.find_tasks queries.sprints_between
-      queries.task_by_id queries.task_comments queries.tasks_in_sprint
+      operations.add_task_comment operations.current_sprint operations.drop_sprint operations.link_tasks
+      operations.plan_sprint operations.unlink_task queries.sprints_between queries.task_by_id queries.task_comments
+      queries.tasks_in_sprint
     ], from: :tasks
 
     export %w[operations.revoke_client queries.connected_clients]
