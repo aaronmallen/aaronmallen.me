@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+#MISE description="Render the PNG and ICO icons from the favicon SVG"
+
+set -e
+
+images=app/assets/images
+svg="$images/favicon.svg"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+rsvg-convert -w 180 -h 180 "$svg" -o "$images/apple-touch-icon.png"
+rsvg-convert -w 192 -h 192 "$svg" -o "$images/icon-192.png"
+rsvg-convert -w 512 -h 512 "$svg" -o "$images/icon-512.png"
+
+for size in 16 32 48; do
+  rsvg-convert -w "$size" -h "$size" "$svg" -o "$tmp/$size.png"
+done
+
+magick "$tmp/16.png" "$tmp/32.png" "$tmp/48.png" -strip "$images/favicon.ico"
