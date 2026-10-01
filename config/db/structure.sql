@@ -580,7 +580,9 @@ CREATE TABLE public.webmentions (
     received_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT webmentions_source_url_check CHECK ((octet_length((source_url)::text) <= 2048))
+    spam_reason public.non_blank_text,
+    CONSTRAINT webmentions_source_url_check CHECK ((octet_length((source_url)::text) <= 2048)),
+    CONSTRAINT webmentions_spam_reason_check CHECK (((status = 'spam'::public.webmention_status) OR (spam_reason IS NULL)))
 );
 
 
@@ -2910,4 +2912,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261001000059_create_post_deletions.rb'),
 ('20261001000060_add_marked_spam_at_to_messages.rb'),
 ('20261001000061_add_redirect_uri_sent_to_oauth_codes.rb'),
-('20261001000062_create_spam_senders.rb');
+('20261001000062_create_spam_senders.rb'),
+('20261001000063_add_spam_reason_to_webmentions.rb');

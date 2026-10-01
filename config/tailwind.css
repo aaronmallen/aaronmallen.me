@@ -1760,6 +1760,26 @@
   @apply flex flex-wrap items-center gap-2 meta;
 }
 
+@utility wm-reason {
+  @apply meta;
+}
+
+@utility wm-spam {
+  @apply flex items-center gap-2;
+
+  & .inp {
+    @apply w-44;
+  }
+
+  @media (width < 43.75rem) {
+    @apply basis-full;
+
+    & .inp {
+      @apply flex-1;
+    }
+  }
+}
+
 @utility task-planner {
   & > .card {
     border-color: color-mix(in oklab, var(--color-mk-green) 38%, var(--color-line));

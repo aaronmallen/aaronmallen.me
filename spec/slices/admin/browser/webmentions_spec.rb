@@ -64,6 +64,23 @@ RSpec.describe "Admin webmentions", type: :feature do
     end
   end
 
+  describe "marking a mention as spam with a note" do
+    before do
+      fill_in "Why spam? (optional)", with: "link farm"
+      click_button "Spam"
+    end
+
+    it "shows the toast" do
+      expect(page).to have_css(".toast", text: "Marked as spam")
+    end
+
+    it "shows the note under spam" do
+      find(".seg-option", text: "spam").click
+
+      expect(page).to have_css(".wm-reason", text: "Spam: link farm")
+    end
+  end
+
   describe "turning a setting off" do
     before { uncheck "Receive webmentions" }
 

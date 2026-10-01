@@ -19,7 +19,7 @@ module MCP
       }.freeze
 
       description "List the webmentions received over a range of days, newest first: each with the blog post it " \
-                  "names, its type, its status, its source and author, and its excerpt. " \
+                  "names, its type, its status, its source and author, its excerpt, and the reason given for spam. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
@@ -55,7 +55,12 @@ module MCP
             author_url: mention.author_url,
             excerpt: mention.excerpt,
             received_at: mention.received_at.utc.iso8601,
+            **spam_reason(mention),
           }
+        end
+
+        def spam_reason(mention)
+          mention.spam_reason ? { spam_reason: mention.spam_reason } : Blog::Constants::EMPTY_HASH
         end
       end
     end

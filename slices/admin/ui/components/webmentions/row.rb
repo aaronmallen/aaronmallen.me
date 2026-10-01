@@ -32,6 +32,7 @@ module Admin
                 author
                 excerpt
                 meta
+                spam_reason
               end
               div(class: "li-side") { actions }
             end
@@ -42,7 +43,7 @@ module Admin
           def actions
             moderation(:admin_approve_webmention, ".approve", :pri) unless @mention.status == APPROVED
             moderation(:admin_ignore_webmention, ".ignore", nil) unless @mention.status == IGNORED
-            moderation(:admin_spam_webmention, ".spam", :warn) unless @mention.status == SPAM
+            spam unless @mention.status == SPAM
           end
 
           def author
@@ -67,11 +68,24 @@ module Admin
             end
           end
 
-          def moderation(route, label_key, variant)
-            Form(action: path(route, id: @mention.id)) do
+          def moderation(route, label_key, variant, **attributes)
+            Form(action: path(route, id: @mention.id), **attributes) do
               input(type: "hidden", name: "status", value: @filter)
+              yield if block_given?
               Button(type: "submit", variant:, small: true) { t(label_key) }
             end
+          end
+
+          def spam
+            moderation(:admin_spam_webmention, ".spam", :warn, class: "wm-spam") do
+              Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
+            end
+          end
+
+          def spam_reason
+            return unless @mention.spam_reason
+
+            p(class: "wm-reason") { t(".spam_reason", reason: @mention.spam_reason) }
           end
 
           def type = TYPES.fetch(@mention.type)

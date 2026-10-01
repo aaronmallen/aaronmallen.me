@@ -969,7 +969,9 @@ en:
           approve: "Approve"
           ignore: "Ignore"
           no_content: "no content · like only"
+          reason: "Why spam? (optional)"
           spam: "Spam"
+          spam_reason: "Spam: %{reason}"
           types:
             like: "like"
             mention: "mention"

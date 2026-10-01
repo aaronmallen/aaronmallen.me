@@ -174,6 +174,39 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(repo.by_status("spam").map(&:id)).to eq([mention.id])
       end
 
+      it "stores the note given with spam" do
+        post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "link farm"
+
+        expect(repo.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+      end
+
+      it "marks a mention as spam without a note" do
+        post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: ""
+
+        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+      end
+
+      it "clears the note when ignoring a spam mention" do
+        spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
+        post "/admin/webmentions/#{spam.id}/ignore", _csrf_token: admin_csrf_token
+
+        expect(repo.by_status("ignored").map(&:spam_reason)).to eq([nil])
+      end
+
+      it "offers a note field beside Spam" do
+        mention
+        get "/admin/webmentions"
+
+        expect(page).to have_css("form.wm-spam input.inp[name='reason'][placeholder='Why spam? (optional)']")
+      end
+
+      it "shows the note on a spam mention" do
+        create(:webmention, :spam, post: target, spam_reason: "link farm")
+        get "/admin/webmentions", status: "spam"
+
+        expect(page).to have_css(".wm-reason", exact_text: "Spam: link farm")
+      end
+
       it "ignores a mention" do
         post "/admin/webmentions/#{mention.id}/ignore", _csrf_token: admin_csrf_token
 

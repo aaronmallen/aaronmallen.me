@@ -18,7 +18,7 @@ module Social
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
 
-      def approve(id) = update(id, status: APPROVED)
+      def approve(id) = update(id, status: APPROVED, spam_reason: nil)
 
       def by_status(status) = webmentions.with_status(status).newest_first.to_a
 
@@ -44,13 +44,13 @@ module Social
 
       def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
 
-      def ignore(id) = update(id, status: IGNORED)
+      def ignore(id) = update(id, status: IGNORED, spam_reason: nil)
 
       def known_author?(author_url) = webmentions.by_author_url(normalized_author_url(author_url)).known_author?
 
       def listed_for(post_id) = approved_for(post_id, LISTED_TYPES).oldest_first.to_a
 
-      def mark_spam(id) = update(id, status: SPAM)
+      def mark_spam(id, reason = nil) = update(id, status: SPAM, spam_reason: reason)
 
       def normalized_author_url(url) = Blog::Types::Normalized::Url.call(url) { url }.sub(BARE_HOST, '\\1/')
 

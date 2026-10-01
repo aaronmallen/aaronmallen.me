@@ -12,7 +12,7 @@ module Admin
         def handle(request, response)
           verdict = self.class::VERDICT
 
-          case moderate_webmention.call(record_id(request), verdict)
+          case moderate_webmention.call(record_id(request), verdict, reason: request.params[:reason])
           in Success(_)
             toast(response, "#{TOASTS}.#{verdict}")
             response.redirect_to(routes.path(:admin_webmentions, status: filter(request)))

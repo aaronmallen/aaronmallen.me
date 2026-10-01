@@ -8,19 +8,19 @@ module Social
 
       include Deps[webmention_repo: "repos.webmention_repo"]
 
-      def call(id, verdict)
-        step found(moderated(id, Blog::Types::WebmentionStatus[verdict]))
+      def call(id, verdict, reason: nil)
+        step found(moderated(id, Blog::Types::WebmentionStatus[verdict], Blog::Types::OptionalText[reason]))
       end
 
       private
 
       def found(mention) = mention ? Success(mention) : Failure(:not_found)
 
-      def moderated(id, verdict)
+      def moderated(id, verdict, reason)
         case verdict
         when APPROVED then webmention_repo.approve(id)
         when IGNORED then webmention_repo.ignore(id)
-        else webmention_repo.mark_spam(id)
+        else webmention_repo.mark_spam(id, reason)
         end
       end
     end

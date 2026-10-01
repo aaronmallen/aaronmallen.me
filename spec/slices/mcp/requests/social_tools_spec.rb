@@ -371,6 +371,20 @@ RSpec.describe "MCP social tools", type: :request do
       expect(listed.first).to include(mention.to_h.slice(*shown).transform_keys(&:to_s))
     end
 
+    it "gives the reason a spam mention was marked" do
+      create(:webmention, :spam, spam_reason: "link farm", received_at: at(Date.new(2026, 3, 2)))
+      call_tool("list_webmentions", **range)
+
+      expect(listed.first).to include("spam_reason" => "link farm")
+    end
+
+    it "leaves spam_reason out when there is none" do
+      create(:webmention, :spam, received_at: at(Date.new(2026, 3, 2)))
+      call_tool("list_webmentions", **range)
+
+      expect(listed.first).not_to have_key("spam_reason")
+    end
+
     it "refuses a range that runs backwards" do
       call_tool("list_webmentions", from: "2026-03-31", to: "2026-03-01")
 
@@ -391,6 +405,19 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("moderate_webmention", id: mention.id, verdict: "spam")
 
       expect(webmention_repo.by_status("spam").map(&:id)).to eq([mention.id])
+    end
+
+    it "stores the reason given with spam" do
+      call_tool("moderate_webmention", id: mention.id, verdict: "spam", reason: "link farm")
+
+      expect(webmention_repo.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+    end
+
+    it "clears the reason when approving a spam mention" do
+      spam = create(:webmention, :spam, spam_reason: "link farm")
+      call_tool("moderate_webmention", id: spam.id, verdict: "approved")
+
+      expect(webmention_repo.by_status("approved").map(&:spam_reason)).to eq([nil])
     end
 
     it "marks one as ignored" do
