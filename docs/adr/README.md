@@ -85,6 +85,7 @@ one.
 | [0078][0078] | Ignore a webmention through a new status that is neutral for trust | ![Active][active] | 2026-09-30 |
 | [0079][0079] | Store a mention as a token expanded at delivery | ![Active][active] | 2026-09-30 |
 | [0080][0080] | Store photos in an S3 store and serve them through the site | ![Active][active] | 2026-09-30 |
+| [0081][0081] | Process every upload with libvips on the server | ![Active][active] | 2026-09-30 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -166,6 +167,7 @@ one.
 [0078]: 0078-ignore-a-webmention-through-a-new-status-that-is-neutral-for-trust.md
 [0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md
 [0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
+[0081]: 0081-process-every-upload-with-libvips-on-the-server.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
