@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+#MISE hide=true
+
+bundle exec ruby -e 'require "vips"' >/dev/null 2>&1

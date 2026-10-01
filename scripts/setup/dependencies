@@ -4,7 +4,55 @@
 
 set -e
 
+as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    echo "Run as root, or install sudo, to install: $*" >&2
+    exit 1
+  fi
+}
+
+install_libvips() {
+  if command -v brew >/dev/null 2>&1; then
+    brew install vips libheif
+  elif command -v apt-get >/dev/null 2>&1; then
+    as_root apt-get update
+    if apt-cache show libvips42t64 >/dev/null 2>&1; then
+      as_root apt-get install --no-install-recommends --yes libvips42t64 libheif-plugin-libde265
+    else
+      as_root apt-get install --no-install-recommends --yes libvips42 libheif1
+    fi
+  elif command -v dnf >/dev/null 2>&1; then
+    as_root dnf install --assumeyes vips vips-heif
+  elif command -v pacman >/dev/null 2>&1; then
+    as_root pacman -S --needed --noconfirm libvips libheif
+  else
+    cat >&2 <<'MESSAGE'
+Ruby cannot load libvips, and no brew, apt-get, dnf or pacman is here to install it.
+Install libvips with HEIC support, then run `mise run setup:dependencies` again:
+
+  macOS:          vips libheif
+  Debian, Ubuntu: libvips42t64 libheif-plugin-libde265 (libvips42 libheif1 on Debian 12)
+  Fedora:         vips vips-heif
+  Arch:           libvips libheif
+MESSAGE
+    exit 1
+  fi
+}
+
 mise trust >/dev/null 2>&1
 mise install
 bundle install
+
+if ! scripts/util/check_libvips; then
+  install_libvips
+  if ! scripts/util/check_libvips; then
+    echo "libvips is installed, but Ruby still cannot load it. See docs/media-store.md." >&2
+    exit 1
+  fi
+fi
+
 aube install

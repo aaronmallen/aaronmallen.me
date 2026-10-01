@@ -4,6 +4,11 @@
 
 set -e
 
+if ! scripts/util/check_libvips; then
+  echo "Ruby cannot load libvips. Run \`mise run setup:dependencies\` to install it." >&2
+  exit 1
+fi
+
 scripts/assets/build
 scripts/test/prepare
 scripts/util/ensure_postgres bundle exec rspec --require spec_helper "$@"

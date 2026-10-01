@@ -9,14 +9,23 @@ Without a bucket and both halves of a key, the site boots and takes no uploads.
 ## System libraries
 
 The site processes every upload with libvips, which reads HEIC through libheif ([ADR 0081][0081]). mise does not
-manage either, so install both where the site runs, on each dev machine and in CI:
+manage either. `mise run setup:dependencies` checks whether Ruby can load libvips and, when it cannot, installs both
+through the first package manager it finds:
 
-| Where | Install |
+| Manager | Packages |
 | --- | --- |
-| macOS | `brew install vips libheif` |
-| Debian, Ubuntu or Raspberry Pi OS | `sudo apt install libvips42t64 libheif-plugin-libde265` |
+| `brew` | `vips libheif` |
+| `apt-get` | `libvips42t64 libheif-plugin-libde265`, or `libvips42 libheif1` on Debian 12 |
+| `dnf` | `vips vips-heif` |
+| `pacman` | `libvips libheif` |
 
-On Debian 12 the packages are `libvips42` and `libheif1`. Without libvips the site does not start.
+`apt-get`, `dnf` and `pacman` run through `sudo` unless you are root. With none of the four, the task stops and
+names the packages to install by hand. Fedora's libheif reads no HEIC until you add `libheif-freeworld` from RPM
+Fusion.
+
+CI runs the same task. `mise run test` makes the same check first and stops, pointing to the setup task, when Ruby
+cannot load libvips. The Pi gets both by hand, with the `apt-get` packages above. Without libvips the site does not
+start.
 
 ## Development
 
