@@ -37,6 +37,7 @@ RSpec.describe "MCP reach", type: :request do
       "analytics.operations.refresh_country_database" => "a background job refreshes the country database",
       "analytics.operations.roll_up_analytics" => "a background job rolls up the day's visits",
       "contact.operations.create_message" => "a reader sends a message through the public form",
+      "media.operations.upload_photo" => "the admin's Markdown editor uploads photos; MCP takes no uploads",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",
       "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",
       "mcp.operations.issue_token" => "OAuth: a client trades a code or a refresh token",

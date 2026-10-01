@@ -32,6 +32,7 @@ module Admin
     get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
     post "/people/:id", to: "people.update", as: :update_person, id: ID
     post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID
+    post "/photos", to: "photos.create", as: :create_photo
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post
     get "/posts/new", to: "posts.new", as: :new_post

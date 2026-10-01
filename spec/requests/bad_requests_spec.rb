@@ -96,6 +96,17 @@ RSpec.describe "A request the site cannot read", type: :request do
     end
   end
 
+  describe "a file upload whose bytes are not UTF-8" do
+    before do
+      file = Rack::Test::UploadedFile.new(StringIO.new("\xFF\xD8\xFF\xFE".b), "image/jpeg", original_filename: "a.jpg")
+      post "/admin/photos", photo: file
+    end
+
+    it "passes the guard" do
+      expect(last_response.status).not_to eq(400)
+    end
+  end
+
   describe "a request the site can read" do
     before { get "/writing/tags/nothing-here", {}, "QUERY_STRING" => "a=caf%C3%A9" }
 

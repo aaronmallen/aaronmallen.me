@@ -63,6 +63,9 @@ jobs:
           sudo apt-get install --no-install-recommends --yes postgresql-client-18
           echo /usr/lib/postgresql/18/bin >>"$GITHUB_PATH"
 
+      - name: Install libvips and libheif
+        run: sudo apt-get install --no-install-recommends --yes libvips42t64 libheif-plugin-libde265
+
       - name: Build the test database from the migrations
         env:
           HANAMI_ENV: test

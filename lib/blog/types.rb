@@ -125,6 +125,9 @@ module Blog
       [*values].map { TrimmedText[it] }.reject(&:empty?)
     end
     TrimmedText = Text.constructor(&:strip)
+    UploadParam = Types::Interface(:read, :rewind, :size).optional.constructor do |value|
+      value[:tempfile] if value.is_a?(::Hash)
+    end
     Url = Types::String.constrained(format: /\A#{URL_FORMAT}\z/)
     UrlOrBlank = Types::String.constrained(format: /\A(?:#{URL_FORMAT})?\z/).constructor { |value| TrimmedText[value] }
     Uuid = Types::String.constrained(format: /\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)

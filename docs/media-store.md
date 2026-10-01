@@ -6,6 +6,18 @@ and the settings that name both.
 
 Without a bucket and both halves of a key, the site boots and takes no uploads.
 
+## System libraries
+
+The site processes every upload with libvips, which reads HEIC through libheif ([ADR 0081][0081]). mise does not
+manage either, so install both where the site runs, on each dev machine and in CI:
+
+| Where | Install |
+| --- | --- |
+| macOS | `brew install vips libheif` |
+| Debian, Ubuntu or Raspberry Pi OS | `sudo apt install libvips42t64 libheif-plugin-libde265` |
+
+On Debian 12 the packages are `libvips42` and `libheif1`. Without libvips the site does not start.
+
 ## Development
 
 `mise run dev` starts RustFS from `.config/compose.yml` and makes the `blog-development` bucket in it.
@@ -80,3 +92,4 @@ Production reads every value from the environment. Set these where the site runs
 Restart the web process and the worker. Each reads the settings once, at boot.
 
 [0080]: adr/0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
+[0081]: adr/0081-process-every-upload-with-libvips-on-the-server.md
