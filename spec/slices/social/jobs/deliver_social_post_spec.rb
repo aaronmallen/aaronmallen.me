@@ -413,6 +413,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(delivery(social_post, "bluesky").remote_ids.size).to eq(3)
     end
 
+    it "signs in once for the whole thread" do
+      deliver(social_post, "bluesky")
+
+      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).to have_been_made.once
+    end
+
     it "keeps the error when the parent comes back without a CID" do
       stub_request(:get, bluesky_url("com.atproto.repo.getRecord"))
         .with(query: hash_including({})).to_return(**json_response(uri: first))
@@ -516,6 +522,64 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
       expect(a_request(:post, bluesky_url("com.atproto.repo.putRecord"))
         .with(body: hash_including("rkey" => rkey(social_post, 1)))).to have_been_made.twice
+    end
+
+    it "keeps the session from the failed try" do
+      refused(social_post, "bluesky")
+      stub_bluesky_writes
+      deliver(social_post, "bluesky")
+
+      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).to have_been_made.once
+    end
+  end
+
+  describe "an expired Bluesky session" do
+    let(:social_post) { queued(targets: %w[bluesky], parts: %w[one two]) }
+    let(:expired) { json_response(status: 400, error: "ExpiredToken", message: "Token has expired") }
+
+    def expire_after(writes)
+      sent = Array.new(writes) { json_response(cid: "cid", uri: bluesky_uri(rkey(social_post, it + 1))) }
+      stub_bluesky_writes
+      stub_request(:post, write_url).with(headers: { "Authorization" => "Bearer old" }).to_return(*sent, expired)
+    end
+
+    def session_url = bluesky_url("com.atproto.server.createSession")
+
+    before do
+      stub_request(:post, session_url)
+        .to_return(json_response(accessJwt: "old", did: SocialNetworks::BLUESKY_DID, handle: "ada.example"))
+        .then.to_return(json_response(accessJwt: "new", did: SocialNetworks::BLUESKY_DID, handle: "ada.example"))
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
+    end
+
+    def write_url = bluesky_url("com.atproto.repo.putRecord")
+
+    it "signs in again and sends the part" do
+      expire_after(0)
+      deliver(social_post, "bluesky")
+
+      expect(a_request(:post, write_url).with(headers: { "Authorization" => "Bearer new" })).to have_been_made.twice
+    end
+
+    it "records every part once the new session sends them" do
+      expire_after(1)
+      deliver(social_post, "bluesky")
+
+      expect(delivery(social_post, "bluesky")).to have_attributes(remote_ids: have_attributes(size: 2), error: nil)
+    end
+
+    it "signs in once more, not once per part" do
+      expire_after(1)
+      deliver(social_post, "bluesky")
+
+      expect(a_request(:post, session_url)).to have_been_made.twice
+    end
+
+    it "keeps the error when the new session is refused too" do
+      stub_request(:post, write_url).to_return(expired)
+      refused(social_post, "bluesky")
+
+      expect(delivery(social_post, "bluesky").error).to eq("Bluesky session expired for com.atproto.repo.putRecord")
     end
   end
 
