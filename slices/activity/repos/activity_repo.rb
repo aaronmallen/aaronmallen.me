@@ -24,6 +24,10 @@ module Activity
         tally(found, types)
       end
 
+      def counts_by_day(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
+        narrowed(from:, to:, types:, repos:, text:, tags:).counts_by_day.to_a.to_h { [it.occurred_on, it.count] }
+      end
+
       def counts_by_month(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
         tallied = narrowed(from:, to:, types:, repos:, text:, tags:).counts_by_month.to_a
 

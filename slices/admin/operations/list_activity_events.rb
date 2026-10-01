@@ -29,6 +29,7 @@ module Admin
       include Deps[
         "i18n",
         activity_between: "activity.queries.activity_between",
+        activity_counts_by_day: "activity.queries.activity_counts_by_day",
         views_by_path: "analytics.queries.views_by_path",
       ]
 
@@ -42,13 +43,11 @@ module Admin
       def newer_day(from:, to:, day:, size:, **filters)
         return if day >= to
 
-        start = to
-        loop do
-          older = page(from, start, size, filters).continue_to
-          return start if older.nil? || older <= day
+        counts = activity_counts_by_day.call(from: day, to:, **filters)
+        starts = [to, *page_ends(counts, size).map(&:prev_day)].select { it > day }
+        last = starts.last
 
-          start = older
-        end
+        last == to || counts.keys.min <= last || rows_before?(from, day, filters) ? last : starts[-2]
       end
 
       private
@@ -89,12 +88,26 @@ module Admin
         end
       end
 
+      def page_ends(counts, size)
+        seen = 0
+
+        counts.each_with_object([]) do |(date, count), ends|
+          seen += count
+          next if seen < size
+
+          ends << date
+          seen = 0
+        end
+      end
+
       def post_line(row, views)
         i18n.t(
           "activity_page.sub_lines.post",
           link: row.link, status: status(row.status), views: view_count(row, views),
         )
       end
+
+      def rows_before?(from, day, filters) = activity_between.call(from:, to: day.prev_day, limit: 1, **filters).any?
 
       def shortened(name)
         squished = Blog::Whitespace.squish(Blog::Types::Text[name])

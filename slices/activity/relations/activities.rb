@@ -34,6 +34,12 @@ module Activity
 
       def commit_totals_by_repo = unordered.where(type: COMMIT).select(:repo, &COMMIT_TOTALS).group(:repo).order(:repo)
 
+      def counts_by_day
+        unordered.select(:occurred_on) { integer.count(occurred_on).as(:count) }.group(:occurred_on).order(
+          self[:occurred_on].desc,
+        )
+      end
+
       def counts_by_month
         counts = unordered.select(:type) do
           [string.to_char(occurred_on, MONTH_FORMAT).as(:month), integer.count(source_id).as(:count)]

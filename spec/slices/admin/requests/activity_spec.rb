@@ -318,6 +318,10 @@ RSpec.describe "Admin activity", type: :request do
     describe "paging" do
       let(:range) { { from: (today - 29).iso8601, to: today.iso8601 } }
 
+      def activity_reads(day)
+        counting { visit_activity(range.merge(day: day.iso8601)) }.grep(/FROM "activities"/).length
+      end
+
       def back_from_third_page
         lower_page_size(:admin, to: 1)
         visit_activity(range)
@@ -408,6 +412,20 @@ RSpec.describe "Admin activity", type: :request do
         back_from_third_page
 
         expect(newer_href).not_to include("day=")
+      end
+
+      it "reads the activities as often for the newer link on a deep page as on a shallow one" do
+        lower_page_size(:admin, to: 1)
+        (21..25).each { create(:commit, commit_date: today - it) }
+
+        expect(activity_reads(today - 20)).to eq(activity_reads(today - 1))
+      end
+
+      it "links from a day past the oldest event to the last page that holds one" do
+        visit_activity(range.merge(day: (today - 25).iso8601))
+        follow(newer_href)
+
+        expect(event_names).to eq(["three days ago", "twenty days ago"])
       end
 
       it "counts every event in the range, not one page" do
