@@ -89,6 +89,7 @@ module Admin
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post "/webmentions/:id/approve", to: "webmentions.approve", as: :approve_webmention, id: ID
     post "/webmentions/:id/spam", to: "webmentions.spam", as: :spam_webmention, id: ID
+    post "/webmentions/:id/ignore", to: "webmentions.ignore", as: :ignore_webmention, id: ID
     get "/sign-in", to: "sessions.new", as: :sign_in
     get "/auth/github/callback", to: "sessions.create", as: :github_callback
     post "/sign-out", to: "sessions.destroy", as: :sign_out

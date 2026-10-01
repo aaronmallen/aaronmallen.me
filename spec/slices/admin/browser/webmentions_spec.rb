@@ -46,6 +46,24 @@ RSpec.describe "Admin webmentions", type: :feature do
     end
   end
 
+  describe "ignoring a mention" do
+    before { click_button "Ignore" }
+
+    it "shows the toast" do
+      expect(page).to have_css(".toast", text: "Ignored · hidden from the post")
+    end
+
+    it "takes the mention out of pending" do
+      expect(page).to have_no_css(".wm-author", text: "Ada")
+    end
+
+    it "lists the mention under ignored" do
+      find(".seg-option", text: "ignored").click
+
+      expect(page).to have_css(".wm-author", text: "Ada")
+    end
+  end
+
   describe "turning a setting off" do
     before { uncheck "Receive webmentions" }
 

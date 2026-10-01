@@ -861,6 +861,7 @@ en:
           title: "Per post"
         row:
           approve: "Approve"
+          ignore: "Ignore"
           no_content: "no content · like only"
           spam: "Spam"
           types:
@@ -1224,10 +1225,12 @@ en:
           approved: "approved"
           empty:
             approved: "Nothing approved yet."
+            ignored: "Nothing ignored."
             pending: "Nothing waiting."
             spam: "No spam."
           filter: "Status"
           heading: "Webmentions"
+          ignored: "ignored"
           inbox: "Inbox"
           pending: "pending"
           pending_count: "%{count} pending"
@@ -1236,6 +1239,7 @@ en:
   webmentions_page:
     toasts:
       approved: "Approved · now visible on the post"
+      ignored: "Ignored · hidden from the post"
       saved: "Settings saved"
       spam: "Marked as spam"
       unchanged: "Nothing saved · no setting changed"

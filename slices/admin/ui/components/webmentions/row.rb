@@ -6,6 +6,7 @@ module Admin
       module Webmentions
         class Row < Component
           APPROVED = Blog::Types::WebmentionStatus["approved"]
+          IGNORED = Blog::Types::WebmentionStatus["ignored"]
           LIKE = Blog::Types::WebmentionType["like"]
           MENTION = Blog::Types::WebmentionType["mention"]
           REPLY = Blog::Types::WebmentionType["reply"]
@@ -40,6 +41,7 @@ module Admin
 
           def actions
             moderation(:admin_approve_webmention, ".approve", :pri) unless @mention.status == APPROVED
+            moderation(:admin_ignore_webmention, ".ignore", nil) unless @mention.status == IGNORED
             moderation(:admin_spam_webmention, ".spam", :warn) unless @mention.status == SPAM
           end
 

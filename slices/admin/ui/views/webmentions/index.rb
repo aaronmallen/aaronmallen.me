@@ -8,11 +8,17 @@ module Admin
           include Components::Webmentions
 
           APPROVED = Blog::Types::WebmentionStatus["approved"]
+          IGNORED = Blog::Types::WebmentionStatus["ignored"]
           PENDING = Blog::Types::WebmentionStatus["pending"]
           SPAM = Blog::Types::WebmentionStatus["spam"]
 
-          EMPTIES = { PENDING => ".empty.pending", APPROVED => ".empty.approved", SPAM => ".empty.spam" }.freeze
-          FILTERS = { PENDING => ".pending", APPROVED => ".approved", SPAM => ".spam" }.freeze
+          EMPTIES = {
+            PENDING => ".empty.pending",
+            APPROVED => ".empty.approved",
+            IGNORED => ".empty.ignored",
+            SPAM => ".empty.spam",
+          }.freeze
+          FILTERS = { PENDING => ".pending", APPROVED => ".approved", IGNORED => ".ignored", SPAM => ".spam" }.freeze
           SEPARATOR = " · "
 
           def initialize(counts:, filter:, inbox:, posts:, settings:)

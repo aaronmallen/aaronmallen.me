@@ -60,9 +60,10 @@ RSpec.describe "Admin webmentions", type: :request do
         create(:webmention, :reply, post: target, author_name: "Ada")
         create(:webmention, :approved, post: target, author_name: "Grace")
         create(:webmention, :spam, post: target, author_name: "Alan")
+        create(:webmention, :ignored, post: target, author_name: "Barbara")
       end
 
-      { "pending" => "Ada", "approved" => "Grace", "spam" => "Alan" }.each do |status, author|
+      { "pending" => "Ada", "approved" => "Grace", "spam" => "Alan", "ignored" => "Barbara" }.each do |status, author|
         it "shows only #{status} mentions with the #{status} filter" do
           get "/admin/webmentions", status: status
 
@@ -74,6 +75,13 @@ RSpec.describe "Admin webmentions", type: :request do
 
           expect(page).to have_css(".seg input[name='status'][value='#{status}'][checked]")
         end
+      end
+
+      it "puts the ignored filter before spam" do
+        get "/admin/webmentions"
+
+        expect(page.all(".seg input[name='status']", visible: :all).map(&:value))
+          .to eq(%w[pending approved ignored spam])
       end
 
       it "shows pending mentions without a filter" do
@@ -144,6 +152,13 @@ RSpec.describe "Admin webmentions", type: :request do
       expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.webmentions.index.empty.pending"))
     end
 
+    it "shows an empty inbox for the ignored filter with no ignored mentions" do
+      create(:webmention, :spam, post: target)
+      get "/admin/webmentions", status: "ignored"
+
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.webmentions.index.empty.ignored"))
+    end
+
     describe "moderating" do
       let(:mention) { create(:webmention, post: target) }
 
@@ -157,6 +172,12 @@ RSpec.describe "Admin webmentions", type: :request do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token
 
         expect(repo.by_status("spam").map(&:id)).to eq([mention.id])
+      end
+
+      it "ignores a mention" do
+        post "/admin/webmentions/#{mention.id}/ignore", _csrf_token: admin_csrf_token
+
+        expect(repo.by_status("ignored").map(&:id)).to eq([mention.id])
       end
 
       it "keeps the filter on the way back" do
@@ -180,7 +201,14 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_css("[data-toast]", text: "Marked as spam")
       end
 
-      %w[approve spam].each do |verdict|
+      it "shows the ignored toast" do
+        post "/admin/webmentions/#{mention.id}/ignore", _csrf_token: admin_csrf_token
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "Ignored · hidden from the post")
+      end
+
+      %w[approve spam ignore].each do |verdict|
         it "answers 404 when asked to #{verdict} a mention that isn't there" do
           post "/admin/webmentions/0/#{verdict}", _csrf_token: admin_csrf_token
 
@@ -188,12 +216,13 @@ RSpec.describe "Admin webmentions", type: :request do
         end
       end
 
-      it "offers both buttons on a pending mention", :aggregate_failures do
+      it "offers every button on a pending mention", :aggregate_failures do
         mention
         get "/admin/webmentions"
 
         expect(page).to have_button("Approve")
         expect(page).to have_button("Spam")
+        expect(page).to have_button("Ignore")
       end
 
       it "hides Approve on an approved mention", :aggregate_failures do
@@ -202,6 +231,7 @@ RSpec.describe "Admin webmentions", type: :request do
 
         expect(page).to have_no_button("Approve")
         expect(page).to have_button("Spam")
+        expect(page).to have_button("Ignore")
       end
 
       it "hides Spam on a mention already marked as spam", :aggregate_failures do
@@ -210,6 +240,16 @@ RSpec.describe "Admin webmentions", type: :request do
 
         expect(page).to have_button("Approve")
         expect(page).to have_no_button("Spam")
+        expect(page).to have_button("Ignore")
+      end
+
+      it "hides Ignore on an ignored mention", :aggregate_failures do
+        create(:webmention, :ignored, post: target)
+        get "/admin/webmentions", status: "ignored"
+
+        expect(page).to have_button("Approve")
+        expect(page).to have_button("Spam")
+        expect(page).to have_no_button("Ignore")
       end
     end
 
