@@ -13,6 +13,7 @@ module Admin
           prop :counts, Blog::Types::Array.of(Blog::Types::Hash)
           prop :errors, Blog::Types::Hash
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
+          prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :values, Blog::Types::Hash
           prop :editing, Blog::Types::Integer.optional, default: nil
 
@@ -98,6 +99,7 @@ module Admin
                 part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), @values[:parts].size > 1)
               end
             end
+            Mentions(people: @people)
             div(class: "compose-add") { add_button }
             FieldError(field: :parts, errors: @errors)
           end

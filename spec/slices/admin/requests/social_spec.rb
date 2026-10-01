@@ -49,6 +49,19 @@ RSpec.describe "Admin social", type: :request do
 
         expect(counts.first).to eq("Mastodon 29/500")
       end
+
+      it "ships the directory as a hidden list of people to mention" do
+        create(:person, name: "Ada Lovelace", key: "ada-lovelace")
+        get "/admin/social"
+
+        expect(page).to have_css("[data-social-mentions][hidden] [role='option']", text: "Ada Lovelace", visible: :all)
+      end
+
+      it "ships no list with nobody in the directory" do
+        get "/admin/social"
+
+        expect(page).to have_no_css("[data-social-mentions]")
+      end
     end
 
     describe "posting now" do
@@ -62,6 +75,13 @@ RSpec.describe "Admin social", type: :request do
         compose(parts: ["hello"], mode: "now")
 
         expect(repo.due_scheduled(Time.now)).to have(1).item
+      end
+
+      it "takes a mention typed by hand" do
+        create(:person, key: "ada-lovelace")
+        compose(parts: ["hi @{ada-lovelace}"], mode: "now")
+
+        expect(repo.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
       end
 
       it "keeps the parts in order" do

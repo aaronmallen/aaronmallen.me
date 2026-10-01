@@ -15,6 +15,7 @@ module Admin
         list_networks: "operations.list_networks",
         list_social_accounts: "operations.list_social_accounts",
         open_suggestion_counts: "suggestions.queries.open_counts_for_social_posts",
+        people: "social.queries.people",
         review_social_edits: "operations.review_social_edits",
         settings: "settings",
         social_post_counts_by_status: "social.queries.social_post_counts_by_status",
@@ -40,6 +41,7 @@ module Admin
           editing: editing&.id,
           errors:,
           networks: list_networks.call(selected: targets(params, editing)),
+          people: people.call,
           suggestions: review_social_edits.call(editing),
           values:,
         }

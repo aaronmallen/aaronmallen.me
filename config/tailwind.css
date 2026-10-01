@@ -2659,11 +2659,45 @@
 }
 
 @utility compose-part {
-  @apply flex flex-col gap-2;
+  @apply relative flex flex-col gap-2;
 }
 
 @utility compose-body {
   @apply min-h-compose-body font-mono text-compose;
+}
+
+@utility compose-mentions {
+  @apply absolute right-0 left-0 z-30 mt-1 overflow-y-auto rounded-card border border-line bg-ground-sunk p-2;
+  @apply shadow-palette;
+  max-height: min(40vh, 320px);
+}
+
+@utility compose-mention-group {
+  @apply px-2.5 pt-2.5 pb-1 font-mono text-label text-mk-orange-text uppercase;
+}
+
+@utility compose-mention {
+  @apply flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-0.5 rounded-btn px-2.5 py-2 text-ink;
+
+  &[aria-selected="true"] {
+    @apply bg-wash;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap content-center;
+  }
+}
+
+@utility compose-mention-name {
+  @apply min-w-0 font-mono text-input;
+}
+
+@utility compose-mention-handles {
+  @apply min-w-0 font-mono text-badge break-all text-ink-muted;
+
+  :where(.compose-mention[aria-selected="true"]) > & {
+    @apply text-ink;
+  }
 }
 
 @utility compose-part-foot {

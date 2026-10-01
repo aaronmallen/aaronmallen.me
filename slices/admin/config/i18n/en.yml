@@ -556,6 +556,16 @@ en:
           targets:
             blank: "Pick a network."
             unavailable: "That network has no credentials."
+        mentions:
+          chosen: "Mentioned {name}"
+          groups:
+            bluesky: "Bluesky only"
+            both: "Mastodon and Bluesky"
+            mastodon: "Mastodon only"
+          label: "People to mention"
+          results:
+            one: "{count} person"
+            other: "{count} people"
         part:
           body: "Post text"
           placeholder: "Say the thing. It goes out everywhere you pick."

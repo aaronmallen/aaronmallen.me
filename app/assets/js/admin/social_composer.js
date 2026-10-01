@@ -1,4 +1,5 @@
 import { renderCounts, selectedTargets } from "./social_counts.js";
+import { setupMentions } from "./social_mentions.js";
 
 const SCHEDULE = "schedule";
 
@@ -50,6 +51,7 @@ function setupComposer(form) {
     renderMode();
     render();
   });
+  setupMentions(form);
   render();
 }
 

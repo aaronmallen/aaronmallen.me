@@ -17,6 +17,16 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def composers
+    {
+      "social mention" => lambda do
+        visit "/admin/social"
+        find("[data-social-body]").send_keys("@ada")
+        find("[data-social-mentions]")
+      end,
+    }
+  end
+
   def dialogs = { "task modal" => -> { open_modal }, "task panel" => -> { open_panel } }
 
   def journal_editors
@@ -92,7 +102,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def person = @person ||= create(:person, :bluesky, name: "Ada Lovelace", key: "ada-lovelace")
 
-  def screens = pages.merge(people, dialogs, journal_editors)
+  def screens = pages.merge(people, composers, dialogs, journal_editors)
 
   def seed
     seed_analytics
