@@ -5,6 +5,93 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-01
+
+### Added
+
+- A JSON API at `/api/v1` lists, reads, creates, changes and deletes journal entries, tasks, task comments, task
+  links and sprints. It takes a bearer token minted on a new API tokens page in the admin, which shows each token
+  once and can revoke it. A token never expires. `GET /api/v1/openapi.json` serves an OpenAPI 3.1 document of every
+  route. The MCP tools for these records now run through the same code and answer as before.
+- Drag a task row by its grip to reorder it in its list or sprint, or move a focused row with Alt+Up and Alt+Down.
+  A move saves at once, and a failed save puts the rows back and shows a toast.
+- `read_analytics` answers far more:
+  - `path` narrows the answer to one page, with its days, referrers, countries, sources, devices, scroll depth and
+    the pages on the site that sent readers to it. For a published post it adds `since_publish`, which numbers the
+    days from the day it went out, so two posts line up.
+  - `hours` gives views and visitors for each hour, and `since` counts views, visitors and read time from a given
+    time. `read_spread` sorts views by read time and gives the median. These read raw visits, so they reach back
+    90 days, and the answer says so when a range starts before that.
+  - `reach` counts visitors once a month, `devices` splits views into desktop, mobile, tablet and in-app, and
+    `entry_pages` and `exit_pages` name where each day's visits start and end.
+  - `sources` counts visits by the `?ref=` on the link. Links in posts sent to Mastodon and Bluesky carry
+    `?ref=mastodon` or `?ref=bluesky`, and links in the Atom feed carry `?ref=feed`.
+  - The tool's description defines a view, a visitor, a bounce and read seconds, and the answer names its
+    `time_zone`.
+- Each row on the admin posts list shows visitors beside views.
+- `read_activity` rows carry their tags.
+- A webmention marked spam can carry a note saying why, in the admin and through `moderate_webmention`.
+  `list_webmentions` returns it as `spam_reason`, and gives `received_at` in Chicago time with a `time_zone`.
+- Marking a message spam flags its sender, and later messages from that address land as spam. Marking one of their
+  messages read or unread clears the flag. Spam messages go 30 days after they were marked.
+- The @ list in the social composer ends with an Add New row, which opens a form to add a person without leaving the
+  post. Each handle field on that form, and on the People screen, can search Mastodon or Bluesky for the account
+  when that network has credentials.
+- On a published post, saving a changed body opens a dialog that asks for the edit note. The note's card now sits
+  under the body editor rather than in the sidebar.
+- The glasses favicon is back, with an apple-touch-icon, a web app manifest and a theme color for light and dark.
+  `mise run assets:icons` draws the icons from the SVG.
+- `mise run db:seed` fills a development database with a record in every state, from tasks and sprints to posts,
+  webmentions, messages and analytics. A second run adds nothing.
+
+### Changed
+
+- Anonymous visitors to the home page, about, projects, the post list, a post and a tag page get a copy that
+  Cloudflare may keep for five minutes. A missing photo's 404 keeps for one minute.
+- Edit notes read newest day first, each under an orange "Edited" date, on the post page and in the Atom feed.
+- The contact form takes at most 20 messages an hour from everyone together, set by `CONTACT_TOTAL_THROTTLE_LIMIT`.
+  The limit for one sender treats every IPv6 address in a /64 as one sender.
+- The MCP `suggest_edits` and `accept_suggestion_edits` tools, and accepting a suggestion in the admin, work on
+  drafts and scheduled posts only. A published post changes through an edit with a note.
+- `read_analytics` and `summarize_activity` refuse a range longer than 366 days.
+- A closed GitHub or Linear issue syncs once a day rather than every run, so a reopened issue can take up to a day
+  to show.
+- An MCP client that holds no live token and has not connected in 90 days goes, with its codes and tokens.
+
+### Removed
+
+- The up and down carets on task rows. With scripts off, the admin can no longer reorder tasks.
+
+### Fixed
+
+- Yesterday's analytics read zero between midnight and the 01:00 rollup, or all day after a failed rollup.
+- A read sent after midnight for a page opened before it failed, so the visit lost its read time.
+- Visits to a post or tag page that does not exist no longer count in analytics.
+- The Atom feed now changes when an edit note, a tag name or a deleted post changes it. Before, a reader could keep
+  a stale copy.
+- A message near the length cap with line breaks passed the counter, then failed as too long.
+- A thread sent to Bluesky signed in once per part, and a long one could hit Bluesky's sign-in limit.
+- A webmention sent again inside the throttle window got a 202 but never landed. It now gets a 429.
+- A webmention endpoint that answers 4xx no longer retries, and one dead endpoint no longer leaves later edits
+  pinging links the post dropped.
+- Searching the activity feed or `read_activity` for two repos dropped every commit.
+- One post that failed to publish held back every post due after it.
+- A task capture or edit refused for its sprint date kept the task or its new title and tags.
+- Two tasks or projects saved at the same moment could take the same place, and a project save then failed with a
+  500.
+- Reordering a task did nothing when it shared a place with its neighbor.
+- A photo uploaded while the nightly sweep ran could vanish with the post that just claimed it.
+- An MCP client that connects to OAuth 2.1 without a `redirect_uri` could not finish signing in.
+- The first request or job after Postgres dropped its connections failed with a 500.
+- A GitHub issue sync with no token logged a failure on Today every 15 minutes.
+
+### Security
+
+- Refreshing an MCP token ends the old access token at once rather than an hour later.
+- Revoking an MCP client while it refreshed a token could leave it a live token.
+- A request body over 1 MB, or 25 MB for a photo upload, gets a 413, and a multipart body sent anywhere but photo
+  uploads gets a 415.
+
 ## [1.3.0] - 2026-09-30
 
 ### Added
@@ -162,7 +249,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.3.0...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.0...HEAD
+[1.4.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
