@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809]
+amended: [AA-559, AA-571, AA-803, AA-809, "#236"]
 tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
 ---
 
@@ -64,10 +64,14 @@ the one exception, and AA-584 records why.
   this way only where an import would close a cycle. Anywhere else the caller imports an operation that enqueues it,
   the way admin calls `record.operations.queue_commit_import` (AA-716).
 
-**Seeds follow the rule, specs do not.** `config/db/seeds.rb` checks `projects.queries.work_entries` and adds
-development work entries through `projects.operations.add_work_entry`. A spec sets rows up straight out of the owning
-slice's container. A test arranges the database rather than serving a request, so the rule it walks past is one no
-caller runs.
+**Seeds follow the rule, specs do not.** `config/db/seeds.rb` loads every file under `config/db/seeds/<env>/`, and
+only `development/` holds any. A seed reads and writes through a slice's exports wherever one covers the record. Where
+none does, it calls the owning slice's own operation, and hands it a stand-in for any remote service: the issue sync,
+commit import, client registration, webmention check and social delivery. Where no operation writes the record
+either, it uses the owning slice's repo: backdated analytics events, which that slice's own rollup then reads, and the
+id of a new MCP client. A seed never reaches one slice's records through another. A spec sets rows up straight out of
+the owning slice's container. A test arranges the database rather than serving a request, so the rule it walks past
+is one no caller runs.
 
 ## Alternatives
 
