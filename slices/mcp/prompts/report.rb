@@ -28,6 +28,7 @@ module MCP
           last = Blog::TimeZone.parse_day(args[:to].to_s)
           refuse("give from and to as days, such as 2026-01-01") unless first && last
           refuse("from comes after to") if first > last
+          refuse(Tools::Base::LONG_RANGE) if last - first >= Tools::Base::LONGEST_RANGE
 
           Prompt::Result.new(description: headline(first, last), messages: [say(instructions(first, last))])
         end

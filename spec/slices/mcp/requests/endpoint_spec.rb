@@ -1891,6 +1891,19 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(document.dig("error", "data")).to include("from comes after to")
     end
 
+    it "refuses a range longer than 366 days", :aggregate_failures do
+      fetch_prompt("report", from: "2024-01-01", to: "2025-01-01")
+
+      expect(document.dig("error", "code")).to eq(-32_602)
+      expect(document.dig("error", "data")).to include("give a range of 366 days or fewer")
+    end
+
+    it "reports on a range of 366 days" do
+      fetch_prompt("report", from: "2024-01-01", to: "2024-12-31")
+
+      expect(result.fetch("description")).to eq("Report on 2024-01-01 to 2024-12-31")
+    end
+
     it "refuses a call with no end" do
       fetch_prompt("report", from: "2026-01-01")
 
