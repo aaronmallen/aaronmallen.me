@@ -96,6 +96,7 @@ one.
 | [0089][0089] | Build every API response with Alba serializers | ![Active][active] | 2026-10-01 |
 | [0090][0090] | Let Cloudflare keep anonymous public pages for five minutes | ![Active][active] | 2026-10-01 |
 | [0091][0091] | Fetch the palette's open tasks from a session-only admin route when it opens | ![Active][active] | 2026-10-01 |
+| [0092][0092] | Keep task history in task_events and a task_timeline view | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -188,6 +189,7 @@ one.
 [0089]: 0089-build-every-api-response-with-alba-serializers.md
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
+[0092]: 0092-keep-task-history-in-task-events-and-a-task-timeline-view.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
