@@ -1,16 +1,18 @@
 ---
 id: "0091"
 title: Fetch the palette's open tasks from a session-only admin route when it opens
-status: active
+status: superseded
 created: 2026-10-01
 area: [admin, assets]
+superseded-by: "0096"
 issue: "#201"
+amended: ["#299"]
 tags: [admin, palette, tasks, fetch, json, javascript, performance]
 ---
 
 # ADR 0091: Fetch the palette's open tasks from a session-only admin route when it opens
 
-![Active][status]
+[![Superseded][status]][0096]
 
 ## Context
 
@@ -61,4 +63,5 @@ checks that they do.
 
 [0053]: 0053-navigate-the-admin-through-a-command-palette-not-a-tab-strip.md
 [0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[0096]: 0096-search-every-kind-through-tsvector-columns-and-one-view-in-a-search-slice.md
+[status]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
