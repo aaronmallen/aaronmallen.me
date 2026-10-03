@@ -62,6 +62,7 @@ RSpec.describe "Admin bulk task actions", type: :request do
       end
 
       it "keeps the search and the page in the bar", :aggregate_failures do
+        2.times { create(:task, title: "Plan a trip") }
         lower_page_size(:admin, to: 1)
         get "/admin/tasks", filter: "next", page: 2, q: "a"
 
