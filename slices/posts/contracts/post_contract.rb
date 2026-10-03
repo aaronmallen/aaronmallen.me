@@ -9,7 +9,11 @@ module Posts
       PUBLISH = Blog::Types::PostIntent["publish"]
       TOO_LONG = "too_long"
 
-      include Deps[announcement: "operations.compose_announcement", networks: "social.networks.all"]
+      include Deps[
+        announcement: "operations.compose_announcement",
+        link_tagger: "social.links.tagger",
+        networks: "social.networks.all",
+      ]
 
       params do
         required(:title).value(Blog::Types::TrimmedText, :filled?)
@@ -47,7 +51,10 @@ module Posts
 
         typed = Blog::Types::Text[values[:syndication_body]]
         body = announcement.compose(body: typed, slug: values[:slug], title: values[:title])
-        next if values[:syndication_targets].to_a.all? { networks.fetch(it).within_limit?(body) }
+        fits = values[:syndication_targets].to_a.all? do |name|
+          networks.fetch(name).within_limit?(link_tagger.call(body, name))
+        end
+        next if fits
 
         key(:syndication_body).failure(typed.strip.empty? ? ANNOUNCEMENT_TOO_LONG : TOO_LONG)
       end

@@ -532,6 +532,8 @@ RSpec.describe "Admin post editor", type: :request do
           syndication_targets: %w[mastodon bluesky] }
       end
 
+      def bluesky_only = { syndication_targets: %w[bluesky] }
+
       def queued
         Social::Jobs::SyndicatePost.drain
         Social::Slice["repos.social_post_repo"].queued
@@ -687,6 +689,26 @@ RSpec.describe "Admin post editor", type: :request do
         expect(last_response.status).to eq(422)
         expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
         expect(post_repo.all).to be_empty
+      end
+
+      it "refuses an announcement that fits Bluesky only before its link to the site is tagged" do
+        typed = "#{'a' * 262} https://aaronmallen.me/writing/hello"
+        save(intent: "publish", title: "Hello", **card, **bluesky_only, syndication_body: typed)
+
+        expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
+      end
+
+      it "refuses a title and link that fit Bluesky only before the link is tagged" do
+        save(intent: "publish", title: "a" * 262, slug: "hello", **card, **bluesky_only, syndication_body: "")
+
+        expect(field_error)
+          .to eq(i18n.t("ui.components.posts.field_error.syndication_body.announcement_too_long"))
+      end
+
+      it "publishes a title and link that still fit Bluesky once the link is tagged" do
+        save(intent: "publish", title: "a" * 250, slug: "hello", **card, **bluesky_only, syndication_body: "")
+
+        expect(post_repo.all.last.status).to eq("published")
       end
 
       it "names the title and link when the blank box is what goes over", :aggregate_failures do

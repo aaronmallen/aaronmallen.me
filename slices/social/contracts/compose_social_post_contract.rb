@@ -12,7 +12,11 @@ module Social
       UNAVAILABLE = "unavailable"
       UNKNOWN_MENTION = "unknown_mention"
 
-      include Deps[mention_directory: "queries.mention_directory", networks: "networks.all"]
+      include Deps[
+        link_tagger: "links.tagger",
+        mention_directory: "queries.mention_directory",
+        networks: "networks.all",
+      ]
 
       params do
         required(:parts).value(Blog::Types::TextList, :filled?)
@@ -44,7 +48,9 @@ module Social
         parts, targets = values.values_at(:parts, :targets)
         directory = mention_directory.call(parts)
         over = targets.any? do |name|
-          parts.any? { |body| !networks.fetch(name).within_limit?(directory.expand(body, name).text) }
+          parts.any? do |body|
+            !networks.fetch(name).within_limit?(directory.expand(link_tagger.call(body, name), name).text)
+          end
         end
         key(:parts).failure(TOO_LONG) if over
       end

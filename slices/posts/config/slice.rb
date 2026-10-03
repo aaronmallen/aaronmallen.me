@@ -8,7 +8,7 @@ module Posts
 
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
-    import keys: %w[networks.all], from: :social
+    import keys: %w[links.tagger networks.all], from: :social
 
     export %w[
       operations.compose_announcement operations.delete_post operations.lock_post operations.record_post_webmentions

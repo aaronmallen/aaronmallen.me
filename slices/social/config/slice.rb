@@ -11,7 +11,7 @@ module Social
     ], from: :posts
 
     export %w[
-      networks.all operations.compose_social_post operations.delete_person operations.delete_social_post
+      links.tagger networks.all operations.compose_social_post operations.delete_person operations.delete_social_post
       operations.lock_editable_social_post operations.moderate_webmention operations.receive_webmention
       operations.replace_social_post_parts operations.save_person operations.save_social_post
       operations.update_webmention_settings queries.counted_webmentions_for_post queries.editable_social_post

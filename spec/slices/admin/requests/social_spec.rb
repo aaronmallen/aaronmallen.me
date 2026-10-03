@@ -341,6 +341,18 @@ RSpec.describe "Admin social", type: :request do
         expect(repo.queued).to have(1).item
       end
 
+      it "rejects a part that fits Bluesky only before its link to the site is tagged" do
+        compose(parts: ["#{'a' * 262} https://aaronmallen.me/writing/hello"], targets: %w[bluesky])
+
+        expect(page).to have_css(".field-error", text: "over the limit")
+      end
+
+      it "takes a part that still fits Bluesky once its link to the site is tagged" do
+        compose(parts: ["#{'a' * 251} https://aaronmallen.me/writing/hello"], targets: %w[bluesky])
+
+        expect(repo.queued).to have(1).item
+      end
+
       it "rejects a mention of nobody in the directory" do
         compose(parts: ["hi @{nobody}"])
 
