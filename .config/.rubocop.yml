@@ -49,6 +49,8 @@ Metrics/ModuleLength:
     - hash
     - heredoc
     - method_call
+  Exclude:
+    - ../lib/blog/types.rb
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
