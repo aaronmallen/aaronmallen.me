@@ -67,6 +67,10 @@ module Activity
         order(self[:occurred_on].desc, self[:occurred_at].desc, self[:type].asc, self[:source_id].desc)
       end
 
+      def oldest_first
+        order(self[:occurred_on].asc, self[:occurred_at].asc, self[:type].asc, self[:source_id].asc)
+      end
+
       def tagged(names)
         folded = names.map { it.to_s.downcase }.uniq
 

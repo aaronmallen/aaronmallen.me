@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, posts, search, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -26,7 +26,7 @@ allowed.
 ## Decision
 
 A slice's SQL may read a table another slice owns. It never writes one. We take the SQL path when the export path
-would cost one import per owning slice, or would close a cycle the record on exports refuses. These six reads
+would cost one import per owning slice, or would close a cycle the record on exports refuses. These reads
 cross today:
 
 - **The `activities` view**, built in `config/db/migrate/20260928000035_create_activities_view.rb` and read by
@@ -37,6 +37,10 @@ cross today:
 - **The `attention` view**, built in `config/db/migrate/20261003000075_create_attention_view.rb` and read by
   `slices/activity/relations/attention.rb`, unions `tasks`, `posts` and `journal_entries`, which `tasks`, `posts`
   and `record` own. The record on the stalled list holds why it lives in `activity`.
+- **The `review_tasks` and `work_session_days` views**, built in
+  `config/db/migrate/20261003000082_create_review_views.rb` and read by `slices/activity/relations/review_tasks.rb`
+  and `slices/activity/relations/work_session_days.rb`, read `tasks`, `sprints` and `work_sessions`, which `tasks`
+  owns. The record on building the review in one activity query holds why they live in `activity`.
 - **The `search_documents` view**, built in `config/db/migrate/20261003000076_create_search_documents.rb` and
   read by `slices/search/relations/search_documents.rb`, unions `tasks`, `posts`, `social_posts`,
   `social_post_parts`, `journal_entries`, `commits`, `projects`, `work_entries`, `people`, `messages` and
