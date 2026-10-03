@@ -16,6 +16,8 @@ en:
       rules:
         edits:
           max_size?: "many"
+        other_id:
+          lt?: "missing"
         original:
           format?: "blank"
         reason:

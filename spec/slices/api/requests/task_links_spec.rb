@@ -53,6 +53,11 @@ RSpec.describe "API task links", type: :request do
         .to eq([{ "other_id" => ["that task is gone, so find another"] }, 422])
     end
 
+    it "refuses a task on the other end past the integer range as one that is gone" do
+      expect([link(task.id, kind: "relates", other_id: 2**31).fetch("errors"), status])
+        .to eq([{ "other_id" => ["that task is gone, so find another"] }, 422])
+    end
+
     it "refuses a kind it does not know with a 422" do
       expect([link(task.id, kind: "follows", other_id: other.id).fetch("errors").keys, status])
         .to eq([%w[kind], 422])

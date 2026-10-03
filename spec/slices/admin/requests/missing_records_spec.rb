@@ -2,6 +2,7 @@
 
 RSpec.describe "Admin records that are gone", type: :request do
   missing = 999_999
+  past_range = 2**31
 
   {
     "/journal/#{missing}" => { entry: { body: "after" } },
@@ -20,6 +21,8 @@ RSpec.describe "Admin records that are gone", type: :request do
     "/tasks/#{missing}/complete" => {},
     "/tasks/#{missing}/delete" => {},
     "/tasks/#{missing}/links" => { link: { key: "T-1", kind: "blocks" } },
+    "/tasks/#{past_range}" => { task: { title: "mow the lawn" } },
+    "/tasks/#{past_range}/links" => { link: { kind: "blocks", other_id: "1" } },
     "/tasks/#{missing}/move/today" => {},
     "/tasks/#{missing}/place" => {},
     "/tasks/#{missing}/reopen" => {},

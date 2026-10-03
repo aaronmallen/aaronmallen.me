@@ -454,6 +454,14 @@ RSpec.describe "Admin task links", type: :request do
       expect(page.find("#task-#{task.id}-link-other-id-error").text)
         .to eq(i18n.t("ui.components.tasks.field_error.other_id.missing"))
     end
+
+    it "says the task is gone when its ID runs past the integer range", :aggregate_failures do
+      link(other_id: 2**31)
+
+      expect(last_response.status).to eq(422)
+      expect(page.find("#task-#{task.id}-link-other-id-error").text)
+        .to eq(i18n.t("ui.components.tasks.field_error.other_id.missing"))
+    end
   end
 
   describe "removing a link" do

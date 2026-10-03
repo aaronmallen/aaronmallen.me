@@ -46,7 +46,7 @@ module Blog
       gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),
     ).optional.fallback(nil)
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
-    Id = Types::Params::Integer.constrained(gt: 0)
+    Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdParam = Id.optional.fallback(nil)
     LocalTime = Types::Instance(Object).constructor do |value|
       text = TrimmedText[value]
