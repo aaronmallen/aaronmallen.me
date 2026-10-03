@@ -11,7 +11,7 @@ module Tasks
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
 
-      def still_there(provider) = task_sources.still_there(provider).to_a
+      def for_provider(provider) = task_sources.where(provider:).to_a
 
       def with_sync_lock(provider, &)
         task_sources.with_advisory_lock(SYNC_LOCKS.fetch(provider), busy: Failure(:lock_busy), &)

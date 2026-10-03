@@ -466,6 +466,45 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "a gone issue assigned to me again" do
+    def linked = Tasks::Slice["relations.task_sources"].where(remote_id: "I_seven").pluck(:task_id)
+
+    %w[deleted moved].each do |state|
+      it "reopens the task it had when it was #{state}", :aggregate_failures do
+        task = tracked(:canceled, state:)
+        stub_assigned(issue)
+        sync
+
+        expect(linked).to eq([task.id])
+        expect(repo.by_id(task.id)).to have_attributes(status: "open", source: have_attributes(remote_state: "open"))
+      end
+    end
+
+    it "lets the rest of the run import" do
+      tracked(:canceled, state: "deleted")
+      stub_assigned(issue, github_issue("I_eight", number: 8))
+      sync
+
+      expect(imported("I_eight").status).to eq("open")
+    end
+
+    it "lets the run clear a failure the last run left" do
+      tracked(:canceled, state: "deleted")
+      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited)
+      stub_assigned(issue)
+      sync
+
+      expect(failure).to be_nil
+    end
+
+    it "is not asked about while it stays gone" do
+      tracked(:canceled, state: "deleted")
+      sync
+
+      expect(github_request(GitHubGraphQL::ISSUES_QUERY)).not_to have_been_made
+    end
+  end
+
   describe "an issue moved to another repository" do
     let(:moved_url) { "https://github.com/aaronmallen/elsewhere/issues/3" }
 

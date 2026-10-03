@@ -3,8 +3,7 @@
 module Tasks
   module Operations
     class SyncIssues < Blog::Operation
-      CHECK_CLOSED_EVERY = 24 * 60 * 60
-      CLOSED = %w[completed not_planned unassigned].map { Blog::Types::TaskSourceState[it] }.freeze
+      CLOSED = Structs::TaskSource::CLOSED
       COMMENT_FIELDS = %i[author body url].freeze
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       EXTERNAL = Blog::Types::TaskList["external"]
@@ -53,10 +52,6 @@ module Tasks
       end
 
       def drop(gone) = gone.empty? || task_comment_repo.delete_synced(gone.map(&:id))
-
-      def due?(source, now)
-        !CLOSED.include?(source.remote_state) || source.checked_at.nil? || source.checked_at <= now - CHECK_CLOSED_EVERY
-      end
 
       def fetch(provider, client, known, now)
         return Failure(:not_configured) unless client.configured?
@@ -147,10 +142,10 @@ module Tasks
         issue.fetch(:labels, Blog::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }.uniq
       end
 
-      def tracked(provider) = task_source_repo.still_there(provider).to_h { [it.remote_id, it] }
+      def tracked(provider) = task_source_repo.for_provider(provider).to_h { [it.remote_id, it] }
 
       def unseen(known, assigned, now)
-        known.except(*assigned.map { it[:id] }).values.select { due?(it, now) }.to_h { [it.remote_id, it.url] }
+        known.except(*assigned.map { it[:id] }).values.select { it.due?(now) }.to_h { [it.remote_id, it.url] }
       end
     end
   end

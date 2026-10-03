@@ -110,6 +110,16 @@ RSpec.describe Tasks::Operations::SyncIssues do
     end
   end
 
+  describe "a deleted issue assigned to me again" do
+    it "reopens its task instead of importing another" do
+      task = tracked(:canceled, state: "deleted")
+      assign(issue)
+      sync
+
+      expect(imported).to have_attributes(id: task.id, status: "open")
+    end
+  end
+
   describe "a run" do
     before do
       tracked
