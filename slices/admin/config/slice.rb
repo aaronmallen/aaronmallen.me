@@ -25,7 +25,7 @@ module Admin
       queries.visitors_for_day
     ], from: :analytics
 
-    import keys: %w[operations.mint_token operations.revoke_token queries.live_tokens], from: :api
+    import keys: %w[operations.mint_token operations.revoke_token queries.calendar queries.live_tokens], from: :api
 
     import keys: %w[operations.mark_message queries.by_status queries.count_with_status], from: :contact
 

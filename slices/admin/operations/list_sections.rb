@@ -7,6 +7,7 @@ module Admin
         %i[today daily fa-sun admin_root].freeze,
         %i[tasks daily fa-list-check admin_tasks].freeze,
         %i[journal daily fa-feather admin_journal].freeze,
+        %i[calendar daily fa-calendar-days admin_calendar].freeze,
         %i[posts publish fa-file-lines admin_posts].freeze,
         %i[social publish fa-paper-plane admin_social].freeze,
         %i[projects publish fa-cube admin_projects].freeze,

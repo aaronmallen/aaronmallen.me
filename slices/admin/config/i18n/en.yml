@@ -227,6 +227,41 @@ en:
       bulk_bar:
         all: "Select all"
         ticked: "%{count} ticked"
+      calendar:
+        cell:
+          journal: "journal"
+          social:
+            one: "%{count} social post"
+            other: "%{count} social posts"
+          tasks:
+            one: "%{count} task"
+            other: "%{count} tasks"
+        month_pager:
+          label: "Months"
+          next: "Next month, %{month}"
+          previous: "Previous month, %{month}"
+          today: "This month"
+        panel:
+          dated: "%{status} · %{time}"
+          empty: "Nothing lands on this day."
+          journal: "Journal"
+          journal_entry: "Journal entry"
+          label: "Day"
+          no_tasks: "No tasks in this sprint yet."
+          posts: "Posts"
+          social_posts: "Social posts"
+          sprint: "Sprint · %{tasks}"
+          statuses:
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            open: "open"
+            posted: "posted"
+            published: "published"
+            scheduled: "scheduled"
+          tasks:
+            one: "%{count} task"
+            other: "%{count} tasks"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"
@@ -372,6 +407,7 @@ en:
         sections:
           activity: "activity"
           analytics: "analytics"
+          calendar: "calendar"
           clients: "clients"
           journal: "journal"
           messages: "messages"
@@ -1152,6 +1188,9 @@ en:
           views: "Page views"
           visitors: "Visitors"
           webmentions: "Webmentions"
+      calendar:
+        show:
+          heading: "Calendar"
       clients:
         index:
           connected: "Connected clients"

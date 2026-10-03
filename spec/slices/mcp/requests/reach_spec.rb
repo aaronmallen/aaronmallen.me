@@ -4,6 +4,7 @@ RSpec.describe "MCP reach", type: :request do
   def self.exempt
     {
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
+      "admin.operations.build_calendar_page" => "builds the admin's calendar screen; #361 adds list_calendar",
       "admin.operations.build_navigation" => "builds the admin's menu",
       "admin.operations.build_person_editor" => "builds the admin's people editor; the MCP has no people tool",
       "admin.operations.build_post_editor" => "builds the admin's post editor; read_post and update_post cover a post",

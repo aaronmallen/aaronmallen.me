@@ -42,8 +42,8 @@ RSpec.describe "Admin layout", type: :request do
       sections = page.all("[data-palette-group]:not([aria-labelledby$='-actions']) [data-palette-option]")
 
       expect(sections.map { it["data-palette-href"] })
-        .to eq(%w[/admin /admin/tasks /admin/journal /admin/posts /admin/social /admin/projects /admin/messages
-                  /admin/webmentions /admin/activity /admin/analytics /admin/tags /admin/people
+        .to eq(%w[/admin /admin/tasks /admin/journal /admin/calendar /admin/posts /admin/social /admin/projects
+                  /admin/messages /admin/webmentions /admin/activity /admin/analytics /admin/tags /admin/people
                   /admin/clients /admin/tokens])
     end
 

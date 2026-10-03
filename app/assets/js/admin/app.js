@@ -1,5 +1,6 @@
 import { setupAutosubmit } from "./autosubmit.js";
 import { setupBulk } from "./bulk.js";
+import { setupCalendars } from "./calendar.js";
 import { setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
 import { setupDialogs } from "./dialog.js";
@@ -21,6 +22,7 @@ import { setupWorkForms } from "./work_form.js";
 
 setupAutosubmit();
 setupBulk();
+setupCalendars();
 setupCommitImports();
 setupConfirms();
 setupDialogs();

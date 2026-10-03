@@ -17,6 +17,10 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def calendars
+    { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{Blog::TimeZone.today.iso8601}" }
+  end
+
   def composers
     {
       "social mention" => lambda do
@@ -126,10 +130,11 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def screens = pages.merge(people, person_search, composers, dialogs, journal_editors, selections)
+  def screens = pages.merge(calendars, people, person_search, composers, dialogs, journal_editors, selections)
 
   def seed
     seed_analytics
+    seed_calendar
     seed_tasks
     seed_writing
     create(
@@ -149,6 +154,15 @@ RSpec.describe "Admin screens", type: :feature do
     create(:analytics_rollup_path, day: today, path: "/writing/a-very-long-slug-for-a-post", views: 120)
     create(:analytics_rollup_referrer, day: today, host: "news.ycombinator.com", views: 60)
     create(:analytics_rollup_country, day: today, country_code: "US", views: 90)
+  end
+
+  def seed_calendar
+    today = Blog::TimeZone.today
+    sprint = create(:sprint, sprint_date: today)
+    create(:task, :in_sprint, sprint_id: sprint.id, title: "Plan the week ahead on the calendar screen")
+    create(:post, :published, title: "A post published today with a title too long to fit its cell",
+                              published_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 30))
+    create(:social_post, :posted, posted_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 45))
   end
 
   def seed_tasks

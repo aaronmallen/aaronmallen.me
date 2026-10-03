@@ -1,9 +1,11 @@
 en:
   date:
     formats:
+      day_name: "%a"
       full: "%A, %B %-d, %Y"
       long: "%B %-d, %Y"
       medium: "%b %-d, %Y"
+      month: "%B %Y"
       short: "%b %-d"
       weekday: "%A, %B %-d"
   time:

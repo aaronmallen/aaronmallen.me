@@ -1360,6 +1360,143 @@
   @apply shrink-0 font-mono text-event-time text-ink-muted;
 }
 
+@utility cal {
+  @apply grid items-start gap-6;
+  grid-template-columns: minmax(0, 1fr) var(--container-rail);
+
+  @media (width < 53.75rem) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@utility cal-pager {
+  @apply flex items-center gap-2;
+}
+
+@utility cal-month {
+  @apply min-w-0;
+}
+
+@utility cal-weekdays {
+  @apply mb-2 grid grid-cols-7 gap-px font-mono text-label text-ink-muted uppercase;
+
+  @media (width < 43.75rem) {
+    @apply hidden;
+  }
+}
+
+@utility cal-weekday {
+  @apply px-2;
+}
+
+@utility cal-days {
+  @apply grid grid-cols-7 gap-px overflow-hidden rounded-card border border-line bg-line;
+
+  @media (width < 43.75rem) {
+    @apply flex flex-col;
+  }
+}
+
+@utility cal-day {
+  @apply min-w-0 bg-ground-sunk;
+
+  &.cal-out {
+    @apply bg-ground text-ink-muted;
+
+    @media (width < 43.75rem) {
+      @apply hidden;
+    }
+  }
+
+  &.cal-picked {
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+}
+
+@utility cal-link {
+  @apply flex h-full min-h-24 flex-col gap-1.5 p-2 text-inherit no-underline hover:bg-mk-selection focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap flex-row items-center gap-3 px-3 py-2;
+  }
+}
+
+@utility cal-date {
+  @apply flex shrink-0 items-center gap-1.5 font-display font-bold;
+
+  @media (width < 43.75rem) {
+    @apply w-16;
+  }
+}
+
+@utility cal-day-name {
+  @apply font-mono text-label font-normal text-ink-muted uppercase;
+
+  @media (width >= 43.75rem) {
+    @apply hidden;
+  }
+}
+
+@utility cal-num {
+  @apply inline-flex size-7 items-center justify-center rounded-full;
+
+  .cal-today & {
+    @apply bg-accent text-accent-on;
+  }
+}
+
+@utility cal-marks {
+  @apply flex min-w-0 flex-col gap-1 font-mono text-badge;
+
+  @media (width < 43.75rem) {
+    @apply flex-row flex-wrap gap-x-3;
+  }
+}
+
+@utility cal-mark {
+  @apply flex min-w-0 items-center gap-1.5;
+
+  &.sprint {
+    @apply text-mk-orange-text;
+  }
+
+  &.post {
+    @apply text-mk-blue;
+  }
+
+  &.social {
+    @apply text-mk-violet;
+  }
+
+  &.journal {
+    @apply text-mk-green-text;
+  }
+}
+
+@utility cal-mark-text {
+  @apply min-w-0 truncate;
+}
+
+@utility cal-panel {
+  @apply focus-ring;
+
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-ctx-bar)+1rem)];
+  }
+
+  @media (width < 53.75rem) {
+    @apply -order-1;
+  }
+}
+
+@utility cal-group {
+  @apply mt-5 first:mt-0;
+}
+
+@utility cal-group-title {
+  @apply mb-2 font-mono text-label text-mk-comment uppercase;
+}
+
 @utility today-journal-foot {
   @apply mt-3 flex flex-wrap items-center justify-between gap-3;
 }

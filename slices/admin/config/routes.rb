@@ -15,6 +15,7 @@ module Admin
     post "/", to: "today.create_journal_entry", as: :create_today_journal_entry
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
+    get "/calendar", to: "calendar.show", as: :calendar
     get "/clients", to: "clients.index", as: :clients
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID
