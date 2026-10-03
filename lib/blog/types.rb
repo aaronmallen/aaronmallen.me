@@ -99,6 +99,7 @@ module Blog
       Blog::Constants::EMPTY_STRING
     end.constrained(min_size: 1)
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
+    SavedViewScreen = Types::String.enum("activity", "journal", "posts", "tasks")
     SearchKind = Types::String.enum(
       "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
     )
