@@ -14,6 +14,8 @@ module Record
 
       def between(from, to) = where(entry_date: from..to)
 
+      def days = unordered.distinct.select(:entry_date)
+
       def days_written = unordered.distinct.select(:entry_date).count
 
       def later_than(day) = where { entry_date > day }

@@ -27,6 +27,12 @@ module Posts
 
       def by_status(status) = with_tags.with_status(status).newest_first.to_a
 
+      def calendar_between(from:, to:)
+        dated = with_tags.scheduled_or_published
+
+        dated.dated_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1)).oldest_first.to_a
+      end
+
       def count_by_status = posts.counts_by_status.to_a.to_h { [it.status, it.count] }
 
       def dated_between(from:, to:, page:)

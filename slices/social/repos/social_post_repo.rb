@@ -15,6 +15,12 @@ module Social
 
       def by_id(id) = with_children.by_pk(id).one
 
+      def calendar_between(from:, to:)
+        dated = with_children.scheduled_or_posted
+
+        dated.posted_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1)).oldest_first.to_a
+      end
+
       def claim_delivery(social_post_id, network, stale_before:)
         social_post_deliveries.claim(social_post_id:, network:, stale_before:)
       end

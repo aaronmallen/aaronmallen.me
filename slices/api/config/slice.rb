@@ -8,17 +8,21 @@ module API
 
     config.actions.csrf_protection = false
 
+    import keys: %w[queries.calendar_posts], from: :posts
+
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.update_journal_entry
-      queries.journal_entries_between queries.journal_entry_by_id
+      queries.journal_days_between queries.journal_entries_between queries.journal_entry_by_id
     ], from: :record
+
+    import keys: %w[queries.calendar_social_posts], from: :social
 
     import keys: %w[
       operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
       operations.current_sprint operations.delete_task operations.drop_sprint operations.link_tasks operations.move_task
       operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
-      operations.schedule_task operations.start_task operations.unlink_task queries.find_tasks queries.sprints_between
-      queries.task_by_id queries.task_comments queries.tasks_in_sprint
+      operations.schedule_task operations.start_task operations.unlink_task queries.counted_sprints_between
+      queries.find_tasks queries.sprints_between queries.task_by_id queries.task_comments queries.tasks_in_sprint
     ], from: :tasks
 
     export %w[
@@ -28,7 +32,7 @@ module API
       endpoints.move_task endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry
       endpoints.read_task endpoints.reopen_task endpoints.reorder_task endpoints.save_task endpoints.schedule_task
       endpoints.start_task endpoints.unlink_task endpoints.update_journal_entry
-      operations.mint_token operations.revoke_token queries.live_tokens
+      operations.mint_token operations.revoke_token queries.calendar queries.live_tokens
     ]
   end
 end

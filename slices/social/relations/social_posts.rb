@@ -43,7 +43,11 @@ module Social
 
       def oldest_first = order(self[:posted_at].asc, self[:id].asc)
 
+      def posted_between(from, to) = where(posted_at: from...to)
+
       def posted_since(time) = with_status(POSTED).where { posted_at >= time }
+
+      def scheduled_or_posted = with_status([SCHEDULED, POSTED])
 
       def unclaimed = exclude(id: dataset.db[:social_post_deliveries].select(:social_post_id))
 

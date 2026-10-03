@@ -30,6 +30,14 @@ module Tasks
       end
 
       def on(date) = where(sprint_date: date)
+
+      def with_task_counts
+        task_id = tasks[:id].qualified
+
+        counted = left_join(:tasks, sprint_id: :id).group(self[:id].qualified)
+
+        counted.select_append { integer.count(task_id).as(:task_count) }
+      end
     end
   end
 end

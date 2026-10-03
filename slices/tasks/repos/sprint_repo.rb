@@ -15,6 +15,8 @@ module Tasks
 
       def count_arrivals(id, arrived) = sprints.count_arrivals(id, arrived)
 
+      def counted_between(first, last) = sprints.dated_between(first, last).with_task_counts.in_date_order.to_a
+
       def on(date) = sprints.on(date).one
 
       private

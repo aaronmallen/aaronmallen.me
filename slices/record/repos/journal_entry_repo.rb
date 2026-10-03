@@ -37,6 +37,8 @@ module Record
         searched(journal_entries, **search).later_than(day).oldest_first.limit(limit).pluck(:entry_date)
       end
 
+      def days_between(from, to) = journal_entries.between(from, to).days.pluck(:entry_date)
+
       def replace_tags(id, names)
         journal_entry_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
       end

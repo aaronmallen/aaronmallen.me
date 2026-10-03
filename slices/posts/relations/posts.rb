@@ -40,6 +40,8 @@ module Posts
 
       def scheduled = with_status(SCHEDULED)
 
+      def scheduled_or_published = with_status([SCHEDULED, PUBLISHED])
+
       def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
 
       def unpublished = exclude(status: PUBLISHED)
