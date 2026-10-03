@@ -40,6 +40,7 @@ module Blog
     )
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)
+    AttentionKind = Types::String.enum("carried", "draft", "someday", "journal")
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
     DateParam = Types::Params::Date.constrained(

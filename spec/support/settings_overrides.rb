@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module SettingsOverrides
+  def change_attention_limit(limit, to:)
+    settings = Hanami.app["settings"]
+    allow(settings).to receive(:attention).and_return(settings.attention.merge(limit => to))
+  end
+
   def lower_page_size(scope, to:)
     settings = Hanami.app["settings"]
     allow(settings).to receive(:page_size).and_return(settings.page_size.merge(scope => to))

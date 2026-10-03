@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, posts, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -26,7 +26,7 @@ allowed.
 ## Decision
 
 A slice's SQL may read a table another slice owns. It never writes one. We take the SQL path when the export path
-would cost one import per owning slice, or would close a cycle the record on exports refuses. These five reads
+would cost one import per owning slice, or would close a cycle the record on exports refuses. These six reads
 cross today:
 
 - **The `activities` view**, built in `config/db/migrate/20260928000035_create_activities_view.rb` and read by
@@ -34,6 +34,9 @@ cross today:
   `social_post_parts`, `webmentions`, `tasks`, `sprints`, `projects` and `suggestions`, which
   `record`, `posts`, `social`, `tasks`, `projects` and `suggestions` own. AA-824 added the last three tables. The
   record on the activities view holds why one view beats merging rows in Ruby.
+- **The `attention` view**, built in `config/db/migrate/20261003000075_create_attention_view.rb` and read by
+  `slices/activity/relations/attention.rb`, unions `tasks`, `posts` and `journal_entries`, which `tasks`, `posts`
+  and `record` own. The record on the stalled list holds why it lives in `activity`.
 - **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags` and
   `task_tags`. The tags screen is the one place that answers for all four kinds at once, and the SQL spares it
   four imports.

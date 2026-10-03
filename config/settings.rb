@@ -18,6 +18,7 @@ module Blog
       (value.is_a?(::Array) ? value : value.to_s.split(",")).map { it.to_s.strip }.reject(&:empty?)
     end
 
+    AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
     RedisAttempts = Types::Coercible::Integer.constrained(gteq: 0)
@@ -62,6 +63,13 @@ module Blog
     setting :analytics_salt, constructor: Types::String.constrained(min_size: 64)
 
     setting :app_secret, constructor: Types::String.constrained(min_size: 64)
+
+    setting :attention, constructor: Schema.schema(
+      carried_count: AttentionLimit,
+      draft_days: AttentionLimit,
+      journal_days: AttentionLimit,
+      someday_days: AttentionLimit,
+    )
 
     setting :bluesky, default: {}, constructor: Schema.schema(app_password?: Value, handle?: Value, profile_url?: Value)
 

@@ -1,6 +1,11 @@
 analytics:
   throttle_limit: <%= ENV["ANALYTICS_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["ANALYTICS_THROTTLE_WINDOW_MINUTES"].to_json %>
+attention:
+  carried_count: 3
+  draft_days: 30
+  journal_days: 2
+  someday_days: 90
 bluesky:
   app_password: <%= ENV["BLUESKY_APP_PASSWORD"].to_json %>
   handle: aaronmallen.dev
