@@ -74,7 +74,7 @@ module Blog
     end
     PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
-    PhotoOwner = Types::String.enum("post", "journal_entry", "task", "task_comment")
+    PhotoOwner = Types::String.enum("post", "journal_entry", "task", "task_comment", "decision_comment")
     PostStatus = Types::String.enum("draft", "scheduled", "published")
     PostFilter = Types::String.enum("all", *PostStatus.values)
     PostFilterParam = PostFilter.fallback(PostFilter.values.first)

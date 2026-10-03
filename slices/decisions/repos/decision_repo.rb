@@ -10,6 +10,8 @@ module Decisions
 
       def by_id_for_update(id) = decisions.by_pk(id).lock.one
 
+      def exist?(id) = decisions.by_pk(id).exist?
+
       def record(decision_id, kind, **) = decision_events.command(:create).call(decision_id:, kind:, **)
     end
   end
