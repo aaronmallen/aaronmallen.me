@@ -440,6 +440,61 @@ RSpec.describe "Admin journal", type: :request do
       end
     end
 
+    describe "paging newer past a crowded day" do
+      def days_newer_from(href)
+        get href
+        seen = day_dates
+        seen |= day_dates while follow("prev")
+        seen
+      end
+
+      def follow(rel)
+        return false unless page.has_css?("nav.pager a[rel='#{rel}']")
+
+        get(pager_href(rel))
+      end
+
+      def older_pages
+        get "/admin/journal"
+        hrefs = []
+        hrefs << last_request.fullpath while follow("next")
+        hrefs
+      end
+
+      def page = Capybara.string(last_response.body)
+
+      def pager_href(rel) = page.find("nav.pager a[rel='#{rel}']")["href"]
+
+      def round_trip(href)
+        get href
+        follow("prev")
+        follow("next")
+        last_request.fullpath
+      end
+
+      before do
+        lower_page_size(:admin, to: 2)
+        { 0 => 1, 1 => 3, 2 => 1, 3 => 2, 4 => 1, 6 => 1 }.each do |days, count|
+          count.times { |index| create(:journal_entry, entry_date: today - days, body: "d#{days}e#{index}") }
+        end
+      end
+
+      it "returns to each older page after paging newer then older" do
+        expect(older_pages.map { round_trip(it) }).to eq(older_pages)
+      end
+
+      it "shows every day while paging newer from the oldest page" do
+        expect(days_newer_from(older_pages.last).sort).to eq([0, 1, 2, 3, 4, 6].map { (today - it).iso8601 }.sort)
+      end
+
+      it "shows the next day when the day past it fills a page" do
+        get "/admin/journal", to: (today - 3).iso8601
+        follow("prev")
+
+        expect(day_dates).to eq([today - 2, today - 3].map(&:iso8601))
+      end
+    end
+
     describe "saving an entry" do
       it "saves it under today with the time of saving", :aggregate_failures do
         before = Blog::TimeZone.local(Time.now - 1)

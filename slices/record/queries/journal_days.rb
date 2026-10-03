@@ -17,11 +17,18 @@ module Record
 
       private
 
+      def newer_day(days, size)
+        day = days[size - 1]
+        overflow = days[days.count(days.first) + size - 1]
+
+        overflow && overflow <= day ? overflow - 1 : day
+      end
+
       def newer_query(to, size, search)
-        days = journal_entry_repo.days_after(to, limit: size + 1, **search)
+        days = journal_entry_repo.days_after(to, limit: size * 2, **search)
         return if days.empty?
 
-        Blog::DayPaged.query(days.length > size ? days[size - 1] : nil)
+        Blog::DayPaged.query(days.length > size ? newer_day(days, size) : nil)
       end
     end
   end
