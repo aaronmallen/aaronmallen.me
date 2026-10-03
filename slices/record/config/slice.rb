@@ -16,7 +16,8 @@ module Record
       queries.commit_by_id queries.commit_totals_today queries.commits_between queries.commits_last_synced_at
       queries.commits_today queries.journal_days queries.journal_days_between queries.journal_entries_between
       queries.journal_entries_today queries.journal_entry_by_id queries.journal_entry_count queries.journal_streak
-      queries.journal_word_count queries.recent_commit_repos queries.sync_failures
+      queries.journal_word_count queries.linkable_commits queries.linkable_journal_entries queries.recent_commit_repos
+      queries.sync_failures
     ]
   end
 end

@@ -3,9 +3,9 @@ id: "0017"
 title: Enforce rules over stored state in Postgres, not in contracts
 status: active
 created: 2026-09-28
-area: [db, lib, admin, decisions, posts, projects, record, social, tags, tasks]
+area: [db, lib, admin, decisions, links, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -56,6 +56,10 @@ raises again.
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |
 | `projects_repo_index` | unique index | `Projects::Operations::SaveProject` | `repo: taken` |
 | `projects_archived_order_check` | `CHECK` | `Projects::Operations::SaveProject` | `started_on: after_archived` |
+| `record_links_order_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: self` |
+| `record_links_pair_key` | unique index | `Links::Operations::LinkRecords` | `other_id: taken` |
+| `record_links_record_missing` | trigger | `Links::Operations::LinkRecords` | `other_id: missing` |
+| `record_links_task_pair_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: task_pair` |
 | `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
@@ -65,8 +69,9 @@ raises again.
 Tags hold `tags_scope_name_key` since #77 split them into a public and a private scope (ADR 0074). It replaced
 `tags_name_key`.
 
-The trigger raises with `ERRCODE = 'check_violation'`, so ROM reports it as a `CheckConstraintError` and the
-operation reads it like any other name.
+`posts_published_slug_locked` raises with `ERRCODE = 'check_violation'`, so ROM reports it as a
+`CheckConstraintError` and the operation reads it like any other name. `record_links_record_missing` raises with
+`ERRCODE = 'foreign_key_violation'`, so ROM reports it as a `ForeignKeyConstraintError` (ADR 0093).
 
 Two more shapes follow the same stance. `session_validity` and `webmention_settings` hold one row each, held there
 by `CHECK (id = 1)`, and their repos address it by that id. Every tag join and `tasks.sprint_id` hold their parent
@@ -85,9 +90,9 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the ten names has a spec
-that would fail: the posts request spec, the operation specs for decisions, tags and task links, and the admin
-request specs for the post and project editors. A new mapped name needs one too.
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the fourteen names has a
+spec that would fail: the posts request spec, the operation specs for decisions, record links, tags and task links,
+and the admin request specs for the post and project editors. A new mapped name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

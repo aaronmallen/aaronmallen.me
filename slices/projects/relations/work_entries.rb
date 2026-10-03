@@ -9,6 +9,10 @@ module Projects
 
       def last_position = unordered.max(:position).to_i
 
+      def linkable = linkables(title: Sequel.join([:role, ", ", :org]), day: self.class.site_day(:created_at))
+
+      def matching(text) = containing(text, :org, :role, :blurb)
+
       def overlapping(first, last)
         where(Sequel[:from_year] <= last).where(Sequel.|({ to_year: nil }, Sequel[:to_year] >= first))
       end

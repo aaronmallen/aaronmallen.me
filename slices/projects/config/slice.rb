@@ -6,7 +6,8 @@ module Projects
 
     export %w[
       operations.add_work_entry operations.archive_project operations.delete_work_entry operations.move_project
-      operations.restore_project operations.save_project queries.archived queries.by_id queries.live
+      operations.restore_project operations.save_project queries.archived queries.by_id
+      queries.linkable_projects queries.linkable_work_entries queries.live
       queries.public_by_tag queries.public_grid queries.work_entries queries.work_entries_between
     ]
   end

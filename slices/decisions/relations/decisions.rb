@@ -8,6 +8,10 @@ module Decisions
           has_many :decision_options, as: :options, view: :in_order
         end
       end
+
+      def linkable = linkables(title: :title, day: self.class.site_day(:created_at))
+
+      def matching(text) = containing(text, :title, :problem)
     end
   end
 end

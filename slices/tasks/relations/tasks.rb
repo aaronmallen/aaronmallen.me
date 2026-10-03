@@ -48,6 +48,8 @@ module Tasks
 
       def last_position = unordered.max(:position).to_i
 
+      def linkable = linkables(title: :title, day: self.class.site_day(:completed_at, :created_at))
+
       def linkable_from(id) = exclude(id:).exclude(id: task_links.partner_ids(id).dataset)
 
       def list_counts = select_append { LISTS.map { integer.count(id).filter(list: it).as(it.to_sym) } }

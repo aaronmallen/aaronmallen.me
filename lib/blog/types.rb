@@ -87,6 +87,7 @@ module Blog
     ProjectMonth = Types::String.constrained(format: /\A\d{4}-(?:0[1-9]|1[0-2])\z/)
     ProjectMove = Types::String.enum("up", "down")
     ProjectStatus = Types::String.enum(*ProjectLiveStatus.values, "archived")
+    RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision])
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
 

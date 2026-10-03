@@ -3,9 +3,9 @@ id: "0021"
 title: Let SQL read another slice's tables, never write them
 status: active
 created: 2026-09-28
-area: [activity, analytics, db, lib, posts, search, social, tags]
+area: [activity, analytics, db, lib, links, posts, search, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -58,6 +58,14 @@ cross today:
   fills `webmentions_enabled` on insert from social's `webmention_settings`. Reading the setting in `SavePost`
   would make posts import a query from social, which already imports from posts, and ADR 0003 allows no such
   cycle.
+
+- **The `record_links_find_records` trigger**, in `config/db/migrate/20261003000094_create_record_links.rb`, finds
+  and locks the row each side of a new link names in `tasks`, `posts`, `social_posts`, `journal_entries`, `commits`,
+  `projects`, `work_entries` or `decisions`, which `tasks`, `posts`, `social`, `record`, `projects` and `decisions`
+  own. The same migration hangs a `<table>_drop_record_links` trigger on each of those eight tables, which deletes
+  the links of a deleted row from `record_links`, a table `links` owns. A migration that drops and rebuilds one of
+  the eight tables loses its trigger. The record on linking any two records (ADR 0093) holds why Postgres keeps
+  these rules.
 
 The one table several slices write is `tags`, and the record on declaring the tags relation in every slice that
 tags holds that choice.

@@ -35,7 +35,11 @@ module Social
         )
       end
 
+      def linkable = linkables(title: first_part, day: self.class.site_day(:posted_at, :created_at))
+
       def mark_posted(id, at:) = by_pk(id).unposted.stamped(:update).call(status: POSTED, posted_at: at)
+
+      def matching(text) = where(id: social_post_parts.containing(text, :body).dataset.select(:social_post_id))
 
       def newest_dated_first = order(Sequel.desc(DATED), self[:id].desc)
 
@@ -54,6 +58,12 @@ module Social
       def unposted = exclude(status: POSTED)
 
       def with_status(status) = where(status:)
+
+      private
+
+      def first_part
+        social_post_parts.where(social_post_id: Sequel[:social_posts][:id]).in_order.limit(1).dataset.select(:body)
+      end
     end
   end
 end

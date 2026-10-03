@@ -51,6 +51,8 @@ RSpec.describe "MCP reach", type: :request do
       "decisions.operations.open_decision" => "#280 gives the MCP a tool for it",
       "decisions.operations.reopen_decision" => "#280 gives the MCP a tool for it",
       "decisions.operations.resolve_decision" => "#280 gives the MCP a tool for it",
+      "links.operations.link_records" => "#326 gives the MCP link_records",
+      "links.operations.unlink_records" => "#326 gives the MCP unlink_records",
       "media.operations.upload_photo" => "the admin's Markdown editor uploads photos; MCP takes no uploads",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",

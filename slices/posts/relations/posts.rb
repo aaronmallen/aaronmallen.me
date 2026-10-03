@@ -22,6 +22,10 @@ module Posts
 
       def due_at(time) = with_status(SCHEDULED).where { published_at <= time }
 
+      def linkable = linkables(title: :title, day: self.class.site_day(:published_at, :created_at))
+
+      def matching(text) = containing(text, :title, :summary, :body)
+
       def newer_than(post) = where(published_order > [post.published_at, post.id])
 
       def newest_first = order(self[:published_at].desc, self[:id].desc)

@@ -20,9 +20,13 @@ module Projects
 
       def last_position = unordered.max(:position).to_i
 
+      def linkable = linkables(title: :name, day: self.class.site_day(:created_at))
+
       def live = exclude(status: Blog::Types::ProjectStatus["archived"])
 
       def lock_positions_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
+
+      def matching(text) = containing(text, :name, :tagline, :repo)
 
       def newest_archived_first = order(Sequel.desc(:archived_on, nulls: :last), self[:id].desc)
 

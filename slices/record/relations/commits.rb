@@ -22,6 +22,10 @@ module Record
 
       def line_totals = unordered.select(&LINE_TOTALS)
 
+      def linkable = linkables(title: Sequel.function(:split_part, :message, "\n", 1), day: :commit_date)
+
+      def matching(text) = containing(text, :message, :repo)
+
       def newest_first = order(self[:commit_date].desc, self[:commit_time].desc, self[:id].desc)
 
       def on(date) = where(commit_date: date)

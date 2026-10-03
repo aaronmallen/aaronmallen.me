@@ -20,6 +20,8 @@ module Record
 
       def later_than(day) = where { entry_date > day }
 
+      def linkable = linkables(title: Sequel.function(:split_part, :body, "\n", 1), day: :entry_date)
+
       def matching(text) = where(Sequel.ilike(:body, "%#{dataset.escape_like(text)}%"))
 
       def newest_first = order(self[:entry_date].desc, self[:entry_time].desc, self[:id].desc)
