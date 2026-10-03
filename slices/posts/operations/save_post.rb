@@ -4,7 +4,7 @@ module Posts
   module Operations
     class SavePost < Blog::Operation
       include Deps[
-        claim_photos: "media.operations.claim_photos",
+        claim_post_photos: "operations.claim_post_photos",
         contract: "contracts.post_contract",
         post_edit_repo: "repos.post_edit_repo",
         post_repo: "repos.post_repo",
@@ -17,7 +17,6 @@ module Posts
       DRAFT = Blog::Types::PostIntent["draft"]
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
       NOTE = :edit_note
-      PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
       PUBLISH = Blog::Types::PostIntent["publish"]
       SLUG_CONSTRAINTS = { "posts_published_slug_locked" => "locked", "posts_slug_key" => "taken" }.freeze
 
@@ -28,13 +27,11 @@ module Posts
 
       private
 
-      def claim(post) = claim_photos.call(PHOTO_OWNER, post.id, post.body, post.og_image_url)
-
       def create_or_update(post, attributes)
         fields = attributes.except(:tags, NOTE)
         saved = post ? post_repo.update(post.id, fields) : post_repo.create(fields)
         post_repo.replace_tags(saved.id, attributes.fetch(:tags))
-        claim(saved)
+        claim_post_photos.call(saved)
 
         post_repo.by_id(saved.id)
       end
@@ -93,8 +90,8 @@ module Posts
         note = attributes[NOTE].to_s
         return invalid(NOTE, BLANK) if edited && note.empty?
 
+        post_edit_repo.create(post_id: post.id, note:) if edited
         saved = create_or_update(post, attributes.except(:published_at))
-        post_edit_repo.create(post_id: saved.id, note:) if edited
         post_repo.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         Success([:saved, saved])

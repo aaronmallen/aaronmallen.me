@@ -12,6 +12,8 @@ module Posts
 
       def for_posts(post_ids) = post_edits.for_posts(post_ids).oldest_first.to_a.group_by(&:post_id)
 
+      def notes(post_id) = post_edits.for_post(post_id).pluck(:note)
+
       def on_post?(post_id, id) = post_edits.for_post(post_id).by_pk(id).exist?
     end
   end

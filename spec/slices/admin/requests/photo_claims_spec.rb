@@ -64,6 +64,48 @@ RSpec.describe "Admin photo claims", type: :request do
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end
 
+    describe "edit notes" do
+      let(:published) { create(:post, :published, slug: "hello", body: "one") }
+      let(:post_edit_repo) { Posts::Slice["repos.post_edit_repo"] }
+
+      def edit = post_edit_repo.for_post(published.id).first
+
+      def revise(note) = send_to("/admin/posts/#{published.id}/edits/#{edit.id}", edit: { note: })
+
+      def save_published(**fields)
+        send_to("/admin/posts/#{published.id}", intent: "save", post: { title: "Hello", slug: "hello", **fields })
+      end
+
+      it "claims the photo a new edit note points to" do
+        save_published(body: "two", edit_note: markdown(photo))
+
+        expect(claims_of("post")).to eq([[published.id, photo.id]])
+      end
+
+      it "keeps the claim when a later save leaves the note alone" do
+        save_published(body: "two", edit_note: markdown(photo))
+        save_published(body: "two", og_title: "On the card")
+
+        expect(claims_of("post")).to eq([[published.id, photo.id]])
+      end
+
+      it "moves the claim to the photo a revised note points to" do
+        save_published(body: "two", edit_note: markdown(photo))
+        revise(markdown(other))
+
+        expect(claims_of("post")).to eq([[published.id, other.id]])
+      end
+
+      it "keeps the photo through the sweep", :aggregate_failures do
+        stub_store_delete(photo)
+        save_published(body: "two", edit_note: markdown(photo))
+        Media::Slice["operations.sweep_photos"].call(at: Time.now + (2 * 24 * 60 * 60))
+
+        expect(keys).to include(photo.key)
+        expect(a_request(:delete, media_store_url(photo.key))).not_to have_been_made
+      end
+    end
+
     it "claims nothing for a key no photo carries" do
       save(body: "![Gone](/media/#{'f' * 32}.png)")
 

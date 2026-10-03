@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [media, posts, record, tasks]
 issue: "#134"
-amended: ["#140"]
+amended: ["#140", "#247"]
 tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
 ---
 
@@ -31,7 +31,8 @@ A photo belongs to the records whose Markdown points to it, and to nothing else.
 - **Saving claims by reference.** Saving a post, journal entry, task or task comment reads the `/media/<key>` URLs
   in its Markdown and makes the record's claims match them: a photo the text now points to gains a claim, and one it
   no longer points to loses one. A photo can carry claims from many records. #140 added a post's Open Graph image
-  field, so a `/media/<key>` URL there claims too, and a card image can be an upload.
+  field, so a `/media/<key>` URL there claims too, and a card image can be an upload. Since #247 a post's edit
+  notes claim for the post too, so a photo in a note lives as long as the post.
 - **Deleting releases, and the last release deletes.** Deleting a record drops its claims, and deletes from the
   store and the table each photo left with no claim. Deleting a task does the same for its comments.
 - **A sweep takes the rest.** A scheduled job deletes every photo that has no claim and was uploaded over 24 hours
