@@ -12,11 +12,12 @@ module Admin
           SEPARATOR = " · "
 
           def initialize(
-            commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:, visitors:,
-            webmentions:, body: Blog::Constants::EMPTY_STRING, errors: Blog::Constants::EMPTY_HASH,
+            attention:, commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:,
+            visitors:, webmentions:, body: Blog::Constants::EMPTY_STRING, errors: Blog::Constants::EMPTY_HASH,
             tags: Blog::Constants::EMPTY_STRING
           )
             super()
+            @attention = attention
             @commits = commits
             @commit_totals = commit_totals
             @journal = { body:, entries:, errors:, tags:, word_count: Blog::Figures.words(body) }
@@ -77,6 +78,7 @@ module Admin
           end
 
           def side_cards
+            AttentionCard(rows: @attention)
             Components::Webmentions::PendingCard(**@webmentions) if @webmentions[:count].positive?
             ShipsNextCard(posts: posts[:scheduled], social_posts: social[:scheduled], summaries: social[:summaries])
             DraftsCard(posts: posts[:drafts], counts: posts[:draft_counts])

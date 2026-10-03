@@ -184,6 +184,28 @@ en:
           time: "Avg. time"
           title: "Top pages"
           views: "Views"
+      attention_card:
+        cancel: "Cancel"
+        carried:
+          one: "Carried over %{count} day"
+          other: "Carried over %{count} days"
+        confirm_cancel: "Cancel %{task}? It moves to completed."
+        count:
+          one: "%{count} stalled"
+          other: "%{count} stalled"
+        journal: "Journal"
+        journal_gap:
+          one: "No entry in %{count} day"
+          other: "No entry in %{count} days"
+        lists:
+          next: "Next"
+        move: "Move to %{list}"
+        open: "Open"
+        title: "Needs attention"
+        untouched:
+          one: "Untouched for %{count} day"
+          other: "Untouched for %{count} days"
+        write: "Write"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"

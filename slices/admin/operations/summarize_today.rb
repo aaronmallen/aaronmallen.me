@@ -23,6 +23,7 @@ module Admin
         queued_social_posts: "social.queries.queued_social_posts",
         recent_commit_repos: "record.queries.recent_commit_repos",
         scheduled_posts: "posts.queries.scheduled",
+        stalled_list: "activity.queries.stalled_list",
         sync_failures: "record.queries.sync_failures",
         visitors_for_day: "analytics.queries.visitors_for_day",
       ]
@@ -32,6 +33,7 @@ module Admin
 
         {
           **publishing(now),
+          attention: attention(now),
           commits: commits(now),
           commit_totals: commit_totals_today.call(now:),
           entries: journal_entries_today.call(now:),
@@ -43,6 +45,8 @@ module Admin
       end
 
       private
+
+      def attention(now) = stalled_list.call(on: Blog::TimeZone.today(now))
 
       def commits(now)
         {
