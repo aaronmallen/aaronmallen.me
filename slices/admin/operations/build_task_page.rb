@@ -9,7 +9,7 @@ module Admin
         current_sprint: "tasks.operations.current_sprint",
         link_targets: "tasks.queries.link_targets",
         task_by_id: "tasks.queries.task_by_id",
-        task_comments: "tasks.queries.task_comments",
+        task_timeline: "tasks.queries.task_timeline",
       ]
 
       def call(id, query: nil, kind: nil, errors: EMPTY_HASH, commenting: EMPTY_HASH)
@@ -17,7 +17,7 @@ module Admin
         task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
-        { task:, note_html: note_html(task.note), comments: task_comments.call(id), commenting:,
+        { task:, note_html: note_html(task.note), timeline: task_timeline.call(id), commenting:,
           linking: { errors:, kind:, query:, targets: link_targets.call(id, query) } }
       end
 

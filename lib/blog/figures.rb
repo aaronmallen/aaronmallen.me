@@ -5,7 +5,10 @@ module Blog
     DELIMITER = ","
     DURATION = "%d:%02d"
     GROUPS = /(\d)(?=(\d{3})+\z)/
+    HOUR = 3600
+    HOURS = "%dh %02dm"
     MINUTE = 60
+    MINUTES = "%dm"
     PERCENT = 100
     WORD = /\S+/
     ZERO = 0
@@ -17,6 +20,12 @@ module Blog
     def count(number) = number.to_i.to_s.gsub(GROUPS, "\\1#{DELIMITER}")
 
     def duration(seconds) = format(DURATION, seconds / MINUTE, seconds % MINUTE)
+
+    def hours(seconds)
+      hours, rest = seconds.divmod(HOUR)
+
+      hours.zero? ? format(MINUTES, rest / MINUTE) : format(HOURS, hours, rest / MINUTE)
+    end
 
     def rate(part, whole) = whole.zero? ? 0.0 : (part.to_f / whole).round(1)
 

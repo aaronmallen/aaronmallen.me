@@ -693,9 +693,14 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "with none yet" do
       before { open_task("Email the accountant") }
 
+      it "heads the section Activity" do
+        expect(panel).to have_css(".task-activity .card-title",
+                                  exact_text: translate("ui.components.tasks.timeline.title"))
+      end
+
       it "adds a comment and comes back to the list", :aggregate_failures do
-        panel.fill_in(translate("ui.components.tasks.comments.add_label"), with: "Sent the **forms**")
-        panel.click_button(translate("ui.components.tasks.comments.add"))
+        panel.fill_in(translate("ui.components.tasks.timeline.add_label"), with: "Sent the **forms**")
+        panel.click_button(translate("ui.components.tasks.timeline.add"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_added"))
         expect(page).to have_current_path("/admin/tasks?filter=next")
@@ -710,16 +715,16 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "edits it", :aggregate_failures do
-        comment_on(panel).find("summary", text: translate("ui.components.tasks.comments.edit")).click
-        comment_on(panel).fill_in(translate("ui.components.tasks.comments.edit_label"), with: "Sent the forms twice")
-        comment_on(panel).click_button(translate("ui.components.tasks.comments.save"))
+        comment_on(panel).find("summary", text: translate("ui.components.tasks.timeline.edit")).click
+        comment_on(panel).fill_in(translate("ui.components.tasks.timeline.edit_label"), with: "Sent the forms twice")
+        comment_on(panel).click_button(translate("ui.components.tasks.timeline.save"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_saved"))
         expect(bodies).to eq(["Sent the forms twice"])
       end
 
       it "deletes it once asked", :aggregate_failures do
-        comment_on(panel).click_button(translate("ui.components.tasks.comments.delete"))
+        comment_on(panel).click_button(translate("ui.components.tasks.timeline.delete"))
         confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_deleted"))
@@ -745,8 +750,8 @@ RSpec.describe "Admin tasks", type: :feature do
     after { scripts_on }
 
     it "adds a comment", :aggregate_failures do
-      fill_in(translate("ui.components.tasks.comments.add_label"), with: "Called them")
-      click_button(translate("ui.components.tasks.comments.add"))
+      fill_in(translate("ui.components.tasks.timeline.add_label"), with: "Called them")
+      click_button(translate("ui.components.tasks.timeline.add"))
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(bodies).to eq(["Sent the forms", "Called them"])
@@ -754,15 +759,15 @@ RSpec.describe "Admin tasks", type: :feature do
 
     it "edits a comment", :aggregate_failures do
       comment_on.find("summary").click
-      comment_on.fill_in(translate("ui.components.tasks.comments.edit_label"), with: "Sent the forms twice")
-      comment_on.click_button(translate("ui.components.tasks.comments.save"))
+      comment_on.fill_in(translate("ui.components.tasks.timeline.edit_label"), with: "Sent the forms twice")
+      comment_on.click_button(translate("ui.components.tasks.timeline.save"))
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(bodies).to eq(["Sent the forms twice"])
     end
 
     it "deletes a comment", :aggregate_failures do
-      comment_on.click_button(translate("ui.components.tasks.comments.delete"))
+      comment_on.click_button(translate("ui.components.tasks.timeline.delete"))
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(bodies).to be_empty
@@ -773,7 +778,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
 
-    def add_label = translate("ui.components.tasks.comments.add_label")
+    def add_label = translate("ui.components.tasks.timeline.add_label")
 
     def bold(editor) = editor.find("[role='toolbar'] button[aria-label='Bold']").click
 

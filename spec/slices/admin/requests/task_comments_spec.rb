@@ -59,7 +59,7 @@ RSpec.describe "Admin task comments", type: :request do
       it "says when there are none" do
         read
 
-        expect(page).to have_css(".task-comments .hint", text: t("ui.components.tasks.comments.empty"))
+        expect(page).to have_css(".task-activity .hint", text: t("ui.components.tasks.timeline.empty"))
       end
 
       it "lists them oldest first" do

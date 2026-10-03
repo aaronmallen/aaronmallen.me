@@ -134,6 +134,7 @@ module Blog
     TaskSourceProvider = Types::String.enum("github", "linear")
     TaskSourceState = Types::String.enum(*%w[open completed not_planned unassigned moved deleted started])
     TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
+    TaskTimelineKind = Types::String.enum("comment", "session", "moved", "tagged", "untagged", "status_changed")
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
     TaskTab = Types::String.enum(*TaskView.values, "completed")
     TaskTabParam = TaskTab.fallback(TaskTab.values.first)

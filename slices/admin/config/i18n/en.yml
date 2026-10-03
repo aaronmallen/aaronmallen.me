@@ -812,19 +812,6 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
           done_at: "done %{date} · %{time}"
-        comments:
-          add: "Add comment"
-          add_label: "New comment"
-          confirm_delete: "Delete this comment?"
-          delete: "Delete comment"
-          edit: "Edit"
-          edit_label: "Comment"
-          empty: "No comments yet."
-          label: "Talk"
-          save: "Save"
-          title: "Comments"
-          unknown_author: "unknown"
-          view: "View"
         completed_day:
           days_ago: "%{count} days ago"
           today: "Today"
@@ -971,6 +958,37 @@ en:
         task_key:
           copied: "Task %{key} copied"
           copy: "Copy task %{key}"
+        timeline:
+          add: "Add comment"
+          add_label: "New comment"
+          confirm_delete: "Delete this comment?"
+          delete: "Delete comment"
+          edit: "Edit"
+          edit_label: "Comment"
+          empty: "Nothing has happened yet."
+          label: "Timeline"
+          save: "Save"
+          title: "Activity"
+          unknown_author: "unknown"
+          view: "View"
+        timeline_event:
+          lists:
+            external: "external"
+            next: "next"
+            someday: "someday"
+          moved: "Moved from %{from} to %{to}"
+          running: "Started work"
+          running_pill: "running"
+          sprint: "the %{day} sprint"
+          status_changed: "Changed the status from %{from} to %{to}"
+          statuses:
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            open: "open"
+          tagged: "Added the tag %{tag}"
+          untagged: "Removed the tag %{tag}"
+          worked: "Worked %{span}"
         upcoming_sprints:
           confirm_drop: "Drop the sprint for %{date}? Its tasks go back to their lists."
           count:
@@ -1382,6 +1400,7 @@ en:
             open: "open"
           unscheduled: "not set"
           updated: "Updated"
+          worked: "Time worked"
       today:
         show:
           clients: "MCP clients"

@@ -1965,18 +1965,30 @@
   }
 }
 
-@utility task-comments {
+@utility task-activity {
   & > .card-body {
     @apply flex flex-col gap-3;
   }
 }
 
-@utility task-comment-list {
+@utility task-timeline {
   @apply flex flex-col;
 }
 
 @utility task-comment {
   @apply flex min-w-0 flex-col gap-1.5 border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility task-event {
+  @apply flex min-w-0 flex-wrap items-center gap-2 border-t border-line py-2 text-li text-ink first:border-t-0 first:pt-0;
+}
+
+@utility task-event-icon {
+  @apply w-4 text-center text-ink-muted;
+}
+
+@utility task-event-text {
+  @apply inline-flex min-w-0 flex-wrap items-center gap-2;
 }
 
 @utility task-comment-head {

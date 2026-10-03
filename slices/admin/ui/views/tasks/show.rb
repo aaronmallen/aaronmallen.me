@@ -17,12 +17,12 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
           }.freeze
 
-          def initialize(task:, note_html:, linking:, comments:, commenting:, filter:, origin:)
+          def initialize(task:, note_html:, linking:, timeline:, commenting:, filter:, origin:)
             super()
             @task = task
             @note_html = note_html
             @linking = linking
-            @comments = comments
+            @timeline = timeline
             @commenting = commenting
             @filter = filter
             @origin = origin
@@ -36,7 +36,7 @@ module Admin
               note
               facts
               links
-              Comments(task: @task, comments: @comments, commenting: @commenting, tab: @filter, origin: @origin)
+              Timeline(task: @task, entries: @timeline, commenting: @commenting, tab: @filter, origin: @origin)
             end
           end
 
@@ -67,14 +67,19 @@ module Admin
             end
           end
 
+          def fact_values
+            {
+              ".created" => stamp(@task.created_at),
+              ".updated" => stamp(@task.updated_at),
+              ".completed" => @task.completed_at && stamp(@task.completed_at),
+              ".sprint" => sprint_day,
+              ".carried" => t(".carried_count", count: @task.carried_count),
+              ".worked" => Blog::Figures.hours(@task.worked_seconds),
+            }.compact
+          end
+
           def facts
-            dl(class: "task-facts") do
-              fact(".created", stamp(@task.created_at))
-              fact(".updated", stamp(@task.updated_at))
-              fact(".completed", stamp(@task.completed_at)) if @task.completed_at
-              fact(".sprint", sprint_day)
-              fact(".carried", t(".carried_count", count: @task.carried_count))
-            end
+            dl(class: "task-facts") { fact_values.each { |key, value| fact(key, value) } }
           end
 
           def head
