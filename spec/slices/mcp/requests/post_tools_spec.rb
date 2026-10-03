@@ -179,7 +179,9 @@ RSpec.describe "MCP post tools", type: :request do
       before_update = stored(draft.id).to_h
       call_tool("update_post", id: draft.id, body: "two")
 
-      expect(stored(draft.id).to_h.except(:body, :updated_at)).to eq(before_update.except(:body, :updated_at))
+      changed = %i[body search_vector updated_at]
+
+      expect(stored(draft.id).to_h.except(*changed)).to eq(before_update.except(*changed))
     end
 
     it "keeps the tags a post carries" do

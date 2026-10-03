@@ -95,6 +95,9 @@ module Blog
       Blog::Constants::EMPTY_STRING
     end.constrained(min_size: 1)
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
+    SearchKind = Types::String.enum(
+      "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
+    )
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: Constants::SLUG_RESERVED)
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)

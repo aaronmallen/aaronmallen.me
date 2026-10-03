@@ -11,6 +11,7 @@ require "blog/extensions/hanami/cli/db/postgres/extension" if defined?(Hanami::C
 require "blog/extensions/hanami/providers/routes/extension"
 require "blog/extensions/hanami/router/node/extension"
 require "blog/extensions/hanami/router/trie/extension"
+require "blog/extensions/rom/sql/postgres/type_builder/extension"
 require "blog/params_guard"
 require "blog/providers/honeybadger_provider"
 require "blog/version"

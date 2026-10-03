@@ -428,6 +428,8 @@ CREATE TABLE public.commits (
     deletions integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(split_part(message, '
+'::text, 1), ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(repo, ''::text) || ' '::text) || COALESCE(regexp_replace(message, '^[^\n]*\n?'::text, ''::text), ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT commits_additions_check CHECK ((additions >= 0)),
     CONSTRAINT commits_deletions_check CHECK ((deletions >= 0))
 );
@@ -443,7 +445,8 @@ CREATE TABLE public.journal_entries (
     entry_time time without time zone NOT NULL,
     body public.non_blank_text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE((body)::text, ''::text)), 'B'::"char")) STORED
 );
 
 
@@ -469,6 +472,7 @@ CREATE TABLE public.posts (
     og_title text DEFAULT ''::text NOT NULL,
     og_image_url text DEFAULT ''::text NOT NULL,
     canonical_url text DEFAULT ''::text NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(summary, ''::text) || ' '::text) || COALESCE(body, ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT posts_published_at_check CHECK (((status = 'draft'::public.post_status) OR (published_at IS NOT NULL)))
 );
 
@@ -493,6 +497,7 @@ CREATE TABLE public.projects (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     og_image_url text,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((name)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(tagline, ''::text) || ' '::text) || COALESCE((repo)::text, ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT projects_archived_on_check CHECK (((archived_on IS NULL) OR (status = 'archived'::public.project_status))),
     CONSTRAINT projects_archived_order_check CHECK ((archived_on >= started_on)),
     CONSTRAINT projects_position_check CHECK (("position" > 0)),
@@ -511,6 +516,7 @@ CREATE TABLE public.social_post_parts (
     body public.non_blank_text NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS (setweight(to_tsvector('english'::regconfig, COALESCE((body)::text, ''::text)), 'B'::"char")) STORED,
     CONSTRAINT social_post_parts_position_check CHECK (("position" > 0))
 );
 
@@ -595,6 +601,7 @@ CREATE TABLE public.tasks (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     worked_seconds integer DEFAULT 0 NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE(note, ''::text)), 'B'::"char"))) STORED,
     CONSTRAINT tasks_carried_count_check CHECK ((carried_count >= 0)),
     CONSTRAINT tasks_completed_at_check CHECK (((status = ANY (ARRAY['done'::public.task_status, 'canceled'::public.task_status])) = (completed_at IS NOT NULL))),
     CONSTRAINT tasks_list_or_sprint_check CHECK ((num_nonnulls(list, sprint_id) = 1)),
@@ -621,6 +628,7 @@ CREATE TABLE public.webmentions (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     spam_reason public.non_blank_text,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(author_name, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(excerpt, ''::text) || ' '::text) || COALESCE((source_url)::text, ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT webmentions_source_url_check CHECK ((octet_length((source_url)::text) <= 2048)),
     CONSTRAINT webmentions_spam_reason_check CHECK (((status = 'spam'::public.webmention_status) OR (spam_reason IS NULL)))
 );
@@ -1323,6 +1331,7 @@ CREATE TABLE public.messages (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     marked_spam_at timestamp with time zone,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((subject)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE((body)::text, ''::text) || ' '::text) || COALESCE((reply_to)::text, ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT messages_marked_spam_at_check CHECK (((status = 'spam'::public.message_status) = (marked_spam_at IS NOT NULL)))
 );
 
@@ -1459,6 +1468,7 @@ CREATE TABLE public.people (
     bluesky_did text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((name)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((((COALESCE(key, ''::text) || ' '::text) || COALESCE(mastodon_handle, ''::text)) || ' '::text) || COALESCE(bluesky_handle, ''::text))), 'B'::"char"))) STORED,
     CONSTRAINT people_bluesky_did_check CHECK (((bluesky_handle IS NULL) = (bluesky_did IS NULL))),
     CONSTRAINT people_handles_check CHECK ((num_nonnulls(mastodon_handle, bluesky_handle) > 0)),
     CONSTRAINT people_key_check CHECK ((key ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text)),
@@ -1618,6 +1628,180 @@ ALTER TABLE public.projects ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY
 CREATE TABLE public.schema_migrations (
     filename text NOT NULL
 );
+
+
+--
+-- Name: work_entries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.work_entries (
+    id integer NOT NULL,
+    org public.non_blank_text NOT NULL,
+    role public.non_blank_text NOT NULL,
+    blurb text,
+    from_year integer NOT NULL,
+    to_year integer,
+    "position" integer NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((org)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE((role)::text, ''::text) || ' '::text) || COALESCE(blurb, ''::text))), 'B'::"char"))) STORED,
+    CONSTRAINT work_entries_from_year_check CHECK ((from_year > 0)),
+    CONSTRAINT work_entries_position_check CHECK (("position" > 0)),
+    CONSTRAINT work_entries_to_year_check CHECK (((to_year IS NULL) OR (to_year >= from_year)))
+);
+
+
+--
+-- Name: search_documents; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.search_documents AS
+ SELECT 'task'::text AS kind,
+    tasks.id AS source_id,
+    (tasks.title)::text AS title,
+    ((COALESCE((tasks.title)::text, ''::text) || '
+'::text) || COALESCE(tasks.note, ''::text)) AS body,
+    ((COALESCE(tasks.completed_at, tasks.created_at) AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (tasks.status)::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    tasks.search_vector
+   FROM public.tasks
+UNION ALL
+ SELECT 'post'::text AS kind,
+    posts.id AS source_id,
+    posts.title,
+    ((((COALESCE(posts.title, ''::text) || '
+'::text) || COALESCE(posts.summary, ''::text)) || '
+'::text) || COALESCE(posts.body, ''::text)) AS body,
+    ((COALESCE(posts.published_at, posts.created_at) AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (posts.status)::text AS status,
+    posts.slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    posts.search_vector
+   FROM public.posts
+UNION ALL
+ SELECT 'social'::text AS kind,
+    social_posts.id AS source_id,
+    (social_post_parts.body)::text AS title,
+    (social_post_parts.body)::text AS body,
+    ((COALESCE(social_posts.posted_at, social_posts.created_at) AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (social_posts.status)::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    social_post_parts.search_vector
+   FROM (public.social_post_parts
+     JOIN public.social_posts ON ((social_posts.id = social_post_parts.social_post_id)))
+UNION ALL
+ SELECT 'journal'::text AS kind,
+    journal_entries.id AS source_id,
+    split_part((journal_entries.body)::text, '
+'::text, 1) AS title,
+    (journal_entries.body)::text AS body,
+    journal_entries.entry_date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    journal_entries.search_vector
+   FROM public.journal_entries
+UNION ALL
+ SELECT 'commit'::text AS kind,
+    commits.id AS source_id,
+    split_part(commits.message, '
+'::text, 1) AS title,
+    commits.message AS body,
+    commits.commit_date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    commits.repo,
+    commits.sha,
+    NULL::text AS url,
+    commits.search_vector
+   FROM public.commits
+UNION ALL
+ SELECT 'project'::text AS kind,
+    projects.id AS source_id,
+    (projects.name)::text AS title,
+    ((((COALESCE((projects.name)::text, ''::text) || '
+'::text) || COALESCE(projects.tagline, ''::text)) || '
+'::text) || COALESCE((projects.repo)::text, ''::text)) AS body,
+    ((projects.created_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (projects.status)::text AS status,
+    NULL::text AS slug,
+    (projects.repo)::text AS repo,
+    NULL::text AS sha,
+    projects.url,
+    projects.search_vector
+   FROM public.projects
+UNION ALL
+ SELECT 'work'::text AS kind,
+    work_entries.id AS source_id,
+    (work_entries.org)::text AS title,
+    ((((COALESCE((work_entries.org)::text, ''::text) || '
+'::text) || COALESCE((work_entries.role)::text, ''::text)) || '
+'::text) || COALESCE(work_entries.blurb, ''::text)) AS body,
+    ((work_entries.created_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    work_entries.search_vector
+   FROM public.work_entries
+UNION ALL
+ SELECT 'person'::text AS kind,
+    people.id AS source_id,
+    (people.name)::text AS title,
+    ((((((COALESCE((people.name)::text, ''::text) || '
+'::text) || COALESCE(people.key, ''::text)) || '
+'::text) || COALESCE(people.mastodon_handle, ''::text)) || '
+'::text) || COALESCE(people.bluesky_handle, ''::text)) AS body,
+    ((people.created_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    people.search_vector
+   FROM public.people
+UNION ALL
+ SELECT 'message'::text AS kind,
+    messages.id AS source_id,
+    (messages.subject)::text AS title,
+    ((((COALESCE((messages.subject)::text, ''::text) || '
+'::text) || COALESCE((messages.body)::text, ''::text)) || '
+'::text) || COALESCE((messages.reply_to)::text, ''::text)) AS body,
+    ((messages.received_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (messages.status)::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    messages.search_vector
+   FROM public.messages
+UNION ALL
+ SELECT 'webmention'::text AS kind,
+    webmentions.id AS source_id,
+    COALESCE(webmentions.author_name, webmentions.author_domain, (webmentions.source_url)::text) AS title,
+    ((((COALESCE(webmentions.author_name, ''::text) || '
+'::text) || COALESCE(webmentions.excerpt, ''::text)) || '
+'::text) || COALESCE((webmentions.source_url)::text, ''::text)) AS body,
+    ((webmentions.received_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (webmentions.status)::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    (webmentions.source_url)::text AS url,
+    webmentions.search_vector
+   FROM public.webmentions;
 
 
 --
@@ -1986,26 +2170,6 @@ ALTER TABLE public.webmentions ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENT
     NO MINVALUE
     NO MAXVALUE
     CACHE 1
-);
-
-
---
--- Name: work_entries; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.work_entries (
-    id integer NOT NULL,
-    org public.non_blank_text NOT NULL,
-    role public.non_blank_text NOT NULL,
-    blurb text,
-    from_year integer NOT NULL,
-    to_year integer,
-    "position" integer NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT work_entries_from_year_check CHECK ((from_year > 0)),
-    CONSTRAINT work_entries_position_check CHECK (("position" > 0)),
-    CONSTRAINT work_entries_to_year_check CHECK (((to_year IS NULL) OR (to_year >= from_year)))
 );
 
 
@@ -2598,6 +2762,13 @@ CREATE INDEX commits_commit_date_index ON public.commits USING btree (commit_dat
 
 
 --
+-- Name: commits_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX commits_search_vector_index ON public.commits USING gin (search_vector);
+
+
+--
 -- Name: held_post_follow_ups_post_id_follow_up_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2626,6 +2797,13 @@ CREATE INDEX journal_entries_entry_date_index ON public.journal_entries USING bt
 
 
 --
+-- Name: journal_entries_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX journal_entries_search_vector_index ON public.journal_entries USING gin (search_vector);
+
+
+--
 -- Name: journal_entry_tags_tag_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2644,6 +2822,13 @@ CREATE INDEX messages_marked_spam_at_index ON public.messages USING btree (marke
 --
 
 CREATE INDEX messages_received_at_id_index ON public.messages USING btree (received_at, id);
+
+
+--
+-- Name: messages_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX messages_search_vector_index ON public.messages USING gin (search_vector);
 
 
 --
@@ -2731,6 +2916,13 @@ CREATE UNIQUE INDEX people_key_index ON public.people USING btree (key);
 
 
 --
+-- Name: people_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX people_search_vector_index ON public.people USING gin (search_vector);
+
+
+--
 -- Name: photo_claims_photo_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2780,6 +2972,13 @@ CREATE INDEX posts_published_on_index ON public.posts USING btree ((((published_
 
 
 --
+-- Name: posts_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX posts_search_vector_index ON public.posts USING gin (search_vector);
+
+
+--
 -- Name: posts_status_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2822,6 +3021,13 @@ CREATE UNIQUE INDEX projects_repo_index ON public.projects USING btree (repo);
 
 
 --
+-- Name: projects_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projects_search_vector_index ON public.projects USING gin (search_vector);
+
+
+--
 -- Name: projects_status_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -2833,6 +3039,13 @@ CREATE INDEX projects_status_index ON public.projects USING btree (status);
 --
 
 CREATE UNIQUE INDEX social_post_deliveries_social_post_id_network_index ON public.social_post_deliveries USING btree (social_post_id, network);
+
+
+--
+-- Name: social_post_parts_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX social_post_parts_search_vector_index ON public.social_post_parts USING gin (search_vector);
 
 
 --
@@ -3011,6 +3224,13 @@ CREATE INDEX tasks_newest_first_index ON public.tasks USING btree (COALESCE(comp
 
 
 --
+-- Name: tasks_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX tasks_search_vector_index ON public.tasks USING gin (search_vector);
+
+
+--
 -- Name: tasks_sprint_id_position_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3074,6 +3294,13 @@ CREATE INDEX webmentions_received_on_index ON public.webmentions USING btree (((
 
 
 --
+-- Name: webmentions_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX webmentions_search_vector_index ON public.webmentions USING gin (search_vector);
+
+
+--
 -- Name: webmentions_status_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3085,6 +3312,13 @@ CREATE INDEX webmentions_status_index ON public.webmentions USING btree (status)
 --
 
 CREATE INDEX work_entries_position_index ON public.work_entries USING btree ("position");
+
+
+--
+-- Name: work_entries_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX work_entries_search_vector_index ON public.work_entries USING gin (search_vector);
 
 
 --
@@ -3500,4 +3734,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000072_create_held_post_follow_ups.rb'),
 ('20261003000073_create_held_webmentions.rb'),
 ('20261003000074_create_work_sessions.rb'),
-('20261003000075_create_attention_view.rb');
+('20261003000075_create_attention_view.rb'),
+('20261003000076_create_search_documents.rb');
