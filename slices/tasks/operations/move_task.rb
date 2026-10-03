@@ -7,11 +7,11 @@ module Tasks
 
       include Deps[current_sprint: "operations.current_sprint", task_repo: "repos.task_repo"]
 
-      def call(id, filter)
+      def call(id, filter, at: Time.now)
         step find(id)
-        return task_repo.join_sprint(id, step(current_sprint.call).id) if filter == TODAY
+        return task_repo.join_sprint(id, step(current_sprint.call(now: at)).id) if filter == TODAY
 
-        task_repo.move_to_list(id, Blog::Types::TaskList[filter])
+        task_repo.move_to_list(id, Blog::Types::TaskList[filter], at:)
       end
 
       private

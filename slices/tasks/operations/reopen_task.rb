@@ -3,12 +3,15 @@
 module Tasks
   module Operations
     class ReopenTask < Blog::Operation
-      include Deps[task_repo: "repos.task_repo"]
+      include Deps[task_repo: "repos.task_repo", work_session_repo: "repos.work_session_repo"]
 
-      def call(id)
+      def call(id, at: Time.now)
         step find(id)
 
-        task_repo.update(id, completed_at: nil, status: Blog::Types::TaskStatus["open"])
+        transaction do
+          work_session_repo.close(id, at)
+          task_repo.update(id, completed_at: nil, status: Blog::Types::TaskStatus["open"])
+        end
       end
 
       private

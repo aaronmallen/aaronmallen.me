@@ -9,12 +9,13 @@ module Tasks
         current_sprint: "operations.current_sprint",
         sprint_repo: "repos.sprint_repo",
         task_repo: "repos.task_repo",
+        work_session_repo: "repos.work_session_repo",
       ]
 
       def call(id, date, now: Time.now)
         task = step find(id)
         asked = Blog::Types::TrimmedText[date]
-        return [:unscheduled, unschedule(task)] if asked.empty?
+        return [:unscheduled, unschedule(task, now)] if asked.empty?
 
         day = step parse(asked)
         placed = asked == held(task) ? task : place(task, day, now)
@@ -42,7 +43,7 @@ module Tasks
         transaction do
           next task_repo.join_sprint(task.id, step(current_sprint.call(now:)).id) if day == Blog::TimeZone.today(now)
 
-          task_repo.update(task.id, list: nil, sprint_id: sprint_repo.claim(day).id, **waiting(task))
+          wait(task, day, now)
         end
       end
 
@@ -58,7 +59,12 @@ module Tasks
         join(task, day, now)
       end
 
-      def unschedule(task) = task.in_sprint? ? task_repo.return_to_list(task.id) : task
+      def unschedule(task, now) = task.in_sprint? ? task_repo.return_to_list(task.id, at: now) : task
+
+      def wait(task, day, now)
+        work_session_repo.close(task.id, now)
+        task_repo.update(task.id, list: nil, sprint_id: sprint_repo.claim(day).id, **waiting(task))
+      end
 
       def waiting(task) = task.in_progress? ? { status: OPEN } : Blog::Constants::EMPTY_HASH
     end

@@ -3,19 +3,26 @@
 module Tasks
   module Operations
     class StartTask < Blog::Operation
-      include Deps[current_sprint: "operations.current_sprint", task_repo: "repos.task_repo"]
+      include Deps[
+        current_sprint: "operations.current_sprint",
+        task_repo: "repos.task_repo",
+        work_session_repo: "repos.work_session_repo",
+      ]
 
-      def call(id)
+      def call(id, at: Time.now)
         step find(id)
-        sprint = step current_sprint.call
+        sprint = step current_sprint.call(now: at)
 
-        task_repo.update(
-          id,
-          completed_at: nil,
-          list: nil,
-          sprint_id: sprint.id,
-          status: Blog::Types::TaskStatus["in_progress"],
-        )
+        transaction do
+          work_session_repo.open(id, at)
+          task_repo.update(
+            id,
+            completed_at: nil,
+            list: nil,
+            sprint_id: sprint.id,
+            status: Blog::Types::TaskStatus["in_progress"],
+          )
+        end
       end
 
       private

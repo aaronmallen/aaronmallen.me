@@ -32,8 +32,13 @@ module Tasks
 
       def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
-      def carry_forward(sprint_id)
-        tasks.unfinished_in(sprints.before_sprint(sprint_id).ids).carry_into(sprint_id)
+      def carry_forward(sprint_id, at: Time.now)
+        carried = tasks.unfinished_in(sprints.before_sprint(sprint_id).ids)
+
+        transaction do
+          work_sessions.split(carried.in_progress.pluck(:id), at)
+          carried.carry_into(sprint_id)
+        end
       end
 
       def complete(id, at: Time.now) = update(id, status: DONE, completed_at: at)
@@ -72,9 +77,9 @@ module Tasks
         found.open_first.limit(limit).to_a
       end
 
-      def move_to_list(id, list)
+      def move_to_list(id, list, at: Time.now)
         transaction do
-          pause(tasks.by_pk(id))
+          pause(tasks.by_pk(id), at)
           update(id, list:, sprint_id: nil, carried_count: 0)
         end
       end
@@ -107,18 +112,18 @@ module Tasks
         end
       end
 
-      def release_sprint(sprint_id)
+      def release_sprint(sprint_id, at: Time.now)
         held = tasks.for_sprint(sprint_id)
 
         transaction do
-          release(held.sourced, EXTERNAL)
-          release(held.unsourced, NEXT)
+          release(held.sourced, EXTERNAL, at)
+          release(held.unsourced, NEXT, at)
         end
       end
 
       def replace_tags(id, names) = task_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 
-      def return_to_list(id) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT)
+      def return_to_list(id, at: Time.now) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT, at:)
 
       def unlink(id, other_id) = task_links.between(id, other_id).delete
 
@@ -128,10 +133,14 @@ module Tasks
 
       def next_position = tasks.last_position + 1
 
-      def pause(held) = held.in_progress.stamped(:update, result: :many).call(status: OPEN)
+      def pause(held, at)
+        running = held.in_progress
+        work_sessions.close(running.dataset.select(:id), at)
+        running.stamped(:update, result: :many).call(status: OPEN)
+      end
 
-      def release(held, list)
-        pause(held)
+      def release(held, list, at)
+        pause(held, at)
         held.stamped(:update, result: :many).call(list:, sprint_id: nil)
       end
 

@@ -9,16 +9,16 @@ module Tasks
         sprint = step find(id)
         step ahead(sprint, now)
 
-        drop(sprint)
+        drop(sprint, now)
       end
 
       private
 
       def ahead(sprint, now) = sprint.sprint_date > Blog::TimeZone.today(now) ? Success(sprint) : Failure(:started)
 
-      def drop(sprint)
+      def drop(sprint, now)
         transaction do
-          task_repo.release_sprint(sprint.id)
+          task_repo.release_sprint(sprint.id, at: now)
           sprint_repo.delete(sprint.id)
         end
 

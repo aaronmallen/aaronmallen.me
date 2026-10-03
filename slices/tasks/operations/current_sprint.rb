@@ -8,7 +8,7 @@ module Tasks
       def call(now: Time.now)
         transaction do
           sprint = sprint_repo.claim(Blog::TimeZone.today(now))
-          arrived = task_repo.carry_forward(sprint.id)
+          arrived = task_repo.carry_forward(sprint.id, at: now)
           next sprint unless arrived.positive?
 
           sprint_repo.count_arrivals(sprint.id, arrived)

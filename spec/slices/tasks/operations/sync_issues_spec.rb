@@ -69,6 +69,67 @@ RSpec.describe Tasks::Operations::SyncIssues do
     end
   end
 
+  describe "a synced issue's work session" do
+    let(:synced_at) { Time.at(Time.now.to_i - 600) }
+
+    def sessions(task) = Tasks::Slice["relations.work_sessions"].for_task(task.id).to_a
+
+    def started(task) = create(:work_session, task_id: task.id, started_at: synced_at - 3600)
+
+    def sync_at(now) = Tasks::Slice["operations.sync_issues"].call(provider: "linear", client:, now:)
+
+    it "opens when the issue starts, at the time of the sync" do
+      task = tracked
+      assign(issue("started"))
+      sync_at(synced_at)
+
+      expect(sessions(task).map { [it[:started_at], it[:ended_at]] }).to eq([[synced_at, nil]])
+    end
+
+    it "opens when a new issue arrives already started" do
+      assign(issue("started"))
+      sync_at(synced_at)
+
+      expect(sessions(imported).map { it[:started_at] }).to eq([synced_at])
+    end
+
+    it "ends when the issue completes" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      assign(issue("completed"))
+      sync_at(synced_at)
+
+      expect(sessions(task).map { it[:ended_at] }).to eq([synced_at])
+    end
+
+    it "adds its length to the total when the issue completes" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      assign(issue("completed"))
+      sync_at(synced_at)
+
+      expect(repo.by_id(task.id).worked_seconds).to eq(3600)
+    end
+
+    it "ends when the issue closes as not planned" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      assign(issue("not_planned"))
+      sync_at(synced_at)
+
+      expect(sessions(task).map { it[:ended_at] }).to eq([synced_at])
+    end
+
+    it "ends when the issue goes back to open" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      assign(issue)
+      sync_at(synced_at)
+
+      expect(sessions(task).map { it[:ended_at] }).to eq([synced_at])
+    end
+  end
+
   describe "an issue reopened while I work on its closed task" do
     it "leaves the task in progress" do
       task = tracked(:in_progress, state: "completed")

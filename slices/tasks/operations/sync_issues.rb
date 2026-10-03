@@ -101,10 +101,10 @@ module Tasks
 
       def listening?(task, issue) = issue.key?(:comments) && !task.closed?
 
-      def reopen(task, was)
+      def reopen(task, was, now)
         return Success(task) unless task.closed? || (was == STARTED && task.in_progress?)
 
-        reopen_task.call(task.id)
+        reopen_task.call(task.id, at: now)
       end
 
       def restamp(source, state, url, now)
@@ -131,8 +131,8 @@ module Tasks
 
       def settle(task, state, was, now)
         case state
-        when OPEN then reopen(task, was)
-        when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id)
+        when OPEN then reopen(task, was, now)
+        when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id, at: now)
         when COMPLETED then task.done? ? Success(task) : complete_task.call(task.id, at: now)
         else close(task, now)
         end.value_or(task)
