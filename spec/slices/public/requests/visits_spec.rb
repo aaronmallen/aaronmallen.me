@@ -382,6 +382,10 @@ RSpec.describe "Visits", type: :request do
       "a tag that does not exist" => "/writing/tags/nothing-here",
       "a tag only a draft carries" => "/writing/tags/secret",
       "a tag in another case than its own" => "/writing/tags/Ruby",
+      "a media file" => "/media/made-up-key",
+      "the manifest" => "/site.webmanifest",
+      "the writing feed" => "/writing.atom",
+      "a tag's feed" => "/writing/tags/ruby.atom",
     }.each do |named, path|
       it "accepts the beacon for #{named}" do
         beacon({ kind: "view", path: })

@@ -3,19 +3,24 @@
 module Public
   module Operations
     class FindPage
+      FEED = ".atom"
       FIRST = Blog::Page.new(number: 1, size: 1)
+      PAGES = %i[root writing about projects contact].freeze
 
       include Deps[
         public_projects_by_tag: "projects.queries.public_by_tag",
         published_page_by_tag: "posts.queries.published_page_by_tag",
         published_post_by_slug: "posts.queries.published_by_slug",
+        routes: "routes",
       ]
 
-      def call(params)
+      def call(route)
+        params = route.params
+        return false if route.path.end_with?(FEED)
         return post?(unescape(params[:slug])) if params.key?(:slug)
         return tag?(unescape(params[:tag])) if params.key?(:tag)
 
-        true
+        PAGES.any? { routes.path(it) == route.path }
       end
 
       private

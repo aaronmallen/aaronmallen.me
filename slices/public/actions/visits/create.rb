@@ -68,7 +68,7 @@ module Public
           visit = payload(request)
           route = route_for(visit)
           return REJECTED unless route
-          return uncounted(visit) unless find_page.call(route.params)
+          return uncounted(visit) unless find_page.call(route)
 
           case outcome(request, visit)
           in Success(_) then ACCEPTED
