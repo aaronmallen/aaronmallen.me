@@ -98,6 +98,7 @@ one.
 | [0091][0091] | Fetch the palette's open tasks from a session-only admin route when it opens | ![Active][active] | 2026-10-01 |
 | [0092][0092] | Keep task history in task_events and a task_timeline view | ![Active][active] | 2026-10-03 |
 | [0093][0093] | Link any two records through one record_links table in a links slice | ![Active][active] | 2026-10-03 |
+| [0094][0094] | Keep a seen_at on task_sources, and merge the inbox in the api slice | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -192,6 +193,7 @@ one.
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
 [0092]: 0092-keep-task-history-in-task-events-and-a-task-timeline-view.md
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
+[0094]: 0094-keep-a-seen-at-on-task-sources-and-merge-the-inbox-in-the-api-slice.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
