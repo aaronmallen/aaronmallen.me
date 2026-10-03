@@ -5,6 +5,35 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-03
+
+### Added
+
+- `REDIS_CONNECT_TIMEOUT`, `REDIS_TIMEOUT` and `REDIS_RECONNECT_ATTEMPTS` set how long Sidekiq waits on Redis and how
+  often it tries again, so a short outage need not fail a job. Left unset, Sidekiq keeps its own defaults.
+
+### Fixed
+
+- The Atom feeds answer a reader whose `If-Modified-Since` date has a one-digit day, such as
+  `Thu, 1 Oct 2026 12:00:00 GMT`. They used to answer 500, and now ignore a date they cannot read.
+- Publishing or saving a post, and receiving a webmention, no longer answer 500 when Redis is down. The post or
+  mention saves, its job waits in Postgres, and it goes out within a minute of Redis coming back.
+- The issue sync no longer stops for good when a deleted or moved issue comes back assigned. Its old task reopens,
+  where the sync used to fail on that issue every run.
+- A photo dropped into a post's edit note keeps its claim, so the sweep of unclaimed photos no longer deletes it.
+- Visit beacons for media, the web manifest and the Atom feeds no longer count as views, so made-up media keys
+  cannot fill the top paths.
+- The admin activity and journal pages ignore a date before year 1000 or after 9999, where they used to answer 500.
+- The post editor and the social composer check a Bluesky part's length with the `?ref=bluesky` tag on its links, so
+  a part that fits only without the tag no longer saves and then fails to send.
+- A webmention whose target slug decodes to bad UTF-8 answers 400, where it used to answer 500.
+- Linking a task to an ID past 2147483647 gets the "task is gone" error in the admin, the API and MCP, where it used
+  to answer 500.
+- The contact form refuses a subject, body or reply-to made only of Unicode spaces, where it used to answer 500.
+- The admin photo upload and task palette answer 400 to a body that is not valid JSON, where they used to answer 500.
+- The newer link on the admin journal no longer skips days when one day holds more entries than fit on a page.
+- The MCP `report` prompt refuses a range over 366 days, as `summarize_activity` and `read_analytics` do.
+
 ## [1.4.0] - 2026-10-01
 
 ### Added
@@ -249,7 +278,8 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.0...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.1...HEAD
+[1.4.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...1.3.0
 [1.2.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
