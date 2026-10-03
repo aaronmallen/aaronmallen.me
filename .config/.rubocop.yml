@@ -35,6 +35,8 @@ Metrics/ClassLength:
     - hash
     - heredoc
     - method_call
+  Exclude:
+    - ../slices/admin/config/routes.rb
 
 Metrics/MethodLength:
   CountAsOne:
