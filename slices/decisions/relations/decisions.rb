@@ -9,9 +9,15 @@ module Decisions
         end
       end
 
+      def counts_by_status = unordered.select(:status) { integer.count(id).as(:count) }.group(:status)
+
       def linkable = linkables(title: :title, day: self.class.site_day(:created_at))
 
       def matching(text) = containing(text, :title, :problem)
+
+      def newest_first = order(self[:created_at].desc, self[:id].desc)
+
+      def with_status(status) = where(status:)
     end
   end
 end

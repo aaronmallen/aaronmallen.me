@@ -46,7 +46,7 @@ module Admin
             {
               name: "post[body]", value: @values[:body], height: BODY_HEIGHT, renderer: "posts", id: "post-body",
               label: t(".body"), placeholder: t(".placeholder"), preview_path: path(:admin_preview_post),
-              view: @view, view_name: "view", data: { post_body: "" },
+              view: @view, view_name: "view", data: { post_body: "", edit_note_watch: "" },
             }
           end
 

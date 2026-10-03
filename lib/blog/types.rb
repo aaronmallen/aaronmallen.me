@@ -50,6 +50,7 @@ module Blog
       "opened", "option_added", "option_edited", "edited", "resolved", "dropped", "reopened",
     )
     DecisionStatus = Types::String.enum("open", "resolved", "dropped")
+    DecisionStatusParam = DecisionStatus.fallback(DecisionStatus.values.first)
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }

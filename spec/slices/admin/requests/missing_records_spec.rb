@@ -5,6 +5,12 @@ RSpec.describe "Admin records that are gone", type: :request do
   past_range = 2**31
 
   {
+    "/decisions/#{missing}" => { decision: { title: "Pick", problem: "Why" } },
+    "/decisions/#{missing}/drop" => { decision: { reason: "No need" } },
+    "/decisions/#{missing}/options" => { option: { title: "Sidekiq", body: "" } },
+    "/decisions/#{missing}/options/#{missing}" => { option: { title: "Sidekiq", body: "" } },
+    "/decisions/#{missing}/reopen" => { decision: { reason: "Again" } },
+    "/decisions/#{missing}/resolve" => { decision: { option_id: "1", reason: "It runs" } },
     "/journal/#{missing}" => { entry: { body: "after" } },
     "/journal/#{missing}/delete" => {},
     "/messages/#{missing}/mark/read" => {},

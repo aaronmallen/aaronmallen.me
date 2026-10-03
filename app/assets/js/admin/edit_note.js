@@ -1,20 +1,21 @@
 const ACCEPT = "accept";
 
 export function setupEditNotes() {
-  for (const form of document.querySelectorAll("form[data-post-editor]")) {
-    const dialog = form.querySelector("[data-edit-note-dialog]");
-    if (dialog) setupEditNote(form, dialog);
+  for (const dialog of document.querySelectorAll("[data-edit-note-dialog]")) {
+    const form = dialog.closest("form");
+    if (form) setupEditNote(form, dialog);
   }
 }
 
 function setupEditNote(form, dialog) {
-  const body = form.querySelector("[data-post-body]");
+  const watched = [...form.querySelectorAll("[data-edit-note-watch]")];
   const card = form.querySelector("[data-edit-note]");
   const field = card.querySelector("[data-edit-note-field]");
   const note = field.querySelector("textarea");
   if (note.value.trim() !== "" || note.getAttribute("aria-invalid") === "true") return;
 
-  const loaded = lines(body.defaultValue);
+  const loaded = watched.map((input) => lines(input.defaultValue));
+  const changed = () => watched.some((input, index) => lines(input.value) !== loaded[index]);
   let confirmed = false;
 
   dialog.querySelector("[data-edit-note-slot]").append(field);
@@ -24,7 +25,7 @@ function setupEditNote(form, dialog) {
   dialog.querySelector("[data-edit-note-decline]").addEventListener("click", () => dialog.close());
 
   form.addEventListener("submit", (event) => {
-    if (confirmed || lines(body.value) === loaded) return;
+    if (confirmed || !changed()) return;
 
     event.preventDefault();
     ask(dialog, note, event.submitter, () => {

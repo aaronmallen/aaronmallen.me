@@ -20,6 +20,20 @@ module Admin
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID
     post "/commits/import", to: "commits.import", as: :import_commits
+    get "/decisions", to: "decisions.index", as: :decisions
+    post "/decisions", to: "decisions.create", as: :create_decision
+    get "/decisions/new", to: "decisions.new", as: :new_decision
+    get "/decisions/:id", to: "decisions.show", as: :decision, id: ID
+    get "/decisions/:id/edit", to: "decisions.edit", as: :edit_decision, id: ID
+    post "/decisions/:id", to: "decisions.update", as: :update_decision, id: ID
+    post "/decisions/:id/drop", to: "decisions.drop", as: :drop_decision, id: ID
+    post "/decisions/:id/options", to: "decisions.create_option", as: :create_decision_option, id: ID
+    post(
+      "/decisions/:id/options/:option_id",
+      to: "decisions.update_option", as: :update_decision_option, id: ID, option_id: ID,
+    )
+    post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
+    post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
     get "/journal", to: "journal.index", as: :journal
     post "/journal", to: "journal.create", as: :create_journal_entry
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID
