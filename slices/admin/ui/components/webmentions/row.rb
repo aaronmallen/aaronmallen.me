@@ -27,7 +27,7 @@ module Admin
           prop :filter, Blog::Types::String
 
           def view_template
-            div(class: "li") do
+            div(class: "li", data: { key_row: true }) do
               div(class: "li-main") do
                 author
                 excerpt
@@ -49,7 +49,10 @@ module Admin
           def author
             div(class: "wm-author") do
               i(class: [type.icon, "wm-type-icon"], aria: { hidden: "true" })
-              a(class: "li-title", href: @mention.source_url, target: "_blank", rel: "noopener noreferrer") do
+              a(
+                class: "li-title", href: @mention.source_url, target: "_blank", rel: "noopener noreferrer",
+                data: { key_open: true },
+              ) do
                 @mention.author_label
               end
             end

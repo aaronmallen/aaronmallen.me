@@ -39,7 +39,7 @@ module Admin
           def open = @open ||= @tasks.reject(&:closed?)
 
           def panel
-            Card(label:, title: t(open.empty? ? ".clear" : ".title")) do |card|
+            Card(label:, title: t(open.empty? ? ".clear" : ".title"), data: { key_list: true }) do |card|
               card.side { span(class: "sprint-note") { t(".done", done:, total: @tasks.size) } }
               progress
               rows

@@ -28,6 +28,7 @@ module Admin
             Blog::Types::TaskFilter["someday"] => ".backlog",
             Blog::Types::TaskFilter["external"] => ".imported",
           }.freeze
+          LIST = { data: { key_list: true } }.freeze
           LIVE = { class: "card-live" }.freeze
           SEPARATOR = " · "
           TITLES = {
@@ -63,7 +64,7 @@ module Admin
           private
 
           def archive
-            Card(label: t(".archive"), title: t(".completed")) do |card|
+            Card(label: t(".archive"), title: t(".completed"), **LIST) do |card|
               card.side { span(class: "card-note") { t(".shown", count: @tasks.rows.size) } }
               archived
             end
@@ -101,7 +102,7 @@ module Admin
           def label = t(LABELS.fetch(@tab), date: l(@today, format: :short))
 
           def list
-            Card(label:, title: t(TITLES.fetch(@tab)), **(today? ? LIVE : Blog::Constants::EMPTY_HASH)) do |card|
+            Card(label:, title: t(TITLES.fetch(@tab)), **list_attributes) do |card|
               card.side do
                 span(class: "card-note") { open_note }
                 SyncButton() if external?
@@ -110,6 +111,8 @@ module Admin
               rows
             end
           end
+
+          def list_attributes = today? ? LIST.merge(LIVE) : LIST
 
           def open_note
             counts = [t(".open", count: filtering? ? @tasks.rows.size : @counts.fetch(@tab))]

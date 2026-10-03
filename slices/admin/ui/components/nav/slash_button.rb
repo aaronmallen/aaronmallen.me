@@ -8,7 +8,10 @@ module Admin
           MARK = "/"
 
           def view_template
-            button(type: "button", class: "slash", aria: { label: t(".label") }, data: { palette_open: true }) do
+            label = t(".label")
+            data = { palette_open: true, key: MARK, key_label: label }
+
+            button(type: "button", class: "slash", aria: { label: }, data:) do
               span(aria: { hidden: "true" }) { MARK }
             end
           end

@@ -987,6 +987,26 @@
   @apply rounded-xs border border-line bg-ground px-1.5 py-0.5 font-mono text-badge text-ink-muted;
 }
 
+@utility keys {
+  @apply m-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2.5;
+}
+
+@utility keys-row {
+  @apply col-span-2 grid grid-cols-subgrid items-baseline;
+
+  &[hidden] {
+    @apply hidden;
+  }
+}
+
+@utility keys-keys {
+  @apply flex flex-wrap gap-1.5;
+}
+
+@utility keys-label {
+  @apply m-0 meta text-ink;
+}
+
 @utility slash {
   @apply focus-ring fixed bottom-5 z-50 grid size-11 cursor-pointer place-items-center border border-line;
   @apply rounded-slash bg-ground-sunk font-mono text-slash leading-none text-ink-muted shadow-palette;
@@ -3254,6 +3274,20 @@
   .syntax-highlighting .string { color: var(--color-mk-sand-text); }
   .syntax-highlighting :is(.entity.name.function, .support.function) { color: var(--color-mk-blue); }
   .syntax-highlighting :is(.comment, .comment *) { color: var(--color-mk-comment); }
+}
+
+@layer components {
+  [data-key-row] {
+    scroll-margin-block: calc(var(--spacing-ctx-bar) + 1rem) 1rem;
+
+    &:focus-visible,
+    &:has([data-key-open]:focus-visible) {
+      outline: none;
+      border-radius: var(--radius-btn);
+      background-color: var(--color-wash);
+      box-shadow: 0 0 0 0.5rem var(--color-wash);
+    }
+  }
 }
 
 @layer base {

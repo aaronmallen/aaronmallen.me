@@ -22,7 +22,7 @@ module Admin
 
             Minted(value: @minted) if @minted
             Card(title: t(".mint")) { Mint(name: @name, errors: @errors) }
-            Card(title: t(".live")) do
+            Card(title: t(".live"), data: { key_list: true }) do
               next Empty { t(".empty") } if @tokens.empty?
 
               @tokens.each { Row(token: it) }

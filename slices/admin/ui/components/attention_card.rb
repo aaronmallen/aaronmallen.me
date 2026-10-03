@@ -16,7 +16,7 @@ module Admin
         def view_template
           return if @rows.empty?
 
-          Card(title: t(".title"), data: { attention: "" }) do |card|
+          Card(title: t(".title"), data: { attention: "", key_list: true }) do |card|
             card.side { span(class: "meta") { t(".count", count: @rows.size) } }
             @rows.each { row(it) }
           end

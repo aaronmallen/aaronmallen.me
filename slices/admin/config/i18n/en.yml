@@ -371,6 +371,7 @@ en:
           alert: "something needs you"
           back: "today"
           jump: "jump"
+          keys: "Show the keys"
           separator: "/"
           shortcut: "⌘/"
         groups:
@@ -420,6 +421,14 @@ en:
           today: "today"
           tokens: "API tokens"
           webmentions: "webmentions"
+        key_help:
+          close: "Close"
+          next: "Highlight the next row"
+          open: "Open the highlighted row"
+          palette: "Open the command palette from anywhere"
+          previous: "Highlight the row above"
+          reorder: "Move the focused task up or down"
+          title: "Keys"
         slash_button:
           label: "Open the command palette"
       people:

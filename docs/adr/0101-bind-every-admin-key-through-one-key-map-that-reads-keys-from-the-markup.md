@@ -38,8 +38,9 @@ such key. A published post draws no publish button, so `p` does nothing on it.
 - **Rows.** A list marks itself with `data-key-list` and each row with `data-key-row`. `j` and `k` move focus to
   the next or previous row's open control, the link or button marked `data-key-open`, and scroll it into view. The
   highlight is that focus, so Enter opens the row the way the browser opens any focused link, and Alt+Up and
-  Alt+Down find the row the way they do today. A `data-key` inside a row runs against the row that holds focus,
-  and does nothing when no row does.
+  Alt+Down find the row the way they do today. A row with no open control, such as a message, takes focus
+  itself, and Enter does nothing there, as a click on it does nothing. A `data-key` inside a row runs against the
+  row that holds focus, and does nothing when no row does.
 - **Screen keys** such as `c` sit on a control outside any row, such as the create button.
 - **Jumps.** Each row of `Admin::Operations::ListSections::ALL` gains its jump letter, and the palette draws it as
   `data-key="g t"` on the section's row. After `g` the key map waits for one more key, and a key with no section
@@ -79,8 +80,8 @@ attributes takes no keys and nothing warns.
 Letters are spread across the views that draw them, so changing one, or finding a clash on a screen, means
 searching the views. Only a browser spec on the screen catches two controls claiming one key.
 
-Moving focus as the highlight means a row's open control must take focus. A row with no link or button cannot be
-highlighted.
+Moving focus as the highlight means a row's open control must take focus. A row without one gets `tabindex="-1"`
+from the key map when `j` or `k` first reaches it.
 
 Jump letters live with the sections, so a section added to `ListSections::ALL` has to pick a letter no other
 section uses.

@@ -1,3 +1,4 @@
+import { bind } from "./keys.js";
 import { showToast } from "./toast.js";
 
 const DRAGGING = "task-dragging";
@@ -18,7 +19,7 @@ export function setupTaskOrder(root = document) {
     grip.addEventListener("pointerdown", (event) => drag(event, grip));
   }
 
-  if (root === document) document.addEventListener("keydown", nudge);
+  if (root === document) bind(nudges, nudge);
 }
 
 function after(row) {
@@ -61,8 +62,6 @@ function drag(event, grip) {
 
 function nudge(event) {
   const step = KEYS[event.key];
-  if (!step || !event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-
   const row = event.target.closest?.(ROW);
   if (!row?.querySelector(`${GRIP}:not([hidden])`)) return;
 
@@ -81,6 +80,10 @@ function keepFocus(work) {
   work();
   focused?.focus({ preventScroll: true });
   focused?.scrollIntoView({ block: "nearest" });
+}
+
+function nudges(event) {
+  return event.key in KEYS && event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey;
 }
 
 function peers(row) {

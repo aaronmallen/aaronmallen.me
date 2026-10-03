@@ -53,7 +53,7 @@ module Admin
           def filter_options = FILTERS.transform_values { t(it) }
 
           def inbox
-            Card(title: t(".inbox")) do
+            Card(title: t(".inbox"), data: { key_list: true }) do
               next Empty { t(EMPTIES.fetch(@filter)) } if @inbox[:mentions].rows.empty?
 
               @inbox[:mentions].rows.each { |mention| row(mention) }

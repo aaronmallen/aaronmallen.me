@@ -18,7 +18,7 @@ module Admin
           prop :suggestion_counts, Blog::Types::Hash
 
           def view_template
-            Card(label: t(".label"), title: t(".title")) do |card|
+            Card(label: t(".label"), title: t(".title"), data: { key_list: true }) do |card|
               card.side { filter_form }
               next Empty { t(EMPTIES.fetch(@filter)) } if @page.rows.empty?
 

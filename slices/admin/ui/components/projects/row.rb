@@ -17,9 +17,11 @@ module Admin
           prop :last, Blog::Types::Bool, default: false
 
           def view_template
-            div(class: "li") do
+            div(class: "li", data: { key_row: true }) do
               div(class: "li-main") do
-                a(class: "li-title mono", href: path(:admin_edit_project, id: @project.id)) { @project.name }
+                a(class: "li-title mono", href: path(:admin_edit_project, id: @project.id), data: { key_open: true }) do
+                  @project.name
+                end
                 p(class: "proj-tagline") { @project.tagline } if written?(@project.tagline)
                 meta
               end

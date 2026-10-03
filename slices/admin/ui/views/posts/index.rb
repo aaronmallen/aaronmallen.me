@@ -54,7 +54,7 @@ module Admin
           def filter_options = FILTERS.transform_values { t(it) }
 
           def list
-            @posts.rows.empty? ? Empty { t(".empty") } : Card { @posts.rows.each { |post| row(post) } }
+            @posts.rows.empty? ? Empty { t(".empty") } : rows
             Pager(page: @posts, route: :admin_posts, params: { status: @filter })
           end
 
@@ -83,6 +83,8 @@ module Admin
             visitors = t(".visitors", count: @visitor_counts.fetch(post.id))
             [path(:post, slug: post.slug), date, words, views, visitors].join(SEPARATOR)
           end
+
+          def rows = Card(data: { key_list: true }) { @posts.rows.each { |post| row(post) } }
 
           def sub
             [

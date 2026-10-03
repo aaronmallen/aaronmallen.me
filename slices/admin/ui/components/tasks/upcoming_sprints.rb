@@ -89,7 +89,9 @@ module Admin
           def sprint_card(sprint, tasks)
             open = tasks.reject(&:closed?)
 
-            Card(label: relative(sprint.sprint_date), title: l(sprint.sprint_date, format: :weekday)) do |card|
+            date = sprint.sprint_date
+
+            Card(label: relative(date), title: l(date, format: :weekday), data: { key_list: true }) do |card|
               card.side { sprint_side(sprint, open) }
               rows(sprint, open)
               chips(sprint)

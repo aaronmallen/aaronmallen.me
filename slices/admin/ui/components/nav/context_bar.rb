@@ -5,6 +5,8 @@ module Admin
     module Components
       module Nav
         class ContextBar < Component
+          KEY = "?"
+
           prop :current, Blog::Types::Instance(Structs::Section).optional
           prop :alert, Blog::Types::Bool, default: false
 
@@ -14,6 +16,7 @@ module Admin
                 where
                 back
                 jump
+                keys
               end
             end
           end
@@ -44,6 +47,18 @@ module Admin
               alert_dot
               whitespace
               span(class: "kbd", aria: { hidden: "true" }) { t(".shortcut") }
+            end
+          end
+
+          def keys
+            label = t(".keys")
+
+            button(
+              type: "button", class: "ctx-btn", aria: { label: }, title: label,
+              data: { dialog_open: KeyHelp::ID, key: KEY, key_label: label, key_help_open: true },
+            ) do
+              i(class: "fa-regular fa-keyboard", aria: { hidden: "true" })
+              span(class: "kbd", aria: { hidden: "true" }) { KEY }
             end
           end
 

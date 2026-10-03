@@ -19,7 +19,7 @@ module Admin
         prop :filter, Blog::Types::String
 
         def view_template
-          div(class: "li") do
+          div(class: "li", data: { key_row: true }) do
             div(class: "li-main") do
               span(class: "li-title") { @message.subject }
               p(class: "msg-body") { @message.body }

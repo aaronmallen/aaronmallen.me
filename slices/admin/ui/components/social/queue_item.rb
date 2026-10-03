@@ -26,7 +26,7 @@ module Admin
           prop :suggestions, Blog::Types::Integer, default: 0
 
           def view_template
-            article(class: "sq-item", data: { social_item: @social_post.id }) do
+            article(class: "sq-item", data: { social_item: @social_post.id, key_row: true }) do
               div(class: "sq-text") { @social_post.parts.each { |part| p(class: "sq-part") { part.body } } }
               failures
               div(class: "sq-foot") do
@@ -43,7 +43,7 @@ module Admin
           def deliveries = @deliveries ||= @social_post.deliveries.to_h { [it.network, it] }
 
           def edit_link
-            a(class: "btn sm", href: edit_path, data: { social_edit: "" }) { t(".edit") }
+            a(class: "btn sm", href: edit_path, data: { social_edit: "", key_open: true }) { t(".edit") }
           end
 
           def edit_path = path(:admin_social, filter: @filter, edit: @social_post.id)

@@ -51,7 +51,7 @@ module Admin
           def card
             label_key, title_key = CARDS.fetch(@filter)
 
-            Card(label: t(label_key), title: t(title_key)) do |card|
+            Card(label: t(label_key), title: t(title_key), data: { key_list: true }) do |card|
               card.side { Hint(inline: true) { t(".archived_hint") } } if archived?
               rows
             end
@@ -86,7 +86,7 @@ module Admin
 
           def work
             Grid(columns: 2) do
-              Card(label: t(".work_label"), title: t(".work_title")) { work_rows }
+              Card(label: t(".work_label"), title: t(".work_title"), data: { key_list: true }) { work_rows }
               Components::WorkEntries::Form(values: @work_values, errors: @work_errors)
             end
           end

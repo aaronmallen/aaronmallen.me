@@ -10,7 +10,7 @@ module Admin
           prop :entry, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            div(class: "li") do
+            div(class: "li", data: { key_row: true }) do
               div(class: "li-main") do
                 span(class: "li-title") { @entry.role }
                 p(class: "li-sub") { sub }

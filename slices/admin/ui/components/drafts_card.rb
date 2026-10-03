@@ -10,7 +10,7 @@ module Admin
         prop :counts, Blog::Types::Hash
 
         def view_template
-          Card(title: t(".title")) do
+          Card(title: t(".title"), data: { key_list: true }) do
             @posts.empty? ? Empty { t(".empty") } : @posts.each { |post| row(post) }
           end
         end

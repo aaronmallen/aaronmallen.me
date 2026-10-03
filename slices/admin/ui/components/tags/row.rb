@@ -14,7 +14,7 @@ module Admin
           prop :page, Blog::Types::Integer, default: 1
 
           def view_template
-            div(class: "tag-row") do
+            div(class: "tag-row", data: { key_row: true }) do
               input(type: "checkbox", class: "sr-only tag-toggle", id: toggle_id, checked: editing?)
               label(class: "tag-name", for: toggle_id) { Tag(tag: @tag) }
               p(class: "tag-uses") { uses }

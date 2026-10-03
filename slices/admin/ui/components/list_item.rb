@@ -9,7 +9,7 @@ module Admin
         prop :sub, Blog::Types::String.optional
 
         def view_template(&side)
-          div(class: "li") do
+          div(class: "li", data: { key_row: true }) do
             @sub ? render_main : render_title
             div(class: "li-side", &side) if side
           end
@@ -26,7 +26,7 @@ module Admin
 
         def render_title
           if @href
-            a(class: "li-title", href: @href) { @title }
+            a(class: "li-title", href: @href, data: { key_open: true }) { @title }
           else
             span(class: "li-title") { @title }
           end

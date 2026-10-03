@@ -44,6 +44,7 @@ module Admin
           Components::Tasks::CreateDialog(today: Blog::TimeZone.today, origin: content_for(:task_origin))
           Components::Tasks::Panel()
           SlashButton()
+          KeyHelp()
         end
 
         def title_suffix = t(".title", owner: Blog::Owner.full_name)

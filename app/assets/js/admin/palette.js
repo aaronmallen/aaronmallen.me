@@ -1,11 +1,11 @@
 import { openDialog } from "./dialog.js";
+import { bind } from "./keys.js";
 
 const COUNT = "{count}";
 const OPTION = "[data-palette-option]";
 const SHOWN = "[data-palette-option]:not([hidden])";
 const SLASH_CODES = ["Slash", "NumpadDivide"];
 const TASK_LIMIT = 5;
-const TYPING = "input, textarea, select, [contenteditable]";
 
 export function setupPalette() {
   const dialog = document.querySelector("[data-palette]");
@@ -109,8 +109,8 @@ function setupDialog(dialog) {
     trigger.addEventListener("click", open);
   }
 
-  document.addEventListener("keydown", (event) => {
-    if (dialog.open || !opens(event)) return;
+  bind(opens, (event) => {
+    if (dialog.open) return;
 
     event.preventDefault();
     open();
@@ -171,9 +171,7 @@ function matches(option, text) {
 }
 
 function opens(event) {
-  if (event.metaKey || event.ctrlKey) return event.key === "/" || SLASH_CODES.includes(event.code);
-
-  return event.key === "/" && !event.target?.closest?.(TYPING);
+  return (event.metaKey || event.ctrlKey) && (event.key === "/" || SLASH_CODES.includes(event.code));
 }
 
 function steer(event, { move, run, select, shown }) {

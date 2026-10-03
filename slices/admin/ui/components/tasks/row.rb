@@ -18,7 +18,7 @@ module Admin
           prop :bulk, Blog::Types::String.optional, default: nil
 
           def view_template
-            div(class: classes, data: order) do
+            div(class: classes, data: { key_row: true, **order }) do
               TaskKey(task: @task)
               pick if @bulk
               task_title
@@ -81,7 +81,9 @@ module Admin
           end
 
           def order
-            { task_id: @task.id, task_order: @task.list || @task.sprint_id } if ordered?
+            return Blog::Constants::EMPTY_HASH unless ordered?
+
+            { task_id: @task.id, task_order: @task.list || @task.sprint_id }
           end
 
           def ordered? = @ordered && !@task.closed?
@@ -114,7 +116,7 @@ module Admin
           def task_title
             href = path(:admin_task, id: @task.id, filter: tab, origin: @origin)
 
-            a(class: "task-title", href:, data: { task_open: true }) do
+            a(class: "task-title", href:, data: { task_open: true, key_open: true }) do
               @task.title
             end
           end

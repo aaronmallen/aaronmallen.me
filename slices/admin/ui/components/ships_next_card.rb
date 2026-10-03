@@ -12,7 +12,7 @@ module Admin
         prop :summaries, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
 
         def view_template
-          Card(title: t(".title")) do
+          Card(title: t(".title"), data: { key_list: true }) do
             next Empty { t(".empty") } if @posts.empty? && @social_posts.empty?
 
             @posts.each { post_row(it) }

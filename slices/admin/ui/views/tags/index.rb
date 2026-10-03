@@ -41,7 +41,7 @@ module Admin
           private
 
           def card
-            Card(label: t(LABELS.fetch(@scope)), title: t(TITLES.fetch(@scope))) do |card|
+            Card(label: t(LABELS.fetch(@scope)), title: t(TITLES.fetch(@scope)), data: { key_list: true }) do |card|
               card.side { Hint(inline: true) { t(".aside") } }
               Capture(name: @name, errors: @errors, tag_scope: @scope)
               rows

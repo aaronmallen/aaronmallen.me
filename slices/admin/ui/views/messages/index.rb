@@ -22,7 +22,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
 
-            Card(title: t(".inbox")) do
+            Card(title: t(".inbox"), data: { key_list: true }) do
               next Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
 
               @messages.rows.each { MessageRow(message: it, filter: @filter) }

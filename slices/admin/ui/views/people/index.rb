@@ -14,7 +14,7 @@ module Admin
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @people.size)) { new_person }
-            @people.empty? ? Empty { t(".empty") } : Card { @people.each { row(it) } }
+            @people.empty? ? Empty { t(".empty") } : Card(data: { key_list: true }) { @people.each { row(it) } }
             Hint { t(".note") }
           end
 
