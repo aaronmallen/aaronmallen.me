@@ -9,10 +9,13 @@ proxy:
   address_header: CF-Connecting-IP
   trusted_proxies: <%= ENV.fetch("PROXY_TRUSTED_PROXIES", "127.0.0.0/8,::1/128").to_json %>
 redis:
+  connect_timeout: <%= ENV["REDIS_CONNECT_TIMEOUT"].to_json %>
   db: 0
   host: <%= ENV.fetch("REDIS_HOST", "localhost").to_json %>
   password: <%= ENV["REDIS_PASSWORD"].to_json %>
   port: <%= ENV.fetch("REDIS_PORT", 6379).to_json %>
+  reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
+  timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
 site:
   url: https://aaronmallen.me

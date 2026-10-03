@@ -20,6 +20,8 @@ module Blog
 
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
+    RedisAttempts = Types::Coercible::Integer.constrained(gteq: 0)
+    RedisTimeout = Types::Coercible::Float.constrained(gt: 0)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
     ThrottleLimit = Types::Coercible::Integer.constrained(gteq: 1)
@@ -44,6 +46,11 @@ module Blog
       )
     end
     private_class_method :throttle
+
+    def self.unless_blank(type)
+      type.optional.constructor { |value| value.to_s.strip.empty? ? nil : value }
+    end
+    private_class_method :unless_blank
 
     def self.unless_set(type, default)
       type.default(default).constructor { it.nil? ? Dry::Types::Undefined : it }
@@ -114,10 +121,13 @@ module Blog
     )
 
     setting :redis, default: {}, constructor: Schema.schema(
+      connect_timeout?: unless_blank(RedisTimeout),
       db?: Types::Coercible::Integer.default(0),
       host?: Types::String.default("localhost"),
       password?: Value,
       port?: Types::Coercible::Integer.default(6379),
+      reconnect_attempts?: unless_blank(RedisAttempts),
+      timeout?: unless_blank(RedisTimeout),
       username?: Value,
     )
 

@@ -33,10 +33,13 @@ media_store:
   endpoint: null
   secret_key: null
 redis:
+  connect_timeout: <%= ENV["REDIS_CONNECT_TIMEOUT"].to_json %>
   db: 2
   host: localhost
   password: <%= ENV["REDIS_PASSWORD"].to_json %>
   port: <%= ENV.fetch("REDIS_PORT", 6379).to_json %>
+  reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
+  timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
 site:
   url: https://aaronmallen.me
