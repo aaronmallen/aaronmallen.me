@@ -104,6 +104,7 @@ one.
 | [0097][0097] | Keep saved views in their own slice with a screen enum and jsonb filters | ![Active][active] | 2026-10-03 |
 | [0098][0098] | Run each bulk action as one operation per list, in one transaction | ![Active][active] | 2026-10-03 |
 | [0099][0099] | Keep decision logs in a decisions slice with decision_events and a decision_timeline view | ![Active][active] | 2026-10-03 |
+| [0100][0100] | Build the review in one activity query that admin and api share | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -204,6 +205,7 @@ one.
 [0097]: 0097-keep-saved-views-in-their-own-slice-with-a-screen-enum-and-jsonb-filters.md
 [0098]: 0098-run-each-bulk-action-as-one-operation-per-list-in-one-transaction.md
 [0099]: 0099-keep-decision-logs-in-a-decisions-slice-with-decision-events-and-a-decision-timeline-view.md
+[0100]: 0100-build-the-review-in-one-activity-query-that-admin-and-api-share.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
