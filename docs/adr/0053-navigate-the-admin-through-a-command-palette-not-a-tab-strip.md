@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201"]
+amended: ["#17", "#87", "#201", "#297"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -42,7 +42,8 @@ request and draws three parts from what it returns:
 - `Nav::SlashButton` floats in the corner and opens the palette with a tap.
 
 `app/assets/js/admin/palette.js` opens the palette on `/` from anywhere outside a field, and on `⌘/` or `Ctrl+/`
-from anywhere at all.
+from anywhere at all. Since #297 it binds those keys through the admin's one key map, `keys.js`, as
+[ADR 0101][0101] records.
 
 The Actions group holds two rows. "Create task" shuts the palette and opens the new task dialog on the page you
 are on, and goes to `/admin/tasks/new` when that page has no dialog. "Create journal entry" goes to
@@ -72,11 +73,12 @@ One dialog does two jobs. It holds navigation and the actions, so a change to ei
 script.
 
 `/` belongs to the admin. Any admin screen that wants the key for itself, outside a field, has to take it back from
-`palette.js`.
+the palette. #297 moved every admin key into one key map, and an open palette now silences the rest of them.
 
 Without JavaScript the admin chrome links to no admin screen but Today. Palette rows are `div role="option"` with
 the target in `data-palette-href`, and the jump and slash buttons are `type="button"`, so the site header's public
 links and the way back to Today are all the chrome holds. A section is then reached by typing its address.
 
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
+[0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
