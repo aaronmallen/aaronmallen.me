@@ -82,6 +82,36 @@ RSpec.describe "Social webmentions", type: :request do
     end
   end
 
+  describe "a target whose slug is no slug" do
+    let(:post_repo) { Posts::Slice["repos.post_repo"] }
+
+    before do
+      allow(post_repo).to receive(:published_by_slug).and_call_original
+      replace_component("repos.post_repo", post_repo)
+    end
+
+    {
+      "bytes that are not UTF-8" => "%FF",
+      "a capital letter" => "Hello",
+      "an escaped space" => "hello%20there",
+      "an escaped slash" => "hello%2Fthere",
+      "a reserved word" => "tags",
+    }.each do |what, slug|
+      it "rejects #{what} without looking for a post", :aggregate_failures do
+        notify(target: "https://aaronmallen.me/writing/#{slug}")
+
+        expect([last_response.status, queued]).to eq([400, []])
+        expect(post_repo).not_to have_received(:published_by_slug)
+      end
+    end
+
+    it "looks up a slug that is valid" do
+      notify
+
+      expect(post_repo).to have_received(:published_by_slug).with("hello")
+    end
+  end
+
   describe "one sender's notifications arriving together", :commits do
     before { lower_throttle_limit(:webmentions, to: 2) }
 

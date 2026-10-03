@@ -42,8 +42,8 @@ module Social
       def post_for(target_url)
         return Failure(:foreign_target) unless settings.owns?(target_url)
 
-        slug = TARGET_PATH.match(target_url.path)&.[](:slug)
-        post = slug && published_post_by_slug.call(::Rack::Utils.unescape_path(slug))
+        slug = slug_in(target_url)
+        post = slug && published_post_by_slug.call(slug)
         return Failure(:not_a_post) unless post
         return Failure(:webmentions_off) unless post.webmentions_enabled
 
@@ -58,6 +58,12 @@ module Social
         )
 
         verify(post.id, source_url.to_s, target_url.to_s)
+      end
+
+      def slug_in(target_url)
+        escaped = TARGET_PATH.match(target_url.path)&.[](:slug)
+        slug = escaped && ::Rack::Utils.unescape_path(escaped)
+        slug if slug&.valid_encoding? && Blog::Types::Slug.valid?(slug)
       end
 
       def url(value)
