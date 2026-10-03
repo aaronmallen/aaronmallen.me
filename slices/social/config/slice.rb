@@ -4,7 +4,7 @@ module Social
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/social"), namespace: Social)
 
-    config.shared_app_component_keys += %w[http]
+    config.shared_app_component_keys += %w[honeybadger.agent http]
 
     import keys: %w[
       operations.compose_announcement operations.record_post_webmentions queries.by_id queries.published_by_slug

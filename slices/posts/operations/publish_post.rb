@@ -3,12 +3,12 @@
 module Posts
   module Operations
     class PublishPost < Blog::Operation
-      include Deps[post_repo: "repos.post_repo"]
+      include Deps[post_repo: "repos.post_repo", queue_follow_up: "operations.queue_follow_up"]
 
       def call(id, at: Time.now, only_if_due: false)
         post = step publish(id, at, only_if_due)
-        post_repo.after_commit { Social::Jobs::SyndicatePost.once_published(post.id, at) }
-        post_repo.after_commit { Social::Jobs::SendWebmentions.once_saved(post.id) }
+        post_repo.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SYNDICATE_POST, at:) }
+        post_repo.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         post
       end

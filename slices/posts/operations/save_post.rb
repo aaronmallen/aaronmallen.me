@@ -9,6 +9,7 @@ module Posts
         post_edit_repo: "repos.post_edit_repo",
         post_repo: "repos.post_repo",
         publish_post: "operations.publish_post",
+        queue_follow_up: "operations.queue_follow_up",
       ]
 
       BLANK = "blank"
@@ -94,7 +95,7 @@ module Posts
 
         saved = create_or_update(post, attributes.except(:published_at))
         post_edit_repo.create(post_id: saved.id, note:) if edited
-        post_repo.after_commit { Social::Jobs::SendWebmentions.once_saved(saved.id) }
+        post_repo.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         Success([:saved, saved])
       end

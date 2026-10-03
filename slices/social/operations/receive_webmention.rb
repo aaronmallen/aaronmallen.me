@@ -9,6 +9,7 @@ module Social
 
       include Deps[
         "settings",
+        honeybadger: "honeybadger.agent",
         published_post_by_slug: "posts.queries.published_by_slug",
         webmention_repo: "repos.webmention_repo",
       ]
@@ -56,7 +57,7 @@ module Social
           limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit],
         )
 
-        Jobs::VerifyWebmention.perform_async(source_url.to_s, target_url.to_s, post.id)
+        verify(post.id, source_url.to_s, target_url.to_s)
       end
 
       def url(value)
@@ -65,6 +66,13 @@ module Social
         fits && Blog::Types::Normalized::Host.call(uri) { nil } ? Success(uri) : Failure(:invalid_url)
       rescue URI::Error
         Failure(:invalid_url)
+      end
+
+      def verify(post_id, source_url, target_url)
+        Jobs::VerifyWebmention.perform_async(source_url, target_url, post_id)
+      rescue RedisClient::Error => e
+        honeybadger.notify(e)
+        webmention_repo.hold(post_id:, source_url:, target_url:)
       end
 
       def window_opened_at

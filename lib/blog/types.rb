@@ -72,6 +72,7 @@ module Blog
     PostStatus = Types::String.enum("draft", "scheduled", "published")
     PostFilter = Types::String.enum("all", *PostStatus.values)
     PostFilterParam = PostFilter.fallback(PostFilter.values.first)
+    PostFollowUp = Types::String.enum("syndicate_post", "send_webmentions")
     PostIntent = Types::String.enum("draft", "publish", "save")
     PostIntentParam = PostIntent.fallback(PostIntent.values.first)
     ProjectFilter = Types::String.enum("live", "archived", "work")

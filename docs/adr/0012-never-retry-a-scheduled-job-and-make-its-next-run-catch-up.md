@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, config, lib, mcp, media, posts, projects, record, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140"]
+amended: [AA-823, "#140", "#252"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -55,7 +55,7 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | Scheduled job | On failure |
 | --- | --- |
 | `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
-| `RollOverSprint` | Raise |
+| `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions` | Raise |
 | `ImportCommits`, `RefreshProjects` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos` | Drop it |
 

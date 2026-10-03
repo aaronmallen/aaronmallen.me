@@ -12,6 +12,12 @@ production:
     publish_due_posts:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::PublishDuePosts
+    queue_held_follow_ups:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Posts::Jobs::QueueHeldFollowUps
+    queue_held_webmentions:
+      cron: "* * * * * <%= Blog::TimeZone::NAME %>"
+      class: Social::Jobs::QueueHeldWebmentions
     reap_expired_credentials:
       cron: "0 5 * * * <%= Blog::TimeZone::NAME %>"
       class: MCP::Jobs::ReapExpiredCredentials

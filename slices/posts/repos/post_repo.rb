@@ -38,6 +38,10 @@ module Posts
 
       def due_scheduled(time) = with_tags.due_at(time).oldest_first.to_a
 
+      def held_follow_ups = held_post_follow_ups.oldest_first.to_a
+
+      def hold_follow_up(**) = held_post_follow_ups.hold(**)
+
       def last_deleted_at = post_deletions.last_deleted_at
 
       def locked_by_id(id) = by_id_for_update(id) && by_id(id)
@@ -57,6 +61,8 @@ module Posts
       def published_page(page) = page.fill(with_tags.published.newest_first.paged(page).to_a)
 
       def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
+
+      def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
 
       def replace_tags(id, names) = post_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 

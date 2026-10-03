@@ -44,6 +44,10 @@ module Social
 
       def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
 
+      def held = held_webmentions.oldest_first.to_a
+
+      def hold(**) = held_webmentions.hold(**)
+
       def ignore(id) = update(id, status: IGNORED, spam_reason: nil)
 
       def known_author?(author_url) = webmentions.by_author_url(normalized_author_url(author_url)).known_author?
@@ -71,6 +75,8 @@ module Social
 
         page.fill((status ? days.with_status(status) : days).newest_first.paged(page).to_a)
       end
+
+      def release(id) = held_webmentions.by_pk(id).delete
 
       def settings = stored_settings || created_settings
 
