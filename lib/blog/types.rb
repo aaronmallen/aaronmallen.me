@@ -42,7 +42,9 @@ module Blog
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
-    DateParam = Types::Params::Date.optional.fallback(nil)
+    DateParam = Types::Params::Date.constrained(
+      gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),
+    ).optional.fallback(nil)
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0)
     IdParam = Id.optional.fallback(nil)

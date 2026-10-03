@@ -313,6 +313,20 @@ RSpec.describe "Admin activity", type: :request do
 
         expect(page).to have_css("#activity-from[value='#{week_ago.iso8601}']")
       end
+
+      %w[99999999-01-01 -4800-01-01].each do |date|
+        it "falls back to the default range for a From of #{date}" do
+          visit_activity(from: date)
+
+          expect(page).to have_css("#activity-from[value='#{week_ago.iso8601}']")
+        end
+
+        it "falls back to today for a To of #{date}" do
+          visit_activity(to: date)
+
+          expect(page).to have_css("#activity-to[value='#{today.iso8601}']")
+        end
+      end
     end
 
     describe "paging" do
@@ -448,6 +462,12 @@ RSpec.describe "Admin activity", type: :request do
 
       it "starts at the end of the range for a day that is not a date" do
         visit_activity(range.merge(day: "soon"))
+
+        expect(event_names).to include("today")
+      end
+
+      it "starts at the end of the range for a day past four-digit years" do
+        visit_activity(range.merge(day: "99999999-01-01"))
 
         expect(event_names).to include("today")
       end

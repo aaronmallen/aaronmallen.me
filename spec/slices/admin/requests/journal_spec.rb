@@ -424,6 +424,14 @@ RSpec.describe "Admin journal", type: :request do
         expect(day_dates).to eq([today, today - 1].map(&:iso8601))
       end
 
+      %w[99999999-01-01 -4800-01-01].each do |date|
+        it "reads a day of #{date} as the newest page" do
+          get "/admin/journal", to: date
+
+          expect(day_dates).to eq([today, today - 1].map(&:iso8601))
+        end
+      end
+
       it "draws no pager when one page holds every entry" do
         lower_page_size(:admin, to: 10)
         get "/admin/journal"
