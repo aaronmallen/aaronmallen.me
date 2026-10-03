@@ -5,6 +5,8 @@ module Public
   class Action < Blog::Action
     ANY_MEDIA_TYPE = "*/*"
     FORBIDDEN = 403
+    HTTP_DATE_FORMATS = %i[httpdate rfc2822].freeze
+    NOT_MODIFIED = 304
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
     OK = 200
     PERSONAL_COOKIES = [Blog::SessionCookie::KEY, Blog::UI::Layouts::Application::THEME_COOKIE].freeze
@@ -37,15 +39,26 @@ module Public
     end
 
     def halt_if_feed_unchanged(request, response, version)
-      etag = version.etag
       last_modified = version.last_modified
       response.headers[LAST_MODIFIED] = last_modified.httpdate if last_modified
-      return response.fresh(etag:) if request.get_header(IF_NONE_MATCH)
+      response.fresh(etag: version.etag)
+      return if request.get_header(IF_NONE_MATCH)
 
-      response.fresh(etag:, last_modified:)
+      halt NOT_MODIFIED if unchanged_since?(modified_since(request), last_modified)
     end
 
     def keep_response_header?(header) = super || NOT_MODIFIED_HEADERS.include?(header.downcase)
+
+    def modified_since(request)
+      sent = request.get_header(IF_MODIFIED_SINCE)
+      HTTP_DATE_FORMATS.lazy.filter_map { parse_http_date(it, sent) }.first if sent
+    end
+
+    def parse_http_date(format, sent)
+      Time.public_send(format, sent)
+    rescue ArgumentError
+      nil
+    end
 
     def refuse_cross_site(request, _response)
       halt FORBIDDEN if cross_site?(request)
@@ -61,6 +74,8 @@ module Public
 
       response.cache_control(:public, max_age: 0, s_maxage: SHARED_CACHE_LIFETIME)
     end
+
+    def unchanged_since?(since, last_modified) = since && last_modified && since.to_i >= last_modified.to_time.to_i
 
     def version_feed_or_halt(request, response, posts)
       version = version_atom_feed.call(posts)

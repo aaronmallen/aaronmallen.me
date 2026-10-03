@@ -630,6 +630,46 @@ RSpec.describe "Feeds", type: :request do
     end
   end
 
+  describe "a reader sending back a time in another shape" do
+    let(:changed_at) { Time.utc(2026, 10, 1, 12) }
+
+    def poll(path, last_modified) = get path, {}, "HTTP_IF_MODIFIED_SINCE" => last_modified
+
+    before do
+      create(:post, :published, slug: "hello", tags: %w[ruby], published_at: changed_at, updated_at: changed_at)
+    end
+
+    %w[/writing.atom /writing/tags/ruby.atom].each do |path|
+      describe path do
+        it "answers 304 to a time with a one-digit day", :aggregate_failures do
+          poll(path, "Thu, 1 Oct 2026 12:00:00 GMT")
+
+          expect(last_response.status).to eq(304)
+          expect(last_response.body).to be_empty
+        end
+
+        it "answers 200 to a time with a one-digit day from before the change" do
+          poll(path, "Thu, 1 Oct 2026 11:59:59 GMT")
+
+          expect(last_response.status).to eq(200)
+        end
+
+        it "answers 304 to a time in the obsolete RFC 850 shape" do
+          poll(path, "Thursday, 01-Oct-26 12:00:00 GMT")
+
+          expect(last_response.status).to eq(304)
+        end
+
+        it "answers 200 with the feed to a time that is no date", :aggregate_failures do
+          poll(path, "not a date")
+
+          expect(last_response.status).to eq(200)
+          expect(last_response.body).to be_valid_atom
+        end
+      end
+    end
+  end
+
   describe "a request arriving on another host" do
     let(:elsewhere) { { "HTTP_HOST" => "pi.local" } }
 
