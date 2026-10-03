@@ -135,7 +135,7 @@ module Tasks
       def settle(task, state, was, now)
         case state
         when OPEN then reopen(task, was, now)
-        when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id, at: now)
+        when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id, at: now, seen: false)
         when COMPLETED then task.done? ? Success(task) : complete_task.call(task.id, at: now)
         else close(task, now)
         end.value_or(task)

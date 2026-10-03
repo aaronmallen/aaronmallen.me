@@ -2409,7 +2409,8 @@ CREATE TABLE public.task_sources (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL,
-    checked_at timestamp with time zone
+    checked_at timestamp with time zone,
+    seen_at timestamp with time zone
 );
 
 
@@ -4301,4 +4302,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000079_create_task_events.rb'),
 ('20261003000080_create_saved_views.rb'),
 ('20261003000082_create_review_views.rb'),
-('20261003000094_create_record_links.rb');
+('20261003000094_create_record_links.rb'),
+('20261003000095_add_seen_at_to_task_sources.rb');

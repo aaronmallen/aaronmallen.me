@@ -17,12 +17,12 @@ module Tasks
 
       def in_order = order(self[:occurred_at].asc, self[:id].asc)
 
-      def track(task_ids, at)
+      def track(task_ids, at, seen: false)
         dataset.db.transaction do
           before = states(task_ids)
           result = yield
           events = History.changes(before, states(before.keys), at)
-          command(:create, result: :many).call(events) unless events.empty?
+          record(events, at, seen:) unless events.empty?
           result
         end
       end
@@ -33,6 +33,11 @@ module Tasks
         found = tasks.dataset.unordered.left_join(:sprints, id: :sprint_id).where(TASK_ID => task_ids)
 
         found.select(TASK_ID, :list, SPRINT_ON, :status)
+      end
+
+      def record(events, at, seen:)
+        command(:create, result: :many).call(events)
+        task_sources.see(History.seen(events), at) if seen
       end
 
       def states(task_ids)

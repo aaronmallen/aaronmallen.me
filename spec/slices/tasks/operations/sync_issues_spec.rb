@@ -32,6 +32,13 @@ RSpec.describe Tasks::Operations::SyncIssues do
       expect(imported).to have_attributes(list: nil, status: "in_progress")
       expect(imported.source.remote_state).to eq("started")
     end
+
+    it "arrives unseen" do
+      assign(issue("started"))
+      sync
+
+      expect(imported.source.seen_at).to be_nil
+    end
   end
 
   describe "an issue that starts" do
@@ -42,6 +49,14 @@ RSpec.describe Tasks::Operations::SyncIssues do
 
       expect(repo.by_id(task.id)).to have_attributes(list: nil, status: "in_progress")
       expect(repo.by_id(task.id).sprint_id).not_to be_nil
+    end
+
+    it "leaves an unseen task unseen as it moves into Today" do
+      task = tracked
+      assign(issue("started"))
+      sync
+
+      expect(repo.by_id(task.id).source.seen_at).to be_nil
     end
 
     it "reopens the task when the issue goes back to open" do

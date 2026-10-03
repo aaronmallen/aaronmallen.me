@@ -13,6 +13,10 @@ module Tasks
 
       def for_provider(provider) = task_sources.where(provider:).to_a
 
+      def see(task_id, at) = task_sources.see(task_id, at)
+
+      def unseen_tasks = tasks.combine(:source, :tags).open.where(id: task_sources.unseen.task_ids).newest_first.to_a
+
       def with_sync_lock(provider, &)
         task_sources.with_advisory_lock(SYNC_LOCKS.fetch(provider), busy: Failure(:lock_busy), &)
       end

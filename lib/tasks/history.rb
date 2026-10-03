@@ -7,6 +7,7 @@ module Tasks
       to_status: nil,
     }.freeze
     PLACE = %i[list sprint_on].freeze
+    SEEN = %w[moved tagged untagged].freeze
 
     module_function
 
@@ -42,5 +43,7 @@ module Tasks
         *(was[:tags] - now[:tags]).map { { kind: "untagged", tag_name: it } },
       ]
     end
+
+    def seen(events) = events.filter_map { it[:task_id] if SEEN.include?(it[:kind]) }.uniq
   end
 end

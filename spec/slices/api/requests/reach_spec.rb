@@ -6,6 +6,7 @@ RSpec.describe "API reach", type: :request do
       "tasks.operations.act_on_tasks" => "the admin's bulk bar runs it; #341 adds the bulk task endpoints and tools",
       "tasks.operations.delete_task_comment" => "the admin deletes a comment; spec #65 gives clients only an add",
       "tasks.operations.edit_task_comment" => "the admin edits a comment; spec #65 gives clients only an add",
+      "tasks.operations.mark_task_seen" => "#339 adds the mark_task_seen endpoint and tool",
       "tasks.operations.place_task" => "the admin's drag places a task; reorder_task moves one a place up or down",
       "tasks.operations.queue_issue_sync" => "the admin's sync button queues the issue sync job",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",

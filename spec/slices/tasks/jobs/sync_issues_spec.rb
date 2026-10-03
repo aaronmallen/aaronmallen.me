@@ -67,6 +67,12 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(imported.source).to have_attributes(provider: "github", remote_id: "I_seven", url:)
     end
 
+    it "arrives unseen" do
+      sync
+
+      expect(imported.source.seen_at).to be_nil
+    end
+
     it "makes one task when the job runs twice" do
       2.times { sync }
 
@@ -92,6 +98,13 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "needs-review")
+    end
+
+    it "arrives unseen with its tags" do
+      stub_assigned(labeled("Bug Fix"))
+      sync
+
+      expect(imported.source.seen_at).to be_nil
     end
 
     it "adds no tag and creates none for a label no private tag matches", :aggregate_failures do

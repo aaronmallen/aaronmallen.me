@@ -10,11 +10,11 @@ module Tasks
         work_session_repo: "repos.work_session_repo",
       ]
 
-      def call(id, at: Time.now)
+      def call(id, at: Time.now, seen: true)
         step find(id)
         sprint = step current_sprint.call(now: at)
 
-        task_event_repo.track(id, at) do
+        task_event_repo.track(id, at, seen:) do
           work_session_repo.open(id, at)
           task_repo.update(
             id,
