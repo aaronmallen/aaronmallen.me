@@ -7,6 +7,7 @@ module Admin
     include Deps[rejected_view: "ui.views.forms.rejected"]
 
     config.formats.accept :html
+    config.handle_exception BodyParsingError => 400
 
     verify_csrf_under_test
 

@@ -101,6 +101,23 @@ RSpec.describe "A request the site cannot read", type: :request do
     end
   end
 
+  [%w[POST /admin/photos], %w[GET /admin/tasks/palette]].product([false, true]).each do |(method, path), signed_in|
+    describe "a JSON body the admin cannot parse, to #{method} #{path} #{signed_in ? 'signed in' : 'signed out'}" do
+      before do
+        sign_in_to_admin if signed_in
+        request(path, method:, input: "{", "CONTENT_TYPE" => "application/json")
+      end
+
+      it "answers 400" do
+        expect(last_response.status).to eq(400)
+      end
+
+      it "sends no notice" do
+        expect(agent).not_to have_received(:notify)
+      end
+    end
+  end
+
   describe "a request the site can read" do
     before { get "/writing/tags/nothing-here", {}, "QUERY_STRING" => "a=caf%C3%A9" }
 
