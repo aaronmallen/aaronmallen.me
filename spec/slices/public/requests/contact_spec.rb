@@ -575,6 +575,48 @@ RSpec.describe "Contact", type: :request do
     end
   end
 
+  describe "a submission holding only Unicode spaces in a field" do
+    {
+      "the reply address" => [:reply_to, "\u2003", "cf-email", "format"],
+      "the subject" => [:subject, "\u2003", "cf-subject", "blank"],
+      "the message" => [:body, "\u2003\n\u3000", "cf-message", "blank"],
+    }.each do |name, (field, value, id, code)|
+      it "comes back unprocessable for #{name}, naming it", :aggregate_failures do
+        send_message(field => value)
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css("##{id}-error.f-e", exact_text: error("#{field}.#{code}"))
+      end
+
+      it "stores nothing for #{name}" do
+        send_message(field => value)
+
+        expect(message_repo.messages.count).to eq(0)
+      end
+    end
+  end
+
+  describe "a submission carrying an address with a Unicode space inside" do
+    before { send_message(reply_to: "ada\u2003lovelace@example.com") }
+
+    it "comes back unprocessable" do
+      expect(last_response.status).to eq(422)
+    end
+
+    it "names the address" do
+      expect(page).to have_css("#cf-email-error.f-e", exact_text: error("reply_to.format"))
+    end
+  end
+
+  describe "a submission with Unicode spaces around its words" do
+    before { send_message(subject: "\u2003A question\u2003", body: "\u00a0About the beacon") }
+
+    it "stores the message as typed", :aggregate_failures do
+      expect(last_response.status).to eq(302)
+      expect(stored.first).to have_attributes(subject: "\u2003A question\u2003", body: "\u00a0About the beacon")
+    end
+  end
+
   describe "a submission longer than the field says it takes" do
     before { send_message(body: "a" * (Contact::MessageLimits::MAX_BODY + 1)) }
 
