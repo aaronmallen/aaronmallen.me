@@ -3,9 +3,9 @@ id: "0017"
 title: Enforce rules over stored state in Postgres, not in contracts
 status: active
 created: 2026-09-28
-area: [db, lib, admin, posts, projects, record, social, tags, tasks]
+area: [db, lib, admin, decisions, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143"]
+amended: [AA-816, "#17", "#77", "#143", "#274"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -39,7 +39,9 @@ singleton row. Nothing in Ruby checks it first.
 
 One rule breaks this, as [ADR 0084][0084] records and #143 built. `Posts::Operations::SavePost` asks for an edit
 note when the body of a published post changes. It checks in Ruby, after it locks the post's row, so the race above
-cannot reach it, but the rule binds only callers that go through `SavePost`.
+cannot reach it, but the rule binds only callers that go through `SavePost`. Decisions follow it, as
+[ADR 0099][0099] records and #274 built: `EditDecision` and `EditDecisionOption` ask for a note on a closed
+decision under the decision's lock.
 
 When a user can break such a rule from a form, the operation turns the refusal into a field error. It rescues
 `ROM::SQL::UniqueConstraintError`, `CheckConstraintError` or `ForeignKeyConstraintError`, asks
@@ -48,6 +50,8 @@ raises again.
 
 | Constraint | Kind | Operation | Field error |
 | --- | --- | --- | --- |
+| `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::DeleteDecisionOption` | `id: chosen` |
+| `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::ResolveDecision` | `option_id: missing` |
 | `posts_slug_key` | unique | `Posts::Operations::SavePost` | `slug: taken` |
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |
 | `projects_repo_index` | unique index | `Projects::Operations::SaveProject` | `repo: taken` |
@@ -81,9 +85,9 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the nine names has a spec
-that would fail: the posts request spec, the operation specs for tags and task links, and the admin request specs
-for the post and project editors. A new mapped name needs one too.
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the ten names has a spec
+that would fail: the posts request spec, the operation specs for decisions, tags and task links, and the admin
+request specs for the post and project editors. A new mapped name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.
@@ -100,4 +104,5 @@ nothing maps that error, so the request answers 500.
 A reader cannot learn every rule from the contract. The ones over stored state are in `config/db/structure.sql`.
 
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
+[0099]: 0099-keep-decision-logs-in-a-decisions-slice-with-decision-events-and-a-decision-timeline-view.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

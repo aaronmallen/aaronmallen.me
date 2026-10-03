@@ -46,6 +46,10 @@ module Blog
     DateParam = Types::Params::Date.constrained(
       gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),
     ).optional.fallback(nil)
+    DecisionEventKind = Types::String.enum(
+      "opened", "option_added", "option_edited", "edited", "resolved", "dropped", "reopened",
+    )
+    DecisionStatus = Types::String.enum("open", "resolved", "dropped")
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdParam = Id.optional.fallback(nil)

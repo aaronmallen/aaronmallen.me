@@ -3,10 +3,10 @@ id: "0001"
 title: Split the app into slices by feature
 status: active
 created: 2026-09-28
-area: [app, config, lib, activity, admin, analytics, contact, mcp, media, posts, projects, public, record,
-  social, suggestions, tags, tasks]
+area: [app, config, lib, activity, admin, analytics, contact, decisions, mcp, media, posts, projects, public,
+  record, social, suggestions, tags, tasks]
 issue: AA-587
-amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137"]
+amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -35,17 +35,17 @@ AA-508 found that two of those clients had one reader each. An app provider cann
 
 ## Decision
 
-We split the code by what it is about, not by who reads it. Fourteen slices, of two kinds, since #137 added
-`media`.
+We split the code by what it is about, not by who reads it. Fifteen slices, of two kinds, since #274 added
+`decisions`.
 
 **Three presentation slices** own routes, actions, layouts and views: `public`, `admin` and `mcp`.
 `config/routes.rb` mounts these three and nothing else. A presentation slice owns no feature's records, only the rows
 its own door needs: `admin` owns `session_validity`, and `mcp` owns `oauth_clients`, `oauth_codes` and
 `oauth_tokens`. A third needs its own record.
 
-**Eleven feature slices** own relations, repos, structs, contracts, operations and jobs, and answer no route:
-`activity`, `analytics`, `contact`, `media`, `posts`, `projects`, `record`, `social`, `suggestions`, `tags` and
-`tasks`. Each owns its tables outright, and a slice reaches another only through its exports.
+**Twelve feature slices** own relations, repos, structs, contracts, operations and jobs, and answer no route:
+`activity`, `analytics`, `contact`, `decisions`, `media`, `posts`, `projects`, `record`, `social`, `suggestions`,
+`tags` and `tasks`. Each owns its tables outright, and a slice reaches another only through its exports.
 
 Privacy rides on those exports, not on where a file sits. `record` exports its journal and commit reads to `admin`,
 `activity` exports its feed to `admin` and `mcp`, and `public` imports from neither.
@@ -89,7 +89,7 @@ A client with readers in four slices, as `networks.all` has, adds an import edge
 provider keys does not count toward a cycle, so `posts` can import `networks.all` from `social` while `social`
 imports from `posts`.
 
-Fourteen slices mean fourteen containers to boot and twelve `db` providers, one for each slice that owns rows. A new
+Fifteen slices mean fifteen containers to boot and thirteen `db` providers, one for each slice that owns rows. A new
 feature costs a directory tree and a `slice.rb` before it holds a line of code.
 
 `app/` is a shell around `app/assets`. A reader who opens it finds CSS and JavaScript, and has to know that the code
