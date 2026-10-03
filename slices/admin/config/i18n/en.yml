@@ -282,6 +282,13 @@ en:
         spam: "Spam"
         unread: "Unread"
       nav:
+        actions:
+          create_journal_entry:
+            label: "Create journal entry"
+            text: "new journal entry, write in the journal"
+          create_task:
+            label: "Create task"
+            text: "new task, add task"
         context_bar:
           alert: "something needs you"
           back: "today"
@@ -297,10 +304,6 @@ en:
         palette:
           actions: "Actions"
           anywhere: "anywhere"
-          create_journal_entry: "Create journal entry"
-          create_journal_entry_text: "create journal entry, new journal entry, write in the journal"
-          create_task: "Create task"
-          create_task_text: "create task, new task, add task"
           current: "current"
           escape: "esc"
           in_list: "in %{list}"

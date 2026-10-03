@@ -20,6 +20,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.describe_social_post" => "words a social post for the admin's list",
       "admin.operations.end_sessions" => "signs the admin out everywhere; sign in stays out of the MCP",
       "admin.operations.find_over_limit_network" => "warns the admin; accept_suggestion_edits checks the limits",
+      "admin.operations.list_actions" => "lists the admin palette's actions",
       "admin.operations.list_activity_events" => "words the admin's activity screen; read_activity reads the feed",
       "admin.operations.list_networks" => "lists networks for the admin's pickers",
       "admin.operations.list_sections" => "lists the admin menu's sections",

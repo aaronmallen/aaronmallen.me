@@ -20,6 +20,7 @@ module Admin
           }.freeze
           TASKS_GROUP = "command-palette-group-tasks"
 
+          prop :actions, Blog::Types::Array.of(Blog::Types::Instance(Structs::Action))
           prop :sections, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
 
           def view_template
@@ -37,16 +38,20 @@ module Admin
           private
 
           def action_group
+            return if @actions.empty?
+
             row_group(ACTIONS_GROUP, t(".actions")) do
-              PaletteRow(
-                id: "command-palette-create-task", icon: "fa-plus", label: t(".create_task"),
-                text: t(".create_task_text"), href: path(:admin_new_task), dialog: Tasks::CreateDialog::ID,
-              )
-              PaletteRow(
-                id: "command-palette-create-journal-entry", icon: "fa-pen", label: t(".create_journal_entry"),
-                text: t(".create_journal_entry_text"), href: path(:admin_journal, write: Blog::Constants::CHECKED),
-              )
+              @actions.each { action_row(it) }
             end
+          end
+
+          def action_row(action)
+            label = t(action.label_key)
+
+            PaletteRow(
+              id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
+              href: action.path, dialog: action.dialog,
+            )
           end
 
           def footer

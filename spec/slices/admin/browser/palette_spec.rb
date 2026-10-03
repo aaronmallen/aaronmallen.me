@@ -139,6 +139,32 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "typing part of an action's name" do
+    before do
+      open_palette
+      query.send_keys(*"crea".chars)
+    end
+
+    it "lists the action" do
+      expect(page).to have_css("#command-palette-create-task", text: "Create task")
+    end
+  end
+
+  describe "a query that matches an action and a task" do
+    before do
+      create(:task, title: "Create the invoice")
+      open_palette
+      query.send_keys(*"create".chars)
+      page.assert_selector(".pal-r", text: "Create the invoice")
+    end
+
+    it "lists the action above the task" do
+      rows = page.all(".pal-r").map(&:text)
+
+      expect(rows.index { it.include?("Create task") }).to be < rows.index { it.include?("Create the invoice") }
+    end
+  end
+
   describe "searching the tasks" do
     before do
       open_palette

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297"]
+amended: ["#17", "#87", "#201", "#297", "#303"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -45,9 +45,15 @@ request and draws three parts from what it returns:
 from anywhere at all. Since #297 it binds those keys through the admin's one key map, `keys.js`, as
 [ADR 0101][0101] records.
 
-The Actions group holds two rows. "Create task" shuts the palette and opens the new task dialog on the page you
-are on, and goes to `/admin/tasks/new` when that page has no dialog. "Create journal entry" goes to
-`/admin/journal?write=1`, which draws the entry field with `autofocus`, so the cursor lands in it without a script.
+An action is an entry in `Admin::Operations::ListActions::ALL`: its name, icon, route and route params, the dialog
+it opens if it has one, and a `shows` check that takes the current path and hides the row where the action does not
+apply. A new action joins by adding its entry and the `label` and `text` locale keys `Structs::Action` reads for it.
+`Palette` draws a row per entry in list order, matches on the label and the text together, and `palette.js` runs any
+row from its `href` and `dialog`, so neither changes for a new action. The Actions group sits above the tasks, so
+a query that matches an action lists it first. Since #303 the list holds two entries. "Create task" shuts the
+palette and opens the new task dialog on the page you are on, and goes to `/admin/tasks/new` when that page has no
+dialog. "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so
+the cursor lands in it without a script.
 
 A section is a row in `Admin::Operations::ListSections::ALL`: its name, group, icon and route, in the order the
 palette lists them. A new section joins by adding its row and the locale keys `Structs::Section` reads for it. A row
