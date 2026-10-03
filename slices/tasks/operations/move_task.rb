@@ -5,13 +5,21 @@ module Tasks
     class MoveTask < Blog::Operation
       TODAY = Blog::Types::TaskFilter["today"]
 
-      include Deps[current_sprint: "operations.current_sprint", task_repo: "repos.task_repo"]
+      include Deps[
+        current_sprint: "operations.current_sprint",
+        task_event_repo: "repos.task_event_repo",
+        task_repo: "repos.task_repo",
+      ]
 
       def call(id, filter, at: Time.now)
         step find(id)
-        return task_repo.join_sprint(id, step(current_sprint.call(now: at)).id) if filter == TODAY
+        sprint = step current_sprint.call(now: at) if filter == TODAY
 
-        task_repo.move_to_list(id, Blog::Types::TaskList[filter], at:)
+        task_event_repo.track(id, at) do
+          next task_repo.join_sprint(id, sprint.id) if sprint
+
+          task_repo.move_to_list(id, Blog::Types::TaskList[filter], at:)
+        end
       end
 
       private

@@ -5,6 +5,7 @@ module Tasks
     class StartTask < Blog::Operation
       include Deps[
         current_sprint: "operations.current_sprint",
+        task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
         work_session_repo: "repos.work_session_repo",
       ]
@@ -13,7 +14,7 @@ module Tasks
         step find(id)
         sprint = step current_sprint.call(now: at)
 
-        transaction do
+        task_event_repo.track(id, at) do
           work_session_repo.open(id, at)
           task_repo.update(
             id,

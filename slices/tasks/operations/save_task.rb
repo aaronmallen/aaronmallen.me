@@ -11,6 +11,7 @@ module Tasks
         contract: "contracts.task_contract",
         move_task: "operations.move_task",
         schedule_task: "operations.schedule_task",
+        task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
       ]
 
@@ -38,10 +39,12 @@ module Tasks
 
       def persist(task, fields)
         task_repo.update(task.id, note: fields[:note], title: fields[:title])
-        task_repo.replace_tags(task.id, fields[:tags])
+        retag(task.id, fields[:tags])
         claim_photos.call(PHOTO_OWNER, task.id, fields[:note])
         step move(task, fields[:list])
       end
+
+      def retag(id, names) = task_event_repo.track(id, Time.now) { task_repo.replace_tags(id, names) }
 
       def schedules?(task, fields, sprint_on) = !(sprint_on.nil? || moves?(task, fields[:list]))
 

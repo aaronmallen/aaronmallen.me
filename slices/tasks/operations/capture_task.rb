@@ -12,6 +12,7 @@ module Tasks
         contract: "contracts.task_contract",
         current_sprint: "operations.current_sprint",
         schedule_task: "operations.schedule_task",
+        task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
       ]
 
@@ -35,13 +36,15 @@ module Tasks
         { list: Blog::Types::TaskList[filter], sprint_id: nil }
       end
 
+      def retag(id, names) = task_event_repo.track(id, Time.now) { task_repo.replace_tags(id, names) }
+
       def validate(params)
         validated(contract.call(title: params[:title], list: "", note: params[:note], tags: params[:tags]))
       end
 
       def write(fields, placed)
         task = task_repo.append(title: fields[:title], note: fields[:note], **placed)
-        task_repo.replace_tags(task.id, fields[:tags])
+        retag(task.id, fields[:tags])
         claim_photos.call(PHOTO_OWNER, task.id, task.note)
         task
       end

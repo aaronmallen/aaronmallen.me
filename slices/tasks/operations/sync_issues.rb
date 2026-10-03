@@ -18,6 +18,7 @@ module Tasks
         reopen_task: "operations.reopen_task",
         start_task: "operations.start_task",
         task_comment_repo: "repos.task_comment_repo",
+        task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
         task_source_repo: "repos.task_source_repo",
       ]
@@ -86,7 +87,7 @@ module Tasks
       def import(provider, issue, now)
         transaction do
           task = task_repo.append(**copy(issue), list: EXTERNAL)
-          task_repo.add_tags(task.id, tags(issue))
+          label(task, issue, now)
           source = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
           follow(task_source_repo.create(**source), issue, now)
         end
@@ -98,6 +99,8 @@ module Tasks
         changes = { **comment.slice(*COMMENT_FIELDS), task_id: source.task_id }
         task_comment_repo.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
       end
+
+      def label(task, issue, now) = task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, tags(issue)) }
 
       def listening?(task, issue) = issue.key?(:comments) && !task.closed?
 

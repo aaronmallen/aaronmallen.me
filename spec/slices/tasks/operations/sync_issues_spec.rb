@@ -130,6 +130,67 @@ RSpec.describe Tasks::Operations::SyncIssues do
     end
   end
 
+  describe "a synced issue's events" do
+    let(:synced_at) { Time.at(Time.now.to_i - 600) }
+
+    def statuses(task)
+      found = Tasks::Slice["relations.task_events"].for_task(task.id).where(kind: "status_changed").in_order
+
+      found.to_a.map { [it[:from_status], it[:to_status], it[:occurred_at]] }
+    end
+
+    def sync_at(now) = Tasks::Slice["operations.sync_issues"].call(provider: "linear", client:, now:)
+
+    it "records a start at the time of the sync" do
+      task = tracked
+      assign(issue("started"))
+      sync_at(synced_at)
+
+      expect(statuses(task)).to eq([["open", "in_progress", synced_at]])
+    end
+
+    it "records a pause when the issue goes back to open" do
+      task = tracked(:in_progress, state: "started")
+      assign(issue)
+      sync_at(synced_at)
+
+      expect(statuses(task)).to eq([["in_progress", "open", synced_at]])
+    end
+
+    it "records a complete" do
+      task = tracked(:in_progress, state: "started")
+      assign(issue("completed"))
+      sync_at(synced_at)
+
+      expect(statuses(task)).to eq([["in_progress", "done", synced_at]])
+    end
+
+    it "records a cancel" do
+      task = tracked
+      assign(issue("not_planned"))
+      sync_at(synced_at)
+
+      expect(statuses(task)).to eq([["open", "canceled", synced_at]])
+    end
+
+    it "records a reopen" do
+      task = tracked(:done, state: "completed")
+      assign(issue)
+      sync_at(synced_at)
+
+      expect(statuses(task)).to eq([["done", "open", synced_at]])
+    end
+
+    it "records the tags a new issue arrives with" do
+      create(:tag, :private, name: "bug-fix")
+      assign(issue(labels: ["Bug Fix"]))
+      sync
+
+      expect(Tasks::Slice["relations.task_events"].for_task(imported.id).to_a.map { [it[:kind], it[:tag_name]] })
+        .to eq([%w[tagged bug-fix]])
+    end
+  end
+
   describe "an issue reopened while I work on its closed task" do
     it "leaves the task in progress" do
       task = tracked(:in_progress, state: "completed")

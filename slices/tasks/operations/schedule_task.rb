@@ -8,6 +8,7 @@ module Tasks
       include Deps[
         current_sprint: "operations.current_sprint",
         sprint_repo: "repos.sprint_repo",
+        task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
         work_session_repo: "repos.work_session_repo",
       ]
@@ -41,9 +42,11 @@ module Tasks
 
       def join(task, day, now)
         transaction do
-          next task_repo.join_sprint(task.id, step(current_sprint.call(now:)).id) if day == Blog::TimeZone.today(now)
+          sprint = step current_sprint.call(now:) if day == Blog::TimeZone.today(now)
 
-          wait(task, day, now)
+          task_event_repo.track(task.id, now) do
+            sprint ? task_repo.join_sprint(task.id, sprint.id) : wait(task, day, now)
+          end
         end
       end
 
@@ -59,7 +62,11 @@ module Tasks
         join(task, day, now)
       end
 
-      def unschedule(task, now) = task.in_sprint? ? task_repo.return_to_list(task.id, at: now) : task
+      def unschedule(task, now)
+        return task unless task.in_sprint?
+
+        task_event_repo.track(task.id, now) { task_repo.return_to_list(task.id, at: now) }
+      end
 
       def wait(task, day, now)
         work_session_repo.close(task.id, now)

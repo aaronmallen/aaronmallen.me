@@ -35,7 +35,7 @@ module Tasks
       def carry_forward(sprint_id, at: Time.now)
         carried = tasks.unfinished_in(sprints.before_sprint(sprint_id).ids)
 
-        transaction do
+        task_events.track(carried.pluck(:id), at) do
           work_sessions.split(carried.in_progress.pluck(:id), at)
           carried.carry_into(sprint_id)
         end
@@ -115,7 +115,7 @@ module Tasks
       def release_sprint(sprint_id, at: Time.now)
         held = tasks.for_sprint(sprint_id)
 
-        transaction do
+        task_events.track(held.pluck(:id), at) do
           release(held.sourced, EXTERNAL, at)
           release(held.unsourced, NEXT, at)
         end
