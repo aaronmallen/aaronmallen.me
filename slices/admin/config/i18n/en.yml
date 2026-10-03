@@ -102,6 +102,24 @@ en:
       renamed: "Tag renamed"
   tasks_page:
     toasts:
+      bulk:
+        canceled:
+          one: "Canceled %{count} task"
+          other: "Canceled %{count} tasks"
+        completed:
+          one: "Finished %{count} task"
+          other: "Finished %{count} tasks"
+        deleted:
+          one: "Deleted %{count} task"
+          other: "Deleted %{count} tasks"
+        failed:
+          closed: "Nothing changed · %{task} is closed already"
+          not_found: "Nothing changed · %{task} is gone"
+          other: "Nothing changed · %{task} would not change"
+        invalid:
+          blank: "Tick a task first"
+          format: "Nothing changed · pick an action from the bar"
+          long: "Tick 100 tasks or fewer"
       canceled: "Canceled"
       captured: "Task captured"
       closed: "That task is closed already"
@@ -206,6 +224,9 @@ en:
           one: "Untouched for %{count} day"
           other: "Untouched for %{count} days"
         write: "Write"
+      bulk_bar:
+        all: "Select all"
+        ticked: "%{count} ticked"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"
@@ -781,6 +802,12 @@ en:
               one: "%{count} task"
               other: "%{count} tasks"
       tasks:
+        bulk:
+          cancel: "Cancel"
+          complete: "Done"
+          confirm_delete: "Delete the ticked tasks? This cannot be undone."
+          delete: "Delete"
+          label: "Ticked tasks"
         closed:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
@@ -899,6 +926,7 @@ en:
             other: "carried ×%{count}"
           edit: "Edit"
           in_progress: "in progress"
+          pick: "Select %{task}"
           scheduled: "%{date}"
         sprint_field:
           label: "Sprint"

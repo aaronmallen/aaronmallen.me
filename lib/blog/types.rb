@@ -52,6 +52,7 @@ module Blog
     DecisionStatus = Types::String.enum("open", "resolved", "dropped")
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
+    IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)
     LocalTime = Types::Instance(Object).constructor do |value|
       text = TrimmedText[value]
@@ -118,6 +119,7 @@ module Blog
     end
     TagScope = Types::String.enum("public", "private")
     TagScopeParam = TagScope.fallback(TagScope.values.first)
+    TaskBulkAction = Types::String.enum("complete", "cancel", "delete")
     TaskFilter = Types::String.enum("today", "next", "someday", "external")
     TaskFilterParam = TaskFilter.fallback(TaskFilter.values.first)
     TaskLinkType = Types::String.enum("blocks", "relates", "duplicates")

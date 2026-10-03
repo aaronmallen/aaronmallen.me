@@ -11,7 +11,8 @@ module Tasks
     ], from: :record
 
     export %w[
-      operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
+      operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
+      operations.complete_task
       operations.current_sprint operations.delete_task operations.delete_task_comment operations.drop_sprint
       operations.edit_task_comment operations.link_tasks operations.move_task operations.plan_sprint
       operations.place_task operations.queue_issue_sync operations.reopen_task operations.reorder_task

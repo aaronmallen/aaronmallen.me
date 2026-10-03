@@ -129,12 +129,13 @@ module Admin
           def planning? = today? && @tasks.rows.empty? && !filtering?
 
           def row(task)
-            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:)
+            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID)
           end
 
           def rows
             return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.rows.empty?
 
+            Bulk(filter: @tab, page: @tasks.number, query: @filters[:query])
             @tasks.rows.each { row(it) }
             pager
           end

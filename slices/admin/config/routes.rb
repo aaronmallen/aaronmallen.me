@@ -67,6 +67,7 @@ module Admin
     post "/tags/:id/delete", to: "tags.destroy", as: :delete_tag, id: ID
     get "/tasks", to: "tasks.index", as: :tasks
     post "/tasks", to: "tasks.create", as: :create_task
+    post "/tasks/bulk", to: "tasks.bulk", as: :bulk_tasks
     get "/tasks/new", to: "tasks.new", as: :new_task
     get "/tasks/palette", to: "tasks.palette", as: :palette_tasks
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID

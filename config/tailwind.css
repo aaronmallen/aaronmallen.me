@@ -1827,6 +1827,10 @@
   }
 }
 
+@utility task-pick {
+  @apply col-start-1 row-start-2 justify-self-center;
+}
+
 @utility task-title {
   @apply col-start-2 row-start-1 min-w-0 font-display text-li font-semibold text-ink no-underline hover:text-accent focus-ring;
 
@@ -2732,6 +2736,26 @@
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
+  }
+}
+
+@utility bulk-bar {
+  @apply mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line pb-3;
+}
+
+@utility bulk-count {
+  @apply meta empty:hidden;
+}
+
+@utility bulk-acts {
+  @apply ml-auto flex flex-wrap items-center gap-2;
+}
+
+@utility bulk-pick {
+  @apply inline-flex cursor-pointer items-center justify-center;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap min-w-tap;
   }
 }
 

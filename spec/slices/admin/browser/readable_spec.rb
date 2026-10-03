@@ -126,7 +126,7 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def screens = pages.merge(people, person_search, composers, dialogs, journal_editors)
+  def screens = pages.merge(people, person_search, composers, dialogs, journal_editors, selections)
 
   def seed
     seed_analytics
@@ -170,6 +170,16 @@ RSpec.describe "Admin screens", type: :feature do
       post: create(:post, :published, slug: "hello", title: "A published post with a fairly long title"),
     )
     social_post
+  end
+
+  def selections
+    {
+      "tasks ticked" => lambda do
+        visit "/admin/tasks?filter=next"
+        find("input[name='ids[]'][value='#{task.id}']").check
+        find("[data-bulk-acts]")
+      end,
+    }
   end
 
   before do

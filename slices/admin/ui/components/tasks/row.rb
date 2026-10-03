@@ -15,10 +15,12 @@ module Admin
           prop :origin, Blog::Types::String, default: ORIGIN
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
+          prop :bulk, Blog::Types::String.optional, default: nil
 
           def view_template
             div(class: classes, data: order) do
               TaskKey(task: @task)
+              pick if @bulk
               task_title
               meta
               side
@@ -83,6 +85,10 @@ module Admin
           end
 
           def ordered? = @ordered && !@task.closed?
+
+          def pick
+            BulkCheck(form: @bulk, value: @task.id, label: t(".pick", task: @task.title), class: "task-pick")
+          end
 
           def scheduled_pill
             Pill(color: :orange) do

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -40,6 +40,8 @@ order, which #148 saves through `fetch` alone.
   task does since #80. Then it asks in `Admin::UI::Components::ConfirmDialog`, which the admin layout draws, and
   falls back to the browser's `confirm` when the page lacks it. Esc or No keeps the form from posting and hands
   focus back to the button that asked. With scripts off either form posts without asking.
+  Since #331 a submit button can carry its own `data-confirm` and `data-confirm-styled`, and they win over the
+  form's, so one form can ask before one of its buttons and not the rest. The bulk bar's Delete asks this way.
 - **Edit notes.** Since #231, `edit_note.js` holds back Save on a published post the way `confirm.js` holds back a
   delete. It moves the note field into a dialog inside the post form, and when the body differs from the one the
   page loaded with, it asks for the note there. Save in the dialog sends the form again with the same button, and

@@ -3,6 +3,7 @@
 RSpec.describe "API reach", type: :request do
   def self.exempt
     {
+      "tasks.operations.act_on_tasks" => "the admin's bulk bar runs it; #341 adds the bulk task endpoints and tools",
       "tasks.operations.delete_task_comment" => "the admin deletes a comment; spec #65 gives clients only an add",
       "tasks.operations.edit_task_comment" => "the admin edits a comment; spec #65 gives clients only an add",
       "tasks.operations.place_task" => "the admin's drag places a task; reorder_task moves one a place up or down",

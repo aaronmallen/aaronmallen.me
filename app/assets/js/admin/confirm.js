@@ -6,26 +6,29 @@ const confirmed = new WeakSet();
 export function setupConfirms(root = document) {
   if (root === document) setupDialog(document.querySelector(DIALOG));
 
-  for (const form of root.querySelectorAll("form[data-confirm]")) {
+  for (const form of root.querySelectorAll("form[data-confirm], form:has([type='submit'][data-confirm])")) {
     form.addEventListener("submit", (event) => {
       if (confirmed.delete(form)) return;
 
-      const dialog = form.hasAttribute("data-confirm-styled") && document.querySelector(DIALOG);
+      const asker = event.submitter?.hasAttribute("data-confirm") ? event.submitter : form;
+      if (!asker.hasAttribute("data-confirm")) return;
+
+      const dialog = asker.hasAttribute("data-confirm-styled") && document.querySelector(DIALOG);
 
       if (dialog) {
         event.preventDefault();
-        ask(dialog, form, event.submitter);
-      } else if (!window.confirm(form.dataset.confirm)) {
+        ask(dialog, form, event.submitter, asker.dataset.confirm);
+      } else if (!window.confirm(asker.dataset.confirm)) {
         event.preventDefault();
       }
     });
   }
 }
 
-function ask(dialog, form, submitter) {
+function ask(dialog, form, submitter, message) {
   const opener = submitter ?? document.activeElement;
 
-  dialog.querySelector("[data-confirm-message]").textContent = form.dataset.confirm;
+  dialog.querySelector("[data-confirm-message]").textContent = message;
   dialog.returnValue = "";
   dialog.addEventListener(
     "close",

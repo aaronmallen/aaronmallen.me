@@ -1,0 +1,148 @@
+# frozen_string_literal: true
+
+RSpec.describe "Admin bulk task actions", type: :feature do
+  let(:repo) { Tasks::Slice["repos.task_repo"] }
+
+  def acts = find("[data-bulk-acts]", visible: :all)
+
+  def all_box = find("[data-bulk-all] input")
+
+  def box(title) = find(".task", text: title).find("input[name='ids[]']")
+
+  def confirm_dialog = find("dialog#confirm-dialog[open]")
+
+  def scripts_off
+    page.driver.browser.page.disable_javascript
+    visit "/admin/tasks?filter=next"
+  end
+
+  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
+
+  def ticked
+    page.all(".task").select { it.has_css?("input:checked", wait: false) }.map { it.find(".task-title").text }
+  end
+
+  before do
+    %w[first second third].each_with_index { |title, index| create(:task, title:, position: index + 1) }
+    create(:task, :someday, title: "elsewhere")
+    sign_in_to_admin
+  end
+
+  describe "with scripts on" do
+    before { visit "/admin/tasks?filter=next" }
+
+    it "hides the actions while nothing is ticked" do
+      expect(acts).not_to be_visible
+    end
+
+    it "shows the actions once a row is ticked" do
+      box("second").check
+
+      expect(acts).to be_visible
+    end
+
+    it "counts the ticked rows" do
+      box("first").check
+      box("third").check
+
+      expect(page).to have_css("[data-bulk-count]", exact_text: "2 ticked")
+    end
+
+    it "hides the actions again once every box is clear" do
+      box("second").check
+      box("second").uncheck
+
+      expect(acts).not_to be_visible
+    end
+
+    it "ticks every row on the page with select all" do
+      all_box.check
+
+      expect(ticked).to eq(%w[first second third])
+    end
+
+    it "clears every row when select all is cleared" do
+      all_box.check
+      all_box.uncheck
+
+      expect(ticked).to be_empty
+    end
+
+    it "marks select all as partly ticked when only some rows are" do
+      box("first").check
+
+      expect(evaluate_script("document.querySelector('[data-bulk-all] input').indeterminate")).to be(true)
+    end
+
+    it "finishes the ticked tasks and leaves the rest", :aggregate_failures do
+      box("first").check
+      box("third").check
+      within("form#task-bulk") { click_button("Done") }
+
+      expect(page).to have_css("[data-toast] .toast", text: "Finished 2 tasks")
+      expect(repo.all_open.map(&:title)).to contain_exactly("second", "elsewhere")
+    end
+
+    it "cancels every task on the page and none on another list", :aggregate_failures do
+      all_box.check
+      within("form#task-bulk") { click_button("Cancel") }
+
+      expect(page).to have_css("[data-toast] .toast", text: "Canceled 3 tasks")
+      expect(repo.all_open.map(&:title)).to eq(["elsewhere"])
+    end
+
+    it "asks before it deletes", :aggregate_failures do
+      box("second").check
+      within("form#task-bulk") { click_button("Delete") }
+      confirm_dialog.click_button("Yes")
+
+      expect(page).to have_css("[data-toast] .toast", text: "Deleted 1 task")
+      expect(repo.all_open.map(&:title)).to contain_exactly("first", "third", "elsewhere")
+    end
+
+    it "keeps the tasks when the delete is declined" do
+      box("second").check
+      within("form#task-bulk") { click_button("Delete") }
+      confirm_dialog.click_button("No")
+
+      expect(repo.all_open.size).to eq(4)
+    end
+  end
+
+  describe "select all on a paged list" do
+    before do
+      lower_page_size(:admin, to: 2)
+      visit "/admin/tasks?filter=next"
+    end
+
+    it "ticks only the rows on the page", :aggregate_failures do
+      all_box.check
+      within("form#task-bulk") { click_button("Done") }
+
+      expect(page).to have_css("[data-toast] .toast", text: "Finished 2 tasks")
+      expect(repo.all_open.map(&:title)).to contain_exactly("third", "elsewhere")
+    end
+  end
+
+  describe "with scripts off" do
+    before { scripts_off }
+
+    after { scripts_on }
+
+    it "shows the actions with nothing ticked" do
+      expect(acts).to be_visible
+    end
+
+    it "draws no select all" do
+      expect(page).to have_no_css("[data-bulk-all]")
+    end
+
+    it "still finishes the ticked tasks with a plain post", :aggregate_failures do
+      box("first").check
+      within("form#task-bulk") { click_button("Done") }
+
+      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(repo.all_open.map(&:title)).to contain_exactly("second", "third", "elsewhere")
+    end
+  end
+end
