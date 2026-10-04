@@ -31,17 +31,17 @@ RSpec.describe "Media", type: :request do
       expect(last_response.content_type).to eq("image/jpeg")
     end
 
-    it "lets every cache keep it for a year" do
+    it "lets a browser keep it for a year and Cloudflare for a day" do
       get path
 
-      expect(cache_control).to eq("public, max-age=31536000, immutable")
+      expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
     end
 
     it "lets every cache keep it when the operator asks for it" do
       sign_in_to_admin
       get path
 
-      expect(cache_control).to eq("public, max-age=31536000, immutable")
+      expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
     end
 
     it "does not key on the cookie" do
@@ -60,7 +60,7 @@ RSpec.describe "Media", type: :request do
       claim_for_post(:draft)
       get path
 
-      expect(cache_control).to eq("public, max-age=31536000, immutable")
+      expect(cache_control).to eq("public, max-age=31536000, s-maxage=86400, immutable")
     end
   end
 

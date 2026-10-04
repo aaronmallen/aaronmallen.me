@@ -4,7 +4,7 @@ module Public
   module Actions
     module Media
       class Show < Action
-        CACHE_FOREVER = "public, max-age=31536000, immutable"
+        CACHE_PUBLISHED = "public, max-age=31536000, s-maxage=86400, immutable"
         CACHE_MISS = "public, max-age=60"
         CACHE_NEVER = "private, no-store"
         NOT_FOUND = 404
@@ -20,7 +20,7 @@ module Public
           response.headers.delete("Vary")
           return miss(response) unless photo
 
-          serve(response, photo, published ? CACHE_FOREVER : CACHE_NEVER)
+          serve(response, photo, published ? CACHE_PUBLISHED : CACHE_NEVER)
         end
 
         private
