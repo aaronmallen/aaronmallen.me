@@ -4,8 +4,6 @@
 module API
   module Endpoints
     module WorkEntries
-      ID = Schema::ID
-
       module_function
 
       def missing(id) = "no work entry has the ID #{id}"

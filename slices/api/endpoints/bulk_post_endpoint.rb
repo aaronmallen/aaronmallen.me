@@ -17,7 +17,7 @@ module API
         in Success[*posts] then Success(posts: answered(posts))
         in Failure[:record, id, reason] then refused(id, reason)
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Posts::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
 
@@ -32,9 +32,9 @@ module API
       end
 
       def rejected(errors)
-        complaints = Posts.complaints(flat(errors))
+        complaints = Wording.complaints(flat(errors), Posts::COMPLAINTS)
 
-        Failure(Refusal.invalid(complaints, message: Posts.summary(complaints)))
+        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
       end
     end
   end

@@ -4,8 +4,6 @@
 module API
   module Endpoints
     module Projects
-      ID = Schema::ID
-
       module_function
 
       def missing(id) = "no project has the ID #{id}"

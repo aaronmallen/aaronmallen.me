@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadWebmention < Endpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Webmentions::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       REPLY = Schema.widen(
         Serializers::Webmention::SCHEMA,

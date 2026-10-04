@@ -20,11 +20,11 @@ module API
       include Deps[save_journal_entry: "record.operations.save_journal_entry"]
 
       def handle(body:, entry_date: nil, tags: nil)
-        params = { body:, entry_date:, tags: JournalEntries.tag_list(tags) }
+        params = { body:, entry_date:, tags: Wording.tag_list(tags) }
 
         case save_journal_entry.call(params)
         in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))
-        in Failure[:invalid, errors] then invalid(JournalEntries.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
         else failed(UNSAVED)
         end
       end

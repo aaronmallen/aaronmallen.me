@@ -26,7 +26,7 @@ module API
         entry = journal_entry_by_id.call(id)
         return not_found(JournalEntries.missing(id)) if entry.nil?
 
-        params = { body: body || entry.body, tags: JournalEntries.tag_list(tags || entry.tags.map(&:name)) }
+        params = { body: body || entry.body, tags: Wording.tag_list(tags || entry.tags.map(&:name)) }
         saved(id, update_journal_entry.call(id, params))
       end
 
@@ -35,7 +35,7 @@ module API
       def saved(id, result)
         case result
         in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))
-        in Failure[:invalid, errors] then invalid(JournalEntries.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
         in Failure(:not_found) then not_found(JournalEntries.missing(id))
         else failed(UNSAVED)
         end

@@ -17,7 +17,7 @@ module API
         case delete_decision_comment.call(id, comment_id)
         in Success(*) then Success(id:, comment_id:, deleted: true)
         in Failure(:not_found) then not_found(Decisions.missing_comment(id, comment_id))
-        else failed(Decisions::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

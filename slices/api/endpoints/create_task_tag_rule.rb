@@ -14,9 +14,9 @@ module API
       include Deps[save_task_tag_rule: "tasks.operations.save_task_tag_rule"]
 
       def handle(pattern:, tags:)
-        case save_task_tag_rule.call({ pattern:, tags: Tasks.tag_list(tags) })
+        case save_task_tag_rule.call({ pattern:, tags: Wording.tag_list(tags) })
         in Success(rule) then Success(serialized(Serializers::TaskTagRule, rule))
-        in Failure[:invalid, errors] then invalid(TaskTagRules.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskTagRules::COMPLAINTS))
         else failed(TaskTagRules::UNSAVED)
         end
       end

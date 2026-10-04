@@ -16,7 +16,7 @@ module API
         in Failure[:record, id, :not_found] then invalid(ids: [Webmentions.missing(id)])
         in Failure[:record, id, _] then failed(format(UNCHANGED, id))
         in Failure[:invalid, errors] then invalid(flat(errors))
-        else failed(Webmentions::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

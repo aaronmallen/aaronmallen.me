@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadJournalEntry < Endpoint
-      SCHEMA = { additionalProperties: false, properties: { id: JournalEntries::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       KIND = "journal_entry"
       REPLY = Schema.widen(Serializers::JournalEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 

@@ -22,7 +22,7 @@ module API
         in Success(comment) then Success(serialized(Serializers::TaskComment, comment))
         in Failure(:not_found) then not_found(Tasks.missing_comment(id, comment_id))
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Tasks::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

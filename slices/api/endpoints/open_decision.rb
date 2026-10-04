@@ -16,10 +16,10 @@ module API
       include Deps[open_decision: "decisions.operations.open_decision"]
 
       def handle(title:, problem:, tags: nil)
-        case open_decision.call({ title:, problem:, tags: Decisions.tag_list(tags) })
+        case open_decision.call({ title:, problem:, tags: Wording.tag_list(tags) })
         in Success(decision) then answered(decision.id)
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Decisions::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class StartTask < TaskEndpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       include Deps[start_task: "tasks.operations.start_task"]
 

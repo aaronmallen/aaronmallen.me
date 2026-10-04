@@ -38,7 +38,7 @@ module API
           list: fields[:list],
           note: fields.fetch(:note, task.note),
           sprint_on: fields[:sprint_on],
-          tags: Tasks.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
+          tags: Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
           title: fields.fetch(:title, task.title),
         }
       end

@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class DeleteTaskTagRule < Endpoint
-      SCHEMA = { additionalProperties: false, properties: { id: TaskTagRules::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       REPLY = Schema.object({ id: Schema::INTEGER, deleted: Schema::BOOLEAN }).freeze
 
       include Deps[delete_task_tag_rule: "tasks.operations.delete_task_tag_rule"]

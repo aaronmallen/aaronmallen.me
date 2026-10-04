@@ -34,7 +34,7 @@ module API
 
       def handle(from:, to:, status: nil, post_id: nil, page: 1)
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] then Success(listed(first, last, status, post_id, Blog::Page.new(number: page, size:)))
+        in Success[first, last] then Success(listed(first, last, status, post_id, page_of(page)))
         in Failure(message) then invalid(from: [message], to: [message])
         end
       end
@@ -52,8 +52,6 @@ module API
           **Blog::Paging.fields(found),
         }
       end
-
-      def size = settings.page_size[:mcp]
     end
   end
 end

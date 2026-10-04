@@ -32,16 +32,16 @@ module API
       end
 
       def rejected(errors)
-        complaints = Tasks.complaints(errors)
+        complaints = Wording.complaints(errors, Tasks::COMPLAINTS)
 
-        Failure(Refusal.invalid(complaints, message: Tasks.summary(complaints)))
+        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
       end
 
       def settled(result, id)
         case result
         in Success(*) then answered(id)
         in Failure(:not_found) then not_found(Tasks.missing(id))
-        else failed(Tasks::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
 

@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ReadPost < Endpoint
       KIND = Blog::Types::RecordKind["post"]
-      SCHEMA = { additionalProperties: false, properties: { id: Posts::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       EDIT_NOTES = "the notes left on each change to the published post, newest first"
       RECEIVED = "the webmentions the post has received"

@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReopenTask < TaskEndpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       include Deps[reopen_task: "tasks.operations.reopen_task"]
 

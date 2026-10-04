@@ -6,7 +6,6 @@ module API
     module RecordLinks
       ID = Schema::ID
       KIND = { type: "string", enum: Blog::Types::RecordKind.values }.freeze
-      UNSAVED = "could not save the change"
 
       COMPLAINTS = {
         other_id: {
@@ -21,15 +20,9 @@ module API
 
       module_function
 
-      def complaints(errors) = errors.to_h { |field, codes| [field, codes.map { reason(field, it) }] }
-
       def missing(kind, id) = "no #{name(kind)} has the ID #{id}"
 
       def name(kind) = kind.tr("_", " ")
-
-      def reason(field, code) = COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
-
-      def summary(complaints) = complaints.map { |field, (reason)| "#{field}: #{reason}" }.join("; ")
 
       def unlinked(kind, id, other_kind, other_id)
         "#{name(kind)} #{id} has no link to #{name(other_kind)} #{other_id}"

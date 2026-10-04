@@ -4,12 +4,9 @@
 module API
   module Endpoints
     module Decisions
-      CONTROL = "holds a control character"
       ID = Schema::ID
       NOTE = { type: "string", description: "why it changed; a resolved or dropped decision needs one" }.freeze
       REASON = { type: "string", description: "why, in Markdown" }.freeze
-      TAG_SEPARATOR = ","
-      UNSAVED = "could not save the change"
 
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
@@ -30,23 +27,11 @@ module API
 
       module_function
 
-      def complaints(errors) = errors.to_h { |field, codes| [field, codes.map { reason(field, it) }] }
-
       def missing(id) = "no decision has the ID #{id}"
 
       def missing_comment(id, comment_id) = "decision #{id} has no comment with the ID #{comment_id}"
 
       def missing_option(id, option_id) = "decision #{id} has no option with the ID #{option_id}"
-
-      def reason(field, code)
-        return CONTROL if code == Blog::Contract::CONTROL
-
-        COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
-      end
-
-      def summary(complaints) = complaints.map { |field, (reason)| "#{field}: #{reason}" }.join("; ")
-
-      def tag_list(tags) = Array(tags).join(TAG_SEPARATOR)
     end
   end
 end

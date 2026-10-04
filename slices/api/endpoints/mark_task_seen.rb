@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class MarkTaskSeen < TaskEndpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       UNSOURCED = "task %s has no synced issue to mark seen"
 
       include Deps[mark_task_seen: "tasks.operations.mark_task_seen"]

@@ -32,12 +32,6 @@ module API
 
       module_function
 
-      def complaints(errors)
-        errors.to_h do |field, codes|
-          [field, codes.map { COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(it, it) }]
-        end
-      end
-
       def missing(id) = "no task tag rule has the ID #{id}"
     end
   end

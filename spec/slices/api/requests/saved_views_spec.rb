@@ -94,6 +94,11 @@ RSpec.describe "API saved views", type: :request do
       expect([create_view(name: "  ", screen: "tasks"), status]).to eq([refusal, 422])
     end
 
+    it "refuses a name holding a control character" do
+      expect(create_view(name: "bad\u0000name", screen: "tasks").fetch("errors"))
+        .to eq("name" => ["name holds a control character"])
+    end
+
     it "refuses a long name" do
       expect(create_view(name: "a" * 101, screen: "tasks").fetch("errors"))
         .to eq("name" => ["name runs past 100 characters"])

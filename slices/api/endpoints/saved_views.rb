@@ -8,10 +8,8 @@ module API
       UNSAVED = "could not save the saved view"
 
       COMPLAINTS = {
-        [:filters, Blog::Contract::CONTROL] => "filters hold a control character",
-        [:name, "blank"] => "name needs a character that is not a space",
-        [:name, Blog::Contract::CONTROL] => "name holds a control character",
-        [:name, "long"] => "name runs past 100 characters",
+        filters: { Blog::Contract::CONTROL => "filters hold a control character" },
+        name: { "blank" => "name needs a character that is not a space", "long" => "name runs past 100 characters" },
       }.freeze
 
       FILTERS = {
@@ -33,10 +31,6 @@ module API
       }.freeze
 
       module_function
-
-      def complaints(errors)
-        errors.to_h { |field, tokens| [field, tokens.map { COMPLAINTS.fetch([field, it]) { "#{field} #{it}" } }] }
-      end
 
       def missing(id) = "no saved view has the ID #{id}"
     end

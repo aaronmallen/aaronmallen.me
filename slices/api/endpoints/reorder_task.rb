@@ -18,7 +18,7 @@ module API
         in Success(*) then answered(id, moved: true)
         in Failure(:not_moved) then answered(id, moved: false)
         in Failure(:not_found) then not_found(Tasks.missing(id))
-        else failed(Tasks::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

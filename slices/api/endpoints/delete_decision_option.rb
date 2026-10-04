@@ -18,14 +18,14 @@ module API
         in Success(*) then Success(id:, option_id:, deleted: true)
         in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
         in Failure[:invalid, _] then chosen
-        else failed(Decisions::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
 
       private
 
       def chosen
-        reason = Decisions.reason(:option_id, "chosen")
+        reason = Wording.reason(Decisions::COMPLAINTS, :option_id, "chosen")
 
         Failure(Refusal.invalid({ option_id: [reason] }, message: "option_id: #{reason}"))
       end

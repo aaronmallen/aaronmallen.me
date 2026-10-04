@@ -157,6 +157,10 @@ RSpec.describe "API journal entries", type: :request do
       expect([create_entry(body: "  "), status]).to eq([refusal, 422])
     end
 
+    it "refuses a body holding a control character" do
+      expect(create_entry(body: "bad\u0000body").fetch("errors")).to eq("body" => ["body holds a control character"])
+    end
+
     it "refuses a day after today and saves nothing" do
       create_entry(body: "Not yet", entry_date: (today + 1).iso8601)
 

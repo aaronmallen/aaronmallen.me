@@ -41,6 +41,8 @@ module API
 
     def not_found(message) = Failure(Refusal.not_found(message))
 
+    def page_of(number) = Blog::Page.new(number:, size: settings.page_size[:mcp])
+
     def serialized(serializer, object, **params) = serializer.new(object, params:).serializable_hash
   end
 end

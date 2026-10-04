@@ -18,7 +18,7 @@ module API
         in Success[*tasks] then Success(tasks: answered(ids.uniq, tasks))
         in Failure[:record, id, reason] then refused(id, reason)
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Tasks::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
 
@@ -33,9 +33,9 @@ module API
       end
 
       def rejected(errors)
-        complaints = Tasks.complaints(flat(errors).transform_keys { FIELDS.fetch(it, it) })
+        complaints = Wording.complaints(flat(errors).transform_keys { FIELDS.fetch(it, it) }, Tasks::COMPLAINTS)
 
-        Failure(Refusal.invalid(complaints, message: Tasks.summary(complaints)))
+        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
       end
     end
   end

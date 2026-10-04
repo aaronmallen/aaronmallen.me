@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadDecision < Endpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Decisions::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       KIND = Blog::Types::RecordKind["decision"]
       RESOLVED = Blog::Types::DecisionEventKind["resolved"]

@@ -20,7 +20,7 @@ module API
 
       def handle(from: nil, to: nil, page: 1)
         case Blog::DayWindow.open_days(from || opening(to), to)
-        in Success[first, last] then Success(listed(first, last, Blog::Page.new(number: page, size:)))
+        in Success[first, last] then Success(listed(first, last, page_of(page)))
         in Failure(message) then invalid(from: [message], to: [message])
         end
       end
@@ -34,8 +34,6 @@ module API
       end
 
       def opening(to) = to ? nil : Blog::TimeZone.today.iso8601
-
-      def size = settings.page_size[:mcp]
     end
   end
 end

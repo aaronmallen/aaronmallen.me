@@ -16,7 +16,7 @@ module API
       def handle(name:, screen:, filters: {})
         case create_saved_view.call(name:, screen:, filters:)
         in Success(view) then Success(serialized(Serializers::SavedView, view))
-        in Failure[:invalid, errors] then invalid(SavedViews.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
         else failed(SavedViews::UNSAVED)
         end
       end

@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ReadSocialPost < Endpoint
       KIND = Blog::Types::RecordKind["social_post"]
-      SCHEMA = { additionalProperties: false, properties: { id: SocialPosts::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
       REPLY = Schema.widen(

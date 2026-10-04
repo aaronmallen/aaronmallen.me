@@ -4,23 +4,12 @@
 module API
   module Endpoints
     module Tasks
-      CONTROL = "holds a control character"
+      BULK = Schema.bulk("tasks")
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
       ID = Schema::ID
-      MOST_IDS = 100
-      IDS = {
-        type: "array",
-        items: ID,
-        minItems: 1,
-        maxItems: MOST_IDS,
-        description: "the tasks to change, #{MOST_IDS} at most; one that fails changes none".freeze,
-      }.freeze
-      BULK = { additionalProperties: false, properties: { ids: IDS }, required: ["ids"] }.freeze
       LISTS = Blog::Types::TaskFilter.values.freeze
       SPRINT_PAST = "a sprint opens on today or a day after it"
       TAG = { type: "string", description: "one private tag, lowercase words" }.freeze
-      TAG_SEPARATOR = ","
-      UNSAVED = "could not save the change"
       WORKED = {
         hours: { type: "integer", description: "whole hours worked, 0 to 9999" },
         minutes: { type: "integer", description: "minutes on top of the hours, 0 to 59" },
@@ -62,8 +51,6 @@ module API
 
       module_function
 
-      def complaints(errors) = errors.to_h { |field, codes| [field, codes.map { reason(field, it) }] }
-
       def missing(id) = "no task has the ID #{id}"
 
       def missing_comment(id, comment_id) = "task #{id} has no comment with the ID #{comment_id}"
@@ -73,16 +60,6 @@ module API
       def moment(meaning)
         { type: "string", description: "#{meaning}, as YYYY-MM-DDTHH:MM in #{Blog::TimeZone::NAME}" }
       end
-
-      def reason(field, code)
-        return CONTROL if code == Blog::Contract::CONTROL
-
-        COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
-      end
-
-      def summary(complaints) = complaints.map { |field, (reason)| "#{field}: #{reason}" }.join("; ")
-
-      def tag_list(tags) = Array(tags).join(TAG_SEPARATOR)
     end
   end
 end

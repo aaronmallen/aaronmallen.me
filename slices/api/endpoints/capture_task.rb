@@ -23,11 +23,11 @@ module API
       include Deps[capture_task: "tasks.operations.capture_task"]
 
       def handle(title:, list: NEXT, sprint_on: nil, tags: nil)
-        case capture_task.call({ title:, tags: Tasks.tag_list(tags) }, filter: list, sprint_on:)
+        case capture_task.call({ title:, tags: Wording.tag_list(tags) }, filter: list, sprint_on:)
         in Success[_, task, *] then answered(task.id)
         in Failure(:past) | Failure(:invalid) then sprint_past
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Tasks::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end

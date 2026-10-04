@@ -21,10 +21,7 @@ module API
           "taken" => "someone else already holds that key",
         },
         mastodon_handle: { Blog::Contract::FORMAT => "a Mastodon handle looks like @ada@ruby.social" },
-        name: {
-          Blog::Contract::BLANK => "give the person a name",
-          Blog::Contract::CONTROL => "name holds a control character",
-        },
+        name: { Blog::Contract::BLANK => "give the person a name" },
       }.freeze
 
       BLUESKY_HANDLE = [
@@ -45,12 +42,6 @@ module API
       }.freeze
 
       module_function
-
-      def complaints(errors)
-        errors.to_h do |field, codes|
-          [field, codes.map { COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(it) { "#{field} #{it}" } }]
-        end
-      end
 
       def missing(id) = "no person has the ID #{id}"
     end

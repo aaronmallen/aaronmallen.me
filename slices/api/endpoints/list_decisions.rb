@@ -24,8 +24,7 @@ module API
       include Deps["settings", find_decisions: "decisions.queries.find_decisions"]
 
       def handle(page: 1, status: nil, tag: nil)
-        found = find_decisions.call(page: Blog::Page.new(number: page, size: settings.page_size[:mcp]), status:,
-                                    tag: tag&.downcase)
+        found = find_decisions.call(page: page_of(page), status:, tag: tag&.downcase)
 
         Success(
           { count: found.rows.length, decisions: serialized(Serializers::Decision, found.rows),

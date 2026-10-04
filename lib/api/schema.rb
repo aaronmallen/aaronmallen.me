@@ -12,6 +12,22 @@ module API
 
     module_function
 
+    def bulk(noun) = { additionalProperties: false, properties: { ids: ids(noun) }, required: ["ids"] }.freeze
+
+    def by_id = { additionalProperties: false, properties: { id: ID }, required: ["id"] }.freeze
+
+    def ids(noun)
+      most = Blog::Contract::MAX_IDS
+
+      {
+        type: "array",
+        items: ID,
+        minItems: 1,
+        maxItems: most,
+        description: "the #{noun} to change, #{most} at most; one that fails changes none".freeze,
+      }.freeze
+    end
+
     def list(items) = { type: "array", items: }
 
     def names(properties) = properties.keys.map(&:to_s)

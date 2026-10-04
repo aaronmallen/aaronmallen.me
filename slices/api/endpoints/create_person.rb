@@ -11,7 +11,7 @@ module API
       def handle(**fields)
         case save_person.call(People::FIELDS.to_h { [it, fields[it]] })
         in Success(person) then Success(serialized(Serializers::Person, person))
-        in Failure[:invalid, errors] then invalid(People.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, People::COMPLAINTS, named: true))
         else failed(People::UNSAVED)
         end
       end

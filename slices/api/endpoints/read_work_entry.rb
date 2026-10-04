@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ReadWorkEntry < Endpoint
       KIND = Blog::Types::RecordKind["work_entry"]
-      SCHEMA = { additionalProperties: false, properties: { id: WorkEntries::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       REPLY = Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
       include Deps[record_links: "links.queries.record_links", work_entry_by_id: "projects.queries.work_entry_by_id"]

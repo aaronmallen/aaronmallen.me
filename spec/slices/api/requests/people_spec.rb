@@ -117,6 +117,11 @@ RSpec.describe "API people", type: :request do
         .to eq("name" => ["give the person a name"])
     end
 
+    it "refuses a name holding a control character" do
+      expect(add(name: "A\u0000da", key: "ada", mastodon_handle: "@ada@ruby.social").fetch("errors"))
+        .to eq("name" => ["name holds a control character"])
+    end
+
     it "refuses a Mastodon handle that is not @user@instance" do
       expect(add(name: "Ada", key: "ada", mastodon_handle: "ada@ruby.social").fetch("errors"))
         .to eq("mastodon_handle" => ["a Mastodon handle looks like @ada@ruby.social"])

@@ -32,13 +32,13 @@ module API
       def form(rule, fields)
         tags = fields.fetch(:tags) { rule.tags.map(&:name) }
 
-        { pattern: fields.fetch(:pattern, rule.pattern), tags: Tasks.tag_list(tags) }
+        { pattern: fields.fetch(:pattern, rule.pattern), tags: Wording.tag_list(tags) }
       end
 
       def saved(id, result)
         case result
         in Success(rule) then Success(serialized(Serializers::TaskTagRule, rule))
-        in Failure[:invalid, errors] then invalid(TaskTagRules.complaints(errors))
+        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskTagRules::COMPLAINTS))
         in Failure(:not_found) then not_found(TaskTagRules.missing(id))
         else failed(TaskTagRules::UNSAVED)
         end

@@ -14,7 +14,7 @@ module API
         in Failure[:planned, day] then refused("a sprint already exists for #{day.iso8601}")
         in Failure(:past) then refused("plan a sprint for a day after today")
         in Failure(:invalid) then refused("pick a day first, such as 2026-01-01")
-        else failed(Sprints::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
 

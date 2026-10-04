@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadPerson < Endpoint
-      SCHEMA = { additionalProperties: false, properties: { id: People::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       REPLY = Serializers::Person.reference
 
       include Deps[person_by_id: "social.queries.person_by_id"]

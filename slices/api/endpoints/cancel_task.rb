@@ -4,7 +4,7 @@ module API
   module Endpoints
     class CancelTask < TaskEndpoint
       CLOSED = "task %s is already done or canceled"
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       include Deps[cancel_task: "tasks.operations.cancel_task"]
 

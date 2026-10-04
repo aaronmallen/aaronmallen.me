@@ -44,7 +44,7 @@ module API
       private
 
       def listed(filters, from, to, number)
-        found = find_tasks.call(**filters, from:, to:, page: Blog::Page.new(number:, size: settings.page_size[:mcp]))
+        found = find_tasks.call(**filters, from:, to:, page: page_of(number))
 
         { count: found.rows.length, tasks: serialized(Serializers::Task, found.rows), **Blog::Paging.fields(found) }
       end

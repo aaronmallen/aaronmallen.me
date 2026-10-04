@@ -4,7 +4,7 @@ module API
   module Endpoints
     class PauseTask < TaskEndpoint
       IDLE = "task %s is not in progress"
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       include Deps[pause_task: "tasks.operations.pause_task"]
 

@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadTask < TaskEndpoint
-      SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
 
       TIMELINE = "the task's comments, work sessions, moves, tag changes and status changes, oldest first"
 

@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ReadCommit < Endpoint
       KIND = Blog::Types::RecordKind["commit"]
-      SCHEMA = { additionalProperties: false, properties: { id: Commits::ID }, required: ["id"] }.freeze
+      SCHEMA = Schema.by_id
       REPLY = Schema.widen(Serializers::Commit::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
       include Deps[commit_by_id: "record.queries.commit_by_id", record_links: "links.queries.record_links"]

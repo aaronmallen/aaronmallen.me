@@ -16,9 +16,9 @@ module API
       def closed(id) = invalid(id: [format(CLOSED, id)])
 
       def rejected(errors)
-        complaints = Decisions.complaints(errors)
+        complaints = Wording.complaints(errors, Decisions::COMPLAINTS)
 
-        Failure(Refusal.invalid(complaints, message: Decisions.summary(complaints)))
+        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
       end
 
       def settled(result, id)
@@ -27,7 +27,7 @@ module API
         in Failure(:not_found) then not_found(Decisions.missing(id))
         in Failure(:closed) then closed(id)
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Decisions::UNSAVED)
+        else failed(Wording::UNSAVED)
         end
       end
     end
