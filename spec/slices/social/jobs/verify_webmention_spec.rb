@@ -435,6 +435,20 @@ RSpec.describe Social::Jobs::VerifyWebmention do
 
     def gives_up_in(&) = elapsed(described_class::SourceUnreachable, &)
 
+    def page_reply = "HTTP/1.1 200 OK\r\nContent-Length: #{entry.bytesize}\r\n\r\n#{entry}"
+
+    def redirect_reply = "HTTP/1.1 302 Found\r\nLocation: /notes/1\r\nContent-Length: 0\r\n\r\n"
+
+    def slow_redirects(hops)
+      answered = 0
+
+      serve do |socket|
+        sleep(budget * 0.4)
+        socket.write(answered < hops ? redirect_reply : page_reply)
+        answered += 1
+      end
+    end
+
     before { shorten_webmention_budget(budget) }
 
     it "gives up within the budget on a body that trickles in" do
@@ -463,13 +477,9 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       WebMock.disable_net_connect!(allow_localhost: true)
     end
 
-    it "counts every redirect against the one budget" do
-      slow = serve do |socket|
-        sleep(budget * 0.4)
-        socket.write("HTTP/1.1 302 Found\r\nLocation: /notes/1\r\nContent-Length: 0\r\n\r\n")
-      end
-
-      expect { verify(source: slow) }.to raise_error(described_class::SourceUnreachable)
+    it "counts every redirect against the one budget", :aggregate_failures do
+      expect { verify(source: slow_redirects(2)) }.to raise_error(described_class::SourceUnreachable)
+      expect(webmentions.count).to eq(0)
     end
   end
 
