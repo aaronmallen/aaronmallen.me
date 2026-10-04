@@ -85,6 +85,7 @@ module Admin
     post "/photos", to: "photos.create", as: :create_photo
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post
+    post "/posts/bulk", to: "posts.bulk", as: :bulk_posts
     get "/posts/new", to: "posts.new", as: :new_post
     get "/posts/:id/analytics", to: "posts.analytics", as: :post_analytics, id: ID
     get "/posts/:id/edit", to: "posts.edit", as: :edit_post, id: ID

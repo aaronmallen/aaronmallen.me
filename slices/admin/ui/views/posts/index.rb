@@ -80,6 +80,8 @@ module Admin
             end
           end
 
+          def pick(post) = { form: Bulk::ID, value: post.id, label: t(".pick", title: post.title) }
+
           def readership(post)
             [
               t(".views", count: @view_counts.fetch(post.id)),
@@ -89,7 +91,9 @@ module Admin
           end
 
           def row(post)
-            ListItem(title: post.title, href: path(:admin_edit_post, id: post.id), sub: row_sub(post)) do
+            href = path(:admin_edit_post, id: post.id)
+
+            ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do
               analytics_link(post)
               Tags(tags: post.tags)
               mentions(post)
@@ -103,7 +107,12 @@ module Admin
             [path(:post, slug: post.slug), date, words, *readership(post)].join(SEPARATOR)
           end
 
-          def rows = Card(data: { key_list: true }) { @posts.rows.each { |post| row(post) } }
+          def rows
+            Card(data: { key_list: true }) do
+              Bulk(filter: @filter, page: @posts.number)
+              @posts.rows.each { |post| row(post) }
+            end
+          end
 
           def sub
             [

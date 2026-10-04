@@ -115,6 +115,25 @@ en:
         other: "%{count} suggestions rejected"
       saved: "Saved"
       scheduled: "Scheduled for %{date}"
+  posts_page:
+    toasts:
+      bulk:
+        deleted:
+          one: "Deleted %{count} draft"
+          other: "Deleted %{count} drafts"
+        failed:
+          not_draft: "Nothing changed · %{post} is not a draft"
+          not_found: "Nothing changed · %{post} is gone"
+          other: "Nothing changed · %{post} would not change"
+        invalid:
+          blank: "Tick a post first"
+          format: "Nothing changed · pick an action from the bar"
+          long: "Tick 100 posts or fewer"
+          tag_blank: "Type a tag first"
+          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
+        tagged:
+          one: "Tagged %{count} post %{tag}"
+          other: "Tagged %{count} posts %{tag}"
   projects_page:
     toasts:
       archived: "Archived · removed from /projects"
@@ -710,6 +729,13 @@ en:
           none: "No accounts match."
           rate_limited: "%{network} has had too many searches. Wait a minute, or type the handle."
       posts:
+        bulk:
+          confirm_delete: "Delete the ticked drafts? This cannot be undone."
+          delete: "Delete"
+          label: "Ticked posts"
+          tag: "Tag"
+          tag_name: "Tag name"
+          tag_placeholder: "tag"
         delete_form:
           confirm: "Delete this post? You can't undo it."
           confirm_webmentions:
@@ -1706,6 +1732,7 @@ en:
             one: "%{count} webmention"
             other: "%{count} webmentions"
           new_post: "New post"
+          pick: "Select %{title}"
           published: "published"
           published_count: "%{count} published"
           read_throughs:

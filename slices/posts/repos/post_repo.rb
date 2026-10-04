@@ -11,6 +11,14 @@ module Posts
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
       commands delete: :by_pk
 
+      def add_tag(id, name)
+        tag_id = tags.claim([name], scope: TAG_SCOPE).fetch(name)
+        return if tagged?(id, tag_id)
+
+        post_tags.add(id, [tag_id])
+        update(id, {})
+      end
+
       def all = with_tags.newest_first.to_a
 
       def by_filter(filter, page)
@@ -81,6 +89,8 @@ module Posts
       def publish_where(candidates, id, at)
         by_id(id) if candidates.publish(at).any?
       end
+
+      def tagged?(id, tag_id) = post_tags.for_owner(id).where(tag_id:).exist?
 
       def with_tags = posts.combine(:tags)
     end

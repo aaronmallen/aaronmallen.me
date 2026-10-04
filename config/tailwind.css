@@ -1881,6 +1881,10 @@
   }
 }
 
+@utility li-start {
+  @apply flex min-w-0 items-center gap-3;
+}
+
 @utility li-main {
   @apply flex min-w-0 flex-col gap-1;
 }

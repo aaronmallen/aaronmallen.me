@@ -7,20 +7,30 @@ module Admin
         prop :title, Blog::Types::String
         prop :href, Blog::Types::String.optional
         prop :sub, Blog::Types::String.optional
+        prop :pick, Blog::Types::Hash.optional, default: nil
 
         def view_template(&side)
           div(class: "li", data: { key_row: true }) do
-            @sub ? render_main : render_title
+            @pick ? render_picked : render_body
             div(class: "li-side", &side) if side
           end
         end
 
         private
 
+        def render_body = @sub ? render_main : render_title
+
         def render_main
           div(class: "li-main") do
             render_title
             p(class: "li-sub") { @sub }
+          end
+        end
+
+        def render_picked
+          div(class: "li-start") do
+            BulkCheck(**@pick)
+            render_body
           end
         end
 
