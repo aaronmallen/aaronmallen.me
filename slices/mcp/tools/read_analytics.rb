@@ -46,6 +46,8 @@ module MCP
                   "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
                   "the 90 days of raw visits. " \
+                  "#{PriorRange::DESCRIPTION}" \
+                  "#{format(Following::DESCRIPTION, top: TOP)}" \
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
@@ -54,11 +56,12 @@ module MCP
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
                   "#{Blog::DayWindow::LONGEST} days. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
-                  "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, and " \
-                  "its devices, with no top paths or weekday_hours. Its totals give its own read_throughs. A " \
+                  "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, its " \
+                  "devices, and its top #{TOP} outbound clicks, with no top paths, weekday_hours, change, feed or " \
+                  "webmentions. Its totals give its own read_throughs and its bounces. clicks counts the times " \
+                  "a reader followed a link off the page, by link_host and link_path, most first. A " \
                   "page's referrers and countries always give visitors. A page nobody visited reads as zeros. " \
-                  "For a published post's path, since_publish numbers each day of " \
-                  "the range from the Chicago day the post went out, which is day 1. " \
+                  "#{PublishedPost::DESCRIPTION}" \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \
                   "#{Analytics::Scroll::DEPTHS.join(', ')}%, the views that scrolled at least that far and their " \
                   "share of those views, null when no view tracked it. Scroll depth is kept forever, and views " \
@@ -108,28 +111,24 @@ module MCP
 
         def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
+        def deps(keys, server_context) = keys.to_h { [it, dep(it, server_context)] }
+
         def devices(range, path, server_context)
           dep(:devices_between, server_context).call(from: range.first, to: range.last, path:)
-        end
-
-        def numbered(days, first)
-          days.map do |found|
-            date = found.fetch(:day)
-            { day: (date - first).to_i + 1, date: date.iso8601, **found.except(:day) }
-          end
         end
 
         def page(path, range, server_context)
           found = dep(:page_between, server_context).call(path:, from: range.first, to: range.last)
           read_throughs = read_throughs(range, server_context).fetch(path, 0)
 
-          found.merge(totals: found.fetch(:totals).merge(read_throughs:))
+          found.merge(totals: found.fetch(:totals).merge(read_throughs:, bounces: found.fetch(:bounces)))
         end
 
         def page_ranked(found, range, path, server_context)
           {
             **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
             **breakdowns(range, path, server_context),
+            clicks: dep(:clicks_between, server_context).call(path:, from: range.first, to: range.last).take(TOP),
             scroll: dep(:scroll_depths_between, server_context).call(path:, from: range.first, to: range.last),
           }
         end
@@ -147,13 +146,19 @@ module MCP
             days: dated(days),
             **page_ranked(found, range, path, server_context),
             **raw(range, at, path, server_context),
-            **since_publish(post_at(path, server_context), days),
+            **published(post_at(path, server_context), path, days, server_context),
           )
         end
 
         def post_at(path, server_context)
           slug = path.delete_prefix("#{Blog::Site::WRITING}/")
           dep(:published_post_by_slug, server_context).call(slug) unless slug == path
+        end
+
+        def published(post, path, days, server_context)
+          return {} unless post
+
+          PublishedPost.call(post, path, days, **deps(PublishedPost::QUERIES, server_context))
         end
 
         def ranked(range, server_context)
@@ -201,11 +206,12 @@ module MCP
           { at: stamped(at), **found.fetch(:totals), **top }
         end
 
-        def since_publish(post, days)
-          return {} unless post
-
-          first = Blog::TimeZone.today(post.published_at)
-          { since_publish: numbered(days.select { it.fetch(:day) >= first }, first) }
+        def site_wide(found, range, server_context)
+          {
+            weekday_hours: WeekdayGrid.call(dep(:weekday_hours, server_context)),
+            change: PriorRange.call(found.fetch(:totals), range, dep(:analytics_between, server_context)),
+            **Following.call(range, top: TOP, **deps(Following::QUERIES, server_context)),
+          }
         end
 
         def sources(range, path, server_context)
@@ -225,7 +231,7 @@ module MCP
             days: dated(found.fetch(:days)),
             **raw(range, at, nil, server_context),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
-            weekday_hours: WeekdayGrid.call(dep(:weekday_hours, server_context)),
+            **site_wide(found, range, server_context),
           )
         end
 

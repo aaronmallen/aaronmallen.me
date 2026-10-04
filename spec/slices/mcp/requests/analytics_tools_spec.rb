@@ -558,13 +558,15 @@ RSpec.describe "MCP analytics tools", type: :request do
       create(:analytics_rollup_path, day:, path:, views:, visitors: views - 1, read_seconds: views * 10, bounces: 0)
     end
 
+    def unread_totals = { "read_throughs" => 0, "bounces" => 0, "reach" => 0 }
+
     it "gives the totals of that page only" do
       roll_up_page(today - 2, "/writing/hello", views: 4)
       create(:analytics_rollup_path, day: today - 2, path: "/writing/other", views: 9, visitors: 9, bounces: 0)
       roll_up_page(today - 1, "/writing/hello", views: 6)
 
       expect(read_page("/writing/hello").fetch("totals"))
-        .to eq("views" => 10, "visitors" => 8, "read_seconds" => 100, "read_throughs" => 0, "reach" => 0)
+        .to eq("views" => 10, "visitors" => 8, "read_seconds" => 100, **unread_totals)
     end
 
     it "gives the page's days, oldest first, with zero on a quiet day" do
@@ -583,7 +585,7 @@ RSpec.describe "MCP analytics tools", type: :request do
     end
 
     it "leaves out the site's top lists" do
-      keys = %w[from to time_zone path totals days referrers countries sources devices scroll hours read_spread]
+      keys = %w[from to time_zone path totals days referrers countries sources devices clicks scroll hours read_spread]
 
       expect(read_page("/writing/hello").keys).to eq([*keys, "internal_referrers"])
     end
@@ -646,13 +648,43 @@ RSpec.describe "MCP analytics tools", type: :request do
       roll_up_page(today - 1, "/writing/hello", views: 4)
 
       expect(read_page("/nowhere").fetch("totals"))
-        .to eq("views" => 0, "visitors" => 0, "read_seconds" => 0, "read_throughs" => 0, "reach" => 0)
+        .to eq("views" => 0, "visitors" => 0, "read_seconds" => 0, **unread_totals)
     end
 
-    it "gives no since_publish for a page that is not a post" do
+    it "adds up the page's bounces over the range" do
+      roll_up(today - 2, views: 50, visitors: 20)
+      create(:analytics_rollup_path, day: today - 2, path: "/writing/hello", views: 5, visitors: 4, bounces: 2)
+      create(:analytics_rollup_path, day: today - 2, path: "/writing/other", views: 9, visitors: 9, bounces: 9)
+      create(:analytics_event, path: "/writing/hello")
+
+      expect(read_page("/writing/hello").fetch("totals")).to include("bounces" => 3)
+    end
+
+    describe "the page's outbound clicks" do
+      before do
+        day = roll_up(today - 2, views: 50, visitors: 20).day
+        { "docs.example" => ["/a", 2], "code.example" => ["/b", 5] }.each do |link_host, (link_path, clicks)|
+          create(:analytics_rollup_click, day:, path: "/writing/hello", link_host:, link_path:, clicks:)
+        end
+        create(:analytics_rollup_click, day:, path: "/writing/other", link_host: "else.example", clicks: 9)
+        create(:analytics_click, event_id: create(:analytics_event, path: "/writing/hello").id, link_path: "/a")
+      end
+
+      it "ranks the links followed off the page by clicks, today's included" do
+        expect(read_page("/writing/hello").fetch("clicks").map { it.values_at("link_host", "link_path", "clicks") })
+          .to eq([["code.example", "/b", 5], ["docs.example", "/a", 3]])
+      end
+
+      it "leaves out the days outside the range" do
+        expect(read_page("/writing/hello", from: today, to: today).fetch("clicks"))
+          .to eq([{ "link_host" => "docs.example", "link_path" => "/a", "clicks" => 1 }])
+      end
+    end
+
+    it "gives no since_publish, first_days or unique_readers for a page that is not a post" do
       roll_up_page(today - 1, "/about", views: 4)
 
-      expect(read_page("/about")).not_to have_key("since_publish")
+      expect(read_page("/about").keys).not_to include("since_publish", "first_days", "unique_readers")
     end
 
     it "gives no since_publish for a draft's path" do
@@ -681,6 +713,123 @@ RSpec.describe "MCP analytics tools", type: :request do
         expect(read_page("/writing/part-two", from: today - 2, to: today - 2).fetch("since_publish").first)
           .to include("day" => 2, "date" => (today - 2).iso8601)
       end
+
+      it "gives the visitors of its first days up to today beside the median post, whatever the range" do
+        expect(read_page("/writing/part-two", from: today, to: today).fetch("first_days"))
+          .to eq("span" => 30, "days" => [3, 7, 0, 0], "median" => [3, 7, 0, 0])
+      end
+
+      it "counts its unique readers in its first 12 months" do
+        2.times { create(:post_reader_hash, path: "/writing/part-two") }
+
+        expect(read_page("/writing/part-two").fetch("unique_readers")).to eq("readers" => 2, "final" => false)
+      end
+
+      it "gives zero unique readers before anyone reads it" do
+        expect(read_page("/writing/part-two").fetch("unique_readers")).to eq("readers" => 0, "final" => false)
+      end
+    end
+
+    describe "a post older than 12 months" do
+      before { create(:post, :published, slug: "old", published_at: Time.now - (400 * 86_400)) }
+
+      it "gives its saved unique readers as final" do
+        create(:post_reader_count, path: "/writing/old", readers: 1234)
+
+        expect(read_page("/writing/old").fetch("unique_readers")).to eq("readers" => 1234, "final" => true)
+      end
+
+      it "gives no unique readers when the site kept no count" do
+        expect(read_page("/writing/old").fetch("unique_readers")).to eq("readers" => nil, "final" => true)
+      end
+    end
+  end
+
+  describe "read_analytics change" do
+    def change = mcp_answer("read_analytics", from: (today - 6).iso8601, to: today.iso8601).fetch("change")
+
+    it "sets the views against the range of the same length before" do
+      roll_up(today - 1, views: 15, visitors: 4)
+      roll_up(today - 7, views: 10, visitors: 4)
+      roll_up(today - 13, views: 10, visitors: 4)
+      roll_up(today - 14, views: 99, visitors: 9)
+
+      expect(change).to eq("from" => (today - 13).iso8601, "to" => (today - 7).iso8601, "views" => 20, "percent" => -25)
+    end
+
+    it "gives no percent when the range before had no views" do
+      roll_up(today - 1, views: 15, visitors: 4)
+
+      expect(change).to include("views" => 0, "percent" => nil)
+    end
+
+    it "leaves the change out of a page's answer" do
+      expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/about"))
+        .not_to have_key("change")
+    end
+  end
+
+  describe "read_analytics feed" do
+    def feed(to: today) = mcp_answer("read_analytics", from: (to - 6).iso8601, to: to.iso8601).fetch("feed")
+
+    before do
+      create(:feed_subscriber, day: today, aggregator: "feedly", subscribers: 40)
+      create(:feed_subscriber, day: today, path: "/writing/tags/ruby.atom", aggregator: "feedly", subscribers: 2)
+      create(:feed_subscriber, day: today - 1, aggregator: "inoreader", subscribers: 9)
+      create(:feed_subscriber, day: today - 9, aggregator: "newsblur", subscribers: 5)
+      create(:feed_reader, day: today - 1, readers: 3)
+    end
+
+    it "gives each aggregator's latest count across the feeds, most first" do
+      expect(feed.fetch("aggregators")).to eq(
+        [{ "aggregator" => "feedly", "subscribers" => 42 }, { "aggregator" => "inoreader", "subscribers" => 9 }],
+      )
+    end
+
+    it "counts the subscribers and other readers each day", :aggregate_failures do
+      expect(feed.fetch("days").last(2))
+        .to eq([{ "day" => (today - 1).iso8601, "subscribers" => 12 }, { "day" => today.iso8601, "subscribers" => 42 }])
+      expect(feed.fetch("days").length).to eq(7)
+    end
+
+    it "gives yesterday's count as the latest for a range that runs to today" do
+      expect(feed.fetch("latest")).to eq(12)
+    end
+
+    it "leaves the feed out of a page's answer" do
+      expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/about"))
+        .not_to have_key("feed")
+    end
+  end
+
+  describe "read_analytics webmentions" do
+    def webmentions = mcp_answer("read_analytics", from: (today - 6).iso8601, to: today.iso8601).fetch("webmentions")
+
+    let(:hello) { create(:post, :published, title: "Hello") }
+    let(:other) { create(:post, :published, title: "Other") }
+
+    before do
+      2.times { create(:webmention, post_id: hello.id, received_at: Blog::TimeZone.day_start(today)) }
+      create(:webmention, :approved, post_id: other.id, received_at: Blog::TimeZone.day_start(today - 1))
+      create(:webmention, post_id: other.id, received_at: Blog::TimeZone.day_start(today - 8))
+    end
+
+    it "counts the webmentions waiting now, whatever the range" do
+      expect(webmentions.fetch("pending")).to eq(3)
+    end
+
+    it "counts the webmentions received over the range" do
+      expect(webmentions.fetch("received")).to eq(3)
+    end
+
+    it "ranks the posts by webmentions received over the range" do
+      expect(webmentions.fetch("posts").map { it.values_at("post_id", "title", "received") })
+        .to eq([[hello.id, "Hello", 2], [other.id, "Other", 1]])
+    end
+
+    it "leaves the webmentions out of a page's answer" do
+      expect(mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/about"))
+        .not_to have_key("webmentions")
     end
   end
 

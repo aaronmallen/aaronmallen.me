@@ -51,16 +51,17 @@ module MCP
     ], from: :api
 
     import keys: %w[
-      operations.hash_visitor queries.devices_between queries.hourly_between queries.navigation_between
-      queries.page_between queries.reach_between queries.read_spread_between queries.read_throughs_between
-      queries.scroll_depths_between queries.sources_between queries.summary_between queries.weekday_hours
+      operations.hash_visitor queries.clicks_between queries.devices_between queries.feed_subscribers_between
+      queries.first_days queries.hourly_between queries.navigation_between queries.page_between queries.reach_between
+      queries.read_spread_between queries.read_throughs_between queries.readers_by_path queries.scroll_depths_between
+      queries.sources_between queries.summary_between queries.weekday_hours
     ], from: :analytics
 
     import keys: %w[operations.mark_message queries.by_id queries.received_between], from: :contact
 
     import keys: %w[
       operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id
-      queries.dated_between queries.published_by_slug
+      queries.by_ids queries.dated_between queries.published_by_slug
     ], from: :posts
 
     import keys: %w[
@@ -77,8 +78,9 @@ module MCP
 
     import keys: %w[
       operations.compose_social_post operations.delete_social_post operations.moderate_webmention
-      operations.update_webmention_settings queries.editable_social_post queries.social_posts_dated_between
-      queries.unsent_social_posts queries.webmention_settings
+      operations.update_webmention_settings queries.editable_social_post queries.pending_webmention_count
+      queries.social_posts_dated_between queries.unsent_social_posts queries.webmention_settings
+      queries.webmentions_received_between queries.webmentions_received_by_post
     ], from: :social
 
     import keys: %w[
