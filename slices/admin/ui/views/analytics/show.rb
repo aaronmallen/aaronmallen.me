@@ -11,7 +11,8 @@ module Admin
           SIGNED = "%+d"
 
           def initialize(
-            change:, countries:, paths:, per_visit:, range:, read_time:, referrers:, series:, totals:, webmentions:
+            change:, countries:, paths:, per_visit:, range:, read_time:, referrers:, series:, totals:, webmentions:,
+            weekday_hours:
           )
             super()
             @countries = countries
@@ -21,6 +22,7 @@ module Admin
             @series = series
             @stats = { change:, per_visit:, read_time:, **totals }
             @webmentions = webmentions
+            @weekday_hours = weekday_hours
           end
 
           def view_template
@@ -30,7 +32,10 @@ module Admin
             ChartCard(series: @series)
 
             Grid(columns: 2) do
-              SideStack { PagesCard(paths: @paths) }
+              SideStack do
+                PagesCard(paths: @paths)
+                HourGridCard(**@weekday_hours)
+              end
               SideStack { side_cards }
             end
           end

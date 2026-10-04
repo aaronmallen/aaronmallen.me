@@ -25,6 +25,7 @@ module Admin
         view_totals: "analytics.queries.view_totals",
         webmentions_received_between: "social.queries.webmentions_received_between",
         webmentions_received_by_post: "social.queries.webmentions_received_by_post",
+        weekday_hours: "analytics.queries.weekday_hours",
       ]
 
       def call(range:)
@@ -33,7 +34,13 @@ module Admin
         before = view_totals.call(from: from - range, to: from - 1).to_h
         found = period(from, to)
 
-        { range:, webmentions: webmentions(from, to), **found, **stats(found.fetch(:totals), before) }
+        {
+          range:,
+          webmentions: webmentions(from, to),
+          weekday_hours: weekday_hours.call(to:),
+          **found,
+          **stats(found.fetch(:totals), before),
+        }
       end
 
       private

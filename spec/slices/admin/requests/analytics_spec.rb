@@ -297,6 +297,61 @@ RSpec.describe "Admin analytics", type: :request do
       end
     end
 
+    describe "with events across the week" do
+      let(:sunday) { today - (today.wday.zero? ? 7 : today.wday) }
+
+      def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
+
+      def cell(hour, weekday) = grid.all("tbody tr")[hour].all(".heat-cell")[weekday]
+
+      def grid = page.find("table.heat")
+
+      before do
+        2.times { create(:analytics_event, occurred_at: at(sunday, 23, 30)) }
+        create(:analytics_event, occurred_at: at(sunday + 1, 9))
+        create(:analytics_event, occurred_at: at(today - 95, 9))
+        get "/admin/analytics"
+      end
+
+      it "draws a row for every hour of the day" do
+        expect(grid.all("tbody tr").size).to eq(24)
+      end
+
+      it "draws a cell for every day of the week in each row" do
+        expect(grid.all("tbody tr").map { it.all(".heat-cell").size }.uniq).to eq([7])
+      end
+
+      it "heads the columns Monday to Sunday" do
+        expect(grid.all(".heat-day").map(&:text)).to eq(%w[Mon Tue Wed Thu Fri Sat Sun])
+      end
+
+      it "names the window in the card head" do
+        expect(page.find(".card", text: "Readers by hour")).to have_css(".chart-peak", exact_text: "last 90 days")
+      end
+
+      it "counts a late Sunday event in Sunday's 23 row, whatever its UTC date" do
+        expect(cell(23, 6)).to have_css(".sr-only", exact_text: "2 readers")
+      end
+
+      it "counts the Monday morning event in Monday's 9 row" do
+        expect(cell(9, 0)).to have_css(".sr-only", exact_text: "1 reader")
+      end
+
+      it "leaves out events older than the window" do
+        expect(grid.all(".heat-cell .sr-only").sum { it.text.to_i }).to eq(3)
+      end
+
+      it "names the count of an empty cell" do
+        expect(cell(0, 0)).to have_css(".sr-only", exact_text: "0 readers")
+      end
+
+      it "shades each cell against the busiest one", :aggregate_failures do
+        expect(cell(23, 6)[:style]).to eq("--heat: 100%")
+        expect(cell(9, 0)[:style]).to eq("--heat: 50%")
+        expect(cell(0, 0)[:style]).to eq("--heat: 0%")
+      end
+    end
+
     describe "with webmentions" do
       before do
         hello = create(:post, :published, title: "Hello")

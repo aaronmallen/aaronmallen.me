@@ -2917,6 +2917,23 @@
   @apply flex justify-between meta;
 }
 
+@utility heat {
+  @apply w-full border-separate border-spacing-0.5;
+}
+
+@utility heat-day {
+  @apply pb-1 text-center font-mono text-label font-normal uppercase text-ink-muted;
+}
+
+@utility heat-hour {
+  @apply pr-2 text-right font-mono text-label font-normal tabular-nums text-ink-muted;
+}
+
+@utility heat-cell {
+  @apply h-3 rounded-xs;
+  background-color: color-mix(in oklab, var(--color-mk-green) var(--heat), var(--color-ground-sunk));
+}
+
 @utility tbl {
   @apply w-full border-collapse;
 }

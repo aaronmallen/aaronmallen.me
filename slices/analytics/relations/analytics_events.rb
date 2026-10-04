@@ -16,6 +16,8 @@ module Analytics
           integer.count(visitor_hash).distinct.as(:visitors),
         ]
       end
+      LOCAL_TIME = Sequel.function(:timezone, Blog::TimeZone::NAME, :occurred_at)
+      CLOCK_HOUR = Sequel.extract(:hour, LOCAL_TIME).cast(Integer)
       LATEST_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
       MEDIAN_READ = Sequel.function(:percentile_cont, 0.5).within_group(:read_seconds)
       NEWEST_FIRST = Sequel.desc(:occurred_at)
@@ -37,6 +39,7 @@ module Analytics
       end
       VISITORS = Sequel.function(:count, :visitor_hash).distinct
       VISITS = Sequel.function(:count).*
+      WEEKDAY = Sequel.extract(:isodow, LOCAL_TIME).cast(Integer)
 
       schema :analytics_events, infer: true
 
@@ -128,6 +131,12 @@ module Analytics
       end
 
       def visitor_count = unordered.dataset.get(VISITORS)
+
+      def visitors_by_weekday_hour
+        found = unordered.dataset.select(WEEKDAY.as(:weekday), CLOCK_HOUR.as(:hour), VISITORS.as(:visitors))
+
+        found.group(WEEKDAY, CLOCK_HOUR).to_h { [it.values_at(:weekday, :hour), it.fetch(:visitors)] }
+      end
 
       private
 

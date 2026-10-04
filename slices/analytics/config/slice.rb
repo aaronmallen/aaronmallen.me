@@ -15,7 +15,7 @@ module Analytics
       queries.read_spread_between queries.read_throughs_between queries.readers_by_path queries.referrer_counts
       queries.rollups_between queries.scroll_depths_between queries.sources_between queries.summary_between
       queries.top_paths queries.unrolled_summaries queries.view_totals queries.views_by_path queries.views_by_post
-      queries.visitors_for_day
+      queries.visitors_for_day queries.weekday_hours
     ]
   end
 end

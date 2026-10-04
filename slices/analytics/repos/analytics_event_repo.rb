@@ -79,6 +79,8 @@ module Analytics
 
       def visit_ends_between(from:, to:, direction:) = analytics_events.between(from, to).visit_ends(direction)
 
+      def visitors_by_weekday_hour(from:, to:) = analytics_events.between_days(from, to).visitors_by_weekday_hour
+
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 
       private

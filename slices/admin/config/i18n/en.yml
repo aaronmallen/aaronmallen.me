@@ -296,6 +296,39 @@ en:
           visitors:
             one: "%{formatted} visitor"
             other: "%{formatted} visitors"
+        hour_grid_card:
+          caption:
+            one: "Readers by hour and weekday, last %{count} day, Chicago time"
+            other: "Readers by hour and weekday, last %{count} days, Chicago time"
+          days:
+            friday:
+              name: "Friday"
+              short: "Fri"
+            monday:
+              name: "Monday"
+              short: "Mon"
+            saturday:
+              name: "Saturday"
+              short: "Sat"
+            sunday:
+              name: "Sunday"
+              short: "Sun"
+            thursday:
+              name: "Thursday"
+              short: "Thu"
+            tuesday:
+              name: "Tuesday"
+              short: "Tue"
+            wednesday:
+              name: "Wednesday"
+              short: "Wed"
+          readers:
+            one: "%{formatted} reader"
+            other: "%{formatted} readers"
+          title: "Readers by hour"
+          window:
+            one: "last %{count} day"
+            other: "last %{count} days"
         pages_card:
           bounce: "Bounce"
           empty: "No page views yet."

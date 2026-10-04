@@ -23,7 +23,7 @@ module Admin
       queries.country_counts queries.country_database_failure queries.devices_between queries.page_between
       queries.reach_between queries.read_throughs_between queries.referrer_counts queries.rollups_between
       queries.scroll_depths_between queries.sources_between queries.top_paths queries.unrolled_summaries
-      queries.view_totals queries.views_by_path queries.views_by_post queries.visitors_for_day
+      queries.view_totals queries.views_by_path queries.views_by_post queries.visitors_for_day queries.weekday_hours
     ], from: :analytics
 
     import keys: %w[
