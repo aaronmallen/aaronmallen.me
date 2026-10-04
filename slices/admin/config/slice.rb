@@ -16,7 +16,7 @@ module Admin
 
     import keys: %w[
       queries.activity_between queries.activity_counts queries.activity_counts_by_day queries.activity_day_count
-      queries.stalled_list
+      queries.review queries.stalled_list
     ], from: :activity
 
     import keys: %w[

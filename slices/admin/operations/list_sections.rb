@@ -15,6 +15,7 @@ module Admin
         %i[messages inbox fa-envelope admin_messages].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
+        %i[review insights fa-calendar-week admin_review].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[tags settings fa-tag admin_tags].freeze,
         %i[people settings fa-address-book admin_people].freeze,

@@ -1525,6 +1525,26 @@
   @apply mb-2 font-mono text-label text-mk-comment uppercase;
 }
 
+@utility review-pager {
+  @apply flex items-center gap-2;
+}
+
+@utility review-group {
+  @apply mt-5 first:mt-0;
+}
+
+@utility review-group-title {
+  @apply mb-2 font-mono text-label text-mk-comment uppercase;
+}
+
+@utility review-note {
+  @apply mb-3 meta;
+}
+
+@utility review-total {
+  @apply meta;
+}
+
 @utility today-journal-foot {
   @apply mt-3 flex flex-wrap items-center justify-between gap-3;
 }

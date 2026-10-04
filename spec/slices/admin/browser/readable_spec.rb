@@ -91,6 +91,8 @@ RSpec.describe "Admin screens", type: :feature do
       "posts" => "/admin/posts",
       "project editor" => "/admin/projects/#{project.id}/edit",
       "projects" => "/admin/projects",
+      "review" => "/admin/review",
+      "review month" => "/admin/review?period=month",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
@@ -165,6 +167,7 @@ RSpec.describe "Admin screens", type: :feature do
     today = Blog::TimeZone.today
     sprint = create(:sprint, sprint_date: today)
     create(:task, :in_sprint, sprint_id: sprint.id, title: "Plan the week ahead on the calendar screen")
+    create(:task, :in_sprint, sprint_id: sprint.id, carried_count: 4, title: "A task that keeps slipping to tomorrow")
     create(:post, :published, title: "A post published today with a title too long to fit its cell",
                               published_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 30))
     create(:social_post, :posted, posted_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 45))

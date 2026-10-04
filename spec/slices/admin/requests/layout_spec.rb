@@ -43,8 +43,8 @@ RSpec.describe "Admin layout", type: :request do
 
       expect(sections.map { it["data-palette-href"] })
         .to eq(%w[/admin /admin/tasks /admin/journal /admin/calendar /admin/decisions /admin/posts /admin/social
-                  /admin/projects /admin/messages /admin/webmentions /admin/activity /admin/analytics /admin/tags
-                  /admin/people /admin/clients /admin/tokens])
+                  /admin/projects /admin/messages /admin/webmentions /admin/activity /admin/review
+                  /admin/analytics /admin/tags /admin/people /admin/clients /admin/tokens])
     end
 
     it "reads the session validity row once for the action and the layout" do
