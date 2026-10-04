@@ -14,7 +14,7 @@ module Posts
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_post
       operations.move_post operations.publish_draft
       operations.record_post_webmentions operations.revise_edit_note operations.revise_post_body operations.save_post
-      operations.save_post_seo operations.tag_post queries.all
+      operations.save_post_seo queries.all
       queries.by_filter queries.by_id queries.by_ids queries.by_status queries.calendar_posts queries.count_by_status
       queries.dated_between queries.edited_at queries.edits_for_post queries.edits_for_posts queries.edits_newest_first
       queries.last_deleted_at queries.last_untagged_at queries.latest_published queries.linkable_posts

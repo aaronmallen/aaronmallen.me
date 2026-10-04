@@ -17,7 +17,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
   def failure(name = Record::Repos::SyncStateRepo::LINEAR_ISSUES) = sync_state_repo.failure(name)
 
-  def imported = repo.by_source("linear", "L_one")
+  def imported = repo.by_id(sources.at("linear", "L_one").pluck(:task_id).first)
 
   def issue(**) = linear_issue("L_one", **)
 
@@ -422,7 +422,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       both
 
       expect(failure).to include(reason: "linear_failed")
-      expect(repo.by_source("github", "I_seven")).not_to be_nil
+      expect(sources.at("github", "I_seven").count).to eq(1)
     end
 
     it "leaves Linear to run when GitHub fails", :aggregate_failures do

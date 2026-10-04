@@ -19,8 +19,6 @@ module Social
 
       def for_social_post(social_post_id) = where(social_post_id:)
 
-      def in_network(network) = where(network:)
-
       def in_network_order = order(self[:network].asc)
 
       def record(social_post_id:, network:, **attrs)

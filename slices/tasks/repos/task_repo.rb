@@ -28,8 +28,6 @@ module Tasks
 
       def by_id(id) = with_details.by_pk(id).one
 
-      def by_source(provider, remote_id) = with_details.where(id: task_sources.at(provider, remote_id).task_ids).one
-
       def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
       def carry_forward(sprint_id, at: Time.now)

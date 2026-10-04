@@ -177,14 +177,6 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
       expect(task_by_id.call(create(:task).id).source).to be_nil
     end
 
-    it "is found by its provider and its id there" do
-      expect(repo.by_source("github", "I_kwDOAbc").id).to eq(source.task_id)
-    end
-
-    it "finds nothing for an issue that never imported" do
-      expect(repo.by_source("github", "I_missing")).to be_nil
-    end
-
     it "is refused by Postgres a second source for the same issue" do
       expect { create(:task_source, remote_id: source.remote_id) }.to raise_error(ROM::SQL::UniqueConstraintError)
     end
@@ -200,10 +192,6 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     let!(:source) do
       url = "https://linear.app/acme/issue/ABC-123/fix-the-feed"
       create(:task_source, provider: "linear", remote_id: "lin_1", remote_state: "started", url:)
-    end
-
-    it "is found by its provider and its id there" do
-      expect(repo.by_source("linear", "lin_1").id).to eq(source.task_id)
     end
 
     it "carries the started state it was saved with when read" do

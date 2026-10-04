@@ -38,7 +38,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def sha = "a" * 40
 
-  def stored(sha) = commit_repo.by_sha(sha)
+  def stored(sha) = Record::Slice["relations.commits"].with_sha(sha).with(auto_struct: true).one
 
   def stub_refs(*branches, **) = stub_github(GitHubGraphQL::REFS_QUERY, github_refs_page(*branches, **))
 

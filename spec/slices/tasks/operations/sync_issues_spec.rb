@@ -9,7 +9,7 @@ RSpec.describe Tasks::Operations::SyncIssues do
 
   def comment = { author: "octocat", body: "Still on it", created_at: Time.now, id: "LC_1", url: "#{url}#c1" }
 
-  def imported = repo.by_source("linear", "L_one")
+  def imported = repo.by_id(Tasks::Slice["relations.task_sources"].at("linear", "L_one").pluck(:task_id).first)
 
   def issue(remote_state = "open", **)
     { body: "Keep them in step", id: "L_one", reference: "ABC-1", remote_state:, title: "Sync my issues", url:, ** }

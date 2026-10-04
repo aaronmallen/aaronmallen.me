@@ -26,6 +26,8 @@ RSpec.describe Record::Jobs::ImportCommits do
     Record::Slice["relations.sync_states"].of("backfill", repo: name).update(updated_at: at)
   end
 
+  def stored(sha) = Record::Slice["relations.commits"].with_sha(sha).with(auto_struct: true).one
+
   def stored_at(time) = create(:commit, created_at: time, updated_at: time)
 
   def stub_repos(*repositories, **) = stub_github(GitHubGraphQL::REPOS_QUERY, github_repos_page(*repositories, **))
@@ -254,7 +256,7 @@ RSpec.describe Record::Jobs::ImportCommits do
         history["aaronmallen/one"] = [written("e", 21 * day), written("f", 35 * day)]
         run_through
 
-        expect(%w[e f].map { commit_repo.by_sha(it * 40) }).to all(have_attributes(repo: "aaronmallen/one"))
+        expect(%w[e f].map { stored(it * 40) }).to all(have_attributes(repo: "aaronmallen/one"))
       end
 
       it "fills a repository whose walk failed, though nobody pushed to it", :aggregate_failures do
@@ -262,7 +264,7 @@ RSpec.describe Record::Jobs::ImportCommits do
         sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
         run_through
 
-        expect(%w[a b c].map { commit_repo.by_sha(it * 40) }).to all(have_attributes(repo:))
+        expect(%w[a b c].map { stored(it * 40) }).to all(have_attributes(repo:))
         expect(sync_state_repo.failure(commits_sync, repo:)).to be_nil
       end
     end
@@ -291,7 +293,7 @@ RSpec.describe Record::Jobs::ImportCommits do
       import
       Record::Jobs::BackfillRepoCommits.drain
 
-      expect(commit_repo.by_sha("a" * 40)).to have_attributes(repo:)
+      expect(stored("a" * 40)).to have_attributes(repo:)
       expect(sync_state_repo.failure(commits_sync, repo:)).to be_nil
     end
   end

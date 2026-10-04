@@ -19,9 +19,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::ISSUES)
 
-  def imported(id = "I_seven") = repo.by_source("github", id)
+  def imported(id = "I_seven") = repo.by_id(sources.at("github", id).pluck(:task_id).first)
 
   def issue(id = "I_seven", **) = github_issue(id, number: 7, **)
+
+  def sources = Tasks::Slice["relations.task_sources"]
 
   def stub_assigned(*nodes) = stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search(*nodes))
 
@@ -623,7 +625,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(failure).to include(reason: "rate_limited")
-      expect(repo.by_source("github", "I_seven")).to be_nil
+      expect(imported).to be_nil
     end
 
     it "records a check GitHub fails rather than cancel the task", :aggregate_failures do

@@ -23,8 +23,6 @@ module Record
 
       def by_id(id) = commits.by_pk(id).one
 
-      def by_sha(sha) = commits.with_sha(sha).one
-
       def end_walk(repo) = sync_states.of(BACKFILL_KIND, repo:).delete
 
       def finish_walk(repo, synced_through:)
