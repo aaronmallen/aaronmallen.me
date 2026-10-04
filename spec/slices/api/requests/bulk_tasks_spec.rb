@@ -7,9 +7,9 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def bare(answer) = answer.fetch("tasks").map { it.except("id", "completed_at", "created_at", "updated_at") }
 
-  def call_api(name, body, token: api_token)
+  def call_api(name, body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/tasks/bulk/#{name}", body, headers
     JSON.parse(last_response.body)
   end
@@ -222,12 +222,6 @@ RSpec.describe "API bulk task actions", type: :request do
 
     expect([act("complete", [task.id]), status])
       .to eq([{ "error" => "failed", "message" => "could not change task #{task.id}" }, 500])
-  end
-
-  it "refuses a request with no token" do
-    call_api("complete", JSON.generate(ids: [1]), token: nil)
-
-    expect(status).to eq(401)
   end
 
   describe "the MCP tools" do

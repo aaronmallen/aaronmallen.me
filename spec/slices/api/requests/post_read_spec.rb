@@ -10,9 +10,8 @@ RSpec.describe "API reading a post", type: :request do
     }
   end
 
-  def read(id, token: api_token)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read(id)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/posts/#{id}", nil, headers
     JSON.parse(last_response.body)
   end
@@ -93,12 +92,6 @@ RSpec.describe "API reading a post", type: :request do
     it "answers 404 for a post that isn't there" do
       expect([read(999_999), status])
         .to eq([{ "error" => "not_found", "message" => "no blog post has the ID 999999" }, 404])
-    end
-
-    it "refuses a request with no token" do
-      read(1, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

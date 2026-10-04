@@ -27,9 +27,8 @@ RSpec.describe "API review", type: :request do
     { done:, carried: }
   end
 
-  def read(token: api_token, **query)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read(**query)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/review", query, headers
     JSON.parse(last_response.body)
   end
@@ -172,12 +171,6 @@ RSpec.describe "API review", type: :request do
                 "errors" => { "day" => ["give the day as a date, such as 2026-01-01"] } }
 
     expect([read(day: "2026-13-40"), status]).to eq([refusal, 422])
-  end
-
-  it "refuses a request with no token" do
-    read(token: nil)
-
-    expect(status).to eq(401)
   end
 
   describe "the MCP tool" do

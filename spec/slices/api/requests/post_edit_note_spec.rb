@@ -7,9 +7,9 @@ RSpec.describe "API revising a post's edit note", type: :request do
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "note" => [message] } }
 
-  def revise(id, edit_id, token: api_token, **fields)
+  def revise(id, edit_id, **fields)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     patch "/api/v1/posts/#{id}/edits/#{edit_id}", JSON.generate(fields), headers
     JSON.parse(last_response.body)
   end
@@ -90,12 +90,6 @@ RSpec.describe "API revising a post's edit note", type: :request do
 
       expect([revise(published.id, edit.id, note: "Mine"), status])
         .to eq([{ "error" => "failed", "message" => "could not save the change" }, 500])
-    end
-
-    it "refuses a request with no token" do
-      revise(published.id, edit.id, note: "Mine", token: nil)
-
-      expect([status, note_of(edit)]).to eq([401, "Fixed a typo"])
     end
   end
 

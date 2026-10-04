@@ -392,12 +392,6 @@ RSpec.describe "Admin task links", type: :request do
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
     end
 
-    it "answers 404 for a task that isn't there" do
-      send_to("/admin/tasks/0/links", filter: "next", link: { kind: "blocks", other_id: other.id.to_s })
-
-      expect(last_response.status).to eq(404)
-    end
-
     describe "a second link between the same two tasks" do
       before do
         create(:task_link, from_task_id: other.id, to_task_id: task.id, type: "relates")

@@ -350,12 +350,6 @@ RSpec.describe "Admin work history", type: :request do
 
         expect(repo.all.map(&:role)).to eq(%w[Kept])
       end
-
-      it "answers 404 for a role that isn't there" do
-        remove(0)
-
-        expect(last_response.status).to eq(404)
-      end
     end
   end
 

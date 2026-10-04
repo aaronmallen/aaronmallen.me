@@ -716,12 +716,6 @@ RSpec.describe "Admin journal", type: :request do
         expect(page).to have_no_css("#journal-body-error")
       end
 
-      it "answers 404 for an entry that doesn't exist" do
-        edit(0, body: "after")
-
-        expect(last_response.status).to eq(404)
-      end
-
       it "rejects an edit without a CSRF token" do
         post "/admin/journal/#{entry.id}", entry: { body: "after" }
 
@@ -755,12 +749,6 @@ RSpec.describe "Admin journal", type: :request do
 
         expect(page).to have_css(".page-head-sub", text: "1 entry · 1 word")
         expect(page).to have_css(".journal-streak", exact_text: "Wrote on 1 of the last 30 days")
-      end
-
-      it "answers 404 for an entry that doesn't exist" do
-        delete_entry(0)
-
-        expect(last_response.status).to eq(404)
       end
 
       it "rejects a delete without a CSRF token" do

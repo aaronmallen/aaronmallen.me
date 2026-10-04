@@ -5,9 +5,9 @@ RSpec.describe "API publishing a post", type: :request do
 
   def overlong = { syndication_enabled: true, syndication_body: "a" * 301, syndication_targets: %w[bluesky] }
 
-  def publish(id, body = "{}", token: api_token)
+  def publish(id, body = "{}")
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/posts/#{id}/publish", body, headers
     JSON.parse(last_response.body)
   end
@@ -69,12 +69,6 @@ RSpec.describe "API publishing a post", type: :request do
 
       expect([publish(create(:post, :draft).id), status])
         .to eq([{ "error" => "failed", "message" => "could not save the change" }, 500])
-    end
-
-    it "refuses a request with no token" do
-      publish(1, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

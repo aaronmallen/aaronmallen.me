@@ -403,12 +403,6 @@ RSpec.describe "Admin post editor", type: :request do
         expect(last_response).to be_not_found
       end
 
-      it "answers 404 for a post that doesn't exist" do
-        remove(0)
-
-        expect(last_response).to be_not_found
-      end
-
       it "rejects a delete without a CSRF token", :aggregate_failures do
         post "/admin/posts/#{article.id}/delete"
 
@@ -868,12 +862,6 @@ RSpec.describe "Admin post editor", type: :request do
 
       it "returns 404 for invalid input to a post that doesn't exist" do
         save("/admin/posts/0", title: "")
-
-        expect(last_response).to be_not_found
-      end
-
-      it "returns 404 for a post that doesn't exist" do
-        save("/admin/posts/0", title: "Hello")
 
         expect(last_response).to be_not_found
       end

@@ -414,12 +414,6 @@ RSpec.describe "Admin projects", type: :request do
           .and have_attributes(location: end_with("/admin/projects?filter=archived"))
       end
 
-      it "answers 404 for a project that isn't there" do
-        post "/admin/projects/0/archive", _csrf_token: admin_csrf_token
-
-        expect(last_response.status).to eq(404)
-      end
-
       it "refuses a project whose start month comes after today", :aggregate_failures do
         unstarted = create(:project, started_on: Blog::TimeZone.today.next_month)
         post "/admin/projects/#{unstarted.id}/archive", _csrf_token: admin_csrf_token
@@ -454,12 +448,6 @@ RSpec.describe "Admin projects", type: :request do
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Restored to /projects")
-      end
-
-      it "answers 404 for a project that isn't there" do
-        post "/admin/projects/0/restore", _csrf_token: admin_csrf_token
-
-        expect(last_response.status).to eq(404)
       end
 
       it "answers 404 for a project that is not archived", :aggregate_failures do

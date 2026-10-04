@@ -35,8 +35,13 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(call_api(:get, "/openapi.json").status).to eq(200)
   end
 
-  it "refuses a request with no token" do
-    expect(call_api(:get, "/openapi.json", token: nil).status).to eq(401)
+  it "refuses every operation it describes when the request has no token" do
+    unguarded = operations.reject do |verb, path|
+      call_api(verb.to_sym, path.gsub(/\{\w+\}/, "0"), nil, token: nil)
+      last_response.status == 401 && last_response.headers["WWW-Authenticate"] == "Bearer"
+    end
+
+    expect(unguarded).to be_empty, unguarded.map { |verb, path| "#{verb.upcase} #{path}" }.join("\n")
   end
 
   it "is a valid OpenAPI 3.1 document" do

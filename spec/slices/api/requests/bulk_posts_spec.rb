@@ -5,9 +5,9 @@ RSpec.describe "API bulk post actions", type: :request do
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(name, body, token: api_token)
+  def call_api(name, body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/posts/bulk/#{name}", body, headers
     JSON.parse(last_response.body)
   end
@@ -142,12 +142,6 @@ RSpec.describe "API bulk post actions", type: :request do
 
     expect([act("delete", [article.id]), status])
       .to eq([{ "error" => "failed", "message" => "could not change blog post #{article.id}" }, 500])
-  end
-
-  it "refuses a request with no token" do
-    call_api("delete", JSON.generate(ids: [1]), token: nil)
-
-    expect(status).to eq(401)
   end
 
   describe "the MCP tools" do

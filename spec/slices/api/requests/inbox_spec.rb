@@ -5,9 +5,8 @@ RSpec.describe "API inbox", type: :request do
 
   def issue_url = "https://github.com/aaronmallen/aaronmallen.me/issues/1"
 
-  def read(token: api_token)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/inbox", {}, headers
     JSON.parse(last_response.body)
   end
@@ -69,12 +68,6 @@ RSpec.describe "API inbox", type: :request do
     %i[done canceled].each { synced(it) }
 
     expect(rows).to eq([])
-  end
-
-  it "refuses a request with no token" do
-    read(token: nil)
-
-    expect(status).to eq(401)
   end
 
   it "answers the MCP tool with the same JSON" do

@@ -7,9 +7,9 @@ RSpec.describe "API people", type: :request do
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token, query: nil)
+  def call_api(verb, path, body = nil, query: nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/people#{path}", query || body, headers)
     JSON.parse(last_response.body)
   end
@@ -62,12 +62,6 @@ RSpec.describe "API people", type: :request do
 
     it "answers an empty list with 200" do
       expect([list, status]).to eq([{ "people" => [] }, 200])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "", token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

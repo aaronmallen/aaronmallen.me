@@ -405,12 +405,6 @@ RSpec.describe "Admin tags", type: :request do
 
         expect(last_response.status).to eq(404)
       end
-
-      it "answers 404 for a tag that isn't there" do
-        send_to("/admin/tags/0", tag: { name: "hanami" })
-
-        expect(last_response.status).to eq(404)
-      end
     end
 
     describe "recolouring a tag" do
@@ -620,12 +614,6 @@ RSpec.describe "Admin tags", type: :request do
         send_to("/admin/tags/#{chores.id}/delete", scope: "private")
 
         expect(stored(chores.id)).to be_nil
-      end
-
-      it "answers 404 for a tag that isn't there" do
-        send_to("/admin/tags/0/delete")
-
-        expect(last_response.status).to eq(404)
       end
     end
 

@@ -18,9 +18,8 @@ RSpec.describe "API time report", type: :request do
     task
   end
 
-  def read(token: api_token, **params)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read(**params)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/time_report", params, headers
     JSON.parse(last_response.body)
   end
@@ -165,11 +164,5 @@ RSpec.describe "API time report", type: :request do
     read(**range, by: "year")
 
     expect(status).to eq(422)
-  end
-
-  it "refuses a request with no token" do
-    read(**range, token: nil)
-
-    expect(status).to eq(401)
   end
 end

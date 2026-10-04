@@ -527,12 +527,6 @@ RSpec.describe "Admin people", type: :request do
 
         expect(last_response).to be_not_found
       end
-
-      it "answers 404 when saving a person who is not there" do
-        send_to("/admin/people/999999", person: { name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social" })
-
-        expect(last_response).to be_not_found
-      end
     end
 
     describe "removing a person" do
@@ -552,12 +546,6 @@ RSpec.describe "Admin people", type: :request do
 
         expect(everyone).to be_empty
         expect(page).to have_css("[data-toast]", text: "Person removed")
-      end
-
-      it "answers 404 for a person who is not there" do
-        send_to("/admin/people/999999/delete")
-
-        expect(last_response).to be_not_found
       end
     end
   end

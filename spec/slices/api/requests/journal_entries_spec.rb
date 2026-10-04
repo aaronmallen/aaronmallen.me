@@ -3,9 +3,9 @@
 RSpec.describe "API journal entries", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/journal_entries#{path}", body, headers)
     JSON.parse(last_response.body)
   end
@@ -85,12 +85,6 @@ RSpec.describe "API journal entries", type: :request do
 
     it "refuses a window with no end" do
       expect([list(from: "2026-03-01").fetch("errors"), status]).to eq([{ "to" => ["to is missing"] }, 422])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "", { from: "2026-03-01", to: "2026-03-31" }, token: nil)
-
-      expect(status).to eq(401)
     end
 
     it "tells every cache not to store the answer" do

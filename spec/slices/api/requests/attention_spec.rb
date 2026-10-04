@@ -11,18 +11,17 @@ RSpec.describe "API attention", type: :request do
     Capybara.string(last_response.body).all("section.card[data-attention] .li-title").map(&:text)
   end
 
-  def read(token: api_token)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/attention", {}, headers
     JSON.parse(last_response.body)
   end
 
   def rows = read.fetch("attention")
 
-  def snooze(token: api_token, **body)
+  def snooze(**body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/attention/snooze", JSON.generate(body), headers
     JSON.parse(last_response.body)
   end
@@ -80,12 +79,6 @@ RSpec.describe "API attention", type: :request do
     expect(rows.map { it.fetch("title") }).to eq(["Carried twice"])
   end
 
-  it "refuses a request with no token" do
-    read(token: nil)
-
-    expect(status).to eq(401)
-  end
-
   describe "snoozing a row" do
     let!(:draft) { create(:post, :draft, title: "Old draft", updated_at: days_ago(60)) }
 
@@ -134,12 +127,6 @@ RSpec.describe "API attention", type: :request do
       snooze(kind: "draft")
 
       expect(status).to eq(404)
-    end
-
-    it "refuses a request with no token" do
-      snooze(kind: "journal", token: nil)
-
-      expect([status, snoozes.count]).to eq([401, 0])
     end
 
     it "answers the MCP tool with the same JSON" do

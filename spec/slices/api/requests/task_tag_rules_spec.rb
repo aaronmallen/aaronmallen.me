@@ -3,9 +3,9 @@
 RSpec.describe "API task tag rules", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/task_tag_rules#{path}", body, headers)
     JSON.parse(last_response.body)
   end
@@ -43,12 +43,6 @@ RSpec.describe "API task tag rules", type: :request do
 
     it "answers an empty list with 200" do
       expect([list, status]).to eq([{ "task_tag_rules" => [] }, 200])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "", nil, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

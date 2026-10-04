@@ -7,9 +7,9 @@ RSpec.describe "API issue sync", type: :request do
 
   def status = last_response.status
 
-  def sync(token: api_token)
+  def sync
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/tasks/issues/sync", nil, headers
     JSON.parse(last_response.body)
   end
@@ -29,12 +29,6 @@ RSpec.describe "API issue sync", type: :request do
         sync
 
         expect(a_request(:any, /api\.github\.com/)).not_to have_been_made
-      end
-
-      it "refuses a request with no token", :aggregate_failures do
-        sync(token: nil)
-
-        expect([status, queued]).to eq([401, [0, 0]])
       end
     end
 

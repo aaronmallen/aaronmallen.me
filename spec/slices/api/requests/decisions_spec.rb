@@ -5,9 +5,9 @@ RSpec.describe "API decisions", type: :request do
 
   def at(hour) = Blog::TimeZone.local_time(2026, 9, 1, hour, 0)
 
-  def call_api(verb, path, fields = nil, token: api_token)
+  def call_api(verb, path, fields = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/decisions#{path}", fields && JSON.generate(fields), headers)
     JSON.parse(last_response.body)
   end
@@ -81,12 +81,6 @@ RSpec.describe "API decisions", type: :request do
 
       expect([call_api(:post, "", { title: "Pick a queue", problem: " " }), status]).to eq([refusal, 422])
     end
-
-    it "refuses a request with no token" do
-      call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" }, token: nil)
-
-      expect(status).to eq(401)
-    end
   end
 
   describe "PATCH /api/v1/decisions/:id" do
@@ -121,12 +115,6 @@ RSpec.describe "API decisions", type: :request do
     it "answers an unknown decision with a 404" do
       expect([call_api(:patch, "/999999", { title: "Gone" }), status])
         .to eq([{ "error" => "not_found", "message" => "no decision has the ID 999999" }, 404])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:patch, "/#{decision.id}", { title: "Pick a job queue" }, token: nil)
-
-      expect([status, reload(decision).title]).to eq([401, "Pick a queue"])
     end
   end
 
@@ -166,12 +154,6 @@ RSpec.describe "API decisions", type: :request do
       expect(call_api(:post, "/#{closed.id}/resolve", { option_id: choice.id, reason: "Now" }).fetch("errors"))
         .to eq("id" => ["decision #{closed.id} is already resolved or dropped"])
     end
-
-    it "refuses a request with no token" do
-      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs" }, token: nil)
-
-      expect([status, reload(decision).status]).to eq([401, "open"])
-    end
   end
 
   describe "POST /api/v1/decisions/:id/drop" do
@@ -183,12 +165,6 @@ RSpec.describe "API decisions", type: :request do
     it "refuses a request with no reason" do
       expect([call_api(:post, "/#{decision.id}/drop", {}).fetch("errors"), status])
         .to eq([{ "reason" => ["reason is missing"] }, 422])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:post, "/#{decision.id}/drop", { reason: "Not needed" }, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 
@@ -203,12 +179,6 @@ RSpec.describe "API decisions", type: :request do
     it "refuses an open decision" do
       expect(call_api(:post, "/#{decision.id}/reopen", { reason: "Again" }).fetch("errors"))
         .to eq("id" => ["decision #{decision.id} is already open"])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" }, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 
@@ -236,12 +206,6 @@ RSpec.describe "API decisions", type: :request do
 
       expect(status).to eq(404)
     end
-
-    it "refuses a request with no token" do
-      call_api(:post, "/#{decision.id}/options", { title: "Resque" }, token: nil)
-
-      expect([status, options.count]).to eq([401, 0])
-    end
   end
 
   describe "PATCH /api/v1/decisions/:id/options/:option_id" do
@@ -266,12 +230,6 @@ RSpec.describe "API decisions", type: :request do
       expect([call_api(:patch, "/#{decision.id}/options/#{stranger.id}", { title: "Mine" }), status])
         .to eq([{ "error" => "not_found", "message" => message }, 404])
     end
-
-    it "refuses a request with no token" do
-      call_api(:patch, "/#{decision.id}/options/#{option.id}", { title: "Sidekiq 8" }, token: nil)
-
-      expect(status).to eq(401)
-    end
   end
 
   describe "DELETE /api/v1/decisions/:id/options/:option_id" do
@@ -287,12 +245,6 @@ RSpec.describe "API decisions", type: :request do
 
       expect([call_api(:delete, "/#{decision.id}/options/#{option.id}").fetch("errors"), status])
         .to eq([{ "option_id" => ["the decision was resolved with this option, so reopen it first"] }, 422])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:delete, "/#{decision.id}/options/#{option.id}", token: nil)
-
-      expect([status, options.by_pk(option.id).exist?]).to eq([401, true])
     end
   end
 
@@ -330,24 +282,6 @@ RSpec.describe "API decisions", type: :request do
       expect([answered, comments.by_pk(comment.id).exist?])
         .to eq([{ "id" => decision.id, "comment_id" => comment.id, "deleted" => true }, false])
     end
-
-    it "refuses a new comment with no token" do
-      call_api(:post, "/#{decision.id}/comments", { body: "Hi" }, token: nil)
-
-      expect([status, comments.count]).to eq([401, 0])
-    end
-
-    it "refuses an edit with no token" do
-      call_api(:patch, "/#{decision.id}/comments/#{comment.id}", { body: "Hi" }, token: nil)
-
-      expect([status, comments.by_pk(comment.id).one[:body]]).to eq([401, "Leaning on Sidekiq"])
-    end
-
-    it "refuses a delete with no token" do
-      call_api(:delete, "/#{decision.id}/comments/#{comment.id}", token: nil)
-
-      expect([status, comments.by_pk(comment.id).exist?]).to eq([401, true])
-    end
   end
 
   describe "the tag endpoints" do
@@ -379,19 +313,6 @@ RSpec.describe "API decisions", type: :request do
     it "answers a tag the decision does not carry with a 404" do
       expect([call_api(:delete, "/#{decision.id}/tags/queues"), status])
         .to eq([{ "error" => "not_found", "message" => "decision #{decision.id} has no tag queues" }, 404])
-    end
-
-    it "refuses a new tag with no token" do
-      call_api(:post, "/#{decision.id}/tags", { tags: %w[ruby] }, token: nil)
-
-      expect([status, reload(decision).tags]).to eq([401, []])
-    end
-
-    it "refuses to take a tag off with no token" do
-      tag(decision, "queues")
-      call_api(:delete, "/#{decision.id}/tags/queues", token: nil)
-
-      expect([status, reload(decision).tags.map(&:name)]).to eq([401, ["queues"]])
     end
   end
 
@@ -442,12 +363,6 @@ RSpec.describe "API decisions", type: :request do
 
     it "refuses an unknown status with a 422 naming the field" do
       expect([list("status=done").fetch("errors").keys, status]).to eq([["status"], 422])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "", token: nil)
-
-      expect(status).to eq(401)
     end
   end
 
@@ -524,12 +439,6 @@ RSpec.describe "API decisions", type: :request do
     it "answers an unknown decision with a 404" do
       expect([read(999_999), status])
         .to eq([{ "error" => "not_found", "message" => "no decision has the ID 999999" }, 404])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "/#{decision.id}", token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

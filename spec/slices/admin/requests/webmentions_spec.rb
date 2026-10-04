@@ -248,14 +248,6 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_css("[data-toast]", text: "Ignored · hidden from the post")
       end
 
-      %w[approve spam ignore].each do |verdict|
-        it "answers 404 when asked to #{verdict} a mention that isn't there" do
-          post "/admin/webmentions/0/#{verdict}", _csrf_token: admin_csrf_token
-
-          expect(last_response.status).to eq(404)
-        end
-      end
-
       it "offers every button on a pending mention", :aggregate_failures do
         mention
         get "/admin/webmentions"

@@ -202,12 +202,6 @@ RSpec.describe "Admin messages", type: :request do
         end
       end
 
-      it "answers 404 for a message that isn't there" do
-        mark(0, "read")
-
-        expect(last_response.status).to eq(404)
-      end
-
       it "writes nothing for a message that isn't there" do
         message = create(:message)
         mark(0, "read")

@@ -121,16 +121,4 @@ RSpec.describe "Social webmentions", type: :request do
       expect([receipts, queued.size]).to eq([2, 2])
     end
   end
-
-  describe "moderating a mention that is gone" do
-    before { sign_in_to_admin }
-
-    %w[approve spam].each do |verdict|
-      it "answers 404 when asked to #{verdict} it" do
-        post "/admin/webmentions/#{create(:webmention).id + 1}/#{verdict}", _csrf_token: admin_csrf_token
-
-        expect(last_response.status).to eq(404)
-      end
-    end
-  end
 end

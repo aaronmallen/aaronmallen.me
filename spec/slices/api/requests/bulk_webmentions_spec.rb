@@ -7,9 +7,9 @@ RSpec.describe "API bulk webmention actions", type: :request do
 
   def bare(answer) = answer.fetch("webmentions").map { it.except("id", "source_url") }
 
-  def call_api(name, body, token: api_token)
+  def call_api(name, body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     post "/api/v1/webmentions/bulk/#{name}", body, headers
     JSON.parse(last_response.body)
   end
@@ -128,12 +128,6 @@ RSpec.describe "API bulk webmention actions", type: :request do
 
     expect([act("approve", [mention.id]), status])
       .to eq([{ "error" => "failed", "message" => "could not change webmention #{mention.id}" }, 500])
-  end
-
-  it "refuses a request with no token" do
-    call_api("approve", JSON.generate(ids: [1]), token: nil)
-
-    expect(status).to eq(401)
   end
 
   describe "the MCP tools" do

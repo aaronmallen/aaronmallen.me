@@ -3,9 +3,9 @@
 RSpec.describe "API saved views", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/saved_views#{path}", body, headers)
     JSON.parse(last_response.body)
   end
@@ -59,12 +59,6 @@ RSpec.describe "API saved views", type: :request do
 
     it "refuses a screen it does not know with a 422" do
       expect([list(screen: "inbox").fetch("errors").keys, status]).to eq([%w[screen], 422])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "", nil, token: nil)
-
-      expect(status).to eq(401)
     end
   end
 

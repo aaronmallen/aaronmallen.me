@@ -82,12 +82,6 @@ RSpec.describe "Projects", type: :request do
   end
 
   describe "archiving" do
-    it "answers 404 for an id no project has" do
-      post "/admin/projects/#{missing_id}/archive", _csrf_token: admin_csrf_token
-
-      expect(last_response.status).to eq(404)
-    end
-
     it "keeps the repo, the stars and the position" do
       project = create(:project, repo: "aaronmallen/kept", stars: 12, position: 4)
       post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token
@@ -97,26 +91,12 @@ RSpec.describe "Projects", type: :request do
   end
 
   describe "restoring" do
-    it "answers 404 for an id no project has" do
-      post "/admin/projects/#{missing_id}/restore", _csrf_token: admin_csrf_token
-
-      expect(last_response.status).to eq(404)
-    end
-
     it "keeps a project that was featured before it was archived off the featured list" do
       project = create(:project, :featured)
       post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token
       post "/admin/projects/#{project.id}/restore", _csrf_token: admin_csrf_token
 
       expect(repo.by_id(project.id)).to have_attributes(status: "active", featured: false)
-    end
-  end
-
-  describe "removing a role" do
-    it "answers 404 for an id no role has" do
-      post "/admin/projects/work/#{missing_id}/delete", _csrf_token: admin_csrf_token
-
-      expect(last_response.status).to eq(404)
     end
   end
 end

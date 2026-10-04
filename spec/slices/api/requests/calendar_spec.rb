@@ -21,9 +21,8 @@ RSpec.describe "API calendar", type: :request do
     end
   end
 
-  def read(token: api_token, **params)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def read(**params)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/calendar", params, headers
     JSON.parse(last_response.body)
   end
@@ -120,12 +119,6 @@ RSpec.describe "API calendar", type: :request do
     found = read
 
     expect([status, found.fetch("errors").keys]).to eq([422, %w[from to]])
-  end
-
-  it "refuses a request with no token" do
-    read(token: nil, **range)
-
-    expect(status).to eq(401)
   end
 
   it "answers the MCP tool with the same JSON" do

@@ -5,20 +5,20 @@ RSpec.describe "API task comments", type: :request do
 
   def body_of(comment) = Tasks::Slice["relations.task_comments"].by_pk(comment.id).one&.fetch(:body)
 
-  def call_api(verb, path, fields = nil, token: api_token)
+  def call_api(verb, path, fields = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/tasks/#{path}", fields && JSON.generate(fields), headers)
     JSON.parse(last_response.body)
   end
 
-  def comment(id, token: api_token, **fields) = call_api(:post, "#{id}/comments", fields, token:)
+  def comment(id, **fields) = call_api(:post, "#{id}/comments", fields)
 
-  def edit(id, comment_id, token: api_token, **fields)
-    call_api(:patch, "#{id}/comments/#{comment_id}", fields, token:)
+  def edit(id, comment_id, **fields)
+    call_api(:patch, "#{id}/comments/#{comment_id}", fields)
   end
 
-  def remove(id, comment_id, token: api_token) = call_api(:delete, "#{id}/comments/#{comment_id}", token:)
+  def remove(id, comment_id) = call_api(:delete, "#{id}/comments/#{comment_id}")
 
   def stamps(saved) = { "created_at" => saved.created_at.utc.iso8601, "updated_at" => saved.updated_at.utc.iso8601 }
 
@@ -70,12 +70,6 @@ RSpec.describe "API task comments", type: :request do
       expect([comment(999_999, body: "Hello"), status])
         .to eq([{ "error" => "not_found", "message" => "no task has the ID 999999" }, 404])
     end
-
-    it "refuses a request with no token" do
-      comment(task.id, body: "Hello", token: nil)
-
-      expect([status, stored(task)]).to eq([401, []])
-    end
   end
 
   describe "PATCH /api/v1/tasks/:id/comments/:comment_id" do
@@ -117,12 +111,6 @@ RSpec.describe "API task comments", type: :request do
 
       expect([status, body_of(stranger)]).to eq([404, "Elsewhere"])
     end
-
-    it "refuses a request with no token" do
-      edit(task.id, local.id, body: "Mine", token: nil)
-
-      expect([status, body_of(local)]).to eq([401, "Blocked on review"])
-    end
   end
 
   describe "DELETE /api/v1/tasks/:id/comments/:comment_id" do
@@ -148,12 +136,6 @@ RSpec.describe "API task comments", type: :request do
       remove(task.id, stranger.id)
 
       expect([status, body_of(stranger)]).to eq([404, "Elsewhere"])
-    end
-
-    it "refuses a request with no token" do
-      remove(task.id, local.id, token: nil)
-
-      expect([status, body_of(local)]).to eq([401, "Blocked on review"])
     end
   end
 

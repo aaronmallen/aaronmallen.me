@@ -3,9 +3,8 @@
 RSpec.describe "API search", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def find(token: api_token, **params)
-    headers = { "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+  def find(**params)
+    headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/search", params, headers
     JSON.parse(last_response.body)
   end
@@ -117,11 +116,5 @@ RSpec.describe "API search", type: :request do
     find(query: "zeppelin", kind: "spaceship")
 
     expect(status).to eq(422)
-  end
-
-  it "refuses a request with no token" do
-    find(query: "zeppelin", token: nil)
-
-    expect(status).to eq(401)
   end
 end

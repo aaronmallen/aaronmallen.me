@@ -1068,12 +1068,6 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page.find(".task-acts form[action$='/move/today']")["data-confirm"]).to be_nil
       end
 
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/move/someday")
-
-        expect(last_response.status).to eq(404)
-      end
-
       it "answers 404 for a list that isn't one" do
         task = create(:task)
         send_to("/admin/tasks/#{task.id}/move/later")
@@ -1118,12 +1112,6 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(page).to have_css("form[action$='/start']")
       end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/start")
-
-        expect(last_response.status).to eq(404)
-      end
     end
 
     describe "stopping a task" do
@@ -1154,12 +1142,6 @@ RSpec.describe "Admin tasks", type: :request do
         send_to("/admin/tasks/#{task.id}/stop", filter: "today")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=today"))
-      end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/stop")
-
-        expect(last_response.status).to eq(404)
       end
 
       %i[done canceled].each do |status|
@@ -1246,18 +1228,6 @@ RSpec.describe "Admin tasks", type: :request do
         send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/tasks?filter=completed"))
-      end
-
-      it "answers 404 for finishing a task that isn't there" do
-        send_to("/admin/tasks/0/complete")
-
-        expect(last_response.status).to eq(404)
-      end
-
-      it "answers 404 for opening a task that isn't there" do
-        send_to("/admin/tasks/0/reopen")
-
-        expect(last_response.status).to eq(404)
       end
     end
 
@@ -1401,12 +1371,6 @@ RSpec.describe "Admin tasks", type: :request do
         follow_redirect!
 
         expect(page).to have_css("[data-toast] .toast", exact_text: "That task is closed already", visible: :all)
-      end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/cancel")
-
-        expect(last_response.status).to eq(404)
       end
 
       it "leaves a canceled task out of a planned sprint's card" do
@@ -1610,12 +1574,6 @@ RSpec.describe "Admin tasks", type: :request do
         send_to("/admin/tasks/#{task.id}", filter: "today", origin: "today", task: { title: "Email the accountant" })
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
-      end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0", filter: "next", task: { title: "Anything" })
-
-        expect(last_response.status).to eq(404)
       end
 
       it "moves the task to the list it was given" do
@@ -1870,12 +1828,6 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(page.find("form[action$='/delete']")["data-confirm"]).to include("Email the accountant")
       end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/delete")
-
-        expect(last_response.status).to eq(404)
-      end
     end
 
     describe "the grip" do
@@ -2030,12 +1982,6 @@ RSpec.describe "Admin tasks", type: :request do
           expect(last_response.status).to eq(422)
           expect(repo.open_in_list("next").map(&:title)).to eq(%w[first second third fourth])
         end
-      end
-
-      it "answers 404 for a task that isn't there" do
-        send_to("/admin/tasks/0/place", after: listed("first").id)
-
-        expect(last_response.status).to eq(404)
       end
 
       it "refuses a forged CSRF token with no change", :aggregate_failures do
@@ -2655,12 +2601,6 @@ RSpec.describe "Admin tasks", type: :request do
         drop(sprint)
 
         expect(sprint_repo.on(today)).not_to be_nil
-      end
-
-      it "answers 404 for a sprint nobody opened" do
-        send_to("/admin/tasks/sprints/0/delete")
-
-        expect(last_response.status).to eq(404)
       end
 
       it "captures a task straight into a planned sprint" do

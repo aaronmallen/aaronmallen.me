@@ -3,9 +3,9 @@
 RSpec.describe "API sprints", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/sprints#{path}", body, headers)
     JSON.parse(last_response.body)
   end
@@ -37,12 +37,6 @@ RSpec.describe "API sprints", type: :request do
       current
 
       expect([status, sprints.on(today)]).to match([200, have_attributes(sprint_date: today)])
-    end
-
-    it "refuses a request with no token" do
-      call_api(:get, "/current", token: nil)
-
-      expect(status).to eq(401)
     end
 
     it "answers a failure it did not expect with a 500" do

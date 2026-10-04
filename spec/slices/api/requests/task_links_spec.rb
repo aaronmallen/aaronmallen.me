@@ -3,14 +3,14 @@
 RSpec.describe "API task links", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/tasks#{path}", body, headers)
     JSON.parse(last_response.body)
   end
 
-  def link(id, token: api_token, **fields) = call_api(:post, "/#{id}/links", JSON.generate(fields), token:)
+  def link(id, **fields) = call_api(:post, "/#{id}/links", JSON.generate(fields))
 
   def status = last_response.status
 
@@ -70,12 +70,6 @@ RSpec.describe "API task links", type: :request do
     it "answers an unknown task with a 404" do
       expect([link(999_999, kind: "relates", other_id: other.id).fetch("message"), status])
         .to eq(["no task has the ID 999999", 404])
-    end
-
-    it "refuses a request with no token" do
-      link(task.id, kind: "relates", other_id: other.id, token: nil)
-
-      expect([status, tasks.by_id(task.id).links]).to eq([401, []])
     end
   end
 

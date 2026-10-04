@@ -3,9 +3,9 @@
 RSpec.describe "API record links", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def call_api(verb, path, body = nil, token: api_token)
+  def call_api(verb, path, body = nil)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
-    headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
+    headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
     public_send(verb, "/api/v1/links#{path}", body, headers)
     JSON.parse(last_response.body)
   end
@@ -17,7 +17,7 @@ RSpec.describe "API record links", type: :request do
       .merge("url" => "/admin/commits/#{id}")
   end
 
-  def link(kind, id, token: api_token, **fields) = call_api(:post, "/#{kind}/#{id}", JSON.generate(fields), token:)
+  def link(kind, id, **fields) = call_api(:post, "/#{kind}/#{id}", JSON.generate(fields))
 
   def list(kind, id) = call_api(:get, "/#{kind}/#{id}")
 
@@ -79,12 +79,6 @@ RSpec.describe "API record links", type: :request do
     it "answers an unknown record with a 404" do
       expect([link("journal_entry", 999_999, other_kind: "commit", other_id: commit.id).fetch("message"), status])
         .to eq(["no journal entry has the ID 999999", 404])
-    end
-
-    it "refuses a request with no token" do
-      link("post", post_record.id, other_kind: "commit", other_id: commit.id, token: nil)
-
-      expect([status, stored]).to eq([401, 0])
     end
   end
 
