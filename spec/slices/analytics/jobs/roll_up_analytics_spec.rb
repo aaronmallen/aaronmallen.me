@@ -2,7 +2,7 @@
 
 require "digest"
 
-RSpec.describe Analytics::Jobs::RollUpAnalytics do
+RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   let(:day) { Blog::TimeZone.today - 1 }
   let(:today) { Blog::TimeZone.today }
   let(:visitor_hash) { Digest::SHA256.hexdigest("203.0.113.7 Mozilla/5.0") }

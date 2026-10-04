@@ -2,7 +2,7 @@
 
 require "fugit"
 
-RSpec.describe Tasks::Jobs::RollOverSprint do
+RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
   subject(:job) { described_class.new }
 
   let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
@@ -13,14 +13,14 @@ RSpec.describe Tasks::Jobs::RollOverSprint do
   it "starts the day's sprint" do
     job.perform
 
-    expect(sprint_repo.on(Blog::TimeZone.today).sprint_date).to eq(today)
+    expect(sprint_repo.on(today).sprint_date).to eq(today)
   end
 
   it "carries an unfinished task into it" do
     task = create(:task, :in_sprint, sprint_id: yesterday.id)
     job.perform
 
-    expect(task_repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(Blog::TimeZone.today).id)
+    expect(task_repo.by_id(task.id).sprint_id).to eq(sprint_repo.on(today).id)
   end
 
   it "leaves a finished task in the sprint it was finished in" do

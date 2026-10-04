@@ -2,6 +2,7 @@
 
 RSpec.describe Tasks::Relations::TaskEvents do
   let(:task) { create(:task) }
+  let(:today) { Blog::TimeZone.today }
 
   def record(kind, **columns) = create(:task_event, task_id: task.id, kind:, tag_name: nil, **columns)
 
@@ -10,7 +11,7 @@ RSpec.describe Tasks::Relations::TaskEvents do
   end
 
   it "holds a move from a list into a sprint" do
-    expect(record("moved", from_list: "next", to_sprint_on: Date.today).to_sprint_on).to eq(Date.today)
+    expect(record("moved", from_list: "next", to_sprint_on: today).to_sprint_on).to eq(today)
   end
 
   it "holds a status change" do
@@ -32,7 +33,7 @@ RSpec.describe Tasks::Relations::TaskEvents do
   end
 
   it "refuses a move from both a list and a sprint" do
-    expect { record("moved", from_list: "next", from_sprint_on: Date.today, to_list: "someday") }
+    expect { record("moved", from_list: "next", from_sprint_on: today, to_list: "someday") }
       .to raise_error(ROM::SQL::CheckConstraintError, /task_events_kind_check/)
   end
 

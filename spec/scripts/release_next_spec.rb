@@ -62,8 +62,9 @@ RSpec.describe "mise run release:next", type: :script do
 
   it "names today's UTC month with no date given" do
     tag
+    now = Time.now.utc
 
-    expect(next_version).to eq("#{Time.now.utc.strftime('%y')}.#{Time.now.utc.month}.0")
+    expect(next_version).to eq("#{now.strftime('%y')}.#{now.month}.0")
   end
 
   it "refuses a date in another shape", :aggregate_failures do

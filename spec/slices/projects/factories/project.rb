@@ -10,12 +10,12 @@ Spec::DB::Factories.define(:project) do |f|
   f.status "active"
   f.featured false
   f.sequence(:position) { |n| n }
-  f.started_on { Date.today - 365 }
+  f.started_on { Blog::TimeZone.today - 365 }
   f.archived_on nil
 
   f.trait :archived do |t|
     t.status "archived"
-    t.archived_on { Date.today }
+    t.archived_on { Blog::TimeZone.today }
   end
 
   f.trait :featured do |t|

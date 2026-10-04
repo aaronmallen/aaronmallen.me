@@ -63,7 +63,8 @@ RSpec.describe Links::Queries::FindRecords do
   end
 
   it "keeps a few of each kind, newest first" do
-    newer, newest = [3, 2, 1].map { create(:journal_entry, body: "zeppelin", entry_date: Date.today - it) }.drop(1)
+    today = Blog::TimeZone.today
+    newer, newest = [3, 2, 1].map { create(:journal_entry, body: "zeppelin", entry_date: today - it) }.drop(1)
 
     expect(find("zeppelin", limit: 2)["journal_entry"].map(&:id)).to eq([newest.id, newer.id])
   end

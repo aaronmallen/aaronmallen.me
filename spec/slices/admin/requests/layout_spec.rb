@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin layout", type: :request do
+RSpec.describe "Admin layout", :frozen_clock, type: :request do
   def section_groups = "[data-palette-group]:not([aria-labelledby$='-actions']):not([aria-labelledby$='-see-all'])"
 
   let(:page) { Capybara.string(last_response.body) }

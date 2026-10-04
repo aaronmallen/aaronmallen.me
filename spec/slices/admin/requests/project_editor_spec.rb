@@ -494,7 +494,7 @@ RSpec.describe "Admin project editor", type: :request do
       it "keeps the archived status when the editor saves" do
         save(project, repo: "aaronmallen/gone", status: "active")
 
-        expect(repo.by_id(project.id)).to have_attributes(status: "archived", archived_on: Date.today)
+        expect(repo.by_id(project.id)).to have_attributes(status: "archived", archived_on: project.archived_on)
       end
     end
 
