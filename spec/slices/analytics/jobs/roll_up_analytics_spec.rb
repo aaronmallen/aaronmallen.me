@@ -585,6 +585,47 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       end
     end
 
+    describe "of a path that matches no post" do
+      before do
+        post("new", 30)
+        readers("/writing/gone", 2)
+        roll_up
+      end
+
+      it "deletes its hashes" do
+        expect(hashes("/writing/gone")).to be_zero
+      end
+
+      it "saves no count" do
+        expect(saved).to be_empty
+      end
+    end
+
+    describe "of a post whose slug changed" do
+      def rename(post, slug)
+        row = reader_repo.post_reader_hashes.dataset.db[:posts].where(id: post.id)
+        row.update(status: "draft")
+        row.update(slug:)
+        row.update(status: "published")
+      end
+
+      before do
+        renamed = post("old-slug", 30)
+        readers("/writing/old-slug", 2)
+        readers("/writing/new-slug", 1)
+        rename(renamed, "new-slug")
+        roll_up
+      end
+
+      it "deletes the old path's hashes" do
+        expect(hashes("/writing/old-slug")).to be_zero
+      end
+
+      it "keeps the new path's hashes" do
+        expect(hashes("/writing/new-slug")).to eq(1)
+      end
+    end
+
     it "leaves a draft's hashes alone" do
       create(:post, slug: "draft")
       readers("/writing/draft", 1)

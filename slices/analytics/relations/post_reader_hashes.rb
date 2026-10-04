@@ -14,6 +14,8 @@ module Analytics
 
       def for_paths(paths) = where(path: paths)
 
+      def orphaned = exclude(path: dataset.db[:posts].select(POST_PATH))
+
       def record(path:, reader_hash:, since:)
         post = dataset.db[:posts].where(status: PUBLISHED, POST_PATH => path).where { published_at > since }
 

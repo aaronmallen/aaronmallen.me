@@ -14,6 +14,7 @@ module Analytics
           closed = post_reader_hashes.closed(since)
           post_reader_counts.save(closed.counts_by_path)
           closed.delete
+          post_reader_hashes.orphaned.delete
         end
       end
 
