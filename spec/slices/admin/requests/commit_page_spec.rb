@@ -76,6 +76,19 @@ RSpec.describe "Admin commit page", type: :request do
       expect(bodies("li")).to eq(%w[one two])
     end
 
+    it "turns a remote image in the body into a link to it", :aggregate_failures do
+      visit_commit(commit_record(message: "subject\n\n![shot](https://example.com/shot.png)"))
+
+      expect(page.find(".commit-body")).to have_link("shot", href: "https://example.com/shot.png")
+      expect(page).to have_no_css(".commit-body img")
+    end
+
+    it "keeps an image from the site's own /media path in the body" do
+      visit_commit(commit_record(message: "subject\n\n![shot](/media/#{'a' * 32}.png)"))
+
+      expect(page).to have_css(".commit-body img[src='/media/#{'a' * 32}.png'][alt='shot']")
+    end
+
     it "says so when the subject is the whole message" do
       visit_commit(commit_record(message: "admin: add the view"))
 

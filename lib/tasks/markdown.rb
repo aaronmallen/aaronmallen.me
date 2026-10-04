@@ -39,23 +39,26 @@ module Tasks
 
     class << self
       def to_html(markdown)
-        label_boxes(Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE))
+        html = Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE)
+        fragment = Nokogiri::HTML5.fragment(html)
+        boxes = fragment.css(BOX)
+        images = Blog::RemoteImages.find(fragment)
+        return html if boxes.empty? && images.empty?
+
+        label(boxes)
+        Blog::RemoteImages.swap(images)
+        fragment.to_html
       end
 
       private
 
       def item_text(box) = box.parent.xpath(ITEM_TEXT).map(&:text).join.split.join(" ")
 
-      def label_boxes(html)
-        fragment = Nokogiri::HTML5.fragment(html)
-        boxes = fragment.css(BOX)
-        return html if boxes.empty?
-
+      def label(boxes)
         boxes.each do |box|
           text = item_text(box)
           box[ARIA_LABEL] = text unless text.empty?
         end
-        fragment.to_html
       end
     end
   end

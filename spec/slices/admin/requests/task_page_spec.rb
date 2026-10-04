@@ -239,10 +239,40 @@ RSpec.describe "Admin task page", type: :request do
         expect(body).to have_css("details sub", text: "s", visible: :all)
       end
 
-      it "keeps an image from https" do
-        read_note('<img src="https://example.com/shot.png" alt="shot">')
+      it "turns a remote image into a link to it", :aggregate_failures do
+        read_note('<img src="https://example.com/shot.png" alt="shot"> ![](http://example.com/bare.png)')
 
-        expect(body).to have_css("img[src='https://example.com/shot.png'][alt='shot']")
+        expect(body).to have_link("shot", href: "https://example.com/shot.png")
+        expect(body).to have_link("http://example.com/bare.png", href: "http://example.com/bare.png")
+        expect(body).to have_no_css("img")
+      end
+
+      it "keeps the outer link of a linked remote image and words it with the alt text", :aggregate_failures do
+        read_note("[![CI](https://example.com/badge.svg)](https://example.com/actions)")
+
+        expect(body).to have_link("CI", href: "https://example.com/actions")
+        expect(body).to have_no_css("img").and have_no_css("a a")
+      end
+
+      it "turns an image on another host's /media path into a link" do
+        read_note("![shot](https://example.com/media/#{'a' * 32}.png) ![two](//example.com/media/#{'b' * 32}.png)")
+
+        expect(body).to have_no_css("img")
+      end
+
+      it "keeps an image from the site's own /media path", :aggregate_failures do
+        key = "#{'a' * 32}.png"
+        read_note("![one](/media/#{key}) ![two](#{Blog::Site.url("/media/#{key}")})")
+
+        expect(body).to have_css("img[src='/media/#{key}'][alt='one']")
+        expect(body).to have_css("img[src='#{Blog::Site.url("/media/#{key}")}'][alt='two']")
+      end
+
+      it "keeps the alt text of an image it cannot link", :aggregate_failures do
+        read_note("![a diagram](docs/diagram.png)")
+
+        expect(body).to have_no_css("img").and have_no_css("a")
+        expect(body).to have_text("a diagram")
       end
 
       it "strips scripts and their content", :aggregate_failures do

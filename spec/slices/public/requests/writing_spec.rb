@@ -231,6 +231,13 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_css(".post-body > p:first-child", text: "the start").and have_css(".post-body h2")
     end
 
+    it "keeps a remote image in the body" do
+      publish("hello", 1, body: "the start\n\n![shot](https://example.com/shot.png)")
+      get "/writing/hello"
+
+      expect(page).to have_css(".post-body img[src='https://example.com/shot.png'][alt='shot']")
+    end
+
     it "parses the body once for the body, the read time and the description", :aggregate_failures do
       publish("hello", 1, body: "the start\n\nthe rest")
       watch_markdown

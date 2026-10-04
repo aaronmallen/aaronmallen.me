@@ -160,6 +160,14 @@ RSpec.describe "Admin task comments", type: :request do
         expect(comment_on_page(comment).find("time")["datetime"]).to eq(comment.created_at.iso8601)
       end
 
+      it "turns a remote image into a link to it", :aggregate_failures do
+        image = create(:task_comment, :synced, task_id: task.id, body: "![shot](https://example.com/shot.png)")
+        read
+
+        expect(comment_on_page(image)).to have_link("shot", href: "https://example.com/shot.png")
+        expect(comment_on_page(image)).to have_no_css("img")
+      end
+
       it "links back to the provider" do
         expect(comment_on_page(comment).find("a.task-source")["href"]).to eq(comment.url)
       end
