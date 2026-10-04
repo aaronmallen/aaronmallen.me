@@ -10,7 +10,7 @@ module API
 
     import keys: %w[queries.review queries.stalled_list], from: :activity
 
-    import keys: %w[queries.count_with_status queries.unread_messages], from: :contact
+    import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact
 
     import keys: %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
@@ -55,20 +55,20 @@ module API
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment endpoints.cancel_task
       endpoints.cancel_tasks endpoints.capture_task endpoints.complete_task endpoints.complete_tasks
       endpoints.create_journal_entry endpoints.create_saved_view endpoints.delete_decision_comment
-      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_posts endpoints.delete_saved_view
-      endpoints.delete_task endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision
-      endpoints.drop_sprint endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option
-      endpoints.link_records endpoints.link_tasks endpoints.list_attention endpoints.list_decisions
-      endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views endpoints.list_sprints
-      endpoints.list_tasks endpoints.move_task endpoints.move_tasks endpoints.open_decision endpoints.pause_task
-      endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry
-      endpoints.read_review endpoints.read_task endpoints.read_time_report endpoints.reopen_decision
-      endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.start_task endpoints.tag_decision
-      endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
-      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session
-      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
-      queries.live_tokens
+      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_posts
+      endpoints.delete_saved_view endpoints.delete_task endpoints.delete_tasks endpoints.delete_work_session
+      endpoints.drop_decision endpoints.drop_sprint endpoints.edit_decision endpoints.edit_decision_comment
+      endpoints.edit_decision_option endpoints.link_records endpoints.link_tasks endpoints.list_attention
+      endpoints.list_decisions endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
+      endpoints.list_sprints endpoints.list_tasks endpoints.mark_messages_read endpoints.mark_messages_unread
+      endpoints.move_task endpoints.move_tasks endpoints.open_decision endpoints.pause_task endpoints.plan_sprint
+      endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_review
+      endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
+      endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search
+      endpoints.set_task_total endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
+      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session operations.mint_token
+      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]
   end
 end

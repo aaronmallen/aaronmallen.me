@@ -50,6 +50,10 @@ module API
     post "/decisions/:id/tags", to: "decision_tags.create"
     delete "/decisions/:id/tags/:tag", to: "decision_tags.destroy"
 
+    post "/messages/bulk/delete", to: "bulk_messages.delete"
+    post "/messages/bulk/read", to: "bulk_messages.read"
+    post "/messages/bulk/unread", to: "bulk_messages.unread"
+
     post "/posts/bulk/delete", to: "bulk_posts.delete"
     post "/posts/bulk/tag", to: "bulk_posts.tag"
 
