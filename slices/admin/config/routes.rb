@@ -114,6 +114,15 @@ module Admin
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID
+    post "/tasks/:id/total", to: "tasks.update_total", as: :update_task_total, id: ID
+    post(
+      "/tasks/:id/sessions/:session_id",
+      to: "tasks.update_session", as: :update_task_session, id: ID, session_id: ID,
+    )
+    post(
+      "/tasks/:id/sessions/:session_id/delete",
+      to: "tasks.destroy_session", as: :delete_task_session, id: ID, session_id: ID,
+    )
     post "/tasks/issues/sync", to: "issues.sync", as: :sync_issues
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID

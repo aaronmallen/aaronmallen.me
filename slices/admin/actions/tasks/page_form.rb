@@ -4,15 +4,13 @@
 module Admin
   module Actions
     module Tasks
-      module CommentForm
+      module PageForm
         include Dry::Monads[:result]
 
         private
 
-        def comment_params(request) = Blog::Types::Fields[request.params[:comment]]
-
-        def refuse_comment(request, response, commenting)
-          case build_task_page.call(record_id(request), commenting:)
+        def refuse(request, response, **state)
+          case build_task_page.call(record_id(request), **state)
           in Success(page)
             response.status = 422
             response.render(task_view, **page, **return_to(request))

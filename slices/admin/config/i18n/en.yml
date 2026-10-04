@@ -150,6 +150,8 @@ en:
       reopened: "Reopened"
       saved: "Task saved"
       scheduled: "Scheduled for the %{date} sprint"
+      session_deleted: "Session deleted"
+      session_saved: "Session saved"
       sprint_ahead: "Plan a sprint for a day after today"
       sprint_dropped: "Sprint dropped · its tasks went back to their lists"
       sprint_invalid: "Pick a day first"
@@ -159,6 +161,8 @@ en:
       sprint_taken: "A sprint already exists for %{date}"
       started: "Started · it is today's work now"
       stopped: "Stopped · it waits in the sprint"
+      total_refused: "Not done · give the time as whole hours and minutes"
+      total_saved: "Total saved"
       unlinked: "Link removed"
       unscheduled: "Unscheduled · back in %{list}"
   today_page:
@@ -975,6 +979,7 @@ en:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."
           confirm_move: "Move %{task} to %{list}? It stops and goes back to open."
+          ask: "How long did this take?"
           complete: "Done"
           lists:
             next: "Next"
@@ -995,15 +1000,30 @@ en:
           body:
             blank: "Write the comment first."
             control: "Take out the control characters."
+          ended_at:
+            blank: "Give the time it ended."
+            format: "Give the end as a date and time."
+            order: "End it after it starts."
+            skipped: "That time does not exist here. The clocks skip it."
+          hours:
+            blank: "Give the hours, the minutes or both."
+            format: "Give whole hours, up to 9999."
           kind:
             format: "Pick one of the four link types."
           list:
             format: "Pick one of the lists."
+          minutes:
+            format: "Give whole minutes, up to 59."
           other_id:
             format: "Pick a task from the list."
             missing: "That task is gone. Find another."
             self: "A task cannot link to itself."
             taken: "These two tasks are already linked."
+          started_at:
+            blank: "Give the time it started."
+            format: "Give the start as a date and time."
+            future: "A running session cannot start later than now."
+            skipped: "That time does not exist here. The clocks skip it."
           tags:
             format: "Tags are lowercase words, separated by commas."
           title:
@@ -1070,6 +1090,13 @@ en:
           in_progress: "in progress"
           pick: "Select %{task}"
           scheduled: "%{date}"
+        session_acts:
+          confirm_delete: "Delete this session? Its time comes off the total."
+          delete: "Delete session"
+          edit: "Edit"
+          ended_at: "Ended"
+          save: "Save"
+          started_at: "Started"
         sprint_field:
           label: "Sprint"
           ran: "Ran in that day's sprint."
@@ -1144,6 +1171,10 @@ en:
           tagged: "Added the tag %{tag}"
           untagged: "Removed the tag %{tag}"
           worked: "Worked %{span}"
+        total_form:
+          hint: "This replaces the total. Sessions after it add to it."
+          save: "Save total"
+          set: "Set total"
         upcoming_sprints:
           confirm_drop: "Drop the sprint for %{date}? Its tasks go back to their lists."
           count:
@@ -1164,6 +1195,9 @@ en:
           pull_task: "Schedule %{task} into this sprint"
           title: "New sprint"
           tomorrow: "Tomorrow"
+        worked_fields:
+          hours: "Hours"
+          minutes: "Minutes"
       today_journal_card:
         body: "Entry"
         label: "Private"

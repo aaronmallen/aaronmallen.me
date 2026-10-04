@@ -17,14 +17,14 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
           }.freeze
 
-          def initialize(task:, note_html:, linking:, records:, timeline:, commenting:, filter:, origin:)
+          def initialize(task:, note_html:, linking:, records:, timeline:, forms:, filter:, origin:)
             super()
             @task = task
             @note_html = note_html
             @linking = linking
             @records = records
             @timeline = timeline
-            @commenting = commenting
+            @forms = forms
             @filter = filter
             @origin = origin
           end
@@ -38,7 +38,7 @@ module Admin
               facts
               links
               linked
-              Timeline(task: @task, entries: @timeline, commenting: @commenting, tab: @filter, origin: @origin)
+              Timeline(task: @task, entries: @timeline, forms: @forms, tab: @filter, origin: @origin)
             end
           end
 
@@ -82,6 +82,7 @@ module Admin
 
           def facts
             dl(class: "task-facts") { fact_values.each { |key, value| fact(key, value) } }
+            TotalForm(task: @task, totaling: @forms[:totaling], tab: @filter, origin: @origin)
           end
 
           def head
@@ -128,11 +129,7 @@ module Admin
 
           def reference = @task.source && Structs::TaskSourceReference.for(@task.source).key
 
-          def sprint_day
-            sprint = @task.sprint
-
-            sprint ? l(sprint.sprint_date, format: :medium) : t(".unscheduled")
-          end
+          def sprint_day = @task.sprint ? l(@task.sprint.sprint_date, format: :medium) : t(".unscheduled")
 
           def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
 

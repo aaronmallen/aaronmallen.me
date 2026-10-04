@@ -8,10 +8,20 @@ module Admin
           SCOPE = "task"
           MESSAGES = {
             body: { "blank" => ".body.blank", "control" => ".body.control" },
+            ended_at: {
+              "blank" => ".ended_at.blank", "format" => ".ended_at.format", "order" => ".ended_at.order",
+              "skipped" => ".ended_at.skipped",
+            },
+            hours: { "blank" => ".hours.blank", "format" => ".hours.format" },
             kind: { "format" => ".kind.format" },
+            minutes: { "format" => ".minutes.format" },
             other_id: {
               "format" => ".other_id.format", "missing" => ".other_id.missing", "self" => ".other_id.self",
               "taken" => ".other_id.taken",
+            },
+            started_at: {
+              "blank" => ".started_at.blank", "format" => ".started_at.format", "future" => ".started_at.future",
+              "skipped" => ".started_at.skipped",
             },
             tags: { "format" => ".tags.format" },
             title: { "blank" => ".title.blank" },

@@ -11,6 +11,13 @@ RSpec.describe "Admin tasks", type: :feature do
     confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
   end
 
+  def complete_task(scope)
+    done = translate("ui.components.tasks.controls.complete")
+
+    scope.find("summary", text: done).click
+    scope.click_button(done)
+  end
+
   def confirm_dialog = find("dialog#confirm-dialog[open]")
 
   def create_task(title, list: "next", **fields)
@@ -389,7 +396,7 @@ RSpec.describe "Admin tasks", type: :feature do
   describe "finishing a task" do
     before do
       find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.start"))
-      find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.complete"))
+      complete_task(find(".task", text: "Email the accountant"))
     end
 
     it "files it out of the list it was in" do
@@ -771,6 +778,67 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(bodies).to be_empty
+    end
+  end
+
+  describe "timing a task with scripts off" do
+    let(:started) { Time.at(((Time.now.to_i - 86_400) / 60) * 60) }
+    let(:task) do
+      sprint = Tasks::Slice["operations.current_sprint"].call.value!
+      create(:task, :in_progress, title: "Count the hours", sprint_id: sprint.id, list: nil, worked_seconds: 1800)
+    end
+    let!(:session) { create(:work_session, task_id: task.id, started_at: started, ended_at: started + 1800) }
+
+    def answer(scope, summary, button, hours)
+      within(scope) do
+        find("summary", text: summary).click
+        fill_in(words("worked_fields.hours"), with: hours)
+        fill_in(words("worked_fields.minutes"), with: "0")
+        click_button(button)
+      end
+    end
+
+    def session_row = find("#task-session-#{session.id}")
+
+    def total = repo.by_id(task.id).worked_seconds
+
+    def words(key) = translate(key, scope: "ui.components.tasks")
+
+    before do
+      scripts_off
+      visit "/admin/tasks/#{task.id}?filter=today"
+    end
+
+    after { scripts_on }
+
+    it "edits a session", :aggregate_failures do
+      session_row.find("summary", text: words("session_acts.edit")).click
+      session_row.fill_in(words("session_acts.ended_at"), with: Blog::TimeZone.input_value(started + 3600))
+      session_row.click_button(words("session_acts.save"))
+
+      expect(page).to have_current_path("/admin/tasks?filter=today")
+      expect(total).to eq(3600)
+    end
+
+    it "deletes a session", :aggregate_failures do
+      session_row.click_button(words("session_acts.delete"))
+
+      expect(page).to have_current_path("/admin/tasks?filter=today")
+      expect(total).to eq(0)
+    end
+
+    it "sets the total", :aggregate_failures do
+      answer(".task-total-edit", words("total_form.set"), words("total_form.save"), "2")
+
+      expect(page).to have_current_path("/admin/tasks?filter=today")
+      expect(total).to eq(7200)
+    end
+
+    it "asks how long it took on complete", :aggregate_failures do
+      answer(".task-read-acts", words("controls.complete"), words("controls.complete"), "4")
+
+      expect(page).to have_current_path("/admin/tasks?filter=today")
+      expect(total).to eq(14_400)
     end
   end
 
@@ -1358,7 +1426,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "still completes while blocked" do
         row("Email the accountant").click_button(translate("ui.components.tasks.controls.start"))
-        row("Email the accountant").click_button(translate("ui.components.tasks.controls.complete"))
+        complete_task(row("Email the accountant"))
 
         expect(page).to have_css(".toast", text: "Done")
       end
@@ -1375,7 +1443,7 @@ RSpec.describe "Admin tasks", type: :feature do
       it "loses the blocked pill once the blocker is done" do
         visit "/admin/tasks?filter=someday"
         row("Learn Elixir").click_button(translate("ui.components.tasks.controls.start"))
-        row("Learn Elixir").click_button(translate("ui.components.tasks.controls.complete"))
+        complete_task(row("Learn Elixir"))
         find(".subtab", text: "next").click
 
         expect(row("Email the accountant")).to have_no_css(".task-meta .pill.pink")

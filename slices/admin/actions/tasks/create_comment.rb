@@ -6,7 +6,7 @@ module Admin
       class CreateComment < Action
         ADDED = "tasks_page.toasts.comment_added"
 
-        include CommentForm
+        include PageForm
         include Redirect
         include Deps[
           add_task_comment: "tasks.operations.add_task_comment",
@@ -15,13 +15,13 @@ module Admin
         ]
 
         def handle(request, response)
-          params = comment_params(request)
+          params = Blog::Types::Fields[request.params[:comment]]
 
           case add_task_comment.call(record_id(request), params)
           in Success(_) then written(request, response, ADDED)
           in Failure(:not_found) then halt 404
           in Failure[:invalid, errors]
-            refuse_comment(request, response, { id: nil, body: Blog::Types::Text[params[:body]], errors: })
+            refuse(request, response, commenting: { id: nil, body: Blog::Types::Text[params[:body]], errors: })
           else halt 500
           end
         end

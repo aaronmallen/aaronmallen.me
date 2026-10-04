@@ -144,7 +144,7 @@ module Tasks
         held.stamped(:update, result: :many).call(list:, sprint_id: nil)
       end
 
-      def with_details = tasks.combine(:source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
+      def with_details = tasks.detailed
     end
   end
 end

@@ -18,6 +18,7 @@ module Tasks
           has_many :task_tags
           has_many :tags, through: :task_tags, view: :in_name_order
           has_one :task_sources, as: :source
+          has_one :work_sessions, as: :running_session, view: :running
         end
       end
 
@@ -26,6 +27,8 @@ module Tasks
       end
 
       def closed = where(status: CLOSED)
+
+      def detailed = combine(:running_session, :source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
 
       def finished_counts(day)
         closed.unordered.select do

@@ -5,6 +5,7 @@ module Admin
     class BuildTaskPage < Blog::Operation
       include Blog::Constants
 
+      FORMS = { commenting: EMPTY_HASH, timing: EMPTY_HASH, totaling: EMPTY_HASH }.freeze
       KIND = Blog::Types::RecordKind["task"]
 
       include Deps[
@@ -15,12 +16,13 @@ module Admin
         task_timeline: "tasks.queries.task_timeline",
       ]
 
-      def call(id, query: nil, kind: nil, errors: EMPTY_HASH, commenting: EMPTY_HASH, records: EMPTY_HASH)
+      def call(id, query: nil, kind: nil, errors: EMPTY_HASH, records: EMPTY_HASH, **forms)
         step roll
         task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
-        { task:, note_html: note_html(task.note), timeline: task_timeline.call(id), commenting:,
+        { task:, note_html: note_html(task.note), timeline: task_timeline.call(id),
+          forms: FORMS.merge(forms),
           linking: { errors:, kind:, query:, targets: link_targets.call(id, query) },
           records: list_record_links.call(KIND, task.id, **records, except: [KIND]) }
       end

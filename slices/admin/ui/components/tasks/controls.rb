@@ -46,11 +46,19 @@ module Admin
           def complete
             Form(action: path(:admin_complete_task, id: @task.id)) do
               origin_fields
-              Button(type: "submit", variant: :pri, small: true) do
-                i(class: "fa-solid fa-check", aria: { hidden: "true" })
-                span { t(".complete") }
+              details(class: "task-complete") do
+                summary(class: "btn pri sm") { done_label }
+                div(class: "task-complete-panel") do
+                  worked_fields
+                  Button(type: "submit", variant: :pri, small: true) { done_label }
+                end
               end
             end
+          end
+
+          def done_label
+            i(class: "fa-solid fa-check", aria: { hidden: "true" })
+            span { t(".complete") }
           end
 
           def move(place, icon)
@@ -102,6 +110,16 @@ module Admin
           def start = change(:admin_start_task, "fa-solid fa-play", t(".start"))
 
           def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"))
+
+          def worked_fields
+            tracked = @task.tracked_seconds
+
+            input(type: "hidden", name: "worked[tracked]", value: tracked)
+            fieldset(class: "task-complete-ask") do
+              legend { t(".ask") }
+              WorkedFields(name: "worked", scope: "task-#{@task.id}-worked", seconds: tracked)
+            end
+          end
         end
       end
     end

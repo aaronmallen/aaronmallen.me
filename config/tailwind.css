@@ -2258,7 +2258,68 @@
     @apply flex w-full flex-col items-end gap-2;
   }
 
+  &:not([open]) > form {
+    @apply hidden;
+  }
+
   & .field {
+    @apply w-full;
+  }
+}
+
+@utility task-complete {
+  @apply relative;
+
+  &:not([open]) > .task-complete-panel {
+    @apply hidden;
+  }
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+}
+
+@utility task-complete-panel {
+  @apply absolute top-full right-0 z-30 mt-2 flex w-64 flex-col items-end gap-3 p-3;
+  @apply rounded-card border border-line bg-ground-sunk shadow-lg;
+}
+
+@utility task-complete-ask {
+  @apply m-0 flex w-full flex-col gap-2 border-0 p-0;
+
+  & > legend {
+    @apply mb-2 p-0 text-li text-ink;
+  }
+}
+
+@utility task-worked-fields {
+  @apply grid w-full grid-cols-2 gap-2;
+}
+
+@utility task-total-edit {
+  @apply flex flex-col items-end gap-2;
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  & > form {
+    @apply flex w-full flex-col items-end gap-2;
+  }
+
+  &:not([open]) > form {
+    @apply hidden;
+  }
+
+  & .hint {
     @apply w-full;
   }
 }

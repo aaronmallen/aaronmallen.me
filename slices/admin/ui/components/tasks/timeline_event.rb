@@ -17,11 +17,12 @@ module Admin
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
 
-          def view_template
-            li(class: "task-event", data: { task_event: @entry.kind }) do
+          def view_template(&)
+            li(class: "task-event", id:, data: { task_event: @entry.kind }) do
               i(class: ["task-event-icon", icon], aria: { hidden: "true" })
               span(class: "task-event-text") { @entry.session? ? session : event }
               time(class: "task-comment-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
+              yield if block_given?
             end
           end
 
@@ -30,6 +31,8 @@ module Admin
           def event = plain(t(EVENTS.fetch(@entry.kind).last, **parts))
 
           def icon = @entry.session? ? SESSION_ICON : EVENTS.fetch(@entry.kind).first
+
+          def id = @entry.session? ? "task-session-#{@entry.source_id}" : nil
 
           def parts
             {

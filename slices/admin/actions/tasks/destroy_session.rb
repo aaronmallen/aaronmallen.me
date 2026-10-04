@@ -3,17 +3,17 @@
 module Admin
   module Actions
     module Tasks
-      class DestroyComment < Action
-        DELETED = "tasks_page.toasts.comment_deleted"
+      class DestroySession < Action
+        DELETED = "tasks_page.toasts.session_deleted"
 
         include PageForm
         include Redirect
-        include Deps[delete_task_comment: "tasks.operations.delete_task_comment"]
+        include Deps[delete_work_session: "tasks.operations.delete_work_session"]
 
         def handle(request, response)
-          id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
+          id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)
 
-          case delete_task_comment.call(record_id(request), id)
+          case delete_work_session.call(record_id(request), id)
           in Success(_) then written(request, response, DELETED)
           in Failure(:not_found) then halt 404
           else halt 500

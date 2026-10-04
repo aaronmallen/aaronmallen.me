@@ -20,6 +20,10 @@ module Tasks
       def listed? = !list.nil?
 
       def place = list || Blog::Types::TaskFilter["today"]
+
+      def tracked_seconds(now = Time.now)
+        running_session ? worked_seconds + (now - running_session.started_at).floor : worked_seconds
+      end
     end
   end
 end

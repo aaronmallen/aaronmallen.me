@@ -10,7 +10,7 @@ module Admin
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-          prop :commenting, Blog::Types::Hash
+          prop :forms, Blog::Types::Hash
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
 
@@ -52,7 +52,7 @@ module Admin
           def body_field(id, label, saved = nil)
             scope = ["task-#{@task.id}-comment", id].compact.join("-")
             errors = errors_for(id)
-            value = mine?(id) ? @commenting[:body] : saved
+            value = mine?(id) ? @forms[:commenting][:body] : saved
 
             Field(label:) do
               MarkdownEditor(**FieldError.control_attributes(:body, errors, scope), **editor_props(label, value))
@@ -106,17 +106,21 @@ module Admin
             { name: "comment[body]", value: value.to_s, height: EDITOR_HEIGHT, renderer: RENDERER, label: }
           end
 
-          def entry(entry) = entry.comment? ? comment(entry) : TimelineEvent(entry:)
+          def entry(entry) = entry.comment? ? comment(entry) : TimelineEvent(entry:) { session_acts(entry) }
 
-          def errors_for(id) = mine?(id) ? @commenting[:errors] : Blog::Constants::EMPTY_HASH
+          def errors_for(id) = mine?(id) ? @forms[:commenting][:errors] : Blog::Constants::EMPTY_HASH
 
-          def mine?(id) = @commenting.key?(:id) && @commenting[:id] == id
+          def mine?(id) = @forms[:commenting].key?(:id) && @forms[:commenting][:id] == id
 
           def moment(at) = time(class: "task-comment-time", datetime: at.iso8601) { stamp(at) }
 
           def return_fields
             input(type: "hidden", name: "filter", value: @tab)
             input(type: "hidden", name: "origin", value: @origin)
+          end
+
+          def session_acts(entry)
+            SessionActs(task: @task, entry:, timing: @forms[:timing], tab: @tab, origin: @origin) if entry.session?
           end
 
           def source(comment)
