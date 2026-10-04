@@ -26,11 +26,6 @@ RSpec.describe "MCP list tool paging", type: :request do
       arguments: -> { range },
       seed: -> { 1.upto(3) { create(:social_post, :posted, posted_at: earlier(it)) } },
     },
-    "list_tasks" => {
-      key: "tasks",
-      arguments: -> { {} },
-      seed: -> { 3.times { create(:task) } },
-    },
     "list_messages" => {
       key: "messages",
       arguments: -> { range },
@@ -45,11 +40,6 @@ RSpec.describe "MCP list tool paging", type: :request do
       key: "suggestions",
       arguments: -> { range },
       seed: -> { 3.times { suggest(create(:post, body: "a")) } },
-    },
-    "list_sprints" => {
-      key: "sprints",
-      arguments: -> { {} },
-      seed: -> { 0.upto(2) { create(:sprint, sprint_date: today + it) } },
     },
     "list_tags" => {
       key: "tags",
@@ -119,13 +109,6 @@ RSpec.describe "MCP list tool paging", type: :request do
       kept = [2, 3].map { create(:message, received_at: earlier(it)).id }
 
       expect([1, 2].flat_map { ids("list_messages", "messages", **range, status: "unread", page: it) }).to eq(kept)
-    end
-
-    it "keeps the statuses while paging tasks" do
-      create(:task, :done)
-      kept = Array.new(2) { create(:task).id }.reverse
-
-      expect([1, 2].flat_map { ids("list_tasks", "tasks", statuses: %w[open], page: it) }).to eq(kept)
     end
 
     it "keeps a status while paging webmentions" do

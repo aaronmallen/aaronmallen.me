@@ -70,6 +70,12 @@ RSpec.describe "API task comments", type: :request do
       expect([comment(999_999, body: "Hello"), status])
         .to eq([{ "error" => "not_found", "message" => "no task has the ID 999999" }, 404])
     end
+
+    it "shows the comment when the task is read" do
+      comment(task.id, body: "Blocked on review")
+
+      expect(call_api(:get, task.id.to_s).fetch("comments").map { it.fetch("body") }).to eq(["Blocked on review"])
+    end
   end
 
   describe "PATCH /api/v1/tasks/:id/comments/:comment_id" do

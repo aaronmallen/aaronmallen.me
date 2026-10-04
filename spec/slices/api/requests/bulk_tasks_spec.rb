@@ -93,6 +93,14 @@ RSpec.describe "API bulk task actions", type: :request do
     it "leaves the closed task as it was" do
       expect(repo.by_id(canceled.id)).to have_attributes(status: "canceled", completed_at: closed_at)
     end
+
+    it "completes none when the closed task is done", :aggregate_failures do
+      done = create(:task, :done, completed_at: closed_at)
+
+      expect([act("complete", [open_task.id, done.id]).fetch("errors"), status_of(open_task)])
+        .to eq([{ "ids" => ["task #{done.id} is already done or canceled"] }, "open"])
+      expect(repo.by_id(done.id)).to have_attributes(status: "done", completed_at: closed_at)
+    end
   end
 
   describe "POST /api/v1/tasks/bulk/delete" do

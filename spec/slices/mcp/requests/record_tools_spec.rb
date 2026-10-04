@@ -17,8 +17,6 @@ RSpec.describe "MCP record tools", type: :request do
 
   def entries = Record::Slice["relations.journal_entries"]
 
-  def entry_repo = Record::Slice["repos.journal_entry_repo"]
-
   def error? = document.dig("result", "isError")
 
   def journal_page
@@ -119,50 +117,6 @@ RSpec.describe "MCP record tools", type: :request do
     end
   end
 
-  describe "list_journal_entries" do
-    def entry_on(day, time, body) = create(:journal_entry, entry_date: Date.new(2026, 3, day), entry_time: time, body:)
-
-    def rows = content.fetch("entries").map { it.values_at("id", "date", "time", "body", "tags") }
-
-    it "answers each entry in the window with its tags, newest first" do
-      older = entry_on(1, "08:00", "first")
-      newer = entry_on(2, "21:15", "second").tap { entry_repo.replace_tags(it.id, %w[health]) }
-      call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
-
-      expect(rows).to eq([[newer.id, "2026-03-02", "21:15", "second", %w[health]],
-                          [older.id, "2026-03-01", "08:00", "first", []]])
-    end
-
-    it "answers the body as the markdown it was written in" do
-      entry_on(1, "08:00", "a **bold** day\n\n- one")
-      call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
-
-      expect(rows.map { it[3] }).to eq(["a **bold** day\n\n- one"])
-    end
-
-    it "leaves out an entry past the window" do
-      create(:journal_entry, entry_date: Date.new(2026, 4, 1))
-      call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
-
-      expect(content.fetch("entries")).to be_empty
-    end
-
-    it "stops at the row cap and says where to go on" do
-      stub_const("Blog::DayWindow::CAP", 1)
-      create(:journal_entry, entry_date: Date.new(2026, 3, 1))
-      create(:journal_entry, entry_date: Date.new(2026, 3, 2))
-      call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")
-
-      expect(content).to include("count" => 1, "partial" => true, "continue_to" => "2026-03-01")
-    end
-
-    it "refuses a window that runs backwards" do
-      call_tool("list_journal_entries", from: "2026-03-31", to: "2026-03-01")
-
-      expect(message).to eq("from comes after to")
-    end
-  end
-
   describe "read_commit" do
     it "answers the commit whole, as list_commits gives it" do
       commit = create(:commit, message: "fix the feed\n\nthe body runs on", commit_date: Date.new(2026, 3, 2))
@@ -189,151 +143,36 @@ RSpec.describe "MCP record tools", type: :request do
     end
   end
 
-  describe "read_journal_entry" do
-    it "answers the entry with its tags" do
-      entry = create(:journal_entry, entry_date: Date.new(2026, 3, 2), entry_time: "09:30", body: "a day")
-      entry_repo.replace_tags(entry.id, %w[health ruby])
-      call_tool("read_journal_entry", id: entry.id)
-
-      expect(content.values_at("date", "time", "body", "tags", "record_links"))
-        .to eq(["2026-03-02", "09:30", "a day", %w[health ruby], {}])
-    end
-
-    it "answers when the entry was written and when it last changed, in UTC" do
-      entry = create(:journal_entry, created_at: Time.utc(2026, 3, 2, 9, 30), updated_at: Time.utc(2026, 3, 4, 18))
-      call_tool("read_journal_entry", id: entry.id)
-
-      expect(content.values_at("created_at", "updated_at")).to eq(%w[2026-03-02T09:30:00Z 2026-03-04T18:00:00Z])
-    end
-
-    it "answers the body as the markdown it was written in" do
-      entry = create(:journal_entry, body: "a **bold** day\n\n- one")
-      call_tool("read_journal_entry", id: entry.id)
-
-      expect(content.fetch("body")).to eq("a **bold** day\n\n- one")
-    end
-
-    it "calls an unknown ID an error" do
-      call_tool("read_journal_entry", id: 404)
-
-      expect(message).to eq("no journal entry has the ID 404")
-    end
-  end
-
   describe "create_journal_entry" do
-    it "saves the entry on today with its tags" do
-      call_tool("create_journal_entry", body: "Wrote about abc", tags: %w[ruby Health])
-
-      expect(content).to include("date" => today.iso8601, "body" => "Wrote about abc", "tags" => %w[health ruby])
-    end
-
     it "shows the entry in the admin" do
       call_tool("create_journal_entry", body: "Wrote about abc")
 
       expect(journal_page).to include("Wrote about abc")
     end
 
-    it "lands on the earlier day it names" do
-      call_tool("create_journal_entry", body: "Back then", entry_date: (today - 3).iso8601)
-
-      expect(entries.one[:entry_date]).to eq(today - 3)
-    end
-
-    it "refuses a day after today, as the admin does", :aggregate_failures do
+    it "refuses a day after today as an error and saves nothing", :aggregate_failures do
       call_tool("create_journal_entry", body: "Not yet", entry_date: (today + 1).iso8601)
 
       expect([error?, message, entries.count])
         .to eq([true, "entry_date falls after today; pick today or an earlier day", 0])
     end
-
-    it "refuses a blank body" do
-      call_tool("create_journal_entry", body: "  ")
-
-      expect(message).to eq("body needs a character that is not a space")
-    end
-
-    it "refuses a tag the admin would refuse" do
-      call_tool("create_journal_entry", body: "Tagged", tags: ["no_good"])
-
-      expect(message).to eq("tags take lowercase letters, numbers and single dashes in each tag")
-    end
-
-    it "refuses a body holding a NUL" do
-      call_tool("create_journal_entry", body: "a\u0000b")
-
-      expect(message).to eq("body holds a control character")
-    end
-
-    it "says it saved nothing when the save fails for a reason it does not know" do
-      failing = instance_double(Record::Operations::SaveJournalEntry, call: Dry::Monads::Failure(:unexpected))
-      replace_component("record.operations.save_journal_entry", failing)
-      call_tool("create_journal_entry", body: "Lost")
-
-      expect(message).to eq("could not save the journal entry")
-    end
   end
 
   describe "update_journal_entry" do
-    let(:entry) { create(:journal_entry, entry_date: Date.new(2026, 3, 2), body: "before") }
-
-    before { entry_repo.replace_tags(entry.id, %w[health]) }
-
-    it "changes the body and keeps the tags it was not given" do
-      call_tool("update_journal_entry", id: entry.id, body: "after")
-
-      expect(content).to include("body" => "after", "tags" => %w[health], "date" => "2026-03-02")
-    end
-
-    it "changes the tags and keeps the body it was not given" do
-      call_tool("update_journal_entry", id: entry.id, tags: %w[ruby])
-
-      expect(entry_repo.by_id(entry.id)).to have_attributes(body: "before", tags: [have_attributes(name: "ruby")])
-    end
-
-    it "clears the tags on an empty list" do
-      call_tool("update_journal_entry", id: entry.id, tags: [])
-
-      expect(content.fetch("tags")).to eq([])
-    end
-
     it "shows the change in the admin" do
+      entry = create(:journal_entry, body: "before")
       call_tool("update_journal_entry", id: entry.id, body: "after the edit")
 
       expect(journal_page).to include("after the edit")
     end
-
-    it "refuses a blank body and keeps the old one", :aggregate_failures do
-      call_tool("update_journal_entry", id: entry.id, body: " ")
-
-      expect([message, entry_repo.by_id(entry.id).body]).to eq(["body needs a character that is not a space", "before"])
-    end
-
-    it "calls an unknown ID an error" do
-      call_tool("update_journal_entry", id: entry.id + 1000, body: "after")
-
-      expect(message).to eq("no journal entry has the ID #{entry.id + 1000}")
-    end
   end
 
   describe "delete_journal_entry" do
-    it "removes the entry", :aggregate_failures do
-      entry = create(:journal_entry, body: "gone soon")
-      call_tool("delete_journal_entry", id: entry.id)
-
-      expect([content, entries.count]).to eq([{ "id" => entry.id, "deleted" => true }, 0])
-    end
-
     it "drops the entry from the admin" do
       entry = create(:journal_entry, body: "gone soon")
       call_tool("delete_journal_entry", id: entry.id)
 
       expect(journal_page).not_to include("gone soon")
-    end
-
-    it "calls an unknown ID an error" do
-      call_tool("delete_journal_entry", id: 404)
-
-      expect(message).to eq("no journal entry has the ID 404")
     end
   end
 

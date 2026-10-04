@@ -62,6 +62,12 @@ RSpec.describe "API journal entries", type: :request do
       expect([march, status]).to eq([window, 200])
     end
 
+    it "answers the body as the markdown it was written in" do
+      entry_on(1, "08:00", "a **bold** day\n\n- one")
+
+      expect(rows.map { it[3] }).to eq(["a **bold** day\n\n- one"])
+    end
+
     it "leaves out entries outside the window" do
       create(:journal_entry, entry_date: Date.new(2026, 4, 1))
 
@@ -109,6 +115,12 @@ RSpec.describe "API journal entries", type: :request do
 
       expect(read(entry.id).values_at("created_at", "updated_at"))
         .to eq(%w[2026-03-02T09:30:00Z 2026-03-04T18:00:00Z])
+    end
+
+    it "answers the body as the markdown it was written in" do
+      entry = create(:journal_entry, body: "a **bold** day\n\n- one")
+
+      expect(read(entry.id).fetch("body")).to eq("a **bold** day\n\n- one")
     end
 
     it "answers the records linked to the entry, grouped by kind" do
@@ -159,6 +171,11 @@ RSpec.describe "API journal entries", type: :request do
 
     it "refuses a body holding a control character" do
       expect(create_entry(body: "bad\u0000body").fetch("errors")).to eq("body" => ["body holds a control character"])
+    end
+
+    it "refuses a tag the admin would refuse with a 422" do
+      expect([create_entry(body: "Tagged", tags: ["no_good"]).fetch("message"), status])
+        .to eq(["tags take lowercase letters, numbers and single dashes in each tag", 422])
     end
 
     it "refuses a day after today and saves nothing" do

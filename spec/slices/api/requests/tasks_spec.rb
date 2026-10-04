@@ -102,6 +102,13 @@ RSpec.describe "API tasks", type: :request do
       it "refuses a page that is not a number with a 422" do
         expect([list(page: "two").fetch("errors").keys, status]).to eq([%w[page], 422])
       end
+
+      it "keeps the statuses while paging" do
+        create(:task, :done)
+        paged = %w[1 2].flat_map { |page| list(statuses: "open", page:).fetch("tasks").map { it.fetch("id") } }
+
+        expect(paged).to match_array(tasks.all_open.map(&:id))
+      end
     end
 
     it "gives each task its source and when it last changed" do
@@ -127,6 +134,112 @@ RSpec.describe "API tasks", type: :request do
 
     it "refuses a status it does not know with a 422" do
       expect([list(statuses: "lost").fetch("errors").keys, status]).to eq([%w[statuses], 422])
+    end
+
+    it "tells a canceled task from a done one" do
+      create(:task, :done, title: "finished")
+      create(:task, :canceled, title: "dropped")
+
+      expect(list(statuses: "canceled").fetch("tasks").map { it.values_at("title", "status") })
+        .to eq([%w[dropped canceled]])
+    end
+
+    describe "a finished task" do
+      def entry = list(statuses: "done").fetch("tasks").first
+
+      before do
+        done = create(:task, :done, title: "finished", tags: %w[admin], completed_at: at(today))
+        create(:task_link, from_task_id: create(:task, title: "blocker").id, to_task_id: done.id)
+      end
+
+      it "carries its tags and no type", :aggregate_failures do
+        expect(entry).to include("tags" => %w[admin])
+        expect(entry.keys.grep(/type/)).to be_empty
+      end
+
+      it "carries a link stored on the other task" do
+        expect(entry.fetch("links")).to contain_exactly(include("label" => "blocked_by", "title" => "blocker"))
+      end
+
+      it "carries its completed time" do
+        expect(entry.fetch("completed_at")).to eq(at(today).utc.iso8601)
+      end
+    end
+
+    it "keeps a task finished inside the window though it was made before it" do
+      create(:task, :done, title: "finished inside", created_at: at(today - 30), completed_at: at(today - 2))
+
+      expect(titles(list(from: (today - 5).iso8601, to: today.iso8601))).to eq(["finished inside"])
+    end
+
+    it "leaves the end of the window open when it names no to" do
+      create(:task, title: "new", created_at: at(today))
+      create(:task, title: "old", created_at: at(today - 30))
+
+      expect(titles(list(from: (today - 1).iso8601))).to eq(%w[new])
+    end
+
+    it "lists the open tasks the someday tab shows when it names that list" do
+      create(:task, :someday, title: "idea")
+      create(:task, :someday, :in_progress, title: "poking at it")
+      create(:task, :someday, :done, title: "settled")
+
+      expect(titles(list(lists: "someday"))).to match_array(tasks.open_in_list("someday").map(&:title))
+    end
+
+    it "keeps finished tasks on a list when it names their status" do
+      create(:task, :someday, title: "idea")
+      create(:task, :someday, :done, title: "settled")
+
+      expect(titles(list(lists: "someday", statuses: "done"))).to eq(%w[settled])
+    end
+
+    it "refuses a list it does not know with a 422" do
+      expect([list(lists: "nowhere").fetch("errors").keys, status]).to eq([%w[lists], 422])
+    end
+
+    it "narrows to the tasks that carry the tag, in any case" do
+      create(:task, title: "tagged", tags: %w[admin])
+      create(:task, title: "other", tags: %w[ruby])
+
+      expect(titles(list(tag: " Admin "))).to eq(%w[tagged])
+    end
+
+    it "finds the query in the title or the note" do
+      create(:task, title: "Fix the feed")
+      create(:task, title: "Write a post", note: "about the feed")
+      create(:task, title: "Mow the lawn")
+
+      expect(titles(list(query: "feed"))).to contain_exactly("Fix the feed", "Write a post")
+    end
+
+    describe "every filter at once" do
+      def match(title, **fields)
+        defaults = { tags: %w[admin], note: "the feed", created_at: at(today - 30), completed_at: at(today - 1) }
+        create(:task, :someday, :done, title:, **defaults, **fields)
+      end
+
+      before do
+        match("match")
+        match("too old", completed_at: at(today - 20))
+        match("still open", status: "open", completed_at: nil)
+        match("untagged", tags: [])
+        match("on next", list: "next")
+        match("no words", note: "")
+      end
+
+      it "combines them with the statuses and the window" do
+        filters = { lists: "someday", tag: "admin", query: "feed", statuses: "done", from: (today - 5).iso8601 }
+
+        expect(titles(list(filters))).to eq(%w[match])
+      end
+    end
+
+    it "leaves today's sprint unclaimed" do
+      create(:task, :someday, tags: %w[admin])
+      list(lists: "someday", tag: "admin", query: "x")
+
+      expect(Tasks::Slice["repos.sprint_repo"].on(today)).to be_nil
     end
   end
 
@@ -209,6 +322,76 @@ RSpec.describe "API tasks", type: :request do
 
     it "refuses an ID that is not a number with a 422" do
       expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
+    end
+
+    describe "a link" do
+      let(:blocker) { create(:task, title: "blocker") }
+      let(:blocked) { create(:task, title: "blocked") }
+
+      before { create(:task_link, from_task_id: blocker.id, to_task_id: blocked.id) }
+
+      it "shows on the task it runs from" do
+        expect(read(blocker.id).fetch("links").map { it.fetch("label") }).to eq(%w[blocks])
+      end
+
+      it "shows from the other end on the task it runs to" do
+        expect(read(blocked.id)).to include("blocked" => true, "links" => [include("label" => "blocked_by")])
+      end
+
+      it "stops blocking once the blocker is canceled" do
+        freed = create(:task, title: "freed")
+        create(:task_link, from_task_id: create(:task, :canceled).id, to_task_id: freed.id)
+
+        expect(read(freed.id)).to include("blocked" => false)
+      end
+    end
+
+    it "names the sprint day of a task in a sprint" do
+      task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today + 2).id)
+
+      expect(read(task.id).fetch("sprint_on")).to eq((today + 2).iso8601)
+    end
+
+    it "shows a canceled task as canceled, with the time it closed" do
+      task = create(:task, :canceled, completed_at: at(today))
+
+      expect(read(task.id)).to include("status" => "canceled", "completed_at" => at(today).utc.iso8601)
+    end
+
+    it "loads the task once" do
+      task = create(:task)
+      reads = counting { read(task.id) }
+
+      expect(reads.grep(/FROM "tasks" WHERE \("tasks"."id" = #{task.id}\)/)).to have(1).item
+    end
+
+    describe "comments" do
+      let(:task) { create(:task) }
+
+      def comments = read(task.id).fetch("comments")
+
+      it "carries none when the task has none" do
+        expect(comments).to eq([])
+      end
+
+      it "leaves out another task's comments" do
+        create(:task_comment, body: "elsewhere")
+
+        expect(comments).to be_empty
+      end
+
+      it "names the owner as the author of a local comment" do
+        create(:task_comment, task_id: task.id, body: "mine", created_at: at(today, 9))
+
+        expect(comments.first).to include("body" => "mine", "author" => Blog::Owner.full_name, "source" => "local",
+                                          "url" => nil, "created_at" => at(today, 9).utc.iso8601)
+      end
+
+      it "names the provider, author and link of a synced comment" do
+        synced = create(:task_comment, :synced, task_id: task.id, author: "octocat")
+
+        expect(comments.first).to include("author" => "octocat", "source" => "github", "url" => synced.url)
+      end
     end
   end
 
@@ -317,6 +500,26 @@ RSpec.describe "API tasks", type: :request do
       expect(capture(tags: %w[admin]).fetch("errors")).to eq("title" => ["title is missing"])
     end
 
+    it "keeps a #word in the title and adds no tag for it" do
+      expect(capture(title: "Email the accountant #admin"))
+        .to include("title" => "Email the accountant #admin", "tags" => [])
+    end
+
+    it "refuses a tag that is not a lowercase word with a 422" do
+      expect([capture(title: "Email the accountant", tags: ["not_a_tag"]).fetch("errors"), status])
+        .to eq([{ "tags" => ["tags are lowercase words"] }, 422])
+    end
+
+    it "captures a task into today's sprint" do
+      expect(capture(title: "Ship it", list: "today").fetch("sprint_on")).to eq(today.iso8601)
+    end
+
+    it "refuses a sprint day it cannot read with a 422 and captures nothing" do
+      capture(title: "Someday", sprint_on: "next week")
+
+      expect([status, tasks.all_open]).to eq([422, []])
+    end
+
     it "refuses a body that is not JSON with a 400" do
       expect([call_api(:post, "", "{nope"), status])
         .to eq([{ "error" => "invalid_json", "message" => "the body takes a JSON object" }, 400])
@@ -368,6 +571,41 @@ RSpec.describe "API tasks", type: :request do
 
       expect(status).to eq(404)
     end
+
+    it "replaces the whole set of tags" do
+      save(task.id, tags: %w[site ruby])
+
+      expect(tasks.by_id(task.id).tags.map(&:name)).to contain_exactly("site", "ruby")
+    end
+
+    it "refuses a title made only of Unicode spaces with a 422" do
+      expect([save(task.id, title: " ").fetch("errors"), status])
+        .to eq([{ "title" => ["write the task down first"] }, 422])
+    end
+
+    it "refuses a note holding a control character with a 422" do
+      expect(save(task.id, note: "bad\u0000note").fetch("errors")).to eq("note" => ["holds a control character"])
+    end
+
+    it "refuses a tag that is not a lowercase word with a 422" do
+      expect(save(task.id, tags: ["two words!"]).fetch("errors")).to eq("tags" => ["tags are lowercase words"])
+    end
+
+    it "schedules the task for a later sprint" do
+      expect(save(task.id, sprint_on: (today + 2).iso8601).fetch("sprint_on")).to eq((today + 2).iso8601)
+    end
+
+    it "keeps the title when it refuses the sprint day" do
+      save(task.id, title: "Final", sprint_on: (today - 1).iso8601)
+
+      expect(tasks.by_id(task.id).title).to eq("Draft")
+    end
+
+    it "keeps the title for a sprint day it cannot read" do
+      save(task.id, title: "Final", sprint_on: "next week")
+
+      expect([status, tasks.by_id(task.id).title]).to eq([422, "Draft"])
+    end
   end
 
   describe "DELETE /api/v1/tasks/:id" do
@@ -409,7 +647,24 @@ RSpec.describe "API tasks", type: :request do
         .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
     end
 
+    it "reopens a canceled task" do
+      expect(act(create(:task, :canceled).id, "reopen")).to include("status" => "open", "completed_at" => nil)
+    end
+
+    it "cancels a task in progress and stamps when it closed" do
+      expect(act(create(:task, :in_progress).id, "cancel"))
+        .to include("status" => "canceled", "completed_at" => be_a(String))
+    end
+
     %i[done canceled].each do |closed|
+      it "refuses to cancel a #{closed} task with a 422 and leaves it as it was" do
+        task = create(:task, closed, completed_at: at(today - 1))
+        act(task.id, "cancel")
+
+        expect([status, tasks.by_id(task.id).to_h.values_at(:status, :completed_at)])
+          .to eq([422, [closed.to_s, at(today - 1)]])
+      end
+
       it "refuses to complete a #{closed} task with a 422 and leaves it as it was", :aggregate_failures do
         task = create(:task, closed, completed_at: at(today - 1))
 
@@ -496,6 +751,16 @@ RSpec.describe "API tasks", type: :request do
     it "refuses a list it does not know with a 422" do
       expect([act(create(:task).id, "move", list: "nowhere").fetch("errors").keys, status]).to eq([%w[list], 422])
     end
+
+    it "moves the task into today's sprint" do
+      expect(act(create(:task).id, "move", list: "today")).to include("list" => nil, "sprint_on" => today.iso8601)
+    end
+
+    it "answers with a task in progress open in its new list" do
+      task = create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
+
+      expect(act(task.id, "move", list: "someday")).to include("list" => "someday", "status" => "open")
+    end
   end
 
   describe "POST /api/v1/tasks/:id/reorder" do
@@ -516,6 +781,37 @@ RSpec.describe "API tasks", type: :request do
     it "refuses a direction it does not know with a 422" do
       expect([act(first.id, "reorder", direction: "sideways").fetch("errors").keys, status])
         .to eq([%w[direction], 422])
+    end
+
+    it "moves the task past one that shares its position" do
+      tied = create(:task, title: "tied", position: 2)
+      act(tied.id, "reorder", direction: "up")
+
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[first tied second])
+    end
+
+    it "moves the task down past the one below it" do
+      act(first.id, "reorder", direction: "down")
+
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[second first])
+    end
+
+    %i[done canceled].each do |closed|
+      it "leaves a #{closed} task where it is", :aggregate_failures do
+        task = create(:task, closed, title: "closed", position: 3)
+
+        expect(act(task.id, "reorder", direction: "up").fetch("moved")).to be(false)
+        expect(tasks.in_list("next").map(&:title)).to eq(%w[first second closed])
+      end
+    end
+
+    it "moves the task past the one beside it in a sprint" do
+      sprint = create(:sprint, sprint_date: today)
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "sprint one", position: 3)
+      later = create(:task, :in_sprint, sprint_id: sprint.id, title: "sprint two", position: 4)
+      act(later.id, "reorder", direction: "up")
+
+      expect(tasks.in_sprint(sprint.id).map(&:title)).to eq(["sprint two", "sprint one"])
     end
   end
 
