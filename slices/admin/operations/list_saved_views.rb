@@ -3,14 +3,7 @@
 module Admin
   module Operations
     class ListSavedViews
-      FILTERS = {
-        Blog::Types::SavedViewScreen["activity"] => %i[from to types q day],
-        Blog::Types::SavedViewScreen["journal"] => %i[q to],
-        Blog::Types::SavedViewScreen["posts"] => %i[status],
-        Blog::Types::SavedViewScreen["tasks"] => %i[filter pool q],
-      }.freeze
-
-      include Deps[saved_views: "saved_views.queries.all"]
+      include Deps[saved_views: "saved_views.queries.all", screen_filters: "saved_views.queries.screen_filters"]
 
       def call(screen, params)
         { screen:, views: saved_views.call(screen:), filters: current(screen, params) }
@@ -19,9 +12,9 @@ module Admin
       private
 
       def current(screen, params)
-        FILTERS.fetch(screen).each_with_object({}) do |name, kept|
-          value = filter(params[name])
-          kept[name.to_s] = value unless value.empty?
+        screen_filters.call(screen).each_with_object({}) do |name, kept|
+          value = filter(params[name.to_sym])
+          kept[name] = value unless value.empty?
         end
       end
 

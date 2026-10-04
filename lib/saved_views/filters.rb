@@ -14,8 +14,10 @@ module SavedViews
     def keep(screen, filters)
       named = Blog::Types::Fields[filters].to_h { |key, value| [key.to_s, nested(value)] }
 
-      named.slice(*KNOWN.fetch(screen, Blog::Constants::EMPTY_ARRAY))
+      named.slice(*names(screen))
     end
+
+    def names(screen) = KNOWN.fetch(screen, Blog::Constants::EMPTY_ARRAY)
 
     def nested(value) = value.is_a?(::Hash) ? value.transform_keys(&:to_s) : value
   end

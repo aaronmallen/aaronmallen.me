@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, lib, admin, api, mcp]
 issue: "#315"
+amended: ["#452"]
 tags: [saved-views, slices, schema, enums, jsonb, filters, admin, api, mcp]
 ---
 
@@ -75,9 +76,9 @@ Adding a screen is `ALTER TYPE ... ADD VALUE`. Removing one means building the t
 Saved views bring the first `jsonb` column to the schema, so the relation is the first to read and write one
 through ROM.
 
-The names each screen knows live twice: in the `saved_views` slice and in the admin action that reads the params.
-Nothing compares the two. A filter added to a screen but not to the slice never saves, and one renamed on the screen
-alone stops loading without an error.
+The names each screen knows live once, in the `saved_views` slice. #452 removed the admin's copy: the slice exports
+the names as `queries.screen_filters`, and the admin reads the params through them, so a filter added to the slice
+saves and loads with no second edit.
 
 Postgres checks only that the filters form an object, not the keys or values inside it. The contract and the
 screens' fallbacks carry the rest.
