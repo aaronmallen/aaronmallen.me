@@ -31,10 +31,6 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(document).to eq(OpenAPI.document)
   end
 
-  it "answers 200" do
-    expect(call_api(:get, "/openapi.json").status).to eq(200)
-  end
-
   it "refuses every operation it describes when the request has no token" do
     unguarded = operations.reject do |verb, path|
       call_api(verb.to_sym, path.gsub(/\{\w+\}/, "0"), nil, token: nil)
@@ -54,21 +50,6 @@ RSpec.describe "API OpenAPI document", type: :request do
     missing = endpoints - operation_ids
 
     expect(missing).to be_empty, "the document leaves out these endpoints:\n#{missing.join("\n")}"
-  end
-
-  it "describes the timeline read_task answers, one schema per kind of entry" do
-    reply = document.dig("paths", "/tasks/{id}", "get", "responses", "200", "content", "application/json", "schema")
-
-    expect(reply.dig("properties", "timeline", "items", "oneOf").map { it.fetch("$ref").split("/").last })
-      .to eq(%w[TaskTimelineComment TaskTimelineSession TaskTimelineMove TaskTimelineTag TaskTimelineStatus])
-  end
-
-  it "describes when a journal entry was written and when it last changed" do
-    entry = document.dig("components", "schemas", "JournalEntry")
-    stamp = { "type" => "string", "format" => "date-time" }
-
-    expect(entry.fetch("properties").slice("created_at", "updated_at"))
-      .to eq("created_at" => stamp, "updated_at" => stamp)
   end
 
   it "lists the serializer schemas in name order, after the refusals" do

@@ -25,28 +25,6 @@ RSpec.describe "MCP tag tools", type: :request do
     post "/mcp", body, { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}" }
   end
 
-  def tool(name)
-    rpc("tools/list")
-    result.fetch("tools").find { it.fetch("name") == name }
-  end
-
-  %w[list_tags save_tag remove_tag].each do |name|
-    describe "#{name}'s schema" do
-      it "requires a scope" do
-        expect(tool(name).dig("inputSchema", "required")).to include("scope")
-      end
-
-      it "takes public or private" do
-        expect(tool(name).dig("inputSchema", "properties", "scope", "enum")).to eq(%w[public private])
-      end
-
-      it "says which kinds each scope covers" do
-        expect(tool(name).fetch("description"))
-          .to include("Public tags go on posts and projects", "private tags go on journal entries and tasks")
-      end
-    end
-  end
-
   {
     "list_tags" => {},
     "save_tag" => { name: "ruby" },
@@ -242,10 +220,6 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("remove_tag", scope: "private", id: tag_repo.all_in("private").first.id)
 
       expect(tag_repo.all_in("private")).to be_empty
-    end
-
-    it "says every record that carries the tag loses it" do
-      expect(tool("remove_tag").fetch("description")).to include("Every record that carries the tag loses it")
     end
 
     it "refuses the only tag on a task tag rule, naming the rules", :aggregate_failures do

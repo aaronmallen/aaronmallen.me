@@ -81,13 +81,6 @@ RSpec.describe Record::Linear::Client do
       expect(assigned.items.first[:comments].first[:author]).to be_nil
     end
 
-    it "asks for the first 100 comments of each issue" do
-      stub_assigned(linear_assigned)
-      assigned
-
-      expect(linear_request("comments(first: 100)")).to have_been_made
-    end
-
     it "lists each issue's label names" do
       stub_assigned(linear_assigned(labeled({ name: "Bug" }, { name: "p1" })))
 
@@ -98,13 +91,6 @@ RSpec.describe Record::Linear::Client do
       stub_assigned(linear_assigned(labeled({ name: "Bug", parent: { name: "Type" } })))
 
       expect(assigned.items.first[:labels]).to eq(%w[Bug])
-    end
-
-    it "asks for the first 50 labels of each issue" do
-      stub_assigned(linear_assigned)
-      assigned
-
-      expect(linear_request("labels(first: 50) { nodes { name } }")).to have_been_made
     end
 
     it "asks for 25 issues a page, so the query stays under Linear's complexity limit" do

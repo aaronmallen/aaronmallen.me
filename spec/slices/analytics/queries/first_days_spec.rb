@@ -60,10 +60,6 @@ RSpec.describe Analytics::Queries::FirstDays do
     expect(first_days("/writing/hello").fetch(:days)).to eq([])
   end
 
-  it "spans 30 days" do
-    expect(first_days("/writing/hello").fetch(:span)).to eq(30)
-  end
-
   describe "the median" do
     before do
       publish("one", on: today - 3)

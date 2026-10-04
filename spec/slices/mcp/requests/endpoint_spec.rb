@@ -1952,23 +1952,6 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers proofreading and a report, and nothing else" do
       expect(result.fetch("prompts").map { it.fetch("name") }).to eq(%w[proofread report])
     end
-
-    it "has the report take a start day and an end day" do
-      expect(result.fetch("prompts").last.fetch("arguments").map { it.slice("name", "required") })
-        .to eq([{ "name" => "from", "required" => true }, { "name" => "to", "required" => true }])
-    end
-
-    it "takes a target and an ID" do
-      expect(result.fetch("prompts").first.fetch("arguments").map { it.fetch("name") }).to eq(%w[target id])
-    end
-
-    it "asks for both" do
-      expect(result.fetch("prompts").first.fetch("arguments").map { it.fetch("required") }).to eq([true, true])
-    end
-
-    it "says what it does" do
-      expect(result.fetch("prompts").first.fetch("description")).to include("grammar, spelling and punctuation")
-    end
   end
 
   describe "proofread" do

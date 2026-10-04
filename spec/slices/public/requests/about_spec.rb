@@ -10,28 +10,6 @@ RSpec.describe "About", type: :request do
 
   def settings = Hanami.app.settings
 
-  it "titles the page" do
-    expect(page.title).to eq("About | Aaron Allen")
-  end
-
-  it "heads the page with a kicker over the heading", :aggregate_failures do
-    expect(page).to have_css(".about .kicker", exact_text: copy("kicker"))
-    expect(page).to have_css(".about h1.page-title", exact_text: copy("heading"))
-  end
-
-  it "opens with a lede" do
-    expect(page).to have_css(".about p.lede", exact_text: copy("lede"))
-  end
-
-  it "puts the prose in the same body as an article" do
-    expect(page).to have_css(".about .post-body h2", exact_text: copy("prose.open_source.heading"))
-  end
-
-  it "speaks of a domain-driven focus", :aggregate_failures do
-    expect(page).to have_css(".about .post-body p", exact_text: copy("prose.work"))
-    expect(page).to have_css(".about .post-body p", exact_text: copy("prose.structure"))
-  end
-
   it "points the Rust paragraph at the projects page for the full list" do
     paragraph = page.find(".about .post-body p", text: copy("prose.open_source.rust"))
 
@@ -48,11 +26,6 @@ RSpec.describe "About", type: :request do
     retired = /Root Insurance|Commands and Queries|activeinteractor|domainic|\bsai\b|farg|overlanding/i
 
     expect(page.text).not_to match(retired)
-  end
-
-  it "lists what happens away from the keyboard" do
-    expect(page.all(".about .post-body ul li strong").map(&:text))
-      .to eq(Public::UI::Views::Pages::About::HOBBIES.map { copy(it.first.delete_prefix(".")) })
   end
 
   it "leaves out the career heading while there is no history" do

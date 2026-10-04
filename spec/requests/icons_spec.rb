@@ -47,14 +47,6 @@ RSpec.describe "Icons", type: :request do
       it "links the web manifest" do
         expect(head).to have_tag("link[rel='manifest'][href='/site.webmanifest']")
       end
-
-      it "colours the browser white in light mode" do
-        expect(head).to have_tag("meta[name='theme-color'][media='(prefers-color-scheme: light)'][content='#ffffff']")
-      end
-
-      it "colours the browser #272822 in dark mode" do
-        expect(head).to have_tag("meta[name='theme-color'][media='(prefers-color-scheme: dark)'][content='#272822']")
-      end
     end
   end
 

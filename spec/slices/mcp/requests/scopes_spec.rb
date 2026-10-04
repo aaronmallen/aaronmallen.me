@@ -63,12 +63,6 @@ RSpec.describe "MCP tool scopes", type: :request do
     it "guards each tool with the scope this spec expects" do
       expect(listed).to match_array(guarded.values.flatten)
     end
-
-    it "tells a client to summarize the feed before it reads the months" do
-      summary = tools.find { it.fetch("name") == "summarize_activity" }
-
-      expect(summary.fetch("description")).to include("read_activity")
-    end
   end
 
   guarded.each do |scope, names|

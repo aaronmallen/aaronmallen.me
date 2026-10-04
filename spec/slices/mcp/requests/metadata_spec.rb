@@ -3,38 +3,43 @@
 RSpec.describe "OAuth discovery metadata", type: :request do
   let(:issuer) { "https://aaronmallen.me" }
 
+  def authorization_server
+    {
+      "authorization_endpoint" => "#{issuer}/oauth/authorize",
+      "authorization_response_iss_parameter_supported" => true,
+      "code_challenge_methods_supported" => %w[S256],
+      "grant_types_supported" => %w[authorization_code refresh_token],
+      "issuer" => issuer,
+      "registration_endpoint" => "#{issuer}/oauth/register",
+      "scopes_supported" => %w[read suggest write],
+      "token_endpoint" => "#{issuer}/oauth/token",
+      "token_endpoint_auth_methods_supported" => %w[none],
+    }
+  end
+
   def document = JSON.parse(last_response.body)
 
-  describe "the protected resource metadata" do
-    before { get "/.well-known/oauth-protected-resource/mcp" }
+  def protected_resource
+    {
+      "authorization_servers" => [issuer],
+      "bearer_methods_supported" => %w[header],
+      "resource" => "#{issuer}/mcp",
+      "resource_name" => "aaronmallen.me",
+    }
+  end
 
-    it "answers" do
-      expect(last_response.status).to eq(200)
-    end
+  def served
+    headers = shared_headers.keys.to_h { [it, last_response.headers[it]] }
 
-    it "answers with JSON" do
-      expect(last_response.headers["Content-Type"]).to eq("application/json")
-    end
+    { status: last_response.status, headers:, document: }
+  end
 
-    it "allows a browser client to read it" do
-      expect(last_response.headers["Access-Control-Allow-Origin"]).to eq("*")
-    end
+  def shared_headers = { "Access-Control-Allow-Origin" => "*", "Content-Type" => "application/json" }
 
-    it "names the MCP endpoint as the resource" do
-      expect(document["resource"]).to eq("#{issuer}/mcp")
-    end
+  it "serves the protected resource metadata" do
+    get "/.well-known/oauth-protected-resource/mcp"
 
-    it "points at this server as the authorization server" do
-      expect(document["authorization_servers"]).to eq([issuer])
-    end
-
-    it "takes the token from the Authorization header" do
-      expect(document["bearer_methods_supported"]).to eq(%w[header])
-    end
-
-    it "names the resource" do
-      expect(document["resource_name"]).to eq("aaronmallen.me")
-    end
+    expect(served).to match(status: 200, headers: shared_headers, document: include(protected_resource))
   end
 
   it "names the same scopes in both documents" do
@@ -56,48 +61,8 @@ RSpec.describe "OAuth discovery metadata", type: :request do
   describe "the authorization server metadata" do
     before { get "/.well-known/oauth-authorization-server" }
 
-    it "answers" do
-      expect(last_response.status).to eq(200)
-    end
-
-    it "answers with JSON" do
-      expect(last_response.headers["Content-Type"]).to eq("application/json")
-    end
-
-    it "allows a browser client to read it" do
-      expect(last_response.headers["Access-Control-Allow-Origin"]).to eq("*")
-    end
-
-    it "names itself as the issuer" do
-      expect(document["issuer"]).to eq(issuer)
-    end
-
-    it "describes the endpoints" do
-      expect(document).to include(
-        "authorization_endpoint" => "#{issuer}/oauth/authorize",
-        "registration_endpoint" => "#{issuer}/oauth/register",
-        "token_endpoint" => "#{issuer}/oauth/token",
-      )
-    end
-
-    it "supports the authorization code and refresh token grants" do
-      expect(document["grant_types_supported"]).to eq(%w[authorization_code refresh_token])
-    end
-
-    it "names the scopes a client can ask for" do
-      expect(document["scopes_supported"]).to eq(%w[read suggest write])
-    end
-
-    it "asks for PKCE with S256" do
-      expect(document["code_challenge_methods_supported"]).to eq(%w[S256])
-    end
-
-    it "takes public clients only" do
-      expect(document["token_endpoint_auth_methods_supported"]).to eq(%w[none])
-    end
-
-    it "answers the authorization request with its issuer" do
-      expect(document["authorization_response_iss_parameter_supported"]).to be(true)
+    it "serves the metadata" do
+      expect(served).to match(status: 200, headers: shared_headers, document: include(authorization_server))
     end
 
     it "gives a registration endpoint that registers" do

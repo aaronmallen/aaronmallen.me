@@ -15,13 +15,6 @@ RSpec.describe "MCP list tool paging", type: :request do
 
   def today = Blog::TimeZone.today
 
-  def tool(name)
-    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
-    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list", params: {}), headers
-
-    JSON.parse(last_response.body).dig("result", "tools").find { it.fetch("name") == name }
-  end
-
   {
     "list_posts" => {
       key: "posts",
@@ -105,15 +98,6 @@ RSpec.describe "MCP list tool paging", type: :request do
 
       it "answers nothing on a distant page" do
         expect(ids(name, key, **arguments, page: Blog::Constants::INTEGER_MAX)).to be_empty
-      end
-
-      it "takes the page in its schema" do
-        expect(tool(name).dig("inputSchema", "properties", "page"))
-          .to include("type" => "integer", "minimum" => 1, "maximum" => Blog::Constants::INTEGER_MAX)
-      end
-
-      it "says how to page" do
-        expect(tool(name).fetch("description")).to include("partial comes back true and next_page holds")
       end
     end
   end

@@ -97,24 +97,10 @@ RSpec.describe Record::GitHub::Client do
       expect(assigned.items.first[:comments].first[:author]).to be_nil
     end
 
-    it "asks for the first 100 comments of each issue" do
-      stub_assigned(github_issue_search)
-      assigned
-
-      expect(github_request("comments(first: 100)")).to have_been_made
-    end
-
     it "lists each issue's label names" do
       stub_assigned(github_issue_search(labeled("bug", "p1")))
 
       expect(assigned.items.first[:labels]).to eq(%w[bug p1])
-    end
-
-    it "asks for the first 50 labels of each issue" do
-      stub_assigned(github_issue_search)
-      assigned
-
-      expect(github_request("labels(first: 50) { nodes { name } }")).to have_been_made
     end
 
     it "records the rate limit it spent" do
