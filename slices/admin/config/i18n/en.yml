@@ -957,6 +957,7 @@ en:
           prune_backups_failed: "The old dumps wouldn't delete"
           prune_failed: "The old events wouldn't delete"
           rate_limited: "It hit the rate limit"
+          readers_failed: "The reader counts wouldn't save"
           repository_start: "It walked back to the day the repository was made"
           rollup_failed: "The days wouldn't roll up"
           unreadable: "The database won't open"

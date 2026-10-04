@@ -44,6 +44,7 @@ RSpec.describe "MCP reach", type: :request do
       "analytics.operations.record_visit" => "records a visit as a reader's browser reports it",
       "analytics.operations.refresh_country_database" => "a background job refreshes the country database",
       "analytics.operations.roll_up_analytics" => "a background job rolls up the day's visits",
+      "analytics.operations.save_reader_counts" => "a background job saves each post's final reader count",
       "api.operations.authenticate" => "checks the API token on each API request",
       "api.operations.mint_token" => "the owner mints an API token in the admin, which no client should do",
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",

@@ -474,6 +474,105 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
     end
   end
 
+  describe "the reader counts" do
+    let(:reader_repo) { Analytics::Slice["repos.post_reader_hash_repo"] }
+
+    def hashes(path) = reader_repo.post_reader_hashes.for_paths(path).count
+
+    def post(slug, days_ago) = create(:post, :published, slug:, published_at: Time.now - (days_ago * 86_400))
+
+    def readers(path, count) = count.times { create(:post_reader_hash, path:) }
+
+    def saved = reader_repo.post_reader_counts.to_a.to_h { [it.path, it.readers] }
+
+    describe "of a post past its first 12 months" do
+      before do
+        post("old", 370)
+        readers("/writing/old", 3)
+      end
+
+      it "saves the count of its readers" do
+        roll_up
+
+        expect(saved).to eq("/writing/old" => 3)
+      end
+
+      it "deletes its hashes" do
+        roll_up
+
+        expect(hashes("/writing/old")).to be_zero
+      end
+
+      it "keeps the count the same on the next night" do
+        2.times { roll_up }
+
+        expect(saved).to eq("/writing/old" => 3)
+      end
+    end
+
+    describe "of a post within its first 12 months" do
+      before do
+        post("new", 360)
+        readers("/writing/new", 2)
+        roll_up
+      end
+
+      it "keeps its hashes" do
+        expect(hashes("/writing/new")).to eq(2)
+      end
+
+      it "saves no count" do
+        expect(saved).to be_empty
+      end
+    end
+
+    it "leaves a draft's hashes alone" do
+      create(:post, slug: "draft")
+      readers("/writing/draft", 1)
+      roll_up
+
+      expect(hashes("/writing/draft")).to eq(1)
+    end
+
+    describe "when the delete breaks" do
+      before do
+        post("old", 370)
+        readers("/writing/old", 3)
+        allow(reader_repo).to(receive(:post_reader_hashes).and_wrap_original { break_closed(it.call) })
+        replace_component("repos.post_reader_hash_repo", reader_repo)
+      end
+
+      def break_closed(relation)
+        allow(relation).to(receive(:closed).and_wrap_original { |closed, since| break_delete(closed.call(since)) })
+        relation
+      end
+
+      def break_delete(relation)
+        allow(relation).to receive(:delete).and_raise(Sequel::DatabaseError, "PG::DiskFull")
+        relation
+      end
+
+      def roll_up_failing
+        roll_up
+      rescue Sequel::DatabaseError
+        nil
+      end
+
+      it "keeps the hashes and saves no count", :aggregate_failures do
+        roll_up_failing
+
+        expect(hashes("/writing/old")).to eq(3)
+        expect(saved).to be_empty
+      end
+
+      it "tells the operator the reader counts failed" do
+        roll_up_failing
+
+        expect(failure).to include(reason: "readers_failed", message: "PG::DiskFull")
+      end
+    end
+  end
+
   it "clears an earlier failure once a run gets through" do
     sync_state_repo.record_failure(analytics_rollup, :rollup_failed)
     roll_up

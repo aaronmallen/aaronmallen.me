@@ -8,6 +8,12 @@ module Analytics
 
       schema :post_reader_hashes, infer: true
 
+      def closed(since) = where(path: dataset.db[:posts].where { published_at <= since }.select(POST_PATH))
+
+      def counts_by_path = unordered.select(:path) { integer.count(:reader_hash).as(:readers) }.group(:path)
+
+      def for_paths(paths) = where(path: paths)
+
       def record(path:, reader_hash:, since:)
         post = dataset.db[:posts].where(status: PUBLISHED, POST_PATH => path).where { published_at > since }
 
