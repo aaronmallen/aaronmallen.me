@@ -189,6 +189,24 @@ RSpec.describe "Admin photo claims", type: :request do
     end
   end
 
+  describe "a review note" do
+    def note = Record::Slice["relations.review_notes"].to_a.first
+
+    def save(body) = send_to("/admin/review/note", day: "2026-09-20", note: { body: })
+
+    before { save(markdown(photo, other)) }
+
+    it "claims the photos its body points to" do
+      expect(claims_of("review_note")).to contain_exactly([note[:id], photo.id], [note[:id], other.id])
+    end
+
+    it "drops the claim on a photo taken out of its body" do
+      save(markdown(other))
+
+      expect(claims_of("review_note")).to eq([[note[:id], other.id]])
+    end
+  end
+
   describe "a task" do
     let(:tasks) { Tasks::Slice["relations.tasks"] }
 

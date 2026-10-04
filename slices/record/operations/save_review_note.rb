@@ -3,37 +3,27 @@
 module Record
   module Operations
     class SaveReviewNote < Blog::Operation
-      TAG = "review"
-      TAG_SEPARATOR = ", "
+      PHOTO_OWNER = Blog::Types::PhotoOwner["review_note"]
 
       include Deps[
+        claim_photos: "media.operations.claim_photos",
+        contract: "contracts.review_note_contract",
         review_note_repo: "repos.review_note_repo",
-        save_journal_entry: "operations.save_journal_entry",
-        update_journal_entry: "operations.update_journal_entry",
       ]
 
       def call(body, period:, on:, now: Time.now)
-        range = Blog::ReviewRange.call(period, on)
+        attributes = step validated(contract.call(body:))
+        starts_on, = Blog::ReviewRange.call(period, on)
 
-        transaction { step write(review_note_repo.entry(period, range.first), body, period, range, now) }
+        Success(transaction { save(attributes.fetch(:body), period, starts_on, now) })
       end
 
       private
 
-      def create(body, period, range, now)
-        from, to = range
-        entry = step save_journal_entry.call({ body:, entry_date: to.iso8601, tags: TAG }, now:, latest: to)
-        review_note_repo.create(period:, starts_on: from, journal_entry_id: entry.id)
-
-        Success(entry)
-      end
-
-      def tags(entry) = (entry.tags.map(&:name) | [TAG]).join(TAG_SEPARATOR)
-
-      def write(entry, body, period, range, now)
-        return create(body, period, range, now) unless entry
-
-        update_journal_entry.call(entry.id, { body:, tags: tags(entry) })
+      def save(body, period, starts_on, now)
+        note = review_note_repo.save_note(period:, starts_on:, body:, now:)
+        claim_photos.call(PHOTO_OWNER, note.id, note.body)
+        note
       end
     end
   end

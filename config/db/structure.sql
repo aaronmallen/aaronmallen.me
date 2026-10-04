@@ -155,7 +155,8 @@ CREATE TYPE public.photo_owner AS ENUM (
     'journal_entry',
     'task',
     'task_comment',
-    'decision_comment'
+    'decision_comment',
+    'review_note'
 );
 
 
@@ -2264,9 +2265,9 @@ CREATE TABLE public.review_notes (
     id integer NOT NULL,
     period public.review_period NOT NULL,
     starts_on date NOT NULL,
-    journal_entry_id integer NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    body public.non_blank_text NOT NULL,
     CONSTRAINT review_notes_starts_on_check CHECK (
 CASE period
     WHEN 'week'::public.review_period THEN (EXTRACT(isodow FROM starts_on) = (1)::numeric)
@@ -3445,14 +3446,6 @@ ALTER TABLE ONLY public.projects
 
 ALTER TABLE ONLY public.record_links
     ADD CONSTRAINT record_links_pkey PRIMARY KEY (id);
-
-
---
--- Name: review_notes review_notes_journal_entry_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.review_notes
-    ADD CONSTRAINT review_notes_journal_entry_id_key UNIQUE (journal_entry_id);
 
 
 --
@@ -4830,14 +4823,6 @@ ALTER TABLE ONLY public.project_tags
 
 
 --
--- Name: review_notes review_notes_journal_entry_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.review_notes
-    ADD CONSTRAINT review_notes_journal_entry_id_fkey FOREIGN KEY (journal_entry_id) REFERENCES public.journal_entries(id) ON DELETE CASCADE;
-
-
---
 -- Name: social_post_deliveries social_post_deliveries_social_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5096,4 +5081,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000335_add_work_sessions_to_activities.rb'),
 ('20261003000336_cascade_tag_joins_on_delete.rb'),
 ('20261004000404_create_review_notes.rb'),
+('20261004000405_move_review_notes_out_of_the_journal.rb'),
 ('20261004000461_add_single_author_hosts_to_webmention_settings.rb');

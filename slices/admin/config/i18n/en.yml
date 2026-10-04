@@ -1103,7 +1103,7 @@ en:
         note_card:
           body: "Review note"
           label: "Private"
-          placeholder: "How did it go? The note lands in the journal, tagged review."
+          placeholder: "How did it go?"
           private: "private · filed under %{day}"
           save: "Save note"
           saved: "Saved"
