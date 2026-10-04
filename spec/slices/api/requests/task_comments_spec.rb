@@ -165,8 +165,9 @@ RSpec.describe "API task comments", type: :request do
       local = create(:task_comment, task_id: task.id, body: "Blocked on review")
       answered = edit(task.id, local.id, body: "the same")
 
-      expect(mcp_answer("edit_task_comment", id: task.id, comment_id: local.id, body: "the same").except("updated_at"))
-        .to eq(answered.except("updated_at"))
+      edited_by_tool = trusted(mcp_answer("edit_task_comment", id: task.id, comment_id: local.id, body: "the same"))
+
+      expect(edited_by_tool.except("updated_at")).to eq(answered.except("updated_at"))
     end
 
     it "deletes as delete_task_comment does" do

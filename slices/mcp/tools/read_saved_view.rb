@@ -4,7 +4,6 @@ module MCP
   module Tools
     class ReadSavedView < Base
       ACTIVITY = Blog::Types::SavedViewScreen["activity"]
-      TASKS = Blog::Types::SavedViewScreen["tasks"]
 
       description "Read the records one saved view shows on its admin screen, with its saved filters set: tasks, " \
                   "blog posts, journal entries or activity rows. A filter the screen no longer reads falls back " \
@@ -23,16 +22,10 @@ module MCP
         private
 
         def answered(found)
-          screen = found.fetch(:saved_view).fetch("screen")
-          found.merge(records: found.fetch(:records).map { marked(screen, it) })
-        end
+          marked = super
+          return marked unless found.fetch(:saved_view).fetch("screen") == ACTIVITY
 
-        def marked(screen, row)
-          case screen
-          when TASKS then Untrusted.fields(row, "note")
-          when ACTIVITY then Untrusted.activity(row)
-          else row
-          end
+          marked.merge(records: marked.fetch(:records).map { Untrusted.activity(it) })
         end
       end
     end

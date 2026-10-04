@@ -7,12 +7,6 @@ module MCP
                   "posts to GitHub or Linear. The body comes back marked untrusted, as every comment body does. " \
                   "#{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::WRITE
-
-      class << self
-        private
-
-        def answered(comment) = Untrusted.fields(comment, "body")
-      end
     end
   end
 end

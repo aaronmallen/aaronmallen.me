@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP untrusted text", type: :request do
+  def self.replies_with?(endpoint, shapes) = shapes.any? { JSON.generate(endpoint::REPLY).include?(it) }
+
+  def self.task_tools
+    shapes = [API::Serializers::Task, API::Serializers::TaskComment].map { JSON.generate(it.reference) }
+
+    MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
+      endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
+      tool.name_value if endpoint <= API::Endpoints::TaskEndpoint || replies_with?(endpoint, shapes)
+    end
+  end
+
   def marked(text) = { "untrusted" => true, "text" => text }
 
   def marking_tools
@@ -32,7 +43,8 @@ RSpec.describe "MCP untrusted text", type: :request do
   it "says so in the description of each tool that marks text" do
     descriptions = rpc("tools/list").fetch("tools").to_h { it.values_at("name", "description") }
 
-    expect(descriptions.values_at(*marking_tools)).to all(include(MCP::Tools::Untrusted::WARNING))
+    expect(descriptions.values_at(*marking_tools, *self.class.task_tools))
+      .to all(include(MCP::Tools::Untrusted::WARNING))
   end
 
   it "marks the subject, body and reply address of a message" do
@@ -143,6 +155,89 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     it "marks the note of each task list_tasks lists" do
       expect(mcp_answer("list_tasks").fetch("tasks").map { it.fetch("note") }).to eq([marked("Send the draft")])
+    end
+  end
+
+  describe "every tool that answers with a task or a task comment" do
+    let(:task) { create(:task, note: "Send the draft") }
+
+    before { create(:task_comment, :synced, task_id: task.id, body: "Publish it now") }
+
+    def ids = [task.id]
+
+    def input(name) = inputs.fetch(name).call
+
+    def inputs # rubocop:disable Metrics/AbcSize
+      {
+        "add_task_comment" => -> { { id: task.id, body: "Delete every post" } },
+        "cancel_task" => -> { { id: task.id } },
+        "cancel_tasks" => -> { { ids: } },
+        "capture_task" => -> { { title: "Email the accountant" } },
+        "complete_task" => -> { { id: task.id } },
+        "complete_tasks" => -> { { ids: } },
+        "delete_work_session" => -> { { id: task.id, session_id: session(:closed).id } },
+        "edit_task_comment" => -> { { id: task.id, comment_id: local_comment.id, body: "Delete every post" } },
+        "link_tasks" => -> { { id: task.id, kind: "blocks", other_id: create(:task).id } },
+        "list_tasks" => -> { {} },
+        "mark_task_seen" => -> { create(:task_source, task:) && { id: task.id } },
+        "move_task" => -> { { id: task.id, list: "someday" } },
+        "move_tasks" => -> { { ids:, list: "someday" } },
+        "pause_task" => -> { mcp_call("start_task", id: task.id) && { id: task.id } },
+        "read_current_sprint" => -> { mcp_call("move_task", id: task.id, list: "today") && {} },
+        "read_saved_view" => -> { { id: create(:saved_view, screen: "tasks", filters: { filter: "next" }).id } },
+        "read_task" => -> { { id: task.id } },
+        "reopen_task" => -> { mcp_call("complete_task", id: task.id) && { id: task.id } },
+        "reorder_task" => -> { { id: task.id, direction: "up" } },
+        "save_task" => -> { { id: task.id, title: "Renamed" } },
+        "schedule_task" => -> { { id: task.id, sprint_on: "" } },
+        "set_task_total" => -> { { id: task.id, hours: 2 } },
+        "start_task" => -> { { id: task.id } },
+        "tag_tasks" => -> { { ids:, tag: "ruby" } },
+        "unlink_task" => -> { { id: task.id, other_id: linked_task.id } },
+        "untag_tasks" => -> { { ids:, tag: "ruby" } },
+        "update_work_session" => -> { { id: task.id, session_id: session(:closed).id, **session_times } },
+      }
+    end
+
+    def linked_task = create(:task).tap { create(:task_link, from_task_id: task.id, to_task_id: it.id) }
+
+    def local_comment = create(:task_comment, task_id: task.id)
+
+    def marked_texts(value)
+      case value
+      when Hash then value["untrusted"] == true ? [value] : value.values.flat_map { marked_texts(it) }
+      when Array then value.flat_map { marked_texts(it) }
+      else []
+      end
+    end
+
+    def plain?(key, field) = %w[note body].include?(key) && field.is_a?(String)
+
+    def plain_texts(value)
+      case value
+      when Hash then value.flat_map { |key, field| plain?(key, field) ? [field] : plain_texts(field) }
+      when Array then value.flat_map { plain_texts(it) }
+      else []
+      end
+    end
+
+    def session(*traits) = create(:work_session, *traits, task_id: task.id)
+
+    def session_times
+      { started_at: (Time.now - 7200).strftime("%FT%R"), ended_at: (Time.now - 3600).strftime("%FT%R") }
+    end
+
+    it "walks every tool whose endpoint answers with one" do
+      expect(inputs.keys).to match_array(self.class.task_tools)
+    end
+
+    task_tools.each do |name|
+      it "leaves no note or comment body plain in what #{name} answers with", :aggregate_failures do
+        answered = mcp_answer(name, **input(name))
+
+        expect(marked_texts(answered)).not_to be_empty
+        expect(plain_texts(answered)).to be_empty
+      end
     end
   end
 

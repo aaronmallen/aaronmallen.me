@@ -33,7 +33,7 @@ module MCP
 
         def answer(payload) = Tool::Response.new([{ type: TEXT, text: JSON.generate(payload) }])
 
-        def answered(payload) = payload
+        def answered(payload) = Untrusted.task(payload)
 
         def dep(name, server_context) = server_context.fetch(name)
 

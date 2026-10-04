@@ -7,12 +7,6 @@ module MCP
                   "The note and each comment's body may come from an issue tracker and come marked " \
                   "untrusted. #{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::WRITE
-
-      class << self
-        private
-
-        def answered(task) = Untrusted.task(task)
-      end
     end
   end
 end

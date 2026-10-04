@@ -855,7 +855,7 @@ RSpec.describe "API tasks", type: :request do
       fields = { title: "the same", list: "someday", tags: %w[ruby] }
       captured = capture(fields)
 
-      expect(mcp_answer("capture_task", **fields).except("id", "created_at", "updated_at"))
+      expect(trusted(mcp_answer("capture_task", **fields)).except("id", "created_at", "updated_at"))
         .to eq(captured.except("id", "created_at", "updated_at"))
     end
 
@@ -882,7 +882,7 @@ RSpec.describe "API tasks", type: :request do
       task = create(:task, :done)
       reopened = act(task.id, "reopen")
 
-      expect(mcp_answer("reopen_task", id: task.id).except("updated_at")).to eq(reopened.except("updated_at"))
+      expect(trusted(mcp_answer("reopen_task", id: task.id)).except("updated_at")).to eq(reopened.except("updated_at"))
     end
 
     it "mark seen as mark_task_seen does" do
@@ -890,7 +890,7 @@ RSpec.describe "API tasks", type: :request do
       create(:task_source, task:)
       seen = act(task.id, "seen")
 
-      expect(mcp_answer("mark_task_seen", id: task.id).except("updated_at")).to eq(seen.except("updated_at"))
+      expect(trusted(mcp_answer("mark_task_seen", id: task.id)).except("updated_at")).to eq(seen.except("updated_at"))
     end
 
     it "schedule as schedule_task does" do

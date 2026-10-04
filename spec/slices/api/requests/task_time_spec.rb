@@ -254,7 +254,7 @@ RSpec.describe "API task time", type: :request do
       ids.each { act(it, "start") }
       paused = act(ids.first, "pause")
 
-      expect(mcp_answer("pause_task", id: ids.last).except("id", "created_at", "updated_at", "worked_seconds"))
+      expect(trusted(mcp_answer("pause_task", id: ids.last)).except("id", "created_at", "updated_at", "worked_seconds"))
         .to eq(paused.except("id", "created_at", "updated_at", "worked_seconds"))
     end
 
@@ -262,8 +262,9 @@ RSpec.describe "API task time", type: :request do
       times = { started_at: local(started), ended_at: local(started + 900) }
       edited = edit(closed, **times)
 
-      expect(unstamped(mcp_answer("update_work_session", id: task.id, session_id: sessions.first[:id], **times)))
-        .to eq(unstamped(edited))
+      answered = mcp_answer("update_work_session", id: task.id, session_id: sessions.first[:id], **times)
+
+      expect(unstamped(trusted(answered))).to eq(unstamped(edited))
     end
 
     it "delete a session as delete_work_session does" do
@@ -285,7 +286,7 @@ RSpec.describe "API task time", type: :request do
     it "set the total as set_task_total does" do
       set = act(task.id, "total", hours: 4)
 
-      expect(unstamped(mcp_answer("set_task_total", id: task.id, hours: 4))).to eq(unstamped(set))
+      expect(unstamped(trusted(mcp_answer("set_task_total", id: task.id, hours: 4)))).to eq(unstamped(set))
     end
 
     it "complete with a duration as complete_task does" do

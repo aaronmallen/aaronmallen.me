@@ -95,7 +95,7 @@ RSpec.describe "API task links", type: :request do
       linked = link(task.id, kind: "blocks", other_id: other.id)
       call_api(:delete, "/#{task.id}/links/#{other.id}")
 
-      expect(unstamped(mcp_answer("link_tasks", id: task.id, kind: "blocks", other_id: other.id)))
+      expect(unstamped(trusted(mcp_answer("link_tasks", id: task.id, kind: "blocks", other_id: other.id))))
         .to eq(unstamped(linked))
     end
 
@@ -104,7 +104,7 @@ RSpec.describe "API task links", type: :request do
       unlinked = unlink(task.id, other.id)
       create(:task_link, from_task_id: other.id, to_task_id: task.id)
 
-      expect(unstamped(mcp_answer("unlink_task", id: task.id, other_id: other.id))).to eq(unstamped(unlinked))
+      expect(unstamped(trusted(mcp_answer("unlink_task", id: task.id, other_id: other.id)))).to eq(unstamped(unlinked))
     end
 
     it "refuse with the message the endpoint gives" do

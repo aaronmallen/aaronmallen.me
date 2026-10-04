@@ -159,7 +159,7 @@ RSpec.describe "API sprints", type: :request do
     it "read the current sprint as read_current_sprint does" do
       create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
 
-      expect(current).to eq(mcp_answer("read_current_sprint"))
+      expect(current).to eq(trusted(mcp_answer("read_current_sprint")))
     end
 
     it "list as list_sprints does" do

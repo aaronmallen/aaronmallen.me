@@ -17,7 +17,7 @@ module MCP
         private
 
         def answered(task)
-          Untrusted.task(task).merge(timeline: task.fetch(:timeline).map { marked_entry(it) })
+          super.merge(timeline: task.fetch(:timeline).map { marked_entry(it) })
         end
 
         def marked_entry(entry) = COMMENTS.include?(entry.fetch("kind")) ? Untrusted.fields(entry, "body") : entry

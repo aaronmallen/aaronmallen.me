@@ -238,7 +238,7 @@ RSpec.describe "API bulk task actions", type: :request do
         first = create(:task, title: "same")
         last = create(:task, title: "same")
 
-        expect(bare(mcp_answer("#{name}_tasks", ids: [last.id]))).to eq(bare(act(name, [first.id])))
+        expect(bare(trusted(mcp_answer("#{name}_tasks", ids: [last.id])))).to eq(bare(act(name, [first.id])))
       end
     end
 
@@ -246,21 +246,21 @@ RSpec.describe "API bulk task actions", type: :request do
       task = create(:task)
       moved = act("move", [task.id], list: "external")
 
-      expect(unstamped(mcp_answer("move_tasks", ids: [task.id], list: "external"))).to eq(unstamped(moved))
+      expect(unstamped(trusted(mcp_answer("move_tasks", ids: [task.id], list: "external")))).to eq(unstamped(moved))
     end
 
     it "tag as tag_tasks does" do
       task = create(:task)
       tagged_answer = act("tag", [task.id], tag: "ruby")
 
-      expect(unstamped(mcp_answer("tag_tasks", ids: [task.id], tag: "ruby"))).to eq(unstamped(tagged_answer))
+      expect(unstamped(trusted(mcp_answer("tag_tasks", ids: [task.id], tag: "ruby")))).to eq(unstamped(tagged_answer))
     end
 
     it "untag as untag_tasks does" do
       task = tagged("ruby", "rails")
       untagged = act("untag", [task.id], tag: "ruby")
 
-      expect(unstamped(mcp_answer("untag_tasks", ids: [task.id], tag: "ruby"))).to eq(unstamped(untagged))
+      expect(unstamped(trusted(mcp_answer("untag_tasks", ids: [task.id], tag: "ruby")))).to eq(unstamped(untagged))
     end
 
     it "delete as delete_tasks does" do

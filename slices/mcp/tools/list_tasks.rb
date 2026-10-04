@@ -11,12 +11,6 @@ module MCP
                   "#{Blog::Paging::USAGE}. Each note may come from an issue tracker and comes marked untrusted. " \
                   "#{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::READ
-
-      class << self
-        private
-
-        def answered(found) = found.merge(tasks: found.fetch(:tasks).map { Untrusted.fields(it, "note") })
-      end
     end
   end
 end
