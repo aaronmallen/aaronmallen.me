@@ -79,6 +79,10 @@ module API
 
     get "/time_report", to: "time_reports.show"
 
+    post "/webmentions/bulk/approve", to: "bulk_webmentions.approve"
+    post "/webmentions/bulk/ignore", to: "bulk_webmentions.ignore"
+    post "/webmentions/bulk/spam", to: "bulk_webmentions.spam"
+
     get "/token", to: "tokens.show"
 
     get "/openapi.json", to: "documents.show"

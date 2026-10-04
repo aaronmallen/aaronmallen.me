@@ -37,7 +37,8 @@ module API
     import keys: %w[queries.search], from: :search
 
     import keys: %w[
-      queries.calendar_social_posts queries.pending_webmention_count queries.pending_webmentions
+      operations.act_on_webmentions queries.calendar_social_posts queries.pending_webmention_count
+      queries.pending_webmentions
     ], from: :social
 
     import keys: %w[
@@ -52,16 +53,18 @@ module API
     ], from: :tasks
 
     export %w[
-      endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment endpoints.cancel_task
-      endpoints.cancel_tasks endpoints.capture_task endpoints.complete_task endpoints.complete_tasks
-      endpoints.create_journal_entry endpoints.create_saved_view endpoints.delete_decision_comment
-      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_posts
-      endpoints.delete_saved_view endpoints.delete_task endpoints.delete_tasks endpoints.delete_work_session
-      endpoints.drop_decision endpoints.drop_sprint endpoints.edit_decision endpoints.edit_decision_comment
-      endpoints.edit_decision_option endpoints.link_records endpoints.link_tasks endpoints.list_attention
+      endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
+      endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
+      endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_saved_view
+      endpoints.delete_decision_comment endpoints.delete_decision_option endpoints.delete_journal_entry
+      endpoints.delete_messages endpoints.delete_posts endpoints.delete_saved_view endpoints.delete_task
+      endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision endpoints.drop_sprint
+      endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option
+      endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks endpoints.list_attention
       endpoints.list_decisions endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
       endpoints.list_sprints endpoints.list_tasks endpoints.mark_messages_read endpoints.mark_messages_unread
-      endpoints.move_task endpoints.move_tasks endpoints.open_decision endpoints.pause_task endpoints.plan_sprint
+      endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
+      endpoints.pause_task endpoints.plan_sprint
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_review
       endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search

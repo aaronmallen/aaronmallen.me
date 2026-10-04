@@ -81,6 +81,9 @@ module API
       ["update_saved_view", "patch", "/saved_views/{id}", OK],
       ["delete_saved_view", "delete", "/saved_views/{id}", OK],
       ["read_time_report", "get", "/time_report", OK],
+      ["approve_webmentions", "post", "/webmentions/bulk/approve", OK],
+      ["ignore_webmentions", "post", "/webmentions/bulk/ignore", OK],
+      ["mark_webmentions_spam", "post", "/webmentions/bulk/spam", OK],
       ["read_token", "get", "/token", OK],
       ["read_document", "get", "/openapi.json", OK],
     ].freeze
