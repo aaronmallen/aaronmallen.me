@@ -120,20 +120,19 @@ RSpec.describe "Admin calendar drag", type: :feature do
   end
 
   describe "a drop on a past day" do
+    let(:past) { Date.new(2026, 7, 14) }
     let!(:task) do
-      create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id, title: "Stay put")
+      create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: past).id, title: "Stay put")
     end
-    let(:past) { page.first("a[data-calendar-past]", minimum: 0) }
 
-    before { open_day(today) }
+    before { open_day(past) }
 
     it "is refused and leaves the task on its day", :aggregate_failures do
-      skip "the month opens on today" unless past
-      drag("Stay put", past)
+      drag("Stay put", cell(past + 1))
 
       expect(page).to have_css(".toast-failed", text: translate("calendar_page.toasts.past"))
       expect(panel).to have_text("Stay put")
-      expect(sprint_on(task)).to eq(today)
+      expect(sprint_on(task)).to eq(past)
     end
   end
 
