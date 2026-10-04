@@ -22,7 +22,16 @@ module Blog
     AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
-    RedisAttempts = Types::Coercible::Integer.constrained(gteq: 0)
+    RedisCount = Types::Coercible::Integer.constrained(gteq: 0)
+    RedisWaits = Types::Array.of(Types::Coercible::Float.constrained(gteq: 0)).constrained(min_size: 1)
+
+    RedisAttempts = (RedisCount | RedisWaits).constructor do |value|
+      case value
+      when ::Array, ::Integer, /\A\s*\d+\s*\z/ then value
+      else value.to_s.split(",", -1)
+      end
+    end
+
     RedisTimeout = Types::Coercible::Float.constrained(gt: 0)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})

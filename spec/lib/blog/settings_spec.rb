@@ -47,7 +47,7 @@ RSpec.describe Blog::Settings do
       {
         connect_timeout: config.connect_timeout,
         read_timeout: config.read_timeout,
-        reconnect_attempts: (0..10).count { config.retriable?(it) },
+        reconnect_waits: (0..10).filter_map { config.retriable?(it) },
         write_timeout: config.write_timeout,
       }
     end
@@ -73,7 +73,13 @@ RSpec.describe Blog::Settings do
           set = names.zip(%w[2.5 4 10]).to_h
 
           expect(client_for(environment, **set))
-            .to eq(connect_timeout: 2.5, read_timeout: 10.0, reconnect_attempts: 4, write_timeout: 10.0)
+            .to eq(connect_timeout: 2.5, read_timeout: 10.0, reconnect_waits: [0, 0, 0, 0], write_timeout: 10.0)
+        end
+
+        it "hands a list of reconnect waits to Sidekiq's Redis client" do
+          client = client_for(environment, "REDIS_RECONNECT_ATTEMPTS" => "0.5, 1,2")
+
+          expect(client[:reconnect_waits]).to eq([0.5, 1.0, 2.0])
         end
 
         it "keeps Sidekiq's own defaults when nothing is set", :aggregate_failures do
@@ -88,7 +94,19 @@ RSpec.describe Blog::Settings do
       redis = { "connect_timeout" => 2, "reconnect_attempts" => 3, "timeout" => 7.5 }
 
       expect(client(redis_settings(redis)))
-        .to eq(connect_timeout: 2.0, read_timeout: 7.5, reconnect_attempts: 3, write_timeout: 7.5)
+        .to eq(connect_timeout: 2.0, read_timeout: 7.5, reconnect_waits: [0, 0, 0], write_timeout: 7.5)
+    end
+
+    it "takes a list of waits written straight into a settings file" do
+      expect(client(redis_settings("reconnect_attempts" => [0.25, 1]))[:reconnect_waits]).to eq([0.25, 1.0])
+    end
+
+    it "reads a single number with a fraction as one wait" do
+      expect(client_for("test", "REDIS_RECONNECT_ATTEMPTS" => "1.5")[:reconnect_waits]).to eq([1.5])
+    end
+
+    it "takes zero reconnect attempts" do
+      expect(client_for("test", "REDIS_RECONNECT_ATTEMPTS" => "0")[:reconnect_waits]).to eq([])
     end
 
     it "refuses a timeout that is not a positive number" do
@@ -98,6 +116,13 @@ RSpec.describe Blog::Settings do
     it "refuses a negative number of reconnect attempts" do
       expect { client_for("test", "REDIS_RECONNECT_ATTEMPTS" => "-1") }
         .to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+
+    it "refuses a list of reconnect waits that is not all numbers of zero or more", :aggregate_failures do
+      ["0.5,-1", "1,,2", "1,2,", "1,soon", ","].each do |value|
+        expect { client_for("test", "REDIS_RECONNECT_ATTEMPTS" => value) }
+          .to raise_error(Hanami::Settings::InvalidSettingsError)
+      end
     end
   end
 end
