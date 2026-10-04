@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, public]
 issue: "#235"
+amended: ["#376"]
 tags: [cache, cloudflare, cache-control, cookies, sessions, theme, deploy, public]
 ---
 
@@ -33,7 +34,9 @@ only on a 200, only when nothing set `Cache-Control` first, and only when the re
 `admin.session` nor the `site_theme` cookie. A shared page is then always the page a reader with no cookie gets.
 The home page, about, projects, the post index, a post and a tag page call it. A halt, such as a 404, skips after
 callbacks, and so does an error, so neither is ever marked shared. A redirect is not a 200. The contact page sends
-`private, no-store` itself. The feeds keep their own `ETag` and `Last-Modified` and do not call it.
+`private, no-store` itself. The feeds keep their own `ETag` and `Last-Modified` and do not call it. #376 has them send
+`private, no-cache`, so Cloudflare never keeps a feed and every fetch reaches the server to be counted, as
+[ADR 0106][0106] says.
 
 `s-maxage=300` lets Cloudflare keep a page for five minutes. `max-age=0` makes a browser ask again each time, so a
 reader who signs in or picks a theme never sees a stale copy from their own browser cache.
@@ -90,4 +93,5 @@ missing one for 60 seconds.
 
 [0024]: 0024-mount-the-session-cookie-in-admin-and-mcp-alone-and-let-public-read-it-by-hand.md
 [0032]: 0032-keep-the-theme-in-a-site-theme-cookie-the-browser-sets-and-draw-it-with-light-dark.md
+[0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -110,6 +110,7 @@ one.
 | [0103][0103] | Tag an imported task from repo rules on import, and once when a rule is saved | ![Active][active] | 2026-10-03 |
 | [0104][0104] | Version releases with CalVer, back to the first release | ![Active][active] | 2026-10-03 |
 | [0105][0105] | Dump the database nightly to a private backups bucket and keep the newest 7 | ![Active][active] | 2026-10-03 |
+| [0106][0106] | Count feed fetches on the server, and capture outbound clicks from the beacon | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -216,6 +217,7 @@ one.
 [0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-save.md
 [0104]: 0104-version-releases-with-calver-back-to-the-first-release.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
+[0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
