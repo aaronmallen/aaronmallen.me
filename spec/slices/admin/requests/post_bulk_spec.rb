@@ -162,6 +162,24 @@ RSpec.describe "Admin bulk post actions", type: :request do
       end
     end
 
+    describe "a batch refused for a reason the bar does not name" do
+      let(:draft) { create(:post, :draft, title: "Held") }
+
+      before do
+        replace_component(
+          "posts.operations.act_on_posts",
+          ->(_params) { Dry::Monads::Result::Failure.new([:record, draft.id, :locked]) },
+        )
+        act("delete", [draft])
+      end
+
+      it "names the post in the toast" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · Held would not change")
+      end
+    end
+
     describe "a delete that rolls back", :commits do
       let(:photo) { create(:photo) }
       let(:claims) { Media::Slice["relations.photo_claims"] }

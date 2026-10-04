@@ -169,6 +169,24 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       end
     end
 
+    describe "a batch refused for a reason the bar does not name" do
+      let(:mention) { mentions(1).first }
+
+      before do
+        replace_component(
+          "social.operations.act_on_webmentions",
+          ->(_params) { Dry::Monads::Result::Failure.new([:record, mention.id, :locked]) },
+        )
+        act("approved", [mention])
+      end
+
+      it "names the webmention in the toast" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · webmention ##{mention.id} would not change")
+      end
+    end
+
     describe "where it lands" do
       it "goes back to the list it came from" do
         act("approved", mentions(1, :spam), status: "spam")

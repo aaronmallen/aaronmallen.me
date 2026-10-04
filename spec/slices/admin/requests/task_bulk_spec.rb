@@ -269,6 +269,52 @@ RSpec.describe "Admin bulk task actions", type: :request do
       end
     end
 
+    describe "one ticked task" do
+      {
+        "cancel" => [{}, "Canceled 1 task"],
+        "delete" => [{}, "Deleted 1 task"],
+        "move" => [{ to: "external" }, "Moved 1 task to external"],
+        "untag" => [{ tag: "money" }, "Took money off 1 task"],
+      }.each do |name, (params, said)|
+        it "says #{name} changed one" do
+          act(name, [tagged("money")], **params)
+          follow_redirect!
+
+          expect(toast).to eq(said)
+        end
+      end
+    end
+
+    describe "a move back to next" do
+      let!(:ticked) { Array.new(2) { create(:task, list: "someday") } }
+
+      before { act("move", ticked, to: "next") }
+
+      it "says how many moved and where" do
+        follow_redirect!
+
+        expect(toast).to eq("Moved 2 tasks to next")
+      end
+    end
+
+    describe "a batch refused for a reason the bar does not name" do
+      let(:task) { create(:task, title: "Held") }
+
+      before do
+        replace_component(
+          "tasks.operations.act_on_tasks",
+          ->(_params) { Dry::Monads::Result::Failure.new([:record, task.id, :locked]) },
+        )
+        act("complete", [task])
+      end
+
+      it "names the task in the toast" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · ##{task.id} Held would not change")
+      end
+    end
+
     describe "a move or tag change with a task that is gone" do
       let!(:ticked) { [tagged("money"), tagged("money")] }
       let(:missing) { gone_id }

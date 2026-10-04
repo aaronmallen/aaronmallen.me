@@ -44,7 +44,7 @@ module Admin
     def sign_in_required? = true
 
     def toast(response, key, **)
-      response.flash[UI::Components::Toast::FLASH_KEY] = i18n.t(key, **)
+      response.flash[UI::Components::Toast::FLASH_KEY] = i18n.t!(key, **)
     end
   end
 end

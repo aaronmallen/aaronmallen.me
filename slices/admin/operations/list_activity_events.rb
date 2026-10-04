@@ -65,19 +65,19 @@ module Admin
       private
 
       def commit_line(row)
-        i18n.t(
+        i18n.t!(
           "activity_page.sub_lines.commit",
           repo: row.repo, sha: row.sha.to_s[0, SHA_LENGTH], additions: row.additions, deletions: row.deletions,
         )
       end
 
-      def decision_comment_line(row) = i18n.t("activity_page.sub_lines.decision_comment", decision: row.excerpt)
+      def decision_comment_line(row) = i18n.t!("activity_page.sub_lines.decision_comment", decision: row.excerpt)
 
       def decision_line(row)
-        event = i18n.t(row.status, scope: DECISION_EVENTS)
-        return i18n.t("activity_page.sub_lines.decision", event:) unless row.excerpt
+        event = i18n.t!(row.status, scope: DECISION_EVENTS)
+        return i18n.t!("activity_page.sub_lines.decision", event:) unless row.excerpt
 
-        i18n.t("activity_page.sub_lines.decision_excerpt", event:, excerpt: shortened(row.excerpt))
+        i18n.t!("activity_page.sub_lines.decision_excerpt", event:, excerpt: shortened(row.excerpt))
       end
 
       def display_name(row) = row.type == COMMIT ? CommitMessage.subject(row.name) : row.name
@@ -101,7 +101,7 @@ module Admin
       end
 
       def networks(targets)
-        targets.to_a.map { i18n.t(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
+        targets.to_a.map { i18n.t!(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
       end
 
       def page(from, to, size, filters)
@@ -123,7 +123,7 @@ module Admin
       end
 
       def post_line(row, views)
-        i18n.t(
+        i18n.t!(
           "activity_page.sub_lines.post",
           link: row.link, status: status(row.status), views: view_count(row, views),
         )
@@ -131,7 +131,7 @@ module Admin
 
       def rows_before?(from, day, filters) = activity_between.call(from:, to: day.prev_day, limit: 1, **filters).any?
 
-      def session_line(row) = i18n.t("activity_page.sub_lines.session", span: Blog::Figures.hours(row.worked_seconds))
+      def session_line(row) = i18n.t!("activity_page.sub_lines.session", span: Blog::Figures.hours(row.worked_seconds))
 
       def shortened(name)
         squished = Blog::Whitespace.squish(Blog::Types::Text[name])
@@ -140,24 +140,24 @@ module Admin
       end
 
       def social_line(row)
-        i18n.t("activity_page.sub_lines.social", status: status(row.status), networks: networks(row.targets))
+        i18n.t!("activity_page.sub_lines.social", status: status(row.status), networks: networks(row.targets))
       end
 
-      def status(value) = i18n.t(STATUSES.fetch(value))
+      def status(value) = i18n.t!(STATUSES.fetch(value))
 
       def sub_line(row, views)
         return post_line(row, views) if row.type == POST
 
         builder = LINE_BUILDERS[row.type]
-        builder ? send(builder, row) : i18n.t(LINES.fetch(row.type), task: row.excerpt)
+        builder ? send(builder, row) : i18n.t!(LINES.fetch(row.type), task: row.excerpt)
       end
 
-      def view_count(row, views) = i18n.t("activity_page.views", count: views.fetch(row.link, 0))
+      def view_count(row, views) = i18n.t!("activity_page.views", count: views.fetch(row.link, 0))
 
       def webmention_line(row)
-        return i18n.t("activity_page.sub_lines.webmention", link: row.link) unless row.excerpt
+        return i18n.t!("activity_page.sub_lines.webmention", link: row.link) unless row.excerpt
 
-        i18n.t("activity_page.sub_lines.webmention_excerpt", link: row.link, excerpt: row.excerpt)
+        i18n.t!("activity_page.sub_lines.webmention_excerpt", link: row.link, excerpt: row.excerpt)
       end
     end
   end

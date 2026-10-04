@@ -1040,6 +1040,19 @@ RSpec.describe "Admin activity", type: :request do
       end
     end
 
+    describe "a post's sub-line with one view" do
+      before do
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:analytics_rollup, day: today)
+        create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 1, visitors: 1, bounces: 1)
+        visit_activity
+      end
+
+      it "counts the one view" do
+        expect(event_subs).to eq(["/writing/hello · published · 1 view"])
+      end
+    end
+
     describe "a webmention's sub-line" do
       let(:post) { create(:post, :published, slug: "hello", published_at: at(7, on: today - 1)) }
 

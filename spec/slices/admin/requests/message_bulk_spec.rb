@@ -142,6 +142,34 @@ RSpec.describe "Admin bulk message actions", type: :request do
       end
     end
 
+    describe "delete on one ticked message" do
+      before { act("delete", messages(1)) }
+
+      it "says one went" do
+        follow_redirect!
+
+        expect(toast).to eq("Deleted 1 message")
+      end
+    end
+
+    describe "a batch refused for a reason the bar does not name" do
+      let(:message) { create(:message, subject: "Hello") }
+
+      before do
+        replace_component(
+          "contact.operations.act_on_messages",
+          ->(_params) { Dry::Monads::Result::Failure.new([:record, message.id, :locked]) },
+        )
+        act("read", [message])
+      end
+
+      it "names the message in the toast" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · message ##{message.id} Hello would not change")
+      end
+    end
+
     describe "a batch with a message that is gone" do
       let!(:ticked) { messages(2) }
       let(:missing) { gone_id }

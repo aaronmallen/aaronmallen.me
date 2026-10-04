@@ -56,7 +56,7 @@ module Admin
         end
 
         def done(request, response, count)
-          list = LISTS[request.params[:to]]&.then { i18n.t(it) }
+          list = LISTS[request.params[:to]]&.then { i18n.t!(it) }
           tag = Blog::Types::Nullable::Tag[request.params[:tag]]
 
           toast(response, DONE.fetch(request.params[:act]), count:, list:, tag:)
