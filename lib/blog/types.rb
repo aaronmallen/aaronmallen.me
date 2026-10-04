@@ -51,6 +51,7 @@ module Blog
     )
     DecisionStatus = Types::String.enum("open", "resolved", "dropped")
     DecisionStatusParam = DecisionStatus.fallback(DecisionStatus.values.first)
+    DecisionTimelineKind = Types::String.enum("comment", *DecisionEventKind.values)
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }

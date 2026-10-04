@@ -27,6 +27,15 @@ module Admin
     get "/decisions/:id", to: "decisions.show", as: :decision, id: ID
     get "/decisions/:id/edit", to: "decisions.edit", as: :edit_decision, id: ID
     post "/decisions/:id", to: "decisions.update", as: :update_decision, id: ID
+    post "/decisions/:id/comments", to: "decisions.create_comment", as: :create_decision_comment, id: ID
+    post(
+      "/decisions/:id/comments/:comment_id",
+      to: "decisions.update_comment", as: :update_decision_comment, id: ID, comment_id: ID,
+    )
+    post(
+      "/decisions/:id/comments/:comment_id/delete",
+      to: "decisions.destroy_comment", as: :delete_decision_comment, id: ID, comment_id: ID,
+    )
     post "/decisions/:id/drop", to: "decisions.drop", as: :drop_decision, id: ID
     post "/decisions/:id/options", to: "decisions.create_option", as: :create_decision_option, id: ID
     post(

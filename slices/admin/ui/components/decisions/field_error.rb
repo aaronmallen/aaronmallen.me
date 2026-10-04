@@ -7,7 +7,7 @@ module Admin
         class FieldError < Blog::UI::FieldError
           SCOPE = "decision"
           MESSAGES = {
-            body: { "control" => ".control" },
+            body: { "blank" => ".body.blank", "control" => ".control" },
             note: { "blank" => ".note.blank", "control" => ".control", "long" => ".note.long" },
             option_id: { "format" => ".option_id.missing", "missing" => ".option_id.missing" },
             problem: { "blank" => ".problem.blank", "control" => ".control" },

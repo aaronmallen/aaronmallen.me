@@ -7,10 +7,11 @@ module Admin
         class Show < View
           include Components::Decisions
 
-          def initialize(decision:, form:, records:)
+          def initialize(decision:, form:, timeline:, records:)
             super()
             @decision = decision
             @form = form
+            @timeline = timeline
             @records = records
           end
 
@@ -18,11 +19,10 @@ module Admin
             article(class: "task-read", data: { decision_read: @decision.id }) do
               head
               meta
-              Card(label: t(".problem_label"), title: t(".problem")) do
-                div(class: "task-body post-body") { raw(safe(::Tasks::Markdown.to_html(@decision.problem).strip)) }
-              end
+              problem
               Options(decision: @decision, form: @form)
               Closing(decision: @decision, form: @form)
+              Timeline(decision: @decision, entries: @timeline, form: @form)
               linked
             end
           end
@@ -55,6 +55,12 @@ module Admin
             p(class: "task-meta task-read-meta") do
               Status(status: @decision.status)
               @decision.tags.each { Tag(tag: it) }
+            end
+          end
+
+          def problem
+            Card(label: t(".problem_label"), title: t(".problem")) do
+              div(class: "task-body post-body") { raw(safe(::Tasks::Markdown.to_html(@decision.problem).strip)) }
             end
           end
         end

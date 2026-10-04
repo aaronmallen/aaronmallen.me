@@ -1482,6 +1482,32 @@ CREATE TABLE public.decision_tags (
 
 
 --
+-- Name: decision_timeline; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.decision_timeline AS
+ SELECT 'comment'::text AS kind,
+    decision_comments.id AS source_id,
+    decision_comments.decision_id,
+    decision_comments.created_at AS occurred_at,
+    (decision_comments.body)::text AS body,
+    NULL::integer AS option_id,
+    NULL::text AS reason,
+    NULL::text AS note
+   FROM public.decision_comments
+UNION ALL
+ SELECT (decision_events.kind)::text AS kind,
+    decision_events.id AS source_id,
+    decision_events.decision_id,
+    decision_events.created_at AS occurred_at,
+    NULL::text AS body,
+    decision_events.option_id,
+    (decision_events.reason)::text AS reason,
+    (decision_events.note)::text AS note
+   FROM public.decision_events;
+
+
+--
 -- Name: decisions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4580,4 +4606,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000136_add_read_throughs_to_analytics_rollup_paths.rb'),
 ('20261003000137_create_post_reader_hashes.rb'),
 ('20261003000152_add_backups_to_sync_name.rb'),
-('20261003000153_create_task_tag_rules.rb');
+('20261003000153_create_task_tag_rules.rb'),
+('20261003000154_create_decision_timeline_view.rb');

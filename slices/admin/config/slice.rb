@@ -28,9 +28,10 @@ module Admin
     import keys: %w[operations.mint_token operations.revoke_token queries.calendar queries.live_tokens], from: :api
 
     import keys: %w[
-      operations.add_decision_option operations.drop_decision operations.edit_decision
+      operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
+      operations.drop_decision operations.edit_decision operations.edit_decision_comment
       operations.edit_decision_option operations.open_decision operations.reopen_decision
-      operations.resolve_decision queries.by_id queries.by_status queries.count_by_status
+      operations.resolve_decision queries.by_id queries.by_status queries.count_by_status queries.timeline
     ], from: :decisions
 
     import keys: %w[operations.mark_message queries.by_status queries.count_with_status], from: :contact
