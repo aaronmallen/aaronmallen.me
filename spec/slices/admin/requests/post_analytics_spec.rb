@@ -12,9 +12,17 @@ RSpec.describe "Admin post analytics", type: :request do
 
   def counts(title) = card(title).all(".meter-count").map(&:text)
 
+  def curve = card("First 30 days")
+
   def message(key) = i18n.t(key, scope: "ui")
 
   def names(title) = card(title).all(".meter-name").map(&:text)
+
+  def points(name) = curve.find("polyline.curve-#{name}", visible: :all)[:points].split
+
+  def published(slug, on:) = create(:post, :published, slug:, published_at: Blog::TimeZone.day_start(on) + 43_200)
+
+  def readings = curve.all("tbody tr", visible: :all).map { |row| row.all("th, td", visible: :all).map(&:text) }
 
   def roll_up(day, **)
     create(:analytics_rollup, day:)
@@ -45,6 +53,14 @@ RSpec.describe "Admin post analytics", type: :request do
       create(:analytics_rollup_scroll_depth, day:, path: "/writing/hello", scroll_depth:, views:, visitors: 1)
     end
   end
+
+  def rolled(slug, on:, visitors:)
+    day = create(:analytics_rollup, day: on).day
+
+    create(:analytics_rollup_path, day:, path: "/writing/#{slug}", views: visitors, visitors:, bounces: 0)
+  end
+
+  def show(post) = get("/admin/posts/#{post.id}/analytics")
 
   def stat(key) = page.find(".stat", text: key)
 
@@ -213,6 +229,64 @@ RSpec.describe "Admin post analytics", type: :request do
 
         expect(unique_readers).to have_css(".stat-value", exact_text: "None")
         expect(unique_readers).to have_css(".stat-change", exact_text: "no count kept")
+      end
+    end
+
+    describe "first 30 days of a three day old post" do
+      before do
+        young = published("young", on: today - 2)
+        rolled("young", on: today - 2, visitors: 7)
+        show(young)
+      end
+
+      it "draws the post's readers per day, with zero for a day nobody read" do
+        expect(readings.map { it.first(2) }).to eq([%w[1 7], %w[2 0], %w[3 0]])
+      end
+
+      it "draws a point for each day" do
+        expect(points("post").size).to eq(3)
+      end
+    end
+
+    describe "first 30 days beside the median post" do
+      before do
+        old = published("old", on: today - 3)
+        published("young", on: today - 1)
+        rolled("old", on: today - 3, visitors: 4)
+        rolled("young", on: today - 1, visitors: 8)
+        show(old)
+      end
+
+      it "names the median curve" do
+        expect(curve).to have_css(".curve-key", exact_text: "Median post")
+      end
+
+      it "takes the middle count, leaving out posts too young for a day" do
+        expect(readings.map(&:last)).to eq(%w[6 0 0 0])
+      end
+
+      it "draws the median as far as the oldest post" do
+        expect(points("median").size).to eq(4)
+      end
+    end
+
+    describe "first 30 days" do
+      it "draws as many days as a young post has had" do
+        show(published("young", on: today - 9))
+
+        expect(points("post").size).to eq(10)
+      end
+
+      it "stops at day 30 for an older post" do
+        show(published("old", on: today - 60))
+
+        expect(points("post").size).to eq(30)
+      end
+
+      it "says a draft has no curve" do
+        show(create(:post, :draft))
+
+        expect(curve).to have_css(".empty", exact_text: message("components.analytics.first_days_card.empty"))
       end
     end
 

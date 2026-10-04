@@ -28,6 +28,8 @@ module Analytics
         analytics_rollup_devices.between(from, to).for_path(path).top_by_visitors.to_a
       end
 
+      def first_days(span) = analytics_rollup_paths.first_days(span).to_a
+
       def newest_day = analytics_rollups.newest_day
 
       def page_countries(path:, from:, to:)

@@ -313,6 +313,18 @@ en:
           visitors:
             one: "%{formatted} visitor"
             other: "%{formatted} visitors"
+        first_days_card:
+          caption:
+            one: "Readers per day for the first %{count} day after publish, beside the median post"
+            other: "Readers per day for the first %{count} days after publish, beside the median post"
+          day: "day %{day}"
+          day_heading: "Day"
+          empty: "Not published yet."
+          median: "Median post"
+          post: "This post"
+          title:
+            one: "First %{count} day"
+            other: "First %{count} days"
         hour_grid_card:
           caption:
             one: "Readers by hour and weekday, last %{count} day, Chicago time"

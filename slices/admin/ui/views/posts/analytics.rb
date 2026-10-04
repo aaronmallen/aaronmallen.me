@@ -16,13 +16,14 @@ module Admin
 
           def initialize(
             post:, range:, views:, visitors:, bounces:, readers:, read_throughs:, scroll:, countries:, devices:,
-            referrers:, sources:, unique_readers:
+            referrers:, sources:, first_days:, unique_readers:
           )
             super()
             @post = post
             @range = range
             @stats = { views:, visitors:, bounces:, readers:, read_throughs: }
             @scroll = scroll
+            @first_days = first_days
             @unique_readers = unique_readers
             @breakdowns = { countries:, devices:, referrers:, sources: }
           end
@@ -34,6 +35,7 @@ module Admin
             end
 
             Grid(columns: 4) { stats }
+            FirstDaysCard(**@first_days)
 
             Grid(columns: 2) do
               SideStack { left_cards }

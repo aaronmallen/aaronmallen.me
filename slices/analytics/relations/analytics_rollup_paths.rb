@@ -22,12 +22,25 @@ module Analytics
         ]
       end
       POST_PATH = Sequel.join(["#{Blog::Site::WRITING}/", Sequel[:posts][:slug]])
+      PUBLISH_DAY = site_day(Sequel[:posts][:published_at])
+      PUBLISHED = Blog::Types::PostStatus["published"]
       RECENT_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }
+      ROLLED = Sequel[:analytics_rollup_paths]
       TITLED = Sequel.~(title: nil)
 
       schema :analytics_rollup_paths, infer: true
 
       def between(from, to) = where(day: from..to)
+
+      def first_days(span)
+        day = ROLLED[:day]
+        within = Sequel.&({ ROLLED[:path] => POST_PATH }, day >= PUBLISH_DAY, day < PUBLISH_DAY + span)
+        posts = dataset.db[:posts].where(Sequel[:posts][:status] => PUBLISHED)
+
+        joined = posts.left_join(:analytics_rollup_paths, within)
+
+        joined.select(POST_PATH.as(:path), PUBLISH_DAY.as(:published_on), day, ROLLED[:visitors])
+      end
 
       def for_path(path) = where(path:)
 

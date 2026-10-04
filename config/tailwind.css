@@ -3080,6 +3080,51 @@
   @apply flex justify-between meta;
 }
 
+@utility curve {
+  @apply h-chart w-full overflow-visible;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@utility curve-post {
+  stroke: var(--color-mk-green);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+@utility curve-median {
+  stroke: var(--color-ink-muted);
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+@utility curve-key {
+  @apply inline-flex items-center gap-1.5 meta;
+
+  &::before {
+    @apply inline-block h-0.5 w-3;
+    content: "";
+  }
+
+  & + & {
+    @apply ml-3;
+  }
+}
+
+@utility curve-key-post {
+  &::before {
+    @apply bg-mk-green;
+  }
+}
+
+@utility curve-key-median {
+  &::before {
+    @apply bg-ink-muted;
+  }
+}
+
 @utility heat {
   @apply w-full border-separate border-spacing-0.5;
 }

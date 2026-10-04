@@ -7,6 +7,7 @@ module Admin
 
       include Deps[
         devices_between: "analytics.queries.devices_between",
+        first_days: "analytics.queries.first_days",
         page_between: "analytics.queries.page_between",
         reach_between: "analytics.queries.reach_between",
         read_throughs_between: "analytics.queries.read_throughs_between",
@@ -20,7 +21,14 @@ module Admin
         window = { from: to - (range - 1), to:, path: "#{Blog::Site::WRITING}/#{post.slug}" }
         page = page_between.call(**window)
 
-        { post:, range:, **counts(page, window), **breakdowns(page, window), unique_readers: unique_readers(post) }
+        {
+          post:,
+          range:,
+          **counts(page, window),
+          **breakdowns(page, window),
+          first_days: first_days.call(window.fetch(:path)),
+          unique_readers: unique_readers(post),
+        }
       end
 
       private
