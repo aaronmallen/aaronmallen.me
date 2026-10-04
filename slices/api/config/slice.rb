@@ -9,7 +9,7 @@ module API
     config.actions.csrf_protection = false
 
     import keys: %w[
-      operations.snooze_attention queries.activity_between queries.review queries.stalled_list
+      operations.snooze_attention queries.activity_between queries.activity_filters queries.review queries.stalled_list
     ], from: :activity
 
     import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact

@@ -5,38 +5,22 @@ require "dry/monads"
 module API
   module Queries
     class SavedViewActivity
-      DEFAULT_RANGE = Blog::Constants::ACTIVITY_RANGES.first
       FIELDS = %i[repo tag].freeze
-      KINDS = Blog::Constants::ACTIVITY_SCREEN_KINDS
 
       include Dry::Monads[:result]
-      include Deps[activity_between: "activity.queries.activity_between"]
+      include Deps[
+        activity_between: "activity.queries.activity_between", activity_filters: "activity.queries.activity_filters",
+      ]
 
       def call(filters, continue_to: nil, **)
-        first, last = days(filters)
-        search = { types: types(filters["types"]), **Blog::SearchQuery.parse(filters["q"], fields: FIELDS) }
-        day = start(continue_to || Blog::Types::DateParam[filters["day"]], first, last)
+        window = activity_filters.call(
+          from: filters["from"], to: filters["to"], day: continue_to || filters["day"], types: filters["types"],
+        )
+        search = { types: window[:types], **Blog::SearchQuery.parse(filters["q"], fields: FIELDS) }
 
-        Success(Blog::DayWindow.page(first, day, day: :occurred_on.to_proc) do |from, to, limit|
+        Success(Blog::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
           activity_between.call(from:, to:, limit:, **search)
         end)
-      end
-
-      private
-
-      def days(filters)
-        last = Blog::Types::DateParam[filters["to"]] || Blog::TimeZone.today
-        first = Blog::Types::DateParam[filters["from"]] || (last - (DEFAULT_RANGE - 1))
-
-        [[first, last].min, last]
-      end
-
-      def start(picked, first, last) = picked && (first..last).cover?(picked) ? picked : last
-
-      def types(chosen)
-        return KINDS unless chosen.is_a?(::Hash)
-
-        KINDS.select { Blog::Types::Checkbox[chosen[it]] }
       end
     end
   end

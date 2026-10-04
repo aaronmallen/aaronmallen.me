@@ -32,6 +32,18 @@ RSpec.describe "API saved view records", type: :request do
 
   def records(screen = "tasks", query: {}, **filters) = read(create(:saved_view, screen:, filters:).id, query)
 
+  def saved_rows(filters)
+    view = create(:saved_view, screen: "activity", filters:)
+    mcp_answer("read_saved_view", id: view.id).fetch("records").map { it.values_at("date", "name") }
+  end
+
+  def screen_rows(filters)
+    get "/admin/activity", filters
+    Capybara.string(last_response.body).all(".activity-day").flat_map do |day|
+      day.all(".activity-event-name").map { [day.find(".activity-day-date")[:datetime], it.text] }
+    end
+  end
+
   def status = last_response.status
 
   def today = Blog::TimeZone.today
@@ -206,6 +218,30 @@ RSpec.describe "API saved view records", type: :request do
       view = create(:saved_view, screen: "activity", filters: { day: (today - 1).iso8601 })
 
       expect([names(read(view.id)), names(next_window(view.id))]).to eq([["day 1"], ["day 2"]])
+    end
+
+    describe "beside the admin screen" do
+      let(:filters) do
+        {
+          from: (today - 30).iso8601, to: (today - 10).iso8601, day: (today - 12).iso8601,
+          types: { commit: "1", journal: "1" },
+        }
+      end
+
+      before do
+        sign_in_to_admin
+        [11, 12, 15, 31].each { create(:commit, commit_date: today - it, message: "commit #{it}") }
+        create(:journal_entry, entry_date: today - 14, body: "journal 14")
+        create(:post, :published, title: "post 13", published_at: at(today - 13))
+      end
+
+      it "covers the days and kinds the screen shows for the same filters" do
+        shown = [[12, "commit 12"], [14, "journal 14"], [15, "commit 15"]].map do |ago, name|
+          [(today - ago).iso8601, name]
+        end
+
+        expect([screen_rows(filters), saved_rows(filters)]).to eq([shown, shown])
+      end
     end
   end
 
