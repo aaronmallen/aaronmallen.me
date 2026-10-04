@@ -130,6 +130,12 @@ RSpec.describe "Admin decisions", type: :request do
         expect(last_response.location).to end_with("/admin/decisions/#{opened[:id]}")
       end
 
+      it "saves its tags" do
+        send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow", tags: "hosting" })
+
+        expect(reload(Decisions::Slice["relations.decisions"].to_a.last[:id]).tags.map(&:name)).to eq(%w[hosting])
+      end
+
       it "says so" do
         send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
         follow_redirect!
@@ -184,6 +190,13 @@ RSpec.describe "Admin decisions", type: :request do
       it "offers to drop it and not to reopen it", :aggregate_failures do
         expect(page).to have_css("form[action='/admin/decisions/#{decision.id}/drop']")
         expect(page).to have_no_css("form[action='/admin/decisions/#{decision.id}/reopen']")
+      end
+
+      it "shows its tags" do
+        Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, %w[queues])
+        get "/admin/decisions/#{decision.id}"
+
+        expect(page.find(".task-read-meta")).to have_css(".tag", text: "#queues")
       end
 
       it "answers 404 for a decision that isn't there" do
@@ -291,6 +304,29 @@ RSpec.describe "Admin decisions", type: :request do
 
         expect(reload.problem).to eq("Jobs pile up fast")
         expect(last_response.location).to end_with("/admin/decisions/#{decision.id}")
+      end
+
+      it "fills the tags field with its tags" do
+        update(title: "Pick a queue", problem: "Jobs pile up", tags: "queues, ruby")
+        get "/admin/decisions/#{decision.id}/edit"
+
+        expect(page).to have_field("decision[tags]", with: "queues, ruby")
+      end
+
+      it "adds and removes its tags", :aggregate_failures do
+        update(title: "Pick a queue", problem: "Jobs pile up", tags: "queues, ruby")
+        update(title: "Pick a queue", problem: "Jobs pile up", tags: "ruby")
+
+        expect(reload.tags.map(&:name)).to eq(%w[ruby])
+        expect(reload.tags.map(&:scope)).to eq(%w[private])
+      end
+
+      it "refuses a tag that is not a slug beside the field", :aggregate_failures do
+        update(title: "Pick a queue", problem: "Jobs pile up", tags: "two words!")
+
+        expect(last_response.status).to eq(422)
+        expect(page.find_by_id("decision-tags-error").text).to eq(t("ui.components.decisions.field_error.tags.format"))
+        expect(page).to have_field("decision[tags]", with: "two words!")
       end
     end
 

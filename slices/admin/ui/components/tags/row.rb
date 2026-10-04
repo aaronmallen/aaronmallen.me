@@ -6,7 +6,7 @@ module Admin
       module Tags
         class Row < Component
           SEPARATOR = " · "
-          USE_KEYS = %i[posts projects journal_entries tasks].to_h { [it, ".uses.#{it}"] }.freeze
+          USE_KEYS = %i[posts projects journal_entries tasks decisions].to_h { [it, ".uses.#{it}"] }.freeze
 
           prop :tag, Blog::Types::Instance(ROM::Struct)
           prop :uses, Blog::Types::Hash

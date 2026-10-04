@@ -71,6 +71,15 @@ RSpec.describe "Admin task record links", type: :request do
       expect(group("project")).to have_link("aaronmallen.me", href: "/admin/projects/#{project.id}/edit")
     end
 
+    it "lists its decisions, each linking to the decision's page" do
+      decisions = [create(:decision, title: "Pick a host"), create(:decision, title: "Pick a rack")]
+      decisions.each { link_records("decision", it.id) }
+      get "/admin/tasks/#{task.id}"
+
+      expect(group("decision").all("a.record-link-title").map { [it.text, it[:href]] })
+        .to match_array(decisions.map { [it.title, "/admin/decisions/#{it.id}"] })
+    end
+
     it "shows a link stored from the other side" do
       Links::Slice["operations.link_records"].call("post", post_record.id, { other_kind: "task", other_id: task.id })
       get "/admin/tasks/#{task.id}"

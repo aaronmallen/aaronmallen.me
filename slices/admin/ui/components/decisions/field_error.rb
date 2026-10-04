@@ -12,6 +12,7 @@ module Admin
             option_id: { "format" => ".option_id.missing", "missing" => ".option_id.missing" },
             problem: { "blank" => ".problem.blank", "control" => ".control" },
             reason: { "blank" => ".reason.blank", "control" => ".control" },
+            tags: { "format" => ".tags.format" },
             title: { "blank" => ".title.blank", "control" => ".control" },
           }.freeze
 

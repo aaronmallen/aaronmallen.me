@@ -26,6 +26,8 @@ en:
       opened: "Decision opened"
       option_added: "Option added"
       option_saved: "Option saved"
+      record_linked: "Record linked"
+      record_unlinked: "Link removed"
       reopened: "Reopened"
       resolved: "Resolved"
       saved: "Decision saved"
@@ -331,6 +333,8 @@ en:
           problem: "Problem"
           problem_placeholder: "What needs a choice, and why it matters."
           save: "Save"
+          tags: "Tags"
+          tags_placeholder: "hosting, queues"
           title: "Title"
           title_placeholder: "Pick a job queue"
         field_error:
@@ -344,6 +348,8 @@ en:
             blank: "Say what needs a choice."
           reason:
             blank: "Say why."
+          tags:
+            format: "Tags are lowercase words, separated by commas."
           title:
             blank: "Give it a title."
         option_form:
@@ -948,6 +954,9 @@ en:
           save: "Save"
           unused: "unused · the colour is kept"
           uses:
+            decisions:
+              one: "%{count} decision"
+              other: "%{count} decisions"
             journal_entries:
               one: "%{count} journal entry"
               other: "%{count} journal entries"

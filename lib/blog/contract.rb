@@ -19,7 +19,7 @@ module Blog
     end
 
     register_macro(:tag_slugs) do
-      key.failure(FORMAT) unless value.all? { Types::Tag.valid?(it) }
+      key.failure(FORMAT) unless Array(value).all? { Types::Tag.valid?(it) }
     end
   end
 end

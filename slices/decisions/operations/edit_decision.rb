@@ -14,6 +14,7 @@ module Decisions
 
         transaction do
           step revise(step(find(id)), **fields)
+          decision_repo.replace_tags(id, fields[:tags]) if fields.key?(:tags)
           decision_repo.by_id(id)
         end
       end
@@ -25,7 +26,9 @@ module Decisions
         decision ? Success(decision) : Failure(:not_found)
       end
 
-      def revise(decision, title:, problem:, note:)
+      def form(params) = FIELDS.to_h { [it, params[it]] }.merge(params.slice(:tags))
+
+      def revise(decision, title:, problem:, note:, **)
         edited = decision.problem != problem
         return Success(decision) unless edited || decision.title != title
 
@@ -36,7 +39,7 @@ module Decisions
         Success(decision_repo.record(decision.id, EDITED, note: noted ? note : nil))
       end
 
-      def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
+      def validate(params) = validated(contract.call(form(params)))
     end
   end
 end

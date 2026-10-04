@@ -49,6 +49,7 @@ module Links
       when "post" then routes.path(:admin_edit_post, id:)
       when "commit" then routes.path(:admin_commit, id:)
       when "project" then routes.path(:admin_edit_project, id:)
+      when "decision" then routes.path(:admin_decision, id:)
       else listed_url(kind, row)
       end
     end

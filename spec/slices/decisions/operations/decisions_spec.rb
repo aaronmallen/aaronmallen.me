@@ -18,12 +18,21 @@ RSpec.describe "Decisions" do
     call(:resolve_decision, id, { option_id:, reason: })
   end
 
+  def tag_names(id) = reload(id).tags.map(&:name)
+
   describe "opening a decision" do
     it "keeps the title and problem and records an opened event", :aggregate_failures do
       opened = call(:open_decision, { title: "Pick a queue", problem: "Jobs pile up\r\nOften" }).value!
 
       expect(opened).to have_attributes(title: "Pick a queue", problem: "Jobs pile up\nOften", status: "open")
       expect(events(opened.id)).to contain_exactly(include(kind: "opened", option_id: nil, reason: nil))
+    end
+
+    it "keeps its tags as private tags", :aggregate_failures do
+      opened = call(:open_decision, { title: "Pick a queue", problem: "Jobs", tags: "Queues, ruby" }).value!
+
+      expect(opened.tags.map(&:name)).to eq(%w[queues ruby])
+      expect(opened.tags.map(&:scope)).to all(eq("private"))
     end
 
     it "refuses a blank problem and records nothing", :aggregate_failures do
@@ -111,6 +120,43 @@ RSpec.describe "Decisions" do
 
     it "answers not found for a missing decision" do
       expect(call(:edit_decision, 0, { title: "Pick a queue", problem: "Jobs" }).failure).to eq(:not_found)
+    end
+
+    describe "its tags" do
+      def edit(**) = call(:edit_decision, decision.id, { title: "Pick a queue", problem: "Jobs pile up", ** })
+
+      before { edit(tags: "hosting, queues") }
+
+      it "adds them" do
+        expect(tag_names(decision.id)).to eq(%w[hosting queues])
+      end
+
+      it "removes the ones left out" do
+        edit(tags: "queues")
+
+        expect(tag_names(decision.id)).to eq(%w[queues])
+      end
+
+      it "keeps them when the edit leaves them out" do
+        edit
+
+        expect(tag_names(decision.id)).to eq(%w[hosting queues])
+      end
+
+      it "records no event for a tag change" do
+        expect(events(decision.id)).to be_empty
+      end
+
+      it "refuses a tag that is not a slug" do
+        expect(edit(tags: "two words!").failure).to eq([:invalid, { tags: ["format"] }])
+      end
+
+      it "takes a tag change on a closed decision with no note" do
+        drop
+        edit(tags: "")
+
+        expect(tag_names(decision.id)).to be_empty
+      end
     end
 
     context "when the decision is closed" do
@@ -247,6 +293,14 @@ RSpec.describe "Decisions" do
   end
 
   describe "deleting a decision" do
+    it "takes its tags with it and leaves the tags themselves", :aggregate_failures do
+      call(:edit_decision, decision.id, { title: "Pick a queue", problem: "Jobs pile up", tags: "queues" })
+      Decisions::Slice["relations.decisions"].by_pk(decision.id).delete
+
+      expect(Decisions::Slice["relations.decision_tags"].count).to eq(0)
+      expect(Decisions::Slice["relations.tags"].by_names(%w[queues]).count).to eq(1)
+    end
+
     it "takes its options and events with it", :aggregate_failures do
       resolve
       Decisions::Slice["relations.decisions"].by_pk(decision.id).delete
@@ -259,6 +313,17 @@ RSpec.describe "Decisions" do
   describe "the rules Postgres holds" do
     let(:decisions) { Decisions::Slice["relations.decisions"] }
     let(:event_rows) { Decisions::Slice["relations.decision_events"] }
+    let(:tag_rows) { Decisions::Slice["relations.decision_tags"] }
+
+    it "refuses a decision tag that points at a public tag" do
+      expect { tag_rows.insert(decision_id: decision.id, tag_id: create(:tag).id) }
+        .to raise_error(Sequel::ForeignKeyConstraintViolation, /decision_tags_tag_id_fkey/)
+    end
+
+    it "refuses a decision tag that claims the public scope" do
+      expect { tag_rows.insert(decision_id: decision.id, tag_id: create(:tag).id, tag_scope: "public") }
+        .to raise_error(Sequel::CheckConstraintViolation, /decision_tags_tag_scope_check/)
+    end
 
     it "refuses a choice from another decision" do
       other = create(:decision_option)

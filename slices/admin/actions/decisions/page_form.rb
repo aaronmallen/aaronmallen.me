@@ -12,11 +12,11 @@ module Admin
         def decision_params(request) = Blog::Types::Fields[request.params[:decision]]
 
         def refuse_form(request, response, form)
-          decision = decision_by_id.call(record_id(request))
-          halt 404 unless decision
+          page = build_decision_page.call(record_id(request), form:)
+          halt 404 unless page
 
           response.status = 422
-          response.render(show_view, decision:, form:)
+          response.render(show_view, **page)
         end
 
         def to_decision(request, response, key)

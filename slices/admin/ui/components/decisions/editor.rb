@@ -14,12 +14,7 @@ module Admin
 
           def view_template
             Form(action: form_action, class: "form-stack") do
-              Card(label: t(".label"), title: t(@decision ? ".edit_title" : ".new_title")) do
-                div(class: "form-stack") do
-                  title_field
-                  problem_field
-                end
-              end
+              fields
               note if closed?
               div { Button(variant: :pri, type: "submit") { t(@decision ? ".save" : ".open") } }
             end
@@ -28,6 +23,16 @@ module Admin
           private
 
           def closed? = @decision&.closed? || false
+
+          def fields
+            Card(label: t(".label"), title: t(@decision ? ".edit_title" : ".new_title")) do
+              div(class: "form-stack") do
+                title_field
+                problem_field
+                tags_field
+              end
+            end
+          end
 
           def form_action = @decision ? path(:admin_update_decision, id: @decision.id) : path(:admin_create_decision)
 
@@ -43,6 +48,16 @@ module Admin
           def problem_props
             { name: "decision[problem]", value: @values[:problem], height: HEIGHT, renderer: RENDERER,
               label: t(".problem"), placeholder: t(".problem_placeholder"), data: { edit_note_watch: "" } }
+          end
+
+          def tags_field
+            Field(label: t(".tags"), id: FieldError.id_for(:tags)) do
+              Input(
+                name: "decision[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"),
+                **FieldError.control_attributes(:tags, @errors),
+              )
+              FieldError(field: :tags, errors: @errors)
+            end
           end
 
           def title_attributes

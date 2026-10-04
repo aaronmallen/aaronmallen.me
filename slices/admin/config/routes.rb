@@ -33,6 +33,11 @@ module Admin
       "/decisions/:id/options/:option_id",
       to: "decisions.update_option", as: :update_decision_option, id: ID, option_id: ID,
     )
+    post "/decisions/:id/records", to: "decisions.link_record", as: :link_decision_record, id: ID
+    post(
+      "/decisions/:id/records/:other_kind/:other_id/delete",
+      to: "decisions.unlink_record", as: :unlink_decision_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
     post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
     get "/journal", to: "journal.index", as: :journal

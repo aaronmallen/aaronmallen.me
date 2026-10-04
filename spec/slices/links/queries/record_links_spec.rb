@@ -84,11 +84,12 @@ RSpec.describe Links::Queries::RecordLinks do
       expect(only("work_entry")).to have_attributes(title: "Engineer, Acme", url: "/admin/projects?filter=work")
     end
 
-    it "names a decision by its title" do
+    it "names a decision by its title and links to its page" do
       other = create(:decision, title: "Pick a rack")
       link("decision", other.id)
 
-      expect(only("decision")).to have_attributes(id: other.id, title: "Pick a rack")
+      expect(only("decision")).to have_attributes(id: other.id, title: "Pick a rack",
+                                                  url: "/admin/decisions/#{other.id}")
     end
 
     it "cuts a long title" do

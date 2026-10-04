@@ -9,11 +9,13 @@ module Decisions
         required(:title).value(Blog::Types::TrimmedText, :filled?)
         required(:problem).value(Blog::Types::Normalized::Lines, :filled?)
         optional(:note).value(Blog::Types::TrimmedText, max_size?: NOTE_LIMIT)
+        optional(:tags).value(Blog::Types::TagList)
       end
 
       rule(:title).validate(:without_controls)
       rule(:problem).validate(:without_controls)
       rule(:note).validate(:without_controls)
+      rule(:tags).validate(:tag_slugs)
     end
   end
 end

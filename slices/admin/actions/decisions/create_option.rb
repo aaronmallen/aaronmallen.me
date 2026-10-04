@@ -10,7 +10,7 @@ module Admin
         include PageForm
         include Deps[
           add_decision_option: "decisions.operations.add_decision_option",
-          decision_by_id: "decisions.queries.by_id",
+          build_decision_page: "operations.build_decision_page",
           show_view: "ui.views.decisions.show",
         ]
 

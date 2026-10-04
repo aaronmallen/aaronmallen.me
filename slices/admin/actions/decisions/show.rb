@@ -4,13 +4,13 @@ module Admin
   module Actions
     module Decisions
       class Show < Action
-        include Deps[decision_by_id: "decisions.queries.by_id"]
+        include Deps[build_decision_page: "operations.build_decision_page"]
 
         def handle(request, response)
-          decision = decision_by_id.call(record_id(request))
-          not_found(response) unless decision
+          page = build_decision_page.call(record_id(request), records: { query: request.params[:record_q] })
+          not_found(response) unless page
 
-          response.render(view, decision:, form: Blog::Constants::EMPTY_HASH)
+          response.render(view, **page)
         end
       end
     end
