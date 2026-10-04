@@ -6,7 +6,7 @@ RSpec.describe "Social webmentions", type: :request do
   let(:target) { "https://aaronmallen.me/writing/hello" }
   let(:webmention_repo) { Social::Slice["repos.webmention_repo"] }
 
-  before { create(:post, :published, slug: "hello") }
+  let!(:article) { create(:post, :published, slug: "hello") }
 
   def notify(**params) = post("/webmention", { source:, target: }.merge(params))
 
@@ -83,37 +83,36 @@ RSpec.describe "Social webmentions", type: :request do
   end
 
   describe "a target whose slug is no slug" do
-    let(:post_repo) { Posts::Slice["repos.post_repo"] }
-
-    before do
-      allow(post_repo).to receive(:published_by_slug).and_call_original
-      replace_component("repos.post_repo", post_repo)
-    end
+    def receipt_post_ids = Social::Slice["relations.webmention_receipts"].pluck(:post_id)
 
     {
-      "bytes that are not UTF-8" => "%FF",
-      "a capital letter" => "Hello",
-      "an escaped space" => "hello%20there",
-      "an escaped slash" => "hello%2Fthere",
-      "a reserved word" => "tags",
-    }.each do |what, slug|
-      it "rejects #{what} without looking for a post", :aggregate_failures do
-        notify(target: "https://aaronmallen.me/writing/#{slug}")
+      "bytes that are not UTF-8" => ["%FF", nil],
+      "a capital letter" => %w[Hello Hello],
+      "an escaped space" => ["hello%20there", "hello there"],
+      "an escaped slash" => ["hello%2Fthere", "hello/there"],
+      "a reserved word" => %w[tags tags],
+    }.each do |what, (escaped, slug)|
+      it "rejects #{what} even when a post has it", :aggregate_failures do
+        create(:post, :published, slug:) if slug
+        notify(target: "https://aaronmallen.me/writing/#{escaped}")
 
         expect([last_response.status, queued]).to eq([400, []])
-        expect(post_repo).not_to have_received(:published_by_slug)
+        expect(receipts).to eq(0)
       end
     end
 
-    it "looks up a slug that is valid" do
+    it "takes the post a valid slug names" do
       notify
 
-      expect(post_repo).to have_received(:published_by_slug).with("hello")
+      expect(receipt_post_ids).to eq([article.id])
     end
   end
 
   describe "one sender's notifications arriving together", :commits do
-    before { lower_throttle_limit(:webmentions, to: 2) }
+    before do
+      Hanami.app.start(:honeybadger)
+      lower_throttle_limit(:webmentions, to: 2)
+    end
 
     it "stores and queues no more than the limit", :aggregate_failures do
       statuses = sent_together(5)

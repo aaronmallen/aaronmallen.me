@@ -2,6 +2,9 @@
 
 RSpec.describe "Admin posts", type: :request do
   let(:page) { Capybara.string(last_response.body) }
+  let(:today) { Blog::TimeZone.today }
+
+  def dated(day) = day.strftime("%b %-d, %Y")
 
   def sub_line(head, views: 0, visitors: 0, readers: "0 unique readers", read_throughs: 0)
     [head, "#{views} views", "#{visitors} visitors", readers, "#{read_throughs} read-throughs"].join(" · ")
@@ -10,10 +13,7 @@ RSpec.describe "Admin posts", type: :request do
   def titles = page.all(".li-title").map(&:text)
 
   describe "signed in" do
-    before do
-      sign_in_to_admin
-      allow(Analytics::Readers).to receive(:window_opened_at).and_return(Time.utc(2026, 1, 1))
-    end
+    before { sign_in_to_admin }
 
     describe "paging" do
       before do
@@ -163,17 +163,17 @@ RSpec.describe "Admin posts", type: :request do
     end
 
     it "shows the path, publish date, word count, views and visitors under the title" do
-      create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 7, 12))
+      create(:post, :published, slug: "hello", body: "one two three", published_at: days_ago(27))
       get "/admin/posts"
 
-      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · Sep 7, 2026 · 3 words"))
+      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · #{dated(today - 27)} · 3 words"))
     end
 
     describe "with rolled up views" do
-      let(:today) { Blog::TimeZone.today }
+      let(:head) { "/writing/hello · #{dated(today - 27)} · 3 words" }
 
       before do
-        create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 7, 12))
+        create(:post, :published, slug: "hello", body: "one two three", published_at: days_ago(27))
         create(:post, :draft, slug: "unseen", body: "one", updated_at: Time.utc(2026, 9, 1, 12))
         create(:analytics_rollup, day: today)
         create(:analytics_rollup, day: today - 400)
@@ -194,12 +194,12 @@ RSpec.describe "Admin posts", type: :request do
         create(:analytics_rollup_path, day: today - 89, path: "/writing/hello", views: 3, visitors: 2, bounces: 0)
         get "/admin/posts"
 
-        sub = sub_line("/writing/hello · Sep 7, 2026 · 3 words", views: 11, visitors: 7, read_throughs: 4)
+        sub = sub_line(head, views: 11, visitors: 7, read_throughs: 4)
         expect(page).to have_css(".li-sub", exact_text: sub)
       end
 
       it "adds up the rolled up days inside the window, leaving out the day before it" do
-        sub = sub_line("/writing/hello · Sep 7, 2026 · 3 words", views: 8, visitors: 5, read_throughs: 4)
+        sub = sub_line(head, views: 8, visitors: 5, read_throughs: 4)
         expect(page).to have_css(".li-sub", exact_text: sub)
       end
 
@@ -209,7 +209,6 @@ RSpec.describe "Admin posts", type: :request do
     end
 
     describe "with today's views not rolled up yet" do
-      let(:today) { Blog::TimeZone.today }
       let!(:post) do
         create(:post, :published, slug: "hello", published_at: Blog::TimeZone.day_start(today - 1) + 43_200)
       end
@@ -269,7 +268,7 @@ RSpec.describe "Admin posts", type: :request do
       def readership(slug) = page.find(".li-sub", text: "/writing/#{slug} ").text.split(" · ")[5]
 
       it "counts the readers of a post in its first 12 months" do
-        post("hello", Time.utc(2026, 9, 7, 12))
+        post("hello", days_ago(27))
         2.times { create(:post_reader_hash, path: "/writing/hello") }
         get "/admin/posts"
 
@@ -277,7 +276,7 @@ RSpec.describe "Admin posts", type: :request do
       end
 
       it "marks a saved count as final" do
-        post("old", Time.utc(2025, 6, 1, 12))
+        post("old", days_ago(400))
         create(:post_reader_count, path: "/writing/old", readers: 1)
         get "/admin/posts"
 
@@ -285,7 +284,7 @@ RSpec.describe "Admin posts", type: :request do
       end
 
       it "says a post older than 12 months with no saved count has none" do
-        post("old", Time.utc(2025, 6, 1, 12))
+        post("old", days_ago(400))
         get "/admin/posts"
 
         expect(readership("old")).to eq("no unique reader count")
@@ -300,10 +299,11 @@ RSpec.describe "Admin posts", type: :request do
     end
 
     it "dates a post by its Chicago day" do
-      create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 8, 3))
+      late = Blog::TimeZone.day_start(today - 27) + (22 * 3_600)
+      create(:post, :published, slug: "hello", body: "one two three", published_at: late)
       get "/admin/posts"
 
-      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · Sep 7, 2026 · 3 words"))
+      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · #{dated(today - 27)} · 3 words"))
     end
 
     it "dates a draft by its last edit" do

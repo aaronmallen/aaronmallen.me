@@ -20,16 +20,6 @@ RSpec.describe "Admin tasks", type: :request do
 
   def titles = page.all(".task-title, .li-title").map(&:text)
 
-  def watch_carry_forward
-    allow(repo).to receive(:carry_forward).and_call_original
-    replace_component("repos.task_repo", repo)
-  end
-
-  def watch_finished
-    allow(repo).to receive(:finished).and_call_original
-    replace_component("repos.task_repo", repo)
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 
@@ -140,20 +130,25 @@ RSpec.describe "Admin tasks", type: :request do
         expect(page.all(".subtab-count").map(&:text).last).to eq("1")
       end
 
-      %w[today upcoming next someday].each do |filter|
-        it "reads no finished task on the #{filter} tab" do
-          watch_finished
+      {
+        "today" => -> { { list: nil, sprint_id: sprint_repo.claim(Blog::TimeZone.today).id } },
+        "upcoming" => -> { { list: nil, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id } },
+        "next" => -> { { list: "next" } },
+        "someday" => -> { { list: "someday" } },
+      }.each do |filter, placed|
+        it "lists no finished task on the #{filter} tab" do
+          create(:task, :done, title: "Filed already", **instance_exec(&placed))
           get "/admin/tasks", filter: filter
 
-          expect(repo).not_to have_received(:finished)
+          expect(titles).not_to include("Filed already")
         end
       end
 
-      it "reads the finished tasks on the completed tab" do
-        watch_finished
+      it "lists the finished tasks on the completed tab" do
+        create(:task, :done, title: "Filed already")
         get "/admin/tasks", filter: "completed"
 
-        expect(repo).to have_received(:finished)
+        expect(titles).to include("Filed already")
       end
 
       it "dates the sprint in the page sub" do
@@ -698,17 +693,18 @@ RSpec.describe "Admin tasks", type: :request do
       end
 
       it "carries the day's work forward once" do
-        watch_carry_forward
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
         capture("Ship the screen", filter: "today")
 
-        expect(repo).to have_received(:carry_forward).once
+        expect(repo.by_id(task.id).carried_count).to eq(1)
       end
 
       it "carries nothing forward when it comes back with the form" do
-        watch_carry_forward
+        yesterday = create(:sprint, sprint_date: Blog::TimeZone.today - 1)
+        task = create(:task, :in_sprint, sprint_id: yesterday.id)
         capture("", filter: "today")
 
-        expect(repo).not_to have_received(:carry_forward)
+        expect(repo.by_id(task.id)).to have_attributes(sprint_id: yesterday.id, carried_count: 0)
       end
 
       it "comes back to the list that was open" do

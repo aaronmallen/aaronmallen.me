@@ -238,12 +238,11 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         .with(body: { identifier: "ada.example", password: "secret" })).to have_been_made
     end
 
-    it "writes the record to the author's repo under the TID for the part" do
+    it "writes the record to the author's feed" do
       deliver(social_post, "bluesky")
 
       expect(bluesky_writes.first).to include("collection" => "app.bsky.feed.post",
-                                              "repo" => SocialNetworks::BLUESKY_DID,
-                                              "rkey" => rkey(social_post, 1))
+                                              "repo" => SocialNetworks::BLUESKY_DID)
     end
 
     it "writes the record under a key Bluesky takes as a TID" do
@@ -361,7 +360,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "records the AT URI and the bsky.app URL" do
       deliver(social_post, "bluesky")
-      tid = rkey(social_post, 1)
+      tid = bluesky_writes.first.fetch("rkey")
 
       expect(delivery(social_post, "bluesky")).to have_attributes(
         remote_ids: [bluesky_uri(tid)], remote_url: "https://bsky.app/profile/ada.example/post/#{tid}",
@@ -383,7 +382,8 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     it "looks the parent up by its URI" do
       deliver(social_post, "bluesky")
 
-      query = { collection: "app.bsky.feed.post", repo: SocialNetworks::BLUESKY_DID, rkey: rkey(social_post, 1) }
+      rkey = bluesky_writes.first.fetch("rkey")
+      query = { collection: "app.bsky.feed.post", repo: SocialNetworks::BLUESKY_DID, rkey: }
 
       expect(a_request(:get, bluesky_url("com.atproto.repo.getRecord")).with(query:)).to have_been_made
     end
@@ -507,12 +507,16 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   end
 
   describe "a retry to Bluesky" do
+    let(:failed) { [] }
     let(:social_post) { queued(targets: %w[bluesky], parts: %w[one two]) }
 
     before do
       stub_bluesky_session
       stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
-      stub_request(:post, bluesky_url("com.atproto.repo.putRecord")).to_return(status: 500)
+      stub_request(:post, bluesky_url("com.atproto.repo.putRecord")).to_return do |request|
+        failed << JSON.parse(request.body).fetch("rkey")
+        { status: 500 }
+      end
     end
 
     it "writes the part again under the key the failed try sent" do
@@ -520,8 +524,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       stub_bluesky_writes
       deliver(social_post, "bluesky")
 
-      expect(a_request(:post, bluesky_url("com.atproto.repo.putRecord"))
-        .with(body: hash_including("rkey" => rkey(social_post, 1)))).to have_been_made.twice
+      expect(bluesky_writes.first.fetch("rkey")).to eq(failed.first)
     end
 
     it "keeps the session from the failed try" do

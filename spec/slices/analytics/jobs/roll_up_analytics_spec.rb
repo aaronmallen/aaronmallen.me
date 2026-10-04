@@ -610,12 +610,6 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
         expect(hashes("/writing/old")).to eq(3)
         expect(saved).to be_empty
       end
-
-      it "tells the operator the reader counts failed" do
-        roll_up_failing
-
-        expect(failure).to include(reason: "readers_failed", message: "PG::DiskFull")
-      end
     end
   end
 
@@ -647,6 +641,15 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       roll_up_failing
 
       expect(failure).to include(reason: "prune_failed")
+    end
+
+    it "tells the operator the reader counts failed, message and all" do
+      reader_repo = Analytics::Slice["repos.post_reader_hash_repo"]
+      allow(reader_repo).to receive(:save_counts).and_raise(Sequel::DatabaseError, "PG::DiskFull")
+      replace_component("repos.post_reader_hash_repo", reader_repo)
+      roll_up_failing
+
+      expect(failure).to include(reason: "readers_failed", message: "PG::DiskFull")
     end
 
     it "still fails the run, so the error reaches the log with its backtrace" do
