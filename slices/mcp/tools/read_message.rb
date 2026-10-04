@@ -8,7 +8,7 @@ module MCP
       SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Read one message sent through the contact form: its subject, body, reply address, status " \
-                  "and when it came in"
+                  "and when it came in. The subject, body and reply address come marked untrusted. #{Untrusted::WARNING}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -19,9 +19,9 @@ module MCP
 
           answer(
             id: message.id,
-            subject: message.subject,
-            body: message.body,
-            reply_to: message.reply_to,
+            subject: Untrusted.call(message.subject),
+            body: Untrusted.call(message.body),
+            reply_to: Untrusted.call(message.reply_to),
             status: message.status,
             received_at: message.received_at.utc.iso8601,
           )

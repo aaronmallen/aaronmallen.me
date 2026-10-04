@@ -159,7 +159,8 @@ module MCP
         "projects, work history, tags, messages, suggestions, analytics, settings and the whole activity feed.",
         "Suggest edits to a post or social post for the owner to accept or reject in the admin. Make any change the",
         "admin makes, publishing, sending and deleting included. A published post or a sent social post cannot be",
-        "called back. The tool list holds only what this connection was granted",
+        "called back. The tool list holds only what this connection was granted.",
+        Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
       TITLE = "%s's writing"

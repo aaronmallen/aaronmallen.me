@@ -50,6 +50,8 @@ module MCP
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
+                  "Each top path gives its latest page title, which the visitor's browser sends, marked untrusted. " \
+                  "#{Untrusted::WARNING}. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
                   "#{Blog::DayWindow::LONGEST} days. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
@@ -161,9 +163,13 @@ module MCP
 
           found.merge(
             breakdowns(range, nil, server_context),
-            paths: found.fetch(:paths).map { it.merge(read_throughs: read_throughs.fetch(it.fetch(:path), 0)) },
+            paths: found.fetch(:paths).map { ranked_path(it, read_throughs) },
             totals: found.fetch(:totals).merge(read_throughs: read_throughs.values.sum),
           )
+        end
+
+        def ranked_path(found, read_throughs)
+          found.merge(title: Untrusted.call(found[:title]), read_throughs: read_throughs.fetch(found.fetch(:path), 0))
         end
 
         def raw(range, at, path, server_context)

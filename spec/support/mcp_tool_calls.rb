@@ -13,6 +13,14 @@ module MCPToolCalls
 
   def mcp_text(name, **) = mcp_call(name, **).fetch("content").first.fetch("text")
 
+  def trusted(value)
+    case value
+    when Hash then value["untrusted"] == true ? value["text"] : value.transform_values { trusted(it) }
+    when Array then value.map { trusted(it) }
+    else value
+    end
+  end
+
   private
 
   def mcp_access_token

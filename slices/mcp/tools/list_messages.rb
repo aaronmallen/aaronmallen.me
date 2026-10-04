@@ -24,7 +24,8 @@ module MCP
 
       description "List the messages people sent through the contact form over a range, newest first: " \
                   "the ID, subject, reply address, status and when it came in. " \
-                  "Read one with read_message for its body. " \
+                  "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
+                  "#{Untrusted::WARNING}. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
@@ -53,8 +54,8 @@ module MCP
         def summary(message)
           {
             id: message.id,
-            subject: message.subject,
-            reply_to: message.reply_to,
+            subject: Untrusted.call(message.subject),
+            reply_to: Untrusted.call(message.reply_to),
             status: message.status,
             received_at: message.received_at.utc.iso8601,
           }

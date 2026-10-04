@@ -341,9 +341,11 @@ RSpec.describe "MCP social tools", type: :request do
   describe "list_webmentions" do
     def listed = content.fetch("webmentions")
 
+    def marked(mention) = %i[author_name excerpt].to_h { [it.to_s, { "untrusted" => true, "text" => mention[it] }] }
+
     def range = { from: "2026-03-01", to: "2026-03-31" }
 
-    def shown = %i[post_id type status source_url author_name author_url excerpt]
+    def shown = %i[post_id type status source_url author_url]
 
     it "lists the webmentions received in the range, newest first" do
       older = create(:webmention, received_at: at(Date.new(2026, 3, 2)))
@@ -374,7 +376,7 @@ RSpec.describe "MCP social tools", type: :request do
       mention = create(:webmention, :reply, received_at: at(Date.new(2026, 3, 2)), excerpt: "Nice post")
       call_tool("list_webmentions", **range)
 
-      expect(listed.first).to include(mention.to_h.slice(*shown).transform_keys(&:to_s))
+      expect(listed.first).to include(mention.to_h.slice(*shown).transform_keys(&:to_s).merge(marked(mention)))
     end
 
     it "gives the reason a spam mention was marked" do

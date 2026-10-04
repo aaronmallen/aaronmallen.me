@@ -80,8 +80,9 @@ RSpec.describe "API saved view records", type: :request do
       task = create(:task, title: "linked", tags: %w[ops])
       create(:task_link, from_task_id: create(:task, :done).id, to_task_id: task.id)
       found = records(filter: "next").fetch("records")
+      task_read = trusted(mcp_answer("read_task", id: task.id))
 
-      expect(found).to eq([mcp_answer("read_task", id: task.id).except("comments", "record_links", "timeline")])
+      expect(found).to eq([task_read.except("comments", "record_links", "timeline")])
     end
 
     it "pages as list_tasks does" do

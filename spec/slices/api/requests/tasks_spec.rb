@@ -487,7 +487,7 @@ RSpec.describe "API tasks", type: :request do
       create(:work_session, :closed, task_id: task.id)
       create(:task_event, task_id: task.id)
 
-      expect(read(task.id)).to eq(mcp_answer("read_task", id: task.id))
+      expect(read(task.id)).to eq(trusted(mcp_answer("read_task", id: task.id)))
     end
 
     it "capture as capture_task does" do

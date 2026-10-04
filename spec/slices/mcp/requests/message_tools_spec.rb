@@ -7,6 +7,8 @@ RSpec.describe "MCP contact message tools", type: :request do
 
   def today = Blog::TimeZone.today
 
+  def untrusted(text) = { "untrusted" => true, "text" => text }
+
   describe "list_messages" do
     def listed(from: today - 6, to: today, **)
       mcp_answer("list_messages", from: from.iso8601, to: to.iso8601, **).fetch("messages")
@@ -29,7 +31,7 @@ RSpec.describe "MCP contact message tools", type: :request do
 
     it "says what the admin list shows" do
       message = create(:message, :read, subject: "Hello", reply_to: "someone@example.com", received_at: at(today, 0, 5))
-      shown = { "subject" => "Hello", "reply_to" => "someone@example.com", "status" => "read" }
+      shown = { "subject" => untrusted("Hello"), "reply_to" => untrusted("someone@example.com"), "status" => "read" }
 
       expect(listed.first).to eq("id" => message.id, **shown, "received_at" => at(today, 0, 5).utc.iso8601)
     end
@@ -56,8 +58,8 @@ RSpec.describe "MCP contact message tools", type: :request do
       message = create(:message, subject: "Hi", body: "I liked the post", reply_to: "a@example.com")
 
       expect(mcp_answer("read_message", id: message.id)).to include(
-        "id" => message.id, "subject" => "Hi", "body" => "I liked the post", "reply_to" => "a@example.com",
-        "status" => "unread",
+        "id" => message.id, "subject" => untrusted("Hi"), "body" => untrusted("I liked the post"),
+        "reply_to" => untrusted("a@example.com"), "status" => "unread",
       )
     end
 

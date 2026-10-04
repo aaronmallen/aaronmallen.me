@@ -81,9 +81,9 @@ module MCP
           Blog::Types::TagScope.values.map { tag_usage(server_context).call(scope: it) }.reduce(:merge)
         end
 
-        def hand_over(endpoint, input, server_context)
+        def hand_over(endpoint, input, server_context, &shape)
           case server_context.fetch(endpoint).call(input)
-          in Success(payload) then answer(payload)
+          in Success(payload) then answer(shape ? yield(payload) : payload)
           in Failure(refusal) then refuse(refusal.message)
           end
         end

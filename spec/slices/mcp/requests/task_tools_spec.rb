@@ -35,6 +35,8 @@ RSpec.describe "MCP task tools", type: :request do
 
   def today = Blog::TimeZone.today
 
+  def untrusted(text) = { "untrusted" => true, "text" => text }
+
   describe "list_tasks" do
     it "lists tasks in every status when it names none" do
       create(:task, title: "open")
@@ -203,7 +205,7 @@ RSpec.describe "MCP task tools", type: :request do
         create(:task_comment, task_id: task.id, body: "first", created_at: at(today, 9))
         call_tool("read_task", id: task.id)
 
-        expect(comments.map { it.fetch("body") }).to eq(%w[first second])
+        expect(comments.map { it.dig("body", "text") }).to eq(%w[first second])
       end
 
       it "leaves out another task's comments" do
@@ -217,7 +219,7 @@ RSpec.describe "MCP task tools", type: :request do
         create(:task_comment, task_id: task.id, body: "mine", created_at: at(today, 9))
         call_tool("read_task", id: task.id)
 
-        expect(comments.first).to include(local_entry("mine", at(today, 9)))
+        expect(comments.first).to include(local_entry("mine", at(today, 9)).merge("body" => untrusted("mine")))
       end
 
       it "names the provider, author and link of a synced comment" do
@@ -250,7 +252,7 @@ RSpec.describe "MCP task tools", type: :request do
       call_tool("add_task_comment", id: task.id, body: "Blocked on review")
       call_tool("read_task", id: task.id)
 
-      expect(content.fetch("comments").map { it.fetch("body") }).to eq(["Blocked on review"])
+      expect(content.fetch("comments").map { it.fetch("body") }).to eq([untrusted("Blocked on review")])
     end
 
     it "refuses an empty body and adds nothing", :aggregate_failures do

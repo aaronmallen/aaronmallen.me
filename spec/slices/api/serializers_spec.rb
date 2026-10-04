@@ -12,7 +12,7 @@ RSpec.describe "API serializers", type: :request do
     post "/mcp", JSON.generate(body), headers
   end
 
-  def content = JSON.parse(JSON.parse(last_response.body).dig("result", "content", 0, "text"))
+  def content = trusted(JSON.parse(JSON.parse(last_response.body).dig("result", "content", 0, "text")))
 
   def serialized(serializer, object, **params) = JSON.parse(serializer.new(object, params:).serialize)
 
