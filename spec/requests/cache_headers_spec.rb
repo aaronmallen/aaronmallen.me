@@ -49,6 +49,30 @@ RSpec.describe "Cache headers", type: :request do
     end
   end
 
+  describe "a feed a visitor asked for" do
+    before do
+      create(:post, :published, tags: ["ruby"])
+      get "/writing.atom"
+    end
+
+    it "tells a shared cache not to keep it" do
+      expect(cache_control).to eq("private, no-cache")
+    end
+
+    it "tells a shared cache not to keep the 304 either", :aggregate_failures do
+      get "/writing.atom", {}, "HTTP_IF_NONE_MATCH" => last_response.headers["ETag"]
+
+      expect(last_response.status).to eq(304)
+      expect(cache_control).to eq("private, no-cache")
+    end
+
+    it "tells a shared cache not to keep a tag feed" do
+      get "/writing/tags/ruby.atom"
+
+      expect(cache_control).to eq("private, no-cache")
+    end
+  end
+
   describe "a public page a visitor asked for" do
     before { get "/" }
 

@@ -5,9 +5,16 @@ module Analytics
     class PruneAnalyticsEvents < Blog::Operation
       RETENTION_DAYS = 90
 
-      include Deps[event_repo: "repos.analytics_event_repo", rollup_repo: "repos.analytics_rollup_repo"]
+      include Deps[
+        event_repo: "repos.analytics_event_repo",
+        feed_repo: "repos.feed_fetch_repo",
+        rollup_repo: "repos.analytics_rollup_repo",
+      ]
 
-      def call = event_repo.delete_before(Blog::TimeZone.day_start(rolled_up_through(cutoff)))
+      def call
+        feed_repo.delete_hashes_before(cutoff)
+        event_repo.delete_before(Blog::TimeZone.day_start(rolled_up_through(cutoff)))
+      end
 
       private
 

@@ -13,7 +13,12 @@ module Public
     SAME_ORIGIN_FETCHES = %w[none same-origin].freeze
     SHARED_CACHE_LIFETIME = 300
 
-    include Deps[session_reader: "admin.auth.session_reader", version_atom_feed: "operations.version_atom_feed"]
+    include Deps[
+      "operations.find_visitor_address",
+      record_feed_fetch: "analytics.operations.record_feed_fetch",
+      session_reader: "admin.auth.session_reader",
+      version_atom_feed: "operations.version_atom_feed",
+    ]
 
     config.formats.accept :html
 
@@ -30,6 +35,15 @@ module Public
 
     private
 
+    def count_feed_fetch(request)
+      record_feed_fetch.call(
+        path: request.path,
+        address: find_visitor_address.call(request),
+        user_agent: request.get_header("HTTP_USER_AGENT"),
+        signed_in: session_reader.call(request).signed_in?,
+      )
+    end
+
     def cross_site?(request)
       fetch_site = request.get_header("HTTP_SEC_FETCH_SITE")
       return !SAME_ORIGIN_FETCHES.include?(fetch_site) if fetch_site
@@ -45,6 +59,10 @@ module Public
       return if request.get_header(IF_NONE_MATCH)
 
       halt NOT_MODIFIED if unchanged_since?(modified_since(request), last_modified)
+    end
+
+    def keep_feed_from_caches(response)
+      response.cache_control(:private, :no_cache) unless response.headers.key?(CACHE_CONTROL)
     end
 
     def keep_response_header?(header) = super || NOT_MODIFIED_HEADERS.include?(header.downcase)
@@ -78,6 +96,8 @@ module Public
     def unchanged_since?(since, last_modified) = since && last_modified && since.to_i >= last_modified.to_time.to_i
 
     def version_feed_or_halt(request, response, posts)
+      count_feed_fetch(request)
+      keep_feed_from_caches(response)
       version = version_atom_feed.call(posts)
       halt_if_feed_unchanged(request, response, version)
       version

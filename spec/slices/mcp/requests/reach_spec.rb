@@ -41,6 +41,7 @@ RSpec.describe "MCP reach", type: :request do
       "analytics.operations.hash_reader" => "hashes a post's reader as a view comes in",
       "analytics.operations.hash_visitor" => "hashes a visitor as a request comes in",
       "analytics.operations.prune_analytics_events" => "a background job prunes old visits after the roll up",
+      "analytics.operations.record_feed_fetch" => "counts a feed fetch as a feed reader polls",
       "analytics.operations.record_visit" => "records a visit as a reader's browser reports it",
       "analytics.operations.refresh_country_database" => "a background job refreshes the country database",
       "analytics.operations.roll_up_analytics" => "a background job rolls up the day's visits",

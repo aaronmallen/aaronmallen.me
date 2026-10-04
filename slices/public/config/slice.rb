@@ -8,7 +8,9 @@ module Public
 
     import keys: %w[auth.session_reader], from: :admin
 
-    import keys: %w[contracts.visit_contract operations.hash_visitor operations.record_visit], from: :analytics
+    import keys: %w[
+      contracts.visit_contract operations.hash_visitor operations.record_feed_fetch operations.record_visit
+    ], from: :analytics
 
     import keys: %w[operations.create_message], from: :contact
 
