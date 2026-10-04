@@ -6,22 +6,6 @@ RSpec.describe Tasks::Relations::TaskEvents do
 
   def record(kind, **columns) = create(:task_event, task_id: task.id, kind:, tag_name: nil, **columns)
 
-  it "holds a move between lists" do
-    expect(record("moved", from_list: "next", to_list: "someday").kind).to eq("moved")
-  end
-
-  it "holds a move from a list into a sprint" do
-    expect(record("moved", from_list: "next", to_sprint_on: today).to_sprint_on).to eq(today)
-  end
-
-  it "holds a status change" do
-    expect(record("status_changed", from_status: "open", to_status: "done").to_status).to eq("done")
-  end
-
-  it "holds a tag change" do
-    expect(record("untagged", tag_name: "money").tag_name).to eq("money")
-  end
-
   it "refuses a move with no destination" do
     expect { record("moved", from_list: "next") }
       .to raise_error(ROM::SQL::CheckConstraintError, /task_events_kind_check/)

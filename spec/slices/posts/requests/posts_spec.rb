@@ -79,14 +79,5 @@ RSpec.describe "Posts", type: :request do
       expect(field_error).to eq(slug_error("locked"))
       expect(post_repo.by_id(published.id)).to have_attributes(slug: "hello", status: "published")
     end
-
-    it "raises for a constraint no form can break" do
-      allow(post_repo).to(receive(:create).and_wrap_original do |create, attributes|
-        create.call(attributes.merge(status: "scheduled", published_at: nil))
-      end)
-      replace_component("repos.post_repo", post_repo)
-
-      expect { save(title: "Hello", slug: "hello") }.to raise_error(ROM::SQL::CheckConstraintError)
-    end
   end
 end

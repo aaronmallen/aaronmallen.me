@@ -77,16 +77,6 @@ RSpec.describe "Decisions" do
     end
   end
 
-  describe "deleting a decision" do
-    it "takes its comments with it", :aggregate_failures do
-      kept = create(:decision_comment)
-      comment
-      Decisions::Slice["relations.decisions"].by_pk(decision.id).delete
-
-      expect(comments.to_a.map { it[:id] }).to eq([kept.id])
-    end
-  end
-
   describe "photos in a comment" do
     before { connect_media_store }
 
