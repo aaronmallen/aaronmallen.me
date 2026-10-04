@@ -145,6 +145,8 @@ en:
       linked: "Tasks linked"
       moved: "Moved"
       pulled_in: "Pulled into today's sprint"
+      record_linked: "Record linked"
+      record_unlinked: "Link removed"
       reopened: "Reopened"
       saved: "Task saved"
       scheduled: "Scheduled for the %{date} sprint"
@@ -747,6 +749,35 @@ en:
           archived: "archived"
           paused: "paused"
           wip: "wip"
+      record_links:
+        field_error:
+          other_id:
+            format: "Pick a record from the list."
+            missing: "That record is gone. Find another."
+            self: "A record cannot link to itself."
+            task_pair: "Link two tasks from the Links section."
+            taken: "These two are already linked."
+          other_kind:
+            format: "Pick a record from the list."
+        kinds:
+          commit: "Commits"
+          decision: "Decisions"
+          journal_entry: "Journal entries"
+          post: "Posts"
+          project: "Projects"
+          social_post: "Social posts"
+          task: "Tasks"
+          work_entry: "Work entries"
+        picker:
+          find: "Search"
+          label: "Link a record"
+          no_match: "No unlinked record matches."
+          placeholder: "Post, commit, project…"
+        section:
+          empty: "Nothing linked yet."
+          label: "Records"
+          remove: "Remove the link to %{title}"
+          title: "Linked"
       ships_next_card:
         empty: "Nothing scheduled."
         title: "What ships next"

@@ -1403,6 +1403,122 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  describe "linking records" do
+    let(:task) { repo.all_open.find { it.title == "Email the accountant" } }
+    let!(:post_record) { create(:post, title: "Filing the quarterly taxes") }
+
+    def find_record(query)
+      within(".record-picker") do
+        fill_in(picker(:label), with: query)
+        click_button(picker(:find))
+      end
+      find(".record-picker-target", text: "Filing the quarterly taxes")
+    end
+
+    def linked = Links::Slice["queries.record_links"].call("task", task.id)
+
+    def picker(name) = translate(["ui.components.record_links.picker", name].join("."))
+
+    def remove_label = translate("ui.components.record_links.section.remove", title: "Filing the quarterly taxes")
+
+    describe "in the panel" do
+      before do
+        open_task("Email the accountant")
+        find_record("quarterly")
+      end
+
+      it "finds the record without leaving the panel", :aggregate_failures do
+        expect(panel).to have_css(".record-picker-target", text: "Filing the quarterly taxes")
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+      end
+
+      it "links the record I pick", :aggregate_failures do
+        find(".record-picker-target", text: "Filing the quarterly taxes").click
+
+        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.record_linked"))
+        expect(linked.fetch("post").map(&:id)).to eq([post_record.id])
+      end
+
+      it "spans a phone with the matches and no sideways scroll", :aggregate_failures do
+        page.driver.resize(375, 800)
+
+        expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.querySelector('#task-panel'))"))
+          .to be(false)
+        expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+      end
+    end
+
+    describe "a linked record in the panel" do
+      before do
+        Links::Slice["operations.link_records"]
+          .call("task", task.id, { other_kind: "post", other_id: post_record.id })
+        open_task("Email the accountant")
+      end
+
+      it "links to the record's page" do
+        expect(panel.find(".record-links"))
+          .to have_link("Filing the quarterly taxes", href: "/admin/posts/#{post_record.id}/edit")
+      end
+
+      it "removes it", :aggregate_failures do
+        click_button(remove_label)
+
+        expect(page).to have_css(".toast", text: translate("tasks_page.toasts.record_unlinked"))
+        expect(linked).to be_empty
+      end
+    end
+
+    describe "with scripts off" do
+      def open_page = find(".task", text: "Email the accountant").find(".task-title").click
+
+      def pick
+        find(".record-picker-target", text: "Filing the quarterly taxes").click
+        find(".toast", text: translate("tasks_page.toasts.record_linked"), visible: :all)
+      end
+
+      before do
+        scripts_off
+        open_page
+        find_record("quarterly")
+      end
+
+      after { scripts_on }
+
+      it "finds on the task's page" do
+        expect(page).to have_current_path(%r{\A/admin/tasks/#{task.id}\?.*record_q=quarterly})
+      end
+
+      it "links the record I pick" do
+        pick
+
+        expect(linked.fetch("post").map(&:id)).to eq([post_record.id])
+      end
+
+      it "removes a link" do
+        pick
+        open_page
+        click_button(remove_label)
+        find(".toast", text: translate("tasks_page.toasts.record_unlinked"), visible: :all)
+
+        expect(linked).to be_empty
+      end
+    end
+
+    describe "a record linked since the page loaded" do
+      before do
+        open_task("Email the accountant")
+        find_record("quarterly")
+        Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "post", other_id: post_record.id })
+        find(".record-picker-target", text: "Filing the quarterly taxes").click
+      end
+
+      it "says it is linked already beside the picker" do
+        expect(find(".record-picker #task-#{task.id}-record-other-id-error"))
+          .to have_text(translate("ui.components.record_links.field_error.other_id.taken"))
+      end
+    end
+  end
+
   describe "deleting a task" do
     before { open_editor("Email the accountant") }
 

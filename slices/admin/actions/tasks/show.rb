@@ -8,7 +8,7 @@ module Admin
         include Deps[build_task_page: "operations.build_task_page"]
 
         def handle(request, response)
-          case build_task_page.call(record_id(request), query: request.params[:link_q], kind: kind(request))
+          case build_task_page.call(record_id(request), **page_params(request))
           in Success(page) then response.render(view, **page, **return_to(request))
           in Failure(:not_found) then not_found(response)
           else halt 500
@@ -17,7 +17,11 @@ module Admin
 
         private
 
-        def kind(request) = Blog::Types::Text[request.params[:link_kind]]
+        def page_params(request)
+          params = request.params
+
+          { query: params[:link_q], kind: Blog::Types::Text[params[:link_kind]], records: { query: params[:record_q] } }
+        end
       end
     end
   end

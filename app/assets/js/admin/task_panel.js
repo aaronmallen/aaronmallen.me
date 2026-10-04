@@ -29,6 +29,11 @@ function findUrl(form, button) {
   const data = new FormData(form);
   const url = new URL(button.dataset.taskFind, window.location.href);
 
+  if (form.method === "get") {
+    for (const [name, value] of data) url.searchParams.set(name, value);
+    return url.href;
+  }
+
   url.searchParams.set("link_kind", data.get("link[kind]") ?? "");
   url.searchParams.set("link_q", data.get("link_q") ?? "");
   return url.href;

@@ -17,11 +17,12 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
           }.freeze
 
-          def initialize(task:, note_html:, linking:, timeline:, commenting:, filter:, origin:)
+          def initialize(task:, note_html:, linking:, records:, timeline:, commenting:, filter:, origin:)
             super()
             @task = task
             @note_html = note_html
             @linking = linking
+            @records = records
             @timeline = timeline
             @commenting = commenting
             @filter = filter
@@ -36,6 +37,7 @@ module Admin
               note
               facts
               links
+              linked
               Timeline(task: @task, entries: @timeline, commenting: @commenting, tab: @filter, origin: @origin)
             end
           end
@@ -92,6 +94,14 @@ module Admin
           def key = PREFIX + @task.id.to_s
 
           def kicker = [key, reference].compact.join(KICKER_SEPARATOR)
+
+          def linked
+            RecordLinks::Section(
+              records: @records, scope: "task-#{@task.id}-record", fields: { filter: @filter, origin: @origin },
+              id: @task.id, unlink_route: :admin_unlink_task_record,
+              link_path: path(:admin_link_task_record, id: @task.id), find_path: path(:admin_task, id: @task.id),
+            )
+          end
 
           def links
             Card(label: t(".related"), title: t(".links")) do

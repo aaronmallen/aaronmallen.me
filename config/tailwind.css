@@ -2122,6 +2122,77 @@
   }
 }
 
+@utility record-links {
+  & > .card-body {
+    @apply flex flex-col gap-3;
+  }
+}
+
+@utility record-link-group {
+  @apply flex min-w-0 flex-col gap-1;
+}
+
+@utility record-link-kind {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility record-link-list {
+  @apply flex min-w-0 flex-col;
+}
+
+@utility record-link-row {
+  @apply flex min-w-0 items-center gap-2 border-t border-line py-1.5 first:border-t-0 first:pt-0;
+
+  & > a.record-link-title {
+    @apply no-underline hover:text-accent hover:underline focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap content-center;
+    }
+  }
+}
+
+@utility record-link-title {
+  @apply min-w-0 flex-1 truncate text-ink;
+}
+
+@utility record-link-day {
+  @apply shrink-0 meta;
+}
+
+@utility record-picker {
+  @apply flex flex-col;
+}
+
+@utility record-picker-find {
+  @apply flex items-center gap-2;
+
+  & > input:not([type="hidden"]) {
+    @apply min-w-0 flex-1;
+  }
+}
+
+@utility record-picker-results {
+  @apply mt-2 flex flex-col gap-2;
+
+  & .record-link-list {
+    @apply gap-1;
+  }
+}
+
+@utility record-picker-target {
+  @apply flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-code border border-line px-2.5 py-2;
+  @apply text-left hover:bg-wash focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+
+  & > i {
+    @apply text-ink-muted;
+  }
+}
+
 @utility task-activity {
   & > .card-body {
     @apply flex flex-col gap-3;

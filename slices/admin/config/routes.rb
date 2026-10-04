@@ -7,6 +7,7 @@ module Admin
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
+    RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
 
     use(*Admin::Slice.config.actions.sessions.middleware)
@@ -104,6 +105,11 @@ module Admin
     post "/tasks/:id/links/:other_id/delete", to: "tasks.unlink", as: :unlink_task, id: ID, other_id: ID
     post "/tasks/:id/move/:filter", to: "tasks.move", as: :move_task, id: ID, filter: TASK_FILTER
     post "/tasks/:id/place", to: "tasks.place", as: :place_task, id: ID
+    post "/tasks/:id/records", to: "tasks.link_record", as: :link_task_record, id: ID
+    post(
+      "/tasks/:id/records/:other_kind/:other_id/delete",
+      to: "tasks.unlink_record", as: :unlink_task_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/tasks/:id/reopen", to: "tasks.reopen", as: :reopen_task, id: ID
     post "/tasks/:id/schedule", to: "tasks.schedule", as: :schedule_task, id: ID
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID

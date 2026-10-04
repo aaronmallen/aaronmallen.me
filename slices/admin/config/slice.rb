@@ -43,6 +43,10 @@ module Admin
       queries.sync_failures
     ], from: :record
 
+    import keys: %w[
+      operations.link_records operations.unlink_records queries.find_records queries.record_links
+    ], from: :links
+
     import keys: %w[operations.upload_photo store.client], from: :media
 
     import keys: %w[

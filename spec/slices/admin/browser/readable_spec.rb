@@ -130,7 +130,11 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def screens = pages.merge(calendars, people, person_search, composers, dialogs, journal_editors, selections)
+  def record_search = { "task record search" => "/admin/tasks/#{task.id}?record_q=published" }
+
+  def screens
+    pages.merge(calendars, people, person_search, record_search, composers, dialogs, journal_editors, selections)
+  end
 
   def seed
     seed_analytics
@@ -170,6 +174,7 @@ RSpec.describe "Admin screens", type: :feature do
     create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
     running = create(:task, :in_progress, title: "Ship the phone layout")
     create(:task_link, from_task_id: task.id, to_task_id: running.id)
+    Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "commit", other_id: commit.id })
     create(:task, :done, title: "Something finished a while ago")
   end
 
