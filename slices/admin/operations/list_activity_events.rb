@@ -56,10 +56,10 @@ module Admin
         return if day >= to
 
         counts = activity_counts_by_day.call(from: day, to:, **filters)
-        starts = [to, *page_ends(counts, size).map(&:prev_day)].select { it > day }
-        last = starts.last
+        starts = page_starts(counts, to:, day:, size:)
+        return starts.last if shows_rows?(starts.last, counts:, to:, from:, day:, filters:)
 
-        last == to || counts.keys.min <= last || rows_before?(from, day, filters) ? last : starts[-2]
+        starts[-2]
       end
 
       private
@@ -122,6 +122,10 @@ module Admin
         end
       end
 
+      def page_starts(counts, to:, day:, size:)
+        [to, *page_ends(counts, size).map(&:prev_day)].select { it > day }
+      end
+
       def post_line(row, views)
         i18n.t!(
           "activity_page.sub_lines.post",
@@ -137,6 +141,10 @@ module Admin
         squished = Blog::Whitespace.squish(Blog::Types::Text[name])
 
         Blog::Truncation.cut(squished, keep: NAME_LIMIT)
+      end
+
+      def shows_rows?(start, counts:, to:, from:, day:, filters:)
+        start == to || counts.keys.min <= start || rows_before?(from, day, filters)
       end
 
       def social_line(row)
