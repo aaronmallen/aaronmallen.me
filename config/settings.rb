@@ -8,7 +8,7 @@ module Blog
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
     DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
-    DEFAULT_MEDIA_STORE_REGION = "us-east-1"
+    DEFAULT_STORE_REGION = "us-east-1"
     DEFAULT_THROTTLE_WINDOW_MINUTES = 60
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
@@ -39,6 +39,18 @@ module Blog
       trimmed = value.strip
       trimmed unless trimmed.empty?
     end
+
+    def self.object_store
+      Schema.schema(
+        access_key?: Value,
+        bucket?: Value,
+        endpoint?: Value,
+        path_style?: unless_set(Types::Params::Bool, false),
+        region?: unless_set(Types::String, DEFAULT_STORE_REGION),
+        secret_key?: Value,
+      )
+    end
+    private_class_method :object_store
 
     def self.throttle(limit, **keys)
       Schema.schema(
@@ -71,6 +83,8 @@ module Blog
       journal_days: AttentionLimit,
       someday_days: AttentionLimit,
     )
+
+    setting :backup_store, default: {}, constructor: object_store
 
     setting :bluesky, default: {}, constructor: Schema.schema(app_password?: Value, handle?: Value, profile_url?: Value)
 
@@ -108,14 +122,7 @@ module Blog
 
     setting :maxmind, default: {}, constructor: Schema.schema(account_id?: Value, license_key?: Value)
 
-    setting :media_store, default: {}, constructor: Schema.schema(
-      access_key?: Value,
-      bucket?: Value,
-      endpoint?: Value,
-      path_style?: unless_set(Types::Params::Bool, false),
-      region?: unless_set(Types::String, DEFAULT_MEDIA_STORE_REGION),
-      secret_key?: Value,
-    )
+    setting :media_store, default: {}, constructor: object_store
 
     setting :owner, default: {}, constructor: Schema.schema(
       github_id: Types::Coercible::Integer.constrained(gt: 0),

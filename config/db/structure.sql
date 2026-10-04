@@ -265,7 +265,8 @@ CREATE TYPE public.sync_name AS ENUM (
     'country_database',
     'projects',
     'issues',
-    'linear_issues'
+    'linear_issues',
+    'backups'
 );
 
 
@@ -4485,4 +4486,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000097_create_decision_comments.rb'),
 ('20261003000131_create_decision_tags.rb'),
 ('20261003000136_add_read_throughs_to_analytics_rollup_paths.rb'),
-('20261003000137_create_post_reader_hashes.rb');
+('20261003000137_create_post_reader_hashes.rb'),
+('20261003000152_add_backups_to_sync_name.rb');

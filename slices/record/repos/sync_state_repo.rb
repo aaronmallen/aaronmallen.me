@@ -4,6 +4,7 @@ module Record
   module Repos
     class SyncStateRepo < Blog::DB::Repo
       ANALYTICS_ROLLUP = "analytics_rollup"
+      BACKUPS = "backups"
       COMMITS = "commits"
       COUNTRY_DATABASE = "country_database"
       FAILURE = "failure"

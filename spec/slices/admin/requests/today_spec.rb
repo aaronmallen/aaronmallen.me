@@ -884,6 +884,13 @@ RSpec.describe "Admin today", type: :request do
         expect(failure_lines).to eq(["Analytics rollup failed at Jan 7, 2026, 09:30 · The days wouldn't roll up"])
       end
 
+      it "reports a failed database backup" do
+        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed, at: failed_at)
+        get "/admin"
+
+        expect(failure_lines).to eq(["Database backup failed at Jan 7, 2026, 09:30 · The dump wouldn't upload"])
+      end
+
       it "still reports a reason no one has written words for" do
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :teapot, at: failed_at)
         get "/admin"

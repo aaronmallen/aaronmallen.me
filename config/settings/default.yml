@@ -6,6 +6,13 @@ attention:
   draft_days: 30
   journal_days: 2
   someday_days: 90
+backup_store:
+  access_key: <%= ENV["BACKUP_STORE_ACCESS_KEY"].to_json %>
+  bucket: <%= ENV["BACKUP_STORE_BUCKET"].to_json %>
+  endpoint: <%= ENV["BACKUP_STORE_ENDPOINT"].to_json %>
+  path_style: <%= ENV["BACKUP_STORE_PATH_STYLE"].to_json %>
+  region: <%= ENV["BACKUP_STORE_REGION"].to_json %>
+  secret_key: <%= ENV["BACKUP_STORE_SECRET_KEY"].to_json %>
 bluesky:
   app_password: <%= ENV["BLUESKY_APP_PASSWORD"].to_json %>
   handle: aaronmallen.dev

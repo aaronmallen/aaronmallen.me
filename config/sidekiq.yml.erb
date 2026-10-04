@@ -6,6 +6,9 @@ production:
   - default
 :scheduler:
   :schedule:
+    back_up_database:
+      cron: "30 0 * * * <%= Blog::TimeZone::NAME %>"
+      class: Backups::Jobs::BackUpDatabase
     import_commits:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportCommits
