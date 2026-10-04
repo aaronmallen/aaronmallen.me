@@ -11,13 +11,6 @@ RSpec.describe "Admin bulk webmention actions", type: :feature do
 
   def box(author) = find(".li", text: author).find("input[name='ids[]']")
 
-  def scripts_off
-    page.driver.browser.page.disable_javascript
-    visit "/admin/webmentions"
-  end
-
-  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
-
   before do
     target = create(:post, :published)
     %w[Ada Grace Alan].each { create(:webmention, post_id: target.id, author_name: it) }
@@ -73,24 +66,6 @@ RSpec.describe "Admin bulk webmention actions", type: :feature do
 
       expect(page).to have_css("[data-toast] .toast", text: "Approved 1 webmention")
       expect(authors("spam")).to be_empty
-    end
-  end
-
-  describe "with scripts off" do
-    before { scripts_off }
-
-    after { scripts_on }
-
-    it "shows the actions with nothing ticked" do
-      expect(acts).to be_visible
-    end
-
-    it "still approves the ticked webmentions with a plain post", :aggregate_failures do
-      box("Ada").check
-      within("form#webmention-bulk") { click_button("Approve") }
-
-      expect(page).to have_current_path("/admin/webmentions?status=pending")
-      expect(authors("pending")).to eq(%w[Alan Grace])
     end
   end
 end

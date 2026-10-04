@@ -464,6 +464,12 @@ RSpec.describe "Admin social", type: :request do
         expect(texts).to eq(%w[a draft])
       end
 
+      it "checks the filter it shows" do
+        get "/admin/social", filter: "drafts"
+
+        expect(page).to have_css("input[name='filter'][value='drafts'][checked]", visible: :all)
+      end
+
       it "falls back to the queued items for a filter it doesn't know" do
         queued
         get "/admin/social", filter: "burned"
@@ -801,6 +807,12 @@ RSpec.describe "Admin social", type: :request do
         get "/admin/social", filter: "drafts", edit: social_post.id
 
         expect(page.all("[data-social-body]").map(&:value)).to eq(%w[first])
+      end
+
+      it "counts the text it opened with" do
+        get "/admin/social", filter: "drafts", edit: social_post.id
+
+        expect(counts).to eq(["Mastodon 5/500", "Bluesky 5/300"])
       end
 
       it "points the composer at the item" do

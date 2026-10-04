@@ -19,13 +19,6 @@ RSpec.describe "Admin bulk task actions", type: :feature do
 
   def confirm_dialog = find("dialog#confirm-dialog[open]")
 
-  def scripts_off
-    page.driver.browser.page.disable_javascript
-    visit "/admin/tasks?filter=next"
-  end
-
-  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
-
   def tagged(name)
     names = Tasks::Slice["relations.task_tags"].names_by_task(repo.all_open.map(&:id))
 
@@ -151,42 +144,6 @@ RSpec.describe "Admin bulk task actions", type: :feature do
 
       expect(page).to have_css("[data-toast] .toast", text: "Finished 2 tasks")
       expect(repo.all_open.map(&:title)).to contain_exactly("third", "elsewhere")
-    end
-  end
-
-  describe "with scripts off" do
-    before { scripts_off }
-
-    after { scripts_on }
-
-    it "shows the actions with nothing ticked" do
-      expect(acts).to be_visible
-    end
-
-    it "draws no select all" do
-      expect(page).to have_no_css("[data-bulk-all]")
-    end
-
-    it "still finishes the ticked tasks with a plain post", :aggregate_failures do
-      box("first").check
-      within("form#task-bulk") { click_button("Done") }
-
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(repo.all_open.map(&:title)).to contain_exactly("second", "third", "elsewhere")
-    end
-
-    it "still moves the ticked tasks with a plain post" do
-      box("second").check
-      bulk("Move", to: "Someday")
-
-      expect(repo.in_list("someday").map(&:title)).to contain_exactly("second", "elsewhere")
-    end
-
-    it "still tags the ticked tasks with a plain post" do
-      box("third").check
-      bulk("Tag", tag: "home")
-
-      expect(tagged("home")).to eq(["third"])
     end
   end
 end

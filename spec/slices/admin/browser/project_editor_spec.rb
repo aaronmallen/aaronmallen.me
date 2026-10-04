@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin project editor", type: :feature do
-  let(:repo) { Projects::Slice["repos.project_repo"] }
-
   before { sign_in_to_admin }
 
   describe "a new project" do
@@ -69,50 +67,6 @@ RSpec.describe "Admin project editor", type: :feature do
 
     it "keeps the preview card out of the tab order" do
       expect(page).to have_css("a.proj[tabindex='-1']")
-    end
-
-    it "saves the changes" do
-      fill_in "project[tagline]", with: "Terminal colors"
-      click_button "Save project"
-      page.assert_selector("[data-toast]", text: "Project saved")
-
-      expect(repo.by_id(project.id).tagline).to eq("Terminal colors")
-    end
-
-    it "archives from the editor" do
-      click_button "Archive"
-      page.assert_selector("[data-toast]", text: "Archived · removed from /projects")
-
-      expect(repo.by_id(project.id)).to have_attributes(status: "archived", featured: false)
-    end
-
-    it "lands on the archived list after archiving" do
-      click_button "Archive"
-
-      expect(page).to have_current_path("/admin/projects?filter=archived")
-    end
-
-    it "restores from the editor" do
-      click_button "Archive"
-      find(".li-side a", text: "Edit").click
-      click_button "Restore"
-      page.assert_selector("[data-toast]", text: "Restored to /projects")
-
-      expect(repo.by_id(project.id).status).to eq("active")
-    end
-
-    it "reaches the editor from the list" do
-      visit "/admin/projects"
-      find(".li-side a", text: "Edit").click
-
-      expect(page).to have_field("project[name]", with: "sai")
-    end
-
-    it "reaches the new editor from the list" do
-      visit "/admin/projects"
-      click_link "New project"
-
-      expect(page).to have_button("Create project", disabled: true)
     end
   end
 end

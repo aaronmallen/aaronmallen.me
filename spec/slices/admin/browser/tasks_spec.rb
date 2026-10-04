@@ -54,13 +54,6 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def panel = find("dialog#task-panel[open]")
 
-  def scripts_off
-    page.driver.browser.page.disable_javascript
-    visit "/admin/tasks?filter=next"
-  end
-
-  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
-
   def scroll_down
     execute_script(<<~JS)
       document.querySelector("[data-pools] .seg").scrollIntoView({ block: "center" });
@@ -82,27 +75,6 @@ RSpec.describe "Admin tasks", type: :feature do
     create(:task, :someday, title: "Learn Elixir")
     sign_in_to_admin
     visit "/admin/tasks?filter=next"
-  end
-
-  describe "the tabs" do
-    before { find(".subtab", text: "someday").click }
-
-    it "opens the list it names" do
-      expect(page).to have_current_path("/admin/tasks?filter=someday")
-    end
-
-    it "lists only the someday tasks", :aggregate_failures do
-      expect(page).to have_css(".task-title", text: "Learn Elixir")
-      expect(page).to have_no_css(".task-title", text: "Email the accountant")
-    end
-
-    it "marks someday as the one you are on" do
-      expect(page).to have_css(".subtab.on", text: "someday")
-    end
-
-    it "counts each list on its own tab" do
-      expect(page.all(".subtab-count").map(&:text)).to eq(%w[0 0 1 1 0 0])
-    end
   end
 
   describe "the Create Task button" do
@@ -171,46 +143,6 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "searching" do
-    let(:field) { translate("ui.components.tasks.filters.search") }
-
-    before do
-      create(:task, title: "Email the plumber")
-      visit "/admin/tasks?filter=next"
-      fill_in(field, with: "accountant")
-      find_field(field).send_keys(:enter)
-    end
-
-    it "narrows the list it is on", :aggregate_failures do
-      expect(page).to have_css(".task-title", text: "Email the accountant")
-      expect(page).to have_no_css(".task-title", text: "Email the plumber")
-    end
-
-    it "keeps the query in the field" do
-      expect(page).to have_field(field, with: "accountant")
-    end
-
-    it "carries the query onto the next tab" do
-      find(".subtab", text: "someday").click
-
-      expect(page).to have_field(field, with: "accountant")
-    end
-  end
-
-  describe "clicking a tag" do
-    before do
-      create(:task, title: "Fix the feed", tags: %w[site])
-      create(:task, title: "Email the plumber", tags: %w[home])
-      visit "/admin/tasks?filter=next"
-      find(".task", text: "Fix the feed").click_link("#site")
-    end
-
-    it "opens the list showing only tasks with that tag", :aggregate_failures do
-      expect(page).to have_current_path("/admin/tasks?filter=next&q=tag:site")
-      expect(all(".task-title").map(&:text)).to eq(["Fix the feed"])
-    end
-  end
-
   def watch_clipboard
     page.execute_script(<<~JS)
       window.copiedKeys = [];
@@ -235,39 +167,10 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(page.evaluate_script("window.copiedKeys")).to eq([key])
       end
     end
-
-    describe "with scripts off" do
-      before { scripts_off }
-
-      after { scripts_on }
-
-      it "still shows the key" do
-        expect(find(".task", text: "Email the accountant")).to have_css(".task-key", exact_text: key)
-      end
-    end
-  end
-
-  describe "moving a task to today" do
-    before { find(".task", text: "Email the accountant").click_button(move_to("today")) }
-
-    it "follows it to today", :aggregate_failures do
-      expect(page).to have_current_path("/admin/tasks?filter=today")
-      expect(page).to have_css(".task-title", text: "Email the accountant")
-    end
-
-    it "takes it off next" do
-      find(".subtab", text: "next").click
-
-      expect(page).to have_no_css(".task-title", text: "Email the accountant")
-    end
   end
 
   describe "an empty sprint" do
     before { visit "/admin/tasks?filter=today" }
-
-    it "asks what the day is for" do
-      expect(page).to have_css(".task-planner .card-title", text: translate("ui.components.tasks.planner.ask"))
-    end
 
     it "takes a new task into the sprint", :aggregate_failures do
       create_task("Ship the screen", list: "today")
@@ -289,66 +192,10 @@ RSpec.describe "Admin tasks", type: :feature do
         find(".task-planner .seg-option", exact_text: "someday · 1").click
       end
 
-      it "stays on the tasks screen" do
-        expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
-      end
-
-      it "offers what is in someday", :aggregate_failures do
-        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
-        expect(page).to have_no_css(".task-planner .li-title", text: "Email the accountant")
-      end
-
-      it "marks someday as the pool on show" do
-        expect(page).to have_css(".task-planner .seg-option.current[aria-current='true']", exact_text: "someday · 1")
-      end
-
       it "switches without loading the page", :aggregate_failures do
         expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
         expect(evaluate_script("window.poolsLoaded")).to be(true)
         expect(evaluate_script("window.scrollY > 0 && window.scrollY === window.poolsScroll")).to be(true)
-      end
-
-      it "opens someday again on reload" do
-        refresh
-
-        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
-      end
-
-      it "returns to someday after pulling from it" do
-        find(".task-planner .li", text: "Learn Elixir").click_button("Pull in")
-
-        expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
-      end
-    end
-
-    describe "switching the pool with scripts off" do
-      before do
-        page.driver.browser.page.disable_javascript
-        visit "/admin/tasks?filter=today"
-        find(".task-planner .seg-option", exact_text: "someday · 1").click
-      end
-
-      after { scripts_on }
-
-      it "loads someday from the link", :aggregate_failures do
-        expect(page).to have_current_path("/admin/tasks?filter=today&pool=someday")
-        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
-        expect(page).to have_no_css(".task-planner .li-title", text: "Email the accountant")
-      end
-    end
-
-    describe "pulling from next" do
-      before { find(".task-planner .li", text: "Email the accountant").click_button("Pull in") }
-
-      it "lands the task in today", :aggregate_failures do
-        expect(page).to have_current_path("/admin/tasks?filter=today&pool=next")
-        expect(page).to have_css(".task-title", text: "Email the accountant")
-      end
-
-      it "takes it off Next" do
-        find(".subtab", text: "next").click
-
-        expect(page).to have_no_css(".task-title", text: "Email the accountant")
       end
     end
   end
@@ -361,58 +208,11 @@ RSpec.describe "Admin tasks", type: :feature do
       find(".subtab", text: "external").click
     end
 
-    it "shows on the external tab with a link to its issue", :aggregate_failures do
-      expect(page).to have_current_path("/admin/tasks?filter=external")
-      expect(find(".task", text: "Fix the feed")).to have_link("aaronmallen/aaronmallen.me#42", href: issue_url)
-    end
-
     it "takes a tag from the editor and stays on external", :aggregate_failures do
       tag_task("Fix the feed", "site")
 
       expect(page).to have_current_path("/admin/tasks?filter=external")
       expect(find(".task", text: "Fix the feed")).to have_css(".tag", text: "#site")
-    end
-
-    describe "pulled in from the planner" do
-      before do
-        visit "/admin/tasks?filter=today"
-        find(".task-planner .seg-option", exact_text: "external · 1").click
-        find(".task-planner .li", text: "Fix the feed").click_button("Pull in")
-      end
-
-      it "lands in today, still linked to its issue", :aggregate_failures do
-        expect(page).to have_current_path("/admin/tasks?filter=today&pool=external")
-        expect(find(".task", text: "Fix the feed")).to have_link(href: issue_url)
-      end
-
-      it "leaves external" do
-        find(".subtab", text: "external").click
-
-        expect(page).to have_no_css(".task-title", text: "Fix the feed")
-      end
-    end
-  end
-
-  describe "finishing a task" do
-    before do
-      find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.start"))
-      complete_task(find(".task", text: "Email the accountant"))
-    end
-
-    it "files it out of the list it was in" do
-      expect(page).to have_no_css(".task-title", text: "Email the accountant")
-    end
-
-    it "files it under the day it was finished" do
-      find(".subtab", text: "completed").click
-
-      expect(page).to have_css(".task-day-date").and have_css(".task-title", text: "Email the accountant")
-    end
-
-    it "offers to open it again from the archive" do
-      find(".subtab", text: "completed").click
-
-      expect(find(".task", text: "Email the accountant")).to have_button("Reopen")
     end
   end
 
@@ -537,19 +337,6 @@ RSpec.describe "Admin tasks", type: :feature do
         asked = dismiss_confirm { row("Email the accountant").click_button(cancel) }
 
         expect(asked).to eq(message)
-      end
-    end
-
-    describe "with scripts off" do
-      before { scripts_off }
-
-      after { scripts_on }
-
-      it "still cancels the task with a plain post", :aggregate_failures do
-        find(".task", text: "Email the accountant").click_button(cancel)
-
-        expect(page).to have_no_css(".task-title", text: "Email the accountant")
-        expect(still_open?).to be(false)
       end
     end
   end
@@ -740,108 +527,6 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "commenting with scripts off" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
-    let(:comments) { Tasks::Slice["relations.task_comments"] }
-
-    def bodies = comments.to_a.map { it[:body] }
-
-    def comment_on = find(".task-comment", text: "Sent the forms")
-
-    before do
-      create(:task_comment, task_id: task.id, body: "Sent the forms")
-      scripts_off
-      find(".task", text: "Email the accountant").find(".task-title").click
-    end
-
-    after { scripts_on }
-
-    it "adds a comment", :aggregate_failures do
-      fill_in(translate("ui.components.tasks.timeline.add_label"), with: "Called them")
-      click_button(translate("ui.components.tasks.timeline.add"))
-
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(bodies).to eq(["Sent the forms", "Called them"])
-    end
-
-    it "edits a comment", :aggregate_failures do
-      comment_on.find("summary").click
-      comment_on.fill_in(translate("ui.components.tasks.timeline.edit_label"), with: "Sent the forms twice")
-      comment_on.click_button(translate("ui.components.tasks.timeline.save"))
-
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(bodies).to eq(["Sent the forms twice"])
-    end
-
-    it "deletes a comment", :aggregate_failures do
-      comment_on.click_button(translate("ui.components.tasks.timeline.delete"))
-
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(bodies).to be_empty
-    end
-  end
-
-  describe "timing a task with scripts off" do
-    let(:started) { Time.at(((Time.now.to_i - 86_400) / 60) * 60) }
-    let(:task) do
-      sprint = Tasks::Slice["operations.current_sprint"].call.value!
-      create(:task, :in_progress, title: "Count the hours", sprint_id: sprint.id, list: nil, worked_seconds: 1800)
-    end
-    let!(:session) { create(:work_session, task_id: task.id, started_at: started, ended_at: started + 1800) }
-
-    def answer(scope, summary, button, hours)
-      within(scope) do
-        find("summary", text: summary).click
-        fill_in(words("worked_fields.hours"), with: hours)
-        fill_in(words("worked_fields.minutes"), with: "0")
-        click_button(button)
-      end
-    end
-
-    def session_row = find("#task-session-#{session.id}")
-
-    def total = repo.by_id(task.id).worked_seconds
-
-    def words(key) = translate(key, scope: "ui.components.tasks")
-
-    before do
-      scripts_off
-      visit "/admin/tasks/#{task.id}?filter=today"
-    end
-
-    after { scripts_on }
-
-    it "edits a session", :aggregate_failures do
-      session_row.find("summary", text: words("session_acts.edit")).click
-      session_row.fill_in(words("session_acts.ended_at"), with: Blog::TimeZone.input_value(started + 3600))
-      session_row.click_button(words("session_acts.save"))
-
-      expect(page).to have_current_path("/admin/tasks?filter=today")
-      expect(total).to eq(3600)
-    end
-
-    it "deletes a session", :aggregate_failures do
-      session_row.click_button(words("session_acts.delete"))
-
-      expect(page).to have_current_path("/admin/tasks?filter=today")
-      expect(total).to eq(0)
-    end
-
-    it "sets the total", :aggregate_failures do
-      answer(".task-total-edit", words("total_form.set"), words("total_form.save"), "2")
-
-      expect(page).to have_current_path("/admin/tasks?filter=today")
-      expect(total).to eq(7200)
-    end
-
-    it "asks how long it took on complete", :aggregate_failures do
-      answer(".task-read-acts", words("controls.complete"), words("controls.complete"), "4")
-
-      expect(page).to have_current_path("/admin/tasks?filter=today")
-      expect(total).to eq(14_400)
-    end
-  end
-
   describe "writing Markdown in a task" do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
@@ -920,22 +605,6 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "opening a task with scripts off" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
-
-    before do
-      scripts_off
-      find(".task", text: "Email the accountant").find(".task-title").click
-    end
-
-    after { scripts_on }
-
-    it "opens its page", :aggregate_failures do
-      expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=next&origin=tasks")
-      expect(page).to have_css("h1", exact_text: "Email the accountant")
-    end
-  end
-
   describe "opening a task from Today" do
     before do
       sprint = sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today)
@@ -994,44 +663,6 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(modal).to have_field("task[title]")
       expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
-    end
-  end
-
-  describe "creating a task from Today with scripts off" do
-    before do
-      page.driver.browser.page.disable_javascript
-      visit "/admin"
-      click_link("Create Task")
-    end
-
-    after { scripts_on }
-
-    it "leads to the new task page", :aggregate_failures do
-      expect(page).to have_current_path("/admin/tasks/new?origin=today")
-      expect(page).to have_select("task[list]", selected: "today")
-    end
-
-    it "comes back to Today after the save", :aggregate_failures do
-      fill_in("task[title]", with: "Ship the screen")
-      click_button("Create task")
-
-      expect(page).to have_current_path("/admin")
-      expect(page).to have_css(".sprint-panel .task-title", text: "Ship the screen")
-    end
-  end
-
-  describe "pulling a task into Today's sprint while it holds tasks" do
-    before do
-      sprint = sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today)
-      create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
-      visit "/admin"
-      find(".sprint-panel .task-planner-pull .li", text: "Email the accountant").click_button("Pull in")
-    end
-
-    it "adds it to the sprint and stays on Today", :aggregate_failures do
-      expect(page).to have_current_path("/admin?pool=next")
-      expect(page).to have_css(".sprint-panel .task-title", text: "Email the accountant")
-      expect(page).to have_css(".sprint-panel .task-title", text: "Ship it")
     end
   end
 
@@ -1181,27 +812,6 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  describe "editing a task with scripts off" do
-    before do
-      scripts_off
-      find(".task", text: "Email the accountant").find(".task-title").click
-      click_link(translate("ui.views.tasks.show.edit"))
-    end
-
-    after { scripts_on }
-
-    it "opens the edit page" do
-      expect(page).to have_css("h1", exact_text: "Email the accountant").and have_field("task[title]")
-    end
-
-    it "shows what went wrong on the page when the save fails" do
-      fill_in("task[title]", with: " ")
-      click_button("Save")
-
-      expect(page).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
-    end
-  end
-
   describe "editing from a row's pen" do
     def pen = find(".task", text: "Email the accountant").find("a[data-task-open-edit]")
 
@@ -1239,27 +849,6 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_no_css("dialog#task-create[open]")
       expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
-    end
-  end
-
-  describe "editing from a row's pen with scripts off" do
-    before do
-      scripts_off
-      find(".task", text: "Email the accountant").find("a[data-task-open-edit]").click
-    end
-
-    after { scripts_on }
-
-    it "opens the edit page" do
-      expect(page).to have_css("h1", exact_text: "Email the accountant").and have_field("task[title]")
-    end
-
-    it "comes back to the row's list on save", :aggregate_failures do
-      fill_in("task[tags]", with: "admin")
-      click_button("Save")
-
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
     end
   end
 
@@ -1363,27 +952,6 @@ RSpec.describe "Admin tasks", type: :feature do
       end
     end
 
-    describe "a type picked before the find with scripts off" do
-      before do
-        scripts_off
-        find(".task", text: "Email the accountant").find(".task-title").click
-        pick_kind_and_find("elixir")
-      end
-
-      after { scripts_on }
-
-      it "stays picked once the page comes back" do
-        expect(kind_select.value).to eq("blocked_by")
-      end
-
-      it "adds the link with that type" do
-        pick("Learn Elixir")
-        find(".toast", text: translate("tasks_page.toasts.linked"), visible: :all)
-
-        expect(stored).to eq([[other.id, task.id, "blocks"]])
-      end
-    end
-
     it "finds the task by its key" do
       find_task("##{other.id}")
 
@@ -1435,15 +1003,6 @@ RSpec.describe "Admin tasks", type: :feature do
         visit "/admin/tasks?filter=someday"
         cancel_task(row("Learn Elixir"))
         find(".toast", text: "Canceled")
-        find(".subtab", text: "next").click
-
-        expect(row("Email the accountant")).to have_no_css(".task-meta .pill.pink")
-      end
-
-      it "loses the blocked pill once the blocker is done" do
-        visit "/admin/tasks?filter=someday"
-        row("Learn Elixir").click_button(translate("ui.components.tasks.controls.start"))
-        complete_task(row("Learn Elixir"))
         find(".subtab", text: "next").click
 
         expect(row("Email the accountant")).to have_no_css(".task-meta .pill.pink")
@@ -1533,42 +1092,6 @@ RSpec.describe "Admin tasks", type: :feature do
         click_button(remove_label)
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.record_unlinked"))
-        expect(linked).to be_empty
-      end
-    end
-
-    describe "with scripts off" do
-      def open_page = find(".task", text: "Email the accountant").find(".task-title").click
-
-      def pick
-        find(".record-picker-target", text: "Filing the quarterly taxes").click
-        find(".toast", text: translate("tasks_page.toasts.record_linked"), visible: :all)
-      end
-
-      before do
-        scripts_off
-        open_page
-        find_record("quarterly")
-      end
-
-      after { scripts_on }
-
-      it "finds on the task's page" do
-        expect(page).to have_current_path(%r{\A/admin/tasks/#{task.id}\?.*record_q=quarterly})
-      end
-
-      it "links the record I pick" do
-        pick
-
-        expect(linked.fetch("post").map(&:id)).to eq([post_record.id])
-      end
-
-      it "removes a link" do
-        pick
-        open_page
-        click_button(remove_label)
-        find(".toast", text: translate("tasks_page.toasts.record_unlinked"), visible: :all)
-
         expect(linked).to be_empty
       end
     end

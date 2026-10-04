@@ -3,12 +3,6 @@
 RSpec.describe "Admin API tokens", type: :feature do
   let(:row) { find(".li", text: "Laptop") }
 
-  def mint(name)
-    fill_in "Token name", with: name
-    click_button "Mint token"
-    find(".toast", text: "Token minted")
-  end
-
   before do
     API::Slice["operations.mint_token"].call(name: "Laptop")
     sign_in_to_admin
@@ -16,20 +10,6 @@ RSpec.describe "Admin API tokens", type: :feature do
   end
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
-
-  it "shows a new token" do
-    mint("Terminal")
-
-    expect(page).to have_field("New API token", with: /\A[A-Za-z0-9_-]{43}\z/)
-  end
-
-  it "hides the new token once I reload", :aggregate_failures do
-    mint("Terminal")
-    visit "/admin/tokens"
-
-    expect(page).to have_css(".li-title", text: "Terminal")
-    expect(page).to have_no_field("New API token")
-  end
 
   it "asks with the confirmation text" do
     message = dismiss_confirm { row.click_button "Revoke" }

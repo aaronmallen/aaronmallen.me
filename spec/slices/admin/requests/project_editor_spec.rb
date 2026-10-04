@@ -130,6 +130,12 @@ RSpec.describe "Admin project editor", type: :request do
         expect(page).to have_no_button("Restore")
       end
 
+      it "sends Archive to the archived list" do
+        form = page.find("form#project-status-change[action='/admin/projects/#{project.id}/archive']", visible: :all)
+
+        expect(form).to have_field("filter", with: "archived", type: :hidden)
+      end
+
       it "answers 404 for a project that isn't there" do
         get "/admin/projects/0/edit"
 
@@ -484,6 +490,12 @@ RSpec.describe "Admin project editor", type: :request do
 
       it "posts the restore to AA-297's route" do
         expect(page).to have_css("form[action='/admin/projects/#{project.id}/restore']", visible: :all)
+      end
+
+      it "sends Restore back to the live list" do
+        form = page.find("form#project-status-change[action='/admin/projects/#{project.id}/restore']", visible: :all)
+
+        expect(form).to have_field("filter", with: "live", type: :hidden)
       end
 
       it "shows the status without a control", :aggregate_failures do

@@ -61,6 +61,12 @@ RSpec.describe "Admin bulk post actions", type: :request do
         expect(page).to have_css("[data-bulk-acts]:not([hidden])")
       end
 
+      it "leaves select all for the script to draw" do
+        get "/admin/posts"
+
+        expect(page).to have_css("[data-bulk-all][hidden]", visible: :all)
+      end
+
       it "draws a labelled tag field in the bar" do
         get "/admin/posts"
 

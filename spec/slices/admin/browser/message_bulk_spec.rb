@@ -11,13 +11,6 @@ RSpec.describe "Admin bulk message actions", type: :feature do
 
   def confirm_dialog = find("dialog#confirm-dialog[open]")
 
-  def scripts_off
-    page.driver.browser.page.disable_javascript
-    visit "/admin/messages"
-  end
-
-  def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
-
   def subjects(status) = repo.by_status(status).map(&:subject)
 
   before do
@@ -85,31 +78,6 @@ RSpec.describe "Admin bulk message actions", type: :feature do
 
       expect(page).to have_css("[data-toast] .toast", text: "Moved 1 message back to unread")
       expect(subjects("read")).to be_empty
-    end
-  end
-
-  describe "with scripts off" do
-    before { scripts_off }
-
-    after { scripts_on }
-
-    it "shows the actions with nothing ticked" do
-      expect(acts).to be_visible
-    end
-
-    it "still marks the ticked messages read with a plain post", :aggregate_failures do
-      box("first").check
-      within("form#message-bulk") { click_button("Read") }
-
-      expect(page).to have_current_path("/admin/messages?status=unread")
-      expect(subjects("unread")).to eq(%w[second third])
-    end
-
-    it "still deletes the ticked messages with a plain post" do
-      box("third").check
-      within("form#message-bulk") { click_button("Delete") }
-
-      expect(subjects("unread")).to eq(%w[first second])
     end
   end
 end

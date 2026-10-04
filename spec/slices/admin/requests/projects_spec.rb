@@ -70,6 +70,12 @@ RSpec.describe "Admin projects", type: :request do
         expect(page).to have_css(".page-head-sub", exact_text: expected_sub)
       end
 
+      it "links to the new editor" do
+        get "/admin/projects"
+
+        expect(page).to have_link(href: "/admin/projects/new")
+      end
+
       it "says projects is where you are" do
         get "/admin/projects"
 
@@ -181,6 +187,13 @@ RSpec.describe "Admin projects", type: :request do
         get "/admin/projects"
 
         expect(page).to have_no_button("Delete")
+      end
+
+      it "links the row to its editor" do
+        project
+        get "/admin/projects"
+
+        expect(page).to have_link("Edit", href: "/admin/projects/#{project.id}/edit")
       end
     end
 

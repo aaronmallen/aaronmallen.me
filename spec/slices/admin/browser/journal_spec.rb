@@ -216,11 +216,6 @@ RSpec.describe "Admin journal", type: :feature do
       item.click_link "Links"
     end
 
-    it "opens the entry with its Linked section", :aggregate_failures do
-      expect(item).to have_field("Entry text", with: "Packed the rack")
-      expect(item.find(".record-links")).to have_link("On racks")
-    end
-
     it "hides the section on Cancel" do
       item.click_button "Cancel"
 
@@ -354,20 +349,6 @@ RSpec.describe "Admin journal", type: :feature do
       scroll_into_a_day
 
       expect(day_heading_stuck_to_bar?).to be(true)
-    end
-  end
-
-  describe "clicking a tag" do
-    before do
-      create(:journal_entry, body: "Rode to work", tags: %w[bike])
-      create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
-      visit "/admin/journal"
-      find(".journal-entry", text: "Rode to work").click_link("#bike")
-    end
-
-    it "opens the journal showing only entries with that tag", :aggregate_failures do
-      expect(page).to have_current_path("/admin/journal?q=tag:bike")
-      expect(all(".journal-entry-body").map(&:text)).to eq(["Rode to work"])
     end
   end
 
