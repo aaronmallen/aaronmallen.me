@@ -4,7 +4,11 @@ module Admin
   module Actions
     module Activity
       class Show < Action
-        include Deps[build_activity_page: "operations.build_activity_page"]
+        SCREEN = Blog::Types::SavedViewScreen["activity"]
+
+        include Deps[
+          build_activity_page: "operations.build_activity_page", list_saved_views: "operations.list_saved_views",
+        ]
 
         def handle(request, response)
           params = request.params
@@ -14,6 +18,7 @@ module Admin
             **build_activity_page.call(
               from: params[:from], to: params[:to], types: params[:types], query: params[:q], day: params[:day],
             ),
+            saved_views: list_saved_views.call(SCREEN, params),
           )
         end
       end

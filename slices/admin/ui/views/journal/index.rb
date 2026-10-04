@@ -15,7 +15,7 @@ module Admin
           SEPARATOR = " · "
 
           def initialize(
-            days:, entries:, streak:, today:, words:, editing: nil, errors: Blog::Constants::EMPTY_HASH,
+            days:, entries:, saved_views:, streak:, today:, words:, editing: nil, errors: Blog::Constants::EMPTY_HASH,
             search: Blog::Constants::EMPTY_STRING, values: BLANK_ENTRY, writing: false
           )
             super()
@@ -24,7 +24,7 @@ module Admin
             @editing = editing
             @errors = errors
             @search = search
-            @streak = streak
+            @rail = { saved_views:, streak: }
             @today = today
             @values = values
             @writing = writing
@@ -34,7 +34,7 @@ module Admin
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock")
 
             Split do
-              Filters(search:, entry_date: entry_date.iso8601, today: @today, streak: @streak, errors: @errors)
+              Filters(search:, entry_date: entry_date.iso8601, today: @today, errors: @errors, **@rail)
               div(class: "journal-main") do
                 new_entry
                 days

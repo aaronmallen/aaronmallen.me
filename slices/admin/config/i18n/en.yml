@@ -143,6 +143,13 @@ en:
       role_added: "Role added to /projects"
       role_removed: "Role removed from /projects"
       saved: "Project saved"
+  saved_views_page:
+    toasts:
+      changed: "View now holds these filters"
+      deleted: "View deleted"
+      invalid: "Nothing saved · give the view a name of 100 characters or fewer"
+      renamed: "View renamed"
+      saved: "View saved"
   social:
     networks:
       bluesky: "Bluesky"
@@ -1056,6 +1063,17 @@ en:
         worked_card:
           day: "%{weekday} %{date}"
           title: "Time worked"
+      saved_view:
+        change: "Use current filters"
+        confirm_delete: "Delete %{view}? You can't undo it."
+        delete: "Delete"
+        manage: "Manage %{view}"
+        rename: "Rename"
+      saved_view_name:
+        name: "Name"
+      saved_views:
+        label: "Saved views"
+        save: "Save view"
       ships_next_card:
         empty: "Nothing scheduled."
         title: "What ships next"

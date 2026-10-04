@@ -73,6 +73,11 @@ module Admin
       operations.remove_tag operations.save_tag queries.matching queries.matching_count queries.usage
     ], from: :tags
 
+    import keys: %w[
+      operations.change_saved_view operations.create_saved_view operations.delete_saved_view
+      operations.rename_saved_view queries.all
+    ], from: :saved_views
+
     import keys: %w[queries.search], from: :search
 
     import keys: %w[

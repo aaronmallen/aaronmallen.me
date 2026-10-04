@@ -1071,6 +1071,81 @@
   @apply flex flex-wrap items-center gap-2;
 }
 
+@utility saved-views {
+  @apply flex flex-wrap items-center gap-2;
+
+  :where(.page-head-actions) > & {
+    @apply basis-full;
+
+    @media (width >= 43.75rem) {
+      @apply justify-end;
+    }
+  }
+}
+
+@utility saved-views-list {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+@utility saved-view {
+  @apply inline-flex items-center gap-0.5 rounded-btn border border-line bg-ground-sunk;
+}
+
+@utility saved-view-link {
+  @apply rounded-btn px-2.5 py-1 font-mono text-meta text-ink no-underline hover:text-accent;
+  @apply transition-colors duration-150 ease-in-out;
+  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+
+  &.current {
+    @apply bg-wash;
+  }
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
+@utility saved-view-menu {
+  @apply relative;
+
+  &:not([open]) > .saved-view-panel {
+    @apply hidden;
+  }
+
+  & > summary {
+    @apply list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+}
+
+@utility saved-view-panel {
+  @apply absolute top-full right-0 z-30 mt-2 flex w-80 flex-col gap-3 p-3 text-left;
+  @apply rounded-card border border-line bg-ground-sunk shadow-lg;
+
+  :where(.journal-rail, .activity-rail) & {
+    @apply right-auto left-0;
+  }
+
+  @media (width < 43.75rem) {
+    @apply fixed inset-x-4 top-auto w-auto;
+  }
+}
+
+@utility saved-view-form {
+  @apply flex flex-col items-end gap-2;
+
+  & .field {
+    @apply w-full;
+  }
+}
+
+@utility saved-view-acts {
+  @apply flex flex-wrap items-center justify-end gap-2 border-t border-line pt-3;
+}
+
 @utility btn {
   @apply inline-flex cursor-pointer items-center gap-2 rounded-btn border border-line bg-ground-sunk px-3 py-1.5;
   @apply font-mono text-meta whitespace-nowrap text-ink no-underline hover:bg-mk-selection;

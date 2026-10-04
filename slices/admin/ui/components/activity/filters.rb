@@ -27,11 +27,13 @@ module Admin
           prop :text, Blog::Types::String
           prop :to, Blog::Types::Date
           prop :today, Blog::Types::Date
+          prop :saved_views, Blog::Types::Hash
 
           def view_template
             div(class: "activity-rail") do
               Card do
                 div(class: "form-stack") do
+                  SavedViews(**@saved_views)
                   presets
                   filter_form
                 end

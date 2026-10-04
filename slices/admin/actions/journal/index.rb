@@ -11,7 +11,7 @@ module Admin
           to = Blog::Types::DateParam[request.params[:to]]
           writing = Blog::Types::Checkbox[request.params[:write]]
 
-          response.render(view, **summarize_journal.call(search:, to:), search:, writing:)
+          response.render(view, **summarize_journal.call(search:, to:, filters: request.params), search:, writing:)
         end
       end
     end

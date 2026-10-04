@@ -9,10 +9,11 @@ module Admin
 
           SEPARATOR = " · "
 
-          def initialize(events:, filters:, totals:, older:, newer:)
+          def initialize(events:, filters:, saved_views:, totals:, older:, newer:)
             super()
             @events = events
             @filters = filters
+            @saved_views = saved_views
             @totals = totals
             @older = older
             @newer = newer
@@ -22,7 +23,7 @@ module Admin
             PageHead(title: t(".heading"), sub:)
 
             Split do
-              Filters(**@filters)
+              Filters(**@filters, saved_views: @saved_views)
               div(class: "activity-main") do
                 timeline
                 DayPager(older: @older, newer: @newer, **@filters.slice(:from, :to, :types, :text))

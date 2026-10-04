@@ -9,8 +9,10 @@ module Admin
 
           prop :query, Blog::Types::String
           prop :tab, Blog::Types::String
+          prop :saved_views, Blog::Types::Hash
 
           def view_template
+            SavedViews(**@saved_views)
             form(
               action: path(:admin_tasks), method: "get", role: "search", class: "tasks-filters",
               data: { autosubmit: "" },

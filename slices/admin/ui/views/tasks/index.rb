@@ -56,7 +56,7 @@ module Admin
               Filters(tab: @tab, **@filters)
               CreateButton()
             end
-            Tabs(counts: @counts, tab: @tab, **@filters)
+            Tabs(counts: @counts, tab: @tab, query: @filters[:query])
             body
             p(class: "task-note") { t(".footnote") }
           end

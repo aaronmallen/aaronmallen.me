@@ -18,14 +18,15 @@ module Admin
           SEPARATOR = " · "
 
           def initialize(
-            counts:, filter:, posts:, read_through_counts:, view_counts:, visitor_counts:, webmention_counts:,
-            word_counts:
+            counts:, filter:, posts:, read_through_counts:, saved_views:, view_counts:, visitor_counts:,
+            webmention_counts:, word_counts:
           )
             super()
             @counts = counts
             @filter = filter
             @posts = posts
             @read_through_counts = read_through_counts
+            @saved_views = saved_views
             @view_counts = view_counts
             @visitor_counts = visitor_counts
             @webmention_counts = webmention_counts
@@ -34,6 +35,7 @@ module Admin
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
+              SavedViews(**@saved_views)
               filter_form
               a(class: "btn pri", href: path(:admin_new_post)) do
                 i(class: "fa-solid fa-plus", aria: { hidden: "true" })

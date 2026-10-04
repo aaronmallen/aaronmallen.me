@@ -10,11 +10,13 @@ module Admin
           prop :today, Blog::Types::Date
           prop :streak, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
+          prop :saved_views, Blog::Types::Hash
 
           def view_template
             div(class: "journal-rail") do
               Card do
                 div(class: "form-stack") do
+                  SavedViews(**@saved_views)
                   search_field
                   date_field
                   streak

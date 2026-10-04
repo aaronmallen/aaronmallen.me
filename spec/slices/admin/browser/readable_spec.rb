@@ -140,9 +140,25 @@ RSpec.describe "Admin screens", type: :feature do
 
   def record_search = { "task record search" => "/admin/tasks/#{task.id}?record_q=published" }
 
+  def saved_view_menus
+    {
+      "saved view menu" => lambda do
+        visit "/admin/tasks"
+        find(".saved-view", text: "Next up for the week").find("summary").click
+        find(".saved-view-panel", visible: :visible)
+      end,
+      "save view in the rail" => lambda do
+        visit "/admin/activity"
+        find(".saved-views summary", text: "Save view").click
+        find(".saved-view-panel", visible: :visible)
+      end,
+    }
+  end
+
   def screens
     pages.merge(
-      calendars, people, person_search, record_search, composers, dialogs, journal_editors, selections, time_rows,
+      calendars, people, person_search, record_search, composers, dialogs, journal_editors, saved_view_menus,
+      selections, time_rows,
     )
   end
 
@@ -158,6 +174,8 @@ RSpec.describe "Admin screens", type: :feature do
       tags: %w[health commute ruby],
     )
     create(:message, subject: "A question about the site")
+    create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
+    create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
     create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
     person
   end
