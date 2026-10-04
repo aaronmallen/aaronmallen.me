@@ -101,7 +101,7 @@ RSpec.describe "A request the site cannot read", type: :request do
     end
   end
 
-  [%w[POST /admin/photos], %w[GET /admin/tasks/palette]].product([false, true]).each do |(method, path), signed_in|
+  [%w[POST /admin/photos], %w[GET /admin/search/palette]].product([false, true]).each do |(method, path), signed_in|
     describe "a JSON body the admin cannot parse, to #{method} #{path} #{signed_in ? 'signed in' : 'signed out'}" do
       before do
         sign_in_to_admin if signed_in

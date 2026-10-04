@@ -970,6 +970,14 @@
   @apply min-w-0 flex-1 truncate font-mono text-input;
 }
 
+@utility pal-r-text {
+  @apply flex min-w-0 flex-1 flex-col;
+}
+
+@utility pal-r-match {
+  @apply min-w-0 truncate text-badge text-ink-muted;
+}
+
 @utility pal-r-sub {
   @apply shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-badge whitespace-nowrap text-ink-muted;
 

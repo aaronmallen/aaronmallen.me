@@ -31,6 +31,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.list_sections" => "lists the admin menu's sections",
       "admin.operations.list_social_accounts" => "lists the admin's accounts for its social screen",
       "admin.operations.preview_announcement" => "previews the admin's announcement; compose_announcement writes one",
+      "admin.operations.search_palette" => "groups search hits for the admin palette; #312 adds the search tool",
       "admin.operations.search_accounts" => "fills the admin's people form; the MCP has no people tool",
       "admin.operations.review_social_edits" => "lays out edits for the admin; list_suggestions reads them",
       "admin.operations.sign_in" => "signs the admin in through GitHub; sign in stays out of the MCP",

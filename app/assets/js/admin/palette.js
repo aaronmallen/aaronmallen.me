@@ -2,10 +2,11 @@ import { openDialog } from "./dialog.js";
 import { bind } from "./keys.js";
 
 const COUNT = "{count}";
+const DELAY = 150;
+const FOUND = "[data-palette-found]";
 const OPTION = "[data-palette-option]";
 const SHOWN = "[data-palette-option]:not([hidden])";
 const SLASH_CODES = ["Slash", "NumpadDivide"];
-const TASK_LIMIT = 5;
 
 export function setupPalette() {
   const dialog = document.querySelector("[data-palette]");
@@ -17,11 +18,14 @@ function setupDialog(dialog) {
   const query = dialog.querySelector("[data-palette-query]");
   const list = dialog.querySelector("[data-palette-list]");
   const status = dialog.querySelector("[data-palette-status]");
-  const tasks = dialog.querySelector("[data-palette-tasks]");
-  const row = dialog.querySelector("[data-palette-task-row]");
   const groups = [...dialog.querySelectorAll("[data-palette-group]")];
+  const kinds = new Map(
+    [...dialog.querySelectorAll("[data-palette-kind]")].map((group) => [group.dataset.paletteKind, group]),
+  );
   let options = [...dialog.querySelectorAll(OPTION)];
-  let loading = null;
+  let asked = "";
+  let controller = null;
+  let timer = null;
 
   const shown = () => options.filter((option) => !option.hidden);
   const active = () => options.find((option) => option.getAttribute("aria-selected") === "true");
@@ -42,18 +46,8 @@ function setupDialog(dialog) {
 
   const filter = () => {
     const text = query.value.trim().toLowerCase();
-    let tasks = 0;
 
-    for (const option of options) {
-      let visible = matches(option, text);
-
-      if (visible && option.hasAttribute("data-palette-task")) {
-        tasks += 1;
-        visible = tasks <= TASK_LIMIT;
-      }
-
-      option.hidden = !visible;
-    }
+    for (const option of options) option.hidden = !matches(option, text);
 
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
@@ -81,28 +75,52 @@ function setupDialog(dialog) {
     if (!openDialog(target)) window.location.assign(option.dataset.paletteHref);
   };
 
-  const load = () => {
-    if (loading) return;
+  const show = (found) => {
+    for (const row of dialog.querySelectorAll(FOUND)) row.remove();
+    for (const { kind, hits } of found) kinds.get(kind)?.append(...hits.map((hit) => foundRow(kinds.get(kind), hit)));
 
-    loading = fetchTasks(tasks, row)
-      .then((rows) => {
-        tasks.append(...rows);
-        options = [...dialog.querySelectorAll(OPTION)];
-        if (query.value.trim() !== "") filter();
-      })
-      .catch(() => {
-        loading = null;
-      });
+    options = [...dialog.querySelectorAll(OPTION)];
+    filter();
+  };
+
+  const stop = () => {
+    clearTimeout(timer);
+    controller?.abort();
+    controller = null;
+  };
+
+  const ask = async (text) => {
+    controller = new AbortController();
+    const { signal } = controller;
+
+    try {
+      const found = await fetchFound(dialog.dataset.paletteSearch, text, signal);
+      if (!signal.aborted) show(found);
+    } catch {
+      if (!signal.aborted) asked = "";
+    }
+  };
+
+  const search = () => {
+    const text = query.value.trim();
+    if (text === asked) return;
+
+    stop();
+    asked = text;
+    if (text === "") return show([]);
+
+    timer = setTimeout(() => ask(text), DELAY);
   };
 
   const open = () => {
     if (dialog.open) return;
 
     query.value = "";
-    filter();
+    stop();
+    asked = "";
+    show([]);
     dialog.showModal();
     query.focus();
-    load();
   };
 
   for (const trigger of document.querySelectorAll("[data-palette-open]")) {
@@ -116,7 +134,10 @@ function setupDialog(dialog) {
     open();
   });
 
-  query.addEventListener("input", filter);
+  query.addEventListener("input", () => {
+    filter();
+    search();
+  });
   query.addEventListener("keydown", (event) => steer(event, { move, run, select, shown }));
 
   list.addEventListener("click", (event) => {
@@ -136,36 +157,38 @@ function setupDialog(dialog) {
     if (event.target === dialog) dialog.close();
   });
 
+  dialog.addEventListener("close", stop);
+
   filter();
 }
 
-async function fetchTasks(group, template) {
-  const response = await fetch(group.dataset.paletteTasks, {
+async function fetchFound(route, text, signal) {
+  const response = await fetch(`${route}?${new URLSearchParams({ q: text })}`, {
     headers: { Accept: "application/json" },
     redirect: "manual",
+    signal,
   });
-  if (!response.ok) throw new Error(`palette tasks answered ${response.status}`);
+  if (!response.ok) throw new Error(`palette search answered ${response.status}`);
 
-  const lists = JSON.parse(group.dataset.paletteLists);
-  const { tasks } = await response.json();
+  const { groups } = await response.json();
 
-  return tasks.map((task) => taskRow(template, task, lists[task.list]));
+  return groups;
 }
 
-function taskRow(template, { id, title }, { href, sub }) {
-  const row = template.content.firstElementChild.cloneNode(true);
+function foundRow(group, { id, title, match, date, href }) {
+  const row = group.querySelector("[data-palette-found-row]").content.firstElementChild.cloneNode(true);
 
-  row.id = `command-palette-task-${id}`;
-  row.dataset.paletteText = title.toLowerCase();
+  row.id = `command-palette-${group.dataset.paletteKind}-${id}`;
   row.dataset.paletteHref = href;
   row.querySelector(".pal-r-label").textContent = title;
-  row.querySelector(".pal-r-sub").textContent = sub;
+  row.querySelector(".pal-r-match").textContent = match;
+  row.querySelector(".pal-r-sub").textContent = date;
 
   return row;
 }
 
 function matches(option, text) {
-  if (option.hasAttribute("data-palette-task")) return text !== "" && option.dataset.paletteText.includes(text);
+  if (option.hasAttribute("data-palette-found")) return text !== "";
 
   return text === "" || option.dataset.paletteText.includes(text);
 }

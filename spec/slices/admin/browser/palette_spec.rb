@@ -7,6 +7,8 @@ RSpec.describe "Admin command palette", type: :feature do
 
   def query = find("[data-palette-query]")
 
+  def search_path = "/admin/search/palette"
+
   before do
     create(:task, title: "Email the accountant")
     create(:message)
@@ -53,7 +55,7 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "holds the task back until you ask for one" do
-      expect(page).to have_no_css("#command-palette-group-tasks")
+      expect(page).to have_no_css("#command-palette-kind-task")
     end
   end
 
@@ -176,36 +178,90 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(page).to have_css(".pal-r", text: "Email the accountant")
     end
 
-    it "says which list the task sits in" do
-      expect(page).to have_css(".pal-r", text: "in next")
+    it "dates it" do
+      expect(page).to have_css(".pal-r .pal-r-sub", text: Blog::TimeZone.today.strftime("%b %-d, %Y"))
     end
   end
 
-  describe "fetching the tasks" do
-    def fetches = request_gate.count("/admin/tasks/palette")
+  describe "searching a phrase from a journal entry" do
+    let!(:entry) { create(:journal_entry, body: "Walked the levee at dawn\nThe river ran high") }
 
-    it "waits until the palette opens" do
-      expect(fetches).to eq(0)
+    before do
+      open_palette
+      query.send_keys(*"levee".chars)
     end
 
-    describe "opening it twice" do
+    it "lists the entry under its kind", :aggregate_failures do
+      within("[aria-labelledby='command-palette-kind-journal']") do
+        expect(page).to have_css(".pal-g", text: /journal entries/i)
+        expect(page).to have_css(".pal-r-label", text: "Walked the levee at dawn")
+      end
+    end
+
+    it "shows a short match" do
+      expect(page).to have_css(".pal-r-match", text: /levee/)
+    end
+
+    it "opens it on enter" do
+      page.assert_selector(".pal-r", text: "Walked the levee at dawn")
+      query.send_keys(:enter)
+
+      expect(page).to have_current_path("/admin/journal?to=#{entry.entry_date.iso8601}")
+    end
+  end
+
+  describe "asking the search" do
+    def asks = request_gate.count(search_path)
+
+    it "waits until you type" do
+      open_palette
+
+      expect(asks).to eq(0)
+    end
+
+    describe "typing fast" do
       before do
-        2.times do
-          open_palette
-          query.send_keys(*"accountant".chars)
-          page.assert_selector(".pal-r", text: "Email the accountant")
-          query.send_keys(:escape)
-        end
         open_palette
         query.send_keys(*"accountant".chars)
+        page.assert_selector(".pal-r", text: "Email the accountant")
       end
 
       it "asks once" do
-        expect(fetches).to eq(1)
+        expect(asks).to eq(1)
+      end
+    end
+
+    describe "a reply that a newer one overtakes" do
+      before do
+        create(:task, title: "Call the plumber")
+        open_palette
+        hold = request_gate.hold(search_path)
+        query.send_keys(*"plumber".chars)
+        hold.wait_for_arrival
+        query.send_keys(*Array.new(7, :backspace), *"accountant".chars)
+        page.assert_selector(".pal-r", text: "Email the accountant")
+        hold.release
+        Timeout.timeout(5) { sleep 0.05 until request_gate.answered(search_path) >= 2 }
+        page.driver.wait_for_network_idle
       end
 
-      it "draws each task once" do
-        expect(page).to have_css(".pal-r", text: "Email the accountant", count: 1)
+      it "keeps the newer results", :aggregate_failures do
+        expect(page).to have_css(".pal-r", text: "Email the accountant")
+        expect(page).to have_no_css(".pal-r", text: "Call the plumber")
+      end
+    end
+
+    describe "opening it again" do
+      before do
+        open_palette
+        query.send_keys(*"accountant".chars)
+        page.assert_selector(".pal-r", text: "Email the accountant")
+        query.send_keys(:escape)
+        open_palette
+      end
+
+      it "clears the last results" do
+        expect(page).to have_no_css(".pal-r", text: "Email the accountant")
       end
     end
   end
@@ -230,8 +286,8 @@ RSpec.describe "Admin command palette", type: :feature do
       query.send_keys(:enter)
     end
 
-    it "goes to the task's list" do
-      expect(page).to have_current_path("/admin/tasks?filter=next")
+    it "opens the task" do
+      expect(page).to have_current_path(%r{\A/admin/tasks/\d+\z})
     end
   end
 

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "json"
-
 module Admin
   module UI
     module Components
@@ -10,25 +8,32 @@ module Admin
           ACTIONS_GROUP = "command-palette-group-actions"
           DIALOG_ID = "command-palette"
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘/" }.freeze
-          LIST_ID = "command-palette-list"
-          LISTS = {
-            Blog::Types::TaskView["external"] => ".lists.external",
-            Blog::Types::TaskView["next"] => ".lists.next",
-            Blog::Types::TaskView["someday"] => ".lists.someday",
-            Blog::Types::TaskView["today"] => ".lists.today",
-            Blog::Types::TaskView["upcoming"] => ".lists.upcoming",
+          KINDS = {
+            Blog::Types::SearchKind["task"] => "fa-list-check",
+            Blog::Types::SearchKind["post"] => "fa-file-lines",
+            Blog::Types::SearchKind["social"] => "fa-paper-plane",
+            Blog::Types::SearchKind["journal"] => "fa-feather",
+            Blog::Types::SearchKind["commit"] => "fa-code-commit",
+            Blog::Types::SearchKind["project"] => "fa-cube",
+            Blog::Types::SearchKind["work"] => "fa-briefcase",
+            Blog::Types::SearchKind["person"] => "fa-address-book",
+            Blog::Types::SearchKind["message"] => "fa-envelope",
+            Blog::Types::SearchKind["webmention"] => "fa-at",
           }.freeze
-          TASKS_GROUP = "command-palette-group-tasks"
+          KIND_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
+          LIST_ID = "command-palette-list"
 
           prop :actions, Blog::Types::Array.of(Blog::Types::Instance(Structs::Action))
           prop :sections, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
 
           def view_template
-            dialog(id: DIALOG_ID, class: "pal-b", aria: { label: t(".label") }, data: { palette: true }) do
+            dialog(
+              id: DIALOG_ID, class: "pal-b", aria: { label: t(".label") },
+              data: { palette: true, palette_search: path(:admin_palette_search) },
+            ) do
               div(class: "pal") do
                 query_box
                 results
-                task_row
                 status
                 footer
               end
@@ -66,6 +71,14 @@ module Admin
             end
           end
 
+          def kind_group(kind, icon)
+            row_group("command-palette-kind-#{kind}", t(KIND_KEYS.fetch(kind)), data: { palette_kind: kind }) do
+              template(data: { palette_found_row: true }) do
+                PaletteRow(id: "", icon:, label: "", match: "", sub: "", found: true)
+              end
+            end
+          end
+
           def query_box
             div(class: "pal-in") do
               i(class: "fa-solid fa-magnifying-glass pal-in-icon", aria: { hidden: "true" })
@@ -89,7 +102,7 @@ module Admin
                 end
               end
               action_group
-              task_group
+              KINDS.each { |kind, icon| kind_group(kind, icon) }
             end
           end
 
@@ -123,25 +136,6 @@ module Admin
                 palette_results_other: t(".results.other"),
               },
             )
-          end
-
-          def task_group
-            row_group(
-              TASKS_GROUP, t(".tasks"),
-              data: { palette_tasks: path(:admin_palette_tasks), palette_lists: JSON.generate(task_lists) },
-            )
-          end
-
-          def task_lists
-            LISTS.to_h do |list, key|
-              [list, { href: path(:admin_tasks, filter: list), sub: t(".in_list", list: t(key)) }]
-            end
-          end
-
-          def task_row
-            template(data: { palette_task_row: true }) do
-              PaletteRow(id: "", icon: "fa-list-check", label: "", sub: "", task: true, hidden: true)
-            end
           end
         end
       end

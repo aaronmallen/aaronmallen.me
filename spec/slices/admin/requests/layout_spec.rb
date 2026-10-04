@@ -59,8 +59,8 @@ RSpec.describe "Admin layout", type: :request do
       expect(reads).to be_empty
     end
 
-    it "points the palette at the route that lists open tasks" do
-      expect(page).to have_css("[data-palette-tasks='/admin/tasks/palette']", visible: :all)
+    it "points the palette at the route that searches every record" do
+      expect(page).to have_css("[data-palette-search='/admin/search/palette']", visible: :all)
     end
 
     it "links no feed" do

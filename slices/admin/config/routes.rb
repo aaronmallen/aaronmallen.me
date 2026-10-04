@@ -86,6 +86,7 @@ module Admin
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
+    get "/search/palette", to: "search.palette", as: :palette_search
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID
@@ -100,7 +101,6 @@ module Admin
     post "/tasks", to: "tasks.create", as: :create_task
     post "/tasks/bulk", to: "tasks.bulk", as: :bulk_tasks
     get "/tasks/new", to: "tasks.new", as: :new_task
-    get "/tasks/palette", to: "tasks.palette", as: :palette_tasks
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID
