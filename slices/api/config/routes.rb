@@ -38,6 +38,8 @@ module API
     post "/decisions/:id/tags", to: "decision_tags.create"
     delete "/decisions/:id/tags/:tag", to: "decision_tags.destroy"
 
+    get "/attention", to: "attention.index"
+
     get "/links/:kind/:id", to: "record_links.index"
     post "/links/:kind/:id", to: "record_links.create"
     delete "/links/:kind/:id/:other_kind/:other_id", to: "record_links.destroy"
