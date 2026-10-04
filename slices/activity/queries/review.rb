@@ -6,13 +6,12 @@ module Activity
       include Deps[review_repo: "repos.review_repo"]
 
       JOURNAL = Blog::Types::ActivityKind["journal"]
-      MONTH = Blog::Types::ReviewPeriod["month"]
       NONE = Blog::Constants::EMPTY_ARRAY
       POST = Blog::Types::ActivityKind["post"]
       SOCIAL = Blog::Types::ActivityKind["social"]
 
       def call(period:, on: Blog::TimeZone.today)
-        from, to = range(Blog::Types::ReviewPeriod[period], on)
+        from, to = Blog::ReviewRange.call(Blog::Types::ReviewPeriod[period], on)
 
         Structs::Review.new(
           period:, from:, to:, **tasks(from, to), **records(from, to),
@@ -22,15 +21,6 @@ module Activity
       end
 
       private
-
-      def month(on) = [Date.new(on.year, on.month, 1), Date.new(on.year, on.month, -1)]
-
-      def range(period, on)
-        return month(on) if period == MONTH
-
-        monday = on - (on.cwday - 1)
-        [monday, monday + 6]
-      end
 
       def records(from, to)
         found = review_repo.records(from:, to:).group_by(&:type)

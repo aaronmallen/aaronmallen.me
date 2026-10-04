@@ -19,7 +19,7 @@ module Admin
           on = Blog::Types::DateParam[params[:day]] || halt(400)
           body = Blog::Types::Text[Blog::Types::Fields[params[:note]][:body]]
 
-          case save_review_note.call(body, on:)
+          case save_review_note.call(body, period:, on:)
           in Success(_) then saved(response, period, on)
           in Failure[:invalid, errors] then invalid(response, period, on, body, errors)
           else halt 500

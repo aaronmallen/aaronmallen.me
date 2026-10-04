@@ -3,9 +3,9 @@
 module Record
   module Queries
     class ReviewNote
-      include Deps[journal_entry_repo: "repos.journal_entry_repo"]
+      include Deps[review_note_repo: "repos.review_note_repo"]
 
-      def call(on) = journal_entry_repo.tagged_on(Operations::SaveReviewNote::TAG, on)
+      def call(period, starts_on) = review_note_repo.entry(period, starts_on)
     end
   end
 end

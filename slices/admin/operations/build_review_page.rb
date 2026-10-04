@@ -9,7 +9,7 @@ module Admin
         on = Blog::Types::DateParam[day] || today
         found = review.call(period: Blog::Types::ReviewPeriodParam[period], on:)
 
-        { review: found, note: review_note.call(found.to), on:, today: }
+        { review: found, note: review_note.call(found.period, found.from), on:, today: }
       end
     end
   end

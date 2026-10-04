@@ -10,6 +10,8 @@ RSpec.describe "Admin review note", type: :request do
 
   def notes = page.find_by_id("review-notes")
 
+  def notes_repo = Record::Slice["repos.review_note_repo"]
+
   def review_entries = repo.between(from: Date.new(2026, 9, 1), to: Date.new(2026, 10, 31))
 
   def save_note(body, **params)
@@ -81,7 +83,7 @@ RSpec.describe "Admin review note", type: :request do
       last_day = today + (7 - today.cwday)
       save_note("halfway", day: last_day.iso8601)
 
-      expect(repo.tagged_on("review", last_day).body).to eq("halfway")
+      expect(notes_repo.entry("week", last_day - 6).then { [it.body, it.entry_date] }).to eq(["halfway", last_day])
     end
 
     it "shows the saved note in the box and offers to update it", :aggregate_failures do
@@ -112,6 +114,83 @@ RSpec.describe "Admin review note", type: :request do
       save_note("good week")
 
       expect(review_entries.map(&:body)).to contain_exactly("walked the dog", "good week")
+    end
+
+    describe "a month that ends on a Sunday" do
+      let(:may) { review_entries_in(Date.new(2026, 5, 1), Date.new(2026, 5, 31)) }
+
+      def note_box(**params)
+        get "/admin/review", day: "2026-05-31", **params
+        notes.find_field("Review note").value
+      end
+
+      def review_entries_in(from, to) = repo.between(from:, to:)
+
+      def save_month(body) = save_note(body, period: "month", day: "2026-05-31")
+
+      def save_week(body) = save_note(body, day: "2026-05-31")
+
+      it "keeps the month's note when the week's last day saves" do
+        save_month("good month")
+        save_week("good week")
+        save_week("great week")
+
+        expect(may.map(&:body)).to contain_exactly("good month", "great week")
+      end
+
+      it "keeps the week's note when the month saves" do
+        save_week("good week")
+        save_month("good month")
+        save_month("great month")
+
+        expect(may.map(&:body)).to contain_exactly("good week", "great month")
+      end
+
+      it "shows the week only its own note" do
+        save_month("good month")
+        save_week("good week")
+
+        expect(note_box).to eq("good week")
+      end
+
+      it "shows the month only its own note" do
+        save_week("good week")
+        save_month("good month")
+
+        expect(note_box(period: "month")).to eq("good month")
+      end
+
+      it "starts the month empty when only the week has a note" do
+        save_week("good week")
+
+        expect(note_box(period: "month")).to eq("")
+      end
+    end
+
+    describe "an entry I wrote and tagged review on the week's last day" do
+      let!(:mine) { create(:journal_entry, entry_date: sunday, body: "my own review", tags: %w[review]) }
+
+      it "stays out of the box" do
+        get "/admin/review", day: sunday.iso8601
+
+        expect(notes).to have_field("Review note", with: "")
+      end
+
+      it "stays as I wrote it when the form saves", :aggregate_failures do
+        save_note("good week")
+        save_note("great week")
+
+        expect(repo.by_id(mine.id).body).to eq("my own review")
+        expect(review_entries.map(&:body)).to contain_exactly("my own review", "great week")
+      end
+    end
+
+    it "writes a fresh entry when I delete the note's entry from the journal" do
+      save_note("good week")
+      repo.delete(review_entries.first.id)
+      save_note("great week")
+
+      expect(review_entries.map(&:body)).to eq(["great week"])
     end
 
     it "lists the note in the journal" do
