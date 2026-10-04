@@ -7,13 +7,12 @@ module MCP
                   "that post's title and slug, its type, its status, its source and author, its excerpt, and the " \
                   "reason given for spam. The source, author name, author URL and excerpt, taken from the " \
                   "sender's page, come marked untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ReadWebmention::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input)
-          hand_over(:read_webmention, input, server_context) { Webmentions.marked(it) }
-        end
+        private
+
+        def answered(webmention) = Webmentions.marked(webmention)
       end
     end
   end

@@ -10,15 +10,12 @@ module MCP
                   "combine with statuses and the window. count gives the tasks on this page. " \
                   "#{Blog::Paging::USAGE}. Each note may come from an issue tracker and comes marked untrusted. " \
                   "#{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ListTasks::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input) = hand_over(:list_tasks, input, server_context) { marked(it) }
-
         private
 
-        def marked(found) = found.merge(tasks: found.fetch(:tasks).map { Untrusted.fields(it, "note") })
+        def answered(found) = found.merge(tasks: found.fetch(:tasks).map { Untrusted.fields(it, "note") })
       end
     end
   end

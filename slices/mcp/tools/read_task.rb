@@ -11,15 +11,12 @@ module MCP
                   "timeline: comments, work sessions with their IDs, moves, tag changes and status changes, " \
                   "oldest first. The note and each comment's body may come from an issue tracker and come marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ReadTask::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input) = hand_over(:read_task, input, server_context) { marked(it) }
-
         private
 
-        def marked(task)
+        def answered(task)
           Untrusted.task(task).merge(timeline: task.fetch(:timeline).map { marked_entry(it) })
         end
 

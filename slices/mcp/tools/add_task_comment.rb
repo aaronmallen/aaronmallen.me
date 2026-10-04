@@ -6,13 +6,12 @@ module MCP
       description "Add a comment to a task, as the admin's comment form does. It stays on this site and never " \
                   "posts to GitHub or Linear. The body comes back marked untrusted, as every comment body does. " \
                   "#{Untrusted::WARNING}"
-      input_schema(API::Endpoints::AddTaskComment::SCHEMA)
-      scope OAuth::Scope::WRITE
+      endpoint scope: OAuth::Scope::WRITE
 
       class << self
-        def call(server_context:, **input)
-          hand_over(:add_task_comment, input, server_context) { Untrusted.fields(it, "body") }
-        end
+        private
+
+        def answered(comment) = Untrusted.fields(comment, "body")
       end
     end
   end

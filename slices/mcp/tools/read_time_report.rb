@@ -9,12 +9,7 @@ module MCP
                   "with their seconds. A task in two projects or under two tags counts in both, so the groups " \
                   "can add up to more than seconds, the range's total. Tasks with no project or tag sit last, " \
                   "with a null key and name"
-      input_schema(API::Endpoints::ReadTimeReport::SCHEMA)
-      scope OAuth::Scope::READ
-
-      class << self
-        def call(server_context:, **input) = hand_over(:read_time_report, input, server_context)
-      end
+      endpoint scope: OAuth::Scope::READ
     end
   end
 end

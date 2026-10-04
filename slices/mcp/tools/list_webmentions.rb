@@ -10,15 +10,12 @@ module MCP
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}. " \
                   "The source, author name, author URL and excerpt, taken from the sender's page, come marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ListWebmentions::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input)
-          hand_over(:list_webmentions, input, server_context) do |found|
-            found.merge(webmentions: found.fetch(:webmentions).map { Webmentions.marked(it) })
-          end
-        end
+        private
+
+        def answered(found) = found.merge(webmentions: found.fetch(:webmentions).map { Webmentions.marked(it) })
       end
     end
   end

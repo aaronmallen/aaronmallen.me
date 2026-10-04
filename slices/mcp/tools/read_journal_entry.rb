@@ -4,12 +4,7 @@ module MCP
   module Tools
     class ReadJournalEntry < Base
       description "Read one journal entry: its date, time, body, tags and the records linked to it, grouped by kind"
-      input_schema(API::Endpoints::ReadJournalEntry::SCHEMA)
-      scope OAuth::Scope::READ
-
-      class << self
-        def call(server_context:, **input) = hand_over(:read_journal_entry, input, server_context)
-      end
+      endpoint scope: OAuth::Scope::READ
     end
   end
 end

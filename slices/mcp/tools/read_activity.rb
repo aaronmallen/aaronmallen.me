@@ -22,15 +22,12 @@ module MCP
                   "#{Blog::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
                   "a time, newest first. A comment's name, and a webmention's name and excerpt, may come from " \
                   "someone else and come marked untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ReadActivity::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input)
-          hand_over(:read_activity, input, server_context) do |found|
-            found.merge(activity: found.fetch(:activity).map { Untrusted.activity(it) })
-          end
-        end
+        private
+
+        def answered(found) = found.merge(activity: found.fetch(:activity).map { Untrusted.activity(it) })
       end
     end
   end

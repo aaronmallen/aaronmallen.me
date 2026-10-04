@@ -7,11 +7,12 @@ module MCP
                   "At either end, or once done or canceled, it stays put and moved comes back false. " \
                   "The note and each comment's body may come from an issue tracker and come marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ReorderTask::SCHEMA)
-      scope OAuth::Scope::WRITE
+      endpoint scope: OAuth::Scope::WRITE
 
       class << self
-        def call(server_context:, **input) = hand_over(:reorder_task, input, server_context) { Untrusted.task(it) }
+        private
+
+        def answered(task) = Untrusted.task(task)
       end
     end
   end

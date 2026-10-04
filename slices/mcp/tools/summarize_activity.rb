@@ -10,12 +10,7 @@ module MCP
                   "#{Blog::DayWindow::LONGEST} days. " \
                   "A year answers in one call, so call this first to see where the work sits, then read the " \
                   "months that matter with read_activity, one month at a time, newest first"
-      input_schema(API::Endpoints::SummarizeActivity::SCHEMA)
-      scope OAuth::Scope::READ
-
-      class << self
-        def call(server_context:, **input) = hand_over(:summarize_activity, input, server_context)
-      end
+      endpoint scope: OAuth::Scope::READ
     end
   end
 end

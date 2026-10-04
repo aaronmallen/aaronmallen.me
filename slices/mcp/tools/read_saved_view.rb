@@ -17,18 +17,15 @@ module MCP
                   "today has none yet and carrying in what the day before left open, as read_current_sprint and " \
                   "the admin's task list do. A task's note, a comment's name, and a webmention's name and excerpt " \
                   "may come from someone else and come marked untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::ReadSavedView::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input)
-          hand_over(:read_saved_view, input, server_context) do |found|
-            screen = found.fetch(:saved_view).fetch("screen")
-            found.merge(records: found.fetch(:records).map { marked(screen, it) })
-          end
-        end
-
         private
+
+        def answered(found)
+          screen = found.fetch(:saved_view).fetch("screen")
+          found.merge(records: found.fetch(:records).map { marked(screen, it) })
+        end
 
         def marked(screen, row)
           case screen

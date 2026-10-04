@@ -16,13 +16,24 @@ module MCP
       extend Dry::Monads[:result]
 
       class << self
-        attr_reader :scope_value
+        attr_reader :endpoint_key, :scope_value
+
+        def endpoint(scope:)
+          @endpoint_key = name_value.to_sym
+          input_schema(API::Endpoints.const_get(name.split("::").last, false)::SCHEMA)
+          scope(scope)
+          define_singleton_method(:call) do |server_context:, **input|
+            hand_over(endpoint_key, input, server_context) { answered(it) }
+          end
+        end
 
         def scope(value) = @scope_value = value
 
         private
 
         def answer(payload) = Tool::Response.new([{ type: TEXT, text: JSON.generate(payload) }])
+
+        def answered(payload) = payload
 
         def dep(name, server_context) = server_context.fetch(name)
 

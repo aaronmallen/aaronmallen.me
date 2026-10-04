@@ -17,15 +17,12 @@ module MCP
                   "(#{READERS.map { |kind, tool| "#{kind}: #{tool}" }.join(', ')}). count gives the results on " \
                   "this page. #{Blog::Paging::USAGE}. The match of a task, and the title and match of a message or " \
                   "webmention, come marked untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Endpoints::Search::SCHEMA)
-      scope OAuth::Scope::READ
+      endpoint scope: OAuth::Scope::READ
 
       class << self
-        def call(server_context:, **input) = hand_over(:search, input, server_context) { marked(it) }
-
         private
 
-        def marked(found) = found.merge(results: found.fetch(:results).map { marked_hit(it) })
+        def answered(found) = found.merge(results: found.fetch(:results).map { marked_hit(it) })
 
         def marked_hit(hit) = Untrusted.fields(hit, *MARKED.fetch(hit.fetch("kind"), Blog::Constants::EMPTY_ARRAY))
       end

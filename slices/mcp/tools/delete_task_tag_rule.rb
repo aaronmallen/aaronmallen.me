@@ -5,12 +5,7 @@ module MCP
     class DeleteTaskTagRule < Base
       description "Delete one task tag rule for good. Every task keeps the tags it has, and later imports stop " \
                   "taking the rule's tags"
-      input_schema(API::Endpoints::DeleteTaskTagRule::SCHEMA)
-      scope OAuth::Scope::WRITE
-
-      class << self
-        def call(server_context:, **input) = hand_over(:delete_task_tag_rule, input, server_context)
-      end
+      endpoint scope: OAuth::Scope::WRITE
     end
   end
 end
