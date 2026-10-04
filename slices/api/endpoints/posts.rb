@@ -41,6 +41,7 @@ module API
           "blank" => "is needed when the body of a published post changes: say what changed and why",
           "long" => "runs over 500 characters",
         },
+        note: { "blank" => "can't be blank: say what changed and why", "long" => "runs over 500 characters" },
         og_image_url: { Blog::Contract::FORMAT => URL },
         publish_at: { Blog::Contract::FORMAT => "needs a time as YYYY-MM-DDTHH:MM, in Chicago time" },
         slug: {
@@ -59,6 +60,8 @@ module API
       def form_complaints(errors) = errors.to_h { |field, (code)| [field, ["#{field} #{field_reason(field, code)}"]] }
 
       def missing(id) = "no blog post has the ID #{id}"
+
+      def missing_edit(id, edit_id) = "blog post #{id} has no edit with the ID #{edit_id}"
 
       def reason(field, code) = COMPLAINTS.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code, code)
 

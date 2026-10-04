@@ -63,6 +63,7 @@ module API
     post "/posts/bulk/tag", to: "bulk_posts.tag"
     get "/posts/:id", to: "posts.show"
     post "/posts/:id/publish", to: "posts.publish"
+    patch "/posts/:id/edits/:edit_id", to: "post_edits.update"
 
     get "/attention", to: "attention.index"
     post "/attention/snooze", to: "attention.snooze"

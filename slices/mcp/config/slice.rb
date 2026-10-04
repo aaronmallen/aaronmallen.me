@@ -45,8 +45,8 @@ module MCP
       endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts
       endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
       endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
-      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_saved_view
-      endpoints.update_task_tag_rule endpoints.update_work_session
+      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note
+      endpoints.update_saved_view endpoints.update_task_tag_rule endpoints.update_work_session
     ], from: :api
 
     import keys: %w[

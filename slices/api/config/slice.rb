@@ -25,8 +25,8 @@ module API
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
     import keys: %w[
-      operations.act_on_posts operations.publish_draft queries.by_filter queries.by_id queries.calendar_posts
-      queries.edits_newest_first
+      operations.act_on_posts operations.publish_draft operations.revise_edit_note queries.by_filter queries.by_id
+      queries.calendar_posts queries.edits_newest_first
     ], from: :posts
 
     import keys: %w[queries.by_id queries.work_entry_by_id], from: :projects
@@ -88,9 +88,9 @@ module API
       endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts
       endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
       endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
-      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_saved_view
-      endpoints.update_task_tag_rule endpoints.update_work_session operations.mint_token operations.revoke_token
-      queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note
+      endpoints.update_saved_view endpoints.update_task_tag_rule endpoints.update_work_session operations.mint_token
+      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]
   end
 end

@@ -180,7 +180,8 @@ RSpec.describe "MCP endpoint", type: :request do
       reopen_decision reopen_task reorder_task resolve_decision restore_project save_person save_project save_tag
       save_task save_task_tag_rule schedule_task send_social_post set_task_total snooze_attention start_task
       tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry
-      update_post update_saved_view update_social_post update_webmention_settings update_work_session write_post_seo
+      update_post update_post_edit_note update_saved_view update_social_post update_webmention_settings
+      update_work_session write_post_seo
     ]
   end
 
@@ -2502,6 +2503,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "untag_tasks" => { ids: [1], tag: "ruby" },
         "update_journal_entry" => { id: 1 },
         "update_post" => { id: 1 },
+        "update_post_edit_note" => { id: 1, edit_id: 2, note: "Fixed the numbers" },
         "update_saved_view" => { id: 1 },
         "update_social_post" => { id: 1 },
         "update_webmention_settings" => {},

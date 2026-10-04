@@ -72,6 +72,7 @@ module API
       ["tag_posts", "post", "/posts/bulk/tag", OK],
       ["read_post", "get", "/posts/{id}", OK],
       ["publish_post", "post", "/posts/{id}/publish", OK],
+      ["update_post_edit_note", "patch", "/posts/{id}/edits/{edit_id}", OK],
       ["list_attention", "get", "/attention", OK],
       ["list_inbox", "get", "/inbox", OK],
       ["snooze_attention", "post", "/attention/snooze", OK],
