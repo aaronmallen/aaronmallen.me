@@ -6,9 +6,7 @@ module API
   module Queries
     class Calendar
       BACKWARDS = "from comes after to"
-      LONGEST = 366
       NONE = Blog::Constants::EMPTY_ARRAY
-      TOO_LONG = "give a range of #{LONGEST} days or fewer".freeze
 
       Day = Data.define(:date, :sprint, :posts, :social_posts, :journal)
 
@@ -22,7 +20,7 @@ module API
 
       def call(from:, to:)
         return Failure(BACKWARDS) if from > to
-        return Failure(TOO_LONG) if to - from >= LONGEST
+        return Failure(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(from, to)
 
         Success(days(from, to))
       end

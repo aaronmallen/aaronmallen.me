@@ -4,7 +4,7 @@ RSpec.describe "MCP reach", type: :request do
   def self.exempt
     {
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
-      "admin.operations.build_calendar_page" => "builds the admin's calendar screen; #361 adds list_calendar",
+      "admin.operations.build_calendar_page" => "builds the admin's calendar screen; list_calendar reads the same days",
       "admin.operations.build_commit_page" => "builds the admin's commit page; list_commits reads the same commits",
       "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",
       "admin.operations.build_decision_page" => "builds the admin's decision page; #281 adds read_decision",

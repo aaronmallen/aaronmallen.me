@@ -80,7 +80,7 @@ RSpec.describe API::Queries::Calendar do
   end
 
   it "refuses a range over 366 days" do
-    expect(calendar.call(from: first, to: first + 366)).to eq(Dry::Monads::Failure(described_class::TOO_LONG))
+    expect(calendar.call(from: first, to: first + 366)).to eq(Dry::Monads::Failure(Blog::DayWindow::TOO_LONG))
   end
 
   it "refuses a range that ends before it starts" do

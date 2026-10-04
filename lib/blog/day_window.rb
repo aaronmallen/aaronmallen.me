@@ -6,10 +6,12 @@ module Blog
   module DayWindow
     CAP = 100
     DAYS = { type: "string", description: "a day, as YYYY-MM-DD" }.freeze
+    LONGEST = 366
     PAGING_NOTE = "Give from and to as YYYY-MM-DD; both days sit inside the window. " \
                   "One answer carries about #{CAP} rows, newest first, rounded out to the end of a day. " \
                   "Past that, partial comes back true and continue_to holds the day to send as to " \
                   "for the next window".freeze
+    TOO_LONG = "give a range of #{LONGEST} days or fewer".freeze
 
     extend Dry::Monads[:result]
 
@@ -30,5 +32,7 @@ module Blog
 
       { rows: found.rows, partial: true, continue_to: found.continue_to.iso8601 }
     end
+
+    def too_long?(first, last) = last - first >= LONGEST
   end
 end

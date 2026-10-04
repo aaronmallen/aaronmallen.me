@@ -12,8 +12,6 @@ module MCP
         description: "public holds the tags on posts and projects; private holds those on journal entries and tasks",
       }.freeze
       TEXT = "text"
-      LONGEST_RANGE = 366
-      LONG_RANGE = "give a range of #{LONGEST_RANGE} days or fewer".freeze
 
       extend Dry::Monads[:result]
 
@@ -130,7 +128,7 @@ module MCP
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
-        def refuse_long_range = refuse(LONG_RANGE)
+        def refuse_long_range = refuse(Blog::DayWindow::TOO_LONG)
 
         def reject_edits(server_context) = server_context.fetch(:reject_edits)
 
@@ -166,7 +164,7 @@ module MCP
 
         def tag_usage(server_context) = server_context.fetch(:tag_usage)
 
-        def too_long?(first, last) = last - first >= LONGEST_RANGE
+        def too_long?(first, last) = Blog::DayWindow.too_long?(first, last)
 
         def unsent_social_posts(server_context) = server_context.fetch(:unsent_social_posts)
 
