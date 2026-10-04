@@ -83,6 +83,7 @@ module API
       ["read_person", "get", "/people/{id}", OK],
       ["update_person", "patch", "/people/{id}", OK],
       ["delete_person", "delete", "/people/{id}", OK],
+      ["read_project", "get", "/projects/{id}", OK],
       ["read_review", "get", "/review", OK],
       ["search", "get", "/search", OK],
       ["list_sprints", "get", "/sprints", OK],
@@ -102,6 +103,7 @@ module API
       ["approve_webmentions", "post", "/webmentions/bulk/approve", OK],
       ["ignore_webmentions", "post", "/webmentions/bulk/ignore", OK],
       ["mark_webmentions_spam", "post", "/webmentions/bulk/spam", OK],
+      ["read_work_entry", "get", "/work_entries/{id}", OK],
       ["read_token", "get", "/token", OK],
       ["read_document", "get", "/openapi.json", OK],
     ].freeze

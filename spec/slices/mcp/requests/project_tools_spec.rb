@@ -20,11 +20,17 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
   def error? = result.fetch("isError", false)
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
   def message = result.fetch("content").first.fetch("text")
 
   def month(date) = date.strftime("%Y-%m")
 
   def result = JSON.parse(last_response.body).fetch("result")
+
+  def stamps(record) = { "created_at" => record.created_at.utc.iso8601, "updated_at" => record.updated_at.utc.iso8601 }
 
   def today = Blog::TimeZone.today
 
@@ -104,6 +110,58 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("list_work_entries", from: "2021-01-01", to: "2020-12-31")
 
       expect(message).to eq("from comes after to")
+    end
+  end
+
+  describe "read_project" do
+    it "answers every field list_projects gives, with its stamps and no links" do
+      project = create(:project, :archived, name: "kept", tags: %w[ruby], started_on: Date.new(2024, 6, 1))
+      call_tool("list_projects")
+      listed = content.fetch("projects").first
+      call_tool("read_project", id: project.id)
+
+      expect(content).to eq(listed.merge(stamps(project), "record_links" => {}))
+    end
+
+    it "answers the records linked to the project, grouped by kind" do
+      project = create(:project)
+      task = create(:task)
+      link("project", project.id, "task", task.id)
+      call_tool("read_project", id: project.id)
+
+      expect(content.fetch("record_links")).to match("task" => [include("id" => task.id)])
+    end
+
+    it "calls an unknown ID an error" do
+      call_tool("read_project", id: 404)
+
+      expect([error?, message]).to eq([true, "no project has the ID 404"])
+    end
+  end
+
+  describe "read_work_entry" do
+    it "answers every field list_work_entries gives, with no links" do
+      entry = create(:work_entry, :current, org: "now", from_year: 2020, blurb: nil)
+      call_tool("list_work_entries", from: "2020-01-01", to: "2020-12-31")
+      listed = content.fetch("work_entries").first
+      call_tool("read_work_entry", id: entry.id)
+
+      expect(content).to eq(listed.merge("record_links" => {}))
+    end
+
+    it "answers the records linked to the work entry, grouped by kind" do
+      entry = create(:work_entry)
+      project = create(:project)
+      link("work_entry", entry.id, "project", project.id)
+      call_tool("read_work_entry", id: entry.id)
+
+      expect(content.fetch("record_links")).to match("project" => [include("id" => project.id)])
+    end
+
+    it "calls an unknown ID an error" do
+      call_tool("read_work_entry", id: 404)
+
+      expect([error?, message]).to eq([true, "no work entry has the ID 404"])
     end
   end
 

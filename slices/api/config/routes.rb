@@ -80,6 +80,8 @@ module API
     patch "/people/:id", to: "people.update"
     delete "/people/:id", to: "people.destroy"
 
+    get "/projects/:id", to: "projects.show"
+
     get "/review", to: "reviews.show"
 
     get "/search", to: "search.index"
@@ -105,6 +107,8 @@ module API
     post "/webmentions/bulk/approve", to: "bulk_webmentions.approve"
     post "/webmentions/bulk/ignore", to: "bulk_webmentions.ignore"
     post "/webmentions/bulk/spam", to: "bulk_webmentions.spam"
+
+    get "/work_entries/:id", to: "work_entries.show"
 
     get "/token", to: "tokens.show"
 

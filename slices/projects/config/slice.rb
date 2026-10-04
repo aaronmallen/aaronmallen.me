@@ -9,6 +9,7 @@ module Projects
       operations.restore_project operations.save_project queries.archived queries.by_id
       queries.linkable_projects queries.linkable_work_entries queries.live
       queries.public_by_tag queries.public_grid queries.work_entries queries.work_entries_between
+      queries.work_entry_by_id
     ]
   end
 end

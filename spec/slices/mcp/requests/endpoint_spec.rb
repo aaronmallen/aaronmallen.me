@@ -105,6 +105,7 @@ RSpec.describe "MCP endpoint", type: :request do
       "read_message" => "messages",
       "read_person" => "people",
       "read_post" => "posts",
+      "read_project" => "projects",
       "read_review" => "the review",
       "read_saved_view" => "saved views",
       "read_social_post" => "social posts",
@@ -112,6 +113,7 @@ RSpec.describe "MCP endpoint", type: :request do
       "read_task" => "tasks",
       "read_time_report" => "the time report",
       "read_webmention_settings" => "webmentions and their settings",
+      "read_work_entry" => "work history",
       "search" => "Search every kind",
       "search_accounts" => "accounts on Mastodon and Bluesky",
       "summarize_activity" => "activity feed",
@@ -124,8 +126,8 @@ RSpec.describe "MCP endpoint", type: :request do
       list_links list_messages list_people list_posts list_projects list_saved_views list_social_posts list_sprints
       list_suggestions list_tags list_task_tag_rules list_tasks list_webmentions list_work_entries read_activity
       read_analytics read_commit read_current_sprint read_decision read_journal_entry read_message read_person read_post
-      read_review read_saved_view read_social_post read_sync_state read_task read_time_report read_webmention_settings
-      search search_accounts summarize_activity
+      read_project read_review read_saved_view read_social_post read_sync_state read_task read_time_report
+      read_webmention_settings read_work_entry search search_accounts summarize_activity
     ]
   end
 
@@ -2454,6 +2456,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_message" => { id: 1 },
         "read_person" => { id: 1 },
         "read_post" => { id: 1 },
+        "read_project" => { id: 1 },
         "read_review" => {},
         "read_saved_view" => { id: 1 },
         "read_social_post" => { id: 1 },
@@ -2461,6 +2464,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_task" => { id: 1 },
         "read_time_report" => { from: "2026-01-01", to: "2026-12-31" },
         "read_webmention_settings" => {},
+        "read_work_entry" => { id: 1 },
         "reject_suggestion_edits" => { suggestion_id: 1 },
         "remove_tag" => { id: 1, scope: "public" },
         "reopen_decision" => { id: 1, reason: "Load grew" },

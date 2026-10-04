@@ -1,0 +1,20 @@
+# frozen_string_literal: true
+
+module API
+  module Endpoints
+    class ReadWorkEntry < Endpoint
+      KIND = Blog::Types::RecordKind["work_entry"]
+      SCHEMA = { additionalProperties: false, properties: { id: WorkEntries::ID }, required: ["id"] }.freeze
+      REPLY = Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
+
+      include Deps[record_links: "links.queries.record_links", work_entry_by_id: "projects.queries.work_entry_by_id"]
+
+      def handle(id:)
+        entry = work_entry_by_id.call(id)
+        return not_found(WorkEntries.missing(id)) if entry.nil?
+
+        Success(serialized(Serializers::WorkEntry, entry).merge(record_links: linked(KIND, entry.id)))
+      end
+    end
+  end
+end

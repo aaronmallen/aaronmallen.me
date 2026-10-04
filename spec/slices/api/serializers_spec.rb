@@ -84,6 +84,16 @@ RSpec.describe "API serializers", type: :request do
     end
   end
 
+  describe API::Serializers::Project do
+    it "gives the JSON read_project returns, less its record links" do
+      project = create(:project, :archived, tags: %w[ruby cli])
+      call_tool("read_project", id: project.id)
+
+      expect(serialized(described_class, Projects::Slice["queries.by_id"].call(project.id)))
+        .to eq(content.except("record_links"))
+    end
+  end
+
   describe API::Serializers::Sprint do
     def first_page = Blog::Page.new(number: 1, size: 50)
 
@@ -100,6 +110,16 @@ RSpec.describe "API serializers", type: :request do
       found = Tasks::Slice["queries.sprints_between"].call(from: today, to: nil, page: first_page)
 
       expect(serialized(described_class, found.rows)).to eq(content.fetch("sprints"))
+    end
+  end
+
+  describe API::Serializers::WorkEntry do
+    it "gives the JSON read_work_entry returns, less its record links" do
+      entry = create(:work_entry, :current)
+      call_tool("read_work_entry", id: entry.id)
+
+      expect(serialized(described_class, Projects::Slice["queries.work_entry_by_id"].call(entry.id)))
+        .to eq(content.except("record_links"))
     end
   end
 end
