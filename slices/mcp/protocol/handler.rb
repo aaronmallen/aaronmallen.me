@@ -162,15 +162,18 @@ module MCP
         work_entries_between: "projects.queries.work_entries_between",
       }.freeze
       INSTRUCTIONS = [
-        "Read everything %s's site keeps: posts, social posts, webmentions, the journal, commits, tasks, sprints,",
-        "projects, work history, tags, messages, suggestions, analytics, settings and the whole activity feed.",
-        "Suggest edits to a post or social post for the owner to accept or reject in the admin. Make any change the",
-        "admin makes, publishing, sending and deleting included. A published post or a sent social post cannot be",
-        "called back. The tool list holds only what this connection was granted.",
+        "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",
+        "the journal, commits and the sync state, tasks, sprints, task tag rules, work sessions and the time report,",
+        "projects, work history, decisions, people, tags, record links, saved views, messages, the inbox, attention,",
+        "the calendar, the review, suggestions, analytics and the whole activity feed. Search every kind by its",
+        "words, and look up accounts on Mastodon and Bluesky. Suggest edits to a post or social post, and settle",
+        "suggestions with accept_suggestion_edits and reject_suggestion_edits or leave them for the owner in the",
+        "admin. Make any change the admin makes, publishing, sending and deleting included. A published post or a",
+        "sent social post cannot be called back. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
-      TITLE = "%s's writing"
+      TITLE = "%s's site"
       TOOLS = [
         Tools::AcceptSuggestionEdits,
         Tools::AddDecisionComment,

@@ -10,7 +10,10 @@ module MCP
                   "send as page. A journal or activity view pages by day: partial comes back true and " \
                   "continue_to holds the day to send as continue_to. An activity row carries its kind, day, time " \
                   "and whole name, and whichever of link, repo, sha, additions, deletions, status, targets, " \
-                  "excerpt, task_id, decision_id, worked_seconds and tags its kind holds, as read_activity does"
+                  "excerpt, task_id, decision_id, worked_seconds and tags its kind holds, as read_activity does. " \
+                  "Reading a Today, Next, Someday or External tasks view claims today's sprint, starting it when " \
+                  "today has none yet and carrying in what the day before left open, as read_current_sprint and " \
+                  "the admin's task list do"
       input_schema(API::Endpoints::ReadSavedView::SCHEMA)
       scope OAuth::Scope::READ
 

@@ -73,6 +73,50 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def prompt_text = prompt.fetch("content").fetch("text")
 
+  def read_kinds
+    {
+      "compose_announcement" => "announcements",
+      "list_attention" => "attention",
+      "list_calendar" => "the calendar",
+      "list_commits" => "commits",
+      "list_decisions" => "decisions",
+      "list_inbox" => "the inbox",
+      "list_journal_entries" => "the journal",
+      "list_links" => "record links",
+      "list_messages" => "messages",
+      "list_people" => "people",
+      "list_posts" => "posts",
+      "list_projects" => "projects",
+      "list_saved_views" => "saved views",
+      "list_social_posts" => "social posts",
+      "list_sprints" => "sprints",
+      "list_suggestions" => "suggestions",
+      "list_tags" => "tags",
+      "list_task_tag_rules" => "task tag rules",
+      "list_tasks" => "tasks",
+      "list_webmentions" => "webmentions",
+      "list_work_entries" => "work history",
+      "read_activity" => "activity feed",
+      "read_analytics" => "analytics",
+      "read_current_sprint" => "sprints",
+      "read_decision" => "decisions",
+      "read_journal_entry" => "the journal",
+      "read_message" => "messages",
+      "read_person" => "people",
+      "read_post" => "posts",
+      "read_review" => "the review",
+      "read_saved_view" => "saved views",
+      "read_social_post" => "social posts",
+      "read_sync_state" => "the sync state",
+      "read_task" => "tasks",
+      "read_time_report" => "the time report",
+      "read_webmention_settings" => "webmentions and their settings",
+      "search" => "Search every kind",
+      "search_accounts" => "accounts on Mastodon and Bluesky",
+      "summarize_activity" => "activity feed",
+    }
+  end
+
   def read_tools
     %w[
       compose_announcement list_attention list_calendar list_commits list_decisions list_inbox list_journal_entries
@@ -326,6 +370,29 @@ RSpec.describe "MCP endpoint", type: :request do
 
       expect(result.fetch("instructions"))
         .to include("Read everything").and(include("publishing, sending and deleting included"))
+    end
+
+    it "names a kind in the instructions for every read tool" do
+      readers = MCP::Protocol::Handler::TOOLS.select { it.scope_value == MCP::OAuth::Scope::READ }.map(&:name_value)
+      rpc("initialize",
+          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+
+      expect(readers.reject { result.fetch("instructions").include?(read_kinds.fetch(it, it)) }).to be_empty
+    end
+
+    it "tells the client suggestions settle through the tools" do
+      rpc("initialize",
+          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+
+      expect(result.fetch("instructions"))
+        .to include("accept_suggestion_edits").and(include("reject_suggestion_edits"))
+    end
+
+    it "titles the server after the whole site" do
+      rpc("initialize",
+          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+
+      expect(result.dig("serverInfo", "title")).to eq("#{Hanami.app['settings'].owner[:name]}'s site")
     end
 
     it "takes a notification without answering" do
