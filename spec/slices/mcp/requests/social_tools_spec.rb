@@ -432,6 +432,13 @@ RSpec.describe "MCP social tools", type: :request do
       expect(webmention_repo.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
     end
 
+    it "stores no reason when it holds only Unicode spaces", :aggregate_failures do
+      call_tool("moderate_webmention", id: mention.id, verdict: "spam", reason: "\u3000\u00a0")
+
+      expect(content).to eq("id" => mention.id, "status" => "spam")
+      expect(webmention_repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+    end
+
     it "clears the reason when approving a spam mention" do
       spam = create(:webmention, :spam, spam_reason: "link farm")
       call_tool("moderate_webmention", id: spam.id, verdict: "approved")

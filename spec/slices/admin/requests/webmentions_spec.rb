@@ -186,6 +186,13 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
+      it "marks a mention as spam without a note when the note holds only Unicode spaces", :aggregate_failures do
+        post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "\u3000\u00a0"
+
+        expect(last_response).to be_redirect
+        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+      end
+
       it "clears the note when ignoring a spam mention" do
         spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
         post "/admin/webmentions/#{spam.id}/ignore", _csrf_token: admin_csrf_token

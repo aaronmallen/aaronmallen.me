@@ -9,7 +9,7 @@ module Social
       include Deps[webmention_repo: "repos.webmention_repo"]
 
       def call(id, verdict, reason: nil)
-        step found(moderated(id, Blog::Types::WebmentionStatus[verdict], Blog::Types::OptionalText[reason]))
+        step found(moderated(id, Blog::Types::WebmentionStatus[verdict], visible(reason)))
       end
 
       private
@@ -23,6 +23,8 @@ module Social
         else webmention_repo.mark_spam(id, reason)
         end
       end
+
+      def visible(reason) = Blog::Types::OptionalText[reason]&.then { it if it.match?(Blog::Contract::VISIBLE) }
     end
   end
 end

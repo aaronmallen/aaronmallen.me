@@ -193,6 +193,13 @@ RSpec.describe "Admin inbox", type: :request do
         expect(webmentions.by_status("spam").map(&:spam_reason)).to eq(["Selling pills"])
       end
 
+      it "keeps no reason when it holds only Unicode spaces", :aggregate_failures do
+        act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "\u3000\u00a0")
+
+        expect(last_response).to be_redirect
+        expect(webmentions.by_status("spam").map(&:spam_reason)).to eq([nil])
+      end
+
       it "refuses to set it back to pending" do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/pending")
 

@@ -37,6 +37,13 @@ RSpec.describe Social::Operations::ModerateWebmention do
     expect(spam_reason(mention)).to be_nil
   end
 
+  it "stores no reason for spam marked with only Unicode spaces" do
+    mention = create(:webmention)
+    moderate(mention.id, "spam", reason: "\u3000\u2003\u00a0")
+
+    expect(spam_reason(mention)).to be_nil
+  end
+
   it "replaces the reason when marked as spam again" do
     mention = create(:webmention, :spam, spam_reason: "link farm")
     moderate(mention.id, "spam")
