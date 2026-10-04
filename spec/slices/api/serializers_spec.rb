@@ -35,18 +35,18 @@ RSpec.describe "API serializers", type: :request do
       serialized(described_class, Tasks::Slice["queries.task_by_id"].call(id))
     end
 
-    it "gives the JSON read_task returns, less its comments and record links" do
+    it "gives the JSON read_task returns, less its comments, record links and timeline" do
       done = create(:task, :done, :carried, title: "finished", note: "a note", tags: %w[admin])
       create(:task_link, from_task_id: create(:task, title: "blocker").id, to_task_id: done.id)
       create(:task_link, :relates, from_task_id: done.id, to_task_id: create(:task, :in_sprint).id)
 
-      expect(read(done.id)).to eq(content.except("comments", "record_links"))
+      expect(read(done.id)).to eq(content.except("comments", "record_links", "timeline"))
     end
 
     it "gives the sprint day of a task in a sprint" do
       task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
 
-      expect(read(task.id)).to eq(content.except("comments", "record_links"))
+      expect(read(task.id)).to eq(content.except("comments", "record_links", "timeline"))
     end
 
     it "gives the sprint day it is handed, as read_current_sprint lists tasks" do

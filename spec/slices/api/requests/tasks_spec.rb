@@ -5,7 +5,7 @@ RSpec.describe "API tasks", type: :request do
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
+  def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
   def call_api(verb, path, body = nil, token: api_token)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
@@ -148,6 +148,79 @@ RSpec.describe "API tasks", type: :request do
 
     it "refuses an ID that is not a number with a 422" do
       expect([read("abc").fetch("errors").keys, status]).to eq([%w[id], 422])
+    end
+  end
+
+  describe "GET /api/v1/tasks/:id timeline" do
+    let(:task) { create(:task) }
+
+    def event(kind, hour, **fields)
+      create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(today, hour), **fields)
+    end
+
+    def stamp(*) = at(*).utc.iso8601
+
+    def timeline = read(task.id).fetch("timeline")
+
+    context "with an entry of every kind" do
+      before do
+        event("untagged", 14, tag_name: "money")
+        create(:work_session, task_id: task.id, started_at: at(today, 10), ended_at: at(today, 11))
+        event("moved", 8, from_list: "next", to_sprint_on: today)
+        event("tagged", 9, tag_name: "money")
+        create(:task_comment, task_id: task.id, created_at: at(today, 12))
+        event("status_changed", 13, from_status: "open", to_status: "in_progress")
+      end
+
+      it "lists them oldest first" do
+        expect(timeline.map { it.fetch("kind") }).to eq(%w[moved tagged session comment status_changed untagged])
+      end
+    end
+
+    it "says what a move changed" do
+      event("moved", 8, from_list: "next", to_sprint_on: today)
+
+      expect(timeline).to eq([{ "kind" => "moved", "occurred_at" => stamp(today, 8), "from_list" => "next",
+                                "from_sprint_on" => nil, "to_list" => nil, "to_sprint_on" => today.iso8601 }])
+    end
+
+    it "says which tag went on or came off" do
+      event("untagged", 9, tag_name: "money")
+
+      expect(timeline).to eq([{ "kind" => "untagged", "occurred_at" => stamp(today, 9), "tag" => "money" }])
+    end
+
+    it "says what a status change changed" do
+      event("status_changed", 9, from_status: "open", to_status: "done")
+
+      expect(timeline).to eq([{ "kind" => "status_changed", "occurred_at" => stamp(today, 9),
+                                "from_status" => "open", "to_status" => "done" }])
+    end
+
+    it "gives a comment its ID, body and author" do
+      comment = create(:task_comment, task_id: task.id, body: "a note", created_at: at(today, 9))
+
+      expect(timeline).to eq([{ "kind" => "comment", "id" => comment.id, "occurred_at" => stamp(today, 9),
+                                "body" => "a note", "author" => Blog::Owner.full_name, "source" => "local",
+                                "url" => nil }])
+    end
+
+    it "gives a session its ID, start, end and length" do
+      session = create(:work_session, task_id: task.id, started_at: at(today, 9), ended_at: at(today, 10, 30))
+
+      expect(timeline).to eq([{ "kind" => "session", "id" => session.id, "occurred_at" => stamp(today, 9),
+                                "started_at" => stamp(today, 9), "ended_at" => stamp(today, 10, 30),
+                                "seconds" => 5400, "running" => false }])
+    end
+
+    it "gives a running session no end and its length so far" do
+      create(:work_session, task_id: task.id, started_at: Time.now - 600)
+
+      expect(timeline.first).to include("ended_at" => nil, "running" => true, "seconds" => be_between(600, 660))
+    end
+
+    it "carries none for a task with no history" do
+      expect(timeline).to eq([])
     end
   end
 
@@ -344,6 +417,8 @@ RSpec.describe "API tasks", type: :request do
     it "read as read_task does" do
       task = create(:task, tags: %w[ruby])
       create(:task_comment, task_id: task.id)
+      create(:work_session, :closed, task_id: task.id)
+      create(:task_event, task_id: task.id)
 
       expect(read(task.id)).to eq(mcp_answer("read_task", id: task.id))
     end

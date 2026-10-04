@@ -44,7 +44,8 @@ module API
       operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.sprints_between queries.task_by_id
-      queries.task_comments queries.tasks_in_sprint queries.unseen_task_count queries.unseen_tasks
+      queries.task_comments queries.task_timeline queries.tasks_in_sprint queries.unseen_task_count
+      queries.unseen_tasks
     ], from: :tasks
 
     export %w[

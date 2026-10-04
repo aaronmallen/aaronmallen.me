@@ -173,6 +173,14 @@ RSpec.describe "MCP task tools", type: :request do
       expect(reads.grep(/FROM "tasks" WHERE \("tasks"."id" = #{task.id}\)/)).to have(1).item
     end
 
+    it "gives each work session in its timeline the ID update_work_session takes" do
+      task = create(:task)
+      session = create(:work_session, :closed, task_id: task.id)
+      call_tool("read_task", id: task.id)
+
+      expect(content.fetch("timeline")).to match([include("kind" => "session", "id" => session.id)])
+    end
+
     it "refuses a task that is not there" do
       call_tool("read_task", id: 999_999)
 

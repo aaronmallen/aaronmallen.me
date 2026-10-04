@@ -51,6 +51,13 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(missing).to be_empty, "the document leaves out these endpoints:\n#{missing.join("\n")}"
   end
 
+  it "describes the timeline read_task answers, one schema per kind of entry" do
+    reply = document.dig("paths", "/tasks/{id}", "get", "responses", "200", "content", "application/json", "schema")
+
+    expect(reply.dig("properties", "timeline", "items", "oneOf").map { it.fetch("$ref").split("/").last })
+      .to eq(%w[TaskTimelineComment TaskTimelineSession TaskTimelineMove TaskTimelineTag TaskTimelineStatus])
+  end
+
   it "gives each operation one ID" do
     expect(operation_ids).to eq(operation_ids.uniq)
   end
