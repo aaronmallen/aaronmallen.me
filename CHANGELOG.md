@@ -1,11 +1,11 @@
 # Changelog
 
 This file records each notable change to the site. It follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
+and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the UTC day of the tag.
 
 ## [Unreleased]
 
-## [1.4.1] - 2026-10-03
+## [26.10.2] - 2026-10-03
 
 ### Added
 
@@ -34,7 +34,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - The newer link on the admin journal no longer skips days when one day holds more entries than fit on a page.
 - The MCP `report` prompt refuses a range over 366 days, as `summarize_activity` and `read_analytics` do.
 
-## [1.4.0] - 2026-10-01
+## [26.10.1] - 2026-10-02
 
 ### Added
 
@@ -121,7 +121,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - A request body over 1 MB, or 25 MB for a photo upload, gets a 413, and a multipart body sent anywhere but photo
   uploads gets a 415.
 
-## [1.3.0] - 2026-09-30
+## [26.10.0] - 2026-10-01
 
 ### Added
 
@@ -158,7 +158,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 
 - Hashtags in a post sent to Bluesky work as tags. Before, they went out as plain text.
 
-## [1.2.0] - 2026-09-29
+## [26.9.4] - 2026-09-30
 
 ### Added
 
@@ -210,7 +210,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - A click outside the task dialog no longer closes it and throws away what you typed. It closes on Esc, Cancel or a
   new X button.
 
-## [1.1.0] - 2026-09-29
+## [26.9.3] - 2026-09-29
 
 ### Added
 
@@ -245,7 +245,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - The editor that opened inside a task's row. The task's edit page replaces it.
 - The Journaled tile on Today.
 
-## [1.0.2] - 2026-09-27
+## [26.9.2] - 2026-09-27
 
 ### Fixed
 
@@ -254,7 +254,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - CI runs again: it sets `GEM_HOME` in the install step, compiles Ruby the way `mise.lock` expects, and resolves the
   link-local test address on Linux.
 
-## [1.0.1] - 2026-09-27
+## [26.9.1] - 2026-09-27
 
 ### Fixed
 
@@ -263,7 +263,7 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - MCP clients such as Claude Code ask for every scope, not read alone. The protected resource document now lists
   `scopes_supported`, where they look for the scopes to ask for.
 
-## [1.0.0] - 2026-09-27
+## [26.9.0] - 2026-09-27
 
 ### Added
 
@@ -278,12 +278,12 @@ and versions follow [BreakVer](https://www.taoensso.com/break-versioning).
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.1...HEAD
-[1.4.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.4.0...1.4.1
-[1.4.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.3.0...1.4.0
-[1.3.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.2.0...1.3.0
-[1.2.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.1.0...1.2.0
-[1.1.0]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.2...1.1.0
-[1.0.2]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.1...1.0.2
-[1.0.1]: https://github.com/aaronmallen/aaronmallen.me/compare/1.0.0...1.0.1
-[1.0.0]: https://github.com/aaronmallen/aaronmallen.me/releases/tag/1.0.0
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.2...HEAD
+[26.10.2]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.1...26.10.2
+[26.10.1]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.0...26.10.1
+[26.10.0]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.4...26.10.0
+[26.9.4]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.3...26.9.4
+[26.9.3]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.2...26.9.3
+[26.9.2]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.1...26.9.2
+[26.9.1]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.0...26.9.1
+[26.9.0]: https://github.com/aaronmallen/aaronmallen.me/releases/tag/26.9.0

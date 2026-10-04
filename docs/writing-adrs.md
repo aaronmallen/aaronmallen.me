@@ -48,7 +48,7 @@ all of this when ADR 0069 superseded ADR 0048.
 
 ## Editing a record that landed
 
-The site has run since 1.0.0 on 2026-09-27. A record that landed describes something that shipped, and a reader
+The site has run since 26.9.0 on 2026-09-27. A record that landed describes something that shipped, and a reader
 needs to know it was once true, so we never rewrite the decision in a shipped record. Migrations follow the same
 rule: we never edit one that has shipped, and a change takes a new migration.
 
