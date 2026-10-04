@@ -77,6 +77,7 @@ RSpec.describe "Admin projects", type: :feature do
 
     it "reorders the public page" do
       find("[aria-label='Move live-two up']").click
+      page.assert_selector("[aria-label='Move live-two up'][disabled]")
       visit "/projects"
 
       expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[live-two live-one])
@@ -93,6 +94,7 @@ RSpec.describe "Admin projects", type: :feature do
 
     it "keeps the position of the project it swapped with" do
       find("[aria-label='Move live-two up']").click
+      page.assert_selector("[aria-label='Move live-two up'][disabled]")
 
       expect(repo.by_id(below.id).position).to eq(live.position)
     end
@@ -110,6 +112,8 @@ RSpec.describe "Admin projects", type: :feature do
     end
 
     it "unfeatures the project" do
+      page.assert_selector("[data-toast]", text: "Archived · removed from /projects")
+
       expect(repo.by_id(live.id)).to have_attributes(status: "archived", featured: false)
     end
 

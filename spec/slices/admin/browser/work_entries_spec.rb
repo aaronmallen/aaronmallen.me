@@ -68,6 +68,7 @@ RSpec.describe "Admin work history", type: :feature do
     end
 
     it "shows the role on the public page" do
+      page.assert_selector("[data-toast]", text: "Role added to /projects")
       visit "/about"
 
       expect(page).to have_css(".rows .row h3", text: "Software Engineer")
@@ -106,6 +107,7 @@ RSpec.describe "Admin work history", type: :feature do
 
     it "takes the role off the public page" do
       accept_confirm { click_button "Remove" }
+      page.assert_selector("[data-toast]", text: "Role removed from /projects")
       visit "/about"
 
       expect(page).to have_css("h1.page-title").and have_no_css(".rows .row")

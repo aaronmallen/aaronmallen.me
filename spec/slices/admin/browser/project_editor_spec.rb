@@ -74,12 +74,14 @@ RSpec.describe "Admin project editor", type: :feature do
     it "saves the changes" do
       fill_in "project[tagline]", with: "Terminal colors"
       click_button "Save project"
+      page.assert_selector("[data-toast]", text: "Project saved")
 
       expect(repo.by_id(project.id).tagline).to eq("Terminal colors")
     end
 
     it "archives from the editor" do
       click_button "Archive"
+      page.assert_selector("[data-toast]", text: "Archived · removed from /projects")
 
       expect(repo.by_id(project.id)).to have_attributes(status: "archived", featured: false)
     end
@@ -94,6 +96,7 @@ RSpec.describe "Admin project editor", type: :feature do
       click_button "Archive"
       find(".li-side a", text: "Edit").click
       click_button "Restore"
+      page.assert_selector("[data-toast]", text: "Restored to /projects")
 
       expect(repo.by_id(project.id).status).to eq("active")
     end
