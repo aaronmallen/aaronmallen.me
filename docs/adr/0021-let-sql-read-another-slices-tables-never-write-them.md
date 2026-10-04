@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, links, posts, search, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -59,6 +59,9 @@ cross today:
   would make posts import a query from social, which already imports from posts, and ADR 0003 allows no such
   cycle.
 
+- **`Media::Relations::Photos#published`** reads `posts`, which `posts` owns, to find the photos a published post
+  claims, so `/media/<key>` serves a visitor those alone. `posts` imports `operations.claim_photos` from `media`, so
+  an import the other way would close a cycle.
 - **`Tasks::Relations::RecordLinks#project_ids_by_task`** reads `record_links`, which `links` owns, to find the
   projects each task links to for the time report. `links` imports `queries.linkable_tasks` from `tasks`, so an
   import the other way would close a cycle.

@@ -19,6 +19,8 @@ module Media
         photos.unclaimed.by_pk(id).delete
       end
 
+      def published(key) = photos.published.with_keys(key).one
+
       def release(owner, owner_ids)
         claims = photo_claims.for_owners(owner, owner_ids)
         released = photos.where(id: claims.pluck(:photo_id)).to_a
