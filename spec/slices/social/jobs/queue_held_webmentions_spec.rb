@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Social::Jobs::QueueHeldWebmentions, type: :request do
+RSpec.describe Social::Jobs::QueueHeldWebmentions do
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:source) { "https://ada.example/notes/1" }
   let(:target) { "https://aaronmallen.me/writing/hello" }
@@ -29,7 +29,7 @@ RSpec.describe Social::Jobs::QueueHeldWebmentions, type: :request do
     create(:post, :published, slug: "hello")
   end
 
-  describe "a webmention received while Redis is down" do
+  describe "a webmention received while Redis is down", type: :request do
     before do
       redis_down
       notify

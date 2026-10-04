@@ -467,6 +467,12 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   end
 
   describe "the prune" do
+    def feed_reader_hash(day)
+      feed_reader_hashes.dataset.insert(day:, path: "/writing.atom", reader_hash: Digest::SHA256.hexdigest(day.to_s))
+    end
+
+    def feed_reader_hashes = Analytics::Slice["repos.feed_fetch_repo"].feed_reader_hashes
+
     it "deletes the events older than 90 days once their day is rolled up" do
       event(on: today - 91)
       roll_up
@@ -509,6 +515,13 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
 
       expect(event_repo.analytics_clicks.count).to be_zero
       expect(clicks_of("/writing/hello", today - 91)).to eq([["docs.example", "/guide", 1]])
+    end
+
+    it "deletes the feed reader hashes older than 90 days" do
+      [90, 89].each { feed_reader_hash(today - it) }
+      roll_up
+
+      expect(feed_reader_hashes.to_a.map(&:day)).to eq([today - 89])
     end
 
     it "stops at the first day no run rolled up" do

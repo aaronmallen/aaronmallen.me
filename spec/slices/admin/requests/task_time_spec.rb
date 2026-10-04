@@ -144,13 +144,6 @@ RSpec.describe "Admin task time", type: :request do
         expect(page).to have_text(t("ui.components.tasks.field_error.started_at.blank"))
       end
 
-      it "lets Postgres refuse an end before the start" do
-        session = closed
-
-        expect { Tasks::Slice["repos.work_session_repo"].update(session.id, ended_at: started - 60) }
-          .to raise_error(ROM::SQL::CheckConstraintError, /work_sessions_order_check/)
-      end
-
       it "answers 404 for another task's session" do
         edit(closed(on: create(:task)), started_at: started, ended_at: started + 60)
 

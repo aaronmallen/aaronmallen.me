@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
+RSpec.describe MCP::Jobs::ReapExpiredCredentials do
   let(:client) { mcp_create(:oauth_client) }
   let(:verifier) { MCP::OAuth::Secret.generate }
 
@@ -49,7 +49,7 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
       expect(codes.count).to eq(1)
     end
 
-    it "still revokes the client when a kept code is replayed" do
+    it "still revokes the client when a kept code is replayed", type: :request do
       code = mcp_authorization_code(client, verifier:)
       mcp_exchange(client, code, verifier:)
       reap
@@ -95,7 +95,7 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
       expect(tokens.count).to eq(1)
     end
 
-    it "still revokes the client when a kept refresh token is replayed" do
+    it "still revokes the client when a kept refresh token is replayed", type: :request do
       spent = mcp_connect(client, verifier:).fetch("refresh_token")
       mcp_refresh(client, spent)
       reap
@@ -191,7 +191,7 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
       expect(clients.by_pk(held.id).count).to eq(1)
     end
 
-    it "keeps an idle client the owner has just approved" do
+    it "keeps an idle client the owner has just approved", type: :request do
       approved = idle_client
       code = mcp_authorization_code(approved, verifier:)
       reap

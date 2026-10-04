@@ -640,11 +640,12 @@ RSpec.describe "API tasks", type: :request do
       expect(act(create(:task).id, "cancel").fetch("status")).to eq("canceled")
     end
 
-    it "refuses to cancel a finished task with a 422" do
+    it "refuses to cancel a finished task with a 422 and leaves it done", :aggregate_failures do
       task = create(:task, :done)
 
       expect([act(task.id, "cancel").fetch("errors"), status])
         .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
+      expect(tasks.by_id(task.id).status).to eq("done")
     end
 
     it "reopens a canceled task" do
@@ -729,6 +730,15 @@ RSpec.describe "API tasks", type: :request do
       expect([act(task.id, "seen"), status]).to match([include("id" => task.id, "list" => "external"), 200])
       expect(read(task.id).fetch("timeline")).to be_empty
       expect(seen_at(task)).not_to be_nil
+    end
+
+    it "stamps the time it was marked seen" do
+      task = synced
+      marked = Time.at(Time.now.to_i - 600)
+      allow(Time).to receive(:now).and_return(marked)
+      act(task.id, "seen")
+
+      expect(seen_at(task)).to eq(marked)
     end
 
     it "refuses a task with no synced issue with a 422" do

@@ -68,6 +68,32 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(API::Token.digest(revealed)).to eq(stored.one[:token_digest])
     end
 
+    it "stores a SHA-256 digest of the value" do
+      mint("Terminal")
+      follow_redirect!
+
+      expect(stored.one[:token_digest]).to eq(Digest::SHA256.hexdigest(revealed))
+    end
+
+    it "never stores the value itself" do
+      mint("Terminal")
+      follow_redirect!
+
+      expect(stored.one.values).not_to include(revealed)
+    end
+
+    it "mints a new value each time" do
+      values = Array.new(2) { mint("Terminal").then { follow_redirect! }.then { revealed } }
+
+      expect(values.uniq.size).to eq(2)
+    end
+
+    it "trims the name" do
+      mint("  Laptop  ")
+
+      expect(stored.one[:name]).to eq("Laptop")
+    end
+
     it "shows a value the API takes" do
       mint("Terminal")
       follow_redirect!

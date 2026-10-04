@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Media::Jobs::SweepPhotos, type: :request do
+RSpec.describe Media::Jobs::SweepPhotos do
   let(:day) { 24 * 60 * 60 }
 
   def claim(photo)

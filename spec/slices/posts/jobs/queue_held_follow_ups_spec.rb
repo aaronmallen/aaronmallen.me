@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits, type: :request do
+RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:endpoint) { "https://ada.example/webmention" }
   let(:post_repo) { Posts::Slice["repos.post_repo"] }
@@ -48,11 +48,11 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits, type: :request do
     resolves_publicly("ada.example")
     stub_request(:get, target).to_return(headers: { "Link" => %(<#{endpoint}>; rel="webmention") }, body: "<p>a</p>")
     stub_request(:post, endpoint).to_return(status: 202)
-    sign_in_to_admin
   end
 
-  describe "publishing while Redis is down" do
+  describe "publishing while Redis is down", type: :request do
     before do
+      sign_in_to_admin
       redis_down
       publish
     end
@@ -104,10 +104,11 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits, type: :request do
     end
   end
 
-  describe "saving a published post while Redis is down" do
+  describe "saving a published post while Redis is down", type: :request do
     let(:published) { create(:post, :published, slug: "hello", body: "See [a note](#{target}).") }
 
     before do
+      sign_in_to_admin
       redis_down
       save_published(published)
     end

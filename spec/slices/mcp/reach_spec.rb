@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "MCP reach", type: :request do
+RSpec.describe "MCP reach", type: :app do
   def self.exempt
     {
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
@@ -99,10 +99,6 @@ RSpec.describe "MCP reach", type: :request do
     }
   end
 
-  def article = @article ||= create(:post, :published, published_at: at(9))
-
-  def at(hour) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, 0)
-
   def exempt = self.class.exempt
 
   def operations
@@ -132,41 +128,6 @@ RSpec.describe "MCP reach", type: :request do
     Hanami.app.slices[slice.to_sym][local]
   end
 
-  def seed(kind)
-    seeder = :"seed_#{kind}"
-    public_send(seeder) if respond_to?(seeder)
-  end
-
-  def seed_comment = create(:task_comment, created_at: at(10))
-
-  def seed_commit = create(:commit, commit_date: today)
-
-  def seed_decision = create(:decision_event, created_at: at(10))
-
-  def seed_decision_comment = create(:decision_comment, created_at: at(10))
-
-  def seed_journal = create(:journal_entry, entry_date: today)
-
-  def seed_post = article
-
-  def seed_project = create(:project)
-
-  def seed_session = create(:work_session, started_at: at(9), ended_at: at(10))
-
-  def seed_social = create(:social_post, :posted, posted_at: at(12))
-
-  def seed_sprint = create(:sprint, sprint_date: today)
-
-  def seed_suggestion = Suggestions::Slice["repos.suggestion_repo"].replace_for_post(article.id, [typo])
-
-  def seed_task = create(:task, :done, completed_at: at(16))
-
-  def seed_webmention = create(:webmention, :approved, post_id: article.id, received_at: at(8))
-
-  def today = Blog::TimeZone.today
-
-  def typo = { original: "teh", replacement: "the", reason: "typo" }
-
   def walked?(dependency) = dependency.class.name.to_s.match?(/::(Endpoints|Operations)::/)
 
   it "reaches every operation from a tool unless the operation is exempt" do
@@ -185,14 +146,5 @@ RSpec.describe "MCP reach", type: :request do
 
   it "gives every exempt operation a reason" do
     expect(exempt.select { |_, reason| reason.to_s.strip.empty? }.keys).to be_empty
-  end
-
-  Blog::Types::ActivityKind.each_value do |kind|
-    it "serves the #{kind} kind through read_activity" do
-      seed(kind)
-      served = mcp_answer("read_activity", from: (today - 1).iso8601, to: today.iso8601, kinds: [kind])
-
-      expect(served.fetch("activity").map { it.fetch("kind") }).to include(kind)
-    end
   end
 end

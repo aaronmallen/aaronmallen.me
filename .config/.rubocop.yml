@@ -61,6 +61,7 @@ Metrics/ParameterLists:
 RSpec/DescribeClass:
   IgnoredMetadata:
     type:
+      - app
       - feature
       - migration
       - request

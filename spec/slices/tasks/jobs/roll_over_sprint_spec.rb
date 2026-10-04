@@ -56,6 +56,55 @@ RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
     expect { described_class.new(current_sprint:).perform }.to raise_error(described_class::RollOverFailed, "not_found")
   end
 
+  describe "a task in progress" do
+    let(:now) { Time.at(Time.now.to_i) }
+
+    def running
+      task = create(:task, :in_progress, :in_sprint, sprint_id: yesterday.id)
+      create(:work_session, task_id: task.id, started_at: now - 5400)
+      task
+    end
+
+    def spans(task)
+      sessions = Tasks::Slice["relations.work_sessions"].for_task(task.id).order(:started_at).to_a
+      sessions.map { [it[:started_at], it[:ended_at]] }
+    end
+
+    it "ends its session and opens a new one", :aggregate_failures do
+      task = running
+      job.perform
+
+      expect(spans(task)).to eq([[now - 5400, now], [now, nil]])
+      expect(task_repo.by_id(task.id).status).to eq("in_progress")
+    end
+  end
+
+  describe "the events it records" do
+    def events(task) = Tasks::Slice["relations.task_events"].for_task(task.id).in_order.to_a.map(&:to_h)
+
+    it "records the move from yesterday's sprint into today's" do
+      task = create(:task, :in_sprint, sprint_id: yesterday.id)
+      job.perform
+
+      expect(events(task).map { it.slice(:kind, :from_list, :from_sprint_on, :to_list, :to_sprint_on) })
+        .to eq([{ kind: "moved", from_list: nil, from_sprint_on: today - 1, to_list: nil, to_sprint_on: today }])
+    end
+
+    it "records no status change for a task it carries in progress" do
+      task = create(:task, :in_progress, :in_sprint, sprint_id: yesterday.id)
+      job.perform
+
+      expect(events(task).map { it[:kind] }).not_to include("status_changed")
+    end
+
+    it "records nothing for a finished task it leaves behind" do
+      task = create(:task, :done, :in_sprint, sprint_id: yesterday.id)
+      job.perform
+
+      expect(events(task)).to be_empty
+    end
+  end
+
   describe "two roll-overs at once", :commits do
     let(:carried) { create(:task, :in_progress, :in_sprint, sprint_id: yesterday.id) }
 

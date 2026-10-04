@@ -2,7 +2,7 @@
 
 require "sidekiq/scheduled"
 
-RSpec.describe "Redis dropping under the worker", type: :request do
+RSpec.describe "Redis dropping under the worker", type: :app do
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:notices) { [] }
   let(:poller) { Sidekiq::Scheduled::Poller.new(sidekiq) }

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Content security policy", type: :request do
+RSpec.describe "Content security policy", type: :app do
   def font_sources
     stylesheet = Hanami.app.root.join("public", Hanami.app["assets"]["app.css"].url.delete_prefix("/")).read
     stylesheet.scan(/@font-face\s*{[^}]*}/).flat_map { it.scan(/url\(\s*["']?([^"')]+)/).flatten }

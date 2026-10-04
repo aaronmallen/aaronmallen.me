@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Dropped database connections", :commits, type: :request do
+RSpec.describe "Dropped database connections", :commits, type: :app do
   let(:post_repo) { Posts::Slice["repos.post_repo"] }
 
   def databases
@@ -22,7 +22,7 @@ RSpec.describe "Dropped database connections", :commits, type: :request do
     killer&.disconnect
   end
 
-  it "answers the next request" do
+  it "answers the next request", type: :request do
     get "/"
     drop_connections
     get "/"

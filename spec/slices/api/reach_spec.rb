@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "API reach", type: :request do
+RSpec.describe "API reach", type: :app do
   def self.exempt
     {
       "saved_views.operations.rename_saved_view" => "the admin renames a view; PATCH changes it in one step",

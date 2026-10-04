@@ -57,7 +57,9 @@ RSpec.describe "Post reader counting", type: :request do
     end
 
     it "keeps only the path and the hash" do
-      expect(readers.columns).to contain_exactly(:path, :reader_hash)
+      view
+
+      expect(readers.first.keys).to contain_exactly(:path, :reader_hash)
     end
   end
 

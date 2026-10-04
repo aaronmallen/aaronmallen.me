@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "digest"
-
 RSpec.describe "Feed fetch counting", type: :request do
   let(:feed_repo) { Analytics::Slice["repos.feed_fetch_repo"] }
   let(:reader) { "NetNewsWire (RSS Reader; https://netnewswire.com/)" }
@@ -201,18 +199,6 @@ RSpec.describe "Feed fetch counting", type: :request do
     let(:hashes) { feed_repo.feed_reader_hashes }
 
     def roll_up = Analytics::Jobs::RollUpAnalytics.new.perform
-
-    def store_hash(day, name)
-      hashes.dataset.insert(day:, path: "/writing.atom", reader_hash: Digest::SHA256.hexdigest(name))
-    end
-
-    it "go once they are older than 90 days" do
-      store_hash(today - 90, "old")
-      store_hash(today - 89, "edge")
-      roll_up
-
-      expect(hashes.to_a.map(&:day)).to eq([today - 89])
-    end
 
     it "leave the daily count in place" do
       fetch

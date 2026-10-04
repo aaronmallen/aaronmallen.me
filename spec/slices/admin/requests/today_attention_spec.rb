@@ -157,7 +157,7 @@ RSpec.describe "Admin today needs attention", type: :request do
 
     it "moves the end out a week when snoozed again" do
       snoozed("draft", draft.id, at: days_ago(6))
-      snoozed("draft", draft.id, at: Time.now)
+      post "/admin/attention/snooze", _csrf_token: admin_csrf_token, kind: "draft", record_id: draft.id
 
       expect(snoozes.map { it[:ends_at] }).to all(be > Time.now + week - 60)
     end

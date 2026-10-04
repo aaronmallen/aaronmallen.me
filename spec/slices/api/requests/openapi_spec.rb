@@ -18,7 +18,7 @@ RSpec.describe "API OpenAPI document", type: :request do
     names.select { API::Slice.key?("endpoints.#{it}") }
   end
 
-  def operation_ids = OpenAPI.document.fetch("paths").values.flat_map { it.values.map { it.fetch("operationId") } }
+  def operation_ids = document.fetch("paths").values.flat_map { it.values.map { it.fetch("operationId") } }
 
   def operations = OpenAPI.document.fetch("paths").flat_map { |path, verbs| verbs.map { |verb, _| [verb, path] } }
 

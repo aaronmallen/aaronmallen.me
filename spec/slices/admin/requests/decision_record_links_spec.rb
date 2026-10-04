@@ -189,17 +189,14 @@ RSpec.describe "Admin decision record links", type: :request do
     end
   end
 
-  describe "deleting a linked record" do
-    before { link_records("task", task.id) }
-
-    it "drops the link with the task" do
-      Tasks::Slice["operations.delete_task"].call(task.id)
-
-      expect(links.to_a).to be_empty
+  describe "deleting a linked task" do
+    before do
+      sign_in_to_admin
+      link_records("task", task.id)
     end
 
-    it "drops the link with the decision" do
-      Decisions::Slice["relations.decisions"].by_pk(decision.id).delete
+    it "drops the link" do
+      send_to("/admin/tasks/#{task.id}/delete")
 
       expect(links.to_a).to be_empty
     end

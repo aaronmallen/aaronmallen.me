@@ -2,7 +2,7 @@
 
 require "fugit"
 
-RSpec.describe "The worker's schedule", type: :request do
+RSpec.describe "The worker's schedule", type: :app do
   let(:config) { sidekiq_config }
   let(:schedule) { config.dig(:scheduler, :schedule) }
 

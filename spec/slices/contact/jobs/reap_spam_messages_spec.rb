@@ -48,7 +48,7 @@ RSpec.describe Contact::Jobs::ReapSpamMessages, type: :request do
 
   it "keeps unread and read messages whatever their age" do
     create(:message, subject: "Hello", received_at: Time.now - (400 * day))
-    create(:message, :read, subject: "Thanks", received_at: Time.now - (400 * day))
+    mark(create(:message, subject: "Thanks", received_at: Time.now - (400 * day)), "read")
     later(400 * day)
     reap
 
