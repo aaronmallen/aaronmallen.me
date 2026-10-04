@@ -12,6 +12,8 @@ RSpec.describe "Admin tasks", type: :request do
 
   def empty_text(filter) = i18n.t(["ui.views.tasks.index.empty", filter].join("."))
 
+  def move_keys = page.all(".task-acts form[action*='/move/']:has(button[data-key='m'])").map { it["action"] }
+
   def send_to(path, **params)
     post path, { _csrf_token: admin_csrf_token, **params }
   end
@@ -336,6 +338,12 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
           .to eq(["/admin/tasks/#{imported.id}/move/today"])
+      end
+
+      it "gives the move key to the move into today" do
+        get "/admin/tasks", filter: "external"
+
+        expect(move_keys).to eq(["/admin/tasks/#{imported.id}/move/today"])
       end
 
       it "offers external in the edit form, marked as the list it is in", :aggregate_failures do
@@ -1014,6 +1022,27 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(page.all(".task-acts form[action*='/move/']").map { it["action"] })
           .to eq(["/admin/tasks/#{repo.in_list('someday').first.id}/move/next"])
+      end
+
+      it "gives the move key to the move into next from today" do
+        task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
+        get "/admin/tasks", filter: "today"
+
+        expect(move_keys).to eq(["/admin/tasks/#{task.id}/move/next"])
+      end
+
+      it "gives the move key to the move left from next" do
+        task = create(:task)
+        get "/admin/tasks", filter: "next"
+
+        expect(move_keys).to eq(["/admin/tasks/#{task.id}/move/today"])
+      end
+
+      it "gives the move key to the move into next from someday" do
+        task = create(:task, :someday)
+        get "/admin/tasks", filter: "someday"
+
+        expect(move_keys).to eq(["/admin/tasks/#{task.id}/move/next"])
       end
 
       it "asks before an in-progress task leaves today" do

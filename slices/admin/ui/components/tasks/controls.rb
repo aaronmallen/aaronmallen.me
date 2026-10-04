@@ -6,7 +6,6 @@ module Admin
       module Tasks
         class Controls < Component
           COMPLETE = "x"
-          EXTERNAL = Blog::Types::TaskFilter["external"]
           LEFT = "fa-solid fa-arrow-left"
           LISTS = {
             Blog::Types::TaskFilter["today"] => ".lists.today",
@@ -15,8 +14,14 @@ module Admin
           }.freeze
           MOVE = "m"
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
-          PLACES = LISTS.keys.freeze
           RIGHT = "fa-solid fa-arrow-right"
+          TODAY, NEXT, SOMEDAY = LISTS.keys
+          MOVES = {
+            TODAY => [[NEXT, RIGHT, MOVE]],
+            NEXT => [[TODAY, LEFT, MOVE], [SOMEDAY, RIGHT, nil]],
+            SOMEDAY => [[NEXT, LEFT, MOVE]],
+            Blog::Types::TaskFilter["external"] => [[TODAY, LEFT, MOVE]],
+          }.freeze
           START = "s"
           KEY_LABELS = { COMPLETE => ".keys.complete", MOVE => ".keys.move", START => ".keys.start" }.freeze
 
@@ -72,7 +77,7 @@ module Admin
             { aria: { **aria, keyshortcuts: key }, data: { key:, key_label: t(KEY_LABELS.fetch(key)) } }
           end
 
-          def move(place, icon, key: nil)
+          def move(place, icon, key:)
             list = t(LISTS.fetch(place))
             label = t(".move", list:)
 
@@ -88,14 +93,7 @@ module Admin
             { confirm: t(".confirm_move", task: @task.title, list:), confirm_styled: true } if running?
           end
 
-          def moves
-            return move(PLACES.first, LEFT, key: MOVE) if @task.place == EXTERNAL
-
-            here = PLACES.index(@task.place)
-
-            move(PLACES[here - 1], LEFT, key: MOVE) if here.positive?
-            move(PLACES[here + 1], RIGHT, key: (MOVE if here.zero?)) if here < PLACES.size - 1
-          end
+          def moves = MOVES.fetch(@task.place).each { |place, side, key| move(place, side, key:) }
 
           def origin_field = input(type: "hidden", name: "origin", value: @origin)
 
