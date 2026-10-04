@@ -16,6 +16,7 @@ module API
     post "/tasks/bulk/move", to: "bulk_tasks.move"
     post "/tasks/bulk/tag", to: "bulk_tasks.tag"
     post "/tasks/bulk/untag", to: "bulk_tasks.untag"
+    post "/tasks/issues/sync", to: "issues.sync"
     get "/tasks/:id", to: "tasks.show"
     patch "/tasks/:id", to: "tasks.update"
     delete "/tasks/:id", to: "tasks.destroy"

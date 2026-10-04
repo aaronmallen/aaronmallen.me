@@ -29,6 +29,7 @@ module API
       ["move_tasks", "post", "/tasks/bulk/move", OK],
       ["tag_tasks", "post", "/tasks/bulk/tag", OK],
       ["untag_tasks", "post", "/tasks/bulk/untag", OK],
+      ["sync_issues", "post", "/tasks/issues/sync", OK],
       ["read_task", "get", "/tasks/{id}", OK],
       ["save_task", "patch", "/tasks/{id}", OK],
       ["delete_task", "delete", "/tasks/{id}", OK],

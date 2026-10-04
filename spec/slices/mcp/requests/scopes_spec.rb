@@ -24,9 +24,9 @@ RSpec.describe "MCP tool scopes", type: :request do
         move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits remove_tag
         reopen_decision reopen_task reorder_task resolve_decision restore_project save_person save_project save_tag
         save_task save_task_tag_rule schedule_task send_social_post set_task_total snooze_attention start_task
-        tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry
-        update_post update_post_edit_note update_saved_view update_social_post update_webmention_settings
-        update_work_session write_post_seo
+        sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks
+        update_journal_entry update_post update_post_edit_note update_saved_view update_social_post
+        update_webmention_settings update_work_session write_post_seo
       ],
     }
   end

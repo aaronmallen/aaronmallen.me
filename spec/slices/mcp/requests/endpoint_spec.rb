@@ -179,9 +179,9 @@ RSpec.describe "MCP endpoint", type: :request do
       move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits remove_tag
       reopen_decision reopen_task reorder_task resolve_decision restore_project save_person save_project save_tag
       save_task save_task_tag_rule schedule_task send_social_post set_task_total snooze_attention start_task
-      tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry
-      update_post update_post_edit_note update_saved_view update_social_post update_webmention_settings
-      update_work_session write_post_seo
+      sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks
+      update_journal_entry update_post update_post_edit_note update_saved_view update_social_post
+      update_webmention_settings update_work_session write_post_seo
     ]
   end
 
@@ -2479,6 +2479,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
+        "sync_issues" => {},
         "tag_decision" => { id: 1, tags: ["queues"] },
         "tag_posts" => { ids: [1], tag: "ruby" },
         "tag_tasks" => { ids: [1], tag: "ruby" },

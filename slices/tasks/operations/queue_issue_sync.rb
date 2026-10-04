@@ -3,22 +3,24 @@
 module Tasks
   module Operations
     class QueueIssueSync < Blog::Operation
+      JOBS = { "github" => Jobs::SyncIssues, "linear" => Jobs::SyncLinearIssues }.freeze
+
       include Deps[github: "record.github.client", linear: "record.linear.client"]
 
       def call
-        jobs = step configured
-        jobs.map(&:perform_async)
+        sources = step configured
+        sources.each { |source| JOBS.fetch(source).perform_async }
       end
 
       private
 
+      def clients = { "github" => github, "linear" => linear }
+
       def configured
-        jobs = providers.filter_map { |job, client| job if client.configured? }
+        sources = clients.filter_map { |source, client| source if client.configured? }
 
-        jobs.empty? ? Failure(:not_configured) : Success(jobs)
+        sources.empty? ? Failure(:not_configured) : Success(sources)
       end
-
-      def providers = { Jobs::SyncIssues => github, Jobs::SyncLinearIssues => linear }
     end
   end
 end

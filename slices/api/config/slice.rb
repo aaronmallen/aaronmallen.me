@@ -57,12 +57,12 @@ module API
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
       operations.delete_task_tag_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
-      operations.pause_task operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
-      operations.save_task_tag_rule operations.schedule_task operations.set_task_total operations.start_task
-      operations.unlink_task queries.counted_sprints_between queries.find_tasks queries.list_finished_tasks
-      queries.list_tasks queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id
-      queries.task_comments queries.task_tag_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
-      queries.unseen_task_count queries.unseen_tasks
+      operations.pause_task operations.plan_sprint operations.queue_issue_sync operations.reopen_task
+      operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
+      operations.set_task_total operations.start_task operations.unlink_task queries.counted_sprints_between
+      queries.find_tasks queries.list_finished_tasks queries.list_tasks queries.planned_tasks queries.sprints_after
+      queries.sprints_between queries.task_by_id queries.task_comments queries.task_tag_rules queries.task_timeline
+      queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
     export %w[
@@ -86,11 +86,12 @@ module API
       endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_webmention
       endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
       endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts
-      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
-      endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
-      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note
-      endpoints.update_saved_view endpoints.update_task_tag_rule endpoints.update_work_session operations.mint_token
-      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.sync_issues
+      endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
+      endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
+      endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_tag_rule
+      endpoints.update_work_session operations.mint_token operations.revoke_token queries.calendar queries.inbox
+      queries.inbox_count queries.live_tokens
     ]
   end
 end
