@@ -144,8 +144,8 @@ RSpec.describe Search::Queries::Search do
     let(:social_post) { create(:social_post, :posted) }
 
     before do
-      create(:social_post_part, social_post_id: social_post.id, body: "Otters are out", position: 8)
-      create(:social_post_part, social_post_id: social_post.id, body: "Otters otters otters", position: 9)
+      create(:social_post_part, social_post_id: social_post.id, body: "Otters are out")
+      create(:social_post_part, social_post_id: social_post.id, body: "Otters otters otters")
     end
 
     it "comes back once" do
