@@ -49,7 +49,7 @@ one.
 | [0042][0042] | Trust a webmention author by exact URL, on their own host | ![Active][active] | 2026-09-28 |
 | [0043][0043] | Guard the contact form with a honeypot and a daily hash, not a cookie | ![Active][active] | 2026-09-28 |
 | [0044][0044] | Replace the contact form with its answer, on a page load | ![Active][active] | 2026-09-28 |
-| [0045][0045] | Count visitors with a daily hash and no cookies | ![Active][active] | 2026-09-28 |
+| [0045][0045] | Count visitors with a daily hash and no cookies | ![Superseded][superseded-0102] | 2026-09-28 |
 | [0046][0046] | Let the garbage collector take a superseded MaxMind reader | ![Active][active] | 2026-09-28 |
 | [0047][0047] | Keep every sync's state in record's sync_states table, keyed by kind, sync and repo | ![Active][active] | 2026-09-28 |
 | [0048][0048] | Import commits over GitHub's GraphQL API and keep REST for two project reads | ![Superseded][superseded-0069] | 2026-09-28 |
@@ -106,6 +106,7 @@ one.
 | [0099][0099] | Keep decision logs in a decisions slice with decision_events and a decision_timeline view | ![Active][active] | 2026-10-03 |
 | [0100][0100] | Build the review in one activity query that admin and api share | ![Active][active] | 2026-10-03 |
 | [0101][0101] | Bind every admin key through one key map that reads keys from the markup | ![Active][active] | 2026-10-03 |
+| [0102][0102] | Count each post's unique readers with an undated hash kept for 12 months | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -208,7 +209,9 @@ one.
 [0099]: 0099-keep-decision-logs-in-a-decisions-slice-with-decision-events-and-a-decision-timeline-view.md
 [0100]: 0100-build-the-review-in-one-activity-query-that-admin-and-api-share.md
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
+[0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0102]: https://img.shields.io/badge/0102-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

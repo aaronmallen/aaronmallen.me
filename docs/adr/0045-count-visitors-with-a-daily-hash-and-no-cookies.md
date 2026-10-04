@@ -1,17 +1,18 @@
 ---
 id: "0045"
 title: Count visitors with a daily hash and no cookies
-status: active
+status: superseded
 created: 2026-09-28
 area: [analytics, public, admin, assets, db]
+superseded-by: "0102"
 issue: AA-613
-amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210", "#183"]
+amended: [AA-470, AA-472, AA-485, AA-492, AA-527, AA-537, AA-552, AA-714, "#210", "#183", "#371"]
 tags: [analytics, privacy, beacon, retention, geoip, throttle]
 ---
 
 # ADR 0045: Count visitors with a daily hash and no cookies
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -107,4 +108,4 @@ day's count, where a visitor counts twice.
 Adding an analytics cookie or storing addresses breaks this record and needs a new one.
 
 [0087]: 0087-widen-what-analytics-keeps-with-a-monthly-hash-and-roll-up-each-pages-breakdowns.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0102-black?style=for-the-badge&label=Superseded&labelColor=orange
