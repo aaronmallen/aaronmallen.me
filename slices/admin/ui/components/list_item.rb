@@ -8,6 +8,7 @@ module Admin
         prop :href, Blog::Types::String.optional
         prop :sub, Blog::Types::String.optional
         prop :pick, Blog::Types::Hash.optional, default: nil
+        prop :beside, Blog::Types::Instance(Phlex::SGML).optional, default: nil
         prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
         def view_template(&side)
@@ -19,11 +20,20 @@ module Admin
 
         private
 
-        def render_body = @sub ? render_main : render_title
+        def render_body = @sub ? render_main : render_head
+
+        def render_head
+          return render_title unless @beside
+
+          div(class: "li-head") do
+            render_title
+            render @beside
+          end
+        end
 
         def render_main
           div(class: "li-main") do
-            render_title
+            render_head
             p(class: "li-sub") { @sub }
           end
         end

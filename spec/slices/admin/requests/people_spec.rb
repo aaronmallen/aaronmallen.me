@@ -65,6 +65,58 @@ RSpec.describe "Admin people", type: :request do
         expect(page).to have_css("a.li-title[href='/admin/people/#{person.id}/edit']")
       end
 
+      it "shows a Bluesky and a Mastodon icon beside the name of someone on both" do
+        create(:person, :bluesky, name: "Ada Lovelace")
+        get "/admin/people"
+
+        expect(page.all(".li-head .person-link i").map { it[:class] })
+          .to eq(["fa-brands fa-bluesky", "fa-brands fa-mastodon"])
+      end
+
+      it "shows only the icon of the one network someone is on" do
+        create(:person, mastodon_handle: "@ada@ruby.social")
+        get "/admin/people"
+
+        expect(page.all(".person-link i").map { it[:class] }).to eq(["fa-brands fa-mastodon"])
+      end
+
+      it "shows only the Bluesky icon for someone with no Mastodon handle" do
+        create(:person, :bluesky, mastodon_handle: nil)
+        get "/admin/people"
+
+        expect(page.all(".person-link i").map { it[:class] }).to eq(["fa-brands fa-bluesky"])
+      end
+
+      it "links the Bluesky icon to the profile by DID" do
+        create(:person, :bluesky, bluesky_did: "did:plc:ada")
+        get "/admin/people"
+
+        expect(page).to have_link(class: "person-link", href: "https://bsky.app/profile/did:plc:ada")
+      end
+
+      it "links the Mastodon icon to the profile on the person's instance" do
+        create(:person, mastodon_handle: "@ada@ruby.social")
+        get "/admin/people"
+
+        expect(page).to have_link(class: "person-link", href: "https://ruby.social/@ada")
+      end
+
+      it "opens each profile in a new tab" do
+        create(:person, :bluesky)
+        get "/admin/people"
+
+        expect(page.all("a.person-link").map { [it[:target], it[:rel]] })
+          .to eq([["_blank", "noopener noreferrer"]] * 2)
+      end
+
+      it "shows each handle on hover and names the person and the network" do
+        create(:person, :bluesky, name: "Ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social")
+        get "/admin/people"
+
+        expect(page.all("a.person-link").map { [it[:title], it["aria-label"]] })
+          .to eq([["@ada.bsky.social", "Ada on Bluesky"], ["@ada@ruby.social", "Ada on Mastodon"]])
+      end
+
       it "links to the form for a new person" do
         get "/admin/people"
 

@@ -816,6 +816,10 @@ en:
           name: "Name"
           name_placeholder: "Ada Lovelace"
           save: "Save"
+        profile_links:
+          bluesky: "%{name} on Bluesky"
+          bluesky_handle: "@%{handle}"
+          mastodon: "%{name} on Mastodon"
         search:
           label: "Search %{network}"
           placeholder: "Search %{network} by name or handle"

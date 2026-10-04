@@ -2032,6 +2032,10 @@
   @apply flex min-w-0 items-center gap-3;
 }
 
+@utility li-head {
+  @apply flex min-w-0 flex-wrap items-center gap-2;
+}
+
 @utility li-main {
   @apply flex min-w-0 flex-col gap-1;
 }
@@ -3411,6 +3415,18 @@
 
   :where(.compose-mention[aria-selected="true"]) > & {
     @apply text-ink;
+  }
+}
+
+@utility person-links {
+  @apply inline-flex items-center gap-1;
+}
+
+@utility person-link {
+  @apply inline-flex items-center justify-center text-ink-muted no-underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap min-w-tap;
   }
 }
 
