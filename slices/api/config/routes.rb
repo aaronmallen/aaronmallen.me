@@ -59,6 +59,7 @@ module API
     post "/posts/bulk/tag", to: "bulk_posts.tag"
 
     get "/attention", to: "attention.index"
+    post "/attention/snooze", to: "attention.snooze"
 
     get "/inbox", to: "inbox.index"
 

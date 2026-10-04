@@ -128,9 +128,9 @@ RSpec.describe "MCP endpoint", type: :request do
       mark_message mark_messages_read mark_messages_unread mark_task_seen mark_webmentions_spam moderate_webmention
       move_project move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits
       remove_tag reopen_decision reopen_task reorder_task resolve_decision restore_project save_project save_tag
-      save_task schedule_task send_social_post set_task_total start_task tag_decision tag_posts tag_tasks unlink_records
-      unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view update_social_post
-      update_webmention_settings update_work_session write_post_seo
+      save_task schedule_task send_social_post set_task_total snooze_attention start_task tag_decision tag_posts
+      tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view
+      update_social_post update_webmention_settings update_work_session write_post_seo
     ]
   end
 
@@ -2388,6 +2388,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "search" => { query: "zeppelin" },
         "send_social_post" => { id: 1 },
         "set_task_total" => { id: 1, hours: 2 },
+        "snooze_attention" => { kind: "journal" },
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },

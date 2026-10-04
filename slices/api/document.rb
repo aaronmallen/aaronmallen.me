@@ -69,6 +69,7 @@ module API
       ["tag_posts", "post", "/posts/bulk/tag", OK],
       ["list_attention", "get", "/attention", OK],
       ["list_inbox", "get", "/inbox", OK],
+      ["snooze_attention", "post", "/attention/snooze", OK],
       ["list_links", "get", "/links/{kind}/{id}", OK],
       ["link_records", "post", "/links/{kind}/{id}", CREATED],
       ["unlink_records", "delete", "/links/{kind}/{id}/{other_kind}/{other_id}", OK],
@@ -192,7 +193,7 @@ module API
     def responses(source, status, fields:, body:)
       codes = ["401"]
       codes << "400" if body
-      codes << "404" if fields.any?
+      codes << "404" if fields.any? || (source < Endpoint && source::FINDS)
       codes << "422" if source::SCHEMA.fetch(:properties, {}).any?
       codes << "500" if source < Endpoint
 

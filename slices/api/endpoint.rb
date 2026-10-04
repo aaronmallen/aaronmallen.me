@@ -7,6 +7,7 @@ require "json_schemer"
 
 module API
   class Endpoint
+    FINDS = false
     ROOT = :input
 
     include Dry::Monads[:result]
