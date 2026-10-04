@@ -77,10 +77,9 @@ RSpec.describe "MCP endpoint", type: :request do
     %w[
       compose_announcement list_attention list_calendar list_commits list_decisions list_inbox list_journal_entries
       list_links list_messages list_posts list_projects list_saved_views list_social_posts list_sprints list_suggestions
-      list_tags list_tasks list_webmentions list_work_entries read_activity read_analytics read_current_sprint
-      read_decision
-      read_journal_entry read_message read_post read_review read_social_post read_sync_state read_task read_time_report
-      read_webmention_settings search summarize_activity
+      list_tags list_task_tag_rules list_tasks list_webmentions list_work_entries read_activity read_analytics
+      read_current_sprint read_decision read_journal_entry read_message read_post read_review read_social_post
+      read_sync_state read_task read_time_report read_webmention_settings search summarize_activity
     ]
   end
 
@@ -124,14 +123,15 @@ RSpec.describe "MCP endpoint", type: :request do
       approve_webmentions archive_project cancel_task cancel_tasks capture_task complete_task complete_tasks
       create_journal_entry create_post create_saved_view create_social_post delete_decision_comment
       delete_decision_option delete_journal_entry delete_messages delete_post delete_posts delete_saved_view
-      delete_social_post delete_task delete_tasks delete_work_entry delete_work_session drop_decision drop_sprint
-      edit_decision edit_decision_comment edit_decision_option ignore_webmentions import_commits link_records link_tasks
-      mark_message mark_messages_read mark_messages_unread mark_task_seen mark_webmentions_spam moderate_webmention
-      move_project move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits
-      remove_tag reopen_decision reopen_task reorder_task resolve_decision restore_project save_project save_tag
-      save_task schedule_task send_social_post set_task_total snooze_attention start_task tag_decision tag_posts
-      tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view
-      update_social_post update_webmention_settings update_work_session write_post_seo
+      delete_social_post delete_task delete_task_tag_rule delete_tasks delete_work_entry delete_work_session
+      drop_decision drop_sprint edit_decision edit_decision_comment edit_decision_option ignore_webmentions
+      import_commits link_records link_tasks mark_message mark_messages_read mark_messages_unread mark_task_seen
+      mark_webmentions_spam moderate_webmention move_project move_task move_tasks open_decision pause_task plan_sprint
+      publish_post reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task resolve_decision
+      restore_project save_project save_tag save_task save_task_tag_rule schedule_task send_social_post set_task_total
+      snooze_attention start_task tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks
+      update_journal_entry update_post update_saved_view update_social_post update_webmention_settings
+      update_work_session write_post_seo
     ]
   end
 
@@ -2320,6 +2320,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "delete_saved_view" => { id: 1 },
         "delete_social_post" => { id: 1 },
         "delete_task" => { id: 1 },
+        "delete_task_tag_rule" => { id: 1 },
         "delete_tasks" => { ids: [1] },
         "delete_work_entry" => { id: 1 },
         "delete_work_session" => { id: 1, session_id: 2 },
@@ -2347,6 +2348,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "list_sprints" => {},
         "list_suggestions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_tags" => { scope: "public" },
+        "list_task_tag_rules" => {},
         "list_tasks" => {},
         "list_webmentions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_work_entries" => { from: "2026-01-01", to: "2026-12-31" },
@@ -2386,6 +2388,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "save_project" => { id: 1 },
         "save_tag" => { id: 1, scope: "public" },
         "save_task" => { id: 1 },
+        "save_task_tag_rule" => { pattern: "aaronmallen/*", tags: ["ruby"] },
         "schedule_task" => { id: 1, sprint_on: "" },
         "search" => { query: "zeppelin" },
         "send_social_post" => { id: 1 },

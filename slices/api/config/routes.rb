@@ -83,6 +83,11 @@ module API
     patch "/saved_views/:id", to: "saved_views.update"
     delete "/saved_views/:id", to: "saved_views.destroy"
 
+    get "/task_tag_rules", to: "task_tag_rules.index"
+    post "/task_tag_rules", to: "task_tag_rules.create"
+    patch "/task_tag_rules/:id", to: "task_tag_rules.update"
+    delete "/task_tag_rules/:id", to: "task_tag_rules.destroy"
+
     get "/time_report", to: "time_reports.show"
 
     post "/webmentions/bulk/approve", to: "bulk_webmentions.approve"
