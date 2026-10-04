@@ -33,6 +33,8 @@ module API
       operations.rename_saved_view queries.all queries.by_id
     ], from: :saved_views
 
+    import keys: %w[queries.search], from: :search
+
     import keys: %w[
       queries.calendar_social_posts queries.pending_webmention_count queries.pending_webmentions
     ], from: :social
@@ -60,8 +62,8 @@ module API
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.read_current_sprint
       endpoints.read_journal_entry endpoints.read_review endpoints.read_task endpoints.reopen_decision
       endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.set_task_total endpoints.start_task endpoints.tag_decision endpoints.tag_tasks
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.start_task endpoints.tag_decision
+      endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session operations.mint_token
       operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]

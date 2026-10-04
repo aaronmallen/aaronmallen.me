@@ -34,8 +34,8 @@ module MCP
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.read_current_sprint
       endpoints.read_journal_entry endpoints.read_review endpoints.read_task endpoints.reopen_decision
       endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.set_task_total endpoints.start_task endpoints.tag_decision endpoints.tag_tasks
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.start_task endpoints.tag_decision
+      endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session
     ], from: :api
 

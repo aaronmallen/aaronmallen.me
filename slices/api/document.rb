@@ -64,6 +64,7 @@ module API
       ["link_records", "post", "/links/{kind}/{id}", CREATED],
       ["unlink_records", "delete", "/links/{kind}/{id}/{other_kind}/{other_id}", OK],
       ["read_review", "get", "/review", OK],
+      ["search", "get", "/search", OK],
       ["list_sprints", "get", "/sprints", OK],
       ["plan_sprint", "post", "/sprints", CREATED],
       ["read_current_sprint", "get", "/sprints/current", OK],

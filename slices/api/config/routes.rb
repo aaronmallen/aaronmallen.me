@@ -56,6 +56,8 @@ module API
 
     get "/review", to: "reviews.show"
 
+    get "/search", to: "search.index"
+
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"
     get "/sprints/current", to: "sprints.current"

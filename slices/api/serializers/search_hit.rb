@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+module API
+  module Serializers
+    class SearchHit < Serializer
+      SCHEMA = Schema.object(
+        {
+          kind: { type: "string", enum: Blog::Types::SearchKind.values },
+          id: { type: "integer", description: "the record's ID, as the kind's read tool takes it" },
+          title: Schema::STRING,
+          match: { type: "string", description: "the stretch of text around the words that matched" },
+          date: Schema::DAY,
+        },
+      ).freeze
+
+      attributes :kind, :id, :title, :match, :date
+
+      def date(hit) = day(hit.day)
+
+      def id(hit) = hit.source_id
+    end
+  end
+end

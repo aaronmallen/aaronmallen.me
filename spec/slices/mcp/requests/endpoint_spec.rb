@@ -79,7 +79,7 @@ RSpec.describe "MCP endpoint", type: :request do
       list_projects list_saved_views list_social_posts list_sprints list_suggestions list_tags list_tasks
       list_webmentions list_work_entries read_activity read_analytics read_current_sprint read_journal_entry
       read_message read_post read_review read_social_post read_sync_state read_task read_webmention_settings
-      summarize_activity
+      search summarize_activity
     ]
   end
 
@@ -2301,6 +2301,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "save_tag" => { id: 1, scope: "public" },
         "save_task" => { id: 1 },
         "schedule_task" => { id: 1, sprint_on: "" },
+        "search" => { query: "zeppelin" },
         "send_social_post" => { id: 1 },
         "set_task_total" => { id: 1, hours: 2 },
         "start_task" => { id: 1 },
