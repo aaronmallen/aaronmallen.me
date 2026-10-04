@@ -90,6 +90,7 @@ module API
     get "/projects/:id", to: "projects.show"
 
     get "/review", to: "reviews.show"
+    post "/review/note", to: "reviews.save_note"
 
     get "/search", to: "search.index"
 

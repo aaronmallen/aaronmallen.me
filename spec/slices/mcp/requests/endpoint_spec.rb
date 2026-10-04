@@ -2420,6 +2420,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "restore_project" => { id: 1 },
         "save_person" => { name: "Ada Lovelace", key: "ada" },
         "save_project" => { id: 1 },
+        "save_review_note" => { day: "2026-09-16", body: "A good week" },
         "save_tag" => { id: 1, scope: "public" },
         "save_task" => { id: 1 },
         "save_task_tag_rule" => { pattern: "aaronmallen/*", tags: ["ruby"] },

@@ -4,6 +4,7 @@ module API
   module Serializers
     class Review < Serializer
       OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
+      NOTE = "the note kept on the period, or null when it has none"
       RECORD = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, name: Schema::STRING }).freeze
 
       SCHEMA = Schema.object(
@@ -65,11 +66,13 @@ module API
             ),
           ),
           worked: Schema.list(Schema.object({ date: Schema::DAY, seconds: Schema::INTEGER })),
+          note: { oneOf: [ReviewNote.reference, { type: "null" }], description: NOTE },
         },
       ).freeze
 
       attributes(
         :period, :from, :to, :totals, :done, :carried, :posts, :social_posts, :journal, :commits, :decisions, :worked,
+        :note,
       )
 
       def carried(review)
@@ -108,6 +111,8 @@ module API
 
         { entries: records(found.entries), words: found.words, streak: found.streak }
       end
+
+      def note(_review) = params[:note]&.then { ReviewNote.new(it).serializable_hash }
 
       def posts(review) = records(review.posts)
 

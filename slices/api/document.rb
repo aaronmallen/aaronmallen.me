@@ -91,6 +91,7 @@ module API
       ["delete_person", "delete", "/people/{id}", OK],
       ["read_project", "get", "/projects/{id}", OK],
       ["read_review", "get", "/review", OK],
+      ["save_review_note", "post", "/review/note", OK],
       ["search", "get", "/search", OK],
       ["read_social_post", "get", "/social_posts/{id}", OK],
       ["list_sprints", "get", "/sprints", OK],

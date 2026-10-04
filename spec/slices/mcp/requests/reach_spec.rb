@@ -85,7 +85,6 @@ RSpec.describe "MCP reach", type: :request do
       "record.operations.record_projects_sync_outcome" => "the projects job records how it went",
       "record.operations.record_rollup_sync_outcome" => "the roll up job records how it went",
       "record.operations.record_sync_outcome" => "each sync job records how it went; read_sync_state reads it",
-      "record.operations.save_review_note" => "saves the admin review's note; the MCP has no note tool",
       "record.operations.store_commits" => "the import and backfill jobs store the commits they fetch",
       "saved_views.operations.rename_saved_view" => "the admin renames a view; update_saved_view does it in one step",
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",

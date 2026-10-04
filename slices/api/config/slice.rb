@@ -33,8 +33,9 @@ module API
     import keys: %w[queries.by_id queries.work_entry_by_id], from: :projects
 
     import keys: %w[
-      operations.delete_journal_entry operations.save_journal_entry operations.update_journal_entry queries.commit_by_id
-      queries.journal_days queries.journal_days_between queries.journal_entries_between queries.journal_entry_by_id
+      operations.delete_journal_entry operations.save_journal_entry operations.save_review_note
+      operations.update_journal_entry queries.commit_by_id queries.journal_days queries.journal_days_between
+      queries.journal_entries_between queries.journal_entry_by_id queries.review_note
     ], from: :record
 
     import keys: %w[
@@ -86,13 +87,13 @@ module API
       endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
       endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_webmention
       endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
-      endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts
-      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.summarize_activity
-      endpoints.sync_issues endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records
-      endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry
-      endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_tag_rule
-      endpoints.update_work_session operations.mint_token operations.revoke_token queries.calendar queries.inbox
-      queries.inbox_count queries.live_tokens
+      endpoints.resolve_decision endpoints.save_review_note endpoints.save_task endpoints.schedule_task endpoints.search
+      endpoints.search_accounts endpoints.set_task_total endpoints.snooze_attention endpoints.start_task
+      endpoints.summarize_activity endpoints.sync_issues endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
+      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view
+      endpoints.update_task_tag_rule endpoints.update_work_session operations.mint_token operations.revoke_token
+      queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]
   end
 end

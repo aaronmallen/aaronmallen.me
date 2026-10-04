@@ -15,7 +15,7 @@ module Record
         attributes = step validated(contract.call(body:))
         starts_on, = Blog::ReviewRange.call(period, on)
 
-        Success(transaction { save(attributes.fetch(:body), period, starts_on, now) })
+        transaction { save(attributes.fetch(:body), period, starts_on, now) }
       end
 
       private
