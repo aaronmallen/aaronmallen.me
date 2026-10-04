@@ -521,6 +521,36 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "the Create decision command" do
+    before { open_palette }
+
+    it "is listed under the actions when I type decision" do
+      query.send_keys(*"decision".chars)
+
+      within("[aria-labelledby='command-palette-group-actions']") do
+        expect(page).to have_css("#command-palette-create-decision", text: "Create decision")
+      end
+    end
+
+    it "is picked first when I type create decision" do
+      query.send_keys(*"create decision".chars)
+
+      expect(active).to eq("command-palette-create-decision")
+    end
+  end
+
+  describe "running the Create decision command" do
+    before do
+      visit "/admin/posts"
+      open_palette
+      query.send_keys(*"create decision".chars, :enter)
+    end
+
+    it "opens the new decision form" do
+      expect(page).to have_current_path("/admin/decisions/new")
+    end
+  end
+
   describe "the Create journal entry command" do
     before { open_palette }
 

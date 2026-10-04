@@ -684,6 +684,9 @@ en:
           complete_task_in_progress:
             label: "Complete %{title}"
             text: "finish task, mark done"
+          create_decision:
+            label: "Create decision"
+            text: "new decision, log a decision, record a decision"
           create_journal_entry:
             label: "Create journal entry"
             text: "new journal entry, write in the journal"

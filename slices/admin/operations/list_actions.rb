@@ -18,6 +18,7 @@ module Admin
         Entry.new(
           name: :create_task, icon: "fa-plus", route: :admin_new_task, dialog: UI::Components::Tasks::CreateDialog::ID,
         ),
+        Entry.new(name: :create_decision, icon: "fa-plus", route: :admin_new_decision),
         Entry.new(
           name: :create_journal_entry, icon: "fa-pen", route: :admin_journal,
           params: { write: Blog::Constants::CHECKED },

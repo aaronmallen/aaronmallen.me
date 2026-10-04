@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -54,6 +54,7 @@ a query that matches an action lists it first. #303 made the list, and it now ho
 
 - "Create task" shuts the palette and opens the new task dialog on the page you are on, and goes to
   `/admin/tasks/new` when that page has no dialog.
+- "Create decision" goes to `/admin/decisions/new`.
 - "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so the
   cursor lands in it without a script.
 - "New post" goes to `/admin/posts/new`.

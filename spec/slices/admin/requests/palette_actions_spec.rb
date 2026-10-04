@@ -14,8 +14,8 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "draws one row per entry, in order" do
       names = %w[
-        create-task create-journal-entry new-post new-social-post log-work todays-journal start-task complete-task
-        pause-task
+        create-task create-decision create-journal-entry new-post new-social-post log-work todays-journal start-task
+        complete-task pause-task
       ]
 
       expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
@@ -28,30 +28,39 @@ RSpec.describe "Admin palette actions", type: :request do
       expect(row["data-palette-href"]).to eq("/admin/tasks/new")
     end
 
-    it "sends Create journal entry to the journal, ready to write", :aggregate_failures do
+    it "sends Create decision to the new decision form, with no dialog", :aggregate_failures do
       row = actions[1]
+
+      expect(row["data-palette-dialog"]).to be_nil
+      expect(row["data-palette-href"]).to eq("/admin/decisions/new")
+      expect(row).to have_css(".pal-r-label", text: "Create decision")
+      expect(row).to have_css(".fa-plus", visible: :all)
+    end
+
+    it "sends Create journal entry to the journal, ready to write", :aggregate_failures do
+      row = actions[2]
 
       expect(row["data-palette-dialog"]).to be_nil
       expect(row["data-palette-href"]).to eq("/admin/journal?write=1")
     end
 
     it "sends New post to the new post form" do
-      expect(actions[2]["data-palette-href"]).to eq("/admin/posts/new")
+      expect(actions[3]["data-palette-href"]).to eq("/admin/posts/new")
     end
 
     it "sends New social post to the composer, ready to write" do
-      expect(actions[3]["data-palette-href"]).to eq("/admin/social?write=1")
+      expect(actions[4]["data-palette-href"]).to eq("/admin/social?write=1")
     end
 
     it "sends Log work to the work entry dialog, or the work tab without one", :aggregate_failures do
-      row = actions[4]
+      row = actions[5]
 
       expect(row["data-palette-dialog"]).to eq("work-log")
       expect(row["data-palette-href"]).to eq("/admin/projects?filter=work")
     end
 
     it "sends Go to today's journal to the journal" do
-      expect(actions[5]["data-palette-href"]).to eq("/admin/journal")
+      expect(actions[6]["data-palette-href"]).to eq("/admin/journal")
     end
 
     it "matches each row on its label and the words for what it does" do
@@ -63,21 +72,21 @@ RSpec.describe "Admin palette actions", type: :request do
     before { get "/admin" }
 
     it "posts Start task to the task on screen", :aggregate_failures do
-      row = actions[6]
+      row = actions[7]
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("start")
     end
 
     it "posts Complete task to the task on screen", :aggregate_failures do
-      row = actions[7]
+      row = actions[8]
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("complete")
     end
 
     it "posts Pause task to the task on screen", :aggregate_failures do
-      row = actions[8]
+      row = actions[9]
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("pause")
