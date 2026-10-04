@@ -1549,6 +1549,50 @@
   @apply meta;
 }
 
+@utility time-rail {
+  @apply activity-rail;
+}
+
+@utility time-main {
+  @apply activity-main;
+}
+
+@utility time-total {
+  @apply meta;
+}
+
+@utility time-group {
+  @apply border-t border-line first-of-type:border-t-0;
+
+  &[open] .time-caret {
+    @apply rotate-90;
+  }
+}
+
+@utility time-row {
+  @apply flex min-h-tap cursor-pointer list-none items-center gap-3 py-2;
+
+  &::-webkit-details-marker {
+    @apply hidden;
+  }
+
+  &:focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@utility time-caret {
+  @apply w-3 shrink-0 text-icon-sm text-ink-muted transition-transform duration-150 ease-in-out;
+}
+
+@utility time-tasks {
+  @apply pb-3 pl-6;
+}
+
+@utility time-task-hours {
+  @apply font-mono tabular-nums;
+}
+
 @utility today-journal-foot {
   @apply mt-3 flex flex-wrap items-center justify-between gap-3;
 }

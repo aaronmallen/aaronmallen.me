@@ -164,6 +164,7 @@ module Admin
     post "/tasks/issues/sync", to: "issues.sync", as: :sync_issues
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
+    get "/time", to: "time_report.show", as: :time
     get "/tokens", to: "tokens.index", as: :tokens
     post "/tokens", to: "tokens.create", as: :create_token
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID

@@ -107,6 +107,8 @@ RSpec.describe "Admin screens", type: :feature do
       "tasks archive" => "/admin/tasks?filter=completed",
       "tasks next" => "/admin/tasks?filter=next",
       "tasks someday" => "/admin/tasks?filter=someday",
+      "time" => "/admin/time",
+      "time by day" => "/admin/time?by=day",
       "today" => "/admin",
       "webmentions" => "/admin/webmentions",
     }
@@ -139,7 +141,9 @@ RSpec.describe "Admin screens", type: :feature do
   def record_search = { "task record search" => "/admin/tasks/#{task.id}?record_q=published" }
 
   def screens
-    pages.merge(calendars, people, person_search, record_search, composers, dialogs, journal_editors, selections)
+    pages.merge(
+      calendars, people, person_search, record_search, composers, dialogs, journal_editors, selections, time_rows,
+    )
   end
 
   def seed
@@ -183,6 +187,15 @@ RSpec.describe "Admin screens", type: :feature do
     create(:task_link, from_task_id: task.id, to_task_id: running.id)
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "commit", other_id: commit.id })
     create(:task, :done, title: "Something finished a while ago")
+    seed_time
+  end
+
+  def seed_time
+    timed = create(:task, :done, title: "Draw the time screen for a phone", worked_seconds: 3600, tags: %w[site])
+    create(:work_session, task_id: timed.id, started_at: Time.now - 3660, ended_at: Time.now - 60)
+    [project, create(:project, name: "a-second-project-with-a-long-name")].each do |linked|
+      Links::Slice["operations.link_records"].call("task", timed.id, { other_kind: "project", other_id: linked.id })
+    end
   end
 
   def seed_writing
@@ -211,6 +224,16 @@ RSpec.describe "Admin screens", type: :feature do
     visit path
     find(box).check
     find("[data-bulk-acts]")
+  end
+
+  def time_rows
+    {
+      "time row open" => lambda do
+        visit "/admin/time"
+        first(".time-row").click
+        find(".time-group[open] .time-tasks")
+      end,
+    }
   end
 
   before do

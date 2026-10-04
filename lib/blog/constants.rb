@@ -10,5 +10,6 @@ module Blog
     GITHUB_COMMIT_URL = "https://github.com/%s/commit/%s"
     GITHUB_REPO_URL = "https://github.com/%s"
     SLUG_RESERVED = %w[tags].freeze
+    TIME_RANGES = [7, 30, 90].freeze
   end
 end

@@ -720,6 +720,7 @@ en:
           social: "social"
           tags: "tags"
           tasks: "tasks"
+          time: "time"
           today: "today"
           tokens: "API tokens"
           webmentions: "webmentions"
@@ -1509,6 +1510,29 @@ en:
         words:
           one: "%{count} word"
           other: "%{count} words"
+      time_report:
+        filters:
+          apply: "Show"
+          by: "Group by"
+          from: "From"
+          groupings:
+            day: "Day"
+            project: "Project"
+            tag: "Tag"
+          preset: "%{count}d"
+          range: "Range"
+          to: "To"
+        groups:
+          by_day: "By day"
+          by_project: "By project"
+          by_tag: "By tag"
+          empty: "No time logged in this range."
+          shared_project: "A shared task counts in each of its projects, so the rows add up to more than the total."
+          shared_tag: "A task with two tags counts under both, so the rows add up to more than the total."
+        row:
+          no_project: "No project"
+          no_tag: "No tag"
+          shared: "shared"
       tokens:
         field_error:
           name:
@@ -2012,6 +2036,10 @@ en:
           unscheduled: "not set"
           updated: "Updated"
           worked: "Time worked"
+      time_report:
+        show:
+          heading: "Time"
+          span: "%{from} → %{to} · %{total}"
       today:
         show:
           clients: "MCP clients"

@@ -151,6 +151,7 @@ module Blog
       [*values].map { TrimmedText[it] }.reject(&:empty?)
     end
     TimeGrouping = Types::String.enum("project", "tag", "day")
+    TimeGroupingParam = TimeGrouping.fallback(TimeGrouping.values.first)
     TrimmedText = Text.constructor(&:strip)
     UploadParam = Types::Interface(:read, :rewind, :size).optional.constructor do |value|
       value[:tempfile] if value.is_a?(::Hash)
