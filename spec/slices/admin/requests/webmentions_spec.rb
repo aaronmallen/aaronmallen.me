@@ -193,6 +193,14 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
+      %w[approve ignore].each do |action|
+        it "keeps no note given with #{action}" do
+          post "/admin/webmentions/#{mention.id}/#{action}", _csrf_token: admin_csrf_token, reason: "link farm"
+
+          expect(Social::Slice["relations.webmentions"].by_pk(mention.id).one[:spam_reason]).to be_nil
+        end
+      end
+
       it "clears the note when ignoring a spam mention" do
         spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
         post "/admin/webmentions/#{spam.id}/ignore", _csrf_token: admin_csrf_token

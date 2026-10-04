@@ -105,6 +105,12 @@ RSpec.describe "API search", type: :request do
     expect(find(query: "  ")).to eq("count" => 0, "results" => [], "partial" => false)
   end
 
+  it "answers nothing for a phrase of stop words" do
+    create(:journal_entry, body: "The and of")
+
+    expect(find(query: "the").fetch("results")).to eq([])
+  end
+
   it "refuses a request with no query", :aggregate_failures do
     find
 

@@ -262,4 +262,33 @@ RSpec.describe "Admin photo claims", type: :request do
       expect(a_request(:delete, media_store_url(other.key))).to have_been_made
     end
   end
+
+  describe "a decision comment" do
+    let(:decision) { create(:decision) }
+    let(:comments) { Decisions::Slice["relations.decision_comments"] }
+
+    def comment = comments.to_a.first
+
+    def path = "/admin/decisions/#{decision.id}/comments"
+
+    before { send_to(path, comment: { body: markdown(photo, other) }) }
+
+    it "claims the photos its body points to" do
+      expect(claims_of("decision_comment")).to contain_exactly([comment[:id], photo.id], [comment[:id], other.id])
+    end
+
+    it "drops the claim on a photo taken out of its body" do
+      send_to("#{path}/#{comment[:id]}", comment: { body: markdown(other) })
+
+      expect(claims_of("decision_comment")).to eq([[comment[:id], other.id]])
+    end
+
+    it "deletes its photos with it", :aggregate_failures, :commits do
+      stub_store_delete(photo, other)
+      send_to("#{path}/#{comment[:id]}/delete")
+
+      expect(keys).to be_empty
+      expect(a_request(:delete, media_store_url(other.key))).to have_been_made
+    end
+  end
 end

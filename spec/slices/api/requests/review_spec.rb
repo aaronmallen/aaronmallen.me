@@ -156,6 +156,10 @@ RSpec.describe "API review", type: :request do
     end
   end
 
+  it "keeps a Sunday in the week before the next Monday" do
+    expect(read(day: "2026-09-20").values_at("from", "to")).to eq(%w[2026-09-14 2026-09-20])
+  end
+
   it "reads the week that holds today when it names no period or day" do
     monday = today - (today.cwday - 1)
 

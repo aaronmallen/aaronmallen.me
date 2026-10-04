@@ -257,6 +257,14 @@ RSpec.describe "API saved view records", type: :request do
       expect(records("posts", state: "draft").dig("saved_view", "filters")).to eq({})
     end
 
+    it "keeps the filter in the stored view" do
+      view = create(:saved_view, screen: "posts", filters: { status: "draft", tag: "ruby" })
+      read(view.id)
+
+      expect(SavedViews::Slice["relations.saved_views"].by_pk(view.id).one[:filters])
+        .to eq("status" => "draft", "tag" => "ruby")
+    end
+
     it "falls back to the default for a value the screen no longer takes" do
       sprint = create(:sprint, sprint_date: today)
       task = create(:task, :in_sprint, sprint_id: sprint.id)

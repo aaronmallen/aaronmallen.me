@@ -471,38 +471,4 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       expect(github_request(GitHubGraphQL::ASSIGNED_QUERY)).to have_been_made
     end
   end
-
-  describe "a sync asked for now" do
-    let(:queue) { Tasks::Slice["operations.queue_issue_sync"] }
-
-    it "queues the Linear and GitHub jobs", :aggregate_failures do
-      connect_github_token
-      queue.call
-
-      expect([described_class.jobs.size, Tasks::Jobs::SyncIssues.jobs.size]).to eq([1, 1])
-    end
-
-    it "queues the Linear job alone without a GitHub token", :aggregate_failures do
-      disconnect_github
-      queue.call
-
-      expect([described_class.jobs.size, Tasks::Jobs::SyncIssues.jobs.size]).to eq([1, 0])
-    end
-
-    it "queues the GitHub job alone without a Linear key", :aggregate_failures do
-      connect_linear
-      connect_github_token
-      queue.call
-
-      expect([described_class.jobs.size, Tasks::Jobs::SyncIssues.jobs.size]).to eq([0, 1])
-    end
-
-    it "queues nothing when no provider is set up", :aggregate_failures do
-      connect_linear
-      disconnect_github
-
-      expect(queue.call).to eq(Dry::Monads::Failure(:not_configured))
-      expect(Sidekiq::Job.jobs).to be_empty
-    end
-  end
 end

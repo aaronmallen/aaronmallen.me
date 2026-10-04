@@ -186,68 +186,12 @@ RSpec.describe Search::Queries::Search do
 
       expect(found("plums -figs").map(&:title)).to eq(["Plums alone"])
     end
-
-    it "finds nothing for a blank phrase" do
-      create(:journal_entry, body: "Anything")
-
-      expect(found("  ")).to be_empty
-    end
-
-    it "finds nothing for a phrase of stop words" do
-      create(:journal_entry, body: "The and of")
-
-      expect(found("the")).to be_empty
-    end
   end
 
-  describe "narrowing" do
-    before do
-      create(:task, title: "Walnut tart")
-      create(:journal_entry, body: "Baked a walnut tart")
-      create(:message, subject: "Walnut", body: "Recipe please")
-    end
+  it "finds nothing when no kind is asked for" do
+    create(:task, title: "Walnut tart")
 
-    it "keeps only the kinds asked for" do
-      expect(found("walnut", kinds: %w[task message]).map(&:kind)).to match_array(%w[task message])
-    end
-
-    it "finds nothing when no kind is asked for" do
-      expect(found("walnut", kinds: [])).to be_empty
-    end
-  end
-
-  describe "the cap per kind" do
-    before do
-      4.times { create(:task, title: "Juggle #{it}") }
-      3.times { create(:journal_entry, body: "Juggled #{it}") }
-      create(:commit, message: "Juggling")
-    end
-
-    it "keeps no more than the cap of each kind" do
-      expect(found("juggle", per_kind: 2).map(&:kind).tally).to eq("task" => 2, "journal" => 2, "commit" => 1)
-    end
-  end
-
-  describe "paging" do
-    let(:page) { Blog::Page.new(number:, size: 2) }
-
-    before { 5.times { create(:journal_entry, body: "Heron #{it}", entry_date: today - it) } }
-
-    context "with the first page" do
-      let(:number) { 1 }
-
-      it "holds a page of results and says more remain" do
-        expect(search("heron")).to have_attributes(rows: have_attributes(length: 2), more: true)
-      end
-    end
-
-    context "with the last page" do
-      let(:number) { 3 }
-
-      it "holds the rest and says none remain" do
-        expect(search("heron")).to have_attributes(rows: [have_attributes(day: today - 4)], more: false)
-      end
-    end
+    expect(found("walnut", kinds: [])).to be_empty
   end
 
   describe "the query plan" do

@@ -300,6 +300,15 @@ RSpec.describe "Admin post analytics", type: :request do
         expect(points("post").size).to eq(10)
       end
 
+      it "reads today's readers live beside the rolled up days" do
+        young = published("young", on: today - 1)
+        rolled("young", on: today - 1, visitors: 6)
+        2.times { create(:analytics_event, path: "/writing/young") }
+        show(young)
+
+        expect(readings.map { it.first(2) }).to eq([%w[1 6], %w[2 2]])
+      end
+
       it "stops at day 30 for an older post" do
         show(published("old", on: today - 60))
 

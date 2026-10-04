@@ -388,9 +388,12 @@ RSpec.describe "API tasks", type: :request do
       end
 
       it "names the provider, author and link of a synced comment" do
-        synced = create(:task_comment, :synced, task_id: task.id, author: "octocat")
+        synced = create(:task_comment, :synced, task_id: task.id, author: "octocat", body: "theirs",
+                                                created_at: at(today, 9), updated_at: at(today, 10))
 
-        expect(comments.first).to include("author" => "octocat", "source" => "github", "url" => synced.url)
+        expect(comments).to eq([{ "id" => synced.id, "body" => "theirs", "author" => "octocat", "source" => "github",
+                                  "url" => synced.url, "created_at" => at(today, 9).utc.iso8601,
+                                  "updated_at" => at(today, 10).utc.iso8601 }])
       end
     end
   end

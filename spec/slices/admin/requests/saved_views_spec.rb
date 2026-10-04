@@ -123,6 +123,14 @@ RSpec.describe "Admin saved views", type: :request do
       expect(page).to have_link("Stale", href: "/admin/tasks?filter=gone")
     end
 
+    it "keeps the unknown filter when it renames the view" do
+      fields = { saved_view: { name: "Fresh" }, return_to: "/admin/tasks" }
+      post "/admin/saved-views/#{views.first.id}", _csrf_token: admin_csrf_token, **fields
+
+      expect(SavedViews::Slice["relations.saved_views"].to_a.map { it.values_at(:name, :filters) })
+        .to eq([["Fresh", { "filter" => "gone", "colour" => "red" }]])
+    end
+
     it "opens at the screen's default for a value it no longer takes", :aggregate_failures do
       get "/admin/tasks?filter=gone"
 
@@ -136,6 +144,19 @@ RSpec.describe "Admin saved views", type: :request do
 
     it "answers 404 for a view that is gone" do
       post "/admin/saved-views/999999", _csrf_token: admin_csrf_token, saved_view: { name: "New" }
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "saves nothing for a filter that is not text" do
+      fields = { screen: "tasks", filters: { q: { a: "b" } }, saved_view: { name: "Odd" }, return_to: "/admin/tasks" }
+      post "/admin/saved-views", _csrf_token: admin_csrf_token, **fields
+
+      expect(views).to be_empty
+    end
+
+    it "answers 404 when changing a view that is gone" do
+      post "/admin/saved-views/999999/change", _csrf_token: admin_csrf_token, filters: { q: "x" }
 
       expect(last_response.status).to eq(404)
     end

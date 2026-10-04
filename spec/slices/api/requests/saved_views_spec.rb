@@ -53,6 +53,22 @@ RSpec.describe "API saved views", type: :request do
       expect(list.dig("saved_views", 0, "filters")).to eq("status" => "draft")
     end
 
+    it "answers no filters for a view whose every filter the screen dropped" do
+      create(:saved_view, screen: "journal", filters: { mood: "calm" })
+
+      expect(list.dig("saved_views", 0, "filters")).to eq({})
+    end
+
+    Blog::Types::SavedViewScreen.each_value do |screen|
+      it "keeps every filter a #{screen} view reads" do
+        names = SavedViews::Slice["queries.screen_filters"].call(screen)
+        filters = names.to_h { [it, it == "types" ? { "post" => "1" } : "x"] }
+        create(:saved_view, screen:, filters: filters.merge("page" => "2"))
+
+        expect(list.dig("saved_views", 0, "filters").keys).to match_array(names)
+      end
+    end
+
     it "answers an empty list with 200" do
       expect([list, status]).to eq([{ "saved_views" => [] }, 200])
     end
@@ -99,6 +115,16 @@ RSpec.describe "API saved views", type: :request do
         .to eq("name" => ["name holds a control character"])
     end
 
+    it "refuses a name holding a bell" do
+      expect(create_view(name: "bad\u0007name", screen: "tasks").fetch("errors"))
+        .to eq("name" => ["name holds a control character"])
+    end
+
+    it "refuses a filter holding a control character" do
+      expect([create_view(name: "Open", screen: "tasks", filters: { q: "sh\u0007ip" }).fetch("errors").keys, status])
+        .to eq([%w[filters], 422])
+    end
+
     it "refuses a long name" do
       expect(create_view(name: "a" * 101, screen: "tasks").fetch("errors"))
         .to eq("name" => ["name runs past 100 characters"])
@@ -114,8 +140,17 @@ RSpec.describe "API saved views", type: :request do
         .to eq([%w[filters], 422])
     end
 
+    it "refuses activity types that are not text" do
+      expect([create_view(name: "Posts", screen: "activity", filters: { types: { post: 1 } }).fetch("errors").keys,
+              status]).to eq([%w[filters], 422])
+    end
+
     it "refuses a screen it does not know" do
       expect(create_view(name: "Inbox", screen: "inbox").fetch("errors").keys).to eq(%w[screen])
+    end
+
+    it "refuses a view with no name" do
+      expect(create_view(screen: "tasks").fetch("errors").keys).to eq(%w[name])
     end
 
     it "refuses a view with no screen" do
@@ -191,6 +226,14 @@ RSpec.describe "API saved views", type: :request do
       view = create(:saved_view)
 
       expect([delete_view(view.id), views.count]).to eq([{ "id" => view.id, "deleted" => true }, 0])
+    end
+
+    it "leaves the other views alone" do
+      view = create(:saved_view)
+      kept = create(:saved_view)
+      delete_view(view.id)
+
+      expect(views.pluck(:id)).to eq([kept.id])
     end
 
     it "answers an unknown ID with a 404" do

@@ -199,7 +199,7 @@ RSpec.describe "Admin task tag rules", type: :request do
       end
 
       it "answers 404 for a rule that isn't there" do
-        send_to("/admin/tasks/rules/0", rule: { pattern: "aaronmallen/*", tags: "ruby" })
+        send_to("/admin/tasks/rules/999999", rule: { pattern: "aaronmallen/*", tags: "ruby" })
 
         expect(last_response.status).to eq(404)
       end

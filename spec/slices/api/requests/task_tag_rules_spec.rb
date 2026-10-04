@@ -20,10 +20,8 @@ RSpec.describe "API task tag rules", type: :request do
 
   def rules = Tasks::Slice["queries.task_tag_rules"].call
 
-  def sourced(repo)
-    create(:task, :external).tap do |task|
-      create(:task_source, task:, provider: "github", url: "https://github.com/#{repo}/issues/1")
-    end
+  def sourced(repo, provider: "github", url: "https://github.com/#{repo}/issues/1")
+    create(:task, :external).tap { create(:task_source, task: it, provider:, url:) }
   end
 
   def status = last_response.status
@@ -59,6 +57,43 @@ RSpec.describe "API task tag rules", type: :request do
       create_rule(pattern: "aaronmallen/*", tags: %w[projects])
 
       expect(tag_names(task)).to eq(%w[projects])
+    end
+
+    it "creates each tag it names as a private tag" do
+      create_rule(pattern: "aaronmallen/*", tags: %w[brand-new])
+
+      expect(Tasks::Slice["relations.tags"].where(name: "brand-new").pluck(:scope)).to eq(%w[private])
+    end
+
+    it "tags only the repo a one repo pattern names, whatever its case" do
+      tasks = [sourced("AaronMallen/AaronMallen.me"), sourced("aaronmallen/aaronmallen.me2")]
+      create_rule(pattern: "aaronmallen/aaronmallen.me", tags: %w[ruby])
+
+      expect(tasks.map { tag_names(it) }).to eq([%w[ruby], []])
+    end
+
+    it "tags no Linear task and no task without a source" do
+      linear = sourced("aaronmallen/x", provider: "linear", url: "https://linear.app/aaronmallen/issue/ABC-1")
+      plain = create(:task)
+      create_rule(pattern: "aaronmallen/*", tags: %w[projects])
+
+      expect([tag_names(linear), tag_names(plain)]).to eq([[], []])
+    end
+
+    it "keeps a tag a task already has once" do
+      task = sourced("aaronmallen/aaronmallen.me")
+      Tasks::Slice["repos.task_repo"].replace_tags(task.id, %w[ruby])
+      create_rule(pattern: "aaronmallen/*", tags: %w[ruby projects])
+
+      expect(tag_names(task)).to eq(%w[projects ruby])
+    end
+
+    it "records the tags on the task's timeline without marking it seen", :aggregate_failures do
+      task = sourced("aaronmallen/aaronmallen.me")
+      create_rule(pattern: "aaronmallen/*", tags: %w[projects])
+
+      expect(Tasks::Slice["relations.task_events"].where(task_id: task.id).pluck(:kind)).to eq(%w[tagged])
+      expect(Tasks::Slice["repos.task_repo"].by_id(task.id).source.seen_at).to be_nil
     end
 
     it "refuses a bad pattern with a 422 naming the field and saves nothing", :aggregate_failures do

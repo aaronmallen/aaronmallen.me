@@ -102,6 +102,14 @@ RSpec.describe "API reading a social post", type: :request do
         .to eq([["retrying", "timed out"], %w[failed refused]])
     end
 
+    it "marks a delivery with parts still to send and no error as sending" do
+      social_post = create(:social_post, :posted)
+      deliver(social_post, "mastodon")
+
+      expect(read(social_post.id).fetch("deliveries").map { it.values_at("network", "state") })
+        .to include(%w[mastodon sending])
+    end
+
     it "gives the suggested edits still open, and leaves out the settled ones" do
       social_post = compose("a cat and a dog")
       suggestion = suggest(social_post, typo("cat", "black cat"), typo("dog", "dogs"))

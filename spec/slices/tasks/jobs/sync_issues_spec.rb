@@ -673,21 +673,4 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(failure).to be_nil
     end
   end
-
-  describe "a sync asked for now" do
-    let(:queue) { Tasks::Slice["operations.queue_issue_sync"] }
-
-    it "queues the job" do
-      queue.call
-
-      expect(described_class.jobs.size).to eq(1)
-    end
-
-    it "queues nothing without a token", :aggregate_failures do
-      disconnect_github
-
-      expect(queue.call).to eq(Dry::Monads::Failure(:not_configured))
-      expect(described_class.jobs).to be_empty
-    end
-  end
 end

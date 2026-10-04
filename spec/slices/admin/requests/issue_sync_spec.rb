@@ -39,6 +39,13 @@ RSpec.describe "Admin issue sync", type: :request do
       expect(enqueued.size).to eq(1)
     end
 
+    it "queues no Linear job without a Linear key" do
+      connect_linear
+      sync
+
+      expect(Tasks::Jobs::SyncLinearIssues.jobs).to be_empty
+    end
+
     it "says the sync is queued" do
       sync
       follow_redirect!

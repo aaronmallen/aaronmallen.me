@@ -19,6 +19,14 @@ RSpec.describe "API record links", type: :request do
 
   def link(kind, id, **fields) = call_api(:post, "/#{kind}/#{id}", JSON.generate(fields))
 
+  def link_every_pair
+    Blog::Types::RecordKind.values.to_h { [it, linkable_record(it)] }.tap do |records|
+      records.keys.combination(2).each do |one, two|
+        link(one, records[one].id, other_kind: two, other_id: records[two].id)
+      end
+    end
+  end
+
   def list(kind, id) = call_api(:get, "/#{kind}/#{id}")
 
   def status = last_response.status
@@ -76,6 +84,15 @@ RSpec.describe "API record links", type: :request do
         .to eq([%w[other_kind], 422])
     end
 
+    it "links any two kinds and shows the link from both sides", :aggregate_failures do
+      records = link_every_pair
+
+      records.each do |kind, record|
+        expect(list(kind, record.id).fetch("links").transform_values { it.map { it.fetch("id") } })
+          .to eq(records.except(kind).transform_values { [it.id] })
+      end
+    end
+
     it "answers an unknown record with a 404" do
       expect([link("journal_entry", 999_999, other_kind: "commit", other_id: commit.id).fetch("message"), status])
         .to eq(["no journal entry has the ID 999999", 404])
@@ -92,6 +109,10 @@ RSpec.describe "API record links", type: :request do
     it "answers a pair with no link with a 404" do
       expect([unlink("post", post_record.id, "commit", commit.id).fetch("message"), status])
         .to eq(["post #{post_record.id} has no link to commit #{commit.id}", 404])
+    end
+
+    it "refuses another kind it does not know with a 422" do
+      expect([unlink("post", post_record.id, "person", 1).fetch("errors").keys, status]).to eq([%w[other_kind], 422])
     end
 
     it "refuses another ID that is not a number with a 422" do

@@ -13,6 +13,10 @@ RSpec.describe "API calendar", type: :request do
 
   def days(**params) = read(**range, **params).fetch("days")
 
+  def empty_day(date)
+    { "date" => date.iso8601, "sprint" => nil, "posts" => [], "social_posts" => [], "journal" => false }
+  end
+
   def listed_items
     days.to_h do |found|
       ids = found.fetch("posts").map { "post-#{it.fetch('id')}" } +
@@ -75,6 +79,28 @@ RSpec.describe "API calendar", type: :request do
     create(:journal_entry, entry_date: first + 4)
 
     expect(days.map { it.fetch("journal") }).to eq((first..last).map { it == first + 4 })
+  end
+
+  it "leaves out drafts of posts and social posts" do
+    create(:post, :draft, published_at: at(first, 12))
+    create(:social_post, :draft, posted_at: at(first, 12))
+
+    expect(day(first).values_at("posts", "social_posts")).to eq([[], []])
+  end
+
+  it "puts a post at 23:30 site time on that day, not the next UTC day" do
+    post = create(:post, :published, published_at: at(first + 5, 23, 30))
+
+    expect(listed_items.values_at(first + 5, first + 6)).to eq([["post-#{post.id}"], []])
+  end
+
+  it "leaves out records dated outside the range" do
+    create(:sprint, sprint_date: last + 1)
+    create(:post, :published, published_at: at(first - 1, 23, 59))
+    create(:social_post, :posted, posted_at: at(last + 1, 0, 1))
+    create(:journal_entry, entry_date: first - 1)
+
+    expect(days).to eq((first..last).map { empty_day(it) })
   end
 
   describe "beside the calendar screen" do

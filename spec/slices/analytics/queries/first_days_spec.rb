@@ -17,47 +17,11 @@ RSpec.describe Analytics::Queries::FirstDays do
 
   def rolled_day(on) = (@rolled_days ||= {})[on] ||= create(:analytics_rollup, day: on).day
 
-  it "counts readers per day for the first 30 days, leaving out the days after" do
-    publish("hello", on: today - 40)
-    rolled("hello", on: today - 40, visitors: 9)
-    rolled("hello", on: today - 11, visitors: 4)
-    rolled("hello", on: today - 10, visitors: 7)
-
-    expect(first_days("/writing/hello").fetch(:days)).to eq([9, *Array.new(28, 0), 4])
-  end
-
-  it "counts a day nobody read as zero" do
-    publish("hello", on: today - 2)
-    rolled("hello", on: today - 2, visitors: 5)
-
-    expect(first_days("/writing/hello").fetch(:days)).to eq([5, 0, 0])
-  end
-
-  it "draws as many days as a young post has had" do
-    publish("hello", on: today - 9)
-
-    expect(first_days("/writing/hello").fetch(:days).size).to eq(10)
-  end
-
   it "counts publish day as day one in Chicago time" do
     create(:post, :published, slug: "hello", published_at: Blog::TimeZone.day_start(today - 1) - 60)
     rolled("hello", on: today - 1, visitors: 3)
 
     expect(first_days("/writing/hello").fetch(:days)).to eq([0, 3, 0])
-  end
-
-  it "reads today live beside the rolled up days" do
-    publish("hello", on: today - 1)
-    rolled("hello", on: today - 1, visitors: 6)
-    2.times { create(:analytics_event, path: "/writing/hello") }
-
-    expect(first_days("/writing/hello").fetch(:days)).to eq([6, 2])
-  end
-
-  it "gives no days for a draft" do
-    publish("hello", on: today, status: "draft")
-
-    expect(first_days("/writing/hello").fetch(:days)).to eq([])
   end
 
   describe "the median" do

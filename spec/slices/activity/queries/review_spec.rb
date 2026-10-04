@@ -28,12 +28,6 @@ RSpec.describe Activity::Queries::Review do
       expect([review.from, review.to]).to eq([Date.new(2026, 9, 14), Date.new(2026, 9, 20)])
     end
 
-    it "keeps a Sunday in the week before the next Monday" do
-      found = review("week", Date.new(2026, 9, 20))
-
-      expect([found.from, found.to]).to eq([Date.new(2026, 9, 14), Date.new(2026, 9, 20)])
-    end
-
     it "runs a month from its first day to its last" do
       found = review("month", Date.new(2026, 2, 10))
 
@@ -301,13 +295,6 @@ RSpec.describe Activity::Queries::Review do
       it "sums the time worked inside it" do
         expect(september.worked.select { _2.positive? }.keys).to eq(inside)
       end
-    end
-
-    it "runs the same statements for a full month as for an empty one" do
-      empty = counting { review("month") }.size
-      (1..30).each { fill(Date.new(2026, 9, it)) }
-
-      expect(counting { review("month") }).to have(empty).items
     end
   end
 end

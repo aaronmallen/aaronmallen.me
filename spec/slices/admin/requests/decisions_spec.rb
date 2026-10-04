@@ -306,6 +306,12 @@ RSpec.describe "Admin decisions", type: :request do
         expect(last_response.location).to end_with("/admin/decisions/#{decision.id}")
       end
 
+      it "answers 404 for a decision that isn't there" do
+        send_to("/admin/decisions/404404", decision: { title: "Pick a queue", problem: "Jobs pile up" })
+
+        expect(last_response.status).to eq(404)
+      end
+
       it "fills the tags field with its tags" do
         update(title: "Pick a queue", problem: "Jobs pile up", tags: "queues, ruby")
         get "/admin/decisions/#{decision.id}/edit"
