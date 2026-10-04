@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [config, media, public]
 issue: "#132"
-amended: ["#137"]
+amended: ["#137", "#396"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 
@@ -19,8 +19,9 @@ No part of the site takes a file. A photo in a post means hosting it somewhere e
 no backup and the link can rot. #128 adds uploads to the Markdown editor, and the bytes need a home.
 
 Photos are the one kind of data here nobody can rebuild. A lost database comes back from GitHub and the social
-networks, a lost photo does not. So photos belong where the backups are, and under [ADR 0006][0006] that is the
-NAS, not the Pi.
+networks, a lost photo does not. #396 found that true only for what the site syncs in, and added a nightly dump of
+the database to a bucket of its own ([ADR 0105][0105]). So photos belong where the backups are, and under
+[ADR 0006][0006] that is the NAS, not the Pi.
 
 The site runs behind a Cloudflare Tunnel so that nothing at home accepts a connection from outside. Whatever holds
 the photos has to keep that true.
@@ -75,4 +76,5 @@ so the client has to send them only when the request needs them.
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0006]: 0006-run-the-site-on-a-raspberry-pi-behind-a-cloudflare-tunnel-with-its-data-on-the-nas.md
 [0009]: 0009-register-every-service-client-with-or-without-its-credentials.md
+[0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
