@@ -3,6 +3,8 @@
 RSpec.describe "API decisions", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
+  def at(hour) = Blog::TimeZone.local_time(2026, 9, 1, hour, 0)
+
   def call_api(verb, path, fields = nil, token: api_token)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token
@@ -12,15 +14,48 @@ RSpec.describe "API decisions", type: :request do
 
   def comments = Decisions::Slice["relations.decision_comments"]
 
+  def event(decision, kind, hour, **)
+    create(:decision_event, decision_id: decision.id, kind:, created_at: at(hour), **)
+  end
+
   def events(decision) = Decisions::Slice["relations.decision_events"].where(decision_id: decision.id)
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
+  def list(query = "") = call_api(:get, "?#{query}")
+
+  def listed(query = "") = list(query).fetch("decisions").map { it.fetch("id") }
+
   def options = Decisions::Slice["relations.decision_options"]
+
+  def read(id) = call_api(:get, "/#{id}")
+
+  def record_history
+    event(decision, "opened", 8)
+    event(decision, "option_added", 9, option_id: option.id)
+    event(decision, "resolved", 11, option_id: option.id, reason: "It runs today")
+    event(decision, "reopened", 12, reason: "Load grew")
+    event(decision, "edited", 13, note: "Load grew more")
+  end
 
   def reload(decision) = Decisions::Slice["queries.by_id"].call(decision.id)
 
   def status = last_response.status
 
   def tag(decision, *names) = Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, names)
+
+  def whole_timeline
+    [
+      { "kind" => "opened", "option_id" => nil, "reason" => nil, "note" => nil },
+      { "kind" => "option_added", "option_id" => option.id, "reason" => nil, "note" => nil },
+      { "kind" => "comment", "body" => "Ask ops first" },
+      { "kind" => "resolved", "option_id" => option.id, "reason" => "It runs today", "note" => nil },
+      { "kind" => "reopened", "option_id" => nil, "reason" => "Load grew", "note" => nil },
+      { "kind" => "edited", "option_id" => nil, "reason" => nil, "note" => "Load grew more" },
+    ]
+  end
 
   let(:decision) { create(:decision, title: "Pick a queue", problem: "Jobs pile up") }
   let(:option) { create(:decision_option, decision_id: decision.id, title: "Sidekiq", body: "Runs today") }
@@ -360,7 +395,161 @@ RSpec.describe "API decisions", type: :request do
     end
   end
 
+  describe "GET /api/v1/decisions" do
+    let!(:open_one) { create(:decision, created_at: at(9)) }
+    let!(:dropped) { create(:decision, status: "dropped", created_at: at(10)) }
+
+    it "lists every decision, newest first, when no filter is given" do
+      expect(listed).to eq([dropped.id, open_one.id])
+    end
+
+    it "narrows the list by status" do
+      expect(listed("status=dropped")).to eq([dropped.id])
+    end
+
+    it "narrows the list by tag" do
+      tag(open_one, "queues")
+      tag(dropped, "ruby")
+
+      expect(listed("tag=Queues")).to eq([open_one.id])
+    end
+
+    it "narrows the list by status and tag together" do
+      tag(open_one, "queues")
+      tag(dropped, "queues")
+
+      expect(listed("status=open&tag=queues")).to eq([open_one.id])
+    end
+
+    it "answers each decision with its options and tags" do
+      create(:decision_option, decision_id: open_one.id, title: "Sidekiq")
+      tag(open_one, "queues")
+
+      expect(list("status=open").fetch("decisions").first)
+        .to include("tags" => ["queues"], "options" => [include("title" => "Sidekiq")])
+    end
+
+    it "counts the page and says when no more remain" do
+      expect(list).to include("count" => 2, "partial" => false)
+    end
+
+    it "pages the decisions" do
+      allow(API::Slice["settings"]).to receive(:page_size).and_return({ mcp: 1 })
+
+      expect([listed, list.slice("partial", "next_page"), listed("page=2")])
+        .to eq([[dropped.id], { "partial" => true, "next_page" => 2 }, [open_one.id]])
+    end
+
+    it "refuses an unknown status with a 422 naming the field" do
+      expect([list("status=done").fetch("errors").keys, status]).to eq([["status"], 422])
+    end
+
+    it "refuses a request with no token" do
+      call_api(:get, "", token: nil)
+
+      expect(status).to eq(401)
+    end
+  end
+
+  describe "GET /api/v1/decisions/:id" do
+    it "answers the decision with its problem, status and dates" do
+      dates = { "created_at" => String, "updated_at" => String }
+
+      expect(read(decision.id)).to include("title" => "Pick a queue", "problem" => "Jobs pile up", **dates)
+    end
+
+    it "answers the decision with its options and tags" do
+      option
+      tag(decision, "queues")
+
+      expect(read(decision.id)).to include("tags" => ["queues"], "options" => [include("title" => "Sidekiq")])
+    end
+
+    it "answers no choice for an open decision" do
+      expect(read(decision.id).fetch("choice")).to be_nil
+    end
+
+    it "answers the chosen option and the reason it won", :aggregate_failures do
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      choice = read(decision.id).fetch("choice")
+
+      expect(choice).to include("reason" => "It runs today", "option" => include("id" => option.id))
+      expect(Time.iso8601(choice.fetch("resolved_at"))).to be_within(60).of(Time.now)
+    end
+
+    it "answers the latest reason when the decision was resolved again" do
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      call_api(:post, "/#{decision.id}/reopen", { reason: "Load grew" })
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "Still the best" })
+
+      expect(read(decision.id).dig("choice", "reason")).to eq("Still the best")
+    end
+
+    it "answers the comments, oldest first, with their dates" do
+      create(:decision_comment, decision_id: decision.id, body: "second", created_at: at(14))
+      create(:decision_comment, decision_id: decision.id, body: "first", created_at: at(9))
+
+      first = include("body" => "first", "created_at" => at(9).utc.iso8601, "updated_at" => String)
+
+      expect(read(decision.id).fetch("comments")).to match([first, include("body" => "second")])
+    end
+
+    it "answers the records linked to it, the tasks that carry it out among them" do
+      task = create(:task, title: "Set up Sidekiq")
+      link("decision", decision.id, "task", task.id)
+
+      expect(read(decision.id).fetch("record_links"))
+        .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Set up Sidekiq")])
+    end
+
+    it "answers no record links for a decision with none" do
+      expect(read(decision.id).fetch("record_links")).to eq({})
+    end
+
+    it "answers the whole timeline, oldest first" do
+      record_history
+      create(:decision_comment, decision_id: decision.id, body: "Ask ops first", created_at: at(10))
+
+      expect(read(decision.id).fetch("timeline").map { it.slice("kind", "option_id", "reason", "note", "body") })
+        .to eq(whole_timeline)
+    end
+
+    it "gives each timeline entry its ID and time" do
+      comment = create(:decision_comment, decision_id: decision.id, created_at: at(10))
+
+      expect(read(decision.id).fetch("timeline"))
+        .to match([include("kind" => "comment", "id" => comment.id, "occurred_at" => at(10).utc.iso8601)])
+    end
+
+    it "answers an unknown decision with a 404" do
+      expect([read(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no decision has the ID 999999" }, 404])
+    end
+
+    it "refuses a request with no token" do
+      call_api(:get, "/#{decision.id}", token: nil)
+
+      expect(status).to eq(401)
+    end
+  end
+
   describe "the MCP tools" do
+    it "lists decisions as list_decisions does" do
+      create(:decision)
+
+      expect(mcp_answer("list_decisions", status: "open")).to eq(list("status=open"))
+    end
+
+    it "reads a decision as read_decision does" do
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+
+      expect(mcp_answer("read_decision", id: decision.id)).to eq(read(decision.id))
+    end
+
+    it "refuses an unknown decision in read_decision" do
+      expect(mcp_text("read_decision", id: 999_999)).to eq("no decision has the ID 999999")
+    end
+
     it "opens a decision as open_decision does" do
       answered = call_api(:post, "", { title: "Pick a queue", problem: "Jobs pile up" })
       stamps = %w[id created_at updated_at]

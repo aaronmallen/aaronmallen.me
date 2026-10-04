@@ -19,6 +19,12 @@ module Decisions
 
       def newest_first = order(self[:created_at].desc, self[:id].desc)
 
+      def tagged(name)
+        owner = decision_tags[:decision_id].qualified
+
+        where(id: decision_tags.unordered.join(:tag).where(tags[:name].qualified => name).select(owner).dataset)
+      end
+
       def with_status(status) = where(status:)
     end
   end

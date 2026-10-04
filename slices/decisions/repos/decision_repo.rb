@@ -16,6 +16,14 @@ module Decisions
 
       def exist?(id) = decisions.by_pk(id).exist?
 
+      def listed(page, status: nil, tag: nil)
+        found = decisions.combine(:options, :tags)
+        found = found.with_status(status) if status
+        found = found.tagged(tag) if tag
+
+        page.fill(found.newest_first.paged(page).to_a)
+      end
+
       def page_by_status(status, page)
         page.fill(decisions.combine(:options).with_status(status).newest_first.paged(page).to_a)
       end

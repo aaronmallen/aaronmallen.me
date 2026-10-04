@@ -75,10 +75,10 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def read_tools
     %w[
-      compose_announcement list_attention list_commits list_journal_entries list_links list_messages list_posts
-      list_projects list_saved_views list_social_posts list_sprints list_suggestions list_tags list_tasks
-      list_webmentions list_work_entries read_activity read_analytics read_current_sprint read_journal_entry
-      read_message read_post read_review read_social_post read_sync_state read_task read_time_report
+      compose_announcement list_attention list_commits list_decisions list_journal_entries list_links list_messages
+      list_posts list_projects list_saved_views list_social_posts list_sprints list_suggestions list_tags list_tasks
+      list_webmentions list_work_entries read_activity read_analytics read_current_sprint read_decision
+      read_journal_entry read_message read_post read_review read_social_post read_sync_state read_task read_time_report
       read_webmention_settings search summarize_activity
     ]
   end
@@ -425,6 +425,20 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("read_post", id: article.id)
 
       expect(content.fetch("id")).to eq(article.id)
+    end
+
+    it "still lists decisions" do
+      decision = create(:decision)
+      call_tool("list_decisions")
+
+      expect(content.fetch("decisions").map { it.fetch("id") }).to eq([decision.id])
+    end
+
+    it "still reads a decision" do
+      decision = create(:decision)
+      call_tool("read_decision", id: decision.id)
+
+      expect(content.fetch("id")).to eq(decision.id)
     end
 
     it "refuses the social card write" do
@@ -2257,6 +2271,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "link_tasks" => { id: 1, kind: "blocks", other_id: 2 },
         "list_attention" => {},
         "list_commits" => { from: "2026-01-01", to: "2026-12-31" },
+        "list_decisions" => {},
         "list_journal_entries" => { from: "2026-01-01", to: "2026-12-31" },
         "list_links" => { kind: "post", id: 1 },
         "list_messages" => { from: "2026-01-01", to: "2026-12-31" },
@@ -2282,6 +2297,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_activity" => { from: "2026-01-01", to: "2026-12-31" },
         "read_analytics" => { from: "2026-01-01", to: "2026-12-31" },
         "read_current_sprint" => {},
+        "read_decision" => { id: 1 },
         "read_journal_entry" => { id: 1 },
         "read_message" => { id: 1 },
         "read_post" => { id: 1 },

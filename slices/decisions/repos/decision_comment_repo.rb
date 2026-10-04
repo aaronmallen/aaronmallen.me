@@ -8,6 +8,8 @@ module Decisions
 
       def delete_on_decision(decision_id, id) = on_decision(decision_id, id).delete
 
+      def oldest_first(decision_id) = decision_comments.for_decision(decision_id).oldest_first.to_a
+
       def on_decision?(decision_id, id) = on_decision(decision_id, id).exist?
 
       private

@@ -130,6 +130,15 @@ RSpec.describe "API tasks", type: :request do
         .to match("post" => [include("kind" => "post", "id" => post.id, "title" => "On hosting")])
     end
 
+    it "answers the decisions the task carries out" do
+      task = create(:task)
+      decision = create(:decision, title: "Pick a queue")
+      link("decision", decision.id, "task", task.id)
+
+      expect(read(task.id).fetch("record_links"))
+        .to match("decision" => [include("kind" => "decision", "id" => decision.id, "title" => "Pick a queue")])
+    end
+
     it "answers the same record links as read_task" do
       task = create(:task)
       link("task", task.id, "journal_entry", create(:journal_entry).id)

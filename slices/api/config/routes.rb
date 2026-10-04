@@ -34,7 +34,9 @@ module API
     post "/tasks/:id/links", to: "task_links.create"
     delete "/tasks/:id/links/:other_id", to: "task_links.destroy"
 
+    get "/decisions", to: "decisions.index"
     post "/decisions", to: "decisions.create"
+    get "/decisions/:id", to: "decisions.show"
     patch "/decisions/:id", to: "decisions.update"
     post "/decisions/:id/drop", to: "decisions.drop"
     post "/decisions/:id/reopen", to: "decisions.reopen"
