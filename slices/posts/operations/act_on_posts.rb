@@ -17,9 +17,7 @@ module Posts
       def call(params)
         fields = step validate(params)
 
-        transaction do
-          fields[:ids].map { |id| step(single(id, fields).alt_map { [:record, id, it] }) }
-        end
+        each_record(fields[:ids]) { single(it, fields) }
       end
 
       private

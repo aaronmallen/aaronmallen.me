@@ -26,9 +26,7 @@ module Tasks
         operation = single(fields[:act])
         input = fields.values_at(*INPUTS[fields[:act]])
 
-        transaction do
-          fields[:ids].map { |id| step(operation.call(id, *input, at:).alt_map { [:record, id, it] }) }
-        end
+        each_record(fields[:ids]) { operation.call(it, *input, at:) }
       end
 
       private

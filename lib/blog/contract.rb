@@ -9,6 +9,7 @@ module Blog
     BLANK = "blank"
     CONTROL = "control"
     FORMAT = "format"
+    MAX_IDS = 100
     SKIPPED = "skipped"
 
     CONTROLS = /[[:cntrl:]&&[^\t\n\r]]/

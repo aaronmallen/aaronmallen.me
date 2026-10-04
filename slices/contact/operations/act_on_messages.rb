@@ -16,9 +16,7 @@ module Contact
         fields = step validate(params)
         act = fields[:act]
 
-        transaction do
-          fields[:ids].map { |id| step(single(act, id).alt_map { [:record, id, it] }) }
-        end
+        each_record(fields[:ids]) { single(act, it) }
       end
 
       private

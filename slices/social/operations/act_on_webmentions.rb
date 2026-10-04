@@ -11,9 +11,7 @@ module Social
         fields = step validate(params)
         verdict = fields[:act]
 
-        transaction do
-          fields[:ids].map { |id| step(moderate_webmention.call(id, verdict).alt_map { [:record, id, it] }) }
-        end
+        each_record(fields[:ids]) { moderate_webmention.call(it, verdict) }
       end
 
       private

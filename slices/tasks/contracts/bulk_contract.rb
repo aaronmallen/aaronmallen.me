@@ -2,14 +2,12 @@
 
 module Tasks
   module Contracts
-    class BulkContract < Blog::Contract
-      MAX_IDS = 100
+    class BulkContract < Blog::BulkContract
       MOVE = Blog::Types::TaskBulkAction["move"]
       TAGGING = [Blog::Types::TaskBulkAction["tag"], Blog::Types::TaskBulkAction["untag"]].freeze
 
       params do
         required(:act).value(Blog::Types::TaskBulkAction)
-        required(:ids).value(Blog::Types::IdList, :filled?, max_size?: MAX_IDS)
         optional(:to).maybe(Blog::Types::Nullable::TaskFilter)
         optional(:tag).maybe(Blog::Types::Nullable::Tag)
       end
@@ -18,12 +16,7 @@ module Tasks
         key(:to).failure(BLANK) if values[:act] == MOVE && values[:to].nil?
       end
 
-      rule(:act, :tag) do
-        next unless TAGGING.include?(values[:act])
-
-        key(:tag).failure(BLANK) if values[:tag].nil?
-        key(:tag).failure(FORMAT) unless values[:tag].nil? || Blog::Types::Tag.valid?(values[:tag])
-      end
+      rule(:act, :tag).validate(tag_for: TAGGING)
     end
   end
 end
