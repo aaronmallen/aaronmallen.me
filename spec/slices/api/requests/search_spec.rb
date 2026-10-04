@@ -61,7 +61,8 @@ RSpec.describe "API search", type: :request do
     end
 
     it "answers the MCP tool with the same JSON" do
-      expect(mcp_answer("search", query: "zeppelin", kind: "task")).to eq(find(query: "zeppelin", kind: "task"))
+      expect(trusted(mcp_answer("search", query: "zeppelin",
+                                          kind: "task"))).to eq(find(query: "zeppelin", kind: "task"))
     end
   end
 
@@ -95,7 +96,7 @@ RSpec.describe "API search", type: :request do
     end
 
     it "answers the MCP tool with the same page" do
-      expect(mcp_answer("search", query: "plumber", page: 2)).to eq(find(query: "plumber", page: 2))
+      expect(trusted(mcp_answer("search", query: "plumber", page: 2))).to eq(find(query: "plumber", page: 2))
     end
   end
 

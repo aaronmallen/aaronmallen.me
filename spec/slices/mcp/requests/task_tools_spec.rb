@@ -247,7 +247,7 @@ RSpec.describe "MCP task tools", type: :request do
 
       saved = stored.first
 
-      expect(content).to eq({ "id" => saved.id, **local_entry("Blocked on review", saved.created_at),
+      expect(content).to eq({ "id" => saved.id, **local_entry(untrusted("Blocked on review"), saved.created_at),
                               "updated_at" => saved.updated_at.utc.iso8601 })
     end
 
@@ -389,7 +389,7 @@ RSpec.describe "MCP task tools", type: :request do
     it "keeps every field it leaves out" do
       call_tool("save_task", id: task.id, title: "Final")
 
-      expect(content).to include("title" => "Final", "note" => "the plan", "tags" => %w[admin])
+      expect(content).to include("title" => "Final", "note" => untrusted("the plan"), "tags" => %w[admin])
     end
 
     it "replaces the whole set of tags" do

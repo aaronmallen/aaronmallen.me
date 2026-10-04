@@ -341,11 +341,13 @@ RSpec.describe "MCP social tools", type: :request do
   describe "list_webmentions" do
     def listed = content.fetch("webmentions")
 
-    def marked(mention) = %i[author_name excerpt].to_h { [it.to_s, { "untrusted" => true, "text" => mention[it] }] }
+    def marked(mention)
+      %i[author_name author_url excerpt source_url].to_h { [it.to_s, { "untrusted" => true, "text" => mention[it] }] }
+    end
 
     def range = { from: "2026-03-01", to: "2026-03-31" }
 
-    def shown = %i[post_id type status source_url author_url]
+    def shown = %i[post_id type status]
 
     it "lists the webmentions received in the range, newest first" do
       older = create(:webmention, received_at: at(Date.new(2026, 3, 2)))

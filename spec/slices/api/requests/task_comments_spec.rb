@@ -162,7 +162,8 @@ RSpec.describe "API task comments", type: :request do
       other = create(:task)
       answered = comment(task.id, body: "the same")
 
-      expect(mcp_answer("add_task_comment", id: other.id, body: "the same").except("id", "created_at", "updated_at"))
+      expect(trusted(mcp_answer("add_task_comment", id: other.id, body: "the same")).except("id", "created_at",
+                                                                                            "updated_at"))
         .to eq(answered.except("id", "created_at", "updated_at"))
     end
 

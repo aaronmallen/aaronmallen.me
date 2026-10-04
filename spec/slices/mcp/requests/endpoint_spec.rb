@@ -610,6 +610,8 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def kinds = entries.map { it.fetch("kind") }
 
+    def marked(text) = { "untrusted" => true, "text" => text }
+
     def month_ago = today - 30
 
     def names = entries.map { it.fetch("name") }
@@ -717,9 +719,9 @@ RSpec.describe "MCP endpoint", type: :request do
         comment(body: "Down to ten")
         read_activity
 
-        expect(entries).to contain_exactly(
-          include("kind" => "comment", "name" => "Down to ten", "excerpt" => "Clear the inbox", "task_id" => task.id),
-        )
+        shown = { "kind" => "comment", "name" => marked("Down to ten"), "excerpt" => "Clear the inbox" }
+
+        expect(entries).to contain_exactly(include(shown.merge("task_id" => task.id)))
       end
 
       it "sends a synced comment with its link" do
@@ -727,7 +729,7 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity
 
         expect(entries).to contain_exactly(
-          include("kind" => "comment", "name" => "From the issue", "link" => synced.url),
+          include("kind" => "comment", "name" => marked("From the issue"), "link" => synced.url),
         )
       end
 
@@ -744,7 +746,7 @@ RSpec.describe "MCP endpoint", type: :request do
         create(:task_comment, body: "Elsewhere", created_at: at(10))
         read_activity(tags: %w[home])
 
-        expect(names).to eq(["Down to ten"])
+        expect(names).to eq([marked("Down to ten")])
       end
 
       it "gives a comment its task's tags" do
@@ -759,7 +761,7 @@ RSpec.describe "MCP endpoint", type: :request do
         comment(body: "Still full")
         read_activity(text: "down to")
 
-        expect(names).to eq(["Down to ten"])
+        expect(names).to eq([marked("Down to ten")])
       end
     end
 

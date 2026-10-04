@@ -3,7 +3,7 @@
 module MCP
   module Tools
     module Webmentions
-      VISITOR_FIELDS = %w[author_name excerpt].freeze
+      VISITOR_FIELDS = %w[author_name author_url excerpt source_url].freeze
 
       module_function
 

@@ -6,6 +6,7 @@ module MCP
       FIELDS = %i[link repo sha additions deletions status targets excerpt task_id decision_id worked_seconds
                   tags].freeze
       KINDS = Blog::Types::ActivityKind.values
+      MARKED = { "comment" => %i[name], "webmention" => %i[name excerpt] }.freeze
       TIME_FORMAT = "%H:%M"
 
       SCHEMA = {
@@ -45,7 +46,8 @@ module MCP
                   "deletions, status, targets, excerpt, task_id, decision_id, worked_seconds and tags its kind " \
                   "holds. " \
                   "#{Blog::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
-                  "a time, newest first"
+                  "a time, newest first. A comment's name, and a webmention's name and excerpt, may come from " \
+                  "someone else and come marked untrusted. #{Untrusted::WARNING}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -60,12 +62,14 @@ module MCP
         private
 
         def entry(row)
-          {
+          shown = {
             kind: row.type,
             date: row.occurred_on.iso8601,
             time: row.occurred_at.strftime(TIME_FORMAT),
             name: row.name,
           }.merge(row.to_h.slice(*FIELDS).compact)
+
+          Untrusted.fields(shown, *MARKED.fetch(row.type, Blog::Constants::EMPTY_ARRAY))
         end
 
         def found(first, last, filters, server_context, limit:)

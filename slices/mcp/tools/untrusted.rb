@@ -9,6 +9,10 @@ module MCP
       module_function
 
       def call(text) = { untrusted: true, text: }
+
+      def fields(entry, *names) = entry.merge(names.to_h { [it, call(entry.fetch(it))] })
+
+      def task(task) = fields(task, "note").merge(comments: task.fetch(:comments).map { fields(it, "body") })
     end
   end
 end

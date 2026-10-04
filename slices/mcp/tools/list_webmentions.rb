@@ -8,8 +8,8 @@ module MCP
                   "Give post_id to list only the webmentions one post got. Days run on " \
                   "#{Blog::TimeZone::NAME} time, and the answer names it as time_zone; received_at comes in UTC. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}. " \
-                  "The author name and excerpt, taken from the sender's page, come marked untrusted. " \
-                  "#{Untrusted::WARNING}"
+                  "The source, author name, author URL and excerpt, taken from the sender's page, come marked " \
+                  "untrusted. #{Untrusted::WARNING}"
       input_schema(API::Endpoints::ListWebmentions::SCHEMA)
       scope OAuth::Scope::READ
 

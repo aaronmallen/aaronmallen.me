@@ -520,7 +520,7 @@ RSpec.describe "API tasks", type: :request do
       create(:task, :done, tags: %w[admin], completed_at: at(today))
       create(:task_link, from_task_id: create(:task).id, to_task_id: create(:task).id)
 
-      expect(list(statuses: "open,done")).to eq(mcp_answer("list_tasks", statuses: %w[open done]))
+      expect(list(statuses: "open,done")).to eq(trusted(mcp_answer("list_tasks", statuses: %w[open done])))
     end
 
     it "read as read_task does" do
@@ -544,8 +544,9 @@ RSpec.describe "API tasks", type: :request do
       task = create(:task, title: "Draft", tags: %w[admin])
       saved = save(task.id, title: "Final", note: "done looks like this")
 
-      expect(mcp_answer("save_task", id: task.id, title: "Final", note: "done looks like this").except("updated_at"))
-        .to eq(saved.except("updated_at"))
+      answered = trusted(mcp_answer("save_task", id: task.id, title: "Final", note: "done looks like this"))
+
+      expect(answered.except("updated_at")).to eq(saved.except("updated_at"))
     end
 
     %w[start complete cancel].each do |verb|

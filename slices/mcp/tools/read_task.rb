@@ -20,14 +20,10 @@ module MCP
         private
 
         def marked(task)
-          task.merge(
-            "note" => Untrusted.call(task.fetch("note")),
-            comments: task.fetch(:comments).map { marked_body(it) },
-            timeline: task.fetch(:timeline).map { COMMENTS.include?(it.fetch("kind")) ? marked_body(it) : it },
-          )
+          Untrusted.task(task).merge(timeline: task.fetch(:timeline).map { marked_entry(it) })
         end
 
-        def marked_body(entry) = entry.merge("body" => Untrusted.call(entry.fetch("body")))
+        def marked_entry(entry) = COMMENTS.include?(entry.fetch("kind")) ? Untrusted.fields(entry, "body") : entry
       end
     end
   end
