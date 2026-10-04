@@ -3,4 +3,6 @@
 
 set -e
 
-bundle exec sidekiq --environment "${HANAMI_ENV:-${APP_ENV:-${RACK_ENV:-development}}}" --require ./config/sidekiq.rb
+export HANAMI_ENV=development
+
+bundle exec sidekiq --environment "$HANAMI_ENV" --require ./config/sidekiq.rb

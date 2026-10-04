@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "blog/secret_check"
 require "ipaddr"
 
 module Blog
@@ -171,12 +172,10 @@ module Blog
 
     def initialize(...)
       super
-      repeats = SECRETS.combination(2).filter_map do |secret, other|
-        [secret, "must not repeat #{other}"] if public_send(secret) == public_send(other)
-      end
-      return if repeats.empty?
+      errors = SecretCheck.call(SECRETS.to_h { [it, public_send(it)] })
+      return if errors.empty?
 
-      raise Hanami::Settings::InvalidSettingsError, repeats.to_h
+      raise Hanami::Settings::InvalidSettingsError, errors
     end
 
     def inspect_values = inspect

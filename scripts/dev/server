@@ -3,4 +3,6 @@
 
 set -e
 
+export HANAMI_ENV=development
+
 scripts/util/ensure_postgres bundle exec hanami server --config .config/config.ru --guardfile .config/Guardfile

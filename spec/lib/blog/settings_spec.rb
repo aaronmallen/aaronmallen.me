@@ -34,6 +34,50 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "the committed secrets" do
+    let(:committed) do
+      %w[development test].to_h do |environment|
+        store = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/#{environment}.yml"))
+        [environment, described_class::SECRETS.to_h { [it, store.fetch(it)] }]
+      end
+    end
+
+    let(:fresh) { { analytics_salt: "a" * 64, app_secret: "s" * 64, reader_salt: "r" * 64 } }
+
+    def settings_in(environment, **values)
+      stub_const("ENV", ENV.to_h.merge("HANAMI_ENV" => environment))
+      described_class.new(Hanami::Settings::CompositeStore.new(values, Hanami.app.config.settings_store))
+    end
+
+    it "takes secrets of its own in production" do
+      expect(settings_in("production", **fresh).app_secret).to eq("s" * 64)
+    end
+
+    %w[development test].each do |source|
+      described_class::SECRETS.each do |secret|
+        it "refuses the #{secret} committed for #{source} in production" do
+          expect { settings_in("production", **fresh, secret => committed[source][secret]) }
+            .to raise_error(
+              Hanami::Settings::InvalidSettingsError,
+              /#{secret}: must not use a value committed for development or test/,
+            )
+        end
+      end
+    end
+
+    it "refuses them in any environment but development and test" do
+      expect { settings_in("staging", **fresh, app_secret: committed["development"][:app_secret]) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /app_secret: must not use a value committed/)
+    end
+
+    %w[development test].each do |environment|
+      it "takes the secrets committed for development in #{environment}" do
+        expect(settings_in(environment, **committed["development"]).app_secret)
+          .to eq(committed["development"][:app_secret])
+      end
+    end
+  end
+
   describe "#redis" do
     let(:blanks) { [nil, "", " "] }
     let(:names) { %w[REDIS_CONNECT_TIMEOUT REDIS_RECONNECT_ATTEMPTS REDIS_TIMEOUT] }
