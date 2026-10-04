@@ -132,12 +132,19 @@ RSpec.describe "API task time", type: :request do
       expect(answer.fetch("worked_seconds")).to eq(1800)
     end
 
-    it "leaves the total alone for the running session", :aggregate_failures do
+    it "refuses the running session with a 422" do
+      found = running_task
+
+      expect([remove(sessions(found).first, on: found).fetch("errors"), status])
+        .to eq([{ "ended_at" => ["pause or complete the task before you delete its running session"] }, 422])
+    end
+
+    it "keeps the running session open and the task in progress", :aggregate_failures do
       found = running_task
       remove(sessions(found).first, on: found)
 
-      expect(sessions(found)).to be_empty
-      expect(total(found)).to eq(600)
+      expect(sessions(found).map { it[:ended_at] }).to eq([nil])
+      expect([Tasks::Slice["repos.task_repo"].by_id(found.id).status, total(found)]).to eq(["in_progress", 600])
     end
 
     it "answers a session on another task with a 404 and keeps it", :aggregate_failures do
@@ -240,6 +247,14 @@ RSpec.describe "API task time", type: :request do
 
       expect(mcp_answer("delete_work_session", id: task.id, session_id: sessions_made.last.id))
         .to include("worked_seconds" => 1500)
+    end
+
+    it "refuse the running session as delete_work_session does" do
+      found = running_task
+      refused = remove(sessions(found).first, on: found)
+
+      expect(mcp_text("delete_work_session", id: found.id, session_id: sessions(found).first[:id]))
+        .to eq(refused.fetch("message"))
     end
 
     it "set the total as set_task_total does" do

@@ -171,11 +171,42 @@ RSpec.describe "Admin task time", type: :request do
         expect(total).to eq(0)
       end
 
-      it "leaves the total alone for a running session" do
-        found = running_task
-        send_to("/admin/tasks/#{found.id}/sessions/#{sessions(found).first[:id]}/delete")
+      def refuse_running(since: Time.at(((Time.now.to_i - 600) / 60) * 60))
+        found = running_task(since:)
+        session = sessions(found).first
+        send_to("/admin/tasks/#{found.id}/sessions/#{session[:id]}/delete")
+        [found, session, since]
+      end
 
-        expect([sessions(found), total(found)]).to eq([[], 600])
+      it "refuses the running session with the reason beside it", :aggregate_failures do
+        _, session = refuse_running
+
+        expect(last_response.status).to eq(422)
+        expect(page.find("#task-session-#{session[:id]}-ended-at-error"))
+          .to have_text(t("ui.components.tasks.field_error.ended_at.running"))
+      end
+
+      it "keeps the saved start in the form it reopens" do
+        _, session, since = refuse_running
+
+        expect(page.find("#task-session-#{session[:id]}-started-at")["value"]).to eq(local(since))
+      end
+
+      it "keeps the running session open and the task in progress", :aggregate_failures do
+        found, session = refuse_running
+
+        expect(sessions(found).map { it[:id] }).to include(session[:id])
+        expect(sessions(found).count { it[:ended_at].nil? }).to eq(1)
+        expect(repo.by_id(found.id).status).to eq("in_progress")
+      end
+
+      it "has no delete form on the running session while a closed one keeps it", :aggregate_failures do
+        found = running_task(since: started + 3600)
+        finished = closed(on: found)
+        get("/admin/tasks/#{found.id}", filter: "next")
+
+        expect(page).to have_no_css("form[action$='/sessions/#{sessions(found).last[:id]}/delete']", visible: :all)
+        expect(page).to have_css("form[action$='/sessions/#{finished.id}/delete']", visible: :all)
       end
 
       it "answers 404 for another task's session" do

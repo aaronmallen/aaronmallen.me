@@ -3,13 +3,16 @@
 module Tasks
   module Operations
     class DeleteWorkSession < Blog::Operation
+      RUNNING = "running"
+
       include Deps[work_session_repo: "repos.work_session_repo"]
 
       def call(task_id, id)
         session = step find(task_id, id)
+        step finished(session)
 
         transaction do
-          work_session_repo.shift_total(task_id, -(session.ended_at - session.started_at).floor) if session.ended_at
+          work_session_repo.shift_total(task_id, -(session.ended_at - session.started_at).floor)
           work_session_repo.delete(id)
         end
       end
@@ -21,6 +24,8 @@ module Tasks
 
         session ? Success(session) : Failure(:not_found)
       end
+
+      def finished(session) = session.ended_at ? Success(session) : Failure[:invalid, { ended_at: [RUNNING] }]
     end
   end
 end

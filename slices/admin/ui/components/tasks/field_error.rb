@@ -10,7 +10,7 @@ module Admin
             body: { "blank" => ".body.blank", "control" => ".body.control" },
             ended_at: {
               "blank" => ".ended_at.blank", "format" => ".ended_at.format", "order" => ".ended_at.order",
-              "skipped" => ".ended_at.skipped",
+              "running" => ".ended_at.running", "skipped" => ".ended_at.skipped",
             },
             hours: { "blank" => ".hours.blank", "format" => ".hours.format" },
             kind: { "format" => ".kind.format" },

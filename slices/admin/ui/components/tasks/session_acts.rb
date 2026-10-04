@@ -16,7 +16,7 @@ module Admin
           def view_template
             div(class: "task-comment-acts") do
               edit_form
-              delete_form
+              delete_form unless @entry.running?
             end
           end
 
@@ -40,10 +40,13 @@ module Admin
               Form(action: route(:admin_update_task_session)) do
                 return_fields
                 fields.each { |field, label| moment_field(field, label) }
+                FieldError(field: :ended_at, errors:, scope: error_scope) if @entry.running?
                 Button(variant: :pri, type: "submit", small: true) { t(".save") }
               end
             end
           end
+
+          def error_scope = "task-session-#{@entry.source_id}"
 
           def errors = mine? ? @timing[:errors] : Blog::Constants::EMPTY_HASH
 
@@ -52,12 +55,11 @@ module Admin
           def mine? = @timing[:id] == @entry.source_id
 
           def moment_field(field, label)
-            scope = "task-session-#{@entry.source_id}"
-            control = FieldError.control_attributes(field, errors, scope)
+            control = FieldError.control_attributes(field, errors, error_scope)
 
             Field(label: t(label), id: control[:id]) do
               Input(**control, type: "datetime-local", name: "session[#{field}]", value: value(field))
-              FieldError(field:, errors:, scope:)
+              FieldError(field:, errors:, scope: error_scope)
             end
           end
 
@@ -70,7 +72,11 @@ module Admin
 
           def saved(field) = field == :started_at ? @entry.occurred_at : @entry.ended_at
 
-          def value(field) = mine? ? @timing[:values][field].to_s : Blog::TimeZone.input_value(saved(field))
+          def saved_value(field) = Blog::TimeZone.input_value(saved(field))
+
+          def typed(field) = @timing[:values].fetch(field) { saved_value(field) }.to_s
+
+          def value(field) = mine? ? typed(field) : saved_value(field)
         end
       end
     end

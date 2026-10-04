@@ -33,6 +33,7 @@ module API
           Blog::Contract::FORMAT => "give the end as YYYY-MM-DDTHH:MM",
           Blog::Contract::SKIPPED => "that end falls in the hour the clocks skip",
           "order" => "a session ends after it starts",
+          "running" => "pause or complete the task before you delete its running session",
         },
         hours: {
           "blank" => "give the hours, the minutes or both",

@@ -8,7 +8,11 @@ module Admin
 
         include PageForm
         include Redirect
-        include Deps[delete_work_session: "tasks.operations.delete_work_session"]
+        include Deps[
+          build_task_page: "operations.build_task_page",
+          delete_work_session: "tasks.operations.delete_work_session",
+          task_view: "ui.views.tasks.show",
+        ]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)
@@ -16,6 +20,8 @@ module Admin
           case delete_work_session.call(record_id(request), id)
           in Success(_) then written(request, response, DELETED)
           in Failure(:not_found) then halt 404
+          in Failure[:invalid, errors]
+            refuse(request, response, timing: { id:, values: Blog::Constants::EMPTY_HASH, errors: })
           else halt 500
           end
         end

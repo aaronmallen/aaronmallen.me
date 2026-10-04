@@ -1420,6 +1420,7 @@ en:
             blank: "Give the time it ended."
             format: "Give the end as a date and time."
             order: "End it after it starts."
+            running: "Pause or complete the task before you delete its running session."
             skipped: "That time does not exist here. The clocks skip it."
           hours:
             blank: "Give the hours, the minutes or both."
