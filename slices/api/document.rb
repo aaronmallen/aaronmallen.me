@@ -67,6 +67,7 @@ module API
       ["delete_posts", "post", "/posts/bulk/delete", OK],
       ["tag_posts", "post", "/posts/bulk/tag", OK],
       ["list_attention", "get", "/attention", OK],
+      ["list_inbox", "get", "/inbox", OK],
       ["list_links", "get", "/links/{kind}/{id}", OK],
       ["link_records", "post", "/links/{kind}/{id}", CREATED],
       ["unlink_records", "delete", "/links/{kind}/{id}/{other_kind}/{other_id}", OK],

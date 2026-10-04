@@ -59,6 +59,8 @@ module API
 
     get "/attention", to: "attention.index"
 
+    get "/inbox", to: "inbox.index"
+
     get "/links/:kind/:id", to: "record_links.index"
     post "/links/:kind/:id", to: "record_links.create"
     delete "/links/:kind/:id/:other_kind/:other_id", to: "record_links.destroy"

@@ -61,10 +61,10 @@ module API
       endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision endpoints.drop_sprint
       endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option
       endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks endpoints.list_attention
-      endpoints.list_decisions endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
-      endpoints.list_sprints endpoints.list_tasks endpoints.mark_messages_read endpoints.mark_messages_unread
-      endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
-      endpoints.pause_task endpoints.plan_sprint
+      endpoints.list_decisions endpoints.list_inbox endpoints.list_journal_entries endpoints.list_links
+      endpoints.list_saved_views endpoints.list_sprints endpoints.list_tasks endpoints.mark_messages_read
+      endpoints.mark_messages_unread endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
+      endpoints.open_decision endpoints.pause_task endpoints.plan_sprint
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_review
       endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search
