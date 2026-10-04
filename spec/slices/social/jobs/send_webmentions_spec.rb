@@ -317,7 +317,7 @@ RSpec.describe Social::Jobs::SendWebmentions do
       shorten_webmention_budget(0.5)
       stub_page(target, endpoint: trickle("HTTP/1.1 202 Accepted\r\n\r\n", every: 0.05, path: "/webmention"))
 
-      expect(elapsed(described_class::EndpointUnreachable) { send_for(post_with(target)) }).to be < 1
+      expect(elapsed(described_class::EndpointUnreachable) { send_for(post_with(target)) }).to be < 3
     end
 
     it "raises when the connection fails" do

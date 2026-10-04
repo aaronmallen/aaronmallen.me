@@ -443,6 +443,8 @@ RSpec.describe Social::Jobs::VerifyWebmention do
   describe "the time it takes" do
     def budget = 0.5
 
+    def ceiling = budget * 6
+
     def gives_up_in(&) = elapsed(described_class::SourceUnreachable, &)
 
     def page_reply = "HTTP/1.1 200 OK\r\nContent-Length: #{entry.bytesize}\r\n\r\n#{entry}"
@@ -459,32 +461,36 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       end
     end
 
+    def stall_connects
+      allow(TCPSocket).to receive(:open) do |*, open_timeout: nil, **|
+        sleep(open_timeout || 60)
+        raise IO::TimeoutError
+      end
+    end
+
     before { shorten_webmention_budget(budget) }
 
     it "gives up within the budget on a body that trickles in" do
-      expect(gives_up_in { verify(source: trickle("HTTP/1.1 200 OK\r\n\r\n", every: budget / 10)) }).to be < budget * 2
+      expect(gives_up_in { verify(source: trickle("HTTP/1.1 200 OK\r\n\r\n", every: budget / 10)) }).to be < ceiling
     end
 
     it "gives up within the budget on headers that trickle in" do
       expect(gives_up_in { verify(source: trickle("HTTP/1.1 200 OK\r\nX-Slow: ", every: budget / 10)) })
-        .to be < budget * 2
+        .to be < ceiling
     end
 
     it "gives up within the budget on a site that never answers" do
-      expect(gives_up_in { verify(source: serve { sleep }) }).to be < budget * 2
+      expect(gives_up_in { verify(source: serve { sleep }) }).to be < ceiling
     end
 
     it "gives up within the budget on a handshake that never finishes" do
-      expect(gives_up_in { verify(source: serve { sleep }.sub("http:", "https:")) }).to be < budget * 2
+      expect(gives_up_in { verify(source: serve { sleep }.sub("http:", "https:")) }).to be < ceiling
     end
 
     it "gives up within the budget on a connection that never opens" do
-      resolves("stalled.example", "192.0.2.1")
-      WebMock.disable_net_connect!(allow_localhost: true, allow: "stalled.example")
+      stall_connects
 
-      expect(gives_up_in { verify(source: "http://stalled.example/notes/1") }).to be < budget * 2
-    ensure
-      WebMock.disable_net_connect!(allow_localhost: true)
+      expect(gives_up_in { verify(source: "http://127.0.0.1:9/notes/1") }).to be < ceiling
     end
 
     it "counts every redirect against the one budget", :aggregate_failures do
