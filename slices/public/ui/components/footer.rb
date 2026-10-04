@@ -31,6 +31,8 @@ module Public
             span { t(".and") }
             built_with_link(href: "https://www.phlex.fun", name: "Phlex")
             span { t(".location") }
+            span(aria: { hidden: "true" }) { t(".separator") }
+            a(class: "site-footer-text-link", href: path(:privacy)) { t(".privacy") }
           end
         end
 

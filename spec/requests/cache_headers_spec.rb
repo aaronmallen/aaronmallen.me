@@ -7,7 +7,9 @@ RSpec.describe "Cache headers", type: :request do
 
   def shared = "public, max-age=0, s-maxage=300"
 
-  def shared_paths(slug) = ["/", "/about", "/projects", "/writing", "/writing/#{slug}", "/writing/tags/ruby"]
+  def shared_paths(slug)
+    ["/", "/about", "/privacy", "/projects", "/writing", "/writing/#{slug}", "/writing/tags/ruby"]
+  end
 
   def vary = last_response.headers["Vary"]
 

@@ -7,7 +7,7 @@ RSpec.describe "Public pages", type: :request do
     end
   end
 
-  %w[/ /about /contact /projects /writing].each do |path|
+  %w[/ /about /contact /privacy /projects /writing].each do |path|
     it "renders #{path} with every credential blank" do
       get path
 

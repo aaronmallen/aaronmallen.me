@@ -3,7 +3,7 @@
 RSpec::Matchers.define_negated_matcher :not_include, :include
 
 RSpec.describe "Translations", type: :request do
-  %w[/ /writing /about /projects /contact /contact?sent=1].each do |path|
+  %w[/ /writing /about /privacy /projects /contact /contact?sent=1].each do |path|
     it "renders #{path} without a missing translation" do
       get path
 

@@ -13,6 +13,7 @@ module Public
     get "/about", to: "pages.about", as: :about
     get "/projects", to: "pages.projects", as: :projects
     get "/contact", to: "pages.contact", as: :contact
+    get "/privacy", to: "pages.privacy", as: :privacy
     get "/media/:key", to: "media.show", as: :media
     get "/site.webmanifest", to: "manifests.show", as: :manifest
     post "/contact", to: "messages.create", as: :message

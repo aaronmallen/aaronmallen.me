@@ -14,6 +14,7 @@ RSpec.describe "Public screens", type: :feature do
       "home" => "/",
       "not found" => "/writing/nothing-here",
       "post" => "/writing/hello",
+      "privacy" => "/privacy",
       "projects" => "/projects",
       "tag" => "/writing/tags/ruby",
       "writing" => "/writing",

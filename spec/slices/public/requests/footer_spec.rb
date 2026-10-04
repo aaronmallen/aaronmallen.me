@@ -42,6 +42,24 @@ RSpec.describe "Footer", type: :request do
     expect(profile_links.map { it.text.strip }).to eq(%w[github bluesky mastodon])
   end
 
+  %w[/ /about /contact /privacy /projects /writing].each do |path|
+    it "links #{path} to the privacy page" do
+      get path
+
+      expect(page.find("footer.site-footer")).to have_link("privacy", href: "/privacy", exact: true)
+    end
+  end
+
+  it "links a post and its tag to the privacy page", :aggregate_failures do
+    post = create(:post, :published, tags: %w[ruby])
+
+    ["/writing/#{post.slug}", "/writing/tags/ruby"].each do |path|
+      get path
+
+      expect(page.find("footer.site-footer")).to have_link("privacy", href: "/privacy", exact: true)
+    end
+  end
+
   context "with a network left unconfigured" do
     let(:profiles) { { bluesky: {}, github: { profile_url: "https://github.example/ada" }, mastodon: {} } }
 
