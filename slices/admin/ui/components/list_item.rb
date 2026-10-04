@@ -8,9 +8,10 @@ module Admin
         prop :href, Blog::Types::String.optional
         prop :sub, Blog::Types::String.optional
         prop :pick, Blog::Types::Hash.optional, default: nil
+        prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
         def view_template(&side)
-          div(class: "li", data: { key_row: true }) do
+          div(class: "li", data: { key_row: true, **@data }) do
             @pick ? render_picked : render_body
             div(class: "li-side", &side) if side
           end

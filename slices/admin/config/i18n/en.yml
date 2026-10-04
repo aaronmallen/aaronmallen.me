@@ -401,7 +401,9 @@ en:
           today: "This month"
         panel:
           dated: "%{status} · %{time}"
+          drag: "Drag %{title} to another day"
           empty: "Nothing lands on this day."
+          failed: "Couldn't move it · try again"
           journal: "Journal"
           journal_entry: "Journal entry"
           label: "Day"

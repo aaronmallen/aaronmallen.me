@@ -33,7 +33,9 @@ module Admin
 
           def inside? = date.month == @month.month
 
-          def link_attributes = { aria: { current: ("date" if today?) }, data: { calendar_day: date.iso8601 } }
+          def link_attributes
+            { aria: { current: ("date" if today?) }, data: { calendar_day: date.iso8601, calendar_past: past? } }
+          end
 
           def mark(icon, text, kind)
             span(class: ["cal-mark", kind]) do
@@ -50,6 +52,8 @@ module Admin
               mark("fa-solid fa-feather", t(".journal"), "journal") if @day.journal
             end
           end
+
+          def past? = date < @today
 
           def picked? = date == @picked
 

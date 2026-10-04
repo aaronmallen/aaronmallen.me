@@ -55,9 +55,22 @@ module Admin
           def empty? = !@day.sprint && @day.posts.empty? && @day.social_posts.empty? && !@day.journal
 
           def entry(kind, record, item, movable: record.status == SCHEDULED)
-            return ListItem(**item) unless movable
+            row = { **item, data: { calendar_item: "#{kind}-#{record.id}" } }
+            return ListItem(**row) unless movable
 
-            ListItem(**item) { move_form(kind, record.id, item[:title]) }
+            ListItem(**row) { move_form(kind, record.id, item[:title]) }
+          end
+
+          def grip(title)
+            label = t(".drag", title:)
+
+            Button(small: true, class: "cal-grip", hidden: true, title: label, aria: { label: }, data: grip_data) do
+              i(class: "fa-solid fa-grip-vertical", aria: { hidden: "true" })
+            end
+          end
+
+          def grip_data
+            { calendar_grip: "", calendar_failed: t(".failed"), calendar_past: t("calendar_page.toasts.past") }
           end
 
           def group(title, &)
@@ -77,6 +90,7 @@ module Admin
             field = "cal-move-#{kind}-#{id}"
 
             Form(action: path(MOVES.fetch(kind), id:), class: "cal-move") do
+              grip(title)
               input(type: "hidden", name: "day", value: date.iso8601)
               label(class: "sr-only", for: field) { t(".move_to", title:) }
               Input(type: "date", id: field, name: "to", min: @today.iso8601, value: date.iso8601)

@@ -1,3 +1,5 @@
+import { armGrips, setupCalendarDrag } from "./calendar_drag.js";
+
 const DAY = "a[data-calendar-day]";
 const PANEL = "[data-calendar-panel]";
 
@@ -27,6 +29,8 @@ function pick(calendar, link) {
 function setupCalendar(calendar) {
   let latest = 0;
 
+  setupCalendarDrag(calendar);
+
   const open = async (link) => {
     const ticket = ++latest;
     const panel = await load(link.href);
@@ -34,6 +38,7 @@ function setupCalendar(calendar) {
     if (!panel) return false;
 
     calendar.querySelector(PANEL).replaceWith(panel);
+    armGrips(panel);
     pick(calendar, link);
     history.replaceState(history.state, "", link.href);
     panel.focus();

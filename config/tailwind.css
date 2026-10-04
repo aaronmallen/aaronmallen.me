@@ -1600,6 +1600,30 @@
   @apply flex flex-wrap items-center gap-2;
 }
 
+@utility cal-grip {
+  @apply cursor-grab touch-none border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
+}
+
+@utility cal-dragging {
+  @apply opacity-60;
+
+  & .cal-grip {
+    @apply cursor-grabbing;
+  }
+}
+
+@utility cal-ghost {
+  @apply pointer-events-none fixed z-50 max-w-64 truncate rounded-card border border-line bg-ground-sunk px-3 py-2 text-li shadow-toast;
+}
+
+@utility cal-target {
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+@utility cal-refused {
+  @apply cursor-not-allowed opacity-50;
+}
+
 @utility cal-group-title {
   @apply mb-2 font-mono text-label text-mk-comment uppercase;
 }
