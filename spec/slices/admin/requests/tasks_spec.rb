@@ -1219,6 +1219,28 @@ RSpec.describe "Admin tasks", type: :request do
       end
     end
 
+    describe "completing a closed task" do
+      let(:closed_at) { Time.now.round - 86_400 }
+
+      def complete(task) = send_to("/admin/tasks/#{task.id}/complete", filter: "completed")
+
+      %i[done canceled].each do |status|
+        it "leaves a #{status} task as it was" do
+          task = create(:task, status, completed_at: closed_at)
+          complete(task)
+
+          expect(repo.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: closed_at)
+        end
+
+        it "says a #{status} task is closed already" do
+          complete(create(:task, status))
+          follow_redirect!
+
+          expect(page).to have_css("[data-toast] .toast", exact_text: "That task is closed already", visible: :all)
+        end
+      end
+    end
+
     describe "canceling a task" do
       def cancel(task, filter: "next") = send_to("/admin/tasks/#{task.id}/cancel", filter:)
 

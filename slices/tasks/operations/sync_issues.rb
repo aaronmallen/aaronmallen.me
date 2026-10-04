@@ -67,6 +67,8 @@ module Tasks
         Failure([:"#{provider}_failed", e.message])
       end
 
+      def finish(task, now) = reopen(task, nil, now).bind { complete_task.call(task.id, at: now) }
+
       def follow(source, issue, now)
         state = issue.fetch(:remote_state)
         task = task_repo.by_id(source.task_id)
@@ -137,7 +139,7 @@ module Tasks
         case state
         when OPEN then reopen(task, was, now)
         when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id, at: now, seen: false)
-        when COMPLETED then task.done? ? Success(task) : complete_task.call(task.id, at: now)
+        when COMPLETED then task.done? ? Success(task) : finish(task, now)
         else close(task, now)
         end.value_or(task)
       end

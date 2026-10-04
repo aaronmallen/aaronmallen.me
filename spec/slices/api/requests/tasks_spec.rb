@@ -355,6 +355,16 @@ RSpec.describe "API tasks", type: :request do
         .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
     end
 
+    %i[done canceled].each do |closed|
+      it "refuses to complete a #{closed} task with a 422 and leaves it as it was", :aggregate_failures do
+        task = create(:task, closed, completed_at: at(today - 1))
+
+        expect([act(task.id, "complete").fetch("errors"), status])
+          .to eq([{ "id" => ["task #{task.id} is already done or canceled"] }, 422])
+        expect(tasks.by_id(task.id)).to have_attributes(status: closed.to_s, completed_at: at(today - 1))
+      end
+    end
+
     %w[start complete reopen cancel].each do |verb|
       it "answers #{verb} on an unknown ID with a 404" do
         expect([act(999_999, verb).fetch("message"), status]).to eq(["no task has the ID 999999", 404])

@@ -79,6 +79,22 @@ RSpec.describe "API bulk task actions", type: :request do
     end
   end
 
+  describe "POST /api/v1/tasks/bulk/complete on a closed task" do
+    let(:closed_at) { Time.now.round - 86_400 }
+    let!(:open_task) { create(:task) }
+    let!(:canceled) { create(:task, :canceled, completed_at: closed_at) }
+    let!(:answer) { act("complete", [open_task.id, canceled.id]) }
+
+    it "completes none and says which one was closed" do
+      expect([answer.fetch("errors"), status, status_of(open_task)])
+        .to eq([{ "ids" => ["task #{canceled.id} is already done or canceled"] }, 422, "open"])
+    end
+
+    it "leaves the closed task as it was" do
+      expect(repo.by_id(canceled.id)).to have_attributes(status: "canceled", completed_at: closed_at)
+    end
+  end
+
   describe "POST /api/v1/tasks/bulk/delete" do
     let!(:picked) { [create(:task, title: "One"), create(:task, title: "Two")] }
     let!(:left) { create(:task) }

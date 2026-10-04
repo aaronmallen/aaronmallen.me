@@ -501,6 +501,23 @@ RSpec.describe "MCP task tools", type: :request do
         expect(message).to eq("task #{task.id} is already done or canceled")
         expect(tasks.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: at(today - 1))
       end
+
+      it "refuses to complete a task that is #{status}", :aggregate_failures do
+        task = create(:task, status, completed_at: at(today - 1))
+        call_tool("complete_task", id: task.id)
+
+        expect(message).to eq("task #{task.id} is already done or canceled")
+        expect(tasks.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: at(today - 1))
+      end
+
+      it "refuses to complete a batch that holds a task that is #{status}", :aggregate_failures do
+        ids = [create(:task), create(:task, status, completed_at: at(today - 1))].map(&:id)
+        call_tool("complete_tasks", ids:)
+
+        expect(message).to eq("task #{ids.last} is already done or canceled")
+        expect(ids.map { tasks.by_id(it).to_h.values_at(:status, :completed_at) })
+          .to eq([["open", nil], [status.to_s, at(today - 1)]])
+      end
     end
 
     %w[start_task complete_task reopen_task cancel_task delete_task].each do |name|

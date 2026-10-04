@@ -140,6 +140,31 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  describe "completing a closed task" do
+    let(:complete_task) { Tasks::Slice["operations.complete_task"] }
+    let(:closed_at) { Time.now.round - 86_400 }
+
+    %i[done canceled].each do |status|
+      it "refuses a task already #{status}" do
+        expect(complete_task.call(create(:task, status).id).failure).to eq(:closed)
+      end
+
+      it "leaves a #{status} task as it was" do
+        task = create(:task, status, completed_at: closed_at)
+        complete_task.call(task.id)
+
+        expect(repo.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: closed_at)
+      end
+
+      it "tracks no event on a #{status} task" do
+        task = create(:task, status)
+
+        expect { complete_task.call(task.id) }
+          .not_to(change { Tasks::Slice["relations.task_events"].for_task(task.id).count })
+      end
+    end
+  end
+
   describe "a task imported from GitHub" do
     let!(:source) { create(:task_source, remote_id: "I_kwDOAbc", url: "https://github.com/aaronmallen/blog/issues/7") }
     let(:task_by_id) { Tasks::Slice["queries.task_by_id"] }

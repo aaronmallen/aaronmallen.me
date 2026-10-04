@@ -337,6 +337,25 @@ RSpec.describe "Admin bulk task actions", type: :request do
       end
     end
 
+    describe "a complete that reaches a closed task" do
+      let!(:ticked) { create(:task) }
+      let(:closed_at) { Time.now.round - 86_400 }
+      let!(:closed) { create(:task, :canceled, completed_at: closed_at, title: "Dropped") }
+
+      before { act("complete", [ticked, closed]) }
+
+      it "changes nothing", :aggregate_failures do
+        expect(status(ticked)).to eq("open")
+        expect(repo.by_id(closed.id)).to have_attributes(status: "canceled", completed_at: closed_at)
+      end
+
+      it "names the task and why" do
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · ##{closed.id} Dropped is closed already")
+      end
+    end
+
     describe "where it lands" do
       it "goes back to the list it came from" do
         act("complete", [create(:task, :someday)], filter: "someday")

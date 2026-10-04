@@ -4,6 +4,7 @@ module Admin
   module Actions
     module Tasks
       class Complete < Action
+        CLOSED = "tasks_page.toasts.closed"
         COMPLETED = "tasks_page.toasts.completed"
         REFUSED = "tasks_page.toasts.total_refused"
 
@@ -13,6 +14,7 @@ module Admin
         def handle(request, response)
           case complete_task.call(record_id(request), worked: Blog::Types::Fields[request.params[:worked]])
           in Success(_) then answer(request, response, COMPLETED)
+          in Failure(:closed) then answer(request, response, CLOSED)
           in Failure(:not_found) then halt 404
           in Failure[:invalid, _] then answer(request, response, REFUSED)
           else halt 500
