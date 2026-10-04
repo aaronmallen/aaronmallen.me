@@ -696,11 +696,11 @@ RSpec.describe "Admin tasks", type: :request do
         expect(repo).to have_received(:carry_forward).once
       end
 
-      it "carries the day's work forward no more than once when it comes back with the form" do
+      it "carries nothing forward when it comes back with the form" do
         watch_carry_forward
         capture("", filter: "today")
 
-        expect(repo).to have_received(:carry_forward).at_most(:once)
+        expect(repo).not_to have_received(:carry_forward)
       end
 
       it "comes back to the list that was open" do

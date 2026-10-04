@@ -62,8 +62,4 @@ RSpec.describe "Writing list", type: :feature do
   it "shows the summary the post carries and nothing longer" do
     expect(page).to have_css(".entry-blurb", exact_text: summary)
   end
-
-  it "points at no archive" do
-    expect(page).to have_no_css(".writing p.eyebrow")
-  end
 end

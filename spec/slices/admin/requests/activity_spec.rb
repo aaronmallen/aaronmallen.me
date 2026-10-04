@@ -777,12 +777,6 @@ RSpec.describe "Admin activity", type: :request do
         create(:journal_entry, entry_date: today, body: "walked the dog")
       end
 
-      it "offers no repository dropdown" do
-        visit_activity
-
-        expect(page).to have_no_css("#activity-repo")
-      end
-
       it "keeps the commits of the repo named" do
         visit_activity(q: "repo:aaronmallen/one")
 

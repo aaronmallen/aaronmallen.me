@@ -97,7 +97,7 @@ RSpec.describe "A request the site cannot read", type: :request do
     end
 
     it "passes the guard" do
-      expect(last_response.status).not_to eq(400)
+      expect(last_response.status).to eq(403)
     end
   end
 

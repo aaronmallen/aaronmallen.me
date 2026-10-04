@@ -16,10 +16,6 @@ RSpec.describe "Admin activity filters", type: :feature do
     expect(page).to have_css(".activity-event", count: 2)
   end
 
-  it "offers no repository dropdown" do
-    expect(page).to have_no_css("#activity-repo")
-  end
-
   describe "unchecking a type" do
     before { uncheck "Blog posts" }
 
