@@ -513,6 +513,33 @@ RSpec.describe "MCP task tools", type: :request do
     end
   end
 
+  describe "mark_task_seen" do
+    def seen_at(task) = tasks.by_id(task.id).source.seen_at
+
+    it "marks a synced task seen and leaves it in its list", :aggregate_failures do
+      task = create(:task, list: "external")
+      create(:task_source, task:)
+      call_tool("mark_task_seen", id: task.id)
+
+      expect(content).to include("id" => task.id, "list" => "external", "sprint_on" => nil)
+      expect(seen_at(task)).not_to be_nil
+    end
+
+    it "refuses a task with no synced issue", :aggregate_failures do
+      task = create(:task)
+      call_tool("mark_task_seen", id: task.id)
+
+      expect(refused?).to be(true)
+      expect(message).to eq("task #{task.id} has no synced issue to mark seen")
+    end
+
+    it "refuses a task that is not there" do
+      call_tool("mark_task_seen", id: 999_999)
+
+      expect(message).to eq("no task has the ID 999999")
+    end
+  end
+
   describe "schedule_task" do
     let(:task) { create(:task) }
 

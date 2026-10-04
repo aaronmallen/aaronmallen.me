@@ -125,10 +125,10 @@ RSpec.describe "MCP endpoint", type: :request do
       delete_decision_option delete_journal_entry delete_messages delete_post delete_posts delete_saved_view
       delete_social_post delete_task delete_tasks delete_work_entry delete_work_session drop_decision drop_sprint
       edit_decision edit_decision_comment edit_decision_option ignore_webmentions import_commits link_records link_tasks
-      mark_message mark_messages_read mark_messages_unread mark_webmentions_spam moderate_webmention move_project
-      move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits remove_tag
-      reopen_decision reopen_task reorder_task resolve_decision restore_project save_project save_tag save_task
-      schedule_task send_social_post set_task_total start_task tag_decision tag_posts tag_tasks unlink_records
+      mark_message mark_messages_read mark_messages_unread mark_task_seen mark_webmentions_spam moderate_webmention
+      move_project move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits
+      remove_tag reopen_decision reopen_task reorder_task resolve_decision restore_project save_project save_tag
+      save_task schedule_task send_social_post set_task_total start_task tag_decision tag_posts tag_tasks unlink_records
       unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view update_social_post
       update_webmention_settings update_work_session write_post_seo
     ]
@@ -2351,6 +2351,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "mark_message" => { id: 1, status: "read" },
         "mark_messages_read" => { ids: [1] },
         "mark_messages_unread" => { ids: [1] },
+        "mark_task_seen" => { id: 1 },
         "mark_webmentions_spam" => { ids: [1] },
         "moderate_webmention" => { id: 1, verdict: "spam" },
         "move_project" => { id: 1, direction: "up" },

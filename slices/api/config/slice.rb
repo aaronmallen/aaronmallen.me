@@ -44,8 +44,8 @@ module API
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_work_session
-      operations.drop_sprint operations.edit_work_session operations.link_tasks operations.move_task
-      operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
+      operations.drop_sprint operations.edit_work_session operations.link_tasks operations.mark_task_seen
+      operations.move_task operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.sprints_between queries.task_by_id
       queries.task_comments queries.task_timeline queries.tasks_in_sprint queries.time_report queries.unseen_task_count
@@ -63,8 +63,8 @@ module API
       endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks endpoints.list_attention
       endpoints.list_decisions endpoints.list_inbox endpoints.list_journal_entries endpoints.list_links
       endpoints.list_saved_views endpoints.list_sprints endpoints.list_tasks endpoints.mark_messages_read
-      endpoints.mark_messages_unread endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
-      endpoints.open_decision endpoints.pause_task endpoints.plan_sprint
+      endpoints.mark_messages_unread endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task
+      endpoints.move_tasks endpoints.open_decision endpoints.pause_task endpoints.plan_sprint
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_review
       endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search

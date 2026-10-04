@@ -23,6 +23,7 @@ module API
     post "/tasks/:id/complete", to: "tasks.complete"
     post "/tasks/:id/move", to: "tasks.move"
     post "/tasks/:id/reopen", to: "tasks.reopen"
+    post "/tasks/:id/seen", to: "tasks.see"
     post "/tasks/:id/reorder", to: "tasks.reorder"
     post "/tasks/:id/schedule", to: "tasks.schedule"
     post "/tasks/:id/pause", to: "tasks.pause"

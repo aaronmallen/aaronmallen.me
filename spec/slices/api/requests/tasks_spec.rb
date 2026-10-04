@@ -384,6 +384,35 @@ RSpec.describe "API tasks", type: :request do
     end
   end
 
+  describe "POST /api/v1/tasks/:id/seen" do
+    def seen_at(task) = tasks.by_id(task.id).source.seen_at
+
+    def synced
+      task = create(:task, list: "external")
+      create(:task_source, task:)
+      task
+    end
+
+    it "marks a synced task seen and leaves it in its list", :aggregate_failures do
+      task = synced
+
+      expect([act(task.id, "seen"), status]).to match([include("id" => task.id, "list" => "external"), 200])
+      expect(read(task.id).fetch("timeline")).to be_empty
+      expect(seen_at(task)).not_to be_nil
+    end
+
+    it "refuses a task with no synced issue with a 422" do
+      task = create(:task)
+
+      expect([act(task.id, "seen").fetch("errors"), status])
+        .to eq([{ "id" => ["task #{task.id} has no synced issue to mark seen"] }, 422])
+    end
+
+    it "answers an unknown ID with a 404" do
+      expect([act(999_999, "seen").fetch("message"), status]).to eq(["no task has the ID 999999", 404])
+    end
+  end
+
   describe "POST /api/v1/tasks/:id/move" do
     it "moves the task to the list it names" do
       expect(act(create(:task).id, "move", list: "someday").fetch("list")).to eq("someday")
@@ -462,6 +491,14 @@ RSpec.describe "API tasks", type: :request do
       reopened = act(task.id, "reopen")
 
       expect(mcp_answer("reopen_task", id: task.id)).to eq(reopened)
+    end
+
+    it "mark seen as mark_task_seen does" do
+      task = create(:task, list: "external")
+      create(:task_source, task:)
+      seen = act(task.id, "seen")
+
+      expect(mcp_answer("mark_task_seen", id: task.id)).to eq(seen)
     end
 
     it "schedule as schedule_task does" do
