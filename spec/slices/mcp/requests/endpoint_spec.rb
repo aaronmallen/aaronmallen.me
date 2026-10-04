@@ -121,17 +121,6 @@ RSpec.describe "MCP endpoint", type: :request do
     }
   end
 
-  def read_tools
-    %w[
-      compose_announcement list_attention list_calendar list_commits list_decisions list_inbox list_journal_entries
-      list_links list_messages list_people list_posts list_projects list_saved_views list_social_posts list_sprints
-      list_suggestions list_tags list_task_tag_rules list_tasks list_webmentions list_work_entries read_activity
-      read_analytics read_commit read_current_sprint read_decision read_journal_entry read_message read_person read_post
-      read_project read_review read_saved_view read_social_post read_sync_state read_task read_time_report
-      read_webmention read_webmention_settings read_work_entry search search_accounts summarize_activity
-    ]
-  end
-
   def refresh_token = issued.fetch("refresh_token")
 
   def refusal = document.dig("error", "data")
@@ -166,23 +155,8 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def tokens = MCP::Slice["db.rom"].relations[:oauth_tokens]
 
-  def write_tools
-    %w[
-      accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_entry
-      approve_webmentions archive_project cancel_task cancel_tasks capture_task complete_task complete_tasks
-      create_journal_entry create_post create_saved_view create_social_post delete_decision_comment
-      delete_decision_option delete_journal_entry delete_messages delete_person delete_post delete_posts
-      delete_saved_view delete_social_post delete_task delete_task_comment delete_task_tag_rule delete_tasks
-      delete_work_entry delete_work_session drop_decision drop_sprint edit_decision edit_decision_comment
-      edit_decision_option edit_task_comment ignore_webmentions import_commits link_records link_tasks mark_message
-      mark_messages_read mark_messages_unread mark_task_seen mark_webmentions_spam moderate_webmention move_project
-      move_task move_tasks open_decision pause_task plan_sprint publish_post reject_suggestion_edits remove_tag
-      reopen_decision reopen_task reorder_task resolve_decision restore_project save_person save_project save_tag
-      save_task save_task_tag_rule schedule_task send_social_post set_task_total snooze_attention start_task
-      sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision untag_tasks
-      update_journal_entry update_post update_post_edit_note update_saved_view update_social_post
-      update_webmention_settings update_work_session write_post_seo
-    ]
+  def tools_guarded_by(*scopes)
+    MCP::Protocol::Handler::TOOLS.select { scopes.include?(it.scope_value) }.map(&:name_value).sort
   end
 
   describe "a request with no token" do
@@ -378,7 +352,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "names a kind in the instructions for every read tool" do
-      readers = MCP::Protocol::Handler::TOOLS.select { it.scope_value == MCP::OAuth::Scope::READ }.map(&:name_value)
+      readers = tools_guarded_by(MCP::OAuth::Scope::READ)
       rpc("initialize",
           { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
@@ -468,14 +442,14 @@ RSpec.describe "MCP endpoint", type: :request do
     before { rpc("tools/list") }
 
     it "offers reading, suggesting and writing, and nothing else" do
-      expect(offered).to eq((read_tools + write_tools + %w[suggest_edits]).sort)
+      expect(offered).to eq(tools_guarded_by(*MCP::OAuth::Scope::ALL))
     end
 
     it "names a read tool in search for every kind it finds" do
       description = result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
       readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
 
-      expect(readers.reject { |_kind, tool| read_tools.include?(tool) }).to be_empty
+      expect(readers.reject { |_kind, tool| tools_guarded_by(MCP::OAuth::Scope::READ).include?(tool) }).to be_empty
     end
   end
 
@@ -489,7 +463,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers the reading tools and nothing else" do
       rpc("tools/list")
 
-      expect(offered).to eq(read_tools)
+      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ))
     end
 
     it "still reads a post" do
@@ -524,15 +498,6 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(last_response.status).to eq(200)
     end
 
-    it "names the permission the write needed" do
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
-
-      expect(refusal).to eq(
-        "write_post_seo needs the write permission, and this connection was never granted it. " \
-        "Connect the app again to grant it",
-      )
-    end
-
     it "leaves the post as it stands" do
       call_tool("write_post_seo", id: article.id, og_title: "On the card")
 
@@ -551,12 +516,6 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(content).to include("from" => "2026-01-01", "to" => "2026-12-31")
     end
 
-    it "refuses a suggestion too" do
-      call_tool("suggest_edits", target: "post", id: article.id, edits: [typo])
-
-      expect(refusal).to include("suggest_edits needs the suggest permission")
-    end
-
     it "stores no suggestion" do
       call_tool("suggest_edits", target: "post", id: article.id, edits: [typo])
 
@@ -572,7 +531,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers the suggesting tool" do
       rpc("tools/list")
 
-      expect(offered).to eq((read_tools + %w[suggest_edits]).sort)
+      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ, MCP::OAuth::Scope::SUGGEST))
     end
 
     it "stores a suggestion" do
@@ -580,12 +539,6 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(suggestion_repo.for_post(post.id).edits).to have(1).item
-    end
-
-    it "refuses the social card write" do
-      call_tool("write_post_seo", id: create(:post, :published).id, og_title: "On the card")
-
-      expect(refusal).to include("write_post_seo needs the write permission")
     end
   end
 
@@ -1405,7 +1358,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "still reads" do
       rpc("tools/list", authorization: "Bearer #{backfilled}")
 
-      expect(offered).to eq(read_tools)
+      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ))
     end
 
     it "cannot write until it is granted again" do

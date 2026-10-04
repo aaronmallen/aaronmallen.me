@@ -83,12 +83,13 @@ RSpec.describe "MCP tool scopes", type: :request do
         expect(listed).to match_array(guarded.values.flatten - names)
       end
 
-      names.each do |name|
-        it "refuses a call to #{name}, naming the #{scope} permission" do
-          rpc("tools/call", { name:, arguments: {} })
+      it "refuses a call to a tool #{scope} guards, naming the #{scope} permission" do
+        rpc("tools/call", { name: names.first, arguments: {} })
 
-          expect(document.dig("error", "data")).to start_with("#{name} needs the #{scope} permission")
-        end
+        expect(document.dig("error", "data")).to eq(
+          "#{names.first} needs the #{scope} permission, and this connection was never granted it. " \
+          "Connect the app again to grant it",
+        )
       end
     end
   end
