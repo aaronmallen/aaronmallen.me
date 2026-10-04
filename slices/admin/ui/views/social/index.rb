@@ -11,16 +11,16 @@ module Admin
           SEPARATOR = " · "
 
           def initialize(
-            accounts:, filter:, items:, now:, queued:, suggestion_counts:, suggestions:, writing: false, **composer
+            accounts:, filter:, items:, now:, queued:, records:, suggestion_counts:, suggestions:, writing: false,
+            **composer
           )
             super()
             @accounts = accounts
             @composer = composer
             @filter = filter
-            @items = items
-            @now = now
+            @queue = { page: items, now:, suggestion_counts: }
             @queued = queued
-            @suggestion_counts = suggestion_counts
+            @records = records
             @suggestions = suggestions
             @writing = writing
           end
@@ -32,6 +32,7 @@ module Admin
               SideStack do
                 suggestions
                 composer
+                linked if @records
               end
               SideStack { queue }
             end
@@ -48,8 +49,18 @@ module Admin
             t(".cross_posting", accounts: @accounts.join(ACCOUNTS_SEPARATOR))
           end
 
+          def linked
+            id = @composer[:editing]
+
+            RecordLinks::Section(
+              records: @records, scope: "social-post-#{id}-record", id:, fields: { filter: @filter, edit: id },
+              unlink_route: :admin_unlink_social_post_record, link_path: path(:admin_link_social_post_record, id:),
+              find_path: path(:admin_social),
+            )
+          end
+
           def queue
-            Queue(filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
+            Queue(filter: @filter, **@queue)
           end
 
           def sub = [cross_posting, t(".queued", count: @queued)].join(SEPARATOR)

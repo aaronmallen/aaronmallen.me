@@ -27,6 +27,11 @@ module Admin
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID
     post "/commits/import", to: "commits.import", as: :import_commits
+    post "/commits/:id/records", to: "commits.link_record", as: :link_commit_record, id: ID
+    post(
+      "/commits/:id/records/:other_kind/:other_id/delete",
+      to: "commits.unlink_record", as: :unlink_commit_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     get "/decisions", to: "decisions.index", as: :decisions
     post "/decisions", to: "decisions.create", as: :create_decision
     get "/decisions/new", to: "decisions.new", as: :new_decision
@@ -71,6 +76,11 @@ module Admin
     post "/journal", to: "journal.create", as: :create_journal_entry
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID
     post "/journal/:id/delete", to: "journal.destroy", as: :delete_journal_entry, id: ID
+    post "/journal/:id/records", to: "journal.link_record", as: :link_journal_entry_record, id: ID
+    post(
+      "/journal/:id/records/:other_kind/:other_id/delete",
+      to: "journal.unlink_record", as: :unlink_journal_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
     post "/messages/bulk", to: "messages.bulk", as: :bulk_messages
@@ -93,6 +103,11 @@ module Admin
     post "/posts/:id/delete", to: "posts.destroy", as: :delete_post, id: ID
     post "/posts/:id/publish", to: "posts.publish", as: :publish_post, id: ID
     post "/posts/:id/edits/:edit_id", to: "posts.update_edit", as: :update_post_edit, id: ID, edit_id: ID
+    post "/posts/:id/records", to: "posts.link_record", as: :link_post_record, id: ID
+    post(
+      "/posts/:id/records/:other_kind/:other_id/delete",
+      to: "posts.unlink_record", as: :unlink_post_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/posts/preview", to: "posts.preview", as: :preview_post
     post "/posts/preview/syndication", to: "posts.preview_syndication", as: :preview_post_syndication
     post "/posts/:id/suggestions/accept", to: "posts.accept_suggestions", as: :accept_post_suggestions, id: ID
@@ -104,9 +119,19 @@ module Admin
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
     post "/projects/:id/archive", to: "projects.archive", as: :archive_project, id: ID
     post "/projects/:id/move/:direction", to: "projects.move", as: :move_project, id: ID, direction: DIRECTION
+    post "/projects/:id/records", to: "projects.link_record", as: :link_project_record, id: ID
+    post(
+      "/projects/:id/records/:other_kind/:other_id/delete",
+      to: "projects.unlink_record", as: :unlink_project_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
+    post "/projects/work/:id/records", to: "projects.link_work_record", as: :link_work_entry_record, id: ID
+    post(
+      "/projects/work/:id/records/:other_kind/:other_id/delete",
+      to: "projects.unlink_work_record", as: :unlink_work_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     get "/review", to: "review.show", as: :review
     post "/review/note", to: "review.save_note", as: :save_review_note
     post "/saved-views", to: "saved_views.create", as: :create_saved_view
@@ -119,6 +144,11 @@ module Admin
     post "/social", to: "social.create", as: :create_social_post
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID
     post "/social/:id/delete", to: "social.destroy", as: :delete_social_post, id: ID
+    post "/social/:id/records", to: "social.link_record", as: :link_social_post_record, id: ID
+    post(
+      "/social/:id/records/:other_kind/:other_id/delete",
+      to: "social.unlink_record", as: :unlink_social_post_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
+    )
     post "/social/:id/suggestions/accept", to: "social.accept_suggestions", as: :accept_social_suggestions, id: ID
     post "/social/:id/suggestions/reject", to: "social.reject_suggestions", as: :reject_social_suggestions, id: ID
     get "/tags", to: "tags.index", as: :tags

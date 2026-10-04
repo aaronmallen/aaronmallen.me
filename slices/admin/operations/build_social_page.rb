@@ -10,9 +10,12 @@ module Admin
         parts: [EMPTY_STRING].freeze,
         schedule_at: EMPTY_STRING,
       }.freeze
+      KIND = Blog::Types::RecordKind["social_post"]
+
       include Deps[
         count_network_lengths: "operations.count_network_lengths",
         list_networks: "operations.list_networks",
+        list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
         open_suggestion_counts: "suggestions.queries.open_counts_for_social_posts",
         people: "social.queries.people",
@@ -24,11 +27,14 @@ module Admin
 
       def call(
         filter: Blog::Types::SocialQueue["queued"], page: nil, params: nil, editing: nil,
-        errors: EMPTY_HASH, now: Time.now
+        errors: EMPTY_HASH, records: EMPTY_HASH, now: Time.now
       )
         items = social_posts_by_filter.call(filter, page || first_page)
 
-        { filter:, items:, now:, **queue(items.rows), **composer(params, editing, errors) }
+        {
+          filter:, items:, now:, records: editing && list_record_links.call(KIND, editing.id, **records),
+          **queue(items.rows), **composer(params, editing, errors),
+        }
       end
 
       private

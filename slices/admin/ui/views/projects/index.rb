@@ -18,7 +18,7 @@ module Admin
 
           def initialize(
             archived_count:, featured_count:, filter:, live_count:, projects:, stars:,
-            work_entries:, work_errors:, work_values:
+            work_entries:, work_errors:, work_links:, work_values:
           )
             super()
             @archived_count = archived_count
@@ -28,8 +28,8 @@ module Admin
             @projects = projects
             @stars = stars
             @work_entries = work_entries
-            @work_errors = work_errors
-            @work_values = work_values
+            @work_form = { values: work_values, errors: work_errors }
+            @work_links = work_links
           end
 
           def view_template
@@ -87,16 +87,32 @@ module Admin
           def work
             Grid(columns: 2) do
               Card(label: t(".work_label"), title: t(".work_title"), data: { key_list: true }) { work_rows }
-              Components::WorkEntries::Form(values: @work_values, errors: @work_errors)
+              SideStack do
+                work_linked if @work_links
+                Components::WorkEntries::Form(**@work_form)
+              end
             end
           end
 
           def work? = @filter == WORK
 
+          def work_linked
+            entry = @work_links[:entry]
+            id = entry.id
+
+            RecordLinks::Section(
+              records: @work_links[:records], scope: "work-entry-#{id}-record", id:, fields: { filter: WORK, edit: id },
+              label: t(".work_linked", org: entry.org, role: entry.role), unlink_route: :admin_unlink_work_entry_record,
+              link_path: path(:admin_link_work_entry_record, id:), find_path: path(:admin_projects),
+            )
+          end
+
+          def work_linking?(entry) = @work_links&.fetch(:entry)&.id == entry.id
+
           def work_rows
             return Empty { t(EMPTY.fetch(WORK)) } if @work_entries.empty?
 
-            @work_entries.each { Components::WorkEntries::Row(entry: it) }
+            @work_entries.each { Components::WorkEntries::Row(entry: it, linking: work_linking?(it)) }
           end
         end
       end

@@ -7,7 +7,10 @@ module Admin
         class Row < Component
           WRITING = /\S/
 
+          WORK = Blog::Types::ProjectFilter["work"]
+
           prop :entry, Blog::Types::Instance(ROM::Struct)
+          prop :linking, Blog::Types::Bool, default: false
 
           def view_template
             div(class: "li", data: { key_row: true }) do
@@ -16,13 +19,21 @@ module Admin
                 p(class: "li-sub") { sub }
                 p(class: "proj-tagline") { @entry.blurb } if written?(@entry.blurb)
               end
-              div(class: "li-side") { remove }
+              side
             end
           end
 
           private
 
           def confirm = t(".confirm_remove", org: @entry.org, role: @entry.role)
+
+          def links
+            a(class: "btn sm", href: path(:admin_projects, filter: WORK, edit: @entry.id),
+              aria: { current: @linking && "true" }) do
+              i(class: "fa-solid fa-link", aria: { hidden: "true" })
+              span { t(".links") }
+            end
+          end
 
           def remove
             render Blog::UI::Components::Form.new(action: remove_path, data: { confirm: }) do
@@ -34,6 +45,13 @@ module Admin
           end
 
           def remove_path = path(:admin_delete_work_entry, id: @entry.id)
+
+          def side
+            div(class: "li-side") do
+              links
+              remove
+            end
+          end
 
           def sub = t(".sub", from: @entry.from_year, org: @entry.org, to:)
 

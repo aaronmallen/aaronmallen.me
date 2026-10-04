@@ -4,10 +4,12 @@ module Admin
   module Actions
     module Posts
       class UpdateEdit < Action
+        KIND = Blog::Types::RecordKind["post"]
         SAVED = "post_form.toasts.note_saved"
 
         include Deps[
           build_post_editor: "operations.build_post_editor",
+          list_record_links: "operations.list_record_links",
           post_by_id: "posts.queries.by_id",
           revise_edit_note: "posts.operations.revise_edit_note",
           view: "ui.views.posts.edit",
@@ -34,7 +36,8 @@ module Admin
           noting = { id:, note: Blog::Types::Text[note], errors: }
 
           response.status = 422
-          response.render(view, **build_post_editor.call(post:, noting:))
+          response.render(view, **build_post_editor.call(post:, noting:),
+records: list_record_links.call(KIND, post.id))
         end
 
         def saved(response, post)

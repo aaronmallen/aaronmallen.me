@@ -14,11 +14,12 @@ module Admin
           prop :id, Blog::Types::Integer
           prop :unlink_route, Blog::Types::Symbol
           prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
+          prop :label, Blog::Types::String.optional, default: nil
 
           def self.kind_name_key(kind) = [KINDS, kind].join(".")
 
           def view_template
-            Card(label: t(".label"), title: t(".title"), class: "record-links") do
+            Card(label: @label || t(".label"), title: t(".title"), class: "record-links") do
               links.empty? ? Hint { t(".empty") } : links.each { |kind, rows| group(kind, rows) }
               Picker(
                 scope: @scope, link_path: @link_path, find_path: @find_path, fields: @fields,

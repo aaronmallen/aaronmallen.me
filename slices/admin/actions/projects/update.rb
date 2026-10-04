@@ -4,10 +4,12 @@ module Admin
   module Actions
     module Projects
       class Update < Action
+        KIND = Blog::Types::RecordKind["project"]
         SAVED = "projects_page.toasts.saved"
 
         include Deps[
           build_project_editor: "operations.build_project_editor",
+          list_record_links: "operations.list_record_links",
           project_by_id: "projects.queries.by_id",
           save_project: "projects.operations.save_project",
         ]
@@ -30,7 +32,8 @@ module Admin
           halt 404 unless project
 
           response.status = 422
-          response.render(view, **build_project_editor.call(project:, params:, errors:))
+          records = list_record_links.call(KIND, project.id)
+          response.render(view, **build_project_editor.call(project:, params:, errors:), records:)
         end
 
         def saved(response, project)

@@ -17,6 +17,7 @@ module Admin
               head
               Body(body: @entry.body, hidden: editing?, data: { journal_text: "" })
               edit_form
+              linked if records
             end
           end
 
@@ -25,6 +26,7 @@ module Admin
           def actions
             div(class: "journal-entry-actions", hidden: editing?, data: { journal_actions: "" }) do
               Button(small: true, data: { journal_edit: "" }) { t(".edit") }
+              links_link
               delete_form
             end
           end
@@ -89,6 +91,27 @@ module Admin
               actions
             end
           end
+
+          def linked
+            id = @entry.id
+
+            div(class: "journal-links", data: { journal_links: "" }) do
+              RecordLinks::Section(
+                records:, scope: "journal-entry-#{id}-record", id:, fields: { to: @date.iso8601, edit: id },
+                unlink_route: :admin_unlink_journal_entry_record, find_path: path(:admin_journal),
+                link_path: path(:admin_link_journal_entry_record, id:),
+              )
+            end
+          end
+
+          def links_link
+            a(class: "btn sm", href: path(:admin_journal, to: @date.iso8601, edit: @entry.id)) do
+              i(class: "fa-solid fa-link", aria: { hidden: "true" })
+              span { t(".links") }
+            end
+          end
+
+          def records = @editing&.fetch(:records, nil)
 
           def save_button
             blank = !body.match?(/\S/)

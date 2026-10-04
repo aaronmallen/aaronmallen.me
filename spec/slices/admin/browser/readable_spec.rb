@@ -52,6 +52,22 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def journal_entry
+    @journal_entry ||= create(
+      :journal_entry,
+      body: "A **long** entry about the day and [everything](https://example.com/day) that went into it\n\n" \
+            "- one\n- two\n\n```\n#{'a_very_long_line_of_code ' * 8}\n```",
+      tags: %w[health commute ruby],
+    )
+  end
+
+  def linked_records
+    {
+      "journal links" => "/admin/journal?to=#{journal_entry.entry_date.iso8601}&edit=#{journal_entry.id}",
+      "work entry links" => "/admin/projects?filter=work&edit=#{work_entry.id}",
+    }
+  end
+
   def open_modal
     open_panel
     find("dialog#task-panel .btn", text: "Edit").click
@@ -138,7 +154,12 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
-  def record_search = { "task record search" => "/admin/tasks/#{task.id}?record_q=published" }
+  def record_search
+    {
+      "task record search" => "/admin/tasks/#{task.id}?record_q=published",
+      "post record search" => "/admin/posts/#{draft.id}/edit?record_q=published",
+    }
+  end
 
   def saved_view_menus
     {
@@ -157,8 +178,8 @@ RSpec.describe "Admin screens", type: :feature do
 
   def screens
     pages.merge(
-      calendars, people, person_search, record_search, composers, dialogs, journal_editors, saved_view_menus,
-      selections, time_rows,
+      calendars, people, person_search, record_search, linked_records, composers, dialogs, journal_editors,
+      saved_view_menus, selections, time_rows,
     )
   end
 
@@ -167,12 +188,7 @@ RSpec.describe "Admin screens", type: :feature do
     seed_calendar
     seed_tasks
     seed_writing
-    create(
-      :journal_entry,
-      body: "A **long** entry about the day and [everything](https://example.com/day) that went into it\n\n" \
-            "- one\n- two\n\n```\n#{'a_very_long_line_of_code ' * 8}\n```",
-      tags: %w[health commute ruby],
-    )
+    seed_links
     create(:message, subject: "A question about the site")
     create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
     create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
@@ -196,6 +212,13 @@ RSpec.describe "Admin screens", type: :feature do
     create(:post, :published, title: "A post published today with a title too long to fit its cell",
                               published_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 30))
     create(:social_post, :posted, posted_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 45))
+  end
+
+  def seed_links
+    link = Links::Slice["operations.link_records"]
+    link.call("journal_entry", journal_entry.id, { other_kind: "post", other_id: draft.id })
+    link.call("work_entry", work_entry.id, { other_kind: "project", other_id: project.id })
+    link.call("social_post", social_post.id, { other_kind: "commit", other_id: commit.id })
   end
 
   def seed_tasks
@@ -253,6 +276,8 @@ RSpec.describe "Admin screens", type: :feature do
       end,
     }
   end
+
+  def work_entry = @work_entry ||= create(:work_entry, org: "Rackspace", role: "Software Engineer")
 
   before do
     seed

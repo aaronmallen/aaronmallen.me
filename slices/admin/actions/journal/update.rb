@@ -4,10 +4,12 @@ module Admin
   module Actions
     module Journal
       class Update < Action
+        KIND = Blog::Types::RecordKind["journal_entry"]
         UPDATED = "journal_page.toasts.updated"
 
         include Deps[
           index_view: "ui.views.journal.index",
+          list_record_links: "operations.list_record_links",
           summarize_journal: "operations.summarize_journal",
           update_journal_entry: "record.operations.update_journal_entry",
         ]
@@ -27,7 +29,10 @@ module Admin
         private
 
         def editing(id, params, errors)
-          { id:, body: Blog::Types::Text[params[:body]], tags: Blog::Types::Text[params[:tags]], errors: }
+          {
+            id:, body: Blog::Types::Text[params[:body]], tags: Blog::Types::Text[params[:tags]], errors:,
+            records: list_record_links.call(KIND, id),
+          }
         end
 
         def invalid(response, id, params, errors)

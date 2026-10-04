@@ -7,15 +7,28 @@ module Admin
         class Edit < View
           include Components::Posts
 
-          def initialize(**editor)
+          def initialize(records:, **editor)
             super()
             @editor = editor
+            @records = records
           end
 
           def view_template
             content_for(:title, @editor[:post].title)
 
             Editor(**@editor)
+            linked
+          end
+
+          private
+
+          def linked
+            id = @editor[:post].id
+
+            RecordLinks::Section(
+              records: @records, scope: "post-#{id}-record", id:, unlink_route: :admin_unlink_post_record,
+              link_path: path(:admin_link_post_record, id:), find_path: path(:admin_edit_post, id:),
+            )
           end
         end
       end

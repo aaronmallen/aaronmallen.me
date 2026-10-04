@@ -4,10 +4,12 @@ module Admin
   module Actions
     module Posts
       class Update < Action
+        KIND = Blog::Types::RecordKind["post"]
         TOASTS = "post_form.toasts"
 
         include Deps[
           build_post_editor: "operations.build_post_editor",
+          list_record_links: "operations.list_record_links",
           post_by_id: "posts.queries.by_id",
           save_post: "posts.operations.save_post",
         ]
@@ -33,7 +35,8 @@ module Admin
           halt 404 unless post
 
           response.status = 422
-          response.render(view, **build_post_editor.call(post:, params:, errors:, view: request.params[:view]))
+          editor = build_post_editor.call(post:, params:, errors:, view: request.params[:view])
+          response.render(view, **editor, records: list_record_links.call(KIND, id))
         end
 
         def saved(response, outcome, post)

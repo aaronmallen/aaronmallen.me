@@ -7,10 +7,11 @@ module Admin
         class Show < View
           SHA_LENGTH = 7
 
-          def initialize(commit:, body_html:)
+          def initialize(commit:, body_html:, records:)
             super()
             @commit = commit
             @body_html = body_html
+            @records = records
           end
 
           def view_template
@@ -19,6 +20,8 @@ module Admin
             Grid(columns: 3) { stats }
 
             Card(label: t(".label"), title: t(".title")) { message }
+
+            linked
           end
 
           private
@@ -35,6 +38,15 @@ module Admin
           end
 
           def github_url = format(Blog::Constants::GITHUB_COMMIT_URL, @commit.repo, @commit.sha)
+
+          def linked
+            id = @commit.id
+
+            RecordLinks::Section(
+              records: @records, scope: "commit-#{id}-record", id:, unlink_route: :admin_unlink_commit_record,
+              link_path: path(:admin_link_commit_record, id:), find_path: path(:admin_commit, id:),
+            )
+          end
 
           def message
             return Empty { t(".no_body") } unless @body_html

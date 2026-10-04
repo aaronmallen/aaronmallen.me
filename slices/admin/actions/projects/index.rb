@@ -7,9 +7,11 @@ module Admin
         include Deps[build_projects_page: "operations.build_projects_page"]
 
         def handle(request, response)
-          filter = Blog::Types::ProjectFilterParam[request.params[:filter]]
+          params = request.params
+          filter = Blog::Types::ProjectFilterParam[params[:filter]]
+          linking = Blog::Types::IdParam[params[:edit]]
 
-          response.render(view, **build_projects_page.call(filter:))
+          response.render(view, **build_projects_page.call(filter:, linking:, records: { query: params[:record_q] }))
         end
       end
     end

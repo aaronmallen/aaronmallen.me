@@ -146,6 +146,10 @@ en:
       role_added: "Role added to /projects"
       role_removed: "Role removed from /projects"
       saved: "Project saved"
+  record_links:
+    toasts:
+      linked: "Record linked"
+      unlinked: "Link removed"
   review_page:
     toasts:
       saved: "Review note saved · private"
@@ -589,6 +593,7 @@ en:
           confirm_delete: "Delete this entry? You can't undo this."
           delete: "Delete"
           edit: "Edit"
+          links: "Links"
           save: "Save"
           tags: "Tags"
           tags_placeholder: "ruby, health"
@@ -1671,6 +1676,7 @@ en:
         row:
           confirm_remove: "Remove %{role} at %{org}? You can't undo this."
           current: "Present"
+          links: "Links"
           remove: "Remove"
           sub: "%{org} · %{from}–%{to}"
     layouts:
@@ -1924,6 +1930,7 @@ en:
             other: "%{stars} stars total"
           work: "work"
           work_label: "Work history"
+          work_linked: "%{role} at %{org}"
           work_title: "Shown under Work on /projects"
         log_work:
           cancel: "Cancel"

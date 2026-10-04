@@ -205,6 +205,29 @@ RSpec.describe "Admin journal", type: :feature do
     end
   end
 
+  describe "an entry's links" do
+    let(:entry) { create(:journal_entry, body: "Packed the rack") }
+    let(:item) { find(".journal-entry") }
+
+    before do
+      Links::Slice["operations.link_records"]
+        .call("journal_entry", entry.id, { other_kind: "post", other_id: create(:post, title: "On racks").id })
+      visit "/admin/journal"
+      item.click_link "Links"
+    end
+
+    it "opens the entry with its Linked section", :aggregate_failures do
+      expect(item).to have_field("Entry text", with: "Packed the rack")
+      expect(item.find(".record-links")).to have_link("On racks")
+    end
+
+    it "hides the section on Cancel" do
+      item.click_button "Cancel"
+
+      expect(item).to have_no_css(".record-links")
+    end
+  end
+
   describe "cancelling an edit to a markdown entry" do
     let(:item) { find(".journal-entry") }
 

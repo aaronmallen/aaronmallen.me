@@ -20,6 +20,7 @@ function setupEntry(entry) {
   const body = form.querySelector("[data-journal-body]");
   const save = form.querySelector("[data-journal-save]");
   const remove = entry.querySelector("[data-journal-delete]");
+  const links = entry.querySelector("[data-journal-links]");
 
   const renderSave = () => {
     save.disabled = BLANK.test(body.value);
@@ -29,6 +30,7 @@ function setupEntry(entry) {
     text.hidden = editing;
     actions.hidden = editing;
     form.hidden = !editing;
+    if (links) links.hidden = !editing;
   };
 
   edit.addEventListener("click", () => {
