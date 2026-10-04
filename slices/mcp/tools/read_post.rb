@@ -3,30 +3,16 @@
 module MCP
   module Tools
     class ReadPost < Base
-      KIND = "post"
-      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
-
-      description "Read one blog post: its title, status, markdown body, social card fields and the records " \
-                  "linked to it, grouped by kind"
-      input_schema(SCHEMA)
+      description "Read one blog post with all the admin editor shows: its title, slug, status, summary, tags, " \
+                  "dates, markdown body, social card fields, announcement and the networks it goes to, whether " \
+                  "it sends webmentions and how many it has received, its word count and read time, the edit " \
+                  "notes left on it newest first, the suggested edits still open on it and the records linked " \
+                  "to it, grouped by kind"
+      input_schema(API::Endpoints::ReadPost::SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(id:, server_context:)
-          post = post_by_id(server_context).call(id)
-          return refuse("no blog post has the ID #{id}") if post.nil?
-
-          answer(
-            id: post.id,
-            status: post.status,
-            title: post.title,
-            body: post.body,
-            og_title: post.og_title,
-            og_image_url: post.og_image_url,
-            canonical_url: post.canonical_url,
-            record_links: record_links(KIND, post.id, server_context),
-          )
-        end
+        def call(server_context:, **input) = hand_over(:read_post, input, server_context)
       end
     end
   end

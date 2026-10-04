@@ -1347,16 +1347,24 @@ RSpec.describe "MCP endpoint", type: :request do
 
     def listed_draft(post)
       {
-        "id" => post.id, "draft" => true, "published_at" => nil, "status" => "draft", "title" => post.title,
-        "updated_at" => post.updated_at.utc.iso8601,
+        "id" => post.id, "draft" => true, "published_at" => nil, "slug" => post.slug, "status" => "draft",
+        "tags" => [], "title" => post.title, "updated_at" => post.updated_at.utc.iso8601,
       }
     end
 
-    it "gives each blog post its ID, title, status, publish time and update time" do
+    it "gives each blog post its ID, slug, tags, title, status, publish time and update time" do
       post = create(:post, :draft, title: "A draft")
       call_tool("list_posts")
 
       expect(content.fetch("posts").first).to eq(listed_draft(post))
+    end
+
+    it "gives each blog post its tags" do
+      post = create(:post, :draft)
+      Posts::Slice["repos.post_repo"].replace_tags(post.id, %w[ruby web])
+      call_tool("list_posts")
+
+      expect(content.fetch("posts").first.fetch("tags")).to eq(%w[ruby web])
     end
 
     it "says which blog posts are drafts" do
@@ -1523,8 +1531,9 @@ RSpec.describe "MCP endpoint", type: :request do
 
       written = { "id" => post.id, "status" => "draft", "title" => "Draft one", "body" => "# Heading\n\nsome words" }
 
-      expect(content).to eq(written.merge("og_title" => nil, "og_image_url" => nil, "canonical_url" => nil,
-                                          "record_links" => {}))
+      blank = { "og_title" => nil, "og_image_url" => nil, "canonical_url" => nil, "record_links" => {} }
+
+      expect(content).to include(written.merge(blank))
     end
 
     it "gives the records linked to the post, grouped by kind" do

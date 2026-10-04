@@ -38,7 +38,7 @@ module MCP
       endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.publish_post
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
-      endpoints.read_review endpoints.read_saved_view endpoints.read_task endpoints.read_time_report
+      endpoints.read_post endpoints.read_review endpoints.read_saved_view endpoints.read_task endpoints.read_time_report
       endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
       endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
       endpoints.snooze_attention endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks

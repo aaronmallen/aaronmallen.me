@@ -57,6 +57,7 @@ module API
 
     post "/posts/bulk/delete", to: "bulk_posts.delete"
     post "/posts/bulk/tag", to: "bulk_posts.tag"
+    get "/posts/:id", to: "posts.show"
     post "/posts/:id/publish", to: "posts.publish"
 
     get "/attention", to: "attention.index"

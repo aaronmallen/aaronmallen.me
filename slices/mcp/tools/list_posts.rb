@@ -18,7 +18,8 @@ module MCP
       }.freeze
 
       description "List every blog post, in any status, and every social post that has not been sent yet. " \
-                  "Each blog post says whether it is a draft and when it goes out or went out. " \
+                  "Each blog post gives its slug and tags, and says whether it is a draft and when it goes out " \
+                  "or went out. " \
                   "Give from, to or both as YYYY-MM-DD, in Chicago time, to keep only the blog posts whose " \
                   "publish time falls inside those days; a post with no publish time then drops out. " \
                   "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
@@ -69,7 +70,9 @@ module MCP
             id: post.id,
             draft: post.status == DRAFT,
             published_at: post.published_at&.utc&.iso8601,
+            slug: post.slug,
             status: post.status,
+            tags: post.tags.map(&:name),
             title: post.title,
             updated_at: post.updated_at.utc.iso8601,
           }

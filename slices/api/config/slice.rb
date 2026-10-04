@@ -25,7 +25,8 @@ module API
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
     import keys: %w[
-      operations.act_on_posts operations.publish_draft queries.by_filter queries.calendar_posts
+      operations.act_on_posts operations.publish_draft queries.by_filter queries.by_id queries.calendar_posts
+      queries.edits_newest_first
     ], from: :posts
 
     import keys: %w[
@@ -43,8 +44,10 @@ module API
     import keys: %w[
       operations.act_on_webmentions operations.delete_person operations.save_person operations.search_accounts
       queries.calendar_social_posts queries.pending_webmention_count queries.pending_webmentions queries.people
-      queries.person_by_id
+      queries.person_by_id queries.received_webmention_count
     ], from: :social
+
+    import keys: %w[queries.for_post], from: :suggestions
 
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
@@ -74,7 +77,7 @@ module API
       endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.publish_post
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
-      endpoints.read_review endpoints.read_saved_view endpoints.read_task endpoints.read_time_report
+      endpoints.read_post endpoints.read_review endpoints.read_saved_view endpoints.read_task endpoints.read_time_report
       endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
       endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
       endpoints.snooze_attention endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks

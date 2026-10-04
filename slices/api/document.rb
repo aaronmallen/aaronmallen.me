@@ -67,6 +67,7 @@ module API
       ["mark_messages_unread", "post", "/messages/bulk/unread", OK],
       ["delete_posts", "post", "/posts/bulk/delete", OK],
       ["tag_posts", "post", "/posts/bulk/tag", OK],
+      ["read_post", "get", "/posts/{id}", OK],
       ["publish_post", "post", "/posts/{id}/publish", OK],
       ["list_attention", "get", "/attention", OK],
       ["list_inbox", "get", "/inbox", OK],

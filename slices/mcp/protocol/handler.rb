@@ -107,6 +107,7 @@ module MCP
         read_decision: "api.endpoints.read_decision",
         read_journal_entry: "api.endpoints.read_journal_entry",
         read_person: "api.endpoints.read_person",
+        read_post: "api.endpoints.read_post",
         read_review: "api.endpoints.read_review",
         read_saved_view: "api.endpoints.read_saved_view",
         read_spread_between: "analytics.queries.read_spread_between",
