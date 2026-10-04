@@ -31,7 +31,7 @@ module MCP
         include SocialPostAnswer
 
         def call(parts:, targets:, server_context:)
-          composed(compose_social_post(server_context).call({ parts:, targets: }, intent: DRAFT), nil)
+          composed(dep(:compose_social_post, server_context).call({ parts:, targets: }, intent: DRAFT), nil)
         end
       end
     end

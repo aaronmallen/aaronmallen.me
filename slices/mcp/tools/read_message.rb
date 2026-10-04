@@ -14,7 +14,7 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          message = message_by_id(server_context).call(id)
+          message = dep(:message_by_id, server_context).call(id)
           return refuse("no message has the ID #{id}") if message.nil?
 
           answer(

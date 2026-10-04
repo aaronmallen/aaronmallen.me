@@ -12,10 +12,10 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          post = post_by_id(server_context).call(id)
+          post = dep(:post_by_id, server_context).call(id)
           return refuse("no blog post has the ID #{id}") if post.nil?
 
-          answer(id: post.id, announcement: compose_announcement(server_context).call(post))
+          answer(id: post.id, announcement: dep(:compose_announcement, server_context).call(post))
         end
       end
     end

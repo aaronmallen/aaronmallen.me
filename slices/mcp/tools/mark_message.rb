@@ -18,7 +18,7 @@ module MCP
 
       class << self
         def call(id:, status:, server_context:)
-          case mark_message(server_context).call(id, status)
+          case dep(:mark_message, server_context).call(id, status)
           in Success(message) then answer(id: message.id, status: message.status)
           in Failure(:not_found) then refuse("no message has the ID #{id}")
           else refuse("could not mark the message")

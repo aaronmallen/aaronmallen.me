@@ -16,8 +16,8 @@ module MCP
       class << self
         def call(server_context:)
           answer(
-            commits_last_synced_at: stamp(commits_last_synced_at(server_context).call),
-            failures: sync_failures(server_context).call.map { failure(it) },
+            commits_last_synced_at: stamp(dep(:commits_last_synced_at, server_context).call),
+            failures: dep(:sync_failures, server_context).call.map { failure(it) },
           )
         end
 

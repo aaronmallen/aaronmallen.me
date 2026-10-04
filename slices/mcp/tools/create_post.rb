@@ -12,7 +12,7 @@ module MCP
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(server_context:, **given) = saved(save_post(server_context).call(form(given), intent: DRAFT))
+        def call(server_context:, **given) = saved(dep(:save_post, server_context).call(form(given), intent: DRAFT))
       end
     end
   end

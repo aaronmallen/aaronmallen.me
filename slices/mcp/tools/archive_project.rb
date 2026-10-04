@@ -14,7 +14,7 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          case archive_project(server_context).call(id)
+          case dep(:archive_project, server_context).call(id)
           in Success(project) then answer(id:, status: project.status, archived_on: project.archived_on.iso8601)
           in Failure(:not_started) then refuse("not archived: its start month has not come yet")
           in Failure(:not_found) then refuse("no project has the ID #{id}")

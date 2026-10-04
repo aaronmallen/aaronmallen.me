@@ -34,10 +34,10 @@ module MCP
 
       class << self
         def call(scope:, server_context:, id: nil, name: nil, color: nil)
-          current = id && tag_by_id(server_context).call(id, scope:)
+          current = id && dep(:tag_by_id, server_context).call(id, scope:)
           return refuse(missing(id)) if id && current.nil?
 
-          saved(save_tag(server_context).call({ name: name || current&.name, color: }, scope:, id:), id)
+          saved(dep(:save_tag, server_context).call({ name: name || current&.name, color: }, scope:, id:), id)
         end
 
         private

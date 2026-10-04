@@ -14,7 +14,7 @@ module MCP
       class << self
         include WebmentionSettingsAnswer
 
-        def call(server_context:) = answer(settings_entry(webmention_settings(server_context).call))
+        def call(server_context:) = answer(settings_entry(dep(:webmention_settings, server_context).call))
       end
     end
   end

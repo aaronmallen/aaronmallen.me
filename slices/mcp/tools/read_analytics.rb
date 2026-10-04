@@ -109,7 +109,7 @@ module MCP
         def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
         def devices(range, path, server_context)
-          devices_between(server_context).call(from: range.first, to: range.last, path:)
+          dep(:devices_between, server_context).call(from: range.first, to: range.last, path:)
         end
 
         def numbered(days, first)
@@ -120,7 +120,7 @@ module MCP
         end
 
         def page(path, range, server_context)
-          found = page_between(server_context).call(path:, from: range.first, to: range.last)
+          found = dep(:page_between, server_context).call(path:, from: range.first, to: range.last)
           read_throughs = read_throughs(range, server_context).fetch(path, 0)
 
           found.merge(totals: found.fetch(:totals).merge(read_throughs:))
@@ -130,7 +130,7 @@ module MCP
           {
             **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
             **breakdowns(range, path, server_context),
-            scroll: scroll_depths_between(server_context).call(path:, from: range.first, to: range.last),
+            scroll: dep(:scroll_depths_between, server_context).call(path:, from: range.first, to: range.last),
           }
         end
 
@@ -153,11 +153,11 @@ module MCP
 
         def post_at(path, server_context)
           slug = path.delete_prefix("#{Blog::Site::WRITING}/")
-          published_post_by_slug(server_context).call(slug) unless slug == path
+          dep(:published_post_by_slug, server_context).call(slug) unless slug == path
         end
 
         def ranked(range, server_context)
-          found = analytics_between(server_context).call(from: range.first, to: range.last)
+          found = dep(:analytics_between, server_context).call(from: range.first, to: range.last)
           read_throughs = read_throughs(range, server_context)
 
           found.merge(
@@ -173,13 +173,13 @@ module MCP
 
         def raw(range, at, path, server_context)
           window = raw_window(range, at, path)
-          found = hourly_between(server_context).call(**window)
+          found = dep(:hourly_between, server_context).call(**window)
           return { refused: RAW_REFUSAL } unless found
 
           hours = found.fetch(:hours).map { it.merge(hour: stamped(it.fetch(:hour))) }
-          read_spread = read_spread_between(server_context).call(**window)
+          read_spread = dep(:read_spread_between, server_context).call(**window)
           timed = at ? { hours:, read_spread:, since: since_counts(found, at) } : { hours:, read_spread: }
-          timed.merge(navigation_between(server_context).call(**window).transform_values { it.take(TOP) })
+          timed.merge(dep(:navigation_between, server_context).call(**window).transform_values { it.take(TOP) })
         end
 
         def raw_window(range, at, path)
@@ -192,7 +192,7 @@ module MCP
         end
 
         def read_throughs(range, server_context)
-          read_throughs_between(server_context).call(from: range.first, to: range.last)
+          dep(:read_throughs_between, server_context).call(from: range.first, to: range.last)
         end
 
         def since_counts(found, at)
@@ -209,7 +209,7 @@ module MCP
         end
 
         def sources(range, path, server_context)
-          sources_between(server_context).call(from: range.first, to: range.last, path:).take(TOP)
+          dep(:sources_between, server_context).call(from: range.first, to: range.last, path:).take(TOP)
         end
 
         def stamped(time) = Blog::TimeZone.local(time).iso8601
@@ -225,12 +225,12 @@ module MCP
             days: dated(found.fetch(:days)),
             **raw(range, at, nil, server_context),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
-            weekday_hours: WeekdayGrid.call(weekday_hours(server_context)),
+            weekday_hours: WeekdayGrid.call(dep(:weekday_hours, server_context)),
           )
         end
 
         def totals(found, range, server_context, path: nil)
-          reach = reach_between(server_context).call(from: range.first, to: range.last, path:)
+          reach = dep(:reach_between, server_context).call(from: range.first, to: range.last, path:)
 
           found.fetch(:totals).merge(reach:)
         end

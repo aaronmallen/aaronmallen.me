@@ -23,7 +23,7 @@ module MCP
         include WebmentionSettingsAnswer
 
         def call(server_context:, **fields)
-          case update_webmention_settings(server_context).call(**changes(fields))
+          case dep(:update_webmention_settings, server_context).call(**changes(fields))
           in Success(settings) then answer(settings_entry(settings))
           in Failure(:unchanged) then refuse("nothing saved, since no setting changed")
           else refuse("could not save the webmention settings")

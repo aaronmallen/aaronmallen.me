@@ -44,8 +44,8 @@ module MCP
         end
 
         def listed(first, last, page, server_context)
-          posts = dated_posts(server_context).call(from: first, to: last, page:)
-          social_posts = unsent_social_posts(server_context).call(page)
+          posts = dep(:dated_posts, server_context).call(from: first, to: last, page:)
+          social_posts = dep(:unsent_social_posts, server_context).call(page)
 
           answer(
             posts: posts.rows.map { summary(it) },

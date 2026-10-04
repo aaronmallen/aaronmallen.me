@@ -13,7 +13,7 @@ module MCP
 
       class << self
         def call(server_context:)
-          projects = live_projects(server_context).call + archived_projects(server_context).call
+          projects = dep(:live_projects, server_context).call + dep(:archived_projects, server_context).call
 
           answer(projects: projects.map { summary(it) })
         end

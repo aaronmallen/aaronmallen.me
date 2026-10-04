@@ -26,7 +26,7 @@ module MCP
 
       class << self
         def call(id:, server_context:, **fields)
-          case save_post_seo(server_context).call(id, fields.slice(*FIELDS))
+          case dep(:save_post_seo, server_context).call(id, fields.slice(*FIELDS))
           in Success(post) then answer(seo(post))
           in Failure[:invalid, errors] then refuse(complaint(errors))
           in Failure(:not_found) then refuse("no blog post has the ID #{id}")

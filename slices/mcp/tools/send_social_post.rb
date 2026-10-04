@@ -29,7 +29,7 @@ module MCP
         include SocialPostAnswer
 
         def call(id:, server_context:, schedule_at: nil)
-          stored = editable_social_post(server_context).call(id)
+          stored = dep(:editable_social_post, server_context).call(id)
           params = {
             parts: stored&.parts&.map(&:body),
             targets: stored&.targets.to_a,
@@ -37,7 +37,7 @@ module MCP
             schedule_at:,
           }
 
-          composed(compose_social_post(server_context).call(params, intent: SEND, id:), id)
+          composed(dep(:compose_social_post, server_context).call(params, intent: SEND, id:), id)
         end
       end
     end

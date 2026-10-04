@@ -76,25 +76,25 @@ module MCP
         def fault(index, field, token) = "edit #{index + 1}: #{field} #{COMPLAINTS.fetch(token, token)}"
 
         def for_post(id, edits, server_context)
-          return refuse("no blog post has the ID #{id}") if post_by_id(server_context).call(id).nil?
+          return refuse("no blog post has the ID #{id}") if dep(:post_by_id, server_context).call(id).nil?
 
           unnumbered = edits.map { it.except(:part) }
 
-          case replace_post_edits(server_context).call(id, edits: unnumbered)
+          case dep(:replace_post_edits, server_context).call(id, edits: unnumbered)
           in Failure(:published) then refuse(format(PUBLISHED, id))
           in result then stored(result, POST)
           end
         end
 
         def for_social_post(id, edits, server_context)
-          social_post = editable_social_post(server_context).call(id)
+          social_post = dep(:editable_social_post, server_context).call(id)
           return refuse("no unsent social post has the ID #{id}") if social_post.nil?
 
           numbered = edits.map { it.merge(part: it.fetch(:part, FIRST_PART)) }
           missing = missing_part(numbered, social_post.parts.length)
           return refuse("social post #{id} has no part #{missing}") if missing
 
-          stored(replace_social_post_edits(server_context).call(id, edits: numbered), SOCIAL_POST)
+          stored(dep(:replace_social_post_edits, server_context).call(id, edits: numbered), SOCIAL_POST)
         end
 
         def missing_part(edits, count) = edits.map { it.fetch(:part) }.grep_v(FIRST_PART..count).first

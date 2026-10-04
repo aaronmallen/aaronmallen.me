@@ -11,7 +11,7 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          case delete_social_post(server_context).call(id)
+          case dep(:delete_social_post, server_context).call(id)
           in Success(_) then answer(id:, deleted: true)
           in Failure(:already_posted) then refuse("social post #{id} has gone out, so nothing was removed")
           in Failure(:not_found) then refuse("no social post has the ID #{id}")

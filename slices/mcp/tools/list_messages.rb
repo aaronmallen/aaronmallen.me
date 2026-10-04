@@ -40,7 +40,7 @@ module MCP
         private
 
         def listed(range, status, page, server_context)
-          found = messages_between(server_context).call(from: range.first, to: range.last, page:, status:)
+          found = dep(:messages_between, server_context).call(from: range.first, to: range.last, page:, status:)
 
           answer(
             from: range.first.iso8601,

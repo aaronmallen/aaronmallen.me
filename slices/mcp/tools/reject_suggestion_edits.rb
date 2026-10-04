@@ -23,7 +23,7 @@ module MCP
 
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)
-          suggestion = suggestion_by_id(server_context).call(suggestion_id)
+          suggestion = dep(:suggestion_by_id, server_context).call(suggestion_id)
           return refuse(format(AcceptSuggestionEdits::UNKNOWN, suggestion_id)) if suggestion.nil?
           return refuse(format(AcceptSuggestionEdits::SENT, suggestion_id)) if sent?(suggestion, server_context)
 
@@ -40,12 +40,12 @@ module MCP
         def reject(suggestion, chosen, server_context)
           return refuse("suggestion #{suggestion.id} has no open edit with those IDs") if chosen.empty?
 
-          rejected = reject_edits(server_context).call(chosen.map(&:id))
+          rejected = dep(:reject_edits, server_context).call(chosen.map(&:id))
           answer(suggestion_id: suggestion.id, rejected: rejected.map(&:id))
         end
 
         def sent?(suggestion, server_context)
-          suggestion.social_post_id && editable_social_post(server_context).call(suggestion.social_post_id).nil?
+          suggestion.social_post_id && dep(:editable_social_post, server_context).call(suggestion.social_post_id).nil?
         end
       end
     end

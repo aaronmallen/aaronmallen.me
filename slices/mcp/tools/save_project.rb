@@ -49,10 +49,10 @@ module MCP
 
       class << self
         def call(server_context:, id: nil, **fields)
-          current = id && project_by_id(server_context).call(id)
+          current = id && dep(:project_by_id, server_context).call(id)
           return refuse("no project has the ID #{id}") if id && current.nil?
 
-          saved(save_project(server_context).call(form(current, fields), id:), id)
+          saved(dep(:save_project, server_context).call(form(current, fields), id:), id)
         end
 
         private

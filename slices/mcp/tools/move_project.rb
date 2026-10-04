@@ -21,7 +21,7 @@ module MCP
 
       class << self
         def call(id:, direction:, server_context:)
-          case move_project(server_context).call(id, direction)
+          case dep(:move_project, server_context).call(id, direction)
           in Success(_) then answer(id:, direction:, moved: true)
           in Failure(:not_moved) then answer(id:, direction:, moved: false)
           in Failure(:not_found) then refuse("no live project has the ID #{id}")

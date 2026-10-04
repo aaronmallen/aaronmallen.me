@@ -13,7 +13,7 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          case restore_project(server_context).call(id)
+          case dep(:restore_project, server_context).call(id)
           in Success(project) then answer(id:, status: project.status)
           in Failure(:not_found) then refuse("no archived project has the ID #{id}")
           else refuse(UNRESTORED)

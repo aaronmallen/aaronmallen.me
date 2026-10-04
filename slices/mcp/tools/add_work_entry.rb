@@ -35,7 +35,7 @@ module MCP
         def call(org:, role:, from_year:, server_context:, blurb: nil, to_year: nil)
           params = { blurb:, from_year: from_year.to_s, org:, role:, to_year: to_year&.to_s }
 
-          case add_work_entry(server_context).call(params)
+          case dep(:add_work_entry, server_context).call(params)
           in Success(entry) then answer(ListWorkEntries.summary(entry))
           in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
           else refuse(UNSAVED)

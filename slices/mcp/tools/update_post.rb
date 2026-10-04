@@ -39,7 +39,7 @@ module MCP
 
       class << self
         def call(id:, server_context:, **given)
-          post = post_by_id(server_context).call(id)
+          post = dep(:post_by_id, server_context).call(id)
           return missing(id) unless post
 
           now = Time.now
@@ -47,7 +47,7 @@ module MCP
 
           params = ::Posts::PostForm.call(post).merge(form(given))
 
-          saved(save_post(server_context).call(params, id:, intent: INTENTS.fetch(post.status), now:), id)
+          saved(dep(:save_post, server_context).call(params, id:, intent: INTENTS.fetch(post.status), now:), id)
         end
 
         private

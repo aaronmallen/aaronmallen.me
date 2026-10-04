@@ -17,9 +17,9 @@ module MCP
 
       class << self
         def call(scope:, server_context:, page: 1)
-          usage = tag_usage(server_context).call(scope:)
+          usage = dep(:tag_usage, server_context).call(scope:)
           requested = page(page, server_context)
-          tags = matching_tags(server_context).call(scope:, text: Blog::Constants::EMPTY_STRING, page: requested)
+          tags = dep(:matching_tags, server_context).call(scope:, text: Blog::Constants::EMPTY_STRING, page: requested)
 
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },

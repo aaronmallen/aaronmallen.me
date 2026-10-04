@@ -33,7 +33,7 @@ module MCP
         private
 
         def listed(first, last, page, server_context)
-          found = social_posts_dated_between(server_context).call(from: first, to: last, page:)
+          found = dep(:social_posts_dated_between, server_context).call(from: first, to: last, page:)
 
           answer(
             from: first.iso8601,

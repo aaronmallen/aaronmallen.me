@@ -50,7 +50,7 @@ module MCP
 
         def listed(first, last, repos, server_context)
           page = Blog::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
-            commits_between(server_context).call(from:, to:, repos:, limit:)
+            dep(:commits_between, server_context).call(from:, to:, repos:, limit:)
           end
           rows = page.fetch(:rows)
           window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
