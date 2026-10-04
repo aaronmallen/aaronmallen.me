@@ -20,14 +20,11 @@ RSpec.describe "Feed fetch counting", type: :request do
   describe "an aggregator that names its subscribers" do
     inoreader = "Mozilla/5.0 (compatible; Inoreader/1.0; https://www.inoreader.com; 42 subscribers)"
     newsblur = "NewsBlur Feed Fetcher - 42 subscribers - https://www.newsblur.com/site/1/hello"
-    wrapped = "Mozilla/5.0 (compatible; Bazqux/2.0; 42 subscribers)"
 
     [
       ["Feedly", "Feedly/1.0 (+https://feedly.com/poller.html; 42 subscribers; )", "feedly"],
       ["Inoreader", inoreader, "inoreader"],
       ["NewsBlur", newsblur, "newsblur"],
-      ["an aggregator the parser does not name", "Feedbin feed-id:1234 - 42 subscribers", "feedbin"],
-      ["a wrapped aggregator the parser does not name", wrapped, "bazqux"],
     ].each do |named, agent, aggregator|
       it "stores the count for #{named} that day" do
         fetch(agent:)
@@ -133,13 +130,34 @@ RSpec.describe "Feed fetch counting", type: :request do
     end
   end
 
-  describe "a fetch the parser cannot name" do
-    it "counts as a reader when the name runs past the cap" do
-      fetch(agent: "#{'a' * 33} - 42 subscribers")
+  describe "an agent the site does not know that names a count" do
+    [
+      ["a plain name", "Feedbin feed-id:1234 - 42 subscribers"],
+      ["a wrapped name", "Mozilla/5.0 (compatible; Bazqux/2.0; 42 subscribers)"],
+      ["a long name", "#{'a' * 33} - 42 subscribers"],
+      ["no name at all", "42 subscribers"],
+    ].each do |named, agent|
+      it "counts #{named} as a reader and stores no count" do
+        fetch(agent:)
+
+        expect([readers.map(&:last), subscribers]).to eq([[1], []])
+      end
+    end
+
+    it "counts once a day however often it fetches" do
+      3.times { fetch(agent: "Feedbin feed-id:1234 - 42 subscribers") }
 
       expect([readers.map(&:last), subscribers]).to eq([[1], []])
     end
 
+    it "adds no subscriber row for any name it makes up" do
+      %w[alpha beta gamma].each { fetch(agent: "Mozilla/5.0 (compatible; #{it}/1.0; 42 subscribers)") }
+
+      expect(subscribers).to be_empty
+    end
+  end
+
+  describe "a fetch the parser cannot read" do
     it "counts as a reader when the count is too large to store" do
       fetch(agent: "Feedly/1.0 (12345678901 subscribers)")
 
