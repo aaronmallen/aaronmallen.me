@@ -201,6 +201,90 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     end
   end
 
+  describe "a branch pushed days after its commits" do
+    let(:floor) { Time.utc(2026, 8, 12, 9) }
+
+    before do
+      commit_repo.record_synced_through(repo, at: floor)
+      create(:commit, sha: old_sha, branch: "main")
+    end
+
+    def late_sha = "c" * 40
+
+    def stub_late_push(*below, remaining: 4999)
+      above = github_refs_page(github_branch("main", commit(sha, at: "2026-08-15T09:00:00Z")), remaining:)
+      stub_github(GitHubGraphQL::REFS_QUERY) do |request|
+        JSON.parse(request.body).dig("variables", "since") ? above : below.shift
+      end
+    end
+
+    def topic(*commits, more: false) = github_branch("topic", *commits, more:)
+
+    def under_floor(*branches) = github_refs_page(github_branch("main", commit(old_sha)), *branches)
+
+    it "stores a commit dated before the floor that GitHub lists under it", :aggregate_failures do
+      stub_late_push(under_floor(topic(commit(late_sha), commit(old_sha), more: true)))
+      walk
+
+      expect(stored(late_sha)).to have_attributes(branch: "topic", repo:)
+      expect(github_request(GitHubGraphQL::REFS_QUERY, since: nil, until: floor.iso8601)).to have_been_made
+    end
+
+    it "ends the walk once every branch under the floor meets a commit it already has", :aggregate_failures do
+      stub_late_push(under_floor(topic(commit(late_sha), commit(old_sha), more: true)))
+      walk
+
+      expect(commit_repo.backfilled_to(repo)).to be_nil
+      expect(commit_repo.synced_through(repo)).to eq(clock - day)
+      expect(scheduled).to be_empty
+    end
+
+    it "keeps reading under the floor while a branch has only new commits", :aggregate_failures do
+      stub_late_push(under_floor(topic(commit(late_sha, at: "2026-08-05T09:00:00Z"), more: true)))
+      walk
+
+      expect(commit_repo.backfilled_to(repo)).to eq(Time.utc(2026, 8, 5, 9))
+      expect(commit_repo.synced_through(repo)).to eq(floor)
+      expect(scheduled).to eq(walking)
+    end
+
+    describe "the chunk after it" do
+      let(:deeper) { "e" * 40 }
+
+      before do
+        first = under_floor(topic(commit(late_sha, at: "2026-08-05T09:00:00Z"), more: true))
+        stub_late_push(first, under_floor(topic(commit(deeper, at: "2026-08-02T09:00:00Z"), commit(old_sha))))
+        walk
+        next_chunk
+      end
+
+      it "reads on from the new back edge with no lower bound" do
+        expect(github_request(GitHubGraphQL::REFS_QUERY, since: nil, until: "2026-08-05T09:00:00Z")).to have_been_made
+      end
+
+      it "stores what it finds there" do
+        expect(stored(deeper)).to have_attributes(branch: "topic")
+      end
+    end
+
+    it "resumes under the floor after GitHub rate limits that read" do
+      stub_late_push(github_rate_limited, under_floor(topic(commit(late_sha), commit(old_sha))))
+      walk
+      next_chunk
+
+      expect(stored(late_sha)).not_to be_nil
+    end
+
+    it "waits for the reset before it reads under the floor when the read above left too few", :aggregate_failures do
+      stub_late_push(under_floor(topic(commit(late_sha))), remaining: Record::Operations::BackfillRepoCommits::RESERVE)
+      walk
+
+      expect(github_request(GitHubGraphQL::REFS_QUERY, since: nil)).not_to have_been_made
+      expect(commit_repo.backfilled_to(repo)).to eq(floor)
+      expect(scheduled).to contain_exactly([[repo, clock.iso8601], be_within(5).of(Time.now.to_f + 1800)])
+    end
+  end
+
   describe "reaching the end of what it has to read" do
     before { stub_refs(github_branch("main", commit(sha))) }
 
