@@ -74,6 +74,11 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_no_css("footer.adm-footer a")
     end
 
+    it "renders the confirm dialog before the footer and the palette after it", :aggregate_failures do
+      expect(page).to have_css("main#main ~ dialog#confirm-dialog + footer.adm-footer", visible: :all)
+      expect(page).to have_css("footer.adm-footer ~ dialog#command-palette", visible: :all)
+    end
+
     it "loads the site styles and scripts", :aggregate_failures do
       expect(page).to have_css("link[rel='stylesheet'][href*='app']", visible: :all)
       expect(page).to have_css("script[src*='app']", visible: :all)
@@ -102,6 +107,10 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "shows the app version in the footer" do
       expect(page).to have_css("footer.adm-footer", text: "Version #{Blog::Version::CURRENT}")
+    end
+
+    it "renders no confirm dialog" do
+      expect(page).to have_no_css("dialog#confirm-dialog", visible: :all)
     end
 
     it "offers only the theme options in the settings menu" do

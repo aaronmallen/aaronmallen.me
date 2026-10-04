@@ -28,9 +28,7 @@ module Admin
           ContextBar(current: navigation.current, alert: navigation.alert?) if navigation
           main(id: "main", class: "adm-main", &)
           Toast(message: toast_message) if toast_message
-          ConfirmDialog() if navigation
-          Footer()
-          render_palette(navigation) if navigation
+          navigation ? render_signed_in_tail(navigation) : Footer()
         end
 
         def render_head
@@ -46,6 +44,12 @@ module Admin
           Components::Tasks::Panel()
           SlashButton()
           KeyHelp()
+        end
+
+        def render_signed_in_tail(navigation)
+          ConfirmDialog()
+          Footer()
+          render_palette(navigation)
         end
 
         def title_suffix = t(".title", owner: Blog::Owner.full_name)
