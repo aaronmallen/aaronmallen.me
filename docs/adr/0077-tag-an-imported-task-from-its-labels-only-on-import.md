@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [record, tasks]
 issue: "#107"
+amended: ["#389"]
 tags: [tasks, tags, labels, imports, sync, github, linear, providers]
 ---
 
@@ -29,6 +30,10 @@ Tags come from labels once, when `Tasks::Operations::SyncIssues#import` creates 
 Each client hands the operation an issue's labels. A Linear label in a group counts by its child name alone. A label
 adds an existing private tag whose name it turns into. It never creates a tag, and it never adds a public one.
 
+Repo rules, added by #389, put their tags beside label tags in the same `import` ([ADR 0103][0103]). Rule tags differ
+from label tags in two ways: saving a rule creates any tag it names, and tags once every task already imported from a
+matching repo.
+
 ## Alternatives
 
 **Tag on every sync.** Each run adds the tags the issue's labels match. It lost because it brings back every tag
@@ -52,4 +57,5 @@ the providers again, or first add the column this record turned down.
 
 A task the operator deletes and the sync brings back counts as a new import, so it takes its tags again.
 
+[0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-save.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
