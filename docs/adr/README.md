@@ -108,6 +108,7 @@ one.
 | [0101][0101] | Bind every admin key through one key map that reads keys from the markup | ![Active][active] | 2026-10-03 |
 | [0102][0102] | Count each post's unique readers with an undated hash kept for 12 months | ![Active][active] | 2026-10-03 |
 | [0103][0103] | Tag an imported task from repo rules on import, and once when a rule is saved | ![Active][active] | 2026-10-03 |
+| [0104][0104] | Version releases with CalVer, back to the first release | ![Active][active] | 2026-10-03 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -212,6 +213,7 @@ one.
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
 [0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-save.md
+[0104]: 0104-version-releases-with-calver-back-to-the-first-release.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
