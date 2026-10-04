@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, lib, tasks]
 issue: "#38"
-amended: ["#52"]
+amended: ["#52", "#466"]
 tags: [tasks, markdown, html, sanitize, security, commonmarker]
 ---
 
@@ -93,12 +93,14 @@ The allowlist is ours to keep. A sanitize release that closes a hole reaches us 
 widening the list needs the same care as a change to sign-in.
 
 An image in a note loads from wherever its `src` points, so opening a task can tell a third party the owner's
-address and the time.
+address and the time. #466 closed that gap: [ADR 0108][0108] turns every image off the site's own `/media` path into
+a link after the cleaning.
 
 Two renderers now sit side by side with different rules. Code that renders a note through `Posts::Markdown` loses
 its HTML, and code that renders a post through `Tasks::Markdown` lets HTML onto the public site. Pick by what is
 being rendered, never by what is closer to hand.
 
 [0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
+[0108]: 0108-show-remote-images-in-imported-markdown-as-links.md
 [sanitize]: https://github.com/rgrove/sanitize
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
