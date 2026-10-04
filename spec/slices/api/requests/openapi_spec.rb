@@ -66,6 +66,12 @@ RSpec.describe "API OpenAPI document", type: :request do
       .to eq("created_at" => stamp, "updated_at" => stamp)
   end
 
+  it "lists the serializer schemas in name order, after the refusals" do
+    names = document.dig("components", "schemas").keys
+
+    expect(names.drop(2)).to eq(names.drop(2).sort)
+  end
+
   it "gives each operation one ID" do
     expect(operation_ids).to eq(operation_ids.uniq)
   end

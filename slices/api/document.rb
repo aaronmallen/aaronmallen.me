@@ -140,7 +140,70 @@ module API
       "500" => ["Failed", "the site could not finish the work", "Refusal"],
     }.freeze
 
+    REFUSAL_TESTS = {
+      "400" => -> { it.body.any? },
+      "401" => ->(_row) { true },
+      "404" => -> { it.fields.any? || it.finds? },
+      "422" => -> { it.properties.any? },
+      "500" => lambda(&:endpoint?),
+    }.freeze
+
+    Descriptor = Data.define(:id, :verb, :path, :status, :source) do
+      def body
+        return {} unless BODIES.include?(verb) && rest.any?
+
+        schema = { type: "object", additionalProperties: false, properties: rest, required: }.reject do |_, value|
+          value == []
+        end
+        { requestBody: { required: required.any?, content: Document.json(schema) } }
+      end
+
+      def endpoint? = source < Endpoint
+
+      def fields = path.scan(FIELD).flatten
+
+      def finds? = endpoint? && source::FINDS
+
+      def properties = source::SCHEMA.fetch(:properties, {})
+
+      def query = verb == "get" ? rest : {}
+
+      def refusal_codes = REFUSAL_TESTS.filter_map { |code, test| code if test.call(self) }
+
+      def to_h(summary:)
+        { operationId: id, summary:, parameters:, **body, responses: }
+      end
+
+      private
+
+      def parameter(name, place, schema, required:)
+        exploded = schema[:type] == "array" ? { style: "form", explode: false } : {}
+
+        { name:, in: place, required:, schema:, **exploded }
+      end
+
+      def parameters
+        [
+          *fields.map { parameter(it, "path", properties.fetch(it.to_sym), required: true) },
+          *query.map { |name, schema| parameter(name.to_s, "query", schema, required: required.include?(name.to_s)) },
+        ]
+      end
+
+      def required = source::SCHEMA.fetch(:required, []) - fields
+
+      def responses
+        {
+          status => { description: SUCCESS, content: Document.json(source::REPLY) },
+          **refusal_codes.to_h { [it, { "$ref": "#{RESPONSES}#{REFUSALS.fetch(it).first}" }] },
+        }
+      end
+
+      def rest = properties.except(*fields.map(&:to_sym))
+    end
+
     include Deps["inflector"]
+
+    def self.json(schema) = { JSON_TYPE => { schema: } }
 
     def call
       {
@@ -155,15 +218,6 @@ module API
 
     private
 
-    def body(fields, required)
-      return {} if fields.empty?
-
-      schema = { type: "object", additionalProperties: false, properties: fields, required: }.reject do |_, value|
-        value == []
-      end
-      { requestBody: { required: required.any?, content: json(schema) } }
-    end
-
     def components
       {
         schemas: { Refusal: REFUSAL, Unauthorized: UNAUTHORIZED, **serializers },
@@ -172,65 +226,22 @@ module API
       }
     end
 
-    def json(schema) = { JSON_TYPE => { schema: } }
-
-    def operation(id, verb, path, status)
-      source = SOURCES.fetch(id) { Endpoints.const_get(inflector.camelize(id)) }
-      fields = path.scan(FIELD).flatten
-      rest, required = remaining(source::SCHEMA, fields)
-      taken = BODIES.include?(verb) ? body(rest, required) : {}
-
-      {
-        operationId: id,
-        summary: inflector.humanize(id),
-        parameters: parameters(fields, verb == "get" ? rest : {}, source::SCHEMA, required),
-        **taken,
-        responses: responses(source, status, fields:, body: taken.any?),
-      }
-    end
-
-    def parameter(name, place, schema, required:)
-      exploded = schema[:type] == "array" ? { style: "form", explode: false } : {}
-
-      { name:, in: place, required:, schema:, **exploded }
-    end
-
-    def parameters(fields, query, input, required)
-      properties = input.fetch(:properties, {})
-
-      [
-        *fields.map { parameter(it, "path", properties.fetch(it.to_sym), required: true) },
-        *query.map { |name, schema| parameter(name.to_s, "query", schema, required: required.include?(name.to_s)) },
-      ]
+    def descriptors
+      OPERATIONS.map { |id, verb, path, status| Descriptor.new(id:, verb:, path:, status:, source: source(id)) }
     end
 
     def paths
-      OPERATIONS.each_with_object({}) do |(id, verb, path, status), found|
-        found[path] = found.fetch(path, {}).merge(verb => operation(id, verb, path, status))
+      descriptors.each_with_object({}) do |row, found|
+        found[row.path] = found.fetch(row.path, {}).merge(row.verb => row.to_h(summary: inflector.humanize(row.id)))
       end
     end
 
-    def refusal(description, schema) = { description:, content: json({ "$ref": "#{SCHEMAS}#{schema}" }) }
-
-    def remaining(input, fields)
-      [input.fetch(:properties, {}).except(*fields.map(&:to_sym)), input.fetch(:required, []) - fields]
-    end
-
-    def responses(source, status, fields:, body:)
-      codes = ["401"]
-      codes << "400" if body
-      codes << "404" if fields.any? || (source < Endpoint && source::FINDS)
-      codes << "422" if source::SCHEMA.fetch(:properties, {}).any?
-      codes << "500" if source < Endpoint
-
-      {
-        status => { description: SUCCESS, content: json(source::REPLY) },
-        **codes.sort.to_h { [it, { "$ref": "#{RESPONSES}#{REFUSALS.fetch(it).first}" }] },
-      }
-    end
+    def refusal(description, schema) = { description:, content: Document.json({ "$ref": "#{SCHEMAS}#{schema}" }) }
 
     def serializers
-      Serializers.constants.map { Serializers.const_get(it) }.to_h { [it.component, it::SCHEMA] }
+      Serializers.constants.sort.map { Serializers.const_get(it) }.to_h { [it.component, it::SCHEMA] }
     end
+
+    def source(id) = SOURCES.fetch(id) { Endpoints.const_get(inflector.camelize(id)) }
   end
 end
