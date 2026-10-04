@@ -3,8 +3,6 @@
 RSpec.describe Activity::Queries::StalledList do
   let(:today) { Blog::TimeZone.today }
 
-  def days_ago(days) = Time.now - (days * 24 * 60 * 60)
-
   def rows = Activity::Slice["queries.stalled_list"].call
 
   def rows_of(kind) = rows.select { it.kind == kind }

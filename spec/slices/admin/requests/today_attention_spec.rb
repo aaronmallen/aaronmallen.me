@@ -5,8 +5,6 @@ RSpec.describe "Admin today needs attention", type: :request do
 
   def card = page.find("section.card[data-attention]")
 
-  def days_ago(days) = Time.now - (days * 24 * 60 * 60)
-
   def page = Capybara.string(last_response.body)
 
   def row(title) = card.find(".li", text: title)

@@ -42,7 +42,7 @@ RSpec.describe "Visits", type: :request do
   end
 
   def roll_up_tomorrow
-    allow(Time).to receive(:now).and_return(Time.now + 86_400)
+    allow(Time).to receive(:now).and_return(days_ahead(1))
     Analytics::Jobs::RollUpAnalytics.new.perform
   end
 

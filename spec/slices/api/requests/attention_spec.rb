@@ -11,8 +11,6 @@ RSpec.describe "API attention", type: :request do
     Capybara.string(last_response.body).all("section.card[data-attention] .li-title").map(&:text)
   end
 
-  def days_ago(days) = Time.now - (days * 24 * 60 * 60)
-
   def read(token: api_token)
     headers = { "HTTP_ACCEPT" => "application/json" }
     headers["HTTP_AUTHORIZATION"] = "Bearer #{token}" if token

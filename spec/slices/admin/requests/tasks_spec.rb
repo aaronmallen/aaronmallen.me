@@ -2344,9 +2344,9 @@ RSpec.describe "Admin tasks", type: :request do
     describe "the archive" do
       def day_heads = page.all(".task-day-date").map(&:text)
 
-      def finished(title, days_ago, hour, **)
-        day = Blog::TimeZone.today
-        at = Blog::TimeZone.local_time(day.year, day.month, day.day, hour) - (days_ago * 86_400)
+      def finished(title, days, hour, **)
+        day = Blog::TimeZone.today - days
+        at = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
 
         create(:task, :done, title:, completed_at: at, **)
       end
@@ -2443,8 +2443,8 @@ RSpec.describe "Admin tasks", type: :request do
     end
 
     describe "paging the archive" do
-      def finished(title, days_ago)
-        create(:task, :done, title:, completed_at: Time.now - (days_ago * 86_400))
+      def finished(title, days)
+        create(:task, :done, title:, completed_at: days_ago(days))
       end
 
       def pager_link(rel) = page.find("nav.pager a[rel='#{rel}']")[:href]

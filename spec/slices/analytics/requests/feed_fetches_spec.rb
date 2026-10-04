@@ -45,7 +45,7 @@ RSpec.describe "Feed fetch counting", type: :request do
 
     it "keeps a count for each day" do
       fetch(agent: "Feedly/1.0 (42 subscribers)")
-      allow(Time).to receive(:now).and_return(Time.now + (24 * 60 * 60))
+      allow(Time).to receive(:now).and_return(days_ahead(1))
       fetch(agent: "Feedly/1.0 (43 subscribers)")
 
       expect(subscribers.map(&:last)).to contain_exactly(42, 43)
@@ -91,7 +91,7 @@ RSpec.describe "Feed fetch counting", type: :request do
 
     it "counts again the next day" do
       fetch
-      allow(Time).to receive(:now).and_return(Time.now + (24 * 60 * 60))
+      allow(Time).to receive(:now).and_return(days_ahead(1))
       fetch
 
       expect(readers.map(&:last)).to eq([1, 1])

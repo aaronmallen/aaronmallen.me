@@ -153,7 +153,7 @@ RSpec.describe "MCP list tool paging", type: :request do
     end
 
     it "keeps the range while paging posts" do
-      create(:post, :published, published_at: Time.now - (10 * 24 * 60 * 60))
+      create(:post, :published, published_at: days_ago(10))
       kept = [1, 2].map { create(:post, :published, published_at: earlier(it)).id }
 
       expect([1, 2].flat_map { ids("list_posts", "posts", from: (today - 1).iso8601, page: it) }).to eq(kept)
