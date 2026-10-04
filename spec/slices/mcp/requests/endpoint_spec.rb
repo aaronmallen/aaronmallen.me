@@ -66,8 +66,8 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def read_tools
     %w[
-      compose_announcement list_commits list_journal_entries list_messages list_posts list_projects list_social_posts
-      list_sprints list_suggestions list_tags list_tasks list_webmentions list_work_entries
+      compose_announcement list_commits list_journal_entries list_links list_messages list_posts list_projects
+      list_social_posts list_sprints list_suggestions list_tags list_tasks list_webmentions list_work_entries
       read_activity read_analytics read_current_sprint read_journal_entry read_message read_post read_social_post
       read_sync_state read_task read_webmention_settings summarize_activity
     ]
@@ -111,10 +111,11 @@ RSpec.describe "MCP endpoint", type: :request do
     %w[
       accept_suggestion_edits add_task_comment add_work_entry archive_project cancel_task capture_task complete_task
       create_journal_entry create_post create_social_post delete_journal_entry delete_post delete_social_post
-      delete_task delete_work_entry drop_sprint import_commits link_tasks mark_message moderate_webmention
-      move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag reopen_task reorder_task
-      restore_project save_project save_tag save_task schedule_task send_social_post start_task
-      unlink_task update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
+      delete_task delete_work_entry drop_sprint import_commits link_records link_tasks mark_message
+      moderate_webmention move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag
+      reopen_task reorder_task restore_project save_project save_tag save_task schedule_task send_social_post
+      start_task unlink_records unlink_task update_journal_entry update_post update_social_post
+      update_webmention_settings write_post_seo
     ]
   end
 
@@ -2132,9 +2133,11 @@ RSpec.describe "MCP endpoint", type: :request do
         "delete_work_entry" => { id: 1 },
         "drop_sprint" => { id: 1 },
         "import_commits" => {},
+        "link_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "link_tasks" => { id: 1, kind: "blocks", other_id: 2 },
         "list_commits" => { from: "2026-01-01", to: "2026-12-31" },
         "list_journal_entries" => { from: "2026-01-01", to: "2026-12-31" },
+        "list_links" => { kind: "post", id: 1 },
         "list_messages" => { from: "2026-01-01", to: "2026-12-31" },
         "list_posts" => {},
         "list_projects" => {},
@@ -2174,6 +2177,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
+        "unlink_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "unlink_task" => { id: 1, other_id: 2 },
         "update_journal_entry" => { id: 1 },
         "update_post" => { id: 1 },

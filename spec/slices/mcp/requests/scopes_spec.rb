@@ -4,8 +4,8 @@ RSpec.describe "MCP tool scopes", type: :request do
   def self.guarded
     {
       "read" => %w[
-        compose_announcement list_commits list_journal_entries list_messages list_posts list_projects list_social_posts
-        list_sprints list_suggestions list_tags list_tasks list_webmentions list_work_entries
+        compose_announcement list_commits list_journal_entries list_links list_messages list_posts list_projects
+        list_social_posts list_sprints list_suggestions list_tags list_tasks list_webmentions list_work_entries
         read_activity read_analytics read_current_sprint read_journal_entry read_message read_post read_social_post
         read_sync_state read_task read_webmention_settings summarize_activity
       ],
@@ -13,10 +13,10 @@ RSpec.describe "MCP tool scopes", type: :request do
       "write" => %w[
         accept_suggestion_edits add_task_comment add_work_entry archive_project cancel_task capture_task complete_task
         create_journal_entry create_post create_social_post delete_journal_entry delete_post delete_social_post
-        delete_task delete_work_entry drop_sprint import_commits link_tasks mark_message moderate_webmention
-        move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag reopen_task
-        reorder_task restore_project save_project save_tag save_task schedule_task
-        send_social_post start_task unlink_task update_journal_entry update_post update_social_post
+        delete_task delete_work_entry drop_sprint import_commits link_records link_tasks mark_message
+        moderate_webmention move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag
+        reopen_task reorder_task restore_project save_project save_tag save_task schedule_task
+        send_social_post start_task unlink_records unlink_task update_journal_entry update_post update_social_post
         update_webmention_settings write_post_seo
       ],
     }

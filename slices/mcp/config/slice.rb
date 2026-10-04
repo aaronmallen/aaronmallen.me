@@ -25,10 +25,11 @@ module MCP
     import keys: %w[
       endpoints.add_task_comment endpoints.cancel_task endpoints.capture_task endpoints.complete_task
       endpoints.create_journal_entry endpoints.delete_journal_entry endpoints.delete_task endpoints.drop_sprint
-      endpoints.link_tasks endpoints.list_journal_entries endpoints.list_sprints endpoints.list_tasks
-      endpoints.move_task endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry
-      endpoints.read_task endpoints.reopen_task endpoints.reorder_task endpoints.save_task endpoints.schedule_task
-      endpoints.start_task endpoints.unlink_task endpoints.update_journal_entry
+      endpoints.link_records endpoints.link_tasks endpoints.list_journal_entries endpoints.list_links
+      endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.plan_sprint
+      endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
+      endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
+      endpoints.unlink_records endpoints.unlink_task endpoints.update_journal_entry
     ], from: :api
 
     import keys: %w[

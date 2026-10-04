@@ -24,6 +24,10 @@ module API
     post "/tasks/:id/links", to: "task_links.create"
     delete "/tasks/:id/links/:other_id", to: "task_links.destroy"
 
+    get "/links/:kind/:id", to: "record_links.index"
+    post "/links/:kind/:id", to: "record_links.create"
+    delete "/links/:kind/:id/:other_kind/:other_id", to: "record_links.destroy"
+
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"
     get "/sprints/current", to: "sprints.current"
