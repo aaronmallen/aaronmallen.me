@@ -225,6 +225,37 @@ RSpec.describe "MCP post tools", type: :request do
       expect(Blog::TimeZone.input_value(stored(scheduled.id).published_at)).to eq(future(5))
     end
 
+    it "refuses an empty publish time on a scheduled post and keeps its status and time", :aggregate_failures do
+      scheduled = create(:post, :scheduled)
+      call_tool("update_post", id: scheduled.id, publish_at: "", body: "two")
+
+      expect(refused?).to be(true)
+      expect(stored(scheduled.id)).to have_attributes(status: "scheduled", body: scheduled.body)
+      expect(stored(scheduled.id).published_at).to be_within(1).of(scheduled.published_at)
+    end
+
+    it "refuses a past publish time on a scheduled post and points to publish_post", :aggregate_failures do
+      scheduled = create(:post, :scheduled)
+      call_tool("update_post", id: scheduled.id, publish_at: future(-1))
+
+      expect(message).to include("publish_post")
+      expect(stored(scheduled.id).status).to eq("scheduled")
+      expect(stored(scheduled.id).published_at).to be_within(1).of(scheduled.published_at)
+    end
+
+    it "sends no announcement when it refuses a past publish time", :commits do
+      scheduled = create(:post, :scheduled, **announced)
+      call_tool("update_post", id: scheduled.id, publish_at: future(-1))
+
+      expect(Social::Jobs::SyndicatePost.jobs).to be_empty
+    end
+
+    it "still clears the publish time of a draft" do
+      call_tool("update_post", id: draft.id, publish_at: "")
+
+      expect(stored(draft.id).published_at).to be_nil
+    end
+
     it "edits a published post with an edit note and keeps it published", :aggregate_failures do
       published = create(:post, :published)
       call_tool("update_post", id: published.id, body: "fixed", edit_note: "fixed the numbers")
