@@ -6,6 +6,8 @@ RSpec.describe "Admin calendar moves", type: :request do
 
   def at(date, hour, minute = 0) = Blog::TimeZone.local_time(date.year, date.month, date.day, hour, minute)
 
+  def clock(hour) = allow(Time).to receive(:now).and_return(at(today, hour))
+
   def day = today + 3
 
   def form(to, from) = { _csrf_token: admin_csrf_token, to: to.to_s, day: from.to_s }
@@ -90,14 +92,6 @@ RSpec.describe "Admin calendar moves", type: :request do
 
         expect(toast).to eq("Moved to #{target.strftime('%b %-d, %Y')} at 09:15")
       end
-
-      it "lets the publish job pick up the new time" do
-        early = create(:post, :scheduled, published_at: at(today + 1, 0))
-        move("posts", early, today)
-        Posts::Jobs::PublishDuePosts.new.perform
-
-        expect(stored_post(early).status).to eq("published")
-      end
     end
 
     describe "moving a scheduled social post" do
@@ -112,13 +106,68 @@ RSpec.describe "Admin calendar moves", type: :request do
 
         expect(last_response.location).to end_with("/admin/calendar?day=#{day.iso8601}")
       end
+    end
+
+    describe "a move to today" do
+      before { clock(12) }
+
+      it "moves a post to a time still ahead" do
+        later = create(:post, :scheduled, published_at: at(day, 15))
+        move("posts", later, today)
+
+        expect(stored_post(later).published_at).to eq(at(today, 15))
+      end
+
+      it "moves a social post to a time still ahead" do
+        later = create(:social_post, :scheduled, posted_at: at(day, 15))
+        move("social", later, today)
+
+        expect(stored_social(later).posted_at).to eq(at(today, 15))
+      end
+
+      it "lets the publish job pick up the new time" do
+        early = create(:post, :scheduled, published_at: at(today + 1, 13))
+        move("posts", early, today)
+        clock(13)
+        Posts::Jobs::PublishDuePosts.new.perform
+
+        expect(stored_post(early).status).to eq("published")
+      end
 
       it "lets the send job pick up the new time" do
-        early = create(:social_post, :scheduled, posted_at: at(today + 1, 0))
+        early = create(:social_post, :scheduled, posted_at: at(today + 1, 13))
         move("social", early, today)
+        clock(13)
         Social::Jobs::SendDueSocialPosts.new.perform
 
         expect(Social::Jobs::DeliverSocialPost.jobs.map { it["args"].first }.uniq).to eq([early.id])
+      end
+
+      it "leaves a post where it was when its time has gone" do
+        move("posts", scheduled, today)
+
+        expect(stored_post(scheduled).published_at).to eq(scheduled.published_at)
+      end
+
+      it "leaves a social post where it was when its time has gone" do
+        early = create(:social_post, :scheduled, posted_at: at(day, 9))
+        move("social", early, today)
+
+        expect(stored_social(early).posted_at).to eq(early.posted_at)
+      end
+
+      it "keeps the publish job from picking up a post it refused" do
+        move("posts", scheduled, today)
+        Posts::Jobs::PublishDuePosts.new.perform
+
+        expect(stored_post(scheduled).status).to eq("scheduled")
+      end
+
+      it "keeps the send job from picking up a social post it refused" do
+        move("social", create(:social_post, :scheduled, posted_at: at(day, 9)), today)
+        Social::Jobs::SendDueSocialPosts.new.perform
+
+        expect(Social::Jobs::DeliverSocialPost.jobs).to be_empty
       end
     end
 

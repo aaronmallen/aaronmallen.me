@@ -13,7 +13,7 @@ module Social
 
         transaction do
           social_post = step scheduled(id, social_post_repo.locked_editable(id))
-          social_post_repo.update(social_post.id, posted_at: step(moved(social_post.posted_at, day)))
+          social_post_repo.update(social_post.id, posted_at: step(moved(social_post.posted_at, day, now)))
           social_post_repo.by_id(social_post.id)
         end
       end

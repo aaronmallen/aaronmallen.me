@@ -11,8 +11,10 @@ module Blog
       day >= TimeZone.today(now) ? Success(day) : Failure(:past)
     end
 
-    def moved(time, day)
-      Success(TimeZone.on_day(time, day))
+    def moved(time, day, now)
+      at = TimeZone.on_day(time, day)
+
+      at > now ? Success(at) : Failure(:past)
     rescue TZInfo::PeriodNotFound
       Failure(:invalid)
     end

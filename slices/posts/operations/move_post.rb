@@ -13,7 +13,7 @@ module Posts
 
         transaction do
           post = step scheduled(post_repo.by_id_for_update(id))
-          post_repo.update(post.id, published_at: step(moved(post.published_at, day)))
+          post_repo.update(post.id, published_at: step(moved(post.published_at, day, now)))
           post_repo.by_id(post.id)
         end
       end
