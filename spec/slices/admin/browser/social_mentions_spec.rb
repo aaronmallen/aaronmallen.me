@@ -382,7 +382,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       end
 
       it "puts their token in place of what I typed" do
-        expect(body.value).to eq("hi @{zed-shaw} ")
+        expect(body).to match_selector(:field, with: "hi @{zed-shaw} ")
       end
 
       it "gives the focus back to the text box" do
