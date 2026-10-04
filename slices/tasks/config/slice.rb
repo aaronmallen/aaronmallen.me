@@ -15,11 +15,13 @@ module Tasks
     export %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
       operations.complete_task
-      operations.current_sprint operations.delete_task operations.delete_task_comment operations.delete_work_session
+      operations.current_sprint operations.delete_task operations.delete_task_comment operations.delete_task_tag_rule
+      operations.delete_work_session
       operations.drop_sprint operations.edit_task_comment operations.edit_work_session operations.link_tasks
       operations.mark_task_seen operations.move_task
       operations.plan_sprint operations.place_task operations.queue_issue_sync operations.reopen_task
-      operations.reorder_task operations.save_task operations.schedule_task operations.set_task_total
+      operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
+      operations.set_task_total
       operations.start_task
       operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.finished_task_counts queries.link_targets

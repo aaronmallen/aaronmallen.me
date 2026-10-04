@@ -1,0 +1,35 @@
+# frozen_string_literal: true
+
+module Tasks
+  module Repos
+    class TaskTagRuleRepo < Blog::DB::Repo
+      GITHUB = Blog::Types::TaskSourceProvider["github"]
+      ISSUE_URL = Record::GitHub::Issues::URL
+      TAG_SCOPE = Blog::Types::TagScope["private"]
+
+      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
+      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      commands delete: :by_pk
+
+      def by_id(id) = task_tag_rules.combine(:tags).by_pk(id).one
+
+      def matching_task_ids(rule)
+        sources = task_sources.where(provider: GITHUB).unordered.pluck(:task_id, :url)
+
+        sources.filter_map { |task_id, url| task_id if rule.matches?(repo(url)) }.uniq
+      end
+
+      def replace_tags(id, names)
+        tag_ids = tags.claim(names, scope: TAG_SCOPE).values_at(*names)
+        task_tag_rule_tags.replace(id, tag_ids)
+        tag_ids
+      end
+
+      def tag_tasks(task_ids, tag_ids) = task_tags.add_missing(task_ids, tag_ids)
+
+      private
+
+      def repo(url) = url.to_s[ISSUE_URL, :repo].to_s.downcase
+    end
+  end
+end

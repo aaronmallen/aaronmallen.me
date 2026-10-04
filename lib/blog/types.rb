@@ -102,6 +102,7 @@ module Blog
       Blog::Constants::EMPTY_STRING
     end.constrained(min_size: 1)
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
+    RepoPattern = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/(?:\*|[a-z0-9._-]+)\z})
     ReviewPeriod = Types::String.enum("week", "month")
     SavedViewScreen = Types::String.enum("activity", "journal", "posts", "tasks")
     SearchKind = Types::String.enum(
@@ -175,6 +176,7 @@ module Blog
         Types::NetworkName.values.select { found.include?(it) }
       end
       Repo = Types::Repo.constructor { |value| Normalizers::Repo[value] }
+      RepoPattern = Types::RepoPattern.constructor { |value| Normalizers::Repo[value] }
       Slug = Types::String.constructor do |text|
         text.to_s.unicode_normalize(:nfkd).gsub(/\p{M}/, "").downcase.gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end.constrained(format: SLUG_FORMAT)

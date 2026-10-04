@@ -107,7 +107,7 @@ one.
 | [0100][0100] | Build the review in one activity query that admin and api share | ![Active][active] | 2026-10-03 |
 | [0101][0101] | Bind every admin key through one key map that reads keys from the markup | ![Active][active] | 2026-10-03 |
 | [0102][0102] | Count each post's unique readers with an undated hash kept for 12 months | ![Active][active] | 2026-10-03 |
-| [0103][0103] | Tag an imported task from repo rules on import, and once when a rule is saved | ![Active][active] | 2026-10-03 |
+| [0103][0103] | Tag an imported task from repo rules on import, and once when a rule is created | ![Active][active] | 2026-10-03 |
 | [0104][0104] | Version releases with CalVer, back to the first release | ![Active][active] | 2026-10-03 |
 | [0105][0105] | Dump the database nightly to a private backups bucket and keep the newest 7 | ![Active][active] | 2026-10-03 |
 | [0106][0106] | Count feed fetches on the server, and capture outbound clicks from the beacon | ![Active][active] | 2026-10-03 |
@@ -214,7 +214,7 @@ one.
 [0100]: 0100-build-the-review-in-one-activity-query-that-admin-and-api-share.md
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
-[0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-save.md
+[0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-create.md
 [0104]: 0104-version-releases-with-calver-back-to-the-first-release.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
 [0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md

@@ -1,6 +1,6 @@
 ---
 id: "0103"
-title: Tag an imported task from repo rules on import, and once when a rule is saved
+title: Tag an imported task from repo rules on import, and once when a rule is created
 status: active
 created: 2026-10-03
 area: [db, record, tasks]
@@ -8,7 +8,7 @@ issue: "#389"
 tags: [tasks, tags, rules, imports, sync, github, linear, providers, repos]
 ---
 
-# ADR 0103: Tag an imported task from repo rules on import, and once when a rule is saved
+# ADR 0103: Tag an imported task from repo rules on import, and once when a rule is created
 
 ![Active][status]
 
@@ -34,10 +34,11 @@ filled it.
 **Rule tags join label tags at import.** `import` adds the tags of every matching rule beside the label tags, in the
 same transaction. `follow` reads no rule, so a tag the owner removes stays off, as [ADR 0077][0077] holds for labels.
 
-**Saving a rule creates its tags and tags existing tasks once.** The save creates any tag the rule names that does
-not exist, as a private tag. Then it adds the rule's tags to every task already imported from a
-matching repo, found by the repo in `task_sources.url`. After that, only new imports take the rule's tags. Deleting a
-rule, or dropping a tag from one, takes no tag off any task.
+**Saving a rule creates its tags, and creating one tags existing tasks once.** Every save creates any tag the rule
+names that does not exist, as a private tag. Creating a rule also adds its tags to every task already imported from a
+matching repo, found by the repo in `task_sources.url`. Editing a rule changes only what new imports take: it adds no
+tag to a task already imported, so a tag the owner took off stays off. Deleting a rule, or dropping a tag from one,
+takes no tag off any task.
 
 The admin calls these operations to save and delete rules, and the MCP reaches the same operations through the API,
 as [ADR 0088][0088] says.
@@ -60,11 +61,11 @@ job would add it back.
 
 The owner sets a repo's tags once, and every new issue from it arrives tagged.
 
-The one pass on save reads the repo from `task_sources.url`, so it depends on GitHub's URL shape, and imports read it
+The one pass on create reads the repo from `task_sources.url`, so it depends on GitHub's URL shape, and imports read it
 from `origin`. The two can disagree, and nothing checks them against each other.
 
-The pass on save runs on every save, edits included, so it brings back a rule's tag on any matching task the owner
-took it off.
+The pass runs only when a rule is created, so a tag added to a rule later never reaches tasks already imported. The
+owner tags those by hand, or deletes the rule and creates it again.
 
 Nothing records which tags came from a rule, a label or the owner, so no later change can tell them apart.
 
