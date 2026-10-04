@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, mcp]
 issue: AA-660
-amended: [AA-819]
+amended: [AA-819, "#237"]
 tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
 ---
 
@@ -35,7 +35,9 @@ and registers `honeybadger.agent`. The app requires `honeybadger/ruby`, never `h
   has configured by then, though `config.middleware.use` runs before the container exists.
 - **The worker** gets its error handler from the gem's Sidekiq plugin, which `load_plugins!` registers when the
   provider starts. `config/sidekiq.rb` requires `hanami/boot` so the provider starts. A job that retries reports
-  only on its last try, through `attempt_threshold`.
+  only on its last try, through `attempt_threshold`. A Redis connection error raised on Sidekiq's scheduler thread
+  (`sidekiq.scheduler`) reports nothing: the poller logs it and tries again, a short drop never reaches a job, and
+  a long one still reports from the processors that fetch work and from whatever enqueues a job.
 - **The MCP server** reports what the SDK catches. `MCP::Protocol::Handler#report` sends a tool or prompt error to
   `honeybadger.agent`, since the SDK turns it into a response and no middleware sees it.
 - `report_data` is on in production and off elsewhere, unless `honeybadger.report_data` says otherwise.

@@ -2,6 +2,7 @@
 
 require "blog/version"
 require "honeybadger/ruby"
+require "redis_client"
 require "sidekiq"
 require "sidekiq/job_retry"
 
@@ -34,6 +35,7 @@ module Blog
         Hanami::Router::NotFoundError
       ]).freeze
       PRODUCTION = "production"
+      SCHEDULER_THREAD = "sidekiq.scheduler"
 
       class << self
         def agent(settings, env)
@@ -67,6 +69,7 @@ module Blog
           config.env = chosen[:env]
           config.report_data = chosen[:report_data]
           config.revision = chosen[:revision]
+          config.before_notify { quiet_scheduler(it) }
           apply_sections(config, chosen)
         end
 
@@ -74,6 +77,12 @@ module Blog
           config.exceptions.ignore = chosen[:ignore]
           config.request.filter_keys = chosen[:filter_keys]
           config.sidekiq.attempt_threshold = chosen[:attempt_threshold]
+        end
+
+        def quiet_scheduler(notice)
+          return unless notice.exception.is_a?(RedisClient::ConnectionError) && Thread.current.name == SCHEDULER_THREAD
+
+          notice.halt!
         end
 
         def report_data?(honeybadger, env)
