@@ -8,10 +8,7 @@ module Admin
           prop :origin, Blog::Types::TaskOrigin.optional, default: nil
 
           def view_template
-            a(class: "btn pri", href:, data: { dialog_open: CreateDialog::ID }) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".label") }
-            end
+            CreateLink(href:, label: t(".label"), dialog: CreateDialog::ID)
           end
 
           private

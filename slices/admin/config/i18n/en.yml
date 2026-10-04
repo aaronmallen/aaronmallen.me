@@ -726,6 +726,8 @@ en:
           waiting:
             one: "%{count} waiting"
             other: "%{count} waiting"
+        palette_row:
+          jump: "Go to %{section}"
         sections:
           activity: "activity"
           analytics: "analytics"

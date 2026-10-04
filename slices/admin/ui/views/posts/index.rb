@@ -37,10 +37,7 @@ module Admin
             PageHead(title: t(".heading"), sub:) do
               SavedViews(**@saved_views)
               filter_form
-              a(class: "btn pri", href: path(:admin_new_post)) do
-                i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-                span { t(".new_post") }
-              end
+              CreateLink(href: path(:admin_new_post), label: t(".new_post"))
             end
 
             list

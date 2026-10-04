@@ -35,10 +35,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:) do
               filter_form
-              a(class: "btn pri", href: path(:admin_new_project)) do
-                i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-                span { t(".new_project") }
-              end
+              CreateLink(href: path(:admin_new_project), label: t(".new_project"))
             end
             work? ? work : card
             Hint { t(".archive_note") } if @filter == LIVE

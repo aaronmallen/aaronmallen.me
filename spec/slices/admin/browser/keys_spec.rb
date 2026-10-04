@@ -263,6 +263,92 @@ RSpec.describe "Admin keys", type: :feature do
     end
   end
 
+  describe "g jumps" do
+    before { visit "/admin/analytics" }
+
+    {
+      "t" => "/admin", "k" => "/admin/tasks", "j" => "/admin/journal", "p" => "/admin/posts",
+      "a" => "/admin/activity",
+    }.each do |letter, path|
+      it "goes to #{path} on g #{letter}" do
+        press("g", letter)
+
+        expect(page).to have_current_path(path)
+      end
+    end
+
+    it "does nothing on g alone", :aggregate_failures do
+      press("g")
+      find(".ctx-btn[aria-label='Show the keys']").click
+
+      expect(page).to have_css("dialog#key-help[open]")
+      expect(page).to have_current_path("/admin/analytics")
+    end
+
+    it "does nothing on a letter with no section", :aggregate_failures do
+      press("g", "x", "t")
+      press("?")
+
+      expect(page).to have_css("dialog#key-help[open]")
+      expect(page).to have_current_path("/admin/analytics")
+    end
+
+    it "lists the jumps in the help overlay", :aggregate_failures do
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ag\s*t\s+Go to today\z/)
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ag\s*a\s+Go to activity\z/)
+    end
+  end
+
+  describe "c" do
+    def task_dialog = "dialog##{Admin::UI::Components::Tasks::CreateDialog::ID}[open]"
+
+    {
+      "/admin/posts" => "/admin/posts/new", "/admin/projects" => "/admin/projects/new",
+      "/admin/decisions" => "/admin/decisions/new", "/admin/people" => "/admin/people/new",
+    }.each do |screen, form|
+      it "opens #{form} from #{screen}" do
+        visit screen
+        press("c")
+
+        expect(page).to have_current_path(form)
+      end
+    end
+
+    ["/admin", "/admin/tasks"].each do |screen|
+      it "opens the task dialog on #{screen}" do
+        visit screen
+        press("c")
+
+        expect(page).to have_css(task_dialog)
+      end
+    end
+
+    it "does nothing on a screen with no create button", :aggregate_failures do
+      visit "/admin/analytics"
+      press("c")
+      press("?")
+
+      expect(page).to have_css("dialog#key-help[open]")
+      expect(page).to have_current_path("/admin/analytics")
+    end
+
+    it "lists c in the help overlay where it works" do
+      visit "/admin/posts"
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ac\s+New post\z/)
+    end
+
+    it "leaves c out of the help overlay where it does nothing" do
+      visit "/admin/analytics"
+      press("?")
+
+      expect(find_by_id("key-help")).to have_no_css(".keys-row", text: /\Ac\s/)
+    end
+  end
+
   describe "a row with no link" do
     before do
       create(:message, subject: "Hello there")

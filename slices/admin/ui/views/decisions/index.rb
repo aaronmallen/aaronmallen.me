@@ -46,10 +46,7 @@ module Admin
           def filter_options = FILTERS.transform_values { t(it) }
 
           def new_link
-            a(class: "btn pri", href: path(:admin_new_decision)) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".new_decision") }
-            end
+            CreateLink(href: path(:admin_new_decision), label: t(".new_decision"))
           end
 
           def rows

@@ -2,7 +2,7 @@
 
 module Admin
   module Structs
-    Section = Data.define(:name, :group, :icon, :path, :count, :current) do
+    Section = Data.define(:name, :group, :icon, :path, :count, :current, :jump) do
       def group_key = "ui.components.nav.groups.#{group}"
 
       def label_key = "ui.components.nav.sections.#{name}"

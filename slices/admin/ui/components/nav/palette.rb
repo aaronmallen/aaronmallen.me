@@ -136,6 +136,7 @@ module Admin
             PaletteRow(
               id: "command-palette-#{section.name}", icon: section.icon, label:, href: section.path,
               text: "#{label} #{t(section.group_key)}".downcase, sub: section_sub(section), warn: section.waiting?,
+              jump: section.jump,
             )
           end
 

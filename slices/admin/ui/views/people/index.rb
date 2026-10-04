@@ -23,10 +23,7 @@ module Admin
           def bluesky(person) = person.bluesky_handle && t(".bluesky_handle", handle: person.bluesky_handle)
 
           def new_person
-            a(class: "btn pri", href: path(:admin_new_person)) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".new_person") }
-            end
+            CreateLink(href: path(:admin_new_person), label: t(".new_person"))
           end
 
           def row(person)

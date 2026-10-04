@@ -25,6 +25,7 @@ module Admin
         %i[tokens settings fa-key admin_tokens].freeze,
       ].freeze
 
+      JUMPS = { today: "t", tasks: "k", journal: "j", posts: "p", activity: "a" }.freeze
       ROOT = :today
 
       include Deps["routes", inbox_count: "api.queries.inbox_count"]
@@ -34,7 +35,9 @@ module Admin
         current = found.select { |(name, _, _, path)| covers?(name, path, current_path) }.map(&:last).max_by(&:length)
 
         found.map do |(name, group, icon, path)|
-          Structs::Section.new(name:, group:, icon: icon.to_s, path:, count: count_for(name), current: path == current)
+          Structs::Section.new(
+            name:, group:, icon: icon.to_s, path:, count: count_for(name), current: path == current, jump: JUMPS[name],
+          )
         end
       end
 
