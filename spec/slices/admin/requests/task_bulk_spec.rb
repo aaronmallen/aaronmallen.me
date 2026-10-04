@@ -9,9 +9,23 @@ RSpec.describe "Admin bulk task actions", type: :request do
     post "/admin/tasks/bulk", { _csrf_token: admin_csrf_token, act: name, ids:, filter: "next", **params }
   end
 
+  def event(kind, from_list: nil, to_list: nil, tag_name: nil) = { kind:, from_list:, to_list:, tag_name: }
+
+  def events(task)
+    found = Tasks::Slice["relations.task_events"].for_task(task.id).in_order.to_a
+
+    found.map { it.to_h.slice(:kind, :from_list, :to_list, :tag_name) }
+  end
+
   def gone_id = create(:task).id.tap { repo.delete(it) }
 
+  def place(task) = repo.by_id(task.id).place
+
   def status(task) = repo.by_id(task.id)&.status
+
+  def tag_names(task) = Tasks::Slice["relations.task_tags"].names_by_task([task.id]).fetch(task.id, [])
+
+  def tagged(*names) = create(:task).tap { repo.replace_tags(it.id, names) }
 
   def tasks(count) = Array.new(count) { create(:task) }
 
@@ -27,7 +41,8 @@ RSpec.describe "Admin bulk task actions", type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page).to have_css("form#task-bulk[action='/admin/tasks/bulk'][method='post']", count: 1)
-        expect(page.all("form#task-bulk button[name='act']").map(&:value)).to eq(%w[complete cancel delete])
+        expect(page.all("form#task-bulk button[name='act']").map(&:value)).to eq(%w[complete cancel move tag untag
+                                                                                    delete])
       end
 
       it "gives each row a box that joins the bar" do
@@ -53,6 +68,20 @@ RSpec.describe "Admin bulk task actions", type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page).to have_css("[data-bulk-all][hidden]", visible: :all)
+      end
+
+      it "offers every list to move to" do
+        get "/admin/tasks", filter: "next"
+
+        options = page.all("form#task-bulk select[name='to'] option").map(&:value)
+
+        expect(options).to eq(["", "today", "next", "someday", "external"])
+      end
+
+      it "draws a labelled tag field in the bar" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css("form#task-bulk input[name='tag'][aria-label='Tag name']")
       end
 
       it "asks before deleting" do
@@ -130,6 +159,144 @@ RSpec.describe "Admin bulk task actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Deleted 2 tasks")
+      end
+    end
+
+    describe "move on the ticked tasks" do
+      let!(:ticked) { tasks(2) }
+      let!(:left) { create(:task) }
+
+      before { act("move", ticked, to: "someday") }
+
+      it "puts them on the list" do
+        expect(ticked.map { place(it) }).to eq(%w[someday someday])
+      end
+
+      it "leaves the rest alone" do
+        expect(place(left)).to eq("next")
+      end
+
+      it "records a move on each" do
+        expect(ticked.map { events(it) }).to all(eq([event("moved", from_list: "next", to_list: "someday")]))
+      end
+
+      it "records nothing on the rest" do
+        expect(events(left)).to be_empty
+      end
+
+      it "says how many moved and where" do
+        follow_redirect!
+
+        expect(toast).to eq("Moved 2 tasks to someday")
+      end
+    end
+
+    describe "move into the sprint" do
+      let!(:ticked) { tasks(2) }
+
+      before { act("move", ticked, to: "today") }
+
+      it "puts them in today's sprint", :aggregate_failures do
+        sprint = Tasks::Slice["repos.sprint_repo"].on(Blog::TimeZone.today)
+
+        expect(ticked.map { repo.by_id(it.id).sprint_id }).to eq([sprint.id, sprint.id])
+        expect(ticked.map { place(it) }).to eq(%w[today today])
+      end
+
+      it "records a move off the list on each" do
+        expect(ticked.map { events(it).map { |event| event.slice(:kind, :from_list) } })
+          .to all(eq([{ kind: "moved", from_list: "next" }]))
+      end
+    end
+
+    describe "tag on the ticked tasks" do
+      let!(:ticked) { [tagged("home"), tagged] }
+      let!(:left) { tagged("home") }
+
+      before { act("tag", ticked, tag: " Money ") }
+
+      it "adds the tag and keeps the others" do
+        expect(ticked.map { tag_names(it) }).to eq([%w[home money], %w[money]])
+      end
+
+      it "leaves the rest alone" do
+        expect(tag_names(left)).to eq(%w[home])
+      end
+
+      it "records the tag on each" do
+        expect(ticked.map { events(it) }).to all(eq([event("tagged", tag_name: "money")]))
+      end
+
+      it "says how many it tagged" do
+        follow_redirect!
+
+        expect(toast).to eq("Tagged 2 tasks money")
+      end
+    end
+
+    describe "tag on a task that has it already" do
+      it "keeps one and records nothing", :aggregate_failures do
+        task = tagged("money")
+        act("tag", [task], tag: "money")
+
+        expect(tag_names(task)).to eq(%w[money])
+        expect(events(task)).to be_empty
+      end
+    end
+
+    describe "untag on the ticked tasks" do
+      let!(:ticked) { [tagged("home", "money"), tagged("money")] }
+      let!(:left) { tagged("money") }
+
+      before { act("untag", ticked, tag: "money") }
+
+      it "takes the tag off and keeps the others" do
+        expect(ticked.map { tag_names(it) }).to eq([%w[home], []])
+      end
+
+      it "leaves the rest alone" do
+        expect(tag_names(left)).to eq(%w[money])
+      end
+
+      it "records the untag on each" do
+        expect(ticked.map { events(it) }).to all(eq([event("untagged", tag_name: "money")]))
+      end
+
+      it "says how many it untagged" do
+        follow_redirect!
+
+        expect(toast).to eq("Took money off 2 tasks")
+      end
+    end
+
+    describe "a move or tag change with a task that is gone" do
+      let!(:ticked) { [tagged("money"), tagged("money")] }
+      let(:missing) { gone_id }
+
+      {
+        "move" => { to: "someday" },
+        "tag" => { tag: "home" },
+        "untag" => { tag: "money" },
+      }.each do |name, input|
+        it "#{name} changes nothing", :aggregate_failures do
+          act(name, [*ticked, missing], **input)
+
+          expect(ticked.map { place(it) }).to eq(%w[next next])
+          expect(ticked.map { tag_names(it) }).to eq([%w[money], %w[money]])
+        end
+
+        it "#{name} records no events" do
+          act(name, [*ticked, missing], **input)
+
+          expect(ticked.flat_map { events(it) }).to be_empty
+        end
+
+        it "#{name} names the task" do
+          act(name, [*ticked, missing], **input)
+          follow_redirect!
+
+          expect(toast).to eq("Nothing changed · ##{missing} is gone")
+        end
       end
     end
 
@@ -229,6 +396,38 @@ RSpec.describe "Admin bulk task actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Finished 1 task")
+      end
+
+      it "asks for a list before a move", :aggregate_failures do
+        task = create(:task)
+        act("move", [task], to: "")
+        follow_redirect!
+
+        expect(toast).to eq("Pick a list first")
+        expect(place(task)).to eq("next")
+      end
+
+      it "asks for a tag before a tag change" do
+        act("tag", [create(:task)], tag: " ")
+        follow_redirect!
+
+        expect(toast).to eq("Type a tag first")
+      end
+
+      it "refuses a tag that is not a slug", :aggregate_failures do
+        task = create(:task)
+        act("tag", [task], tag: "not a tag!")
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · a tag takes lowercase letters, numbers and dashes")
+        expect(tag_names(task)).to be_empty
+      end
+
+      it "ignores the move and tag fields on other actions" do
+        task = create(:task)
+        act("complete", [task], to: "", tag: "not a tag!")
+
+        expect(status(task)).to eq("done")
       end
 
       it "refuses an action off the bar", :aggregate_failures do

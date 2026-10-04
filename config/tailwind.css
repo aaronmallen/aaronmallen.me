@@ -3060,6 +3060,14 @@
   @apply ml-auto flex flex-wrap items-center gap-2;
 }
 
+@utility bulk-group {
+  @apply flex items-center gap-2;
+}
+
+@utility bulk-field {
+  @apply max-w-40;
+}
+
 @utility bulk-pick {
   @apply inline-flex cursor-pointer items-center justify-center;
 

@@ -9,6 +9,14 @@ RSpec.describe "Admin bulk task actions", type: :feature do
 
   def box(title) = find(".task", text: title).find("input[name='ids[]']")
 
+  def bulk(button, **fields)
+    within("form#task-bulk") do
+      select(fields[:to], from: "to") if fields[:to]
+      fill_in("tag", with: fields[:tag]) if fields[:tag]
+      click_button(button)
+    end
+  end
+
   def confirm_dialog = find("dialog#confirm-dialog[open]")
 
   def scripts_off
@@ -17,6 +25,12 @@ RSpec.describe "Admin bulk task actions", type: :feature do
   end
 
   def scripts_on = page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
+
+  def tagged(name)
+    names = Tasks::Slice["relations.task_tags"].names_by_task(repo.all_open.map(&:id))
+
+    names.filter_map { |id, tags| repo.by_id(id).title if tags.include?(name) }
+  end
 
   def ticked
     page.all(".task").select { it.has_css?("input:checked", wait: false) }.map { it.find(".task-title").text }
@@ -91,6 +105,22 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       expect(repo.all_open.map(&:title)).to eq(["elsewhere"])
     end
 
+    it "moves the ticked tasks to the list picked", :aggregate_failures do
+      box("first").check
+      bulk("Move", to: "Someday")
+
+      expect(page).to have_css("[data-toast] .toast", text: "Moved 1 task to someday")
+      expect(repo.in_list("someday").map(&:title)).to contain_exactly("first", "elsewhere")
+    end
+
+    it "tags rather than finishes when Enter goes in the tag field", :aggregate_failures do
+      box("first").check
+      find("form#task-bulk input[name='tag']").send_keys("home", :enter)
+
+      expect(page).to have_css("[data-toast] .toast", text: "Tagged 1 task home")
+      expect(tagged("home")).to eq(["first"])
+    end
+
     it "asks before it deletes", :aggregate_failures do
       box("second").check
       within("form#task-bulk") { click_button("Delete") }
@@ -143,6 +173,20 @@ RSpec.describe "Admin bulk task actions", type: :feature do
 
       expect(page).to have_current_path("/admin/tasks?filter=next")
       expect(repo.all_open.map(&:title)).to contain_exactly("second", "third", "elsewhere")
+    end
+
+    it "still moves the ticked tasks with a plain post" do
+      box("second").check
+      bulk("Move", to: "Someday")
+
+      expect(repo.in_list("someday").map(&:title)).to contain_exactly("second", "elsewhere")
+    end
+
+    it "still tags the ticked tasks with a plain post" do
+      box("third").check
+      bulk("Tag", tag: "home")
+
+      expect(tagged("home")).to eq(["third"])
     end
   end
 end

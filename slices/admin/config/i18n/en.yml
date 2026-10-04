@@ -147,6 +147,23 @@ en:
           blank: "Tick a task first"
           format: "Nothing changed · pick an action from the bar"
           long: "Tick 100 tasks or fewer"
+          tag_blank: "Type a tag first"
+          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
+          to_blank: "Pick a list first"
+        lists:
+          external: "external"
+          next: "next"
+          someday: "someday"
+          today: "today"
+        moved:
+          one: "Moved %{count} task to %{list}"
+          other: "Moved %{count} tasks to %{list}"
+        tagged:
+          one: "Tagged %{count} task %{tag}"
+          other: "Tagged %{count} tasks %{tag}"
+        untagged:
+          one: "Took %{tag} off %{count} task"
+          other: "Took %{tag} off %{count} tasks"
       canceled: "Canceled"
       captured: "Task captured"
       closed: "That task is closed already"
@@ -1026,6 +1043,18 @@ en:
           confirm_delete: "Delete the ticked tasks? This cannot be undone."
           delete: "Delete"
           label: "Ticked tasks"
+          lists:
+            external: "External"
+            next: "Next"
+            someday: "Someday"
+            today: "Today"
+          move: "Move"
+          move_to: "Move to"
+          pick_list: "Move to…"
+          tag: "Tag"
+          tag_name: "Tag name"
+          tag_placeholder: "tag"
+          untag: "Untag"
         closed:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"

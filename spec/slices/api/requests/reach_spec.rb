@@ -15,6 +15,8 @@ RSpec.describe "API reach", type: :request do
       "tasks.operations.save_task_tag_rule" => "#393 adds the endpoint and tool that save a tag rule",
       "tasks.operations.set_task_total" => "#264 adds the endpoint and tool that set the total",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
+      "tasks.operations.tag_task" => "the bulk bar runs it through act_on_tasks; #341 adds its endpoint and tool",
+      "tasks.operations.untag_task" => "the bulk bar runs it through act_on_tasks; #341 adds its endpoint and tool",
     }
   end
 

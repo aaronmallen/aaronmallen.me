@@ -125,7 +125,7 @@ module Blog
     end
     TagScope = Types::String.enum("public", "private")
     TagScopeParam = TagScope.fallback(TagScope.values.first)
-    TaskBulkAction = Types::String.enum("complete", "cancel", "delete")
+    TaskBulkAction = Types::String.enum("complete", "cancel", "move", "tag", "untag", "delete")
     TaskFilter = Types::String.enum("today", "next", "someday", "external")
     TaskFilterParam = TaskFilter.fallback(TaskFilter.values.first)
     TaskLinkType = Types::String.enum("blocks", "relates", "duplicates")
@@ -190,6 +190,7 @@ module Blog
       ProjectLiveStatus = Types::ProjectLiveStatus.optional.constructor { |value| OptionalText[value] }
       Repo = Types::Repo.optional.constructor { |value| OptionalText[value] }
       Slug = Types::Slug.optional.constructor { |value| OptionalText[value] }
+      Tag = Types::String.optional.constructor { |value| OptionalText[value]&.then { Normalizers::Tag[it] } }
       TagColor = Types::TagColor.optional.constructor { |value| OptionalText[value] }
       TaskFilter = Types::TaskFilter.optional.constructor { |value| OptionalText[value] }
       Url = Types::Url.optional.constructor { |value| OptionalText[value] }
