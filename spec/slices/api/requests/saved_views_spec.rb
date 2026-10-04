@@ -69,17 +69,12 @@ RSpec.describe "API saved views", type: :request do
   end
 
   describe "POST /api/v1/saved_views" do
-    it "saves the view and answers it" do
+    it "saves the view and answers it with a 201" do
       created = create_view(name: "Open deploys", screen: "tasks", filters: { filter: "next", q: "deploy" })
 
-      expect(created.except("id"))
-        .to eq("name" => "Open deploys", "screen" => "tasks", "filters" => { "filter" => "next", "q" => "deploy" })
-    end
+      view = { "name" => "Open deploys", "screen" => "tasks", "filters" => { "filter" => "next", "q" => "deploy" } }
 
-    it "answers 201" do
-      create_view(name: "Open", screen: "tasks")
-
-      expect(status).to eq(201)
+      expect([created.except("id"), status]).to eq([view, 201])
     end
 
     it "keeps the activity types as an object" do

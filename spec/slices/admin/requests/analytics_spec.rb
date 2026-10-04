@@ -26,15 +26,12 @@ RSpec.describe "Admin analytics", type: :request do
         get "/admin/analytics"
       end
 
-      it "answers with the page" do
-        expect(last_response).to be_ok
-      end
-
       it "heads the page with the range" do
         expect(page).to have_css(".page-head-sub", text: "Last 7 days · self-hosted rollups, no third-party scripts")
       end
 
-      it "titles the page Analytics" do
+      it "answers with the page titled Analytics", :aggregate_failures do
+        expect(last_response).to be_ok
         expect(page).to have_title("Analytics | Admin | #{Blog::Owner.full_name}")
       end
 
@@ -280,11 +277,8 @@ RSpec.describe "Admin analytics", type: :request do
         get "/admin/analytics"
       end
 
-      it "answers with the page" do
+      it "answers with the page and ranks a referrer with no counted day last", :aggregate_failures do
         expect(last_response).to be_ok
-      end
-
-      it "ranks a referrer with no counted day last" do
         expect(meter_card("Referrers").all(".meter-name").map(&:text)).to eq(%w[news.example old.example])
       end
 
@@ -484,11 +478,8 @@ RSpec.describe "Admin analytics", type: :request do
     describe "with no data at all" do
       before { get "/admin/analytics" }
 
-      it "answers with the page" do
+      it "answers with the page and zeroed stats", :aggregate_failures do
         expect(last_response).to be_ok
-      end
-
-      it "shows zeroed stats" do
         expect(page.all(".stat-value").map(&:text)).to eq(["0", "0", "0:00", "0"])
       end
 

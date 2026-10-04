@@ -620,11 +620,8 @@ RSpec.describe "Admin tasks", type: :request do
 
       before { get "/admin/tasks/new" }
 
-      it "answers 200" do
+      it "answers 200 asking for every field a task has but its type", :aggregate_failures do
         expect(last_response.status).to eq(200)
-      end
-
-      it "asks for every field a task has but its type" do
         expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
       end
 
@@ -1445,21 +1442,16 @@ RSpec.describe "Admin tasks", type: :request do
 
       def open_edit(**params) = get("/admin/tasks/#{task.id}/edit", params)
 
-      it "answers 200" do
-        open_edit
-
-        expect(last_response.status).to eq(200)
-      end
-
       it "answers 404 for a task that isn't there" do
         get "/admin/tasks/0/edit"
 
         expect(last_response.status).to eq(404)
       end
 
-      it "heads the page with the title" do
+      it "answers 200 headed with the title", :aggregate_failures do
         open_edit
 
+        expect(last_response.status).to eq(200)
         expect(page).to have_css("h1.page-head-title", exact_text: "Email accountant")
       end
 

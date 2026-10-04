@@ -292,15 +292,9 @@ RSpec.describe "API tasks", type: :request do
   end
 
   describe "POST /api/v1/tasks" do
-    it "captures a task into next with its tags" do
-      expect(capture(title: "Email the accountant", tags: %w[admin money]))
-        .to include("title" => "Email the accountant", "list" => "next", "tags" => %w[admin money])
-    end
-
-    it "answers 201" do
-      capture(title: "Email the accountant")
-
-      expect(status).to eq(201)
+    it "captures a task into next with its tags and answers 201" do
+      expect([capture(title: "Email the accountant", tags: %w[admin money]), status])
+        .to match([include("title" => "Email the accountant", "list" => "next", "tags" => %w[admin money]), 201])
     end
 
     it "schedules a task for the sprint day it names" do

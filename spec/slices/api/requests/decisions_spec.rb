@@ -434,7 +434,7 @@ RSpec.describe "API decisions", type: :request do
     end
 
     it "pages the decisions" do
-      allow(API::Slice["settings"]).to receive(:page_size).and_return({ mcp: 1 })
+      lower_page_size(:mcp, to: 1)
 
       expect([listed, list.slice("partial", "next_page"), listed("page=2")])
         .to eq([[dropped.id], { "partial" => true, "next_page" => 2 }, [open_one.id]])

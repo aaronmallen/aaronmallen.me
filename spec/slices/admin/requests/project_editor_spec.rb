@@ -22,11 +22,8 @@ RSpec.describe "Admin project editor", type: :request do
     describe "the new editor" do
       before { get "/admin/projects/new" }
 
-      it "answers ok" do
+      it "answers with the page titled New project", :aggregate_failures do
         expect(last_response).to be_ok
-      end
-
-      it "titles the page New project" do
         expect(page).to have_title("New project | Admin | #{Blog::Owner.full_name}")
       end
 
@@ -77,11 +74,8 @@ RSpec.describe "Admin project editor", type: :request do
         get "/admin/projects/#{project.id}/edit"
       end
 
-      it "answers ok" do
+      it "answers with the page titled with the project's name", :aggregate_failures do
         expect(last_response).to be_ok
-      end
-
-      it "titles the page with the project's name" do
         expect(page).to have_title("sai | Admin | #{Blog::Owner.full_name}")
       end
 

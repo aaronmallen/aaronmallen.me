@@ -85,11 +85,8 @@ RSpec.describe "Admin post analytics", type: :request do
         get "/admin/posts/#{post.id}/analytics"
       end
 
-      it "answers with the page" do
+      it "answers with the page titled with the post", :aggregate_failures do
         expect(last_response).to be_ok
-      end
-
-      it "titles the page with the post" do
         expect(page).to have_css(".page-head-title", exact_text: "Hello")
       end
 

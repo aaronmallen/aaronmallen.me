@@ -56,9 +56,10 @@ RSpec.describe "API journal entries", type: :request do
         .to eq([%w[2026-03-02T09:00:00Z 2026-03-05T12:00:00Z]])
     end
 
-    it "describes the window" do
-      expect(march).to eq("from" => "2026-03-01", "to" => "2026-03-31", "count" => 0, "partial" => false,
-                          "entries" => [])
+    it "describes the window with a 200" do
+      window = { "from" => "2026-03-01", "to" => "2026-03-31", "count" => 0, "partial" => false, "entries" => [] }
+
+      expect([march, status]).to eq([window, 200])
     end
 
     it "leaves out entries outside the window" do
@@ -73,12 +74,6 @@ RSpec.describe "API journal entries", type: :request do
       entry_on(2, "08:00", "second")
 
       expect(march).to include("count" => 1, "partial" => true, "continue_to" => "2026-03-01")
-    end
-
-    it "answers 200" do
-      march
-
-      expect(status).to eq(200)
     end
 
     it "refuses a window that runs backwards with a 422" do
@@ -150,15 +145,9 @@ RSpec.describe "API journal entries", type: :request do
   end
 
   describe "POST /api/v1/journal_entries" do
-    it "saves the entry on today with its tags" do
-      expect(create_entry(body: "Wrote about abc", tags: %w[ruby Health]))
-        .to include("date" => today.iso8601, "body" => "Wrote about abc", "tags" => %w[health ruby])
-    end
-
-    it "answers 201" do
-      create_entry(body: "Wrote about abc")
-
-      expect(status).to eq(201)
+    it "saves the entry on today with its tags and answers 201" do
+      expect([create_entry(body: "Wrote about abc", tags: %w[ruby Health]), status])
+        .to match([include("date" => today.iso8601, "body" => "Wrote about abc", "tags" => %w[health ruby]), 201])
     end
 
     it "lands on the earlier day it names" do
