@@ -26,7 +26,7 @@ RSpec.describe Links::Queries::FindRecords do
 
     it "finds a social post by a later part" do
       social_post = create(:social_post, :thread)
-      create(:social_post_part, social_post_id: social_post.id, body: "And a zeppelin", position: 99)
+      create(:social_post_part, social_post_id: social_post.id, body: "And a zeppelin")
 
       expect(find("zeppelin")["social_post"].map(&:id)).to eq([social_post.id])
     end

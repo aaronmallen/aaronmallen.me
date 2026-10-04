@@ -53,7 +53,7 @@ RSpec.describe Search::Queries::Search do
     before do
       create(:task, title: "Open task", note: "about zeppelins")
       create(:post, :published, title: "Zeppelins", body: "A post")
-      create(:social_post_part, social_post_id: create(:social_post, :posted).id, body: "Saw a zeppelin", position: 9)
+      create(:social_post_part, social_post_id: create(:social_post, :posted).id, body: "Saw a zeppelin")
       create(:journal_entry, body: "Dreamt of zeppelins")
       create(:commit, message: "Draw the zeppelin")
       create(:project, name: "airship", tagline: "Zeppelin tracker")
