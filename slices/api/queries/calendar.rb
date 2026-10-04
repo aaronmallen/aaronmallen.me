@@ -5,7 +5,6 @@ require "dry/monads"
 module API
   module Queries
     class Calendar
-      BACKWARDS = "from comes after to"
       NONE = Blog::Constants::EMPTY_ARRAY
 
       Day = Data.define(:date, :sprint, :posts, :social_posts, :journal)
@@ -19,7 +18,7 @@ module API
       ]
 
       def call(from:, to:)
-        return Failure(BACKWARDS) if from > to
+        return Failure(Blog::DayWindow::BACKWARDS) if from > to
         return Failure(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(from, to)
 
         Success(days(from, to))

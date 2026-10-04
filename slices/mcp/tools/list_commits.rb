@@ -8,25 +8,25 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: DayWindow::DAYS,
+          from: Blog::DayWindow::DAYS,
           repos: {
             type: "array",
             items: { type: "string" },
             description: "repository names, with or without the owner; a commit in any of them comes back",
           },
-          to: DayWindow::DAYS,
+          to: Blog::DayWindow::DAYS,
         },
         required: %w[from to],
       }.freeze
 
       description "List the commits in a date range, each with its sha, repository, branch, whole message, " \
-                  "date, time and lines added and deleted. #{DayWindow::PAGING_NOTE}"
+                  "date, time and lines added and deleted. #{Blog::DayWindow::PAGING_NOTE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, repos: nil)
-          case DayWindow.days(from, to)
+          case Blog::DayWindow.days(from, to)
           in Success[first, last] then listed(first, last, Array(repos), server_context)
           in Failure(message) then refuse(message)
           end
@@ -49,7 +49,7 @@ module MCP
         end
 
         def listed(first, last, repos, server_context)
-          page = DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
+          page = Blog::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
             commits_between(server_context).call(from:, to:, repos:, limit:)
           end
           rows = page.fetch(:rows)

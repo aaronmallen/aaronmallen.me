@@ -5,10 +5,7 @@ module MCP
     class ListWorkEntries < Base
       SCHEMA = {
         additionalProperties: false,
-        properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
-        },
+        properties: Blog::DayWindow::RANGE,
         required: %w[from to],
       }.freeze
 
@@ -21,11 +18,13 @@ module MCP
 
       class << self
         def call(from:, to:, server_context:)
-          first = Blog::TimeZone.parse_day(from)
-          last = Blog::TimeZone.parse_day(to)
-          return refuse("give from and to as days, such as 2026-01-01") unless first && last
-          return refuse("from comes after to") if first > last
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] then listed(first, last, server_context)
+          in Failure(message) then refuse(message)
+          end
+        end
 
+        def listed(first, last, server_context)
           entries = work_entries_between(server_context).call(from: first, to: last)
 
           answer(from: first.iso8601, to: last.iso8601, work_entries: entries.map { summary(it) })

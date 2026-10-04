@@ -84,6 +84,6 @@ RSpec.describe API::Queries::Calendar do
   end
 
   it "refuses a range that ends before it starts" do
-    expect(calendar.call(from: first, to: first - 1)).to eq(Dry::Monads::Failure(described_class::BACKWARDS))
+    expect(calendar.call(from: first, to: first - 1)).to eq(Dry::Monads::Failure(Blog::DayWindow::BACKWARDS))
   end
 end

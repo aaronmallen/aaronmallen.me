@@ -54,15 +54,6 @@ module MCP
 
         def dated_posts(server_context) = server_context.fetch(:dated_posts)
 
-        def days(from, to)
-          first = Blog::TimeZone.parse_day(from)
-          last = Blog::TimeZone.parse_day(to)
-          return Failure("give from and to as days, such as 2026-01-01") unless first && last
-          return Failure("from comes after to") if first > last
-
-          Success(first..last)
-        end
-
         def delete_post(server_context) = server_context.fetch(:delete_post)
 
         def delete_social_post(server_context) = server_context.fetch(:delete_social_post)

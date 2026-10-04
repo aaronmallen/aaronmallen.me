@@ -6,9 +6,8 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
-          page: Paging::PAGE,
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
+          **Blog::DayWindow::RANGE,
+          page: Blog::Paging::PAGE,
         },
         required: %w[from to],
       }.freeze
@@ -17,7 +16,7 @@ module MCP
                   "status, its parts in order and, per network it targets, how delivery stands (waiting, " \
                   "sending, retrying, sent or failed) with the link, error and engagement counts. " \
                   "A post falls on the day it went out or is set to go out, and a draft on the day it was made. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -25,19 +24,22 @@ module MCP
         include SocialPostAnswer
 
         def call(from:, to:, server_context:, page: 1)
-          first = Blog::TimeZone.parse_day(from)
-          last = Blog::TimeZone.parse_day(to)
-          return refuse("give from and to as days, such as 2026-01-01") unless first && last
-          return refuse("from comes after to") if first > last
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] then listed(first, last, page(page, server_context), server_context)
+          in Failure(message) then refuse(message)
+          end
+        end
 
-          requested = page(page, server_context)
-          found = social_posts_dated_between(server_context).call(from: first, to: last, page: requested)
+        private
+
+        def listed(first, last, page, server_context)
+          found = social_posts_dated_between(server_context).call(from: first, to: last, page:)
 
           answer(
             from: first.iso8601,
             to: last.iso8601,
             social_posts: found.rows.map { social_post_entry(it) },
-            **Paging.fields(found),
+            **Blog::Paging.fields(found),
           )
         end
       end

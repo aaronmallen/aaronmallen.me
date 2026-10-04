@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ListJournalEntries < Base
       description "List the journal entries in a date range, each with its ID, date, time, whole body and tags. " \
-                  "#{DayWindow::PAGING_NOTE}"
+                  "#{Blog::DayWindow::PAGING_NOTE}"
       input_schema(API::Endpoints::ListJournalEntries::SCHEMA)
       scope OAuth::Scope::READ
 

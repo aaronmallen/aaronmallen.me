@@ -6,8 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
+          **Blog::DayWindow::RANGE,
         },
         required: %w[from to],
       }.freeze
@@ -24,13 +23,11 @@ module MCP
 
       class << self
         def call(from:, to:, server_context:)
-          first = Blog::TimeZone.parse_day(from)
-          last = Blog::TimeZone.parse_day(to)
-          return refuse("give from and to as days, such as 2026-01-01") unless first && last
-          return refuse("from comes after to") if first > last
-          return refuse_long_range if too_long?(first, last)
-
-          summary(first, last, server_context)
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] if too_long?(first, last) then refuse_long_range
+          in Success[first, last] then summary(first, last, server_context)
+          in Failure(message) then refuse(message)
+          end
         end
 
         private

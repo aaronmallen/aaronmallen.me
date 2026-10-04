@@ -11,7 +11,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the window, as YYYY-MM-DD" },
+          **Blog::DayWindow::WINDOW,
           kinds: {
             type: "array",
             items: { type: "string", enum: KINDS },
@@ -28,7 +28,6 @@ module MCP
             description: "tags on journal entries, tasks and decisions; a comment or session takes its owner's tags",
           },
           text: { type: "string", description: "free text to match against the row" },
-          to: { type: "string", description: "the last day of the window, as YYYY-MM-DD" },
         },
         required: %w[from to],
       }.freeze
@@ -45,14 +44,14 @@ module MCP
                   "Each row carries its kind, day, time and name, and whichever of link, repo, sha, additions, " \
                   "deletions, status, targets, excerpt, task_id, decision_id, worked_seconds and tags its kind " \
                   "holds. " \
-                  "#{DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
+                  "#{Blog::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
                   "a time, newest first"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, **filters)
-          case DayWindow.days(from, to)
+          case Blog::DayWindow.days(from, to)
           in Success[first, last] then window(first, last, filters, server_context)
           in Failure(message) then refuse(message)
           end
@@ -88,7 +87,7 @@ module MCP
         end
 
         def window(first, last, filters, server_context)
-          page = DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
+          page = Blog::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
             found(from, to, filters, server_context, limit:)
           end
           rows = page.fetch(:rows)

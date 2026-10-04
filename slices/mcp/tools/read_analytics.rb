@@ -19,10 +19,9 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
+          **Blog::DayWindow::RANGE,
           path: { type: "string", description: "one page to read alone, such as #{Blog::Site::WRITING}/hello" },
           since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
         },
         required: %w[from to],
       }.freeze
@@ -94,9 +93,9 @@ module MCP
           at = Blog::TimeZone.parse_time(since) if since
           return refuse(SINCE_REFUSAL) if since && !at
 
-          case days(from, to)
-          in Success(range) if too_long?(range.first, range.last) then refuse_long_range
-          in Success(range) then read(range, at, path, server_context)
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] if too_long?(first, last) then refuse_long_range
+          in Success[first, last] then read(first..last, at, path, server_context)
           in Failure(message) then refuse(message)
           end
         end

@@ -91,7 +91,7 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "stops at the row cap and says where to go on" do
-      stub_const("MCP::Tools::DayWindow::CAP", 2)
+      stub_const("Blog::DayWindow::CAP", 2)
       [1, 2, 2, 3].each { create(:commit, commit_date: Date.new(2026, 3, it)) }
       call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
 
@@ -99,7 +99,7 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "rounds a full window out to the end of its last day" do
-      stub_const("MCP::Tools::DayWindow::CAP", 2)
+      stub_const("Blog::DayWindow::CAP", 2)
       3.times { create(:commit, commit_date: Date.new(2026, 3, 2)) }
       call_tool("list_commits", from: "2026-03-01", to: "2026-03-31")
 
@@ -148,7 +148,7 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "stops at the row cap and says where to go on" do
-      stub_const("MCP::Tools::DayWindow::CAP", 1)
+      stub_const("Blog::DayWindow::CAP", 1)
       create(:journal_entry, entry_date: Date.new(2026, 3, 1))
       create(:journal_entry, entry_date: Date.new(2026, 3, 2))
       call_tool("list_journal_entries", from: "2026-03-01", to: "2026-03-31")

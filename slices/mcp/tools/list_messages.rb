@@ -14,10 +14,9 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
-          page: Paging::PAGE,
+          **Blog::DayWindow::RANGE,
+          page: Blog::Paging::PAGE,
           status: STATUS,
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
         },
         required: %w[from to],
       }.freeze
@@ -26,14 +25,14 @@ module MCP
                   "the ID, subject, reply address, status and when it came in. " \
                   "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, status: nil, page: 1)
-          case days(from, to)
-          in Success(range) then listed(range, status, page(page, server_context), server_context)
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] then listed(first..last, status, page(page, server_context), server_context)
           in Failure(message) then refuse(message)
           end
         end
@@ -47,7 +46,7 @@ module MCP
             from: range.first.iso8601,
             to: range.last.iso8601,
             messages: found.rows.map { summary(it) },
-            **Paging.fields(found),
+            **Blog::Paging.fields(found),
           )
         end
 

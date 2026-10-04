@@ -5,13 +5,13 @@ module MCP
     class ListTags < Base
       SCHEMA = {
         additionalProperties: false,
-        properties: { page: Paging::PAGE, scope: TAG_SCOPE },
+        properties: { page: Blog::Paging::PAGE, scope: TAG_SCOPE },
         required: ["scope"],
       }.freeze
 
       description "List the tags in one scope by name with their colour, how many records carry each, and that " \
                   "count split by kind. Public tags go on posts and projects; private tags go on journal entries " \
-                  "and tasks. A tag nothing carries counts zero. #{Paging::USAGE}"
+                  "and tasks. A tag nothing carries counts zero. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -23,7 +23,7 @@ module MCP
 
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
-            **Paging.fields(tags),
+            **Blog::Paging.fields(tags),
           )
         end
 

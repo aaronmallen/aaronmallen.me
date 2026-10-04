@@ -24,10 +24,7 @@ module MCP
 
       class << self
         def template(args)
-          first = Blog::TimeZone.parse_day(args[:from].to_s)
-          last = Blog::TimeZone.parse_day(args[:to].to_s)
-          refuse("give from and to as days, such as 2026-01-01") unless first && last
-          refuse("from comes after to") if first > last
+          first, last = Blog::DayWindow.days(args[:from].to_s, args[:to].to_s).value_or { refuse(it) }
           refuse(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(first, last)
 
           Prompt::Result.new(description: headline(first, last), messages: [say(instructions(first, last))])

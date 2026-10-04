@@ -11,9 +11,8 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: { type: "string", description: "the first day of the range, as YYYY-MM-DD" },
-          page: Paging::PAGE,
-          to: { type: "string", description: "the last day of the range, as YYYY-MM-DD" },
+          **Blog::DayWindow::RANGE,
+          page: Blog::Paging::PAGE,
         },
         required: %w[from to],
       }.freeze
@@ -23,14 +22,14 @@ module MCP
                   "and its status. A pending edit waits on the author, a stale one no longer matches the text, " \
                   "and accepted and rejected ones are settled. Accept or reject open edits with " \
                   "accept_suggestion_edits and reject_suggestion_edits. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Paging::USAGE}"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, page: 1)
-          case days(from, to)
-          in Success(range) then listed(range, page(page, server_context), server_context)
+          case Blog::DayWindow.days(from, to)
+          in Success[first, last] then listed(first..last, page(page, server_context), server_context)
           in Failure(message) then refuse(message)
           end
         end
@@ -55,7 +54,7 @@ module MCP
             from: range.first.iso8601,
             to: range.last.iso8601,
             suggestions: found.rows.map { summary(it) },
-            **Paging.fields(found),
+            **Blog::Paging.fields(found),
           )
         end
 
