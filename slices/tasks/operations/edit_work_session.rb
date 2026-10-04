@@ -31,6 +31,8 @@ module Tasks
         session ? Success(session) : Failure(:not_found)
       end
 
+      def future(time, now) = ([FUTURE] if time && time > now)
+
       def kept(saved, given) = Blog::TimeZone.input_value(saved) == Blog::TimeZone.input_value(given) ? saved : given
 
       def length(started_at, ended_at) = ended_at ? (ended_at - started_at).floor : 0
@@ -38,8 +40,9 @@ module Tasks
       def ordered(session, fields, now)
         started_at = kept(session.started_at, fields[:started_at])
         ended_at = session.ended_at && kept(session.ended_at, fields[:ended_at])
+        errors = { started_at: future(started_at, now), ended_at: future(ended_at, now) }.compact
+        return Failure[:invalid, errors] unless errors.empty?
         return Failure[:invalid, { ended_at: [ORDER] }] if ended_at && ended_at < started_at
-        return Failure[:invalid, { started_at: [FUTURE] }] if ended_at.nil? && started_at > now
 
         Success([started_at, ended_at])
       end

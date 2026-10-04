@@ -11,24 +11,26 @@ module Tasks
       ]
 
       def call(id, at: Time.now, seen: true)
-        step find(id)
         sprint = step current_sprint.call(now: at)
 
-        task_event_repo.track(id, at, seen:) do
-          work_session_repo.open(id, at)
-          task_repo.update(
-            id,
-            completed_at: nil,
-            list: nil,
-            sprint_id: sprint.id,
-            status: Blog::Types::TaskStatus["in_progress"],
-          )
+        transaction do
+          step find(id)
+          task_event_repo.track(id, at, seen:) do
+            work_session_repo.open(id, at)
+            task_repo.update(
+              id,
+              completed_at: nil,
+              list: nil,
+              sprint_id: sprint.id,
+              status: Blog::Types::TaskStatus["in_progress"],
+            )
+          end
         end
       end
 
       private
 
-      def find(id) = task_repo.by_id(id) ? Success(id) : Failure(:not_found)
+      def find(id) = work_session_repo.lock_task(id) ? Success(id) : Failure(:not_found)
     end
   end
 end

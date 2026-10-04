@@ -11,6 +11,8 @@ module Tasks
 
       def find(task_id, id) = work_sessions.for_task(task_id).by_pk(id).one
 
+      def lock_task(task_id) = tasks.by_pk(task_id).lock.one
+
       def open(task_id, at) = work_sessions.open(task_id, at)
 
       def restart(task_id, at)

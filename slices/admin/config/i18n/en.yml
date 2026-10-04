@@ -1421,6 +1421,7 @@ en:
           ended_at:
             blank: "Give the time it ended."
             format: "Give the end as a date and time."
+            future: "A session cannot end later than now."
             order: "End it after it starts."
             running: "Pause or complete the task before you delete its running session."
             skipped: "That time does not exist here. The clocks skip it."
@@ -1441,7 +1442,7 @@ en:
           started_at:
             blank: "Give the time it started."
             format: "Give the start as a date and time."
-            future: "A running session cannot start later than now."
+            future: "A session cannot start later than now."
             skipped: "That time does not exist here. The clocks skip it."
           tags:
             format: "Tags are lowercase words, separated by commas."

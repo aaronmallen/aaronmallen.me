@@ -105,6 +105,23 @@ RSpec.describe "Admin task time", type: :request do
         expect([last_response.status, sessions(found).first[:started_at]]).to eq([422, started])
       end
 
+      it "refuses an end later than now and changes nothing", :aggregate_failures do
+        edit(closed, started_at: started, ended_at: Time.now + 7200)
+
+        expect(last_response.status).to eq(422)
+        error = page.find("#task-session-#{sessions.first[:id]}-ended-at-error")
+        expect(error).to have_text(t("ui.components.tasks.field_error.ended_at.future"))
+        expect([sessions.first[:ended_at], total]).to eq([started + 1800, 3600])
+      end
+
+      it "refuses a finished session that starts later than now", :aggregate_failures do
+        edit(closed, started_at: Time.now + 7200, ended_at: Time.now + 9000)
+
+        expect(last_response.status).to eq(422)
+        expect(page.find("#task-session-#{sessions.first[:id]}-started-at-error"))
+          .to have_text(t("ui.components.tasks.field_error.started_at.future"))
+      end
+
       it "refuses an end before the start and changes nothing", :aggregate_failures do
         edit(closed, started_at: started, ended_at: started - 60)
 

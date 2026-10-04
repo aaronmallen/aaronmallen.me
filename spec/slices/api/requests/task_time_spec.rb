@@ -109,6 +109,21 @@ RSpec.describe "API task time", type: :request do
       expect(total).to eq(3600)
     end
 
+    it "refuses an end later than now with a 422 and keeps the session", :aggregate_failures do
+      answer = edit(closed, started_at: started, ended_at: Time.now + 7200)
+
+      expect([answer.fetch("errors"), status]).to eq([{ "ended_at" => ["a session cannot end later than now"] }, 422])
+      expect([sessions.first[:ended_at], total]).to eq([started + 1800, 3600])
+    end
+
+    it "refuses a finished session that starts later than now with a 422" do
+      errors = edit(closed, started_at: Time.now + 7200, ended_at: Time.now + 9000).fetch("errors")
+
+      expect(errors.transform_values(&:first)).to eq(
+        "started_at" => "a session cannot start later than now", "ended_at" => "a session cannot end later than now",
+      )
+    end
+
     it "refuses a finished session with no end with a 422" do
       expect(edit(closed, started_at: started).fetch("errors"))
         .to eq("ended_at" => ["a finished session needs an end"])
