@@ -8,6 +8,8 @@ module API
 
     config.actions.csrf_protection = false
 
+    import keys: %w[queries.review], from: :activity
+
     import keys: %w[queries.count_with_status queries.unread_messages], from: :contact
 
     import keys: %w[
@@ -52,11 +54,12 @@ module API
       endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option endpoints.link_records
       endpoints.link_tasks endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
       endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.open_decision endpoints.plan_sprint
-      endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_task endpoints.reopen_decision
-      endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.start_task endpoints.tag_decision endpoints.unlink_records endpoints.unlink_task
-      endpoints.untag_decision endpoints.update_journal_entry endpoints.update_saved_view operations.mint_token
-      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_review endpoints.read_task
+      endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
+      endpoints.save_task endpoints.schedule_task endpoints.start_task endpoints.tag_decision endpoints.unlink_records
+      endpoints.unlink_task endpoints.untag_decision endpoints.update_journal_entry endpoints.update_saved_view
+      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
+      queries.live_tokens
     ]
   end
 end

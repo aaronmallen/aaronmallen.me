@@ -42,6 +42,8 @@ module API
     post "/links/:kind/:id", to: "record_links.create"
     delete "/links/:kind/:id/:other_kind/:other_id", to: "record_links.destroy"
 
+    get "/review", to: "reviews.show"
+
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"
     get "/sprints/current", to: "sprints.current"
