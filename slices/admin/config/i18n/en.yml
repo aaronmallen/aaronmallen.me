@@ -1274,6 +1274,10 @@ en:
           confirm_move: "Move %{task} to %{list}? It stops and goes back to open."
           ask: "How long did this take?"
           complete: "Done"
+          keys:
+            complete: "Complete the highlighted task"
+            move: "Move the highlighted task one list over"
+            start: "Start the highlighted task"
           lists:
             next: "Next"
             someday: "Someday"
@@ -1380,6 +1384,7 @@ en:
             one: "carried ×%{count}"
             other: "carried ×%{count}"
           edit: "Edit"
+          edit_key: "Edit the highlighted task"
           in_progress: "in progress"
           pick: "Select %{task}"
           scheduled: "%{date}"

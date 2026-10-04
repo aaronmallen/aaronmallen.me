@@ -49,6 +49,7 @@ function press(event) {
   if (!control) return;
 
   event.preventDefault();
+  if (control.matches("summary")) control.focus();
   control.click();
 }
 

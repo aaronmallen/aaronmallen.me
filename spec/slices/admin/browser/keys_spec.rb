@@ -95,6 +95,105 @@ RSpec.describe "Admin keys", type: :feature do
     end
   end
 
+  describe "task row keys" do
+    let(:repo) { Tasks::Slice["repos.task_repo"] }
+
+    def task(title) = repo.all_open.find { it.title == title }
+
+    before do
+      create(:task, title: "Write the brief")
+      create(:task, title: "Book the venue")
+      visit "/admin/tasks?filter=next"
+    end
+
+    describe "s" do
+      let!(:rows) { page.all(".task-title").map(&:text) }
+
+      before do
+        press("j", "j", "s")
+        find(".toast")
+      end
+
+      it "starts the highlighted task" do
+        expect(task(rows.last)).to have_attributes(status: "in_progress")
+      end
+
+      it "leaves the other task alone" do
+        expect(task(rows.first)).to have_attributes(status: "open")
+      end
+    end
+
+    describe "m" do
+      before { press("j", "m") }
+
+      it "moves the task the way its first arrow does" do
+        expect(page).to have_current_path("/admin/tasks?filter=today")
+      end
+    end
+
+    describe "e" do
+      before { press("j", "e") }
+
+      it "opens the task for editing the way the pen does" do
+        expect(page).to have_css("dialog[open] [data-task-edit] form.task-form")
+      end
+    end
+
+    describe "with no highlight" do
+      before { press("s") }
+
+      it "starts nothing", :aggregate_failures do
+        expect(page).to have_current_path("/admin/tasks?filter=next")
+        expect(repo.all_open.map(&:status)).to all(eq("open"))
+      end
+    end
+  end
+
+  describe "x" do
+    let(:sprint) { create(:sprint, sprint_date: Blog::TimeZone.today) }
+
+    def done = Admin::Slice["i18n"].t("ui.components.tasks.controls.complete")
+
+    before do
+      create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
+      visit "/admin/tasks?filter=today"
+      press("j", "x")
+    end
+
+    it "opens the done panel the way a click does" do
+      expect(page).to have_css("details.task-complete[open]")
+    end
+
+    it "moves focus to the done button" do
+      expect(focused).to eq(done)
+    end
+
+    it "completes the task from there" do
+      find("details.task-complete[open]").click_button(done)
+
+      expect(Tasks::Slice["repos.task_repo"].all_open).to be_empty
+    end
+  end
+
+  describe "the help overlay on a task list" do
+    def help = find_by_id("key-help")
+
+    before do
+      sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+      create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
+      create(:task, :in_sprint, sprint_id: sprint.id, title: "Write the brief")
+      visit "/admin/tasks?filter=today"
+      press("?")
+    end
+
+    it "lists the task row keys", :aggregate_failures do
+      expect(help).to have_css(".keys-row", text: /\Ax\s+Complete the highlighted task\z/)
+      expect(help).to have_css(".keys-row", text: /\As\s+Start the highlighted task\z/)
+      expect(help).to have_css(".keys-row", text: /\Am\s+Move the highlighted task one list over\z/)
+      expect(help).to have_css(".keys-row", text: /\Ae\s+Edit the highlighted task\z/)
+    end
+  end
+
   describe "a row with no link" do
     before do
       create(:message, subject: "Hello there")

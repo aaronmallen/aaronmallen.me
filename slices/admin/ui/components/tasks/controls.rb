@@ -5,6 +5,7 @@ module Admin
     module Components
       module Tasks
         class Controls < Component
+          COMPLETE = "x"
           EXTERNAL = Blog::Types::TaskFilter["external"]
           LEFT = "fa-solid fa-arrow-left"
           LISTS = {
@@ -12,14 +13,18 @@ module Admin
             Blog::Types::TaskFilter["next"] => ".lists.next",
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
+          MOVE = "m"
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
           PLACES = LISTS.keys.freeze
           RIGHT = "fa-solid fa-arrow-right"
+          START = "s"
+          KEY_LABELS = { COMPLETE => ".keys.complete", MOVE => ".keys.move", START => ".keys.start" }.freeze
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
           prop :origin, Blog::Types::String, default: ORIGIN
           prop :moves, Blog::Types::Bool, default: true
+          prop :keys, Blog::Types::Bool, default: false
 
           def view_template
             @task.closed? ? reopen : progress
@@ -34,10 +39,10 @@ module Admin
             change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"), data:)
           end
 
-          def change(route, icon, label, variant: nil, data: nil)
+          def change(route, icon, label, variant: nil, data: nil, key: nil)
             Form(action: path(route, id: @task.id), data:) do
               origin_fields
-              Button(type: "submit", variant:, small: true, title: label, aria: { label: }) do
+              Button(type: "submit", variant:, small: true, title: label, **keyed(key, label:)) do
                 i(class: icon, aria: { hidden: "true" })
               end
             end
@@ -47,7 +52,7 @@ module Admin
             Form(action: path(:admin_complete_task, id: @task.id), data: { task_act: "complete" }) do
               origin_fields
               details(class: "task-complete") do
-                summary(class: "btn pri sm") { done_label }
+                summary(class: "btn pri sm", **keyed(COMPLETE)) { done_label }
                 div(class: "task-complete-panel") do
                   worked_fields
                   Button(type: "submit", variant: :pri, small: true) { done_label }
@@ -61,13 +66,19 @@ module Admin
             span { t(".complete") }
           end
 
-          def move(place, icon)
+          def keyed(key, **aria)
+            return { aria: } unless @keys && key
+
+            { aria: { **aria, keyshortcuts: key }, data: { key:, key_label: t(KEY_LABELS.fetch(key)) } }
+          end
+
+          def move(place, icon, key: nil)
             list = t(LISTS.fetch(place))
             label = t(".move", list:)
 
             Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do
               origin_field
-              Button(type: "submit", small: true, title: label, aria: { label: }) do
+              Button(type: "submit", small: true, title: label, **keyed(key, label:)) do
                 i(class: icon, aria: { hidden: "true" })
               end
             end
@@ -78,12 +89,12 @@ module Admin
           end
 
           def moves
-            return move(PLACES.first, LEFT) if @task.place == EXTERNAL
+            return move(PLACES.first, LEFT, key: MOVE) if @task.place == EXTERNAL
 
             here = PLACES.index(@task.place)
 
-            move(PLACES[here - 1], LEFT) if here.positive?
-            move(PLACES[here + 1], RIGHT) if here < PLACES.size - 1
+            move(PLACES[here - 1], LEFT, key: MOVE) if here.positive?
+            move(PLACES[here + 1], RIGHT, key: (MOVE if here.zero?)) if here < PLACES.size - 1
           end
 
           def origin_field = input(type: "hidden", name: "origin", value: @origin)
@@ -107,7 +118,9 @@ module Admin
 
           def running? = @task.in_progress? && @task.in_sprint?
 
-          def start = change(:admin_start_task, "fa-solid fa-play", t(".start"), data: { task_act: "start" })
+          def start
+            change(:admin_start_task, "fa-solid fa-play", t(".start"), data: { task_act: "start" }, key: START)
+          end
 
           def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"))
 

@@ -5,6 +5,7 @@ module Admin
     module Components
       module Tasks
         class Row < Component
+          EDIT = "e"
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -56,7 +57,10 @@ module Admin
             href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)
             label = t(".edit")
 
-            a(class: "btn sm", href:, title: label, aria: { label: }, data: { task_open_edit: true }) do
+            aria = { label:, keyshortcuts: EDIT }
+            data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
+
+            a(class: "btn sm", href:, title: label, aria:, data:) do
               i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
             end
           end
@@ -102,7 +106,7 @@ module Admin
           def side
             div(class: "task-acts") do
               Grip(task: @task, lead: @lead) if ordered?
-              Controls(task: @task, filter: @filter, origin: @origin)
+              Controls(task: @task, filter: @filter, origin: @origin, keys: true)
               edit
             end
           end
