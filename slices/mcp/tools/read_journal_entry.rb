@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class ReadJournalEntry < Base
-      description "Read one journal entry: its date, time, body and tags"
+      description "Read one journal entry: its date, time, body, tags and the records linked to it, grouped by kind"
       input_schema(API::Endpoints::ReadJournalEntry::SCHEMA)
       scope OAuth::Scope::READ
 

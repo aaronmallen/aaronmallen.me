@@ -19,12 +19,13 @@ RSpec.describe "API serializers", type: :request do
   def today = Blog::TimeZone.today
 
   describe API::Serializers::JournalEntry do
-    it "gives the JSON read_journal_entry returns" do
+    it "gives the JSON read_journal_entry returns, less its record links" do
       entry = create(:journal_entry, entry_time: "21:15", body: "a **bold** day")
       Record::Slice["repos.journal_entry_repo"].replace_tags(entry.id, %w[health ruby])
       call_tool("read_journal_entry", id: entry.id)
 
-      expect(serialized(described_class, Record::Slice["queries.journal_entry_by_id"].call(entry.id))).to eq(content)
+      expect(serialized(described_class, Record::Slice["queries.journal_entry_by_id"].call(entry.id)))
+        .to eq(content.except("record_links"))
     end
   end
 
@@ -34,18 +35,18 @@ RSpec.describe "API serializers", type: :request do
       serialized(described_class, Tasks::Slice["queries.task_by_id"].call(id))
     end
 
-    it "gives the JSON read_task returns, less its comments" do
+    it "gives the JSON read_task returns, less its comments and record links" do
       done = create(:task, :done, :carried, title: "finished", note: "a note", tags: %w[admin])
       create(:task_link, from_task_id: create(:task, title: "blocker").id, to_task_id: done.id)
       create(:task_link, :relates, from_task_id: done.id, to_task_id: create(:task, :in_sprint).id)
 
-      expect(read(done.id)).to eq(content.except("comments"))
+      expect(read(done.id)).to eq(content.except("comments", "record_links"))
     end
 
     it "gives the sprint day of a task in a sprint" do
       task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
 
-      expect(read(task.id)).to eq(content.except("comments"))
+      expect(read(task.id)).to eq(content.except("comments", "record_links"))
     end
 
     it "gives the sprint day it is handed, as read_current_sprint lists tasks" do

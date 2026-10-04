@@ -16,6 +16,10 @@ RSpec.describe "API tasks", type: :request do
 
   def capture(fields) = call_api(:post, "", JSON.generate(fields))
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
   def list(query = {}) = call_api(:get, "", query)
 
   def read(id) = call_api(:get, "/#{id}")
@@ -115,6 +119,26 @@ RSpec.describe "API tasks", type: :request do
 
       expect(read(task.id)).to include("title" => "Read me", "comments" => [include("body" => "first"),
                                                                             include("body" => "second")])
+    end
+
+    it "answers the records linked to the task, grouped by kind" do
+      task = create(:task)
+      post = create(:post, title: "On hosting")
+      link("task", task.id, "post", post.id)
+
+      expect(read(task.id).fetch("record_links"))
+        .to match("post" => [include("kind" => "post", "id" => post.id, "title" => "On hosting")])
+    end
+
+    it "answers the same record links as read_task" do
+      task = create(:task)
+      link("task", task.id, "journal_entry", create(:journal_entry).id)
+
+      expect(read(task.id).fetch("record_links")).to eq(mcp_answer("read_task", id: task.id).fetch("record_links"))
+    end
+
+    it "answers no record links for a task with none" do
+      expect(read(create(:task).id).fetch("record_links")).to eq({})
     end
 
     it "answers an unknown ID with a 404" do

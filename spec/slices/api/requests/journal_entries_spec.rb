@@ -18,6 +18,10 @@ RSpec.describe "API journal entries", type: :request do
 
   def entry_repo = Record::Slice["repos.journal_entry_repo"]
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
   def list(**window) = call_api(:get, "", window)
 
   def read(id) = call_api(:get, "/#{id}")
@@ -98,8 +102,26 @@ RSpec.describe "API journal entries", type: :request do
       entry = create(:journal_entry, entry_date: Date.new(2026, 3, 2), entry_time: "09:30", body: "a day")
       entry_repo.replace_tags(entry.id, %w[health ruby])
 
-      expect(read(entry.id).except("id"))
-        .to eq("date" => "2026-03-02", "time" => "09:30", "body" => "a day", "tags" => %w[health ruby])
+      expect(read(entry.id).except("id")).to eq(
+        "date" => "2026-03-02", "time" => "09:30", "body" => "a day", "tags" => %w[health ruby], "record_links" => {},
+      )
+    end
+
+    it "answers the records linked to the entry, grouped by kind" do
+      entry = create(:journal_entry)
+      task = create(:task, title: "Move the server")
+      link("journal_entry", entry.id, "task", task.id)
+
+      expect(read(entry.id).fetch("record_links"))
+        .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Move the server")])
+    end
+
+    it "answers the same record links as read_journal_entry" do
+      entry = create(:journal_entry)
+      link("journal_entry", entry.id, "post", create(:post).id)
+
+      expect(read(entry.id).fetch("record_links"))
+        .to eq(mcp_answer("read_journal_entry", id: entry.id).fetch("record_links"))
     end
 
     it "answers an unknown ID with a 404" do

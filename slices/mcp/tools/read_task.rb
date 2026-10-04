@@ -3,8 +3,8 @@
 module MCP
   module Tools
     class ReadTask < Base
-      description "Read one task: its title, note, status, list or sprint day, tags, links both ways and its " \
-                  "comments, oldest first"
+      description "Read one task: its title, note, status, list or sprint day, tags, links to other tasks both " \
+                  "ways, its comments, oldest first, and the other records linked to it, grouped by kind"
       input_schema(API::Endpoints::ReadTask::SCHEMA)
       scope OAuth::Scope::READ
 

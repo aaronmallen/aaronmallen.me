@@ -124,6 +124,10 @@ module MCP
 
         def read_spread_between(server_context) = server_context.fetch(:read_spread_between)
 
+        def record_links(kind, id, server_context)
+          server_context.fetch(:list_links).call(kind:, id:).value!.fetch(:links)
+        end
+
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
         def refuse_long_range = refuse(LONG_RANGE)

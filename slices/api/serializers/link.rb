@@ -13,6 +13,11 @@ module API
         },
       ).freeze
 
+      GROUPS = Schema.object(
+        {},
+        optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Schema.list(reference)] },
+      ).freeze
+
       attributes :kind, :id, :title, :day, :url
 
       def day(link) = super(link.day)

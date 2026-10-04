@@ -15,26 +15,13 @@ module API
         required: %w[kind id other_kind other_id],
       }.freeze
 
-      REPLY = Schema.object(
-        {
-          kind: RecordLinks::KIND,
-          id: Schema::INTEGER,
-          links: Schema.object(
-            {},
-            optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Schema.list(Serializers::Link.reference)] },
-          ),
-        },
-      ).freeze
+      REPLY = Schema.object({ kind: RecordLinks::KIND, id: Schema::INTEGER, links: Serializers::Link::GROUPS }).freeze
 
       include Deps[record_links: "links.queries.record_links"]
 
       private
 
-      def answered(kind, id)
-        links = record_links.call(kind, id).transform_values { serialized(Serializers::Link, it) }
-
-        Success(kind:, id:, links:)
-      end
+      def answered(kind, id) = Success(kind:, id:, links: linked(kind, id))
     end
   end
 end

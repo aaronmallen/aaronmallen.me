@@ -52,6 +52,15 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def issued = @issued ||= connect
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
+  def linked(tool, id)
+    call_tool(tool, id:)
+    content.fetch("record_links")
+  end
+
   def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def message = result.fetch("content").first.fetch("text")
@@ -1362,7 +1371,17 @@ RSpec.describe "MCP endpoint", type: :request do
 
       written = { "id" => post.id, "status" => "draft", "title" => "Draft one", "body" => "# Heading\n\nsome words" }
 
-      expect(content).to eq(written.merge("og_title" => nil, "og_image_url" => nil, "canonical_url" => nil))
+      expect(content).to eq(written.merge("og_title" => nil, "og_image_url" => nil, "canonical_url" => nil,
+                                          "record_links" => {}))
+    end
+
+    it "gives the records linked to the post, grouped by kind" do
+      post = create(:post, :draft)
+      commit = create(:commit, message: "Move the server")
+      link("post", post.id, "commit", commit.id)
+
+      expect(linked("read_post", post.id))
+        .to match("commit" => [include("kind" => "commit", "id" => commit.id, "title" => "Move the server")])
     end
 
     it "gives the social card fields the post carries" do
@@ -1409,6 +1428,15 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("read_social_post", id: social_post.id)
 
       expect(content.fetch("parts")).to eq(%w[one two three])
+    end
+
+    it "gives the records linked to the social post, grouped by kind" do
+      social_post = compose("draft", "one")
+      task = create(:task, title: "Announce the move")
+      link("social_post", social_post.id, "task", task.id)
+
+      expect(linked("read_social_post", social_post.id))
+        .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Announce the move")])
     end
 
     it "reads one that is scheduled" do

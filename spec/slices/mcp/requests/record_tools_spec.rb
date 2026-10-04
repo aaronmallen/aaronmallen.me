@@ -166,7 +166,7 @@ RSpec.describe "MCP record tools", type: :request do
       call_tool("read_journal_entry", id: entry.id)
 
       expect(content).to eq("id" => entry.id, "date" => "2026-03-02", "time" => "09:30", "body" => "a day",
-                            "tags" => %w[health ruby])
+                            "tags" => %w[health ruby], "record_links" => {})
     end
 
     it "answers the body as the markdown it was written in" do

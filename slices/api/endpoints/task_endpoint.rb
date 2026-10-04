@@ -4,9 +4,19 @@
 module API
   module Endpoints
     class TaskEndpoint < Endpoint
-      REPLY = Schema.widen(Serializers::Task::SCHEMA, comments: Schema.list(Serializers::TaskComment.reference)).freeze
+      KIND = "task"
 
-      include Deps[task_by_id: "tasks.queries.task_by_id", task_comments: "tasks.queries.task_comments"]
+      REPLY = Schema.widen(
+        Serializers::Task::SCHEMA,
+        comments: Schema.list(Serializers::TaskComment.reference),
+        record_links: Serializers::Link::GROUPS,
+      ).freeze
+
+      include Deps[
+        record_links: "links.queries.record_links",
+        task_by_id: "tasks.queries.task_by_id",
+        task_comments: "tasks.queries.task_comments",
+      ]
 
       private
 
@@ -31,7 +41,9 @@ module API
       def task_reply(task, **extra)
         comments = serialized(Serializers::TaskComment, task_comments.call(task.id))
 
-        Success(serialized(Serializers::Task, task).merge(comments:, **extra))
+        record_links = linked(KIND, task.id)
+
+        Success(serialized(Serializers::Task, task).merge(comments:, record_links:, **extra))
       end
     end
   end
