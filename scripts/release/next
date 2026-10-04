@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+#MISE description="Print the next CalVer version from the tags and the UTC date, or from a date given as YYYY-MM-DD"
+
+set -e
+
+on="${1:-$(date -u +%Y-%m-%d)}"
+
+case "$on" in
+[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+*)
+  echo "Give the date as YYYY-MM-DD, not $on." >&2
+  exit 1
+  ;;
+esac
+
+year=$(echo "$on" | cut -c3-4)
+month=$(echo "$on" | cut -d- -f2 | sed 's/^0//')
+
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  tags=$(git tag --list)
+else
+  tags=$(jj tag list --no-pager -T 'name ++ "\n"')
+fi
+
+last=$(echo "$tags" | grep -E "^$year\.$month\.[0-9]+$" | cut -d. -f3 | sort -n | tail -n 1)
+
+if [ -z "$last" ]; then
+  echo "$year.$month.0"
+else
+  echo "$year.$month.$((last + 1))"
+fi

@@ -10,6 +10,11 @@ Add entries under `[Unreleased]` in `CHANGELOG.md` for the commits it does not c
 Releases stay manual, because a new tag deploys within five minutes. Never move `[Unreleased]` under a version, never
 bump a version and never run a tag command, in `git` or `jj`.
 
+Versions follow [CalVer](https://calver.org) as `YY.M.MICRO`: the two digit year, the month with no zero padding, and
+a counter that starts at 0 each month. The UTC day of the tag sets the date. When the user asks what the next release
+is called, run `mise run release:next` and give its answer. It reads the tags and changes none. Never count tags by
+hand.
+
 ## 1. Read the rules
 
 Read `.claude/CLAUDE.md`. The writing rules there apply to every entry. Then read `CHANGELOG.md` in full, so you know

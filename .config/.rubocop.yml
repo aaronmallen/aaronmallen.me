@@ -63,6 +63,7 @@ RSpec/DescribeClass:
       - feature
       - migration
       - request
+      - script
 
 RSpec/SpecFilePathFormat:
   CustomTransform:
