@@ -16,6 +16,7 @@ module Admin
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :values, Blog::Types::Hash
           prop :editing, Blog::Types::Integer.optional, default: nil
+          prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template
             Form(action: action, data: { social_composer: "" }) do
@@ -59,9 +60,7 @@ module Admin
             send_button
           end
 
-          def cancel_link
-            a(class: "btn sm", href: path(:admin_social)) { t(".cancel") }
-          end
+          def cancel_link = a(class: "btn sm", href: path(:admin_social)) { t(".cancel") }
 
           def draft_disabled? = blank? || @networks.none?(&:selected)
 
@@ -85,18 +84,18 @@ module Admin
             @networks.select(&:selected).any? { |network| @counts.any? { it[network.name]&.over } }
           end
 
-          def part(body, counts, removable)
-            Part(body:, counts:, networks: @networks, removable:)
+          def part(body, counts, autofocus: false, removable: @values[:parts].size > 1)
+            Part(body:, counts:, networks: @networks, removable:, autofocus:)
           end
 
           def part_template
-            template(data: { social_part_template: "" }) { part("", Blog::Constants::EMPTY_HASH, true) }
+            template(data: { social_part_template: "" }) { part("", Blog::Constants::EMPTY_HASH, removable: true) }
           end
 
           def parts
             div(class: "compose-parts", data: { social_parts: "" }) do
               @values[:parts].each_with_index do |body, index|
-                part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), @values[:parts].size > 1)
+                part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), autofocus: @autofocus && index.zero?)
               end
             end
             Mentions(people: @people)

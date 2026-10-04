@@ -649,9 +649,18 @@ en:
           create_task:
             label: "Create task"
             text: "new task, add task"
+          new_post:
+            label: "New post"
+            text: "write a post, draft a post"
+          new_social_post:
+            label: "New social post"
+            text: "write a social post, compose"
           start_task:
             label: "Start task"
             text: "begin task, work on task"
+          todays_journal:
+            label: "Go to today's journal"
+            text: "open the journal, read today"
         context_bar:
           alert: "something needs you"
           back: "today"

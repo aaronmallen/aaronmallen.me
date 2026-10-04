@@ -16,7 +16,7 @@ module Admin
           social_page = build_social_page.call(filter:, page:, editing: editing(request))
           not_found(response) if social_page[:items].past_end?
 
-          response.render(view, **social_page)
+          response.render(view, **social_page, writing: writing?(request))
         end
 
         private
@@ -26,6 +26,8 @@ module Admin
 
           editable_social_post.call(id) if id
         end
+
+        def writing?(request) = Blog::Types::Checkbox[request.params[:write]]
       end
     end
   end

@@ -436,6 +436,60 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "typing post" do
+    before do
+      open_palette
+      query.send_keys(*"post".chars)
+    end
+
+    it "lists New post and New social post", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-actions']") do
+        expect(page).to have_css("#command-palette-new-post", text: "New post")
+        expect(page).to have_css("#command-palette-new-social-post", text: "New social post")
+      end
+    end
+  end
+
+  describe "running the New post command" do
+    before do
+      open_palette
+      query.send_keys(*"new post".chars, :enter)
+    end
+
+    it "opens the new post form" do
+      expect(page).to have_current_path("/admin/posts/new")
+    end
+  end
+
+  describe "running the New social post command" do
+    before do
+      visit "/admin/posts"
+      open_palette
+      query.send_keys(*"new social post".chars, :enter)
+    end
+
+    it "opens the composer" do
+      expect(page).to have_current_path("/admin/social?write=1")
+    end
+
+    it "puts the cursor in it" do
+      expect(page).to have_css("[data-social-part] [data-social-body]:focus")
+    end
+  end
+
+  describe "running the Go to today's journal command" do
+    before do
+      visit "/admin/posts"
+      open_palette
+      query.send_keys(*"today's journal".chars, :enter)
+    end
+
+    it "opens today's journal", :aggregate_failures do
+      expect(page).to have_current_path("/admin/journal")
+      expect(page).to have_css("#journal-entry", text: "Today")
+    end
+  end
+
   describe "pressing escape" do
     before do
       open_palette
@@ -481,6 +535,18 @@ RSpec.describe "Admin command palette", type: :feature do
         find_by_id("command-palette-messages").click
 
         expect(page).to have_current_path("/admin/messages")
+      end
+
+      {
+        "command-palette-new-post" => "/admin/posts/new",
+        "command-palette-new-social-post" => "/admin/social?write=1",
+        "command-palette-todays-journal" => "/admin/journal",
+      }.each do |id, path|
+        it "goes to #{path} from #{id}" do
+          find_by_id(id).click
+
+          expect(page).to have_current_path(path)
+        end
       end
     end
   end

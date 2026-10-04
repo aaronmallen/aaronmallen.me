@@ -31,6 +31,19 @@ RSpec.describe "Admin social", type: :request do
         expect(counts).to eq(["Mastodon 0/500", "Bluesky 0/300"])
       end
 
+      it "leaves the first part unfocused" do
+        get "/admin/social"
+
+        expect(page).to have_no_css("[data-social-body][autofocus]")
+      end
+
+      it "focuses the first part when opened to write", :aggregate_failures do
+        get "/admin/social", write: "1"
+
+        expect(page).to have_css("[data-social-part] [data-social-body][autofocus]", count: 1)
+        expect(page).to have_no_css("template [data-social-body][autofocus]", visible: :all)
+      end
+
       it "selects every connected network" do
         get "/admin/social"
 

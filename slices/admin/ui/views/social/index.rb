@@ -10,7 +10,9 @@ module Admin
           ACCOUNTS_SEPARATOR = " and "
           SEPARATOR = " · "
 
-          def initialize(accounts:, filter:, items:, now:, queued:, suggestion_counts:, suggestions:, **composer)
+          def initialize(
+            accounts:, filter:, items:, now:, queued:, suggestion_counts:, suggestions:, writing: false, **composer
+          )
             super()
             @accounts = accounts
             @composer = composer
@@ -20,6 +22,7 @@ module Admin
             @queued = queued
             @suggestion_counts = suggestion_counts
             @suggestions = suggestions
+            @writing = writing
           end
 
           def view_template
@@ -37,7 +40,7 @@ module Admin
 
           private
 
-          def composer = Composer(**@composer)
+          def composer = Composer(**@composer, autofocus: @writing)
 
           def cross_posting
             return t(".no_accounts") if @accounts.empty?

@@ -9,6 +9,7 @@ module Admin
           prop :counts, Blog::Types::Hash
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
           prop :removable, Blog::Types::Bool, default: false
+          prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template
             div(class: "compose-part", data: { social_part: "" }) do
@@ -29,6 +30,7 @@ module Admin
               name: "social[parts][]",
               placeholder: t(".placeholder"),
               aria: { label: t(".body") },
+              autofocus: @autofocus,
               data: { social_body: "" },
             }
           end
