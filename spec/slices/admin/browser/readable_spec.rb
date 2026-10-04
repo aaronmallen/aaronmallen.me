@@ -32,9 +32,12 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def dialogs
-    { "person dialog" => -> { open_person_dialog }, "task modal" => -> { open_modal }, "task panel" => lambda {
-      open_panel
-    } }
+    {
+      "palette" => -> { open_palette },
+      "person dialog" => -> { open_person_dialog },
+      "task modal" => -> { open_modal },
+      "task panel" => -> { open_panel },
+    }
   end
 
   def journal_editors
@@ -72,6 +75,12 @@ RSpec.describe "Admin screens", type: :feature do
     open_panel
     find("dialog#task-panel .btn", text: "Edit").click
     find("dialog#task-create[open] [data-task-edit]")
+  end
+
+  def open_palette
+    visit "/admin"
+    click_button(class: "slash")
+    find("dialog#command-palette[open] [data-palette-query]:focus")
   end
 
   def open_panel

@@ -41,6 +41,16 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(evaluate_script("document.activeElement.getAttribute('role')")).to eq("combobox")
     end
 
+    it "rings the query box" do
+      expect(evaluate_script(<<~JS)).to be(true)
+        (s => s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0)(getComputedStyle(document.activeElement))
+      JS
+    end
+
+    it "makes the query box tall enough to tap" do
+      expect(evaluate_script("document.activeElement.getBoundingClientRect().height")).to be >= 44
+    end
+
     it "lists every section, under its group", :aggregate_failures do
       expect(page).to have_css(".pal-g", text: /daily/i)
       expect(page).to have_css("#command-palette-messages")

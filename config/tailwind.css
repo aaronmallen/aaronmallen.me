@@ -929,7 +929,7 @@
 }
 
 @utility pal-in {
-  @apply flex items-center gap-3 border-b border-line px-4 py-3.5;
+  @apply flex items-center gap-3 border-b border-line px-4 py-1.5;
 }
 
 @utility pal-in-icon {
@@ -937,8 +937,8 @@
 }
 
 @utility pal-in-field {
-  @apply min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-input text-ink outline-none;
-  @apply placeholder:text-ink-muted;
+  @apply min-h-tap min-w-0 flex-1 rounded-input border-0 bg-transparent px-2 py-0 font-mono text-input text-ink;
+  @apply placeholder:text-ink-muted focus:outline-2 focus:-outline-offset-2 focus:outline-mk-blue;
 }
 
 @utility pal-l {
