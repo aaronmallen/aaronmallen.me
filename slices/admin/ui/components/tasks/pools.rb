@@ -78,7 +78,7 @@ module Admin
           end
 
           def row(task, list)
-            div(class: "li") do
+            div(class: "li", data: { key_row: true }) do
               div(class: "li-main") do
                 span(class: "li-title") { task.title }
                 meta(task, list)

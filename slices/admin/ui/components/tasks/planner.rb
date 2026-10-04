@@ -18,13 +18,17 @@ module Admin
 
           def view_template
             div(class: "task-planner") do
-              Card(label: t(".label", date: l(@date, format: :medium)), title: t(".ask")) do |card|
+              Card(label:, title: t(".ask"), data: { key_list: true }) do |card|
                 card.side { span(class: "sprint-note") { t(".empty") } }
                 p(class: "task-planner-note") { t(".note") }
                 Pools(counts: @counts, origin: @origin, pool: @pool, pools: @pools)
               end
             end
           end
+
+          private
+
+          def label = t(".label", date: l(@date, format: :medium))
         end
       end
     end

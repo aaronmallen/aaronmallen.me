@@ -175,6 +175,42 @@ RSpec.describe "Admin keys", type: :feature do
     end
   end
 
+  describe "the task pools" do
+    before do
+      create(:task, title: "Write the brief")
+      create(:task, :someday, title: "Learn the cello")
+    end
+
+    describe "under a planned sprint on Today" do
+      before do
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
+        visit "/admin"
+        press("j", "j")
+      end
+
+      it "moves from the last sprint row into the open pool" do
+        expect(focused_row).to include("Write the brief")
+      end
+    end
+
+    describe "with an empty sprint" do
+      before { visit "/admin/tasks?filter=today" }
+
+      it "lands on the first pool row" do
+        press("j")
+
+        expect(focused_row).to include("Write the brief")
+      end
+
+      it "skips the rows of a pool that is not open" do
+        press("j", "j")
+
+        expect(focused_row).to include("Write the brief")
+      end
+    end
+  end
+
   describe "the help overlay on a task list" do
     def help = find_by_id("key-help")
 
