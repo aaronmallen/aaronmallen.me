@@ -49,12 +49,10 @@ module Blog
         def userinfo(database)
           password, user = database.values_at(:password, :user)
 
-          if password.nil? && user.nil?
-            nil
-          elsif password.nil?
-            CGI.escapeURIComponent(user)
+          if password.nil?
+            user && CGI.escapeURIComponent(user)
           else
-            [user, password].map { CGI.escapeURIComponent(it) }.join(":")
+            [user.to_s, password].map { CGI.escapeURIComponent(it) }.join(":")
           end
         end
       end
