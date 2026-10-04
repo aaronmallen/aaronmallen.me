@@ -13,13 +13,21 @@ module Blog
       FILTER_KEYS = %w[
         api_key
         authorization
+        bluesky_did
+        bluesky_handle
         body
         cf_connecting_ip
         code
         cookie
         email
         license_key
+        markdown
+        mastodon_handle
+        note
+        parts
         password
+        person
+        problem
         remote_addr
         reply_to
         salt

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, mcp]
 issue: AA-660
-amended: [AA-819, "#237"]
+amended: [AA-819, "#237", "#467"]
 tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
 ---
 
@@ -44,7 +44,11 @@ and registers `honeybadger.agent`. The app requires `honeybadger/ruby`, never `h
 - `FILTER_KEYS` is a list kept by hand, and `config/app.rb` hands it to the logger's filters too. Honeybadger matches
   each entry as a substring with no regard to case, so `token` covers `refresh_token`. Add a key when a setting
   holding a secret gets a name no entry covers, or when a request carries a credential or a person's details under
-  a new name, the way AA-483 added `code` and `state` and AA-531 added `salt`.
+  a new name, the way AA-483 added `code` and `state` and AA-531 added `salt`. Private notes count too: #467 added
+  `note`, `problem`, `parts`, `markdown` and the people fields.
+- The logger alone filters `ip`, the visitor address Hanami's request logger writes on each line. Honeybadger
+  already drops the address through `remote_addr` and `x_forwarded_for`, and as a substring `ip` would filter
+  `description` and `recipient`.
 
 ## Alternatives
 
@@ -67,8 +71,9 @@ the suite runs jobs in its own process, never through `config/sidekiq.rb` (AA-81
 worker (AA-649) covers why it boots the whole app.
 
 `FILTER_KEYS` can drift from what the app handles. `spec/requests/secrets_spec.rb` sends the GitHub callback, the
-MCP token exchange and the MCP authorize request, and fails when a secret they carry reaches the log or an error
-report. Nothing checks a setting that holds a secret, or a request that parameter list does not name. A secret
-passed to a job as a positional argument is not filtered either. Every job takes ids today.
+MCP token exchange, the MCP authorize request, a task, a decision and a visit to the home page, and fails when a
+secret, a note or the visitor address they carry reaches the log or an error report. Nothing checks a setting that
+holds a secret, or a request that parameter list does not name. A secret passed to a job as a positional argument is
+not filtered either. Every job takes ids today.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

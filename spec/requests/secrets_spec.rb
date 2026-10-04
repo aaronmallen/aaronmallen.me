@@ -178,4 +178,66 @@ RSpec.describe "Secrets a request carries", type: :request do
       expect(reported("operations.authorize") { decide }).not_to include(challenge, state, admin_csrf_token)
     end
   end
+
+  describe "a visitor reading the home page" do
+    let(:forwarded) { "198.51.100.#{rand(1..254)}" }
+    let(:remote) { "203.0.113.#{rand(1..254)}" }
+
+    def visit_home = get("/", {}, "HTTP_X_FORWARDED_FOR" => forwarded, "REMOTE_ADDR" => remote)
+
+    it "logs the request" do
+      expect(logged { visit_home }).to match(%r{GET 200 .* / })
+    end
+
+    it "logs no visitor address" do
+      expect(logged { visit_home }).not_to include(forwarded, remote)
+    end
+
+    it "reports no visitor address" do
+      expect(reported("posts.queries.latest_published") { visit_home }).not_to include(forwarded, remote)
+    end
+  end
+
+  describe "the owner capturing a task" do
+    let(:note) { secret }
+
+    def capture = post("/admin/tasks", _csrf_token: admin_csrf_token, task: { title: "Call the bank", note: })
+
+    before { sign_in_to_admin }
+
+    it "logs the capture" do
+      expect(logged { capture }).to include("/admin/tasks")
+    end
+
+    it "logs no task note" do
+      expect(logged { capture }).not_to include(note)
+    end
+
+    it "reports no task note" do
+      expect(reported("tasks.operations.capture_task") { capture }).not_to include(note)
+    end
+  end
+
+  describe "the owner opening a decision" do
+    let(:note) { secret }
+    let(:problem) { secret }
+
+    def open_decision
+      post "/admin/decisions", _csrf_token: admin_csrf_token, decision: { title: "Pick a host", problem:, note: }
+    end
+
+    before { sign_in_to_admin }
+
+    it "logs the decision" do
+      expect(logged { open_decision }).to include("/admin/decisions")
+    end
+
+    it "logs neither the problem nor the note" do
+      expect(logged { open_decision }).not_to include(problem, note)
+    end
+
+    it "reports neither the problem nor the note" do
+      expect(reported("decisions.operations.open_decision") { open_decision }).not_to include(problem, note)
+    end
+  end
 end

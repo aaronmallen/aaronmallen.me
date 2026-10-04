@@ -26,7 +26,7 @@ module Blog
     config.actions.method_override = false
     config.actions.view_name_inference_base = "ui.views"
 
-    config.logger.filters |= %w[_csrf_token client_secret code_challenge code_verifier refresh_token]
+    config.logger.filters |= %w[_csrf_token client_secret code_challenge code_verifier ip refresh_token]
     config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier
