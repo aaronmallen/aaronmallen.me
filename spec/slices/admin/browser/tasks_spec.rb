@@ -1463,6 +1463,7 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "says a task cannot link to itself" do
+        find(".task-link-target", text: "Learn Elixir")
         page.execute_script("document.querySelector('.task-link-target').value = arguments[0]", task.id.to_s)
         pick("Learn Elixir")
 
