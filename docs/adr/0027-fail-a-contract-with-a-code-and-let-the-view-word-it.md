@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-662
-amended: ["#17"]
+amended: ["#17", "#255"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -33,7 +33,7 @@ Codes come from three places:
 - `config/errors.yml`, which `lib/blog/contract.rb` loads, maps each predicate to a code: `filled?` to `blank`,
   `max_size?` to `long`, `excluded_from?` to `reserved`, too many `edits` to `many`, and `format?`, `int?`, `gt?`,
   `date?` and `included_in?` to `format`, except that a blank edit's `original` or `reason` fails `format?` as
-  `blank`.
+  `blank` and an `other_id` past the id range fails `lt?` as `missing`.
 - Rules pass a code to `key.failure`: `control`, `format` and `skipped` from `Blog::Contract`, and `future`,
   `blank`, `before_from`, `too_long`, `announcement_too_long`, `unavailable`, `missing` and `foreign` from slice
   contracts.

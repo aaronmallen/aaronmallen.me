@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809, "#236"]
+amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245"]
 tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
 ---
 
@@ -53,11 +53,12 @@ the one exception, and AA-584 records why.
   `mcp`, and `mcp` imports `auth.session_reader` from `admin`. The MCP consent screen signs the operator in through the
   admin's GitHub session, and the admin holds the page that revokes a client. Both are presentation slices, no
   feature's records cross either edge, and neither calls back through the other inside one unit of work.
-- **An import of provider keys alone.** `posts` imports `networks.all` from `social` so `PostContract` can refuse an
-  announcement too long for a network, while `social` imports operations and queries from `posts`. A client that a
-  provider registers is not a feature dependency: social never calls back into posts through it. An edge whose every
-  key names a provider in the source slice does not count toward a cycle, and an edge that carries one operation,
-  query or repo key still does. AA-571 added this.
+- **An import of provider keys alone.** `posts` imports `links.tagger` and `networks.all` from `social` so
+  `PostContract` can tag the announcement's links the way social sends them and refuse one too long for a network,
+  while `social` imports operations and queries from `posts`. A client that a provider registers is not a feature
+  dependency: social never calls back into posts through it. An edge whose every key names a provider in the source
+  slice does not count toward a cycle, and an edge that carries one operation, query or repo key still does. AA-571
+  added this, and #245 added `links.tagger`.
 - **A job constant enqueued from `after_commit`.** Publishing announces, and social decides what to do about it.
   `PublishPost` enqueues `Social::Jobs::SyndicatePost` and `Social::Jobs::SendWebmentions` inside
   `post_repo.after_commit`, and `SavePost` enqueues the second, so posts calls no social operation. A job crosses
