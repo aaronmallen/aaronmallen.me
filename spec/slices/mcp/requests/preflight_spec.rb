@@ -9,7 +9,7 @@ RSpec.describe "CORS preflight", type: :request do
     }
   end
 
-  %w[/mcp /oauth/register /oauth/token].each do |path|
+  %w[/mcp /oauth/token].each do |path|
     describe "OPTIONS #{path}" do
       before { preflight(path) }
 
@@ -37,6 +37,18 @@ RSpec.describe "CORS preflight", type: :request do
       it "asks for no token" do
         expect(last_response.headers).not_to include("WWW-Authenticate")
       end
+    end
+  end
+
+  describe "OPTIONS /oauth/register" do
+    before { preflight("/oauth/register") }
+
+    it "names no origin that may register" do
+      expect(last_response.headers).not_to include("Access-Control-Allow-Origin")
+    end
+
+    it "allows no cross-origin POST" do
+      expect(last_response.headers).not_to include("Access-Control-Allow-Methods")
     end
   end
 end

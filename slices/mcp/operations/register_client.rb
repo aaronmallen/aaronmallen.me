@@ -43,6 +43,7 @@ module MCP
           **attributes,
           visitor_hash:,
           limit:,
+          total_limit:,
           since: window_opened_at,
         )
 
@@ -67,6 +68,8 @@ module MCP
 
       def refuse(error, description) = Failure([REJECT, { error:, error_description: description }])
 
+      def total_limit = settings.client_registration[:total_throttle_limit]
+
       def validate(payload)
         return refuse(INVALID_METADATA, NOT_AN_OBJECT) unless payload.is_a?(Hash)
 
@@ -82,9 +85,11 @@ module MCP
       end
 
       def within_limit(visitor_hash)
-        registered = client_repo.count_from_visitor_since(visitor_hash, window_opened_at)
+        since = window_opened_at
+        under = client_repo.count_from_visitor_since(visitor_hash, since) < limit &&
+                client_repo.count_since(since) < total_limit
 
-        registered < limit ? Success(registered) : Failure(THROTTLED)
+        under ? Success(visitor_hash) : Failure(THROTTLED)
       end
     end
   end

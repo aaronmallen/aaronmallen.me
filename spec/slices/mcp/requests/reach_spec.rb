@@ -75,7 +75,6 @@ RSpec.describe "MCP reach", type: :request do
       "posts.operations.revise_edit_note" => "the admin fixes a note in the editor; #141 gives MCP no tool for it",
       "projects.operations.refresh_projects" => "a background job refreshes projects from GitHub",
       "public.operations.find_page" => "checks that a visit names a real page as a reader's browser reports it",
-      "public.operations.find_sender_network" => "reads the network a contact message came from off a request",
       "public.operations.find_visitor_address" => "reads a visitor's address off a request",
       "public.operations.render_atom_feed" => "renders the public Atom feed",
       "public.operations.version_atom_feed" => "dates and tags the public Atom feed for a reader polling again",

@@ -30,7 +30,7 @@ module Analytics
         visit = step validate(payload)
         return nil if signed_in || bot?(user_agent)
 
-        address_hash = hash_visitor.call(address:)
+        address_hash = hash_visitor.call(address: Blog::ThrottleKey.call(address))
         step within_limit(address_hash) unless view?(visit)
         hashes = visitor_hashes(address:, user_agent:)
         step store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)

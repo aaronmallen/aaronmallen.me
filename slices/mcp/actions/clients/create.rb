@@ -32,13 +32,17 @@ module MCP
 
         private
 
+        def cross_origin? = false
+
         def payload(request)
           JSON.parse(request.body.read(MAX_BYTES).to_s)
         rescue JSON::ParserError
           nil
         end
 
-        def visitor_hash(request) = hash_visitor.call(address: find_visitor_address.call(request))
+        def visitor_hash(request)
+          hash_visitor.call(address: Blog::ThrottleKey.call(find_visitor_address.call(request)))
+        end
       end
     end
   end

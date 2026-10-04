@@ -150,7 +150,7 @@ en:
             heading: "Hashes"
             intro: "A hash mixes your address and the name and version your browser sends with a secret only the server knows, and turns them into a string of letters and numbers. Without the secret, nobody can turn it back into an address. Until a hash changes, the same visitor makes the same string, so I can count people without knowing who they are."
             items:
-              day: "A daily hash changes at midnight, Central time, and counts visitors for the day. A second daily hash, made from the address alone, caps how many hits one address can send."
+              day: "A daily hash changes at midnight, Central time, and counts visitors for the day. A second daily hash, made from your network alone, caps how many hits one network can send. Your network is your whole address on IPv4, and its first half on IPv6."
               month: "A monthly hash changes on the first of each month and counts readers for the month."
               post: "A per post hash counts each post's unique readers. It mixes in which post you read in place of a date, so it stays the same for that post and never matches you on another. It has a secret of its own, and it counts only in the 12 months after a post goes up."
           heading: "What I keep about your visit."
@@ -179,7 +179,7 @@ en:
               clicks: "on a post, the site and page of each link you follow away from it, but never the part after a ? or #"
               country: "your country"
               device: "your kind of device: desktop, phone, tablet or the browser inside an app"
-              hashes: "the daily, monthly and address hashes"
+              hashes: "the daily, monthly and network hashes"
               page: "the page and its title"
               reading: "how long you read, up to 20 minutes, and how far you scrolled, in quarters"
               referrer: "the name of the site that sent you, or the page you came from on this one"

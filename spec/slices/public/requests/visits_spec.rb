@@ -646,6 +646,41 @@ RSpec.describe "Visits", type: :request do
     end
   end
 
+  describe "a run of beacons past the limit from one IPv6 /64 with a new address on each" do
+    let(:limit) { Hanami.app["settings"].analytics[:throttle_limit] }
+
+    before do
+      lower_throttle_limit(:analytics, to: 5)
+      (limit + 1).times { |sent| view(headers: { "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}" }) }
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the limit" do
+      expect(stored).to have(limit).items
+    end
+
+    it "keys the address hash on the network rather than the address" do
+      network = Analytics::Slice["operations.hash_visitor"].call(address: "2001:db8:1:2::")
+
+      expect(stored.map { it[:address_hash] }.uniq).to eq([network])
+    end
+  end
+
+  describe "a beacon from a second IPv6 /64" do
+    before do
+      lower_throttle_limit(:analytics, to: 5)
+      5.times { view(headers: { "REMOTE_ADDR" => "2001:db8:1:2::1" }) }
+      view(headers: { "REMOTE_ADDR" => "2001:db8:1:3::1" })
+    end
+
+    it "goes through, since the first network spent only its own allowance" do
+      expect(last_response.status).to eq(202)
+    end
+  end
+
   describe "a malformed payload" do
     it "rejects a body that is not JSON" do
       post "/pulse", "kind=view", "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent

@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp]
 issue: AA-679
+amended: ["#463"]
 tags: [mcp, transport, json-rpc, sdk, cors, sessions, hanami-actions]
 ---
 
@@ -37,7 +38,8 @@ token holds.
   `MCP::Actions::Preflights::Show` answers the preflight for `POST` with `Authorization`, `Content-Type` and
   `MCP-Protocol-Version` (AA-597), so an MCP client running in a browser can call the server. `/mcp` sits outside
   the session middleware, which the routes mount on the OAuth scope alone, so the bearer token is the only
-  credential the endpoint reads.
+  credential the endpoint reads. Since #463 `POST /oauth/register` sends no `Access-Control-Allow-Origin` and has
+  no preflight route, so a web page cannot make its readers' browsers register clients.
 
 The bearer check, the headers and the errors stay in Hanami, beside the rest of the slice's actions.
 

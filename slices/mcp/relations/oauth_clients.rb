@@ -9,10 +9,11 @@ module MCP
         attribute :visitor_hash, Blog::Types::VisitorHash
       end
 
-      def claim(visitor_hash:, limit:, since:, **attrs)
+      def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
         transaction do
-          lock_until_commit(visitor_hash)
-          next unless for_visitor(visitor_hash).registered_since(since).count < limit
+          lock_table_until_commit
+          fresh = registered_since(since)
+          next unless fresh.for_visitor(visitor_hash).count < limit && fresh.count < total_limit
 
           stamped(:create).call(**attrs, visitor_hash:)
         end
@@ -36,6 +37,13 @@ module MCP
 
       def registered_since(time) = where { created_at >= time }
 
+      def unclaimed(since:)
+        where(last_used_at: nil)
+          .exclude(id: dataset.db[:oauth_codes].select(:oauth_client_id))
+          .exclude(id: dataset.db[:oauth_tokens].select(:oauth_client_id))
+          .where { created_at < since }
+      end
+
       def with_client_id(client_id) = where(client_id:)
 
       private
@@ -44,9 +52,7 @@ module MCP
 
       def live_tokens(at) = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
 
-      def lock_until_commit(visitor_hash)
-        dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, visitor_hash)))
-      end
+      def lock_table_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
     end
   end
 end

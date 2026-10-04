@@ -14,8 +14,10 @@ module MCP
     private
 
     def allow_any_origin(response)
-      response.headers["Access-Control-Allow-Origin"] = ANY_ORIGIN
+      response.headers["Access-Control-Allow-Origin"] = ANY_ORIGIN if cross_origin?
     end
+
+    def cross_origin? = true
 
     def issuer = Blog::Site.url.chomp("/")
 

@@ -3,7 +3,9 @@
 module MCP
   module Operations
     class ReapExpiredCredentials < Blog::Operation
-      IDLE_FOR = 90 * 24 * 60 * 60
+      DAY = 24 * 60 * 60
+      IDLE_FOR = 90 * DAY
+      UNCLAIMED_FOR = DAY
 
       include Deps[
         client_repo: "repos.oauth_client_repo",
@@ -13,7 +15,8 @@ module MCP
 
       def call(at: Time.now)
         expired = code_repo.delete_expired(at:) + token_repo.delete_expired(at:)
-        expired + client_repo.delete_idle(since: at - IDLE_FOR, at:)
+        expired + client_repo.delete_idle(since: at - IDLE_FOR, at:) +
+          client_repo.delete_unclaimed(since: at - UNCLAIMED_FOR)
       end
     end
   end

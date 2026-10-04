@@ -20,6 +20,7 @@ bluesky:
 client_registration:
   throttle_limit: <%= ENV["CLIENT_REGISTRATION_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["CLIENT_REGISTRATION_THROTTLE_WINDOW_MINUTES"].to_json %>
+  total_throttle_limit: <%= ENV["CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT"].to_json %>
 contact:
   throttle_limit: <%= ENV["CONTACT_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["CONTACT_THROTTLE_WINDOW_MINUTES"].to_json %>

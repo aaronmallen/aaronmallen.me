@@ -283,6 +283,39 @@ RSpec.describe "Webmentions", type: :request do
     end
   end
 
+  describe "a run of receipts past the limit from one IPv6 /64 with a new address on each" do
+    let(:limit) { Hanami.app["settings"].webmentions[:throttle_limit] }
+
+    before do
+      lower_throttle_limit(:webmentions, to: 5)
+      (limit + 1).times do |sent|
+        notify({ "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}" }, source: "https://ada.example/notes/#{sent}")
+      end
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "queues no more than the limit" do
+      expect(Social::Jobs::VerifyWebmention.jobs).to have(limit).items
+    end
+  end
+
+  describe "a receipt from a second IPv6 /64" do
+    before do
+      lower_throttle_limit(:webmentions, to: 5)
+      5.times do |sent|
+        notify({ "REMOTE_ADDR" => "2001:db8:1:2::1" }, source: "https://ada.example/notes/#{sent}")
+      end
+      notify({ "REMOTE_ADDR" => "2001:db8:1:3::1" }, source: "https://ada.example/notes/other")
+    end
+
+    it "goes through, since the first network spent only its own allowance" do
+      expect(last_response.status).to eq(202)
+    end
+  end
+
   describe "a run of receipts from many addresses past the total limit" do
     let(:limit) { 3 }
 

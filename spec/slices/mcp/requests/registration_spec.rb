@@ -144,6 +144,96 @@ RSpec.describe "Dynamic client registration", type: :request do
     end
   end
 
+  describe "a run of registrations from one IPv6 /64 with a new address on each" do
+    before do
+      (limit + 1).times do |sent|
+        register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}")
+      end
+    end
+
+    it "comes back throttled once the limit is reached" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the limit" do
+      expect(clients.count).to eq(limit)
+    end
+
+    it "keys the hash on the network rather than the address" do
+      network = Analytics::Slice["operations.hash_visitor"].call(address: "2001:db8:1:2::")
+
+      expect(clients.first[:visitor_hash]).to eq(network)
+    end
+  end
+
+  describe "a registration from a second IPv6 /64" do
+    before do
+      limit.times { register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "2001:db8:1:2::1") }
+      register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "2001:db8:1:3::1")
+    end
+
+    it "goes through, since the first network spent only its own allowance" do
+      expect(last_response.status).to eq(201)
+    end
+  end
+
+  describe "a run of registrations from many addresses past the total limit" do
+    let(:total) { 3 }
+
+    before do
+      settings = Hanami.app["settings"]
+      allow(settings).to receive(:client_registration)
+        .and_return(settings.client_registration.merge(total_throttle_limit: total))
+      (total + 1).times do |sent|
+        register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}")
+      end
+    end
+
+    it "comes back throttled" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the total limit" do
+      expect(clients.count).to eq(total)
+    end
+  end
+
+  describe "a registration that loses the last place across the site to one landing beside it" do
+    let(:total) { 2 }
+
+    before do
+      settings = Hanami.app["settings"]
+      allow(settings).to receive(:client_registration)
+        .and_return(settings.client_registration.merge(total_throttle_limit: total))
+      total.times { |sent| register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") }
+      client_repo = MCP::Slice["repos.oauth_client_repo"]
+      allow(client_repo).to receive(:count_since).and_return(total - 1)
+      replace_component("repos.oauth_client_repo", client_repo)
+      register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "198.51.100.4")
+    end
+
+    it "comes back throttled" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the total limit" do
+      expect(clients.count).to eq(total)
+    end
+  end
+
+  it "takes thirty from all senders together and refuses the next when no total limit is set", :aggregate_failures do
+    31.times { |sent| register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") }
+
+    expect(last_response.status).to eq(429)
+    expect(clients.count).to eq(30)
+  end
+
+  it "names no origin that may read the answer" do
+    register(redirect_uris: [redirect_uri])
+
+    expect(last_response.headers).not_to include("Access-Control-Allow-Origin")
+  end
+
   describe "a registration that loses the last place to one landing beside it" do
     before do
       limit.times { register(redirect_uris: [redirect_uri]) }

@@ -17,7 +17,6 @@ module MCP
       get "/authorize", to: "authorizations.new", as: :authorize
       post "/authorize", to: "authorizations.create", as: :decide
       post "/register", to: "clients.create", as: :register
-      options "/register", to: "preflights.show"
       post "/token", to: "tokens.create", as: :token
       options "/token", to: "preflights.show"
     end

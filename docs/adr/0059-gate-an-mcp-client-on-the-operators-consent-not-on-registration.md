@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, mcp, admin]
 issue: AA-670
-amended: ["#176"]
+amended: ["#176", "#463"]
 tags: [mcp, oauth, consent, registration, clients, revoke]
 ---
 
@@ -64,9 +64,16 @@ nothing. The redirect URI the page shows is where the code goes, and the clients
 name so the operator can tell two clients called `Claude` apart (AA-693).
 
 Anyone can grow `oauth_clients`. `POST /oauth/register` answers 429 past `client_registration.throttle_limit`
-registrations from one visitor hash in the window, 10 an hour by default (AA-693). Since #176
-`MCP::Operations::ReapExpiredCredentials` deletes a client that holds no live code or token and has not connected,
-or registered, in 90 days. It locks each client row before it deletes, as issuing a token does, so a token issued
-while the job runs keeps its client.
+registrations from one visitor hash in the window, 10 an hour by default (AA-693). Since #463 the hash covers an
+IPv6 sender's whole /64, and past `client_registration.total_throttle_limit` registrations from everyone together,
+30 an hour by default, it answers 429 whatever the address. The cap is site wide, so a flood locks out the operator's
+own connector for up to a window. Registration sends no wildcard CORS origin and answers no preflight, so a web page
+cannot make its readers' browsers register clients.
+
+Since #176 `MCP::Operations::ReapExpiredCredentials` deletes a client that holds no live code or token and has not
+connected, or registered, in 90 days. Since #463 it deletes a client a day after it registers when it holds no code
+or token row and has never connected. A code lasts a minute and the job deletes it once it lapses, so a client that
+took a code and never traded it for a token counts as one that took nothing. The job locks each client row before it
+deletes, as issuing a token does, so a token issued while the job runs keeps its client.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

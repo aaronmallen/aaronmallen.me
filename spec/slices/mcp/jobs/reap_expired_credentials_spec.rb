@@ -135,11 +135,41 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
       expect([clients.by_pk(idle.id).count, tokens.by_pk(revoked.id).count]).to eq([0, 0])
     end
 
-    it "keeps a client that registered inside 90 days" do
-      fresh = mcp_create(:oauth_client, created_at: days_ago(89))
+    it "deletes a client that registered over a day ago and never received a code or token" do
+      unclaimed = mcp_create(:oauth_client, created_at: days_ago(2))
+      reap
+
+      expect(clients.by_pk(unclaimed.id).count).to eq(0)
+    end
+
+    it "keeps a client that registered inside a day" do
+      fresh = mcp_create(:oauth_client, created_at: Time.now - (23 * 60 * 60))
       reap
 
       expect(clients.by_pk(fresh.id).count).to eq(1)
+    end
+
+    it "keeps a client inside 90 days that holds a code" do
+      approved = mcp_create(:oauth_client, created_at: days_ago(2))
+      mcp_create(:oauth_code, :used, oauth_client_id: approved.id)
+      reap
+
+      expect(clients.by_pk(approved.id).count).to eq(1)
+    end
+
+    it "keeps a client inside 90 days that holds only a revoked token" do
+      revoked = mcp_create(:oauth_client, created_at: days_ago(2))
+      mcp_create(:oauth_token, :refresh, :revoked, oauth_client_id: revoked.id)
+      reap
+
+      expect(clients.by_pk(revoked.id).count).to eq(1)
+    end
+
+    it "keeps a client inside 90 days that has connected, once its tokens have lapsed" do
+      lapsed = mcp_create(:oauth_client, created_at: days_ago(89), last_used_at: days_ago(60))
+      reap
+
+      expect(clients.by_pk(lapsed.id).count).to eq(1)
     end
 
     it "keeps a client that connected inside 90 days" do

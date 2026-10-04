@@ -6,6 +6,7 @@ module Blog
   class Settings < Hanami::Settings
     DEFAULT_ANALYTICS_THROTTLE_LIMIT = 120
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
+    DEFAULT_CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT = 30
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
     DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
     DEFAULT_STORE_REGION = "us-east-1"
@@ -97,7 +98,10 @@ module Blog
 
     setting :bluesky, default: {}, constructor: Schema.schema(app_password?: Value, handle?: Value, profile_url?: Value)
 
-    setting :client_registration, default: {}, constructor: throttle(DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT)
+    setting :client_registration, default: {}, constructor: throttle(
+      DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT,
+      total_throttle_limit?: unless_set(ThrottleLimit, DEFAULT_CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT),
+    )
 
     setting :contact, default: {}, constructor: throttle(
       DEFAULT_CONTACT_THROTTLE_LIMIT,

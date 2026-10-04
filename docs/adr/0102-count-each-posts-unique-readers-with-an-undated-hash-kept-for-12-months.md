@@ -6,6 +6,7 @@ created: 2026-10-03
 area: [analytics, public, admin, config, db]
 supersedes: ["0045"]
 issue: "#371"
+amended: ["#463"]
 tags: [analytics, privacy, gdpr, legitimate-interest, unique-readers, retention, salt]
 ---
 
@@ -26,7 +27,8 @@ stored. Keeping it needs a lawful basis, a time limit and a notice that tells re
 
 We count each post's unique readers for the 12 months after it goes up, with a hash that carries no date. The rest
 of [ADR 0045][0045] and [ADR 0087][0087] stands: the beacon, the daily and monthly hashes, the throttle, bot and
-sign-in skips, and 90 days of raw events.
+sign-in skips, and 90 days of raw events. Since #463 the throttle hashes `Blog::ThrottleKey` of the address, which
+cuts an IPv6 address to its /64, so one host cannot spread its hits over a network.
 
 **The hash.** When a view of a published post arrives within 12 months of its publish date, the analytics slice
 hashes a salt, the address, the user agent and the post's path. The path in the hash means one reader's hashes on
