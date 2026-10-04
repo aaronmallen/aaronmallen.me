@@ -33,11 +33,9 @@ module Decisions
       def revise(decision, option, title:, body:, note:)
         return Success(option) if option.title == title && option.body == body
 
-        noted = decision.closed?
-        return Failure([:invalid, { note: [Blog::Contract::BLANK] }]) if noted && note.empty?
-
+        kept = step EditNote.call(needed: decision.closed?, note:)
         saved = decision_option_repo.update(option.id, title:, body:)
-        decision_repo.record(decision.id, OPTION_EDITED, option_id: option.id, note: noted ? note : nil)
+        decision_repo.record(decision.id, OPTION_EDITED, option_id: option.id, note: kept)
         Success(saved)
       end
 

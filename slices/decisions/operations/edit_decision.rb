@@ -31,11 +31,9 @@ module Decisions
         edited = decision.problem != problem
         return Success(decision) unless edited || decision.title != title
 
-        noted = edited && decision.closed?
-        return Failure([:invalid, { note: [Blog::Contract::BLANK] }]) if noted && note.empty?
-
+        kept = step EditNote.call(needed: edited && decision.closed?, note:)
         decision_repo.update(decision.id, title:, problem:)
-        Success(decision_repo.record(decision.id, EDITED, note: noted ? note : nil))
+        Success(decision_repo.record(decision.id, EDITED, note: kept))
       end
 
       def validate(params) = validated(contract.call(form(params)))
