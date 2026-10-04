@@ -404,6 +404,123 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "running the Log work command on a page with no dialog" do
+    before do
+      execute_script("document.getElementById('work-log').remove()")
+      open_palette
+      query.send_keys(*"log work".chars, :enter)
+    end
+
+    it "goes to the work tab, where the form lives" do
+      expect(page).to have_current_path("/admin/projects?filter=work")
+    end
+  end
+
+  describe "running the Log work command" do
+    let(:repo) { Projects::Slice["repos.work_entry_repo"] }
+
+    def modal = find("dialog#work-log")
+
+    def year_format = Admin::Slice["i18n"].t("ui.components.work_entries.field_error.from_year.format")
+
+    before do
+      visit "/admin/posts?status=draft"
+      open_palette
+      query.send_keys(*"log work".chars, :enter)
+    end
+
+    it "opens the work entry dialog on the page you are on", :aggregate_failures do
+      expect(page).to have_no_css("dialog#command-palette[open]")
+      expect(page).to have_css("dialog#work-log[open]")
+      expect(page).to have_current_path("/admin/posts?status=draft")
+    end
+
+    it "asks for the work entry fields, the role or project among them", :aggregate_failures do
+      %w[org role from_year to_year blurb].each { expect(modal).to have_field("work_entry[#{it}]") }
+      expect(modal).to have_field("Role or project")
+    end
+
+    it "puts the cursor in the first field" do
+      expect(evaluate_script("document.activeElement.name")).to eq("work_entry[org]")
+    end
+
+    describe "saving the dialog" do
+      before do
+        within(modal) do
+          fill_in("work_entry[org]", with: "Rackspace")
+          fill_in("work_entry[role]", with: "Software Engineer")
+          fill_in("work_entry[from_year]", with: "2018")
+          click_button("Add role")
+        end
+        page.assert_selector("[data-toast]", text: "Role added to /projects")
+      end
+
+      it "adds the work entry" do
+        expect(repo.all.map(&:role)).to eq(["Software Engineer"])
+      end
+
+      it "leaves me on the screen I opened it from", :aggregate_failures do
+        expect(page).to have_current_path("/admin/posts?status=draft")
+        expect(page).to have_no_css("dialog#work-log[open]")
+      end
+    end
+
+    describe "saving a bad entry" do
+      before do
+        within(modal) do
+          fill_in("work_entry[org]", with: "Rackspace")
+          fill_in("work_entry[role]", with: "Software Engineer")
+          fill_in("work_entry[from_year]", with: "18")
+          fill_in("work_entry[blurb]", with: "Built things")
+          click_button("Add role")
+        end
+      end
+
+      it "shows its errors in the dialog", :aggregate_failures do
+        expect(modal).to have_css(".field-error", text: year_format)
+        expect(page).to have_current_path("/admin/posts?status=draft")
+      end
+
+      it "keeps what I typed", :aggregate_failures do
+        expect(modal).to have_field("work_entry[org]", with: "Rackspace")
+        expect(modal).to have_field("work_entry[role]", with: "Software Engineer")
+        expect(modal).to have_field("work_entry[from_year]", with: "18")
+        expect(modal).to have_field("work_entry[blurb]", with: "Built things")
+      end
+
+      it "stores nothing" do
+        modal.assert_selector(".field-error")
+
+        expect(repo.all).to be_empty
+      end
+
+      it "saves once I fix it" do
+        modal.fill_in("work_entry[from_year]", with: "2018")
+        modal.click_button("Add role")
+        page.assert_selector("[data-toast]", text: "Role added to /projects")
+
+        expect(repo.all.map(&:from_year)).to eq([2018])
+      end
+
+      it "shuts on Cancel and comes back empty", :aggregate_failures do
+        modal.click_link("Cancel")
+
+        expect(page).to have_no_css("dialog#work-log[open]")
+        expect(page).to have_current_path("/admin/posts?status=draft")
+        expect(find("dialog#work-log", visible: :all)).to have_no_css(".field-error", visible: :all)
+      end
+    end
+
+    it "fits a phone without scrolling the page sideways", :aggregate_failures do
+      page.driver.resize(375, 800)
+
+      expect(modal).to have_field("work_entry[org]")
+      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+      expect(evaluate_script("document.querySelector('#work-log .task-dialog-box').getBoundingClientRect().right"))
+        .to be <= 375
+    end
+  end
+
   describe "the Create journal entry command" do
     before { open_palette }
 
@@ -535,6 +652,13 @@ RSpec.describe "Admin command palette", type: :feature do
         find_by_id("command-palette-messages").click
 
         expect(page).to have_current_path("/admin/messages")
+      end
+
+      it "opens the log work dialog from Log work", :aggregate_failures do
+        find_by_id("command-palette-log-work").click
+
+        expect(page).to have_css("dialog#work-log[open]")
+        expect(page).to have_current_path("/admin")
       end
 
       {

@@ -13,11 +13,11 @@ RSpec.describe "Admin palette actions", type: :request do
     before { get "/admin" }
 
     it "draws one row per entry, in order" do
-      expect(actions.map { it[:id] }).to eq(
-        %w[
-          create-task create-journal-entry new-post new-social-post todays-journal start-task complete-task
-        ].map { "command-palette-#{it}" },
-      )
+      names = %w[
+        create-task create-journal-entry new-post new-social-post log-work todays-journal start-task complete-task
+      ]
+
+      expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
     end
 
     it "sends Create task to the new task dialog, or its page without one", :aggregate_failures do
@@ -42,8 +42,15 @@ RSpec.describe "Admin palette actions", type: :request do
       expect(actions[3]["data-palette-href"]).to eq("/admin/social?write=1")
     end
 
+    it "sends Log work to the work entry dialog, or the work tab without one", :aggregate_failures do
+      row = actions[4]
+
+      expect(row["data-palette-dialog"]).to eq("work-log")
+      expect(row["data-palette-href"]).to eq("/admin/projects?filter=work")
+    end
+
     it "sends Go to today's journal to the journal" do
-      expect(actions[4]["data-palette-href"]).to eq("/admin/journal")
+      expect(actions[5]["data-palette-href"]).to eq("/admin/journal")
     end
 
     it "matches each row on its label and the words for what it does" do
@@ -55,14 +62,14 @@ RSpec.describe "Admin palette actions", type: :request do
     before { get "/admin" }
 
     it "posts Start task to the task on screen", :aggregate_failures do
-      row = actions[5]
+      row = actions[6]
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("start")
     end
 
     it "posts Complete task to the task on screen", :aggregate_failures do
-      row = actions[6]
+      row = actions[7]
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("complete")

@@ -19,6 +19,7 @@ import { setupTaskKeys } from "./task_key.js";
 import { setupTaskOrder } from "./task_order.js";
 import { setupTaskPanel } from "./task_panel.js";
 import { setupToasts } from "./toast.js";
+import { setupWorkDialog } from "./work_dialog.js";
 import { setupWorkForms } from "./work_form.js";
 
 setupAutosubmit();
@@ -42,4 +43,5 @@ setupTaskKeys();
 setupTaskOrder();
 setupTaskPanel();
 setupToasts();
+setupWorkDialog();
 setupWorkForms();

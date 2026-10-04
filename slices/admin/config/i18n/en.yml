@@ -659,6 +659,9 @@ en:
           create_task:
             label: "Create task"
             text: "new task, add task"
+          log_work:
+            label: "Log work"
+            text: "add a role, work history, project"
           new_post:
             label: "New post"
             text: "write a post, draft a post"
@@ -1638,21 +1641,26 @@ en:
           to_year:
             before_from: "The end year falls before the start year."
             format: "Use a four digit year, as 2021."
-        form:
+        fields:
           add: "Add role"
           blurb: "Blurb"
           blurb_placeholder: "One line. What you did there."
           current_note: "Leave the end year empty for a role you still hold."
           from: "From"
           from_placeholder: "2018"
-          heading: "Add"
           org: "Organization"
           org_placeholder: "Rackspace"
           role: "Role or project"
           role_placeholder: "Software Engineer"
-          title: "A new role"
           to: "To"
           to_placeholder: "2021"
+        form:
+          heading: "Add"
+          title: "A new role"
+        log_dialog:
+          cancel: "Cancel"
+          close: "Close"
+          title: "Log work"
         row:
           confirm_remove: "Remove %{role} at %{org}? You can't undo this."
           current: "Present"
@@ -1910,6 +1918,12 @@ en:
           work: "work"
           work_label: "Work history"
           work_title: "Shown under Work on /projects"
+        log_work:
+          cancel: "Cancel"
+          heading: "Log work"
+          label: "Add"
+          sub: "Fix what the form flagged, then add the role again."
+          title: "A new role"
         new:
           title: "New project"
       review:

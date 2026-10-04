@@ -42,6 +42,7 @@ module Admin
         def render_palette(navigation)
           Palette(sections: navigation.sections, actions: navigation.actions)
           Components::Tasks::CreateDialog(today: Blog::TimeZone.today, origin: content_for(:task_origin))
+          Components::WorkEntries::LogDialog(return_to: (request.fullpath if request.get?))
           Components::Tasks::Panel()
           SlashButton()
           KeyHelp()
