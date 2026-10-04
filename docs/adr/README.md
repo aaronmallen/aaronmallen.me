@@ -46,7 +46,7 @@ one.
 | [0039][0039] | Keep the announcement on the post and send it once | ![Active][active] | 2026-09-28 |
 | [0040][0040] | Send a social post to each network on its own, from that network's delivery row | ![Active][active] | 2026-09-28 |
 | [0041][0041] | Generate author_domain in Postgres, not in Ruby | ![Active][active] | 2026-09-28 |
-| [0042][0042] | Trust a webmention author by exact URL, on their own host | ![Active][active] | 2026-09-28 |
+| [0042][0042] | Trust a webmention author by exact URL, on their own host | ![Superseded][superseded-0107] | 2026-09-28 |
 | [0043][0043] | Guard the contact form with a honeypot and a daily hash, not a cookie | ![Active][active] | 2026-09-28 |
 | [0044][0044] | Replace the contact form with its answer, on a page load | ![Active][active] | 2026-09-28 |
 | [0045][0045] | Count visitors with a daily hash and no cookies | ![Superseded][superseded-0102] | 2026-09-28 |
@@ -111,6 +111,7 @@ one.
 | [0104][0104] | Version releases with CalVer, back to the first release | ![Active][active] | 2026-10-03 |
 | [0105][0105] | Dump the database nightly to a private backups bucket and keep the newest 7 | ![Active][active] | 2026-10-03 |
 | [0106][0106] | Count feed fetches on the server, and capture outbound clicks from the beacon | ![Active][active] | 2026-10-03 |
+| [0107][0107] | Trust a webmention author only under their URL, and a whole host only when marked | ![Active][active] | 2026-10-04 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -218,8 +219,10 @@ one.
 [0104]: 0104-version-releases-with-calver-back-to-the-first-release.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
 [0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
+[0107]: 0107-trust-a-webmention-author-only-under-their-url-and-a-whole-host-only-when-marked.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0102]: https://img.shields.io/badge/0102-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0107]: https://img.shields.io/badge/0107-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

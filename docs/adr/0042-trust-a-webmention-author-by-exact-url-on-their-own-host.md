@@ -1,16 +1,18 @@
 ---
 id: "0042"
 title: Trust a webmention author by exact URL, on their own host
-status: active
+status: superseded
 created: 2026-09-28
 area: [social]
+superseded-by: "0107"
 issue: AA-598
+amended: ["#461"]
 tags: [webmentions, moderation, trust, spam, bridgy, security]
 ---
 
 # ADR 0042: Trust a webmention author by exact URL, on their own host
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -68,4 +70,4 @@ The site root fallback leaves a gap in what AA-520 fixed. Every page on a host t
 the same author, the site root, so on a shared host one approval of such a page trusts every other page there
 without one.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0107-black?style=for-the-badge&label=Superseded&labelColor=orange
