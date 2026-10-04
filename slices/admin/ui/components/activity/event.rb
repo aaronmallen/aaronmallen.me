@@ -13,6 +13,7 @@ module Admin
           DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
           JOURNAL = Blog::Types::ActivityKind["journal"]
           POST = Blog::Types::ActivityKind["post"]
+          SESSION = Blog::Types::ActivityKind["session"]
           SOCIAL = Blog::Types::ActivityKind["social"]
           TASK = Blog::Types::ActivityKind["task"]
           WEBMENTION = Blog::Types::ActivityKind["webmention"]
@@ -22,11 +23,13 @@ module Admin
             JOURNAL => Type.new(icon: "fa-feather", color: :sand, prose: true),
             SOCIAL => Type.new(icon: "fa-paper-plane", color: :blue, prose: true),
             TASK => Type.new(icon: "fa-circle-check", color: :orange, prose: false),
+            SESSION => Type.new(icon: "fa-clock", color: :orange, prose: false),
             COMMENT => Type.new(icon: "fa-comment", color: :orange, prose: true),
             DECISION => Type.new(icon: "fa-scale-balanced", color: :sand, prose: false),
             DECISION_COMMENT => Type.new(icon: "fa-comments", color: :sand, prose: true),
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
           }.freeze
+          ANCHORS = { COMMENT => "task-comment", SESSION => "task-session" }.freeze
           POSTED = Blog::Types::SocialQueue["posted"]
 
           prop :event, Blog::Types::Instance(Structs::ActivityEvent)
@@ -51,7 +54,7 @@ module Admin
             when POST then path(:admin_edit_post, id: @event.source_id)
             when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
             when SOCIAL then path(:admin_social, filter: POSTED)
-            when TASK, COMMENT, DECISION, DECISION_COMMENT then owner_href
+            when TASK, SESSION, COMMENT, DECISION, DECISION_COMMENT then owner_href
             when WEBMENTION then path(:admin_webmentions)
             end
           end
@@ -80,7 +83,7 @@ module Admin
           def task_href
             return path(:admin_tasks) if @event.type == TASK
 
-            "#{path(:admin_task, id: @event.task_id)}#task-comment-#{@event.source_id}"
+            "#{path(:admin_task, id: @event.task_id)}##{ANCHORS.fetch(@event.type)}-#{@event.source_id}"
           end
 
           def type = TYPES.fetch(@event.type)

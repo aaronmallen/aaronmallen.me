@@ -5,7 +5,7 @@ module Admin
     class ActivityEvent < Data.define(:type, :source_id, :occurred_on, :occurred_at, :name, :name_html, :sub_line,
                                       :task_id, :decision_id)
       KINDS = %w[
-        commit post journal social task comment decision decision_comment webmention
+        commit post journal social task session comment decision decision_comment webmention
       ].map { Blog::Types::ActivityKind[it] }.freeze
     end
   end

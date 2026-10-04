@@ -868,6 +868,21 @@ CREATE TABLE public.webmentions (
 
 
 --
+-- Name: work_sessions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.work_sessions (
+    id integer NOT NULL,
+    task_id integer NOT NULL,
+    started_at timestamp with time zone NOT NULL,
+    ended_at timestamp with time zone,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT work_sessions_order_check CHECK ((ended_at >= started_at))
+);
+
+
+--
 -- Name: activities; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -886,7 +901,8 @@ CREATE VIEW public.activities AS
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.commits
 UNION ALL
  SELECT 'post'::text AS type,
@@ -903,7 +919,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.posts
   WHERE (posts.status = 'published'::public.post_status)
 UNION ALL
@@ -921,7 +938,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.journal_entries
 UNION ALL
  SELECT 'social'::text AS type,
@@ -938,7 +956,8 @@ UNION ALL
     social_posts.targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM (public.social_posts
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
            FROM public.social_post_parts
@@ -961,7 +980,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     webmentions.excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM (public.webmentions
      JOIN public.posts ON ((posts.id = webmentions.post_id)))
   WHERE (webmentions.status = 'approved'::public.webmention_status)
@@ -980,7 +1000,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     tasks.id AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.tasks
   WHERE (tasks.status = 'done'::public.task_status)
 UNION ALL
@@ -998,7 +1019,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     projects.tagline AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.projects
 UNION ALL
  SELECT 'sprint'::text AS type,
@@ -1015,7 +1037,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM public.sprints
 UNION ALL
  SELECT 'suggestion'::text AS type,
@@ -1032,7 +1055,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
     NULL::integer AS task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM ((public.suggestions
      LEFT JOIN public.posts ON ((posts.id = suggestions.post_id)))
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
@@ -1055,7 +1079,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     tasks.title AS excerpt,
     task_comments.task_id,
-    NULL::integer AS decision_id
+    NULL::integer AS decision_id,
+    NULL::integer AS worked_seconds
    FROM (public.task_comments
      JOIN public.tasks ON ((tasks.id = task_comments.task_id)))
 UNION ALL
@@ -1073,7 +1098,8 @@ UNION ALL
     NULL::public.network[] AS targets,
     (COALESCE(decision_events.reason, decision_events.note, decision_options.title))::text AS excerpt,
     NULL::integer AS task_id,
-    decision_events.decision_id
+    decision_events.decision_id,
+    NULL::integer AS worked_seconds
    FROM ((public.decision_events
      JOIN public.decisions ON ((decisions.id = decision_events.decision_id)))
      LEFT JOIN public.decision_options ON ((decision_options.id = decision_events.option_id)))
@@ -1092,9 +1118,30 @@ UNION ALL
     NULL::public.network[] AS targets,
     (decisions.title)::text AS excerpt,
     NULL::integer AS task_id,
-    decision_comments.decision_id
+    decision_comments.decision_id,
+    NULL::integer AS worked_seconds
    FROM (public.decision_comments
-     JOIN public.decisions ON ((decisions.id = decision_comments.decision_id)));
+     JOIN public.decisions ON ((decisions.id = decision_comments.decision_id)))
+UNION ALL
+ SELECT 'session'::text AS type,
+    work_sessions.id AS source_id,
+    ((work_sessions.started_at AT TIME ZONE 'America/Chicago'::text))::date AS occurred_on,
+    ((work_sessions.started_at AT TIME ZONE 'America/Chicago'::text))::time without time zone AS occurred_at,
+    tasks.title AS name,
+    NULL::text AS link,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::integer AS additions,
+    NULL::integer AS deletions,
+    NULL::text AS status,
+    NULL::public.network[] AS targets,
+    NULL::text AS excerpt,
+    work_sessions.task_id,
+    NULL::integer AS decision_id,
+    (floor(EXTRACT(epoch FROM (work_sessions.ended_at - work_sessions.started_at))))::integer AS worked_seconds
+   FROM (public.work_sessions
+     JOIN public.tasks ON ((tasks.id = work_sessions.task_id)))
+  WHERE (work_sessions.ended_at IS NOT NULL);
 
 
 --
@@ -2802,21 +2849,6 @@ CREATE TABLE public.task_tags (
 
 
 --
--- Name: work_sessions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.work_sessions (
-    id integer NOT NULL,
-    task_id integer NOT NULL,
-    started_at timestamp with time zone NOT NULL,
-    ended_at timestamp with time zone,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT work_sessions_order_check CHECK ((ended_at >= started_at))
-);
-
-
---
 -- Name: task_timeline; Type: VIEW; Schema: public; Owner: -
 --
 
@@ -4378,6 +4410,13 @@ CREATE UNIQUE INDEX work_sessions_one_open_index ON public.work_sessions USING b
 
 
 --
+-- Name: work_sessions_started_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX work_sessions_started_on_index ON public.work_sessions USING btree ((((started_at AT TIME ZONE 'America/Chicago'::text))::date));
+
+
+--
 -- Name: work_sessions_task_id_started_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4977,4 +5016,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000176_create_feed_subscribers.rb'),
 ('20261003000196_create_attention_snoozes.rb'),
 ('20261003000214_create_analytics_clicks.rb'),
-('20261003000274_create_review_decisions_view.rb');
+('20261003000274_create_review_decisions_view.rb'),
+('20261003000335_add_work_sessions_to_activities.rb');

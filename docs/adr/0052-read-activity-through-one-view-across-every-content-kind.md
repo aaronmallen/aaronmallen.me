@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -56,6 +56,12 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
   both, so they match the decision's tags and link to its page. An event's name is the decision's title, its status
   the event's kind, and its excerpt the reason, the edit note or else the option's title. A comment's excerpt is the
   decision's title. The Activity screen shows both.
+- Closed work sessions join as the `session` kind (#263), through
+  `config/db/migrate/20261003000335_add_work_sessions_to_activities.rb`. A session lands on the site day it started,
+  even when it runs past midnight, and a running session stays out until it closes. Its name is its task's title and
+  its `task_id` its task's, so it matches the task's tags and links to the task. The view gains a `worked_seconds`
+  column, set on sessions alone, for the session's length. Moves, tag changes and status changes stay on the task's
+  timeline and out of this view. The Activity screen shows sessions.
 
 A new content kind joins by giving its table an index on its day, adding a branch to the view's migration, and
 adding its name to `Blog::Types::ActivityKind`. It shows on the Activity screen only once it joins

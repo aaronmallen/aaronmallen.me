@@ -165,6 +165,8 @@ RSpec.describe "MCP reach", type: :request do
 
   def seed_project = create(:project)
 
+  def seed_session = create(:work_session, started_at: at(9), ended_at: at(10))
+
   def seed_social = create(:social_post, :posted, posted_at: at(12))
 
   def seed_sprint = create(:sprint, sprint_date: today)

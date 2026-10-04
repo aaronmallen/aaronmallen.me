@@ -37,7 +37,7 @@ module Blog
 
     ActivityKind = Types::String.enum(
       "commit", "post", "journal", "social", "task", "webmention", "project", "sprint", "suggestion", "comment",
-      "decision", "decision_comment",
+      "decision", "decision_comment", "session",
     )
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)

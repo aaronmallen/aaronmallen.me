@@ -21,6 +21,7 @@ module Admin
       NAME_LIMIT = 120
       OCCURRED_ON = :occurred_on.to_proc
       POST = Blog::Types::ActivityKind["post"]
+      SESSION = Blog::Types::ActivityKind["session"]
       SHA_LENGTH = 7
       SOCIAL = Blog::Types::ActivityKind["social"]
       STATUSES = {
@@ -28,6 +29,14 @@ module Admin
         Blog::Types::SocialPostStatus["posted"] => "activity_page.statuses.posted",
       }.freeze
       WEBMENTION = Blog::Types::ActivityKind["webmention"]
+      LINE_BUILDERS = {
+        COMMIT => :commit_line,
+        DECISION => :decision_line,
+        DECISION_COMMENT => :decision_comment_line,
+        SESSION => :session_line,
+        SOCIAL => :social_line,
+        WEBMENTION => :webmention_line,
+      }.freeze
 
       include Deps[
         "i18n",
@@ -61,6 +70,8 @@ module Admin
           repo: row.repo, sha: row.sha.to_s[0, SHA_LENGTH], additions: row.additions, deletions: row.deletions,
         )
       end
+
+      def decision_comment_line(row) = i18n.t("activity_page.sub_lines.decision_comment", decision: row.excerpt)
 
       def decision_line(row)
         event = i18n.t(row.status, scope: DECISION_EVENTS)
@@ -120,6 +131,8 @@ module Admin
 
       def rows_before?(from, day, filters) = activity_between.call(from:, to: day.prev_day, limit: 1, **filters).any?
 
+      def session_line(row) = i18n.t("activity_page.sub_lines.session", span: Blog::Figures.hours(row.worked_seconds))
+
       def shortened(name)
         squished = Blog::Whitespace.squish(Blog::Types::Text[name])
 
@@ -133,15 +146,10 @@ module Admin
       def status(value) = i18n.t(STATUSES.fetch(value))
 
       def sub_line(row, views)
-        case row.type
-        when COMMIT then commit_line(row)
-        when DECISION then decision_line(row)
-        when DECISION_COMMENT then i18n.t("activity_page.sub_lines.decision_comment", decision: row.excerpt)
-        when POST then post_line(row, views)
-        when SOCIAL then social_line(row)
-        when WEBMENTION then webmention_line(row)
-        else i18n.t(LINES.fetch(row.type), task: row.excerpt)
-        end
+        return post_line(row, views) if row.type == POST
+
+        builder = LINE_BUILDERS[row.type]
+        builder ? send(builder, row) : i18n.t(LINES.fetch(row.type), task: row.excerpt)
       end
 
       def view_count(row, views) = i18n.t("activity_page.views", count: views.fetch(row.link, 0))

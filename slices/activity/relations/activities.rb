@@ -20,11 +20,13 @@ module Activity
       OWNER_SEPARATOR = "/"
       POST = Blog::Types::ActivityKind["post"]
       SEARCHED = %i[excerpt link name repo sha status].freeze
+      SESSION = Blog::Types::ActivityKind["session"]
       TASK = Blog::Types::ActivityKind["task"]
       TAGGED = {
         JOURNAL => %i[source_id journal_entry_tags journal_entry_id],
         TASK => %i[source_id task_tags task_id],
         COMMENT => %i[task_id task_tags task_id],
+        SESSION => %i[task_id task_tags task_id],
         DECISION => %i[decision_id decision_tags decision_id],
         DECISION_COMMENT => %i[decision_id decision_tags decision_id],
       }.freeze

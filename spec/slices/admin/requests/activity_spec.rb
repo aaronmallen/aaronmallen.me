@@ -27,8 +27,8 @@ RSpec.describe "Admin activity", type: :request do
   def icon_for(type)
     {
       "comment" => "comment", "commit" => "code-commit", "decision" => "scale-balanced",
-      "decision_comment" => "comments", "journal" => "feather", "post" => "file-lines", "social" => "paper-plane",
-      "task" => "circle-check", "webmention" => "at",
+      "decision_comment" => "comments", "journal" => "feather", "post" => "file-lines", "session" => "clock",
+      "social" => "paper-plane", "task" => "circle-check", "webmention" => "at",
     }.fetch(type)
   end
 
@@ -77,7 +77,7 @@ RSpec.describe "Admin activity", type: :request do
       end
 
       it "checks every type" do
-        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 9, visible: :all)
+        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 10, visible: :all)
       end
 
       it "submits the filters as a get" do
@@ -251,6 +251,112 @@ RSpec.describe "Admin activity", type: :request do
       it "drops the comments when their type is unchecked" do
         comment
         visit_activity(types: { comment: "0", task: "1" })
+
+        expect(event_names).to be_empty
+      end
+    end
+
+    describe "work sessions" do
+      let(:task) { create(:task, :in_progress, title: "clear the gutters", tags: %w[home]) }
+
+      def session(started, ended = started + 5400, **attrs)
+        create(:work_session, task_id: task.id, started_at: started, ended_at: ended, **attrs)
+      end
+
+      it "shows a closed session on the day it started, named for its task" do
+        session(at(9, on: today - 1))
+        visit_activity
+
+        expect(day_names(today - 1)).to eq(["clear the gutters"])
+      end
+
+      it "says how long it ran" do
+        session(at(9), at(10, 30))
+        visit_activity
+
+        expect(event_subs).to eq(["worked 1h 30m"])
+      end
+
+      it "shows a session on a task that is not done" do
+        session(at(9))
+        visit_activity
+
+        expect(event_names).to eq(["clear the gutters"])
+      end
+
+      it "shows a session on a task that is done beside the task" do
+        done = create(:task, :done, title: "paint the fence", completed_at: at(16))
+        create(:work_session, task_id: done.id, started_at: at(9), ended_at: at(10))
+        visit_activity
+
+        expect(event_subs).to contain_exactly("done", "worked 1h 00m")
+      end
+
+      it "shows a session that crosses midnight on the day it started", :aggregate_failures do
+        session(at(23, on: today - 2), at(1, on: today - 1))
+        visit_activity
+
+        expect(day_names(today - 2)).to eq(["clear the gutters"])
+        expect(day_names(today - 1)).to be_empty
+      end
+
+      it "leaves out a session that is still running" do
+        create(:work_session, task_id: task.id, started_at: at(9, on: today - 1))
+        visit_activity
+
+        expect(event_names).to be_empty
+      end
+
+      it "opens the session on its task" do
+        made = session(at(9))
+        visit_activity
+
+        expect(page).to have_css(
+          "a.activity-event[href='/admin/tasks/#{task.id}#task-session-#{made.id}']", text: "clear the gutters",
+        )
+      end
+
+      it "counts the sessions in the range" do
+        session(at(9))
+        session(at(13))
+        session(at(9, on: today - 30))
+        visit_activity
+
+        expect(count_for("session")).to eq("2")
+      end
+
+      it "finds a session by its task's tags" do
+        session(at(9))
+        create(:work_session, :closed, started_at: at(8), ended_at: at(9))
+        visit_activity(q: "tag:home")
+
+        expect(event_names).to eq(["clear the gutters"])
+      end
+
+      it "drops the sessions when their type is unchecked" do
+        session(at(9))
+        visit_activity(types: { comment: "1", session: "0" })
+
+        expect(event_names).to be_empty
+      end
+    end
+
+    describe "a task's moves, tags and status changes" do
+      let(:task) { create(:task, title: "clear the gutters") }
+
+      def event(kind, **columns)
+        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(9), **columns)
+      end
+
+      before do
+        event("moved", from_list: "next", to_list: "someday")
+        event("tagged", tag_name: "home")
+        event("untagged", tag_name: "home")
+        event("status_changed", from_status: "open", to_status: "in_progress")
+      end
+
+      it "leaves them out of the timeline" do
+        visit_activity
 
         expect(event_names).to be_empty
       end

@@ -573,9 +573,14 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:journal_entry, entry_date: today)
       create(:social_post, :posted, posted_at: at(12))
       create(:webmention, :approved, post_id: article.id, received_at: at(8))
-      finish_with_comment
+      work_on_tasks
       deciding
       planning(article)
+    end
+
+    def work_on_tasks
+      finish_with_comment
+      create(:work_session, started_at: at(9), ended_at: at(10))
     end
 
     it "names the window it read" do
@@ -682,6 +687,57 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity(text: "down to")
 
         expect(names).to eq(["Down to ten"])
+      end
+    end
+
+    describe "a work session" do
+      let(:task) { create(:task, :in_progress, title: "Clear the inbox", tags: %w[home]) }
+
+      def event(kind, **columns)
+        create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: at(9), **columns)
+      end
+
+      def session(started, ended) = create(:work_session, task_id: task.id, started_at: started, ended_at: ended)
+
+      it "sends a closed session with its task's title, its task's id and how long it ran" do
+        session(at(9), at(10) + 1800)
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "session", "name" => "Clear the inbox", "task_id" => task.id, "worked_seconds" => 5400),
+        )
+      end
+
+      it "sends a session that crosses midnight on the day it started" do
+        session(at(23, on: today - 2), at(1, on: today - 1))
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "session", "date" => (today - 2).iso8601, "time" => "23:00"),
+        )
+      end
+
+      it "leaves out a session that is still running" do
+        create(:work_session, task_id: task.id, started_at: at(9, on: today - 1))
+        read_activity
+
+        expect(entries).to be_empty
+      end
+
+      it "gives a session its task's tags" do
+        session(at(9), at(10))
+        read_activity
+
+        expect(entries).to contain_exactly(include("kind" => "session", "tags" => %w[home]))
+      end
+
+      it "leaves out the task's moves, tag changes and status changes" do
+        event("tagged", tag_name: "home")
+        event("status_changed", from_status: "open", to_status: "in_progress")
+        event("moved", from_list: "next", to_list: "someday")
+        read_activity
+
+        expect(entries).to be_empty
       end
     end
 
