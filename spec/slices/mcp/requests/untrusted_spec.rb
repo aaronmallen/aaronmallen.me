@@ -224,7 +224,8 @@ RSpec.describe "MCP untrusted text", type: :request do
     def session(*traits) = create(:work_session, *traits, task_id: task.id)
 
     def session_times
-      { started_at: (Time.now - 7200).strftime("%FT%R"), ended_at: (Time.now - 3600).strftime("%FT%R") }
+      local = ->(ago) { Blog::TimeZone.local(Time.now - ago).strftime("%FT%R") }
+      { started_at: local.call(7200), ended_at: local.call(3600) }
     end
 
     it "walks every tool whose endpoint answers with one" do
