@@ -150,6 +150,13 @@ RSpec.describe "Work sessions", type: :request do
       expect(repo.by_id(task.id).status).to eq("in_progress")
     end
 
+    it "keeps the session whole when the day's sprint loads again" do
+      task = running
+      2.times { Tasks::Operations::CurrentSprint.new.call }
+
+      expect(sessions(task).map { [it[:started_at], it[:ended_at]] }).to eq([[started, nil]])
+    end
+
     it "ends the session when its sprint is dropped" do
       task = running(sprint: create(:sprint, sprint_date: today + 2))
       operation(:drop_sprint).call(task.sprint_id, now: started + 60)

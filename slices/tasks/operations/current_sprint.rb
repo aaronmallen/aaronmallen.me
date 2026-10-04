@@ -7,6 +7,7 @@ module Tasks
 
       def call(now: Time.now)
         transaction do
+          sprint_repo.lock_roll_over
           sprint = sprint_repo.claim(Blog::TimeZone.today(now))
           arrived = task_repo.carry_forward(sprint.id, at: now)
           next sprint unless arrived.positive?

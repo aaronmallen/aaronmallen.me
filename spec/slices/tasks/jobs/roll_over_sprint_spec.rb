@@ -58,6 +58,45 @@ RSpec.describe Tasks::Jobs::RollOverSprint do
     expect { described_class.new(current_sprint:).perform }.to raise_error(described_class::RollOverFailed, "not_found")
   end
 
+  describe "two roll-overs at once", :commits do
+    let(:carried) { create(:task, :in_progress, :in_sprint, sprint_id: yesterday.id) }
+
+    def database = Tasks::Slice["db.rom"].gateways[:default].connection
+
+    def held_by_another_session
+      other = Sequel.connect(database.opts.merge(max_connections: 1))
+      other.get(Sequel.function(:pg_advisory_lock, Sequel.function(:hashtext, "sprints")))
+      yield
+    ensure
+      other&.disconnect
+    end
+
+    def rolled_together
+      create(:sprint, sprint_date: today)
+      create(:work_session, task_id: carried.id, started_at: Time.now - 60)
+      held_by_another_session do
+        Array.new(2) { Thread.new { Tasks::Operations::CurrentSprint.new.call } }.tap { wait_until_all_wait(2) }
+      end.map(&:value)
+    end
+
+    def wait_until_all_wait(count)
+      here = database[:pg_database].where(datname: Sequel.function(:current_database)).select(:oid)
+      waiting = database[:pg_locks].where(locktype: "advisory", granted: false, database: here)
+      Timeout.timeout(5) { sleep(0.01) until waiting.count == count }
+    end
+
+    it "lets both succeed" do
+      expect(rolled_together).to all(be_success)
+    end
+
+    it "records one move for the carried task" do
+      rolled_together
+      moves = Tasks::Slice["relations.task_events"].for_task(carried.id).where(kind: "moved")
+
+      expect(moves.count).to eq(1)
+    end
+  end
+
   describe "the schedule" do
     let(:entry) { sidekiq_schedule("roll_over_sprint") }
 
