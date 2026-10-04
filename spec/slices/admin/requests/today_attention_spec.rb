@@ -110,4 +110,101 @@ RSpec.describe "Admin today needs attention", type: :request do
     expect(row("Journal").all("a").map { it["href"] }.uniq).to eq(["#today-journal-entry"])
     expect(page).to have_css("form#today-journal-entry")
   end
+
+  describe "snoozing" do
+    let(:week) { 7 * 24 * 60 * 60 }
+    let!(:draft) { create(:post, :draft, title: "Old draft", updated_at: days_ago(60)) }
+
+    def snooze(title) = submit(row(title).find("form[action='/admin/attention/snooze']"))
+
+    def snoozed(kind, record_id = nil, at:)
+      Activity::Slice["operations.snooze_attention"].call(kind, record_id, now: at)
+    end
+
+    def snoozes = Activity::Slice["relations.attention_snoozes"].to_a
+
+    it "takes a task row off the card", :aggregate_failures do
+      create(:task, carried_count: 4, title: "Carried task")
+      get "/admin"
+      snooze("Carried task")
+
+      expect(last_request.path).to eq("/admin")
+      expect(titles).to eq(["Old draft"])
+    end
+
+    it "takes a draft row off the card" do
+      create(:task, :someday, title: "Someday task", updated_at: days_ago(100))
+      get "/admin"
+      snooze("Old draft")
+
+      expect(titles).to eq(["Someday task"])
+    end
+
+    it "takes the journal row off the card" do
+      create(:journal_entry, entry_date: today - 3)
+      get "/admin"
+      snooze("Journal")
+
+      expect(titles).to eq(["Old draft"])
+    end
+
+    it "ends the snooze a week out", :aggregate_failures do
+      before = Time.now
+      get "/admin"
+      snooze("Old draft")
+
+      expect(snoozes.map { it[:kind] }).to eq(["draft"])
+      expect(snoozes.first[:ends_at]).to be_between(before + week, Time.now + week)
+    end
+
+    it "moves the end out a week when snoozed again" do
+      snoozed("draft", draft.id, at: days_ago(6))
+      snoozed("draft", draft.id, at: Time.now)
+
+      expect(snoozes.map { it[:ends_at] }).to all(be > Time.now + week - 60)
+    end
+
+    it "keeps a row off the card for seven days" do
+      create(:journal_entry, entry_date: today - 3)
+      snoozed("journal", at: days_ago(6))
+      get "/admin"
+
+      expect(titles).to eq(["Old draft"])
+    end
+
+    it "brings a row back after seven days while it stays stalled" do
+      create(:journal_entry, entry_date: today - 10)
+      snoozed("journal", at: days_ago(8))
+      get "/admin"
+
+      expect(titles).to eq(["Journal", "Old draft"])
+    end
+
+    it "leaves no snooze behind when a snoozed task goes" do
+      task = create(:task, :someday, title: "Someday task", updated_at: days_ago(100))
+      snoozed("someday", task.id, at: Time.now)
+      post "/admin/tasks/#{task.id}/delete", _csrf_token: admin_csrf_token
+
+      expect(snoozes).to be_empty
+    end
+
+    it "leaves no snooze behind when a snoozed draft goes" do
+      snoozed("draft", draft.id, at: Time.now)
+      post "/admin/posts/#{draft.id}/delete", _csrf_token: admin_csrf_token
+
+      expect(snoozes).to be_empty
+    end
+
+    it "refuses a row that is not on the list" do
+      post "/admin/attention/snooze", _csrf_token: admin_csrf_token, kind: "carried", record_id: "1"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "refuses a kind it does not know" do
+      post "/admin/attention/snooze", _csrf_token: admin_csrf_token, kind: "nope"
+
+      expect(last_response.status).to eq(404)
+    end
+  end
 end

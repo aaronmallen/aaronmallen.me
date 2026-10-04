@@ -34,16 +34,24 @@ module Admin
         def draft(row)
           ListItem(title: row.title, href: edit_post_path(row), sub: t(".untouched", count: row.days)) do
             a(class: "btn sm", href: edit_post_path(row)) { t(".open") }
+            snooze(row)
           end
         end
 
         def edit_post_path(row) = path(:admin_edit_post, id: row.record_id)
+
+        def icon_button(label, icon)
+          Button(type: "submit", small: true, title: label, aria: { label: }) do
+            i(class: icon, aria: { hidden: "true" })
+          end
+        end
 
         def journal(row)
           href = "##{TodayJournalCard::FORM_ID}"
 
           ListItem(title: t(".journal"), href:, sub: t(".journal_gap", count: row.days)) do
             a(class: "btn sm", href:) { t(".write") }
+            snooze(row)
           end
         end
 
@@ -62,19 +70,26 @@ module Admin
           end
         end
 
+        def snooze(row)
+          Form(action: path(:admin_snooze_attention)) do
+            input(type: "hidden", name: "kind", value: row.kind)
+            input(type: "hidden", name: "record_id", value: row.record_id) if row.record_id
+            icon_button(t(".snooze"), "fa-solid fa-bell-slash")
+          end
+        end
+
         def task(row, sub)
           ListItem(title: row.title, href: path(:admin_task, id: row.record_id, origin: ORIGIN), sub:) do
             move(row)
             cancel(row)
+            snooze(row)
           end
         end
 
         def task_form(route, row, label, icon, data: nil, **params)
           Form(action: path(route, id: row.record_id, **params), data:) do
             input(type: "hidden", name: "origin", value: ORIGIN)
-            Button(type: "submit", small: true, title: label, aria: { label: }) do
-              i(class: icon, aria: { hidden: "true" })
-            end
+            icon_button(label, icon)
           end
         end
       end

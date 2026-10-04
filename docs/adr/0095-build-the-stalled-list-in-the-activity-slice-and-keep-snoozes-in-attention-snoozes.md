@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351"]
+amended: ["#351", "#353"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -39,8 +39,8 @@ The `activity` slice builds the list.
   rest worst first. `activity` exports it, `admin` imports it for the card, and `api` imports it for the endpoint
   its MCP tool calls, so the card and the tool read one list.
 - **Snoozes live in `attention_snoozes`**, which `activity` owns: a kind, a record id and the time the snooze ends.
-  The journal row has no record, so its snooze carries no id. An `activity` operation writes a snooze, and
-  `activity` exports it to `admin` and `api`.
+  The journal row has no record, so its snooze carries no id. An `activity` operation writes a snooze a week out,
+  or moves an existing one a week out, and `activity` exports it to `admin` and `api`.
 
 ## Alternatives
 
@@ -61,8 +61,10 @@ column a view reads, so a migration that touches one has to replace `attention` 
 `updated_at` moves on every write through a repo's update command. Dragging a someday task to a new place in its
 list, or a sync of its issue, counts as a touch and puts the task's ninety days back to zero.
 
-A snooze points at records in three tables, so no foreign key holds it. Deleting a task or a draft leaves its snooze
-behind until it ends, and nothing reads it after that.
+A snooze points at records in two tables, so no foreign key holds it. A `tasks_drop_attention_snoozes` and a
+`posts_drop_attention_snoozes` trigger delete a record's snoozes when the record goes, the way the record link
+triggers do. A migration that drops and rebuilds `tasks` or `posts` loses its trigger. A snooze that has ended stays
+in the table, and the stalled list ignores it.
 
 `activity` now writes a table of its own, where before it only read.
 

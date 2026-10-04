@@ -18,6 +18,7 @@ module Admin
     post "/", to: "today.create_journal_entry", as: :create_today_journal_entry
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
+    post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID

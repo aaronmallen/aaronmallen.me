@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, links, posts, search, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -69,6 +69,10 @@ cross today:
   the links of a deleted row from `record_links`, a table `links` owns. A migration that drops and rebuilds one of
   the eight tables loses its trigger. The record on linking any two records (ADR 0093) holds why Postgres keeps
   these rules.
+- **The `attention_snoozes_drop_record` trigger**, in
+  `config/db/migrate/20261003000196_create_attention_snoozes.rb`, hangs on `tasks` and `posts`, which `tasks` and
+  `posts` own, and deletes a deleted row's snoozes from `attention_snoozes`, a table `activity` owns. The record on
+  the stalled list (ADR 0095) holds why snoozes live there.
 
 The one table several slices write is `tags`, and the record on declaring the tags relation in every slice that
 tags holds that choice.

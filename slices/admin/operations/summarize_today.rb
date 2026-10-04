@@ -46,7 +46,7 @@ module Admin
 
       private
 
-      def attention(now) = stalled_list.call(on: Blog::TimeZone.today(now))
+      def attention(now) = stalled_list.call(now:)
 
       def commits(now)
         {

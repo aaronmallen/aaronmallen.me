@@ -213,6 +213,7 @@ en:
     toasts:
       not_configured: "No GitHub token is set."
       queued: "Import queued · new commits show on the card shortly"
+      snoozed: "Snoozed for a week"
   tokens_page:
     toasts:
       minted: "Token minted · copy it now"
@@ -287,6 +288,7 @@ en:
           next: "Next"
         move: "Move to %{list}"
         open: "Open"
+        snooze: "Snooze for a week"
         title: "Needs attention"
         untouched:
           one: "Untouched for %{count} day"

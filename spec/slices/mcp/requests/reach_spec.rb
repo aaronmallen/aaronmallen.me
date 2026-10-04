@@ -3,6 +3,7 @@
 RSpec.describe "MCP reach", type: :request do
   def self.exempt
     {
+      "activity.operations.snooze_attention" => "snoozes a row on the admin's Needs attention card; #356 adds the tool",
       "admin.operations.build_activity_page" => "builds the admin's activity screen; read_activity reads the same feed",
       "admin.operations.build_calendar_page" => "builds the admin's calendar screen; #361 adds list_calendar",
       "admin.operations.build_decision_editor" => "builds the admin's decision editor; edit_decision covers a decision",
