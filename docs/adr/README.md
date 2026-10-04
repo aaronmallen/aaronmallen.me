@@ -110,10 +110,11 @@ one.
 | [0103][0103] | Tag an imported task from repo rules on import, and once when a rule is created | ![Active][active] | 2026-10-03 |
 | [0104][0104] | Version releases with CalVer, back to the first release | ![Active][active] | 2026-10-03 |
 | [0105][0105] | Dump the database nightly to a private backups bucket and keep the newest 7 | ![Active][active] | 2026-10-03 |
-| [0106][0106] | Count feed fetches on the server, and capture outbound clicks from the beacon | ![Active][active] | 2026-10-03 |
+| [0106][0106] | Count feed fetches on the server, and capture outbound clicks from the beacon | ![Superseded][superseded-0110] | 2026-10-03 |
 | [0107][0107] | Trust a webmention author only under their URL, and a whole host only when marked | ![Active][active] | 2026-10-04 |
 | [0108][0108] | Show remote images in imported markdown as links | ![Active][active] | 2026-10-04 |
 | [0109][0109] | Let Cloudflare keep a published photo for one day | ![Active][active] | 2026-10-04 |
+| [0110][0110] | Take subscriber counts only from the feed aggregators we name | ![Active][active] | 2026-10-04 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -224,9 +225,11 @@ one.
 [0107]: 0107-trust-a-webmention-author-only-under-their-url-and-a-whole-host-only-when-marked.md
 [0108]: 0108-show-remote-images-in-imported-markdown-as-links.md
 [0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
+[0110]: 0110-take-subscriber-counts-only-from-the-feed-aggregators-we-name.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0102]: https://img.shields.io/badge/0102-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0107]: https://img.shields.io/badge/0107-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0110]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

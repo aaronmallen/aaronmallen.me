@@ -1,16 +1,18 @@
 ---
 id: "0106"
 title: Count feed fetches on the server, and capture outbound clicks from the beacon
-status: active
+status: superseded
 created: 2026-10-03
 area: [analytics, public, admin, assets, db]
+superseded-by: "0110"
 issue: "#376"
+amended: ["#470"]
 tags: [analytics, privacy, feed, atom, subscribers, user-agent, clicks, beacon, cache, cloudflare]
 ---
 
 # ADR 0106: Count feed fetches on the server, and capture outbound clicks from the beacon
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -89,4 +91,4 @@ its host and path needs a new record.
 [0045]: 0045-count-visitors-with-a-daily-hash-and-no-cookies.md
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
