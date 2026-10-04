@@ -193,6 +193,11 @@ en:
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
+  task_tag_rules_page:
+    toasts:
+      added: "Rule added · tasks from its repos now carry its tags"
+      deleted: "Rule deleted · every task keeps its tags"
+      saved: "Rule saved · new imports take its tags"
   tasks_page:
     toasts:
       bulk:
@@ -1330,6 +1335,30 @@ en:
             tasks:
               one: "%{count} task"
               other: "%{count} tasks"
+      task_tag_rules:
+        capture:
+          add: "Add rule"
+          note: "Adding a rule also tags every task already imported from its repos."
+        field_error:
+          pattern:
+            blank: "Name a repo first."
+            format: "Name one repo as owner/name, or every repo of an owner as owner/*."
+            taken: "Another rule already holds that pattern."
+          tags:
+            blank: "Name a tag first."
+            format: "A tag is lowercase words joined by hyphens."
+        fields:
+          pattern: "Repo"
+          pattern_placeholder: "aaronmallen/*"
+          tags: "Tags"
+          tags_placeholder: "ruby, projects"
+        row:
+          cancel: "Cancel"
+          confirm_delete: "Delete the rule for %{pattern}? Tasks keep the tags it gave them."
+          delete: "Delete"
+          edit: "Edit"
+          note: "Saving changes only what new imports take. Tasks already imported keep the tags they have."
+          save: "Save"
       tasks:
         bulk:
           cancel: "Cancel"
@@ -1421,6 +1450,8 @@ en:
         grip:
           failed: "Couldn't save the new order"
           label: "Reorder %{task}"
+        import_acts:
+          rules: "Tag rules"
         link_editor:
           find: "Find"
           kind: "Link type"
@@ -2067,6 +2098,18 @@ en:
           title:
             private: "Task and journal tags"
             public: "Post and project tags"
+      task_tag_rules:
+        index:
+          aside: "Click a rule to edit it or delete it."
+          back: "Tasks"
+          empty: "No rules yet. Add one above."
+          heading: "Tag rules"
+          label: "Tasks"
+          note: "Deleting a rule, or taking a tag out of one, takes no tag off a task."
+          sub:
+            one: "%{count} rule · each gives its repos' issues private tags on import"
+            other: "%{count} rules · each gives its repos' issues private tags on import"
+          title: "Tags by repo"
       tasks:
         index:
           archive: "Archive"

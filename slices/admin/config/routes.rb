@@ -160,6 +160,10 @@ module Admin
     post "/tasks/bulk", to: "tasks.bulk", as: :bulk_tasks
     get "/tasks/in-progress", to: "tasks.in_progress", as: :tasks_in_progress
     get "/tasks/new", to: "tasks.new", as: :new_task
+    get "/tasks/rules", to: "task_tag_rules.index", as: :task_tag_rules
+    post "/tasks/rules", to: "task_tag_rules.create", as: :create_task_tag_rule
+    post "/tasks/rules/:id", to: "task_tag_rules.update", as: :update_task_tag_rule, id: ID
+    post "/tasks/rules/:id/delete", to: "task_tag_rules.destroy", as: :delete_task_tag_rule, id: ID
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID

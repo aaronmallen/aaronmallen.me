@@ -2984,6 +2984,71 @@
   }
 }
 
+@utility rule-capture {
+  @apply flex flex-col gap-3 pb-4;
+}
+
+@utility rule-capture-foot {
+  @apply flex flex-wrap items-center justify-between gap-2;
+}
+
+@utility rule-fields {
+  @apply grid grid-cols-2 gap-3;
+
+  @media (width < 43.75rem) {
+    @apply grid-cols-1;
+  }
+}
+
+@utility rule-row {
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5;
+  @apply border-t border-line py-3 first:border-t-0 first:pt-0;
+}
+
+@utility rule-toggle {
+  &:checked ~ .rule-editor {
+    @apply flex;
+  }
+
+  &:focus-visible ~ .rule-pattern {
+    @apply underline;
+  }
+}
+
+@utility rule-pattern {
+  @apply col-start-1 row-start-1 min-w-0 cursor-pointer font-mono text-li font-semibold text-ink-muted;
+  @apply hover:underline;
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap items-center;
+  }
+}
+
+@utility rule-tags {
+  @apply col-start-1 row-start-2 flex flex-wrap gap-1.5;
+}
+
+@utility rule-acts {
+  @apply col-start-2 row-start-1 row-span-2 flex shrink-0 items-center gap-1;
+}
+
+@utility rule-pen {
+  @apply cursor-pointer px-2 py-1;
+}
+
+@utility rule-editor {
+  @apply col-span-2 col-start-1 row-start-3 hidden w-full flex-col gap-3;
+  @apply rounded-card border border-line bg-ground p-3.5;
+}
+
+@utility rule-editor-foot {
+  @apply flex flex-wrap items-center gap-2;
+
+  & > form:first-child {
+    @apply mr-auto;
+  }
+}
+
 @utility sprint-panel {
   @apply my-4 block;
 }

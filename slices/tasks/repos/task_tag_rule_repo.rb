@@ -11,6 +11,8 @@ module Tasks
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
       commands delete: :by_pk
 
+      def all = task_tag_rules.combine(:tags).order(:pattern).to_a
+
       def by_id(id) = task_tag_rules.combine(:tags).by_pk(id).one
 
       def matching_task_ids(rule)

@@ -105,7 +105,7 @@ module Admin
             Card(label:, title: t(TITLES.fetch(@tab)), **list_attributes) do |card|
               card.side do
                 span(class: "card-note") { open_note }
-                SyncButton() if external?
+                ImportActs() if external?
               end
               p(class: "card-blurb") { t(BLURBS.fetch(@tab)) }
               rows
