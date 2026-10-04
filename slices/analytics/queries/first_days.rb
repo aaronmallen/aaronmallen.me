@@ -5,12 +5,18 @@ module Analytics
     class FirstDays
       SPAN = 30
 
-      include Deps[rollup_repo: "repos.analytics_rollup_repo", unrolled_summaries: "queries.unrolled_summaries"]
+      include Deps[
+        event_repo: "repos.analytics_event_repo",
+        rollup_repo: "repos.analytics_rollup_repo",
+        unrolled_summaries: "queries.unrolled_summaries",
+      ]
 
       def call(path, today: Blog::TimeZone.today)
-        curves = curves(rollup_repo.first_days(SPAN), today)
+        rows = rollup_repo.first_days(SPAN)
+        curves = curves(rows, today)
+        measured = curves.slice(*measured_paths(rows, today))
 
-        { span: SPAN, days: curves.fetch(path, Blog::Constants::EMPTY_ARRAY), median: medians(curves.values) }
+        { span: SPAN, days: curves.fetch(path, Blog::Constants::EMPTY_ARRAY), median: medians(measured.values) }
       end
 
       private
@@ -27,6 +33,12 @@ module Analytics
         unrolled_summaries.call(from: today - (SPAN - 1), to: today).flat_map do |summary|
           summary.paths.map { [[it.path, summary.day], it.visitors] }
         end
+      end
+
+      def measured_paths(rows, today)
+        first = [rollup_repo.oldest_day, event_repo.oldest_day].compact.min || today
+
+        rows.select { it.fetch(:published_on) >= first }.map { it.fetch(:path) }
       end
 
       def medians(curves)

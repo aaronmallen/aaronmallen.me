@@ -1040,6 +1040,21 @@ RSpec.describe "Admin activity", type: :request do
       end
     end
 
+    describe "a post's sub-line with today's views not rolled up yet" do
+      before do
+        create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))
+        create(:analytics_rollup, day: today - 1)
+        create(:analytics_rollup_path, day: today - 1, path: "/writing/hello", views: 12, visitors: 8, bounces: 2)
+        create(:analytics_event, path: "/writing/hello", occurred_at: Blog::TimeZone.day_start(today - 1) + 60)
+        2.times { create(:analytics_event, path: "/writing/hello") }
+        visit_activity
+      end
+
+      it "adds today's views to the rolled up days, counting each rolled day once" do
+        expect(event_subs).to eq(["/writing/hello · published · 14 views"])
+      end
+    end
+
     describe "a post's sub-line with one view" do
       before do
         create(:post, :published, title: "Hello", slug: "hello", published_at: at(9))

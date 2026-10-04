@@ -58,7 +58,7 @@ module Admin
           end
 
           def feed_cards
-            FeedCard(days: @feed.fetch(:days))
+            FeedCard(**@feed.slice(:days, :latest))
             MeterCard(color: :blue, empty: t(".no_aggregators"), rows: aggregators, title: t(".aggregators"))
           end
 

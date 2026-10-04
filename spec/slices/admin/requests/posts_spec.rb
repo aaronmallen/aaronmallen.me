@@ -208,6 +208,61 @@ RSpec.describe "Admin posts", type: :request do
       end
     end
 
+    describe "with today's views not rolled up yet" do
+      let(:today) { Blog::TimeZone.today }
+      let!(:post) do
+        create(:post, :published, slug: "hello", published_at: Blog::TimeZone.day_start(today - 1) + 43_200)
+      end
+
+      def figures = page.find(".li-sub", text: "/writing/hello ").text.split(" · ").values_at(3, 4, 6)
+
+      def read(reader, at: Time.now)
+        create(
+          :analytics_event,
+          path: "/writing/hello", visitor_hash: Digest::SHA256.hexdigest(reader), scroll_depth: 75, read_seconds: 30,
+          occurred_at: at,
+        )
+      end
+
+      def roll_up_yesterday
+        create(:analytics_rollup, day: today - 1)
+        create(
+          :analytics_rollup_path,
+          day: today - 1, path: "/writing/hello", views: 4, visitors: 3, bounces: 1, read_throughs: 1,
+        )
+      end
+
+      before do
+        roll_up_yesterday
+        %w[one one two].each { read(it) }
+      end
+
+      it "adds today's views, visitors and read-throughs to the rolled up days" do
+        get "/admin/posts"
+
+        expect(figures).to eq(["7 views", "5 visitors", "3 read-throughs"])
+      end
+
+      it "counts a rolled up day once, leaving out its raw events" do
+        read("three", at: Blog::TimeZone.day_start(today - 1) + 60)
+        get "/admin/posts"
+
+        expect(figures).to eq(["7 views", "5 visitors", "3 read-throughs"])
+      end
+
+      it "agrees with the activity list" do
+        get "/admin/activity"
+
+        expect(page).to have_css(".activity-event-sub", exact_text: "/writing/hello · published · 7 views")
+      end
+
+      it "agrees with the post's analytics page" do
+        get "/admin/posts/#{post.id}/analytics", range: "7"
+
+        expect(page.find(".stat", text: "Page views")).to have_css(".stat-value", exact_text: "7")
+      end
+    end
+
     describe "unique readers" do
       def post(slug, published_at) = create(:post, :published, slug:, body: "one", published_at:)
 

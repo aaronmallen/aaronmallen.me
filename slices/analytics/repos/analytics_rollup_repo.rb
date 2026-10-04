@@ -32,6 +32,8 @@ module Analytics
 
       def newest_day = analytics_rollups.newest_day
 
+      def oldest_day = analytics_rollups.oldest_day
+
       def page_countries(path:, from:, to:)
         analytics_rollup_page_countries.between(from, to).for_path(path).top_by_visitors.to_a
       end
@@ -40,6 +42,10 @@ module Analytics
 
       def page_referrers(path:, from:, to:)
         analytics_rollup_page_referrers.between(from, to).for_path(path).top_by_visitors.to_a
+      end
+
+      def post_paths(post_ids)
+        analytics_rollup_paths.post_paths(post_ids).to_a.to_h { [it.fetch(:path), it.fetch(:post_id)] }
       end
 
       def reach_in(month) = analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
@@ -80,11 +86,11 @@ module Analytics
 
       def totals(from:, to:) = analytics_rollups.between(from, to).totals.one
 
-      def views_by_path(from: Blog::TimeZone.today - (VIEW_DAYS - 1), to: Blog::TimeZone.today)
+      def views_by_path(from:, to:)
         analytics_rollup_paths.between(from, to).views_by_path.to_a.to_h { [it.path, it.views] }
       end
 
-      def views_by_post(post_ids, from: Blog::TimeZone.today - (VIEW_DAYS - 1), to: Blog::TimeZone.today)
+      def views_by_post(post_ids, from:, to:)
         views = analytics_rollup_paths.between(from, to).views_by_post(post_ids)
 
         views.to_a.to_h { [it.post_id, it.to_h.slice(:views, :visitors, :read_throughs)] }

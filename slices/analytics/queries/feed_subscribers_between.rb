@@ -9,9 +9,12 @@ module Analytics
         subscribers = feed_repo.subscribers_by_day(from:, to:)
         readers = feed_repo.readers_by_day(from:, to:)
 
+        days = (from..to).to_h { [it, subscribers.fetch(it, 0) + readers.fetch(it, 0)] }
+
         {
           aggregators: aggregators(feed_repo.latest_subscribers(from:, to:)),
-          days: (from..to).map { { day: it, subscribers: subscribers.fetch(it, 0) + readers.fetch(it, 0) } },
+          days: days.map { |day, count| { day:, subscribers: count } },
+          latest: days.fetch([to, Blog::TimeZone.today.prev_day].min, 0),
         }
       end
 

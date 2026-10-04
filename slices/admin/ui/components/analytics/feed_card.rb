@@ -11,10 +11,11 @@ module Admin
           STEP = 10
 
           prop :days, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :latest, Blog::Types::Integer
 
           def view_template
             Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".latest", count: Blog::Figures.count(latest)) } }
+              card.side { span(class: "chart-peak") { t(".latest", count: Blog::Figures.count(@latest)) } }
 
               div(class: "chart") do
                 curve
@@ -40,8 +41,6 @@ module Admin
 
             found.size < LABELS ? found : [found.first, found[found.size / MIDDLE], found.last]
           end
-
-          def latest = counts.last.to_i
 
           def peak = @peak ||= counts.max.to_f
 

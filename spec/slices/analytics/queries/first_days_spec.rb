@@ -86,6 +86,25 @@ RSpec.describe Analytics::Queries::FirstDays do
       expect(first_days("/writing/one").fetch(:median).first).to eq(4)
     end
 
+    it "leaves out a post published before the first rolled up day" do
+      publish("older", on: today - 20)
+
+      expect(first_days("/writing/one").fetch(:median)).to eq([4, 5, 0.5, 4])
+    end
+
+    it "leaves out a post published before the oldest raw event" do
+      publish("older", on: today - 20)
+      create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today - 19))
+
+      expect(first_days("/writing/one").fetch(:median)).to eq([4, 5, 0.5, 4])
+    end
+
+    it "counts a newer post nobody read as zeros" do
+      publish("unread", on: today - 3)
+
+      expect(first_days("/writing/one").fetch(:median)).to eq([3, 3.5, 0, 2])
+    end
+
     it "reaches as far as the oldest post" do
       expect(first_days("/writing/three").fetch(:median).size).to eq(4)
     end

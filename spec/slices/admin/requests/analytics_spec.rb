@@ -383,8 +383,8 @@ RSpec.describe "Admin analytics", type: :request do
         expect(readings.first).to eq([short(today - 6), "0"])
       end
 
-      it "names the latest day in the card head" do
-        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 46")
+      it "names the last whole day in the card head, leaving out today" do
+        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 9")
       end
 
       it "draws a point for each day" do
@@ -403,6 +403,17 @@ RSpec.describe "Admin analytics", type: :request do
         get "/admin/analytics", range: "14"
 
         expect(meter_card("Feed aggregators").all(".meter-name").map(&:text)).to eq(%w[feedly inoreader newsblur])
+      end
+    end
+
+    describe "with feed subscribers yesterday and no fetch yet today" do
+      before do
+        create(:feed_subscriber, day: today - 1, aggregator: "feedly", subscribers: 40)
+        get "/admin/analytics"
+      end
+
+      it "reads yesterday's count in the card head" do
+        expect(page.find(".card", text: "Feed subscribers")).to have_css(".chart-peak", exact_text: "latest 40")
       end
     end
 

@@ -17,6 +17,8 @@ module Analytics
 
       def newest_day = unordered.dataset.max(:day)
 
+      def oldest_day = unordered.dataset.min(:day)
+
       def oldest_first = order(self[:day].asc)
 
       def totals = unordered.select(&TOTALS)

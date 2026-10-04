@@ -46,6 +46,10 @@ module Analytics
 
       def on(day) = where(day:)
 
+      def post_paths(post_ids)
+        dataset.db[:posts].where(POST_ID => post_ids).select(POST_ID.as(:post_id), POST_PATH.as(:path))
+      end
+
       def read_throughs_by_path
         known = unordered.exclude(read_throughs: nil)
 
