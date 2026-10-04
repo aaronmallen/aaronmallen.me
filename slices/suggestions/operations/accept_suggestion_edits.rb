@@ -91,7 +91,12 @@ module Suggestions
         }
       end
 
-      def replaced(id, bodies) = editable(replace_social_post_parts.call(id, bodies))
+      def replaced(id, bodies)
+        empty = bodies.index { !it.match?(Blog::Contract::VISIBLE) }
+        return Failure([:empty_part, empty + 1]) if empty
+
+        editable(replace_social_post_parts.call(id, bodies))
+      end
 
       def sift(bodies, edits, targets)
         sifted = { accepted: [], refused: [], stale: [] }

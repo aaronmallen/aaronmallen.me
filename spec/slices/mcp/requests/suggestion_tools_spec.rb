@@ -116,6 +116,29 @@ RSpec.describe "MCP suggestion tools", type: :request do
       end
     end
 
+    describe "edits that would leave a social post part empty" do
+      let(:social_post) { compose("draft", "teh one", "teh") }
+      let(:suggestion) do
+        suggestion_repo.replace_for_social_post(social_post.id,
+                                                [edit("teh", "the", part: 1), edit("teh", " ", part: 2)])
+      end
+
+      def bodies = Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)
+
+      it "is refused" do
+        expect(mcp_text("accept_suggestion_edits", suggestion_id: suggestion.id)).to eq(
+          "the edits would leave part 2 of the social post under suggestion #{suggestion.id} empty; nothing changed",
+        )
+      end
+
+      it "leaves every part and edit alone", :aggregate_failures do
+        mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
+
+        expect(bodies).to eq(["teh one", "teh"])
+        expect(statuses(suggestion)).to eq(%w[pending pending])
+      end
+    end
+
     it "refuses a social post already sent" do
       social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
       suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])

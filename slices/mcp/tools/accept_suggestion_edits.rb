@@ -3,6 +3,7 @@
 module MCP
   module Tools
     class AcceptSuggestionEdits < Base
+      EMPTY_PART = "the edits would leave part %s of the social post under suggestion %s empty; nothing changed"
       PUBLISHED = "the blog post under suggestion %s is published; its edits can no longer apply"
       SENT = "the social post under suggestion %s has been sent"
       UNKNOWN = "no suggestion has the ID %s"
@@ -23,7 +24,8 @@ module MCP
       description "Accept pending edits from one set of suggested edits, as the admin does, and write them into " \
                   "the draft or scheduled blog post or unsent social post. An edit whose original text no longer " \
                   "appears once goes stale, and one that would push a social post past a network's limit is " \
-                  "refused; both stay out of the text"
+                  "refused; both stay out of the text. Edits that would leave a social post part empty change " \
+                  "nothing"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -44,6 +46,7 @@ module MCP
           in Failure(:not_found) then refuse("suggestion #{id} has no pending edit with those IDs")
           in Failure(:stale) then refuse("the edits you chose on suggestion #{id} have gone stale")
           in Failure(:already_posted) then refuse(format(SENT, id))
+          in Failure(:empty_part, part) then refuse(format(EMPTY_PART, part, id))
           in Failure(:published) then refuse(format(PUBLISHED, id))
           else refuse("could not accept the edits")
           end

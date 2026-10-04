@@ -171,6 +171,7 @@ en:
         zero: "Nothing applied · every edit went stale"
         one: "Suggestion applied"
         other: "%{count} suggestions applied"
+      empty_part: "Not applied · part %{part} would be left empty"
       over_limit: "Not applied · part %{part} would pass the %{network} limit of %{limit}"
       rejected:
         zero: "Nothing to reject"

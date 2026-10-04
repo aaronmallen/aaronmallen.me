@@ -5,6 +5,7 @@ module Admin
     module Social
       class AcceptSuggestions < Action
         APPLIED = "social_suggestions.toasts.applied"
+        EMPTY_PART = "social_suggestions.toasts.empty_part"
         OVER_LIMIT = "social_suggestions.toasts.over_limit"
         SENT = "social_suggestions.toasts.sent"
 
@@ -33,6 +34,7 @@ module Admin
           case accept_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
           in Success(accepted:, refused:) then applied(response, social_post, accepted, refused)
           in Failure(:already_posted) then toast(response, SENT)
+          in Failure(:empty_part, part) then toast(response, EMPTY_PART, part:)
           in Failure(:stale) then toast(response, APPLIED, count: 0)
           in Failure(:not_found) then nil
           else halt 500

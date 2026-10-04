@@ -468,6 +468,35 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
     end
 
+    describe "edits that would leave a part empty" do
+      let(:social_post) { compose("teh cat sat", "teh") }
+
+      before { suggest(social_post, typo(part: 1), typo("teh", "", part: 2)) }
+
+      it "leaves every part and edit alone", :aggregate_failures do
+        accept(social_post)
+
+        expect(bodies(social_post)).to eq(["teh cat sat", "teh"])
+        expect(statuses(social_post)).to eq(%w[pending pending])
+      end
+
+      it "says why in a toast" do
+        accept(social_post)
+        follow_redirect!
+
+        expect(toast).to eq("Not applied · part 2 would be left empty")
+      end
+
+      it "refuses a part left with only Unicode spaces" do
+        spaced = compose("teh")
+        suggest(spaced, typo("teh", "\u2003\u00a0"))
+        accept(spaced)
+        follow_redirect!
+
+        expect(toast).to eq("Not applied · part 1 would be left empty")
+      end
+    end
+
     describe "a part rewritten over the limit between the read and the accept" do
       let(:social_post) { compose("the cat sat") }
 
