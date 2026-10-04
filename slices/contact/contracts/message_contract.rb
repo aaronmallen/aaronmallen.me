@@ -3,12 +3,7 @@
 module Contact
   module Contracts
     class MessageContract < Blog::Contract
-      BLANK = "blank"
       EMAIL = /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/
-
-      register_macro(:visible) do
-        key.failure(BLANK) if value.match?(/\A[[:space:]]*\z/)
-      end
 
       params do
         required(:reply_to).value(

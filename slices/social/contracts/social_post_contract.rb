@@ -11,7 +11,7 @@ module Social
         optional(:posted_at).maybe(:time)
       end
 
-      rule(:parts).validate(:without_controls)
+      rule(:parts).validate(:without_controls, :visible)
     end
   end
 end

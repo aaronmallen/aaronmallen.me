@@ -8,7 +8,7 @@ module Record
         required(:tags).value(Blog::Types::TagList)
       end
 
-      rule(:body).validate(:without_controls)
+      rule(:body).validate(:without_controls, :visible)
       rule(:tags).validate(:tag_slugs)
     end
   end

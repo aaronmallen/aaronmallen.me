@@ -8,7 +8,6 @@ module Suggestions
         reason: SuggestionLimits::MAX_REASON,
         replacement: SuggestionLimits::MAX_TEXT,
       }.freeze
-      VISIBLE = /\S/
 
       params do
         required(:edits).value(:array, max_size?: SuggestionLimits::MAX_EDITS).each(:hash) do

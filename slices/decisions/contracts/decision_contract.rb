@@ -12,9 +12,9 @@ module Decisions
         optional(:tags).value(Blog::Types::TagList)
       end
 
-      rule(:title).validate(:without_controls)
-      rule(:problem).validate(:without_controls)
-      rule(:note).validate(:without_controls)
+      rule(:title).validate(:without_controls, :visible)
+      rule(:problem).validate(:without_controls, :visible)
+      rule(:note).validate(:without_controls, :visible)
       rule(:tags).validate(:tag_slugs)
     end
   end

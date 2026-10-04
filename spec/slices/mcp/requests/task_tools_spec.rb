@@ -405,6 +405,12 @@ RSpec.describe "MCP task tools", type: :request do
       expect(message).to eq("title: write the task down first")
     end
 
+    it "refuses a title made only of Unicode spaces" do
+      call_tool("save_task", id: task.id, title: "\u2003")
+
+      expect(message).to eq("title: write the task down first")
+    end
+
     it "refuses a note holding a control character" do
       call_tool("save_task", id: task.id, note: "bad\u0000note")
 

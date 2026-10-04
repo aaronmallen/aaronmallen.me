@@ -7,7 +7,7 @@ module Posts
         required(:note).value(Blog::Types::TrimmedText, :filled?, max_size?: PostContract::EDIT_NOTE_LIMIT)
       end
 
-      rule(:note).validate(:without_controls)
+      rule(:note).validate(:without_controls, :visible)
     end
   end
 end

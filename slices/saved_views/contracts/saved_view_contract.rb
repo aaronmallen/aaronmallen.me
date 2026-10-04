@@ -12,7 +12,7 @@ module SavedViews
         required(:filters).value(:hash)
       end
 
-      rule(:name).validate(:without_controls)
+      rule(:name).validate(:without_controls, :visible)
 
       rule(:filters) do
         key.failure(FORMAT) unless value.all? { |name, filter| text?(filter) || (name == GROUPED && group?(filter)) }

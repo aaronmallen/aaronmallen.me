@@ -33,11 +33,11 @@ module Posts
         key(:slug).failure(BLANK) if values[:slug].nil?
       end
 
-      rule(:title).validate(:without_controls)
+      rule(:title).validate(:without_controls, :visible)
       rule(:summary).validate(:without_controls)
       rule(:body).validate(:without_controls)
       rule(:syndication_body).validate(:without_controls)
-      rule(:edit_note).validate(:without_controls)
+      rule(:edit_note).validate(:without_controls, :visible)
       rule(:tags).validate(:tag_slugs)
 
       rule(:publish_at) do

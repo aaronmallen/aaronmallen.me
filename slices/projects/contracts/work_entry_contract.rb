@@ -23,8 +23,8 @@ module Projects
         required(:to_year).maybe(TO_YEAR)
       end
 
-      rule(:org).validate(:without_controls)
-      rule(:role).validate(:without_controls)
+      rule(:org).validate(:without_controls, :visible)
+      rule(:role).validate(:without_controls, :visible)
       rule(:blurb).validate(:without_controls)
 
       rule(:from_year, :to_year) do

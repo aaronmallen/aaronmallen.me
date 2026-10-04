@@ -7,7 +7,7 @@ module Decisions
         required(:body).value(Blog::Types::Normalized::Lines, :filled?)
       end
 
-      rule(:body).validate(:without_controls)
+      rule(:body).validate(:without_controls, :visible)
     end
   end
 end

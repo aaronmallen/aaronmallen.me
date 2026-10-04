@@ -9,7 +9,7 @@ module API
         required(:name).value(Blog::Types::TrimmedText, :filled?, max_size?: MAX_NAME)
       end
 
-      rule(:name).validate(:without_controls)
+      rule(:name).validate(:without_controls, :visible)
     end
   end
 end

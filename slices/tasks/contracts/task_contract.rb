@@ -10,7 +10,7 @@ module Tasks
         required(:tags).value(Blog::Types::TagList)
       end
 
-      rule(:title).validate(:without_controls)
+      rule(:title).validate(:without_controls, :visible)
       rule(:note).validate(:without_controls)
       rule(:tags).validate(:tag_slugs)
     end

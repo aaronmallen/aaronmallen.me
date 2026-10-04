@@ -7,7 +7,7 @@ module Tasks
         required(:body).value(Blog::Types::TrimmedText, :filled?)
       end
 
-      rule(:body).validate(:without_controls)
+      rule(:body).validate(:without_controls, :visible)
     end
   end
 end

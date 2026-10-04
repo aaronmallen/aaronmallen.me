@@ -144,6 +144,12 @@ RSpec.describe "MCP social tools", type: :request do
       expect(message).to eq("parts is empty")
     end
 
+    it "refuses a part made only of Unicode spaces" do
+      call_tool("create_social_post", parts: ["\u2003"], targets: %w[mastodon])
+
+      expect(message).to eq("parts is empty")
+    end
+
     it "refuses a post with no network" do
       call_tool("create_social_post", parts: %w[hello], targets: [])
 

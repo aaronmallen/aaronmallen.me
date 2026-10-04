@@ -40,6 +40,12 @@ RSpec.describe "API task comments", type: :request do
       expect(stored(task)).to be_empty
     end
 
+    it "refuses a body made only of Unicode spaces with a 422 and adds nothing", :aggregate_failures do
+      expect([comment(task.id, body: "\u2003").fetch("errors"),
+              status]).to eq([{ "body" => ["write the comment first"] }, 422])
+      expect(stored(task)).to be_empty
+    end
+
     it "refuses a body holding a control character with a 422" do
       expect(comment(task.id, body: "bad\u0000body").fetch("errors")).to eq("body" => ["holds a control character"])
     end

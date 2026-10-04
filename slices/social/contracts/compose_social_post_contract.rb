@@ -25,7 +25,7 @@ module Social
         required(:schedule_at).value(Blog::Types::LocalTime)
       end
 
-      rule(:parts).validate(:without_controls)
+      rule(:parts).validate(:without_controls, :visible)
 
       rule(:parts) do
         key.failure(UNKNOWN_MENTION) if mention_directory.call(value).unknown(value).any?

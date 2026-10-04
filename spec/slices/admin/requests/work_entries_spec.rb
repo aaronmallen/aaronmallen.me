@@ -189,7 +189,9 @@ RSpec.describe "Admin work history", type: :request do
 
       [
         [{ org: " " }, "org.blank"],
+        [{ org: "\u2003" }, "org.blank"],
         [{ role: " " }, "role.blank"],
+        [{ role: "\u3000" }, "role.blank"],
         [{ from_year: "" }, "from_year.blank"],
         [{ from_year: "18" }, "from_year.format"],
         [{ from_year: "0000" }, "from_year.format"],

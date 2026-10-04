@@ -22,7 +22,7 @@ module Social
         required(:bluesky_handle).maybe(BLUESKY_HANDLE)
       end
 
-      rule(:name).validate(:without_controls)
+      rule(:name).validate(:without_controls, :visible)
 
       rule(:mastodon_handle, :bluesky_handle) do
         key(:handles).failure(NONE) unless values[:mastodon_handle] || values[:bluesky_handle]

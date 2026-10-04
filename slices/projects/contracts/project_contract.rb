@@ -24,7 +24,7 @@ module Projects
         required(:og_image_url).maybe(Blog::Types::Nullable::Url)
       end
 
-      rule(:name).validate(:without_controls)
+      rule(:name).validate(:without_controls, :visible)
       rule(:tagline).validate(:without_controls)
       rule(:url).validate(:without_controls)
       rule(:og_image_url).validate(:without_controls)
