@@ -1139,6 +1139,26 @@ RSpec.describe "Admin tasks", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+
+      %i[done canceled].each do |status|
+        it "leaves a #{status} task #{status} and says it is not in progress", :aggregate_failures do
+          closed = create(:task, status, :in_sprint, sprint_id: task.sprint_id, completed_at: Time.now - 60)
+          send_to("/admin/tasks/#{closed.id}/stop", filter: "today")
+          follow_redirect!
+
+          expect(repo.by_id(closed.id)).to have_attributes(status: status.to_s, completed_at: be_a(Time))
+          expect(page).to have_css("[data-toast] .toast", exact_text: "That task is not in progress", visible: :all)
+        end
+      end
+
+      it "leaves an open task open and says it is not in progress", :aggregate_failures do
+        open = create(:task)
+        send_to("/admin/tasks/#{open.id}/stop", filter: "next")
+        follow_redirect!
+
+        expect(repo.by_id(open.id)).to have_attributes(status: "open", list: "next")
+        expect(page).to have_css("[data-toast] .toast", exact_text: "That task is not in progress", visible: :all)
+      end
     end
 
     describe "finishing a task" do

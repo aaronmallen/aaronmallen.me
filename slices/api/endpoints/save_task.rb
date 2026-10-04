@@ -26,11 +26,8 @@ module API
         return not_found(Tasks.missing(id)) if task.nil?
 
         case save_task.call(id, form(task, fields))
-        in Success(*) then answered(id)
-        in Failure(:past) | Failure(:invalid) then sprint_past
-        in Failure(:not_found) then not_found(Tasks.missing(id))
         in Failure[:invalid, errors] then rejected(errors)
-        else failed(Tasks::UNSAVED)
+        in result then placed(result, id)
         end
       end
 

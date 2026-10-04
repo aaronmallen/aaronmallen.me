@@ -4,6 +4,7 @@
 module API
   module Endpoints
     class TaskEndpoint < Endpoint
+      CLOSED = "task %s is already done or canceled"
       KIND = "task"
 
       REPLY = Schema.widen(
@@ -21,6 +22,14 @@ module API
       private
 
       def answered(id, **) = task_reply(task_by_id.call(id), **)
+
+      def placed(result, id)
+        case result
+        in Failure(:closed) then invalid(id: [format(CLOSED, id)])
+        in Failure(:past | :invalid) then sprint_past
+        else settled(result, id)
+        end
+      end
 
       def rejected(errors)
         complaints = Tasks.complaints(errors)

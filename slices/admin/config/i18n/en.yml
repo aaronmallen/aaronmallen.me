@@ -241,6 +241,7 @@ en:
       comment_saved: "Comment saved"
       completed: "Done"
       deleted: "Task deleted"
+      idle: "That task is not in progress"
       issue_sync:
         not_configured: "No GitHub token or Linear key is set."
         queued: "Sync queued · new issues show on external shortly"

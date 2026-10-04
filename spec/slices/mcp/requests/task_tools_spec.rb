@@ -510,6 +510,14 @@ RSpec.describe "MCP task tools", type: :request do
         expect(tasks.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: at(today - 1))
       end
 
+      it "refuses to pause a task that is #{status}", :aggregate_failures do
+        task = create(:task, status, completed_at: at(today - 1))
+        call_tool("pause_task", id: task.id)
+
+        expect(message).to eq("task #{task.id} is not in progress")
+        expect(tasks.by_id(task.id)).to have_attributes(status: status.to_s, completed_at: at(today - 1))
+      end
+
       it "refuses to complete a batch that holds a task that is #{status}", :aggregate_failures do
         ids = [create(:task), create(:task, status, completed_at: at(today - 1))].map(&:id)
         call_tool("complete_tasks", ids:)
@@ -577,6 +585,17 @@ RSpec.describe "MCP task tools", type: :request do
       call_tool("schedule_task", id: task.id, sprint_on: (today - 1).iso8601)
 
       expect(message).to eq("a sprint opens on today or a day after it")
+    end
+
+    %i[done canceled].each do |status|
+      it "refuses a #{status} task and opens no sprint", :aggregate_failures do
+        closed = create(:task, status, completed_at: at(today - 1))
+        call_tool("schedule_task", id: closed.id, sprint_on: (today + 3).iso8601)
+
+        expect(message).to eq("task #{closed.id} is already done or canceled")
+        expect(sprints.on(today + 3)).to be_nil
+        expect(tasks.by_id(closed.id)).to have_attributes(status: status.to_s, sprint_id: nil)
+      end
     end
   end
 

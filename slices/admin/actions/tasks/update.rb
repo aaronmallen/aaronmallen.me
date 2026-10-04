@@ -4,6 +4,7 @@ module Admin
   module Actions
     module Tasks
       class Update < Action
+        CLOSED = "tasks_page.toasts.closed"
         FIELDS = %i[list note sprint_on tags title].freeze
         PAST = "tasks_page.toasts.sprint_past"
         SAVED = "tasks_page.toasts.saved"
@@ -21,6 +22,7 @@ module Admin
 
           case save_task.call(id, params)
           in Success(_) then done(request, response, SAVED)
+          in Failure(:closed) then done(request, response, CLOSED)
           in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
           in Failure(:not_found) then halt 404
           in Failure[:invalid, errors] then invalid(request, response, id, params, errors)

@@ -18,7 +18,7 @@ module Tasks
       operations.current_sprint operations.delete_task operations.delete_task_comment operations.delete_task_tag_rule
       operations.delete_work_session
       operations.drop_sprint operations.edit_task_comment operations.edit_work_session operations.link_tasks
-      operations.mark_task_seen operations.move_task
+      operations.mark_task_seen operations.move_task operations.pause_task
       operations.plan_sprint operations.place_task operations.queue_issue_sync operations.reopen_task
       operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
       operations.set_task_total

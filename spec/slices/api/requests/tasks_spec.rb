@@ -309,6 +309,14 @@ RSpec.describe "API tasks", type: :request do
       expect([save(task.id, sprint_on: (today - 1).iso8601).fetch("errors").keys, status]).to eq([%w[sprint_on], 422])
     end
 
+    it "refuses a sprint day for a closed task with a 422 and keeps its title", :aggregate_failures do
+      done = create(:task, :done, title: "Draft", completed_at: Time.now - 60)
+
+      expect([save(done.id, title: "Final", sprint_on: (today + 3).iso8601).fetch("message"), status])
+        .to eq(["task #{done.id} is already done or canceled", 422])
+      expect(tasks.by_id(done.id)).to have_attributes(title: "Draft", sprint_id: nil)
+    end
+
     it "answers an unknown ID with a 404" do
       save(999_999, title: "Ghost")
 
@@ -391,6 +399,17 @@ RSpec.describe "API tasks", type: :request do
 
     it "refuses a request with no day" do
       expect(act(create(:task).id, "schedule").fetch("errors")).to eq("sprint_on" => ["sprint_on is missing"])
+    end
+
+    %i[done canceled].each do |closed|
+      it "refuses a #{closed} task with a 422 and opens no sprint", :aggregate_failures do
+        task = create(:task, closed, completed_at: Time.now - 60)
+
+        expect([act(task.id, "schedule", sprint_on: (today + 3).iso8601).fetch("message"), status])
+          .to eq(["task #{task.id} is already done or canceled", 422])
+        expect(Tasks::Slice["repos.sprint_repo"].on(today + 3)).to be_nil
+        expect(tasks.by_id(task.id)).to have_attributes(status: closed.to_s, sprint_id: nil)
+      end
     end
   end
 

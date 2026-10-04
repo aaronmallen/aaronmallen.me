@@ -16,6 +16,7 @@ module Tasks
       def call(id, date, now: Time.now)
         task = step find(id)
         asked = Blog::Types::TrimmedText[date]
+        step movable(task, asked)
         return [:unscheduled, unschedule(task, now)] if asked.empty?
 
         day = step parse(asked)
@@ -49,6 +50,8 @@ module Tasks
           end
         end
       end
+
+      def movable(task, asked) = task.closed? && asked != held(task) ? Failure(:closed) : Success(task)
 
       def parse(date)
         day = Blog::TimeZone.parse_day(date)

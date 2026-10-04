@@ -319,6 +319,62 @@ RSpec.describe "Tasks", type: :request do
     end
   end
 
+  closed_days = { "a later day" => 3, "today" => 0 }.freeze
+
+  %i[done canceled].each do |status|
+    describe "scheduling a #{status} task" do
+      let(:closed) { create(:task, status, title: "Email the accountant", completed_at: Time.now - 60) }
+
+      def edit(**fields) = send_to("/admin/tasks/#{closed.id}", filter: "next", task: { title: closed.title, **fields })
+
+      def schedule(day) = send_to("/admin/tasks/#{closed.id}/schedule", sprint_on: day.to_s)
+
+      def toast = Capybara.string(last_response.body).find("[data-toast] .toast", visible: :all).text(:all)
+
+      closed_days.each do |named, ahead|
+        it "leaves it #{status} in its list for #{named}" do
+          schedule((today + ahead).iso8601)
+
+          expect(repo.by_id(closed.id)).to have_attributes(status: status.to_s, sprint_id: nil, list: "next")
+        end
+
+        it "opens no sprint for #{named}" do
+          schedule((today + ahead).iso8601)
+
+          expect(sprints.on(today + ahead)).to be_nil
+        end
+      end
+
+      it "says it is closed already" do
+        schedule((today + 3).iso8601)
+        follow_redirect!
+
+        expect(toast).to eq("That task is closed already")
+      end
+
+      it "leaves it in the sprint it closed in when its date is cleared" do
+        ran = create(:sprint, sprint_date: today - 1)
+        task = create(:task, status, :in_sprint, sprint_id: ran.id, completed_at: Time.now - 60)
+        send_to("/admin/tasks/#{task.id}/schedule", sprint_on: "")
+
+        expect(repo.by_id(task.id)).to have_attributes(sprint_id: ran.id, list: nil)
+      end
+
+      it "keeps its title when its editor sends a new date" do
+        edit(title: "Call the accountant", sprint_on: (today + 3).iso8601)
+
+        expect(repo.by_id(closed.id)).to have_attributes(title: "Email the accountant", sprint_id: nil)
+      end
+
+      it "says it is closed already when its editor sends a new date" do
+        edit(sprint_on: (today + 3).iso8601)
+        follow_redirect!
+
+        expect(toast).to eq("That task is closed already")
+      end
+    end
+  end
+
   describe "moving a task in progress" do
     let(:task) { create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id) }
 

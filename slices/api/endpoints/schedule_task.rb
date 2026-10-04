@@ -17,14 +17,7 @@ module API
 
       include Deps[schedule_task: "tasks.operations.schedule_task"]
 
-      def handle(id:, sprint_on:)
-        case schedule_task.call(id, sprint_on)
-        in Success(*) then answered(id)
-        in Failure(:past) | Failure(:invalid) then sprint_past
-        in Failure(:not_found) then not_found(Tasks.missing(id))
-        else failed(Tasks::UNSAVED)
-        end
-      end
+      def handle(id:, sprint_on:) = placed(schedule_task.call(id, sprint_on), id)
     end
   end
 end

@@ -6,14 +6,13 @@ module API
       IDLE = "task %s is not in progress"
       SCHEMA = { additionalProperties: false, properties: { id: Tasks::ID }, required: ["id"] }.freeze
 
-      include Deps[reopen_task: "tasks.operations.reopen_task"]
+      include Deps[pause_task: "tasks.operations.pause_task"]
 
       def handle(id:)
-        task = task_by_id.call(id)
-        return not_found(Tasks.missing(id)) if task.nil?
-        return invalid(id: [format(IDLE, id)]) unless task.in_progress?
-
-        settled(reopen_task.call(id), id)
+        case pause_task.call(id)
+        in Failure(:idle) then invalid(id: [format(IDLE, id)])
+        in result then settled(result, id)
+        end
       end
     end
   end
