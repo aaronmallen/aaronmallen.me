@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-module Admin
+module Social
   module Operations
     class SearchAccounts < Blog::Operation
       LIMIT = 8
       MINIMUM = 2
       RATE_LIMITED = [Social::Bluesky::Client::RateLimited, Social::Mastodon::Client::RateLimited].freeze
 
-      include Deps[networks: "social.networks.all"]
+      include Deps[networks: "networks.all"]
 
       def call(network:, query:)
         client = step find_client(network)

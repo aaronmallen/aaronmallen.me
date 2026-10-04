@@ -70,6 +70,13 @@ module API
     post "/links/:kind/:id", to: "record_links.create"
     delete "/links/:kind/:id/:other_kind/:other_id", to: "record_links.destroy"
 
+    get "/people", to: "people.index"
+    post "/people", to: "people.create"
+    get "/people/search/:network", to: "people.search"
+    get "/people/:id", to: "people.show"
+    patch "/people/:id", to: "people.update"
+    delete "/people/:id", to: "people.destroy"
+
     get "/review", to: "reviews.show"
 
     get "/search", to: "search.index"

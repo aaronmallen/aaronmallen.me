@@ -5,27 +5,27 @@ RSpec.describe "MCP tool scopes", type: :request do
     {
       "read" => %w[
         compose_announcement list_attention list_calendar list_commits list_decisions list_inbox list_journal_entries
-        list_links list_messages list_posts list_projects list_saved_views list_social_posts list_sprints
+        list_links list_messages list_people list_posts list_projects list_saved_views list_social_posts list_sprints
         list_suggestions list_tags list_task_tag_rules list_tasks list_webmentions list_work_entries read_activity
-        read_analytics read_current_sprint read_decision read_journal_entry read_message read_post read_review
-        read_saved_view read_social_post read_sync_state read_task read_time_report read_webmention_settings search
-        summarize_activity
+        read_analytics read_current_sprint read_decision read_journal_entry read_message read_person read_post
+        read_review read_saved_view read_social_post read_sync_state read_task read_time_report read_webmention_settings
+        search search_accounts summarize_activity
       ],
       "suggest" => %w[suggest_edits],
       "write" => %w[
         accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_entry
         approve_webmentions archive_project cancel_task cancel_tasks capture_task complete_task complete_tasks
         create_journal_entry create_post create_saved_view create_social_post delete_decision_comment
-        delete_decision_option delete_journal_entry delete_messages delete_post delete_posts delete_saved_view
-        delete_social_post delete_task delete_task_tag_rule delete_tasks delete_work_entry delete_work_session
-        drop_decision drop_sprint edit_decision edit_decision_comment edit_decision_option ignore_webmentions
-        import_commits link_records link_tasks mark_message mark_messages_read mark_messages_unread mark_task_seen
-        mark_webmentions_spam moderate_webmention move_project move_task move_tasks open_decision pause_task plan_sprint
-        publish_post reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task resolve_decision
-        restore_project save_project save_tag save_task save_task_tag_rule schedule_task send_social_post set_task_total
-        snooze_attention start_task tag_decision tag_posts tag_tasks unlink_records unlink_task untag_decision
-        untag_tasks update_journal_entry update_post update_saved_view update_social_post update_webmention_settings
-        update_work_session write_post_seo
+        delete_decision_option delete_journal_entry delete_messages delete_person delete_post delete_posts
+        delete_saved_view delete_social_post delete_task delete_task_tag_rule delete_tasks delete_work_entry
+        delete_work_session drop_decision drop_sprint edit_decision edit_decision_comment edit_decision_option
+        ignore_webmentions import_commits link_records link_tasks mark_message mark_messages_read mark_messages_unread
+        mark_task_seen mark_webmentions_spam moderate_webmention move_project move_task move_tasks open_decision
+        pause_task plan_sprint publish_post reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task
+        resolve_decision restore_project save_person save_project save_tag save_task save_task_tag_rule schedule_task
+        send_social_post set_task_total snooze_attention start_task tag_decision tag_posts tag_tasks unlink_records
+        unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view update_social_post
+        update_webmention_settings update_work_session write_post_seo
       ],
     }
   end

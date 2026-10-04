@@ -7,8 +7,8 @@ module MCP
                   "search screen does: tasks open and closed, posts, social posts, journal entries, commits, " \
                   "projects, work entries, people, messages and webmentions. Each result gives its kind, id, " \
                   "title, a short match and its day; pass the id to read_task, read_post, read_social_post, " \
-                  "read_journal_entry or read_message for the whole record. count gives the results on this " \
-                  "page. #{Paging::USAGE}"
+                  "read_journal_entry, read_message or read_person for the whole record. count gives the " \
+                  "results on this page. #{Paging::USAGE}"
       input_schema(API::Endpoints::Search::SCHEMA)
       scope OAuth::Scope::READ
 

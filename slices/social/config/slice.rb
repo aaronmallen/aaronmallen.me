@@ -15,7 +15,7 @@ module Social
       operations.delete_social_post
       operations.lock_editable_social_post operations.moderate_webmention operations.move_social_post
       operations.receive_webmention
-      operations.replace_social_post_parts operations.save_person operations.save_social_post
+      operations.replace_social_post_parts operations.save_person operations.save_social_post operations.search_accounts
       operations.update_webmention_settings queries.calendar_social_posts queries.counted_webmentions_for_post
       queries.editable_social_post queries.linkable_social_posts queries.listed_webmentions_for_post
       queries.mention_directory

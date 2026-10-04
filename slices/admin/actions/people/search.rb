@@ -6,7 +6,7 @@ module Admin
       class Search < Action
         STATUSES = { failed: 502, rate_limited: 429 }.freeze
 
-        include Deps[search_accounts: "operations.search_accounts"]
+        include Deps[search_accounts: "social.operations.search_accounts"]
 
         def handle(request, response)
           network = request.params[:network]
