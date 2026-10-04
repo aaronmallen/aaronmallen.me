@@ -531,6 +531,24 @@ RSpec.describe "Feeds", type: :request do
           expect(last_response.status).to eq(200)
           expect(feed.xpath("/feed/entry/category").map { it[:term] }).to include("rails")
         end
+
+        it "answers 200 with the new category to a reader that sends only the time back", :aggregate_failures do
+          sent = validators
+          rename_tag("hanami", "rails")
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(feed.xpath("/feed/entry/category").map { it[:term] }).to include("rails")
+        end
+
+        it "answers 304 to a reader that sends only the time back after a tag off the page is renamed" do
+          sent = validators
+          create(:post, :draft, tags: %w[secret])
+          rename_tag("secret", "hidden")
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(304)
+        end
       end
 
       describe "#{path} with an edit note" do

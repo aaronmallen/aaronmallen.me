@@ -15,7 +15,11 @@ module Public
           %(W/"#{Digest::SHA256.hexdigest(JSON.generate([posts.more, *entries]))}")
         end
 
-        def last_modified = [updated, deleted_at].compact.max
+        def last_modified = [updated, deleted_at, tags_edited_at].compact.max
+
+        def tags_edited_at
+          posts.rows.flat_map(&:tags).filter_map { it.updated_at if it.updated_at > it.created_at }.max
+        end
 
         def updated = posts.rows.map { changed_at(it) }.max
       end
