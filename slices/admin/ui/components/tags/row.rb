@@ -8,7 +8,8 @@ module Admin
           LAST_SEPARATOR = " and "
           LIST_SEPARATOR = ", "
           SEPARATOR = " · "
-          USE_KEYS = %i[posts projects journal_entries tasks decisions].to_h { [it, ".uses.#{it}"] }.freeze
+          KINDS = %i[posts projects journal_entries tasks decisions task_tag_rules].freeze
+          USE_KEYS = KINDS.to_h { [it, ".uses.#{it}"] }.freeze
 
           prop :tag, Blog::Types::Instance(ROM::Struct)
           prop :uses, Blog::Types::Hash

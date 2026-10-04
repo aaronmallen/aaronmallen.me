@@ -13,6 +13,8 @@ module Tags
 
       def find_in(scope, id) = tags.in_scope(scope).by_pk(id).one
 
+      def last_tag_of_rules(id) = tags.last_tag_of_rules(id)
+
       def next_color(scope:) = tags.next_color(scope:)
 
       def page_matching(scope, text, page) = page.fill(matching(scope, text).in_name_order.paged(page).to_a)

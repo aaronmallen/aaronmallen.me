@@ -177,6 +177,14 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(message).to eq("name: a tag is lowercase words joined by hyphens")
     end
 
+    it "names one rule as one" do
+      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "rails/*", tags: "ruby" })
+      id = tag_repo.all_in("private").first.id
+      call_tool("remove_tag", scope: "private", id:)
+
+      expect(message).to eq("tag #{id} is the only tag on the task tag rule rails/*")
+    end
+
     it "refuses an ID no tag has" do
       call_tool("save_tag", scope: "public", id: 999_999, name: "ghost")
 
@@ -238,6 +246,23 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "says every record that carries the tag loses it" do
       expect(tool("remove_tag").fetch("description")).to include("Every record that carries the tag loses it")
+    end
+
+    it "refuses the only tag on a task tag rule, naming the rules", :aggregate_failures do
+      %w[rails/* aaronmallen/*].each { Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: it, tags: "ruby" }) }
+      id = tag_repo.all_in("private").first.id
+      call_tool("remove_tag", scope: "private", id:)
+
+      expect(message).to eq("tag #{id} is the only tag on the task tag rules aaronmallen/*, rails/*")
+      expect(tag_repo.find_in("private", id)).not_to be_nil
+    end
+
+    it "names one rule as one" do
+      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "rails/*", tags: "ruby" })
+      id = tag_repo.all_in("private").first.id
+      call_tool("remove_tag", scope: "private", id:)
+
+      expect(message).to eq("tag #{id} is the only tag on the task tag rule rails/*")
     end
 
     it "refuses an ID no tag has" do

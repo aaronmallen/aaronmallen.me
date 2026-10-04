@@ -579,6 +579,14 @@ RSpec.describe "Admin tags", type: :request do
         expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 1, uses: "1 project"))
       end
 
+      it "counts the task tag rules that hold the tag" do
+        create(:task, tags: %w[ruby])
+        %w[rails/* hanami/*].each { Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: it, tags: "ruby" }) }
+        get "/admin/tags", scope: "private"
+
+        expect(page.find(".tag-uses").text).to eq("1 task · 2 rules")
+      end
+
       it "lists three kinds of private record that lose the tag" do
         %i[journal_entry task task decision].each { create(it, tags: %w[chores]) }
         get "/admin/tags", scope: "private"
@@ -618,6 +626,55 @@ RSpec.describe "Admin tags", type: :request do
         send_to("/admin/tags/0/delete")
 
         expect(last_response.status).to eq(404)
+      end
+    end
+
+    describe "removing the only tag on a task tag rule" do
+      def remove(name) = send_to("/admin/tags/#{named(name).id}/delete", scope: "private")
+
+      def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: }).value!
+
+      def rules = Tasks::Slice["queries.task_tag_rules"].call
+
+      def tags_of(pattern) = rules.find { it.pattern == pattern }.tags.map(&:name)
+
+      before do
+        rule("rails/*", "ruby")
+        rule("aaronmallen/*", "ruby")
+      end
+
+      it "keeps the tag" do
+        remove("ruby")
+
+        expect(named("ruby")).not_to be_nil
+      end
+
+      it "keeps the tag on each rule", :aggregate_failures do
+        remove("ruby")
+
+        expect(tags_of("rails/*")).to eq(%w[ruby])
+        expect(tags_of("aaronmallen/*")).to eq(%w[ruby])
+      end
+
+      it "names the rules it would empty" do
+        remove("ruby")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: "only tag on the rules aaronmallen/*, rails/*")
+      end
+
+      it "goes back to the private tab" do
+        remove("ruby")
+
+        expect(last_response.location).to end_with("/admin/tags?scope=private")
+      end
+
+      it "takes away a tag a rule holds beside another", :aggregate_failures do
+        rule("hanami/*", "hanami, projects")
+        remove("hanami")
+
+        expect(named("hanami")).to be_nil
+        expect(tags_of("hanami/*")).to eq(%w[projects])
       end
     end
 

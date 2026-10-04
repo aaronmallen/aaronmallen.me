@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, decisions, links, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -65,6 +65,7 @@ raises again.
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
 | `task_links_pair_key` | unique index | `Tasks::Operations::LinkTasks` | `other_id: taken` |
 | `task_links_to_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
+| `task_tag_rules_last_tag` | trigger | `Tags::Operations::RemoveTag` | a toast naming the rules |
 
 Tags hold `tags_scope_name_key` since #77 split them into a public and a private scope (ADR 0074). It replaced
 `tags_name_key`.
@@ -78,6 +79,10 @@ by `CHECK (id = 1)`, and their repos address it by that id. `tasks.sprint_id` ho
 `ON DELETE RESTRICT`. Every tag join holds its tag with `ON DELETE CASCADE` since #284, so deleting a tag takes it
 off every record in the same statement. `RemoveTag` checks nothing first, and the foreign key stays the rule.
 
+One join breaks that, since #415. A task tag rule must hold a tag, so `task_tag_rules_last_tag` refuses to delete a
+tag that is the only tag on a rule, before the cascade runs. It raises with `ERRCODE = 'check_violation'`, and
+`RemoveTag` answers with the patterns of the rules that tag would empty, read after the refusal.
+
 ## Alternatives
 
 **A contract rule with an injected repo, or the loaded row as context.** It would put every rule in one place and
@@ -90,9 +95,9 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the fourteen names has a
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the fifteen names has a
 spec that would fail: the posts request spec, the operation specs for decisions, record links, tags and task links,
-and the admin request specs for the post and project editors. A new mapped name needs one too.
+and the admin request specs for the post, project and tag editors. A new mapped name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

@@ -188,6 +188,9 @@ en:
   tags_page:
     toasts:
       added: "Tag added"
+      kept:
+        one: "Tag kept · it is the only tag on the rule %{rules}"
+        other: "Tag kept · it is the only tag on the rules %{rules}"
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
@@ -1335,6 +1338,9 @@ en:
             projects:
               one: "%{count} project"
               other: "%{count} projects"
+            task_tag_rules:
+              one: "%{count} rule"
+              other: "%{count} rules"
             tasks:
               one: "%{count} task"
               other: "%{count} tasks"

@@ -3,6 +3,7 @@
 module MCP
   module Tools
     class RemoveTag < Base
+      RULES = { true => "the task tag rule", false => "the task tag rules" }.freeze
       UNREMOVED = "could not remove the tag"
 
       SCHEMA = {
@@ -12,7 +13,8 @@ module MCP
       }.freeze
 
       description "Remove one tag for good from its scope. Public tags go on posts and projects; private tags go " \
-                  "on journal entries and tasks. Every record that carries the tag loses it"
+                  "on journal entries and tasks. Every record that carries the tag loses it. A tag that is the only " \
+                  "tag on a task tag rule stays until the rule takes another tag or goes"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -20,6 +22,8 @@ module MCP
         def call(id:, scope:, server_context:)
           case remove_tag(server_context).call(id, scope:)
           in Success(_) then answer(id:, removed: true)
+          in Failure[:last_tag_of_rules, patterns]
+            refuse("tag #{id} is the only tag on #{RULES.fetch(patterns.one?)} #{patterns.join(', ')}")
           in Failure(:not_found) then refuse("no tag has the ID #{id}")
           else refuse(UNREMOVED)
           end

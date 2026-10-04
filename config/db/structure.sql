@@ -600,6 +600,35 @@ END;
 $$;
 
 
+--
+-- Name: task_tag_rules_last_tag(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.task_tag_rules_last_tag() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  PERFORM 1 FROM task_tag_rules
+    WHERE id IN (SELECT task_tag_rule_id FROM task_tag_rule_tags WHERE tag_id = OLD.id)
+    FOR SHARE;
+
+  IF EXISTS (
+    SELECT 1 FROM task_tag_rule_tags held
+      WHERE held.tag_id = OLD.id
+        AND NOT EXISTS (
+          SELECT 1 FROM task_tag_rule_tags other
+            WHERE other.task_tag_rule_id = held.task_tag_rule_id AND other.tag_id <> OLD.id
+        )
+  ) THEN
+    RAISE EXCEPTION 'removing tag % would leave a task tag rule with no tags', OLD.id
+      USING ERRCODE = 'check_violation', CONSTRAINT = 'task_tag_rules_last_tag';
+  END IF;
+
+  RETURN OLD;
+END;
+$$;
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -4618,6 +4647,13 @@ CREATE TRIGGER social_posts_drop_record_links AFTER DELETE ON public.social_post
 
 
 --
+-- Name: tags task_tag_rules_last_tag; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_tag_rules_last_tag BEFORE DELETE ON public.tags FOR EACH ROW EXECUTE FUNCTION public.task_tag_rules_last_tag();
+
+
+--
 -- Name: tasks tasks_drop_attention_snoozes; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -5139,5 +5175,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261004000404_create_review_notes.rb'),
 ('20261004000405_move_review_notes_out_of_the_journal.rb'),
 ('20261004000414_count_review_carries_from_task_events.rb'),
+('20261004000415_refuse_a_tag_delete_that_empties_a_task_tag_rule.rb'),
 ('20261004000419_create_post_tag_removals.rb'),
 ('20261004000461_add_single_author_hosts_to_webmention_settings.rb');
