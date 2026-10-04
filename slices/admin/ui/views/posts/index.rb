@@ -97,6 +97,7 @@ module Admin
             href = path(:admin_edit_post, id: post.id)
 
             ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do
+              PublishForm(post:, filter: @filter, page: @posts.number) if post.status == DRAFT
               analytics_link(post)
               Tags(tags: post.tags)
               mentions(post)

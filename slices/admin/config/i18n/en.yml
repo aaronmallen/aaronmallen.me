@@ -134,6 +134,9 @@ en:
         tagged:
           one: "Tagged %{count} post %{tag}"
           other: "Tagged %{count} posts %{tag}"
+      publish:
+        invalid: "Not published · open %{post} to fix it"
+        not_draft: "Nothing published · %{post} is not a draft"
   projects_page:
     toasts:
       archived: "Archived · removed from /projects"
@@ -643,6 +646,7 @@ en:
       message_row:
         pick: "Select %{subject}"
         read: "Read"
+        read_key: "Mark the highlighted message read"
         spam: "Spam"
         unread: "Unread"
       nav:
@@ -863,6 +867,9 @@ en:
             format: "Use lowercase letters, numbers and single dashes in each tag."
           title:
             blank: "Add a title."
+        publish_form:
+          key: "Publish the highlighted draft"
+          publish: "Publish %{title}"
         publishing:
           heading: "Publishing"
           hint_later: "Future date: publishing will schedule it."

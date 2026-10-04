@@ -91,6 +91,7 @@ module Admin
     get "/posts/:id/edit", to: "posts.edit", as: :edit_post, id: ID
     post "/posts/:id", to: "posts.update", as: :update_post, id: ID
     post "/posts/:id/delete", to: "posts.destroy", as: :delete_post, id: ID
+    post "/posts/:id/publish", to: "posts.publish", as: :publish_post, id: ID
     post "/posts/:id/edits/:edit_id", to: "posts.update_edit", as: :update_post_edit, id: ID, edit_id: ID
     post "/posts/preview", to: "posts.preview", as: :preview_post
     post "/posts/preview/syndication", to: "posts.preview_syndication", as: :preview_post_syndication

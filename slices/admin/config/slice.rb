@@ -65,7 +65,7 @@ module Admin
 
     import keys: %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.move_post
-      operations.revise_edit_note
+      operations.publish_draft operations.revise_edit_note
       operations.save_post queries.by_filter queries.by_id queries.by_ids queries.by_status queries.count_by_status
       queries.edits_newest_first queries.scheduled queries.summaries
     ], from: :posts

@@ -12,7 +12,7 @@ module Posts
 
     export %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_post
-      operations.move_post
+      operations.move_post operations.publish_draft
       operations.record_post_webmentions operations.revise_edit_note operations.revise_post_body operations.save_post
       operations.save_post_seo operations.tag_post queries.all
       queries.by_filter queries.by_id queries.by_ids queries.by_status queries.calendar_posts queries.count_by_status

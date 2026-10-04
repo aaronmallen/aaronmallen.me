@@ -5,6 +5,7 @@ module Admin
     module Components
       class MessageRow < Component
         READ = Blog::Types::MessageStatus["read"]
+        READ_KEY = "r"
         SEPARATOR = " · "
         SPAM = Blog::Types::MessageStatus["spam"]
         UNREAD = Blog::Types::MessageStatus["unread"]
@@ -31,6 +32,12 @@ module Admin
 
         private
 
+        def keyed(status)
+          return Blog::Constants::EMPTY_HASH unless status == READ
+
+          { aria: { keyshortcuts: READ_KEY }, data: { key: READ_KEY, key_label: t(".read_key") } }
+        end
+
         def main
           div(class: "li-main") do
             span(class: "li-title") { @message.subject }
@@ -44,7 +51,7 @@ module Admin
         def move(status, label_key, variant)
           Form(action: path(:admin_mark_message, id: @message.id, status:)) do
             input(type: "hidden", name: "filter", value: @filter)
-            Button(type: "submit", variant:, small: true) { t(label_key) }
+            Button(type: "submit", variant:, small: true, **keyed(status)) { t(label_key) }
           end
         end
 

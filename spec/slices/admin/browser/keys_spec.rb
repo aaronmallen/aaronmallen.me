@@ -194,6 +194,75 @@ RSpec.describe "Admin keys", type: :feature do
     end
   end
 
+  describe "p on the posts list" do
+    let(:repo) { Posts::Slice["repos.post_repo"] }
+    let!(:draft) { create(:post, :draft, title: "Half done") }
+    let!(:published) { create(:post, :published, title: "Out already") }
+
+    def row_of(post) = titles.index(post.title) + 1
+
+    def status(post) = repo.by_id(post.id).status
+
+    before { visit "/admin/posts" }
+
+    it "publishes the highlighted draft" do
+      press(*Array.new(row_of(draft), "j"), "p")
+      find(".toast", text: "Published")
+
+      expect(status(draft)).to eq("published")
+    end
+
+    it "does nothing on a published post", :aggregate_failures do
+      published_at = repo.by_id(published.id).published_at
+      press(*Array.new(row_of(published), "j"), "p")
+
+      expect(page).to have_current_path("/admin/posts")
+      expect(repo.by_id(published.id).published_at).to eq(published_at)
+      expect(status(draft)).to eq("draft")
+    end
+
+    it "does nothing with no highlight", :aggregate_failures do
+      press("p")
+
+      expect(page).to have_current_path("/admin/posts")
+      expect(status(draft)).to eq("draft")
+    end
+
+    it "lists p in the help overlay" do
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ap\s+Publish the highlighted draft\z/)
+    end
+  end
+
+  describe "r on the messages list" do
+    let(:repo) { Contact::Slice["repos.message_repo"] }
+    let!(:first) { create(:message, subject: "First", received_at: Time.now) }
+    let!(:second) { create(:message, subject: "Second", received_at: Time.now - 60) }
+
+    before { visit "/admin/messages" }
+
+    it "marks the highlighted message read", :aggregate_failures do
+      press("j", "r")
+      find(".toast", text: "Marked read")
+
+      expect(repo.by_id(first.id).status).to eq("read")
+      expect(repo.by_id(second.id).status).to eq("unread")
+    end
+
+    it "does nothing with no highlight" do
+      press("r")
+
+      expect(repo.by_id(first.id).status).to eq("unread")
+    end
+
+    it "lists r in the help overlay" do
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ar\s+Mark the highlighted message read\z/)
+    end
+  end
+
   describe "a row with no link" do
     before do
       create(:message, subject: "Hello there")
