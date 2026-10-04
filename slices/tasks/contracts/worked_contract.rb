@@ -3,7 +3,6 @@
 module Tasks
   module Contracts
     class WorkedContract < Blog::Contract
-      BLANK = "blank"
       HOUR = 3600
       HOURS = (0..9999)
       MINUTE = 60

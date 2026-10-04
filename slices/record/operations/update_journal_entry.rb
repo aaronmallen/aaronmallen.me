@@ -23,7 +23,7 @@ module Record
 
       def form(params) = { body: params[:body], tags: params[:tags] }
 
-      def invalid = Failure([:invalid, { body: [Contracts::JournalEntryContract::BLANK] }])
+      def invalid = Failure([:invalid, { body: [Blog::Contract::BLANK] }])
 
       def persist(id, attributes)
         transaction do

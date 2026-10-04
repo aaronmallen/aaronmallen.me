@@ -12,7 +12,6 @@ module Posts
         queue_follow_up: "operations.queue_follow_up",
       ]
 
-      BLANK = "blank"
       CARD = %i[syndication_body syndication_enabled syndication_targets webmentions_enabled].freeze
       DRAFT = Blog::Types::PostIntent["draft"]
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url].freeze
@@ -99,7 +98,7 @@ module Posts
       def update_published(post, attributes)
         edited = edited?(post, attributes)
         note = attributes[NOTE].to_s
-        return invalid(NOTE, BLANK) if edited && note.empty?
+        return invalid(NOTE, Blog::Contract::BLANK) if edited && note.empty?
 
         post_edit_repo.create(post_id: post.id, note:) if edited
         saved = create_or_update(post, attributes.except(:published_at))

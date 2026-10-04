@@ -4,7 +4,6 @@ module Posts
   module Contracts
     class PostContract < PostSeoContract
       ANNOUNCEMENT_TOO_LONG = "announcement_too_long"
-      BLANK = "blank"
       EDIT_NOTE_LIMIT = 500
       PUBLISH = Blog::Types::PostIntent["publish"]
       TOO_LONG = "too_long"

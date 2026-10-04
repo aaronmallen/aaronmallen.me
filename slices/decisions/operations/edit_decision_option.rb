@@ -3,7 +3,6 @@
 module Decisions
   module Operations
     class EditDecisionOption < Blog::Operation
-      BLANK = "blank"
       FIELDS = %i[title body note].freeze
       OPTION_EDITED = Blog::Types::DecisionEventKind["option_edited"]
 
@@ -35,7 +34,7 @@ module Decisions
         return Success(option) if option.title == title && option.body == body
 
         noted = decision.closed?
-        return Failure([:invalid, { note: [BLANK] }]) if noted && note.empty?
+        return Failure([:invalid, { note: [Blog::Contract::BLANK] }]) if noted && note.empty?
 
         saved = decision_option_repo.update(option.id, title:, body:)
         decision_repo.record(decision.id, OPTION_EDITED, option_id: option.id, note: noted ? note : nil)

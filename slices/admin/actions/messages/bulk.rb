@@ -4,14 +4,12 @@ module Admin
   module Actions
     module Messages
       class Bulk < Action
-        BLANK = "blank"
         DONE = {
           Blog::Types::MessageBulkAction["delete"] => "messages_page.toasts.bulk.deleted",
           Blog::Types::MessageBulkAction["read"] => "messages_page.toasts.bulk.read",
           Blog::Types::MessageBulkAction["unread"] => "messages_page.toasts.bulk.unread",
         }.freeze
         FAILED = "messages_page.toasts.bulk.failed"
-        FORMAT = "format"
         INVALID = "messages_page.toasts.bulk.invalid"
         KEY = "#"
         LONG = "long"
@@ -61,8 +59,8 @@ module Admin
         def refused(errors)
           case errors
           in { ids: [LONG, *] } then LONG
-          in { ids: [::String, *] } then BLANK
-          else FORMAT
+          in { ids: [::String, *] } then Blog::Contract::BLANK
+          else Blog::Contract::FORMAT
           end
         end
       end

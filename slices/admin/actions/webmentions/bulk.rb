@@ -4,14 +4,12 @@ module Admin
   module Actions
     module Webmentions
       class Bulk < Action
-        BLANK = "blank"
         DONE = {
           Blog::Types::WebmentionVerdict["approved"] => "webmentions_page.toasts.bulk.approved",
           Blog::Types::WebmentionVerdict["ignored"] => "webmentions_page.toasts.bulk.ignored",
           Blog::Types::WebmentionVerdict["spam"] => "webmentions_page.toasts.bulk.spam",
         }.freeze
         FAILED = "webmentions_page.toasts.bulk.failed"
-        FORMAT = "format"
         INVALID = "webmentions_page.toasts.bulk.invalid"
         KEY = "#"
         LONG = "long"
@@ -59,8 +57,8 @@ module Admin
         def refused(errors)
           case errors
           in { ids: [LONG, *] } then LONG
-          in { ids: [::String, *] } then BLANK
-          else FORMAT
+          in { ids: [::String, *] } then Blog::Contract::BLANK
+          else Blog::Contract::FORMAT
           end
         end
       end

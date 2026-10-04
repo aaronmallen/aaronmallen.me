@@ -3,7 +3,6 @@
 module MCP
   module Tools
     class SuggestEdits < Base
-      BLANK = "blank"
       FIRST_PART = 1
       LONG = "long"
       POST = "post"
@@ -12,8 +11,8 @@ module MCP
       UNSTORED = "could not store the edits"
 
       COMPLAINTS = {
-        BLANK => "needs a character that is not a space",
-        Blog::Contract::CONTROL => "holds a control character",
+        Blog::Contract::BLANK => "needs a character that is not a space",
+        Blog::Contract::CONTROL => Complaints::CONTROL,
         LONG => "is too long",
       }.freeze
 

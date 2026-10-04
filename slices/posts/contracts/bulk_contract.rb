@@ -3,7 +3,6 @@
 module Posts
   module Contracts
     class BulkContract < Blog::Contract
-      BLANK = "blank"
       MAX_IDS = 100
       TAG = Blog::Types::PostBulkAction["tag"]
 

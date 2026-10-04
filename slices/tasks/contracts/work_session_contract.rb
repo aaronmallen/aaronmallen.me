@@ -3,8 +3,6 @@
 module Tasks
   module Contracts
     class WorkSessionContract < Blog::Contract
-      BLANK = "blank"
-
       params do
         required(:started_at).value(Blog::Types::LocalTime)
         optional(:ended_at).value(Blog::Types::LocalTime)

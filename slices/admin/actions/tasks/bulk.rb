@@ -4,7 +4,6 @@ module Admin
   module Actions
     module Tasks
       class Bulk < Action
-        BLANK = "blank"
         DONE = {
           Blog::Types::TaskBulkAction["cancel"] => "tasks_page.toasts.bulk.canceled",
           Blog::Types::TaskBulkAction["complete"] => "tasks_page.toasts.bulk.completed",
@@ -14,7 +13,6 @@ module Admin
           Blog::Types::TaskBulkAction["untag"] => "tasks_page.toasts.bulk.untagged",
         }.freeze
         FAILED = "tasks_page.toasts.bulk.failed"
-        FORMAT = "format"
         INVALID = "tasks_page.toasts.bulk.invalid"
         KEY = "#"
         LISTS = {
@@ -85,17 +83,17 @@ module Admin
         def refusal(errors)
           case errors
           in [LONG, *] then LONG
-          in [::String, *] then BLANK
-          else FORMAT
+          in [::String, *] then Blog::Contract::BLANK
+          else Blog::Contract::FORMAT
           end
         end
 
         def refused(errors)
           case errors
           in { ids: } then refusal(ids)
-          in { to: } then "to_#{BLANK}"
+          in { to: } then "to_#{Blog::Contract::BLANK}"
           in { tag: [message, *] } then "tag_#{message}"
-          else FORMAT
+          else Blog::Contract::FORMAT
           end
         end
       end

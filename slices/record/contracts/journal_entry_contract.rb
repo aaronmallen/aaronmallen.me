@@ -3,7 +3,6 @@
 module Record
   module Contracts
     class JournalEntryContract < Blog::Contract
-      BLANK = "blank"
       ENTRY_DATE = Blog::Types::Date.optional.constructor do |value|
         text = Blog::Types::TrimmedText[value]
         next nil if text.empty?

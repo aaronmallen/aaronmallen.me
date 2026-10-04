@@ -29,7 +29,7 @@ module Record
 
         Success(journal_entry_repo.by_id(id))
       rescue ROM::SQL::CheckConstraintError
-        invalid(:body, Contracts::JournalEntryContract::BLANK)
+        invalid(:body, Blog::Contract::BLANK)
       end
 
       def validate(params, now, latest)

@@ -7,7 +7,7 @@ module MCP
 
       COMPLAINTS = {
         "blank" => "is empty",
-        Blog::Contract::CONTROL => "holds a control character",
+        Blog::Contract::CONTROL => Complaints::CONTROL,
         Blog::Contract::FORMAT => "needs a date and time, as 2026-10-01T09:30",
         Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
         "too_long" => "has a part over the limit for a network you picked",

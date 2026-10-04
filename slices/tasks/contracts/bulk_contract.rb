@@ -3,7 +3,6 @@
 module Tasks
   module Contracts
     class BulkContract < Blog::Contract
-      BLANK = "blank"
       MAX_IDS = 100
       MOVE = Blog::Types::TaskBulkAction["move"]
       TAGGING = [Blog::Types::TaskBulkAction["tag"], Blog::Types::TaskBulkAction["untag"]].freeze

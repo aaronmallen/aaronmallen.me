@@ -3,6 +3,7 @@
 module MCP
   module Tools
     module Complaints
+      CONTROL = "holds a control character"
       INVALID = "check this field"
 
       module_function
