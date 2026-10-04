@@ -572,6 +572,76 @@ CREATE TABLE public.commits (
 
 
 --
+-- Name: decision_comments; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.decision_comments (
+    id integer NOT NULL,
+    decision_id integer NOT NULL,
+    body public.non_blank_text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: decision_events; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.decision_events (
+    id integer NOT NULL,
+    decision_id integer NOT NULL,
+    kind public.decision_event_kind NOT NULL,
+    option_id integer,
+    reason public.non_blank_text,
+    note public.non_blank_text,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT decision_events_kind_check CHECK (
+CASE kind
+    WHEN 'opened'::public.decision_event_kind THEN (num_nonnulls(option_id, reason, note) = 0)
+    WHEN 'option_added'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (num_nonnulls(reason, note) = 0))
+    WHEN 'option_edited'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (reason IS NULL))
+    WHEN 'edited'::public.decision_event_kind THEN (num_nonnulls(option_id, reason) = 0)
+    WHEN 'resolved'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (reason IS NOT NULL) AND (note IS NULL))
+    WHEN 'dropped'::public.decision_event_kind THEN ((option_id IS NULL) AND (reason IS NOT NULL) AND (note IS NULL))
+    WHEN 'reopened'::public.decision_event_kind THEN ((option_id IS NULL) AND (reason IS NOT NULL) AND (note IS NULL))
+    ELSE false
+END),
+    CONSTRAINT decision_events_note_length_check CHECK ((char_length((note)::text) <= 500))
+);
+
+
+--
+-- Name: decision_options; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.decision_options (
+    id integer NOT NULL,
+    decision_id integer NOT NULL,
+    title public.non_blank_text NOT NULL,
+    body text DEFAULT ''::text NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
+-- Name: decisions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.decisions (
+    id integer NOT NULL,
+    title public.non_blank_text NOT NULL,
+    problem public.non_blank_text NOT NULL,
+    status public.decision_status DEFAULT 'open'::public.decision_status NOT NULL,
+    resolved_option_id integer,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT decisions_choice_check CHECK (((status = 'resolved'::public.decision_status) = (resolved_option_id IS NOT NULL)))
+);
+
+
+--
 -- Name: journal_entries; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -788,7 +858,8 @@ CREATE VIEW public.activities AS
     NULL::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM public.commits
 UNION ALL
  SELECT 'post'::text AS type,
@@ -804,7 +875,8 @@ UNION ALL
     (posts.status)::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM public.posts
   WHERE (posts.status = 'published'::public.post_status)
 UNION ALL
@@ -821,7 +893,8 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM public.journal_entries
 UNION ALL
  SELECT 'social'::text AS type,
@@ -837,7 +910,8 @@ UNION ALL
     (social_posts.status)::text AS status,
     social_posts.targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM (public.social_posts
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
            FROM public.social_post_parts
@@ -859,7 +933,8 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     webmentions.excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM (public.webmentions
      JOIN public.posts ON ((posts.id = webmentions.post_id)))
   WHERE (webmentions.status = 'approved'::public.webmention_status)
@@ -877,7 +952,8 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    tasks.id AS task_id
+    tasks.id AS task_id,
+    NULL::integer AS decision_id
    FROM public.tasks
   WHERE (tasks.status = 'done'::public.task_status)
 UNION ALL
@@ -894,7 +970,8 @@ UNION ALL
     (projects.status)::text AS status,
     NULL::public.network[] AS targets,
     projects.tagline AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM public.projects
 UNION ALL
  SELECT 'sprint'::text AS type,
@@ -910,7 +987,8 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM public.sprints
 UNION ALL
  SELECT 'suggestion'::text AS type,
@@ -926,7 +1004,8 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     NULL::text AS excerpt,
-    NULL::integer AS task_id
+    NULL::integer AS task_id,
+    NULL::integer AS decision_id
    FROM ((public.suggestions
      LEFT JOIN public.posts ON ((posts.id = suggestions.post_id)))
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
@@ -948,9 +1027,47 @@ UNION ALL
     NULL::text AS status,
     NULL::public.network[] AS targets,
     tasks.title AS excerpt,
-    task_comments.task_id
+    task_comments.task_id,
+    NULL::integer AS decision_id
    FROM (public.task_comments
-     JOIN public.tasks ON ((tasks.id = task_comments.task_id)));
+     JOIN public.tasks ON ((tasks.id = task_comments.task_id)))
+UNION ALL
+ SELECT 'decision'::text AS type,
+    decision_events.id AS source_id,
+    ((decision_events.created_at AT TIME ZONE 'America/Chicago'::text))::date AS occurred_on,
+    ((decision_events.created_at AT TIME ZONE 'America/Chicago'::text))::time without time zone AS occurred_at,
+    (decisions.title)::text AS name,
+    NULL::text AS link,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::integer AS additions,
+    NULL::integer AS deletions,
+    (decision_events.kind)::text AS status,
+    NULL::public.network[] AS targets,
+    (COALESCE(decision_events.reason, decision_events.note, decision_options.title))::text AS excerpt,
+    NULL::integer AS task_id,
+    decision_events.decision_id
+   FROM ((public.decision_events
+     JOIN public.decisions ON ((decisions.id = decision_events.decision_id)))
+     LEFT JOIN public.decision_options ON ((decision_options.id = decision_events.option_id)))
+UNION ALL
+ SELECT 'decision_comment'::text AS type,
+    decision_comments.id AS source_id,
+    ((decision_comments.created_at AT TIME ZONE 'America/Chicago'::text))::date AS occurred_on,
+    ((decision_comments.created_at AT TIME ZONE 'America/Chicago'::text))::time without time zone AS occurred_at,
+    (decision_comments.body)::text AS name,
+    NULL::text AS link,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::integer AS additions,
+    NULL::integer AS deletions,
+    NULL::text AS status,
+    NULL::public.network[] AS targets,
+    (decisions.title)::text AS excerpt,
+    NULL::integer AS task_id,
+    decision_comments.decision_id
+   FROM (public.decision_comments
+     JOIN public.decisions ON ((decisions.id = decision_comments.decision_id)));
 
 
 --
@@ -1374,19 +1491,6 @@ ALTER TABLE public.commits ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY 
 
 
 --
--- Name: decision_comments; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.decision_comments (
-    id integer NOT NULL,
-    decision_id integer NOT NULL,
-    body public.non_blank_text NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
-);
-
-
---
 -- Name: decision_comments_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1401,33 +1505,6 @@ ALTER TABLE public.decision_comments ALTER COLUMN id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: decision_events; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.decision_events (
-    id integer NOT NULL,
-    decision_id integer NOT NULL,
-    kind public.decision_event_kind NOT NULL,
-    option_id integer,
-    reason public.non_blank_text,
-    note public.non_blank_text,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT decision_events_kind_check CHECK (
-CASE kind
-    WHEN 'opened'::public.decision_event_kind THEN (num_nonnulls(option_id, reason, note) = 0)
-    WHEN 'option_added'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (num_nonnulls(reason, note) = 0))
-    WHEN 'option_edited'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (reason IS NULL))
-    WHEN 'edited'::public.decision_event_kind THEN (num_nonnulls(option_id, reason) = 0)
-    WHEN 'resolved'::public.decision_event_kind THEN ((option_id IS NOT NULL) AND (reason IS NOT NULL) AND (note IS NULL))
-    WHEN 'dropped'::public.decision_event_kind THEN ((option_id IS NULL) AND (reason IS NOT NULL) AND (note IS NULL))
-    WHEN 'reopened'::public.decision_event_kind THEN ((option_id IS NULL) AND (reason IS NOT NULL) AND (note IS NULL))
-    ELSE false
-END),
-    CONSTRAINT decision_events_note_length_check CHECK ((char_length((note)::text) <= 500))
-);
-
-
---
 -- Name: decision_events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
@@ -1438,20 +1515,6 @@ ALTER TABLE public.decision_events ALTER COLUMN id ADD GENERATED BY DEFAULT AS I
     NO MINVALUE
     NO MAXVALUE
     CACHE 1
-);
-
-
---
--- Name: decision_options; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.decision_options (
-    id integer NOT NULL,
-    decision_id integer NOT NULL,
-    title public.non_blank_text NOT NULL,
-    body text DEFAULT ''::text NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
@@ -1505,22 +1568,6 @@ UNION ALL
     (decision_events.reason)::text AS reason,
     (decision_events.note)::text AS note
    FROM public.decision_events;
-
-
---
--- Name: decisions; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.decisions (
-    id integer NOT NULL,
-    title public.non_blank_text NOT NULL,
-    problem public.non_blank_text NOT NULL,
-    status public.decision_status DEFAULT 'open'::public.decision_status NOT NULL,
-    resolved_option_id integer,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT decisions_choice_check CHECK (((status = 'resolved'::public.decision_status) = (resolved_option_id IS NOT NULL)))
-);
 
 
 --
@@ -3407,10 +3454,24 @@ CREATE INDEX commits_search_vector_index ON public.commits USING gin (search_vec
 
 
 --
+-- Name: decision_comments_created_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX decision_comments_created_on_index ON public.decision_comments USING btree ((((created_at AT TIME ZONE 'America/Chicago'::text))::date));
+
+
+--
 -- Name: decision_comments_decision_id_created_at_index; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX decision_comments_decision_id_created_at_index ON public.decision_comments USING btree (decision_id, created_at);
+
+
+--
+-- Name: decision_events_created_on_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX decision_events_created_on_index ON public.decision_events USING btree ((((created_at AT TIME ZONE 'America/Chicago'::text))::date));
 
 
 --
@@ -4607,4 +4668,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000137_create_post_reader_hashes.rb'),
 ('20261003000152_add_backups_to_sync_name.rb'),
 ('20261003000153_create_task_tag_rules.rb'),
-('20261003000154_create_decision_timeline_view.rb');
+('20261003000154_create_decision_timeline_view.rb'),
+('20261003000156_add_decisions_to_activities.rb');

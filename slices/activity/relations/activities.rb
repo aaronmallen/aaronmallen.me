@@ -12,6 +12,8 @@ module Activity
           integer.coalesce(integer.sum(deletions), 0).as(:deletions),
         ]
       end
+      DECISION = Blog::Types::ActivityKind["decision"]
+      DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
       JOURNAL = Blog::Types::ActivityKind["journal"]
       MATCHED = Sequel.function(:count, Sequel[:tags][:name]).distinct
       MONTH_FORMAT = "YYYY-MM"
@@ -23,6 +25,8 @@ module Activity
         JOURNAL => %i[source_id journal_entry_tags journal_entry_id],
         TASK => %i[source_id task_tags task_id],
         COMMENT => %i[task_id task_tags task_id],
+        DECISION => %i[decision_id decision_tags decision_id],
+        DECISION_COMMENT => %i[decision_id decision_tags decision_id],
       }.freeze
       LISTED = { **TAGGED, POST => %i[source_id post_tags post_id] }.freeze
       TAG_NAME = Sequel.cast(Sequel[:tags][:name], :text)

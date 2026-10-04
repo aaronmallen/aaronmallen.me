@@ -26,8 +26,9 @@ RSpec.describe "Admin activity", type: :request do
 
   def icon_for(type)
     {
-      "comment" => "comment", "commit" => "code-commit", "journal" => "feather", "post" => "file-lines",
-      "social" => "paper-plane", "task" => "circle-check", "webmention" => "at",
+      "comment" => "comment", "commit" => "code-commit", "decision" => "scale-balanced",
+      "decision_comment" => "comments", "journal" => "feather", "post" => "file-lines", "social" => "paper-plane",
+      "task" => "circle-check", "webmention" => "at",
     }.fetch(type)
   end
 
@@ -76,7 +77,7 @@ RSpec.describe "Admin activity", type: :request do
       end
 
       it "checks every type" do
-        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 7, visible: :all)
+        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 9, visible: :all)
       end
 
       it "submits the filters as a get" do
@@ -252,6 +253,95 @@ RSpec.describe "Admin activity", type: :request do
         visit_activity(types: { comment: "0", task: "1" })
 
         expect(event_names).to be_empty
+      end
+    end
+
+    describe "decisions" do
+      let(:decision) { create(:decision, title: "Pick a queue", tags: %w[infra]) }
+
+      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(11), **attrs)
+
+      def event(kind, **attrs) = create(:decision_event, decision_id: decision.id, kind:, created_at: at(10), **attrs)
+
+      def every_event
+        option_id = create(:decision_option, decision_id: decision.id, title: "Sidekiq").id
+
+        [
+          event("opened"), event("option_added", option_id:), event("option_edited", option_id:),
+          event("edited", note: "Fixed a typo"), event("resolved", option_id:, reason: "It already runs"),
+          event("dropped", reason: "Not worth it"), event("reopened", reason: "Jobs pile up again"),
+        ]
+      end
+
+      def every_sub_line
+        [
+          "opened", "option added · Sidekiq", "option edited · Sidekiq", "edited · Fixed a typo",
+          "resolved · It already runs", "dropped · Not worth it", "reopened · Jobs pile up again",
+        ]
+      end
+
+      def opening(selector = "") = page.all("a.activity-event[href='/admin/decisions/#{decision.id}'] #{selector}")
+
+      it "shows every kind of event, each opening its decision" do
+        every_event
+        visit_activity
+
+        expect(opening(".activity-event-name").map(&:text)).to eq(["Pick a queue"] * 7)
+      end
+
+      it "says what happened in each event's sub-line" do
+        every_event
+        visit_activity
+
+        expect(event_subs).to match_array(every_sub_line)
+      end
+
+      it "shows a comment's markdown, opening its decision" do
+        comment(body: "Ask **ops** first")
+        visit_activity
+
+        expect(opening(".activity-event-name.prose strong").map(&:text)).to eq(["ops"])
+      end
+
+      it "names the decision a comment is on" do
+        comment
+        visit_activity
+
+        expect(event_subs).to eq(["on Pick a queue"])
+      end
+
+      it "counts events and comments apart", :aggregate_failures do
+        event("opened")
+        comment
+        visit_activity
+
+        expect(count_for("decision")).to eq("1")
+        expect(count_for("decision_comment")).to eq("1")
+      end
+
+      it "finds a decision's events and comments by its tags" do
+        event("opened")
+        comment(body: "Ask ops first")
+        create(:decision_event, kind: "opened", created_at: at(12))
+        visit_activity(q: "tag:infra")
+
+        expect(event_names).to contain_exactly("Pick a queue", "Ask ops first")
+      end
+
+      it "leaves out a decision that carries another tag" do
+        event("opened")
+        comment
+        visit_activity(q: "tag:work")
+
+        expect(event_names).to be_empty
+      end
+
+      it "drops the decisions when their type is unchecked" do
+        event("opened")
+        comment(body: "Ask ops first")
+        visit_activity(types: { decision: "0", decision_comment: "1" })
+
+        expect(event_names).to eq(["Ask ops first"])
       end
     end
 

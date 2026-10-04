@@ -147,6 +147,10 @@ RSpec.describe "MCP reach", type: :request do
 
   def seed_commit = create(:commit, commit_date: today)
 
+  def seed_decision = create(:decision_event, created_at: at(10))
+
+  def seed_decision_comment = create(:decision_comment, created_at: at(10))
+
   def seed_journal = create(:journal_entry, entry_date: today)
 
   def seed_post = article

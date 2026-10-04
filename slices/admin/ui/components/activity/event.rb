@@ -9,6 +9,8 @@ module Admin
 
           COMMENT = Blog::Types::ActivityKind["comment"]
           COMMIT = Blog::Types::ActivityKind["commit"]
+          DECISION = Blog::Types::ActivityKind["decision"]
+          DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
           JOURNAL = Blog::Types::ActivityKind["journal"]
           POST = Blog::Types::ActivityKind["post"]
           SOCIAL = Blog::Types::ActivityKind["social"]
@@ -21,6 +23,8 @@ module Admin
             SOCIAL => Type.new(icon: "fa-paper-plane", color: :blue, prose: true),
             TASK => Type.new(icon: "fa-circle-check", color: :orange, prose: false),
             COMMENT => Type.new(icon: "fa-comment", color: :orange, prose: true),
+            DECISION => Type.new(icon: "fa-scale-balanced", color: :sand, prose: false),
+            DECISION_COMMENT => Type.new(icon: "fa-comments", color: :sand, prose: true),
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
           }.freeze
           POSTED = Blog::Types::SocialQueue["posted"]
@@ -47,7 +51,7 @@ module Admin
             when POST then path(:admin_edit_post, id: @event.source_id)
             when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
             when SOCIAL then path(:admin_social, filter: POSTED)
-            when TASK, COMMENT then task_href
+            when TASK, COMMENT, DECISION, DECISION_COMMENT then owner_href
             when WEBMENTION then path(:admin_webmentions)
             end
           end
@@ -60,6 +64,8 @@ module Admin
               span(class: "activity-event-sub") { @event.sub_line }
             end
           end
+
+          def owner_href = @event.decision_id ? path(:admin_decision, id: @event.decision_id) : task_href
 
           def row
             i(class: ["fa-solid", type.icon, "activity-icon", type.color.to_s], aria: { hidden: "true" })

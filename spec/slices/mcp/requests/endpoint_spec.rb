@@ -504,6 +504,12 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "a token that may read the activity feed" do
     def at(hour, on: today) = Blog::TimeZone.local_time(on.year, on.month, on.day, hour, 0)
 
+    def deciding
+      decision = create(:decision)
+      create(:decision_event, decision_id: decision.id, created_at: at(11))
+      create(:decision_comment, decision_id: decision.id, created_at: at(11))
+    end
+
     def entries = content.fetch("activity")
 
     def finish_with_comment
@@ -549,6 +555,7 @@ RSpec.describe "MCP endpoint", type: :request do
       create(:social_post, :posted, posted_at: at(12))
       create(:webmention, :approved, post_id: article.id, received_at: at(8))
       finish_with_comment
+      deciding
       planning(article)
     end
 
@@ -656,6 +663,73 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity(text: "down to")
 
         expect(names).to eq(["Down to ten"])
+      end
+    end
+
+    describe "a decision" do
+      let(:decision) { create(:decision, title: "Pick a queue", tags: %w[infra]) }
+      let(:option) { create(:decision_option, decision_id: decision.id, title: "Sidekiq") }
+
+      def comment(**attrs) = create(:decision_comment, decision_id: decision.id, created_at: at(11), **attrs)
+
+      def event(kind, **attrs) = create(:decision_event, decision_id: decision.id, kind:, created_at: at(10), **attrs)
+
+      def tagged_rows = entries.map { it.values_at("kind", "decision_id", "tags") }
+
+      it "sends each event with the decision's title, what happened and the decision's id" do
+        event("opened")
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "decision", "name" => "Pick a queue", "status" => "opened", "decision_id" => decision.id),
+        )
+      end
+
+      it "sends the reason as the excerpt" do
+        event("resolved", option_id: option.id, reason: "It already runs")
+        read_activity
+
+        expect(entries).to contain_exactly(include("status" => "resolved", "excerpt" => "It already runs"))
+      end
+
+      it "sends the option's title when the event has no reason or note" do
+        event("option_added", option_id: option.id)
+        read_activity
+
+        expect(entries).to contain_exactly(include("status" => "option_added", "excerpt" => "Sidekiq"))
+      end
+
+      it "sends a comment with its text and the decision's title" do
+        comment(body: "Ask ops first")
+        read_activity
+
+        expect(entries).to contain_exactly(
+          include("kind" => "decision_comment", "name" => "Ask ops first", "excerpt" => "Pick a queue"),
+        )
+      end
+
+      it "gives a comment its decision's id" do
+        comment
+        read_activity
+
+        expect(entries).to contain_exactly(include("kind" => "decision_comment", "decision_id" => decision.id))
+      end
+
+      it "matches events and comments by the decision's tags" do
+        event("opened")
+        comment
+        create(:decision_event, kind: "opened", created_at: at(12))
+        read_activity(tags: %w[infra])
+
+        expect(tagged_rows).to match_array(%w[decision decision_comment].map { [it, decision.id, %w[infra]] })
+      end
+
+      it "narrows to decision events" do
+        event("opened")
+        comment
+        read_activity(kinds: %w[decision])
+
+        expect(kinds).to eq(%w[decision])
       end
     end
 

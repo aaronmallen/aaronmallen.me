@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -51,6 +51,11 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
   task and comment rows, so a comment matches its task's tags, links to its task and names the task's title in its
   excerpt. A comment lands on the day of its `created_at`, whether or not its task is done. The Activity screen
   shows comments with the six kinds above.
+- Decision events join as the `decision` kind and decision comments as `decision_comment` (#279), through
+  `config/db/migrate/20261003000156_add_decisions_to_activities.rb`. The view gains a `decision_id` column, set on
+  both, so they match the decision's tags and link to its page. An event's name is the decision's title, its status
+  the event's kind, and its excerpt the reason, the edit note or else the option's title. A comment's excerpt is the
+  decision's title. The Activity screen shows both.
 
 A new content kind joins by giving its table an index on its day, adding a branch to the view's migration, and
 adding its name to `Blog::Types::ActivityKind`. It shows on the Activity screen only once it joins

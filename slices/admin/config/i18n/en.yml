@@ -1,11 +1,22 @@
 en:
   activity_page:
+    decision_events:
+      dropped: "dropped"
+      edited: "edited"
+      opened: "opened"
+      option_added: "option added"
+      option_edited: "option edited"
+      reopened: "reopened"
+      resolved: "resolved"
     statuses:
       posted: "posted"
       published: "published"
     sub_lines:
       comment: "on %{task}"
       commit: "%{repo} · %{sha} · +%{additions}/−%{deletions}"
+      decision: "%{event}"
+      decision_comment: "on %{decision}"
+      decision_excerpt: "%{event} · %{excerpt}"
       journal: "private entry"
       post: "%{link} · %{status} · %{views}"
       social: "%{status} · %{networks}"
@@ -200,6 +211,8 @@ en:
           types:
             comment: "Comments"
             commit: "Commits"
+            decision: "Decisions"
+            decision_comment: "Decision comments"
             journal: "Journal"
             post: "Blog posts"
             social: "Social"

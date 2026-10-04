@@ -108,6 +108,7 @@ module Spec
 
     module Tagging
       REPOS = {
+        decision: ["repos.decision_repo", :decisions],
         journal_entry: ["repos.journal_entry_repo", :record],
         post: ["repos.post_repo", :posts],
         project: ["repos.project_repo", :projects],

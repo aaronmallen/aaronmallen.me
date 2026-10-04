@@ -7,6 +7,9 @@ module Admin
 
       COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]
+      DECISION = Blog::Types::ActivityKind["decision"]
+      DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
+      DECISION_EVENTS = "activity_page.decision_events"
       JOURNAL = Blog::Types::ActivityKind["journal"]
       TASK = Blog::Types::ActivityKind["task"]
       LINES = {
@@ -14,7 +17,7 @@ module Admin
         JOURNAL => "activity_page.sub_lines.journal",
         TASK => "activity_page.sub_lines.task",
       }.freeze
-      MARKDOWN = [JOURNAL, COMMENT].freeze
+      MARKDOWN = [JOURNAL, COMMENT, DECISION_COMMENT].freeze
       NAME_LIMIT = 120
       OCCURRED_ON = :occurred_on.to_proc
       POST = Blog::Types::ActivityKind["post"]
@@ -59,6 +62,13 @@ module Admin
         )
       end
 
+      def decision_line(row)
+        event = i18n.t(row.status, scope: DECISION_EVENTS)
+        return i18n.t("activity_page.sub_lines.decision", event:) unless row.excerpt
+
+        i18n.t("activity_page.sub_lines.decision_excerpt", event:, excerpt: shortened(row.excerpt))
+      end
+
       def display_name(row) = row.type == COMMIT ? CommitMessage.subject(row.name) : row.name
 
       def event(row, views)
@@ -71,6 +81,7 @@ module Admin
           name_html: name_html(row),
           sub_line: sub_line(row, views),
           task_id: row.task_id,
+          decision_id: row.decision_id,
         )
       end
 
@@ -124,6 +135,8 @@ module Admin
       def sub_line(row, views)
         case row.type
         when COMMIT then commit_line(row)
+        when DECISION then decision_line(row)
+        when DECISION_COMMENT then i18n.t("activity_page.sub_lines.decision_comment", decision: row.excerpt)
         when POST then post_line(row, views)
         when SOCIAL then social_line(row)
         when WEBMENTION then webmention_line(row)
