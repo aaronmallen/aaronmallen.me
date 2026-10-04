@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -50,19 +50,30 @@ it opens if it has one, and a `shows` check that takes the current path and hide
 apply. A new action joins by adding its entry and the `label` and `text` locale keys `Structs::Action` reads for it.
 `Palette` draws a row per entry in list order, matches on the label and the text together, and `palette.js` runs any
 row from its `href` and `dialog`, so neither changes for a new action. The Actions group sits above the tasks, so
-a query that matches an action lists it first. Since #303 the list holds two entries. "Create task" shuts the
-palette and opens the new task dialog on the page you are on, and goes to `/admin/tasks/new` when that page has no
-dialog. "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so
-the cursor lands in it without a script.
+a query that matches an action lists it first. #303 made the list, and it now holds these rows:
 
-Since #311 an entry can also `post` to its target, and can say what it `needs` on screen. "Start task" and "Complete
-task" need a task: the one open in the task flyout, or else the one the task page shows. `Tasks::Controls` marks its
-start and complete forms with `data-task-act`, and the row posts to the form's address, so a row shows only where the
-task page would offer the same button. "Complete {title}" needs no task on screen. Its entry names a `from` route,
-`/admin/tasks/in-progress`, and `Palette` draws a `template` in place of a row. `palette.js` fetches the route the
-first time the palette opens with no task on screen, and clones one row per task in progress. The route keeps what
-[ADR 0091][0091] set for such routes: it reads the session alone, answers 401 without one, and answers `no-store`.
-The layout still reads no task. A posted row sends the page's own address as `return_to`, and the task actions
+- "Create task" shuts the palette and opens the new task dialog on the page you are on, and goes to
+  `/admin/tasks/new` when that page has no dialog.
+- "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so the
+  cursor lands in it without a script.
+- "New post" goes to `/admin/posts/new`.
+- "New social post" goes to `/admin/social?write=1`, which puts `autofocus` on the composer's first part.
+- "Log work" opens the work entry dialog the layout draws on every screen, and goes to `/admin/projects?filter=work`
+  when a page has no dialog. Saving it leaves me on the screen I opened it from.
+- "Go to today's journal" goes to `/admin/journal`.
+- "Start task", "Complete task" and "Pause task" act on the task on screen.
+- "Complete {title}" and "Pause {title}" list each task in progress when no task is on screen.
+
+Since #311 an entry can also `post` to its target, and can say what it `needs` on screen. "Start task", "Complete task"
+and, since #314, "Pause task" need a task: the one open in the task flyout, or else the one the task page shows.
+`Tasks::Controls` marks its start, complete and pause forms with `data-task-act`, and the row posts to the form's
+address, so a row shows only where the task page would offer the same button. Pausing posts to the stop action, which
+returns the task to open and ends its work session. "Complete {title}" and "Pause {title}" need no task on screen. Each
+entry names a `from` route, `/admin/tasks/in-progress`, with `from_params` that pick the action each row posts to
+(`act=pause`, or complete when left out), and `Palette` draws a `template` in place of a row. `palette.js` fetches each
+route the first time the palette opens with no task on screen, and clones one row per task in progress. The route keeps
+what [ADR 0091][0091] set for such routes: it reads the session alone, answers 401 without one, and answers `no-store`.
+The layout still reads no task. A posted row sends the page's own address as `return_to`, and start, complete and stop
 redirect there when it is an admin path, so I stay on the screen I ran it from.
 
 A section is a row in `Admin::Operations::ListSections::ALL`: its name, group, icon and route, in the order the

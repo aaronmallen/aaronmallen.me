@@ -7,6 +7,8 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
   def open_palette = page.driver.browser.keyboard.type([:meta, "/"])
 
+  def open_sessions(task) = Tasks::Slice["relations.work_sessions"].running.for_task(task.id).to_a
+
   def query = find("[data-palette-query]")
 
   def status(task) = repo.by_id(task.id).status
@@ -22,9 +24,9 @@ RSpec.describe "Admin palette task actions", type: :feature do
       query.send_keys(*"task".chars)
     end
 
-    it "offers Start task and not Complete task", :aggregate_failures do
+    it "offers Start task and not Complete task or Pause task", :aggregate_failures do
       expect(page).to have_css("#command-palette-start-task", text: "Start task")
-      expect(page).to have_no_css("#command-palette-complete-task")
+      expect(page).to have_no_css("#command-palette-complete-task, [id^='command-palette-pause-task']")
     end
 
     describe "running Start task" do
@@ -53,13 +55,31 @@ RSpec.describe "Admin palette task actions", type: :feature do
       query.send_keys(*"task".chars)
     end
 
-    it "offers Complete task and not Start task", :aggregate_failures do
+    it "offers Complete task and Pause task and not Start task", :aggregate_failures do
       expect(page).to have_css("#command-palette-complete-task", text: "Complete task")
+      expect(page).to have_css("#command-palette-pause-task", text: "Pause task")
       expect(page).to have_no_css("#command-palette-start-task")
     end
 
     it "lists no other task in progress" do
-      expect(page).to have_no_css("[id^='command-palette-complete-task-in-progress-']")
+      expect(page).to have_no_css("[id*='-task-in-progress-']")
+    end
+
+    describe "running Pause task" do
+      before do
+        query.send_keys(*Array.new(4, :backspace), *"pause task".chars, :enter)
+        page.assert_selector("[data-toast]", text: "Stopped")
+      end
+
+      it "returns it to open and ends its work session", :aggregate_failures do
+        expect(status(task)).to eq("open")
+        expect(open_sessions(task)).to be_empty
+      end
+
+      it "leaves me on the task, shown open", :aggregate_failures do
+        expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=today")
+        expect(page).to have_css(".task-read-meta", text: "open")
+      end
     end
 
     describe "running Complete task" do
@@ -88,9 +108,9 @@ RSpec.describe "Admin palette task actions", type: :feature do
       page.assert_selector("#command-palette-create-task")
     end
 
-    it "offers neither, nor the tasks in progress", :aggregate_failures do
+    it "offers none of them, nor the tasks in progress", :aggregate_failures do
       expect(page).to have_no_css("#command-palette-start-task")
-      expect(page).to have_no_css("[id^='command-palette-complete-task']")
+      expect(page).to have_no_css("[id^='command-palette-complete-task'], [id^='command-palette-pause-task']")
     end
   end
 
@@ -131,6 +151,44 @@ RSpec.describe "Admin palette task actions", type: :feature do
     end
   end
 
+  describe "pausing with tasks in progress and no task on screen" do
+    let!(:first) { in_progress("Ship the palette") }
+
+    before do
+      in_progress("Write the record")
+      create(:task, title: "Not started")
+      visit "/admin/posts"
+      open_palette
+      query.send_keys(*"pause".chars)
+    end
+
+    it "lists each task in progress by title", :aggregate_failures do
+      expect(page).to have_css(".pal-r", text: "Pause Ship the palette")
+      expect(page).to have_css(".pal-r", text: "Pause Write the record")
+      expect(page).to have_no_css(".pal-r", text: "Not started")
+    end
+
+    it "offers no Pause task" do
+      expect(page).to have_no_css("#command-palette-pause-task")
+    end
+
+    describe "running one" do
+      before do
+        find_by_id("command-palette-pause-task-in-progress-#{first.id}").click
+        page.assert_selector("[data-toast]", text: "Stopped")
+      end
+
+      it "returns that task to open and ends its work session", :aggregate_failures do
+        expect(status(first)).to eq("open")
+        expect(open_sessions(first)).to be_empty
+      end
+
+      it "leaves me on the screen I ran it from" do
+        expect(page).to have_current_path("/admin/posts")
+      end
+    end
+  end
+
   describe "with no task on screen and none in progress" do
     before do
       create(:task, title: "Not started")
@@ -141,7 +199,13 @@ RSpec.describe "Admin palette task actions", type: :feature do
     end
 
     it "lists none" do
-      expect(page).to have_no_css("[id^='command-palette-complete-task']")
+      expect(page).to have_no_css("[id^='command-palette-complete-task'], [id^='command-palette-pause-task']")
+    end
+
+    it "lists none to pause" do
+      query.send_keys(*Array.new(8, :backspace), *"pause".chars)
+
+      expect(page).to have_no_css("[id^='command-palette-pause-task']")
     end
   end
 
@@ -192,6 +256,18 @@ RSpec.describe "Admin palette task actions", type: :feature do
     it "starts the task from the slash button", :aggregate_failures do
       expect(status(task)).to eq("in_progress")
       expect(page).to have_current_path("/admin/tasks/#{task.id}")
+    end
+
+    describe "then pausing it" do
+      before do
+        click_button(class: "slash")
+        find_by_id("command-palette-pause-task").click
+        page.assert_selector("[data-toast]", text: "Stopped")
+      end
+
+      it "returns it to open" do
+        expect(status(task)).to eq("open")
+      end
     end
 
     describe "then completing it" do

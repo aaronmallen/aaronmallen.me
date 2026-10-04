@@ -367,6 +367,13 @@ RSpec.describe "Admin task page", type: :request do
         expect(page).to have_no_css("[data-task-act='start']")
       end
 
+      it "marks the pause the palette runs on a task in progress" do
+        running = create(:task, :in_progress, :in_sprint)
+        read(running)
+
+        expect(page).to have_css("form[data-task-act='pause'][action='/admin/tasks/#{running.id}/stop']")
+      end
+
       it "marks nothing for the palette to run on a closed task" do
         read(create(:task, :done))
 
@@ -416,7 +423,10 @@ RSpec.describe "Admin task page", type: :request do
         "an address that only starts like the admin" => "/administer",
       }
 
-      { "complete" => "/admin/tasks?filter=next", "start" => "/admin/tasks?filter=today" }.each do |name, back|
+      {
+        "complete" => "/admin/tasks?filter=next", "start" => "/admin/tasks?filter=today",
+        "stop" => "/admin/tasks?filter=next",
+      }.each do |name, back|
         it "sends #{name} back to the admin page it was run from" do
           send_to("/admin/tasks/#{task.id}/#{name}", return_to: "/admin/posts?status=draft", filter: "next")
 

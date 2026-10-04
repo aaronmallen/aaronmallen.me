@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin tasks in progress", type: :request do
-  def ask = get("/admin/tasks/in-progress", {}, { "HTTP_ACCEPT" => "application/json" })
+  def ask(params = {}) = get("/admin/tasks/in-progress", params, { "HTTP_ACCEPT" => "application/json" })
 
   def rows = JSON.parse(last_response.body).fetch("rows")
 
@@ -29,6 +29,18 @@ RSpec.describe "Admin tasks in progress", type: :request do
             { "id" => task.id, "title" => title, "href" => "/admin/tasks/#{task.id}/complete" }
           end,
         )
+      end
+
+      it "points each one at the pause it posts to when asked to pause" do
+        ask(act: "pause")
+
+        expect(rows.map { it["href"] }).to eq([first, second].map { "/admin/tasks/#{it.id}/stop" })
+      end
+
+      it "falls back to complete for an act it does not know" do
+        ask(act: "delete")
+
+        expect(rows.map { it["href"] }).to eq([first, second].map { "/admin/tasks/#{it.id}/complete" })
       end
 
       it "keeps the answer out of every cache" do

@@ -129,6 +129,8 @@ module Blog
     end
     TagScope = Types::String.enum("public", "private")
     TagScopeParam = TagScope.fallback(TagScope.values.first)
+    TaskAct = Types::String.enum("complete", "pause")
+    TaskActParam = TaskAct.fallback(TaskAct.values.first)
     TaskBulkAction = Types::String.enum("complete", "cancel", "move", "tag", "untag", "delete")
     TaskFilter = Types::String.enum("today", "next", "someday", "external")
     TaskFilterParam = TaskFilter.fallback(TaskFilter.values.first)

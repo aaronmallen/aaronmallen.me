@@ -677,6 +677,12 @@ en:
           new_social_post:
             label: "New social post"
             text: "write a social post, compose"
+          pause_task:
+            label: "Pause task"
+            text: "stop task, stop work"
+          pause_task_in_progress:
+            label: "Pause %{title}"
+            text: "stop task, stop work"
           start_task:
             label: "Start task"
             text: "begin task, work on task"

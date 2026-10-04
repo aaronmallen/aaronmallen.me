@@ -13,7 +13,7 @@ module Admin
           case reopen_task.call(record_id(request))
           in Success(_)
             toast(response, STOPPED)
-            response.redirect_to(tasks_path(request))
+            response.redirect_to(back_here(request) || tasks_path(request))
           in Failure(:not_found)
             halt 404
           else halt 500

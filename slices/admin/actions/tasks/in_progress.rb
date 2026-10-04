@@ -6,6 +6,10 @@ module Admin
   module Actions
     module Tasks
       class InProgress < Action
+        ROUTES = {
+          Blog::Types::TaskAct["complete"] => :admin_complete_task,
+          Blog::Types::TaskAct["pause"] => :admin_stop_task,
+        }.freeze
         UNAUTHORIZED = 401
 
         include Deps[tasks_in_progress: "tasks.queries.tasks_in_progress"]
@@ -14,9 +18,11 @@ module Admin
 
         before :forbid_caching
 
-        def handle(_request, response)
+        def handle(request, response)
+          route = ROUTES.fetch(Blog::Types::TaskActParam[request.params[:act]])
+
           response.format = :json
-          response.body = JSON.generate(rows: tasks_in_progress.call.map { row(it) })
+          response.body = JSON.generate(rows: tasks_in_progress.call.map { row(it, route) })
         end
 
         private
@@ -25,7 +31,7 @@ module Admin
           halt UNAUTHORIZED unless auth_session(request).signed_in?
         end
 
-        def row(task) = { id: task.id, title: task.title, href: routes.path(:admin_complete_task, id: task.id) }
+        def row(task, route) = { id: task.id, title: task.title, href: routes.path(route, id: task.id) }
       end
     end
   end

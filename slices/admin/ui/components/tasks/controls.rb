@@ -122,7 +122,7 @@ module Admin
             change(:admin_start_task, "fa-solid fa-play", t(".start"), data: { task_act: "start" }, key: START)
           end
 
-          def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"))
+          def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"), data: { task_act: "pause" })
 
           def worked_fields
             tracked = @task.tracked_seconds

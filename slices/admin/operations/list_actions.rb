@@ -3,10 +3,10 @@
 module Admin
   module Operations
     class ListActions
-      Entry = Data.define(:name, :icon, :route, :params, :dialog, :shows, :post, :needs, :from) do
+      Entry = Data.define(:name, :icon, :route, :params, :dialog, :shows, :post, :needs, :from, :from_params) do
         def initialize(
           name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, shows: nil, post: false,
-          needs: nil, from: nil
+          needs: nil, from: nil, from_params: Blog::Constants::EMPTY_HASH
         )
           super
         end
@@ -34,9 +34,14 @@ module Admin
         Entry.new(name: :todays_journal, icon: "fa-feather", route: :admin_journal),
         Entry.new(name: :start_task, icon: "fa-play", post: true, needs: :start),
         Entry.new(name: :complete_task, icon: "fa-check", post: true, needs: :complete),
+        Entry.new(name: :pause_task, icon: "fa-pause", post: true, needs: :pause),
         Entry.new(
           name: :complete_task_in_progress, icon: "fa-check", post: true, needs: :no_task,
           from: :admin_tasks_in_progress,
+        ),
+        Entry.new(
+          name: :pause_task_in_progress, icon: "fa-pause", post: true, needs: :no_task,
+          from: :admin_tasks_in_progress, from_params: { act: Blog::Types::TaskAct["pause"] },
         ),
       ].freeze
 
@@ -46,7 +51,7 @@ module Admin
         ALL.select { it.shows?(current_path) }.map do |entry|
           Structs::Action.new(
             name: entry.name, icon: entry.icon, path: path(entry.route, entry.params), dialog: entry.dialog,
-            post: entry.post, needs: entry.needs, from: path(entry.from),
+            post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params),
           )
         end
       end

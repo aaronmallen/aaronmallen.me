@@ -15,6 +15,7 @@ RSpec.describe "Admin palette actions", type: :request do
     it "draws one row per entry, in order" do
       names = %w[
         create-task create-journal-entry new-post new-social-post log-work todays-journal start-task complete-task
+        pause-task
       ]
 
       expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
@@ -75,6 +76,13 @@ RSpec.describe "Admin palette actions", type: :request do
       expect(row["data-palette-needs"]).to eq("complete")
     end
 
+    it "posts Pause task to the task on screen", :aggregate_failures do
+      row = actions[8]
+
+      expect(row["data-palette-post"]).not_to be_nil
+      expect(row["data-palette-needs"]).to eq("pause")
+    end
+
     it "carries the token a post needs" do
       expect(page.find("dialog#command-palette", visible: :all)["data-palette-token"]).to eq(admin_csrf_token)
     end
@@ -83,26 +91,32 @@ RSpec.describe "Admin palette actions", type: :request do
   describe "the tasks in progress" do
     before { get "/admin" }
 
-    def row
+    def drawn = rows.map { [it[:id], it.find(".pal-r-label", visible: :all).text(:all), it["data-palette-text"]] }
+
+    def rows
       Capybara.string(Nokogiri::HTML5(last_response.body))
-              .find("template[data-palette-from] [data-palette-option]", visible: :all)
+              .all("template[data-palette-from] [data-palette-option]", visible: :all)
     end
 
-    def template = page.find("template[data-palette-from]", visible: :all)
+    def templates = page.all("template[data-palette-from]", visible: :all)
 
-    it "fetches them from the route that lists them" do
-      expect(template["data-palette-from"]).to eq("/admin/tasks/in-progress")
+    it "fetches complete and pause from the route that lists them" do
+      expect(templates.map { it["data-palette-from"] })
+        .to eq(["/admin/tasks/in-progress", "/admin/tasks/in-progress?act=pause"])
     end
 
-    it "draws the row each one fills in", :aggregate_failures do
-      expect(row[:id]).to eq("command-palette-complete-task-in-progress")
-      expect(row).to have_css(".pal-r-label", text: "Complete {title}", visible: :all)
-      expect(row["data-palette-text"]).to eq("complete {title}, finish task, mark done")
+    [
+      ["command-palette-complete-task-in-progress", "Complete {title}", "complete {title}, finish task, mark done"],
+      ["command-palette-pause-task-in-progress", "Pause {title}", "pause {title}, stop task, stop work"],
+    ].each_with_index do |row, at|
+      it "draws the #{row[1]} row each one fills in" do
+        expect(drawn[at]).to eq(row)
+      end
     end
 
-    it "posts the row and shows it only with no task on screen", :aggregate_failures do
-      expect(row["data-palette-post"]).not_to be_nil
-      expect(row["data-palette-needs"]).to eq("no_task")
+    it "posts each row and shows it only with no task on screen" do
+      expect(rows.map { [it["data-palette-post"].nil?, it["data-palette-needs"]] })
+        .to eq([[false, "no_task"], [false, "no_task"]])
     end
   end
 
