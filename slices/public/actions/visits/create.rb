@@ -8,6 +8,7 @@ module Public
     module Visits
       class Create < Action
         ACCEPTED = 202
+        CLICK = Blog::Types::VisitKind["click"]
         MAX_BYTES = 8192
         PLAIN_PATH = %r{\A/(?!/)[^?#]*\z}
         REJECTED = 400
@@ -30,7 +31,7 @@ module Public
         private
 
         def countable?(visit, route)
-          return false if visit["kind"] == ::Analytics::Contracts::VisitContract::CLICK && !route.params.key?(:slug)
+          return false if visit["kind"] == CLICK && !route.params.key?(:slug)
 
           find_page.call(route)
         end

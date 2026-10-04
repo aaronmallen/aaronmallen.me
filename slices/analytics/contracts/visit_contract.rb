@@ -3,7 +3,7 @@
 module Analytics
   module Contracts
     class VisitContract < Blog::Contract
-      CLICK = "click"
+      CLICK = Blog::Types::VisitKind["click"]
       HOST = /\A[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\z/
       LINK_PATH = %r{\A/[^\s?#]*\z}
       MAX_HOST = 253
@@ -11,15 +11,14 @@ module Analytics
       MAX_TITLE = 512
       MISSING = "missing"
       PATH = %r{\A/\S*\z}
-      READ = "read"
+      READ = Blog::Types::VisitKind["read"]
       REF = Analytics::Ref::KEY.to_sym
-      SCROLL = "scroll"
+      SCROLL = Blog::Types::VisitKind["scroll"]
       TOKEN = /\A[0-9a-f]{32}\z/
-      VIEW = "view"
-      KINDS = [CLICK, READ, SCROLL, VIEW].freeze
+      VIEW = Blog::Types::VisitKind["view"]
 
       json do
-        required(:kind).value(:string, included_in?: KINDS)
+        required(:kind).value(:string, included_in?: Blog::Types::VisitKind.values)
         required(:path).value(:string, max_size?: MAX_PATH, format?: PATH)
         optional(:title).value(:string, max_size?: MAX_TITLE)
         optional(:referrer).value(:string)

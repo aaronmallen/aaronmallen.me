@@ -162,6 +162,7 @@ module Blog
     UrlOrBlank = Types::String.constrained(format: /\A(?:#{URL_FORMAT})?\z/).constructor { |value| TrimmedText[value] }
     Uuid = Types::String.constrained(format: /\A[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\z/)
     UuidParam = Uuid.optional.fallback(nil)
+    VisitKind = Types::String.enum("click", "read", "scroll", "view")
     VisitorHash = Types::String.constrained(format: /\A[0-9a-f]{64}\z/)
     WebmentionStatus = Types::String.enum("pending", "approved", "ignored", "spam")
     WebmentionStatusParam = WebmentionStatus.fallback(WebmentionStatus.values.first)
