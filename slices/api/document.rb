@@ -45,6 +45,8 @@ module API
       ["update_work_session", "patch", "/tasks/{id}/sessions/{session_id}", OK],
       ["delete_work_session", "delete", "/tasks/{id}/sessions/{session_id}", OK],
       ["add_task_comment", "post", "/tasks/{id}/comments", CREATED],
+      ["edit_task_comment", "patch", "/tasks/{id}/comments/{comment_id}", OK],
+      ["delete_task_comment", "delete", "/tasks/{id}/comments/{comment_id}", OK],
       ["link_tasks", "post", "/tasks/{id}/links", CREATED],
       ["unlink_task", "delete", "/tasks/{id}/links/{other_id}", OK],
       ["read_commit", "get", "/commits/{id}", OK],

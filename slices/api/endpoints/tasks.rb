@@ -66,6 +66,8 @@ module API
 
       def missing(id) = "no task has the ID #{id}"
 
+      def missing_comment(id, comment_id) = "task #{id} has no comment with the ID #{comment_id}"
+
       def missing_session(id, session_id) = "task #{id} has no work session with the ID #{session_id}"
 
       def moment(meaning)

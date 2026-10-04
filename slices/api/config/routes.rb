@@ -32,6 +32,8 @@ module API
     patch "/tasks/:id/sessions/:session_id", to: "task_sessions.update"
     delete "/tasks/:id/sessions/:session_id", to: "task_sessions.destroy"
     post "/tasks/:id/comments", to: "task_comments.create"
+    patch "/tasks/:id/comments/:comment_id", to: "task_comments.update"
+    delete "/tasks/:id/comments/:comment_id", to: "task_comments.destroy"
     post "/tasks/:id/links", to: "task_links.create"
     delete "/tasks/:id/links/:other_id", to: "task_links.destroy"
 
