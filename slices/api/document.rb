@@ -56,6 +56,10 @@ module API
       ["plan_sprint", "post", "/sprints", CREATED],
       ["read_current_sprint", "get", "/sprints/current", OK],
       ["drop_sprint", "delete", "/sprints/{id}", OK],
+      ["list_saved_views", "get", "/saved_views", OK],
+      ["create_saved_view", "post", "/saved_views", CREATED],
+      ["update_saved_view", "patch", "/saved_views/{id}", OK],
+      ["delete_saved_view", "delete", "/saved_views/{id}", OK],
       ["read_token", "get", "/token", OK],
       ["read_document", "get", "/openapi.json", OK],
     ].freeze

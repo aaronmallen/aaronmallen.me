@@ -30,7 +30,7 @@ RSpec.describe "API reach", type: :request do
   def exempt = self.class.exempt
 
   def operations
-    { record: /journal/, tasks: // }.flat_map do |slice, pattern|
+    { record: /journal/, saved_views: //, tasks: // }.flat_map do |slice, pattern|
       names = Dir[Hanami.app.slices[slice].root.join("operations", "*.rb")].map { File.basename(it, ".rb") }
 
       names.grep(pattern).map { "#{slice}.operations.#{it}" }
@@ -58,13 +58,13 @@ RSpec.describe "API reach", type: :request do
 
   def walked?(dependency) = dependency.class.name.to_s.match?(/::(Endpoints|Operations)::/)
 
-  it "reaches every journal and task operation from an endpoint unless the operation is exempt" do
+  it "reaches every journal, saved view and task operation from an endpoint unless the operation is exempt" do
     unreached = operations - reached_keys - exempt.keys
 
     expect(unreached).to be_empty, "no endpoint reaches these, and none is exempt:\n#{unreached.join("\n")}"
   end
 
-  it "exempts only journal and task operations" do
+  it "exempts only journal, saved view and task operations" do
     expect(exempt.keys - operations).to be_empty
   end
 

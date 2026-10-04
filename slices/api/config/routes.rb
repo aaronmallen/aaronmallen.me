@@ -47,6 +47,11 @@ module API
     get "/sprints/current", to: "sprints.current"
     delete "/sprints/:id", to: "sprints.destroy"
 
+    get "/saved_views", to: "saved_views.index"
+    post "/saved_views", to: "saved_views.create"
+    patch "/saved_views/:id", to: "saved_views.update"
+    delete "/saved_views/:id", to: "saved_views.destroy"
+
     get "/token", to: "tokens.show"
 
     get "/openapi.json", to: "documents.show"
