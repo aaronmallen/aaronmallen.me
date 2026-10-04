@@ -11,7 +11,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer" },
+          id: API::Schema::ID,
           og_image_url: { type: "string", description: "a link to the social card image, hosted anywhere" },
           og_title: { type: "string", description: "a title for the social card, when the post title reads badly" },
         },

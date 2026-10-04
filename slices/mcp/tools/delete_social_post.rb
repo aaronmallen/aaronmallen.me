@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class DeleteSocialPost < Base
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Delete one social post that has not gone out. A post a network has already taken stays"
       input_schema(SCHEMA)

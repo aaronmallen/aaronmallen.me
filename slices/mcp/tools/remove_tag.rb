@@ -7,7 +7,7 @@ module MCP
 
       SCHEMA = {
         additionalProperties: false,
-        properties: { id: { type: "integer" }, scope: TAG_SCOPE },
+        properties: { id: API::Schema::ID, scope: TAG_SCOPE },
         required: %w[id scope],
       }.freeze
 

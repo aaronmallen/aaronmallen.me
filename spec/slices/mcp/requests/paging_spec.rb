@@ -99,8 +99,17 @@ RSpec.describe "MCP list tool paging", type: :request do
         expect(mcp_call(name, **arguments, page: 0).fetch("isError")).to be(true)
       end
 
+      it "refuses a page past the largest" do
+        expect(mcp_call(name, **arguments, page: Blog::Constants::INTEGER_MAX + 1).fetch("isError")).to be(true)
+      end
+
+      it "answers nothing on a distant page" do
+        expect(ids(name, key, **arguments, page: Blog::Constants::INTEGER_MAX)).to be_empty
+      end
+
       it "takes the page in its schema" do
-        expect(tool(name).dig("inputSchema", "properties", "page")).to include("type" => "integer", "minimum" => 1)
+        expect(tool(name).dig("inputSchema", "properties", "page"))
+          .to include("type" => "integer", "minimum" => 1, "maximum" => Blog::Constants::INTEGER_MAX)
       end
 
       it "says how to page" do

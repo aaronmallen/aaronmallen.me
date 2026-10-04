@@ -10,7 +10,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer" },
+          id: API::Schema::ID,
           schedule_at: {
             type: "string",
             description: "when to send it, as YYYY-MM-DDTHH:MM in #{Blog::TimeZone::NAME}; leave it out for now",

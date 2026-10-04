@@ -9,7 +9,7 @@ module API
         additionalProperties: false,
         properties: {
           kind: { type: "string", enum: Blog::Types::AttentionKind.values, description: "the row's kind" },
-          record_id: Schema.nullable(Schema::INTEGER).merge(
+          record_id: Schema.nullable(Schema::ID).merge(
             description: "the row's record_id from list_attention; leave it out for the journal",
           ),
         },

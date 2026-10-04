@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ReadSocialPost < Base
       KIND = "social_post"
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Read one social post that has not been sent yet: its status, its parts in order and the " \
                   "records linked to it, grouped by kind"

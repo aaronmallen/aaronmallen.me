@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module TaskTagRules
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       UNSAVED = "could not save the rule"
 
       COMPLAINTS = {

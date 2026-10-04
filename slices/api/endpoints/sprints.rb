@@ -5,7 +5,7 @@ module API
   module Endpoints
     module Sprints
       DAY = { type: "string", description: "a day after today, as YYYY-MM-DD" }.freeze
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       UNSAVED = "could not save the change"
 
       module_function

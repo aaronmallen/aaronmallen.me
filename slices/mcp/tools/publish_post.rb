@@ -5,7 +5,7 @@ module MCP
     class PublishPost < PostWrite
       PUBLISH = Blog::Types::PostIntent["publish"]
       PUBLISHED = Blog::Types::PostStatus["published"]
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Publish one blog post as it stands. It goes out now, or on its publish time when that is still " \
                   "to come, and its announcement and webmentions go with it when the post has them on. " \

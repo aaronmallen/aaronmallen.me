@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class ComposeAnnouncement < Base
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Compose the announcement one blog post sends to social networks when it goes out: its own " \
                   "announcement text, or its title and link when it has none. Nothing is sent"

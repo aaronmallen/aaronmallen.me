@@ -10,7 +10,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer" },
+          id: API::Schema::ID,
           reason: {
             type: "string",
             description: "why it is spam, kept with a spam verdict; approved and ignored clear it",

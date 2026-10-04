@@ -6,7 +6,7 @@ module API
     module Tasks
       CONTROL = "holds a control character"
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       MOST_IDS = 100
       IDS = {
         type: "array",

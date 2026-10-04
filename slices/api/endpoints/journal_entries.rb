@@ -6,7 +6,7 @@ module API
     module JournalEntries
       BLANK = "blank"
       FORMAT = Blog::Contract::FORMAT
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       TAG_SEPARATOR = ","
 
       COMPLAINTS = {

@@ -47,7 +47,7 @@ module MCP
         additionalProperties: false,
         properties: {
           edits: { type: "array", items: EDIT, maxItems: ::Suggestions::SuggestionLimits::MAX_EDITS },
-          id: { type: "integer" },
+          id: API::Schema::ID,
           target: { type: "string", enum: [POST, SOCIAL_POST] },
         },
         required: %w[target id edits],

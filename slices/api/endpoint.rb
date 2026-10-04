@@ -33,6 +33,8 @@ module API
 
     def failed(message) = Failure(Refusal.failed(message))
 
+    def flat(errors) = errors.transform_values { it.is_a?(Hash) ? it.values.flatten.uniq : it }
+
     def invalid(errors) = Failure(Refusal.invalid(errors))
 
     def linked(kind, id) = record_links.call(kind, id).transform_values { serialized(Serializers::Link, it) }

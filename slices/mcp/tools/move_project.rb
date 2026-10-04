@@ -9,7 +9,7 @@ module MCP
         additionalProperties: false,
         properties: {
           direction: { type: "string", enum: Blog::Types::ProjectMove.values },
-          id: { type: "integer" },
+          id: API::Schema::ID,
         },
         required: %w[id direction],
       }.freeze

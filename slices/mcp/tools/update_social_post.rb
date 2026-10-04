@@ -8,7 +8,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer" },
+          id: API::Schema::ID,
           parts: {
             type: "array",
             items: { type: "string" },

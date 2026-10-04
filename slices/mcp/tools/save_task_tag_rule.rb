@@ -6,7 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer", description: "the rule to edit; leave it out to add a new one" },
+          id: API::Schema::ID.merge(description: "the rule to edit; leave it out to add a new one"),
           **API::Endpoints::CreateTaskTagRule::SCHEMA.fetch(:properties),
         },
       }.freeze

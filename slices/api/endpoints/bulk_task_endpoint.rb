@@ -33,7 +33,7 @@ module API
       end
 
       def rejected(errors)
-        complaints = Tasks.complaints(errors.transform_keys { FIELDS.fetch(it, it) })
+        complaints = Tasks.complaints(flat(errors).transform_keys { FIELDS.fetch(it, it) })
 
         Failure(Refusal.invalid(complaints, message: Tasks.summary(complaints)))
       end

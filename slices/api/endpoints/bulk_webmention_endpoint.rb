@@ -15,7 +15,7 @@ module API
         in Success[*mentions] then Success(webmentions: serialized(Serializers::Webmention, mentions))
         in Failure[:record, id, :not_found] then invalid(ids: [Webmentions.missing(id)])
         in Failure[:record, id, _] then failed(format(UNCHANGED, id))
-        in Failure[:invalid, errors] then invalid(errors)
+        in Failure[:invalid, errors] then invalid(flat(errors))
         else failed(Webmentions::UNSAVED)
         end
       end

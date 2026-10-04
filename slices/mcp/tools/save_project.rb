@@ -28,7 +28,7 @@ module MCP
         additionalProperties: false,
         properties: {
           featured: { type: "boolean", description: "whether /projects shows it first" },
-          id: { type: "integer", description: "the project to change; leave it out to add a new one" },
+          id: API::Schema::ID.merge(description: "the project to change; leave it out to add a new one"),
           name: { type: "string" },
           og_image_url: { type: "string", description: "a link to the social card image" },
           repo: { type: "string", description: "the GitHub repository, as owner/repo" },

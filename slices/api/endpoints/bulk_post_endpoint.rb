@@ -32,7 +32,7 @@ module API
       end
 
       def rejected(errors)
-        complaints = Posts.complaints(errors)
+        complaints = Posts.complaints(flat(errors))
 
         Failure(Refusal.invalid(complaints, message: Posts.summary(complaints)))
       end

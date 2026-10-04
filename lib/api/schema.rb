@@ -4,6 +4,7 @@ module API
   module Schema
     BOOLEAN = { type: "boolean" }.freeze
     DAY = { type: "string", format: "date" }.freeze
+    ID = { type: "integer", minimum: 1, maximum: Blog::Constants::INTEGER_MAX }.freeze
     INTEGER = { type: "integer" }.freeze
     STAMP = { type: "string", format: "date-time" }.freeze
     STRING = { type: "string" }.freeze

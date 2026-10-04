@@ -6,7 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: { type: "integer" },
+          id: API::Schema::ID,
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
         },
         required: %w[id status],

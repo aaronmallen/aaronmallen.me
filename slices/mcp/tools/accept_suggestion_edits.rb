@@ -12,10 +12,10 @@ module MCP
         properties: {
           edit_ids: {
             type: "array",
-            items: { type: "integer" },
+            items: API::Schema::ID,
             description: "the edits to accept; every pending edit in the set when you leave it out",
           },
-          suggestion_id: { type: "integer" },
+          suggestion_id: API::Schema::ID,
         },
         required: ["suggestion_id"],
       }.freeze

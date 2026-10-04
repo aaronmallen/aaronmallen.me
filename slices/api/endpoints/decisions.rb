@@ -5,7 +5,7 @@ module API
   module Endpoints
     module Decisions
       CONTROL = "holds a control character"
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       NOTE = { type: "string", description: "why it changed; a resolved or dropped decision needs one" }.freeze
       REASON = { type: "string", description: "why, in Markdown" }.freeze
       TAG_SEPARATOR = ","

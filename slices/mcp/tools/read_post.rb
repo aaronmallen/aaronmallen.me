@@ -4,7 +4,7 @@ module MCP
   module Tools
     class ReadPost < Base
       KIND = "post"
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Read one blog post: its title, status, markdown body, social card fields and the records " \
                   "linked to it, grouped by kind"

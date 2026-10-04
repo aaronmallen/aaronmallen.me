@@ -8,10 +8,10 @@ module MCP
         properties: {
           edit_ids: {
             type: "array",
-            items: { type: "integer" },
+            items: API::Schema::ID,
             description: "the edits to reject; every pending and stale edit in the set when you leave it out",
           },
-          suggestion_id: { type: "integer" },
+          suggestion_id: API::Schema::ID,
         },
         required: ["suggestion_id"],
       }.freeze

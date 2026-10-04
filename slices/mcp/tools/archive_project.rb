@@ -5,7 +5,7 @@ module MCP
     class ArchiveProject < Base
       UNARCHIVED = "could not archive the project"
 
-      SCHEMA = { additionalProperties: false, properties: { id: { type: "integer" } }, required: ["id"] }.freeze
+      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
 
       description "Archive one project as of today, which takes it off /projects and unfeatures it. " \
                   "A project whose start month has not come yet stays as it is"

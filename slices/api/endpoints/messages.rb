@@ -7,7 +7,7 @@ module API
       MOST_IDS = 100
       IDS = {
         type: "array",
-        items: { type: "integer" },
+        items: Schema::ID,
         minItems: 1,
         maxItems: MOST_IDS,
         description: "the messages to change, #{MOST_IDS} at most; one that fails changes none".freeze,

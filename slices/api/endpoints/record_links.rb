@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module RecordLinks
-      ID = { type: "integer" }.freeze
+      ID = Schema::ID
       KIND = { type: "string", enum: Blog::Types::RecordKind.values }.freeze
       UNSAVED = "could not save the change"
 
