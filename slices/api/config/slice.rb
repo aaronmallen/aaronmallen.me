@@ -46,7 +46,7 @@ module API
       operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.sprints_between queries.task_by_id
-      queries.task_comments queries.task_timeline queries.tasks_in_sprint queries.unseen_task_count
+      queries.task_comments queries.task_timeline queries.tasks_in_sprint queries.time_report queries.unseen_task_count
       queries.unseen_tasks
     ], from: :tasks
 
@@ -60,12 +60,13 @@ module API
       endpoints.link_tasks endpoints.list_attention endpoints.list_journal_entries endpoints.list_links
       endpoints.list_saved_views endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.move_tasks
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.read_current_sprint
-      endpoints.read_journal_entry endpoints.read_review endpoints.read_task endpoints.reopen_decision
-      endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.start_task endpoints.tag_decision
-      endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
-      endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session operations.mint_token
-      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      endpoints.read_journal_entry endpoints.read_review endpoints.read_task endpoints.read_time_report
+      endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
+      endpoints.save_task endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.start_task
+      endpoints.tag_decision endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
+      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_work_session
+      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
+      queries.live_tokens
     ]
   end
 end

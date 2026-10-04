@@ -73,6 +73,7 @@ module API
       ["create_saved_view", "post", "/saved_views", CREATED],
       ["update_saved_view", "patch", "/saved_views/{id}", OK],
       ["delete_saved_view", "delete", "/saved_views/{id}", OK],
+      ["read_time_report", "get", "/time_report", OK],
       ["read_token", "get", "/token", OK],
       ["read_document", "get", "/openapi.json", OK],
     ].freeze

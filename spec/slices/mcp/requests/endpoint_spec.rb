@@ -78,8 +78,8 @@ RSpec.describe "MCP endpoint", type: :request do
       compose_announcement list_attention list_commits list_journal_entries list_links list_messages list_posts
       list_projects list_saved_views list_social_posts list_sprints list_suggestions list_tags list_tasks
       list_webmentions list_work_entries read_activity read_analytics read_current_sprint read_journal_entry
-      read_message read_post read_review read_social_post read_sync_state read_task read_webmention_settings
-      search summarize_activity
+      read_message read_post read_review read_social_post read_sync_state read_task read_time_report
+      read_webmention_settings search summarize_activity
     ]
   end
 
@@ -2289,6 +2289,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_social_post" => { id: 1 },
         "read_sync_state" => {},
         "read_task" => { id: 1 },
+        "read_time_report" => { from: "2026-01-01", to: "2026-12-31" },
         "read_webmention_settings" => {},
         "reject_suggestion_edits" => { suggestion_id: 1 },
         "remove_tag" => { id: 1, scope: "public" },

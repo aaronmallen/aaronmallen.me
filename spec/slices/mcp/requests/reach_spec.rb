@@ -22,7 +22,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",
       "admin.operations.build_tags_page" => "builds the admin's tags screen; list_tags reads the same tags",
       "admin.operations.build_task_page" => "builds the admin's task page; read_task reads the same task",
-      "admin.operations.build_time_page" => "builds the admin's time screen; #313 adds the time report tool",
+      "admin.operations.build_time_page" => "builds the admin's time screen; read_time_report reads the same",
       "admin.operations.build_tasks_page" => "builds the admin's tasks screen; list_tasks reads the same tasks",
       "admin.operations.count_network_lengths" => "counts characters as the admin types; compose checks the limits",
       "admin.operations.describe_social_post" => "words a social post for the admin's list",

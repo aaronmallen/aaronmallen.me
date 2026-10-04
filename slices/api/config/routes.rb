@@ -68,6 +68,8 @@ module API
     patch "/saved_views/:id", to: "saved_views.update"
     delete "/saved_views/:id", to: "saved_views.destroy"
 
+    get "/time_report", to: "time_reports.show"
+
     get "/token", to: "tokens.show"
 
     get "/openapi.json", to: "documents.show"
