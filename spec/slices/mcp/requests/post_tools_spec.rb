@@ -302,6 +302,14 @@ RSpec.describe "MCP post tools", type: :request do
       expect(admin_save_published(published, slug: "goodbye")).to eq(admin_error(:slug, "locked"))
     end
 
+    it "refuses a mention that names nobody in the directory, as the admin does", :aggregate_failures do
+      call_tool("update_post", id: draft.id, syndication_body: "hi @{grace}")
+
+      expect(message).to eq("syndication_body mentions someone who is not in the directory")
+      expect(admin_save("/admin/posts/#{draft.id}", title: "Hello", slug: "hello", syndication_body: "hi @{grace}"))
+        .to eq(admin_error(:syndication_body, "unknown_mention"))
+    end
+
     it "leaves the post as it stands when it refuses" do
       call_tool("update_post", id: draft.id, body: "two", og_image_url: "card.png")
 
@@ -357,6 +365,14 @@ RSpec.describe "MCP post tools", type: :request do
 
       expect(message).to eq("syndication_body runs over a network's limit")
       expect(admin_publish(draft)).to eq(admin_error(:syndication_body, "too_long"))
+    end
+
+    it "refuses a mention that names nobody in the directory" do
+      draft = create(:post, :draft, syndication_enabled: true, syndication_body: "hi @{grace}",
+                                    syndication_targets: %w[mastodon])
+      call_tool("publish_post", id: draft.id)
+
+      expect(message).to eq("syndication_body mentions someone who is not in the directory")
     end
 
     it "leaves a refused post a draft" do

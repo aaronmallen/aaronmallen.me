@@ -26,6 +26,7 @@ module Admin
             syndication_body: {
               "announcement_too_long" => ".syndication_body.announcement_too_long",
               "too_long" => ".syndication_body.too_long",
+              "unknown_mention" => ".syndication_body.unknown_mention",
             },
             tags: { "format" => ".tags.format" },
             title: { "blank" => ".title.blank" },

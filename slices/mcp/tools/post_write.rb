@@ -24,6 +24,7 @@ module MCP
         Blog::Contract::SKIPPED => "names a time the clocks skip in Chicago",
         "taken" => "belongs to another post",
         "too_long" => "runs over a network's limit",
+        "unknown_mention" => "mentions someone who is not in the directory",
       }.freeze
 
       FIELD_COMPLAINTS = {

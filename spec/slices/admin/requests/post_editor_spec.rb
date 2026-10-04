@@ -532,7 +532,20 @@ RSpec.describe "Admin post editor", type: :request do
           syndication_targets: %w[mastodon bluesky] }
       end
 
+      def ada
+        create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
+                        bluesky_did: "did:plc:ada")
+      end
+
       def bluesky_only = { syndication_targets: %w[bluesky] }
+
+      def delivered
+        stub_bluesky
+        Social::Jobs::SyndicatePost.drain
+        Social::Jobs::DeliverSocialPost.new.perform(queued.first.id, "bluesky")
+
+        bluesky_writes.first.dig("record", "text")
+      end
 
       def queued
         Social::Jobs::SyndicatePost.drain
@@ -726,6 +739,30 @@ RSpec.describe "Admin post editor", type: :request do
         expect(field_error)
           .to eq(i18n.t("ui.components.posts.field_error.syndication_body.announcement_too_long"))
         expect(post_repo.all).to be_empty
+      end
+
+      it "refuses an announcement that fits Bluesky only before its mention expands", :aggregate_failures do
+        ada
+        save(intent: "publish", title: "Hello", **card, **bluesky_only, syndication_body: "#{'a' * 290} @{ada}")
+
+        expect(last_response.status).to eq(422)
+        expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
+        expect(post_repo.all).to be_empty
+      end
+
+      it "publishes and delivers an announcement that fits once its mention expands", :aggregate_failures, :commits do
+        ada
+        save(intent: "publish", title: "Hello", **card, **bluesky_only, syndication_body: "#{'a' * 280} @{ada}")
+
+        expect(post_repo.all.last.status).to eq("published")
+        expect(delivered).to eq("#{'a' * 280} @ada.bsky.social")
+      end
+
+      it "refuses a mention that names nobody in the directory", :aggregate_failures do
+        save(title: "Hello", **card, syndication_body: "hi @{grace}")
+
+        expect(last_response.status).to eq(422)
+        expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.unknown_mention"))
       end
     end
 

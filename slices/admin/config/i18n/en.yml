@@ -911,6 +911,7 @@ en:
           syndication_body:
             announcement_too_long: "The title and link that go out are over the limit for a network you picked."
             too_long: "The cross-post is over the limit for a network you picked."
+            unknown_mention: "A mention names nobody in the directory."
           tags:
             format: "Use lowercase letters, numbers and single dashes in each tag."
           title:

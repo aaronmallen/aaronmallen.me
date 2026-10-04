@@ -8,10 +8,12 @@ module Posts
       EDIT_NOTE_LIMIT = 500
       PUBLISH = Blog::Types::PostIntent["publish"]
       TOO_LONG = "too_long"
+      UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
         announcement: "operations.compose_announcement",
         link_tagger: "social.links.tagger",
+        mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
       ]
 
@@ -46,13 +48,19 @@ module Posts
         key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
       end
 
+      rule(:syndication_body) do
+        key.failure(UNKNOWN_MENTION) if mention_directory.call(value).unknown(value).any?
+      end
+
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|
         next unless context[:intent] == PUBLISH && values[:syndication_enabled]
+        next if rule_error?(:syndication_body)
 
         typed = Blog::Types::Text[values[:syndication_body]]
         body = announcement.compose(body: typed, slug: values[:slug], title: values[:title])
+        directory = mention_directory.call(body)
         fits = values[:syndication_targets].to_a.all? do |name|
-          networks.fetch(name).within_limit?(link_tagger.call(body, name))
+          networks.fetch(name).within_limit?(directory.expand(link_tagger.call(body, name), name).text)
         end
         next if fits
 
