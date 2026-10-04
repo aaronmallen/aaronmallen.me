@@ -15,11 +15,17 @@ module Tasks
 
       def see(task_id, at) = task_sources.see(task_id, at)
 
-      def unseen_tasks = tasks.combine(:source, :tags).open.where(id: task_sources.unseen.task_ids).newest_first.to_a
+      def unseen_task_count = unseen.count
+
+      def unseen_tasks = unseen.combine(:source, :tags).newest_first.to_a
 
       def with_sync_lock(provider, &)
         task_sources.with_advisory_lock(SYNC_LOCKS.fetch(provider), busy: Failure(:lock_busy), &)
       end
+
+      private
+
+      def unseen = tasks.open.where(id: task_sources.unseen.task_ids)
     end
   end
 end

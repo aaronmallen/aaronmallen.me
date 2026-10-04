@@ -5,7 +5,7 @@ module Social
     class PendingWebmentions
       include Deps[webmention_repo: "repos.webmention_repo"]
 
-      def call(limit:) = webmention_repo.pending(limit:)
+      def call(limit: nil) = webmention_repo.pending(limit:)
     end
   end
 end

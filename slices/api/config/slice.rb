@@ -8,6 +8,8 @@ module API
 
     config.actions.csrf_protection = false
 
+    import keys: %w[queries.count_with_status queries.unread_messages], from: :contact
+
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
     import keys: %w[queries.calendar_posts], from: :posts
@@ -17,7 +19,9 @@ module API
       queries.journal_days_between queries.journal_entries_between queries.journal_entry_by_id
     ], from: :record
 
-    import keys: %w[queries.calendar_social_posts], from: :social
+    import keys: %w[
+      queries.calendar_social_posts queries.pending_webmention_count queries.pending_webmentions
+    ], from: :social
 
     import keys: %w[
       operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
@@ -25,6 +29,7 @@ module API
       operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
       operations.schedule_task operations.start_task operations.unlink_task queries.counted_sprints_between
       queries.find_tasks queries.sprints_between queries.task_by_id queries.task_comments queries.tasks_in_sprint
+      queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
     export %w[
@@ -35,7 +40,8 @@ module API
       endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_task endpoints.reopen_task
       endpoints.reorder_task endpoints.save_task endpoints.schedule_task endpoints.start_task
       endpoints.unlink_records endpoints.unlink_task endpoints.update_journal_entry
-      operations.mint_token operations.revoke_token queries.calendar queries.live_tokens
+      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
+      queries.live_tokens
     ]
   end
 end
