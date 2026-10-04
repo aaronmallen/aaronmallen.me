@@ -4,8 +4,6 @@ module Public
   module Actions
     module Tags
       class Show < Action
-        MOVED_PERMANENTLY = 301
-
         include Deps[
           "settings",
           public_projects_by_tag: "projects.queries.public_by_tag",
@@ -17,7 +15,7 @@ module Public
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { not_found(response) }
           page = requested_page(request, response, settings.page_size[:public])
-          redirect_to_own_path(request, response, tag, page)
+          redirect_to_own_path(request, response, :tag, page, tag:)
           expose_listing(response, tag, page)
         end
 
@@ -31,12 +29,6 @@ module Public
           response[:tag] = tag
           response[:posts] = posts
           response[:projects] = projects
-        end
-
-        def redirect_to_own_path(request, response, tag, page)
-          return if request.path == routes.path(:tag, tag:)
-
-          response.redirect_to(routes.path(:tag, tag:, **page.query), status: MOVED_PERMANENTLY)
         end
       end
     end

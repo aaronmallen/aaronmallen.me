@@ -10,8 +10,8 @@ module Blog
       def for_owner(id) = where(owner_key => id)
 
       def replace(id, tag_ids)
-        for_owner(id).delete
-        add(id, tag_ids)
+        for_owner(id).exclude(tag_id: tag_ids).delete
+        add(id, tag_ids - for_owner(id).pluck(:tag_id))
       end
     end
   end

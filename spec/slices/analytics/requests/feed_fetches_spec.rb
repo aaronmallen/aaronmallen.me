@@ -106,6 +106,13 @@ RSpec.describe "Feed fetch counting", type: :request do
       expect(counts).to contain_exactly(["/writing.atom", 1], ["/writing/tags/ruby.atom", 1])
     end
 
+    it "counts a tag feed under its own path once after a move from another case" do
+      fetch("/writing/tags/Ruby.atom")
+      fetch(last_response.location)
+
+      expect(readers.map { it.values_at(1, 2) }).to eq([["/writing/tags/ruby.atom", 1]])
+    end
+
     it "keeps the daily hash, not the address" do
       fetch
 
@@ -155,6 +162,12 @@ RSpec.describe "Feed fetch counting", type: :request do
   describe "a fetch that finds no feed" do
     it "adds nothing for a tag no post has" do
       fetch("/writing/tags/nothing.atom")
+
+      expect(readers).to be_empty
+    end
+
+    it "adds nothing for a tag feed spelled in another case" do
+      fetch("/writing/tags/Ruby.atom")
 
       expect(readers).to be_empty
     end

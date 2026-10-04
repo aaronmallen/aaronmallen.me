@@ -6,6 +6,7 @@ module Public
     ANY_MEDIA_TYPE = "*/*"
     FORBIDDEN = 403
     HTTP_DATE_FORMATS = %i[httpdate rfc2822].freeze
+    MOVED_PERMANENTLY = 301
     NOT_MODIFIED = 304
     NOT_MODIFIED_HEADERS = %w[cache-control etag vary].freeze
     OK = 200
@@ -76,6 +77,12 @@ module Public
       Time.public_send(format, sent)
     rescue ArgumentError
       nil
+    end
+
+    def redirect_to_own_path(request, response, name, page, **params)
+      return if request.path == routes.path(name, **params)
+
+      response.redirect_to(routes.path(name, **params, **page.query), status: MOVED_PERMANENTLY)
     end
 
     def refuse_cross_site(request, _response)

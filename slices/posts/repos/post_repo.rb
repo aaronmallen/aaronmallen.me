@@ -58,6 +58,8 @@ module Posts
 
       def last_deleted_at = post_deletions.last_deleted_at
 
+      def last_untagged_at = post_tag_removals.last_removed_at
+
       def locked_by_id(id) = by_id_for_update(id) && by_id(id)
 
       def next_published(post) = with_tags.published.newer_than(post).oldest_first.limit(1).one

@@ -313,11 +313,19 @@ RSpec.describe "Feeds", type: :request do
       expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
     end
 
-    it "finds the tag whatever case the url uses" do
+    it "moves a url that spells the tag in another case to the tag's own feed", :aggregate_failures do
       publish("hello", 1, tags: %w[ruby])
       get "/writing/tags/RUBY.atom"
 
-      expect(entry_ids).to eq(%w[https://aaronmallen.me/writing/hello])
+      expect(last_response.status).to eq(301)
+      expect(last_response.location).to eq("/writing/tags/ruby.atom")
+    end
+
+    it "keeps the page when it moves a url to the tag's own feed" do
+      publish("hello", 1, tags: %w[ruby])
+      get "/writing/tags/Ruby.atom?page=2"
+
+      expect(last_response.location).to eq("/writing/tags/ruby.atom?page=2")
     end
 
     it "returns 404 for a url that is no tag" do
@@ -428,10 +436,17 @@ RSpec.describe "Feeds", type: :request do
       get path, {}, headers
     end
 
+    def remove_tag(name)
+      tag_repo = Tags::Slice["repos.tag_repo"]
+      tag_repo.delete(tag_repo.all_in("public").find { it.name == name }.id)
+    end
+
     def rename_tag(from, to)
       tag_repo = Tags::Slice["repos.tag_repo"]
       tag_repo.update(tag_repo.all_in("public").find { it.name == from }.id, name: to)
     end
+
+    def retag(slug, names) = post_repo.replace_tags(post_repo.published_by_slug(slug).id, names)
 
     def revise_note = Posts::Slice["repos.post_edit_repo"].update(note.id, note: "fixed two typos")
 
@@ -539,6 +554,41 @@ RSpec.describe "Feeds", type: :request do
 
           expect(last_response.status).to eq(200)
           expect(feed.xpath("/feed/entry/category").map { it[:term] }).to include("rails")
+        end
+
+        it "answers 200 to a reader with only the time once the newest post loses a tag", :aggregate_failures do
+          sent = validators
+          retag("hello", %w[hanami])
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(feed.xpath("/feed/entry[category/@term='ruby']/id").map(&:text)).to eq(post_urls("older"))
+        end
+
+        it "answers 200 without a tag to a reader with only the time once it is deleted", :aggregate_failures do
+          sent = validators
+          remove_tag("hanami")
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(200)
+          expect(feed.xpath("/feed/entry/category").map { it[:term] }).not_to include("hanami")
+        end
+
+        it "answers 304 to a reader that sends only the time back after a post keeps its tags" do
+          sent = validators
+          retag("hello", %w[hanami ruby])
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(304)
+        end
+
+        it "answers 304 to a reader that sends only the time back after a draft loses a tag" do
+          sent = validators
+          draft = create(:post, :draft, tags: %w[ruby secret])
+          post_repo.replace_tags(draft.id, %w[secret])
+          poll(path, last_modified: sent[:last_modified])
+
+          expect(last_response.status).to eq(304)
         end
 
         it "answers 304 to a reader that sends only the time back after a tag off the page is renamed" do

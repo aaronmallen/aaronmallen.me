@@ -471,6 +471,24 @@ $$;
 
 
 --
+-- Name: post_tags_record_removal(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.post_tags_record_removal() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM posts WHERE id = OLD.post_id AND status = 'published') THEN
+    INSERT INTO post_tag_removals (post_id, tag_id) VALUES (OLD.post_id, OLD.tag_id)
+      ON CONFLICT (post_id, tag_id) DO UPDATE SET removed_at = EXCLUDED.removed_at;
+  END IF;
+
+  RETURN OLD;
+END;
+$$;
+
+
+--
 -- Name: posts_default_webmentions_enabled(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -2157,6 +2175,17 @@ CREATE TABLE public.post_reader_hashes (
 
 
 --
+-- Name: post_tag_removals; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.post_tag_removals (
+    post_id integer NOT NULL,
+    tag_id integer NOT NULL,
+    removed_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+
+--
 -- Name: post_tags; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3413,6 +3442,14 @@ ALTER TABLE ONLY public.post_reader_hashes
 
 
 --
+-- Name: post_tag_removals post_tag_removals_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.post_tag_removals
+    ADD CONSTRAINT post_tag_removals_pkey PRIMARY KEY (post_id, tag_id);
+
+
+--
 -- Name: post_tags post_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4518,6 +4555,13 @@ CREATE TRIGGER journal_entries_drop_record_links AFTER DELETE ON public.journal_
 
 
 --
+-- Name: post_tags post_tags_record_removal; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_tags_record_removal AFTER DELETE ON public.post_tags FOR EACH ROW EXECUTE FUNCTION public.post_tags_record_removal();
+
+
+--
 -- Name: posts posts_default_webmentions_enabled; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -5095,4 +5139,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261004000404_create_review_notes.rb'),
 ('20261004000405_move_review_notes_out_of_the_journal.rb'),
 ('20261004000414_count_review_carries_from_task_events.rb'),
+('20261004000419_create_post_tag_removals.rb'),
 ('20261004000461_add_single_author_hosts_to_webmention_settings.rb');
