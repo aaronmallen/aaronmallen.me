@@ -29,7 +29,7 @@ module Admin
         today = Blog::TimeZone.today(now)
         planned = sprints_after.call(today)
         filters = { query: Blog::Types::TrimmedText[query] }
-        tasks = step listed(tab, sprint, planned, page, SearchQuery.parse(filters[:query], fields: FIELDS))
+        tasks = step listed(tab, sprint, planned, page, Blog::SearchQuery.parse(filters[:query], fields: FIELDS))
 
         {
           counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,

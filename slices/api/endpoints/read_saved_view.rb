@@ -1,0 +1,91 @@
+# frozen_string_literal: true
+
+module API
+  module Endpoints
+    class ReadSavedView < Endpoint
+      BAD_DAY = "give continue_to as a day, such as 2026-01-01"
+      NO_SPRINT = "could not open today's sprint"
+      TASKS = Blog::Types::SavedViewScreen["tasks"]
+
+      SERIALIZERS = {
+        Blog::Types::SavedViewScreen["activity"] => Serializers::Activity,
+        Blog::Types::SavedViewScreen["journal"] => Serializers::JournalEntry,
+        Blog::Types::SavedViewScreen["posts"] => Serializers::Post,
+        TASKS => Serializers::Task,
+      }.freeze
+
+      SCHEMA = {
+        additionalProperties: false,
+        properties: {
+          id: SavedViews::ID,
+          page: Blog::Paging::PAGE.merge(description: "the page to read on a tasks or posts view, counting from 1"),
+          continue_to: {
+            type: "string",
+            description: "on a journal or activity view, the continue_to of the last answer, to read the next window",
+          },
+        },
+        required: ["id"],
+      }.freeze
+
+      REPLY = Schema.object(
+        {
+          saved_view: Serializers::SavedView.reference,
+          count: Schema::INTEGER,
+          partial: Schema::BOOLEAN,
+          records: Schema.list({ anyOf: SERIALIZERS.values.map(&:reference) }),
+        },
+        optional: { next_page: Schema::INTEGER, continue_to: Schema::DAY },
+      ).freeze
+
+      include Deps[
+        saved_view_activity: "queries.saved_view_activity",
+        saved_view_by_id: "saved_views.queries.by_id",
+        saved_view_journal: "queries.saved_view_journal",
+        saved_view_posts: "queries.saved_view_posts",
+        saved_view_tasks: "queries.saved_view_tasks",
+      ]
+
+      def handle(id:, page: 1, continue_to: nil)
+        cursor = continue_to && Blog::TimeZone.parse_day(continue_to)
+        return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
+
+        view = saved_view_by_id.call(id)
+        return not_found(SavedViews.missing(id)) if view.nil?
+
+        case reader(view.screen).call(view.filters, page:, continue_to: cursor)
+        in Success(found) then Success(answered(view, found))
+        else failed(NO_SPRINT)
+        end
+      end
+
+      private
+
+      def answered(view, found)
+        rows = found.fetch(:rows)
+
+        {
+          saved_view: serialized(Serializers::SavedView, view),
+          count: rows.length,
+          **found.slice(:partial, :next_page, :continue_to),
+          records: records(view.screen, rows, found),
+        }
+      end
+
+      def reader(screen)
+        {
+          Blog::Types::SavedViewScreen["activity"] => saved_view_activity,
+          Blog::Types::SavedViewScreen["journal"] => saved_view_journal,
+          Blog::Types::SavedViewScreen["posts"] => saved_view_posts,
+          TASKS => saved_view_tasks,
+        }.fetch(screen)
+      end
+
+      def records(screen, rows, found)
+        return serialized(SERIALIZERS.fetch(screen), rows) unless screen == TASKS
+
+        sprint_on = found.fetch(:sprint_on)
+        rows.map { serialized(Serializers::Task, it, sprint_on: sprint_on.fetch(it.id)) }
+      end
+    end
+  end
+end

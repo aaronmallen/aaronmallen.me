@@ -88,6 +88,7 @@ module API
       ["create_task_tag_rule", "post", "/task_tag_rules", CREATED],
       ["update_task_tag_rule", "patch", "/task_tag_rules/{id}", OK],
       ["delete_task_tag_rule", "delete", "/task_tag_rules/{id}", OK],
+      ["read_saved_view", "get", "/saved_views/{id}/records", OK],
       ["read_time_report", "get", "/time_report", OK],
       ["approve_webmentions", "post", "/webmentions/bulk/approve", OK],
       ["ignore_webmentions", "post", "/webmentions/bulk/ignore", OK],

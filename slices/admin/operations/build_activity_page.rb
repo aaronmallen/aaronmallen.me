@@ -16,7 +16,7 @@ module Admin
 
       def call(from: nil, to: nil, types: nil, query: nil, day: nil)
         filters = filters(from, to, types, query)
-        search = filters.merge(**SearchQuery.parse(filters[:text], fields: FIELDS))
+        search = filters.merge(**Blog::SearchQuery.parse(filters[:text], fields: FIELDS))
         counts = activity_counts.call(**search.slice(:from, :to, :repos, :text, :tags))
 
         {

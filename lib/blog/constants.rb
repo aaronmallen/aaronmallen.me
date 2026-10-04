@@ -5,6 +5,9 @@ module Blog
     include Dry::Core::Constants
 
     ACTIVITY_RANGES = [7, 30, 90].freeze
+    ACTIVITY_SCREEN_KINDS = %w[
+      commit post journal social task session comment decision decision_comment webmention
+    ].freeze
     CHECKED = "1"
     GAP = :gap
     GITHUB_COMMIT_URL = "https://github.com/%s/commit/%s"

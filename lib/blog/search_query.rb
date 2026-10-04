@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Admin
+module Blog
   module SearchQuery
     FIELDS = {
       repo: [:repos, Blog::Types::Normalized::Repo],

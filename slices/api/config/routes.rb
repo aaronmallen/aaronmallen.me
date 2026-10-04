@@ -81,6 +81,7 @@ module API
     get "/saved_views", to: "saved_views.index"
     post "/saved_views", to: "saved_views.create"
     patch "/saved_views/:id", to: "saved_views.update"
+    get "/saved_views/:id/records", to: "saved_views.records"
     delete "/saved_views/:id", to: "saved_views.destroy"
 
     get "/task_tag_rules", to: "task_tag_rules.index"

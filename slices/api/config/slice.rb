@@ -8,7 +8,9 @@ module API
 
     config.actions.csrf_protection = false
 
-    import keys: %w[operations.snooze_attention queries.review queries.stalled_list], from: :activity
+    import keys: %w[
+      operations.snooze_attention queries.activity_between queries.review queries.stalled_list
+    ], from: :activity
 
     import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact
 
@@ -22,11 +24,11 @@ module API
 
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
-    import keys: %w[operations.act_on_posts queries.calendar_posts], from: :posts
+    import keys: %w[operations.act_on_posts queries.by_filter queries.calendar_posts], from: :posts
 
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.update_journal_entry
-      queries.journal_days_between queries.journal_entries_between queries.journal_entry_by_id
+      queries.journal_days queries.journal_days_between queries.journal_entries_between queries.journal_entry_by_id
     ], from: :record
 
     import keys: %w[
@@ -48,8 +50,9 @@ module API
       operations.mark_task_seen operations.move_task operations.plan_sprint operations.reopen_task
       operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
       operations.set_task_total operations.start_task operations.unlink_task queries.counted_sprints_between
-      queries.find_tasks queries.sprints_between queries.task_by_id queries.task_comments queries.task_tag_rules
-      queries.task_timeline queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
+      queries.find_tasks queries.list_finished_tasks queries.list_tasks queries.planned_tasks queries.sprints_after
+      queries.sprints_between queries.task_by_id queries.task_comments queries.task_tag_rules queries.task_timeline
+      queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
     export %w[
@@ -66,10 +69,11 @@ module API
       endpoints.list_task_tag_rules endpoints.list_tasks endpoints.mark_messages_read endpoints.mark_messages_unread
       endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
       endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.read_current_sprint
-      endpoints.read_decision endpoints.read_journal_entry endpoints.read_review endpoints.read_task
-      endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
-      endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.set_task_total
-      endpoints.snooze_attention endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
+      endpoints.read_decision endpoints.read_journal_entry endpoints.read_review endpoints.read_saved_view
+      endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
+      endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search
+      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
+      endpoints.tag_posts endpoints.tag_tasks
       endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_task_tag_rule
       endpoints.update_work_session operations.mint_token operations.revoke_token queries.calendar queries.inbox
