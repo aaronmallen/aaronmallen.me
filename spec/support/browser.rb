@@ -52,6 +52,17 @@ module Spec
 
     def admin_session_cookie = Spec::AdminSession.cookie
 
+    def axe_breaches
+      execute_script(Axe::Configuration.instance.jslib)
+
+      using_wait_time(10) { evaluate_async_script(<<~JS, %w[wcag2a wcag2aa wcag21a wcag21aa wcag22aa]) }
+        const done = arguments[arguments.length - 1];
+        axe.run(document, { runOnly: { type: 'tag', values: arguments[0] } }).then(({ violations }) => done(
+          violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id} at ${node.target.join(' ')}: ${node.failureSummary}`))
+        ));
+      JS
+    end
+
     def cookie(name)
       page.driver.cookies[name]&.value
     end

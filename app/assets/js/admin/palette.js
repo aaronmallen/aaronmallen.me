@@ -27,6 +27,7 @@ function setupDialog(dialog) {
   );
   const sources = [...dialog.querySelectorAll("[data-palette-from]")];
   const all = dialog.querySelector("[data-palette-all]");
+  const views = dialog.querySelector("[data-palette-views]");
   const filled = new Set();
   let options = [...dialog.querySelectorAll(OPTION)];
   let task = null;
@@ -109,6 +110,19 @@ function setupDialog(dialog) {
     }
   };
 
+  const fillViews = () => {
+    if (!views || filled.has(views)) return;
+
+    filled.add(views);
+    fetchJSON(views.dataset.paletteViews)
+      .then(({ rows }) => {
+        views.append(...rows.map((row) => viewRow(views, row)));
+        options = [...dialog.querySelectorAll(OPTION)];
+        filter();
+      })
+      .catch(() => filled.delete(views));
+  };
+
   const stop = () => {
     clearTimeout(timer);
     controller?.abort();
@@ -145,6 +159,7 @@ function setupDialog(dialog) {
     task = taskOnScreen();
     aim(options, task);
     if (!task) fill();
+    fillViews();
     stop();
     asked = "";
     show([]);
@@ -249,6 +264,7 @@ function foundRow(group, { id, title, match, date, href }) {
 
 function matches(option, text) {
   if (option.hasAttribute("data-palette-found") || option.hasAttribute("data-palette-all")) return text !== "";
+  if (option.hasAttribute("data-palette-typed")) return text !== "" && option.dataset.paletteText.includes(text);
 
   return text === "" || option.dataset.paletteText.includes(text);
 }
@@ -302,4 +318,16 @@ function taskOnScreen() {
   const scope = panel?.open ? panel : document.querySelector("main");
 
   return scope?.querySelector(TASK) ?? null;
+}
+
+function viewRow(group, { id, title, screen, href }) {
+  const row = group.querySelector("[data-palette-view-row]").content.firstElementChild.cloneNode(true);
+
+  row.id = `command-palette-saved-view-${id}`;
+  row.dataset.paletteHref = href;
+  row.dataset.paletteText = title.toLowerCase();
+  row.querySelector(".pal-r-label").textContent = title;
+  row.querySelector(".pal-r-sub").textContent = screen;
+
+  return row;
 }

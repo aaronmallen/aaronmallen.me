@@ -637,6 +637,106 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "the Saved views group" do
+    def asks = request_gate.count("/admin/saved-views/palette")
+
+    def group = "[aria-labelledby='command-palette-group-saved-views']"
+
+    let!(:drafts) { create(:saved_view, screen: "posts", name: "Stale drafts", filters: { "status" => "draft" }) }
+
+    before do
+      create(:saved_view, screen: "tasks", name: "Next up", filters: { "filter" => "next" })
+      visit "/admin"
+    end
+
+    it "asks for no view until the palette opens", :aggregate_failures do
+      expect(asks).to eq(0)
+
+      open_palette
+      page.assert_selector("#command-palette-saved-view-#{drafts.id}", visible: :all)
+
+      expect(asks).to eq(1)
+    end
+
+    it "holds the views back until you type" do
+      open_palette
+      page.assert_selector("#command-palette-saved-view-#{drafts.id}", visible: :all)
+
+      expect(page).to have_no_css(group)
+    end
+
+    describe "typing part of a view's name" do
+      before do
+        open_palette
+        query.send_keys(*"stale".chars)
+      end
+
+      it "lists the view under Saved views with its screen", :aggregate_failures do
+        within(group) do
+          expect(page).to have_css(".pal-g", text: /saved views/i)
+          expect(page).to have_css(".pal-r", text: /Stale drafts\s*posts/)
+        end
+      end
+
+      it "leaves out the views that do not match" do
+        expect(page).to have_no_css(".pal-r", text: "Next up")
+      end
+
+      it "opens the view's screen with its filters set on enter" do
+        page.assert_selector(".pal-r", text: "Stale drafts")
+        query.send_keys(:enter)
+
+        expect(page).to have_current_path("/admin/posts?status=draft")
+      end
+    end
+
+    describe "after deleting a view and reloading" do
+      before do
+        SavedViews::Slice["repos.saved_view_repo"].delete(drafts.id)
+        visit "/admin"
+        open_palette
+        query.send_keys(*"next".chars)
+        page.assert_selector(".pal-r", text: "Next up")
+        query.send_keys(*Array.new(4, :backspace), *"stale".chars)
+      end
+
+      it "drops the deleted view" do
+        expect(page).to have_no_css(".pal-r", text: "Stale drafts")
+      end
+    end
+
+    describe "on a phone" do
+      before do
+        page.driver.resize(375, 800)
+        visit "/admin"
+        click_button(class: "slash")
+        query.send_keys(*"stale".chars)
+      end
+
+      it "fits without scrolling the page sideways", :aggregate_failures do
+        expect(page).to have_css(".pal-r", text: "Stale drafts")
+        expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+      end
+
+      it "opens the view where you tap" do
+        find(".pal-r", text: "Stale drafts").click
+
+        expect(page).to have_current_path("/admin/posts?status=draft")
+      end
+    end
+
+    %w[light dark].each do |scheme|
+      it "passes axe in #{scheme} mode" do
+        emulate_color_scheme(scheme)
+        open_palette
+        query.send_keys(*"stale".chars)
+        page.assert_selector(".pal-r", text: "Stale drafts")
+
+        expect(axe_breaches).to be_empty
+      end
+    end
+  end
+
   describe "pressing escape" do
     before do
       open_palette

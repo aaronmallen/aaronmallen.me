@@ -756,7 +756,7 @@ en:
           results:
             one: "{count} result"
             other: "{count} results"
-          results_label: "Sections, actions and records"
+          results_label: "Sections, actions, saved views and records"
           search: "Search"
           see_all: "See all results"
           waiting:
@@ -764,6 +764,8 @@ en:
             other: "%{count} waiting"
         palette_row:
           jump: "Go to %{section}"
+        palette_saved_views:
+          heading: "Saved views"
         sections:
           activity: "activity"
           analytics: "analytics"

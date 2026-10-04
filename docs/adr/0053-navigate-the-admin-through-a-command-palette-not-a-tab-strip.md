@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -76,6 +76,13 @@ route the first time the palette opens with no task on screen, and clones one ro
 what [ADR 0091][0091] set for such routes: it reads the session alone, answers 401 without one, and answers `no-store`.
 The layout still reads no task. A posted row sends the page's own address as `return_to`, and start, complete and stop
 redirect there when it is an admin path, so I stay on the screen I ran it from.
+
+Since #320 a Saved views group sits below the actions. It stays hidden until I type, then lists each saved view
+whose name holds the query, with its screen beside it, and opens the screen with the view's filters set.
+`palette.js` fetches `GET /admin/saved-views/palette` the first time the palette opens on a page and clones one row
+per view from the group's `template`. The route keeps what [ADR 0091][0091] set: it reads the session alone, answers
+401 without one, and answers `no-store`. The layout reads no saved view, so a view deleted elsewhere leaves the
+palette on the next page.
 
 A section is a row in `Admin::Operations::ListSections::ALL`: its name, group, icon and route, in the order the
 palette lists them. A new section joins by adding its row and the locale keys `Structs::Section` reads for it. A row

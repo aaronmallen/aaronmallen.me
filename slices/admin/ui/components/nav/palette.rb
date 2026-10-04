@@ -112,21 +112,23 @@ module Admin
               id: LIST_ID, class: "pal-l", role: "listbox",
               aria: { label: t(".results_label") }, data: { palette_list: true },
             ) do
-              @sections.group_by(&:group).each_value do |sections|
-                row_group("command-palette-group-#{sections.first.group}", t(sections.first.group_key)) do
-                  sections.each { section_row(it) }
-                end
-              end
+              section_groups
               action_group
+              PaletteSavedViews()
               KINDS.each { |kind, icon| kind_group(kind, icon) }
               see_all_group
             end
           end
 
           def row_group(id, heading, data: Blog::Constants::EMPTY_HASH, &)
-            div(class: "pal-grp", role: "group", aria: { labelledby: id }, data: { palette_group: true, **data }) do
-              p(id:, class: "pal-g") { heading }
-              yield if block_given?
+            PaletteGroup(id:, heading:, data:, &)
+          end
+
+          def section_groups
+            @sections.group_by(&:group).each_value do |sections|
+              row_group("command-palette-group-#{sections.first.group}", t(sections.first.group_key)) do
+                sections.each { section_row(it) }
+              end
             end
           end
 

@@ -17,6 +17,12 @@ module Admin
         prop :views, Blog::Types::Array
         prop :filters, Blog::Types::Hash
 
+        def self.href(base, filters)
+          query = ::Rack::Utils.build_nested_query(filters)
+
+          query.empty? ? base : "#{base}?#{query}"
+        end
+
         def view_template
           div(class: "saved-views", role: "group", aria: { label: t(".label") }) do
             ul(class: "saved-views-list") { @views.each { item(it) } } unless @views.empty?
@@ -44,12 +50,7 @@ module Admin
 
         def return_to = screen_path(@filters)
 
-        def screen_path(filters)
-          query = ::Rack::Utils.build_nested_query(filters)
-          base = path(SCREENS.fetch(@screen))
-
-          query.empty? ? base : "#{base}?#{query}"
-        end
+        def screen_path(filters) = self.class.href(path(SCREENS.fetch(@screen)), filters)
       end
     end
   end

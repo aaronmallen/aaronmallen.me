@@ -17,6 +17,7 @@ module Admin
           prop :href, Blog::Types::String.optional, default: nil
           prop :dialog, Blog::Types::String.optional, default: nil
           prop :found, Blog::Types::Bool, default: false
+          prop :typed, Blog::Types::Bool, default: false
           prop :all, Blog::Types::String.optional, default: nil
           prop :post, Blog::Types::Bool, default: false
           prop :needs, Blog::Types::String.optional, default: nil
@@ -26,8 +27,8 @@ module Admin
             div(
               id: @id, class: "pal-r", role: "option", aria: { selected: "false" },
               data: {
-                palette_option: true, palette_text: @text, palette_href: @href,
-                palette_dialog: @dialog, palette_found: (true if @found), palette_post: (true if @post),
+                palette_option: true, palette_text: @text, palette_href: @href, palette_dialog: @dialog,
+                palette_found: (true if @found), palette_typed: (true if @typed), palette_post: (true if @post),
                 palette_needs: @needs, palette_all: @all, **jump_key,
               },
             ) do

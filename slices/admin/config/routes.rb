@@ -135,6 +135,7 @@ module Admin
     get "/review", to: "review.show", as: :review
     post "/review/note", to: "review.save_note", as: :save_review_note
     post "/saved-views", to: "saved_views.create", as: :create_saved_view
+    get "/saved-views/palette", to: "saved_views.palette", as: :saved_views_palette
     post "/saved-views/:id", to: "saved_views.update", as: :update_saved_view, id: ID
     post "/saved-views/:id/change", to: "saved_views.change", as: :change_saved_view, id: ID
     post "/saved-views/:id/delete", to: "saved_views.destroy", as: :delete_saved_view, id: ID

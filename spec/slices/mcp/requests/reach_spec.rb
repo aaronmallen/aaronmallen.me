@@ -32,6 +32,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.list_actions" => "lists the admin palette's actions",
       "admin.operations.list_activity_events" => "words the admin's activity screen; read_activity reads the feed",
       "admin.operations.list_networks" => "lists networks for the admin's pickers",
+      "admin.operations.list_palette_saved_views" => "lists views for the admin palette; list_saved_views reads them",
       "admin.operations.list_record_links" => "fills the admin's Linked section; #326 adds list_links",
       "admin.operations.list_saved_views" => "lists a screen's saved views in the admin; list_saved_views reads them",
       "admin.operations.list_sections" => "lists the admin menu's sections",

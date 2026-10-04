@@ -981,6 +981,10 @@
 @utility pal-r-sub {
   @apply shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-badge whitespace-nowrap text-ink-muted;
 
+  :where(.pal-r[aria-selected="true"]) > & {
+    @apply text-ink;
+  }
+
   &.warn {
     @apply border-mk-pink text-mk-pink-text;
   }

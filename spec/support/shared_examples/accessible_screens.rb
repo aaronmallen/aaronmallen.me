@@ -3,14 +3,7 @@
 RSpec.shared_examples "accessible screens" do
   def breaches(screen)
     show(screen)
-    execute_script(Axe::Configuration.instance.jslib)
-
-    using_wait_time(10) { evaluate_async_script(<<~JS, %w[wcag2a wcag2aa wcag21a wcag21aa wcag22aa]) }
-      const done = arguments[arguments.length - 1];
-      axe.run(document, { runOnly: { type: 'tag', values: arguments[0] } }).then(({ violations }) => done(
-        violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id} at ${node.target.join(' ')}: ${node.failureSummary}`))
-      ));
-    JS
+    axe_breaches
   end
 
   def mark_stops(screen)
