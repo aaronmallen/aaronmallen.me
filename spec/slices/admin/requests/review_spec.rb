@@ -9,6 +9,11 @@ RSpec.describe "Admin review", type: :request do
 
   def card(name) = page.find("#review-#{name}")
 
+  def carry(task, from)
+    create(:task_event, :carried, task_id: task.id, from_sprint_on: from, to_sprint_on: from + 1,
+                                  occurred_at: at(from + 1))
+  end
+
   def close(kind, day, title:, chosen: nil)
     decision = create(:decision, title:)
     option_id = chosen && create(:decision_option, decision_id: decision.id, title: chosen).id
@@ -18,8 +23,8 @@ RSpec.describe "Admin review", type: :request do
 
   def fill(day, title: "Finish the review screen")
     done = create(:task, :done, title:, completed_at: at(day), worked_seconds: 5400)
-    sprint = create(:sprint, sprint_date: day)
-    carried = create(:task, list: nil, sprint_id: sprint.id, carried_count: 3, title: "Call the accountant")
+    carried = create(:task, :in_sprint, title: "Call the accountant")
+    [day - 2, day - 1, day].each { carry(carried, it) }
     create(:work_session, task_id: done.id, started_at: at(day, 9), ended_at: at(day, 10))
     decision = close("resolved", day, title: "Pick a queue for #{title}", chosen: "Sidekiq")
     { done:, carried:, decision: }

@@ -5,7 +5,7 @@ module Activity
     class ReviewRepo < Blog::DB::Repo
       RECORDS = %w[post social journal].map { Blog::Types::ActivityKind[it] }.freeze
 
-      def carried(from:, to:) = review_tasks.carried_between(from, to).to_a
+      def carried(from:, to:) = review_carries.per_task_between(from, to).to_a
 
       def commits(from:, to:)
         activities.between(from, to).commit_totals_by_repo.to_a.to_h { [it.repo, it.to_h.except(:repo)] }

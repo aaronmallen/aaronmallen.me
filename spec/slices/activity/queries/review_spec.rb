@@ -5,7 +5,11 @@ RSpec.describe Activity::Queries::Review do
 
   def at(day, hour = 12, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
-  def carried(count, day) = create(:task, list: nil, sprint_id: sprint_on(day).id, carried_count: count)
+  def carried(*days) = create(:task, :in_sprint).tap { |task| days.each { carry(task, it) } }
+
+  def carry(task, from, to = from + 1, at: at(to, 0, 5))
+    create(:task_event, :carried, task_id: task.id, from_sprint_on: from, to_sprint_on: to, occurred_at: at)
+  end
 
   def close(kind, day, decision: create(:decision), chosen: nil, reason: "Settled", hour: 12)
     option_id = chosen && create(:decision_option, decision_id: decision.id, title: chosen).id
@@ -69,20 +73,63 @@ RSpec.describe Activity::Queries::Review do
   end
 
   describe "tasks carried" do
-    it "lists the most days slipped first" do
-      once = carried(1, Date.new(2026, 9, 14))
-      four = carried(4, Date.new(2026, 9, 18))
-      twice = carried(2, wednesday)
+    def carry_forward(day) = Tasks::Slice["operations.current_sprint"].call(now: at(day, 0, 5))
+
+    it "lists the most carries first" do
+      once = carried(Date.new(2026, 9, 14))
+      four = carried(*(Date.new(2026, 9, 14)..Date.new(2026, 9, 17)))
+      twice = carried(wednesday, Date.new(2026, 9, 17))
 
       expect(review.carried.map { [it.task_id, it.carried_count] }).to eq([[four.id, 4], [twice.id, 2], [once.id, 1]])
     end
 
-    it "leaves out tasks never carried and tasks whose sprint falls outside the week" do
-      carried(0, wednesday)
-      carried(3, Date.new(2026, 9, 13))
-      create(:task, carried_count: 2)
+    it "names the last sprint each task left in the week" do
+      carried(Date.new(2026, 9, 14), wednesday)
+
+      expect(review.carried.map(&:sprint_date)).to eq([wednesday])
+    end
+
+    it "counts only the carries out of sprints in the week" do
+      task = carried(Date.new(2026, 9, 11), Date.new(2026, 9, 18), Date.new(2026, 9, 21))
+
+      expect(review.carried.map { [it.task_id, it.carried_count] }).to eq([[task.id, 1]])
+    end
+
+    it "keeps a task carried out of the week after it is carried again the next week" do
+      task = create(:task, list: nil, sprint_id: sprint_on(Date.new(2026, 9, 18)).id)
+      [Date.new(2026, 9, 21), Date.new(2026, 9, 22)].each { carry_forward(it) }
+
+      expect([review, review("week", Date.new(2026, 9, 23))].map { it.carried.map { [it.task_id, it.sprint_date] } })
+        .to eq([[[task.id, Date.new(2026, 9, 18)]], [[task.id, Date.new(2026, 9, 21)]]])
+    end
+
+    it "leaves out a task carried before the week and later scheduled into it" do
+      task = create(:task, list: nil, sprint_id: sprint_on(wednesday).id, carried_count: 3)
+      [Date.new(2026, 9, 1), Date.new(2026, 9, 2), Date.new(2026, 9, 3)].each { carry(task, it) }
 
       expect(review.carried).to be_empty
+    end
+
+    describe "moves that are not carries" do
+      let(:task) { create(:task, :in_sprint) }
+
+      it "leaves out a task scheduled ahead into a later sprint" do
+        carry(task, wednesday, Date.new(2026, 9, 18), at: at(wednesday))
+
+        expect(review.carried).to be_empty
+      end
+
+      it "leaves out a task moved back to an earlier sprint" do
+        carry(task, wednesday, Date.new(2026, 9, 15))
+
+        expect(review.carried).to be_empty
+      end
+
+      it "leaves out a task moved off its sprint onto a list" do
+        create(:task_event, :carried, task_id: task.id, from_sprint_on: wednesday, to_list: "next")
+
+        expect(review.carried).to be_empty
+      end
     end
   end
 
@@ -217,9 +264,9 @@ RSpec.describe Activity::Queries::Review do
     let(:september) { review("month") }
     let(:inside) { [Date.new(2026, 9, 1), Date.new(2026, 9, 30)] }
 
-    def fill(day, count: 1)
+    def fill(day)
       create(:task, :done, completed_at: at(day), worked_seconds: 60)
-      carried(count, day)
+      carried(day)
       create(:post, :published, published_at: at(day))
       create(:social_post, :posted, posted_at: at(day))
       create(:journal_entry, entry_date: day, body: "a day")
@@ -262,7 +309,7 @@ RSpec.describe Activity::Queries::Review do
 
     it "runs the same statements for a full month as for an empty one" do
       empty = counting { review("month") }.size
-      (1..30).each { fill(Date.new(2026, 9, it), count: it) }
+      (1..30).each { fill(Date.new(2026, 9, it)) }
 
       expect(counting { review("month") }).to have(empty).items
     end
