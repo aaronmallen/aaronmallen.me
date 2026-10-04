@@ -37,6 +37,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def paths(on = day) = rollup_repo.top_paths(from: on, to: on).map(&:to_h)
 
+  def read_throughs(on = day)
+    rollup_repo.analytics_rollup_paths.on(on).order(:path).to_a.to_h { [it.path, it.read_throughs] }
+  end
+
   def referrers(on = day) = rollup_repo.referrers(from: on, to: on).map(&:to_h)
 
   def roll_up = described_class.new.perform
@@ -209,6 +213,64 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
       it "leaves out the views from before the site tracked scrolling" do
         expect(scroll_depths_of("/writing/old")).to be_empty
+      end
+    end
+
+    describe "the read-throughs" do
+      def read(path = "/writing/hello", scroll_depth: 75, read_seconds: 30, **)
+        event(path:, scroll_depth:, read_seconds:, **)
+      end
+
+      it "counts a view that scrolled to 75% and read for 30 seconds" do
+        read
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 1)
+      end
+
+      it "counts a view that went past both marks" do
+        read(scroll_depth: 100, read_seconds: 300)
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 1)
+      end
+
+      it "leaves out a view one second short" do
+        read(read_seconds: 29)
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 0)
+      end
+
+      it "leaves out a view that read long but stopped at half the page" do
+        read(scroll_depth: 50, read_seconds: 60)
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 0)
+      end
+
+      it "leaves out a reader whose scroll and read time came from two views" do
+        read(scroll_depth: 75, read_seconds: 5, visitor_hash:)
+        read(scroll_depth: 25, read_seconds: 60, visitor_hash:)
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 0)
+      end
+
+      it "counts a reader who read a post through twice once for the day" do
+        2.times { read(visitor_hash:) }
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 1)
+      end
+
+      it "counts each reader and each page apart" do
+        read(visitor_hash:)
+        read
+        read("/writing/other", visitor_hash:)
+        roll_up
+
+        expect(read_throughs).to eq("/writing/hello" => 2, "/writing/other" => 1)
       end
     end
 

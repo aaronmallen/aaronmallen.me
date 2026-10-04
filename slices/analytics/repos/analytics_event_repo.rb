@@ -86,6 +86,7 @@ module Analytics
           page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
           page_countries: window.page_counts_by(:country_code).to_a.map(&:to_h),
           scroll_depths: window.known(:scroll_depth).page_counts_by(:scroll_depth).to_a.map(&:to_h),
+          read_throughs: window.read_throughs_by_path.to_a.to_h { [it.path, it.read_throughs] },
         }
       end
 

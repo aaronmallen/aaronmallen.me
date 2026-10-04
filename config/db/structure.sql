@@ -1123,8 +1123,10 @@ CREATE TABLE public.analytics_rollup_paths (
     bounces integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    read_throughs integer,
     CONSTRAINT analytics_rollup_paths_bounces_check CHECK (((bounces >= 0) AND (bounces <= visitors))),
-    CONSTRAINT analytics_rollup_paths_counts_check CHECK (((views >= 0) AND (visitors >= 0) AND (read_seconds >= 0) AND (visitors <= views)))
+    CONSTRAINT analytics_rollup_paths_counts_check CHECK (((views >= 0) AND (visitors >= 0) AND (read_seconds >= 0) AND (visitors <= views))),
+    CONSTRAINT analytics_rollup_paths_read_throughs_check CHECK (((read_throughs >= 0) AND (read_throughs <= visitors)))
 );
 
 
@@ -4463,4 +4465,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000095_add_seen_at_to_task_sources.rb'),
 ('20261003000096_create_task_timeline_view.rb'),
 ('20261003000097_create_decision_comments.rb'),
-('20261003000131_create_decision_tags.rb');
+('20261003000131_create_decision_tags.rb'),
+('20261003000136_add_read_throughs_to_analytics_rollup_paths.rb');

@@ -28,6 +28,12 @@ module Analytics
 
       def on(day) = where(day:)
 
+      def read_throughs_by_path
+        known = unordered.exclude(read_throughs: nil)
+
+        known.select(:path) { integer.sum(read_throughs).as(:read_throughs) }.group(:path)
+      end
+
       def top_by_views
         figures = unordered.select(:path, &RECENT_TITLE).select_append(&FIGURES).group(:path)
 

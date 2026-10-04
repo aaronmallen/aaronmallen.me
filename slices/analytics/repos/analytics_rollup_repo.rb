@@ -4,7 +4,6 @@ module Analytics
   module Repos
     class AnalyticsRollupRepo < Blog::DB::Repo
       ROWS = {
-        analytics_rollup_paths: :paths,
         analytics_rollup_referrers: :referrers,
         analytics_rollup_countries: :countries,
         analytics_rollup_sources: :sources,
@@ -39,6 +38,10 @@ module Analytics
       end
 
       def reach_in(month) = analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
+
+      def read_throughs(from:, to:)
+        analytics_rollup_paths.between(from, to).read_throughs_by_path.to_a.to_h { [it.path, it.read_throughs] }
+      end
 
       def referrers(from:, to:)
         analytics_rollup_referrers.between(from, to).top_by_visitors.limit(TOP_ROWS).to_a
@@ -84,6 +87,10 @@ module Analytics
 
       private
 
+      def path_rows(summary)
+        summary.paths.map { { **it.to_h, read_throughs: summary.read_throughs.fetch(it.path, 0) } }
+      end
+
       def replace(relation, day, rows)
         relation.on(day).delete
         return if rows.empty?
@@ -92,6 +99,7 @@ module Analytics
       end
 
       def replace_rows(summary)
+        replace(analytics_rollup_paths, summary.day, path_rows(summary))
         ROWS.each { |relation, rows| replace(public_send(relation), summary.day, summary.public_send(rows)) }
       end
     end
