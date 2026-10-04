@@ -195,8 +195,15 @@ RSpec.describe "MCP record tools", type: :request do
       entry_repo.replace_tags(entry.id, %w[health ruby])
       call_tool("read_journal_entry", id: entry.id)
 
-      expect(content).to eq("id" => entry.id, "date" => "2026-03-02", "time" => "09:30", "body" => "a day",
-                            "tags" => %w[health ruby], "record_links" => {})
+      expect(content.values_at("date", "time", "body", "tags", "record_links"))
+        .to eq(["2026-03-02", "09:30", "a day", %w[health ruby], {}])
+    end
+
+    it "answers when the entry was written and when it last changed, in UTC" do
+      entry = create(:journal_entry, created_at: Time.utc(2026, 3, 2, 9, 30), updated_at: Time.utc(2026, 3, 4, 18))
+      call_tool("read_journal_entry", id: entry.id)
+
+      expect(content.values_at("created_at", "updated_at")).to eq(%w[2026-03-02T09:30:00Z 2026-03-04T18:00:00Z])
     end
 
     it "answers the body as the markdown it was written in" do

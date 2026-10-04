@@ -58,6 +58,14 @@ RSpec.describe "API OpenAPI document", type: :request do
       .to eq(%w[TaskTimelineComment TaskTimelineSession TaskTimelineMove TaskTimelineTag TaskTimelineStatus])
   end
 
+  it "describes when a journal entry was written and when it last changed" do
+    entry = document.dig("components", "schemas", "JournalEntry")
+    stamp = { "type" => "string", "format" => "date-time" }
+
+    expect(entry.fetch("properties").slice("created_at", "updated_at"))
+      .to eq("created_at" => stamp, "updated_at" => stamp)
+  end
+
   it "gives each operation one ID" do
     expect(operation_ids).to eq(operation_ids.uniq)
   end

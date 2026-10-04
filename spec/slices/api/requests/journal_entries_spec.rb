@@ -48,6 +48,14 @@ RSpec.describe "API journal entries", type: :request do
                           [older.id, "2026-03-01", "08:00", "first", []]])
     end
 
+    it "gives each entry when it was written and when it last changed" do
+      stamps = { created_at: Time.utc(2026, 3, 2, 9), updated_at: Time.utc(2026, 3, 5, 12) }
+      create(:journal_entry, entry_date: Date.new(2026, 3, 2), **stamps)
+
+      expect(march.fetch("entries").map { it.values_at("created_at", "updated_at") })
+        .to eq([%w[2026-03-02T09:00:00Z 2026-03-05T12:00:00Z]])
+    end
+
     it "describes the window" do
       expect(march).to eq("from" => "2026-03-01", "to" => "2026-03-31", "count" => 0, "partial" => false,
                           "entries" => [])
@@ -102,9 +110,16 @@ RSpec.describe "API journal entries", type: :request do
       entry = create(:journal_entry, entry_date: Date.new(2026, 3, 2), entry_time: "09:30", body: "a day")
       entry_repo.replace_tags(entry.id, %w[health ruby])
 
-      expect(read(entry.id).except("id")).to eq(
+      expect(read(entry.id).except("id", "created_at", "updated_at")).to eq(
         "date" => "2026-03-02", "time" => "09:30", "body" => "a day", "tags" => %w[health ruby], "record_links" => {},
       )
+    end
+
+    it "answers when the entry was written and when it last changed, in UTC" do
+      entry = create(:journal_entry, created_at: Time.utc(2026, 3, 2, 9, 30), updated_at: Time.utc(2026, 3, 4, 18))
+
+      expect(read(entry.id).values_at("created_at", "updated_at"))
+        .to eq(%w[2026-03-02T09:30:00Z 2026-03-04T18:00:00Z])
     end
 
     it "answers the records linked to the entry, grouped by kind" do
@@ -205,6 +220,15 @@ RSpec.describe "API journal entries", type: :request do
         .to include("body" => "after", "tags" => %w[health], "date" => "2026-03-02")
     end
 
+    it "moves the updated stamp and keeps the created one" do
+      written = Time.utc(2026, 3, 2, 9)
+      entries.where(id: entry.id).update(created_at: written, updated_at: written)
+      updated = update_entry(entry.id, body: "after")
+
+      expect([updated.fetch("created_at"), Time.iso8601(updated.fetch("updated_at")) > written])
+        .to eq(["2026-03-02T09:00:00Z", true])
+    end
+
     it "changes the tags and keeps the body" do
       update_entry(entry.id, tags: %w[ruby])
 
@@ -256,17 +280,19 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "create as create_journal_entry does" do
+      varying = %w[id time created_at updated_at]
       fields = { body: "the same", entry_date: (today - 1).iso8601, tags: %w[ruby] }
       created = create_entry(fields)
 
-      expect(mcp_answer("create_journal_entry", **fields).except("id", "time")).to eq(created.except("id", "time"))
+      expect(mcp_answer("create_journal_entry", **fields).except(*varying)).to eq(created.except(*varying))
     end
 
     it "update as update_journal_entry does" do
       entry = create(:journal_entry, tags: %w[health])
       updated = update_entry(entry.id, body: "after", tags: %w[ruby])
 
-      expect(mcp_answer("update_journal_entry", id: entry.id, body: "after", tags: %w[ruby])).to eq(updated)
+      expect(mcp_answer("update_journal_entry", id: entry.id, body: "after", tags: %w[ruby]).except("updated_at"))
+        .to eq(updated.except("updated_at"))
     end
 
     it "delete as delete_journal_entry does" do
