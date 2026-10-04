@@ -299,7 +299,7 @@ RSpec.describe "API saved view records", type: :request do
       it "answers a #{screen} view as the endpoint does" do
         view = create(:saved_view, screen:, filters:)
 
-        expect(mcp_answer("read_saved_view", id: view.id)).to eq(read(view.id))
+        expect(trusted(mcp_answer("read_saved_view", id: view.id))).to eq(read(view.id))
       end
     end
 
@@ -308,7 +308,7 @@ RSpec.describe "API saved view records", type: :request do
       lower_page_size(:mcp, to: 2)
       view = create(:saved_view, filters: { filter: "next" })
 
-      expect(mcp_answer("read_saved_view", id: view.id, page: 2)).to eq(read(view.id, page: "2"))
+      expect(trusted(mcp_answer("read_saved_view", id: view.id, page: 2))).to eq(read(view.id, page: "2"))
     end
 
     it "refuses a missing view with the message the endpoint gives" do

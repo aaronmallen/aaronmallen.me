@@ -566,9 +566,9 @@ RSpec.describe "API tasks", type: :request do
       it "#{verb} as #{verb}_task does" do
         ids = [create(:task, title: "same").id, create(:task, title: "same").id]
         answered = act(ids.first, verb)
+        stamps = %w[id completed_at created_at updated_at]
 
-        expect(mcp_answer("#{verb}_task", id: ids.last).except("id", "completed_at", "created_at", "updated_at"))
-          .to eq(answered.except("id", "completed_at", "created_at", "updated_at"))
+        expect(trusted(mcp_answer("#{verb}_task", id: ids.last)).except(*stamps)).to eq(answered.except(*stamps))
       end
     end
 
@@ -591,24 +591,22 @@ RSpec.describe "API tasks", type: :request do
       task = create(:task)
       scheduled = act(task.id, "schedule", sprint_on: (today + 2).iso8601)
 
-      expect(mcp_answer("schedule_task", id: task.id, sprint_on: (today + 2).iso8601).except("updated_at"))
-        .to eq(scheduled.except("updated_at"))
+      expect(unstamped(trusted(mcp_answer("schedule_task", id: task.id, sprint_on: (today + 2).iso8601))))
+        .to eq(unstamped(scheduled))
     end
 
     it "move as move_task does" do
       task = create(:task)
       moved = act(task.id, "move", list: "external")
 
-      expect(mcp_answer("move_task", id: task.id, list: "external").except("updated_at"))
-        .to eq(moved.except("updated_at"))
+      expect(unstamped(trusted(mcp_answer("move_task", id: task.id, list: "external")))).to eq(unstamped(moved))
     end
 
     it "reorder as reorder_task does" do
       task = create(:task)
       reordered = act(task.id, "reorder", direction: "up")
 
-      expect(mcp_answer("reorder_task", id: task.id, direction: "up").except("updated_at"))
-        .to eq(reordered.except("updated_at"))
+      expect(unstamped(trusted(mcp_answer("reorder_task", id: task.id, direction: "up")))).to eq(unstamped(reordered))
     end
 
     it "delete as delete_task does" do

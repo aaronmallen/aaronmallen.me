@@ -3,8 +3,6 @@
 module MCP
   module Tools
     class ReadActivity < Base
-      MARKED = { "comment" => %w[name], "webmention" => %w[name excerpt] }.freeze
-
       description "Read one window of the activity feed, newest first, every kind in it: commits with their " \
                   "whole message, repository, sha and lines added and deleted, published posts, journal entries, " \
                   "posted social posts, approved webmentions, done tasks but never canceled ones, comments on " \
@@ -30,13 +28,9 @@ module MCP
       class << self
         def call(server_context:, **input)
           hand_over(:read_activity, input, server_context) do |found|
-            found.merge(activity: found.fetch(:activity).map { marked(it) })
+            found.merge(activity: found.fetch(:activity).map { Untrusted.activity(it) })
           end
         end
-
-        private
-
-        def marked(row) = Untrusted.fields(row, *MARKED.fetch(row.fetch("kind"), Blog::Constants::EMPTY_ARRAY))
       end
     end
   end

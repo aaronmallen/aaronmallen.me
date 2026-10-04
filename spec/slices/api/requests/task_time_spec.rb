@@ -293,7 +293,9 @@ RSpec.describe "API task time", type: :request do
       completed = act(ids.first, "complete", minutes: 20)
       stamps = %w[id completed_at created_at updated_at]
 
-      expect(mcp_answer("complete_task", id: ids.last, minutes: 20).except(*stamps)).to eq(completed.except(*stamps))
+      answered = trusted(mcp_answer("complete_task", id: ids.last, minutes: 20))
+
+      expect(answered.except(*stamps)).to eq(completed.except(*stamps))
     end
 
     it "refuse with the message the endpoint gives" do
