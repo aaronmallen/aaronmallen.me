@@ -40,12 +40,24 @@ RSpec.describe "Admin post analytics", type: :request do
     create(:analytics_rollup_source, day:, path:, source: "mastodon", views: 4, visitors: 3)
   end
 
+  def roll_up_clicks
+    links = { "docs.example" => 2, "code.example" => 5 }
+
+    [today - 1, today - 8].each do |day|
+      links.each do |link_host, clicks|
+        create(:analytics_rollup_click, day:, path: "/writing/hello", link_host:, link_path: "/guide", clicks:)
+      end
+      create(:analytics_rollup_click, day:, path: "/writing/other", clicks: 9)
+    end
+  end
+
   def roll_up_days
     roll_up(today - 1, views: 8, visitors: 5, bounces: 2, read_throughs: 3)
     roll_up(today - 8, views: 100, visitors: 40, bounces: 10, read_throughs: 20)
     create(:analytics_rollup_path, day: today - 1, path: "/writing/other", views: 50, visitors: 30, bounces: 0)
     roll_up_breakdowns(today - 1)
     roll_up_scroll_depths(today - 1)
+    roll_up_clicks
   end
 
   def roll_up_scroll_depths(day)
@@ -124,6 +136,11 @@ RSpec.describe "Admin post analytics", type: :request do
         expect(names("Sources")).to eq(%w[mastodon])
       end
 
+      it "ranks the post's outbound links by clicks, most first", :aggregate_failures do
+        expect(names("Outbound clicks")).to eq(%w[code.example/guide docs.example/guide])
+        expect(counts("Outbound clicks")).to eq(%w[5 2])
+      end
+
       it "links back to the editor" do
         expect(page).to have_css("a[href='/admin/posts/#{post.id}/edit']", text: "Edit")
       end
@@ -137,6 +154,10 @@ RSpec.describe "Admin post analytics", type: :request do
 
       it "counts the days the range covers" do
         expect(stat("Page views")).to have_css(".stat-value", exact_text: "108")
+      end
+
+      it "counts the clicks the range covers" do
+        expect(counts("Outbound clicks")).to eq(%w[10 4])
       end
 
       it "counts the read-throughs the range covers" do
@@ -156,7 +177,7 @@ RSpec.describe "Admin post analytics", type: :request do
       def hashed(name) = Digest::SHA256.hexdigest(name)
 
       before do
-        %w[one one two].each do |reader|
+        events = %w[one one two].map do |reader|
           create(
             :analytics_event,
             path: "/writing/hello", visitor_hash: hashed(reader), month_visitor_hash: hashed("month-#{reader}"),
@@ -164,11 +185,16 @@ RSpec.describe "Admin post analytics", type: :request do
           )
         end
         create(:analytics_event, path: "/writing/other", month_visitor_hash: hashed("month-three"))
+        create(:analytics_click, event_id: events.last.id)
         get "/admin/posts/#{post.id}/analytics"
       end
 
       it "counts today's views" do
         expect(stat("Page views")).to have_css(".stat-value", exact_text: "3")
+      end
+
+      it "counts today's outbound clicks" do
+        expect(names("Outbound clicks")).to eq(%w[docs.example/guide])
       end
 
       it "counts each of this month's readers once" do
@@ -198,7 +224,7 @@ RSpec.describe "Admin post analytics", type: :request do
       it "says there is nothing in the cards", :aggregate_failures do
         %w[
           components.analytics.scroll_card.empty views.posts.analytics.no_devices views.posts.analytics.no_sources
-          views.posts.analytics.no_referrers views.posts.analytics.no_countries
+          views.posts.analytics.no_referrers views.posts.analytics.no_countries views.posts.analytics.no_clicks
         ].each { expect(page).to have_css(".empty", exact_text: message(it)) }
       end
     end

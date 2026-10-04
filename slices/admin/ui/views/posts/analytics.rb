@@ -15,8 +15,8 @@ module Admin
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
           def initialize(
-            post:, range:, views:, visitors:, bounces:, readers:, read_throughs:, scroll:, countries:, devices:,
-            referrers:, sources:, first_days:, unique_readers:
+            post:, range:, views:, visitors:, bounces:, readers:, read_throughs:, scroll:, clicks:, countries:,
+            devices:, referrers:, sources:, first_days:, unique_readers:
           )
             super()
             @post = post
@@ -25,6 +25,7 @@ module Admin
             @scroll = scroll
             @first_days = first_days
             @unique_readers = unique_readers
+            @clicks = clicks
             @breakdowns = { countries:, devices:, referrers:, sources: }
           end
 
@@ -46,6 +47,8 @@ module Admin
           private
 
           def bounce_rate = Blog::Figures.share(stat(:bounces), stat(:visitors))
+
+          def clicks = @clicks.map { { count: it[:clicks], label: it.values_at(:link_host, :link_path).join } }
 
           def countries = rows(:countries) { it[:country_code] || t(".unknown_country") }
 
@@ -75,6 +78,7 @@ module Admin
           def right_cards
             MeterCard(color: :blue, empty: t(".no_referrers"), rows: referrers, title: t(".referrers"))
             MeterCard(color: :violet, empty: t(".no_countries"), rows: countries, title: t(".geography"))
+            MeterCard(color: :pink, empty: t(".no_clicks"), rows: clicks, title: t(".clicks"))
           end
 
           def rows(name) = @breakdowns.fetch(name).map { { count: it[:visitors], label: yield(it) } }

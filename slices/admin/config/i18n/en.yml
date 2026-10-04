@@ -1910,6 +1910,7 @@ en:
         analytics:
           apply: "Apply"
           bounce: "%{percent}% bounce rate"
+          clicks: "Outbound clicks"
           devices: "Devices"
           direct: "direct"
           edit: "Edit"
@@ -1917,6 +1918,7 @@ en:
           first_year: "in its first 12 months"
           geography: "Geography"
           kicker: "Post analytics"
+          no_clicks: "No outbound clicks yet."
           no_countries: "No countries yet."
           no_devices: "No devices yet."
           no_referrers: "No referrers yet."

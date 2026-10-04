@@ -6,6 +6,7 @@ module Admin
       TOP_ROWS = 10
 
       include Deps[
+        clicks_between: "analytics.queries.clicks_between",
         devices_between: "analytics.queries.devices_between",
         first_days: "analytics.queries.first_days",
         page_between: "analytics.queries.page_between",
@@ -35,6 +36,7 @@ module Admin
 
       def breakdowns(page, window)
         {
+          clicks: clicks_between.call(**window).take(TOP_ROWS),
           countries: page.fetch(:countries).take(TOP_ROWS),
           devices: devices_between.call(**window).take(TOP_ROWS),
           referrers: page.fetch(:referrers).take(TOP_ROWS),
