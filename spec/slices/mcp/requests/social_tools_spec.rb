@@ -386,11 +386,19 @@ RSpec.describe "MCP social tools", type: :request do
       expect(listed.first).to include("spam_reason" => "link farm")
     end
 
-    it "leaves spam_reason out when there is none" do
+    it "gives a null spam_reason when there is none" do
       create(:webmention, :spam, received_at: at(Date.new(2026, 3, 2)))
       call_tool("list_webmentions", **range)
 
-      expect(listed.first).not_to have_key("spam_reason")
+      expect(listed.first).to include("spam_reason" => nil)
+    end
+
+    it "narrows to the webmentions one post got" do
+      create(:webmention, received_at: at(Date.new(2026, 3, 2)))
+      mention = create(:webmention, received_at: at(Date.new(2026, 3, 3)))
+      call_tool("list_webmentions", **range, post_id: mention.post_id)
+
+      expect(listed.map { it.fetch("id") }).to eq([mention.id])
     end
 
     it "names the time zone its days run on" do
@@ -399,11 +407,11 @@ RSpec.describe "MCP social tools", type: :request do
       expect(content.fetch("time_zone")).to eq("America/Chicago")
     end
 
-    it "gives received_at in Chicago time with its offset, on the day it lists it under" do
+    it "lists a webmention under its Chicago day and gives received_at in UTC" do
       create(:webmention, received_at: Blog::TimeZone.local_time(2026, 3, 31, 23, 30))
       call_tool("list_webmentions", **range)
 
-      expect(listed.map { it.fetch("received_at") }).to eq(["2026-03-31T23:30:00-05:00"])
+      expect(listed.map { it.fetch("received_at") }).to eq(["2026-04-01T04:30:00Z"])
     end
 
     it "refuses a range that runs backwards" do

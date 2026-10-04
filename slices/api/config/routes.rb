@@ -108,9 +108,11 @@ module API
 
     get "/time_report", to: "time_reports.show"
 
+    get "/webmentions", to: "webmentions.index"
     post "/webmentions/bulk/approve", to: "bulk_webmentions.approve"
     post "/webmentions/bulk/ignore", to: "bulk_webmentions.ignore"
     post "/webmentions/bulk/spam", to: "bulk_webmentions.spam"
+    get "/webmentions/:id", to: "webmentions.show"
 
     get "/work_entries/:id", to: "work_entries.show"
 

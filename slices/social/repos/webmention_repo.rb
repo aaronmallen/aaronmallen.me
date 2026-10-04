@@ -20,6 +20,8 @@ module Social
 
       def approve(id) = update(id, status: APPROVED, spam_reason: nil)
 
+      def by_id(id) = webmentions.by_pk(id).one
+
       def by_status(status) = webmentions.with_status(status).newest_first.to_a
 
       def claim_receipt(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
@@ -74,10 +76,12 @@ module Social
 
       def received_count(post_id) = webmentions.for_post(post_id).count
 
-      def received_in(from:, to:, page:, status: nil)
+      def received_in(from:, to:, page:, status: nil, post_id: nil)
         days = in_days(from, to)
+        days = days.with_status(status) if status
+        days = days.for_post(post_id) if post_id
 
-        page.fill((status ? days.with_status(status) : days).newest_first.paged(page).to_a)
+        page.fill(days.newest_first.paged(page).to_a)
       end
 
       def release(id) = held_webmentions.by_pk(id).delete

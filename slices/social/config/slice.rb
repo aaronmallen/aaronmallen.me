@@ -24,7 +24,8 @@ module Social
       queries.received_webmention_count
       queries.social_post_by_id queries.social_post_counts_by_status queries.social_posts_by_filter
       queries.social_posts_dated_between queries.syndication_urls queries.unsent_social_posts
-      queries.webmention_counts_by_post queries.webmention_counts_by_status queries.webmention_settings
+      queries.webmention_by_id queries.webmention_counts_by_post queries.webmention_counts_by_status
+      queries.webmention_settings
       queries.webmentions_by_status queries.webmentions_received_between queries.webmentions_received_by_post
       queries.webmentions_received_in
     ]

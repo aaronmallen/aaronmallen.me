@@ -34,18 +34,19 @@ module MCP
       endpoints.edit_task_comment endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks
       endpoints.list_attention endpoints.list_calendar endpoints.list_decisions endpoints.list_inbox
       endpoints.list_journal_entries endpoints.list_links endpoints.list_people endpoints.list_saved_views
-      endpoints.list_sprints endpoints.list_task_tag_rules endpoints.list_tasks endpoints.mark_messages_read
-      endpoints.mark_messages_unread endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task
-      endpoints.move_tasks endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.publish_post
-      endpoints.read_commit endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry
-      endpoints.read_person endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
-      endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_work_entry
-      endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
-      endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
-      endpoints.snooze_attention endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
-      endpoints.update_journal_entry endpoints.update_person endpoints.update_saved_view endpoints.update_task_tag_rule
-      endpoints.update_work_session
+      endpoints.list_sprints endpoints.list_task_tag_rules endpoints.list_tasks endpoints.list_webmentions
+      endpoints.mark_messages_read endpoints.mark_messages_unread endpoints.mark_task_seen
+      endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
+      endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_commit
+      endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
+      endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
+      endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_webmention
+      endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
+      endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts
+      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
+      endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision
+      endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person endpoints.update_saved_view
+      endpoints.update_task_tag_rule endpoints.update_work_session
     ], from: :api
 
     import keys: %w[
@@ -81,7 +82,7 @@ module MCP
     import keys: %w[
       operations.compose_social_post operations.delete_social_post operations.moderate_webmention
       operations.update_webmention_settings queries.editable_social_post queries.social_posts_dated_between
-      queries.unsent_social_posts queries.webmention_settings queries.webmentions_received_in
+      queries.unsent_social_posts queries.webmention_settings
     ], from: :social
 
     import keys: %w[
