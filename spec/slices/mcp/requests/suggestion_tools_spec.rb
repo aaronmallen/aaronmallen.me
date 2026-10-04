@@ -197,6 +197,14 @@ RSpec.describe "MCP suggestion tools", type: :request do
         .to eq("the social post under suggestion #{suggestion.id} has been sent")
     end
 
+    it "refuses a sent social post before it looks at the edits it names" do
+      social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
+      suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+
+      expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [404]))
+        .to eq("the social post under suggestion #{suggestion.id} has been sent")
+    end
+
     it "calls an unknown ID an error" do
       expect(mcp_text("reject_suggestion_edits", suggestion_id: 404)).to eq("no suggestion has the ID 404")
     end

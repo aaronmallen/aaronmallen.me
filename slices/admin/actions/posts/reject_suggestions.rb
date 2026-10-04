@@ -7,7 +7,7 @@ module Admin
         REJECTED = "post_form.toasts.rejected"
 
         include Deps[
-          reject_edits: "suggestions.operations.reject_edits",
+          reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
           suggestion_for_post: "suggestions.queries.for_post",
         ]
 

@@ -521,6 +521,13 @@ RSpec.describe "Admin social suggestions", type: :request do
 
         expect(last_response).to be_not_found
       end
+
+      it "answers 404 to a reject once every edit is settled" do
+        suggestion_repo.reject(suggestion_repo.for_social_post(social_post.id).edits.map(&:id))
+        reject(social_post)
+
+        expect(last_response).to be_not_found
+      end
     end
 
     describe "an item mid-delivery" do
@@ -571,6 +578,30 @@ RSpec.describe "Admin social suggestions", type: :request do
         accept(social_post)
 
         expect(bodies(social_post)).to eq(["teh cat sat"])
+        expect(statuses(social_post)).to eq(%w[pending])
+      end
+    end
+
+    describe "an item sent between the read and the reject" do
+      let(:social_post) { compose("teh cat sat") }
+
+      def sends_before_locking
+        inner = Social::Slice["operations.lock_editable_social_post"]
+
+        ->(id) { repo.mark_posted(id).then { inner.call(id) } }
+      end
+
+      before do
+        suggest(social_post, typo)
+        replace_component("social.operations.lock_editable_social_post", sends_before_locking)
+        reject(social_post)
+      end
+
+      it "answers 404" do
+        expect(last_response).to be_not_found
+      end
+
+      it "leaves the edits pending" do
         expect(statuses(social_post)).to eq(%w[pending])
       end
     end

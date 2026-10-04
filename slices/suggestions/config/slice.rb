@@ -12,7 +12,7 @@ module Suggestions
     ], from: :social
 
     export %w[
-      operations.accept_suggestion_edits operations.reject_edits operations.replace_post_edits
+      operations.accept_suggestion_edits operations.reject_suggestion_edits operations.replace_post_edits
       operations.replace_social_post_edits queries.by_id queries.created_between queries.for_post
       queries.for_social_post queries.open_counts_for_social_posts
     ]

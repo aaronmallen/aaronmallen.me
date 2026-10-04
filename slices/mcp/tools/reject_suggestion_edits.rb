@@ -23,29 +23,19 @@ module MCP
 
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)
-          suggestion = dep(:suggestion_by_id, server_context).call(suggestion_id)
-          return refuse(format(AcceptSuggestionEdits::UNKNOWN, suggestion_id)) if suggestion.nil?
-          return refuse(format(AcceptSuggestionEdits::SENT, suggestion_id)) if sent?(suggestion, server_context)
-
-          reject(suggestion, chosen(suggestion, edit_ids), server_context)
+          rejected(suggestion_id, dep(:reject_suggestion_edits, server_context).call(suggestion_id, ids: edit_ids))
         end
 
         private
 
-        def chosen(suggestion, edit_ids)
-          open = suggestion.open_edits
-          edit_ids ? open.select { edit_ids.include?(it.id) } : open
-        end
-
-        def reject(suggestion, chosen, server_context)
-          return refuse("suggestion #{suggestion.id} has no open edit with those IDs") if chosen.empty?
-
-          rejected = dep(:reject_edits, server_context).call(chosen.map(&:id))
-          answer(suggestion_id: suggestion.id, rejected: rejected.map(&:id))
-        end
-
-        def sent?(suggestion, server_context)
-          suggestion.social_post_id && dep(:editable_social_post, server_context).call(suggestion.social_post_id).nil?
+        def rejected(id, result)
+          case result
+          in Success(*rejected) then answer(suggestion_id: id, rejected: rejected.map(&:id))
+          in Failure(:not_found) then refuse(format(AcceptSuggestionEdits::UNKNOWN, id))
+          in Failure(:nothing_open) then refuse("suggestion #{id} has no open edit with those IDs")
+          in Failure(:already_posted) then refuse(format(AcceptSuggestionEdits::SENT, id))
+          else refuse("could not reject the edits")
+          end
         end
       end
     end

@@ -125,7 +125,7 @@ module MCP
         read_webmention: "api.endpoints.read_webmention",
         read_work_entry: "api.endpoints.read_work_entry",
         readers_by_path: "analytics.queries.readers_by_path",
-        reject_edits: "suggestions.operations.reject_edits",
+        reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
         remove_tag: "tags.operations.remove_tag",
         reopen_decision: "api.endpoints.reopen_decision",
         reopen_task: "api.endpoints.reopen_task",
