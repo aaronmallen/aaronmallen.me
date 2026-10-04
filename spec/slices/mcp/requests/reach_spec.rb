@@ -99,7 +99,6 @@ RSpec.describe "MCP reach", type: :request do
       "social.operations.save_person" => "the admin fills in the people directory; the MCP has no people tool",
       "social.operations.send_webmentions" => "a background job sends a post's webmentions after it saves",
       "social.operations.verify_webmention" => "a background job checks a received webmention's source",
-      "tasks.operations.act_on_tasks" => "the admin's bulk bar runs it; #341 adds the bulk task endpoints and tools",
       "tasks.operations.delete_task_comment" => "the admin deletes a comment; spec #65 gives the MCP only an add tool",
       "tasks.operations.delete_task_tag_rule" => "#393 adds the endpoint and tool that delete a tag rule",
       "tasks.operations.delete_work_session" => "#264 adds the endpoint and tool that delete a session",
@@ -111,8 +110,6 @@ RSpec.describe "MCP reach", type: :request do
       "tasks.operations.save_task_tag_rule" => "#393 adds the endpoint and tool that save a tag rule",
       "tasks.operations.set_task_total" => "#264 adds the endpoint and tool that set the total",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
-      "tasks.operations.tag_task" => "the bulk bar runs it through act_on_tasks; #341 adds its endpoint and tool",
-      "tasks.operations.untag_task" => "the bulk bar runs it through act_on_tasks; #341 adds its endpoint and tool",
     }
   end
 

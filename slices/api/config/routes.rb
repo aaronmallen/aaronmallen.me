@@ -10,6 +10,12 @@ module API
 
     get "/tasks", to: "tasks.index"
     post "/tasks", to: "tasks.create"
+    post "/tasks/bulk/cancel", to: "bulk_tasks.cancel"
+    post "/tasks/bulk/complete", to: "bulk_tasks.complete"
+    post "/tasks/bulk/delete", to: "bulk_tasks.delete"
+    post "/tasks/bulk/move", to: "bulk_tasks.move"
+    post "/tasks/bulk/tag", to: "bulk_tasks.tag"
+    post "/tasks/bulk/untag", to: "bulk_tasks.untag"
     get "/tasks/:id", to: "tasks.show"
     patch "/tasks/:id", to: "tasks.update"
     delete "/tasks/:id", to: "tasks.destroy"

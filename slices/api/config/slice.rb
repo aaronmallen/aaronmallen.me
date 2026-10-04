@@ -38,28 +38,29 @@ module API
     ], from: :social
 
     import keys: %w[
-      operations.add_task_comment operations.cancel_task operations.capture_task operations.complete_task
-      operations.current_sprint operations.delete_task operations.drop_sprint operations.link_tasks operations.move_task
-      operations.plan_sprint operations.reopen_task operations.reorder_task operations.save_task
-      operations.schedule_task operations.start_task operations.unlink_task queries.counted_sprints_between
-      queries.find_tasks queries.sprints_between queries.task_by_id queries.task_comments queries.tasks_in_sprint
-      queries.unseen_task_count queries.unseen_tasks
+      operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
+      operations.complete_task operations.current_sprint operations.delete_task operations.drop_sprint
+      operations.link_tasks operations.move_task operations.plan_sprint operations.reopen_task operations.reorder_task
+      operations.save_task operations.schedule_task operations.start_task operations.unlink_task
+      queries.counted_sprints_between queries.find_tasks queries.sprints_between queries.task_by_id
+      queries.task_comments queries.tasks_in_sprint queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
     export %w[
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment endpoints.cancel_task
-      endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry endpoints.create_saved_view
-      endpoints.delete_decision_comment endpoints.delete_decision_option endpoints.delete_journal_entry
-      endpoints.delete_saved_view endpoints.delete_task endpoints.drop_decision endpoints.drop_sprint
-      endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option endpoints.link_records
-      endpoints.link_tasks endpoints.list_attention endpoints.list_journal_entries endpoints.list_links
-      endpoints.list_saved_views endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.open_decision
+      endpoints.cancel_tasks endpoints.capture_task endpoints.complete_task endpoints.complete_tasks
+      endpoints.create_journal_entry endpoints.create_saved_view endpoints.delete_decision_comment
+      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_saved_view endpoints.delete_task
+      endpoints.delete_tasks endpoints.drop_decision endpoints.drop_sprint endpoints.edit_decision
+      endpoints.edit_decision_comment endpoints.edit_decision_option endpoints.link_records endpoints.link_tasks
+      endpoints.list_attention endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
+      endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_review
       endpoints.read_task endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
       endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.start_task endpoints.tag_decision
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.update_journal_entry
-      endpoints.update_saved_view operations.mint_token operations.revoke_token queries.calendar queries.inbox
-      queries.inbox_count queries.live_tokens
+      endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.update_journal_entry endpoints.update_saved_view operations.mint_token operations.revoke_token
+      queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]
   end
 end

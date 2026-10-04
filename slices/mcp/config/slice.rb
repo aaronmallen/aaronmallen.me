@@ -24,17 +24,18 @@ module MCP
 
     import keys: %w[
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment endpoints.cancel_task
-      endpoints.capture_task endpoints.complete_task endpoints.create_journal_entry endpoints.create_saved_view
-      endpoints.delete_decision_comment endpoints.delete_decision_option endpoints.delete_journal_entry
-      endpoints.delete_saved_view endpoints.delete_task endpoints.drop_decision endpoints.drop_sprint
-      endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option endpoints.link_records
-      endpoints.link_tasks endpoints.list_attention endpoints.list_journal_entries endpoints.list_links
-      endpoints.list_saved_views endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.open_decision
+      endpoints.cancel_tasks endpoints.capture_task endpoints.complete_task endpoints.complete_tasks
+      endpoints.create_journal_entry endpoints.create_saved_view endpoints.delete_decision_comment
+      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_saved_view endpoints.delete_task
+      endpoints.delete_tasks endpoints.drop_decision endpoints.drop_sprint endpoints.edit_decision
+      endpoints.edit_decision_comment endpoints.edit_decision_option endpoints.link_records endpoints.link_tasks
+      endpoints.list_attention endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views
+      endpoints.list_sprints endpoints.list_tasks endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.plan_sprint endpoints.read_current_sprint endpoints.read_journal_entry endpoints.read_review
       endpoints.read_task endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
       endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.start_task endpoints.tag_decision
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.update_journal_entry
-      endpoints.update_saved_view
+      endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
+      endpoints.update_journal_entry endpoints.update_saved_view
     ], from: :api
 
     import keys: %w[
