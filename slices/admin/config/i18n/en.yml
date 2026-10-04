@@ -313,6 +313,14 @@ en:
           visitors:
             one: "%{formatted} visitor"
             other: "%{formatted} visitors"
+        feed_card:
+          caption:
+            one: "Feed subscribers per day, last %{count} day"
+            other: "Feed subscribers per day, last %{count} days"
+          day: "Day"
+          latest: "latest %{count}"
+          subscribers: "Subscribers"
+          title: "Feed subscribers"
         first_days_card:
           caption:
             one: "Readers per day for the first %{count} day after publish, beside the median post"
@@ -1728,12 +1736,14 @@ en:
           span: "%{from} → %{to}"
       analytics:
         show:
+          aggregators: "Feed aggregators"
           apply: "Apply"
           change: "%{percent}% vs. previous %{count} days"
           direct: "direct"
           geography: "Geography"
           heading: "Analytics"
           mentioned_posts: "Webmentions per post"
+          no_aggregators: "No aggregator counts yet."
           no_countries: "No countries yet."
           no_mentions: "No mentions yet."
           no_prior: "no prior period"

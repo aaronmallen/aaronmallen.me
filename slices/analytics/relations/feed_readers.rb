@@ -7,6 +7,10 @@ module Analytics
 
       schema :feed_readers, infer: true
 
+      def between(from, to) = where(day: from..to)
+
+      def by_day = unordered.select { [day, integer.sum(readers).as(:readers)] }.group(:day)
+
       def record(day:, path:, reader_hash:)
         hashes = dataset.db[:feed_reader_hashes].insert_conflict.returning(:day, :path)
         added = hashes.with_sql(:insert_sql, day:, path:, reader_hash:)

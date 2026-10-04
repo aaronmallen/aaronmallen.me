@@ -352,6 +352,60 @@ RSpec.describe "Admin analytics", type: :request do
       end
     end
 
+    describe "with feed subscribers" do
+      def feed_card = page.find(".card", text: "Feed subscribers")
+
+      def readings = feed_card.all("tbody tr").map { it.all("th, td").map(&:text) }
+
+      def short(day) = day.strftime("%b %-d")
+
+      before do
+        create(:feed_subscriber, day: today, aggregator: "feedly", subscribers: 40)
+        create(:feed_subscriber, day: today, path: "/writing/tags/ruby.atom", aggregator: "feedly", subscribers: 2)
+        create(:feed_subscriber, day: today - 1, aggregator: "inoreader", subscribers: 9)
+        create(:feed_subscriber, day: today - 2, aggregator: "feedly", subscribers: 38)
+        create(:feed_subscriber, day: today - 9, aggregator: "newsblur", subscribers: 5)
+        create(:feed_reader, day: today, readers: 3)
+        create(:feed_reader, day: today, path: "/writing/tags/ruby.atom", readers: 1)
+        create(:feed_reader, day: today - 2, readers: 2)
+        get "/admin/analytics"
+      end
+
+      it "lists a day for each day in the range" do
+        expect(readings.size).to eq(7)
+      end
+
+      it "adds each day's aggregator counts and other readers across the feeds" do
+        expect(readings.last(3)).to eq([[short(today - 2), "40"], [short(today - 1), "9"], [short(today), "46"]])
+      end
+
+      it "counts a day with nothing as zero" do
+        expect(readings.first).to eq([short(today - 6), "0"])
+      end
+
+      it "names the latest day in the card head" do
+        expect(feed_card).to have_css(".chart-peak", exact_text: "latest 46")
+      end
+
+      it "draws a point for each day" do
+        expect(feed_card.find("polyline")[:points].split.size).to eq(7)
+      end
+
+      it "names each aggregator, most subscribers first" do
+        expect(meter_card("Feed aggregators").all(".meter-name").map(&:text)).to eq(%w[feedly inoreader])
+      end
+
+      it "counts each aggregator's latest count across its feeds" do
+        expect(meter_card("Feed aggregators").all(".meter-count").map(&:text)).to eq(%w[42 9])
+      end
+
+      it "takes in a longer range the aggregators it covers" do
+        get "/admin/analytics", range: "14"
+
+        expect(meter_card("Feed aggregators").all(".meter-name").map(&:text)).to eq(%w[feedly inoreader newsblur])
+      end
+    end
+
     describe "with webmentions" do
       before do
         hello = create(:post, :published, title: "Hello")
@@ -431,11 +485,16 @@ RSpec.describe "Admin analytics", type: :request do
         expect(bars).to eq(["height: 0%"] * 7)
       end
 
+      it "counts no feed subscribers" do
+        expect(page.find(".card", text: "Feed subscribers")).to have_css(".chart-peak", exact_text: "latest 0")
+      end
+
       it "says there is nothing in the cards", :aggregate_failures do
         expect(page).to have_css(".empty", exact_text: message("components.analytics.pages_card.empty"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_referrers"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_countries"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_mentions"))
+        expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_aggregators"))
       end
     end
   end

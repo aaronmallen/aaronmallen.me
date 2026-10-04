@@ -3091,6 +3091,10 @@
   stroke-linejoin: round;
 }
 
+@utility curve-dates {
+  @apply flex justify-between meta;
+}
+
 @utility curve-post {
   stroke: var(--color-mk-green);
   stroke-width: 2;

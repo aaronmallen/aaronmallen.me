@@ -16,6 +16,7 @@ module Admin
 
       include Deps[
         country_counts: "analytics.queries.country_counts",
+        feed_subscribers_between: "analytics.queries.feed_subscribers_between",
         pending_webmention_count: "social.queries.pending_webmention_count",
         posts_by_ids: "posts.queries.by_ids",
         referrer_counts: "analytics.queries.referrer_counts",
@@ -35,6 +36,7 @@ module Admin
         found = period(from, to)
 
         {
+          feed: feed_subscribers_between.call(from:, to:),
           range:,
           webmentions: webmentions(from, to),
           weekday_hours: weekday_hours.call(to:),

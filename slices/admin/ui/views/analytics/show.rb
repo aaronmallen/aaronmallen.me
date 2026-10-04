@@ -11,11 +11,12 @@ module Admin
           SIGNED = "%+d"
 
           def initialize(
-            change:, countries:, paths:, per_visit:, range:, read_time:, referrers:, series:, totals:, webmentions:,
-            weekday_hours:
+            change:, countries:, feed:, paths:, per_visit:, range:, read_time:, referrers:, series:, totals:,
+            webmentions:, weekday_hours:
           )
             super()
             @countries = countries
+            @feed = feed
             @paths = paths
             @range = range
             @referrers = referrers
@@ -42,6 +43,10 @@ module Admin
 
           private
 
+          def aggregators
+            @feed.fetch(:aggregators).map { { count: it[:subscribers], label: it[:aggregator] } }
+          end
+
           def change = @stats.fetch(:change)
 
           def change_text
@@ -50,6 +55,11 @@ module Admin
 
           def countries
             @countries.map { { count: it[:visitors], label: it[:country_code] || t(".unknown_country") } }
+          end
+
+          def feed_cards
+            FeedCard(days: @feed.fetch(:days))
+            MeterCard(color: :blue, empty: t(".no_aggregators"), rows: aggregators, title: t(".aggregators"))
           end
 
           def mentioned_posts
@@ -77,6 +87,7 @@ module Admin
             MeterCard(
               color: :pink, empty: t(".no_mentions"), rows: mentioned_posts, title: t(".mentioned_posts"),
             )
+            feed_cards
           end
 
           def stats
