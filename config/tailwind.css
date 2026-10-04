@@ -42,6 +42,7 @@
   --color-mk-orange: light-dark(#a1600a, #fd971f);
   --color-mk-pink-text: light-dark(#b3105a, #fa4f8d);
   --color-mk-green-text: light-dark(#3a5f0e, #a6e22e);
+  --color-mk-blue-text: light-dark(#0c5f71, #66d9ef);
   --color-mk-sand-text: light-dark(#735808, #e6db74);
   --color-mk-orange-text: light-dark(#855008, #fd971f);
   --color-mk-comment: light-dark(#696658, #939081);
@@ -1994,7 +1995,8 @@
   }
 
   &.blue {
-    @apply text-mk-blue;
+    --hue: var(--color-mk-blue);
+    @apply text-mk-blue-text;
   }
 
   &.violet {
@@ -3621,7 +3623,7 @@
   @apply meta transition-colors duration-150 ease-in-out;
 
   &.bluesky:has(:checked) {
-    @apply text-mk-blue;
+    @apply text-mk-blue-text;
   }
 
   &.mastodon:has(:checked) {

@@ -28,6 +28,11 @@ RSpec.describe "Admin screens", type: :feature do
         find("[data-social-body]").send_keys("@ada")
         find("[data-social-mentions]")
       end,
+      "social targets" => lambda do
+        connect_social_networks
+        visit "/admin/social"
+        find(".compose-target.bluesky:has(:checked)")
+      end,
     }
   end
 
@@ -259,6 +264,8 @@ RSpec.describe "Admin screens", type: :feature do
       post: create(:post, :published, slug: "hello", title: "A published post with a fairly long title"),
     )
     social_post
+    create(:post, :scheduled, title: "A post scheduled for tomorrow")
+    create(:social_post, :scheduled)
   end
 
   def selections
