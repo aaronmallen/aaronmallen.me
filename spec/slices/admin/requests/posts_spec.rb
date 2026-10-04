@@ -3,10 +3,17 @@
 RSpec.describe "Admin posts", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
+  def sub_line(head, views: 0, visitors: 0, readers: "0 unique readers", read_throughs: 0)
+    [head, "#{views} views", "#{visitors} visitors", readers, "#{read_throughs} read-throughs"].join(" · ")
+  end
+
   def titles = page.all(".li-title").map(&:text)
 
   describe "signed in" do
-    before { sign_in_to_admin }
+    before do
+      sign_in_to_admin
+      allow(Analytics::Readers).to receive(:window_opened_at).and_return(Time.utc(2026, 1, 1))
+    end
 
     describe "paging" do
       before do
@@ -45,7 +52,7 @@ RSpec.describe "Admin posts", type: :request do
         create(:analytics_rollup_path, day:, path: "/writing/first", views: 4, visitors: 3, bounces: 1)
         get "/admin/posts", status: "published", page: "2"
 
-        expect(page).to have_css(".li-sub", text: /\d+ words? · 4 views · 3 visitors · 0 read-throughs\z/)
+        expect(page).to have_css(".li-sub", text: /· 4 views · 3 visitors · 0 unique readers · 0 read-throughs\z/)
       end
 
       it "draws no pager when one page holds every post" do
@@ -159,9 +166,7 @@ RSpec.describe "Admin posts", type: :request do
       create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 7, 12))
       get "/admin/posts"
 
-      expect(page).to have_css(
-        ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors · 0 read-throughs",
-      )
+      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · Sep 7, 2026 · 3 words"))
     end
 
     describe "with rolled up views" do
@@ -189,20 +194,46 @@ RSpec.describe "Admin posts", type: :request do
         create(:analytics_rollup_path, day: today - 89, path: "/writing/hello", views: 3, visitors: 2, bounces: 0)
         get "/admin/posts"
 
-        sub = "/writing/hello · Sep 7, 2026 · 3 words · 11 views · 7 visitors · 4 read-throughs"
+        sub = sub_line("/writing/hello · Sep 7, 2026 · 3 words", views: 11, visitors: 7, read_throughs: 4)
         expect(page).to have_css(".li-sub", exact_text: sub)
       end
 
       it "adds up the rolled up days inside the window, leaving out the day before it" do
-        expect(page).to have_css(
-          ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 8 views · 5 visitors · 4 read-throughs",
-        )
+        sub = sub_line("/writing/hello · Sep 7, 2026 · 3 words", views: 8, visitors: 5, read_throughs: 4)
+        expect(page).to have_css(".li-sub", exact_text: sub)
       end
 
       it "counts no views or visitors for a path nothing was rolled up under" do
-        expect(page).to have_css(
-          ".li-sub", exact_text: "/writing/unseen · Sep 1, 2026 · 1 word · 0 views · 0 visitors · 0 read-throughs",
-        )
+        expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/unseen · Sep 1, 2026 · 1 word"))
+      end
+    end
+
+    describe "unique readers" do
+      def post(slug, published_at) = create(:post, :published, slug:, body: "one", published_at:)
+
+      def readership(slug) = page.find(".li-sub", text: "/writing/#{slug} ").text.split(" · ")[5]
+
+      it "counts the readers of a post in its first 12 months" do
+        post("hello", Time.utc(2026, 9, 7, 12))
+        2.times { create(:post_reader_hash, path: "/writing/hello") }
+        get "/admin/posts"
+
+        expect(readership("hello")).to eq("2 unique readers")
+      end
+
+      it "marks a saved count as final" do
+        post("old", Time.utc(2025, 6, 1, 12))
+        create(:post_reader_count, path: "/writing/old", readers: 1)
+        get "/admin/posts"
+
+        expect(readership("old")).to eq("1 unique reader, final")
+      end
+
+      it "says a post older than 12 months with no saved count has none" do
+        post("old", Time.utc(2025, 6, 1, 12))
+        get "/admin/posts"
+
+        expect(readership("old")).to eq("no unique reader count")
       end
     end
 
@@ -217,18 +248,14 @@ RSpec.describe "Admin posts", type: :request do
       create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 8, 3))
       get "/admin/posts"
 
-      expect(page).to have_css(
-        ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors · 0 read-throughs",
-      )
+      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · Sep 7, 2026 · 3 words"))
     end
 
     it "dates a draft by its last edit" do
       create(:post, :draft, slug: "hello", body: "one", updated_at: Time.utc(2026, 9, 1, 12))
       get "/admin/posts"
 
-      expect(page).to have_css(
-        ".li-sub", exact_text: "/writing/hello · Sep 1, 2026 · 1 word · 0 views · 0 visitors · 0 read-throughs",
-      )
+      expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · Sep 1, 2026 · 1 word"))
     end
 
     describe "tags" do

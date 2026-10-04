@@ -10,6 +10,7 @@ module Admin
         page_between: "analytics.queries.page_between",
         reach_between: "analytics.queries.reach_between",
         read_throughs_between: "analytics.queries.read_throughs_between",
+        readers_by_path: "analytics.queries.readers_by_path",
         scroll_depths_between: "analytics.queries.scroll_depths_between",
         sources_between: "analytics.queries.sources_between",
       ]
@@ -19,7 +20,7 @@ module Admin
         window = { from: to - (range - 1), to:, path: "#{Blog::Site::WRITING}/#{post.slug}" }
         page = page_between.call(**window)
 
-        { post:, range:, **counts(page, window), **breakdowns(page, window) }
+        { post:, range:, **counts(page, window), **breakdowns(page, window), unique_readers: unique_readers(post) }
       end
 
       private
@@ -45,6 +46,8 @@ module Admin
           readers: reach_between.call(from: Date.new(to.year, to.month), to:, path:),
         }
       end
+
+      def unique_readers(post) = UniqueReaders.of(post, readers_by_path.call([UniqueReaders.path(post)]))
     end
   end
 end

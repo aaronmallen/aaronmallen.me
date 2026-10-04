@@ -12,16 +12,18 @@ module Admin
           }.freeze
           RANGES = { "7" => ".range_7", "14" => ".range_14", "30" => ".range_30" }.freeze
           SEPARATOR = " · "
+          UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
           def initialize(
             post:, range:, views:, visitors:, bounces:, readers:, read_throughs:, scroll:, countries:, devices:,
-            referrers:, sources:
+            referrers:, sources:, unique_readers:
           )
             super()
             @post = post
             @range = range
             @stats = { views:, visitors:, bounces:, readers:, read_throughs: }
             @scroll = scroll
+            @unique_readers = unique_readers
             @breakdowns = { countries:, devices:, referrers:, sources: }
           end
 
@@ -84,9 +86,17 @@ module Admin
             figure(:visitors, change: t(".bounce", percent: bounce_rate))
             figure(:readers, change: t(".readers_note", month:))
             figure(:read_throughs, change: t(".read_note"))
+            unique_readers
           end
 
           def sub = [t(".sub", count: @range), path(:post, slug: @post.slug)].join(SEPARATOR)
+
+          def unique_readers
+            readers, final = @unique_readers.values_at(:readers, :final)
+            return Stat(key: t(".unique_readers"), value: t(".no_unique_readers"), change: t(".unkept")) unless readers
+
+            Stat(key: t(".unique_readers"), value: Blog::Figures.count(readers), change: t(UNIQUE_NOTES.fetch(final)))
+          end
         end
       end
     end

@@ -16,19 +16,19 @@ module Admin
                       SCHEDULED => ".scheduled" }.freeze
           MENTION_COLOR = :pink
           SEPARATOR = " · "
+          UNIQUE_READERS = { true => ".final_unique_readers", false => ".unique_readers" }.freeze
 
           def initialize(
-            counts:, filter:, posts:, read_through_counts:, saved_views:, view_counts:, visitor_counts:,
-            webmention_counts:, word_counts:
+            counts:, filter:, posts:, read_through_counts:, saved_views:, unique_reader_counts:, view_counts:,
+            visitor_counts:, webmention_counts:, word_counts:
           )
             super()
             @counts = counts
             @filter = filter
             @posts = posts
-            @read_through_counts = read_through_counts
             @saved_views = saved_views
-            @view_counts = view_counts
-            @visitor_counts = visitor_counts
+            @readership = { read_throughs: read_through_counts, views: view_counts, visitors: visitor_counts }
+            @unique_reader_counts = unique_reader_counts
             @webmention_counts = webmention_counts
             @word_counts = word_counts
           end
@@ -86,9 +86,10 @@ module Admin
 
           def readership(post)
             [
-              t(".views", count: @view_counts.fetch(post.id)),
-              t(".visitors", count: @visitor_counts.fetch(post.id)),
-              t(".read_throughs", count: @read_through_counts.fetch(post.id)),
+              t(".views", count: tally(:views, post)),
+              t(".visitors", count: tally(:visitors, post)),
+              unique_readers(post),
+              t(".read_throughs", count: tally(:read_throughs, post)),
             ]
           end
 
@@ -122,6 +123,15 @@ module Admin
               t(".draft_count", count: count(DRAFT)),
               t(".scheduled_count", count: count(SCHEDULED)),
             ].join(SEPARATOR)
+          end
+
+          def tally(name, post) = @readership.fetch(name).fetch(post.id)
+
+          def unique_readers(post)
+            readers, final = @unique_reader_counts.fetch(post.id).values_at(:readers, :final)
+            return t(".no_unique_readers") unless readers
+
+            t(UNIQUE_READERS.fetch(final), count: readers)
           end
         end
       end

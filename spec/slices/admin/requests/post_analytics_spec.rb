@@ -172,7 +172,7 @@ RSpec.describe "Admin post analytics", type: :request do
       before { get "/admin/posts/#{post.id}/analytics" }
 
       it "shows zeroed stats" do
-        expect(page.all(".stat-value").map(&:text)).to eq(%w[0 0 0 0])
+        expect(page.all(".stat-value").map(&:text)).to eq(%w[0 0 0 0 0])
       end
 
       it "shows a zero bounce rate" do
@@ -184,6 +184,35 @@ RSpec.describe "Admin post analytics", type: :request do
           components.analytics.scroll_card.empty views.posts.analytics.no_devices views.posts.analytics.no_sources
           views.posts.analytics.no_referrers views.posts.analytics.no_countries
         ].each { expect(page).to have_css(".empty", exact_text: message(it)) }
+      end
+    end
+
+    describe "unique readers" do
+      def unique_readers = stat("Unique readers")
+
+      def year_old_post = create(:post, :published, slug: "old", published_at: Time.now - (400 * 86_400))
+
+      it "counts the readers of a post in its first 12 months", :aggregate_failures do
+        2.times { create(:post_reader_hash, path: "/writing/hello") }
+        get "/admin/posts/#{post.id}/analytics"
+
+        expect(unique_readers).to have_css(".stat-value", exact_text: "2")
+        expect(unique_readers).to have_css(".stat-change", exact_text: "in its first 12 months")
+      end
+
+      it "marks a saved count as final", :aggregate_failures do
+        create(:post_reader_count, path: "/writing/old", readers: 1234)
+        get "/admin/posts/#{year_old_post.id}/analytics"
+
+        expect(unique_readers).to have_css(".stat-value", exact_text: "1,234")
+        expect(unique_readers).to have_css(".stat-change", exact_text: "final count")
+      end
+
+      it "says a post older than 12 months with no saved count has none", :aggregate_failures do
+        get "/admin/posts/#{year_old_post.id}/analytics"
+
+        expect(unique_readers).to have_css(".stat-value", exact_text: "None")
+        expect(unique_readers).to have_css(".stat-change", exact_text: "no count kept")
       end
     end
 
