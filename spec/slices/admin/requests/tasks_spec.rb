@@ -167,14 +167,15 @@ RSpec.describe "Admin tasks", type: :request do
       end
 
       {
-        "today" => ["Sprint · #{Blog::TimeZone.today.strftime('%b %-d')}", "the current sprint"],
+        "today" => ["Sprint · %<date>s", "the current sprint"],
         "next" => ["On deck", "queued up, not today"],
         "someday" => ["Backlog", "maybe, eventually, probably not"],
       }.each do |filter, (label, blurb)|
         it "labels the #{filter} card with its own label" do
           get "/admin/tasks", filter: filter
+          date = Blog::TimeZone.today.strftime("%b %-d")
 
-          expect(page).to have_css(".card-label", exact_text: label)
+          expect(page).to have_css(".card-label", exact_text: format(label, date:))
         end
 
         it "blurbs the #{filter} card" do

@@ -2,7 +2,7 @@
 
 RSpec.describe "Task events", type: :request do
   let(:today) { Blog::TimeZone.today }
-  let(:at) { Time.at(Time.now.to_i - 600) }
+  let(:at) { [Time.at(Time.now.to_i - 600), Blog::TimeZone.day_start(today)].max }
 
   def events(task, *columns)
     found = Tasks::Slice["relations.task_events"].for_task(task.id).in_order.to_a
