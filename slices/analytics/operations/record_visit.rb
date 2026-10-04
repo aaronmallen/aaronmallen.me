@@ -10,6 +10,7 @@ module Analytics
           preview python-requests ruby scrape slurp spider validator wget yandex
         ],
       )
+      MAX_CLICKS = 50
       MAX_REFERRER = 2048
       MINUTE = 60
       MAX_READ_SECONDS = 20 * MINUTE
@@ -41,6 +42,16 @@ module Analytics
         agent = user_agent.to_s.strip
         agent.empty? || BOT.match?(agent.downcase)
       end
+
+      def click(visit, visitor_hashes)
+        event_id = event_repo.view_id(visitor_hashes:, view_token: visit[:view_token], path: visit[:path])
+        return Failure(:unknown_visit) unless event_id
+
+        clicked = event_repo.record_click(event_id:, limit: MAX_CLICKS, **visit.slice(:link_host, :link_path))
+        clicked ? Success(clicked) : Failure(:throttled)
+      end
+
+      def click?(visit) = visit[:kind] == Contracts::VisitContract::CLICK
 
       def host(url) = Blog::Types::Normalized::Host.call(url) { nil }
 
@@ -100,6 +111,7 @@ module Analytics
       def store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
         return read(visit, view_hashes(hashes, address:, user_agent:)) if read?(visit)
         return scroll(visit, view_hashes(hashes, address:, user_agent:)) if scroll?(visit)
+        return click(visit, view_hashes(hashes, address:, user_agent:)) if click?(visit)
 
         view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
       end

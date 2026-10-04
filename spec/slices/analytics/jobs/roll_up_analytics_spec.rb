@@ -9,6 +9,16 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
   def analytics_rollup = Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP
 
+  def click(view, link_host: "docs.example", link_path: "/guide", **)
+    create(:analytics_click, event_id: view.id, link_host:, link_path:, **)
+  end
+
+  def clicks_of(path, on = day)
+    rows = rollup_repo.analytics_rollup_clicks.on(on).for_path(path).order(:link_host, :link_path).to_a
+
+    rows.map { it.to_h.values_at(:link_host, :link_path, :clicks) }
+  end
+
   def countries(on = day) = rollup_repo.countries(from: on, to: on).map(&:to_h)
 
   def devices_of(path, on = day)
@@ -274,6 +284,31 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       end
     end
 
+    describe "the clicks" do
+      before do
+        hello = event(path: "/writing/hello")
+        2.times { click(hello) }
+        click(event(path: "/writing/hello"), link_host: "code.example", link_path: "/repo")
+        click(event(path: "/writing/other"))
+        roll_up
+      end
+
+      it "stores each post's clicks on each link" do
+        expect(clicks_of("/writing/hello")).to eq([["code.example", "/repo", 1], ["docs.example", "/guide", 2]])
+      end
+
+      it "stores another post apart" do
+        expect(clicks_of("/writing/other")).to eq([["docs.example", "/guide", 1]])
+      end
+    end
+
+    it "files a click under the day of its view" do
+      click(event(path: "/writing/hello"), occurred_at: Blog::TimeZone.day_start(today) + 60)
+      roll_up
+
+      expect(clicks_of("/writing/hello")).to eq([["docs.example", "/guide", 1]])
+    end
+
     describe "the devices" do
       before do
         event(path: "/writing/hello", device_class: "in-app", visitor_hash:)
@@ -362,7 +397,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       ]
     end
 
-    before { event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP", source: "feed") }
+    before do
+      view = event(path: "/writing/hello", referrer_host: "news.example", country_code: "JP", source: "feed")
+      click(view)
+    end
 
     it "stores the same totals" do
       2.times { roll_up }
@@ -372,10 +410,10 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
 
     it "stores the same rows", :aggregate_failures do
       roll_up
-      stored = [paths, referrers, countries, sources_of(nil), page_origins]
+      stored = [paths, referrers, countries, sources_of(nil), page_origins, clicks_of("/writing/hello")]
       roll_up
 
-      expect([paths, referrers, countries, sources_of(nil), page_origins]).to eq(stored)
+      expect([paths, referrers, countries, sources_of(nil), page_origins, clicks_of("/writing/hello")]).to eq(stored)
     end
   end
 
@@ -463,6 +501,14 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics do
       roll_up
 
       expect(kept).to eq([edge.id])
+    end
+
+    it "keeps the clicks for the days it pruned", :aggregate_failures do
+      click(event(path: "/writing/hello", on: today - 91))
+      roll_up
+
+      expect(event_repo.analytics_clicks.count).to be_zero
+      expect(clicks_of("/writing/hello", today - 91)).to eq([["docs.example", "/guide", 1]])
     end
 
     it "stops at the first day no run rolled up" do

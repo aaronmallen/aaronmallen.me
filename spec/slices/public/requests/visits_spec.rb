@@ -287,6 +287,132 @@ RSpec.describe "Visits", type: :request do
     end
   end
 
+  describe "a click" do
+    def click(name: "first", path: "/writing/hello", link_host: "docs.example", link_path: "/guide", **)
+      beacon({ kind: "click", path:, view_token: token(name), link_host:, link_path: }.compact, **)
+    end
+
+    def clicks = event_repo.analytics_clicks.order(:id).to_a
+
+    def view_of(path, name:) = beacon({ kind: "view", path:, title: "Page", view_token: token(name) })
+
+    describe "on a post" do
+      before { view }
+
+      it "accepts the beacon" do
+        click
+
+        expect(last_response.status).to eq(202)
+      end
+
+      it "stores the link's host and path against the view" do
+        click
+
+        expect(clicks.map { it.to_h.values_at(:event_id, :link_host, :link_path) })
+          .to eq([[stored.first.id, "docs.example", "/guide"]])
+      end
+
+      it "stores each click" do
+        2.times { click }
+
+        expect(clicks).to have(2).items
+      end
+
+      it "stores no second view" do
+        click
+
+        expect(stored).to have(1).item
+      end
+
+      it "turns away a click under an unknown view token", :aggregate_failures do
+        click(name: "second")
+
+        expect(last_response.status).to eq(400)
+        expect(clicks).to be_empty
+      end
+
+      it "turns away a click past the cap on one view", :aggregate_failures do
+        50.times { click }
+        click
+
+        expect(last_response.status).to eq(429)
+        expect(clicks).to have(50).items
+      end
+
+      it "stores nothing while the operator is signed in" do
+        sign_in_to_admin
+        click
+
+        expect(clicks).to be_empty
+      end
+    end
+
+    describe "under the token of a view of another page" do
+      before do
+        create(:post, :published, slug: "other")
+        view_of("/writing/other", name: "other")
+        click(name: "other")
+      end
+
+      it "turns the beacon away" do
+        expect(last_response.status).to eq(400)
+      end
+
+      it "stores nothing" do
+        expect(clicks).to be_empty
+      end
+    end
+
+    {
+      "the about page" => "/about",
+      "the writing index" => "/writing",
+      "a tag page" => "/writing/tags/ruby",
+    }.each do |named, path|
+      describe "on #{named}" do
+        before do
+          view_of(path, name: "page")
+          click(path:, name: "page")
+        end
+
+        it "accepts the beacon" do
+          expect(last_response.status).to eq(202)
+        end
+
+        it "stores nothing" do
+          expect(clicks).to be_empty
+        end
+      end
+    end
+
+    {
+      "with no host" => { link_host: nil },
+      "with no path" => { link_path: nil },
+      "to a host that is no host" => { link_host: "docs.example/guide" },
+      "to a host in capitals" => { link_host: "Docs.Example" },
+      "to a host past its cap" => { link_host: "#{'a' * 250}.example" },
+      "carrying a query" => { link_path: "/guide?token=secret" },
+      "carrying a fragment" => { link_path: "/guide#top" },
+      "to a path that is no path" => { link_path: "guide" },
+      "to a path past its cap" => { link_path: "/#{'a' * 2048}" },
+      "carrying a control character" => { link_path: "/guide\u0001" },
+    }.each do |named, link|
+      describe named do
+        before do
+          view
+          click(**link)
+        end
+
+        it "turns the beacon away" do
+          expect(last_response.status).to eq(400)
+        end
+
+        it "stores nothing" do
+          expect(clicks).to be_empty
+        end
+      end
+    end
+  end
+
   describe "a visit that is not counted" do
     it "stores nothing while the operator is signed in" do
       sign_in_to_admin
@@ -546,7 +672,7 @@ RSpec.describe "Visits", type: :request do
     end
 
     it "rejects an unknown kind" do
-      beacon({ kind: "click", path: "/writing/hello" })
+      beacon({ kind: "share", path: "/writing/hello" })
 
       expect(last_response.status).to eq(400)
     end
@@ -582,7 +708,7 @@ RSpec.describe "Visits", type: :request do
     end
 
     it "stores nothing" do
-      beacon({ kind: "click", path: "/writing/hello" })
+      beacon({ kind: "share", path: "/writing/hello" })
 
       expect(stored).to be_empty
     end
@@ -634,6 +760,20 @@ RSpec.describe "Visits", type: :request do
       get "/admin"
 
       expect(Capybara.string(last_response.body)).to have_no_css("body[data-beacon]", visible: :all)
+    end
+
+    it "counts clicks on a post" do
+      get "/writing/hello"
+
+      expect(Capybara.string(last_response.body)).to have_css("body[data-beacon-clicks]", visible: :all)
+    end
+
+    %w[/ /about /contact /projects /writing /writing/tags/ruby].each do |path|
+      it "counts no clicks on #{path}" do
+        get path
+
+        expect(Capybara.string(last_response.body)).to have_no_css("body[data-beacon-clicks]", visible: :all)
+      end
     end
 
     %w[/ /writing].each do |path|

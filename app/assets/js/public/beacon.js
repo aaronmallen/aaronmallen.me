@@ -1,6 +1,8 @@
 const MAX_READ_SECONDS = 20 * 60;
+const MIDDLE_BUTTON = 1;
 const SCROLL_DEPTHS = [100, 75, 50, 25];
 const TYPE = "application/json";
+const WEB = ["http:", "https:"];
 
 const mintToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -21,8 +23,24 @@ const referrerOf = (url) => {
   }
 };
 
+const outboundLink = (event) => {
+  if (event.type === "auxclick" && event.button !== MIDDLE_BUTTON) return undefined;
+
+  const link = event.target.closest?.("a[href]");
+  if (!link || typeof link.href !== "string") return undefined;
+
+  try {
+    const { hostname, pathname, protocol } = new URL(link.href);
+    if (!WEB.includes(protocol) || hostname === location.hostname) return undefined;
+
+    return { link_host: hostname, link_path: pathname };
+  } catch {
+    return undefined;
+  }
+};
+
 export function setupBeacon() {
-  const { beacon: endpoint, beaconRef: refKey } = document.body.dataset;
+  const { beacon: endpoint, beaconClicks: clicks, beaconRef: refKey } = document.body.dataset;
   if (!endpoint || !navigator.sendBeacon) return;
 
   const path = location.pathname;
@@ -59,6 +77,11 @@ export function setupBeacon() {
     send({ kind: "scroll", scroll_depth: depth });
   };
 
+  const clicked = (event) => {
+    const link = outboundLink(event);
+    if (link) send({ kind: "click", ...link });
+  };
+
   addEventListener("pagehide", leave);
   addEventListener("pageshow", (event) => {
     if (event.persisted) readAgain();
@@ -76,4 +99,7 @@ export function setupBeacon() {
     ...(deepest && { scroll_depth: deepest }),
   });
   addEventListener("scroll", scrolled, { passive: true });
+  if (clicks === undefined) return;
+  document.addEventListener("click", clicked);
+  document.addEventListener("auxclick", clicked);
 }

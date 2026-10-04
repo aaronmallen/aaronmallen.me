@@ -11,11 +11,14 @@ module Analytics
         analytics_rollup_page_referrers: :page_referrers,
         analytics_rollup_page_countries: :page_countries,
         analytics_rollup_scroll_depths: :scroll_depths,
+        analytics_rollup_clicks: :clicks,
       }.freeze
       TOP_ROWS = 100
       VIEW_DAYS = 90
 
       def by_day(day) = analytics_rollups.by_pk(day).one
+
+      def clicks(path:, from:, to:) = analytics_rollup_clicks.between(from, to).for_path(path).top_by_clicks.to_a
 
       def countries(from:, to:) = analytics_rollup_countries.between(from, to).top_by_visitors.to_a
 

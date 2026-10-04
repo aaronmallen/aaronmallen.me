@@ -40,6 +40,10 @@ module Analytics
         [{ path: nil, reach: window.reach }, *window.reach_by_path.to_a.map(&:to_h)]
       end
 
+      def record_click(event_id:, limit:, link_host:, link_path:)
+        analytics_clicks.claim(event_id:, limit:, link_host:, link_path:)
+      end
+
       def record_read_seconds(visitor_hashes:, view_token:, read_seconds:)
         analytics_events.for_visitor(visitor_hashes).for_view(view_token).record_read_seconds(read_seconds)
       end
@@ -65,6 +69,10 @@ module Analytics
 
       def totals_between(from:, to:, path: nil) = scoped(analytics_events.between(from, to), path).totals.one
 
+      def view_id(visitor_hashes:, view_token:, path:)
+        analytics_events.for_visitor(visitor_hashes).for_view(view_token).for_path(path).newest_id
+      end
+
       def views_by_read_floor(from:, to:, floors:, path: nil)
         scoped(analytics_events.between(from, to), path).views_by_read_floor(floors)
       end
@@ -81,12 +89,15 @@ module Analytics
         site + window.page_counts_by(column).to_a.map(&:to_h)
       end
 
+      def clicks(window) = { clicks: window.clicks.to_a.map(&:to_h) }
+
       def page_only(window)
         {
           page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
           page_countries: window.page_counts_by(:country_code).to_a.map(&:to_h),
           scroll_depths: window.known(:scroll_depth).page_counts_by(:scroll_depth).to_a.map(&:to_h),
           read_throughs: window.read_throughs_by_path.to_a.to_h { [it.path, it.read_throughs] },
+          **clicks(window),
         }
       end
 

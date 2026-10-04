@@ -3,6 +3,11 @@
 module Analytics
   module Relations
     class AnalyticsEvents < Blog::DB::Relation
+      CLICK = Sequel[:analytics_clicks]
+      CLICKED = [Sequel[:analytics_events][:path], CLICK[:link_host], CLICK[:link_path]].freeze
+      CLICKS = proc do
+        [*CLICKED.map { string(it).as(it.column) }, integer.count(CLICK[:id]).as(:clicks)]
+      end
       HOUR = Sequel.function(:date_trunc, "hour", :occurred_at, Blog::TimeZone::NAME)
       HOURLY = proc do
         [
@@ -48,6 +53,12 @@ module Analytics
         end
       end
 
+      def clicks
+        joined = unordered.join(:analytics_clicks, event_id: :id)
+
+        joined.select(&CLICKS).group(*CLICKED)
+      end
+
       def counts_by(column, as: column)
         figures = unordered.select(self[column].as(as)) do
           [integer.count(id).as(:views), integer.count(visitor_hash).distinct.as(:visitors)]
@@ -69,6 +80,8 @@ module Analytics
       def known(column) = exclude(column => nil)
 
       def newest_first = order(self[:occurred_at].desc, self[:id].desc)
+
+      def newest_id = newest_first.limit(1).pluck(:id).first
 
       def occurred_before(time) = where { occurred_at < time }
 

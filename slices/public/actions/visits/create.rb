@@ -29,6 +29,12 @@ module Public
 
         private
 
+        def countable?(visit, route)
+          return false if visit["kind"] == ::Analytics::Contracts::VisitContract::CLICK && !route.params.key?(:slug)
+
+          find_page.call(route)
+        end
+
         def outcome(request, visit)
           record_visit.call(
             visit,
@@ -68,7 +74,7 @@ module Public
           visit = payload(request)
           route = route_for(visit)
           return REJECTED unless route
-          return uncounted(visit) unless find_page.call(route)
+          return uncounted(visit) unless countable?(visit, route)
 
           case outcome(request, visit)
           in Success(_) then ACCEPTED

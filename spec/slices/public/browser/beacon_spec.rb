@@ -185,6 +185,81 @@ RSpec.describe "Analytics beacon", type: :feature do
     end
   end
 
+  describe "clicks" do
+    before do
+      create(:post, :published, slug: "links",
+                                body: "[the guide](https://docs.example/guide?token=secret#top) [about me](/about)")
+    end
+
+    def clicks = event_repo.analytics_clicks.to_a
+
+    def follow(text, on: "/writing/links")
+      visit on
+      recorded(on)
+      watch_beacon
+      click_link text
+      sent
+    end
+
+    def follow_injected(on:, button: 0, type: "click")
+      visit on
+      recorded(on)
+      watch_beacon
+      execute_script(<<~JS, type, button)
+        const [type, button] = arguments;
+        const link = document.createElement("a");
+        link.href = "https://docs.example/guide";
+        link.textContent = "Injected";
+        document.querySelector("main").append(link);
+        link.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, button }));
+      JS
+      sent
+    end
+
+    def sent
+      evaluate_async_script(<<~JS)
+        const done = arguments[arguments.length - 1];
+        Promise.all(window.beaconSent).then((texts) => done(texts.map((text) => JSON.parse(text))));
+      JS
+    end
+
+    def watch_beacon
+      execute_script(<<~JS)
+        window.beaconSent = [];
+        const sendBeacon = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = (url, body) => {
+          window.beaconSent.push(body.text());
+          return sendBeacon(url, body);
+        };
+        document.addEventListener("click", (event) => event.preventDefault(), { capture: true });
+      JS
+    end
+
+    it "sends the host and path of a link to another site, and nothing more" do
+      expect(follow("the guide").map { it.slice("kind", "link_host", "link_path") })
+        .to eq([{ "kind" => "click", "link_host" => "docs.example", "link_path" => "/guide" }])
+    end
+
+    it "stores the click against the view" do
+      follow("the guide")
+
+      expect(wait_for { clicks.first }.to_h.values_at(:event_id, :link_host, :link_path))
+        .to eq([recorded("/writing/links").id, "docs.example", "/guide"])
+    end
+
+    it "sends a click opened with the middle button" do
+      expect(follow_injected(on: "/writing/links", type: "auxclick", button: 1).map { it["kind"] }).to eq(["click"])
+    end
+
+    it "sends nothing for a link within the site" do
+      expect(follow("about me")).to be_empty
+    end
+
+    it "sends nothing for a link to another site on a page that is not a post" do
+      expect(follow_injected(on: "/about")).to be_empty
+    end
+  end
+
   it "sets no cookie" do
     visit "/writing"
     wait_for { events.first }
