@@ -573,11 +573,19 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page.find("[data-social-target='bluesky']", visible: :all)).to be_disabled
       end
 
-      it "counts the text for each network" do
+      it "counts the text for each network as it goes out" do
         post = create(:post, title: "Hello", slug: "hello")
         get "/admin/posts/#{post.id}/edit"
 
-        expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 30/500", "Bluesky 43/300"])
+        expect(page.all("[data-social-count-text]").map(&:text)).to eq(["Mastodon 30/500", "Bluesky 55/300"])
+      end
+
+      it "marks the text over the Bluesky limit once its link to the site is tagged" do
+        body = "#{'a' * 262} https://aaronmallen.me/writing/hello"
+        post = create(:post, syndication_body: body, syndication_targets: %w[bluesky])
+        get "/admin/posts/#{post.id}/edit"
+
+        expect(page).to have_css(".compose-count.over", text: "Bluesky")
       end
 
       it "counts a mention in the text as each network gets it" do

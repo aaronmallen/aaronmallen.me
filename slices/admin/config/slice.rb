@@ -82,7 +82,7 @@ module Admin
     import keys: %w[queries.search], from: :search
 
     import keys: %w[
-      networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
+      links.tagger networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.moderate_webmention operations.move_social_post operations.save_person
       operations.update_webmention_settings
       queries.editable_social_post queries.mention_directory queries.pending_webmention_count

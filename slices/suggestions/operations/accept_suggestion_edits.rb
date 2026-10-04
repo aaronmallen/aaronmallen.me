@@ -6,6 +6,7 @@ module Suggestions
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[
+        link_tagger: "social.links.tagger",
         lock_editable_social_post: "social.operations.lock_editable_social_post",
         lock_post: "posts.operations.lock_post",
         mention_directory: "social.queries.mention_directory",
@@ -79,7 +80,7 @@ module Suggestions
 
         directory = mention_directory.call([body])
 
-        targets.all? { networks.fetch(it).within_limit?(directory.expand(body, it).text) }
+        targets.all? { networks.fetch(it).within_limit?(directory.expand(link_tagger.call(body, it), it).text) }
       end
 
       def outcome(sifted)

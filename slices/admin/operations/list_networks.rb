@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class ListNetworks
-      include Deps["i18n", networks: "social.networks.all"]
+      include Deps["i18n", "settings", networks: "social.networks.all"]
 
       def call(selected: nil)
         Blog::Types::NetworkName.values.map { network(it, selected) }
@@ -19,9 +19,11 @@ module Admin
 
         Structs::Network.new(
           configured:, label: label(name), limit: client.limit, max_bytes: client.max_bytes, name:,
-          selected: configured && (selected.nil? || selected.include?(name)),
+          selected: configured && (selected.nil? || selected.include?(name)), tagged_host:,
         )
       end
+
+      def tagged_host = Blog::Types::Normalized::Host.call(settings.site[:url]) { Blog::Constants::EMPTY_STRING }
     end
   end
 end

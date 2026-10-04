@@ -97,6 +97,32 @@ RSpec.describe "Admin social composer", type: :feature do
       expect(page).to have_css(".compose-count.over", text: "Mastodon")
     end
 
+    it "counts a link to the site with the tag Bluesky sends" do
+      write link
+
+      expect(counts.last).to eq("Bluesky #{bluesky.count(link.sub('/hello', '/hello?ref=bluesky'))}/300")
+    end
+
+    {
+      "https://example.com/hello" => "https://example.com/hello",
+      "https://aaronmallen.me" => "https://aaronmallen.me/?ref=bluesky",
+      "https://aaronmallen.me/a?b=c#d" => "https://aaronmallen.me/a?b=c&ref=bluesky#d",
+      "https://aaronmallen.me/a?ref=x" => "https://aaronmallen.me/a?ref=x",
+      "(https://aaronmallen.me/a)" => "(https://aaronmallen.me/a?ref=bluesky)",
+    }.each do |typed, sent|
+      it "counts #{typed} as Bluesky gets it" do
+        write "see #{typed}"
+
+        expect(counts.last).to eq("Bluesky #{bluesky.count("see #{sent}")}/300")
+      end
+    end
+
+    it "turns a part over the Bluesky limit pink once its link to the site is tagged" do
+      write "#{'a' * 262} https://aaronmallen.me/writing/hello"
+
+      expect(page).to have_css(".compose-count.over", text: "Bluesky")
+    end
+
     it "counts emoji the way Bluesky does" do
       write "👍🏽 👨‍👩‍👧 done"
 

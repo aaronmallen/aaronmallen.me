@@ -5,6 +5,7 @@ const FULL = 100;
 const LINK = /(?<![\w@])https?:\/\/[^\s<>"]*[^\s<>".,;:!?]/gi;
 const MENTION = /@(\w[\w.-]*)@[\w-]+(?:\.[\w-]+)+/g;
 const OPENER = { ")": "(", "]": "[" };
+const REF = /(?:^|&)ref=/;
 const RESERVED_PER_URL = 23;
 const SEGMENTER = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
@@ -32,9 +33,17 @@ function graphemes(text) {
   return count;
 }
 
+function hostname(address) {
+  try {
+    return new URL(address).hostname;
+  } catch {
+    return "";
+  }
+}
+
 function renderCount(counter, typed, selected) {
   const network = counter.dataset.socialCount;
-  const text = expand(typed, network);
+  const text = expand(tagLinks(typed, counter.dataset.taggedHost, network), network);
   const limit = Number(counter.dataset.limit);
   const count = COUNTS[network](text);
   const on = selected.has(network);
@@ -64,6 +73,31 @@ function proseClose(url) {
 
 function shrinkLinks(text) {
   return text.replace(LINK, (match) => "x".repeat(RESERVED_PER_URL) + match.slice(trimLink(match).length));
+}
+
+function splitAt(text, char) {
+  const at = text.indexOf(char);
+
+  return at === -1 ? [text, null] : [text.slice(0, at), text.slice(at + 1)];
+}
+
+function tagLink(url, host, source) {
+  const [head, fragment] = splitAt(url, "#");
+  const [address, query] = splitAt(head, "?");
+  if (!host || hostname(address) !== host || REF.test(query ?? "")) return url;
+
+  const path = /^https?:\/\/[^/]*$/i.test(address) ? `${address}/` : address;
+  const tagged = `${path}?${query ? `${query}&` : ""}ref=${source}`;
+
+  return fragment === null ? tagged : `${tagged}#${fragment}`;
+}
+
+function tagLinks(text, host, source) {
+  return text.replace(LINK, (match) => {
+    const url = trimLink(match);
+
+    return tagLink(url, host, source) + match.slice(url.length);
+  });
 }
 
 function tally(text, char) {

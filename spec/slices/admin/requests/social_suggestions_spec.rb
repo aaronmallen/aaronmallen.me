@@ -440,6 +440,34 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
     end
 
+    describe "an edit that would pass a network limit once its link to the site is tagged" do
+      def part = "teh #{'a' * 247} https://aaronmallen.me/writing/hello"
+
+      let(:social_post) { compose(part, targets: %w[bluesky]) }
+
+      before { suggest(social_post, typo("teh", "their")) }
+
+      it "says which limit it would pass" do
+        open_item(social_post)
+
+        expect(page).to have_css(".sg-edit .pill", text: "Over the Bluesky limit of 300")
+      end
+
+      it "leaves the part alone", :aggregate_failures do
+        accept(social_post, edit_id: first_edit_id(social_post))
+
+        expect(bodies(social_post)).to eq([part])
+        expect(statuses(social_post)).to eq(%w[pending])
+      end
+
+      it "says why in a toast" do
+        accept(social_post, edit_id: first_edit_id(social_post))
+        follow_redirect!
+
+        expect(toast).to eq("Not applied · part 1 would pass the Bluesky limit of 300")
+      end
+    end
+
     describe "a part rewritten over the limit between the read and the accept" do
       let(:social_post) { compose("the cat sat") }
 

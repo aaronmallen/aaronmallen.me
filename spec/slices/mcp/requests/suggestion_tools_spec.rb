@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP suggestion tools", type: :request do
-  def compose(status, *parts, posted_at: nil)
-    Social::Slice["repos.social_post_repo"].create_with_parts(parts:, posted_at:, status:, targets: %w[mastodon])
+  def compose(status, *parts, posted_at: nil, targets: %w[mastodon])
+    Social::Slice["repos.social_post_repo"].create_with_parts(parts:, posted_at:, status:, targets:)
   end
 
   def edit(original, replacement, part: nil) = { original:, replacement:, reason: "typo", part: }
@@ -96,6 +96,24 @@ RSpec.describe "MCP suggestion tools", type: :request do
       mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
 
       expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
+    end
+
+    describe "an edit that fits Bluesky only before its link to the site is tagged" do
+      def part = "teh #{'a' * 247} https://aaronmallen.me/writing/hello"
+
+      let(:social_post) { compose("draft", part, targets: %w[bluesky]) }
+      let(:suggestion) { suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "their", part: 1)]) }
+
+      it "is refused" do
+        expect(mcp_answer("accept_suggestion_edits", suggestion_id: suggestion.id).fetch("refused"))
+          .to eq(suggestion.edits.map(&:id))
+      end
+
+      it "leaves the part alone" do
+        mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
+
+        expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq([part])
+      end
     end
 
     it "refuses a social post already sent" do

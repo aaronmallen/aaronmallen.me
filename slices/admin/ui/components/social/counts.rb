@@ -37,7 +37,10 @@ module Admin
           end
 
           def counter_data(network, template)
-            { limit: network.limit, max_bytes: network.max_bytes, social_count: network.name, template: }
+            {
+              limit: network.limit, max_bytes: network.max_bytes, social_count: network.name,
+              tagged_host: network.tagged_host, template:,
+            }
           end
 
           def fill(measured, limit) = measured.over ? FULL : [(measured.count * FULL) / limit, FULL].min

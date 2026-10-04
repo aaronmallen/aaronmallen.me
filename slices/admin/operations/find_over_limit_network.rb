@@ -4,6 +4,7 @@ module Admin
   module Operations
     class FindOverLimitNetwork
       include Deps[
+        link_tagger: "social.links.tagger",
         list_networks: "operations.list_networks",
         mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
@@ -23,11 +24,13 @@ module Admin
 
         list_networks.call(selected: targets).find do |network|
           targets.include?(network.name) &&
-            !networks.fetch(network.name).within_limit?(directory.expand(body, network.name).text)
+            !networks.fetch(network.name).within_limit?(sent(directory, body, network.name))
         end
       end
 
       def part_body(social_post, edit) = social_post.parts.map(&:body)[edit.part_number - 1]
+
+      def sent(directory, body, name) = directory.expand(link_tagger.call(body, name), name).text
     end
   end
 end

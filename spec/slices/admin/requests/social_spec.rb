@@ -63,6 +63,30 @@ RSpec.describe "Admin social", type: :request do
         expect(counts.first).to eq("Mastodon 29/500")
       end
 
+      it "counts a link to the site as each network sends it" do
+        compose(parts: ["https://aaronmallen.me/writing/hello there"], targets: %w[])
+
+        expect(counts).to eq(["Mastodon 29/500", "Bluesky 54/300"])
+      end
+
+      it "counts a link elsewhere as typed" do
+        compose(parts: ["https://example.com/hello there"], targets: %w[])
+
+        expect(counts).to eq(["Mastodon 29/500", "Bluesky 31/300"])
+      end
+
+      it "marks a part over the limit once its link to the site is tagged" do
+        compose(parts: ["#{'a' * 262} https://aaronmallen.me/writing/hello"], targets: %w[bluesky])
+
+        expect(page).to have_css(".compose-count.over", text: "Bluesky")
+      end
+
+      it "ships the site's host for the counters to tag" do
+        get "/admin/social"
+
+        expect(page.all("[data-social-count]").map { it["data-tagged-host"] }).to all(eq("aaronmallen.me"))
+      end
+
       it "counts a mention as the handle each network gets" do
         create(:person, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social",
                         bluesky_did: "did:plc:ada")

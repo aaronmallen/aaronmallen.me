@@ -107,11 +107,13 @@ RSpec.describe "Admin post editor", type: :feature do
     describe "counting what goes out" do
       def announcement = "A fresh title\n\nhttps://aaronmallen.me/writing/a-fresh-title"
 
-      it "counts the title and the URL while the box is blank", :aggregate_failures do
+      def tagged = "#{announcement}?ref=bluesky"
+
+      it "counts the title and the URL as each network gets them while the box is blank", :aggregate_failures do
         fill_in "Title", with: "A fresh title"
 
         expect(page).to have_css(".compose-count", text: "Mastodon #{mastodon.count(announcement)}/500")
-        expect(page).to have_css(".compose-count", text: "Bluesky #{bluesky.count(announcement)}/300")
+        expect(page).to have_css(".compose-count", text: "Bluesky #{bluesky.count(tagged)}/300")
       end
 
       it "counts nothing while the title is blank" do
@@ -120,7 +122,7 @@ RSpec.describe "Admin post editor", type: :feature do
 
       it "counts the text you type over the title and the URL" do
         fill_in "Title", with: "A fresh title"
-        find(".compose-count", text: "Bluesky #{bluesky.count(announcement)}/300")
+        find(".compose-count", text: "Bluesky #{bluesky.count(tagged)}/300")
 
         write "hello"
 
