@@ -310,4 +310,56 @@ RSpec.describe "Visit counting", type: :request do
       expect(statuses.tally).to eq(202 => limit, 429 => sent - limit)
     end
   end
+
+  describe "clicks on one view that arrive together", :commits do
+    let(:cap) { Analytics::Operations::RecordVisit::MAX_CLICKS }
+    let(:sent) { 5 }
+    let!(:statuses) { clicked_together }
+
+    def click_request
+      link = { link_host: "docs.example", link_path: "/guide" }
+      body = { kind: "click", path: "/writing/hello", view_token: token("first"), **link }.to_json
+      headers = { "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent, "REMOTE_ADDR" => "203.0.113.7" }
+      server = Rack::MockRequest.new(app)
+
+      -> { server.post("/pulse", input: body, **headers).status }
+    end
+
+    def clicked_together
+      view_one_click_short
+      arrived, release = hold_each_click
+      senders = Array.new(sent) { click_request }.map { |request| Thread.new { request.call } }
+      sent.times { arrived.pop(timeout: 5) }
+      sent.times { release << :go }
+      senders.map(&:value)
+    end
+
+    def clicks = event_repo.analytics_clicks.to_a
+
+    def hold_each_click
+      arrived = Thread::Queue.new
+      release = Thread::Queue.new
+      allow(event_repo).to receive(:record_click).and_wrap_original do |original, **attrs|
+        arrived << true
+        release.pop(timeout: 5)
+        original.call(**attrs)
+      end
+      replace_component("repos.analytics_event_repo", event_repo)
+
+      [arrived, release]
+    end
+
+    def view_one_click_short
+      view
+      cap.pred.times { create(:analytics_click, event_id: stored.first.id) }
+    end
+
+    it "stores no more than the cap" do
+      expect(clicks).to have(cap).items
+    end
+
+    it "tells every click past the cap it is throttled" do
+      expect(statuses.tally).to eq(202 => 1, 429 => sent - 1)
+    end
+  end
 end
