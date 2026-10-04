@@ -9,8 +9,6 @@ module MCP
                     "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
-      PAGE_RANKED = %i[referrers countries].freeze
-      RANKED = %i[paths referrers countries sources devices].freeze
       RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for 90 days; " \
                     "start from or since inside them to get these. The daily counts still hold"
       SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
@@ -93,152 +91,29 @@ module MCP
 
       class << self
         def call(from:, to:, server_context:, path: nil, since: nil)
-          at = Blog::TimeZone.parse_time(since) if since
-          return refuse(SINCE_REFUSAL) if since && !at
+          reader = parse_since(since).bind do |at|
+            range(from, to).fmap { AnalyticsReader.new(range: it, at:, path:, context: server_context) }
+          end
 
-          case Blog::DayWindow.days(from, to)
-          in Success[first, last] if too_long?(first, last) then refuse_long_range
-          in Success[first, last] then read(first..last, at, path, server_context)
+          case reader
+          in Success(found) then answer(found.call)
           in Failure(message) then refuse(message)
           end
         end
 
         private
 
-        def breakdowns(range, path, server_context)
-          { sources: sources(range, path, server_context), devices: devices(range, path, server_context) }
+        def parse_since(since)
+          return Success(nil) unless since
+
+          at = Blog::TimeZone.parse_time(since)
+          at ? Success(at) : Failure(SINCE_REFUSAL)
         end
 
-        def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
-
-        def deps(keys, server_context) = keys.to_h { [it, dep(it, server_context)] }
-
-        def devices(range, path, server_context)
-          dep(:devices_between, server_context).call(from: range.first, to: range.last, path:)
-        end
-
-        def page(path, range, server_context)
-          found = dep(:page_between, server_context).call(path:, from: range.first, to: range.last)
-          read_throughs = read_throughs(range, server_context).fetch(path, 0)
-
-          found.merge(totals: found.fetch(:totals).merge(read_throughs:, bounces: found.fetch(:bounces)))
-        end
-
-        def page_ranked(found, range, path, server_context)
-          {
-            **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
-            **breakdowns(range, path, server_context),
-            clicks: dep(:clicks_between, server_context).call(path:, from: range.first, to: range.last).take(TOP),
-            scroll: dep(:scroll_depths_between, server_context).call(path:, from: range.first, to: range.last),
-          }
-        end
-
-        def page_summary(path, range, at, server_context)
-          found = page(path, range, server_context)
-          days = found.fetch(:days)
-
-          answer(
-            from: range.first.iso8601,
-            to: range.last.iso8601,
-            time_zone: Blog::TimeZone::NAME,
-            path:,
-            totals: totals(found, range, server_context, path:),
-            days: dated(days),
-            **page_ranked(found, range, path, server_context),
-            **raw(range, at, path, server_context),
-            **published(post_at(path, server_context), path, days, server_context),
-          )
-        end
-
-        def post_at(path, server_context)
-          slug = path.delete_prefix("#{Blog::Site::WRITING}/")
-          dep(:published_post_by_slug, server_context).call(slug) unless slug == path
-        end
-
-        def published(post, path, days, server_context)
-          return {} unless post
-
-          PublishedPost.call(post, path, days, **deps(PublishedPost::QUERIES, server_context))
-        end
-
-        def ranked(range, server_context)
-          found = dep(:analytics_between, server_context).call(from: range.first, to: range.last)
-          read_throughs = read_throughs(range, server_context)
-
-          found.merge(
-            breakdowns(range, nil, server_context),
-            paths: found.fetch(:paths).map { ranked_path(it, read_throughs) },
-            totals: found.fetch(:totals).merge(read_throughs: read_throughs.values.sum),
-          )
-        end
-
-        def ranked_path(found, read_throughs)
-          found.merge(title: Untrusted.call(found[:title]), read_throughs: read_throughs.fetch(found.fetch(:path), 0))
-        end
-
-        def raw(range, at, path, server_context)
-          window = raw_window(range, at, path)
-          found = dep(:hourly_between, server_context).call(**window)
-          return { refused: RAW_REFUSAL } unless found
-
-          hours = found.fetch(:hours).map { it.merge(hour: stamped(it.fetch(:hour))) }
-          read_spread = dep(:read_spread_between, server_context).call(**window)
-          timed = at ? { hours:, read_spread:, since: since_counts(found, at) } : { hours:, read_spread: }
-          timed.merge(dep(:navigation_between, server_context).call(**window).transform_values { it.take(TOP) })
-        end
-
-        def raw_window(range, at, path)
-          { from: [Blog::TimeZone.day_start(range.first), at].compact.max,
-            to: Blog::TimeZone.day_start(range.last + 1), path: }
-        end
-
-        def read(range, at, path, server_context)
-          path ? page_summary(path, range, at, server_context) : summary(range, at, server_context)
-        end
-
-        def read_throughs(range, server_context)
-          dep(:read_throughs_between, server_context).call(from: range.first, to: range.last)
-        end
-
-        def since_counts(found, at)
-          top = found.slice(:paths).transform_values { it.take(TOP) }
-
-          { at: stamped(at), **found.fetch(:totals), **top }
-        end
-
-        def site_wide(found, range, server_context)
-          {
-            weekday_hours: WeekdayGrid.call(dep(:weekday_hours, server_context)),
-            change: PriorRange.call(found.fetch(:totals), range, dep(:analytics_between, server_context)),
-            **Following.call(range, top: TOP, **deps(Following::QUERIES, server_context)),
-          }
-        end
-
-        def sources(range, path, server_context)
-          dep(:sources_between, server_context).call(from: range.first, to: range.last, path:).take(TOP)
-        end
-
-        def stamped(time) = Blog::TimeZone.local(time).iso8601
-
-        def summary(range, at, server_context)
-          found = ranked(range, server_context)
-
-          answer(
-            from: range.first.iso8601,
-            to: range.last.iso8601,
-            time_zone: Blog::TimeZone::NAME,
-            totals: totals(found, range, server_context),
-            days: dated(found.fetch(:days)),
-            **raw(range, at, nil, server_context),
-            **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
-            **site_wide(found, range, server_context),
-          )
-        end
-
-        def totals(found, range, server_context, path: nil)
-          reach = dep(:reach_between, server_context).call(from: range.first, to: range.last, path:)
-
-          found.fetch(:totals).merge(reach:)
+        def range(from, to)
+          Blog::DayWindow.days(from, to).bind do |first, last|
+            too_long?(first, last) ? Failure(Blog::DayWindow::TOO_LONG) : Success(first..last)
+          end
         end
       end
     end

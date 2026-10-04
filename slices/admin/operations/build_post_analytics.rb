@@ -57,7 +57,7 @@ module Admin
         }
       end
 
-      def unique_readers(post) = UniqueReaders.of(post, readers_by_path.call([UniqueReaders.path(post)]))
+      def unique_readers(post) = Analytics::UniqueReaders.read(post, readers_by_path)
     end
   end
 end

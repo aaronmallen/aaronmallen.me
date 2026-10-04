@@ -37,9 +37,9 @@ module Admin
       end
 
       def unique_readers(posts)
-        counts = readers_by_path.call(posts.map { UniqueReaders.path(it) })
+        counts = readers_by_path.call(posts.map { Analytics::UniqueReaders.path(it) })
 
-        posts.to_h { [it.id, UniqueReaders.of(it, counts)] }
+        posts.to_h { [it.id, Analytics::UniqueReaders.of(it, counts)] }
       end
     end
   end

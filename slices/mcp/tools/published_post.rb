@@ -13,8 +13,6 @@ module MCP
                     "the count can no longer change. readers is null for a post that went out too long before the " \
                     "site began counting. ".freeze
       QUERIES = %i[first_days readers_by_path].freeze
-      UNCOUNTED = { readers: nil, final: true }.freeze
-      UNREAD = { readers: 0, final: false }.freeze
 
       module_function
 
@@ -22,7 +20,7 @@ module MCP
         {
           since_publish: since_publish(days, Blog::TimeZone.today(post.published_at)),
           first_days: first_days.call(path),
-          unique_readers: unique_readers(post, path, readers_by_path),
+          unique_readers: Analytics::UniqueReaders.read(post, readers_by_path),
         }
       end
 
@@ -30,12 +28,6 @@ module MCP
         days.select { it.fetch(:day) >= first }.map do |found|
           date = found.fetch(:day)
           { day: (date - first).to_i + 1, date: date.iso8601, **found.except(:day) }
-        end
-      end
-
-      def unique_readers(post, path, readers_by_path)
-        readers_by_path.call([path]).fetch(path) do
-          post.published_at > Analytics::Readers.window_opened_at ? UNREAD : UNCOUNTED
         end
       end
     end
