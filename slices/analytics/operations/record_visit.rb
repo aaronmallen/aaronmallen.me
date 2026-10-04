@@ -20,7 +20,9 @@ module Analytics
         "settings",
         contract: "contracts.visit_contract",
         event_repo: "repos.analytics_event_repo",
+        hash_reader: "operations.hash_reader",
         hash_visitor: "operations.hash_visitor",
+        reader_repo: "repos.post_reader_hash_repo",
       ]
 
       def call(payload, address:, user_agent:, base_url:, signed_in: false)
@@ -62,6 +64,10 @@ module Analytics
       end
 
       def read?(visit) = visit[:kind] == Contracts::VisitContract::READ
+
+      def record_reader(path, address:, user_agent:)
+        reader_repo.record(path:, reader_hash: hash_reader.call(address:, user_agent:, path:))
+      end
 
       def referrer(url, base_url)
         return {} if url.to_s.length > MAX_REFERRER
@@ -120,8 +126,10 @@ module Analytics
           limit: settings.analytics[:throttle_limit],
           since: window_opened_at,
         )
+        return Failure(:throttled) unless event
 
-        event ? Success(event) : Failure(:throttled)
+        record_reader(visit[:path], address:, user_agent:)
+        Success(event)
       end
 
       def view?(visit) = visit[:kind] == Contracts::VisitContract::VIEW

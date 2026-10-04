@@ -13,6 +13,7 @@ module Blog
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
+    SECRETS = %i[reader_salt analytics_salt app_secret].freeze
 
     ApiKeys = Types::Array.constructor do |value|
       (value.is_a?(::Array) ? value : value.to_s.split(",")).map { it.to_s.strip }.reject(&:empty?)
@@ -128,6 +129,8 @@ module Blog
       trusted_proxies?: TrustedProxies.default([].freeze),
     )
 
+    setting :reader_salt, constructor: Types::String.constrained(min_size: 64)
+
     setting :redis, default: {}, constructor: Schema.schema(
       connect_timeout?: unless_blank(RedisTimeout),
       db?: Types::Coercible::Integer.default(0),
@@ -148,9 +151,12 @@ module Blog
 
     def initialize(...)
       super
-      return unless analytics_salt == app_secret
+      repeats = SECRETS.combination(2).filter_map do |secret, other|
+        [secret, "must not repeat #{other}"] if public_send(secret) == public_send(other)
+      end
+      return if repeats.empty?
 
-      raise Hanami::Settings::InvalidSettingsError, { analytics_salt: "must not repeat app_secret" }
+      raise Hanami::Settings::InvalidSettingsError, repeats.to_h
     end
 
     def inspect_values = inspect

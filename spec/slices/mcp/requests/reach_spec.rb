@@ -37,6 +37,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.summarize_journal" => "builds the admin's journal tile; list_journal_entries reads the same",
       "admin.operations.summarize_sprint" => "builds the admin's sprint tile; read_current_sprint reads the same",
       "admin.operations.summarize_today" => "builds the admin's today screen; summarize_activity reads the same",
+      "analytics.operations.hash_reader" => "hashes a post's reader as a view comes in",
       "analytics.operations.hash_visitor" => "hashes a visitor as a request comes in",
       "analytics.operations.prune_analytics_events" => "a background job prunes old visits after the roll up",
       "analytics.operations.record_visit" => "records a visit as a reader's browser reports it",

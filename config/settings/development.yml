@@ -1,5 +1,6 @@
 analytics_salt: development-analytics-salt-not-a-real-secret-do-not-use-this-in-production
 app_secret: development-app-secret-not-a-real-secret-do-not-use-this-in-production
+reader_salt: development-reader-salt-not-a-real-secret-do-not-use-this-in-production
 database:
   name: <%= ENV.fetch("DATABASE_NAME", "blog_development").to_json %>
   host: localhost

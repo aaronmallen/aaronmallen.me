@@ -3,6 +3,37 @@
 require "logger"
 
 RSpec.describe Blog::Settings do
+  describe "#reader_salt" do
+    let(:app) { Hanami.app["settings"] }
+
+    def settings_with(**values)
+      described_class.new(Hanami::Settings::CompositeStore.new(values, Hanami.app.config.settings_store))
+    end
+
+    it "takes a salt of 64 characters or more that repeats no other secret" do
+      expect(settings_with(reader_salt: "r" * 64).reader_salt).to eq("r" * 64)
+    end
+
+    it "refuses a salt under 64 characters" do
+      expect { settings_with(reader_salt: "r" * 63) }.to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+
+    it "refuses a salt that repeats analytics_salt" do
+      expect { settings_with(reader_salt: app.analytics_salt) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /reader_salt: must not repeat analytics_salt/)
+    end
+
+    it "refuses a salt that repeats app_secret" do
+      expect { settings_with(reader_salt: app.app_secret) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /reader_salt: must not repeat app_secret/)
+    end
+
+    it "still refuses an analytics_salt that repeats app_secret" do
+      expect { settings_with(analytics_salt: app.app_secret) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /analytics_salt: must not repeat app_secret/)
+    end
+  end
+
   describe "#redis" do
     let(:blanks) { [nil, "", " "] }
     let(:names) { %w[REDIS_CONNECT_TIMEOUT REDIS_RECONNECT_ATTEMPTS REDIS_TIMEOUT] }
