@@ -334,6 +334,16 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       "a name that resolves to a private address" => ["10.1.2.3"],
       "a name with one private address among public ones" => [Resolver::PUBLIC, "10.1.2.3"],
       "a scoped link-local address" => ["fe80::1%1"],
+      "an IPv4-compatible address" => ["::7f00:1"],
+      "a Teredo address" => ["2001:0:4136:e378:8000:63bf:3fff:fdd2"],
+      "a local-use NAT64 address" => ["64:ff9b:1::a01:203"],
+      "a site-local address" => ["fec0::1"],
+      "a discard-only address" => ["100::1"],
+      "a dummy-prefix address" => ["100:0:0:1::1"],
+      "a benchmarking address" => ["2001:2::1"],
+      "a documentation address" => ["2001:db8::1"],
+      "an address from the newer documentation prefix" => ["3fff::1"],
+      "a segment routing address" => ["5f00::1"],
     }.each do |what, addresses|
       it "sends nothing to #{what}" do
         resolves("ada.example", *addresses)
