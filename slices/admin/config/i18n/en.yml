@@ -137,7 +137,7 @@ en:
           other: "Tagged %{count} posts %{tag}"
       publish:
         invalid: "Not published · open %{post} to fix it"
-        not_draft: "Nothing published · %{post} is not a draft"
+        published: "Nothing published · %{post} is not a draft"
   projects_page:
     toasts:
       archived: "Archived · removed from /projects"

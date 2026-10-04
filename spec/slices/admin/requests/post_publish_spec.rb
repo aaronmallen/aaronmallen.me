@@ -100,6 +100,23 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
       end
     end
 
+    describe "a scheduled post" do
+      let!(:scheduled) { create(:post, :scheduled) }
+
+      before { publish(scheduled.id) }
+
+      it "publishes it now", :aggregate_failures do
+        expect(status(scheduled)).to eq("published")
+        expect(repo.by_id(scheduled.id).published_at).to be_within(60).of(Time.now)
+      end
+
+      it "says it went out" do
+        follow_redirect!
+
+        expect(toast).to eq("Published")
+      end
+    end
+
     describe "a published post" do
       let!(:published) { create(:post, :published, title: "Out in the world") }
 

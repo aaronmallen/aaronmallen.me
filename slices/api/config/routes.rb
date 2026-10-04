@@ -57,6 +57,7 @@ module API
 
     post "/posts/bulk/delete", to: "bulk_posts.delete"
     post "/posts/bulk/tag", to: "bulk_posts.tag"
+    post "/posts/:id/publish", to: "posts.publish"
 
     get "/attention", to: "attention.index"
     post "/attention/snooze", to: "attention.snooze"

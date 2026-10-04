@@ -45,7 +45,7 @@ module MCP
           now = Time.now
           return refuse(PAST) if post.status == SCHEDULED && past?(given, now)
 
-          params = stored(post).merge(form(given))
+          params = ::Posts::PostForm.call(post).merge(form(given))
 
           saved(save_post(server_context).call(params, id:, intent: INTENTS.fetch(post.status), now:), id)
         end

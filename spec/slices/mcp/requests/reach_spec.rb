@@ -70,7 +70,6 @@ RSpec.describe "MCP reach", type: :request do
       "mcp.operations.register_client" => "OAuth: a client registers itself",
       "mcp.operations.revoke_client" => "OAuth: the owner cuts off a client in the admin, which no client should do",
       "posts.operations.move_post" => "the admin's calendar moves a post a day; update_post sets any time",
-      "posts.operations.publish_draft" => "the admin's posts list publishes a draft by key; publish_post does the same",
       "posts.operations.record_post_webmentions" => "the webmention delivery job records what it sent",
       "posts.operations.revise_edit_note" => "the admin fixes a note in the editor; #141 gives MCP no tool for it",
       "projects.operations.refresh_projects" => "a background job refreshes projects from GitHub",

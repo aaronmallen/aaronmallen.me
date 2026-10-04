@@ -24,7 +24,9 @@ module API
 
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
-    import keys: %w[operations.act_on_posts queries.by_filter queries.calendar_posts], from: :posts
+    import keys: %w[
+      operations.act_on_posts operations.publish_draft queries.by_filter queries.calendar_posts
+    ], from: :posts
 
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.update_journal_entry
@@ -68,12 +70,12 @@ module API
       endpoints.list_journal_entries endpoints.list_links endpoints.list_saved_views endpoints.list_sprints
       endpoints.list_task_tag_rules endpoints.list_tasks endpoints.mark_messages_read endpoints.mark_messages_unread
       endpoints.mark_task_seen endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks
-      endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.read_current_sprint
-      endpoints.read_decision endpoints.read_journal_entry endpoints.read_review endpoints.read_saved_view
-      endpoints.read_task endpoints.read_time_report endpoints.reopen_decision endpoints.reopen_task
-      endpoints.reorder_task endpoints.resolve_decision endpoints.save_task endpoints.schedule_task endpoints.search
-      endpoints.set_task_total endpoints.snooze_attention endpoints.start_task endpoints.tag_decision
-      endpoints.tag_posts endpoints.tag_tasks
+      endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.publish_post
+      endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_review
+      endpoints.read_saved_view endpoints.read_task endpoints.read_time_report endpoints.reopen_decision
+      endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
+      endpoints.schedule_task endpoints.search endpoints.set_task_total endpoints.snooze_attention
+      endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
       endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_saved_view endpoints.update_task_tag_rule
       endpoints.update_work_session operations.mint_token operations.revoke_token queries.calendar queries.inbox

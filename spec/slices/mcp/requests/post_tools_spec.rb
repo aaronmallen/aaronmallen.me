@@ -382,11 +382,28 @@ RSpec.describe "MCP post tools", type: :request do
       expect(stored(draft.id).status).to eq("draft")
     end
 
-    it "refuses a post already published" do
+    it "publishes a scheduled post now, as the admin does", :aggregate_failures do
+      scheduled = create(:post, :scheduled)
+      call_tool("publish_post", id: scheduled.id)
+
+      expect(content).to include("status" => "published", "outcome" => "published")
+      expect(stored(scheduled.id).published_at).to be_within(60).of(Time.now)
+    end
+
+    it "refuses a post already published and leaves it as it was", :aggregate_failures do
       published = create(:post, :published)
       call_tool("publish_post", id: published.id)
 
+      expect(refused?).to be(true)
       expect(message).to eq("blog post #{published.id} is already published")
+      expect(stored(published.id).published_at).to be_within(1).of(published.published_at)
+    end
+
+    it "sends no second webmention pass for a post already published", :commits do
+      published = create(:post, :published)
+      call_tool("publish_post", id: published.id)
+
+      expect(Social::Jobs::SendWebmentions.jobs).to be_empty
     end
 
     it "calls an unknown ID an error" do

@@ -96,6 +96,7 @@ module MCP
         plan_sprint: "api.endpoints.plan_sprint",
         post_by_id: "posts.queries.by_id",
         project_by_id: "projects.queries.by_id",
+        publish_post: "api.endpoints.publish_post",
         published_post_by_slug: "posts.queries.published_by_slug",
         queue_commit_import: "record.operations.queue_commit_import",
         reach_between: "analytics.queries.reach_between",

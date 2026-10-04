@@ -2,26 +2,17 @@
 
 module MCP
   module Tools
-    class PublishPost < PostWrite
-      PUBLISH = Blog::Types::PostIntent["publish"]
-      PUBLISHED = Blog::Types::PostStatus["published"]
-      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
-
-      description "Publish one blog post as it stands. It goes out now, or on its publish time when that is still " \
-                  "to come, and its announcement and webmentions go with it when the post has them on. " \
-                  "A published post cannot be called back. " \
+    class PublishPost < Base
+      description "Publish one blog post as it stands. A draft goes out now, or on its publish time when that is " \
+                  "still to come. A scheduled post goes out now, as the admin editor sends one when its publish " \
+                  "time is cleared. Its announcement and webmentions go with it when the post has them on. " \
+                  "A published post cannot be called back, and one already out is refused. " \
                   "The post takes the same checks the admin editor makes, and a refusal names each field at fault"
-      input_schema(SCHEMA)
+      input_schema(API::Endpoints::PublishPost::SCHEMA)
       scope OAuth::Scope::WRITE
 
       class << self
-        def call(id:, server_context:)
-          post = post_by_id(server_context).call(id)
-          return missing(id) unless post
-          return refuse("blog post #{id} is already published") if post.status == PUBLISHED
-
-          saved(save_post(server_context).call(stored(post), id:, intent: PUBLISH), id)
-        end
+        def call(server_context:, **input) = hand_over(:publish_post, input, server_context)
       end
     end
   end

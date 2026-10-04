@@ -21,7 +21,7 @@ module Admin
           case publish_draft.call(id)
           in Success[outcome, post] then published(response, outcome, post)
           in Failure(:not_found) then halt 404
-          in Failure(:not_draft) then failed(response, id, :not_draft)
+          in Failure(:published) then failed(response, id, :published)
           in Failure[:invalid, _] then failed(response, id, :invalid)
           else halt 500
           end
