@@ -45,8 +45,8 @@ RSpec.describe "Admin layout", type: :request do
 
       expect(sections.map { it["data-palette-href"] })
         .to eq(%w[/admin /admin/tasks /admin/journal /admin/calendar /admin/decisions /admin/posts /admin/social
-                  /admin/projects /admin/messages /admin/webmentions /admin/activity /admin/review
-                  /admin/analytics /admin/tags /admin/people /admin/clients /admin/tokens])
+                  /admin/projects /admin/inbox /admin/messages /admin/webmentions /admin/activity
+                  /admin/review /admin/analytics /admin/tags /admin/people /admin/clients /admin/tokens])
     end
 
     it "reads the session validity row once for the action and the layout" do
@@ -56,7 +56,7 @@ RSpec.describe "Admin layout", type: :request do
     end
 
     it "loads no task to draw a page that lists none" do
-      reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/)
+      reads = counting { get "/admin/posts" }.grep(/FROM "tasks"/).grep_v(/\ASELECT count\(\*\)/)
 
       expect(reads).to be_empty
     end

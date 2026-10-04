@@ -701,6 +701,7 @@ en:
           calendar: "calendar"
           clients: "clients"
           decisions: "decisions"
+          inbox: "inbox"
           journal: "journal"
           messages: "messages"
           people: "people"

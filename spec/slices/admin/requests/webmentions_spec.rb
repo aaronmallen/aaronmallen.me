@@ -402,15 +402,8 @@ RSpec.describe "Admin webmentions", type: :request do
     end
 
     describe "the palette row" do
-      it "shows the pending count" do
+      it "leaves the pending count to Inbox" do
         2.times { create(:webmention, post: target) }
-        get "/admin"
-
-        expect(page).to have_css("#command-palette-webmentions .pal-r-sub.warn", text: "2 waiting", visible: :all)
-      end
-
-      it "says nothing at zero" do
-        create(:webmention, :approved, post: target)
         get "/admin"
 
         expect(page).to have_no_css("#command-palette-webmentions .pal-r-sub", visible: :all)

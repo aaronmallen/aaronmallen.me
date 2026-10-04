@@ -23,7 +23,6 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.build_task_page" => "builds the admin's task page; read_task reads the same task",
       "admin.operations.build_tasks_page" => "builds the admin's tasks screen; list_tasks reads the same tasks",
       "admin.operations.count_network_lengths" => "counts characters as the admin types; compose checks the limits",
-      "admin.operations.count_unread_messages" => "counts the admin menu's badge; list_messages reads the messages",
       "admin.operations.describe_social_post" => "words a social post for the admin's list",
       "admin.operations.end_sessions" => "signs the admin out everywhere; sign in stays out of the MCP",
       "admin.operations.find_over_limit_network" => "warns the admin; accept_suggestion_edits checks the limits",

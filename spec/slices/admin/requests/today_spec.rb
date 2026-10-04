@@ -387,13 +387,13 @@ RSpec.describe "Admin today", type: :request do
     end
 
     describe "the Webmentions stat" do
-      it "counts the pending mentions the same as the card and the palette", :aggregate_failures do
+      it "counts the pending mentions the same as the card and the palette's Inbox", :aggregate_failures do
         4.times { create(:webmention) }
         get "/admin"
 
         expect(webmentions_stat).to have_css(".stat-value", exact_text: "4")
         expect(pending_card).to have_css(".wm-count", exact_text: "4 pending")
-        expect(page).to have_css("#command-palette-webmentions .pal-r-sub", exact_text: "4 waiting", visible: :all)
+        expect(page).to have_css("#command-palette-inbox .pal-r-sub", exact_text: "4 waiting", visible: :all)
       end
 
       it "names the stat and notes what the count waits for", :aggregate_failures do

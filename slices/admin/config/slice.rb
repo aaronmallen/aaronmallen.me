@@ -27,7 +27,8 @@ module Admin
     ], from: :analytics
 
     import keys: %w[
-      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.live_tokens
+      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
+      queries.live_tokens
     ], from: :api
 
     import keys: %w[

@@ -12,6 +12,7 @@ module Admin
         %i[posts publish fa-file-lines admin_posts].freeze,
         %i[social publish fa-paper-plane admin_social].freeze,
         %i[projects publish fa-cube admin_projects].freeze,
+        %i[inbox inbox fa-inbox admin_inbox].freeze,
         %i[messages inbox fa-envelope admin_messages].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,
@@ -25,11 +26,7 @@ module Admin
 
       ROOT = :today
 
-      include Deps[
-        "operations.count_unread_messages",
-        "routes",
-        pending_webmention_count: "social.queries.pending_webmention_count",
-      ]
+      include Deps["routes", inbox_count: "api.queries.inbox_count"]
 
       def call(current_path:)
         found = located
@@ -42,13 +39,7 @@ module Admin
 
       private
 
-      def count_for(name)
-        case name
-        when :messages then count_unread_messages.call
-        when :webmentions then pending_webmention_count.call
-        else 0
-        end
-      end
+      def count_for(name) = name == :inbox ? inbox_count.call : 0
 
       def covers?(name, path, current_path)
         return current_path == path if name == ROOT

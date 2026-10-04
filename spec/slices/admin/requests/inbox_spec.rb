@@ -60,6 +60,56 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page).to have_css(".empty", exact_text: Admin::Slice["i18n"].t("ui.views.inbox.index.empty"))
     end
 
+    describe "the nav count" do
+      let(:paths) do
+        {
+          message: "/admin/inbox/messages/#{create(:message).id}/mark/read",
+          webmention: "/admin/inbox/webmentions/#{create(:webmention).id}/moderate/approved",
+          issue: "/admin/inbox/tasks/#{synced.id}/seen",
+        }
+      end
+
+      def count_on(section)
+        get "/admin"
+        page.all("#command-palette-#{section} .pal-r-sub", visible: :all).map(&:text)
+      end
+
+      def no_longer_waiting
+        create(:message, :read)
+        create(:webmention, :approved)
+        synced(seen_at: Time.now)
+        %i[done canceled].each { synced(it) }
+      end
+
+      before { paths }
+
+      it "counts the rows on Inbox and nothing that no longer waits", :aggregate_failures do
+        no_longer_waiting
+
+        expect(inbox).to have(3).items
+        expect(count_on(:inbox)).to eq(["3 waiting"])
+      end
+
+      it "leaves Messages and Webmentions without a count", :aggregate_failures do
+        expect(count_on(:messages)).to be_empty
+        expect(count_on(:webmentions)).to be_empty
+      end
+
+      %i[message webmention issue].each do |kind|
+        it "drops by one when a #{kind} is acted on" do
+          act(paths.fetch(kind))
+
+          expect(count_on(:inbox)).to eq(["2 waiting"])
+        end
+      end
+
+      it "says nothing once nothing waits" do
+        paths.each_value { act(it) }
+
+        expect(count_on(:inbox)).to be_empty
+      end
+    end
+
     describe "a message" do
       let(:message) { create(:message, subject: "A question", body: "How?", reply_to: "ada@example.com") }
 
