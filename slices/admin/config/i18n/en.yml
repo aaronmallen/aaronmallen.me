@@ -45,6 +45,11 @@ en:
       reopened: "Reopened"
       resolved: "Resolved"
       saved: "Decision saved"
+  inbox_page:
+    toasts:
+      seen: "Marked seen"
+      tagged: "Tags saved"
+      tags_invalid: "Nothing saved · use letters, numbers and dashes in tags"
   journal_page:
     toasts:
       deleted: "Entry deleted"
@@ -447,6 +452,36 @@ en:
         title: "What changed and why"
       footer:
         version: "Version %{version}"
+      inbox:
+        issue_item:
+          kind: "issue"
+          lists:
+            next: "Next"
+            someday: "Someday"
+            today: "Today"
+          move: "Move to %{list}"
+          seen: "Seen"
+          tag: "Tag"
+          tags: "Tags"
+          tags_placeholder: "hosting, queues"
+        mention_item:
+          approve: "Approve"
+          ignore: "Ignore"
+          kind: "webmention"
+          no_content: "no content · like only"
+          reason: "Why spam? (optional)"
+          spam: "Spam"
+          types:
+            like: "like"
+            mention: "mention"
+            reply: "reply"
+            repost: "repost"
+        message_item:
+          kind: "message"
+          read: "Read"
+          reply: "Reply"
+          spam: "Spam"
+          subject: "Re: %{subject}"
       journal:
         day:
           days_ago:
@@ -1488,6 +1523,15 @@ en:
         rejected:
           heading: "Form expired"
           message: "Nothing changed. Reload the page and try again."
+      inbox:
+        index:
+          empty: "Nothing waits on you."
+          heading: "Inbox"
+          sub:
+            one: "%{count} waiting"
+            other: "%{count} waiting"
+            zero: "Nothing waiting"
+          waiting: "Waiting on you"
       journal:
         index:
           empty: "Nothing written yet."

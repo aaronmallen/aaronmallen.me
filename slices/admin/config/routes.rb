@@ -4,6 +4,8 @@ module Admin
   class Routes < Hanami::Routes
     DIRECTION = Regexp.union(Blog::Types::ProjectMove.values)
     ID = /\d+/
+    INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
+    INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
@@ -49,6 +51,18 @@ module Admin
     )
     post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
     post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
+    get "/inbox", to: "inbox.index", as: :inbox
+    post(
+      "/inbox/messages/:id/mark/:status",
+      to: "inbox.mark_message", as: :inbox_mark_message, id: ID, status: INBOX_MESSAGE_STATUS,
+    )
+    post "/inbox/tasks/:id/move/:filter", to: "inbox.move_task", as: :inbox_move_task, id: ID, filter: TASK_FILTER
+    post "/inbox/tasks/:id/seen", to: "inbox.see_task", as: :inbox_see_task, id: ID
+    post "/inbox/tasks/:id/tags", to: "inbox.tag_task", as: :inbox_tag_task, id: ID
+    post(
+      "/inbox/webmentions/:id/moderate/:verdict",
+      to: "inbox.moderate_webmention", as: :inbox_moderate_webmention, id: ID, verdict: INBOX_VERDICT,
+    )
     get "/journal", to: "journal.index", as: :journal
     post "/journal", to: "journal.create", as: :create_journal_entry
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID

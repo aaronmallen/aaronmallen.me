@@ -81,6 +81,7 @@ RSpec.describe "Admin screens", type: :feature do
         visit "/admin/tags"
         forge_form "/admin/tags"
       end,
+      "inbox" => "/admin/inbox",
       "journal" => "/admin/journal",
       "messages" => "/admin/messages",
       "new post" => "/admin/posts/new",

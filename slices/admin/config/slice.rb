@@ -26,7 +26,9 @@ module Admin
       queries.view_totals queries.views_by_path queries.views_by_post queries.visitors_for_day
     ], from: :analytics
 
-    import keys: %w[operations.mint_token operations.revoke_token queries.calendar queries.live_tokens], from: :api
+    import keys: %w[
+      operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.live_tokens
+    ], from: :api
 
     import keys: %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
@@ -90,7 +92,8 @@ module Admin
       operations.complete_task
       operations.current_sprint operations.delete_task operations.delete_task_comment
       operations.delete_work_session operations.drop_sprint operations.edit_task_comment
-      operations.edit_work_session operations.link_tasks operations.move_task operations.plan_sprint
+      operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
+      operations.plan_sprint
       operations.place_task operations.queue_issue_sync operations.reopen_task
       operations.save_task operations.schedule_task operations.set_task_total operations.start_task
       operations.unlink_task
