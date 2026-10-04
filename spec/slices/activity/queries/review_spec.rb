@@ -7,6 +7,12 @@ RSpec.describe Activity::Queries::Review do
 
   def carried(count, day) = create(:task, list: nil, sprint_id: sprint_on(day).id, carried_count: count)
 
+  def close(kind, day, decision: create(:decision), chosen: nil, reason: "Settled", hour: 12)
+    option_id = chosen && create(:decision_option, decision_id: decision.id, title: chosen).id
+    create(:decision_event, decision_id: decision.id, kind:, option_id:, reason:, created_at: at(day, hour))
+    decision
+  end
+
   def review(period = "week", on = wednesday) = Activity::Slice["queries.review"].call(period:, on:)
 
   def sprint_on(day) = create(:sprint, sprint_date: day)
@@ -142,6 +148,46 @@ RSpec.describe Activity::Queries::Review do
     end
   end
 
+  describe "decisions" do
+    it "lists those resolved in the week with the option chosen" do
+      decision = close("resolved", wednesday, chosen: "Sidekiq", reason: "It is cheap")
+      closed = { decision_id: decision.id, outcome: "resolved", chosen: "Sidekiq", reason: "It is cheap" }
+      found = review.decisions.map { it.to_h.slice(*closed.keys, :closed_on) }
+
+      expect(found).to eq([closed.merge(closed_on: wednesday)])
+    end
+
+    it "lists those dropped in the week with no option chosen" do
+      close("dropped", Date.new(2026, 9, 15))
+
+      expect(review.decisions.map { [it.outcome, it.chosen] }).to eq([["dropped", nil]])
+    end
+
+    it "lists them in the order they closed" do
+      later = close("dropped", Date.new(2026, 9, 18))
+      sooner = close("resolved", Date.new(2026, 9, 14), chosen: "Postgres")
+
+      expect(review.decisions.map(&:decision_id)).to eq([sooner.id, later.id])
+    end
+
+    it "lists a decision closed twice in the week once, with how it last closed" do
+      decision = close("resolved", Date.new(2026, 9, 14), chosen: "Redis")
+      create(:decision_event, decision_id: decision.id, kind: "reopened", reason: "Too costly",
+                              created_at: at(Date.new(2026, 9, 15)))
+      close("dropped", wednesday, decision:)
+
+      expect(review.decisions.map { [it.decision_id, it.outcome] }).to eq([[decision.id, "dropped"]])
+    end
+
+    it "leaves out decisions closed in another week and events that close nothing" do
+      close("resolved", Date.new(2026, 9, 13), chosen: "Redis", hour: 23)
+      close("dropped", Date.new(2026, 9, 21), hour: 0)
+      create(:decision_event, kind: "opened", created_at: at(wednesday))
+
+      expect(review.decisions).to be_empty
+    end
+  end
+
   describe "time worked" do
     it "sums the sessions on each day of the week" do
       work(at(wednesday, 9), at(wednesday, 10))
@@ -179,6 +225,7 @@ RSpec.describe Activity::Queries::Review do
       create(:journal_entry, entry_date: day, body: "a day")
       create(:commit, repo: "aaronmallen/one", commit_date: day, additions: 1, deletions: 0)
       work(at(day, 9), at(day, 10))
+      close("resolved", day, chosen: "Sidekiq")
     end
 
     describe "with records on each edge of the month" do
@@ -202,6 +249,10 @@ RSpec.describe Activity::Queries::Review do
 
       it "totals the commits made inside it" do
         expect(september.commits.dig("aaronmallen/one", :commits)).to eq(2)
+      end
+
+      it "lists the decisions closed inside it" do
+        expect(september.decisions.map(&:closed_on)).to eq(inside)
       end
 
       it "sums the time worked inside it" do

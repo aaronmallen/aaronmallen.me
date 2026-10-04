@@ -1035,6 +1035,11 @@ en:
             one: "Slipped %{count} day"
             other: "Slipped %{count} days"
           title: "Carried over"
+        decisions_card:
+          dropped: "Dropped · %{day}"
+          empty: "No decisions closed."
+          resolved: "Chose %{option} · %{day}"
+          title: "Decisions"
         done_card:
           empty: "Nothing done yet."
           title: "Done"

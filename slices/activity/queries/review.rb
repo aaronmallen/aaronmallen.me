@@ -16,7 +16,8 @@ module Activity
 
         Structs::Review.new(
           period:, from:, to:, **tasks(from, to), **records(from, to),
-          commits: review_repo.commits(from:, to:), worked: worked(from, to),
+          commits: review_repo.commits(from:, to:), decisions: review_repo.decisions(from:, to:),
+          worked: worked(from, to),
         )
       end
 

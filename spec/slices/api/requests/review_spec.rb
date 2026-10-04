@@ -7,6 +7,13 @@ RSpec.describe "API review", type: :request do
 
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
 
+  def close(kind, day, title:, chosen: nil)
+    decision = create(:decision, title:)
+    option_id = chosen && create(:decision_option, decision_id: decision.id, title: chosen).id
+    create(:decision_event, decision_id: decision.id, kind:, option_id:, reason: "Settled", created_at: at(day))
+    decision
+  end
+
   def fill(day, title: "Finish the review screen")
     done = create(:task, :done, title:, completed_at: at(day), worked_seconds: 5400)
     carried = create(:task, list: nil, sprint_id: create(:sprint, sprint_date: day).id, carried_count: 3)
@@ -38,6 +45,8 @@ RSpec.describe "API review", type: :request do
         post: create(:post, :published, title: "A post that went out", published_at: at(wednesday)),
         social_post: create(:social_post, :posted, posted_at: at(Date.new(2026, 9, 18))),
         entry: create(:journal_entry, entry_date: Date.new(2026, 9, 14), body: "one two three"),
+        resolved: close("resolved", Date.new(2026, 9, 15), title: "Pick a queue", chosen: "Sidekiq"),
+        dropped: close("dropped", Date.new(2026, 9, 18), title: "Move to a VPS"),
       }
     end
     let(:review) { read(day: "2026-09-17") }
@@ -87,6 +96,23 @@ RSpec.describe "API review", type: :request do
     it "totals the commits by repo" do
       expect(review.fetch("commits"))
         .to eq([{ "repo" => "aaronmallen/one", "commits" => 1, "additions" => 10, "deletions" => 2 }])
+    end
+
+    it "lists the decisions resolved or dropped, with the option chosen" do
+      resolved = [records[:resolved].id, "resolved", "Sidekiq", "Settled", "2026-09-15"]
+      dropped = [records[:dropped].id, "dropped", nil, "Settled", "2026-09-18"]
+
+      expect(review.fetch("decisions").map { it.values_at("id", "outcome", "chosen", "reason", "date") })
+        .to eq([resolved, dropped])
+    end
+
+    it "gives the decisions the admin screen shows for the same week" do
+      sign_in_to_admin
+      get "/admin/review", day: wednesday.iso8601
+      shown = Capybara.string(last_response.body).all("#review-decisions a.li-title").map(&:text)
+
+      expect(mcp_answer("read_review", day: wednesday.iso8601).fetch("decisions").map { it.fetch("title") })
+        .to eq(shown)
     end
 
     it "gives the time worked on every day of the week" do
@@ -151,6 +177,7 @@ RSpec.describe "API review", type: :request do
   describe "the MCP tool" do
     it "reads as read_review does" do
       fill(wednesday)
+      close("resolved", wednesday, title: "Pick a queue", chosen: "Sidekiq")
 
       expect(read(period: "month", day: wednesday.iso8601))
         .to eq(mcp_answer("read_review", period: "month", day: wednesday.iso8601))

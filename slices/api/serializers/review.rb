@@ -3,6 +3,7 @@
 module API
   module Serializers
     class Review < Serializer
+      OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
       RECORD = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, name: Schema::STRING }).freeze
 
       SCHEMA = Schema.object(
@@ -51,11 +52,25 @@ module API
               },
             ),
           ),
+          decisions: Schema.list(
+            Schema.object(
+              {
+                id: Schema::INTEGER,
+                title: Schema::STRING,
+                outcome: { type: "string", enum: OUTCOMES },
+                chosen: Schema.nullable(Schema::STRING),
+                reason: Schema::STRING,
+                date: Schema::DAY,
+              },
+            ),
+          ),
           worked: Schema.list(Schema.object({ date: Schema::DAY, seconds: Schema::INTEGER })),
         },
       ).freeze
 
-      attributes :period, :from, :to, :totals, :done, :carried, :posts, :social_posts, :journal, :commits, :worked
+      attributes(
+        :period, :from, :to, :totals, :done, :carried, :posts, :social_posts, :journal, :commits, :decisions, :worked,
+      )
 
       def carried(review)
         review.carried.map do |task|
@@ -65,6 +80,19 @@ module API
 
       def commits(review)
         review.commits.map { |repo, totals| { repo:, **totals.slice(:commits, :additions, :deletions) } }
+      end
+
+      def decisions(review)
+        review.decisions.map do |decision|
+          {
+            id: decision.decision_id,
+            title: decision.title,
+            outcome: decision.outcome,
+            chosen: decision.chosen,
+            reason: decision.reason,
+            date: day(decision.closed_on),
+          }
+        end
       end
 
       def done(review)

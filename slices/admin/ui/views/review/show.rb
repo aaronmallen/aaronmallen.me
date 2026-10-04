@@ -42,6 +42,7 @@ module Admin
             PublishedCard(posts: @review.posts, social_posts: @review.social_posts)
             JournalCard(journal: @review.journal)
             ReposCard(commits: @review.commits)
+            DecisionsCard(decisions: @review.decisions)
           end
 
           def stats

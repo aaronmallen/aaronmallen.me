@@ -11,6 +11,8 @@ module Activity
         activities.between(from, to).commit_totals_by_repo.to_a.to_h { [it.repo, it.to_h.except(:repo)] }
       end
 
+      def decisions(from:, to:) = review_decisions.closed_between(from, to).to_a.reverse.uniq(&:decision_id).reverse
+
       def done(from:, to:) = review_tasks.done_between(from, to).to_a
 
       def records(from:, to:) = activities.between(from, to).with_types(RECORDS).oldest_first.to_a

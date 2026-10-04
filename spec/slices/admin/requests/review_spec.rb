@@ -9,12 +9,20 @@ RSpec.describe "Admin review", type: :request do
 
   def card(name) = page.find("#review-#{name}")
 
+  def close(kind, day, title:, chosen: nil)
+    decision = create(:decision, title:)
+    option_id = chosen && create(:decision_option, decision_id: decision.id, title: chosen).id
+    create(:decision_event, decision_id: decision.id, kind:, option_id:, reason: "Settled", created_at: at(day))
+    decision
+  end
+
   def fill(day, title: "Finish the review screen")
     done = create(:task, :done, title:, completed_at: at(day), worked_seconds: 5400)
     sprint = create(:sprint, sprint_date: day)
     carried = create(:task, list: nil, sprint_id: sprint.id, carried_count: 3, title: "Call the accountant")
     create(:work_session, task_id: done.id, started_at: at(day, 9), ended_at: at(day, 10))
-    { done:, carried: }
+    decision = close("resolved", day, title: "Pick a queue for #{title}", chosen: "Sidekiq")
+    { done:, carried:, decision: }
   end
 
   def visit_review(params = {}) = get("/admin/review", params)
@@ -67,6 +75,7 @@ RSpec.describe "Admin review", type: :request do
 
     describe "a week with records" do
       let!(:filled) { fill(wednesday) }
+      let!(:dropped) { close("dropped", Date.new(2026, 9, 18), title: "Move to a VPS") }
 
       before do
         create(:post, :published, title: "A post that went out", published_at: at(wednesday))
@@ -117,6 +126,21 @@ RSpec.describe "Admin review", type: :request do
 
       it "totals the commits by repo" do
         expect(card("commits").find(".li", text: "aaronmallen/one")).to have_text("1 commit · +10 −2")
+      end
+
+      it "links each resolved decision to its decision and names the option chosen" do
+        item = card("decisions").find(".li", text: "Pick a queue")
+        href = item.find_link("Pick a queue for Finish the review screen")[:href]
+
+        expect([href, item.find(".li-sub").text])
+          .to eq(["/admin/decisions/#{filled[:decision].id}", "Chose Sidekiq · Wednesday, September 16"])
+      end
+
+      it "links each dropped decision to its decision and says it was dropped" do
+        item = card("decisions").find(".li", text: "Move to a VPS")
+
+        expect([item.find_link("Move to a VPS")[:href], item.find(".li-sub").text])
+          .to eq(["/admin/decisions/#{dropped.id}", "Dropped · Friday, September 18"])
       end
 
       it "gives the time worked on each day and in all" do
@@ -196,7 +220,7 @@ RSpec.describe "Admin review", type: :request do
 
       {
         "done" => "Nothing done yet", "carried" => "Nothing slipped", "published" => "Nothing went out",
-        "commits" => "No commits",
+        "commits" => "No commits", "decisions" => "No decisions closed",
       }.each do |name, text|
         it "says #{name} holds nothing" do
           expect(card(name)).to have_css(".empty", text:)
