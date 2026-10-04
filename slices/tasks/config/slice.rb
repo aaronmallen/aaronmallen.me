@@ -6,6 +6,8 @@ module Tasks
 
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
+    import keys: %w[queries.linkable_projects], from: :projects
+
     import keys: %w[
       github.client linear.client operations.record_issue_sync_outcome operations.record_linear_issue_sync_outcome
     ], from: :record
@@ -23,7 +25,7 @@ module Tasks
       queries.list_finished_tasks queries.list_tasks queries.open_task_counts queries.open_tasks
       queries.open_tasks_in_list queries.planned_tasks queries.sprints_after queries.sprints_between
       queries.task_by_id queries.task_comments queries.task_timeline queries.tasks_in_sprint
-      queries.unseen_tasks
+      queries.time_report queries.unseen_tasks
     ]
   end
 end

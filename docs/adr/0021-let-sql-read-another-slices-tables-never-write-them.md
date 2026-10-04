@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, links, posts, search, social, tags]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -59,6 +59,9 @@ cross today:
   would make posts import a query from social, which already imports from posts, and ADR 0003 allows no such
   cycle.
 
+- **`Tasks::Relations::RecordLinks#project_ids_by_task`** reads `record_links`, which `links` owns, to find the
+  projects each task links to for the time report. `links` imports `queries.linkable_tasks` from `tasks`, so an
+  import the other way would close a cycle.
 - **The `record_links_find_records` trigger**, in `config/db/migrate/20261003000094_create_record_links.rb`, finds
   and locks the row each side of a new link names in `tasks`, `posts`, `social_posts`, `journal_entries`, `commits`,
   `projects`, `work_entries` or `decisions`, which `tasks`, `posts`, `social`, `record`, `projects` and `decisions`

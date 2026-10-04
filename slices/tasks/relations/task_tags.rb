@@ -11,6 +11,14 @@ module Tasks
         end
       end
 
+      def names_by_task(task_ids)
+        name = Sequel[:tags][:name]
+
+        found = dataset.unordered.join(:tags, id: :tag_id).where(task_id: task_ids)
+
+        found.order(name).select(:task_id, name).to_hash_groups(:task_id, :name)
+      end
+
       def owner_key = :task_id
     end
   end

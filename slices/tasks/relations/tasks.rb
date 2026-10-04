@@ -96,6 +96,15 @@ module Tasks
 
       def titled(text) = where(Sequel.ilike(:title, "%#{dataset.escape_like(text)}%"))
 
+      def titles_and_totals(ids) = dataset.unordered.where(id: ids).select_hash(:id, %i[title worked_seconds])
+
+      def totals_closed_between(first, last)
+        found = exclude(worked_seconds: 0).exclude(id: work_sessions.select(:task_id).dataset)
+        closed = found.where(COMPLETED_ON => first..last).dataset.unordered
+
+        closed.select_map([:id, COMPLETED_ON.as(:closed_on), :worked_seconds])
+      end
+
       def touched_between(first, last)
         days = Range.new(first, last)
 
