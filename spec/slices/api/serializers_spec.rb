@@ -53,6 +53,13 @@ RSpec.describe "API serializers", type: :request do
       expect(read(done.id)).to eq(content.except("comments", "record_links", "timeline"))
     end
 
+    it "gives the JSON read_task returns for a synced task" do
+      task = create(:task)
+      create(:task_source, task_id: task.id, seen_at: Time.now)
+
+      expect(read(task.id)).to eq(content.except("comments", "record_links", "timeline"))
+    end
+
     it "gives the sprint day of a task in a sprint" do
       task = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id)
 

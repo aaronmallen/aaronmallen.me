@@ -10,6 +10,8 @@ RSpec.describe "API task comments", type: :request do
     JSON.parse(last_response.body)
   end
 
+  def stamps(saved) = { "created_at" => saved.created_at.utc.iso8601, "updated_at" => saved.updated_at.utc.iso8601 }
+
   def status = last_response.status
 
   def stored(task) = Tasks::Slice["repos.task_comment_repo"].for_task(task.id)
@@ -27,7 +29,7 @@ RSpec.describe "API task comments", type: :request do
       answered = comment(task.id, body: "  Blocked on review  ")
       saved = stored(task).first
       entry = { "id" => saved.id, "body" => "Blocked on review", "author" => Blog::Owner.full_name,
-                "source" => "local", "url" => nil, "created_at" => saved.created_at.utc.iso8601 }
+                "source" => "local", "url" => nil, **stamps(saved) }
 
       expect([answered, status]).to eq([entry, 201])
     end
@@ -71,8 +73,8 @@ RSpec.describe "API task comments", type: :request do
       other = create(:task)
       answered = comment(task.id, body: "the same")
 
-      expect(mcp_answer("add_task_comment", id: other.id, body: "the same").except("id", "created_at"))
-        .to eq(answered.except("id", "created_at"))
+      expect(mcp_answer("add_task_comment", id: other.id, body: "the same").except("id", "created_at", "updated_at"))
+        .to eq(answered.except("id", "created_at", "updated_at"))
     end
 
     it "refuses with the message the endpoint gives" do

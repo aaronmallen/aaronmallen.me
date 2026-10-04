@@ -88,6 +88,15 @@ RSpec.describe "API tasks", type: :request do
       end
     end
 
+    it "gives each task its source and when it last changed" do
+      synced = create(:task, updated_at: at(today, 15))
+      create(:task_source, task_id: synced.id, url: "https://github.com/aaronmallen/aaronmallen.me/issues/7")
+      create(:task, updated_at: at(today, 16))
+
+      expect(list.fetch("tasks").map { [it.dig("source", "reference"), it.fetch("updated_at")] })
+        .to eq([[nil, at(today, 16).utc.iso8601], ["aaronmallen/aaronmallen.me#7", at(today, 15).utc.iso8601]])
+    end
+
     it "refuses a window that runs backwards with a 422" do
       refusal = { "error" => "invalid", "message" => "from comes after to",
                   "errors" => { "from" => ["from comes after to"], "to" => ["from comes after to"] } }
@@ -148,6 +157,39 @@ RSpec.describe "API tasks", type: :request do
 
     it "answers no record links for a task with none" do
       expect(read(create(:task).id).fetch("record_links")).to eq({})
+    end
+
+    it "answers when the task last changed" do
+      task = create(:task, updated_at: at(today, 15))
+
+      expect(read(task.id).fetch("updated_at")).to eq(at(today, 15).utc.iso8601)
+    end
+
+    it "answers the GitHub issue a synced task comes from" do
+      source = create(:task_source, remote_state: "completed", seen_at: at(today, 9))
+
+      expect(read(source.task_id).fetch("source"))
+        .to include("provider" => "github", "remote_state" => "completed", "seen_at" => at(today, 9).utc.iso8601)
+    end
+
+    it "answers the address and reference of the issue" do
+      url = "https://github.com/aaronmallen/aaronmallen.me/issues/12"
+      source = create(:task_source, url:)
+
+      expect(read(source.task_id).fetch("source"))
+        .to include("url" => url, "reference" => "aaronmallen/aaronmallen.me#12")
+    end
+
+    it "answers the Linear issue a synced task comes from, not yet seen" do
+      task = create(:task)
+      create(:task_source, task_id: task.id, provider: "linear", url: "https://linear.app/aaron/issue/AA-213/a-slug")
+
+      expect(read(task.id).fetch("source"))
+        .to include("provider" => "linear", "reference" => "aaron/AA-213", "remote_state" => "open", "seen_at" => nil)
+    end
+
+    it "answers a null source for a local task" do
+      expect(read(create(:task).id).fetch("source")).to be_nil
     end
 
     it "answers an unknown ID with a 404" do
@@ -494,15 +536,16 @@ RSpec.describe "API tasks", type: :request do
       fields = { title: "the same", list: "someday", tags: %w[ruby] }
       captured = capture(fields)
 
-      expect(mcp_answer("capture_task", **fields).except("id", "created_at"))
-        .to eq(captured.except("id", "created_at"))
+      expect(mcp_answer("capture_task", **fields).except("id", "created_at", "updated_at"))
+        .to eq(captured.except("id", "created_at", "updated_at"))
     end
 
     it "save as save_task does" do
       task = create(:task, title: "Draft", tags: %w[admin])
       saved = save(task.id, title: "Final", note: "done looks like this")
 
-      expect(mcp_answer("save_task", id: task.id, title: "Final", note: "done looks like this")).to eq(saved)
+      expect(mcp_answer("save_task", id: task.id, title: "Final", note: "done looks like this").except("updated_at"))
+        .to eq(saved.except("updated_at"))
     end
 
     %w[start complete cancel].each do |verb|
@@ -510,8 +553,8 @@ RSpec.describe "API tasks", type: :request do
         ids = [create(:task, title: "same").id, create(:task, title: "same").id]
         answered = act(ids.first, verb)
 
-        expect(mcp_answer("#{verb}_task", id: ids.last).except("id", "completed_at", "created_at"))
-          .to eq(answered.except("id", "completed_at", "created_at"))
+        expect(mcp_answer("#{verb}_task", id: ids.last).except("id", "completed_at", "created_at", "updated_at"))
+          .to eq(answered.except("id", "completed_at", "created_at", "updated_at"))
       end
     end
 
@@ -519,7 +562,7 @@ RSpec.describe "API tasks", type: :request do
       task = create(:task, :done)
       reopened = act(task.id, "reopen")
 
-      expect(mcp_answer("reopen_task", id: task.id)).to eq(reopened)
+      expect(mcp_answer("reopen_task", id: task.id).except("updated_at")).to eq(reopened.except("updated_at"))
     end
 
     it "mark seen as mark_task_seen does" do
@@ -527,28 +570,31 @@ RSpec.describe "API tasks", type: :request do
       create(:task_source, task:)
       seen = act(task.id, "seen")
 
-      expect(mcp_answer("mark_task_seen", id: task.id)).to eq(seen)
+      expect(mcp_answer("mark_task_seen", id: task.id).except("updated_at")).to eq(seen.except("updated_at"))
     end
 
     it "schedule as schedule_task does" do
       task = create(:task)
       scheduled = act(task.id, "schedule", sprint_on: (today + 2).iso8601)
 
-      expect(mcp_answer("schedule_task", id: task.id, sprint_on: (today + 2).iso8601)).to eq(scheduled)
+      expect(mcp_answer("schedule_task", id: task.id, sprint_on: (today + 2).iso8601).except("updated_at"))
+        .to eq(scheduled.except("updated_at"))
     end
 
     it "move as move_task does" do
       task = create(:task)
       moved = act(task.id, "move", list: "external")
 
-      expect(mcp_answer("move_task", id: task.id, list: "external")).to eq(moved)
+      expect(mcp_answer("move_task", id: task.id, list: "external").except("updated_at"))
+        .to eq(moved.except("updated_at"))
     end
 
     it "reorder as reorder_task does" do
       task = create(:task)
       reordered = act(task.id, "reorder", direction: "up")
 
-      expect(mcp_answer("reorder_task", id: task.id, direction: "up")).to eq(reordered)
+      expect(mcp_answer("reorder_task", id: task.id, direction: "up").except("updated_at"))
+        .to eq(reordered.except("updated_at"))
     end
 
     it "delete as delete_task does" do

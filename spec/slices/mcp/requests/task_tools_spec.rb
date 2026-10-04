@@ -245,7 +245,10 @@ RSpec.describe "MCP task tools", type: :request do
     it "answers with the comment, trimmed" do
       call_tool("add_task_comment", id: task.id, body: "  Blocked on review  ")
 
-      expect(content).to eq({ "id" => stored.first.id, **local_entry("Blocked on review", stored.first.created_at) })
+      saved = stored.first
+
+      expect(content).to eq({ "id" => saved.id, **local_entry("Blocked on review", saved.created_at),
+                              "updated_at" => saved.updated_at.utc.iso8601 })
     end
 
     it "shows the comment when the task is read" do

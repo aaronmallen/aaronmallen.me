@@ -6,7 +6,8 @@ module MCP
       COMMENTS = API::Serializers::TaskTimelineComment::KINDS
 
       description "Read one task: its title, note, status, list or sprint day, tags, links to other tasks both " \
-                  "ways, its comments, oldest first, the other records linked to it, grouped by kind, and its " \
+                  "ways, the issue it syncs from (null for a local task), its created, updated and completed " \
+                  "times, its comments, oldest first, the other records linked to it, grouped by kind, and its " \
                   "timeline: comments, work sessions with their IDs, moves, tag changes and status changes, " \
                   "oldest first. The note and each comment's body may come from an issue tracker and come marked " \
                   "untrusted. #{Untrusted::WARNING}"

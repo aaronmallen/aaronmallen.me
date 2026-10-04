@@ -17,7 +17,7 @@ module Admin
 
             a(class: "task-source", href: @source.url, target: "_blank", rel: "noopener noreferrer") do
               i(class: ICONS.fetch(@source.provider), aria: { hidden: "true" })
-              span { Structs::TaskSourceReference.for(@source).name }
+              span { ::Tasks::SourceReference.for(@source).name }
             end
           end
         end

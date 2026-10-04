@@ -254,15 +254,16 @@ RSpec.describe "API task time", type: :request do
       ids.each { act(it, "start") }
       paused = act(ids.first, "pause")
 
-      expect(mcp_answer("pause_task", id: ids.last).except("id", "created_at", "worked_seconds"))
-        .to eq(paused.except("id", "created_at", "worked_seconds"))
+      expect(mcp_answer("pause_task", id: ids.last).except("id", "created_at", "updated_at", "worked_seconds"))
+        .to eq(paused.except("id", "created_at", "updated_at", "worked_seconds"))
     end
 
     it "edit a session as update_work_session does" do
       times = { started_at: local(started), ended_at: local(started + 900) }
       edited = edit(closed, **times)
 
-      expect(mcp_answer("update_work_session", id: task.id, session_id: sessions.first[:id], **times)).to eq(edited)
+      expect(unstamped(mcp_answer("update_work_session", id: task.id, session_id: sessions.first[:id], **times)))
+        .to eq(unstamped(edited))
     end
 
     it "delete a session as delete_work_session does" do
@@ -284,15 +285,15 @@ RSpec.describe "API task time", type: :request do
     it "set the total as set_task_total does" do
       set = act(task.id, "total", hours: 4)
 
-      expect(mcp_answer("set_task_total", id: task.id, hours: 4)).to eq(set)
+      expect(unstamped(mcp_answer("set_task_total", id: task.id, hours: 4))).to eq(unstamped(set))
     end
 
     it "complete with a duration as complete_task does" do
       ids = [create(:task, title: "same").id, create(:task, title: "same").id]
       completed = act(ids.first, "complete", minutes: 20)
+      stamps = %w[id completed_at created_at updated_at]
 
-      expect(mcp_answer("complete_task", id: ids.last, minutes: 20).except("id", "completed_at", "created_at"))
-        .to eq(completed.except("id", "completed_at", "created_at"))
+      expect(mcp_answer("complete_task", id: ids.last, minutes: 20).except(*stamps)).to eq(completed.except(*stamps))
     end
 
     it "refuse with the message the endpoint gives" do

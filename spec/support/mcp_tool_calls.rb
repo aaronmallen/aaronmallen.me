@@ -21,6 +21,14 @@ module MCPToolCalls
     end
   end
 
+  def unstamped(value)
+    case value
+    when Hash then value.except("updated_at").transform_values { unstamped(it) }
+    when Array then value.map { unstamped(it) }
+    else value
+    end
+  end
+
   private
 
   def mcp_access_token

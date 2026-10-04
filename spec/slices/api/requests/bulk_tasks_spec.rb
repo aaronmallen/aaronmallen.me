@@ -5,7 +5,7 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def bare(answer) = answer.fetch("tasks").map { it.except("id", "completed_at", "created_at") }
+  def bare(answer) = answer.fetch("tasks").map { it.except("id", "completed_at", "created_at", "updated_at") }
 
   def call_api(name, body, token: api_token)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
@@ -244,21 +244,21 @@ RSpec.describe "API bulk task actions", type: :request do
       task = create(:task)
       moved = act("move", [task.id], list: "external")
 
-      expect(mcp_answer("move_tasks", ids: [task.id], list: "external")).to eq(moved)
+      expect(unstamped(mcp_answer("move_tasks", ids: [task.id], list: "external"))).to eq(unstamped(moved))
     end
 
     it "tag as tag_tasks does" do
       task = create(:task)
       tagged_answer = act("tag", [task.id], tag: "ruby")
 
-      expect(mcp_answer("tag_tasks", ids: [task.id], tag: "ruby")).to eq(tagged_answer)
+      expect(unstamped(mcp_answer("tag_tasks", ids: [task.id], tag: "ruby"))).to eq(unstamped(tagged_answer))
     end
 
     it "untag as untag_tasks does" do
       task = tagged("ruby", "rails")
       untagged = act("untag", [task.id], tag: "ruby")
 
-      expect(mcp_answer("untag_tasks", ids: [task.id], tag: "ruby")).to eq(untagged)
+      expect(unstamped(mcp_answer("untag_tasks", ids: [task.id], tag: "ruby"))).to eq(unstamped(untagged))
     end
 
     it "delete as delete_tasks does" do
