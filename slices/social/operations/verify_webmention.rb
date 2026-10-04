@@ -21,12 +21,13 @@ module Social
 
       private
 
-      def approved?(author_url, source, settings)
-        settings.auto_approve_known_authors && domain(source) == domain(author_url) &&
-          webmention_repo.known_author?(author_url)
-      end
+      def approved?(page, source, settings)
+        author_url = page.author_link
+        return false unless settings.auto_approve_known_authors && author_url
 
-      def domain(url) = Blog::Types::Normalized::Host.call(url) { nil }
+        scope = Webmentions::AuthorScope.new(author_url, single_author_hosts: settings.single_author_hosts)
+        [source, page.url].all? { scope.covers?(it) } && webmention_repo.known_author?(author_url)
+      end
 
       def eligible(post_id, source, settings)
         return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
@@ -59,16 +60,15 @@ module Social
         page.links_to? ? Success(page) : forget(post, source, :no_link)
       end
 
-      def status(author_url, source, settings)
-        approved?(author_url, source, settings) ? Repos::WebmentionRepo::APPROVED : Repos::WebmentionRepo::PENDING
+      def status(page, source, settings)
+        approved?(page, source, settings) ? Repos::WebmentionRepo::APPROVED : Repos::WebmentionRepo::PENDING
       end
 
       def store(page, post, source, settings)
         author = page.author
         webmention_repo.store(
           post_id: post.id, source_url: source, author_name: author[:name], author_url: author[:url],
-          type: page.type, excerpt: page.excerpt, received_at: Time.now,
-          status: status(author[:url], source, settings),
+          type: page.type, excerpt: page.excerpt, received_at: Time.now, status: status(page, source, settings),
         )
       end
     end

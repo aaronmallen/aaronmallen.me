@@ -332,6 +332,47 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_css("[data-toast]", exact_text: "Nothing saved · no setting changed")
       end
 
+      def save_hosts(text)
+        post "/admin/webmentions/settings", _csrf_token: admin_csrf_token,
+                                            settings: toggles.merge(single_author_hosts: text)
+      end
+
+      it "saves one person's sites from the hosts it is sent, one per line, cleaned up and in order" do
+        save_hosts("grace.example\r\nhttps://Ada.Example/about\n\nnot a host/\n")
+
+        expect(repo.settings.single_author_hosts).to eq(%w[ada.example grace.example])
+      end
+
+      it "clears the hosts when sent none" do
+        repo.update_settings(single_author_hosts: ["ada.example"])
+        save_hosts("")
+
+        expect(repo.settings.single_author_hosts).to eq([])
+      end
+
+      it "leaves the hosts alone when the form leaves them out" do
+        repo.update_settings(single_author_hosts: ["ada.example"])
+        post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: { receive: "0" }
+
+        expect(repo.settings.single_author_hosts).to eq(["ada.example"])
+      end
+
+      it "says nothing changed when the hosts match the stored ones" do
+        repo.update_settings(single_author_hosts: ["ada.example"])
+        save_hosts("ada.example")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", exact_text: "Nothing saved · no setting changed")
+      end
+
+      it "shows the stored hosts, one per line" do
+        repo.update_settings(single_author_hosts: %w[ada.example grace.example])
+        get "/admin/webmentions"
+
+        expect(page.find("textarea[name='settings[single_author_hosts]']").value)
+          .to eq("ada.example\ngrace.example")
+      end
+
       it "names the endpoint" do
         get "/admin/webmentions"
 

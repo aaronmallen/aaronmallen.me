@@ -28,8 +28,10 @@ module Admin
 
         def settings(request)
           params = Blog::Types::Fields[request.params[:settings]]
+          toggles = params.slice(*SETTINGS).transform_values { Blog::Types::Checkbox[it] }
+          return toggles unless params.key?(:single_author_hosts)
 
-          params.slice(*SETTINGS).transform_values { Blog::Types::Checkbox[it] }
+          toggles.merge(single_author_hosts: Blog::Types::Normalized::Hosts[params[:single_author_hosts]])
         end
       end
     end

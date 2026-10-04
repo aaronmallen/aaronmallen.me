@@ -531,71 +531,133 @@ RSpec.describe Social::Jobs::VerifyWebmention do
   end
 
   describe "auto-approve" do
-    before do
-      create(:webmention, :approved, post: create(:post, :published), author_url: "https://ada.example/about")
+    let(:ada) { "https://ada.example/~ada" }
+    let(:source) { "https://ada.example/~ada/notes/1" }
+
+    def approve_author(url) = create(:webmention, :approved, post: create(:post, :published), author_url: url)
+
+    def verify_from(from, author:)
+      stub_source(entry(author:), url: from)
+      verify(source: from)
+      stored(from).status
     end
 
+    before { approve_author(ada) }
+
     {
-      "an author I approved before" => "https://ada.example/about",
-      "that author under another case" => "https://ADA.Example/about",
-      "that author with a trailing slash" => "https://ada.example/about/",
+      "an author I approved before" => "https://ada.example/~ada",
+      "that author under another case" => "https://ADA.Example/~ada",
+      "that author with a trailing slash" => "https://ada.example/~ada/",
     }.each do |what, author|
-      it "approves a mention from #{what}" do
+      it "approves a mention under the path of #{what}" do
         verify_page(entry(author:))
 
         expect(stored.status).to eq("approved")
       end
     end
 
+    it "approves a mention under the author's path that holds an escape outside UTF-8" do
+      expect(verify_from("https://ada.example/~ada/%FF/1", author: ada)).to eq("approved")
+    end
+
+    it "approves a mention from the author's own page" do
+      expect(verify_from(ada, author: ada)).to eq("approved")
+    end
+
     {
       "a new host" => ["https://grace.example/notes/1", "https://grace.example/about"],
-      "another host claiming an author on a known host" => ["https://evil.example/note", "https://ada.example/about"],
-      "a known host claiming an author elsewhere" => ["https://ada.example/notes/1", "https://grace.example/about"],
+      "another host claiming an author on a known host" => ["https://evil.example/note", "https://ada.example/~ada"],
+      "a known host claiming an author elsewhere" => ["https://ada.example/~ada/notes/1", "https://grace.example/about"],
       "another author on a known host" => ["https://ada.example/notes/2", "https://ada.example/~grace"],
-      "a page naming no author when only a page on its host is known" => ["https://ada.example/notes/1", nil],
+      "a page outside a known author's path on the same host" => ["https://ada.example/~grace/1", "https://ada.example/~ada"],
+      "a path that only starts with the same letters" => ["https://ada.example/~adam/1", "https://ada.example/~ada"],
+      "a path that climbs out of the author's" => ["https://ada.example/~ada/../~grace/1", "https://ada.example/~ada"],
+      "a path that climbs out under escapes" => ["https://ada.example/~ada/%2e%2e/~grace/1", "https://ada.example/~ada"],
+      "a path that climbs out behind an escaped slash" =>
+        ["https://ada.example/~ada/..%2F~grace/1", "https://ada.example/~ada"],
+      "another scheme on the author's host" => ["http://ada.example/~ada/notes/1", "https://ada.example/~ada"],
       "a Bridgy page whose author's site is unknown" =>
         ["https://brid.gy/like/mastodon/1", "https://mastodon.social/@ada"],
     }.each do |what, (from, author)|
       it "leaves a mention from #{what} waiting" do
-        stub_source(entry(author:), url: from)
-        verify(source: from)
-
-        expect(stored(from).status).to eq("pending")
+        expect(verify_from(from, author:)).to eq("pending")
       end
     end
 
-    it "approves a mention whose page names no author once that site itself is known" do
-      create(:webmention, :approved, post: create(:post, :published), author_url: "https://ada.example/")
-      verify_page(entry)
+    it "leaves a mention waiting that redirects outside the author's path" do
+      stub_request(:get, source).to_return(status: 302, headers: { "Location" => "https://ada.example/~grace/1" })
+      stub_source(entry(author: ada), url: "https://ada.example/~grace/1")
+      verify
 
-      expect(stored.status).to eq("approved")
+      expect(stored.status).to eq("pending")
+    end
+
+    describe "a page that names no author" do
+      before { approve_author("https://ada.example/") }
+
+      it "leaves the mention waiting even once its site is known" do
+        verify_page(entry)
+
+        expect(stored.status).to eq("pending")
+      end
+
+      it "leaves the mention waiting even on a host marked as one person's site" do
+        webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+        verify_page(entry)
+
+        expect(stored.status).to eq("pending")
+      end
+
+      it "leaves the mention waiting when the card carries no URL" do
+        verify_page(entry(body: %(<span class="p-author h-card">Ada</span>#{link})))
+
+        expect(stored.status).to eq("pending")
+      end
+    end
+
+    describe "an author at the root of a host" do
+      before { approve_author("https://ada.example/") }
+
+      it "leaves a mention waiting while the host is not marked as one person's site" do
+        expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("pending")
+      end
+
+      it "approves a mention from any page once the host is marked as one person's site" do
+        webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+
+        expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("approved")
+      end
+
+      it "leaves a mention waiting once another host is the one marked" do
+        webmention_repo.update_settings(single_author_hosts: ["grace.example"])
+
+        expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("pending")
+      end
     end
 
     it "leaves a known author waiting once that author has been marked spam as well" do
-      create(:webmention, :spam, post: create(:post, :published), author_url: "https://ada.example/about")
-      verify_page(entry(author: "https://ada.example/about"))
+      create(:webmention, :spam, post: create(:post, :published), author_url: ada)
+      verify_page(entry(author: ada))
 
       expect(stored.status).to eq("pending")
     end
 
     it "leaves an author waiting whose only mention has been ignored" do
       create(:webmention, :ignored, post: create(:post, :published), author_url: "https://grace.example/about")
-      stub_source(entry(author: "https://grace.example/about"), url: "https://grace.example/notes/1")
-      verify(source: "https://grace.example/notes/1")
 
-      expect(stored("https://grace.example/notes/1").status).to eq("pending")
+      expect(verify_from("https://grace.example/about/1", author: "https://grace.example/about")).to eq("pending")
     end
 
     it "still approves a known author once one of their mentions has been ignored" do
-      create(:webmention, :ignored, post: create(:post, :published), author_url: "https://ada.example/about")
-      verify_page(entry(author: "https://ada.example/about"))
+      create(:webmention, :ignored, post: create(:post, :published), author_url: ada)
+      verify_page(entry(author: ada))
 
       expect(stored.status).to eq("approved")
     end
 
     it "leaves a known author waiting once auto-approve is off" do
       webmention_repo.update_settings(auto_approve_known_authors: false)
-      verify_page(entry(author: "https://ada.example/about"))
+      verify_page(entry(author: ada))
 
       expect(stored.status).to eq("pending")
     end

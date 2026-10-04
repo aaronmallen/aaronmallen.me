@@ -1711,9 +1711,12 @@ en:
           auto_approve: "Auto-approve known authors"
           enable_on_new_posts: "Enable on new posts by default"
           endpoint: "Endpoint: POST %{path}"
+          hosts_hint: "One host per line. Each is one person's site, so an author at its root covers every page on it."
+          hosts_placeholder: "ada.example"
           receive: "Receive webmentions"
           save: "Save"
           send_on_publish: "Send webmentions on publish"
+          single_author_hosts: "One person's sites"
           title: "Settings"
       work_entries:
         field_error:

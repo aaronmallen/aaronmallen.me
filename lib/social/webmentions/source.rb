@@ -25,18 +25,17 @@ module Social
 
       def self.truncate(text) = Blog::Truncation.fit(text, limit: EXCERPT_LIMIT)
 
+      attr_reader :url
+
       def initialize(url:, target:, html:)
         @url = url
         @target = target
         @document = Nokogiri::HTML5.parse(html.to_s)
       end
 
-      def author
-        node = AUTHOR_SELECTORS.lazy.filter_map { @document.at_css(it) }.first || @document.at_css(REL_AUTHOR_SELECTOR)
-        return { name: nil, url: origin } unless node
+      def author = { name: author_node && card_name(author_node), url: author_link || origin }
 
-        { name: card_name(node), url: normalize(card_href(node)) || origin }
-      end
+      def author_link = author_node && normalize(card_href(author_node))
 
       def excerpt
         return nil if WORDLESS_TYPES.include?(type)
@@ -50,6 +49,13 @@ module Social
       def type = @type ||= TYPES.find { |property, _| claims_target?(property) }&.last || DEFAULT_TYPE
 
       private
+
+      def author_node
+        return @author_node if defined?(@author_node)
+
+        card = AUTHOR_SELECTORS.lazy.filter_map { @document.at_css(it) }.first
+        @author_node = card || @document.at_css(REL_AUTHOR_SELECTOR)
+      end
 
       def card_href(node) = node.at_css(".u-url")&.[]("href") || node["href"]
 

@@ -3012,6 +3012,7 @@ CREATE TABLE public.webmention_settings (
     accept_bridgy boolean DEFAULT true NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    single_author_hosts text[] DEFAULT '{}'::text[] NOT NULL,
     CONSTRAINT webmention_settings_singleton_check CHECK ((id = 1))
 );
 
@@ -5094,4 +5095,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000274_create_review_decisions_view.rb'),
 ('20261003000335_add_work_sessions_to_activities.rb'),
 ('20261003000336_cascade_tag_joins_on_delete.rb'),
-('20261004000404_create_review_notes.rb');
+('20261004000404_create_review_notes.rb'),
+('20261004000461_add_single_author_hosts_to_webmention_settings.rb');

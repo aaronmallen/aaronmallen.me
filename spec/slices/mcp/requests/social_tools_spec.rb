@@ -464,7 +464,7 @@ RSpec.describe "MCP social tools", type: :request do
 
       expect(content).to eq(
         "accept_bridgy" => true, "auto_approve_known_authors" => true, "enable_on_new_posts" => true,
-        "receive" => true, "send_on_publish" => true,
+        "receive" => true, "send_on_publish" => true, "single_author_hosts" => [],
       )
     end
   end
@@ -486,6 +486,19 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("update_webmention_settings", accept_bridgy: false)
 
       expect(content).to include("accept_bridgy" => false, "receive" => true)
+    end
+
+    it "saves the hosts it was given, cleaned up and in order" do
+      call_tool("update_webmention_settings", single_author_hosts: ["grace.example", "https://Ada.Example/", "a b"])
+
+      expect(content).to include("single_author_hosts" => %w[ada.example grace.example])
+    end
+
+    it "says it saved nothing when the hosts match the stored ones" do
+      webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+      call_tool("update_webmention_settings", single_author_hosts: ["ada.example"])
+
+      expect(refused?).to be(true)
     end
 
     it "says it saved nothing when nothing changed, as the admin does" do

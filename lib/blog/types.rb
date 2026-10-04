@@ -176,6 +176,11 @@ module Blog
       rescue URI::Error
         Blog::Constants::EMPTY_STRING
       end.constrained(format: %r{\A[^\s/?#@]+\z})
+      Hosts = Types::Array.of(Types::String).constructor do |values|
+        entries = (values.is_a?(::Array) ? values.map(&:to_s) : values.to_s.split(/[\r\n,]+/)).map(&:strip)
+
+        entries.filter_map { Host.call(it.include?("://") ? it : "https://#{it}") { nil } }.uniq.sort
+      end
       LabelTag = Types::Tag.constructor do |label|
         Hanami.app.inflector.underscore(label.to_s).gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
       end
