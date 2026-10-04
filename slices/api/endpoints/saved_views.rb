@@ -8,6 +8,7 @@ module API
       UNSAVED = "could not save the saved view"
 
       COMPLAINTS = {
+        [:filters, Blog::Contract::CONTROL] => "filters hold a control character",
         [:name, "blank"] => "name needs a character that is not a space",
         [:name, Blog::Contract::CONTROL] => "name holds a control character",
         [:name, "long"] => "name runs past 100 characters",

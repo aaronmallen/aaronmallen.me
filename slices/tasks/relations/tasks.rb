@@ -59,11 +59,7 @@ module Tasks
 
       def lock_positions_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
 
-      def matching(text)
-        pattern = "%#{dataset.escape_like(text)}%"
-
-        where(Sequel.ilike(:title, pattern) | Sequel.ilike(:note, pattern))
-      end
+      def matching(text) = containing(text, :title, :note)
 
       def newest_first = order(Sequel.function(:coalesce, :completed_at, :created_at).desc, self[:id].desc)
 
@@ -95,9 +91,13 @@ module Tasks
 
       def sourced = where(id: task_sources.task_ids)
 
-      def tagged(names) = where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+      def tagged(names)
+        return none if unmatchable?(names)
 
-      def titled(text) = where(Sequel.ilike(:title, "%#{dataset.escape_like(text)}%"))
+        where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+      end
+
+      def titled(text) = containing(text, :title)
 
       def titles_and_totals(ids) = dataset.unordered.where(id: ids).select_hash(:id, %i[title worked_seconds])
 

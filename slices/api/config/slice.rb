@@ -34,8 +34,8 @@ module API
     ], from: :record
 
     import keys: %w[
-      operations.change_saved_view operations.create_saved_view operations.delete_saved_view
-      operations.rename_saved_view queries.all queries.by_id
+      operations.change_saved_view operations.create_saved_view operations.delete_saved_view queries.all
+      queries.by_id
     ], from: :saved_views
 
     import keys: %w[queries.search], from: :search

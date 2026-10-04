@@ -14,6 +14,20 @@ RSpec.describe SavedViews::Operations::ChangeSavedView do
     expect(stored(view)).to include(name: "Open", filters: { "pool" => "github" })
   end
 
+  it "renames the view and replaces its filters in one write" do
+    view = create(:saved_view, name: "Open", filters: { q: "deploy" })
+    change(view.id, name: " Shipping ", filters: { q: "ship" })
+
+    expect(stored(view)).to include(name: "Shipping", filters: { "q" => "ship" })
+  end
+
+  it "keeps the old name when it refuses the filters" do
+    view = create(:saved_view, name: "Open", filters: { q: "deploy" })
+    change(view.id, name: "Shipping", filters: { q: "sh\0ip" })
+
+    expect(stored(view)).to include(name: "Open", filters: { "q" => "deploy" })
+  end
+
   it "drops a filter its screen does not know" do
     view = create(:saved_view, screen: "posts", filters: { status: "draft", tag: "ruby" })
     change(view.id, filters: { status: "published", page: "4" })

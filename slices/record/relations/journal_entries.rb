@@ -22,7 +22,7 @@ module Record
 
       def linkable = linkables(title: Sequel.function(:split_part, :body, "\n", 1), day: :entry_date)
 
-      def matching(text) = where(Sequel.ilike(:body, "%#{dataset.escape_like(text)}%"))
+      def matching(text) = containing(text, :body)
 
       def newest_first = order(self[:entry_date].desc, self[:entry_time].desc, self[:id].desc)
 
@@ -30,7 +30,11 @@ module Record
 
       def on(date) = where(entry_date: date)
 
-      def tagged(names) = where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+      def tagged(names)
+        return none if unmatchable?(names)
+
+        where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+      end
 
       def word_total = unordered.sum(WORDS).to_i
 

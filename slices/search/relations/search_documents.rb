@@ -11,6 +11,8 @@ module Search
       schema :search_documents, infer: true
 
       def hits(phrase, kinds:, per_kind:, page:)
+        return none if unmatchable?(phrase)
+
         query = Sequel.function(:websearch_to_tsquery, CONFIG, phrase)
         found = capped(best(query, kinds), per_kind).order(*RANKED).limit(page.limit).offset(page.offset)
 

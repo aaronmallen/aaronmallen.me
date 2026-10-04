@@ -59,15 +59,12 @@ module Activity
       def day_count = unordered.dataset.select(:occurred_on).distinct.count
 
       def in_repo(names)
-        where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), *names.map { named_repo(it) }))
+        named = names.reject { unmatchable?(it) }.map { named_repo(it) }
+
+        where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), *named))
       end
 
-      def matching(text)
-        pattern = "%#{dataset.escape_like(text)}%"
-        columns = [*SEARCHED, Sequel.function(:array_to_string, :targets, TARGET_SEPARATOR)]
-
-        where(Sequel.|(*columns.map { Sequel.ilike(it, pattern) }))
-      end
+      def matching(text) = containing(text, *SEARCHED, Sequel.function(:array_to_string, :targets, TARGET_SEPARATOR))
 
       def newest_first
         order(self[:occurred_on].desc, self[:occurred_at].desc, self[:type].asc, self[:source_id].desc)
@@ -78,6 +75,8 @@ module Activity
       end
 
       def tagged(names)
+        return none if unmatchable?(names)
+
         folded = names.map { it.to_s.downcase }.uniq
 
         where(Sequel.|(*TAGGED.map { |type, (owner, table, key)| owners_tagged(type, owner, table, key, folded) }))

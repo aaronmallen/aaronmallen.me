@@ -15,14 +15,20 @@ module SavedViews
       rule(:name).validate(:without_controls, :visible)
 
       rule(:filters) do
-        key.failure(FORMAT) unless value.all? { |name, filter| text?(filter) || (name == GROUPED && group?(filter)) }
+        if !shaped?(value) then key.failure(FORMAT)
+        elsif texts(value).any? { it.match?(CONTROLS) } then key.failure(CONTROL)
+        end
       end
 
       private
 
       def group?(value) = value.is_a?(::Hash) && value.values.all? { text?(it) }
 
+      def shaped?(filters) = filters.all? { |name, filter| text?(filter) || (name == GROUPED && group?(filter)) }
+
       def text?(value) = value.is_a?(::String)
+
+      def texts(value) = value.is_a?(::Hash) ? value.flat_map { |name, item| [name, *texts(item)] } : [value]
     end
   end
 end

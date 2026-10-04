@@ -6,6 +6,7 @@ module Blog
   module DB
     class Relation < Hanami::DB::Relation
       LINKABLE_ORDER = [Sequel.desc(:day), Sequel.desc(:id)].freeze
+      NUL = "\0"
       STAMPS = { create: %i[created_at updated_at], update: %i[updated_at] }.freeze
 
       def self.site_day(*columns)
@@ -15,6 +16,8 @@ module Blog
       end
 
       def containing(text, *columns)
+        return none if unmatchable?(text)
+
         pattern = "%#{dataset.escape_like(text)}%"
 
         where(Sequel.|(*columns.map { Sequel.ilike(it, pattern) }))
@@ -32,6 +35,8 @@ module Blog
         dataset.select(*columns).order(*LINKABLE_ORDER).map { Linkable.new(**it) }
       end
 
+      def none = where(false)
+
       def paged(page) = limit(page.limit).offset(page.offset)
 
       def stamped(type, *columns, result: :one)
@@ -39,6 +44,8 @@ module Blog
 
         command(type, result:, use: :timestamps, plugins_options: { timestamps: { timestamps: } })
       end
+
+      def unmatchable?(*texts) = texts.flatten.any? { it.to_s.include?(NUL) }
     end
   end
 end

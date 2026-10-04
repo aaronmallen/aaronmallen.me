@@ -17,7 +17,6 @@ module API
 
       include Deps[
         change_saved_view: "saved_views.operations.change_saved_view",
-        rename_saved_view: "saved_views.operations.rename_saved_view",
         saved_view_by_id: "saved_views.queries.by_id",
       ]
 
@@ -25,10 +24,7 @@ module API
         view = saved_view_by_id.call(id)
         return not_found(SavedViews.missing(id)) if view.nil?
 
-        result = Success(view)
-        result = result.bind { rename_saved_view.call(id, name:) } unless name.nil?
-        result = result.bind { change_saved_view.call(id, filters:) } unless filters.nil?
-        saved(id, result)
+        saved(id, change_saved_view.call(id, name: name || view.name, filters: filters || view.filters))
       end
 
       private

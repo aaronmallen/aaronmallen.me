@@ -9,7 +9,7 @@ module SavedViews
         view = step find(id)
         fields = step validate(form(view, params))
 
-        saved_view_repo.update(view.id, filters: fields[:filters])
+        saved_view_repo.update(view.id, **fields.slice(:name, :filters))
       end
 
       private
@@ -21,7 +21,9 @@ module SavedViews
       end
 
       def form(view, params)
-        { name: view.name, screen: view.screen, filters: Filters.keep(view.screen, params[:filters]) }
+        screen = view.screen
+
+        { name: params.fetch(:name, view.name), screen:, filters: Filters.keep(screen, params[:filters]) }
       end
 
       def validate(form) = validated(contract.call(form))

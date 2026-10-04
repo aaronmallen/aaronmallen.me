@@ -32,7 +32,12 @@ module Tags
         emptied.order(:pattern).select_map(:pattern)
       end
 
-      def naming(text) = text.empty? ? self : where(Sequel.like(:name, "%#{dataset.escape_like(text)}%"))
+      def naming(text)
+        return self if text.empty?
+        return none if unmatchable?(text)
+
+        where(Sequel.like(:name, "%#{dataset.escape_like(text)}%"))
+      end
 
       private
 
