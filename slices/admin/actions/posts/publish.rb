@@ -5,9 +5,9 @@ module Admin
     module Posts
       class Publish < Action
         FAILED = "posts_page.toasts.publish"
-        KEY = "#"
         TOASTS = "post_form.toasts"
 
+        include Actions::Bulk
         include Deps[
           "settings",
           post_by_id: "posts.queries.by_id",
@@ -33,20 +33,13 @@ module Admin
 
         def back(request)
           filter = Blog::Types::PostFilterParam[request.params[:status]]
+          page = landing(request) { posts_by_filter.call(filter, it).past_end? }
 
-          routes.path(:admin_posts, status: filter, **Blog::Page.query(landing(request, filter)))
+          routes.path(:admin_posts, status: filter, **Blog::Page.query(page))
         end
 
         def failed(response, id, reason)
           toast(response, "#{FAILED}.#{reason}", post: post_by_id.call(id)&.title || "#{KEY}#{id}")
-        end
-
-        def landing(request, filter)
-          number = Blog::Types::PageParam.call(request.params[:page]) { 1 }
-          return number if number == 1
-
-          page = Blog::Page.new(number:, size: settings.page_size[:admin])
-          posts_by_filter.call(filter, page).past_end? ? number - 1 : number
         end
 
         def published(response, outcome, post)
