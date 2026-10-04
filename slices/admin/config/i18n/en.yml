@@ -28,8 +28,10 @@ en:
       other: "%{count} views"
   calendar_page:
     toasts:
+      closed: "A closed task stays where it closed"
       invalid: "Pick a day first"
       moved: "Moved to %{date} at %{time}"
+      moved_task: "Moved to the %{date} sprint"
       not_scheduled: "Only a scheduled post moves"
       past: "A move lands on today or a day after it"
   clients_page:

@@ -22,6 +22,7 @@ module Admin
     get "/calendar", to: "calendar.show", as: :calendar
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
+    post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID
     get "/clients", to: "clients.index", as: :clients
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID

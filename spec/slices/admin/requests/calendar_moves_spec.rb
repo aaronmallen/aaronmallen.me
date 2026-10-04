@@ -184,4 +184,97 @@ RSpec.describe "Admin calendar moves", type: :request do
       expect(last_response.location).to end_with("/admin/calendar")
     end
   end
+
+  describe "moving a sprint task" do
+    let(:sprint) { create(:sprint, sprint_date: day) }
+    let(:task) { create(:task, :in_sprint, sprint_id: sprint.id, title: "Lighten the day") }
+
+    before { sign_in_to_admin }
+
+    def sprint_on(record) = Tasks::Slice["repos.sprint_repo"].by_id(stored_task(record).sprint_id).sprint_date
+
+    def stored_task(record) = Tasks::Slice["repos.task_repo"].by_id(record.id)
+
+    it "offers a move form on each open task in the day's sprint and none on a closed one" do
+      task
+      create(:task, :in_sprint, :done, sprint_id: sprint.id)
+      create(:task, :in_sprint, :canceled, sprint_id: sprint.id)
+      get "/admin/calendar", day: day.iso8601
+
+      expect(panel.all("form.cal-move").map { it[:action] }).to eq(["/admin/calendar/tasks/#{task.id}/move"])
+    end
+
+    it "names the move field and starts it on the day with today as the floor" do
+      task
+      get "/admin/calendar", day: day.iso8601
+      field = panel.find_field("Move Lighten the day to")
+
+      expect([field[:type], field[:value], field[:min]]).to eq(["date", day.iso8601, today.iso8601])
+    end
+
+    it "puts the task in the sprint already on that day" do
+      planned = create(:sprint, sprint_date: target)
+      move("tasks", task, target)
+
+      expect(stored_task(task).sprint_id).to eq(planned.id)
+    end
+
+    it "plans a sprint for a day that has none and puts the task in it" do
+      move("tasks", task, target)
+
+      expect(sprint_on(task)).to eq(target)
+    end
+
+    it "returns to the day it came from, in the same month" do
+      move("tasks", task, target)
+
+      expect(last_response.location).to end_with("/admin/calendar?day=#{day.iso8601}")
+    end
+
+    it "says where the task went" do
+      move("tasks", task, target)
+      follow_redirect!
+
+      expect(toast).to eq("Moved to the #{target.strftime('%b %-d, %Y')} sprint")
+    end
+
+    it "shows the move on the task's timeline" do
+      move("tasks", task, target)
+      get "/admin/tasks/#{task.id}", filter: "next"
+      dates = [day, target].map { "the #{it.strftime('%b %-d, %Y')} sprint" }
+
+      expect(page).to have_css(".task-event", text: "Moved from #{dates.first} to #{dates.last}")
+    end
+
+    it "leaves a task where it was on a move to a past day, and says why", :aggregate_failures do
+      move("tasks", task, today - 1)
+      follow_redirect!
+
+      expect(stored_task(task).sprint_id).to eq(sprint.id)
+      expect(toast).to eq("A move lands on today or a day after it")
+    end
+
+    it "leaves a task in its sprint when no day is picked", :aggregate_failures do
+      move("tasks", task, "")
+      follow_redirect!
+
+      expect(stored_task(task).sprint_id).to eq(sprint.id)
+      expect(toast).to eq("Pick a day first")
+    end
+
+    it "leaves a done task where it closed", :aggregate_failures do
+      done = create(:task, :in_sprint, :done, sprint_id: sprint.id)
+      move("tasks", done, target)
+      follow_redirect!
+
+      expect(stored_task(done).sprint_id).to eq(sprint.id)
+      expect(toast).to eq("A closed task stays where it closed")
+    end
+
+    it "answers 404 for a task that does not exist" do
+      move("tasks", Data.define(:id).new(id: 999_999), target)
+
+      expect(last_response.status).to eq(404)
+    end
+  end
 end

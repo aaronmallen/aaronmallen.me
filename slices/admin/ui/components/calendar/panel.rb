@@ -5,7 +5,11 @@ module Admin
     module Components
       module Calendar
         class Panel < Component
-          MOVES = { post: :admin_move_calendar_post, social: :admin_move_calendar_social_post }.freeze
+          MOVES = {
+            post: :admin_move_calendar_post,
+            social: :admin_move_calendar_social_post,
+            task: :admin_move_calendar_task,
+          }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
           POSTED_QUEUE = Blog::Types::SocialQueue["posted"]
           QUEUED = Blog::Types::SocialQueue["queued"]
@@ -50,8 +54,8 @@ module Admin
 
           def empty? = !@day.sprint && @day.posts.empty? && @day.social_posts.empty? && !@day.journal
 
-          def entry(kind, record, item)
-            return ListItem(**item) unless record.status == SCHEDULED
+          def entry(kind, record, item, movable: record.status == SCHEDULED)
+            return ListItem(**item) unless movable
 
             ListItem(**item) { move_form(kind, record.id, item[:title]) }
           end
@@ -117,11 +121,13 @@ module Admin
             group(t(".sprint", tasks: t(".tasks", count: found.task_count))) do
               next Empty { t(".no_tasks") } if @tasks.empty?
 
-              @tasks.each { ListItem(title: it.title, href: path(:admin_task, id: it.id), sub: status(it)) }
+              @tasks.each { entry(:task, it, task_item(it), movable: !it.closed?) }
             end
           end
 
           def status(record) = t(STATUSES.fetch(record.status))
+
+          def task_item(task) = { title: task.title, href: path(:admin_task, id: task.id), sub: status(task) }
         end
       end
     end
