@@ -8,6 +8,10 @@ RSpec.describe "Admin tags", type: :request do
 
   def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
 
+  def confirm(**) = i18n.t("ui.components.tags.row.confirm_remove", **)
+
+  def confirm_prompt = page.find("form[action$='/delete']")["data-confirm"]
+
   def every_tag = Blog::Types::TagScope.values.flat_map { repo.all_in(it) }
 
   def message(key) = i18n.t(["ui.components.tags.field_error.name", key].join("."))
@@ -499,11 +503,35 @@ RSpec.describe "Admin tags", type: :request do
         expect(page.find("form[action$='/delete']")["data-confirm"]).to include("ruby")
       end
 
-      it "keeps a tag two records carry" do
+      it "takes away a tag two records carry" do
         2.times { create(:post, tags: %w[ruby]) }
         send_to("/admin/tags/#{named('ruby').id}/delete")
 
-        expect(named("ruby")).not_to be_nil
+        expect(named("ruby")).to be_nil
+      end
+
+      it "takes it off every public record that carried it", :aggregate_failures do
+        post = create(:post, tags: %w[ruby rails])
+        project = create(:project, tags: %w[ruby])
+        send_to("/admin/tags/#{named('ruby').id}/delete")
+
+        expect(post_repo.by_id(post.id).tags.map(&:name)).to eq(%w[rails])
+        expect(Projects::Slice["repos.project_repo"].by_id(project.id).tags).to be_empty
+      end
+
+      it "takes it off every private record that carried it", :aggregate_failures do
+        records = { journal_entry: create(:journal_entry, tags: %w[chores]), task: create(:task, tags: %w[chores]),
+                    decision: create(:decision, tags: %w[chores]) }
+        send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
+
+        records.each { |kind, record| expect(Spec::DB::Tagging.repo_for(kind).by_id(record.id).tags).to be_empty }
+      end
+
+      it "leaves a published post that loses the tag as it was updated" do
+        post = create(:post, :published, tags: %w[ruby])
+        send_to("/admin/tags/#{named('ruby').id}/delete")
+
+        expect(post_repo.by_id(post.id).updated_at).to eq(post.updated_at)
       end
 
       it "takes away a tag while other tags are in use" do
@@ -513,35 +541,49 @@ RSpec.describe "Admin tags", type: :request do
         expect(stored(tag.id)).to be_nil
       end
 
-      it "counts only the records that carry the tag" do
-        2.times { create(:post, tags: %w[ruby]) }
-        create(:post, tags: %w[rails])
+      it "says so for a tag records carry" do
+        create(:post, tags: %w[ruby])
         send_to("/admin/tags/#{named('ruby').id}/delete")
         follow_redirect!
 
-        expect(page).to have_css("[data-toast]", text: "Kept · 2 records still carry it")
+        expect(page).to have_css("[data-toast]", text: "Tag removed")
       end
 
-      it "says how many records kept it" do
-        2.times { create(:post, tags: %w[ruby]) }
-        send_to("/admin/tags/#{named('ruby').id}/delete")
-        follow_redirect!
-
-        expect(page).to have_css("[data-toast]", text: "Kept · 2 records still carry it")
-      end
-
-      it "holds the button while a record carries the tag" do
+      it "leaves the button on while a record carries the tag", :aggregate_failures do
         create(:post, tags: %w[ruby])
         get "/admin/tags"
 
-        expect(page.find("form[action$='/delete'] button")).to be_disabled
+        expect(page.find("form[action$='/delete'] button")).not_to be_disabled
+        expect(page.find("form[action$='/delete']")["title"]).to be_nil
       end
 
-      it "says why the button is held" do
-        create(:post, tags: %w[ruby])
+      it "warns that nothing else loses a tag nothing carries" do
+        tag
         get "/admin/tags"
 
-        expect(page.find("form[action$='/delete']")["title"]).to include("1 record carries this tag")
+        expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 0))
+      end
+
+      it "counts each kind that loses the tag" do
+        4.times { create(:post, tags: %w[ruby]) }
+        create(:project, tags: %w[ruby])
+        get "/admin/tags"
+
+        expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 5, uses: "4 posts and 1 project"))
+      end
+
+      it "counts one record that loses the tag" do
+        create(:project, tags: %w[ruby])
+        get "/admin/tags"
+
+        expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 1, uses: "1 project"))
+      end
+
+      it "lists three kinds of private record that lose the tag" do
+        %i[journal_entry task task decision].each { create(it, tags: %w[chores]) }
+        get "/admin/tags", scope: "private"
+
+        expect(confirm_prompt).to eq(confirm(tag: "chores", count: 4, uses: "1 journal entry, 2 tasks and 1 decision"))
       end
 
       it "takes away a private tag from the private tab" do
@@ -564,12 +606,12 @@ RSpec.describe "Admin tags", type: :request do
         expect(last_response.status).to eq(404)
       end
 
-      it "keeps a private tag a task carries" do
+      it "takes away a private tag a task carries" do
         create(:task, tags: %w[chores])
-        chores = every_tag.find { it.name == "chores" }
+        chores = named("chores")
         send_to("/admin/tags/#{chores.id}/delete", scope: "private")
 
-        expect(stored(chores.id)).not_to be_nil
+        expect(stored(chores.id)).to be_nil
       end
 
       it "answers 404 for a tag that isn't there" do

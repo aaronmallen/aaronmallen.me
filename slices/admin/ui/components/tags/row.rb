@@ -5,6 +5,8 @@ module Admin
     module Components
       module Tags
         class Row < Component
+          LAST_SEPARATOR = " and "
+          LIST_SEPARATOR = ", "
           SEPARATOR = " · "
           USE_KEYS = %i[posts projects journal_entries tasks decisions].to_h { [it, ".uses.#{it}"] }.freeze
 
@@ -46,6 +48,8 @@ module Admin
             end
           end
 
+          def counts = USE_KEYS.filter_map { |kind, key| t(key, count: @uses[kind]) if @uses[kind] }
+
           def editing? = @editing&.fetch(:id) == @tag.id
 
           def editor
@@ -71,7 +75,11 @@ module Admin
 
           def held = @uses.values.sum
 
-          def held? = held.positive?
+          def losers
+            *rest, last = counts
+
+            rest.empty? ? last : [rest.join(LIST_SEPARATOR), last].join(LAST_SEPARATOR)
+          end
 
           def name = editing? ? @editing[:name] : @tag.name
 
@@ -80,7 +88,7 @@ module Admin
           def remove
             Form(**remove_attributes) do
               scope_field
-              Button(variant: :warn, type: "submit", small: true, disabled: held?) do
+              Button(variant: :warn, type: "submit", small: true) do
                 i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
                 span { t(".remove") }
               end
@@ -90,8 +98,7 @@ module Admin
           def remove_attributes
             {
               action: path(:admin_delete_tag, id: @tag.id),
-              data: { confirm: t(".confirm_remove", tag: @tag.name) },
-              title: held? ? t(".held", count: held) : nil,
+              data: { confirm: t(".confirm_remove", tag: @tag.name, count: held, uses: losers) },
             }
           end
 
@@ -120,9 +127,9 @@ module Admin
           def toggle_id = "tag-#{@tag.id}-edit"
 
           def uses
-            return t(".unused") unless held?
+            return t(".unused") if held.zero?
 
-            USE_KEYS.filter_map { |kind, key| t(key, count: @uses[kind]) if @uses[kind] }.join(SEPARATOR)
+            counts.join(SEPARATOR)
           end
         end
       end

@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, lib, admin, mcp, posts, projects, record, tags, tasks]
 issue: "#76"
+amended: ["#284"]
 tags: [tags, scope, schema, migrations, constraints, foreign-keys, mcp, admin]
 ---
 
@@ -30,8 +31,9 @@ tags.
 Postgres holds each join table to its scope, as ADR 0017 asks of a rule over stored state. `tags` adds
 `UNIQUE (id, scope)`. `post_tags`, `project_tags`, `journal_entry_tags` and `task_tags` each gain a `tag_scope`
 column with a default and a `CHECK` that pin it to the join's side, and the foreign key on `tag_id` becomes
-`(tag_id, tag_scope) REFERENCES tags (id, scope) ON DELETE RESTRICT`. A post can then never hold a private tag,
-whichever code writes the row.
+`(tag_id, tag_scope) REFERENCES tags (id, scope)`. A post can then never hold a private tag, whichever code writes
+the row. The key first said `ON DELETE RESTRICT`. #284 made it `ON DELETE CASCADE`, so deleting a tag takes it off
+every record that carries it, and `decision_tags` and `task_tag_rule_tags` follow the same rule.
 
 `Blog::DB::Tags#claim` and `#next_color` take a scope, so a new tag takes the least used color within its scope.
 Each slice's repo passes its own: `posts` and `projects` claim public tags, `record` and `tasks` claim private ones.

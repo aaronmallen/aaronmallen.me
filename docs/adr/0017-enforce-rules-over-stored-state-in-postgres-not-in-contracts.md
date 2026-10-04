@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, decisions, links, posts, projects, record, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -74,9 +74,9 @@ Tags hold `tags_scope_name_key` since #77 split them into a public and a private
 `ERRCODE = 'foreign_key_violation'`, so ROM reports it as a `ForeignKeyConstraintError` (ADR 0093).
 
 Two more shapes follow the same stance. `session_validity` and `webmention_settings` hold one row each, held there
-by `CHECK (id = 1)`, and their repos address it by that id. Every tag join and `tasks.sprint_id` hold their parent
-with `ON DELETE RESTRICT`. `RemoveTag` counts the joins first, but only so the refusal can say how many rows hold
-the parent, a count the database error drops. The foreign key stays the rule.
+by `CHECK (id = 1)`, and their repos address it by that id. `tasks.sprint_id` holds its sprint with
+`ON DELETE RESTRICT`. Every tag join holds its tag with `ON DELETE CASCADE` since #284, so deleting a tag takes it
+off every record in the same statement. `RemoveTag` checks nothing first, and the foreign key stays the rule.
 
 ## Alternatives
 
@@ -102,9 +102,6 @@ A constraint no form can break maps to nothing and raises. That is on purpose: i
 `Record::Operations::SaveJournalEntry` and `UpdateJournalEntry` break the lookup. They rescue any
 `CheckConstraintError` as `body: blank` and never ask for the name, so a new `CHECK` on `journal_entries` would
 answer as a blank body.
-
-The count before a delete is not atomic. A join added between the count and the delete trips the foreign key, and
-nothing maps that error, so the request answers 500.
 
 A reader cannot learn every rule from the contract. The ones over stored state are in `config/db/structure.sql`.
 

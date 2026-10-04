@@ -188,9 +188,6 @@ en:
   tags_page:
     toasts:
       added: "Tag added"
-      in_use:
-        one: "Kept · %{count} record still carries it"
-        other: "Kept · %{count} records still carry it"
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
@@ -1314,11 +1311,11 @@ en:
         row:
           cancel: "Cancel"
           color: "Colour"
-          confirm_remove: "Remove %{tag}? You can't undo it."
+          confirm_remove:
+            zero: "Remove %{tag}? You can't undo it."
+            one: "Remove %{tag}? %{uses} loses it."
+            other: "Remove %{tag}? %{uses} lose it."
           edit: "Edit"
-          held:
-            one: "%{count} record carries this tag"
-            other: "%{count} records carry this tag"
           remove: "Remove"
           rename: "Rename"
           save: "Save"
@@ -2092,7 +2089,7 @@ en:
             private: "Private"
             public: "Public"
           no_match: "Nothing matches %{query}."
-          note: "A tag is kept while anything carries it. Take it off them first, then remove it."
+          note: "Removing a tag takes it off everything that carries it."
           scope: "Tag scope"
           scopes:
             private: "Private"

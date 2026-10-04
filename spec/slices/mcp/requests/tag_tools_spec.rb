@@ -213,13 +213,31 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(tag_repo.find_in("private", tag.id)).not_to be_nil
     end
 
-    it "keeps a tag a record carries, with the reason the admin gives", :aggregate_failures do
-      create(:project, tags: %w[ruby])
-      create(:post, tags: %w[ruby])
-      call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").first.id)
+    it "removes a tag records carry" do
+      create(:post, tags: %w[ruby rails])
+      call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").find { it.name == "ruby" }.id)
 
-      expect(message).to eq("kept: 2 records still carry it")
-      expect(tag_repo.all_in("public").map(&:name)).to eq(%w[ruby])
+      expect(tag_repo.all_in("public").map(&:name)).to eq(%w[rails])
+    end
+
+    it "takes the tag off every record that carried it", :aggregate_failures do
+      post = create(:post, tags: %w[ruby rails])
+      project = create(:project, tags: %w[ruby])
+      call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").find { it.name == "ruby" }.id)
+
+      expect(Posts::Slice["repos.post_repo"].by_id(post.id).tags.map(&:name)).to eq(%w[rails])
+      expect(Projects::Slice["repos.project_repo"].by_id(project.id).tags).to be_empty
+    end
+
+    it "removes a private tag a task carries" do
+      create(:task, tags: %w[chores])
+      call_tool("remove_tag", scope: "private", id: tag_repo.all_in("private").first.id)
+
+      expect(tag_repo.all_in("private")).to be_empty
+    end
+
+    it "says every record that carries the tag loses it" do
+      expect(tool("remove_tag").fetch("description")).to include("Every record that carries the tag loses it")
     end
 
     it "refuses an ID no tag has" do

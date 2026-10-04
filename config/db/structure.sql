@@ -4646,7 +4646,7 @@ ALTER TABLE ONLY public.decision_tags
 --
 
 ALTER TABLE ONLY public.decision_tags
-    ADD CONSTRAINT decision_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE RESTRICT;
+    ADD CONSTRAINT decision_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE CASCADE;
 
 
 --
@@ -4686,7 +4686,7 @@ ALTER TABLE ONLY public.journal_entry_tags
 --
 
 ALTER TABLE ONLY public.journal_entry_tags
-    ADD CONSTRAINT journal_entry_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE RESTRICT;
+    ADD CONSTRAINT journal_entry_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE CASCADE;
 
 
 --
@@ -4742,7 +4742,7 @@ ALTER TABLE ONLY public.post_tags
 --
 
 ALTER TABLE ONLY public.post_tags
-    ADD CONSTRAINT post_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE RESTRICT;
+    ADD CONSTRAINT post_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE CASCADE;
 
 
 --
@@ -4758,7 +4758,7 @@ ALTER TABLE ONLY public.project_tags
 --
 
 ALTER TABLE ONLY public.project_tags
-    ADD CONSTRAINT project_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE RESTRICT;
+    ADD CONSTRAINT project_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE CASCADE;
 
 
 --
@@ -4870,7 +4870,7 @@ ALTER TABLE ONLY public.task_tag_rule_tags
 --
 
 ALTER TABLE ONLY public.task_tags
-    ADD CONSTRAINT task_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE RESTRICT;
+    ADD CONSTRAINT task_tags_tag_id_fkey FOREIGN KEY (tag_id, tag_scope) REFERENCES public.tags(id, scope) ON DELETE CASCADE;
 
 
 --
@@ -5017,4 +5017,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261003000196_create_attention_snoozes.rb'),
 ('20261003000214_create_analytics_clicks.rb'),
 ('20261003000274_create_review_decisions_view.rb'),
-('20261003000335_add_work_sessions_to_activities.rb');
+('20261003000335_add_work_sessions_to_activities.rb'),
+('20261003000336_cascade_tag_joins_on_delete.rb');
