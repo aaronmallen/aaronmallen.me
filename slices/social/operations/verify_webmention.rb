@@ -11,7 +11,8 @@ module Social
 
       def call(source:, target:, post_id:)
         settings = webmention_repo.settings
-        post = step eligible(post_id, source, settings)
+        step accepting(source, settings)
+        post = step open_post(post_id)
         response = step fetch(post, source)
         page = Webmentions::Source.new(url: response.url, target:, html: response.body)
         step linking(page, post, source)
@@ -21,22 +22,19 @@ module Social
 
       private
 
+      def accepting(source, settings)
+        return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
+        return Failure(:not_receiving) unless settings.receive
+
+        Success(settings)
+      end
+
       def approved?(page, source, settings)
         author_url = page.author_link
         return false unless settings.auto_approve_known_authors && author_url
 
         scope = Webmentions::AuthorScope.new(author_url, single_author_hosts: settings.single_author_hosts)
         [source, page.url].all? { scope.covers?(it) } && webmention_repo.known_author?(author_url)
-      end
-
-      def eligible(post_id, source, settings)
-        return Failure(:bridgy_off) if Webmentions::Source.bridgy?(source) && !settings.accept_bridgy
-        return Failure(:not_receiving) unless settings.receive
-
-        post = post_by_id.call(post_id)
-        return Failure(:not_a_post) unless post&.status == PUBLISHED && post.webmentions_enabled
-
-        Success(post)
       end
 
       def fetch(post, source)
@@ -58,6 +56,11 @@ module Social
 
       def linking(page, post, source)
         page.links_to? ? Success(page) : forget(post, source, :no_link)
+      end
+
+      def open_post(post_id)
+        post = post_by_id.call(post_id)
+        post&.status == PUBLISHED && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
       end
 
       def status(page, source, settings)
