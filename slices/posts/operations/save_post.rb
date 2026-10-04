@@ -57,10 +57,21 @@ module Posts
 
       def invalid(field, code) = Failure([:invalid, { field => [code] }])
 
+      def kept(post, attributes)
+        saved = post&.published_at
+        given = attributes[:published_at]
+        same = saved && given && Blog::TimeZone.input_value(saved) == Blog::TimeZone.input_value(given)
+
+        same ? attributes.merge(published_at: saved) : attributes
+      end
+
       def lines(text) = text.encode(universal_newline: true)
 
       def persist(id, attributes, intent, now)
-        transaction { save(step(find(id)), attributes, intent, now) }
+        transaction do
+          post = step find(id)
+          save(post, kept(post, attributes), intent, now)
+        end
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
         code = SLUG_CONSTRAINTS[post_repo.violated_constraint(e)]
         raise unless code

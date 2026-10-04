@@ -36,6 +36,8 @@ RSpec.describe "MCP post tools", type: :request do
 
   def refused? = result.fetch("isError", false)
 
+  def repeated_hour = Time.utc(2030, 11, 3, 7, 30)
+
   def result = JSON.parse(last_response.body).fetch("result")
 
   def stored(id) = post_repo.by_id(id)
@@ -218,6 +220,13 @@ RSpec.describe "MCP post tools", type: :request do
         .to eq(Blog::TimeZone.input_value(scheduled.published_at))
     end
 
+    it "keeps a scheduled time in the hour the clock repeats when daylight saving ends" do
+      scheduled = create(:post, :scheduled, published_at: repeated_hour)
+      call_tool("update_post", id: scheduled.id, title: "Goodbye")
+
+      expect(stored(scheduled.id).published_at).to eq(repeated_hour)
+    end
+
     it "moves a scheduled post to a new publish time" do
       scheduled = create(:post, :scheduled)
       call_tool("update_post", id: scheduled.id, publish_at: future(5))
@@ -350,6 +359,13 @@ RSpec.describe "MCP post tools", type: :request do
       call_tool("publish_post", id: draft.id)
 
       expect(content).to include("status" => "scheduled", "outcome" => "scheduled")
+    end
+
+    it "schedules a draft for the hour the clock repeats when daylight saving ends, at the time it holds" do
+      draft = create(:post, :draft, published_at: repeated_hour)
+      call_tool("publish_post", id: draft.id)
+
+      expect(stored(draft.id)).to have_attributes(status: "scheduled", published_at: repeated_hour)
     end
 
     it "sends the announcement once it goes out", :commits do

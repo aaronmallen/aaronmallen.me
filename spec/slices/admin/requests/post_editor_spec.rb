@@ -850,6 +850,15 @@ RSpec.describe "Admin post editor", type: :request do
         expect(post_edit_repo.for_post(scheduled.id)).to be_empty
       end
 
+      it "keeps a scheduled time in the hour the clock repeats when daylight saving ends" do
+        repeated_hour = Time.utc(2030, 11, 3, 7, 30)
+        scheduled = create(:post, :scheduled, slug: "hello", published_at: repeated_hour)
+        publish_at = Blog::TimeZone.input_value(scheduled.published_at)
+        save("/admin/posts/#{scheduled.id}", intent: "publish", title: "Goodbye", slug: "hello", publish_at:)
+
+        expect(post_repo.by_id(scheduled.id)).to have_attributes(title: "Goodbye", published_at: repeated_hour)
+      end
+
       it "turns a scheduled post back into a draft" do
         scheduled = create(:post, :scheduled, slug: "hello")
         save("/admin/posts/#{scheduled.id}", title: "Hello", slug: "hello")
