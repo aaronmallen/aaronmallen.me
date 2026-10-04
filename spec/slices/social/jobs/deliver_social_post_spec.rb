@@ -943,19 +943,26 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   end
 
   describe "the statements it issues" do
-    let(:social_post) { queued(targets: %w[bluesky mastodon], parts: %w[one two three]) }
+    let(:runs) { (1..3).map { statements(it) } }
 
-    before do
-      stub_bluesky
-      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
-      stub_bluesky_parent(bluesky_uri(rkey(social_post, 2)))
-      stub_mastodon("1", "2", "3")
+    before { stub_bluesky }
+
+    def statements(parts)
+      social_post = queued(targets: %w[bluesky mastodon], parts: Array.new(parts) { "part #{it + 1}" })
+      (1...parts).each { stub_bluesky_parent(bluesky_uri(rkey(social_post, it))) }
+      stub_mastodon(*(1..parts).map(&:to_s))
+
+      counting { %w[bluesky mastodon].each { deliver(social_post, it) } }
     end
 
-    it "posts three parts to two networks in twenty one statements" do
-      sending = -> { %w[bluesky mastodon].each { deliver(social_post, it) } }
+    it "adds the same number of statements for each extra part" do
+      one, two, three = runs.map(&:size)
 
-      expect(counting(&sending)).to have(21).items
+      expect(three - two).to eq(two - one)
+    end
+
+    it "reads no more for three parts than for one" do
+      expect(runs.map { it.grep(/\ASELECT/).size }.uniq).to have(1).item
     end
   end
 end
