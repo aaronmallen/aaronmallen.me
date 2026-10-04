@@ -58,6 +58,22 @@ RSpec.describe "API tasks", type: :request do
       expect(titles(list(statuses: "open,in_progress"))).to contain_exactly("open", "started")
     end
 
+    it "takes the lists as a list split by commas" do
+      create(:task, :someday, title: "idea")
+      create(:task, :external, title: "issue")
+      create(:task, title: "next up")
+
+      expect(titles(list(lists: "someday,external"))).to contain_exactly("idea", "issue")
+    end
+
+    it "narrows by tag and query" do
+      create(:task, title: "Fix the feed", tags: %w[admin])
+      create(:task, title: "Fix the feed later", tags: %w[ruby])
+      create(:task, title: "Mow the lawn", tags: %w[admin])
+
+      expect(titles(list(tag: "admin", query: "feed"))).to eq(["Fix the feed"])
+    end
+
     it "keeps a task created or finished inside the window" do
       create(:task, title: "made inside", created_at: at(today - 3))
       create(:task, :done, title: "outside", created_at: at(today - 30), completed_at: at(today - 20))
@@ -521,6 +537,15 @@ RSpec.describe "API tasks", type: :request do
       create(:task_link, from_task_id: create(:task).id, to_task_id: create(:task).id)
 
       expect(list(statuses: "open,done")).to eq(trusted(mcp_answer("list_tasks", statuses: %w[open done])))
+    end
+
+    it "filter as list_tasks does" do
+      create(:task, :someday, tags: %w[admin], note: "the feed")
+      create(:task, :someday, :done, tags: %w[admin], note: "the feed", completed_at: at(today))
+      filters = { tag: "admin", query: "feed" }
+
+      expect(list(lists: "someday", **filters))
+        .to eq(trusted(mcp_answer("list_tasks", lists: %w[someday], **filters)))
     end
 
     it "read as read_task does" do

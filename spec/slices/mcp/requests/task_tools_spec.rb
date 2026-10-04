@@ -123,6 +123,85 @@ RSpec.describe "MCP task tools", type: :request do
 
       expect(message).to eq("from comes after to")
     end
+
+    it "lists the open tasks the someday tab shows when it names that list" do
+      create(:task, :someday, title: "idea")
+      create(:task, :someday, :in_progress, title: "poking at it")
+      create(:task, :someday, :done, title: "settled")
+      call_tool("list_tasks", lists: %w[someday])
+
+      expect(listed_titles).to match_array(tasks.open_in_list("someday").map(&:title))
+    end
+
+    it "lists every list it names" do
+      create(:task, :someday, title: "idea")
+      create(:task, :external, title: "issue")
+      create(:task, title: "next up")
+      call_tool("list_tasks", lists: %w[someday external])
+
+      expect(listed_titles).to contain_exactly("idea", "issue")
+    end
+
+    it "keeps finished tasks on a list when it names their status" do
+      create(:task, :someday, title: "idea")
+      create(:task, :someday, :done, title: "settled")
+      call_tool("list_tasks", lists: %w[someday], statuses: %w[done])
+
+      expect(listed_titles).to eq(%w[settled])
+    end
+
+    it "refuses a list it does not know" do
+      call_tool("list_tasks", lists: %w[nowhere])
+
+      expect(refused?).to be(true)
+    end
+
+    it "narrows to the tasks that carry the tag, in any case" do
+      create(:task, title: "tagged", tags: %w[admin])
+      create(:task, title: "other", tags: %w[ruby])
+      call_tool("list_tasks", tag: " Admin ")
+
+      expect(listed_titles).to eq(%w[tagged])
+    end
+
+    it "finds the query in the title or the note" do
+      create(:task, title: "Fix the feed")
+      create(:task, title: "Write a post", note: "about the feed")
+      create(:task, title: "Mow the lawn")
+      call_tool("list_tasks", query: "feed")
+
+      expect(listed_titles).to contain_exactly("Fix the feed", "Write a post")
+    end
+
+    describe "every filter at once" do
+      def match(title, **fields)
+        defaults = { tags: %w[admin], note: "the feed", created_at: at(today - 30), completed_at: at(today - 1) }
+        create(:task, :someday, :done, title:, **defaults, **fields)
+      end
+
+      before do
+        match("match")
+        match("too old", completed_at: at(today - 20))
+        match("still open", status: "open", completed_at: nil)
+        match("untagged", tags: [])
+        match("on next", list: "next")
+        match("no words", note: "")
+      end
+
+      it "combines them with the statuses and the window" do
+        call_tool("list_tasks", lists: %w[someday], tag: "admin", query: "feed", statuses: %w[done],
+                                from: (today - 5).iso8601)
+
+        expect(listed_titles).to eq(%w[match])
+      end
+    end
+
+    it "leaves today's sprint unclaimed" do
+      create(:task, :someday, tags: %w[admin])
+      call_tool("list_tasks", lists: %w[someday], tag: "admin", query: "x")
+
+      expect(sprints.on(today)).to be_nil
+    end
   end
 
   describe "read_task" do
