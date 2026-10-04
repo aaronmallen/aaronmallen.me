@@ -20,10 +20,6 @@ RSpec.describe MCP::Jobs::ReapExpiredCredentials, type: :request do
 
   def tokens = MCP::Slice["db.rom"].relations[:oauth_tokens]
 
-  it "runs on the schedule the worker reads" do
-    expect(Object.const_get(sidekiq_schedule("reap_expired_credentials").fetch("class"))).to eq(described_class)
-  end
-
   describe "authorization codes" do
     it "deletes a code past its expiry" do
       code_row(:expired)

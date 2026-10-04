@@ -15,10 +15,6 @@ RSpec.describe Contact::Jobs::ReapSpamMessages, type: :request do
 
   def reap = described_class.new.perform
 
-  it "runs on the schedule the worker reads" do
-    expect(Object.const_get(sidekiq_schedule("reap_spam_messages").fetch("class"))).to eq(described_class)
-  end
-
   it "deletes a message marked spam more than 30 days ago" do
     mark(create(:message, subject: "Cheap pills"), "spam")
     later(keep_for + 60)

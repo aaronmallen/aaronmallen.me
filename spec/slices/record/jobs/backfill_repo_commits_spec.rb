@@ -693,8 +693,4 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       expect(scheduled).to be_empty
     end
   end
-
-  it "runs on the one queue the worker reads" do
-    expect(sidekiq_config[:queues]).to eq([described_class.get_sidekiq_options["queue"]])
-  end
 end

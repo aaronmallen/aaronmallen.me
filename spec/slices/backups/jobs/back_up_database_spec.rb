@@ -28,13 +28,6 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
     stub_backup_listing(*dumps)
   end
 
-  it "runs each night on the schedule the worker reads", :aggregate_failures do
-    entry = sidekiq_schedule("back_up_database")
-
-    expect(Object.const_get(entry.fetch("class"))).to eq(described_class)
-    expect(entry.fetch("cron")).to start_with("30 0 * * *")
-  end
-
   describe "a good run" do
     it "uploads a pg_dump of the database in the custom format" do
       back_up

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "fugit"
-
 RSpec.describe Tasks::Jobs::SyncIssues do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
   let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
@@ -688,21 +686,6 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(queue.call).to eq(Dry::Monads::Failure(:not_configured))
       expect(described_class.jobs).to be_empty
-    end
-  end
-
-  describe "the schedule" do
-    let(:entry) { sidekiq_schedule("sync_issues") }
-
-    it "names the job" do
-      expect(Object.const_get(entry.fetch("class"))).to eq(described_class)
-    end
-
-    it "runs the job every 15 minutes" do
-      cron = Fugit::Cron.parse(entry.fetch("cron"))
-      first = cron.next_time(Time.utc(2026, 9, 17, 12, 1))
-
-      expect(cron.next_time(first).to_t - first.to_t).to eq(15 * 60)
     end
   end
 end

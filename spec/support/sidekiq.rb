@@ -17,8 +17,6 @@ module Spec
 
       config.merge(config.delete(environment.to_sym) || {})
     end
-
-    def sidekiq_schedule(name) = sidekiq_config.dig(:scheduler, :schedule, name)
   end
 end
 

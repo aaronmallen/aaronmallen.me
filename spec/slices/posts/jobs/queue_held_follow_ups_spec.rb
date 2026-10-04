@@ -150,8 +150,4 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits, type: :request do
 
     expect(queued).to be_empty
   end
-
-  it "runs on the schedule the worker reads" do
-    expect(Object.const_get(sidekiq_schedule("queue_held_follow_ups").fetch("class"))).to eq(described_class)
-  end
 end

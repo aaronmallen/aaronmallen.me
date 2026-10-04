@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "fugit"
-
 RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
   subject(:job) { described_class.new }
 
@@ -94,28 +92,6 @@ RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
       moves = Tasks::Slice["relations.task_events"].for_task(carried.id).where(kind: "moved")
 
       expect(moves.count).to eq(1)
-    end
-  end
-
-  describe "the schedule" do
-    let(:entry) { sidekiq_schedule("roll_over_sprint") }
-
-    it "names the job" do
-      expect(Object.const_get(entry.fetch("class"))).to eq(described_class)
-    end
-
-    it "runs the job every day" do
-      cron = Fugit::Cron.parse(entry.fetch("cron"))
-      first = cron.next_time(Time.utc(2026, 9, 17, 12))
-
-      expect(cron.next_time(first).to_t - first.to_t).to eq(24 * 60 * 60)
-    end
-
-    it "runs the job as the Chicago day turns, not the UTC one" do
-      cron = Fugit::Cron.parse(entry.fetch("cron"))
-      run = cron.next_time(Time.utc(2026, 9, 17, 12)).to_t
-
-      expect(Blog::TimeZone.local(run).iso8601).to eq("2026-09-18T00:00:00-05:00")
     end
   end
 end

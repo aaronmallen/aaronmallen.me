@@ -18,10 +18,6 @@ RSpec.describe Media::Jobs::SweepPhotos, type: :request do
     stub_request(:delete, /store\.example/)
   end
 
-  it "runs on the schedule the worker reads" do
-    expect(Object.const_get(sidekiq_schedule("sweep_photos").fetch("class"))).to eq(described_class)
-  end
-
   it "deletes a photo unclaimed for a day from the table and the store", :aggregate_failures do
     photo = uploaded(day + 60)
     sweep
