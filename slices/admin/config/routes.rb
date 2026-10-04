@@ -107,6 +107,7 @@ module Admin
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
     get "/review", to: "review.show", as: :review
+    get "/search", to: "search.index", as: :search
     get "/search/palette", to: "search.palette", as: :palette_search
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post

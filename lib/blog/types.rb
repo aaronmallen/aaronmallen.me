@@ -113,6 +113,7 @@ module Blog
     SearchKind = Types::String.enum(
       "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
     )
+    SearchKindParam = SearchKind.optional.fallback(nil)
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: Constants::SLUG_RESERVED)
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)

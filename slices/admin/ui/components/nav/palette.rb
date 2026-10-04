@@ -22,6 +22,8 @@ module Admin
           }.freeze
           KIND_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           LIST_ID = "command-palette-list"
+          SEE_ALL_GROUP = "command-palette-group-see-all"
+          SEE_ALL_ID = "command-palette-see-all"
           TITLE = "{title}"
 
           prop :actions, Blog::Types::Array.of(Blog::Types::Instance(Structs::Action))
@@ -117,6 +119,7 @@ module Admin
               end
               action_group
               KINDS.each { |kind, icon| kind_group(kind, icon) }
+              see_all_group
             end
           end
 
@@ -140,6 +143,16 @@ module Admin
             return t(".waiting", count: section.count) if section.waiting?
 
             t(".current") if section.current
+          end
+
+          def see_all_group
+            search = path(:admin_search)
+
+            row_group(SEE_ALL_GROUP, t(".search")) do
+              PaletteRow(
+                id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all"), href: search, all: search,
+              )
+            end
           end
 
           def status

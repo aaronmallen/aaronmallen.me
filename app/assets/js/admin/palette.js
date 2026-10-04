@@ -26,6 +26,7 @@ function setupDialog(dialog) {
     [...dialog.querySelectorAll("[data-palette-kind]")].map((group) => [group.dataset.paletteKind, group]),
   );
   const sources = [...dialog.querySelectorAll("[data-palette-from]")];
+  const all = dialog.querySelector("[data-palette-all]");
   const filled = new Set();
   let options = [...dialog.querySelectorAll(OPTION)];
   let task = null;
@@ -53,12 +54,14 @@ function setupDialog(dialog) {
   const filter = () => {
     const text = query.value.trim().toLowerCase();
 
+    if (all) all.dataset.paletteHref = seeAll(all.dataset.paletteAll, query.value.trim());
+
     for (const option of options) option.hidden = !matches(option, text) || !applies(option, task);
 
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
     const visible = shown();
-    announce(visible.length);
+    announce(visible.filter((option) => option !== all).length);
     select(visible[0]);
   };
 
@@ -245,7 +248,7 @@ function foundRow(group, { id, title, match, date, href }) {
 }
 
 function matches(option, text) {
-  if (option.hasAttribute("data-palette-found")) return text !== "";
+  if (option.hasAttribute("data-palette-found") || option.hasAttribute("data-palette-all")) return text !== "";
 
   return text === "" || option.dataset.paletteText.includes(text);
 }
@@ -276,6 +279,10 @@ function post(option, token) {
   );
   document.body.append(form);
   form.submit();
+}
+
+function seeAll(route, text) {
+  return `${route}?${new URLSearchParams({ q: text })}`;
 }
 
 function steer(event, { move, run, select, shown }) {

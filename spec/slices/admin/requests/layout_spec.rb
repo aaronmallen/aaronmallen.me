@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin layout", type: :request do
+  def section_groups = "[data-palette-group]:not([aria-labelledby$='-actions']):not([aria-labelledby$='-see-all'])"
+
   let(:page) { Capybara.string(last_response.body) }
 
   describe "signed in" do
@@ -39,7 +41,7 @@ RSpec.describe "Admin layout", type: :request do
     end
 
     it "offers only the sections whose features exist" do
-      sections = page.all("[data-palette-group]:not([aria-labelledby$='-actions']) [data-palette-option]")
+      sections = page.all("#{section_groups} [data-palette-option]")
 
       expect(sections.map { it["data-palette-href"] })
         .to eq(%w[/admin /admin/tasks /admin/journal /admin/calendar /admin/decisions /admin/posts /admin/social

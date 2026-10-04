@@ -266,6 +266,39 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "the See all results row" do
+    before { open_palette }
+
+    it "stays away until you type" do
+      expect(page).to have_no_css("#command-palette-see-all")
+    end
+
+    describe "after a query" do
+      before do
+        6.times { create(:task, title: "Call the plumber #{it}") }
+        query.send_keys(*"plumber".chars)
+        page.assert_selector(".pal-r", text: "Call the plumber", count: 5)
+      end
+
+      it "sits below the results" do
+        expect(page.all(".pal-r").last[:id]).to eq("command-palette-see-all")
+      end
+
+      it "opens the search screen with the same query, every match listed", :aggregate_failures do
+        find_by_id("command-palette-see-all").click
+
+        expect(page).to have_current_path("/admin/search?q=plumber")
+        expect(page).to have_css(".li-title", text: "Call the plumber", count: 6)
+      end
+
+      it "opens it from the keyboard" do
+        query.send_keys(:end, :enter)
+
+        expect(page).to have_current_path("/admin/search?q=plumber")
+      end
+    end
+  end
+
   describe "searching more tasks than it shows" do
     before do
       6.times { create(:task, title: "Call the plumber #{it}") }

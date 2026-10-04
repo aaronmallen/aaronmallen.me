@@ -2410,6 +2410,18 @@
   }
 }
 
+@utility search-filters {
+  @apply flex flex-wrap items-center gap-2;
+
+  & input.inp {
+    @apply w-56 max-w-full;
+  }
+
+  & select.inp {
+    @apply w-auto max-w-full;
+  }
+}
+
 @utility tasks-filters {
   @apply flex flex-wrap items-center gap-2;
 
