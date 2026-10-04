@@ -353,6 +353,26 @@ RSpec.describe "Admin task page", type: :request do
           .to eq([false, false, false, false, true])
       end
 
+      it "marks the start the palette runs on an open task" do
+        read
+
+        expect(page).to have_css("form[data-task-act='start'][action='/admin/tasks/#{task.id}/start']")
+      end
+
+      it "marks the complete the palette runs on a task in progress, and no start", :aggregate_failures do
+        running = create(:task, :in_progress, :in_sprint)
+        read(running)
+
+        expect(page).to have_css("form[data-task-act='complete'][action='/admin/tasks/#{running.id}/complete']")
+        expect(page).to have_no_css("[data-task-act='start']")
+      end
+
+      it "marks nothing for the palette to run on a closed task" do
+        read(create(:task, :done))
+
+        expect(page).to have_no_css("[data-task-act]")
+      end
+
       it "offers no moves between lists" do
         read
 
@@ -387,6 +407,28 @@ RSpec.describe "Admin task page", type: :request do
           send_to("/admin/tasks/#{task.id}/#{name}", filter: "today", origin: "today")
 
           expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin"))
+        end
+      end
+
+      away = {
+        "another site" => "//elsewhere.example/admin",
+        "a page outside the admin" => "/posts",
+        "an address that only starts like the admin" => "/administer",
+      }
+
+      { "complete" => "/admin/tasks?filter=next", "start" => "/admin/tasks?filter=today" }.each do |name, back|
+        it "sends #{name} back to the admin page it was run from" do
+          send_to("/admin/tasks/#{task.id}/#{name}", return_to: "/admin/posts?status=draft", filter: "next")
+
+          expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/posts?status=draft"))
+        end
+
+        away.each do |what, path|
+          it "ignores a #{name} sent back to #{what}" do
+            send_to("/admin/tasks/#{task.id}/#{name}", return_to: path, filter: "next")
+
+            expect(last_response.location).to end_with(back)
+          end
         end
       end
 

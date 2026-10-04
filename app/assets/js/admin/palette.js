@@ -4,9 +4,12 @@ import { bind } from "./keys.js";
 const COUNT = "{count}";
 const DELAY = 150;
 const FOUND = "[data-palette-found]";
+const NO_TASK = "no_task";
 const OPTION = "[data-palette-option]";
 const SHOWN = "[data-palette-option]:not([hidden])";
 const SLASH_CODES = ["Slash", "NumpadDivide"];
+const TASK = "[data-task-read]";
+const TITLE = "{title}";
 
 export function setupPalette() {
   const dialog = document.querySelector("[data-palette]");
@@ -22,7 +25,10 @@ function setupDialog(dialog) {
   const kinds = new Map(
     [...dialog.querySelectorAll("[data-palette-kind]")].map((group) => [group.dataset.paletteKind, group]),
   );
+  const sources = [...dialog.querySelectorAll("[data-palette-from]")];
+  const filled = new Set();
   let options = [...dialog.querySelectorAll(OPTION)];
+  let task = null;
   let asked = "";
   let controller = null;
   let timer = null;
@@ -47,7 +53,7 @@ function setupDialog(dialog) {
   const filter = () => {
     const text = query.value.trim().toLowerCase();
 
-    for (const option of options) option.hidden = !matches(option, text);
+    for (const option of options) option.hidden = !matches(option, text) || !applies(option, task);
 
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
@@ -68,6 +74,8 @@ function setupDialog(dialog) {
     const option = active();
     if (!option) return;
 
+    if (option.hasAttribute("data-palette-post")) return post(option, dialog.dataset.paletteToken);
+
     const target = option.dataset.paletteDialog;
     if (!target) return window.location.assign(option.dataset.paletteHref);
 
@@ -81,6 +89,21 @@ function setupDialog(dialog) {
 
     options = [...dialog.querySelectorAll(OPTION)];
     filter();
+  };
+
+  const fill = () => {
+    for (const source of sources) {
+      if (filled.has(source)) continue;
+
+      filled.add(source);
+      fetchJSON(source.dataset.paletteFrom)
+        .then(({ rows }) => {
+          source.after(...rows.map((row) => actionRow(source, row)));
+          options = [...dialog.querySelectorAll(OPTION)];
+          filter();
+        })
+        .catch(() => filled.delete(source));
+    }
   };
 
   const stop = () => {
@@ -116,6 +139,9 @@ function setupDialog(dialog) {
     if (dialog.open) return;
 
     query.value = "";
+    task = taskOnScreen();
+    aim(options, task);
+    if (!task) fill();
     stop();
     asked = "";
     show([]);
@@ -162,17 +188,48 @@ function setupDialog(dialog) {
   filter();
 }
 
-async function fetchFound(route, text, signal) {
-  const response = await fetch(`${route}?${new URLSearchParams({ q: text })}`, {
-    headers: { Accept: "application/json" },
-    redirect: "manual",
-    signal,
-  });
-  if (!response.ok) throw new Error(`palette search answered ${response.status}`);
+function actionRow(source, { id, title, href }) {
+  const row = source.content.firstElementChild.cloneNode(true);
+  const label = row.querySelector(".pal-r-label");
 
-  const { groups } = await response.json();
+  row.id = `${row.id}-${id}`;
+  row.dataset.paletteHref = href;
+  row.dataset.paletteText = row.dataset.paletteText.replace(TITLE, () => title.toLowerCase());
+  label.textContent = label.textContent.replace(TITLE, () => title);
+
+  return row;
+}
+
+function act(task, needs) {
+  return task?.querySelector(`[data-task-act="${needs}"]`)?.getAttribute("action") ?? "";
+}
+
+function aim(options, task) {
+  for (const option of options) {
+    const needs = option.dataset.paletteNeeds;
+    if (needs && needs !== NO_TASK) option.dataset.paletteHref = act(task, needs);
+  }
+}
+
+function applies(option, task) {
+  const needs = option.dataset.paletteNeeds;
+  if (!needs) return true;
+  if (needs === NO_TASK) return !task;
+
+  return act(task, needs) !== "";
+}
+
+async function fetchFound(route, text, signal) {
+  const { groups } = await fetchJSON(`${route}?${new URLSearchParams({ q: text })}`, signal);
 
   return groups;
+}
+
+async function fetchJSON(url, signal) {
+  const response = await fetch(url, { headers: { Accept: "application/json" }, redirect: "manual", signal });
+  if (!response.ok) throw new Error(`palette answered ${response.status} for ${url}`);
+
+  return response.json();
 }
 
 function foundRow(group, { id, title, match, date, href }) {
@@ -193,8 +250,32 @@ function matches(option, text) {
   return text === "" || option.dataset.paletteText.includes(text);
 }
 
+function hiddenField(name, value) {
+  const field = document.createElement("input");
+
+  field.type = "hidden";
+  field.name = name;
+  field.value = value;
+
+  return field;
+}
+
 function opens(event) {
   return (event.metaKey || event.ctrlKey) && (event.key === "/" || SLASH_CODES.includes(event.code));
+}
+
+function post(option, token) {
+  const form = document.createElement("form");
+
+  form.method = "post";
+  form.action = option.dataset.paletteHref;
+  form.hidden = true;
+  form.append(
+    hiddenField("_csrf_token", token),
+    hiddenField("return_to", window.location.pathname + window.location.search),
+  );
+  document.body.append(form);
+  form.submit();
 }
 
 function steer(event, { move, run, select, shown }) {
@@ -207,4 +288,11 @@ function steer(event, { move, run, select, shown }) {
   else return;
 
   event.preventDefault();
+}
+
+function taskOnScreen() {
+  const panel = document.querySelector("[data-task-panel]");
+  const scope = panel?.open ? panel : document.querySelector("main");
+
+  return scope?.querySelector(TASK) ?? null;
 }

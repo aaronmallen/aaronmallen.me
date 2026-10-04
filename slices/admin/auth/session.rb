@@ -22,6 +22,11 @@ module Admin
         @session = session
       end
 
+      def admin_return_path(wanted)
+        path = local_path(wanted)
+        wanted if path && admin_path?(path)
+      end
+
       def csrf_token
         @session[Hanami::Action::CSRFProtection::CSRF_TOKEN.to_s]
       end
@@ -89,17 +94,22 @@ module Admin
         !signed_in_at.is_a?(Integer) || @now - signed_in_at >= Blog::SessionCookie::LIFETIME
       end
 
+      def local_path(wanted)
+        return unless wanted.is_a?(String) && LOCAL_PATH.match?(wanted)
+
+        URI.parse(wanted).path
+      rescue URI::InvalidURIError
+        nil
+      end
+
       def oauth_states
         started = @session["oauth_states"]
         started.is_a?(Array) ? started.dup : []
       end
 
       def return_path(wanted)
-        return unless wanted.is_a?(String) && LOCAL_PATH.match?(wanted)
-
-        wanted unless admin_path?(URI.parse(wanted).path)
-      rescue URI::InvalidURIError
-        nil
+        path = local_path(wanted)
+        wanted if path && !admin_path?(path)
       end
 
       def valid_after

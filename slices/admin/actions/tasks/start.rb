@@ -14,7 +14,7 @@ module Admin
           case start_task.call(record_id(request))
           in Success(_)
             toast(response, STARTED)
-            response.redirect_to(tasks_path(request, filter: TODAY))
+            response.redirect_to(back_here(request) || tasks_path(request, filter: TODAY))
           in Failure(:not_found)
             halt 404
           else halt 500

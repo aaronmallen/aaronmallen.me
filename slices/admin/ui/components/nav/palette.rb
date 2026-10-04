@@ -22,6 +22,7 @@ module Admin
           }.freeze
           KIND_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           LIST_ID = "command-palette-list"
+          TITLE = "{title}"
 
           prop :actions, Blog::Types::Array.of(Blog::Types::Instance(Structs::Action))
           prop :sections, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
@@ -29,7 +30,7 @@ module Admin
           def view_template
             dialog(
               id: DIALOG_ID, class: "pal-b", aria: { label: t(".label") },
-              data: { palette: true, palette_search: path(:admin_palette_search) },
+              data: { palette: true, palette_search: path(:admin_palette_search), palette_token: csrf_token },
             ) do
               div(class: "pal") do
                 query_box
@@ -51,12 +52,25 @@ module Admin
           end
 
           def action_row(action)
+            return action_rows(action) if action.from
+
             label = t(action.label_key)
 
             PaletteRow(
               id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
-              href: action.path, dialog: action.dialog,
+              href: action.path, dialog: action.dialog, post: action.post, needs: action.needs&.to_s,
             )
+          end
+
+          def action_rows(action)
+            label = t(action.label_key, title: TITLE)
+
+            template(data: { palette_from: action.from }) do
+              PaletteRow(
+                id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
+                post: action.post, needs: action.needs&.to_s,
+              )
+            end
           end
 
           def footer

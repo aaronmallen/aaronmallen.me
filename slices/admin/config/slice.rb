@@ -103,7 +103,8 @@ module Admin
       operations.unlink_task
       queries.finished_task_counts queries.link_targets queries.list_finished_tasks queries.list_tasks
       queries.open_task_counts queries.open_tasks_in_list queries.planned_tasks
-      queries.sprints_after queries.task_by_id queries.task_timeline queries.tasks_in_sprint
+      queries.sprints_after queries.task_by_id queries.task_timeline queries.tasks_in_progress
+      queries.tasks_in_sprint
     ], from: :tasks
 
     import keys: %w[operations.revoke_client queries.connected_clients], from: :mcp

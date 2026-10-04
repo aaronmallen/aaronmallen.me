@@ -44,7 +44,7 @@ module Admin
           end
 
           def complete
-            Form(action: path(:admin_complete_task, id: @task.id)) do
+            Form(action: path(:admin_complete_task, id: @task.id), data: { task_act: "complete" }) do
               origin_fields
               details(class: "task-complete") do
                 summary(class: "btn pri sm") { done_label }
@@ -107,7 +107,7 @@ module Admin
 
           def running? = @task.in_progress? && @task.in_sprint?
 
-          def start = change(:admin_start_task, "fa-solid fa-play", t(".start"))
+          def start = change(:admin_start_task, "fa-solid fa-play", t(".start"), data: { task_act: "start" })
 
           def stop = change(:admin_stop_task, "fa-solid fa-pause", t(".stop"))
 

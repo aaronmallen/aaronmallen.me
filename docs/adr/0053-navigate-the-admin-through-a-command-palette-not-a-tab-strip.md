@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets]
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -54,6 +54,16 @@ a query that matches an action lists it first. Since #303 the list holds two ent
 palette and opens the new task dialog on the page you are on, and goes to `/admin/tasks/new` when that page has no
 dialog. "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so
 the cursor lands in it without a script.
+
+Since #311 an entry can also `post` to its target, and can say what it `needs` on screen. "Start task" and "Complete
+task" need a task: the one open in the task flyout, or else the one the task page shows. `Tasks::Controls` marks its
+start and complete forms with `data-task-act`, and the row posts to the form's address, so a row shows only where the
+task page would offer the same button. "Complete {title}" needs no task on screen. Its entry names a `from` route,
+`/admin/tasks/in-progress`, and `Palette` draws a `template` in place of a row. `palette.js` fetches the route the
+first time the palette opens with no task on screen, and clones one row per task in progress. The route keeps what
+[ADR 0091][0091] set for such routes: it reads the session alone, answers 401 without one, and answers `no-store`.
+The layout still reads no task. A posted row sends the page's own address as `return_to`, and the task actions
+redirect there when it is an admin path, so I stay on the screen I ran it from.
 
 A section is a row in `Admin::Operations::ListSections::ALL`: its name, group, icon and route, in the order the
 palette lists them. A new section joins by adding its row and the locale keys `Structs::Section` reads for it. A row

@@ -15,13 +15,16 @@ module Admin
           prop :href, Blog::Types::String.optional, default: nil
           prop :dialog, Blog::Types::String.optional, default: nil
           prop :found, Blog::Types::Bool, default: false
+          prop :post, Blog::Types::Bool, default: false
+          prop :needs, Blog::Types::String.optional, default: nil
 
           def view_template
             div(
               id: @id, class: "pal-r", role: "option", aria: { selected: "false" },
               data: {
                 palette_option: true, palette_text: @text, palette_href: @href,
-                palette_dialog: @dialog, palette_found: (true if @found),
+                palette_dialog: @dialog, palette_found: (true if @found), palette_post: (true if @post),
+                palette_needs: @needs,
               },
             ) do
               i(class: ["fa-solid", @icon, "pal-r-icon"], aria: { hidden: "true" })

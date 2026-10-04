@@ -23,7 +23,7 @@ module Admin
 
         def answer(request, response, key)
           toast(response, key)
-          response.redirect_to(tasks_path(request))
+          response.redirect_to(back_here(request) || tasks_path(request))
         end
       end
     end

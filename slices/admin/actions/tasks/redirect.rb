@@ -9,6 +9,8 @@ module Admin
 
         private
 
+        def back_here(request) = auth_session(request).admin_return_path(request.params[:return_to])
+
         def from_today?(request) = Blog::Types::TaskOriginParam[request.params[:origin]] == FROM_TODAY
 
         def return_to(request) = { filter: task_tab(request), origin: task_origin(request) }
