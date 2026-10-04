@@ -134,6 +134,16 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "a new issue while tag rules exist" do
+    it "takes no rule tags" do
+      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "aaronmallen/*", tags: "projects" })
+      stub_assigned(issue)
+      sync
+
+      expect(imported.tags).to be_empty
+    end
+  end
+
   describe "issues in every workspace I hold a key for" do
     before do
       connect_linear(LinearGraphQL::KEY, "lin_api_two")

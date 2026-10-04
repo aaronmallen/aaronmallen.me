@@ -21,6 +21,7 @@ module Tasks
         task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
         task_source_repo: "repos.task_source_repo",
+        task_tag_rule_repo: "repos.task_tag_rule_repo",
       ]
 
       def call(provider:, client:, now: Time.now)
@@ -142,7 +143,9 @@ module Tasks
       end
 
       def tags(issue)
-        issue.fetch(:labels, Blog::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }.uniq
+        labeled = issue.fetch(:labels, Blog::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
+
+        [*labeled, *task_tag_rule_repo.tag_names_for(issue[:origin])].uniq
       end
 
       def tracked(provider) = task_source_repo.for_provider(provider).to_h { [it.remote_id, it] }

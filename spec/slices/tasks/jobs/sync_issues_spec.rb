@@ -134,6 +134,56 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "a new issue from a repo with tag rules" do
+    before do
+      create(:tag, :private, name: "bug-fix")
+      rule("aaronmallen/aaronmallen.me", "ruby, hanami")
+      rule("aaronmallen/*", "projects, ruby")
+    end
+
+    def events = Tasks::Slice["relations.task_events"].for_task(imported.id).to_a
+
+    def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: })
+
+    it "imports with the tags of every rule it matches beside its label tags" do
+      stub_assigned(issue(labels: { nodes: [{ name: "Bug Fix" }] }))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "hanami", "projects", "ruby")
+    end
+
+    it "records each tag once in the import's task event" do
+      stub_assigned(issue(labels: { nodes: [{ name: "Ruby" }] }))
+      sync
+
+      expect(events.map { [it[:kind], it[:tag_name]] })
+        .to contain_exactly(%w[tagged hanami], %w[tagged projects], %w[tagged ruby])
+    end
+
+    it "matches the repo whatever its case" do
+      stub_assigned(issue(repo: "AaronMallen/AaronMallen.me"))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("hanami", "projects", "ruby")
+    end
+
+    it "takes no rule tags when the issue comes from another owner" do
+      stub_assigned(issue(repo: "octocat/aaronmallen.me"))
+      sync
+
+      expect(imported.tags).to be_empty
+    end
+
+    it "keeps a tag I removed off on the next sync" do
+      stub_assigned(issue)
+      sync
+      repo.replace_tags(imported.id, %w[ruby])
+      sync
+
+      expect(imported.tags.map(&:name)).to eq(%w[ruby])
+    end
+  end
+
   describe "an issue edited on GitHub" do
     it "takes the new title and body" do
       task = tracked(title: "Old", note: "Old body")

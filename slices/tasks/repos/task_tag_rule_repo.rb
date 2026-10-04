@@ -25,6 +25,13 @@ module Tasks
         tag_ids
       end
 
+      def tag_names_for(origin)
+        return Blog::Constants::EMPTY_ARRAY unless origin
+
+        repo = origin.downcase
+        task_tag_rules.combine(:tags).to_a.select { it.matches?(repo) }.flat_map { it.tags.map(&:name) }
+      end
+
       def tag_tasks(task_ids, tag_ids) = task_tags.add_missing(task_ids, tag_ids)
 
       private

@@ -77,12 +77,12 @@ module Record
       end
 
       def issue(node, viewer)
-        repo = node.dig("repository", "nameWithOwner")
+        origin = node.dig("repository", "nameWithOwner")
 
         {
           body: node["body"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), labels: labels(node), reference: "#{repo}##{node.fetch('number')}",
-          remote_state: remote_state(node, viewer), repo:, title: node.fetch("title"), url: node.fetch("url"),
+          id: node.fetch("id"), labels: labels(node), origin:, reference: "#{origin}##{node.fetch('number')}",
+          remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
         }
       end
 

@@ -50,11 +50,11 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", comments: [], id: "I_one", labels: [], reference: "someorg/tool#4", remote_state: "open",
-        repo: "someorg/tool", title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
+      { body: "It broke", comments: [], id: "I_one", labels: [], origin: "someorg/tool", reference: "someorg/tool#4",
+        remote_state: "open", title: "Fix it", url: "https://github.com/someorg/tool/issues/4" }
     end
 
-    it "lists each one with its id, reference, title, body, URL and repository" do
+    it "lists each one with its id, reference, title, body, URL and repository as its origin" do
       stub_assigned(github_issue_search(github_issue("I_one", repo: "someorg/tool", number: 4, title: "Fix it",
                                                               body: "It broke")))
 
@@ -127,8 +127,8 @@ RSpec.describe Record::GitHub::Client do
 
   describe "the issues already imported" do
     let(:still_mine) do
-      { body: "Edited", comments: [], id: "I_known", labels: [], reference: "aaronmallen/aaronmallen.me#7",
-        remote_state: "open", repo: "aaronmallen/aaronmallen.me", title: "Renamed", url: known_url }
+      { body: "Edited", comments: [], id: "I_known", labels: [], origin: "aaronmallen/aaronmallen.me",
+        reference: "aaronmallen/aaronmallen.me#7", remote_state: "open", title: "Renamed", url: known_url }
     end
 
     it "reports an open issue still assigned to me, with its title and body" do
