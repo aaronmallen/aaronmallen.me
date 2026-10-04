@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [config, media, public]
 issue: "#132"
-amended: ["#137", "#396", "#394"]
+amended: ["#137", "#396", "#394", "#468"]
 tags: [media, photos, uploads, s3, rustfs, nas, providers, cloudflare, tunnel, puma]
 ---
 
@@ -40,7 +40,8 @@ We store photos in any S3-compatible store named in settings and serve them thro
   alone.
 - The `public` slice answers `GET /media/<key>`, since a feature slice answers no route ([ADR 0001][0001]). It
   fetches the photo from the store over the LAN and streams it back with a one-year `immutable` cache header.
-  Cloudflare then serves repeat requests from its own cache.
+  Cloudflare then serves repeat requests from its own cache. #468 added `s-maxage=86400`, so Cloudflare keeps a
+  photo for a day and a photo taken down drops off the edge ([ADR 0109][0109]).
 - Since #394 a visitor gets only a photo a published post claims ([ADR 0082][0082]). Any other photo answers a
   visitor with the same empty 404 as a missing key, and answers the signed in owner with `private, no-store`, so
   no cache keeps a photo from a journal entry, a task or a draft.
@@ -81,4 +82,5 @@ so the client has to send them only when the request needs them.
 [0009]: 0009-register-every-service-client-with-or-without-its-credentials.md
 [0082]: 0082-tie-a-photo-to-the-records-whose-markdown-points-to-it.md
 [0105]: 0105-dump-the-database-nightly-to-a-private-backups-bucket-and-keep-the-newest-7.md
+[0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

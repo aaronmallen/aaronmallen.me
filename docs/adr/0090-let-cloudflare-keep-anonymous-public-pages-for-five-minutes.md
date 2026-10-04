@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, public]
 issue: "#235"
-amended: ["#376"]
+amended: ["#376", "#468"]
 tags: [cache, cloudflare, cache-control, cookies, sessions, theme, deploy, public]
 ---
 
@@ -88,10 +88,12 @@ Anything new that changes a public page per reader must either set `Cache-Contro
 or add its cookie to `Public::Action::PERSONAL_COOKIES` and to the second rule. Missing either one serves one
 reader's page to everyone.
 
-The first rule also makes photos eligible, so Cloudflare keeps a photo for the year its `Cache-Control` asks and a
-missing one for 60 seconds.
+The first rule also makes photos eligible, so Cloudflare keeps a missing photo for 60 seconds. #468 has a published
+photo send `s-maxage=86400`, so Cloudflare keeps it for a day, not the year its `max-age` asks of a browser
+([ADR 0109][0109]).
 
 [0024]: 0024-mount-the-session-cookie-in-admin-and-mcp-alone-and-let-public-read-it-by-hand.md
 [0032]: 0032-keep-the-theme-in-a-site-theme-cookie-the-browser-sets-and-draw-it-with-light-dark.md
 [0106]: 0106-count-feed-fetches-on-the-server-and-capture-outbound-clicks-from-the-beacon.md
+[0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
