@@ -102,6 +102,7 @@ module MCP
         read_review: "api.endpoints.read_review",
         read_spread_between: "analytics.queries.read_spread_between",
         read_task: "api.endpoints.read_task",
+        read_throughs_between: "analytics.queries.read_throughs_between",
         read_time_report: "api.endpoints.read_time_report",
         reject_edits: "suggestions.operations.reject_edits",
         remove_tag: "tags.operations.remove_tag",
@@ -144,6 +145,7 @@ module MCP
         update_work_session: "api.endpoints.update_work_session",
         webmention_settings: "social.queries.webmention_settings",
         webmentions_received_in: "social.queries.webmentions_received_in",
+        weekday_hours: "analytics.queries.weekday_hours",
         work_entries_between: "projects.queries.work_entries_between",
       }.freeze
       INSTRUCTIONS = [

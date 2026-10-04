@@ -52,8 +52,8 @@ module MCP
 
     import keys: %w[
       operations.hash_visitor queries.devices_between queries.hourly_between queries.navigation_between
-      queries.page_between queries.reach_between queries.read_spread_between queries.scroll_depths_between
-      queries.sources_between queries.summary_between
+      queries.page_between queries.reach_between queries.read_spread_between queries.read_throughs_between
+      queries.scroll_depths_between queries.sources_between queries.summary_between queries.weekday_hours
     ], from: :analytics
 
     import keys: %w[operations.mark_message queries.by_id queries.received_between], from: :contact

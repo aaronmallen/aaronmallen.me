@@ -30,6 +30,11 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
+                  "A read-through is a visitor who scrolled at least #{Analytics::ReadThrough::SCROLL_DEPTH}% " \
+                  "down a page and read it for at least #{Analytics::ReadThrough::READ_SECONDS} seconds, counted " \
+                  "once per page and day by the daily hash. Totals give read_throughs across the range, and each " \
+                  "top path gives its own. Days rolled up before the site counted read-throughs add none. " \
+                  "#{WeekdayGrid::DESCRIPTION}" \
                   "sources gives the top #{TOP} ref tags by visitors, each with its views and visitors: a visit " \
                   "to a link that carries ?#{Analytics::Ref::KEY}=<source> counts under that source, so the " \
                   "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
@@ -49,8 +54,9 @@ module MCP
                   "#{Blog::DayWindow::LONGEST} days. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, and " \
-                  "its devices, with no top paths. A page's referrers and countries always give visitors. A page " \
-                  "nobody visited reads as zeros. For a published post's path, since_publish numbers each day of " \
+                  "its devices, with no top paths or weekday_hours. Its totals give its own read_throughs. A " \
+                  "page's referrers and countries always give visitors. A page nobody visited reads as zeros. " \
+                  "For a published post's path, since_publish numbers each day of " \
                   "the range from the Chicago day the post went out, which is day 1. " \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \
                   "#{Analytics::Scroll::DEPTHS.join(', ')}%, the views that scrolled at least that far and their " \
@@ -112,6 +118,13 @@ module MCP
           end
         end
 
+        def page(path, range, server_context)
+          found = page_between(server_context).call(path:, from: range.first, to: range.last)
+          read_throughs = read_throughs(range, server_context).fetch(path, 0)
+
+          found.merge(totals: found.fetch(:totals).merge(read_throughs:))
+        end
+
         def page_ranked(found, range, path, server_context)
           {
             **PAGE_RANKED.to_h { [it, found.fetch(it).take(TOP)] },
@@ -121,7 +134,7 @@ module MCP
         end
 
         def page_summary(path, range, at, server_context)
-          found = page_between(server_context).call(path:, from: range.first, to: range.last)
+          found = page(path, range, server_context)
           days = found.fetch(:days)
 
           answer(
@@ -144,8 +157,13 @@ module MCP
 
         def ranked(range, server_context)
           found = analytics_between(server_context).call(from: range.first, to: range.last)
+          read_throughs = read_throughs(range, server_context)
 
-          found.merge(breakdowns(range, nil, server_context))
+          found.merge(
+            breakdowns(range, nil, server_context),
+            paths: found.fetch(:paths).map { it.merge(read_throughs: read_throughs.fetch(it.fetch(:path), 0)) },
+            totals: found.fetch(:totals).merge(read_throughs: read_throughs.values.sum),
+          )
         end
 
         def raw(range, at, path, server_context)
@@ -166,6 +184,10 @@ module MCP
 
         def read(range, at, path, server_context)
           path ? page_summary(path, range, at, server_context) : summary(range, at, server_context)
+        end
+
+        def read_throughs(range, server_context)
+          read_throughs_between(server_context).call(from: range.first, to: range.last)
         end
 
         def since_counts(found, at)
@@ -198,6 +220,7 @@ module MCP
             days: dated(found.fetch(:days)),
             **raw(range, at, nil, server_context),
             **RANKED.to_h { [it, found.fetch(it).take(TOP)] },
+            weekday_hours: WeekdayGrid.call(weekday_hours(server_context)),
           )
         end
 

@@ -122,6 +122,8 @@ module MCP
 
         def read_spread_between(server_context) = server_context.fetch(:read_spread_between)
 
+        def read_throughs_between(server_context) = server_context.fetch(:read_throughs_between)
+
         def record_links(kind, id, server_context)
           server_context.fetch(:list_links).call(kind:, id:).value!.fetch(:links)
         end
@@ -173,6 +175,8 @@ module MCP
         def webmention_settings(server_context) = server_context.fetch(:webmention_settings)
 
         def webmentions_received_in(server_context) = server_context.fetch(:webmentions_received_in)
+
+        def weekday_hours(server_context) = server_context.fetch(:weekday_hours)
 
         def work_entries_between(server_context) = server_context.fetch(:work_entries_between)
       end

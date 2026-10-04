@@ -14,7 +14,8 @@ RSpec.describe "MCP analytics tools", type: :request do
       roll_up(today - 1, views: 10, visitors: 4)
       roll_up(today - 2, views: 5, visitors: 2)
 
-      expect(read.fetch("totals")).to eq("views" => 15, "visitors" => 6, "read_seconds" => 150, "reach" => 0)
+      expect(read.fetch("totals"))
+        .to eq("views" => 15, "visitors" => 6, "read_seconds" => 150, "read_throughs" => 0, "reach" => 0)
     end
 
     it "leaves out the days outside the range" do
@@ -147,7 +148,8 @@ RSpec.describe "MCP analytics tools", type: :request do
       end
 
       it "counts every unrolled day in the totals" do
-        expect(read.fetch("totals")).to eq("views" => 7, "visitors" => 5, "read_seconds" => 166, "reach" => 0)
+        expect(read.fetch("totals"))
+          .to eq("views" => 7, "visitors" => 5, "read_seconds" => 166, "read_throughs" => 0, "reach" => 0)
       end
 
       it "puts each unrolled day's visits on that day" do
@@ -203,6 +205,82 @@ RSpec.describe "MCP analytics tools", type: :request do
 
     it "reads a range of 366 days" do
       expect(read(from: today - 365).fetch("days").size).to eq(366)
+    end
+  end
+
+  describe "read_analytics read-throughs" do
+    def read(**) = mcp_answer("read_analytics", from: (today - 6).iso8601, to: today.iso8601, **)
+
+    def read_through(path)
+      create(:analytics_event, path:, scroll_depth: 75, read_seconds: 30)
+    end
+
+    def rolled(day, path, read_throughs:)
+      roll_up(day, views: 20, visitors: 10)
+      create(:analytics_rollup_path, day:, path:, views: 9, visitors: 5, bounces: 0, read_throughs:)
+    end
+
+    before do
+      rolled(today - 2, "/writing/hello", read_throughs: 3)
+      rolled(today - 9, "/writing/hello", read_throughs: 4)
+      2.times { read_through("/writing/hello") }
+      read_through("/writing/other")
+      create(:analytics_event, path: "/writing/other", scroll_depth: 100, read_seconds: 10)
+    end
+
+    it "adds up the read-throughs of every path in the range" do
+      expect(read.fetch("totals").fetch("read_throughs")).to eq(6)
+    end
+
+    it "gives each top path its read-throughs" do
+      expect(read.fetch("paths").to_h { it.values_at("path", "read_throughs") })
+        .to eq("/writing/hello" => 5, "/writing/other" => 1)
+    end
+
+    it "gives a page its own read-throughs" do
+      expect(read(path: "/writing/hello").fetch("totals").fetch("read_throughs")).to eq(5)
+    end
+
+    it "gives zero to a page no one read through" do
+      expect(read(path: "/writing/quiet").fetch("totals").fetch("read_throughs")).to eq(0)
+    end
+  end
+
+  describe "read_analytics weekday_hours" do
+    def at(day, hour) = Blog::TimeZone.day_start(day) + (hour * 3_600)
+
+    def grid(from: today - 6, to: today)
+      mcp_answer("read_analytics", from: from.iso8601, to: to.iso8601).fetch("weekday_hours")
+    end
+
+    def monday(weeks_ago) = today - ((today.cwday - 1) + (7 * weeks_ago))
+
+    it "names the last 90 days and the time zone", :aggregate_failures do
+      expect(grid.slice("from", "to", "time_zone"))
+        .to eq("from" => (today - 89).iso8601, "to" => today.iso8601, "time_zone" => Blog::TimeZone::NAME)
+      expect(grid.fetch("hours").map { it.fetch("hour") }).to eq((0..23).to_a)
+    end
+
+    it "counts the visitors in each hour of each weekday, whatever the range" do
+      2.times { create(:analytics_event, occurred_at: at(monday(2), 9)) }
+      create(:analytics_event, occurred_at: at(monday(3) + 6, 21))
+
+      days = %w[monday tuesday wednesday thursday friday saturday sunday]
+      counts = grid(from: today, to: today).fetch("hours").to_h { [it.fetch("hour"), it.values_at(*days)] }
+
+      expect(counts.values_at(9, 21)).to eq([[2, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1]])
+    end
+
+    it "leaves out visits older than 90 days" do
+      create(:analytics_event, occurred_at: at(today - 120, 9))
+
+      expect(grid.fetch("hours").sum { it.except("hour").values.sum }).to eq(0)
+    end
+
+    it "leaves the grid out of a page's answer" do
+      answer = mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/writing/hello")
+
+      expect(answer).not_to have_key("weekday_hours")
     end
   end
 
@@ -486,7 +564,7 @@ RSpec.describe "MCP analytics tools", type: :request do
       roll_up_page(today - 1, "/writing/hello", views: 6)
 
       expect(read_page("/writing/hello").fetch("totals"))
-        .to eq("views" => 10, "visitors" => 8, "read_seconds" => 100, "reach" => 0)
+        .to eq("views" => 10, "visitors" => 8, "read_seconds" => 100, "read_throughs" => 0, "reach" => 0)
     end
 
     it "gives the page's days, oldest first, with zero on a quiet day" do
@@ -567,8 +645,8 @@ RSpec.describe "MCP analytics tools", type: :request do
     it "answers an unknown path with zeros" do
       roll_up_page(today - 1, "/writing/hello", views: 4)
 
-      expect(read_page("/nowhere").fetch("totals")).to eq("views" => 0, "visitors" => 0, "read_seconds" => 0,
-                                                          "reach" => 0)
+      expect(read_page("/nowhere").fetch("totals"))
+        .to eq("views" => 0, "visitors" => 0, "read_seconds" => 0, "read_throughs" => 0, "reach" => 0)
     end
 
     it "gives no since_publish for a page that is not a post" do
