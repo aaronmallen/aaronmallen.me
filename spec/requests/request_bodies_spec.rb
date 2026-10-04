@@ -45,7 +45,7 @@ RSpec.describe "A request body", type: :request do
   end
 
   describe "a JSON body over 1 MB" do
-    before { post "/mcp", rpc(megabyte), json.merge("HTTP_ACCEPT" => "application/json") }
+    before { post "/api/v1/journal_entries", rpc(megabyte), json.merge("HTTP_ACCEPT" => "application/json") }
 
     it "answers 413 in JSON" do
       expect(JSON.parse(last_response.body)).to include("status" => 413)
@@ -53,10 +53,31 @@ RSpec.describe "A request body", type: :request do
   end
 
   describe "a JSON body under 1 MB" do
-    before { post "/mcp", rpc(megabyte - 1024), json }
+    before { post "/api/v1/journal_entries", rpc(megabyte - 1024), json }
 
     it "reaches the action" do
       expect(last_response.status).to eq(401)
+    end
+  end
+
+  %w[/mcp /api/v1/photos].each do |path|
+    describe "a JSON body to #{path} over 1 MB" do
+      before { post path, rpc(2 * megabyte), json }
+
+      it "reaches the action, since it carries photos in base64" do
+        expect(last_response.status).to eq(401)
+      end
+    end
+
+    describe "a JSON body to #{path} over the base64 upload limit" do
+      before do
+        size = (Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT + 1).to_s
+        post path, rpc(0), json.merge("CONTENT_LENGTH" => size, "HTTP_ACCEPT" => "application/json")
+      end
+
+      it "answers 413 in JSON" do
+        expect(JSON.parse(last_response.body)).to include("status" => 413)
+      end
     end
   end
 

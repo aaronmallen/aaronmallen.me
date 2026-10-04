@@ -2448,6 +2448,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "update_social_post" => { id: 1 },
         "update_webmention_settings" => {},
         "update_work_session" => { id: 1, session_id: 2, started_at: "2026-01-01T09:00" },
+        "upload_photo" => { data: "", filename: "photo.png" },
         "write_post_seo" => { id: 1 },
       }.fetch(name)
     end

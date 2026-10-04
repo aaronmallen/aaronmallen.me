@@ -11,7 +11,7 @@ module API
     CREATED = 201
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     OK = 200
-    STATUSES = { failed: 500, invalid: 422, not_found: 404 }.freeze
+    STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
     UNAUTHORIZED = 401
 
     include Deps[authenticate: "operations.authenticate"]

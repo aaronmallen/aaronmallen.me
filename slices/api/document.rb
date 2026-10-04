@@ -76,6 +76,7 @@ module API
       ["read_post", "get", "/posts/{id}", OK],
       ["publish_post", "post", "/posts/{id}/publish", OK],
       ["update_post_edit_note", "patch", "/posts/{id}/edits/{edit_id}", OK],
+      ["upload_photo", "post", "/photos", CREATED],
       ["list_attention", "get", "/attention", OK],
       ["list_inbox", "get", "/inbox", OK],
       ["snooze_attention", "post", "/attention/snooze", OK],
@@ -139,6 +140,7 @@ module API
       "404" => ["NotFound", "no record has that ID", "Refusal"],
       "422" => ["Invalid", "the input fails a check", "Refusal"],
       "500" => ["Failed", "the site could not finish the work", "Refusal"],
+      "503" => ["Unavailable", "a service the work needs is down or not set up", "Refusal"],
     }.freeze
 
     REFUSAL_TESTS = {
@@ -147,6 +149,7 @@ module API
       "404" => -> { it.fields.any? || it.finds? },
       "422" => -> { it.properties.any? },
       "500" => lambda(&:endpoint?),
+      "503" => -> { it.endpoint? && it.source::UNAVAILABLE },
     }.freeze
 
     Descriptor = Data.define(:id, :verb, :path, :status, :source) do

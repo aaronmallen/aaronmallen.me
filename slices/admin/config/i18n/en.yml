@@ -91,14 +91,6 @@ en:
       added: "Person added"
       removed: "Person removed"
       saved: "Person saved"
-  photo_upload:
-    errors:
-      blank: "Choose a photo to upload."
-      large: "That photo is over 20 MB. Pick a smaller one."
-      oversized: "That photo is over 100 megapixels. Pick a smaller one."
-      type: "Upload a JPEG, PNG, WebP, GIF or HEIC photo."
-      unavailable: "The photo store is down or not set up."
-      unreadable: "The site could not read that photo."
   post_form:
     toasts:
       applied:

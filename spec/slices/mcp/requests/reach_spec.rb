@@ -59,7 +59,6 @@ RSpec.describe "MCP reach", type: :request do
       "backups.operations.back_up_database" => "a background job dumps the database each night",
       "contact.operations.create_message" => "a reader sends a message through the public form",
       "contact.operations.reap_spam_messages" => "a background job reaps old spam messages",
-      "media.operations.upload_photo" => "the admin's Markdown editor uploads photos; MCP takes no uploads",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",
       "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",

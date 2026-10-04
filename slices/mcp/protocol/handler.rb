@@ -171,6 +171,7 @@ module MCP
         update_task_tag_rule: "api.endpoints.update_task_tag_rule",
         update_webmention_settings: "social.operations.update_webmention_settings",
         update_work_session: "api.endpoints.update_work_session",
+        upload_photo: "api.endpoints.upload_photo",
         webmention_settings: "social.queries.webmention_settings",
         webmentions_received_between: "social.queries.webmentions_received_between",
         webmentions_received_by_post: "social.queries.webmentions_received_by_post",
@@ -322,6 +323,7 @@ module MCP
         Tools::UpdateSocialPost,
         Tools::UpdateWebmentionSettings,
         Tools::UpdateWorkSession,
+        Tools::UploadPhoto,
         Tools::WritePostSeo,
       ].freeze
 

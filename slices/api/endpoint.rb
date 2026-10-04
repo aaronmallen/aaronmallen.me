@@ -9,6 +9,7 @@ module API
   class Endpoint
     FINDS = false
     ROOT = :input
+    UNAVAILABLE = false
 
     include Dry::Monads[:result]
 

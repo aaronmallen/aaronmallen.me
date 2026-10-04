@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "base64"
 require "securerandom"
 
 RSpec.describe "Secrets a request carries", type: :request do
@@ -238,6 +239,31 @@ RSpec.describe "Secrets a request carries", type: :request do
 
     it "reports neither the problem nor the note" do
       expect(reported("decisions.operations.open_decision") { open_decision }).not_to include(problem, note)
+    end
+  end
+
+  describe "an agent uploading a photo" do
+    let(:data) { Base64.strict_encode64(secret) }
+
+    def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+
+    def through_api
+      headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
+      post "/api/v1/photos", JSON.generate(data:, filename: "photo.png"), headers
+    end
+
+    def through_mcp = mcp_call("upload_photo", data:, filename: "photo.png")
+
+    it "logs the upload" do
+      expect(logged { through_api }).to include("/api/v1/photos")
+    end
+
+    it "logs none of the photo through the API or MCP" do
+      expect(logged { through_api && through_mcp }).not_to include(data)
+    end
+
+    it "reports none of the photo" do
+      expect(reported("media.operations.upload_photo") { through_api }).not_to include(data)
     end
   end
 end

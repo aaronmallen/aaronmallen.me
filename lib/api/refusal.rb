@@ -8,6 +8,8 @@ module API
 
     def self.not_found(message) = new(error: :not_found, message:, errors: {})
 
+    def self.unavailable(message) = new(error: :unavailable, message:, errors: {})
+
     def to_h = { error: error.to_s, message:, errors: }.reject { |_, value| value == {} }
   end
 end

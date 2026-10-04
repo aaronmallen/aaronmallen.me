@@ -13,7 +13,13 @@ module Blog
     TOO_LARGE = 413
     UNSUPPORTED = 415
     UPLOAD_LIMIT = 25 * 1024 * 1024
+    ENCODED_UPLOAD_LIMIT = UPLOAD_LIMIT * 4 / 3
     UPLOAD_PATH = "/admin/photos"
+    UPLOAD_LIMITS = {
+      UPLOAD_PATH => UPLOAD_LIMIT,
+      "/api/v1/photos" => ENCODED_UPLOAD_LIMIT,
+      "/mcp" => ENCODED_UPLOAD_LIMIT,
+    }.freeze
 
     def initialize(app)
       @app = app
@@ -31,7 +37,7 @@ module Blog
 
     def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
-    def limit(request) = upload?(request) ? UPLOAD_LIMIT : BODY_LIMIT
+    def limit(request) = (request.post? && UPLOAD_LIMITS[request.path_info]) || BODY_LIMIT
 
     def readable?(request)
       [::Rack::Utils.unescape_path(request.path_info), request.GET, form(request)].all? { utf8?(it) }

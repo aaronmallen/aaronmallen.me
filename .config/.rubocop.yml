@@ -37,6 +37,7 @@ Metrics/ClassLength:
     - method_call
   Exclude:
     - ../slices/admin/config/routes.rb
+    - ../slices/api/config/routes.rb
 
 Metrics/MethodLength:
   CountAsOne:

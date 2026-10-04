@@ -25,6 +25,8 @@ module API
 
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
 
+    import keys: %w[operations.upload_photo], from: :media
+
     import keys: %w[
       operations.act_on_posts operations.publish_draft operations.revise_edit_note queries.by_filter queries.by_id
       queries.calendar_posts queries.edits_newest_first
@@ -92,8 +94,8 @@ module API
       endpoints.summarize_activity endpoints.sync_issues endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
       endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view
-      endpoints.update_task_tag_rule endpoints.update_work_session operations.mint_token operations.revoke_token
-      queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      endpoints.update_task_tag_rule endpoints.update_work_session endpoints.upload_photo operations.mint_token
+      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
     ]
   end
 end
