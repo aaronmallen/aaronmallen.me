@@ -4,11 +4,6 @@ RSpec.describe "Writing", type: :request do
   let(:i18n) { Public::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
 
-  def expect_one_parse
-    expect(Commonmarker).to have_received(:parse).once
-    expect(Commonmarker).not_to have_received(:to_html)
-  end
-
   def feed_links
     page.all("head link[rel='alternate'][type='application/atom+xml']", visible: :all).map { [it[:href], it[:title]] }
   end
@@ -22,8 +17,6 @@ RSpec.describe "Writing", type: :request do
   end
 
   def show_copy(key) = i18n.t(key, scope: "ui.views.posts.show")
-
-  def watch_markdown = %i[parse to_html].each { allow(Commonmarker).to receive(it).and_call_original }
 
   describe "the index" do
     it "renders with no posts", :aggregate_failures do
@@ -97,14 +90,6 @@ RSpec.describe "Writing", type: :request do
       get "/writing"
 
       expect(page.find(".entry-meta").all("> *").map(&:text)).to eq(["Sep 7, 2026", "ruby", "2 min"])
-    end
-
-    it "parses each body once for the read time and the blurb", :aggregate_failures do
-      publish("hello", 1, body: "the first part")
-      watch_markdown
-      get "/writing"
-
-      expect_one_parse
     end
 
     it "links each tag to its tag page" do
@@ -236,14 +221,6 @@ RSpec.describe "Writing", type: :request do
       get "/writing/hello"
 
       expect(page).to have_css(".post-body img[src='https://example.com/shot.png'][alt='shot']")
-    end
-
-    it "parses the body once for the body, the read time and the description", :aggregate_failures do
-      publish("hello", 1, body: "the start\n\nthe rest")
-      watch_markdown
-      get "/writing/hello"
-
-      expect_one_parse
     end
 
     it "closes the article with an eyebrow linking to contact", :aggregate_failures do

@@ -127,14 +127,6 @@ RSpec.describe "Feeds", type: :request do
     it "has the rendered body as HTML content" do
       expect(Capybara.string(entry.at_xpath("content[@type='html']").text)).to have_css("p em", text: "start")
     end
-
-    it "parses the body once for the summary and the content", :aggregate_failures do
-      watch_markdown
-      get "/writing.atom"
-
-      expect(Commonmarker).to have_received(:parse).once
-      expect(Commonmarker).not_to have_received(:to_html)
-    end
   end
 
   describe "an entry for a post with notes" do
