@@ -50,6 +50,8 @@ module API
       ["delete_task_comment", "delete", "/tasks/{id}/comments/{comment_id}", OK],
       ["link_tasks", "post", "/tasks/{id}/links", CREATED],
       ["unlink_task", "delete", "/tasks/{id}/links/{other_id}", OK],
+      ["read_activity", "get", "/activity", OK],
+      ["summarize_activity", "get", "/activity/summary", OK],
       ["read_commit", "get", "/commits/{id}", OK],
       ["list_decisions", "get", "/decisions", OK],
       ["open_decision", "post", "/decisions", CREATED],

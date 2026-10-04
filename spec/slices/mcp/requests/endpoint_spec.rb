@@ -668,6 +668,23 @@ RSpec.describe "MCP endpoint", type: :request do
         .to include("kind" => "commit", "date" => today.iso8601, "time" => "14:30", "name" => "posts: add the view")
     end
 
+    it "gives each row the ID its kind's read tool takes" do
+      commit = create(:commit, commit_date: today)
+      entry = create(:journal_entry, entry_date: today)
+      read_activity
+
+      expect(entries.to_h { [it.fetch("kind"), it.fetch("source_id")] })
+        .to eq("commit" => commit.id, "journal" => entry.id)
+    end
+
+    it "opens the record a row names with its kind's read tool" do
+      create(:commit, commit_date: today, sha: "b" * 40)
+      read_activity
+      call_tool("read_commit", id: entries.first.fetch("source_id"))
+
+      expect(content).to include("sha" => "b" * 40)
+    end
+
     it "sends a commit's whole message, not its subject" do
       create(:commit, commit_date: today, message: "posts: add the view\n\nThe body says why it changed")
       read_activity
@@ -1054,12 +1071,12 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(entries).to contain_exactly(include("kind" => "post", "tags" => %w[ruby]))
     end
 
-    it "leaves tags off a row that has none" do
+    it "gives a row that has no tags an empty list" do
       create(:journal_entry, entry_date: today)
       create(:commit, commit_date: today)
       read_activity
 
-      expect(entries).to all(satisfy { !it.key?("tags") })
+      expect(entries.map { it.fetch("tags") }).to eq([[], []])
     end
 
     it "reads the tags of the whole window in the same statements as one row" do

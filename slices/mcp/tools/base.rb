@@ -24,14 +24,6 @@ module MCP
 
         def accept_suggestion_edits(server_context) = server_context.fetch(:accept_suggestion_edits)
 
-        def activity_between(server_context) = server_context.fetch(:activity_between)
-
-        def activity_commit_totals(server_context) = server_context.fetch(:activity_commit_totals)
-
-        def activity_counts(server_context) = server_context.fetch(:activity_counts)
-
-        def activity_counts_by_month(server_context) = server_context.fetch(:activity_counts_by_month)
-
         def add_work_entry(server_context) = server_context.fetch(:add_work_entry)
 
         def all_tags(server_context) = server_context.fetch(:all_tags)

@@ -16,10 +16,6 @@ module MCP
       )
       CONTEXT = {
         accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
-        activity_between: "activity.queries.activity_between",
-        activity_commit_totals: "activity.queries.activity_commit_totals",
-        activity_counts: "activity.queries.activity_counts",
-        activity_counts_by_month: "activity.queries.activity_counts_by_month",
         add_decision_comment: "api.endpoints.add_decision_comment",
         add_decision_option: "api.endpoints.add_decision_option",
         add_task_comment: "api.endpoints.add_task_comment",
@@ -106,6 +102,7 @@ module MCP
         published_post_by_slug: "posts.queries.published_by_slug",
         queue_commit_import: "record.operations.queue_commit_import",
         reach_between: "analytics.queries.reach_between",
+        read_activity: "api.endpoints.read_activity",
         read_commit: "api.endpoints.read_commit",
         read_current_sprint: "api.endpoints.read_current_sprint",
         read_decision: "api.endpoints.read_decision",
@@ -147,6 +144,7 @@ module MCP
         start_task: "api.endpoints.start_task",
         suggestion_by_id: "suggestions.queries.by_id",
         suggestions_between: "suggestions.queries.created_between",
+        summarize_activity: "api.endpoints.summarize_activity",
         sync_failures: "record.queries.sync_failures",
         sync_issues: "api.endpoints.sync_issues",
         tag_by_id: "tags.queries.by_id",
