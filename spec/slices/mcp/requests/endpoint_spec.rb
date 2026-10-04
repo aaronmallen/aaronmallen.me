@@ -118,13 +118,14 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def write_tools
     %w[
-      accept_suggestion_edits add_task_comment add_work_entry archive_project cancel_task capture_task complete_task
-      create_journal_entry create_post create_social_post delete_journal_entry delete_post delete_social_post
-      delete_task delete_work_entry drop_sprint import_commits link_records link_tasks mark_message
-      moderate_webmention move_project move_task plan_sprint publish_post reject_suggestion_edits remove_tag
-      reopen_task reorder_task restore_project save_project save_tag save_task schedule_task send_social_post
-      start_task unlink_records unlink_task update_journal_entry update_post update_social_post
-      update_webmention_settings write_post_seo
+      accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_entry archive_project
+      cancel_task capture_task complete_task create_journal_entry create_post create_social_post delete_decision_comment
+      delete_decision_option delete_journal_entry delete_post delete_social_post delete_task delete_work_entry
+      drop_decision drop_sprint edit_decision edit_decision_comment edit_decision_option import_commits link_records
+      link_tasks mark_message moderate_webmention move_project move_task open_decision plan_sprint publish_post
+      reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task resolve_decision restore_project
+      save_project save_tag save_task schedule_task send_social_post start_task tag_decision unlink_records unlink_task
+      untag_decision update_journal_entry update_post update_social_post update_webmention_settings write_post_seo
     ]
   end
 
@@ -2144,6 +2145,8 @@ RSpec.describe "MCP endpoint", type: :request do
     def enough_for(name)
       {
         "accept_suggestion_edits" => { suggestion_id: 1 },
+        "add_decision_comment" => { id: 1, body: "Leaning on Sidekiq" },
+        "add_decision_option" => { id: 1, title: "Sidekiq" },
         "add_task_comment" => { id: 1, body: "Blocked on review" },
         "add_work_entry" => { org: "Acme", role: "Engineer", from_year: 2019 },
         "archive_project" => { id: 1 },
@@ -2154,12 +2157,18 @@ RSpec.describe "MCP endpoint", type: :request do
         "create_journal_entry" => { body: "Wrote it down" },
         "create_post" => { title: "A draft" },
         "create_social_post" => { parts: ["Hello"], targets: ["mastodon"] },
+        "delete_decision_comment" => { id: 1, comment_id: 2 },
+        "delete_decision_option" => { id: 1, option_id: 2 },
         "delete_journal_entry" => { id: 1 },
         "delete_post" => { id: 1 },
         "delete_social_post" => { id: 1 },
         "delete_task" => { id: 1 },
         "delete_work_entry" => { id: 1 },
+        "drop_decision" => { id: 1, reason: "Not needed" },
         "drop_sprint" => { id: 1 },
+        "edit_decision" => { id: 1 },
+        "edit_decision_comment" => { id: 1, comment_id: 2, body: "Leaning on Resque" },
+        "edit_decision_option" => { id: 1, option_id: 2 },
         "import_commits" => {},
         "link_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "link_tasks" => { id: 1, kind: "blocks", other_id: 2 },
@@ -2180,6 +2189,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "moderate_webmention" => { id: 1, verdict: "spam" },
         "move_project" => { id: 1, direction: "up" },
         "move_task" => { id: 1, list: "next" },
+        "open_decision" => { title: "Pick a queue", problem: "Jobs pile up" },
         "plan_sprint" => { sprint_on: "2026-01-01" },
         "publish_post" => { id: 1 },
         "read_activity" => { from: "2026-01-01", to: "2026-12-31" },
@@ -2194,8 +2204,10 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_webmention_settings" => {},
         "reject_suggestion_edits" => { suggestion_id: 1 },
         "remove_tag" => { id: 1, scope: "public" },
+        "reopen_decision" => { id: 1, reason: "Load grew" },
         "reopen_task" => { id: 1 },
         "reorder_task" => { id: 1, direction: "up" },
+        "resolve_decision" => { id: 1, option_id: 2, reason: "It runs today" },
         "restore_project" => { id: 1 },
         "save_project" => { id: 1 },
         "save_tag" => { id: 1, scope: "public" },
@@ -2205,8 +2217,10 @@ RSpec.describe "MCP endpoint", type: :request do
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
+        "tag_decision" => { id: 1, tags: ["queues"] },
         "unlink_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "unlink_task" => { id: 1, other_id: 2 },
+        "untag_decision" => { id: 1, tag: "queues" },
         "update_journal_entry" => { id: 1 },
         "update_post" => { id: 1 },
         "update_social_post" => { id: 1 },
