@@ -5,8 +5,9 @@ module Analytics
     class PageBetween
       COUNTS = %i[views visitors].freeze
       FIGURES = %i[views visitors read_seconds].freeze
+      COUNTED = [*FIGURES, :bounces].freeze
       RANKED = { countries: :country_code, referrers: :host }.freeze
-      ZERO_DAY = FIGURES.to_h { [it, 0] }.freeze
+      ZERO_DAY = COUNTED.to_h { [it, 0] }.freeze
 
       include Deps[rollup_repo: "repos.analytics_rollup_repo", unrolled_summaries: "queries.unrolled_summaries"]
 
@@ -16,7 +17,8 @@ module Analytics
         days = days(window, live)
 
         {
-          days:,
+          bounces: days.sum { it.fetch(:bounces) },
+          days: days.map { it.except(:bounces) },
           totals: FIGURES.to_h { |key| [key, days.sum { it.fetch(key) }] },
           **RANKED.to_h { |name, key| [name, ranked(name, key, window, live)] },
         }
@@ -37,7 +39,7 @@ module Analytics
         (window.fetch(:from)..window.fetch(:to)).map { { day: it, **found.fetch(it, ZERO_DAY) } }
       end
 
-      def figures(row) = row.to_h.slice(*FIGURES)
+      def figures(row) = row.to_h.slice(*COUNTED)
 
       def live_day(summary, path)
         row = summary.paths.find { it.path == path }

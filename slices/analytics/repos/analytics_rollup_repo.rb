@@ -82,7 +82,7 @@ module Analytics
       def views_by_post(post_ids, from: Blog::TimeZone.today - (VIEW_DAYS - 1), to: Blog::TimeZone.today)
         views = analytics_rollup_paths.between(from, to).views_by_post(post_ids)
 
-        views.to_a.to_h { [it.post_id, { views: it.views, visitors: it.visitors }] }
+        views.to_a.to_h { [it.post_id, it.to_h.slice(:views, :visitors, :read_throughs)] }
       end
 
       private

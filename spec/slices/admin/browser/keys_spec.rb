@@ -5,7 +5,7 @@ RSpec.describe "Admin keys", type: :feature do
 
   def focused_row = evaluate_script("document.activeElement.closest('[data-key-row]')?.textContent")
 
-  def press(*keys) = find("body").send_keys(*keys)
+  def press(*keys) = page.driver.browser.keyboard.type(*keys)
 
   def titles = page.all(".li-title").map(&:text)
 
@@ -152,7 +152,7 @@ RSpec.describe "Admin keys", type: :feature do
       end
 
       it "keeps the list keys quiet behind it" do
-        help.send_keys("j")
+        press("j")
 
         expect(focused_row).to be_nil
       end

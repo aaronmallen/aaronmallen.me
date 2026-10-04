@@ -14,7 +14,12 @@ module Analytics
       NEWEST_FIRST = Sequel.desc(:day)
       POST_ID = Sequel[:posts][:id]
       POST_FIGURES = proc do
-        [integer(POST_ID).as(:post_id), integer.sum(views).as(:views), integer.sum(visitors).as(:visitors)]
+        [
+          integer(POST_ID).as(:post_id),
+          integer.sum(views).as(:views),
+          integer.sum(visitors).as(:visitors),
+          integer.coalesce(integer.sum(read_throughs), 0).as(:read_throughs),
+        ]
       end
       POST_PATH = Sequel.join(["#{Blog::Site::WRITING}/", Sequel[:posts][:slug]])
       RECENT_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }

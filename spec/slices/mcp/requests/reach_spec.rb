@@ -9,6 +9,7 @@ RSpec.describe "MCP reach", type: :request do
       "admin.operations.build_decision_page" => "builds the admin's decision page; #281 adds read_decision",
       "admin.operations.build_navigation" => "builds the admin's menu",
       "admin.operations.build_person_editor" => "builds the admin's people editor; the MCP has no people tool",
+      "admin.operations.build_post_analytics" => "builds the admin's post analytics page; read_analytics reads a path",
       "admin.operations.build_post_editor" => "builds the admin's post editor; read_post and update_post cover a post",
       "admin.operations.build_post_preview" => "renders the admin editor's preview; read_post sends the body",
       "admin.operations.build_posts_page" => "builds the admin's posts screen; list_posts reads the same posts",

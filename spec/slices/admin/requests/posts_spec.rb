@@ -45,7 +45,7 @@ RSpec.describe "Admin posts", type: :request do
         create(:analytics_rollup_path, day:, path: "/writing/first", views: 4, visitors: 3, bounces: 1)
         get "/admin/posts", status: "published", page: "2"
 
-        expect(page).to have_css(".li-sub", text: /\d+ words? · 4 views · 3 visitors\z/)
+        expect(page).to have_css(".li-sub", text: /\d+ words? · 4 views · 3 visitors · 0 read-throughs\z/)
       end
 
       it "draws no pager when one page holds every post" do
@@ -159,7 +159,9 @@ RSpec.describe "Admin posts", type: :request do
       create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 7, 12))
       get "/admin/posts"
 
-      expect(page).to have_css(".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors")
+      expect(page).to have_css(
+        ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors · 0 read-throughs",
+      )
     end
 
     describe "with rolled up views" do
@@ -170,8 +172,14 @@ RSpec.describe "Admin posts", type: :request do
         create(:post, :draft, slug: "unseen", body: "one", updated_at: Time.utc(2026, 9, 1, 12))
         create(:analytics_rollup, day: today)
         create(:analytics_rollup, day: today - 400)
-        create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 8, visitors: 5, bounces: 2)
-        create(:analytics_rollup_path, day: today - 400, path: "/writing/hello", views: 4, visitors: 3, bounces: 1)
+        create(
+          :analytics_rollup_path, day: today, path: "/writing/hello", views: 8, visitors: 5, bounces: 2,
+                                  read_throughs: 4,
+        )
+        create(
+          :analytics_rollup_path,
+          day: today - 400, path: "/writing/hello", views: 4, visitors: 3, bounces: 1, read_throughs: 2,
+        )
         create(:analytics_rollup_path, day: today, path: "/writing/other", views: 9, visitors: 6, bounces: 2)
         get "/admin/posts"
       end
@@ -181,31 +189,46 @@ RSpec.describe "Admin posts", type: :request do
         create(:analytics_rollup_path, day: today - 89, path: "/writing/hello", views: 3, visitors: 2, bounces: 0)
         get "/admin/posts"
 
-        sub = "/writing/hello · Sep 7, 2026 · 3 words · 11 views · 7 visitors"
+        sub = "/writing/hello · Sep 7, 2026 · 3 words · 11 views · 7 visitors · 4 read-throughs"
         expect(page).to have_css(".li-sub", exact_text: sub)
       end
 
       it "adds up the rolled up days inside the window, leaving out the day before it" do
-        expect(page).to have_css(".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 8 views · 5 visitors")
+        expect(page).to have_css(
+          ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 8 views · 5 visitors · 4 read-throughs",
+        )
       end
 
       it "counts no views or visitors for a path nothing was rolled up under" do
-        expect(page).to have_css(".li-sub", exact_text: "/writing/unseen · Sep 1, 2026 · 1 word · 0 views · 0 visitors")
+        expect(page).to have_css(
+          ".li-sub", exact_text: "/writing/unseen · Sep 1, 2026 · 1 word · 0 views · 0 visitors · 0 read-throughs",
+        )
       end
+    end
+
+    it "links each post to its analytics page" do
+      post = create(:post, :published, title: "Hello")
+      get "/admin/posts"
+
+      expect(page).to have_css("a[href='/admin/posts/#{post.id}/analytics'][aria-label='Analytics for Hello']")
     end
 
     it "dates a post by its Chicago day" do
       create(:post, :published, slug: "hello", body: "one two three", published_at: Time.utc(2026, 9, 8, 3))
       get "/admin/posts"
 
-      expect(page).to have_css(".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors")
+      expect(page).to have_css(
+        ".li-sub", exact_text: "/writing/hello · Sep 7, 2026 · 3 words · 0 views · 0 visitors · 0 read-throughs",
+      )
     end
 
     it "dates a draft by its last edit" do
       create(:post, :draft, slug: "hello", body: "one", updated_at: Time.utc(2026, 9, 1, 12))
       get "/admin/posts"
 
-      expect(page).to have_css(".li-sub", exact_text: "/writing/hello · Sep 1, 2026 · 1 word · 0 views · 0 visitors")
+      expect(page).to have_css(
+        ".li-sub", exact_text: "/writing/hello · Sep 1, 2026 · 1 word · 0 views · 0 visitors · 0 read-throughs",
+      )
     end
 
     describe "tags" do

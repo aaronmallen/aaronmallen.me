@@ -1,0 +1,50 @@
+# frozen_string_literal: true
+
+module Admin
+  module Operations
+    class BuildPostAnalytics
+      TOP_ROWS = 10
+
+      include Deps[
+        devices_between: "analytics.queries.devices_between",
+        page_between: "analytics.queries.page_between",
+        reach_between: "analytics.queries.reach_between",
+        read_throughs_between: "analytics.queries.read_throughs_between",
+        scroll_depths_between: "analytics.queries.scroll_depths_between",
+        sources_between: "analytics.queries.sources_between",
+      ]
+
+      def call(post:, range:)
+        to = Blog::TimeZone.today
+        window = { from: to - (range - 1), to:, path: "#{Blog::Site::WRITING}/#{post.slug}" }
+        page = page_between.call(**window)
+
+        { post:, range:, **counts(page, window), **breakdowns(page, window) }
+      end
+
+      private
+
+      def breakdowns(page, window)
+        {
+          countries: page.fetch(:countries).take(TOP_ROWS),
+          devices: devices_between.call(**window).take(TOP_ROWS),
+          referrers: page.fetch(:referrers).take(TOP_ROWS),
+          scroll: scroll_depths_between.call(**window),
+          sources: sources_between.call(**window).take(TOP_ROWS),
+        }
+      end
+
+      def counts(page, window)
+        path = window.fetch(:path)
+        to = window.fetch(:to)
+
+        {
+          **page.fetch(:totals).slice(:views, :visitors),
+          bounces: page.fetch(:bounces),
+          read_throughs: read_throughs_between.call(from: window.fetch(:from), to:).fetch(path, 0),
+          readers: reach_between.call(from: Date.new(to.year, to.month), to:, path:),
+        }
+      end
+    end
+  end
+end

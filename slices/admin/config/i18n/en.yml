@@ -237,6 +237,11 @@ en:
           time: "Avg. time"
           title: "Top pages"
           views: "Views"
+        scroll_card:
+          depth: "%{depth}%"
+          empty: "No scroll depth yet."
+          share: "%{percent}%"
+          title: "Scroll depth"
       attention_card:
         cancel: "Cancel"
         carried:
@@ -1492,8 +1497,35 @@ en:
             zero: "Nobody to mention yet"
           token: "@{%{key}}"
       posts:
+        analytics:
+          apply: "Apply"
+          bounce: "%{percent}% bounce rate"
+          devices: "Devices"
+          direct: "direct"
+          edit: "Edit"
+          geography: "Geography"
+          kicker: "Post analytics"
+          no_countries: "No countries yet."
+          no_devices: "No devices yet."
+          no_referrers: "No referrers yet."
+          no_sources: "No sources yet."
+          range: "Range"
+          range_14: "14d"
+          range_30: "30d"
+          range_7: "7d"
+          read_note: "read 75% for 30 seconds or more"
+          read_throughs: "Read-throughs"
+          readers: "Readers"
+          readers_note: "in %{month}"
+          referrers: "Referrers"
+          sources: "Sources"
+          sub: "Last %{count} days"
+          unknown_country: "unknown"
+          views: "Page views"
+          visitors: "Visitors"
         index:
           all: "all"
+          analytics: "Analytics for %{title}"
           apply: "Filter"
           draft_count:
             one: "%{count} draft"
@@ -1509,6 +1541,9 @@ en:
           new_post: "New post"
           published: "published"
           published_count: "%{count} published"
+          read_throughs:
+            one: "%{count} read-through"
+            other: "%{count} read-throughs"
           scheduled: "scheduled"
           scheduled_count: "%{count} scheduled"
           views:

@@ -17,11 +17,15 @@ module Admin
           MENTION_COLOR = :pink
           SEPARATOR = " · "
 
-          def initialize(counts:, filter:, posts:, view_counts:, visitor_counts:, webmention_counts:, word_counts:)
+          def initialize(
+            counts:, filter:, posts:, read_through_counts:, view_counts:, visitor_counts:, webmention_counts:,
+            word_counts:
+          )
             super()
             @counts = counts
             @filter = filter
             @posts = posts
+            @read_through_counts = read_through_counts
             @view_counts = view_counts
             @visitor_counts = visitor_counts
             @webmention_counts = webmention_counts
@@ -41,6 +45,14 @@ module Admin
           end
 
           private
+
+          def analytics_link(post)
+            label = t(".analytics", title: post.title)
+
+            a(class: "btn sm", href: path(:admin_post_analytics, id: post.id), title: label, aria: { label: }) do
+              i(class: "fa-solid fa-chart-simple", aria: { hidden: "true" })
+            end
+          end
 
           def count(status) = @counts.fetch(status, 0)
 
@@ -68,8 +80,17 @@ module Admin
             end
           end
 
+          def readership(post)
+            [
+              t(".views", count: @view_counts.fetch(post.id)),
+              t(".visitors", count: @visitor_counts.fetch(post.id)),
+              t(".read_throughs", count: @read_through_counts.fetch(post.id)),
+            ]
+          end
+
           def row(post)
             ListItem(title: post.title, href: path(:admin_edit_post, id: post.id), sub: row_sub(post)) do
+              analytics_link(post)
               Tags(tags: post.tags)
               mentions(post)
               StatusPill(status: post.status)
@@ -79,9 +100,7 @@ module Admin
           def row_sub(post)
             date = l(Blog::TimeZone.today(post.published_at || post.updated_at), format: :medium)
             words = t(".words", count: @word_counts.fetch(post.id))
-            views = t(".views", count: @view_counts.fetch(post.id))
-            visitors = t(".visitors", count: @visitor_counts.fetch(post.id))
-            [path(:post, slug: post.slug), date, words, views, visitors].join(SEPARATOR)
+            [path(:post, slug: post.slug), date, words, *readership(post)].join(SEPARATOR)
           end
 
           def rows = Card(data: { key_list: true }) { @posts.rows.each { |post| row(post) } }
