@@ -3,9 +3,13 @@
 RSpec.describe "Admin palette actions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
-  def actions = page.all("[aria-labelledby='command-palette-group-actions'] [data-palette-option]", visible: :all)
+  def action(name) = group.find("#command-palette-#{name}", visible: :all)
+
+  def actions = group.all("[data-palette-option]", visible: :all)
 
   def entry(**) = Admin::Operations::ListActions::Entry.new(**)
+
+  def group = page.find("[aria-labelledby='command-palette-group-actions']", visible: :all)
 
   before { sign_in_to_admin }
 
@@ -22,14 +26,14 @@ RSpec.describe "Admin palette actions", type: :request do
     end
 
     it "sends Create task to the new task dialog, or its page without one", :aggregate_failures do
-      row = actions.first
+      row = action("create-task")
 
       expect(row["data-palette-dialog"]).to eq("task-create")
       expect(row["data-palette-href"]).to eq("/admin/tasks/new")
     end
 
     it "sends Create decision to the new decision form, with no dialog", :aggregate_failures do
-      row = actions[1]
+      row = action("create-decision")
 
       expect(row["data-palette-dialog"]).to be_nil
       expect(row["data-palette-href"]).to eq("/admin/decisions/new")
@@ -38,33 +42,33 @@ RSpec.describe "Admin palette actions", type: :request do
     end
 
     it "sends Create journal entry to the journal, ready to write", :aggregate_failures do
-      row = actions[2]
+      row = action("create-journal-entry")
 
       expect(row["data-palette-dialog"]).to be_nil
       expect(row["data-palette-href"]).to eq("/admin/journal?write=1")
     end
 
     it "sends New post to the new post form" do
-      expect(actions[3]["data-palette-href"]).to eq("/admin/posts/new")
+      expect(action("new-post")["data-palette-href"]).to eq("/admin/posts/new")
     end
 
     it "sends New social post to the composer, ready to write" do
-      expect(actions[4]["data-palette-href"]).to eq("/admin/social?write=1")
+      expect(action("new-social-post")["data-palette-href"]).to eq("/admin/social?write=1")
     end
 
     it "sends Log work to the work entry dialog, or the work tab without one", :aggregate_failures do
-      row = actions[5]
+      row = action("log-work")
 
       expect(row["data-palette-dialog"]).to eq("work-log")
       expect(row["data-palette-href"]).to eq("/admin/projects?filter=work")
     end
 
     it "sends Go to today's journal to the journal" do
-      expect(actions[6]["data-palette-href"]).to eq("/admin/journal")
+      expect(action("todays-journal")["data-palette-href"]).to eq("/admin/journal")
     end
 
     it "matches each row on its label and the words for what it does" do
-      expect(actions.first["data-palette-text"]).to eq("create task, new task, add task")
+      expect(action("create-task")["data-palette-text"]).to eq("create task, new task, add task")
     end
   end
 
@@ -72,21 +76,21 @@ RSpec.describe "Admin palette actions", type: :request do
     before { get "/admin" }
 
     it "posts Start task to the task on screen", :aggregate_failures do
-      row = actions[7]
+      row = action("start-task")
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("start")
     end
 
     it "posts Complete task to the task on screen", :aggregate_failures do
-      row = actions[8]
+      row = action("complete-task")
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("complete")
     end
 
     it "posts Pause task to the task on screen", :aggregate_failures do
-      row = actions[9]
+      row = action("pause-task")
 
       expect(row["data-palette-post"]).not_to be_nil
       expect(row["data-palette-needs"]).to eq("pause")
@@ -131,12 +135,12 @@ RSpec.describe "Admin palette actions", type: :request do
 
   describe "adding an entry" do
     before do
-      Admin::Slice["i18n"].backend.store_translations(
-        :en, ui: { components: { nav: { actions: { review_posts: { label: "Review posts", text: "read drafts" } } } } },
-      )
       stub_const(
         "Admin::Operations::ListActions::ALL",
-        [*Admin::Operations::ListActions::ALL, entry(name: :review_posts, icon: "fa-eye", route: :admin_posts)],
+        [
+          *Admin::Operations::ListActions::ALL.reject { it.name == :new_post },
+          entry(name: :new_post, icon: "fa-eye", route: :admin_posts),
+        ],
       )
       get "/admin"
     end
@@ -144,10 +148,10 @@ RSpec.describe "Admin palette actions", type: :request do
     it "draws its row after the rest", :aggregate_failures do
       row = actions.last
 
-      expect(row[:id]).to eq("command-palette-review-posts")
-      expect(row).to have_css(".pal-r-label", text: "Review posts")
+      expect(row[:id]).to eq("command-palette-new-post")
+      expect(row).to have_css(".pal-r-label", text: "New post")
       expect(row["data-palette-href"]).to eq("/admin/posts")
-      expect(row["data-palette-text"]).to eq("review posts, read drafts")
+      expect(row["data-palette-text"]).to eq("new post, write a post, draft a post")
     end
   end
 
