@@ -35,6 +35,8 @@ module API
     post "/tasks/:id/links", to: "task_links.create"
     delete "/tasks/:id/links/:other_id", to: "task_links.destroy"
 
+    get "/commits/:id", to: "commits.show"
+
     get "/decisions", to: "decisions.index"
     post "/decisions", to: "decisions.create"
     get "/decisions/:id", to: "decisions.show"

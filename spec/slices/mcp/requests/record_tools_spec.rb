@@ -26,6 +26,10 @@ RSpec.describe "MCP record tools", type: :request do
     last_response.body
   end
 
+  def link(kind, id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
+  end
+
   def message = document.dig("result", "content").first.fetch("text")
 
   def rpc(method, params = nil)
@@ -156,6 +160,32 @@ RSpec.describe "MCP record tools", type: :request do
       call_tool("list_journal_entries", from: "2026-03-31", to: "2026-03-01")
 
       expect(message).to eq("from comes after to")
+    end
+  end
+
+  describe "read_commit" do
+    it "answers the commit whole, as list_commits gives it" do
+      commit = create(:commit, message: "fix the feed\n\nthe body runs on", commit_date: Date.new(2026, 3, 2))
+      call_tool("list_commits", from: "2026-03-02", to: "2026-03-02")
+      listed = content.fetch("commits").first
+      call_tool("read_commit", id: commit.id)
+
+      expect(content).to eq(listed.merge("record_links" => {}))
+    end
+
+    it "answers the records linked to the commit, grouped by kind" do
+      commit = create(:commit)
+      entry = create(:journal_entry)
+      link("commit", commit.id, "journal_entry", entry.id)
+      call_tool("read_commit", id: commit.id)
+
+      expect(content.fetch("record_links")).to match("journal_entry" => [include("id" => entry.id)])
+    end
+
+    it "calls an unknown ID an error" do
+      call_tool("read_commit", id: 404)
+
+      expect([error?, message]).to eq([true, "no commit has the ID 404"])
     end
   end
 

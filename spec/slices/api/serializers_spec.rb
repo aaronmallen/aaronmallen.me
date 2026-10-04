@@ -18,6 +18,16 @@ RSpec.describe "API serializers", type: :request do
 
   def today = Blog::TimeZone.today
 
+  describe API::Serializers::Commit do
+    it "gives the JSON read_commit returns, less its record links" do
+      commit = create(:commit, message: "fix the feed\n\nthe body runs on", commit_time: "21:15")
+      call_tool("read_commit", id: commit.id)
+
+      expect(serialized(described_class, Record::Slice["queries.commit_by_id"].call(commit.id)))
+        .to eq(content.except("record_links"))
+    end
+  end
+
   describe API::Serializers::JournalEntry do
     it "gives the JSON read_journal_entry returns, less its record links" do
       entry = create(:journal_entry, entry_time: "21:15", body: "a **bold** day")

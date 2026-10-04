@@ -98,6 +98,7 @@ RSpec.describe "MCP endpoint", type: :request do
       "list_work_entries" => "work history",
       "read_activity" => "activity feed",
       "read_analytics" => "analytics",
+      "read_commit" => "commits",
       "read_current_sprint" => "sprints",
       "read_decision" => "decisions",
       "read_journal_entry" => "the journal",
@@ -122,9 +123,9 @@ RSpec.describe "MCP endpoint", type: :request do
       compose_announcement list_attention list_calendar list_commits list_decisions list_inbox list_journal_entries
       list_links list_messages list_people list_posts list_projects list_saved_views list_social_posts list_sprints
       list_suggestions list_tags list_task_tag_rules list_tasks list_webmentions list_work_entries read_activity
-      read_analytics read_current_sprint read_decision read_journal_entry read_message read_person read_post read_review
-      read_saved_view read_social_post read_sync_state read_task read_time_report read_webmention_settings search
-      search_accounts summarize_activity
+      read_analytics read_commit read_current_sprint read_decision read_journal_entry read_message read_person read_post
+      read_review read_saved_view read_social_post read_sync_state read_task read_time_report read_webmention_settings
+      search search_accounts summarize_activity
     ]
   end
 
@@ -2446,6 +2447,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "publish_post" => { id: 1 },
         "read_activity" => { from: "2026-01-01", to: "2026-12-31" },
         "read_analytics" => { from: "2026-01-01", to: "2026-12-31" },
+        "read_commit" => { id: 1 },
         "read_current_sprint" => {},
         "read_decision" => { id: 1 },
         "read_journal_entry" => { id: 1 },

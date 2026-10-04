@@ -47,6 +47,7 @@ module API
       ["add_task_comment", "post", "/tasks/{id}/comments", CREATED],
       ["link_tasks", "post", "/tasks/{id}/links", CREATED],
       ["unlink_task", "delete", "/tasks/{id}/links/{other_id}", OK],
+      ["read_commit", "get", "/commits/{id}", OK],
       ["list_decisions", "get", "/decisions", OK],
       ["open_decision", "post", "/decisions", CREATED],
       ["read_decision", "get", "/decisions/{id}", OK],
