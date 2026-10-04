@@ -470,6 +470,13 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers reading, suggesting and writing, and nothing else" do
       expect(offered).to eq((read_tools + write_tools + %w[suggest_edits]).sort)
     end
+
+    it "names a read tool in search for every kind it finds" do
+      description = result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
+      readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
+
+      expect(readers.reject { |_kind, tool| read_tools.include?(tool) }).to be_empty
+    end
   end
 
   describe "a token that may only read" do
