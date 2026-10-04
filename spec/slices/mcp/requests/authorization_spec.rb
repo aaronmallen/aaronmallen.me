@@ -34,6 +34,8 @@ RSpec.describe "OAuth authorization", type: :request do
 
   def codes = MCP::Slice["db.rom"].relations[:oauth_codes]
 
+  def copy(key, **) = i18n.t(key, scope: "ui.views.authorizations.new", **)
+
   def document = JSON.parse(last_response.body)
 
   def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
@@ -144,8 +146,20 @@ RSpec.describe "OAuth authorization", type: :request do
       expect(last_response.location).to be_nil
     end
 
-    it "names the client" do
-      expect(page).to have_text("Claude is asking to connect")
+    it "leads with the host the code goes to" do
+      expect(page.find("h1").text).to eq(copy(:heading, host: "claude.ai"))
+    end
+
+    it "gives the client name as the name it gave itself" do
+      expect(page.find(".page-head-sub").text).to eq(copy(:named, client: "Claude"))
+    end
+
+    it "keeps the client name out of the heading" do
+      expect(page.find("h1").text).not_to include("Claude")
+    end
+
+    it "warns of no write access it did not ask for" do
+      expect(page).to have_no_css(".connect-warn")
     end
 
     it "names the access it grants" do
@@ -206,14 +220,71 @@ RSpec.describe "OAuth authorization", type: :request do
     end
   end
 
+  describe "when the client asks to write" do
+    before do
+      sign_in_to_admin
+      authorize(scope: "read write")
+    end
+
+    it "warns that it can publish and send for good" do
+      expect(page.find(".connect-warn").text).to eq(copy(:write_warning))
+    end
+
+    it "puts the warning on the write grant" do
+      expect(page.find("li", text: "Make any change the admin makes")).to have_css(".connect-warn")
+    end
+  end
+
+  describe "when the client has never held a token" do
+    let(:client) { mcp_create(:oauth_client, client_name: "Claude", created_at: Time.new(2026, 9, 3, 15, 4, 0, "UTC")) }
+
+    before do
+      sign_in_to_admin
+      authorize
+    end
+
+    it "says the client is new and when it registered" do
+      expect(page.find(".connect-notice").text).to eq(copy(:new_client, time: "Sep 3, 2026, 10:04"))
+    end
+  end
+
+  describe "when the client holds a token" do
+    before do
+      mcp_create(:oauth_token, oauth_client_id: client.id)
+      sign_in_to_admin
+      authorize
+    end
+
+    it "shows no new client notice" do
+      expect(page).to have_no_css(".connect-notice")
+    end
+  end
+
+  describe "when the client used a token it no longer holds" do
+    let(:client) { mcp_create(:oauth_client, client_name: "Claude", last_used_at: Time.now - 86_400) }
+
+    before do
+      sign_in_to_admin
+      authorize
+    end
+
+    it "shows no new client notice" do
+      expect(page).to have_no_css(".connect-notice")
+    end
+  end
+
   describe "when the client registered no name" do
     before do
       sign_in_to_admin
       authorize(client_id: mcp_create(:oauth_client, client_name: nil).client_id)
     end
 
-    it "falls back to the redirect URI host" do
-      expect(page).to have_text("claude.ai is asking to connect")
+    it "still leads with the redirect URI host" do
+      expect(page.find("h1").text).to eq(copy(:heading, host: "claude.ai"))
+    end
+
+    it "says the client gave no name" do
+      expect(page.find(".page-head-sub").text).to eq(copy(:unnamed))
     end
   end
 
@@ -229,9 +300,12 @@ RSpec.describe "OAuth authorization", type: :request do
       expect(last_response).to be_ok
     end
 
-    it "says an app gave no name rather than leaving the sentence headless" do
-      expect(page.find(".page-head-sub").text)
-        .to eq(i18n.t("ui.views.authorizations.new.asking_unnamed"))
+    it "asks to approve the app rather than naming a host it cannot read" do
+      expect(page.find("h1").text).to eq(copy(:heading_no_host))
+    end
+
+    it "says the client gave no name" do
+      expect(page.find(".page-head-sub").text).to eq(copy(:unnamed))
     end
   end
 

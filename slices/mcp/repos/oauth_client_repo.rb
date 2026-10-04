@@ -25,6 +25,8 @@ module MCP
 
       def delete_unclaimed(since:) = delete_locked(oauth_clients.unclaimed(since:))
 
+      def held_token?(id) = oauth_clients.by_pk(id).held_token.exist?
+
       def touch_last_used(id, at: Time.now, unless_since: at)
         oauth_clients.by_pk(id).last_used_before(unless_since).update(last_used_at: at)
       end

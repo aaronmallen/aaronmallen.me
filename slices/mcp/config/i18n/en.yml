@@ -7,16 +7,19 @@ en:
       authorizations:
         new:
           approve: "Approve"
-          asking: "%{client} is asking to connect."
-          asking_unnamed: "An app that gave no name is asking to connect."
           cancel: "Cancel"
           grants: "What it gets"
-          heading: "Approve this app?"
+          heading: "Connect the app at %{host}?"
+          heading_no_host: "Approve this app?"
+          named: "It calls itself %{client}. Any app can pick that name."
+          new_client: "This app has never connected before. It registered on %{time}."
           returns: "It goes back to %{uri} either way."
           scopes:
             read: "Read everything the site keeps: posts, drafts and all, social posts, your journal, tasks, projects, messages, analytics, settings and the whole activity feed, with every commit you have made, whole message and all, private and work repositories included"
             suggest: "Send you suggested edits to accept or reject"
             write: "Make any change the admin makes: write, publish and delete posts, send social posts, and change or delete any record"
+          unnamed: "It gave no name."
+          write_warning: "It can publish posts and send social posts, and you cannot take either back."
         refused:
           back: "Go back to %{host}"
           error: "%{description} (%{error})."

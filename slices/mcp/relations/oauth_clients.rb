@@ -23,6 +23,10 @@ module MCP
 
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
+      def held_token
+        where(Sequel.|(Sequel.~(last_used_at: nil), { id: dataset.db[:oauth_tokens].select(:oauth_client_id) }))
+      end
+
       def holding_live_token(at: Time.now) = where(id: live_tokens(at).select(:oauth_client_id))
 
       def idle(since:, at: Time.now)

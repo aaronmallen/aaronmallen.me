@@ -3702,6 +3702,15 @@
   @apply mt-6 flex flex-wrap items-center gap-2;
 }
 
+@utility connect-notice {
+  @apply mb-4 rounded-toast border border-l-2 border-line border-l-mk-pink bg-ground-sunk px-4 py-2.5;
+  @apply font-mono text-meta text-ink;
+}
+
+@utility connect-warn {
+  @apply field-error;
+}
+
 @utility toast {
   @apply fixed bottom-toast left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2.5;
   @apply rounded-toast border border-l-2 border-line border-l-mk-green bg-ground-sunk px-4 py-2.5;

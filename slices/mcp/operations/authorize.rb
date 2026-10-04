@@ -61,7 +61,7 @@ module MCP
       def check_decision(decision, client, redirect_uri, scopes)
         return Success(decision) if [APPROVE, CANCEL].include?(decision)
 
-        Failure([CONFIRM, { client_name: client.client_name, redirect_uri:, scopes: }])
+        Failure([CONFIRM, confirmation(client, redirect_uri, scopes)])
       end
 
       def check_request(params, issuer, redirect_uri)
@@ -75,6 +75,16 @@ module MCP
       end
 
       def check_sign_in(signed_in) = signed_in ? Success(signed_in) : Failure(SIGN_IN)
+
+      def confirmation(client, redirect_uri, scopes)
+        {
+          client_name: client.client_name,
+          new_client: !client_repo.held_token?(client.id),
+          redirect_uri:,
+          registered_at: client.created_at,
+          scopes:,
+        }
+      end
 
       def find_client(client_id)
         client = client_repo.connected_by_client_id(client_id) if client_id

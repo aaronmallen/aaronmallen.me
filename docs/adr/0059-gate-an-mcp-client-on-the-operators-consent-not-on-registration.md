@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, mcp, admin]
 issue: AA-670
-amended: ["#176", "#463"]
+amended: ["#176", "#463", "#465"]
 tags: [mcp, oauth, consent, registration, clients, revoke]
 ---
 
@@ -61,7 +61,10 @@ The operator clicks Approve on every connect and every reconnect, after a revoke
 
 The consent page is the only gate, so the operator has to read it. A client names itself, so the name proves
 nothing. The redirect URI the page shows is where the code goes, and the clients page puts its host beside the
-name so the operator can tell two clients called `Claude` apart (AA-693).
+name so the operator can tell two clients called `Claude` apart (AA-693). Since #465 the consent page leads with
+that host, and shows the name only as the name the client gave itself. A client that has never used a token and
+holds no token row gets a notice that it is new, with when it registered, and the `write` grant warns that a post it
+publishes or a social post it sends cannot be taken back.
 
 Anyone can grow `oauth_clients`. `POST /oauth/register` answers 429 past `client_registration.throttle_limit`
 registrations from one visitor hash in the window, 10 an hour by default (AA-693). Since #463 the hash covers an
