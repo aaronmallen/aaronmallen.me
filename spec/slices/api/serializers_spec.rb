@@ -101,6 +101,17 @@ RSpec.describe "API serializers", type: :request do
     end
   end
 
+  describe API::Serializers::SocialPost do
+    it "gives the JSON read_social_post returns, less its suggestion edits and record links" do
+      social_post = create(:social_post, :posted)
+      create(:social_post_delivery, social_post_id: social_post.id, network: "bluesky", like_count: 3)
+      call_tool("read_social_post", id: social_post.id)
+
+      expect(serialized(described_class, Social::Slice["queries.social_post_by_id"].call(social_post.id)))
+        .to eq(content.except("suggestion_edits", "record_links"))
+    end
+  end
+
   describe API::Serializers::Sprint do
     def first_page = Blog::Page.new(number: 1, size: 50)
 

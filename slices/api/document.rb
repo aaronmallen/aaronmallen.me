@@ -88,6 +88,7 @@ module API
       ["read_project", "get", "/projects/{id}", OK],
       ["read_review", "get", "/review", OK],
       ["search", "get", "/search", OK],
+      ["read_social_post", "get", "/social_posts/{id}", OK],
       ["list_sprints", "get", "/sprints", OK],
       ["plan_sprint", "post", "/sprints", CREATED],
       ["read_current_sprint", "get", "/sprints/current", OK],

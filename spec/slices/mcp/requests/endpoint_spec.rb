@@ -1677,17 +1677,18 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(content.fetch("status")).to eq("scheduled")
     end
 
-    it "does not read one already sent" do
+    it "reads one already sent, with each network's delivery" do
       social_post = compose("posted", "gone out", posted_at: Time.now - 3600)
       call_tool("read_social_post", id: social_post.id)
 
-      expect(result.fetch("isError")).to be(true)
+      expect(content.values_at("status", "deliveries"))
+        .to match(["posted", [include("network" => "mastodon", "state" => "waiting")]])
     end
 
     it "says which ID it could not find" do
       call_tool("read_social_post", id: 404)
 
-      expect(message).to eq("no unsent social post has the ID 404")
+      expect(message).to eq("no social post has the ID 404")
     end
   end
 

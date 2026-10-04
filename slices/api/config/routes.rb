@@ -88,6 +88,8 @@ module API
 
     get "/search", to: "search.index"
 
+    get "/social_posts/:id", to: "social_posts.show"
+
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"
     get "/sprints/current", to: "sprints.current"

@@ -46,10 +46,10 @@ module API
     import keys: %w[
       operations.act_on_webmentions operations.delete_person operations.save_person operations.search_accounts
       queries.calendar_social_posts queries.pending_webmention_count queries.pending_webmentions queries.people
-      queries.person_by_id queries.received_webmention_count
+      queries.person_by_id queries.received_webmention_count queries.social_post_by_id
     ], from: :social
 
-    import keys: %w[queries.for_post], from: :suggestions
+    import keys: %w[queries.for_post queries.for_social_post], from: :suggestions
 
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
@@ -81,9 +81,9 @@ module API
       endpoints.move_tasks endpoints.open_decision endpoints.pause_task endpoints.plan_sprint endpoints.publish_post
       endpoints.read_commit endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry
       endpoints.read_person endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
-      endpoints.read_task endpoints.read_time_report endpoints.read_work_entry endpoints.reopen_decision
-      endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision endpoints.save_task
-      endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
+      endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_work_entry
+      endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task endpoints.resolve_decision
+      endpoints.save_task endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
       endpoints.snooze_attention endpoints.start_task endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
       endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_person endpoints.update_saved_view endpoints.update_task_tag_rule

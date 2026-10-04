@@ -114,6 +114,7 @@ module MCP
         read_project: "api.endpoints.read_project",
         read_review: "api.endpoints.read_review",
         read_saved_view: "api.endpoints.read_saved_view",
+        read_social_post: "api.endpoints.read_social_post",
         read_spread_between: "analytics.queries.read_spread_between",
         read_task: "api.endpoints.read_task",
         read_throughs_between: "analytics.queries.read_throughs_between",
