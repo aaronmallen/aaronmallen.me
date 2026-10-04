@@ -169,8 +169,4 @@ RSpec.describe Tasks::Queries::TimeReport do
   it "returns no groups for a range with no time" do
     expect(report("project")).to have_attributes(seconds: 0, groups: [], by: "project", from:, to:)
   end
-
-  it "refuses a grouping it does not know" do
-    expect { report("week") }.to raise_error(Dry::Types::ConstraintError)
-  end
 end

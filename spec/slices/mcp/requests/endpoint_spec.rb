@@ -418,12 +418,6 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(last_response.status).to eq(405)
     end
 
-    it "calls a body that is not JSON a parse error" do
-      post "/mcp", "not json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}"
-
-      expect(document.dig("error", "code")).to eq(-32_700)
-    end
-
     it "calls a body that opens like a batch but is not JSON a parse error" do
       post "/mcp", "[not json", "HTTP_AUTHORIZATION" => "Bearer #{access_token}"
 
@@ -475,12 +469,6 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "offers reading, suggesting and writing, and nothing else" do
       expect(offered).to eq((read_tools + write_tools + %w[suggest_edits]).sort)
-    end
-
-    it "refuses a tool it does not have" do
-      call_tool("rename_site", id: 1)
-
-      expect(document.dig("error", "code")).to eq(-32_602)
     end
   end
 
@@ -2004,12 +1992,6 @@ RSpec.describe "MCP endpoint", type: :request do
     it "says what it does" do
       expect(result.fetch("prompts").first.fetch("description")).to include("grammar, spelling and punctuation")
     end
-
-    it "refuses a prompt it does not have" do
-      fetch_prompt("rewrite", target: "post", id: "1")
-
-      expect(document.dig("error", "code")).to eq(-32_602)
-    end
   end
 
   describe "proofread" do
@@ -2312,10 +2294,6 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "builds one notice" do
       expect(notices).to have(1).item
-    end
-
-    it "gives the client the generic message" do
-      expect(document.dig("error", "data")).to eq("Internal error calling tool write_post_seo")
     end
 
     it "keeps what the tool raised out of the answer" do

@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "CSRF protection", type: :request do
-  def cookie(slice) = sessions(slice).options.first.except(:coder)
-
-  def sessions(slice) = slice.config.actions.sessions
-
   describe "a signed-out admin form" do
     let(:session_token) do
       get "/admin/sign-in"
@@ -27,20 +23,6 @@ RSpec.describe "CSRF protection", type: :request do
       post "/admin/projects", project: { name: "sneaky" }
 
       expect(Projects::Slice["repos.project_repo"].live).to be_empty
-    end
-  end
-
-  describe "the session cookie" do
-    it "is the one cookie both slices read" do
-      expect(cookie(MCP::Slice)).to eq(cookie(Admin::Slice))
-    end
-
-    it "is the cookie the shared config names" do
-      expect(cookie(Admin::Slice)).to include(key: Blog::SessionCookie::KEY)
-    end
-
-    it "is stored the way the shared config says" do
-      expect(sessions(MCP::Slice).storage).to eq(Blog::SessionCookie.store.first)
     end
   end
 

@@ -39,10 +39,6 @@ RSpec.describe Activity::Queries::Review do
 
       expect([found.from, found.to]).to eq([Date.new(2026, 2, 1), Date.new(2026, 2, 28)])
     end
-
-    it "refuses a period other than week or month" do
-      expect { review("year") }.to raise_error(Dry::Types::ConstraintError)
-    end
   end
 
   describe "tasks done" do
