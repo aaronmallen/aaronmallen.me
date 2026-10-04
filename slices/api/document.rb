@@ -61,6 +61,8 @@ module API
       ["delete_decision_comment", "delete", "/decisions/{id}/comments/{comment_id}", OK],
       ["tag_decision", "post", "/decisions/{id}/tags", CREATED],
       ["untag_decision", "delete", "/decisions/{id}/tags/{tag}", OK],
+      ["delete_posts", "post", "/posts/bulk/delete", OK],
+      ["tag_posts", "post", "/posts/bulk/tag", OK],
       ["list_attention", "get", "/attention", OK],
       ["list_links", "get", "/links/{kind}/{id}", OK],
       ["link_records", "post", "/links/{kind}/{id}", CREATED],

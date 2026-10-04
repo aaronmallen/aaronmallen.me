@@ -50,6 +50,9 @@ module API
     post "/decisions/:id/tags", to: "decision_tags.create"
     delete "/decisions/:id/tags/:tag", to: "decision_tags.destroy"
 
+    post "/posts/bulk/delete", to: "bulk_posts.delete"
+    post "/posts/bulk/tag", to: "bulk_posts.tag"
+
     get "/attention", to: "attention.index"
 
     get "/links/:kind/:id", to: "record_links.index"
