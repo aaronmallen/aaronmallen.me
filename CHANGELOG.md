@@ -5,6 +5,112 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.3] - 2026-10-04
+
+### Added
+
+- A Decisions screen in the admin lists, opens, edits and closes decisions. Each one holds options, comments, tags,
+  linked records and a timeline, and closing one asks for a note. Decision events and comments show in the activity
+  feed, and the API and MCP read and write every part of a decision.
+- Starting a task opens a work session, and pausing, finishing or canceling it closes the session. Each task keeps
+  its worked time, which can be set by hand, and completing a task asks for it. Sessions can be edited or deleted,
+  a Log work dialog in the command palette adds time, and sessions show in the activity feed. A Time screen sums work
+  by project, tag or day over a range and drills into each row. The API and MCP pause tasks, change sessions, set
+  totals and read the time report.
+- A task's page has an Activity section listing its moves, tag changes, status changes and comments, and `read_task`
+  returns the same timeline.
+- The task, post, project, commit, journal entry, social post, work entry and decision pages have a Linked section,
+  with a picker that finds a record of any kind. The API and MCP link, unlink and list links, and the reads for
+  tasks, posts, social posts and journal entries return them.
+- A Search screen in the admin finds tasks, posts, social posts, journal entries, commits, projects, work entries,
+  people, messages and webmentions by their words, with a kind filter and paging. Typing in the command palette shows
+  results by kind, with a See all results row. The API and the `search` MCP tool search the same way, and the tool
+  names the read tool for each kind of result.
+- The tasks, posts, journal and activity screens can save their filters as a named view, and the command palette has
+  a Saved views group. The API and MCP list, create, change, delete and read saved views.
+- An Inbox screen gathers unread messages, pending webmentions and synced issues not yet seen, with actions in place.
+  One Inbox count in the nav replaces the Messages and Webmentions counts. The API and the `list_inbox` and
+  `mark_task_seen` MCP tools read it and clear an issue.
+- Tick rows on the tasks, posts, messages and webmentions lists to act on many at once. Tasks can be completed,
+  canceled, deleted, moved, tagged and untagged, drafts deleted and posts tagged, messages marked read or unread and
+  deleted, and webmentions approved, marked spam or ignored. The API and MCP have the same bulk actions.
+- A Review screen shows a week or a month: work done, tasks carried, decisions resolved and dropped, and a note for
+  the period. The API and the `read_review` and `save_review_note` MCP tools read the review and save its note.
+- A Needs attention card on Today lists stalled work, with move, cancel, open, write and snooze actions. The API and
+  the `list_attention` and `snooze_attention` MCP tools read and snooze it.
+- A Calendar screen shows sprints, posts, social posts and journal days on a month grid, with a day panel, and as a
+  list of days on a phone. Drag a scheduled post, social post or sprint task to another day, or move it from the day
+  panel, though not to a time already past. The API and `list_calendar` read it.
+- Keys in the admin: j and k move through a list, Enter opens the row and ? lists every key. On a task row x, s, m
+  and e act on the row, p publishes a draft post, r marks a message read, g jumps to a section and c creates a record.
+- The command palette can start, pause and complete a task, create a decision, start a post, a social post or
+  today's journal entry, and log work.
+- A task tag rules screen in the admin sets the tags for each repo, and issues the sync imports from GitHub or Linear
+  get them. The API and MCP list, save and delete the rules.
+- Each post has an analytics page with read-throughs, unique readers, outbound clicks and its first 30 days drawn
+  against the median post. The posts list shows unique readers. The analytics dashboard gains an hour by weekday grid
+  and feed subscriber cards, which count Atom feed fetches from known aggregators.
+- A privacy page at `/privacy`, linked from the footer, says what the site records and how long it keeps it.
+- The database dumps to a backups bucket at 00:30 Chicago time each night, keeping the 7 newest dumps. The
+  `BACKUP_STORE_*` settings name the bucket, and a failed dump shows on Today.
+- `mise run release:next` prints the next CalVer version.
+- New MCP tools, each with an API route that answers the same JSON: `read_commit`, `read_project`,
+  `read_work_entry`, `read_webmention`, `read_social_post` for a social post in any status, `list_people`,
+  `read_person`, `save_person`, `delete_person`, `search_accounts`, `edit_task_comment`, `delete_task_comment`,
+  `update_post_edit_note`, `sync_issues` and `upload_photo`. `read_post` returns the whole post through the API.
+- `list_tasks` filters by list, tag and text, and `list_webmentions` by post. `read_activity` and
+  `summarize_activity` run through API routes, and each activity row carries the ID of its record.
+- `read_analytics` adds feed subscribers, webmentions and the change in views to the site answer, and bounces,
+  outbound clicks, the first 30 days and unique readers to a page.
+- Task answers in the API and MCP carry `updated_at` and the synced issue they came from, task comments carry
+  `updated_at`, and journal entries carry `created_at` and `updated_at`.
+
+### Changed
+
+- Deleting a tag takes it off every record that has it, where it used to refuse while the tag was in use. A tag that
+  is the last one on a task tag rule still can't be deleted.
+- `REDIS_RECONNECT_ATTEMPTS` takes a list of waits in seconds, such as `0.5,1,2,4`.
+- A tag's Atom feed redirects to its own path, and the feed's Last-Modified moves forward when a tag changes.
+- A remote image in Markdown imported from GitHub or Linear shows as a link rather than loading.
+- Cloudflare may keep a published photo for one day.
+- `list_webmentions` gives `received_at` in UTC and always carries `spam_reason`, as `null` when there is none.
+- The MCP server's opening text names every kind of record it can read, and its title names the whole site.
+- `/mcp` and `/api/v1/photos` take a body up to about 33 MB, so a photo can upload through MCP.
+
+### Fixed
+
+- Completing, pausing or scheduling a task that is already closed is refused.
+- MCP `update_post` keeps a scheduled post scheduled when it gets a blank or past `publish_at`.
+- MCP `publish_post` runs the same checks as publishing in the admin.
+- A post announcement check expands mention tokens and refuses a mention of someone not in the people list.
+- API paging and ID fields refuse values out of range, and a bad ID list gets one plain error.
+- Two sprint roll-overs that start at once no longer both carry the same tasks.
+- A social post edited or moved after it was queued no longer goes out at its old time.
+- Saving a post again keeps its publish time when that time falls in the repeated hour at the end of daylight time.
+- A spam reason made only of Unicode spaces saves no reason.
+- The commit backfill floors on the push date, so a commit pushed late with an older date no longer gets skipped.
+- A database password with no user name now connects.
+- Sidekiq's scheduler no longer reports each Redis connection notice as an error during an outage.
+- Accepting suggestion edits that would leave a social post part empty is refused in the admin and through MCP,
+  where it used to answer 500.
+- The palette search box shows a focus ring and is 44px tall.
+- Blue pills, such as Scheduled, and the checked Bluesky chip pass contrast in light mode.
+
+### Security
+
+- MCP tool results mark text someone other than the owner may have written, such as message bodies, webmention
+  authors and excerpts, and synced task notes and comments, as `{ untrusted: true, text }`. Each tool that returns
+  such text warns the agent to treat it as data.
+- The app refuses to boot outside development and test while it holds the secrets committed to the repo.
+- The app sends Strict-Transport-Security for one year in production.
+- A webmention approves itself only when its source page sits under the author's URL, or on a host set as single
+  author.
+- Public throttles count an IPv6 visitor by their /64, and client registration has a cap across the whole site.
+- The webmention client refuses every special-use IPv6 range.
+- The request log and Honeybadger leave out notes, people fields and visitor addresses.
+- A photo serves only while a record claims it.
+- The MCP consent page leads with the host it sends you back to.
+
 ## [26.10.2] - 2026-10-03
 
 ### Added
@@ -278,7 +384,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.2...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.3...HEAD
+[26.10.3]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.2...26.10.3
 [26.10.2]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.1...26.10.2
 [26.10.1]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.0...26.10.1
 [26.10.0]: https://github.com/aaronmallen/aaronmallen.me/compare/26.9.4...26.10.0
