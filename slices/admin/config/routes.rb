@@ -73,6 +73,7 @@ module Admin
     post "/journal/:id/delete", to: "journal.destroy", as: :delete_journal_entry, id: ID
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
+    post "/messages/bulk", to: "messages.bulk", as: :bulk_messages
     post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
     get "/people", to: "people.index", as: :people
     post "/people", to: "people.create", as: :create_person

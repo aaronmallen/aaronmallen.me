@@ -8,6 +8,7 @@ module Contact
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      commands delete: :by_pk
 
       def by_id(id) = messages.by_pk(id).one
 

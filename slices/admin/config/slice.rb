@@ -37,7 +37,9 @@ module Admin
       operations.resolve_decision queries.by_id queries.by_status queries.count_by_status queries.timeline
     ], from: :decisions
 
-    import keys: %w[operations.mark_message queries.by_status queries.count_with_status], from: :contact
+    import keys: %w[
+      operations.act_on_messages operations.mark_message queries.by_id queries.by_status queries.count_with_status
+    ], from: :contact
 
     import keys: %w[
       github.client operations.delete_journal_entry operations.queue_commit_import operations.save_journal_entry

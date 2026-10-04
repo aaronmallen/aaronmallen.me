@@ -17,19 +17,27 @@ module Admin
 
         prop :message, Blog::Types::Instance(ROM::Struct)
         prop :filter, Blog::Types::String
+        prop :bulk, Blog::Types::String.optional, default: nil
 
         def view_template
           div(class: "li", data: { key_row: true }) do
-            div(class: "li-main") do
-              span(class: "li-title") { @message.subject }
-              p(class: "msg-body") { @message.body }
-              p(class: "li-sub") { meta }
+            div(class: "msg-lead") do
+              pick if @bulk
+              main
             end
             div(class: "li-side") { MOVES.fetch(@message.status).each { move(*it) } }
           end
         end
 
         private
+
+        def main
+          div(class: "li-main") do
+            span(class: "li-title") { @message.subject }
+            p(class: "msg-body") { @message.body }
+            p(class: "li-sub") { meta }
+          end
+        end
 
         def meta = [@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)].join(SEPARATOR)
 
@@ -39,6 +47,8 @@ module Admin
             Button(type: "submit", variant:, small: true) { t(label_key) }
           end
         end
+
+        def pick = BulkCheck(form: @bulk, value: @message.id, label: t(".pick", subject: @message.subject))
       end
     end
   end

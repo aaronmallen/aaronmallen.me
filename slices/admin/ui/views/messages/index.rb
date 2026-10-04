@@ -22,11 +22,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
 
-            Card(title: t(".inbox"), data: { key_list: true }) do
-              next Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
-
-              @messages.rows.each { MessageRow(message: it, filter: @filter) }
-            end
+            Card(title: t(".inbox"), data: { key_list: true }) { rows }
             Pager(page: @messages, route: :admin_messages, params: { status: @filter })
           end
 
@@ -40,6 +36,13 @@ module Admin
           end
 
           def filter_options = FILTERS.transform_values { t(it) }
+
+          def rows
+            return Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
+
+            MessageBulk(filter: @filter, page: @messages.number)
+            @messages.rows.each { MessageRow(message: it, filter: @filter, bulk: MessageBulk::ID) }
+          end
         end
       end
     end

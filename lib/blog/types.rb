@@ -66,6 +66,7 @@ module Blog
       Constants::GAP
     end
     MarkdownRenderer = Types::String.enum("posts", "tasks")
+    MessageBulkAction = Types::String.enum("read", "unread", "delete")
     MessageStatus = Types::String.enum("unread", "read", "spam")
     MessageStatusParam = MessageStatus.fallback(MessageStatus.values.first)
     NetworkName = Types::String.enum("mastodon", "bluesky")

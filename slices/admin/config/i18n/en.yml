@@ -65,6 +65,23 @@ en:
       updated: "Entry updated"
   messages_page:
     toasts:
+      bulk:
+        deleted:
+          one: "Deleted %{count} message"
+          other: "Deleted %{count} messages"
+        failed:
+          not_found: "Nothing changed · message %{message} is gone"
+          other: "Nothing changed · message %{message} would not change"
+        invalid:
+          blank: "Tick a message first"
+          format: "Nothing changed · pick an action from the bar"
+          long: "Tick 100 messages or fewer"
+        read:
+          one: "Marked %{count} message read"
+          other: "Marked %{count} messages read"
+        unread:
+          one: "Moved %{count} message back to unread"
+          other: "Moved %{count} messages back to unread"
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
@@ -555,7 +572,14 @@ en:
           uploading: "Uploading"
         view: "Editor view"
         write: "Write"
+      message_bulk:
+        confirm_delete: "Delete the ticked messages? This cannot be undone."
+        delete: "Delete"
+        label: "Ticked messages"
+        read: "Read"
+        unread: "Unread"
       message_row:
+        pick: "Select %{subject}"
         read: "Read"
         spam: "Spam"
         unread: "Unread"

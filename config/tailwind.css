@@ -2859,6 +2859,10 @@
   }
 }
 
+@utility msg-lead {
+  @apply flex min-w-0 flex-1 items-start gap-3;
+}
+
 @utility msg-body {
   @apply font-serif text-li break-words whitespace-pre-line text-ink-muted;
 }

@@ -197,6 +197,11 @@ RSpec.describe "Admin screens", type: :feature do
 
   def selections
     {
+      "messages ticked" => lambda do
+        visit "/admin/messages"
+        find("input[name='ids[]']").check
+        find("[data-bulk-acts]")
+      end,
       "tasks ticked" => lambda do
         visit "/admin/tasks?filter=next"
         find("input[name='ids[]'][value='#{task.id}']").check
