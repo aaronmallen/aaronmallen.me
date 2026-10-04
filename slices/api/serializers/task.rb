@@ -26,6 +26,7 @@ module API
           links: Schema.list(LINK),
           blocked: Schema::BOOLEAN,
           carried_count: Schema::INTEGER,
+          worked_seconds: Schema::INTEGER,
           created_at: Schema::STAMP,
           completed_at: Schema.nullable(Schema::STAMP),
         },
@@ -33,7 +34,7 @@ module API
 
       attributes :id, :title, :note, :status, :list, :sprint_on, :tags, :links
       attribute :blocked, &:blocked?
-      attributes :carried_count, :created_at, :completed_at
+      attributes :carried_count, :worked_seconds, :created_at, :completed_at
 
       def completed_at(task) = stamp(task.completed_at)
 

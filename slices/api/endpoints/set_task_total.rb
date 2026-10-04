@@ -2,17 +2,17 @@
 
 module API
   module Endpoints
-    class CompleteTask < TaskEndpoint
+    class SetTaskTotal < TaskEndpoint
       SCHEMA = {
         additionalProperties: false,
         properties: { id: Tasks::ID, **Tasks::WORKED },
         required: ["id"],
       }.freeze
 
-      include Deps[complete_task: "tasks.operations.complete_task"]
+      include Deps[set_task_total: "tasks.operations.set_task_total"]
 
       def handle(id:, **worked)
-        case complete_task.call(id, worked: worked.empty? ? nil : worked)
+        case set_task_total.call(id, worked)
         in Failure[:invalid, errors] then rejected(errors)
         in result then settled(result, id)
         end

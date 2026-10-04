@@ -122,13 +122,13 @@ RSpec.describe "MCP endpoint", type: :request do
       accept_suggestion_edits add_decision_comment add_decision_option add_task_comment add_work_entry archive_project
       cancel_task cancel_tasks capture_task complete_task complete_tasks create_journal_entry create_post
       create_saved_view create_social_post delete_decision_comment delete_decision_option delete_journal_entry
-      delete_post delete_saved_view delete_social_post delete_task delete_tasks delete_work_entry drop_decision
-      drop_sprint edit_decision edit_decision_comment edit_decision_option import_commits link_records link_tasks
-      mark_message moderate_webmention move_project move_task move_tasks open_decision plan_sprint publish_post
-      reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task resolve_decision restore_project
-      save_project save_tag save_task schedule_task send_social_post start_task tag_decision tag_tasks unlink_records
-      unlink_task untag_decision untag_tasks update_journal_entry update_post update_saved_view update_social_post
-      update_webmention_settings write_post_seo
+      delete_post delete_saved_view delete_social_post delete_task delete_tasks delete_work_entry delete_work_session
+      drop_decision drop_sprint edit_decision edit_decision_comment edit_decision_option import_commits link_records
+      link_tasks mark_message moderate_webmention move_project move_task move_tasks open_decision pause_task plan_sprint
+      publish_post reject_suggestion_edits remove_tag reopen_decision reopen_task reorder_task resolve_decision
+      restore_project save_project save_tag save_task schedule_task send_social_post set_task_total start_task
+      tag_decision tag_tasks unlink_records unlink_task untag_decision untag_tasks update_journal_entry update_post
+      update_saved_view update_social_post update_webmention_settings update_work_session write_post_seo
     ]
   end
 
@@ -2246,6 +2246,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "delete_task" => { id: 1 },
         "delete_tasks" => { ids: [1] },
         "delete_work_entry" => { id: 1 },
+        "delete_work_session" => { id: 1, session_id: 2 },
         "drop_decision" => { id: 1, reason: "Not needed" },
         "drop_sprint" => { id: 1 },
         "edit_decision" => { id: 1 },
@@ -2275,6 +2276,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "move_task" => { id: 1, list: "next" },
         "move_tasks" => { ids: [1], list: "next" },
         "open_decision" => { title: "Pick a queue", problem: "Jobs pile up" },
+        "pause_task" => { id: 1 },
         "plan_sprint" => { sprint_on: "2026-01-01" },
         "publish_post" => { id: 1 },
         "read_activity" => { from: "2026-01-01", to: "2026-12-31" },
@@ -2300,6 +2302,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "save_task" => { id: 1 },
         "schedule_task" => { id: 1, sprint_on: "" },
         "send_social_post" => { id: 1 },
+        "set_task_total" => { id: 1, hours: 2 },
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
@@ -2314,6 +2317,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "update_saved_view" => { id: 1 },
         "update_social_post" => { id: 1 },
         "update_webmention_settings" => {},
+        "update_work_session" => { id: 1, session_id: 2, started_at: "2026-01-01T09:00" },
         "write_post_seo" => { id: 1 },
       }.fetch(name)
     end

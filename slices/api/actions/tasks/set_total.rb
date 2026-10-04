@@ -3,8 +3,8 @@
 module API
   module Actions
     module Tasks
-      class Complete < Action
-        include Deps[endpoint: "endpoints.complete_task"]
+      class SetTotal < Action
+        include Deps[endpoint: "endpoints.set_task_total"]
 
         def handle(request, response)
           answer(response, endpoint.call(body(request, response).merge("id" => record_id(request))))

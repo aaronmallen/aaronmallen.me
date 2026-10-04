@@ -3,7 +3,8 @@
 module MCP
   module Tools
     class StartTask < Base
-      description "Start one task: it joins today's sprint and shows as in progress"
+      description "Start one task, or resume a paused one: it joins today's sprint, shows as in progress and " \
+                  "opens a work session"
       input_schema(API::Endpoints::StartTask::SCHEMA)
       scope OAuth::Scope::WRITE
 
