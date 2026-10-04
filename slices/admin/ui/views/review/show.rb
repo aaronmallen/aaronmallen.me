@@ -9,9 +9,10 @@ module Admin
 
           MONTH = Blog::Types::ReviewPeriod["month"]
 
-          def initialize(review:, on:, today:)
+          def initialize(review:, note:, on:, today:, note_body: nil, errors: Blog::Constants::EMPTY_HASH)
             super()
             @review = review
+            @note = { body: note_body || note&.body || Blog::Constants::EMPTY_STRING, saved: !note.nil?, errors: }
             @on = on
             @today = today
           end
@@ -27,6 +28,8 @@ module Admin
               SideStack { task_cards }
               SideStack { record_cards }
             end
+
+            NoteCard(**@note, period: @review.period, to: @review.to)
           end
 
           private

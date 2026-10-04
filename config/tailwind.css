@@ -1624,6 +1624,10 @@
   @apply meta;
 }
 
+@utility review-foot {
+  @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+}
+
 @utility time-rail {
   @apply activity-rail;
 }

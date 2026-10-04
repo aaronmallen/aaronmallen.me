@@ -143,6 +143,9 @@ en:
       role_added: "Role added to /projects"
       role_removed: "Role removed from /projects"
       saved: "Project saved"
+  review_page:
+    toasts:
+      saved: "Review note saved · private"
   saved_views_page:
     toasts:
       changed: "View now holds these filters"
@@ -1034,6 +1037,16 @@ en:
           words:
             one: "%{words} word"
             other: "%{words} words"
+        note_card:
+          body: "Review note"
+          label: "Private"
+          placeholder: "How did it go? The note lands in the journal, tagged review."
+          private: "private · filed under %{day}"
+          save: "Save note"
+          saved: "Saved"
+          title: "Notes"
+          unsaved: "Not saved yet"
+          update: "Update note"
         period_pager:
           month:
             current: "This month"

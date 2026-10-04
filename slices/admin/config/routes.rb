@@ -107,6 +107,7 @@ module Admin
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
     get "/review", to: "review.show", as: :review
+    post "/review/note", to: "review.save_note", as: :save_review_note
     post "/saved-views", to: "saved_views.create", as: :create_saved_view
     post "/saved-views/:id", to: "saved_views.update", as: :update_saved_view, id: ID
     post "/saved-views/:id/change", to: "saved_views.change", as: :change_saved_view, id: ID

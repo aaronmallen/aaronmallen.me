@@ -49,6 +49,8 @@ module Record
         journal_entries.between(today - (STREAK_DAYS - 1), today).days_written
       end
 
+      def tagged_on(tag, day) = with_tags.on(day).tagged([tag]).newest_first.limit(1).one
+
       def today(now: Time.now) = with_tags.on(Blog::TimeZone.today(now)).newest_first.to_a
 
       def word_count = journal_entries.word_total

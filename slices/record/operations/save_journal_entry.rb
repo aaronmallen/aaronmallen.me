@@ -12,8 +12,8 @@ module Record
         journal_entry_repo: "repos.journal_entry_repo",
       ]
 
-      def call(params, now: Time.now)
-        attributes = step validate(params, now)
+      def call(params, now: Time.now, latest: Blog::TimeZone.today(now))
+        attributes = step validate(params, now, latest)
         step persist(attributes, now)
       end
 
@@ -32,10 +32,9 @@ module Record
         invalid(:body, Contracts::JournalEntryContract::BLANK)
       end
 
-      def validate(params, now)
-        today = Blog::TimeZone.today(now)
-        attributes = step validated(contract.call(form(params), today:))
-        Success(attributes.merge(entry_date: attributes[:entry_date] || today))
+      def validate(params, now, latest)
+        attributes = step validated(contract.call(form(params), today: latest))
+        Success(attributes.merge(entry_date: attributes[:entry_date] || Blog::TimeZone.today(now)))
       end
 
       def write(attributes, time)
