@@ -60,8 +60,8 @@ module Admin
     ], from: :projects
 
     import keys: %w[
-      operations.compose_announcement operations.delete_post operations.revise_edit_note operations.save_post
-      queries.by_filter queries.by_id queries.by_ids queries.by_status queries.count_by_status
+      operations.compose_announcement operations.delete_post operations.move_post operations.revise_edit_note
+      operations.save_post queries.by_filter queries.by_id queries.by_ids queries.by_status queries.count_by_status
       queries.edits_newest_first queries.scheduled queries.summaries
     ], from: :posts
 
@@ -73,7 +73,8 @@ module Admin
 
     import keys: %w[
       networks.all operations.compose_social_post operations.delete_person operations.delete_social_post
-      operations.moderate_webmention operations.save_person operations.update_webmention_settings
+      operations.moderate_webmention operations.move_social_post operations.save_person
+      operations.update_webmention_settings
       queries.editable_social_post queries.mention_directory queries.pending_webmention_count
       queries.pending_webmentions queries.people queries.person_by_id queries.queued_social_posts
       queries.received_webmention_count

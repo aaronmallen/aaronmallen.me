@@ -24,6 +24,12 @@ module Blog
       ZONE.local_time(year, month, day, hour, minute, 0, 0, true)
     end
 
+    def on_day(time, date)
+      clock = local(time)
+
+      local_time(date.year, date.month, date.day, clock.hour, clock.min)
+    end
+
     def parse_day(value)
       parts = DAY_PATTERN.match(value.to_s)&.captures&.map(&:to_i)
       Date.new(*parts) if parts && Date.valid_date?(*parts)

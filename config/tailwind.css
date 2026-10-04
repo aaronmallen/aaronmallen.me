@@ -1521,6 +1521,10 @@
   @apply mt-5 first:mt-0;
 }
 
+@utility cal-move {
+  @apply flex flex-wrap items-center gap-2;
+}
+
 @utility cal-group-title {
   @apply mb-2 font-mono text-label text-mk-comment uppercase;
 }

@@ -5,9 +5,11 @@ module Admin
     module Components
       module Calendar
         class Panel < Component
+          MOVES = { post: :admin_move_calendar_post, social: :admin_move_calendar_social_post }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
           POSTED_QUEUE = Blog::Types::SocialQueue["posted"]
           QUEUED = Blog::Types::SocialQueue["queued"]
+          SCHEDULED = "scheduled"
           STATUSES = {
             "canceled" => ".statuses.canceled",
             "done" => ".statuses.done",
@@ -21,6 +23,7 @@ module Admin
 
           prop :day, Blog::Types::Instance(API::Queries::Calendar::Day)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :today, Blog::Types::Date
 
           def view_template
             Card(label: t(".label"), title: l(date, format: :full), **attributes) do
@@ -47,6 +50,12 @@ module Admin
 
           def empty? = !@day.sprint && @day.posts.empty? && @day.social_posts.empty? && !@day.journal
 
+          def entry(kind, record, item)
+            return ListItem(**item) unless record.status == SCHEDULED
+
+            ListItem(**item) { move_form(kind, record.id, item[:title]) }
+          end
+
           def group(title, &)
             section(class: "cal-group") do
               h3(class: "cal-group-title") { title }
@@ -60,6 +69,17 @@ module Admin
             group(t(".journal")) { ListItem(title: t(".journal_entry"), href: path(:admin_journal, to: date.iso8601)) }
           end
 
+          def move_form(kind, id, title)
+            field = "cal-move-#{kind}-#{id}"
+
+            Form(action: path(MOVES.fetch(kind), id:), class: "cal-move") do
+              input(type: "hidden", name: "day", value: date.iso8601)
+              label(class: "sr-only", for: field) { t(".move_to", title:) }
+              Input(type: "date", id: field, name: "to", min: @today.iso8601, value: date.iso8601)
+              Button(type: "submit", small: true) { t(".move") }
+            end
+          end
+
           def post_item(post)
             { title: post.title, href: path(:admin_edit_post, id: post.id), sub: dated(post, post.published_at) }
           end
@@ -67,7 +87,7 @@ module Admin
           def posts
             return if @day.posts.empty?
 
-            group(t(".posts")) { @day.posts.each { ListItem(**post_item(it)) } }
+            group(t(".posts")) { @day.posts.each { entry(:post, it, post_item(it)) } }
           end
 
           def social_href(social_post)
@@ -87,7 +107,7 @@ module Admin
           def social_posts
             return if @day.social_posts.empty?
 
-            group(t(".social_posts")) { @day.social_posts.each { ListItem(**social_item(it)) } }
+            group(t(".social_posts")) { @day.social_posts.each { entry(:social, it, social_item(it)) } }
           end
 
           def sprint

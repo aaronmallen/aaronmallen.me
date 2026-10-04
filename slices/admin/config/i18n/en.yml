@@ -26,6 +26,12 @@ en:
     views:
       one: "%{count} view"
       other: "%{count} views"
+  calendar_page:
+    toasts:
+      invalid: "Pick a day first"
+      moved: "Moved to %{date} at %{time}"
+      not_scheduled: "Only a scheduled post moves"
+      past: "A move lands on today or a day after it"
   clients_page:
     toasts:
       revoked: "Access revoked · that client has to sign in again"
@@ -309,6 +315,8 @@ en:
           journal: "Journal"
           journal_entry: "Journal entry"
           label: "Day"
+          move: "Move"
+          move_to: "Move %{title} to"
           no_tasks: "No tasks in this sprint yet."
           posts: "Posts"
           social_posts: "Social posts"

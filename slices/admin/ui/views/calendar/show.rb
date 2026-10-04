@@ -23,7 +23,7 @@ module Admin
 
             div(class: "cal", data: { calendar: "" }) do
               Month(month: @month, today: @today, days: @days, picked: @day.date)
-              Panel(day: @day, tasks: @tasks)
+              Panel(day: @day, tasks: @tasks, today: @today)
             end
           end
         end
