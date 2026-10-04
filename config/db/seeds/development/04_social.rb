@@ -32,7 +32,7 @@ Seeds.unwrap(
 thread = Seeds.unwrap(
   save_social_post.call(
     parts: ["Postgres domains are underrated.", "Name a rule once and every table checks it the same way."],
-    targets: both, status: "posted", posted_at: Seeds.ago(5, hour: 11),
+    targets: both, status: "scheduled", posted_at: Seeds.ago(5, hour: 11),
   ),
 )
 
@@ -40,7 +40,7 @@ article = Posts::Slice["queries.published_by_slug"].call("moving-the-blog-to-han
 announcement = Seeds.unwrap(
   save_social_post.call(
     parts: [Posts::Slice["operations.compose_announcement"].call(article)], post_id: article.id, targets: both,
-    status: "posted", posted_at: article.published_at,
+    status: "scheduled", posted_at: article.published_at,
   ),
 )
 
@@ -48,6 +48,9 @@ deliver = Social::Operations::DeliverSocialPost.new(networks: Seeds.networks)
 both.each { Seeds.unwrap(deliver.call(thread.id, it)) }
 Seeds.unwrap(deliver.call(announcement.id, "mastodon"))
 Seeds.unwrap(deliver.give_up(announcement.id, "bluesky"))
+social_posts = Social::Slice["relations.social_posts"]
+social_posts.by_pk(thread.id).command(:update).call(posted_at: Seeds.ago(5, hour: 11))
+social_posts.by_pk(announcement.id).command(:update).call(posted_at: article.published_at)
 
 Seeds.unwrap(
   Suggestions::Slice["operations.replace_social_post_edits"].call(

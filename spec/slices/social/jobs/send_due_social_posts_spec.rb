@@ -20,6 +20,14 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     allow(Social::Jobs::DeliverSocialPost).to receive(:perform_async).and_call_original
   end
 
+  def moved_after_reading(**attrs)
+    allow(social_post_repo).to receive(:due_scheduled).and_wrap_original do |read, time|
+      read.call(time).tap { |due| due.each { social_post_repo.update(it.id, **attrs) } }
+    end
+
+    described_class.new(social_post_repo:).perform
+  end
+
   def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60)
     social_post_repo.create_with_parts(targets:, posted_at:, status: "scheduled", parts: %w[one])
   end
@@ -61,6 +69,19 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     job.perform
 
     expect(sent).to be_empty
+  end
+
+  {
+    "moved back to draft" => { status: "draft" },
+    "moved later" => { posted_at: Time.now + 3600 },
+  }.each do |what, attrs|
+    it "sends nothing for a social post #{what} after the job read it", :aggregate_failures do
+      social_post = queued
+      moved_after_reading(**attrs)
+
+      expect(sent).to be_empty
+      expect(social_post_repo.claimed?(social_post.id)).to be(false)
+    end
   end
 
   it "opens a delivery for each network it sends to" do

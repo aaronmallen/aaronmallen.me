@@ -12,14 +12,14 @@ module Social
       def perform
         now = Time.now
 
-        social_post_repo.due_scheduled(now).each { queue(it, stale_before: now - STALLED_AFTER) }
+        social_post_repo.due_scheduled(now).each { queue(it, due_by: now, stale_before: now - STALLED_AFTER) }
       end
 
       private
 
-      def queue(social_post, stale_before:)
+      def queue(social_post, due_by:, stale_before:)
         social_post.targets.each do |network|
-          next unless social_post_repo.claim_delivery(social_post.id, network, stale_before:)
+          next unless social_post_repo.claim_delivery(social_post.id, network, due_by:, stale_before:)
 
           DeliverSocialPost.perform_async(social_post.id, network)
         end

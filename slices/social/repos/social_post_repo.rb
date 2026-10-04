@@ -21,8 +21,12 @@ module Social
         dated.posted_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1)).oldest_first.to_a
       end
 
-      def claim_delivery(social_post_id, network, stale_before:)
-        social_post_deliveries.claim(social_post_id:, network:, stale_before:)
+      def claim_delivery(social_post_id, network, due_by:, stale_before:)
+        transaction do
+          next unless lock_due(social_post_id, due_by)
+
+          social_post_deliveries.claim(social_post_id:, network:, stale_before:)
+        end
       end
 
       def claimed?(id) = social_post_deliveries.for_social_post(id).exist?
@@ -107,6 +111,8 @@ module Social
 
         social_post_parts.stamped(:create, result: :many).call(rows)
       end
+
+      def lock_due(id, time) = social_posts.due_at(time).by_pk(id).lock(mode: :share).one
 
       def lock_unclaimed(id) = unposted(id).lock.one && unclaimed(id).exist?
 

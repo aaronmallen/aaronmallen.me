@@ -887,6 +887,31 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "a social post that is not due" do
+    before { stub_mastodon("110") }
+
+    {
+      "a draft" => { status: "draft" },
+      "scheduled for later" => { posted_at: Time.now + 3600 },
+    }.each do |what, attrs|
+      it "sends nothing and opens no delivery for #{what}", :aggregate_failures do
+        social_post = queued
+        social_post_repo.update(social_post.id, **attrs)
+        deliver(social_post, "mastodon")
+
+        expect(delivery(social_post, "mastodon")).to be_nil
+        expect(a_request(:post, statuses)).not_to have_been_made
+      end
+    end
+
+    it "sends nothing for a social post already posted" do
+      social_post = create(:social_post, :posted, targets: %w[mastodon])
+      deliver(social_post, "mastodon")
+
+      expect(a_request(:post, statuses)).not_to have_been_made
+    end
+  end
+
   describe "a social post that is gone" do
     it "finishes quietly" do
       expect { job.perform(0, "mastodon") }.not_to raise_error

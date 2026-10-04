@@ -5,6 +5,7 @@ module Social
     class DeliverSocialPost < Blog::Operation
       NO_CREDENTIALS = :no_credentials
       OVER_LIMIT = :over_limit
+      SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
       SEND_FAILED = :send_failed
 
       include Deps[
@@ -49,6 +50,8 @@ module Social
 
         delivery.failed || delivery.remote_ids.to_a.size >= parts
       end
+
+      def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
 
       def expanded(social_post, network)
         bodies = social_post.parts.map { link_tagger.call(it.body, network) }
@@ -110,6 +113,7 @@ module Social
       def targeted(social_post_id, network)
         social_post = social_post_repo.by_id(social_post_id)
         return Failure(:not_found) unless social_post
+        return Failure(:not_due) unless due?(social_post)
         return Failure(:not_targeted) unless social_post.targets.include?(network)
 
         Success(social_post)
