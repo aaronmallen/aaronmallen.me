@@ -53,16 +53,20 @@ module Admin
           def filter_options = FILTERS.transform_values { t(it) }
 
           def inbox
-            Card(title: t(".inbox"), data: { key_list: true }) do
-              next Empty { t(EMPTIES.fetch(@filter)) } if @inbox[:mentions].rows.empty?
-
-              @inbox[:mentions].rows.each { |mention| row(mention) }
-            end
+            Card(title: t(".inbox"), data: { key_list: true }) { rows }
             Pager(page: @inbox[:mentions], route: :admin_webmentions, params: { status: @filter })
           end
 
           def row(mention)
-            Row(mention:, slug: @inbox[:slugs].fetch(mention.post_id), filter: @filter)
+            Row(mention:, slug: @inbox[:slugs].fetch(mention.post_id), filter: @filter, bulk: Bulk::ID)
+          end
+
+          def rows
+            mentions = @inbox[:mentions]
+            return Empty { t(EMPTIES.fetch(@filter)) } if mentions.rows.empty?
+
+            Bulk(filter: @filter, page: mentions.number)
+            mentions.rows.each { |mention| row(mention) }
           end
 
           def side_cards

@@ -167,6 +167,7 @@ module Admin
     post "/tokens", to: "tokens.create", as: :create_token
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions
+    post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post "/webmentions/:id/approve", to: "webmentions.approve", as: :approve_webmention, id: ID
     post "/webmentions/:id/spam", to: "webmentions.spam", as: :spam_webmention, id: ID

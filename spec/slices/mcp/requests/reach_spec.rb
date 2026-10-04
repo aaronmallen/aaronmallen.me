@@ -88,6 +88,7 @@ RSpec.describe "MCP reach", type: :request do
       "record.operations.record_rollup_sync_outcome" => "the roll up job records how it went",
       "record.operations.record_sync_outcome" => "each sync job records how it went; read_sync_state reads it",
       "record.operations.store_commits" => "the import and backfill jobs store the commits they fetch",
+      "social.operations.act_on_webmentions" => "the admin's bulk bar runs it; #347 adds the bulk webmention tools",
       "social.operations.delete_person" => "the admin removes a person; the MCP has no people tool",
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",
       "social.operations.move_social_post" => "the admin's calendar moves one a day; send_social_post sets any time",

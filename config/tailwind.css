@@ -1933,6 +1933,10 @@
   }
 }
 
+@utility wm-lead {
+  @apply flex min-w-0 flex-1 items-start gap-3;
+}
+
 @utility wm-author {
   @apply flex min-w-0 items-center gap-2;
 }

@@ -200,6 +200,7 @@ RSpec.describe "Admin screens", type: :feature do
       "messages ticked" => -> { tick("/admin/messages", "input[name='ids[]']") },
       "posts ticked" => -> { tick("/admin/posts", "input[name='ids[]'][value='#{draft.id}']") },
       "tasks ticked" => -> { tick("/admin/tasks?filter=next", "input[name='ids[]'][value='#{task.id}']") },
+      "webmentions ticked" => -> { tick("/admin/webmentions", "input[name='ids[]']") },
     }
   end
 

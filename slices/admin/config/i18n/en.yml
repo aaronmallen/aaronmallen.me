@@ -1513,6 +1513,11 @@ en:
           never_used: "never used"
           revoke: "Revoke"
       webmentions:
+        bulk:
+          approve: "Approve"
+          ignore: "Ignore"
+          label: "Ticked webmentions"
+          spam: "Spam"
         pending_card:
           pending: "%{count} pending"
           review: "Review"
@@ -1531,6 +1536,7 @@ en:
           approve: "Approve"
           ignore: "Ignore"
           no_content: "no content · like only"
+          pick: "Select %{author}"
           reason: "Why spam? (optional)"
           spam: "Spam"
           spam_reason: "Spam: %{reason}"
@@ -2019,6 +2025,23 @@ en:
   webmentions_page:
     toasts:
       approved: "Approved · now visible on the post"
+      bulk:
+        approved:
+          one: "Approved %{count} webmention"
+          other: "Approved %{count} webmentions"
+        failed:
+          not_found: "Nothing changed · webmention %{mention} is gone"
+          other: "Nothing changed · webmention %{mention} would not change"
+        ignored:
+          one: "Ignored %{count} webmention"
+          other: "Ignored %{count} webmentions"
+        invalid:
+          blank: "Tick a webmention first"
+          format: "Nothing changed · pick an action from the bar"
+          long: "Tick 100 webmentions or fewer"
+        spam:
+          one: "Marked %{count} webmention as spam"
+          other: "Marked %{count} webmentions as spam"
       ignored: "Ignored · hidden from the post"
       saved: "Settings saved"
       spam: "Marked as spam"

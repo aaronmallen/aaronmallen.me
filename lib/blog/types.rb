@@ -162,6 +162,7 @@ module Blog
     WebmentionStatus = Types::String.enum("pending", "approved", "ignored", "spam")
     WebmentionStatusParam = WebmentionStatus.fallback(WebmentionStatus.values.first)
     WebmentionType = Types::String.enum("reply", "like", "repost", "mention")
+    WebmentionVerdict = Types::String.enum("approved", "ignored", "spam")
     Year = Types::String.constrained(format: /\A[1-9]\d{3}\z/)
 
     module Normalized

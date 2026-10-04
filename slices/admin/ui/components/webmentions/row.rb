@@ -25,14 +25,13 @@ module Admin
           prop :mention, Blog::Types::Instance(ROM::Struct)
           prop :slug, Blog::Types::String
           prop :filter, Blog::Types::String
+          prop :bulk, Blog::Types::String
 
           def view_template
             div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                author
-                excerpt
-                meta
-                spam_reason
+              div(class: "wm-lead") do
+                pick
+                main
               end
               div(class: "li-side") { actions }
             end
@@ -64,6 +63,15 @@ module Admin
             p(class: ["wm-excerpt", ("quiet" if text.empty?)]) { text.empty? ? t(".no_content") : text }
           end
 
+          def main
+            div(class: "li-main") do
+              author
+              excerpt
+              meta
+              spam_reason
+            end
+          end
+
           def meta
             div(class: "wm-meta") do
               Pill(color: type.color) { t(type.label_key) }
@@ -78,6 +86,8 @@ module Admin
               Button(type: "submit", variant:, small: true) { t(label_key) }
             end
           end
+
+          def pick = BulkCheck(form: @bulk, value: @mention.id, label: t(".pick", author: @mention.author_label))
 
           def spam
             moderation(:admin_spam_webmention, ".spam", :warn, class: "wm-spam") do
