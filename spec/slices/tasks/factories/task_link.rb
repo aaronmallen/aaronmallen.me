@@ -9,6 +9,10 @@ Spec::DB::Factories.define(:task_link) do |f|
     t.type "duplicates"
   end
 
+  f.trait :parent do |t|
+    t.type "parent"
+  end
+
   f.trait :relates do |t|
     t.type "relates"
   end

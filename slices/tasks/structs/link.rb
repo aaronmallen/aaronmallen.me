@@ -6,6 +6,7 @@ module Tasks
       BLOCKS = Blog::Types::TaskLinkType["blocks"]
       CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze
       LABELS = {
+        Blog::Types::TaskLinkType["parent"] => { outgoing: "parent_of", incoming: "child_of" },
         BLOCKS => { outgoing: "blocks", incoming: "blocked_by" },
         Blog::Types::TaskLinkType["duplicates"] => { outgoing: "duplicates", incoming: "duplicated_by" },
         Blog::Types::TaskLinkType["relates"] => { outgoing: "relates", incoming: "relates" },

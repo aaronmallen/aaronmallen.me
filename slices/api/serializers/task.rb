@@ -3,7 +3,7 @@
 module API
   module Serializers
     class Task < Serializer
-      LABELS = %w[blocks blocked_by duplicates duplicated_by relates].freeze
+      LABELS = %w[blocks blocked_by child_of duplicates duplicated_by parent_of relates].freeze
       SLUG = { type: "string", pattern: "^[a-z0-9]+([.-][a-z0-9]+)*$", maxLength: 64 }.freeze
 
       CONTRIBUTOR = Schema.object(

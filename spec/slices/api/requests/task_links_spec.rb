@@ -58,6 +58,17 @@ RSpec.describe "API task links", type: :request do
         .to eq([{ "other_id" => ["number at `/other_id` is greater than: 2147483647"] }, 422])
     end
 
+    it "stores the link as made by hand, not by the sync" do
+      link(task.id, kind: "relates", other_id: other.id)
+
+      expect(Tasks::Slice["relations.task_links"].between(task.id, other.id).pluck(:synced)).to eq([false])
+    end
+
+    it "refuses a parent kind, which only the sync writes, with a 422" do
+      expect([link(task.id, kind: "parent", other_id: other.id).fetch("errors").keys, status])
+        .to eq([%w[kind], 422])
+    end
+
     it "refuses a kind it does not know with a 422" do
       expect([link(task.id, kind: "follows", other_id: other.id).fetch("errors").keys, status])
         .to eq([%w[kind], 422])
@@ -87,6 +98,24 @@ RSpec.describe "API task links", type: :request do
 
     it "refuses another task ID that is not a number with a 422" do
       expect([unlink(task.id, "abc").fetch("errors").keys, status]).to eq([%w[other_id], 422])
+    end
+  end
+
+  describe "a parent link" do
+    def read(id) = call_api(:get, "/#{id}")
+
+    before { create(:task_link, :parent, from_task_id: task.id, to_task_id: other.id) }
+
+    it "reads parent_of on the parent" do
+      expect(read(task.id).fetch("links").map { it.values_at("label", "id") }).to eq([["parent_of", other.id]])
+    end
+
+    it "reads child_of on the child" do
+      expect(read(other.id).fetch("links").map { it.values_at("label", "id") }).to eq([["child_of", task.id]])
+    end
+
+    it "reads the same over MCP" do
+      expect(unstamped(trusted(mcp_answer("read_task", id: other.id)))).to eq(unstamped(read(other.id)))
     end
   end
 

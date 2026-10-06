@@ -1512,8 +1512,10 @@ en:
           labels:
             blocked_by: "blocked by"
             blocks: "blocks"
+            child_of: "child of"
             duplicated_by: "duplicated by"
             duplicates: "duplicates"
+            parent_of: "parent of"
             relates: "relates to"
         panel:
           label: "Task"

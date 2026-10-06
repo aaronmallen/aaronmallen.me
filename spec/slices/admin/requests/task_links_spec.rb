@@ -54,6 +54,8 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       ["duplicates", "duplicates", "Ship the links", "Write the migration"],
       ["duplicated_by", "duplicates", "Write the migration", "Ship the links"],
       ["relates", "relates", "Ship the links", "Write the migration"],
+      ["parent_of", "parent", "Ship the links", "Write the migration"],
+      ["child_of", "parent", "Write the migration", "Ship the links"],
     ].each do |label, type, title, linked|
       describe "a #{label} chip" do
         def chip(title) = row(title).find(".task-link")

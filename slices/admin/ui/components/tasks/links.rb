@@ -8,8 +8,10 @@ module Admin
           ICONS = {
             "blocks" => "fa-solid fa-arrow-right-long",
             "blocked_by" => "fa-solid fa-lock",
+            "child_of" => "fa-solid fa-arrow-turn-up",
             "duplicates" => "fa-regular fa-clone",
             "duplicated_by" => "fa-regular fa-clone",
+            "parent_of" => "fa-solid fa-sitemap",
             "relates" => "fa-solid fa-link",
           }.freeze
           CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze

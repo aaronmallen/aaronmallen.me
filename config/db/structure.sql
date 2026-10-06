@@ -381,7 +381,8 @@ CREATE TYPE public.task_event_kind AS ENUM (
 CREATE TYPE public.task_link_type AS ENUM (
     'blocks',
     'relates',
-    'duplicates'
+    'duplicates',
+    'parent'
 );
 
 
@@ -2933,6 +2934,7 @@ CREATE TABLE public.task_links (
     from_task_id integer NOT NULL,
     to_task_id integer NOT NULL,
     type public.task_link_type NOT NULL,
+    synced boolean DEFAULT false NOT NULL,
     CONSTRAINT task_links_distinct_check CHECK ((from_task_id <> to_task_id))
 );
 
@@ -4453,6 +4455,13 @@ CREATE INDEX task_links_from_task_id_index ON public.task_links USING btree (fro
 
 
 --
+-- Name: task_links_one_parent_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX task_links_one_parent_key ON public.task_links USING btree (to_task_id) WHERE (type = 'parent'::public.task_link_type);
+
+
+--
 -- Name: task_links_pair_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5275,4 +5284,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261006000507_add_provider_to_task_tag_rules.rb'),
 ('20261006000517_add_unsent_webmention_targets_to_posts.rb'),
 ('20261006000618_create_task_contributors.rb'),
-('20261006000623_add_contributors_to_activity_views.rb');
+('20261006000623_add_contributors_to_activity_views.rb'),
+('20261006000632_add_parent_to_task_link_type.rb'),
+('20261006000633_add_synced_and_one_parent_to_task_links.rb');
