@@ -2,9 +2,19 @@
 
 module Tags
   class Slice < Hanami::Slice
+    import keys: %w[queries.by_tag], from: :decisions
+
+    import keys: %w[queries.by_tag], from: :posts
+
+    import keys: %w[queries.by_tag], from: :projects
+
+    import keys: %w[queries.journal_entries_by_tag], from: :record
+
+    import keys: %w[queries.tasks_by_tag], from: :tasks
+
     export %w[
       operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.matching_count
-      queries.usage
+      queries.summary queries.usage
     ]
   end
 end

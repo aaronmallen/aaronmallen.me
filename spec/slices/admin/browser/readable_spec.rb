@@ -132,6 +132,7 @@ RSpec.describe "Admin screens", type: :feature do
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
       "tags" => "/admin/tags",
+      "tag summary" => "/admin/tags/site",
       "task" => "/admin/tasks/#{task.id}",
       "task link search" => "/admin/tasks/#{task.id}?link_q=finished",
       "task editor" => "/admin/tasks/#{task.id}/edit",

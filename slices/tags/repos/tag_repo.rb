@@ -14,6 +14,8 @@ module Tags
 
       def last_tag_of_rules(id) = tags.last_tag_of_rules(id)
 
+      def named(name) = tags.by_names(name).to_a
+
       def next_color(scope:) = tags.next_color(scope:)
 
       def page_matching(scope, text, page) = page.fill(matching(scope, text).in_name_order.paged(page).to_a)

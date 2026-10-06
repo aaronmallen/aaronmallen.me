@@ -26,6 +26,8 @@ module Tasks
 
       def by_id(id) = with_details.by_pk(id).one
 
+      def by_tag(tag) = with_details.tagged([tag]).open_first.to_a
+
       def cancel(id, at: Time.now) = update(id, status: CANCELED, completed_at: at)
 
       def complete(id, at: Time.now) = update(id, status: DONE, completed_at: at)

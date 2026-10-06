@@ -2086,6 +2086,23 @@ en:
           title:
             private: "Task and journal tags"
             public: "Post and project tags"
+        show:
+          back: "Tags"
+          count:
+            zero: "Nothing carries this tag"
+            one: "%{count} item carries this tag"
+            other: "%{count} items carry this tag"
+          empty: "Nothing carries this tag yet."
+          kicker: "Tag"
+          kinds:
+            decisions: "Decisions"
+            journal_entries: "Journal entries"
+            posts: "Posts"
+            projects: "Projects"
+            tasks: "Tasks"
+          scopes:
+            private: "Private"
+            public: "Public"
       task_tag_rules:
         index:
           aside: "Click a rule to edit it or delete it."

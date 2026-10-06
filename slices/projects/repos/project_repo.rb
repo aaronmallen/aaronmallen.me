@@ -18,6 +18,8 @@ module Projects
 
       def by_id(id) = with_tags.by_pk(id).one
 
+      def by_tag(tag) = with_tags.tagged(tag).in_order.to_a
+
       def live = with_tags.live.in_order.to_a
 
       def public_by_tag(tag) = with_tags.live.tagged(tag).featured_first.to_a

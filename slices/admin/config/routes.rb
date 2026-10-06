@@ -10,6 +10,7 @@ module Admin
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
+    TAG = %r{[^/]+}
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
     WEBMENTION_VERDICT = Regexp.union(Blog::Types::WebmentionModeration.mapping.values)
 
@@ -155,6 +156,7 @@ module Admin
     post "/social/:id/suggestions/reject", to: "social.reject_suggestions", as: :reject_social_suggestions, id: ID
     get "/tags", to: "tags.index", as: :tags
     post "/tags", to: "tags.create", as: :create_tag
+    get "/tags/:name", to: "tags.show", as: :tag, name: TAG
     post "/tags/:id", to: "tags.update", as: :update_tag, id: ID
     post "/tags/:id/delete", to: "tags.destroy", as: :delete_tag, id: ID
     get "/tasks", to: "tasks.index", as: :tasks

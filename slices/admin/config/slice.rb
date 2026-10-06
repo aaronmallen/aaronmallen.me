@@ -71,7 +71,8 @@ module Admin
     ], from: :posts
 
     import keys: %w[
-      operations.remove_tag operations.save_tag queries.matching queries.matching_count queries.usage
+      operations.remove_tag operations.save_tag queries.matching queries.matching_count queries.summary
+      queries.usage
     ], from: :tags
 
     import keys: %w[

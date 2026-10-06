@@ -12,6 +12,8 @@ module Decisions
 
       def by_id_for_update(id) = decisions.by_pk(id).lock.one
 
+      def by_tag(tag) = decisions.combine(:options, :tags).tagged(tag).newest_first.to_a
+
       def count_by_status = count_statuses(decisions)
 
       def count_found(tag: nil, text: nil)

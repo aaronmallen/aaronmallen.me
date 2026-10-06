@@ -27,12 +27,13 @@ module Posts
       end
 
       def by_id(id) = with_tags.by_pk(id).one
-
       def by_id_for_update(id) = posts.by_pk(id).lock.one
 
       def by_ids(ids) = with_tags.with_ids(ids).newest_first.to_a
 
       def by_status(status) = with_tags.with_status(status).newest_first.to_a
+
+      def by_tag(tag) = with_tags.tagged(tag).newest_first.to_a
 
       def calendar_between(from:, to:)
         dated = with_tags.scheduled_or_published
