@@ -6,7 +6,11 @@ module Decisions
       EDITED = Blog::Types::DecisionEventKind["edited"]
       FIELDS = %i[title problem note].freeze
 
-      include Deps[contract: "contracts.decision_contract", decision_repo: "repos.decision_repo"]
+      include Deps[
+        contract: "contracts.decision_contract",
+        decision_repo: "repos.decision_repo",
+        require_edit_note: "operations.require_edit_note",
+      ]
 
       def call(id, params)
         fields = step validate(params)
@@ -31,7 +35,7 @@ module Decisions
         edited = decision.problem != problem
         return Success(decision) unless edited || decision.title != title
 
-        kept = step EditNote.call(needed: edited && decision.closed?, note:)
+        kept = step require_edit_note.call(needed: edited && decision.closed?, note:)
         decision_repo.update(decision.id, title:, problem:)
         Success(decision_repo.record(decision.id, EDITED, note: kept))
       end

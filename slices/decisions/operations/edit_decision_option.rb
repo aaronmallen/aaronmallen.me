@@ -10,6 +10,7 @@ module Decisions
         contract: "contracts.decision_option_contract",
         decision_option_repo: "repos.decision_option_repo",
         decision_repo: "repos.decision_repo",
+        require_edit_note: "operations.require_edit_note",
       ]
 
       def call(decision_id, id, params)
@@ -33,7 +34,7 @@ module Decisions
       def revise(decision, option, title:, body:, note:)
         return Success(option) if option.title == title && option.body == body
 
-        kept = step EditNote.call(needed: decision.closed?, note:)
+        kept = step require_edit_note.call(needed: decision.closed?, note:)
         saved = decision_option_repo.update(option.id, title:, body:)
         decision_repo.record(decision.id, OPTION_EDITED, option_id: option.id, note: kept)
         Success(saved)

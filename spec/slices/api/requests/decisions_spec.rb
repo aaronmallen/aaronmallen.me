@@ -96,6 +96,12 @@ RSpec.describe "API decisions", type: :request do
       expect([status, reload(decision).problem]).to eq([200, "Jobs pile up fast"])
     end
 
+    it "drops the note on an open decision's edit" do
+      call_api(:patch, "/#{decision.id}", { problem: "Jobs pile up fast", note: "Load grew" })
+
+      expect(events(decision).where(kind: "edited").pluck(:note)).to eq([nil])
+    end
+
     it "refuses a closed decision's new problem without a note and keeps the old one", :aggregate_failures do
       closed = create(:decision, status: "dropped", problem: "Jobs pile up")
       answered = call_api(:patch, "/#{closed.id}", { problem: "Jobs pile up fast" })
