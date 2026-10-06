@@ -13,9 +13,9 @@ module Social
       UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
+        expand_for_network: "operations.expand_for_network",
         mention_directory: "queries.mention_directory",
         networks: "networks.all",
-        tag_links: "operations.tag_links",
       ]
 
       params do
@@ -46,11 +46,8 @@ module Social
         next unless context[:intent] == SEND
 
         parts, targets = values.values_at(:parts, :targets)
-        directory = mention_directory.call(parts)
         over = targets.any? do |name|
-          parts.any? do |body|
-            !networks.fetch(name).within_limit?(directory.expand(tag_links.call(body, name), name).text)
-          end
+          expand_for_network.call(parts, name).any? { !networks.fetch(name).within_limit?(it.text) }
         end
         key(:parts).failure(TOO_LONG) if over
       end

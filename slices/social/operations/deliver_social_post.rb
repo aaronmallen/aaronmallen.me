@@ -9,10 +9,9 @@ module Social
       SEND_FAILED = :send_failed
 
       include Deps[
-        mention_directory: "queries.mention_directory",
+        expand_for_network: "operations.expand_for_network",
         networks: "networks.all",
         social_post_repo: "repos.social_post_repo",
-        tag_links: "operations.tag_links",
       ]
 
       operate_on :call, :give_up
@@ -53,12 +52,7 @@ module Social
 
       def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
 
-      def expanded(social_post, network)
-        bodies = social_post.parts.map { tag_links.call(it.body, network) }
-        directory = mention_directory.call(bodies)
-
-        bodies.map { directory.expand(it, network) }
-      end
+      def expanded(social_post, network) = expand_for_network.call(social_post.parts.map(&:body), network)
 
       def found(social_post_id)
         social_post = social_post_repo.by_id(social_post_id)

@@ -4,24 +4,24 @@ module Admin
   module Operations
     class CountNetworkLengths
       include Deps[
+        expand_for_network: "social.operations.expand_for_network",
         mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
-        tag_links: "social.operations.tag_links",
       ]
 
       def call(bodies)
         directory = mention_directory.call(bodies)
+        sent = Blog::Types::NetworkName.values.to_h { [it, expand_for_network.call(bodies, it).map(&:text)] }
 
-        bodies.map do |body|
-          Blog::Types::NetworkName.values.to_h { [it, measure(directory, body, it)] }
+        bodies.each_with_index.map do |body, index|
+          sent.to_h { |name, texts| [name, measure(directory, body, name, texts[index])] }
         end
       end
 
       private
 
-      def measure(directory, body, name)
+      def measure(directory, body, name, sent)
         client = networks.fetch(name)
-        sent = directory.expand(tag_links.call(body, name), name).text
 
         Structs::NetworkCount.new(
           count: client.count(sent), over: !client.within_limit?(sent), text: directory.expand(body, name).text,

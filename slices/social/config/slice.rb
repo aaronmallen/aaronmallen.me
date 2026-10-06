@@ -12,11 +12,11 @@ module Social
 
     export %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
-      operations.delete_social_post
+      operations.delete_social_post operations.expand_for_network
       operations.lock_editable_social_post operations.moderate_webmention operations.move_social_post
       operations.receive_webmention
       operations.replace_social_post_parts operations.save_person operations.save_social_post operations.search_accounts
-      operations.tag_links operations.update_webmention_settings queries.calendar_social_posts
+      operations.update_webmention_settings queries.calendar_social_posts
       queries.counted_webmentions_for_post
       queries.editable_social_post queries.linkable_social_posts queries.listed_webmentions_for_post
       queries.mention_directory

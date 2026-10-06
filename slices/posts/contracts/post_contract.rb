@@ -11,9 +11,9 @@ module Posts
 
       include Deps[
         announcement: "operations.compose_announcement",
+        expand_for_network: "social.operations.expand_for_network",
         mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
-        tag_links: "social.operations.tag_links",
       ]
 
       params do
@@ -57,9 +57,8 @@ module Posts
 
         typed = Blog::Types::Text[values[:syndication_body]]
         body = announcement.compose(body: typed, slug: values[:slug], title: values[:title])
-        directory = mention_directory.call(body)
         fits = values[:syndication_targets].to_a.all? do |name|
-          networks.fetch(name).within_limit?(directory.expand(tag_links.call(body, name), name).text)
+          networks.fetch(name).within_limit?(expand_for_network.call([body], name).first.text)
         end
         next if fits
 

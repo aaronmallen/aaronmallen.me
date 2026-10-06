@@ -6,14 +6,13 @@ module Suggestions
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[
+        expand_for_network: "social.operations.expand_for_network",
         lock_editable_social_post: "social.operations.lock_editable_social_post",
         lock_post: "posts.operations.lock_post",
-        mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
         replace_social_post_parts: "social.operations.replace_social_post_parts",
         revise_post_body: "posts.operations.revise_post_body",
         suggestion_repo: "repos.suggestion_repo",
-        tag_links: "social.operations.tag_links",
       ]
 
       def call(suggestion_id, ids: nil)
@@ -76,11 +75,7 @@ module Suggestions
       end
 
       def fits?(body, targets)
-        return true if targets.empty?
-
-        directory = mention_directory.call([body])
-
-        targets.all? { networks.fetch(it).within_limit?(directory.expand(tag_links.call(body, it), it).text) }
+        targets.all? { networks.fetch(it).within_limit?(expand_for_network.call([body], it).first.text) }
       end
 
       def outcome(sifted)
