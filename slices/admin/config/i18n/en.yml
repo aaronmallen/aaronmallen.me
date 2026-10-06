@@ -1424,10 +1424,20 @@ en:
           cancel: "Cancel"
           edit_title: "Edit the task"
           title: "New task"
+        credit_fields:
+          agent: "%{agent} on %{model}"
+          agent_placeholder: "claude-code"
+          label: "Contributors"
+          model_placeholder: "claude-opus-5-5"
+          new_agent: "New agent"
+          new_model: "New agent's model"
+          owner: "Me"
         field_error:
           body:
             blank: "Write the comment first."
             control: "Take out the control characters."
+          contributors:
+            format: "Give an agent and its model, each in lowercase letters, numbers, dots and dashes."
           ended_at:
             blank: "Give the time it ended."
             format: "Give the end as a date and time."
@@ -2137,6 +2147,7 @@ en:
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
         show:
+          agent: "%{agent} on %{model}"
           back_tasks: "Tasks"
           back_today: "Today"
           carried: "Carried over"
@@ -2145,11 +2156,13 @@ en:
             other: "%{count} times"
             zero: "never"
           completed: "Completed"
+          contributors: "Contributors"
           created: "Created"
           edit: "Edit"
           links: "Links"
           note: "Note"
           note_label: "Task"
+          owner: "Me"
           related: "Related"
           sprint: "Sprint day"
           statuses:

@@ -8,6 +8,7 @@ module Admin
           SCOPE = "task"
           MESSAGES = {
             body: { "blank" => ".body.blank", "control" => ".body.control" },
+            contributors: { "format" => ".contributors.format" },
             ended_at: {
               "blank" => ".ended_at.blank", "format" => ".ended_at.format", "future" => ".ended_at.future",
               "order" => ".ended_at.order", "running" => ".ended_at.running", "skipped" => ".ended_at.skipped",

@@ -32,6 +32,7 @@ module Admin
               note_field
               pair
               tags_field
+              credit_fields if @task
               foot(&)
             end
           end
@@ -39,6 +40,10 @@ module Admin
           private
 
           def action = @task ? path(:admin_update_task, id: @task.id) : path(:admin_create_task)
+
+          def credit_fields
+            CreditFields(scope: @scope, credits: @values.fetch(:contributors) { @task.credits }, errors: @errors)
+          end
 
           def default_list = @returns[:origin] == FROM_TODAY ? TODAY : NEXT
 

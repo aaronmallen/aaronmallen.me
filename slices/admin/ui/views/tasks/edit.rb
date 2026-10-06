@@ -65,6 +65,7 @@ module Admin
 
           def stored
             {
+              contributors: @task.credits,
               list: @task.place,
               note: @task.note.to_s,
               sprint_on: @task.sprint&.sprint_date&.iso8601,

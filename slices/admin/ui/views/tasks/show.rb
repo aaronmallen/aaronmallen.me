@@ -7,6 +7,7 @@ module Admin
         class Show < View
           include Components::Tasks
 
+          CREDIT_SEPARATOR = ", "
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           PREFIX = "#"
           STATUSES = {
@@ -46,6 +47,10 @@ module Admin
 
           def back_path = today? ? path(:admin_root) : path(:admin_tasks, filter: @filter)
 
+          def credit(credit) = credit[:agent] ? t(".agent", **credit.slice(:agent, :model)) : t(".owner")
+
+          def credits = @task.credits.map { credit(it) }.join(CREDIT_SEPARATOR)
+
           def edit
             href = path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)
 
@@ -67,6 +72,7 @@ module Admin
               ".sprint" => sprint_day,
               ".carried" => t(".carried_count", count: @task.carried_count),
               ".worked" => Blog::Figures.hours(@task.worked_seconds),
+              ".contributors" => credits,
             }.compact
           end
 
