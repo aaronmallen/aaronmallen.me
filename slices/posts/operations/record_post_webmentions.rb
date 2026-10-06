@@ -5,7 +5,9 @@ module Posts
     class RecordPostWebmentions
       include Deps[post_repo: "repos.post_repo"]
 
-      def call(id, targets:) = post_repo.update(id, webmention_targets: targets)
+      def call(id, targets:, unsent: [])
+        post_repo.update(id, webmention_targets: targets, unsent_webmention_targets: unsent)
+      end
     end
   end
 end

@@ -44,9 +44,9 @@ module Social
       end
 
       def announce(post, source, links)
-        outcomes = (links | post.webmention_targets.to_a).to_h { [it, deliver(source, it)] }
+        outcomes = targets_for(post, links).to_h { [it, deliver(source, it)] }
         unsent = outcomes.filter_map { |target, outcome| target if outcome == FAILED }
-        record_post_webmentions.call(post.id, targets: links | unsent)
+        record_post_webmentions.call(post.id, targets: links | unsent, unsent:)
         return Failure(:send_failed) if unsent.any?
 
         Success(outcomes.values.count(SENT))
@@ -123,6 +123,11 @@ module Social
       end
 
       def source_url(post) = routes.url(:post, slug: post.slug).to_s
+
+      def targets_for(post, links)
+        unsent = post.unsent_webmention_targets.to_a
+        unsent.empty? ? links | post.webmention_targets.to_a : unsent
+      end
     end
   end
 end

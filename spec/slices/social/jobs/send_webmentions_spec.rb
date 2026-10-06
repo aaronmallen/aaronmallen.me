@@ -346,6 +346,51 @@ RSpec.describe Social::Jobs::SendWebmentions do
     end
   end
 
+  describe "a retry after some pages took the mention" do
+    let(:post) { post_with(target, other) }
+
+    def save(post)
+      fields = { title: "Hello", slug: "hello", body: post.body }
+      Posts::Slice["operations.save_post"].call(fields, id: post.id, intent: "save")
+    end
+
+    before do
+      stub_target(target, endpoint)
+      stub_target(other, other_endpoint, status: 503)
+      send_retrying(post)
+    end
+
+    it "posts only to the endpoint that failed", :aggregate_failures do
+      expect { send_for(post) }.to raise_error(described_class::EndpointUnreachable)
+      expect(a_request(:post, endpoint)).to have_been_made.once
+      expect(a_request(:post, other_endpoint)).to have_been_made.twice
+    end
+
+    it "still remembers every link the post has" do
+      send_retrying(post)
+
+      expect(targets_of(post)).to eq([target, other])
+    end
+
+    it "sends to every link again once every page took it", :aggregate_failures do
+      stub_endpoint(other_endpoint)
+      send_for(post)
+      send_for(post)
+
+      expect(a_request(:post, endpoint)).to have_been_made.twice
+      expect(a_request(:post, other_endpoint)).to have_been_made.times(3)
+    end
+
+    it "sends to every link from a save made while the retry is due", :aggregate_failures, :commits do
+      stub_endpoint(other_endpoint)
+      save(post)
+      described_class.drain
+
+      expect(a_request(:post, endpoint)).to have_been_made.twice
+      expect(a_request(:post, other_endpoint)).to have_been_made.twice
+    end
+  end
+
   describe "posts and settings that send nothing" do
     before { stub_target(target, endpoint) }
 

@@ -764,6 +764,7 @@ CREATE TABLE public.posts (
     og_image_url text DEFAULT ''::text NOT NULL,
     canonical_url text DEFAULT ''::text NOT NULL,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(title, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(summary, ''::text) || ' '::text) || COALESCE(body, ''::text))), 'B'::"char"))) STORED,
+    unsent_webmention_targets text[] DEFAULT '{}'::text[] NOT NULL,
     CONSTRAINT posts_published_at_check CHECK (((status = 'draft'::public.post_status) OR (published_at IS NOT NULL)))
 );
 
@@ -5179,4 +5180,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261004000415_refuse_a_tag_delete_that_empties_a_task_tag_rule.rb'),
 ('20261004000419_create_post_tag_removals.rb'),
 ('20261004000461_add_single_author_hosts_to_webmention_settings.rb'),
-('20261006000507_add_provider_to_task_tag_rules.rb');
+('20261006000507_add_provider_to_task_tag_rules.rb'),
+('20261006000517_add_unsent_webmention_targets_to_posts.rb');

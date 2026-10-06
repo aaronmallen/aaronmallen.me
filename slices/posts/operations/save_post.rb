@@ -83,6 +83,8 @@ module Posts
         Success([:published, step(publish_post.call(saved.id, at: now))])
       end
 
+      def resending(attributes) = attributes.except(:published_at).merge(unsent_webmention_targets: [])
+
       def save(post, attributes, intent, now)
         return update_published(post, attributes) if post&.status == Blog::Types::PostStatus["published"]
         return draft(post, attributes) unless intent == PUBLISH
@@ -101,7 +103,7 @@ module Posts
         return invalid(NOTE, Blog::Contract::BLANK) if edited && note.empty?
 
         post_edit_repo.create(post_id: post.id, note:) if edited
-        saved = create_or_update(post, attributes.except(:published_at))
+        saved = create_or_update(post, resending(attributes))
         post_repo.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         Success([:saved, saved])
