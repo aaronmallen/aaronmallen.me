@@ -7,6 +7,7 @@ module API
         additionalProperties: false,
         properties: {
           id: Tasks::ID,
+          contributors: Tasks::CONTRIBUTORS,
           list: { type: "string", enum: Tasks::LISTS, description: "moves the task to this list or today's sprint" },
           note: { type: "string", description: "what done looks like" },
           sprint_on: {
@@ -40,6 +41,7 @@ module API
           sprint_on: fields[:sprint_on],
           tags: Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
           title: fields.fetch(:title, task.title),
+          **fields.slice(:contributors),
         }
       end
     end

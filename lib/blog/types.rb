@@ -44,6 +44,12 @@ module Blog
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal")
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
     CodeChallengeMethod = Types::String.enum("S256")
+    ContributorKind = Types::String.enum("owner", "agent")
+    ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/, max_size: 64)
+    Contributor = [
+      { kind: Types::String.constrained(eql: "owner") },
+      { kind: Types::String.constrained(eql: "agent"), agent: ContributorSlug, model: ContributorSlug },
+    ].map { Types::Hash.schema(it).strict.with_key_transform(&:to_sym) }.reduce(:|)
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
     DateParam = Types::Params::Date.constrained(
       gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),

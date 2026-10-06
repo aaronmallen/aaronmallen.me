@@ -6,6 +6,9 @@ module API
     module Tasks
       BULK = Schema.bulk("tasks")
       CLOSED = "task %s is already done or canceled"
+      CREDITS = "the whole set of who did the work: the owner, or an agent with the model it ran on; " \
+                "an empty list clears it, which lists the owner again"
+      CONTRIBUTORS = Schema.list(Serializers::Task::CONTRIBUTOR).merge(description: CREDITS).freeze
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
       ID = Schema::ID
       LISTS = Blog::Types::TaskFilter.values.freeze
@@ -18,6 +21,9 @@ module API
 
       COMPLAINTS = {
         body: { "blank" => "write the comment first" },
+        contributors: {
+          Blog::Contract::FORMAT => "a contributor is the owner alone, or an agent with its model, as lowercase slugs",
+        },
         ended_at: {
           "blank" => "a finished session needs an end",
           Blog::Contract::FORMAT => "give the end as YYYY-MM-DDTHH:MM",

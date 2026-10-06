@@ -654,6 +654,66 @@ RSpec.describe "API tasks", type: :request do
 
       expect([status, tasks.by_id(task.id).title]).to eq([422, "Draft"])
     end
+
+    describe "contributors" do
+      let(:agent) { { "kind" => "agent", "agent" => "claude-code", "model" => "claude-opus-5-5" } }
+      let(:owner) { { "kind" => "owner" } }
+
+      it "lists the owner for a task with none" do
+        expect(read(task.id).fetch("contributors")).to eq([owner])
+      end
+
+      it "takes an agent with its model and reads it back", :aggregate_failures do
+        expect(save(task.id, contributors: [agent]).fetch("contributors")).to eq([agent])
+        expect(read(task.id).fetch("contributors")).to eq([agent])
+      end
+
+      it "keeps the owner beside an agent when the set names both" do
+        expect(save(task.id, contributors: [owner, agent]).fetch("contributors")).to eq([owner, agent])
+      end
+
+      it "keeps the contributors when the save leaves them out" do
+        save(task.id, contributors: [agent])
+
+        expect(save(task.id, title: "Final").fetch("contributors")).to eq([agent])
+      end
+
+      it "lists the owner again when the save clears them" do
+        save(task.id, contributors: [agent])
+
+        expect(save(task.id, contributors: []).fetch("contributors")).to eq([owner])
+      end
+
+      it "stores a repeated contributor once" do
+        expect(save(task.id, contributors: [agent, agent]).fetch("contributors")).to eq([agent])
+      end
+
+      it "refuses an agent with no model with a 422 and keeps the old set", :aggregate_failures do
+        save(task.id, contributors: [agent])
+
+        expect([save(task.id, contributors: [agent.except("model")]).fetch("errors"), status])
+          .to eq([{ "contributors" => [API::Endpoints::Tasks::COMPLAINTS.dig(:contributors, "format")] }, 422])
+        expect(read(task.id).fetch("contributors")).to eq([agent])
+      end
+
+      it "refuses an owner with a model with a 422" do
+        save(task.id, contributors: [owner.merge("model" => "claude-opus-5-5")])
+
+        expect(status).to eq(422)
+      end
+
+      it "refuses an agent that is not a lowercase slug with a 422" do
+        save(task.id, contributors: [agent.merge("agent" => "Claude Code")])
+
+        expect(status).to eq(422)
+      end
+
+      it "refuses a kind it does not know with a 422" do
+        save(task.id, contributors: [{ "kind" => "human" }])
+
+        expect(status).to eq(422)
+      end
+    end
   end
 
   describe "DELETE /api/v1/tasks/:id" do
@@ -964,6 +1024,16 @@ RSpec.describe "API tasks", type: :request do
       saved = save(task.id, title: "Final", note: "done looks like this")
 
       answered = trusted(mcp_answer("save_task", id: task.id, title: "Final", note: "done looks like this"))
+
+      expect(answered.except("updated_at")).to eq(saved.except("updated_at"))
+    end
+
+    it "save contributors as save_task does" do
+      task = create(:task)
+      contributors = [{ kind: "agent", agent: "claude-code", model: "claude-opus-5-5" }]
+      saved = save(task.id, contributors:)
+
+      answered = trusted(mcp_answer("save_task", id: task.id, contributors:))
 
       expect(answered.except("updated_at")).to eq(saved.except("updated_at"))
     end

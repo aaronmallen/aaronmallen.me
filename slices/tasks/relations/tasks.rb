@@ -13,6 +13,7 @@ module Tasks
       schema :tasks, infer: true do
         associations do
           belongs_to :sprint
+          has_many :task_contributors, as: :contributors, view: :in_order
           has_many :task_links, as: :incoming_links, foreign_key: :to_task_id
           has_many :task_links, as: :outgoing_links, foreign_key: :from_task_id
           has_many :task_tags
@@ -28,7 +29,9 @@ module Tasks
 
       def closed = where(status: CLOSED)
 
-      def detailed = combine(:running_session, :source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
+      def detailed
+        combine(:contributors, :running_session, :source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
+      end
 
       def finished_counts(day)
         closed.unordered.select do

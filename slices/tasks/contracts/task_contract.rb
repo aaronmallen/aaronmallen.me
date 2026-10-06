@@ -8,6 +8,11 @@ module Tasks
         required(:list).maybe(Blog::Types::Nullable::TaskFilter)
         required(:note).value(Blog::Types::TrimmedText)
         required(:tags).value(Blog::Types::TagList)
+        optional(:contributors).value(:array)
+      end
+
+      rule(:contributors) do
+        key.failure(FORMAT) if key? && !value.all? { Blog::Types::Contributor.valid?(it) }
       end
 
       rule(:title).validate(:without_controls, :visible)

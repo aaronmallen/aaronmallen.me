@@ -4,6 +4,7 @@ module Tasks
   module Operations
     class SaveTask < Blog::Operation
       FIELDS = %i[list note tags title].freeze
+      OPTIONAL = %i[contributors].freeze
       PHOTO_OWNER = Blog::Types::PhotoOwner["task"]
 
       include Deps[
@@ -11,6 +12,7 @@ module Tasks
         contract: "contracts.task_contract",
         move_task: "operations.move_task",
         schedule_task: "operations.schedule_task",
+        task_contributor_repo: "repos.task_contributor_repo",
         task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",
       ]
@@ -21,6 +23,7 @@ module Tasks
 
         transaction do
           persist(task, fields)
+          credit(id, fields[:contributors])
           step schedule_task.call(id, params[:sprint_on]) if schedules?(task, fields, params[:sprint_on])
 
           task_repo.by_id(id)
@@ -29,9 +32,13 @@ module Tasks
 
       private
 
+      def credit(id, contributors)
+        task_contributor_repo.replace(id, contributors.map { Blog::Types::Contributor[it] }.uniq) if contributors
+      end
+
       def find(id) = found(task_repo.by_id(id))
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
+      def form(params) = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*OPTIONAL))
 
       def move(task, list) = moves?(task, list) ? move_task.call(task.id, list) : Success(task)
 

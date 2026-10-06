@@ -3,11 +3,19 @@
 module Tasks
   module Structs
     class Task < Blog::DB::Struct
+      OWNER = { kind: Blog::Types::ContributorKind["owner"] }.freeze
+
       def blocked? = links.any?(&:blocker?)
 
       def canceled? = status == Blog::Types::TaskStatus["canceled"]
 
       def closed? = done? || canceled?
+
+      def credits
+        return [OWNER] if contributors.empty?
+
+        contributors.map { it.agent ? { kind: it.kind, agent: it.agent, model: it.model } : OWNER }
+      end
 
       def done? = status == Blog::Types::TaskStatus["done"]
 

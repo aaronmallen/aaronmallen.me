@@ -4,6 +4,15 @@ module API
   module Serializers
     class Task < Serializer
       LABELS = %w[blocks blocked_by duplicates duplicated_by relates].freeze
+      SLUG = { type: "string", pattern: "^[a-z0-9]+([.-][a-z0-9]+)*$", maxLength: 64 }.freeze
+
+      CONTRIBUTOR = Schema.object(
+        { kind: { type: "string", enum: Blog::Types::ContributorKind.values } },
+        optional: {
+          agent: SLUG.merge(description: "the agent, such as claude-code; only with kind agent"),
+          model: SLUG.merge(description: "the model's own id, such as claude-opus-5-5; only with kind agent"),
+        },
+      ).freeze
 
       LINK = Schema.object(
         {
@@ -36,6 +45,7 @@ module API
             description: "the task's place in the order the owner set; lower comes first, ties go to the lower id",
           ),
           tags: Schema::TAGS,
+          contributors: Schema.list(CONTRIBUTOR).merge(description: "who did the work; the owner when none is set"),
           links: Schema.list(LINK),
           blocked: Schema::BOOLEAN,
           carried_count: Schema::INTEGER,
@@ -51,6 +61,8 @@ module API
       attribute :blocked, &:blocked?
       stamps :completed_at, :created_at, :updated_at
       tag_names
+
+      def contributors(task) = task.credits
 
       def links(task)
         task.links.map { { label: it.label, id: it.task.id, title: it.task.title, status: it.task.status } }
