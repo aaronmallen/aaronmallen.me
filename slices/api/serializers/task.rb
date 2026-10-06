@@ -32,6 +32,9 @@ module API
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
           list: Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
           sprint_on: Schema.nullable(Schema::DAY),
+          position: Schema::INTEGER.merge(
+            description: "the task's place in the order the owner set; lower comes first, ties go to the lower id",
+          ),
           tags: Schema::TAGS,
           links: Schema.list(LINK),
           blocked: Schema::BOOLEAN,
@@ -44,7 +47,7 @@ module API
         },
       ).freeze
 
-      attributes :id, :title, :note, :status, :list, :sprint_on, :tags, :links
+      attributes :id, :title, :note, :status, :list, :sprint_on, :position, :tags, :links
       attribute :blocked, &:blocked?
       attributes :carried_count, :worked_seconds, :source, :created_at, :updated_at, :completed_at
 

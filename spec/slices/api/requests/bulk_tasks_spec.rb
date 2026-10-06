@@ -5,7 +5,9 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def bare(answer) = answer.fetch("tasks").map { it.except("id", "completed_at", "created_at", "updated_at") }
+  def bare(answer)
+    answer.fetch("tasks").map { it.except("id", "position", "completed_at", "created_at", "updated_at") }
+  end
 
   def call_api(name, body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }

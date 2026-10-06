@@ -826,6 +826,58 @@ RSpec.describe "API tasks", type: :request do
 
       expect(tasks.in_sprint(sprint.id).map(&:title)).to eq(["sprint two", "sprint one"])
     end
+
+    it "places the task right after the task named by after_id" do
+      third = create(:task, title: "third", position: 3)
+      act(third.id, "reorder", after_id: first.id)
+
+      expect([tasks.in_list("next").map(&:title), JSON.parse(last_response.body).fetch("moved")])
+        .to eq([%w[first third second], true])
+    end
+
+    it "puts the task first when after_id is null" do
+      act(second.id, "reorder", after_id: nil)
+
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[second first])
+    end
+
+    it "answers with the task's new position" do
+      expect(act(second.id, "reorder", after_id: nil).fetch("position")).to eq(1)
+    end
+
+    it "refuses an after_id from another list with a 422 that says so", :aggregate_failures do
+      elsewhere = create(:task, title: "elsewhere", list: "someday", position: 3)
+
+      expect([act(second.id, "reorder", after_id: elsewhere.id).fetch("errors"), status])
+        .to eq([{ "after_id" => ["task #{elsewhere.id} is not in task #{second.id}'s list or sprint"] }, 422])
+      expect(tasks.in_list("next").map(&:title)).to eq(%w[first second])
+    end
+
+    it "refuses an after_id from another sprint with a 422 that says so" do
+      held = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today).id, position: 3)
+      later = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: today + 1).id, position: 4)
+
+      expect([act(later.id, "reorder", after_id: held.id).fetch("errors"), status])
+        .to eq([{ "after_id" => ["task #{held.id} is not in task #{later.id}'s list or sprint"] }, 422])
+    end
+
+    it "answers an unknown after_id with a 404" do
+      expect([act(first.id, "reorder", after_id: 999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no task has the ID 999999" }, 404])
+    end
+
+    it "says it did not place a done task" do
+      task = create(:task, :done, position: 3)
+
+      expect(act(task.id, "reorder", after_id: nil).fetch("moved")).to be(false)
+    end
+
+    { "both" => { direction: "up", after_id: nil }, "neither" => {} }.each do |given, fields|
+      it "refuses #{given} of direction and after_id with a 422" do
+        expect([act(second.id, "reorder", fields).fetch("errors"), status])
+          .to eq([{ "input" => ["give either direction or after_id, not both"] }, 422])
+      end
+    end
   end
 
   describe "the MCP tools" do
@@ -858,8 +910,8 @@ RSpec.describe "API tasks", type: :request do
       fields = { title: "the same", list: "someday", tags: %w[ruby] }
       captured = capture(fields)
 
-      expect(trusted(mcp_answer("capture_task", **fields)).except("id", "created_at", "updated_at"))
-        .to eq(captured.except("id", "created_at", "updated_at"))
+      expect(trusted(mcp_answer("capture_task", **fields)).except("id", "position", "created_at", "updated_at"))
+        .to eq(captured.except("id", "position", "created_at", "updated_at"))
     end
 
     it "save as save_task does" do
@@ -875,7 +927,7 @@ RSpec.describe "API tasks", type: :request do
       it "#{verb} as #{verb}_task does" do
         ids = [create(:task, title: "same").id, create(:task, title: "same").id]
         answered = act(ids.first, verb)
-        stamps = %w[id completed_at created_at updated_at]
+        stamps = %w[id position completed_at created_at updated_at]
 
         expect(trusted(mcp_answer("#{verb}_task", id: ids.last)).except(*stamps)).to eq(answered.except(*stamps))
       end
@@ -916,6 +968,13 @@ RSpec.describe "API tasks", type: :request do
       reordered = act(task.id, "reorder", direction: "up")
 
       expect(unstamped(trusted(mcp_answer("reorder_task", id: task.id, direction: "up")))).to eq(unstamped(reordered))
+    end
+
+    it "reorder by after_id as reorder_task does" do
+      task = create(:task)
+      placed = act(task.id, "reorder", after_id: nil)
+
+      expect(unstamped(trusted(mcp_answer("reorder_task", id: task.id, after_id: nil)))).to eq(unstamped(placed))
     end
 
     it "delete as delete_task does" do

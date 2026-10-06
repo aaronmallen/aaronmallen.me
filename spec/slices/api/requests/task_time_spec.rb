@@ -253,9 +253,9 @@ RSpec.describe "API task time", type: :request do
       ids = [create(:task, title: "same").id, create(:task, title: "same").id]
       ids.each { act(it, "start") }
       paused = act(ids.first, "pause")
+      apart = %w[id position created_at updated_at worked_seconds]
 
-      expect(trusted(mcp_answer("pause_task", id: ids.last)).except("id", "created_at", "updated_at", "worked_seconds"))
-        .to eq(paused.except("id", "created_at", "updated_at", "worked_seconds"))
+      expect(trusted(mcp_answer("pause_task", id: ids.last)).except(*apart)).to eq(paused.except(*apart))
     end
 
     it "edit a session as update_work_session does" do
@@ -292,7 +292,7 @@ RSpec.describe "API task time", type: :request do
     it "complete with a duration as complete_task does" do
       ids = [create(:task, title: "same").id, create(:task, title: "same").id]
       completed = act(ids.first, "complete", minutes: 20)
-      stamps = %w[id completed_at created_at updated_at]
+      stamps = %w[id position completed_at created_at updated_at]
 
       answered = trusted(mcp_answer("complete_task", id: ids.last, minutes: 20))
 

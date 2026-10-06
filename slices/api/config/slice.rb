@@ -61,12 +61,13 @@ module API
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
       operations.delete_task_tag_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
-      operations.pause_task operations.plan_sprint operations.queue_issue_sync operations.reopen_task
-      operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
-      operations.set_task_total operations.start_task operations.unlink_task queries.counted_sprints_between
-      queries.find_tasks queries.list_finished_tasks queries.list_tasks queries.planned_tasks queries.sprints_after
-      queries.sprints_between queries.task_by_id queries.task_comments queries.task_tag_rules queries.task_timeline
-      queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
+      operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
+      operations.reopen_task operations.reorder_task operations.save_task operations.save_task_tag_rule
+      operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
+      queries.counted_sprints_between queries.find_tasks queries.list_finished_tasks queries.list_tasks
+      queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
+      queries.task_tag_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
+      queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
     export %w[
