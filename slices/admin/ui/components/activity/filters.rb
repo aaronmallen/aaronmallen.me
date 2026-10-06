@@ -10,6 +10,7 @@ module Admin
           CHECKED = Blog::Constants::CHECKED
           TYPES = Structs::ActivityEvent::KINDS
           LABELS = TYPES.to_h { [it, ".types.#{it}"] }.freeze
+          RANGES = Blog::Constants::ACTIVITY_RANGES
           UNCHECKED = "0"
 
           def self.query(from:, to:, types:, text:)
@@ -34,7 +35,7 @@ module Admin
               Card do
                 div(class: "form-stack") do
                   SavedViews(**@saved_views)
-                  presets
+                  RangePresets(ranges: RANGES, today: @today, from: @from, to: @to) { it.href { preset_path(it) } }
                   filter_form
                 end
               end
@@ -43,19 +44,10 @@ module Admin
 
           private
 
-          def dates
-            Field(label: t(".from"), id: "activity-from") do |control|
-              Input(**control, type: "date", name: "from", value: @from.iso8601, max: @to.iso8601)
-            end
-            Field(label: t(".to"), id: "activity-to") do |control|
-              Input(**control, type: "date", name: "to", value: @to.iso8601, min: @from.iso8601)
-            end
-          end
-
           def filter_form
             AutoForm(action: path(:admin_activity)) do
               div(class: "form-stack") do
-                dates
+                DateRange(from: @from, to: @to, id_prefix: "activity")
                 include_types
                 text_field
               end
@@ -68,22 +60,10 @@ module Admin
             end
           end
 
-          def preset(days)
-            { href: preset_path(days), text: t(".preset", count: days), current: preset_current?(days) }
-          end
-
-          def preset_current?(days) = @to == @today && @from == @today - (days - 1)
-
-          def preset_path(days)
-            query = self.class.query(from: @today - (days - 1), to: @today, types: @types, text: @text)
+          def preset_path(range)
+            query = self.class.query(from: range.begin, to: range.end, types: @types, text: @text)
 
             "#{path(:admin_activity)}?#{Rack::Utils.build_nested_query(query)}"
-          end
-
-          def presets
-            Field(label: t(".range")) do
-              SegmentedLinks(label: t(".range"), items: Blog::Constants::ACTIVITY_RANGES.map { preset(it) })
-            end
           end
 
           def text_field

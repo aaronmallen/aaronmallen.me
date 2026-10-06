@@ -16,7 +16,9 @@ module Admin
             div(class: "time-rail") do
               Card do
                 div(class: "form-stack") do
-                  presets
+                  RangePresets(ranges: Blog::Constants::TIME_RANGES, today: @today, from: @from, to: @to) do |presets|
+                    presets.href { path(:admin_time, from: it.begin.iso8601, to: it.end.iso8601, by: @by) }
+                  end
                   filter_form
                 end
               end
@@ -25,20 +27,11 @@ module Admin
 
           private
 
-          def dates
-            Field(label: t(".from"), id: "time-from") do |control|
-              Input(**control, type: "date", name: "from", value: @from.iso8601, max: @to.iso8601)
-            end
-            Field(label: t(".to"), id: "time-to") do |control|
-              Input(**control, type: "date", name: "to", value: @to.iso8601, min: @from.iso8601)
-            end
-          end
-
           def filter_form
             AutoForm(action: path(:admin_time)) do
               div(class: "form-stack") do
                 grouping
-                dates
+                DateRange(from: @from, to: @to, id_prefix: "time")
               end
             end
           end
@@ -48,19 +41,6 @@ module Admin
               SegmentedControl(
                 label: t(".by"), name: "by", options: GROUPINGS.transform_values { t(it) }, selected: @by,
               )
-            end
-          end
-
-          def preset(days)
-            current = @to == @today && @from == @today - (days - 1)
-            href = path(:admin_time, from: (@today - (days - 1)).iso8601, to: @today.iso8601, by: @by)
-
-            { href:, text: t(".preset", count: days), current: }
-          end
-
-          def presets
-            Field(label: t(".range")) do
-              SegmentedLinks(label: t(".range"), items: Blog::Constants::TIME_RANGES.map { preset(it) })
             end
           end
         end

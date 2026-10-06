@@ -280,11 +280,7 @@ en:
           contains: "Contains"
           contains_hint: "Add tag:ruby to search by tag, or repo:owner/name to search one repo."
           contains_placeholder: "grep activity…"
-          from: "From"
           include: "Include"
-          preset: "%{count}d"
-          range: "Range"
-          to: "To"
           types:
             comment: "Comments"
             commit: "Commits"
@@ -471,6 +467,9 @@ en:
       confirm_dialog:
         accept: "Yes"
         decline: "No"
+      date_range:
+        from: "From"
+        to: "To"
       day_head:
         days_ago:
           one: "%{count} day ago"
@@ -1032,6 +1031,9 @@ en:
           archived: "archived"
           paused: "paused"
           wip: "wip"
+      range_presets:
+        preset: "%{count}d"
+        range: "Range"
       record_links:
         field_error:
           other_id:
@@ -1617,14 +1619,10 @@ en:
       time_report:
         filters:
           by: "Group by"
-          from: "From"
           groupings:
             day: "Day"
             project: "Project"
             tag: "Tag"
-          preset: "%{count}d"
-          range: "Range"
-          to: "To"
         groups:
           by_day: "By day"
           by_project: "By project"

@@ -69,6 +69,11 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         expect(page).to have_css(".seg-option.current[aria-current='page']", text: "7d")
       end
 
+      it "stops From at To and To at From" do
+        expect([page.find_by_id("time-from")[:max], page.find_by_id("time-to")[:min]])
+          .to eq([today.iso8601, (today - 6).iso8601])
+      end
+
       it "says no time was logged" do
         expect(page).to have_css("#time-groups .empty", text: "No time logged")
       end
@@ -137,6 +142,10 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
         href = "/admin/time?from=#{(today - 29).iso8601}&to=#{today.iso8601}&by=project"
 
         expect(page).to have_link("30d", href:)
+      end
+
+      it "marks no preset current for dates that match none" do
+        expect(page).to have_no_css(".seg-option.current", text: /\A\d+d\z/)
       end
     end
 
