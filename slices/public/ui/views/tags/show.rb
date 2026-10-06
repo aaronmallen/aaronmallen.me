@@ -16,7 +16,7 @@ module Public
 
           def view_template
             content_for(:title, t(".title", tag: @tag))
-            content_for(:canonical, Blog::Site.url(path(:tag, tag: @tag, **@posts.query)))
+            content_for(:canonical, url(:tag, tag: @tag, **@posts.query))
             content_for(:feed, path(:tag_feed, tag: @tag)) unless @posts.rows.empty?
 
             section(class: "tagged") do

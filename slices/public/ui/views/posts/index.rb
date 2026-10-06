@@ -14,7 +14,7 @@ module Public
 
           def view_template
             content_for(:title, t(".title"))
-            content_for(:canonical, Blog::Site.url(path(:writing, **@posts.query)))
+            content_for(:canonical, url(:writing, **@posts.query))
 
             section(class: "writing") do
               h1(class: "sr-only") { t(".heading") }
