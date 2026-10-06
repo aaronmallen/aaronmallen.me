@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, lib]
 issue: AA-677
-amended: [AA-811]
+amended: [AA-811, "#551"]
 tags: [mcp, oauth, scopes, tools, consent, sdk]
 ---
 
@@ -41,6 +41,9 @@ tool and the missing permission and says to connect again, where the SDK would s
 A new scope needs three things: a name in `Scope::ALL`, a consent line under `scopes` in
 `slices/mcp/config/i18n/en.yml`, and a tool that names it. `scopes_supported` in the metadata reads `Scope::ALL`
 on its own.
+
+Since #551 split `publish` and `delete` out of `write`, `Scope::ALL` holds five names. ADR 0114 says which tools each
+one guards.
 
 ## Alternatives
 
