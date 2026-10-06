@@ -15,6 +15,15 @@ module Blog
         Sequel.function(:timezone, TimeZone::NAME, moment).cast(Date)
       end
 
+      def capped_claim(fresh, visitor_hash:, limit:, total_limit:)
+        transaction do
+          lock_until_commit
+          next unless fresh.where(visitor_hash:).count < limit && fresh.count < total_limit
+
+          yield
+        end
+      end
+
       def containing(text, *columns)
         return none if unmatchable?(text)
 
@@ -35,6 +44,8 @@ module Blog
         dataset.select(*columns).order(*LINKABLE_ORDER).map { Linkable.new(**it) }
       end
 
+      def lock_until_commit(*keys) = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, table_key, *keys))
+
       def none = where(false)
 
       def paged(page) = limit(page.limit).offset(page.offset)
@@ -46,6 +57,24 @@ module Blog
       end
 
       def unmatchable?(*texts) = texts.flatten.any? { it.to_s.include?(NUL) }
+
+      def with_advisory_lock(key, busy: nil)
+        db = dataset.db
+
+        db.synchronize do
+          next busy unless db.get(Sequel.function(:pg_try_advisory_lock, key))
+
+          begin
+            yield
+          ensure
+            db.get(Sequel.function(:pg_advisory_unlock, key))
+          end
+        end
+      end
+
+      private
+
+      def table_key = Sequel.function(:hashtext, name.dataset.to_s)
     end
   end
 end

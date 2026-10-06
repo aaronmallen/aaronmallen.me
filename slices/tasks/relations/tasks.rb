@@ -9,7 +9,6 @@ module Tasks
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze
       OPEN = Blog::Types::TaskStatus["open"]
-      TABLE_KEY = Sequel.function(:hashtext, "tasks")
 
       schema :tasks, infer: true do
         associations do
@@ -57,8 +56,6 @@ module Tasks
       def linkable_from(id) = exclude(id:).exclude(id: task_links.partner_ids(id).dataset)
 
       def list_counts = select_append { LISTS.map { integer.count(id).filter(list: it).as(it.to_sym) } }
-
-      def lock_positions_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
 
       def matching(text) = containing(text, :title, :note)
 

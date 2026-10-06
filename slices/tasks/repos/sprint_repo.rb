@@ -29,7 +29,7 @@ module Tasks
 
       def counted_between(first, last) = sprints.dated_between(first, last).with_task_counts.in_date_order.to_a
 
-      def lock_roll_over = sprints.lock_roll_over_until_commit
+      def lock_roll_over = sprints.lock_until_commit
 
       def on(date) = sprints.on(date).one
 

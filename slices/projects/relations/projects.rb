@@ -3,8 +3,6 @@
 module Projects
   module Relations
     class Projects < Blog::DB::Relation
-      TABLE_KEY = Sequel.function(:hashtext, "projects")
-
       schema :projects, infer: true do
         associations do
           has_many :project_tags
@@ -23,8 +21,6 @@ module Projects
       def linkable = linkables(title: :name, day: self.class.site_day(:created_at))
 
       def live = exclude(status: Blog::Types::ProjectStatus["archived"])
-
-      def lock_positions_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
 
       def matching(text) = containing(text, :name, :tagline, :repo)
 

@@ -16,20 +16,6 @@ module Tasks
       def task_ids = unordered.dataset.select(:task_id)
 
       def unseen = where(seen_at: nil)
-
-      def with_advisory_lock(key, busy:)
-        db = dataset.db
-
-        db.synchronize do
-          next busy unless db.get(Sequel.function(:pg_try_advisory_lock, key))
-
-          begin
-            yield
-          ensure
-            db.get(Sequel.function(:pg_advisory_unlock, key))
-          end
-        end
-      end
     end
   end
 end

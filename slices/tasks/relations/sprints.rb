@@ -3,8 +3,6 @@
 module Tasks
   module Relations
     class Sprints < Blog::DB::Relation
-      TABLE_KEY = Sequel.function(:hashtext, "sprints")
-
       schema :sprints, infer: true
 
       def before_sprint(id) = dated_before(by_pk(id).dates)
@@ -30,8 +28,6 @@ module Tasks
 
         upsert({ sprint_date: date, created_at: now, updated_at: now }, target: :sprint_date)
       end
-
-      def lock_roll_over_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
 
       def on(date) = where(sprint_date: date)
 

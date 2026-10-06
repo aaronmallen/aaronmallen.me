@@ -9,7 +9,7 @@ module Projects
 
       def append(**fields)
         transaction do
-          projects.lock_positions_until_commit
+          projects.lock_until_commit
           create(**fields, position: next_position)
         end
       end
@@ -28,7 +28,7 @@ module Projects
 
       def swap_positions(one, two)
         transaction do
-          projects.lock_positions_until_commit
+          projects.lock_until_commit
           update(one.id, position: next_position)
           update(two.id, position: one.position)
           update(one.id, position: two.position)

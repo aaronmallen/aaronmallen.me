@@ -3,18 +3,12 @@
 module MCP
   module Relations
     class OAuthClients < Blog::DB::Relation
-      TABLE_KEY = Sequel.function(:hashtext, "oauth_clients")
-
       schema :oauth_clients, infer: true do
         attribute :visitor_hash, Blog::Types::VisitorHash
       end
 
       def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
-        transaction do
-          lock_table_until_commit
-          fresh = registered_since(since)
-          next unless fresh.for_visitor(visitor_hash).count < limit && fresh.count < total_limit
-
+        capped_claim(registered_since(since), visitor_hash:, limit:, total_limit:) do
           stamped(:create).call(**attrs, visitor_hash:)
         end
       end
@@ -55,8 +49,6 @@ module MCP
       def live_codes(at) = dataset.db[:oauth_codes].where(used_at: nil).where { expires_at > at }
 
       def live_tokens(at) = dataset.db[:oauth_tokens].where(revoked_at: nil).where { expires_at > at }
-
-      def lock_table_until_commit = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY))
     end
   end
 end

@@ -28,7 +28,6 @@ module Analytics
       )
       READ_THROUGHS = proc { integer.count(visitor_hash).distinct.filter(READ_THROUGH).as(:read_throughs) }
       SINGLE_VIEW = Sequel.expr(Sequel.function(:count).* => 1)
-      TABLE_KEY = Sequel.function(:hashtext, "analytics_events")
       TITLED = Sequel.~(title: nil)
       TOTALS = proc do
         [
@@ -49,7 +48,7 @@ module Analytics
 
       def claim(address_hash:, limit:, since:, **attrs)
         transaction do
-          lock_until_commit(address_hash)
+          lock_until_commit(Sequel.function(:hashtext, address_hash))
           next unless from_address(address_hash).since(since).count < limit
 
           stamped(:create).call(**attrs, address_hash:)
@@ -141,10 +140,6 @@ module Analytics
       private
 
       def bounced = unordered.dataset.select(:visitor_hash).group(:visitor_hash).having(SINGLE_VIEW)
-
-      def lock_until_commit(address_hash)
-        dataset.db.get(Sequel.function(:pg_advisory_xact_lock, TABLE_KEY, Sequel.function(:hashtext, address_hash)))
-      end
 
       def raise_newest(column, value)
         newest = newest_first.limit(1).dataset.select(:id)

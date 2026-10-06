@@ -19,7 +19,7 @@ module Tasks
 
       def append(**fields)
         transaction do
-          tasks.lock_positions_until_commit
+          tasks.lock_until_commit
           create(**fields, position: next_position)
         end
       end
@@ -92,7 +92,7 @@ module Tasks
 
       def place(task, after_id)
         transaction do
-          tasks.lock_positions_until_commit
+          tasks.lock_until_commit
           moves = Placement.moves(beside(task).in_order.to_a, task.id, after_id)
           moves&.each { |id, position| update(id, position:) }
         end

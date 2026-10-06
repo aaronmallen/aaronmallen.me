@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, record, contact, mcp, analytics, social, tasks]
 issue: AA-644
-amended: [AA-823, "#200"]
+amended: [AA-823, "#200", "#585"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -28,7 +28,7 @@ provider, `config/providers/sidekiq.rb`, connects to it.
 Every guard against a race or a flood lives in Postgres, beside the rows it guards, in one of three shapes.
 
 **A session advisory lock, for a run that must not overlap itself and can skip a turn.**
-`Record::Relations::SyncStates#with_advisory_lock` holds the gateway's connection and takes `pg_try_advisory_lock`.
+`Blog::DB::Relation#with_advisory_lock` holds the gateway's connection and takes `pg_try_advisory_lock`.
 When another run holds it, `Record::Repos::CommitRepo#with_import_lock` hands back `Failure(:lock_busy)`,
 `Record::Jobs::ImportCommits` drops the tick, and the next one catches up.
 
@@ -36,6 +36,8 @@ When another run holds it, `Record::Repos::CommitRepo#with_import_lock` hands ba
 claims on `Contact::Relations::Messages`, `MCP::Relations::OAuthClients`, `Analytics::Relations::AnalyticsEvents` and
 `Social::Relations::WebmentionReceipts` open a transaction, take `pg_advisory_xact_lock`, count and insert. The lock
 ends with the commit, and a row lock would hold nothing before a sender's first row.
+`Blog::DB::Relation#lock_until_commit` takes the lock on `hashtext` of the relation's table, with any extra keys
+after it, and `Blog::DB::Relation#capped_claim` holds the count against a sender's cap and the total cap.
 
 **A unique index with `ON CONFLICT`, for a claim whose row is the state.** `Tasks::Relations::Sprints#insert_missing`
 inserts on `sprint_date` and the loser does nothing. `Social::Relations::SocialPostDeliveries#claim` inserts on
