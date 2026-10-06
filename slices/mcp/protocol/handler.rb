@@ -52,6 +52,7 @@ module MCP
         published_post_by_slug: "posts.queries.published_by_slug",
         queue_commit_import: "record.operations.queue_commit_import",
         reach_between: "analytics.queries.reach_between",
+        read_photo: "media.operations.read_photo",
         read_spread_between: "analytics.queries.read_spread_between",
         read_throughs_between: "analytics.queries.read_throughs_between",
         readers_by_path: "analytics.queries.readers_by_path",
@@ -83,12 +84,12 @@ module MCP
       INSTRUCTIONS = [
         "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",
         "the journal, commits and the sync state, tasks, sprints, task tag rules, work sessions and the time report,",
-        "projects, work history, decisions, people, tags, record links, saved views, messages, the inbox, attention,",
-        "the calendar, the review, suggestions, analytics and the whole activity feed. Search every kind by its",
-        "words, and look up accounts on Mastodon and Bluesky. Suggest edits to a post or social post, and settle",
+        "projects, work history, decisions, people, tags, record links, saved views, messages, photos, the inbox,",
+        "attention, the calendar, the review, suggestions, analytics and the whole activity feed. Search every kind by",
+        "its words, and look up accounts on Mastodon and Bluesky. Suggest edits to a post or social post, and settle",
         "suggestions with accept_suggestion_edits and reject_suggestion_edits or leave them for the owner in the",
-        "admin. Make any change the admin makes, publishing, sending and deleting included. A published post or a",
-        "sent social post cannot be called back. The tool list holds only what this connection was granted.",
+        "admin. Make any change the admin makes, publishing, sending and deleting included. A published post or a sent",
+        "social post cannot be called back. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
@@ -178,6 +179,7 @@ module MCP
         Tools::ReadJournalEntry,
         Tools::ReadMessage,
         Tools::ReadPerson,
+        Tools::ReadPhoto,
         Tools::ReadPost,
         Tools::ReadProject,
         Tools::ReadReview,

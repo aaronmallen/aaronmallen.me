@@ -5,6 +5,8 @@ module Media
     class PhotoRepo < Blog::DB::Repo
       commands :create
 
+      def by_key(key) = photos.with_keys(key).one
+
       def claim(owner, owner_id, keys)
         photo_claims.for_owners(owner, owner_id).delete
         ids = keys.empty? ? Blog::Constants::EMPTY_ARRAY : photos.with_keys(keys).lock(mode: :share).pluck(:id)
