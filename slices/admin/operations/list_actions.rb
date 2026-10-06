@@ -28,10 +28,6 @@ module Admin
           name: :new_social_post, icon: "fa-paper-plane", route: :admin_social,
           params: { write: Blog::Constants::CHECKED },
         ),
-        Entry.new(
-          name: :log_work, icon: "fa-briefcase", route: :admin_projects,
-          params: { filter: Blog::Types::ProjectFilter["work"] }, dialog: UI::Components::WorkEntries::LogDialog::ID,
-        ),
         Entry.new(name: :todays_journal, icon: "fa-feather", route: :admin_journal),
         Entry.new(name: :start_task, icon: "fa-play", post: true, needs: :start),
         Entry.new(name: :complete_task, icon: "fa-check", post: true, needs: :complete),

@@ -227,88 +227,22 @@ RSpec.describe "Admin work history", type: :request do
     end
 
     describe "the log work dialog" do
-      def dialog = page.find("dialog#work-log", visible: :all)
+      it "draws on no screen" do
+        get "/admin/posts", status: "draft"
 
-      before { get "/admin/posts", status: "draft" }
-
-      it "draws on every screen, hidden until opened", :aggregate_failures do
-        expect(dialog[:hidden]).not_to be_nil
-        expect(dialog).to have_css("form[action='/admin/projects/work']", visible: :all)
+        expect(page).to have_no_css("dialog#work-log, [data-work-dialog]", visible: :all)
       end
 
-      it "asks for the organization, the role, the years and the blurb", :aggregate_failures do
-        %w[org role from_year to_year blurb].each do |name|
-          expect(dialog).to have_field("work_entry[#{name}]", visible: :all)
-        end
-      end
-
-      it "sends the screen it opened on as the way back" do
-        expect(dialog.find("input[name='return_to']", visible: :all).value).to eq("/admin/posts?status=draft")
-      end
-
-      it "sends no way back from a page a form posted to" do
-        post "/admin/projects/work", _csrf_token: admin_csrf_token, work_entry: fields(org: " ")
-
-        expect(dialog).to have_no_field("return_to", type: :hidden)
-      end
-
-      it "keeps its ids apart from the work tab's form" do
+      it "leaves the work tab's form as the only work form" do
         get "/admin/projects", filter: "work"
 
-        expect(page.all("#work-dialog-org, #work-entry-org", visible: :all).size).to eq(2)
-      end
-    end
-
-    describe "adding from the dialog" do
-      def add_from(path, **)
-        post "/admin/projects/work", _csrf_token: admin_csrf_token, return_to: path, work_entry: fields(**)
+        expect(page.all("form[data-work-form]", visible: :all).size).to eq(1)
       end
 
-      it "stores the role and goes back to the screen it came from", :aggregate_failures do
-        add_from("/admin/posts?status=draft")
-
-        expect(repo.all.map(&:role)).to eq(["Software Engineer"])
-        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/posts?status=draft"))
-      end
-
-      it "shows the added toast there" do
-        add_from("/admin/posts")
-        follow_redirect!
-
-        expect(page).to have_css("[data-toast]", text: "Role added to /projects")
-      end
-
-      it "goes to the work tab when the way back leaves the admin" do
-        add_from("https://example.com/admin")
+      it "sends a role posted with a way back to the work tab anyway" do
+        post "/admin/projects/work", _csrf_token: admin_csrf_token, return_to: "/admin/posts", work_entry: fields
 
         expect(last_response.location).to end_with("/admin/projects?filter=work")
-      end
-
-      it "refuses a bad entry with its errors on a form of its own", :aggregate_failures do
-        add_from("/admin/posts", from_year: "18")
-
-        expect(last_response.status).to eq(422)
-        expect(page).to have_css("main form[data-work-form] .field-error", text: field_error("from_year.format"))
-      end
-
-      it "keeps what was typed when it refuses", :aggregate_failures do
-        add_from("/admin/posts", org: " ", role: "Lead")
-
-        form = page.find("main form[data-work-form]")
-        expect(form).to have_field("work_entry[role]", with: "Lead")
-        expect(form).to have_field("work_entry[from_year]", with: "2018")
-      end
-
-      it "keeps the way back when it refuses" do
-        add_from("/admin/posts", org: " ")
-
-        expect(page.find("main input[name='return_to']", visible: :all).value).to eq("/admin/posts")
-      end
-
-      it "stores nothing when it refuses" do
-        add_from("/admin/posts", org: " ")
-
-        expect(repo.all).to be_empty
       end
     end
 

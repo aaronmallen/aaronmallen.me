@@ -18,7 +18,7 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "draws one row per entry, in order" do
       names = %w[
-        create-task create-decision create-journal-entry new-post new-social-post log-work todays-journal start-task
+        create-task create-decision create-journal-entry new-post new-social-post todays-journal start-task
         complete-task pause-task
       ]
 
@@ -54,13 +54,6 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "sends New social post to the composer, ready to write" do
       expect(action("new-social-post")["data-palette-href"]).to eq("/admin/social?write=1")
-    end
-
-    it "sends Log work to the work entry dialog, or the work tab without one", :aggregate_failures do
-      row = action("log-work")
-
-      expect(row["data-palette-dialog"]).to eq("work-log")
-      expect(row["data-palette-href"]).to eq("/admin/projects?filter=work")
     end
 
     it "sends Go to today's journal to the journal" do

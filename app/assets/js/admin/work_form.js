@@ -4,7 +4,7 @@ export function setupWorkForms() {
   }
 }
 
-export function setupWorkForm(form) {
+function setupWorkForm(form) {
   const org = form.querySelector("[data-work-org]");
   const role = form.querySelector("[data-work-role]");
   const add = form.querySelector("[data-work-add]");

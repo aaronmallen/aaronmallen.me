@@ -59,8 +59,6 @@ a query that matches an action lists it first. #303 made the list, and it now ho
   cursor lands in it without a script.
 - "New post" goes to `/admin/posts/new`.
 - "New social post" goes to `/admin/social?write=1`, which puts `autofocus` on the composer's first part.
-- "Log work" opens the work entry dialog the layout draws on every screen, and goes to `/admin/projects?filter=work`
-  when a page has no dialog. Saving it leaves me on the screen I opened it from.
 - "Go to today's journal" goes to `/admin/journal`.
 - "Start task", "Complete task" and "Pause task" act on the task on screen.
 - "Complete {title}" and "Pause {title}" list each task in progress when no task is on screen.

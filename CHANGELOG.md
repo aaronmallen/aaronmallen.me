@@ -5,6 +5,12 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+### Removed
+
+- The command palette no longer has a Log work action, and the admin no longer draws its dialog. The action added a
+  role to the work history, not time to a task. Roles still go in through the Work tab on the Projects screen and the
+  `add_work_entry` MCP tool.
+
 ## [26.10.3] - 2026-10-04
 
 ### Added
