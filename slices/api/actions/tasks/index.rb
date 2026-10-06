@@ -14,7 +14,7 @@ module API
         private
 
         def listing(request)
-          found = query(request, :from, :lists, :page, :query, :statuses, :tag, :to)
+          found = query(request, :from, :lists, :page, :query, :sprint_on, :statuses, :tag, :to)
           pages = found.slice(:page).transform_values { whole(it) }
           listed = found.slice(*LISTED).transform_values { split(it) }
 

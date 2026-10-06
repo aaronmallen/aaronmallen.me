@@ -24,6 +24,15 @@ RSpec.describe "MCP task tools", type: :request do
     expect(refused?).to be(true)
   end
 
+  it "lists the tasks planned into a sprint day with the total that match" do
+    sprint = create(:sprint, sprint_date: Blog::TimeZone.today + 2)
+    task = create(:task, :in_sprint, sprint_id: sprint.id)
+    create(:task)
+    call_tool("list_tasks", sprint_on: sprint.sprint_date.iso8601)
+
+    expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => task.id)])
+  end
+
   %w[start_task complete_task reopen_task cancel_task delete_task].each do |name|
     it "refuses #{name} on a task that is not there as an error", :aggregate_failures do
       call_tool(name, id: 999_999)

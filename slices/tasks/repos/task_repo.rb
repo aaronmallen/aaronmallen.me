@@ -45,13 +45,11 @@ module Tasks
 
       def exist?(id) = tasks.by_pk(id).exist?
 
-      def filtered(statuses:, from:, to:, page:, lists: [], **search)
-        found = with_details.combine(:sprint).searched(**search)
-        found = found.where(status: statuses) unless statuses.empty?
-        found = found.in_list(lists) unless lists.empty?
-        found = found.touched_between(from, to) if from || to
+      def filtered(page:, **filters)
+        found = tasks.narrowed(**filters)
+        rows = found.detailed.combine(:sprint).newest_first.paged(page).to_a
 
-        page.fill(found.newest_first.paged(page).to_a)
+        Structs::FoundTasks.new(paged: page.fill(rows), total: found.count)
       end
 
       def finished(page, **search)

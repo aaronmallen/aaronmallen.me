@@ -61,6 +61,14 @@ module Tasks
 
       def matching(text) = containing(text, :title, :note)
 
+      def narrowed(statuses:, from:, to:, lists: [], sprint_on: nil, **search)
+        found = searched(**search)
+        found = found.where(status: statuses) unless statuses.empty?
+        found = found.in_list(lists) unless lists.empty?
+        found = found.for_sprint(sprints.on(sprint_on).ids) if sprint_on
+        from || to ? found.touched_between(from, to) : found
+      end
+
       def newest_first = order(Sequel.function(:coalesce, :completed_at, :created_at).desc, self[:id].desc)
 
       def open = exclude(status: CLOSED)

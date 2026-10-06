@@ -95,6 +95,16 @@ RSpec.describe "API tasks", type: :request do
         expect(list(page: "2")).to include("count" => 1, "partial" => false)
       end
 
+      it "answers the total that match across every page" do
+        expect([list.fetch("total"), list(page: "2").fetch("total")]).to eq([3, 3])
+      end
+
+      it "counts only the tasks that match the filters in the total" do
+        create(:task, :done)
+
+        expect(list(statuses: "done")).to include("count" => 1, "total" => 1)
+      end
+
       it "refuses a page before the first with a 422" do
         expect([list(page: "0").fetch("errors").keys, status]).to eq([%w[page], 422])
       end
@@ -232,6 +242,32 @@ RSpec.describe "API tasks", type: :request do
         filters = { lists: "someday", tag: "admin", query: "feed", statuses: "done", from: (today - 5).iso8601 }
 
         expect(titles(list(filters))).to eq(%w[match])
+      end
+    end
+
+    describe "a sprint day" do
+      before do
+        later = create(:sprint, sprint_date: today + 2)
+        create(:task, :in_sprint, title: "planned", sprint_id: later.id)
+        create(:task, :in_sprint, :done, title: "finished early", sprint_id: later.id)
+        create(:task, :in_sprint, title: "another day", sprint_id: create(:sprint, sprint_date: today + 3).id)
+        create(:task, title: "on a list")
+      end
+
+      it "keeps only the tasks planned into that day's sprint" do
+        expect(titles(list(sprint_on: (today + 2).iso8601))).to contain_exactly("planned", "finished early")
+      end
+
+      it "combines with the statuses and counts the match in the total" do
+        expect(list(sprint_on: (today + 2).iso8601, statuses: "open")).to include("count" => 1, "total" => 1)
+      end
+
+      it "answers no tasks for a day with no sprint" do
+        expect(list(sprint_on: (today + 9).iso8601)).to include("tasks" => [], "total" => 0)
+      end
+
+      it "refuses a day it cannot read with a 422" do
+        expect([list(sprint_on: "soon").fetch("errors").keys, status]).to eq([%w[sprint_on], 422])
       end
     end
 
