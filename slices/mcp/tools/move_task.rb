@@ -4,8 +4,7 @@ module MCP
   module Tools
     class MoveTask < Base
       description "Move one task to next, someday, external or today's sprint. " \
-                  "The note and each comment's body may come from an issue tracker and come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "#{Untrusted::TASK}"
       endpoint scope: OAuth::Scope::WRITE
     end
   end

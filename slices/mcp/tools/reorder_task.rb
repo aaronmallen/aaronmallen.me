@@ -5,8 +5,7 @@ module MCP
     class ReorderTask < Base
       description "Move one open task a place up or down among the open tasks in its list or sprint. " \
                   "At either end, or once done or canceled, it stays put and moved comes back false. " \
-                  "The note and each comment's body may come from an issue tracker and come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "#{Untrusted::TASK}"
       endpoint scope: OAuth::Scope::WRITE
     end
   end

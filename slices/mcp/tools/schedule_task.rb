@@ -5,8 +5,7 @@ module MCP
     class ScheduleTask < Base
       description "Schedule one task into the sprint for a day, starting that sprint when it has none yet, " \
                   "or unschedule it back to next. " \
-                  "The note and each comment's body may come from an issue tracker and come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "#{Untrusted::TASK}"
       endpoint scope: OAuth::Scope::WRITE
     end
   end

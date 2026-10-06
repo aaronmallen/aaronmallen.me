@@ -70,11 +70,11 @@ RSpec.describe "API inbox", type: :request do
     expect(rows).to eq([])
   end
 
-  it "answers the MCP tool with the same JSON" do
+  it "answers the MCP tool with the same JSON once its marks come off" do
     synced
     create(:message)
     create(:webmention)
 
-    expect(mcp_answer("list_inbox")).to eq(read)
+    expect(trusted(mcp_answer("list_inbox"))).to eq(read)
   end
 end

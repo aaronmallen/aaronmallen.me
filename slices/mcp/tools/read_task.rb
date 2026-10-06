@@ -9,8 +9,7 @@ module MCP
                   "ways, the issue it syncs from (null for a local task), its created, updated and completed " \
                   "times, its comments, oldest first, the other records linked to it, grouped by kind, and its " \
                   "timeline: comments, work sessions with their IDs, moves, tag changes and status changes, " \
-                  "oldest first. The note and each comment's body may come from an issue tracker and come marked " \
-                  "untrusted. #{Untrusted::WARNING}"
+                  "oldest first. #{Untrusted::TASK}"
       endpoint scope: OAuth::Scope::READ
 
       class << self
@@ -20,7 +19,7 @@ module MCP
           super.merge(timeline: task.fetch(:timeline).map { marked_entry(it) })
         end
 
-        def marked_entry(entry) = COMMENTS.include?(entry.fetch("kind")) ? Untrusted.fields(entry, "body") : entry
+        def marked_entry(entry) = COMMENTS.include?(entry.fetch("kind")) ? Untrusted.comment(entry) : entry
       end
     end
   end
