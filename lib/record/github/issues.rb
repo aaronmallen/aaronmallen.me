@@ -55,12 +55,7 @@ module Record
       def assigned_issues
         return unless configured?
 
-        walk do |cursor, found|
-          data = transport.query(Queries::ASSIGNED, cursor:)
-          page = data&.dig("search")
-          page&.fetch("nodes")&.each { found << issue(it, data.dig("viewer", "id")) if it&.key?("id") }
-          page
-        end
+        walk { |cursor, found| assigned_page(cursor, found) }
       end
 
       def issues(urls)
@@ -70,6 +65,14 @@ module Record
       end
 
       private
+
+      def assigned_page(cursor, found)
+        data = transport.query(Queries::ASSIGNED, cursor:)
+        viewer = data&.dig("viewer", "id") || raise(Client::Error, "GitHub sent no viewer id")
+        page = data["search"]
+        page&.fetch("nodes")&.each { found << issue(it, viewer) if it&.key?("id") }
+        page
+      end
 
       def comment(node)
         { author: node.dig("author", "login"), body: node["body"].to_s,

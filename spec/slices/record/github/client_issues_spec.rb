@@ -109,6 +109,13 @@ RSpec.describe Record::GitHub::Client do
 
       expect(client.rate_limit_remaining).to eq(4321)
     end
+
+    it "fails rather than read every issue as unassigned when GitHub names no viewer" do
+      search = { nodes: [github_issue("I_one")], pageInfo: github_page_info(false, "issues-page-2") }
+      stub_assigned(github_json(data: { rateLimit: github_rate_limit, search: }))
+
+      expect { assigned }.to raise_error(Record::GitHub::Client::Error, /no viewer/)
+    end
   end
 
   describe "the issues already imported" do

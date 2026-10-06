@@ -5,12 +5,11 @@ require "time"
 module Record
   module GitHub
     class Client
+      include Paging
       include Issues
 
       Error = Transport::Error
       RateLimited = Transport::RateLimited
-
-      Listing = Data.define(:items, :cut_short) { def cut_short? = cut_short }
 
       module Queries
         AFFILIATIONS = "[OWNER, COLLABORATOR, ORGANIZATION_MEMBER]"
@@ -72,9 +71,8 @@ module Record
           }
         GRAPHQL
       end
-      private_constant :Listing, :Queries
+      private_constant :Queries
 
-      MAX_PAGES = 10
       PUSH_PERMISSIONS = %w[ADMIN MAINTAIN WRITE].freeze
 
       def initialize(transport:)
@@ -161,8 +159,6 @@ module Record
         }
       end
 
-      def more?(page) = page&.dig("pageInfo", "hasNextPage") == true
-
       def pushable?(repo) = PUSH_PERMISSIONS.include?(repo["viewerPermission"])
 
       def pushed_since?(repo, since)
@@ -181,21 +177,6 @@ module Record
       def viewer_id
         @viewer_id ||= transport.query(Queries::VIEWER)&.dig("viewer", "id")
         @viewer_id || raise(Error, "GitHub sent no viewer id")
-      end
-
-      def walk
-        found = []
-        cursor = nil
-        page = nil
-
-        MAX_PAGES.times do
-          page = yield cursor, found
-          break unless more?(page)
-
-          cursor = page.dig("pageInfo", "endCursor")
-        end
-
-        Listing.new(items: found, cut_short: more?(page))
       end
     end
   end
