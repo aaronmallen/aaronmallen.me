@@ -36,6 +36,10 @@ RSpec.describe Media::Slice do
       expect(client).to be_configured
     end
 
+    it "waits 30 seconds for the store to answer" do
+      expect(client.instance_variable_get(:@connection).config.http_read_timeout).to eq(30)
+    end
+
     it "stores a photo under its key in the bucket" do
       stub_request(:put, url)
 
@@ -76,7 +80,7 @@ RSpec.describe Media::Slice do
     it "raises its own error when the store does not answer" do
       stub_request(:get, url).to_timeout
 
-      expect { client.get(key) }.to raise_error(Media::Store::Client::Error)
+      expect { client.get(key) }.to raise_error(Media::Store::Client::Error, /\AThe media store failed: /)
     end
   end
 end

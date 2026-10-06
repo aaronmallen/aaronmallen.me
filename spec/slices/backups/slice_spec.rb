@@ -35,6 +35,17 @@ RSpec.describe Backups::Slice do
 
     def signed_with?(request) = request.headers["Authorization"].include?("Credential=backup-access-key/")
 
+    it "waits 300 seconds for the store to answer" do
+      expect(client.instance_variable_get(:@connection).config.http_read_timeout).to eq(300)
+    end
+
+    it "raises its own error when the store does not answer" do
+      stub_request(:delete, backup_store_url("database-1.dump")).to_timeout
+
+      expect { client.delete("database-1.dump") }
+        .to raise_error(Backups::Store::Client::Error, /\AThe backup store failed: /)
+    end
+
     it "signs its requests with its own key" do
       client.keys(prefix: "database-")
 
