@@ -140,6 +140,33 @@ RSpec.describe "API sprints", type: :request do
       expect(Tasks::Slice["queries.task_by_id"].call(task.id)).to have_attributes(list: "next", sprint: nil)
     end
 
+    context "with a sourced task in progress" do
+      let(:sprint) { create(:sprint, sprint_date: today + 1) }
+      let(:task) { create(:task, :in_progress, :in_sprint, sprint_id: sprint.id) }
+      let(:session) { create(:work_session, task_id: task.id) }
+
+      before do
+        create(:task_source, task_id: task.id)
+        session
+        drop(sprint.id)
+      end
+
+      it "sends the task back to external and pauses it" do
+        expect(Tasks::Slice["queries.task_by_id"].call(task.id)).to have_attributes(list: "external", status: "open")
+      end
+
+      it "ends its running session" do
+        expect(Tasks::Slice["relations.work_sessions"].by_pk(session.id).one[:ended_at]).not_to be_nil
+      end
+
+      it "records the move out of the dropped sprint" do
+        moves = Tasks::Slice["relations.task_events"].for_task(task.id).where(kind: "moved").to_a
+        moved = moves.map { it.to_h.slice(:from_sprint_on, :to_list) }
+
+        expect(moved).to eq([{ from_sprint_on: today + 1, to_list: "external" }])
+      end
+    end
+
     it "refuses a sprint that has started with a 422" do
       sprint = create(:sprint, sprint_date: today)
 

@@ -8,6 +8,7 @@ module Tasks
       CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze
+      OPEN = Blog::Types::TaskStatus["open"]
       TABLE_KEY = Sequel.function(:hashtext, "tasks")
 
       schema :tasks, infer: true do
@@ -85,6 +86,12 @@ module Tasks
       end
 
       def open_first = order(Sequel.case({ { status: CLOSED } => 1 }, 0), self[:position].asc, self[:id].asc)
+
+      def pause(at)
+        running = in_progress
+        work_sessions.close(running.dataset.select(:id), at)
+        running.stamped(:update, result: :many).call(status: OPEN)
+      end
 
       def preceding(task)
         where(Sequel.|(Sequel[:position] < task.position, Sequel.&({ position: task.position }, Sequel[:id] < task.id)))

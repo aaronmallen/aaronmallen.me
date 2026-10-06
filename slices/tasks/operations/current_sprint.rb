@@ -3,13 +3,13 @@
 module Tasks
   module Operations
     class CurrentSprint < Blog::Operation
-      include Deps[sprint_repo: "repos.sprint_repo", task_repo: "repos.task_repo"]
+      include Deps[sprint_repo: "repos.sprint_repo"]
 
       def call(now: Time.now)
         transaction do
           sprint_repo.lock_roll_over
           sprint = sprint_repo.claim(Blog::TimeZone.today(now))
-          arrived = task_repo.carry_forward(sprint.id, at: now)
+          arrived = sprint_repo.carry_forward(sprint.id, at: now)
           next sprint unless arrived.positive?
 
           sprint_repo.count_arrivals(sprint.id, arrived)
