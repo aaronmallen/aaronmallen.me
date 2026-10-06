@@ -5,10 +5,7 @@ module Public
     module Views
       module Pages
         class Projects < View
-          def initialize(projects:)
-            super()
-            @projects = projects
-          end
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             content_for(:title, t(".title"))

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, admin, mcp, public]
 issue: AA-632
-amended: [AA-783, AA-809]
+amended: [AA-783, AA-809, "#570"]
 tags: [views, phlex, phlex-hanami, hanami-view, dry-types, props, components, layouts, ui]
 ---
 
@@ -32,10 +32,11 @@ The `Gemfile` pins `phlex-hanami ~> 0.2` from the `gem.coop/@aaron` source, lock
 `Phlex::Hanami::Layout` and `Phlex::Hanami::Component`. Each slice keeps its own under `slices/<slice>/ui`, and each
 slice's `UI::View` subclasses `Blog::UI::View`.
 
-Components type their props with dry types through `Phlex::Hanami::Props`, which `Blog::UI::Component` includes
-(`lib/blog/ui/component.rb`). Props use strict types, as `Blog::Types` does, and a bad value raises
-`Phlex::Hanami::InvalidPropError`. A prop type one slice uses lives in that slice, and only a shared one goes in
-`Blog::Types`, under ADR 0016.
+Components and views type their props with dry types through `Phlex::Hanami::Props`, which `Blog::UI::Component`
+and `Blog::UI::View` include (`lib/blog/ui/component.rb`, `lib/blog/ui/view.rb`). A view declares a prop for each
+input its action exposes or renders with, and writes no `initialize` of its own. Props use strict types, as
+`Blog::Types` does, and a bad value raises `Phlex::Hanami::InvalidPropError`. A prop type one slice uses lives in
+that slice, and only a shared one goes in `Blog::Types`, under ADR 0016.
 
 We chose Phlex because a component is plain Ruby with typed props. It composes, tests and refactors like any other
 class, and there is no template language, no parts and no scopes to learn.
@@ -56,6 +57,9 @@ set of type words and gave nothing back.
 ## Consequences
 
 A component is a Ruby class with typed props, so a spec builds it with those props and reads the HTML it returns.
+
+A view takes its inputs the same way, so a wrong exposure raises `Phlex::Hanami::InvalidPropError` at the view that
+takes it. Auto render passes a view only the props it declares, and a `:**` prop takes every input.
 
 A component and a contract share one set of type words, and a component can take a type from `Blog::Types` as it
 is. A prop declared with `prop?` holds `Phlex::Hanami::Props::UNSET` when the caller leaves it out, so a component

@@ -17,10 +17,7 @@ module Public
             %i[bluesky fa-bluesky .cta.links.bluesky].freeze,
           ].freeze
 
-          def initialize(work_entries:)
-            super()
-            @work_entries = work_entries
-          end
+          prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             content_for(:title, t(".title"))

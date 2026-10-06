@@ -7,10 +7,7 @@ module Public
         class Index < View
           include Components::Posts
 
-          def initialize(posts:)
-            super()
-            @posts = posts
-          end
+          prop :posts, Blog::Types::Instance(Blog::Paged)
 
           def view_template
             content_for(:title, t(".title"))

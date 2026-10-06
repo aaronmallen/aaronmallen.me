@@ -11,15 +11,12 @@ module MCP
           CANCEL = Operations::Authorize::CANCEL
           WRITE = OAuth::Scope::WRITE
 
-          def initialize(client_name:, fields:, new_client:, redirect_uri:, registered_at:, scopes:)
-            super()
-            @client_name = client_name
-            @fields = fields
-            @new_client = new_client
-            @redirect_uri = redirect_uri
-            @registered_at = registered_at
-            @scopes = scopes
-          end
+          prop :client_name, Blog::Types::String.optional
+          prop :fields, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
+          prop :new_client, Blog::Types::Bool
+          prop :redirect_uri, Blog::Types::String
+          prop :registered_at, Blog::Types::Time
+          prop :scopes, Blog::Types::Array.of(Blog::Types::String)
 
           def view_template
             header(class: "page-head") do

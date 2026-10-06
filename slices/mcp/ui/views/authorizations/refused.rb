@@ -5,12 +5,9 @@ module MCP
     module Views
       module Authorizations
         class Refused < View
-          def initialize(error:, error_description:, url:)
-            super()
-            @error = error
-            @error_description = error_description
-            @url = url
-          end
+          prop :error, Blog::Types::String
+          prop :error_description, Blog::Types::String
+          prop :url, Blog::Types::String
 
           def view_template
             header(class: "page-head") do

@@ -7,11 +7,8 @@ module Public
         class Index < View
           include Components::Posts
 
-          def initialize(posts:, projects:)
-            super()
-            @posts = posts
-            @projects = projects
-          end
+          prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             section(class: "home") do

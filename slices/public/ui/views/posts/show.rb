@@ -9,16 +9,16 @@ module Public
         class Show < View
           include Components::Posts
 
-          def initialize(post:, body_html:, edits:, previous_post:, next_post:, syndication_urls:, webmentions:)
-            super()
-            @post = post
-            @body_html = body_html
-            @edits = edits
-            @previous_post = previous_post
-            @next_post = next_post
-            @syndication_urls = syndication_urls
-            @webmentions = webmentions
-          end
+          prop :post, Blog::Types::Instance(ROM::Struct)
+          prop :body_html, Blog::Types::String
+          prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :previous_post, Blog::Types::Instance(ROM::Struct).optional
+          prop :next_post, Blog::Types::Instance(ROM::Struct).optional
+          prop :syndication_urls, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
+          prop :webmentions, Blog::Types::Hash.schema(
+            responses: Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)),
+            counts: Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer),
+          )
 
           def view_template
             page_meta

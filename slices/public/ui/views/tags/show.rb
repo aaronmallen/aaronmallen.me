@@ -7,12 +7,9 @@ module Public
         class Show < View
           include Components::Posts
 
-          def initialize(tag:, posts:, projects:)
-            super()
-            @tag = tag
-            @posts = posts
-            @projects = projects
-          end
+          prop :tag, Blog::Types::String
+          prop :posts, Blog::Types::Instance(Blog::Paged)
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             content_for(:title, t(".title", tag: @tag))

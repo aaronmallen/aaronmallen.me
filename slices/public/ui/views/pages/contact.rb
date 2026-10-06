@@ -12,18 +12,10 @@ module Public
           STAMP = Operations::IssueContactStamp::FIELD
           THROTTLED_ICON = "fa-hourglass-half"
 
-          def initialize(
-            errors: Blog::Constants::EMPTY_HASH,
-            sent: false,
-            throttled: false,
-            values: Blog::Constants::EMPTY_HASH
-          )
-            super()
-            @errors = errors
-            @sent = sent
-            @throttled = throttled
-            @values = values
-          end
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :sent, Blog::Types::Bool, default: false
+          prop :throttled, Blog::Types::Bool, default: false
+          prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
             content_for(:title, t(".title"))
