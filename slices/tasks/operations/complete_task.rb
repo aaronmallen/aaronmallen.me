@@ -3,8 +3,6 @@
 module Tasks
   module Operations
     class CompleteTask < Blog::Operation
-      MINUTE = 60
-
       include Deps[
         contract: "contracts.worked_contract",
         task_event_repo: "repos.task_event_repo",
@@ -33,7 +31,7 @@ module Tasks
       end
 
       def replaced(seconds, tracked)
-        seconds unless seconds.nil? || (tracked && seconds / MINUTE == tracked / MINUTE)
+        seconds unless seconds.nil? || (tracked && seconds / Blog::Figures::MINUTE == tracked / Blog::Figures::MINUTE)
       end
 
       def reported(worked)

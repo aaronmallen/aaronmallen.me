@@ -12,8 +12,7 @@ module Analytics
       )
       MAX_CLICKS = 50
       MAX_REFERRER = 2048
-      MINUTE = 60
-      MAX_READ_SECONDS = 20 * MINUTE
+      MAX_READ_SECONDS = 20 * Blog::Figures::MINUTE
       private_constant :BOT
 
       include Deps[
@@ -160,7 +159,7 @@ module Analytics
       end
 
       def window_opened_at
-        Time.now - (settings.analytics[:throttle_window_minutes] * MINUTE)
+        Time.now - (settings.analytics[:throttle_window_minutes] * Blog::Figures::MINUTE)
       end
 
       def within_limit(address_hash)

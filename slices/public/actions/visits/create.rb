@@ -16,7 +16,6 @@ module Public
 
         include Deps[
           "operations.find_page",
-          "operations.find_visitor_address",
           record_visit: "analytics.operations.record_visit",
           visit_contract: "analytics.contracts.visit_contract",
         ]

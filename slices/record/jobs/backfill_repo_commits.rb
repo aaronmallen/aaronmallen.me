@@ -7,7 +7,7 @@ module Record
 
       include Deps["github.client", backfill_repo_commits: "operations.backfill_repo_commits"]
 
-      sidekiq_options queue: Blog::Job::DEFAULT_QUEUE, retry: 3
+      sidekiq_options retry: 3
 
       def perform(repo, clock)
         case backfill_repo_commits.call(repo, clock: Time.iso8601(clock))

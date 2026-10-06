@@ -7,7 +7,6 @@ Sidekiq.testing!(:fake)
 
 module Seeds
   HOUR = 60 * 60
-  MINUTE = 60
 
   class IssueClient
     def initialize(issues)

@@ -9,7 +9,6 @@ module Public
         THROTTLED = 429
 
         include Deps[
-          "operations.find_visitor_address",
           hash_visitor: "analytics.operations.hash_visitor",
           receive_webmention: "social.operations.receive_webmention",
         ]

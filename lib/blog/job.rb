@@ -5,8 +5,6 @@ require "sidekiq"
 
 module Blog
   class Job
-    DEFAULT_QUEUE = "default"
-
     include Dry::Monads[:result]
     include Sidekiq::Job
   end

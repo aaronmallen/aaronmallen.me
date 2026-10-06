@@ -12,7 +12,6 @@ module Admin
             [".replies", "fa-solid fa-reply", :reply_count],
           ].freeze
           HOUR = 3600
-          MINUTE = 60
           NETWORK_COLORS = {
             Blog::Types::NetworkName["bluesky"] => :blue,
             Blog::Types::NetworkName["mastodon"] => :violet,
@@ -92,8 +91,8 @@ module Admin
 
           def relative(seconds)
             case seconds
-            when ...MINUTE then t(".in_a_moment")
-            when ...HOUR then t(".in_minutes", count: seconds / MINUTE)
+            when ...Blog::Figures::MINUTE then t(".in_a_moment")
+            when ...HOUR then t(".in_minutes", count: seconds / Blog::Figures::MINUTE)
             when ...DAY then t(".in_hours", count: seconds / HOUR)
             else t(".in_days", count: seconds / DAY)
             end

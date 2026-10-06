@@ -6,7 +6,6 @@ module Admin
       module Tasks
         class WorkedFields < Component
           HOUR = 3600
-          MINUTE = 60
           PARTS = { hours: [".hours", 9999], minutes: [".minutes", 59] }.freeze
 
           prop :name, Blog::Types::String
@@ -18,7 +17,7 @@ module Admin
           def view_template
             div(class: "task-worked-fields") do
               part(:hours, @seconds / HOUR)
-              part(:minutes, (@seconds % HOUR) / MINUTE)
+              part(:minutes, (@seconds % HOUR) / Blog::Figures::MINUTE)
             end
           end
 

@@ -7,7 +7,6 @@ module MCP
     class RegisterClient < Blog::Operation
       INVALID_METADATA = "invalid_client_metadata"
       INVALID_REDIRECT_URI = "invalid_redirect_uri"
-      MINUTE = 60
       NOT_AN_OBJECT = "the request body must be a JSON object"
       REJECT = :reject
       THROTTLED = :throttled
@@ -81,7 +80,7 @@ module MCP
       end
 
       def window_opened_at
-        Time.now - (settings.client_registration[:throttle_window_minutes] * MINUTE)
+        Time.now - (settings.client_registration[:throttle_window_minutes] * Blog::Figures::MINUTE)
       end
 
       def within_limit(visitor_hash)

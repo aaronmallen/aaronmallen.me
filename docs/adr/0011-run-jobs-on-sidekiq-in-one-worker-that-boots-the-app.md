@@ -40,8 +40,7 @@ We run every job on Sidekiq, in one worker that boots the whole app.
 - **One worker runs them all.** `scripts/dev/worker` starts Sidekiq with `config/sidekiq.rb`, which requires
   `hanami/boot`. Booting loads every slice and starts every provider: `:sidekiq` for the server's Redis options,
   and `:honeybadger` for the error handler (ADR 0010).
-- **One queue.** Every job takes `default`, named by `Blog::Job::DEFAULT_QUEUE`. We add a queue only with the
-  job that needs it.
+- **One queue.** Every job takes Sidekiq's `default`. We add a queue only with the job that needs it.
 - **Enqueueing needs the `:sidekiq` provider started.** Only its `start` in `config/providers/sidekiq.rb` calls
   `Sidekiq.configure_client` and `Sidekiq.configure_server`, and each skips the process it does not belong to. The
   web process and the worker boot, so they have it. A process that only prepares must start the provider before

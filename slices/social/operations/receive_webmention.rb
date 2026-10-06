@@ -4,7 +4,6 @@ module Social
   module Operations
     class ReceiveWebmention < Blog::Operation
       MAX_URL = 2048
-      MINUTE = 60
       TARGET_PATH = %r{\A#{Blog::Site::WRITING}/(?<slug>[^/]+)\z}
 
       include Deps[
@@ -82,7 +81,7 @@ module Social
       end
 
       def window_opened_at
-        Time.now - (settings.webmentions[:throttle_window_minutes] * MINUTE)
+        Time.now - (settings.webmentions[:throttle_window_minutes] * Blog::Figures::MINUTE)
       end
 
       def within_limits(visitor_hash)
