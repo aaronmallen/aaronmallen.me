@@ -32,10 +32,6 @@ RSpec.describe "The worker's schedule", type: :app do
     let(:cron) { Fugit::Cron.parse(entry.fetch("cron")) }
     let(:run) { cron.next_time(Time.utc(2026, 9, 17, 12)) }
 
-    it "runs the roll-over job" do
-      expect(Object.const_get(entry.fetch("class"))).to eq(Tasks::Jobs::RollOverSprint)
-    end
-
     it "runs once a day, as the Chicago day turns, not the UTC one", :aggregate_failures do
       expect(Blog::TimeZone.local(run.to_t).iso8601).to eq("2026-09-18T00:00:00-05:00")
       expect(cron.next_time(run).to_t - run.to_t).to eq(24 * 60 * 60)

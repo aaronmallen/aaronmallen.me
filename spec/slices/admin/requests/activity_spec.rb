@@ -685,6 +685,40 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
     end
 
+    describe "paging across the edges of the range" do
+      let(:first_day) { today - 29 }
+      let(:range) { { from: first_day.iso8601, to: today.iso8601 } }
+
+      def commits_on(*days) = days.each { create(:commit, commit_date: it, message: "on #{it.iso8601}") }
+
+      before { lower_page_size(:admin, to: 2) }
+
+      it "points past the gap to the day before the last one it answered", :aggregate_failures do
+        lower_page_size(:admin, to: 1)
+        commits_on(today, today - 5)
+        visit_activity(range)
+
+        expect(event_names).to eq(["on #{today.iso8601}"])
+        expect(page.find("a.pager-link[rel='next']")[:href]).to include("day=#{(today - 1).iso8601}")
+      end
+
+      it "shows the whole last day when it holds the rest of the range", :aggregate_failures do
+        commits_on(today - 1, today - 1, today - 1)
+        visit_activity(range)
+
+        expect(event_names.length).to eq(3)
+        expect(page).to have_no_css("a.pager-link[rel='next']")
+      end
+
+      it "offers no older link when the page ends on the first day of the range", :aggregate_failures do
+        commits_on(first_day, first_day, first_day + 1)
+        visit_activity(range)
+
+        expect(event_names.length).to eq(3)
+        expect(page).to have_no_css("a.pager-link[rel='next']")
+      end
+    end
+
     describe "the presets" do
       it "marks 7d active by default" do
         visit_activity

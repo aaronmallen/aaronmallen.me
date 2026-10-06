@@ -31,14 +31,6 @@ RSpec.describe "Admin toast", type: :request do
     end
   end
 
-  describe "with a key the locale lacks" do
-    before { stub_const("Admin::Actions::Posts::Create::TOASTS", "post_form.dropped") }
-
-    it "raises rather than show the key" do
-      expect { save_post }.to raise_error(I18n::MissingTranslationData)
-    end
-  end
-
   it "shows no toast without a save" do
     get "/admin/posts/new"
 

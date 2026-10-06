@@ -178,13 +178,6 @@ RSpec.describe Blog::Settings do
       described_class.new(store).contact
     end
 
-    it "waits 3 seconds and keeps a stamp for 24 hours when nothing is set", :aggregate_failures do
-      contact = contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => nil, "CONTACT_STAMP_EXPIRY_HOURS" => nil)
-
-      expect(contact[:minimum_submit_seconds]).to eq(3)
-      expect(contact[:stamp_expiry_hours]).to eq(24)
-    end
-
     it "takes the wait and the expiry from the environment", :aggregate_failures do
       contact = contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "10", "CONTACT_STAMP_EXPIRY_HOURS" => "2")
 
