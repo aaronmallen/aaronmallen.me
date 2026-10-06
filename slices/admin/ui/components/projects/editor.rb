@@ -47,9 +47,7 @@ module Admin
 
           def name_attributes
             {
-              **FieldError.control_attributes(:name, @errors),
-              class: "editor-title mono",
-              type: "text",
+              class: "mono",
               name: "project[name]",
               value: @values[:name],
               placeholder: t(".name_placeholder"),
@@ -57,20 +55,11 @@ module Admin
             }
           end
 
-          def name_block
-            div(class: "editor-head") do
-              label(class: "sr-only", for: FieldError.id_for(:name)) { t(".name") }
-              input(**name_attributes)
-              FieldError(field: :name, errors: @errors)
-              sub_line
-            end
-          end
-
           def named? = @values[:name].match?(WRITING)
 
           def page_head
-            header(class: "page-head") do
-              name_block
+            EditorHead(label: t(".name"), field: :name, errors: @errors, error: FieldError, **name_attributes) do |head|
+              head.sub { sub_line }
               EditorActions(archived: archived?, existing: !@project.nil?, named: named?)
             end
           end
@@ -80,10 +69,8 @@ module Admin
           def stars = @project&.stars || 0
 
           def sub_line
-            p(class: "page-head-sub") do
-              span(data: { editor_repo: t(".repo_placeholder") }) { text(:repo, ".repo_placeholder") }
-              sub_release
-            end
+            span(data: { editor_repo: t(".repo_placeholder") }) { text(:repo, ".repo_placeholder") }
+            sub_release
           end
 
           def sub_release

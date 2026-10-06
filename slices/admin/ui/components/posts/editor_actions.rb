@@ -14,10 +14,8 @@ module Admin
           prop :scheduling, Blog::Types::Bool
 
           def view_template
-            div(class: "page-head-actions") do
-              delete_button if @deletable
-              @published ? save_button : draft_and_publish_buttons
-            end
+            delete_button if @deletable
+            @published ? save_button : draft_and_publish_buttons
           end
 
           private

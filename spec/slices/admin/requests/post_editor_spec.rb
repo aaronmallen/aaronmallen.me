@@ -58,6 +58,14 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_field("Title", class: "editor-title", with: "", placeholder: "Post title")
       end
 
+      it "heads the page with the title, its sub line, the summary and the actions", :aggregate_failures do
+        head = page.find("header.page-head")
+
+        expect(head).to have_css(".editor-head .page-head-sub", text: "/writing/")
+        expect(head).to have_field("Summary", class: "editor-summary")
+        expect(head).to have_css(".page-head-actions button", text: "Save draft")
+      end
+
       it "renders an empty summary field beside the title" do
         placeholder = i18n.t("ui.components.posts.editor.summary_placeholder")
 

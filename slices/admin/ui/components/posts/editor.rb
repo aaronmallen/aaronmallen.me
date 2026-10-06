@@ -50,8 +50,10 @@ module Admin
           def form_action = @post ? path(:admin_update_post, id: @post.id) : path(:admin_create_post)
 
           def page_head
-            header(class: "page-head") do
-              title_block
+            EditorHead(label: t(".title"), field: :title, errors: @errors, error: FieldError,
+                       **title_attributes) do |head|
+              head.sub { sub_line }
+              head.below { summary_block }
               EditorActions(deletable: !@post.nil?, published: published?, scheduling: scheduling?)
             end
           end
@@ -90,15 +92,13 @@ module Admin
           def sub_line
             writing = "#{path(:writing)}/"
 
-            p(class: "page-head-sub") do
-              span(data: { editor_path: writing }) { writing + slug }
-              plain SEPARATOR
-              span(data: { editor_words: "", one: t(".words.one"), other: t(".words.other") }) do
-                t(".words", count: word_count)
-              end
-              plain SEPARATOR
-              span(**read_time_attributes) { t(".read_time", count: read_time) }
+            span(data: { editor_path: writing }) { writing + slug }
+            plain SEPARATOR
+            span(data: { editor_words: "", one: t(".words.one"), other: t(".words.other") }) do
+              t(".words", count: word_count)
             end
+            plain SEPARATOR
+            span(**read_time_attributes) { t(".read_time", count: read_time) }
           end
 
           def suggestions? = @suggestions[:edits].any?
@@ -121,25 +121,8 @@ module Admin
           end
 
           def title_attributes
-            {
-              **FieldError.control_attributes(:title, @errors),
-              class: "editor-title",
-              type: "text",
-              name: "post[title]",
-              value: @values[:title],
-              placeholder: t(".title_placeholder"),
-              data: { editor_title: "" },
-            }
-          end
-
-          def title_block
-            div(class: "editor-head") do
-              label(class: "sr-only", for: "post-title") { t(".title") }
-              input(**title_attributes)
-              FieldError(field: :title, errors: @errors)
-              sub_line
-              summary_block
-            end
+            { name: "post[title]", value: @values[:title], placeholder: t(".title_placeholder"),
+              data: { editor_title: "" } }
           end
 
           def word_count = @counts[:words]

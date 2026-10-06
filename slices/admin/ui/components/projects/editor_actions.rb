@@ -10,10 +10,8 @@ module Admin
           prop :named, Blog::Types::Bool
 
           def view_template
-            div(class: "page-head-actions") do
-              status_button if @existing
-              save_button
-            end
+            status_button if @existing
+            save_button
           end
 
           private

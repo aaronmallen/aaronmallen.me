@@ -31,6 +31,14 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("input.editor-title.mono[name='project[name]'][value='']")
       end
 
+      it "heads the page with the name, its sub line and the actions", :aggregate_failures do
+        head = page.find("header.page-head")
+
+        expect(head).to have_field("Name", class: "editor-title")
+        expect(head).to have_css(".editor-head .page-head-sub [data-editor-repo]")
+        expect(head).to have_css(".page-head-actions button", text: "Create project")
+      end
+
       it "disables the primary action while the name is empty" do
         expect(page).to have_button("Create project", disabled: true)
       end
