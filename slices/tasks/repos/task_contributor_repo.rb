@@ -3,6 +3,12 @@
 module Tasks
   module Repos
     class TaskContributorRepo < Blog::DB::Repo
+      def add_missing(task_ids, contributors)
+        rows = task_ids.product(contributors).map { |task_id, contributor| { task_id:, **contributor } }
+
+        task_contributors.dataset.insert_conflict.multi_insert(rows) unless rows.empty?
+      end
+
       def replace(task_id, contributors)
         transaction do
           task_contributors.for_task(task_id).delete

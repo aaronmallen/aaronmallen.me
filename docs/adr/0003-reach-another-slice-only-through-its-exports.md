@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524"]
+amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524", "#620"]
 tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
 ---
 
@@ -67,7 +67,8 @@ the one exception, and AA-584 records why.
   `PublishPost` enqueues `Social::Jobs::SyndicatePost` and `Social::Jobs::SendWebmentions` inside
   `post_repo.after_commit`, and `SavePost` enqueues the second, so posts calls no social operation. A job crosses
   this way only where an import would close a cycle. Anywhere else the caller imports an operation that enqueues it,
-  the way admin calls `record.operations.queue_commit_import` (AA-716).
+  the way admin calls `record.operations.queue_commit_import` (AA-716). The commit import enqueues
+  `Tasks::Jobs::CreditAgents` once it stores a new commit, since tasks imports operations from record (#620).
 
 **Seeds follow the rule, specs do not.** `config/db/seeds.rb` loads every file under `config/db/seeds/<env>/`, and
 only `development/` holds any. A seed reads and writes through a slice's exports wherever one covers the record. Where

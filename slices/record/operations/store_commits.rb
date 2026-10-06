@@ -12,10 +12,20 @@ module Record
         known = commit_repo.known_shas(commits.keys)
 
         commits.each_value { |branch, commit| store(repo, branch, commit) }
-        commits.keys.count { !known.include?(it) }
+        found = commits.except(*known)
+        found.each_value { |_, commit| credit(repo, commit[:message]) }
+        found.size
       end
 
       private
+
+      def credit(repo, message)
+        issues = CommitCredits.issues(message)
+        agents = CommitCredits.agents(message)
+        return if issues.empty? || agents.empty?
+
+        Tasks::Jobs::CreditAgents.perform_async(repo, issues, agents)
+      end
 
       def first_sightings(branches)
         branches.each_with_object({}) do |branch, found|

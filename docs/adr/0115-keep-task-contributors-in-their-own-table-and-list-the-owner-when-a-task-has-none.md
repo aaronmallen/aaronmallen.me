@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, activity, admin, api, mcp, record, tasks]
 issue: "#617"
+amended: ["#620"]
 tags: [tasks, contributors, agents, models, commits, trailers, sync, postgres, enums, domains]
 ---
 
@@ -75,17 +76,19 @@ array clears them, which lists the owner again.
 
 **The commit sync credits a commit once, when it first stores it.** `Record::Operations::StoreCommits` already sorts
 the shas it knows from the new ones. For a new commit only, the record slice reads each `Closes #N` line and each
-`Co-Authored-By` trailer, and hands the repo, the issue numbers and the agents to an operation the tasks slice exports
-([ADR 0003][0003]). That operation finds each task by the GitHub issue URL in `task_sources.url`, the way
-[ADR 0103][0103] finds a rule's tasks, and inserts with `ON CONFLICT DO NOTHING`. A commit the sync has seen is never
-read again, so a contributor the owner removes stays off, as a removed tag does under [ADR 0077][0077].
+`Co-Authored-By` trailer, and enqueues `Tasks::Jobs::CreditAgents` with the repo, the issue numbers and the agents.
+The tasks slice already imports operations from the record slice, so an import the other way would close a cycle, and
+[ADR 0003][0003] sends such a call across as a job (#620). The job's operation finds each task by the GitHub issue
+URL in `task_sources.url`, the way [ADR 0103][0103] finds a rule's tasks, and inserts with `ON CONFLICT DO NOTHING`.
+A commit the sync has seen is never read again, so a contributor the owner removes stays off, as a removed tag does
+under [ADR 0077][0077].
 
 **A trailer name maps to an agent by a fixed prefix in the record slice.** A name that starts with `Claude` credits
 agent `claude-code`, and the rest of the name becomes the model: `Claude Opus 5.5` becomes `claude-opus-5-5`, lower
 case with each run of other characters turned into a hyphen and `claude-` in front. A trailer whose name matches no
 prefix, or names no model after it, credits nobody, so a human co-author or a bare `Claude` adds no row. The sync
-reads the trailer key in any case, as git does. `/commit` writes `Co-Authored-By: Claude Opus 5.5` with
-Anthropic's no-reply address (#621).
+reads the trailer key in any case, as git does. `/commit` writes no trailer, so the sync credits only trailers that
+come from elsewhere.
 
 ## Alternatives
 

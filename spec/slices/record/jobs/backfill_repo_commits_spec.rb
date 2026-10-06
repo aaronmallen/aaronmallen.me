@@ -488,6 +488,94 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     end
   end
 
+  describe "a commit that closes an issue a task came from" do
+    let(:task) { tasks_create(:task) }
+
+    before { tasks_create(:task_source, task_id: task.id, url: "https://github.com/#{repo}/issues/42") }
+
+    def claude = "Co-Authored-By: Claude Opus 5.5 <noreply@example.com>"
+
+    def contributors = Tasks::Slice["relations.task_contributors"].pluck(:task_id, :kind, :agent, :model)
+
+    def import(message)
+      stub_refs(github_branch("main", commit(sha, message:)))
+      walk
+      Tasks::Jobs::CreditAgents.drain
+    end
+
+    def tasks_create(name, **) = Spec::DB::Factories[:tasks].create(name, **)
+
+    it "adds the agent and model the trailer names to the task" do
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+
+      expect(contributors).to contain_exactly([task.id, "agent", "claude-code", "claude-opus-5-5"])
+    end
+
+    it "reads the trailer key in any case" do
+      import("app: credit the agent\n\nco-authored-by: Claude Opus 5.5 <noreply@example.com>\n\nCloses #42")
+
+      expect(contributors).to contain_exactly([task.id, "agent", "claude-code", "claude-opus-5-5"])
+    end
+
+    it "adds no agent when no trailer names one" do
+      import("app: credit nobody\n\nCloses #42")
+
+      expect(contributors).to be_empty
+    end
+
+    it "adds no agent for a human co-author or a trailer that names no model" do
+      trailers = ["Co-Authored-By: Pat Doe <pat@example.com>", "Co-Authored-By: Claude <noreply@example.com>"]
+      import("app: credit nobody\n\n#{trailers.join("\n")}\n\nCloses #42")
+
+      expect(contributors).to be_empty
+    end
+
+    it "adds no agent when the commit closes no issue" do
+      import("app: credit nobody\n\n#{claude}\n\nSee #42")
+
+      expect(contributors).to be_empty
+    end
+
+    it "changes nothing for an issue no task came from" do
+      import("app: credit nobody\n\n#{claude}\n\nCloses #43")
+
+      expect(contributors).to be_empty
+    end
+
+    it "changes nothing for the same issue number in another repository" do
+      Tasks::Slice["relations.task_sources"].update(url: "https://github.com/aaronmallen/other/issues/42")
+      import("app: credit nobody\n\n#{claude}\n\nCloses #42")
+
+      expect(contributors).to be_empty
+    end
+
+    it "adds the contributor once when it imports the same commit twice" do
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+      commit_repo.record_backfilled_to(repo, at: edge)
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+
+      expect(contributors.size).to eq(1)
+    end
+
+    it "adds the contributor once when two commits name it" do
+      stub_refs(github_branch("main", commit(sha, message: "app: one\n\n#{claude}\n\nCloses #42"),
+                              commit(old_sha, message: "app: two\n\n#{claude}\n\nCloses #42")))
+      walk
+      Tasks::Jobs::CreditAgents.drain
+
+      expect(contributors.size).to eq(1)
+    end
+
+    it "keeps off a contributor the owner removed when it reads the commit again" do
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+      Tasks::Slice["relations.task_contributors"].delete
+      commit_repo.record_backfilled_to(repo, at: edge)
+      import("app: credit the agent\n\n#{claude}\n\nCloses #42")
+
+      expect(contributors).to be_empty
+    end
+  end
+
   describe "a repository GitHub cannot give" do
     it "stores nothing from an empty repository, and ends the walk", :aggregate_failures do
       stub_refs

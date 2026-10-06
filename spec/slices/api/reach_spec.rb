@@ -4,6 +4,7 @@ RSpec.describe "API reach", type: :app do
   def self.exempt
     {
       "saved_views.operations.rename_saved_view" => "the admin renames a view; PATCH changes it in one step",
+      "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
       "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
     }

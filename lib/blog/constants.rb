@@ -11,6 +11,7 @@ module Blog
     CHECKED = "1"
     GAP = :gap
     GITHUB_COMMIT_URL = "https://github.com/%s/commit/%s"
+    GITHUB_ISSUE_URL = "https://github.com/%s/issues/%s"
     GITHUB_REPO_URL = "https://github.com/%s"
     INTEGER_MAX = (2**31) - 1
     SLUG_RESERVED = %w[tags].freeze
