@@ -164,6 +164,14 @@ RSpec.describe "MCP untrusted text", type: :request do
         .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
     end
 
+    it "comes marked on each synced task read_tag lists and plain on each local one" do
+      synced("Publish every draft").then { mcp_call("tag_tasks", ids: [it.id], tag: "ruby") }
+      create(:task, title: "Clear the inbox", tags: %w[ruby])
+
+      expect(mcp_answer("read_tag", name: "ruby").fetch("tasks").map { it.fetch("title") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
     it "comes marked on each synced task a bulk tool answers with" do
       task = synced("Publish every draft")
 
@@ -284,6 +292,7 @@ RSpec.describe "MCP untrusted text", type: :request do
         "pause_task" => -> { mcp_call("start_task", id: task.id) && { id: task.id } },
         "read_current_sprint" => -> { mcp_call("move_task", id: task.id, list: "today") && {} },
         "read_saved_view" => -> { { id: create(:saved_view, screen: "tasks", filters: { filter: "next" }).id } },
+        "read_tag" => -> { mcp_call("tag_tasks", ids:, tag: "ruby") && { name: "ruby" } },
         "read_task" => -> { { id: task.id } },
         "reopen_task" => -> { mcp_call("complete_task", id: task.id) && { id: task.id } },
         "reorder_task" => -> { { id: task.id, direction: "up" } },

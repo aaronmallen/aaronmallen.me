@@ -104,6 +104,7 @@ module API
         ["create_saved_view", "post", "/saved_views", CREATED],
         ["update_saved_view", "patch", "/saved_views/{id}", OK],
         ["delete_saved_view", "delete", "/saved_views/{id}", OK],
+        ["read_tag", "get", "/tags/{name}", OK],
         ["list_task_tag_rules", "get", "/task_tag_rules", OK],
         ["create_task_tag_rule", "post", "/task_tag_rules", CREATED],
         ["update_task_tag_rule", "patch", "/task_tag_rules/{id}", OK],

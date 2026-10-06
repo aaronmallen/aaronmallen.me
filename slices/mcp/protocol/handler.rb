@@ -198,6 +198,7 @@ module MCP
         Tools::ReadSavedView,
         Tools::ReadSocialPost,
         Tools::ReadSyncState,
+        Tools::ReadTag,
         Tools::ReadTask,
         Tools::ReadTimeReport,
         Tools::ReadWebmention,

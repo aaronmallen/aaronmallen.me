@@ -60,6 +60,8 @@ module API
 
     import keys: %w[queries.for_post queries.for_social_post], from: :suggestions
 
+    import keys: %w[queries.summary], from: :tags
+
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
@@ -92,16 +94,16 @@ module API
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
       endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
-      endpoints.read_social_post endpoints.read_task endpoints.read_time_report endpoints.read_webmention
-      endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task endpoints.reorder_task
-      endpoints.resolve_decision endpoints.save_review_note endpoints.save_task endpoints.schedule_task endpoints.search
-      endpoints.search_accounts endpoints.set_task_total endpoints.snooze_attention endpoints.start_task
-      endpoints.summarize_activity endpoints.sync_issues endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
-      endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
-      endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view
-      endpoints.update_task_tag_rule endpoints.update_work_session endpoints.upload_photo operations.mint_token
-      operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
-      queries.post_figures
+      endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
+      endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
+      endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
+      endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
+      endpoints.snooze_attention endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
+      endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
+      endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
+      endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_tag_rule
+      endpoints.update_work_session endpoints.upload_photo operations.mint_token operations.revoke_token
+      queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
     ]
   end
 end

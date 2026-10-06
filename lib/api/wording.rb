@@ -12,7 +12,7 @@ module API
       errors.to_h { |field, codes| [field, codes.map { reason(table, field, it, named:) }] }
     end
 
-    def missing(noun, id) = "no #{noun} has the ID #{id}"
+    def missing(noun, id, by: "ID") = "no #{noun} has the #{by} #{id}"
 
     def reason(table, field, code, named: false)
       table.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code) do

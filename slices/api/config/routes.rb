@@ -109,6 +109,8 @@ module API
     get "/saved_views/:id/records", to: "saved_views.records"
     delete "/saved_views/:id", to: "saved_views.destroy"
 
+    get "/tags/:name", to: "tags.show"
+
     get "/task_tag_rules", to: "task_tag_rules.index"
     post "/task_tag_rules", to: "task_tag_rules.create"
     patch "/task_tag_rules/:id", to: "task_tag_rules.update"

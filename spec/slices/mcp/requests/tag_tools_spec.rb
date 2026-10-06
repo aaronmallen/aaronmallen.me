@@ -40,9 +40,17 @@ RSpec.describe "MCP tag tools", type: :request do
     end
   end
 
-  it "names every kind each scope covers in every tag tool", :aggregate_failures do
+  def scoped_tag_tools
     rpc("tools/list")
-    tools = JSON.parse(last_response.body).dig("result", "tools").select { it.fetch("name").end_with?("_tag", "_tags") }
+    tools = JSON.parse(last_response.body).dig("result", "tools")
+
+    tools.select do |tool|
+      tool.fetch("name").end_with?("_tag", "_tags") && tool.dig("inputSchema", "properties", "scope")
+    end
+  end
+
+  it "names every kind each scope covers in every tag tool that takes a scope", :aggregate_failures do
+    tools = scoped_tag_tools
     texts = tools.flat_map { [it.fetch("description"), it.dig("inputSchema", "properties", "scope", "description")] }
 
     expect(tools.map { it.fetch("name") }).to include("list_tags", "save_tag", "remove_tag")
@@ -281,6 +289,38 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("remove_tag", scope: "public", id: 999_999)
 
       expect(message).to eq("no tag has the ID 999999")
+    end
+  end
+
+  describe "read_tag" do
+    def statuses(kind)
+      call_tool("read_tag", name: "ruby")
+
+      content.fetch(kind).map { it.values_at(kind == "projects" ? "name" : "title", "status") }
+    end
+
+    it "groups everything with the name by kind, each with its status" do
+      create(:post, :draft, title: "A ruby draft", tags: %w[ruby])
+      create(:project, :archived, name: "old-gem", tags: %w[ruby])
+      create(:decision, title: "Ruby or not", status: "dropped", tags: %w[ruby])
+
+      expect(%w[posts projects decisions].map { statuses(it) })
+        .to eq([[["A ruby draft", "draft"]], [%w[old-gem archived]], [["Ruby or not", "dropped"]]])
+    end
+
+    it "lists the tasks and journal entries with the name" do
+      create(:task, :done, title: "Shipped ruby", tags: %w[ruby])
+      create(:journal_entry, body: "Wrote some ruby", tags: %w[ruby])
+
+      expect([statuses("tasks"), content.fetch("journal_entries").map { it.fetch("body") }])
+        .to eq([[["Shipped ruby", "done"]], ["Wrote some ruby"]])
+    end
+
+    it "refuses a name no tag holds", :aggregate_failures do
+      call_tool("read_tag", name: "nothing")
+
+      expect(error?).to be(true)
+      expect(message).to eq("no tag has the name nothing")
     end
   end
 end
