@@ -143,15 +143,6 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
-  def watch_clipboard
-    page.execute_script(<<~JS)
-      window.copiedKeys = [];
-      Object.defineProperty(navigator, "clipboard", {
-        value: { writeText: (text) => { window.copiedKeys.push(text); return Promise.resolve(); } },
-      });
-    JS
-  end
-
   describe "the key" do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { "##{task.id}" }
@@ -159,11 +150,11 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "clicking it" do
       before do
         watch_clipboard
-        find(".task", text: "Email the accountant").find(".task-key").click
+        find(".task", text: "Email the accountant").find(".record-key").click
       end
 
       it "copies the key", :aggregate_failures do
-        expect(page).to have_css(".toast", text: translate("ui.components.tasks.task_key.copied", key:))
+        expect(page).to have_css(".toast", text: translate("ui.components.record_key.copied.task", key:))
         expect(page.evaluate_script("window.copiedKeys")).to eq([key])
       end
     end
@@ -439,7 +430,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     it "shows it in the panel and stays on the list", :aggregate_failures do
       expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(panel).to have_css(".task-key", exact_text: key)
+      expect(panel).to have_css(".record-key", exact_text: key)
     end
 
     it "closes on Escape and hands focus back to the row", :aggregate_failures do
@@ -464,9 +455,9 @@ RSpec.describe "Admin tasks", type: :feature do
 
     it "copies the key from the panel" do
       watch_clipboard
-      panel.find(".task-key").click
+      panel.find(".record-key").click
 
-      expect(page).to have_css(".toast", text: translate("ui.components.tasks.task_key.copied", key:))
+      expect(page).to have_css(".toast", text: translate("ui.components.record_key.copied.task", key:))
     end
 
     it "comes back to the list after an action in the panel", :aggregate_failures do

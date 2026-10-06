@@ -9,6 +9,7 @@ module Admin
 
           def view_template
             ListItem(title: @decision.title, href: path(:admin_decision, id: @decision.id)) do |item|
+              item.beside { RecordKey(kind: "decision", id: @decision.id) }
               item.meta { p(class: "li-sub") { sub } }
             end
           end

@@ -1334,7 +1334,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         tasks = %w[Ship Read].map { create(:task, :in_sprint, sprint_id: sprint.id, title: it) }
         get "/admin"
 
-        expect(panel.all(".task-key").map(&:text)).to match_array(tasks.map { "##{it.id}" })
+        expect(panel.all(".record-key").map(&:text)).to match_array(tasks.map { "##{it.id}" })
       end
 
       it "fills the progress bar with the share that is done" do

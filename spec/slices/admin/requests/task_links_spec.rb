@@ -9,7 +9,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
 
   def chips(title)
     row(title).all(".task-link").map do |chip|
-      [chip.find(".task-link-label").text, chip.find(".task-key").text, chip["title"]]
+      [chip.find(".task-link-label").text, chip.find(".record-key").text, chip["title"]]
     end
   end
 
@@ -35,7 +35,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     post path, { _csrf_token: admin_csrf_token, **params }
   end
 
-  def targets = page.all(".task-link-target").map { it.find(".task-key").text }
+  def targets = page.all(".task-link-target").map { it.find(".record-key").text }
 
   describe "the chips on a row" do
     before do
@@ -84,7 +84,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       before { get "/admin/tasks", filter: "next" }
 
       it "reads the reverse with the blocker's key and no title", :aggregate_failures do
-        expect([chip.find(".task-link-label").text, chip.find(".task-key").text])
+        expect([chip.find(".task-link-label").text, chip.find(".record-key").text])
           .to eq([link_label(:blocked_by), "##{task.id}"])
         expect(chip).to have_no_css(".task-link-title")
       end
@@ -108,7 +108,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       get "/admin/tasks", filter: "next"
 
       expect(row("Ship the links"))
-        .to have_css(".task-link .task-key[data-task-key='##{other.id}']")
+        .to have_css(".task-link .record-key[data-record-key='##{other.id}']")
     end
 
     it "draws no chips on a task with no links" do

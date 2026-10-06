@@ -29,7 +29,7 @@ module Admin
             span(class: chip_class(link), title: link.task.title) do
               Icon(ICONS.fetch(link.label))
               span(class: "task-link-label") { t(self.class.label_key(link)) }
-              TaskKey(task: link.task)
+              RecordKey(kind: "task", id: link.task.id)
               span(class: "sr-only") { link.task.title }
             end
           end

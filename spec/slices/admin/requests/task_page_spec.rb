@@ -107,7 +107,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
     it "draws the key as a badge that copies it" do
       read
 
-      expect(page).to have_css(".read-meta button.task-key[data-task-key='##{task.id}']", text: "##{task.id}")
+      expect(page).to have_css(".read-meta button.record-key[data-record-key='##{task.id}']", text: "##{task.id}")
     end
 
     {
@@ -500,7 +500,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         send_to("/admin/tasks/#{task.id}/links", **fields)
       end
 
-      def targets = page.all(".task-link-target").map { it.find(".task-key").text }
+      def targets = page.all(".task-link-target").map { it.find(".record-key").text }
 
       def unlink_from_page
         create(:task_link, from_task_id: task.id, to_task_id: other.id)

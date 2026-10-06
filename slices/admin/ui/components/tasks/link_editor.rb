@@ -75,7 +75,7 @@ module Admin
           def key(task) = "#{PREFIX}#{task.id}"
 
           def key_badge(task)
-            span(class: "task-key") { key(task) }
+            span(class: "record-key") { key(task) }
           end
 
           def kind_select
@@ -89,7 +89,7 @@ module Admin
           def link_row(link)
             div(class: "task-link-row") do
               span(class: "task-link-label") { t(Links.label_key(link)) }
-              TaskKey(task: link.task)
+              RecordKey(kind: "task", id: link.task.id)
               link_title(link.task)
               span(class: "task-link-place") { place(link.task) }
               unlink_form(link)

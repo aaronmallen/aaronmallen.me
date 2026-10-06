@@ -20,7 +20,7 @@ module Admin
 
           def view_template
             div(class: classes, data: { key_row: true, **order }) do
-              TaskKey(task: @task)
+              RecordKey(kind: "task", id: @task.id)
               pick if @bulk
               task_title
               meta

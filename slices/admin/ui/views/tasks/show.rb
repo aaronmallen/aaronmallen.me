@@ -101,7 +101,7 @@ module Admin
 
           def meta
             p(class: "read-meta") do
-              TaskKey(task: @task)
+              RecordKey(kind: "task", id: @task.id)
               status
               SourceLink(source: @task.source)
               @task.tags.each { Tag(tag: it, href: tag_path(it)) }

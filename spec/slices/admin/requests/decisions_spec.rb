@@ -49,6 +49,15 @@ RSpec.describe "Admin decisions", type: :request do
         expect(titles).to eq(["Newer open", "Older open"])
       end
 
+      it "shows each decision's key beside its title" do
+        get "/admin/decisions"
+
+        keys = Decisions::Slice["relations.decisions"].where(title: ["Newer open", "Older open"]).pluck(:id)
+
+        expect(page.all(".li .li-head button.record-key").map { it["data-record-key"] })
+          .to match_array(keys.map { "##{it}" })
+      end
+
       it "lists the dropped decisions with the dropped filter" do
         get "/admin/decisions", status: "dropped"
 
@@ -179,6 +188,12 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page).to have_css("h1", text: "Pick a queue")
         expect(page).to have_css(".pill", text: "open")
         expect(page).to have_css(".markdown-body strong", text: "pile")
+      end
+
+      it "shows the decision's key" do
+        expect(page).to have_css(
+          ".read-meta button.record-key[data-record-key='##{decision.id}']", text: "##{decision.id}",
+        )
       end
 
       it "lists the options with their bodies as Markdown" do

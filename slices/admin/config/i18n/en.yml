@@ -1046,6 +1046,13 @@ en:
       range_presets:
         preset: "%{count}d"
         range: "Range"
+      record_key:
+        copied:
+          decision: "Decision %{key} copied"
+          task: "Task %{key} copied"
+        copy:
+          decision: "Copy decision %{key}"
+          task: "Copy task %{key}"
       record_links:
         field_error:
           other_id:
@@ -1562,9 +1569,6 @@ en:
           tags_placeholder: "ruby, admin"
           title: "Title"
           update: "Save"
-        task_key:
-          copied: "Task %{key} copied"
-          copy: "Copy task %{key}"
         timeline:
           empty: "Nothing has happened yet."
           label: "Timeline"

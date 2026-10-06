@@ -2,7 +2,7 @@ import { setupConfirms } from "./confirm.js";
 import { focusField, openDialog, showDialog } from "./dialog.js";
 import { plain, setupPost, setupVisit } from "./in_place.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
-import { setupTaskKeys } from "./task_key.js";
+import { setupRecordKeys } from "./record_key.js";
 import { setupTaskOrder } from "./task_order.js";
 
 const EDIT = "[data-task-edit]";
@@ -20,7 +20,7 @@ export function setupTaskPanel() {
 function bind(root) {
   setupConfirms(root);
   setupMarkdownEditors(root);
-  setupTaskKeys(root);
+  setupRecordKeys(root);
   setupTaskOrder(root);
 }
 

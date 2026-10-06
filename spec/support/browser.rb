@@ -106,6 +106,15 @@ module Spec
     end
 
     def today = @today ||= Blog::TimeZone.today
+
+    def watch_clipboard
+      execute_script(<<~JS)
+        window.copiedKeys = [];
+        Object.defineProperty(navigator, "clipboard", {
+          value: { writeText: (text) => { window.copiedKeys.push(text); return Promise.resolve(); } },
+        });
+      JS
+    end
   end
 end
 

@@ -2144,6 +2144,14 @@
   @apply grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5;
   @apply border-t border-line py-3 first:border-t-0 first:pt-0;
 
+  & > .record-key {
+    @apply col-start-1 row-start-1 mt-px;
+
+    @media (width < 43.75rem) {
+      @apply mt-0;
+    }
+  }
+
   @media (width < 43.75rem) {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -2157,15 +2165,6 @@
 
   &.done .task-title {
     @apply text-ink-muted line-through;
-  }
-}
-
-@utility task-key {
-  @apply col-start-1 row-start-1 mt-px min-w-9 cursor-pointer rounded-code border border-line bg-ground px-1.5 py-0.5;
-  @apply text-center font-mono text-badge whitespace-nowrap text-ink-muted hover:brightness-125;
-
-  @media (width < 43.75rem) {
-    @apply mt-0 min-h-tap min-w-tap;
   }
 }
 
@@ -2217,8 +2216,8 @@
   @apply inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-btn border border-line bg-ground px-2 py-0.5;
   @apply font-mono text-badge text-ink-muted;
 
-  & .task-key {
-    @apply mt-0 px-1 py-0;
+  & .record-key {
+    @apply px-1 py-0;
   }
 
   &.blocker {
@@ -2304,6 +2303,15 @@
 
   & .task-link-title {
     @apply flex-1;
+  }
+}
+
+@utility record-key {
+  @apply min-w-9 cursor-pointer rounded-code border border-line bg-ground px-1.5 py-0.5;
+  @apply text-center font-mono text-badge whitespace-nowrap text-ink-muted hover:brightness-125;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap min-w-tap;
   }
 }
 

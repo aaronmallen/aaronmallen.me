@@ -45,6 +45,7 @@ module Admin
 
           def meta
             p(class: "read-meta") do
+              RecordKey(kind: "decision", id: @decision.id)
               Status(status: @decision.status)
               @decision.tags.each { Tag(tag: it) }
             end

@@ -818,7 +818,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "the shape of a row" do
-      def keys = page.all(".task .task-key").map(&:text)
+      def keys = page.all(".task .record-key").map(&:text)
 
       {
         "today" => [:in_sprint],
@@ -1565,7 +1565,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         edit(tags: "ruby")
         get "/admin/tasks", filter: "next"
 
-        expect(page.find(".task .task-key")["class"]).to eq("task-key")
+        expect(page.find(".task .record-key")["class"]).to eq("record-key")
       end
 
       it "says so" do
