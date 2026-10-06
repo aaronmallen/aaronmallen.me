@@ -610,7 +610,7 @@ RSpec.describe "Admin journal", type: :request do
         actions = page.find(".journal-entry-head .journal-entry-actions")
 
         expect(actions).to have_button("Edit", type: "button", class: "btn", exact: true)
-        expect(actions).to have_button("Delete", type: "button", class: "warn", exact: true)
+        expect(actions).to have_button("Delete", type: "submit", class: "warn", exact: true)
       end
 
       it "posts the delete form with the CSRF token and the confirmation", :aggregate_failures do
@@ -755,6 +755,23 @@ RSpec.describe "Admin journal", type: :request do
         post "/admin/journal/#{entry.id}/delete"
 
         expect([last_response.status, repo.count]).to eq([403, 1])
+      end
+
+      it "deletes from the Delete button with scripts off", :aggregate_failures do
+        browser = signed_in_browser
+        browser.visit("/admin/journal")
+        browser.find(".journal-entry-actions").click_button("Delete")
+
+        expect(repo.count).to eq(0)
+        expect(browser.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Entry deleted")
+      end
+
+      def session_cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
+
+      def signed_in_browser
+        Capybara::Session.new(:rack_test, Hanami.app).tap do |browser|
+          browser.driver.browser.set_cookie(session_cookie, URI(Capybara.default_host))
+        end
       end
     end
   end

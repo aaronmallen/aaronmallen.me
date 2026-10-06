@@ -49,13 +49,13 @@ module Admin
           def delete_attributes
             {
               action: path(:admin_delete_journal_entry, id: @entry.id),
-              data: { journal_delete: "", confirm: t(".confirm_delete") },
+              data: { confirm: t(".confirm_delete") },
             }
           end
 
           def delete_form
             Form(**delete_attributes) do
-              Button(variant: :warn, small: true, data: { journal_delete_button: "" }) { t(".delete") }
+              Button(variant: :warn, small: true, type: "submit") { t(".delete") }
             end
           end
 

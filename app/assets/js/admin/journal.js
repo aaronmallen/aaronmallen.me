@@ -19,7 +19,6 @@ function setupEntry(entry) {
   const form = entry.querySelector("[data-journal-edit-form]");
   const body = form.querySelector("[data-journal-body]");
   const save = form.querySelector("[data-journal-save]");
-  const remove = entry.querySelector("[data-journal-delete]");
   const links = entry.querySelector("[data-journal-links]");
 
   const renderSave = () => {
@@ -50,10 +49,6 @@ function setupEntry(entry) {
   });
 
   body.addEventListener("input", renderSave);
-
-  remove.querySelector("[data-journal-delete-button]").addEventListener("click", () => {
-    if (window.confirm(remove.dataset.confirm)) remove.submit();
-  });
 }
 
 function showWrite(form) {
