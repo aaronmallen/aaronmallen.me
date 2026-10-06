@@ -3,21 +3,11 @@
 module Analytics
   module Relations
     class AnalyticsRollupPageReferrers < Blog::DB::Relation
-      FIGURES = proc { [integer.sum(views).as(:views), integer.sum(visitors).as(:visitors)] }
+      include DailyRollup
 
       schema :analytics_rollup_page_referrers, infer: true
 
-      def between(from, to) = where(day: from..to)
-
-      def for_path(path) = where(path:)
-
-      def on(day) = where(day:)
-
-      def top_by_visitors
-        counts = unordered.select(:host, &FIGURES).group(:host)
-
-        counts.order { [sum(visitors).desc, sum(views).desc, host.asc] }
-      end
+      ranks_by :host
     end
   end
 end

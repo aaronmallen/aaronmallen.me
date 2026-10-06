@@ -3,15 +3,11 @@
 module Analytics
   module Relations
     class AnalyticsRollupClicks < Blog::DB::Relation
+      include DailyRollup
+
       LINK = %i[link_host link_path].freeze
 
       schema :analytics_rollup_clicks, infer: true
-
-      def between(from, to) = where(day: from..to)
-
-      def for_path(path) = where(path:)
-
-      def on(day) = where(day:)
 
       def top_by_clicks
         counts = unordered.select(*LINK) { integer.sum(clicks).as(:clicks) }.group(*LINK)

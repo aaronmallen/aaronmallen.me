@@ -3,6 +3,8 @@
 module Analytics
   module Relations
     class AnalyticsRollups < Blog::DB::Relation
+      include DailyRollup
+
       TOTALS = proc do
         [
           integer.coalesce(integer.sum(views), 0).as(:views),
@@ -12,8 +14,6 @@ module Analytics
       end
 
       schema :analytics_rollups, infer: true
-
-      def between(from, to) = where(day: from..to)
 
       def newest_day = unordered.dataset.max(:day)
 

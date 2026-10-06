@@ -3,11 +3,11 @@
 module Analytics
   module Relations
     class FeedReaders < Blog::DB::Relation
+      include DailyRollup
+
       ONE_MORE = { readers: Sequel[:feed_readers][:readers] + 1, updated_at: Sequel::CURRENT_TIMESTAMP }.freeze
 
       schema :feed_readers, infer: true
-
-      def between(from, to) = where(day: from..to)
 
       def by_day = unordered.select { [day, integer.sum(readers).as(:readers)] }.group(:day)
 

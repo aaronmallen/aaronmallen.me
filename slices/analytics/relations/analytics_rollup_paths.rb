@@ -3,6 +3,8 @@
 module Analytics
   module Relations
     class AnalyticsRollupPaths < Blog::DB::Relation
+      include DailyRollup
+
       FIGURES = proc do
         [
           integer.sum(views).as(:views),
@@ -30,8 +32,6 @@ module Analytics
 
       schema :analytics_rollup_paths, infer: true
 
-      def between(from, to) = where(day: from..to)
-
       def first_days(span)
         day = ROLLED[:day]
         within = Sequel.&({ ROLLED[:path] => POST_PATH }, day >= PUBLISH_DAY, day < PUBLISH_DAY + span)
@@ -41,10 +41,6 @@ module Analytics
 
         joined.select(POST_PATH.as(:path), PUBLISH_DAY.as(:published_on), day, ROLLED[:visitors])
       end
-
-      def for_path(path) = where(path:)
-
-      def on(day) = where(day:)
 
       def post_paths(post_ids)
         dataset.db[:posts].where(POST_ID => post_ids).select(POST_ID.as(:post_id), POST_PATH.as(:path))
