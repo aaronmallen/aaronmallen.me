@@ -7,7 +7,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:task) { create(:task, title: "Ship the read page", note: "say **why** it matters") }
   let(:other) { create(:task, title: "Write the migration") }
 
-  def body = page.find(".task-body")
+  def body = page.find(".markdown-body")
 
   def facts = page.all(".task-fact").to_h { [it.find("dt").text, it.find("dd").text] }
 
@@ -107,7 +107,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
     it "draws the key as a badge that copies it" do
       read
 
-      expect(page).to have_css(".task-read-meta button.task-key[data-task-key='##{task.id}']", text: "##{task.id}")
+      expect(page).to have_css(".read-meta button.task-key[data-task-key='##{task.id}']", text: "##{task.id}")
     end
 
     {
@@ -119,14 +119,14 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows the #{status} status" do
         read(create(:task, *traits))
 
-        expect(page).to have_css(".task-read-meta .pill", text: label("statuses.#{status}"))
+        expect(page).to have_css(".read-meta .pill", text: label("statuses.#{status}"))
       end
     end
 
     it "shows the tags" do
       read(create(:task, tags: %w[site admin]))
 
-      expect(page.all(".task-read-meta .tag").map(&:text)).to contain_exactly("#site", "#admin")
+      expect(page.all(".read-meta .tag").map(&:text)).to contain_exactly("#site", "#admin")
     end
 
     it "links each tag to the list it came from searched by that tag" do
@@ -221,13 +221,13 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows no empty block on a task with no note" do
         read_note("")
 
-        expect(page).to have_no_css(".task-body")
+        expect(page).to have_no_css(".markdown-body")
       end
 
       it "shows no empty block when nothing survives the cleaning" do
         read_note("<script>alert(1)</script>")
 
-        expect(page).to have_no_css(".task-body")
+        expect(page).to have_no_css(".markdown-body")
       end
 
       it "keeps raw HTML", :aggregate_failures do

@@ -12,7 +12,7 @@ RSpec.describe "Admin task comments", type: :request do
 
   def bodies = comments.order(:id).to_a.map { it[:body] }
 
-  def comment_box = page.find(".task-comment-form [data-markdown-editor]")
+  def comment_box = page.find(".stack-form [data-markdown-editor]")
 
   def comment_on_page(comment) = page.find("[data-task-comment='#{comment.id}']")
 
@@ -59,7 +59,7 @@ RSpec.describe "Admin task comments", type: :request do
       it "says when there are none" do
         read
 
-        expect(page).to have_css(".task-activity .hint", text: t("ui.components.tasks.timeline.empty"))
+        expect(page).to have_css(".timeline-card .hint", text: t("ui.components.tasks.timeline.empty"))
       end
 
       it "lists them oldest first" do
@@ -68,36 +68,36 @@ RSpec.describe "Admin task comments", type: :request do
         create(:task_comment, task_id: task.id, body: "First", created_at: Time.now - 120)
         read
 
-        expect(page.all(".task-comment-body").map(&:text)).to eq(%w[First Second Third])
+        expect(page.all(".comment-body").map(&:text)).to eq(%w[First Second Third])
       end
 
       it "leaves out another task's comments" do
         create(:task_comment, body: "Elsewhere")
         read
 
-        expect(page).to have_no_css(".task-comment")
+        expect(page).to have_no_css(".comment")
       end
 
       it "renders the body as markdown" do
         create(:task_comment, task_id: task.id, body: "say **why**")
         read
 
-        expect(page).to have_css(".task-comment-body strong", exact_text: "why")
+        expect(page).to have_css(".comment-body strong", exact_text: "why")
       end
 
       it "strips script from the body", :aggregate_failures do
         create(:task_comment, task_id: task.id, body: "<script>alert(1)</script><a href=\"javascript:alert(1)\">x</a>")
         read
 
-        expect(page).to have_no_css(".task-comment-body script")
-        expect(page.find(".task-comment-body a")["href"]).to be_nil
+        expect(page).to have_no_css(".comment-body script")
+        expect(page.find(".comment-body a")["href"]).to be_nil
       end
 
       it "names the owner and the time on a local comment", :aggregate_failures do
         comment = create(:task_comment, task_id: task.id)
         read
 
-        expect(comment_on_page(comment)).to have_css(".task-comment-author", exact_text: Blog::Owner.full_name)
+        expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: Blog::Owner.full_name)
         expect(comment_on_page(comment).find("time")["datetime"]).to eq(comment.created_at.iso8601)
       end
 
@@ -153,7 +153,7 @@ RSpec.describe "Admin task comments", type: :request do
       before { read }
 
       it "shows its author" do
-        expect(comment_on_page(comment)).to have_css(".task-comment-author", exact_text: "octocat")
+        expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: "octocat")
       end
 
       it "shows its time" do
@@ -221,7 +221,7 @@ RSpec.describe "Admin task comments", type: :request do
         add("Hello there")
         read
 
-        expect(page).to have_css(".task-comment-body", exact_text: "Hello there")
+        expect(page).to have_css(".comment-body", exact_text: "Hello there")
       end
 
       it "answers 404 for a task that isn't there" do
@@ -296,7 +296,7 @@ RSpec.describe "Admin task comments", type: :request do
       end
 
       it "opens that comment's form" do
-        expect(comment_on_page(comment)).to have_css("details.task-comment-edit[open]")
+        expect(comment_on_page(comment)).to have_css("details.comment-edit[open]")
       end
 
       it "leaves the new comment field clean" do

@@ -296,7 +296,7 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "from the task page" do
       before do
         visit "/admin/tasks/#{task.id}?filter=next&origin=tasks"
-        find(".task-read-acts").click_button(cancel)
+        find(".read-acts").click_button(cancel)
       end
 
       it "asks in the styled dialog" do
@@ -482,19 +482,19 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def bodies = comments.to_a.map { it[:body] }
 
-    def comment_on(scope) = scope.find(".task-comment", text: "Sent the forms")
+    def comment_on(scope) = scope.find(".comment", text: "Sent the forms")
 
     describe "with none yet" do
       before { open_task("Email the accountant") }
 
       it "heads the section Activity" do
-        expect(panel).to have_css(".task-activity .card-title",
+        expect(panel).to have_css(".timeline-card .card-title",
                                   exact_text: translate("ui.components.tasks.timeline.title"))
       end
 
       it "adds a comment and comes back to the list", :aggregate_failures do
-        panel.fill_in(translate("ui.components.tasks.timeline.add_label"), with: "Sent the **forms**")
-        panel.click_button(translate("ui.components.tasks.timeline.add"))
+        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "Sent the **forms**")
+        panel.click_button(translate("ui.components.comment_thread.add"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_added"))
         expect(page).to have_current_path("/admin/tasks?filter=next")
@@ -509,16 +509,16 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "edits it", :aggregate_failures do
-        comment_on(panel).find("summary", text: translate("ui.components.tasks.timeline.edit")).click
-        comment_on(panel).fill_in(translate("ui.components.tasks.timeline.edit_label"), with: "Sent the forms twice")
-        comment_on(panel).click_button(translate("ui.components.tasks.timeline.save"))
+        comment_on(panel).find("summary", text: translate("ui.components.comment_thread.edit")).click
+        comment_on(panel).fill_in(translate("ui.components.comment_thread.edit_label"), with: "Sent the forms twice")
+        comment_on(panel).click_button(translate("ui.components.comment_thread.save"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_saved"))
         expect(bodies).to eq(["Sent the forms twice"])
       end
 
       it "deletes it once asked", :aggregate_failures do
-        comment_on(panel).click_button(translate("ui.components.tasks.timeline.delete"))
+        comment_on(panel).click_button(translate("ui.components.comment_thread.delete"))
         confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_deleted"))
@@ -531,7 +531,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
 
-    def add_label = translate("ui.components.tasks.timeline.add_label")
+    def add_label = translate("ui.components.comment_thread.add_label")
 
     def bold(editor) = editor.find("[role='toolbar'] button[aria-label='Bold']").click
 
@@ -686,7 +686,7 @@ RSpec.describe "Admin tasks", type: :feature do
   describe "reading a note with links" do
     def link_box = evaluate_script(<<~JS)
       (() => {
-        const link = document.querySelector('#task-panel .task-body a');
+        const link = document.querySelector('#task-panel .markdown-body a');
         const box = link.getBoundingClientRect();
         return { display: getComputedStyle(link).display, height: box.height, width: box.width };
       })()

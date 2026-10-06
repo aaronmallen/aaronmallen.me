@@ -41,7 +41,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
       it "leaves me on the task, shown in progress", :aggregate_failures do
         expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=next")
-        expect(page).to have_css(".task-read-meta", text: "in progress")
+        expect(page).to have_css(".read-meta", text: "in progress")
       end
     end
   end
@@ -78,7 +78,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
       it "leaves me on the task, shown open", :aggregate_failures do
         expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=today")
-        expect(page).to have_css(".task-read-meta", text: "open")
+        expect(page).to have_css(".read-meta", text: "open")
       end
     end
 
@@ -94,7 +94,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
       it "leaves me on the task, shown done", :aggregate_failures do
         expect(page).to have_current_path("/admin/tasks/#{task.id}?filter=today")
-        expect(page).to have_css(".task-read-meta", text: "done")
+        expect(page).to have_css(".read-meta", text: "done")
       end
     end
   end

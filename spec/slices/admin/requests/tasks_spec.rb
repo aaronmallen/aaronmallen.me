@@ -966,7 +966,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task = create(:task)
         get "/admin/tasks/#{task.id}", filter: "next"
 
-        expect(page).to have_no_css(".task-read-acts .fa-pen-to-square", visible: :all)
+        expect(page).to have_no_css(".read-acts .fa-pen-to-square", visible: :all)
       end
     end
 

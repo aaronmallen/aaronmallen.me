@@ -162,11 +162,11 @@ RSpec.describe "Admin decisions", type: :request do
       it "shows the title, the status and the problem as Markdown", :aggregate_failures do
         expect(page).to have_css("h1", text: "Pick a queue")
         expect(page).to have_css(".pill", text: "open")
-        expect(page).to have_css(".task-body strong", text: "pile")
+        expect(page).to have_css(".markdown-body strong", text: "pile")
       end
 
       it "lists the options with their bodies as Markdown" do
-        expect(page.find("[data-decision-option='#{option.id}']")).to have_css(".task-body em", text: "today")
+        expect(page.find("[data-decision-option='#{option.id}']")).to have_css(".markdown-body em", text: "today")
       end
 
       it "offers a form to add an option" do
@@ -196,7 +196,7 @@ RSpec.describe "Admin decisions", type: :request do
         Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, %w[queues])
         get "/admin/decisions/#{decision.id}"
 
-        expect(page.find(".task-read-meta")).to have_css(".tag", text: "#queues")
+        expect(page.find(".read-meta")).to have_css(".tag", text: "#queues")
       end
 
       it "answers 404 for a decision that isn't there" do

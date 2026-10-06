@@ -14,7 +14,7 @@ module Admin
           prop :origin, Blog::Types::String
 
           def view_template
-            div(class: "task-comment-acts") do
+            div(class: "comment-acts") do
               edit_form
               delete_form unless @entry.running?
             end
@@ -35,7 +35,7 @@ module Admin
           end
 
           def edit_form
-            details(class: "task-comment-edit", open: mine?) do
+            details(class: "comment-edit", open: mine?) do
               summary(class: "btn sm") { t(".edit") }
               Form(action: route(:admin_update_task_session)) do
                 return_fields

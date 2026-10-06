@@ -6,7 +6,7 @@ RSpec.describe "Admin task activity", type: :request do
   let(:task) { create(:task, :in_progress, title: "Ship the timeline") }
   let(:ten) { Time.at(Time.now.to_i - 86_400) }
 
-  def entries = page.all(".task-timeline > li")
+  def entries = page.all(".timeline > li")
 
   def event(kind, **columns) = create(:task_event, task_id: task.id, kind:, tag_name: nil, occurred_at: ten, **columns)
 
@@ -29,14 +29,14 @@ RSpec.describe "Admin task activity", type: :request do
   it "names the section Activity inside the part the flyout reads", :aggregate_failures do
     read
 
-    expect(page).to have_css("[data-task-read] .task-activity .card-title", exact_text: t("title"))
+    expect(page).to have_css("[data-task-read] .timeline-card .card-title", exact_text: t("title"))
     expect(page).to have_no_text("Talk")
   end
 
   it "says when nothing has happened" do
     read
 
-    expect(page).to have_css(".task-activity .hint", text: t("empty"))
+    expect(page).to have_css(".timeline-card .hint", text: t("empty"))
   end
 
   it "puts comments and sessions in time order" do
@@ -52,28 +52,29 @@ RSpec.describe "Admin task activity", type: :request do
     create(:work_session, task_id: task.id, started_at: ten)
     read
 
-    expect(page).to have_css(".task-event[data-task-event='session'] .pill", text: event_text("running_pill"))
+    expect(page).to have_css(".timeline-event[data-task-event='session'] .pill", text: event_text("running_pill"))
   end
 
   it "shows a move between lists" do
     event("moved", from_list: "next", to_list: "someday")
     read
 
-    expect(page).to have_css(".task-event", text: event_text("moved", from: "next", to: "someday"))
+    expect(page).to have_css(".timeline-event", text: event_text("moved", from: "next", to: "someday"))
   end
 
   it "shows a move into a sprint" do
     event("moved", from_list: "next", to_sprint_on: Date.new(2026, 10, 3))
     read
 
-    expect(page).to have_css(".task-event", text: event_text("moved", from: "next", to: "the Oct 3, 2026 sprint"))
+    expect(page).to have_css(".timeline-event", text: event_text("moved", from: "next", to: "the Oct 3, 2026 sprint"))
   end
 
   it "shows a move out of a sprint" do
     event("moved", from_sprint_on: Date.new(2026, 10, 3), to_list: "someday")
     read
 
-    expect(page).to have_css(".task-event", text: event_text("moved", from: "the Oct 3, 2026 sprint", to: "someday"))
+    expect(page)
+      .to have_css(".timeline-event", text: event_text("moved", from: "the Oct 3, 2026 sprint", to: "someday"))
   end
 
   it "shows a tag added and a tag removed", :aggregate_failures do
@@ -81,29 +82,29 @@ RSpec.describe "Admin task activity", type: :request do
     event("untagged", tag_name: "house")
     read
 
-    expect(page).to have_css(".task-event", text: event_text("tagged", tag: "money"))
-    expect(page).to have_css(".task-event", text: event_text("untagged", tag: "house"))
+    expect(page).to have_css(".timeline-event", text: event_text("tagged", tag: "money"))
+    expect(page).to have_css(".timeline-event", text: event_text("untagged", tag: "house"))
   end
 
   it "shows a status change" do
     event("status_changed", from_status: "open", to_status: "in_progress")
     read
 
-    expect(page).to have_css(".task-event", text: event_text("status_changed", from: "open", to: "in progress"))
+    expect(page).to have_css(".timeline-event", text: event_text("status_changed", from: "open", to: "in progress"))
   end
 
   it "records a real tag change on the timeline" do
     tag("garden")
     read
 
-    expect(page).to have_css(".task-event", text: event_text("tagged", tag: "garden"))
+    expect(page).to have_css(".timeline-event", text: event_text("tagged", tag: "garden"))
   end
 
   it "leaves out another task's history" do
     create(:task_event, kind: "tagged", tag_name: "elsewhere")
     read
 
-    expect(page).to have_no_css(".task-event")
+    expect(page).to have_no_css(".timeline-event")
   end
 
   it "shows the task's total time in the facts" do

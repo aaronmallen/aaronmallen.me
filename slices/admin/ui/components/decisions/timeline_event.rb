@@ -19,11 +19,11 @@ module Admin
           prop :options, Blog::Types::Hash
 
           def view_template
-            return li(class: "task-event", **attributes) { line } unless body
+            return li(class: "timeline-event", **attributes) { line } unless body
 
-            li(class: "task-comment", **attributes) do
-              div(class: "task-comment-head") { line }
-              div(class: "task-body post-body task-comment-body") { raw(safe(::Tasks::Markdown.to_html(body).strip)) }
+            li(class: "comment", **attributes) do
+              div(class: "comment-head") { line }
+              div(class: "markdown-body post-body comment-body") { raw(safe(::Tasks::Markdown.to_html(body).strip)) }
             end
           end
 
@@ -36,9 +36,9 @@ module Admin
           def line
             icon, key = EVENTS.fetch(@entry.kind)
 
-            i(class: ["task-event-icon", icon], aria: { hidden: "true" })
-            span(class: "task-event-text") { t(key, option: @options[@entry.option_id]) }
-            time(class: "task-comment-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
+            i(class: ["timeline-event-icon", icon], aria: { hidden: "true" })
+            span(class: "timeline-event-text") { t(key, option: @options[@entry.option_id]) }
+            time(class: "timeline-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
           end
 
           def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)

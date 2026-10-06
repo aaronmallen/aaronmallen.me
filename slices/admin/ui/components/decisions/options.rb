@@ -9,7 +9,7 @@ module Admin
           prop :form, Blog::Types::Hash
 
           def view_template
-            Card(label: t(".label"), title: t(".title"), class: "task-comments") do
+            Card(label: t(".label"), title: t(".title")) do
               list
               add if @decision.open?
             end
@@ -35,7 +35,7 @@ module Admin
           def edit(option)
             mine = mine?(option)
 
-            details(class: "task-comment-edit", open: mine) do
+            details(class: "comment-edit", open: mine) do
               summary(class: "btn sm") { t(".edit") }
               OptionForm(
                 decision: @decision, option:, params: (@form[:params] if mine),
@@ -45,13 +45,13 @@ module Admin
           end
 
           def item(option)
-            li(class: "task-comment", id: "decision-option-#{option.id}", data: { decision_option: option.id }) do
-              div(class: "task-comment-head") do
-                span(class: "task-comment-author") { option.title }
+            li(class: "comment", id: "decision-option-#{option.id}", data: { decision_option: option.id }) do
+              div(class: "comment-head") do
+                span(class: "comment-author") { option.title }
                 chosen if chosen?(option)
-                div(class: "task-comment-acts") { edit(option) }
+                div(class: "comment-acts") { edit(option) }
               end
-              div(class: "task-body post-body task-comment-body") do
+              div(class: "markdown-body post-body comment-body") do
                 raw(safe(::Tasks::Markdown.to_html(option.body).strip))
               end
             end
@@ -60,7 +60,7 @@ module Admin
           def list
             return Hint { t(".empty") } if @decision.options.empty?
 
-            ol(class: "task-comment-list") { @decision.options.each { item(it) } }
+            ol { @decision.options.each { item(it) } }
           end
 
           def mine?(option) = @form[:name] == :option && @form[:id] == option.id

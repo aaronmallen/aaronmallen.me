@@ -30,10 +30,10 @@ module Admin
           end
 
           def view_template
-            article(class: "task-read", data: { task_read: @task.id }) do
+            article(class: "read-page", data: { task_read: @task.id }) do
               head
               meta
-              div(class: "task-read-acts") { Controls(task: @task, filter: @filter, origin: @origin, moves: false) }
+              div(class: "read-acts") { Controls(task: @task, filter: @filter, origin: @origin, moves: false) }
               note
               facts
               links
@@ -111,7 +111,7 @@ module Admin
           end
 
           def meta
-            p(class: "task-meta task-read-meta") do
+            p(class: "read-meta") do
               TaskKey(task: @task)
               status
               SourceLink(source: @task.source)
@@ -123,7 +123,7 @@ module Admin
             return unless @note_html
 
             Card(label: t(".note_label"), title: t(".note")) do
-              div(class: "task-body post-body") { raw(safe(@note_html)) }
+              div(class: "markdown-body post-body") { raw(safe(@note_html)) }
             end
           end
 

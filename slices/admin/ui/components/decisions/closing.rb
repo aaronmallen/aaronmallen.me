@@ -44,7 +44,7 @@ module Admin
           end
 
           def drop
-            Form(action: path(:admin_drop_decision, id: @decision.id), class: "task-comment-form") do
+            Form(action: path(:admin_drop_decision, id: @decision.id), class: "stack-form") do
               reason_field(:drop)
               Button(variant: :warn, type: "submit", small: true) { t(".drop") }
             end
@@ -68,7 +68,7 @@ module Admin
           end
 
           def reopen
-            Form(action: path(:admin_reopen_decision, id: @decision.id), class: "task-comment-form") do
+            Form(action: path(:admin_reopen_decision, id: @decision.id), class: "stack-form") do
               reason_field(:reopen)
               Button(variant: :pri, type: "submit", small: true) { t(".reopen") }
             end
@@ -77,7 +77,7 @@ module Admin
           def resolve
             return Hint { t(".no_options") } if @decision.options.empty?
 
-            Form(action: path(:admin_resolve_decision, id: @decision.id), class: "task-comment-form") do
+            Form(action: path(:admin_resolve_decision, id: @decision.id), class: "stack-form") do
               choice_field(errors_for(:resolve))
               reason_field(:resolve)
               Button(variant: :pri, type: "submit", small: true) { t(".resolve") }

@@ -15,7 +15,7 @@ module Admin
           prop :errors, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
           def view_template
-            Form(action: form_action, class: "task-comment-form") do
+            Form(action: form_action, class: "stack-form") do
               title_field
               body_field
               note if noted?

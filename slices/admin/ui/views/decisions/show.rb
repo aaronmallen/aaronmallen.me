@@ -16,7 +16,7 @@ module Admin
           end
 
           def view_template
-            article(class: "task-read", data: { decision_read: @decision.id }) do
+            article(class: "read-page", data: { decision_read: @decision.id }) do
               head
               meta
               problem
@@ -52,7 +52,7 @@ module Admin
           end
 
           def meta
-            p(class: "task-meta task-read-meta") do
+            p(class: "read-meta") do
               Status(status: @decision.status)
               @decision.tags.each { Tag(tag: it) }
             end
@@ -60,7 +60,7 @@ module Admin
 
           def problem
             Card(label: t(".problem_label"), title: t(".problem")) do
-              div(class: "task-body post-body") { raw(safe(::Tasks::Markdown.to_html(@decision.problem).strip)) }
+              div(class: "markdown-body post-body") { raw(safe(::Tasks::Markdown.to_html(@decision.problem).strip)) }
             end
           end
         end

@@ -18,7 +18,7 @@ RSpec.describe "Admin decision timeline", type: :request do
 
   def edit(comment, body) = send_to("/admin/decisions/#{decision.id}/comments/#{comment.id}", comment: { body: })
 
-  def entries = page.all(".task-timeline > li")
+  def entries = page.all(".timeline > li")
 
   def event(kind, at: ten, **columns)
     Decisions::Slice["relations.decision_events"].insert(decision_id: decision.id, kind:, created_at: at, **columns)
@@ -64,7 +64,7 @@ RSpec.describe "Admin decision timeline", type: :request do
     it "says when nothing has happened" do
       read
 
-      expect(page).to have_css(".task-activity .hint", text: t("ui.components.decisions.timeline.empty"))
+      expect(page).to have_css(".timeline-card .hint", text: t("ui.components.decisions.timeline.empty"))
     end
 
     it "puts comments and events in time order" do
@@ -82,14 +82,14 @@ RSpec.describe "Admin decision timeline", type: :request do
       operation(:drop_decision).call(other.id, { reason: "No need" })
       read
 
-      expect(page).to have_no_css(".task-timeline")
+      expect(page).to have_no_css(".timeline")
     end
 
     it "shows an edit while open without a note" do
       operation(:edit_decision).call(decision.id, { title: "Pick a queue", problem: "Jobs pile up fast" })
       read
 
-      expect(page.find("[data-decision-event='edited']")).to have_no_css(".task-body")
+      expect(page.find("[data-decision-event='edited']")).to have_no_css(".markdown-body")
     end
 
     describe "every event, through its operation" do
@@ -105,7 +105,7 @@ RSpec.describe "Admin decision timeline", type: :request do
       end
 
       def event_bodies
-        page.all("[data-decision-event] .task-body").to_h { [it.ancestor("li")["data-decision-event"], it.text] }
+        page.all("[data-decision-event] .markdown-body").to_h { [it.ancestor("li")["data-decision-event"], it.text] }
       end
 
       def steps(option_id)
@@ -152,11 +152,11 @@ RSpec.describe "Admin decision timeline", type: :request do
       end
 
       it "renders a reason as Markdown" do
-        expect(page).to have_css("[data-decision-event='resolved'] .task-body em", exact_text: "cheap")
+        expect(page).to have_css("[data-decision-event='resolved'] .markdown-body em", exact_text: "cheap")
       end
 
       it "renders a comment as Markdown" do
-        expect(page).to have_css(".task-comment-body strong", exact_text: "cheap")
+        expect(page).to have_css(".comment-body strong", exact_text: "cheap")
       end
     end
 
@@ -166,7 +166,7 @@ RSpec.describe "Admin decision timeline", type: :request do
       before { read }
 
       it "names the owner and the time", :aggregate_failures do
-        expect(comment_on_page(comment)).to have_css(".task-comment-author", exact_text: Blog::Owner.full_name)
+        expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: Blog::Owner.full_name)
         expect(comment_on_page(comment).find("time")["datetime"]).to eq(comment.created_at.iso8601)
       end
 
@@ -174,7 +174,7 @@ RSpec.describe "Admin decision timeline", type: :request do
         create(:decision_comment, decision_id: decision.id, body: "<script>alert(1)</script>")
         read
 
-        expect(page).to have_no_css(".task-comment-body script")
+        expect(page).to have_no_css(".comment-body script")
       end
 
       it "offers an edit form that posts without script" do
@@ -194,6 +194,13 @@ RSpec.describe "Admin decision timeline", type: :request do
         expect(page).to have_css(
           "form[method='post'][action='/admin/decisions/#{decision.id}/comments'] textarea[name='comment[body]']",
         )
+      end
+
+      it "writes no task class" do
+        event("option_added", at: ten, option_id: option_id("Sidekiq"))
+        read
+
+        expect(page).to have_no_css("[class*='task-']")
       end
     end
 
@@ -216,7 +223,7 @@ RSpec.describe "Admin decision timeline", type: :request do
         add("Hello there")
         follow_redirect!
 
-        expect(page).to have_css(".task-comment-body", exact_text: "Hello there")
+        expect(page).to have_css(".comment-body", exact_text: "Hello there")
       end
 
       it "takes one on a closed decision" do
@@ -282,7 +289,7 @@ RSpec.describe "Admin decision timeline", type: :request do
       end
 
       it "opens that comment's form" do
-        expect(comment_on_page(comment)).to have_css("details.task-comment-edit[open]")
+        expect(comment_on_page(comment)).to have_css("details.comment-edit[open]")
       end
 
       it "leaves the new comment field clean" do
