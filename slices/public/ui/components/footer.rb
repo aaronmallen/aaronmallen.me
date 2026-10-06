@@ -26,7 +26,7 @@ module Public
         def built_with
           span(class: "site-footer-group") do
             span { t(".built_with") }
-            i(class: "fa-solid fa-heart site-footer-heart", role: "img", aria: { label: t(".heart_label") })
+            Icon("fa-solid fa-heart site-footer-heart", label: t(".heart_label"))
             built_with_link(href: "https://hanakai.org/hanami", name: "Hanami")
             span { t(".and") }
             built_with_link(href: "https://www.phlex.fun", name: "Phlex")
@@ -56,8 +56,7 @@ module Public
           return unless Blog::Types::Url.valid?(href)
 
           a(class: "site-footer-link", href:, rel: "me") do
-            i(class: ["fa-brands", icon], aria: { hidden: "true" })
-            span { t(label_key) }
+            IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
           end
         end
       end

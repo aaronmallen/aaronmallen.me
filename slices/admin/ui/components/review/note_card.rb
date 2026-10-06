@@ -45,7 +45,7 @@ module Admin
           def foot
             div(class: "review-foot") do
               p(class: "journal-words") do
-                i(class: "fa-solid fa-lock today-journal-lock", aria: { hidden: "true" })
+                Icon("fa-solid fa-lock today-journal-lock")
                 plain t(".private", day: l(@to, format: :medium))
               end
               save_button

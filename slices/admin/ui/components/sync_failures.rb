@@ -16,7 +16,7 @@ module Admin
 
         def failure_line(failure)
           p(class: "sync-failure") do
-            i(class: "fa-solid fa-triangle-exclamation sync-failure-icon", aria: { hidden: "true" })
+            Icon("fa-solid fa-triangle-exclamation sync-failure-icon")
             plain line(failure)
           end
         end

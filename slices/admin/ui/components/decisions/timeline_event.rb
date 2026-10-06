@@ -36,7 +36,7 @@ module Admin
           def line
             icon, key = EVENTS.fetch(@entry.kind)
 
-            i(class: ["timeline-event-icon", icon], aria: { hidden: "true" })
+            Icon(["timeline-event-icon", icon])
             span(class: "timeline-event-text") { t(key, option: @options[@entry.option_id]) }
             time(class: "timeline-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
           end

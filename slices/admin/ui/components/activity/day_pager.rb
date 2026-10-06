@@ -40,8 +40,7 @@ module Admin
             return unless day
 
             a(class: ["pager-link", rel], href: href(day), rel:) do
-              i(class: ["fa-solid", icon], aria: { hidden: "true" })
-              span { t(label) }
+              IconLabel(icon: ["fa-solid", icon]) { t(label) }
             end
           end
         end

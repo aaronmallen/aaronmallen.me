@@ -33,8 +33,7 @@ module Admin
 
           def blocked
             Pill(color: :pink) do
-              i(class: "fa-solid fa-lock", aria: { hidden: "true" })
-              span { t(".blocked") }
+              IconLabel(icon: "fa-solid fa-lock") { t(".blocked") }
             end
           end
 
@@ -42,8 +41,7 @@ module Admin
 
           def carried
             Pill(color: :sand) do
-              i(class: "fa-solid fa-rotate-left", aria: { hidden: "true" })
-              span { t(".carried", count: @task.carried_count) }
+              IconLabel(icon: "fa-solid fa-rotate-left") { t(".carried", count: @task.carried_count) }
             end
           end
 
@@ -67,8 +65,7 @@ module Admin
 
           def in_progress
             Pill(color: :blue) do
-              i(class: "fa-solid fa-circle-play", aria: { hidden: "true" })
-              span { t(".in_progress") }
+              IconLabel(icon: "fa-solid fa-circle-play") { t(".in_progress") }
             end
           end
 
@@ -98,8 +95,7 @@ module Admin
 
           def scheduled_pill
             Pill(color: :orange) do
-              i(class: "fa-regular fa-calendar", aria: { hidden: "true" })
-              span { t(".scheduled", date: l(@scheduled, format: :short)) }
+              IconLabel(icon: "fa-regular fa-calendar") { t(".scheduled", date: l(@scheduled, format: :short)) }
             end
           end
 

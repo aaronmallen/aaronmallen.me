@@ -25,8 +25,7 @@ module Admin
 
           def chosen
             Pill(color: :green) do
-              i(class: "fa-solid fa-check", aria: { hidden: "true" })
-              span { t(".chosen") }
+              IconLabel(icon: "fa-solid fa-check") { t(".chosen") }
             end
           end
 

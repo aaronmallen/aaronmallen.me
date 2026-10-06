@@ -19,7 +19,7 @@ module Admin
 
           def view_template(&)
             li(class: "timeline-event", id:, data: { task_event: @entry.kind }) do
-              i(class: ["timeline-event-icon", icon], aria: { hidden: "true" })
+              Icon(["timeline-event-icon", icon])
               span(class: "timeline-event-text") { @entry.session? ? session : event }
               time(class: "timeline-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
               yield if block_given?

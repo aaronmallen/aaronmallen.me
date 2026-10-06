@@ -30,7 +30,7 @@ module Admin
             a(
               class: "person-link", href:, target: "_blank", rel: "noopener noreferrer", title: handle,
               aria: { label: t(label_key, name: @person.name) },
-            ) { i(class: ["fa-brands", icon], aria: { hidden: "true" }) }
+            ) { Icon(["fa-brands", icon]) }
           end
 
           def mastodon

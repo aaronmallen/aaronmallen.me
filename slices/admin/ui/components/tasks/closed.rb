@@ -29,8 +29,7 @@ module Admin
 
           def mark
             Pill(color: :sand) do
-              i(class: "fa-solid fa-ban", aria: { hidden: "true" })
-              span { t(".canceled") }
+              IconLabel(icon: "fa-solid fa-ban") { t(".canceled") }
             end
           end
         end

@@ -53,8 +53,7 @@ module Admin
               total = deliveries.each_value.sum { it.public_send(column) }
 
               span(class: "sq-metric", data: { social_engagement: column }, aria: { label: t(key) }) do
-                i(class: icon, aria: { hidden: "true" })
-                span { total.to_s }
+                IconLabel(icon:) { total.to_s }
               end
             end
           end

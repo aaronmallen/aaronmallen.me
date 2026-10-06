@@ -73,7 +73,7 @@ module Admin
 
         def meta
           p(class: "journal-words") do
-            i(class: "fa-solid fa-lock today-journal-lock", aria: { hidden: "true" })
+            Icon("fa-solid fa-lock today-journal-lock")
             plain "#{t('.private')}#{SEPARATOR}"
             span(data: { journal_words: "", one: t(".words.one"), other: t(".words.other") }) do
               t(".words", count: @word_count)

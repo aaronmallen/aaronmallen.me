@@ -71,7 +71,7 @@ module Admin
           def owner_href = @event.decision_id ? path(:admin_decision, id: @event.decision_id) : task_href
 
           def row
-            i(class: ["fa-solid", type.icon, "activity-icon", type.color.to_s], aria: { hidden: "true" })
+            Icon(["fa-solid", type.icon, "activity-icon", type.color.to_s])
             named
             stamp
           end

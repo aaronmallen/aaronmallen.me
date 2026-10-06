@@ -27,7 +27,7 @@ module Admin
 
           def box
             div(class: "person-search-box") do
-              i(class: "fa-solid fa-magnifying-glass", aria: { hidden: "true" })
+              Icon("fa-solid fa-magnifying-glass")
               Input(
                 type: "search", id: input_id, autocomplete: "off", role: "combobox",
                 placeholder: t(".placeholder", network: network_label),

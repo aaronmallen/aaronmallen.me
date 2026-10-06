@@ -45,7 +45,7 @@ module Admin
             Form(action: @link_path, class: "record-picker-pick") do
               hidden_fields({ **@fields, record_q: @query, "record[other_kind]": kind, "record[other_id]": link.id })
               button(type: "submit", class: "record-picker-target") do
-                i(class: "fa-solid fa-plus", aria: { hidden: "true" })
+                Icon("fa-solid fa-plus")
                 span(class: "record-link-title") { link.title }
                 time(class: "record-link-day", datetime: link.day.iso8601) { l(link.day, format: :medium) }
               end

@@ -26,7 +26,7 @@ module Admin
           private
 
           def author(comment)
-            i(class: SourceLink::ICONS.fetch(comment.provider), aria: { hidden: "true" })
+            Icon(SourceLink::ICONS.fetch(comment.provider))
             plain(comment.author || t(".unknown_author"))
           end
 

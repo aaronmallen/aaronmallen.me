@@ -11,8 +11,7 @@ module Admin
         def view_template
           div(role: "status", data: { toast: true }) do
             div(class: "toast", hidden: true) do
-              i(class: "fa-solid fa-check toast-icon", aria: { hidden: "true" })
-              span { @message }
+              IconLabel(icon: "fa-solid fa-check toast-icon") { @message }
             end
           end
         end

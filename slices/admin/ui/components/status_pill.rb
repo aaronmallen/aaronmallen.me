@@ -20,8 +20,7 @@ module Admin
           color, icon, label_key = STATUSES.fetch(@status)
 
           Pill(color:) do
-            i(class: icon, aria: { hidden: "true" })
-            span { t(label_key) }
+            IconLabel(icon:) { t(label_key) }
           end
         end
       end

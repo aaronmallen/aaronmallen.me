@@ -33,8 +33,7 @@ module Admin
           def target(network)
             label(class: ["compose-target", network.name]) do
               input(**checkbox(network))
-              i(class: "fa-solid fa-check compose-target-check", aria: { hidden: "true" })
-              span { network.label }
+              IconLabel(icon: "fa-solid fa-check compose-target-check") { network.label }
             end
           end
         end

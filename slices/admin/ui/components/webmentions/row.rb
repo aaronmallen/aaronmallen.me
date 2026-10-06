@@ -47,7 +47,7 @@ module Admin
 
           def author
             div(class: "wm-author") do
-              i(class: [type.icon, "wm-type-icon"], aria: { hidden: "true" })
+              Icon([type.icon, "wm-type-icon"])
               a(
                 class: "li-title", href: @mention.source_url, target: "_blank", rel: "noopener noreferrer",
                 data: { key_open: true },

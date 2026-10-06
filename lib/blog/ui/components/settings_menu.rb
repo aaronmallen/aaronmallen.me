@@ -26,8 +26,7 @@ module Blog
         def admin_items(admin_session)
           hr(class: "settings-menu-separator")
           a(class: "settings-menu-option", href: path(:admin_root)) do
-            i(class: "fa-solid fa-gauge", aria: { hidden: "true" })
-            span { t(".admin") }
+            IconLabel(icon: "fa-solid fa-gauge") { t(".admin") }
           end
           sign_out_form(admin_session.csrf_token)
         end
@@ -51,8 +50,7 @@ module Blog
           Form(action: path(:admin_sign_out), token:) do
             input(type: "hidden", name: "return_to", value: request.fullpath)
             button(type: "submit", class: "settings-menu-option") do
-              i(class: "fa-solid fa-right-from-bracket", aria: { hidden: "true" })
-              span { t(".sign_out") }
+              IconLabel(icon: "fa-solid fa-right-from-bracket") { t(".sign_out") }
             end
           end
         end
@@ -64,9 +62,8 @@ module Blog
             aria: { pressed: "false" },
             data: { theme_choice: theme },
           ) do
-            i(class: ["fa-solid", icon], aria: { hidden: "true" })
-            span { t(label_key) }
-            i(class: "fa-solid fa-check settings-menu-check", aria: { hidden: "true" })
+            IconLabel(icon: ["fa-solid", icon]) { t(label_key) }
+            Icon("fa-solid fa-check settings-menu-check")
           end
         end
 
@@ -77,7 +74,7 @@ module Blog
             aria: { controls: PANEL_ID, expanded: "false", label: t(".toggle_label") },
             data: { disclosure: true },
           ) do
-            i(class: "fa-solid fa-gear", aria: { hidden: "true" })
+            Icon("fa-solid fa-gear")
           end
         end
       end

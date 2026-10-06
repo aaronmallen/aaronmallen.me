@@ -25,8 +25,7 @@ module Admin
 
           def add_link(**)
             a(href: path(:admin_new_person), **) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".add") }
+              IconLabel(icon: "fa-solid fa-plus") { t(".add") }
             end
           end
 

@@ -22,7 +22,7 @@ module Admin
           private
 
           def head
-            i(class: "fa-solid fa-chevron-right time-caret", aria: { hidden: "true" })
+            Icon("fa-solid fa-chevron-right time-caret")
             span(class: "meter-name") { name }
             shared if @group.shared
             meter

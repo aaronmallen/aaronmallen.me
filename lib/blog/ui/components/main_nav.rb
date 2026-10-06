@@ -70,8 +70,8 @@ module Blog
             aria: { controls: LINKS_ID, expanded: "false", label: t(".menu_label") },
             data: { disclosure: true },
           ) do
-            i(class: "fa-solid fa-bars main-nav-toggle-closed-icon", aria: { hidden: "true" })
-            i(class: "fa-solid fa-xmark main-nav-toggle-opened-icon", aria: { hidden: "true" })
+            Icon("fa-solid fa-bars main-nav-toggle-closed-icon")
+            Icon("fa-solid fa-xmark main-nav-toggle-opened-icon")
           end
         end
 

@@ -45,8 +45,7 @@ module Public
 
           def back_link
             a(class: "post-back", href: path(:writing)) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".back") }
+              IconLabel(icon: "fa-solid fa-arrow-left") { t(".back") }
             end
           end
 
@@ -90,8 +89,7 @@ module Public
 
             a(class: ["post-pager-link", rel], href: path(:post, slug: post.slug), rel:) do
               span(class: "post-pager-label") do
-                i(class: ["fa-solid", icon], aria: { hidden: "true" })
-                span { t(label_key) }
+                IconLabel(icon: ["fa-solid", icon]) { t(label_key) }
               end
               span(class: "post-pager-title") { post.title }
             end

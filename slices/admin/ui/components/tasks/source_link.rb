@@ -16,8 +16,7 @@ module Admin
             return if @source.nil?
 
             a(class: "task-source", href: @source.url, target: "_blank", rel: "noopener noreferrer") do
-              i(class: ICONS.fetch(@source.provider), aria: { hidden: "true" })
-              span { ::Tasks::SourceReference.for(@source).name }
+              IconLabel(icon: ICONS.fetch(@source.provider)) { ::Tasks::SourceReference.for(@source).name }
             end
           end
         end

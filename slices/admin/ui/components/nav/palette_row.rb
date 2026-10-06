@@ -32,7 +32,7 @@ module Admin
                 palette_needs: @needs, palette_all: @all, **jump_key,
               },
             ) do
-              i(class: ["fa-solid", @icon, "pal-r-icon"], aria: { hidden: "true" })
+              Icon(["fa-solid", @icon, "pal-r-icon"])
               @match ? text_with_match : span(class: "pal-r-label") { @label }
               span(class: ["pal-r-sub", ("warn" if @warn)]) { @sub } if @sub
             end

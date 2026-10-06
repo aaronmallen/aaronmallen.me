@@ -42,6 +42,18 @@ RSpec.describe "Footer", type: :request do
     expect(profile_links.map { it.text.strip }).to eq(%w[github bluesky mastodon])
   end
 
+  it "hides each profile link's icon from assistive tech" do
+    expect(profile_links.map { it.find("i", visible: :all)["aria-hidden"] }).to all(eq("true"))
+  end
+
+  it "labels the heart as an image", :aggregate_failures do
+    heart = page.find("footer i.fa-heart", visible: :all)
+
+    expect(heart[:role]).to eq("img")
+    expect(heart["aria-label"]).to eq("love")
+    expect(heart["aria-hidden"]).to be_nil
+  end
+
   %w[/ /about /contact /privacy /projects /writing].each do |path|
     it "links #{path} to the privacy page" do
       get path

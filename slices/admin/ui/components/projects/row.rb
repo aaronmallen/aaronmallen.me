@@ -56,8 +56,7 @@ module Admin
 
           def featured
             Pill(color: :orange) do
-              i(class: "fa-solid fa-star", aria: { hidden: "true" })
-              span { t(".featured") }
+              IconLabel(icon: "fa-solid fa-star") { t(".featured") }
             end
           end
 
@@ -73,8 +72,7 @@ module Admin
 
           def repo
             span do
-              i(class: "fa-brands fa-github", aria: { hidden: "true" })
-              span { @project.repo }
+              IconLabel(icon: "fa-brands fa-github") { @project.repo }
             end
           end
 
@@ -88,8 +86,7 @@ module Admin
 
           def stars
             span(role: "img", aria: { label: stars_label }) do
-              i(class: "fa-regular fa-star", aria: { hidden: "true" })
-              span { Blog::Figures.count(@project.stars) }
+              IconLabel(icon: "fa-regular fa-star") { Blog::Figures.count(@project.stars) }
             end
           end
 

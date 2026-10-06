@@ -70,8 +70,7 @@ module Public
 
           def link(href, icon, label)
             a(href:) do
-              i(class: icon, aria: { hidden: "true" })
-              span { label }
+              IconLabel(icon:) { label }
             end
           end
 

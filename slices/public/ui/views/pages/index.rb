@@ -26,7 +26,7 @@ module Public
           def list_link(route, key)
             a(class: "sec-l", href: path(route)) do
               span { t(key) }
-              i(class: "fa-solid fa-arrow-right", aria: { hidden: "true" })
+              Icon("fa-solid fa-arrow-right")
             end
           end
 

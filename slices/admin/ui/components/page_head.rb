@@ -28,7 +28,7 @@ module Admin
           return unless @sub
 
           p(class: "page-head-sub") do
-            i(class: [@sub_icon, "page-head-sub-icon"], aria: { hidden: "true" }) if @sub_icon
+            Icon([@sub_icon, "page-head-sub-icon"]) if @sub_icon
             plain @sub
           end
         end

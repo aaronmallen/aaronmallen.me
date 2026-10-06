@@ -26,8 +26,7 @@ module Admin
             Form(action: path(:admin_schedule_task, id: task.id)) do
               input(type: "hidden", name: "sprint_on", value: sprint.sprint_date.iso8601)
               button(type: "submit", class: "chip-btn", aria: { label: t(".pull_task", task: task.title) }) do
-                i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-                span { shorten(task.title) }
+                IconLabel(icon: "fa-solid fa-plus") { shorten(task.title) }
               end
             end
           end

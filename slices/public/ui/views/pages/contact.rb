@@ -39,7 +39,7 @@ module Public
           def actions
             div(class: "f-a") do
               button(class: "f-b", type: "submit") do
-                icon("fa-paper-plane")
+                Icon("fa-solid fa-paper-plane")
                 plain(t(".send"))
               end
               span(class: "f-n") { t(".note") }
@@ -98,8 +98,6 @@ module Public
 
           def honeypot_id = ContactFieldError.id_for(HONEYPOT)
 
-          def icon(name) = i(class: "fa-solid #{name}", aria: { hidden: "true" })
-
           def input_row(name, label_key, placeholder_key, type: "text", **extra)
             row(name, label_key) do
               input(
@@ -132,7 +130,7 @@ module Public
 
           def panel(classes, glyph, heading, line)
             div(class: classes) do
-              icon(glyph)
+              Icon(["fa-solid", glyph])
               div do
                 strong { heading }
                 p { line }

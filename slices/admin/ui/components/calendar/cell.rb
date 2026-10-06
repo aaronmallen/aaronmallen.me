@@ -39,7 +39,7 @@ module Admin
 
           def mark(icon, text, kind)
             span(class: ["cal-mark", kind]) do
-              i(class: icon, aria: { hidden: "true" })
+              Icon(icon)
               span(class: "cal-mark-text") { text }
             end
           end

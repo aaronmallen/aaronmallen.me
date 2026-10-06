@@ -27,7 +27,7 @@ module Admin
 
           def chip(link)
             span(class: chip_class(link), title: link.task.title) do
-              i(class: ICONS.fetch(link.label), aria: { hidden: "true" })
+              Icon(ICONS.fetch(link.label))
               span(class: "task-link-label") { t(self.class.label_key(link)) }
               TaskKey(task: link.task)
               span(class: "sr-only") { link.task.title }

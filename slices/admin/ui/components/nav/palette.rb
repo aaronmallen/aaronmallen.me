@@ -97,7 +97,7 @@ module Admin
 
           def query_box
             div(class: "pal-in") do
-              i(class: "fa-solid fa-magnifying-glass pal-in-icon", aria: { hidden: "true" })
+              Icon("fa-solid fa-magnifying-glass pal-in-icon")
               input(
                 type: "text", class: "pal-in-field", role: "combobox", autocomplete: "off",
                 placeholder: t(".placeholder"), data: { palette_query: true },

@@ -93,7 +93,7 @@ module Admin
 
         def sub_line
           p(class: "commits-sub") do
-            i(class: "fa-brands fa-github commits-sub-icon", aria: { hidden: "true" })
+            Icon("fa-brands fa-github commits-sub-icon")
             plain "#{synced}#{SEPARATOR}#{t('.repos', count: @repos)}"
           end
         end

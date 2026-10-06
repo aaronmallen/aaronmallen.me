@@ -23,8 +23,7 @@ module Blog
           return unless query
 
           a(class: ["pager-link", rel], href: path(@route, **@params, **query), rel:) do
-            i(class: ["fa-solid", icon], aria: { hidden: "true" })
-            span { t(label_key) }
+            IconLabel(icon: ["fa-solid", icon]) { t(label_key) }
           end
         end
       end

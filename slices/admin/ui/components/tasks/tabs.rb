@@ -36,12 +36,6 @@ module Admin
 
           def href(name) = path(:admin_tasks, **params(name))
 
-          def icon(name)
-            found = ICONS[name]
-
-            i(class: found, aria: { hidden: "true" }) if found
-          end
-
           def params(name)
             found = { filter: name }
             found[:q] = @query unless @query.empty?
@@ -52,7 +46,7 @@ module Admin
             current = name == @tab
 
             a(class: ["subtab", ("on" if current)], href: href(name), aria: { current: ("page" if current) }) do
-              icon(name)
+              Icon(ICONS[name]) if ICONS.key?(name)
               span { t(LABELS.fetch(name)) }
               count(name)
             end

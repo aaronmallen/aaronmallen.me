@@ -104,7 +104,7 @@ module Admin
             type = Event::TYPES.fetch(name)
 
             div(class: "activity-type") do
-              i(class: ["fa-solid", type.icon, "activity-icon", type.color.to_s], aria: { hidden: "true" })
+              Icon(["fa-solid", type.icon, "activity-icon", type.color.to_s])
               Checkbox(label: t(LABELS.fetch(name)), name: "types[#{name}]", checked: @types.include?(name))
               span(class: "activity-type-count") { @counts.fetch(name, 0).to_s }
             end

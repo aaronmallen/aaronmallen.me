@@ -35,15 +35,13 @@ module Admin
             return if @current&.path == today
 
             a(class: "ctx-btn", href: today) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".back") }
+              IconLabel(icon: "fa-solid fa-arrow-left") { t(".back") }
             end
           end
 
           def jump
             button(type: "button", class: "ctx-btn jump", data: { palette_open: true }) do
-              i(class: "fa-solid fa-magnifying-glass", aria: { hidden: "true" })
-              span { t(".jump") }
+              IconLabel(icon: "fa-solid fa-magnifying-glass") { t(".jump") }
               alert_dot
               whitespace
               span(class: "kbd", aria: { hidden: "true" }) { t(".shortcut") }
@@ -57,7 +55,7 @@ module Admin
               type: "button", class: "ctx-btn", aria: { label: }, title: label,
               data: { dialog_open: KeyHelp::ID, key: KEY, key_label: label, key_help_open: true },
             ) do
-              i(class: "fa-regular fa-keyboard", aria: { hidden: "true" })
+              Icon("fa-regular fa-keyboard")
               span(class: "kbd", aria: { hidden: "true" }) { KEY }
             end
           end
@@ -68,8 +66,7 @@ module Admin
             return unless @current
 
             span(class: "ctx-where") do
-              i(class: ["fa-solid", @current.icon, "ctx-where-icon"], aria: { hidden: "true" })
-              span { t(@current.group_key) }
+              IconLabel(icon: ["fa-solid", @current.icon, "ctx-where-icon"]) { t(@current.group_key) }
               whitespace
               span(class: "ctx-where-sep") { t(".separator") }
               whitespace

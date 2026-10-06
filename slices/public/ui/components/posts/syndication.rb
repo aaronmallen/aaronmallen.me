@@ -27,8 +27,7 @@ module Public
             icon, label_key = NETWORKS[network]
 
             a(class: "post-syndication-link u-syndication", href: url) do
-              i(class: ["fa-brands", icon], aria: { hidden: "true" })
-              span { t(label_key) }
+              IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
             end
           end
         end
