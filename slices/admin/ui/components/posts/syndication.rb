@@ -19,7 +19,7 @@ module Admin
           def view_template
             Card(label: t(".heading")) do
               div(class: "form-stack", data: { syndication: path(:admin_preview_post_syndication) }) do
-                Toggle(label: t(".queue"), name: "post[syndication_enabled]", checked: @enabled)
+                Checkbox(switch: true, label: t(".queue"), name: "post[syndication_enabled]", checked: @enabled)
                 input(type: "hidden", name: TARGETS, value: Blog::Constants::EMPTY_STRING)
                 Social::Targets(networks: @networks, name: TARGETS)
                 text_field

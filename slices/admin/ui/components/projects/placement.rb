@@ -21,7 +21,7 @@ module Admin
               div(class: "form-stack") do
                 @archived ? archived_status : status_field
                 tags_field
-                Toggle(label: t(".featured"), name: "project[featured]", checked: @featured)
+                Checkbox(switch: true, label: t(".featured"), name: "project[featured]", checked: @featured)
                 Hint { t(".archived_note") }
               end
             end

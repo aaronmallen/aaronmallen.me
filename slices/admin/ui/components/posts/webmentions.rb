@@ -11,7 +11,7 @@ module Admin
           def view_template
             Card(label: t(".heading")) do
               div(class: "form-stack") do
-                Toggle(label: t(".accept"), name: "post[webmentions_enabled]", checked: @enabled)
+                Checkbox(switch: true, label: t(".accept"), name: "post[webmentions_enabled]", checked: @enabled)
                 Hint { t(".hint") }
                 Hint { t(".received", count: @received) } if @received.positive?
               end

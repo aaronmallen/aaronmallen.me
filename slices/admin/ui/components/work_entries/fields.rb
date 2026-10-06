@@ -14,7 +14,7 @@ module Admin
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
-            render Blog::UI::Components::Form.new(action: path(:admin_create_work_entry), data: { work_form: "" }) do
+            Form(action: path(:admin_create_work_entry), data: { work_form: "" }) do
               div(class: "form-stack") { fields }
             end
           end

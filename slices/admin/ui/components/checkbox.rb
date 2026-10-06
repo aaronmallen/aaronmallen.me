@@ -7,6 +7,7 @@ module Admin
         prop :label, Blog::Types::String
         prop :name, Blog::Types::String
         prop :checked, Blog::Types::Bool, default: false
+        prop :switch, Blog::Types::Bool, default: false
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template
@@ -20,7 +21,8 @@ module Admin
         private
 
         def control_attributes
-          { class: "check", type: "checkbox", name: @name, value: Blog::Constants::CHECKED, checked: @checked }
+          { class: @switch ? "toggle" : "check", type: "checkbox", role: @switch && "switch", name: @name,
+            value: Blog::Constants::CHECKED, checked: @checked }
         end
       end
     end

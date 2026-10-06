@@ -14,15 +14,15 @@ module Admin
             BackLink(href: path(:admin_people), variant: :gh, small: true, class: "editor-back") { t(".all_people") }
 
             PageHead(title: @person ? @person.name : t(".new_person"), sub: t(".sub"))
-            Card { render Form.new(person: @person, values: @values, errors: @errors, searchable: @searchable) }
+            Card { PersonForm(person: @person, values: @values, errors: @errors, searchable: @searchable) }
             delete_form if @person
           end
 
           private
 
           def delete_form
-            render Blog::UI::Components::Form.new(
-              id: Form::DELETE_FORM,
+            Form(
+              id: PersonForm::DELETE_FORM,
               action: path(:admin_delete_person, id: @person.id),
               data: { confirm: t(".confirm_delete", name: @person.name) },
             )

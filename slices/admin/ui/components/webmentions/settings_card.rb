@@ -49,7 +49,7 @@ module Admin
           end
 
           def toggle(name, label_key)
-            Toggle(label: t(label_key), name: "settings[#{name}]", checked: @settings.public_send(name))
+            Checkbox(switch: true, label: t(label_key), name: "settings[#{name}]", checked: @settings.public_send(name))
           end
         end
       end

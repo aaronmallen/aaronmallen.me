@@ -91,7 +91,7 @@ module Admin
               Card(label: t(".work_label"), title: t(".work_title"), data: { key_list: true }) { work_rows }
               SideStack do
                 work_linked if @work_links
-                Components::WorkEntries::Form(**@work_form)
+                Components::WorkEntries::EntryForm(**@work_form)
               end
             end
           end

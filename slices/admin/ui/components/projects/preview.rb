@@ -18,7 +18,7 @@ module Admin
           private
 
           def card
-            render Blog::UI::Components::ProjectCard.new(
+            ProjectCard(
               name: name,
               tagline: tagline,
               tags: Blog::Types::TagList[@values[:tags]],

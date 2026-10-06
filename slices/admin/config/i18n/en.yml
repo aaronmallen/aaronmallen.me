@@ -817,7 +817,9 @@ en:
             format: "A Mastodon handle looks like @ada@ruby.social."
           name:
             blank: "Give them a name first."
-        form:
+        person_dialog:
+          title: "New person"
+        person_form:
           add: "Add person"
           bluesky_handle: "Bluesky handle"
           bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
@@ -831,8 +833,6 @@ en:
           name: "Name"
           name_placeholder: "Ada Lovelace"
           save: "Save"
-        person_dialog:
-          title: "New person"
         profile_links:
           bluesky: "%{name} on Bluesky"
           bluesky_handle: "@%{handle}"
@@ -1711,6 +1711,9 @@ en:
           single_author_hosts: "One person's sites"
           title: "Settings"
       work_entries:
+        entry_form:
+          heading: "Add"
+          title: "A new role"
         field_error:
           from_year:
             blank: "Add the year this started."
@@ -1735,9 +1738,6 @@ en:
           role_placeholder: "Software Engineer"
           to: "To"
           to_placeholder: "2021"
-        form:
-          heading: "Add"
-          title: "A new role"
         row:
           confirm_remove: "Remove %{role} at %{org}? You can't undo this."
           current: "Present"

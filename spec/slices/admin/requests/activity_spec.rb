@@ -778,6 +778,12 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(page).to have_no_css("input[name='types[project]'], input[name='types[sprint]'], " \
                                     "input[name='types[suggestion]']", visible: :all)
       end
+
+      it "draws a type as a plain checkbox, not a switch" do
+        visit_activity
+
+        expect(page).to have_css("input.check[name='types[post]']:not([role])", visible: :all)
+      end
     end
 
     describe "searching by repo" do

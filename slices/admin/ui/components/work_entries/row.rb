@@ -35,7 +35,7 @@ module Admin
           end
 
           def remove
-            render Blog::UI::Components::Form.new(action: remove_path, data: { confirm: }) do
+            Form(action: remove_path, data: { confirm: }) do
               Button(type: "submit", variant: :warn, small: true, icon: "fa-solid fa-trash-can") { t(".remove") }
             end
           end

@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       module People
-        class Form < Component
+        class PersonForm < Component
           DELETE_FORM = "person-delete"
           EDIT = "edit"
           NEW = "new"
@@ -22,7 +22,7 @@ module Admin
           prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
-            render Blog::UI::Components::Form.new(action: form_action, data: { person_form: @person ? EDIT : NEW }) do
+            Form(action: form_action, data: { person_form: @person ? EDIT : NEW }) do
               div(class: "form-stack") do
                 input_field(:name)
                 input_field(:key) { Hint { t(".key_note") } }

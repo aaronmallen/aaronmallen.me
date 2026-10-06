@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       module WorkEntries
-        class Form < Component
+        class EntryForm < Component
           prop :values, Fields::VALUES
           prop :errors, Blog::Types::Hash
 

@@ -319,6 +319,12 @@ RSpec.describe "Admin webmentions", type: :request do
         end
       end
 
+      it "draws a setting as a switch" do
+        get "/admin/webmentions"
+
+        expect(page).to have_css("input.toggle[role='switch'][name='settings[receive]']", visible: :all)
+      end
+
       it "leaves the toggles it isn't sent alone" do
         post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: { receive: "0" }
 
