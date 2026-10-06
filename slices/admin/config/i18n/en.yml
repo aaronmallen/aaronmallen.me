@@ -561,6 +561,8 @@ en:
           option_edited: "Edited the option %{option}"
           reopened: "Reopened it"
           resolved: "Resolved it with %{option}"
+      dialog:
+        close: "Close"
       drafts_card:
         empty: "No drafts. Suspicious."
         read_time: "~%{count} min read"
@@ -774,7 +776,6 @@ en:
           tokens: "API tokens"
           webmentions: "webmentions"
         key_help:
-          close: "Close"
           next: "Highlight the next row"
           open: "Open the highlighted row"
           palette: "Open the command palette from anywhere"
@@ -784,9 +785,6 @@ en:
         slash_button:
           label: "Open the command palette"
       people:
-        dialog:
-          close: "Close"
-          title: "New person"
         editor:
           all_people: "All people"
           confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
@@ -821,6 +819,8 @@ en:
           name: "Name"
           name_placeholder: "Ada Lovelace"
           save: "Save"
+        person_dialog:
+          title: "New person"
         profile_links:
           bluesky: "%{name} on Bluesky"
           bluesky_handle: "@%{handle}"
@@ -1403,7 +1403,6 @@ en:
           label: "Create Task"
         create_dialog:
           cancel: "Cancel"
-          close: "Close"
           edit_title: "Edit the task"
           title: "New task"
         field_error:

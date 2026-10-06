@@ -36,7 +36,7 @@ module Admin
               end
               SideStack { queue }
             end
-            render Components::People::Dialog.new
+            render Components::People::PersonDialog.new
           end
 
           private

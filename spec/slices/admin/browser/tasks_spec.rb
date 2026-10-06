@@ -32,7 +32,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def modal = find("dialog#task-create[open]")
 
-  def modal_x = "button[aria-label='#{translate('ui.components.tasks.create_dialog.close')}']"
+  def modal_x = "button[aria-label='#{translate('ui.components.dialog.close')}']"
 
   def move_to(list)
     named = translate(["ui.components.tasks.controls.lists", list].join("."))

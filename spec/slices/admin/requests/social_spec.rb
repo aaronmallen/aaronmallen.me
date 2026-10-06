@@ -129,6 +129,13 @@ RSpec.describe "Admin social", type: :request do
         expect(page).to have_css("dialog#person-dialog[data-person-dialog]", visible: :all)
         expect(page).to have_no_css("form[data-social-composer] dialog#person-dialog", visible: :all)
       end
+
+      it "draws the people dialog in the dialog shell with its title and the close button" do
+        get "/admin/social"
+
+        head = "dialog#person-dialog.dialog > .dialog-box > .dialog-head"
+        expect(page).to have_css("#{head} > h2#person-dialog-title + button[data-dialog-close]", visible: :all)
+      end
     end
 
     describe "the preview" do

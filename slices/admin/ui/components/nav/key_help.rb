@@ -8,10 +8,6 @@ module Admin
           ID = "key-help"
           ROWS = "[data-key-list] [data-key-row]"
           TITLE_ID = "key-help-title"
-          ATTRIBUTES = {
-            id: ID, class: "task-dialog", hidden: true, aria: { labelledby: TITLE_ID },
-            data: { dialog: true, key_help: true },
-          }.freeze
           FIXED = [
             [%w[j], ".next", ROWS],
             [%w[k], ".previous", ROWS],
@@ -21,12 +17,9 @@ module Admin
           ].freeze
 
           def view_template
-            dialog(**ATTRIBUTES) do
-              div(class: "task-dialog-box") do
-                head
-                dl(class: "keys", data: { key_help_list: true }) { FIXED.each { fixed(*it) } }
-                row_template
-              end
+            Dialog(id: ID, title_id: TITLE_ID, title: t(".title"), data: { dialog: true, key_help: true }) do
+              dl(class: "keys", data: { key_help_list: true }) { FIXED.each { fixed(*it) } }
+              row_template
             end
           end
 
@@ -36,16 +29,6 @@ module Admin
             div(class: "keys-row", data: { key_help_needs: needs }) do
               dt(class: "keys-keys") { keys.each { kbd(class: "kbd") { it } } }
               dd(class: "keys-label") { t(label_key) }
-            end
-          end
-
-          def head
-            div(class: "task-dialog-head") do
-              h2(id: TITLE_ID, class: "card-title") { t(".title") }
-              Button(
-                variant: :gh, small: true, aria: { label: t(".close") }, data: { dialog_close: true },
-                icon: "fa-solid fa-xmark",
-              )
             end
           end
 

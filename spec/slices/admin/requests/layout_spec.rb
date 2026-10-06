@@ -79,6 +79,24 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css("footer.adm-footer ~ dialog#command-palette", visible: :all)
     end
 
+    it "draws the confirm dialog in the dialog shell with a foot and no head", :aggregate_failures do
+      shell = "dialog#confirm-dialog.dialog[role='alertdialog'][aria-labelledby='confirm-dialog-message'][hidden]"
+      expect(page).to have_css("#{shell} > .dialog-box > .dialog-foot > button[data-confirm-accept]", visible: :all)
+      expect(page).to have_no_css("dialog#confirm-dialog .dialog-head", visible: :all)
+    end
+
+    it "draws the key help dialog with a head that holds its title and the close button" do
+      expect(page).to have_css(
+        "dialog#key-help.dialog[aria-labelledby='key-help-title'] > .dialog-box > .dialog-head " \
+        "> h2#key-help-title + button[data-dialog-close][aria-label='Close']",
+        visible: :all,
+      )
+    end
+
+    it "draws no task-dialog class" do
+      expect(page).to have_no_css("[class*='task-dialog']", visible: :all)
+    end
+
     it "loads the site styles and scripts", :aggregate_failures do
       expect(page).to have_css("link[rel='stylesheet'][href*='app']", visible: :all)
       expect(page).to have_css("script[src*='app']", visible: :all)
