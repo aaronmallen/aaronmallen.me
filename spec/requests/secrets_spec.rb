@@ -135,7 +135,7 @@ RSpec.describe "Secrets a request carries", type: :request do
       params = {
         client_id: client.client_id,
         code_challenge: challenge,
-        code_challenge_method: MCP::OAuth::PKCE::METHOD,
+        code_challenge_method: Blog::Types::CodeChallengeMethod["S256"],
         redirect_uri: client.redirect_uris.first,
         response_type: "code",
         state:,

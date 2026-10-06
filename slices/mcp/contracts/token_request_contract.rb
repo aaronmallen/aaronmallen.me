@@ -13,9 +13,9 @@ module MCP
 
       params do
         required(:grant_type).filled(:string, included_in?: OAuth::Metadata::GRANT_TYPES)
-        optional(:code).maybe(:string, format?: Blog::SecretToken::SHAPE)
-        optional(:refresh_token).maybe(:string, format?: Blog::SecretToken::SHAPE)
-        optional(:code_verifier).maybe(:string, format?: OAuth::PKCE::SHAPE)
+        optional(:code).maybe(Blog::Types::IssuedSecret)
+        optional(:refresh_token).maybe(Blog::Types::IssuedSecret)
+        optional(:code_verifier).maybe(Blog::Types::PKCEValue)
         optional(:redirect_uri).maybe(:string)
       end
 

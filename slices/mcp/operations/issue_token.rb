@@ -72,7 +72,7 @@ module MCP
       end
 
       def find_token(value)
-        token = token_repo.by_token(value, type: Repos::OAuthTokenRepo::REFRESH)
+        token = token_repo.by_token(value, type: Blog::Types::OAuthTokenType["refresh"])
         return refuse(UNUSABLE_REFRESH_TOKEN) if token.nil?
         return replay(token.oauth_client_id, UNUSABLE_REFRESH_TOKEN) if token.revoked_at
         return refuse(UNUSABLE_REFRESH_TOKEN) if token.expires_at <= Time.now

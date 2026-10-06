@@ -11,8 +11,8 @@ module MCP
 
       params do
         required(:response_type).filled(:string, included_in?: OAuth::Metadata::RESPONSE_TYPES)
-        required(:code_challenge).filled(:string, format?: OAuth::PKCE::SHAPE)
-        optional(:code_challenge_method).value(UNCOERCED) { nil? | eql?(OAuth::PKCE::METHOD) }
+        required(:code_challenge).filled(Blog::Types::PKCEValue)
+        optional(:code_challenge_method).value(Blog::Types::CodeChallengeMethod.optional)
         optional(:redirect_uri).value(UNCOERCED)
         optional(:resource).value(UNCOERCED)
         optional(:scope).maybe(:string, format?: SCOPE)

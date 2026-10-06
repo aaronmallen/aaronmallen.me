@@ -4,7 +4,6 @@ module MCP
   module OAuth
     module Metadata
       BEARER_METHODS = %w[header].freeze
-      CHALLENGE_METHODS = %w[S256].freeze
       GRANT_TYPES = %w[authorization_code refresh_token].freeze
       NO_TOKEN_AUTH = "none"
       RESPONSE_TYPES = %w[code].freeze
@@ -15,7 +14,7 @@ module MCP
           {
             authorization_endpoint: endpoint(routes, :mcp_oauth_authorize),
             authorization_response_iss_parameter_supported: true,
-            code_challenge_methods_supported: CHALLENGE_METHODS,
+            code_challenge_methods_supported: Blog::Types::CodeChallengeMethod.values,
             grant_types_supported: GRANT_TYPES,
             issuer:,
             registration_endpoint: endpoint(routes, :mcp_oauth_register),

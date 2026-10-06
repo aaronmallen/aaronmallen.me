@@ -43,6 +43,7 @@ module Blog
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal")
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
+    CodeChallengeMethod = Types::String.enum("S256")
     CountryCode = Types::String.constrained(format: /\A[A-Z]{2}\z/)
     DateParam = Types::Params::Date.constrained(
       gteq: ::Date.new(1000), lteq: ::Date.new(9999, 12, 31),
@@ -57,6 +58,7 @@ module Blog
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)
+    IssuedSecret = Types::String.constrained(format: /\A[A-Za-z0-9_-]{43}\z/)
     LocalTime = Types::Instance(Object).constructor do |value|
       text = TrimmedText[value]
       next nil if text.empty?
@@ -72,12 +74,14 @@ module Blog
     NetworkName = Types::String.enum("mastodon", "bluesky")
     OAuthDecision = Types::String.enum("cancel", "approve")
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
+    OAuthTokenType = Types::String.enum("access", "refresh")
     OptionalText = Types::String.optional.constructor do |value|
       text = TrimmedText[value]
       text.empty? ? nil : text
     end
     PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
+    PKCEValue = Types::String.constrained(format: /\A[A-Za-z0-9\-._~]{43,128}\z/)
     PhotoOwner = Types::String.enum("post", "journal_entry", "task", "task_comment", "decision_comment", "review_note")
     PostBulkAction = Types::String.enum("tag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")

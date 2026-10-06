@@ -627,7 +627,7 @@ RSpec.describe "OAuth token", type: :request do
     before do
       token_repo = MCP::Slice["repos.oauth_token_repo"]
       allow(token_repo).to receive(:issue).and_wrap_original do |issue, **attributes|
-        raise Sequel::DatabaseError if attributes[:type] == MCP::Repos::OAuthTokenRepo::REFRESH
+        raise Sequel::DatabaseError if attributes[:type] == Blog::Types::OAuthTokenType["refresh"]
 
         issue.call(**attributes)
       end

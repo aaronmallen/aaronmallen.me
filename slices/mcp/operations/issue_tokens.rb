@@ -13,8 +13,8 @@ module MCP
         held = { oauth_client_id:, resource:, scopes: }
 
         transaction do
-          access_token, access = issue(Repos::OAuthTokenRepo::ACCESS, ACCESS_LIFETIME, **held)
-          refresh_token, = issue(Repos::OAuthTokenRepo::REFRESH, REFRESH_LIFETIME, access_token_id: access.id, **held)
+          access_token, access = issue("access", ACCESS_LIFETIME, **held)
+          refresh_token, = issue("refresh", REFRESH_LIFETIME, access_token_id: access.id, **held)
 
           {
             access_token:,
@@ -30,8 +30,9 @@ module MCP
 
       def issue(type, lifetime, **held)
         token = Blog::SecretToken.generate
+        expires_at = Time.now + lifetime
 
-        [token, token_repo.issue(token:, type:, expires_at: Time.now + lifetime, **held)]
+        [token, token_repo.issue(token:, type: Blog::Types::OAuthTokenType[type], expires_at:, **held)]
       end
     end
   end

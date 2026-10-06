@@ -40,7 +40,7 @@ module MCP
       end
 
       def find(value)
-        token = token_repo.by_token(value, type: Repos::OAuthTokenRepo::ACCESS)
+        token = token_repo.by_token(value, type: Blog::Types::OAuthTokenType["access"])
         return refuse(UNUSABLE_TOKEN) if token.nil? || token.revoked_at || token.expires_at <= Time.now
 
         Success(token)
