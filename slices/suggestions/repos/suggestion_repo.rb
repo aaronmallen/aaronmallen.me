@@ -10,7 +10,7 @@ module Suggestions
       STALE = Blog::Types::SuggestionEditStatus["stale"]
       OPEN = [PENDING, STALE].freeze
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
+      stamped_commands :create
 
       def accept(ids) = mark(ids, ACCEPTED, from: PENDING)
 

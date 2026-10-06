@@ -3,8 +3,7 @@
 module API
   module Repos
     class APITokenRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
 
       def live = api_tokens.live.newest_first.to_a
 

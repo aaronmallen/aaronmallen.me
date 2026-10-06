@@ -3,7 +3,7 @@
 module MCP
   module Repos
     class OAuthTokenRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
+      stamped_commands :create
 
       def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(Blog::SecretToken.digest(token)).one
 

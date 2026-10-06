@@ -3,8 +3,7 @@
 module Tags
   module Repos
     class TagRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
       commands delete: :by_pk
 
       def all_in(scope) = tags.in_scope(scope).in_name_order.to_a

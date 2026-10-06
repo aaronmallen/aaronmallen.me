@@ -15,8 +15,7 @@ module Social
       SETTINGS_ID = 1
       SPAM = Blog::Types::WebmentionStatus["spam"]
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
 
       def approve(id) = update(id, status: APPROVED, spam_reason: nil)
 

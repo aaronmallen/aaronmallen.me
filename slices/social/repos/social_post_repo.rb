@@ -12,8 +12,7 @@ module Social
         Blog::Types::SocialQueue["drafts"] => DRAFT,
       }.freeze
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
       commands delete: :by_pk
 
       def any_for_post?(post_id) = social_posts.for_post(post_id).exist?

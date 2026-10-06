@@ -3,7 +3,7 @@
 module Analytics
   module Repos
     class AnalyticsEventRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
+      stamped_commands :create
 
       def claim(address_hash:, limit:, since:, **attrs)
         analytics_events.claim(address_hash:, limit:, since:, **attrs)

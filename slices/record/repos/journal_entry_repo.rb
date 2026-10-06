@@ -8,8 +8,7 @@ module Record
       STREAK_DAYS = 30
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
       commands delete: :by_pk
 
       def between(from:, to:, limit: nil, tag: nil)

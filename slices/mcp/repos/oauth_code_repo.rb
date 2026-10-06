@@ -3,7 +3,7 @@
 module MCP
   module Repos
     class OAuthCodeRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
+      stamped_commands :create
 
       def burn(id, at: Time.now) = oauth_codes.burn(id, at:)
 

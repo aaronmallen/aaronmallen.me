@@ -10,8 +10,7 @@ module Tasks
       NEXT = Blog::Types::TaskList["next"]
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
       commands delete: :by_pk
 
       def add_tags(id, names) = task_tags.add(id, tags.in_scope(TAG_SCOPE).by_names(names).pluck(:id))

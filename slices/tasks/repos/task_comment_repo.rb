@@ -3,8 +3,7 @@
 module Tasks
   module Repos
     class TaskCommentRepo < Blog::DB::Repo
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
 
       def delete_local(task_id, id) = local(task_id, id).delete
 

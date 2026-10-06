@@ -8,8 +8,7 @@ module Tasks
 
       include Dry::Monads[:result]
 
-      commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
-      commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
+      stamped_commands :create, :update
 
       def for_provider(provider) = task_sources.where(provider:).to_a
 
