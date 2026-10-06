@@ -199,6 +199,22 @@ RSpec.describe "Secrets a request carries", type: :request do
     end
   end
 
+  describe "a visitor reading a post with secrets in the query" do
+    let(:secrets) { %w[api_token access_token webhook_secret signing_key].to_h { [it, secret] } }
+
+    def read_post = get("/writing/hello", { page: "2", **secrets })
+
+    before { create(:post, :published, slug: "hello") }
+
+    it "logs the slug and the page" do
+      expect(logged { read_post }).to include('page: "2"', 'slug: "hello"')
+    end
+
+    it "logs none of the secrets" do
+      expect(logged { read_post }).not_to include(*secrets.values)
+    end
+  end
+
   describe "the owner capturing a task" do
     let(:note) { secret }
 
