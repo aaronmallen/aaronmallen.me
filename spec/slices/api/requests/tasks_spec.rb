@@ -513,6 +513,23 @@ RSpec.describe "API tasks", type: :request do
         .to match([include("title" => "Email the accountant", "list" => "next", "tags" => %w[admin money]), 201])
     end
 
+    it "stores the note it names on the new task" do
+      expect(capture(title: "Email the accountant", note: "Ask about **Q3**")).to include("note" => "Ask about **Q3**")
+    end
+
+    it "claims a photo in the note for the new task" do
+      photo = create(:photo)
+      id = capture(title: "Fix the gutter", note: "![The gutter](/media/#{photo.key})").fetch("id")
+      claims = Media::Slice["relations.photo_claims"].where(owner: "task").to_a
+
+      expect(claims.map { [it[:owner_id], it[:photo_id]] }).to eq([[id, photo.id]])
+    end
+
+    it "refuses a note that holds a control character with a 422" do
+      expect([capture(title: "Email the accountant", note: "bad\u0000note").fetch("errors"), status])
+        .to eq([{ "note" => ["holds a control character"] }, 422])
+    end
+
     it "schedules a task for the sprint day it names" do
       expect(capture(title: "Later", sprint_on: (today + 3).iso8601).fetch("sprint_on")).to eq((today + 3).iso8601)
     end

@@ -33,6 +33,25 @@ RSpec.describe "MCP task tools", type: :request do
     expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => task.id)])
   end
 
+  describe "capture_task with a note" do
+    let(:photo) { create(:photo) }
+    let(:note) { "![The gutter](/media/#{photo.key})" }
+
+    def task = Tasks::Slice["relations.tasks"].to_a.first
+
+    before { call_tool("capture_task", title: "Fix the gutter", note:) }
+
+    it "stores the note on the new task" do
+      expect(task[:note]).to eq(note)
+    end
+
+    it "claims the photo in the note for the new task" do
+      claims = Media::Slice["relations.photo_claims"].where(owner: "task").to_a
+
+      expect(claims.map { [it[:owner_id], it[:photo_id]] }).to eq([[task[:id], photo.id]])
+    end
+  end
+
   %w[start_task complete_task reopen_task cancel_task delete_task].each do |name|
     it "refuses #{name} on a task that is not there as an error", :aggregate_failures do
       call_tool(name, id: 999_999)
