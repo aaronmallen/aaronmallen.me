@@ -26,6 +26,7 @@ module MCP
         commits_last_synced_at: "record.queries.commits_last_synced_at",
         compose_announcement: "posts.operations.compose_announcement",
         compose_social_post: "social.operations.compose_social_post",
+        connected_clients: "queries.connected_clients",
         dated_post_counts: "posts.queries.count_dated_between",
         dated_posts: "posts.queries.dated_between",
         delete_post: "posts.operations.delete_post",
@@ -35,8 +36,10 @@ module MCP
         editable_social_post: "social.queries.editable_social_post",
         feed_subscribers_between: "analytics.queries.feed_subscribers_between",
         first_days: "analytics.queries.first_days",
+        granted_scopes: "queries.granted_scopes",
         hourly_between: "analytics.queries.hourly_between",
         live_projects: "projects.queries.live",
+        live_tokens: "api.queries.live_tokens",
         mark_message: "contact.operations.mark_message",
         matching_tag_count: "tags.queries.matching_count",
         matching_tags: "tags.queries.matching",
@@ -89,13 +92,14 @@ module MCP
       }.freeze
       INSTRUCTIONS = [
         "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",
-        "the journal, commits and the sync state, tasks, sprints, task tag rules, work sessions and the time report,",
-        "projects, work history, decisions, people, tags, record links, saved views, messages, photos, the inbox,",
-        "attention, the calendar, the review, suggestions, analytics and the whole activity feed. Search every kind by",
-        "its words, and look up accounts on Mastodon and Bluesky. Suggest edits to a post or social post, and settle",
-        "suggestions with accept_suggestion_edits and reject_suggestion_edits or leave them for the owner in the",
-        "admin. Make any change the admin makes, publishing, sending and deleting included. A published post or a sent",
-        "social post cannot be called back. The tool list holds only what this connection was granted.",
+        "the journal, commits and the sync state, API tokens and MCP clients, tasks, sprints, task tag rules, work",
+        "sessions and the time report, projects, work history, decisions, people, tags, record links, saved views,",
+        "messages, photos, the inbox, attention, the calendar, the review, suggestions, analytics and the whole",
+        "activity feed. Search every kind by its words, and look up accounts on Mastodon and Bluesky. Suggest edits to",
+        "a post or social post, and settle suggestions with accept_suggestion_edits and reject_suggestion_edits or",
+        "leave them for the owner in the admin. Make any change the admin makes, publishing, sending and deleting",
+        "included, save minting and revoking API tokens and MCP clients. A published post or a sent social post cannot",
+        "be called back. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
@@ -144,8 +148,10 @@ module MCP
         Tools::ImportCommits,
         Tools::LinkRecords,
         Tools::LinkTasks,
+        Tools::ListAPITokens,
         Tools::ListAttention,
         Tools::ListCalendar,
+        Tools::ListClients,
         Tools::ListCommits,
         Tools::ListDecisions,
         Tools::ListInbox,
@@ -242,7 +248,9 @@ module MCP
 
       include Deps["settings", honeybadger: "honeybadger.agent", **CONTEXT, **TOOL_ENDPOINTS]
 
-      def call(payload, scopes:) = batch?(payload) ? BATCH_REFUSAL : server(scopes).handle_json(payload)
+      def call(payload, scopes:, oauth_client_id:)
+        batch?(payload) ? BATCH_REFUSAL : server(scopes, oauth_client_id).handle_json(payload)
+      end
 
       private
 
@@ -252,8 +260,9 @@ module MCP
         false
       end
 
-      def context
-        CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }.merge(page_size: settings.page_size[:mcp])
+      def context(oauth_client_id)
+        endpoints = CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }
+        endpoints.merge(oauth_client_id:, page_size: settings.page_size[:mcp])
       end
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
@@ -264,14 +273,14 @@ module MCP
         honeybadger.notify(error) unless error.is_a?(Server::RequestHandlerError)
       end
 
-      def server(scopes)
+      def server(scopes, oauth_client_id)
         ScopedServer.new(
           configuration: Configuration.new(exception_reporter: method(:report)),
           instructions: format(INSTRUCTIONS, owner),
           name:,
           prompts: PROMPTS,
           scopes:,
-          server_context: context,
+          server_context: context(oauth_client_id),
           title: format(TITLE, owner),
           tools: TOOLS,
           version: Blog::Version::CURRENT,

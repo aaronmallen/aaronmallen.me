@@ -76,8 +76,10 @@ RSpec.describe "MCP endpoint", type: :request do
   def read_kinds
     {
       "compose_announcement" => "announcements",
+      "list_api_tokens" => "API tokens",
       "list_attention" => "attention",
       "list_calendar" => "the calendar",
+      "list_clients" => "MCP clients",
       "list_commits" => "commits",
       "list_decisions" => "decisions",
       "list_inbox" => "the inbox",
@@ -2391,8 +2393,10 @@ RSpec.describe "MCP endpoint", type: :request do
         "import_commits" => {},
         "link_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "link_tasks" => { id: 1, kind: "blocks", other_id: 2 },
+        "list_api_tokens" => {},
         "list_attention" => {},
         "list_calendar" => { from: "2026-01-01", to: "2026-01-31" },
+        "list_clients" => {},
         "list_commits" => { from: "2026-01-01", to: "2026-12-31" },
         "list_decisions" => {},
         "list_inbox" => {},

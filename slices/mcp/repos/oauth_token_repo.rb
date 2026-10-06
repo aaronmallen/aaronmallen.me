@@ -13,6 +13,10 @@ module MCP
 
       def issue(token:, **attributes) = create(token_digest: Blog::SecretToken.digest(token), **attributes)
 
+      def live_scopes(oauth_client_ids, at: Time.now)
+        oauth_tokens.for_client(oauth_client_ids).live.unexpired(at:).pluck(:oauth_client_id, :scopes)
+      end
+
       def revoke(id, at: Time.now)
         oauth_tokens.burn(id, at:)&.tap do |token|
           oauth_tokens.burn(token[:access_token_id], at:) if token[:access_token_id]

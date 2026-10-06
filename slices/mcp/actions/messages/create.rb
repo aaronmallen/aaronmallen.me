@@ -17,7 +17,7 @@ module MCP
 
         def handle(request, response)
           case authenticate.call(request.env[AUTHORIZATION], issuer:)
-          in Success(token) then answer(request, response, token.scopes)
+          in Success(token) then answer(request, response, token)
           in Failure(Operations::Authenticate::REJECT, payload) then challenge(response, payload)
           else challenge(response, UNEXPECTED)
           end
@@ -25,8 +25,9 @@ module MCP
 
         private
 
-        def answer(request, response, scopes)
-          reply = handler.call(request.body.read(MAX_BYTES).to_s, scopes:)
+        def answer(request, response, token)
+          payload = request.body.read(MAX_BYTES).to_s
+          reply = handler.call(payload, scopes: token.scopes, oauth_client_id: token.oauth_client_id)
           return render_body(response, NO_BODY, status: ACCEPTED) if reply.nil?
 
           render_body(response, reply)
