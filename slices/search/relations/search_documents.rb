@@ -5,7 +5,7 @@ module Search
     class SearchDocuments < Blog::DB::Relation
       CONFIG = "english"
       HEADLINE = 'MaxWords=24, MinWords=12, StartSel="", StopSel=""'
-      LINKED = %i[kind source_id title day status slug repo sha url].freeze
+      LINKED = %i[kind source_id title day status].freeze
       RANKED = [Sequel.desc(:rank), Sequel.desc(:day), Sequel.desc(:source_id), Sequel.asc(:kind)].freeze
 
       schema :search_documents, infer: true

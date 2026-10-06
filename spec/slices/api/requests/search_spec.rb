@@ -99,6 +99,161 @@ RSpec.describe "API search", type: :request do
     end
   end
 
+  describe "a record the admin keeps private or closed" do
+    def found(query) = results(query:).map { it.values_at("kind", "id") }
+
+    it "finds a journal entry" do
+      entry = create(:journal_entry, body: "Walked the levee at dawn")
+
+      expect(found("levee")).to eq([["journal", entry.id]])
+    end
+
+    it "finds a closed task" do
+      task = create(:task, :done, title: "Renew the passport")
+
+      expect(found("passport")).to eq([["task", task.id]])
+    end
+
+    it "finds a canceled task" do
+      task = create(:task, :canceled, title: "Repaint the porch")
+
+      expect(found("porch")).to eq([["task", task.id]])
+    end
+
+    it "finds a commit from a private repo" do
+      commit = create(:commit, repo: "aaronmallen/secret-lab", message: "Wire the thermostat relay")
+
+      expect(found("thermostat")).to eq([["commit", commit.id]])
+    end
+
+    it "finds a read message" do
+      message = create(:message, :read, subject: "Hello", body: "Loved your piece on sourdough")
+
+      expect(found("sourdough")).to eq([["message", message.id]])
+    end
+
+    it "finds a draft post" do
+      post = create(:post, :draft, title: "Notes on kayaks", body: "Half done")
+
+      expect(found("kayaks")).to eq([["post", post.id]])
+    end
+  end
+
+  describe "a phrase every kind holds" do
+    before do
+      create(:task, title: "Open task", note: "about zeppelins")
+      create(:post, :published, title: "Zeppelins", body: "A post")
+      create(:social_post_part, social_post_id: create(:social_post, :posted).id, body: "Saw a zeppelin")
+      create(:journal_entry, body: "Dreamt of zeppelins")
+      create(:commit, message: "Draw the zeppelin")
+      create(:project, name: "airship", tagline: "Zeppelin tracker")
+      create(:work_entry, org: "Zeppelin Works", role: "Pilot")
+      create(:person, name: "Zeppelin Fan")
+      create(:message, subject: "Zeppelins", body: "Hi there")
+      create(:webmention, excerpt: "Nice zeppelin")
+    end
+
+    it "finds one of each" do
+      expect(results(query: "zeppelin").map { it.fetch("kind") }).to match_array(Blog::Types::SearchKind.values)
+    end
+  end
+
+  describe "what a result carries" do
+    def only(query) = results(query:).tap { expect(it.length).to eq(1) }.first
+
+    describe "a long post" do
+      let!(:post) { create(:post, :published, title: "Bread", body: "#{'flour ' * 200}crumb #{'salt ' * 200}") }
+
+      it "carries its title" do
+        expect(only("crumb").fetch("title")).to eq("Bread")
+      end
+
+      it "carries a short match around the phrase" do
+        expect(only("crumb").fetch("match")).to include("crumb")
+      end
+
+      it "carries the day it went out" do
+        expect(only("crumb").fetch("date")).to eq(Blog::TimeZone.local(post.published_at).to_date.iso8601)
+      end
+    end
+
+    it "keeps the match short" do
+      create(:journal_entry, body: "#{'rain ' * 100}garden")
+
+      expect(only("garden").fetch("match").split.length).to be <= 24
+    end
+
+    it "leaves markup out of the match" do
+      create(:journal_entry, body: "Fed the ducks")
+
+      expect(only("ducks").fetch("match")).to eq("Fed the ducks")
+    end
+
+    it "takes the date of a journal entry from its day" do
+      create(:journal_entry, body: "Bought a canoe", entry_date: Blog::TimeZone.today - 30)
+
+      expect(only("canoe").fetch("date")).to eq((Blog::TimeZone.today - 30).iso8601)
+    end
+
+    it "takes the date of an open task from when it was made" do
+      create(:task, title: "Find the ladder")
+
+      expect(only("ladder").fetch("date")).to eq(Blog::TimeZone.today.iso8601)
+    end
+
+    it "gives the first line of a commit as its title" do
+      create(:commit, message: "Fix the gutter\n\nIt leaked")
+
+      expect(only("leaked").fetch("title")).to eq("Fix the gutter")
+    end
+  end
+
+  describe "a social post with several parts" do
+    let(:social_post) { create(:social_post, :posted) }
+
+    before do
+      create(:social_post_part, social_post_id: social_post.id, body: "Otters are out")
+      create(:social_post_part, social_post_id: social_post.id, body: "Otters otters otters")
+    end
+
+    it "comes back once, as the part that matches best" do
+      expect(results(query: "otters").map { it.values_at("id", "title") })
+        .to eq([[social_post.id, "Otters otters otters"]])
+    end
+  end
+
+  describe "the order" do
+    it "ranks a title match above a match in the text" do
+      create(:task, title: "Errands", note: "Pick up the mangoes")
+      create(:task, title: "Mangoes")
+
+      expect(results(query: "mangoes").map { it.fetch("title") }).to eq(%w[Mangoes Errands])
+    end
+
+    it "puts the newer one first on a tie" do
+      today = Blog::TimeZone.today
+      create(:journal_entry, body: "Lemons", entry_date: today - 2)
+      create(:journal_entry, body: "Lemons", entry_date: today - 1)
+
+      expect(results(query: "lemons").map { it.fetch("date") }).to eq([today - 1, today - 2].map(&:iso8601))
+    end
+  end
+
+  describe "the phrase" do
+    it "matches a word by its stem" do
+      create(:journal_entry, body: "Running at noon")
+
+      expect(results(query: "runs").length).to eq(1)
+    end
+
+    it "leaves out a word the phrase rules out" do
+      create(:journal_entry, body: "Plums and figs")
+      create(:journal_entry, body: "Plums alone")
+
+      expect(results(query: "plums -figs").map { it.fetch("title") }).to eq(["Plums alone"])
+    end
+  end
+
   it "answers nothing for a blank query" do
     create(:task, title: "Track the zeppelin")
 

@@ -2,6 +2,6 @@
 
 module Search
   module Structs
-    Hit = Data.define(:kind, :source_id, :title, :match, :day, :status, :slug, :repo, :sha, :url)
+    Hit = Data.define(:kind, :source_id, :title, :match, :day, :status)
   end
 end
