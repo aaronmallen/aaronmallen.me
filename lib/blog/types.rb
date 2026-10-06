@@ -170,6 +170,7 @@ module Blog
     UuidParam = Uuid.optional.fallback(nil)
     VisitKind = Types::String.enum("click", "read", "scroll", "view")
     VisitorHash = Types::String.constrained(format: /\A[0-9a-f]{64}\z/)
+    WebmentionModeration = Types::String.enum("approved" => "approve", "ignored" => "ignore", "spam" => "spam")
     WebmentionStatus = Types::String.enum("pending", "approved", "ignored", "spam")
     WebmentionStatusParam = WebmentionStatus.fallback(WebmentionStatus.values.first)
     WebmentionType = Types::String.enum("reply", "like", "repost", "mention")

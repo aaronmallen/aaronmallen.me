@@ -44,8 +44,8 @@ module Admin
           private
 
           def actions
-            moderation(:admin_approve_webmention, ".approve", :pri) unless @mention.status == APPROVED
-            moderation(:admin_ignore_webmention, ".ignore", nil) unless @mention.status == IGNORED
+            moderation(APPROVED, ".approve", :pri) unless @mention.status == APPROVED
+            moderation(IGNORED, ".ignore", nil) unless @mention.status == IGNORED
             spam unless @mention.status == SPAM
           end
 
@@ -62,8 +62,10 @@ module Admin
             end
           end
 
-          def moderation(route, label_key, variant, **attributes)
-            Form(action: path(route, id: @mention.id), **attributes) do
+          def moderation(status, label_key, variant, **attributes)
+            verdict = Blog::Types::WebmentionModeration.mapping.fetch(status)
+
+            Form(action: path(:admin_moderate_webmention, id: @mention.id, verdict:), **attributes) do
               input(type: "hidden", name: "status", value: @filter)
               yield if block_given?
               Button(type: "submit", variant:, small: true) { t(label_key) }
@@ -73,7 +75,7 @@ module Admin
           def pick = { form: @bulk, value: @mention.id, label: t(".pick", author: @mention.author_label) }
 
           def spam
-            moderation(:admin_spam_webmention, ".spam", :warn, class: "wm-spam") do
+            moderation(SPAM, ".spam", :warn, class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
             end
           end

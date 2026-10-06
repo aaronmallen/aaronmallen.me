@@ -11,6 +11,7 @@ module Admin
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
+    WEBMENTION_VERDICT = Regexp.union(Blog::Types::WebmentionModeration.mapping.values)
 
     use(*Admin::Slice.config.actions.sessions.middleware)
 
@@ -212,9 +213,10 @@ module Admin
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
-    post "/webmentions/:id/approve", to: "webmentions.approve", as: :approve_webmention, id: ID
-    post "/webmentions/:id/spam", to: "webmentions.spam", as: :spam_webmention, id: ID
-    post "/webmentions/:id/ignore", to: "webmentions.ignore", as: :ignore_webmention, id: ID
+    post(
+      "/webmentions/:id/:verdict",
+      to: "webmentions.moderate", as: :moderate_webmention, id: ID, verdict: WEBMENTION_VERDICT,
+    )
     get "/sign-in", to: "sessions.new", as: :sign_in
     get "/auth/github/callback", to: "sessions.create", as: :github_callback
     post "/sign-out", to: "sessions.destroy", as: :sign_out

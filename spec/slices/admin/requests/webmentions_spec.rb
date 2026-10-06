@@ -271,6 +271,24 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_button("Ignore")
       end
 
+      it "posts each button to its verdict", :aggregate_failures do
+        mention
+        get "/admin/webmentions"
+
+        %w[approve ignore spam].each do |verdict|
+          expect(page).to have_css("form[action='/admin/webmentions/#{mention.id}/#{verdict}']")
+        end
+      end
+
+      %w[pending approved ignored delete].each do |verdict|
+        it "answers 404 to the #{verdict} verdict", :aggregate_failures do
+          post "/admin/webmentions/#{mention.id}/#{verdict}", _csrf_token: admin_csrf_token
+
+          expect(last_response.status).to eq(404)
+          expect(repo.by_status("pending").map(&:id)).to eq([mention.id])
+        end
+      end
+
       it "hides Approve on an approved mention", :aggregate_failures do
         create(:webmention, :approved, post: target)
         get "/admin/webmentions", status: "approved"

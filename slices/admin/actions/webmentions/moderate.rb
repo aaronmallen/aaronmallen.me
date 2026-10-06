@@ -1,16 +1,15 @@
-# auto_register: false
 # frozen_string_literal: true
 
 module Admin
   module Actions
     module Webmentions
-      module Moderation
+      class Moderate < Action
         TOASTS = "webmentions_page.toasts"
 
-        include Dry::Monads[:result]
+        include Deps[moderate_webmention: "social.operations.moderate_webmention"]
 
         def handle(request, response)
-          verdict = self.class::VERDICT
+          verdict = Blog::Types::WebmentionModeration[request.params[:verdict]]
 
           case moderate_webmention.call(record_id(request), verdict, reason: request.params[:reason])
           in Success(_)
