@@ -129,6 +129,14 @@ RSpec.describe "API record links", type: :request do
       expect(titles(list("decision", decision.id))).to eq("task" => ["Order the Pi"], "commit" => ["Move the server"])
     end
 
+    it "cuts a long title" do
+      entry = create(:journal_entry, body: "word " * 100)
+      link("post", post_record.id, other_kind: "journal_entry", other_id: entry.id)
+
+      expect(titles(list("post", post_record.id)).fetch("journal_entry").first.length)
+        .to eq(Links::Queries::LinkableRecords::TITLE_LIMIT)
+    end
+
     it "answers a record with no links with no groups" do
       expect([list("post", post_record.id).fetch("links"), status]).to eq([{}, 200])
     end

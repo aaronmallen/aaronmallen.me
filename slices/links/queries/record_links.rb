@@ -7,7 +7,7 @@ module Links
 
       def call(kind, id)
         id = Blog::Types::IdParam[id]
-        return Blog::Constants::EMPTY_HASH unless id && Blog::Types::RecordKind.valid?(kind)
+        return Blog::Constants::EMPTY_HASH unless id
 
         ids = record_link_repo.partners(kind, id).group_by(&:first).transform_values { it.map(&:last) }
 

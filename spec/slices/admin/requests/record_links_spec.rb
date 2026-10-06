@@ -178,6 +178,12 @@ RSpec.describe "Admin record links", type: :request do
 
         expect(last_response.status).to eq(404)
       end
+
+      it "answers 404 for an ID too large to store" do
+        unlink("task", 2**31)
+
+        expect(last_response.status).to eq(404)
+      end
     end
 
     describe "signed out" do
@@ -193,6 +199,70 @@ RSpec.describe "Admin record links", type: :request do
 
         expect(links.to_a.size).to eq(1)
       end
+    end
+  end
+
+  describe "the picker on a post" do
+    def create_past_titles
+      create(:task, note: "Bring the zeppelin")
+      create(:post, body: "All about the zeppelin")
+      create(:social_post_part, social_post_id: create(:social_post, :thread).id, body: "And a zeppelin")
+      create(:journal_entry, body: "Morning\nSaw a zeppelin")
+      create(:commit, repo: "aaronmallen/zeppelin")
+      create(:project, tagline: "Tracks a zeppelin")
+      create(:work_entry, blurb: "Flew a zeppelin")
+      create(:decision, problem: "Which zeppelin to buy")
+    end
+
+    def fields = {}
+
+    def found = section.all(".record-picker-results .record-link-group").map { it.find(".record-link-kind").text }
+
+    def page_path = "/admin/posts/#{record.id}/edit"
+
+    def record = @record ||= create(:post, title: "On hosting")
+
+    let(:kinds) { Blog::Types::RecordKind.values }
+
+    before do
+      sign_in_to_admin
+      record
+    end
+
+    it "finds a record of every kind by its title" do
+      kinds.each { linkable_record(it, "Zeppelin #{it}") }
+      show(record_q: "zeppelin")
+
+      expect(found).to eq(kinds.map { kind_name(it) })
+    end
+
+    it "finds a record of every kind by text beyond its title" do
+      create_past_titles
+      show(record_q: "zeppelin")
+
+      expect(found).to eq(kinds.map { kind_name(it) })
+    end
+
+    it "keeps to a few of each kind, newest first" do
+      today = Blog::TimeZone.today
+      (1..6).each { create(:journal_entry, body: "Zeppelin #{it}", entry_date: today - it) }
+      show(record_q: "zeppelin")
+
+      expect(picks).to eq((1..5).map { "Zeppelin #{it}" })
+    end
+
+    it "reads the text as plain, not as a pattern" do
+      create(:task, title: "Half done")
+      show(record_q: "%")
+
+      expect(picks).to be_empty
+    end
+
+    it "finds nothing for blank text" do
+      create(:task, title: "Anything")
+      show(record_q: "   ")
+
+      expect(picks).to be_empty
     end
   end
 
