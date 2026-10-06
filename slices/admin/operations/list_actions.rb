@@ -16,11 +16,12 @@ module Admin
 
       ALL = [
         Entry.new(
-          name: :create_task, icon: "fa-plus", route: :admin_new_task, dialog: UI::Components::Tasks::CreateDialog::ID,
+          name: :create_task, icon: "fa-list-check", route: :admin_new_task,
+          dialog: UI::Components::Tasks::CreateDialog::ID,
         ),
-        Entry.new(name: :create_decision, icon: "fa-plus", route: :admin_new_decision),
+        Entry.new(name: :create_decision, icon: "fa-scale-balanced", route: :admin_new_decision),
         Entry.new(
-          name: :create_journal_entry, icon: "fa-pen", route: :admin_journal,
+          name: :create_journal_entry, icon: "fa-feather", route: :admin_journal,
           params: { write: Blog::Constants::CHECKED },
         ),
         Entry.new(name: :new_post, icon: "fa-file-lines", route: :admin_new_post),

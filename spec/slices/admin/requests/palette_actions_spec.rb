@@ -30,6 +30,7 @@ RSpec.describe "Admin palette actions", type: :request do
 
       expect(row["data-palette-dialog"]).to eq("task-create")
       expect(row["data-palette-href"]).to eq("/admin/tasks/new")
+      expect(row).to have_css(".fa-list-check", visible: :all)
     end
 
     it "sends Create decision to the new decision form, with no dialog", :aggregate_failures do
@@ -38,7 +39,7 @@ RSpec.describe "Admin palette actions", type: :request do
       expect(row["data-palette-dialog"]).to be_nil
       expect(row["data-palette-href"]).to eq("/admin/decisions/new")
       expect(row).to have_css(".pal-r-label", text: "Create decision")
-      expect(row).to have_css(".fa-plus", visible: :all)
+      expect(row).to have_css(".fa-scale-balanced", visible: :all)
     end
 
     it "sends Create journal entry to the journal, ready to write", :aggregate_failures do
@@ -46,6 +47,11 @@ RSpec.describe "Admin palette actions", type: :request do
 
       expect(row["data-palette-dialog"]).to be_nil
       expect(row["data-palette-href"]).to eq("/admin/journal?write=1")
+      expect(row).to have_css(".fa-feather", visible: :all)
+    end
+
+    it "draws no row with a plus" do
+      expect(group).to have_no_css(".fa-plus", visible: :all)
     end
 
     it "sends New post to the new post form" do
@@ -154,7 +160,7 @@ RSpec.describe "Admin palette actions", type: :request do
         "Admin::Operations::ListActions::ALL",
         [
           entry(
-            name: :create_task, icon: "fa-plus", route: :admin_new_task,
+            name: :create_task, icon: "fa-list-check", route: :admin_new_task,
             shows: ->(current_path) { current_path == "/admin/posts" },
           ),
         ],
