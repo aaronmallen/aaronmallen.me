@@ -72,6 +72,41 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
       expect(failure).to be_nil
     end
+
+    it "is asked for among only the issues that are not completed or canceled" do
+      sync
+
+      expect(linear_request('{state: {type: {nin: ["completed", "canceled"]}}}')).to have_been_made
+    end
+
+    it "is asked for 25 a page, so the query stays under Linear's complexity limit" do
+      sync
+
+      expect(linear_request("first: 25")).to have_been_made
+    end
+
+    it "is asked for with the key as it is, with no scheme" do
+      sync
+
+      expect(linear_request(LinearGraphQL::ASSIGNED_QUERY, key: LinearGraphQL::KEY)).to have_been_made
+    end
+  end
+
+  describe "more pages of issues than the cap" do
+    before do
+      pages = 0
+      stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
+        pages += 1
+        linear_assigned(linear_issue("L_#{pages}", key: "ABC-#{pages}"), more: true)
+      end
+    end
+
+    it "reads ten pages and imports what they held", :aggregate_failures do
+      sync
+
+      expect(linear_request(LinearGraphQL::ASSIGNED_QUERY)).to have_been_made.times(10)
+      expect(sources.where(provider: "linear").count).to eq(10)
+    end
   end
 
   describe "a new issue already started" do
@@ -135,6 +170,14 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(imported.tags).to be_empty
+    end
+
+    it "names a label in a group by its own name alone" do
+      create(:tag, :private, name: "type-bug-fix")
+      stub_assigned(issue(labels: { nodes: [{ name: "Bug Fix", parent: { name: "Type" } }] }))
+      sync
+
+      expect(imported.tags.map(&:name)).to eq(%w[bug-fix])
     end
   end
 
@@ -257,6 +300,13 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync_twice(discussed(linear_comment("c1")), discussed(linear_comment("c1", body: "Edited")))
 
       expect(comments.map(&:body)).to eq(%w[Edited])
+    end
+
+    it "arrive with no author when no user wrote them" do
+      stub_assigned(discussed(linear_comment("c1", author: nil)))
+      sync
+
+      expect(comments.map(&:author)).to eq([nil])
     end
 
     it "lose one deleted on Linear" do
@@ -552,6 +602,30 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "tracked issues in two workspaces" do
+    before do
+      connect_linear(LinearGraphQL::KEY, "lin_api_two")
+      tracked
+      task = create(:task, list: "external")
+      create(:task_source, provider: "linear", remote_id: "L_two", url: "https://linear.app/other/issue/xyz-2", task:)
+      stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues(issue), key: LinearGraphQL::KEY)
+      stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues(linear_issue("L_two", key: "XYZ-2", state: "completed")),
+                  key: "lin_api_two")
+    end
+
+    it "are each found in their own workspace" do
+      sync
+
+      expect(sources.order(:remote_id).pluck(:remote_state)).to eq(%w[open completed])
+    end
+
+    it "ask the second workspace only for what the first did not find" do
+      sync
+
+      expect(linear_request(LinearGraphQL::ISSUES_QUERY, key: "lin_api_two", ids: %w[L_two])).to have_been_made
+    end
+  end
+
   describe "a tracked task deleted while the run waits on Linear" do
     before do
       task = tracked
@@ -614,6 +688,29 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "more than 25 tracked issues" do
+    before do
+      26.times { create(:task_source, provider: "linear", task: create(:task, list: "external")) }
+      stub_linear(LinearGraphQL::ISSUES_QUERY) do |request|
+        linear_issues(*JSON.parse(request.body).dig("variables", "ids").map { linear_issue(it) })
+      end
+    end
+
+    it "are checked 25 at a time" do
+      sync
+
+      expect(linear_request(LinearGraphQL::ISSUES_QUERY)).to have_been_made.twice
+    end
+  end
+
+  describe "a run with nothing tracked" do
+    it "checks nothing" do
+      sync
+
+      expect(linear_request(LinearGraphQL::ISSUES_QUERY)).not_to have_been_made
+    end
+  end
+
   describe "an archived issue" do
     it "leaves its task as it was" do
       task = tracked(:done, state: "completed")
@@ -621,6 +718,13 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(repo.by_id(task.id)).to have_attributes(completed_at: task.completed_at, status: "done")
+    end
+
+    it "is asked about among the archived" do
+      tracked
+      sync
+
+      expect(linear_request("includeArchived: true")).to have_been_made
     end
   end
 
@@ -684,6 +788,36 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(failure).to include(reason: "linear_failed")
+      expect(status(task)).to eq("open")
+    end
+
+    it "records a 429 as rate limited" do
+      stub_linear(LinearGraphQL::ASSIGNED_QUERY, { status: 429 })
+      sync
+
+      expect(failure).to include(reason: "rate_limited")
+    end
+
+    it "records the error Linear names" do
+      stub_linear(LinearGraphQL::ASSIGNED_QUERY, linear_errors("AUTHENTICATION_ERROR", "Authentication required"))
+      sync
+
+      expect(failure).to include(reason: "linear_failed", message: /Authentication required/)
+    end
+
+    it "records a connection that fails" do
+      stub_request(:post, LinearGraphQL::URL).to_timeout
+      sync
+
+      expect(failure).to include(reason: "linear_failed", message: /failed/)
+    end
+
+    it "records a check Linear answers with no viewer rather than cancel the task", :aggregate_failures do
+      task = tracked
+      stub_linear(LinearGraphQL::ISSUES_QUERY, linear_json(data: { issues: { nodes: [issue] } }))
+      sync
+
+      expect(failure).to include(reason: "linear_failed", message: /no viewer/)
       expect(status(task)).to eq("open")
     end
   end

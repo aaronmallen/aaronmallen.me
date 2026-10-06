@@ -85,6 +85,21 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
       expect(failure).to be_nil
     end
+
+    it "is found by a search of every repository for open issues, not pull requests, assigned to me" do
+      sync
+
+      expect(github_request("is:issue is:open assignee:@me")).to have_been_made
+    end
+  end
+
+  describe "a search result that is not an issue" do
+    it "is skipped while the rest import" do
+      stub_assigned({}, issue)
+      sync
+
+      expect(sources.pluck(:remote_id)).to eq(%w[I_seven])
+    end
   end
 
   describe "a new issue with labels" do
@@ -112,6 +127,22 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       stub_assigned(labeled("area/api", "Someday"))
 
       expect { sync }.not_to(change { Tags::Slice["relations.tags"].count })
+      expect(imported.tags).to be_empty
+    end
+
+    it "keeps the app's acronyms whole in a label" do
+      create(:tag, :private, name: "github")
+      stub_assigned(labeled("GitHub"))
+      sync
+
+      expect(imported.tags.map(&:name)).to eq(%w[github])
+    end
+
+    it "imports with no tag for a label with no valid form", :aggregate_failures do
+      stub_assigned(labeled("!!!", ""))
+      sync
+
+      expect(imported.status).to eq("open")
       expect(imported.tags).to be_empty
     end
 
@@ -298,6 +329,13 @@ RSpec.describe Tasks::Jobs::SyncIssues do
         .to eq([copied("IC_1", author: "octocat", at:), copied("IC_2", author: "hubot", at: at + 60)])
     end
 
+    it "arrive with no author from a deleted account" do
+      stub_assigned(discussed(github_comment("IC_1", author: nil)))
+      sync
+
+      expect(comments.map(&:author)).to eq([nil])
+    end
+
     it "arrive on a task already tracked" do
       task = tracked
       stub_assigned(discussed(github_comment("IC_1")))
@@ -406,6 +444,14 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(repo.by_id(task.id).status).to eq("canceled")
     end
 
+    it "marks the task done when it closed with no reason" do
+      task = tracked
+      stub_known(issue(state: "CLOSED", stateReason: nil))
+      sync
+
+      expect(repo.by_id(task.id).status).to eq("done")
+    end
+
     it "moves the task to done when a not planned issue is closed again as completed" do
       task = tracked(:canceled, state: "not_planned")
       stub_known(issue(state: "CLOSED", stateReason: "COMPLETED"))
@@ -469,6 +515,21 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       2.times { sync }
 
       expect(checks).to have_been_made.twice
+    end
+  end
+
+  describe "more than a hundred tracked issues" do
+    before do
+      101.times { create(:task_source, task: create(:task, list: "external")) }
+      stub_github(GitHubGraphQL::ISSUES_QUERY) do |request|
+        github_issue_nodes(*JSON.parse(request.body).dig("variables", "ids").map { github_issue(it) })
+      end
+    end
+
+    it "are checked a hundred at a time" do
+      sync
+
+      expect(github_request(GitHubGraphQL::ISSUES_QUERY)).to have_been_made.twice
     end
   end
 
@@ -665,6 +726,24 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(failure).to include(reason: "github_failed")
+      expect(repo.by_id(task.id).status).to eq("open")
+    end
+
+    it "records a search GitHub answers with no viewer rather than import", :aggregate_failures do
+      search = { nodes: [issue], pageInfo: github_page_info(false, "issues-page-2") }
+      stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_json(data: { rateLimit: github_rate_limit, search: }))
+      sync
+
+      expect(failure).to include(reason: "github_failed", message: /no viewer/)
+      expect(imported).to be_nil
+    end
+
+    it "records a check GitHub answers with no viewer rather than cancel the task", :aggregate_failures do
+      task = tracked
+      stub_github(GitHubGraphQL::ISSUES_QUERY, github_json(data: { nodes: [issue], rateLimit: github_rate_limit }))
+      sync
+
+      expect(failure).to include(reason: "github_failed", message: /no viewer/)
       expect(repo.by_id(task.id).status).to eq("open")
     end
 

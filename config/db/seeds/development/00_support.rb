@@ -10,13 +10,11 @@ module Seeds
   MINUTE = 60
 
   class IssueClient
-    Listing = Data.define(:items)
-
     def initialize(issues)
       @issues = issues
     end
 
-    def assigned_issues = Listing.new(items: @issues)
+    def assigned_issues = @issues
 
     def configured? = true
 

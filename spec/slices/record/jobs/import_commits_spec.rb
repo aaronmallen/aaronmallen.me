@@ -248,6 +248,14 @@ RSpec.describe Record::Jobs::ImportCommits do
       expect(Record::Slice["relations.commits"].count).to eq(3)
     end
 
+    it "looks up the commits it already holds in one query for a page of branches" do
+      branches = [github_branch("main", *%w[a b c].map { written(it, 3600) }),
+                  github_branch("topic", *%w[d e].map { written(it, 3600) })]
+      stub_github(GitHubGraphQL::REFS_QUERY, github_refs_page(*branches))
+
+      expect(counting { run_through }.grep(/\ASELECT "commits"."sha" FROM "commits"/).size).to eq(1)
+    end
+
     describe "after an earlier run stored commits" do
       before { stored_at(Time.now - 600) }
 

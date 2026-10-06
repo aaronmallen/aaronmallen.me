@@ -45,7 +45,7 @@ module Tasks
       def fetch(provider, client, known, now)
         return Failure(:not_configured) unless client.configured?
 
-        assigned = client.assigned_issues.items
+        assigned = client.assigned_issues
 
         Success([assigned, client.issues(unseen(known, assigned, now))])
       rescue Record::RateLimited

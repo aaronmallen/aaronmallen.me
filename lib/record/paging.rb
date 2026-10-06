@@ -9,8 +9,6 @@ module Record
 
     private
 
-    def merge(listings) = Listing.new(items: listings.flat_map(&:items), cut_short: listings.any?(&:cut_short?))
-
     def more?(page) = page&.dig("pageInfo", "hasNextPage") == true
 
     def walk

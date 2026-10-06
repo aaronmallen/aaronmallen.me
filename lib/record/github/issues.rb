@@ -55,7 +55,7 @@ module Record
       def assigned_issues
         return unless configured?
 
-        walk { |cursor, found| assigned_page(cursor, found) }
+        walk { |cursor, found| assigned_page(cursor, found) }.items
       end
 
       def issues(urls)

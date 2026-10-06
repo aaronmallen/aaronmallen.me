@@ -60,7 +60,7 @@ module Record
       def assigned_issues
         return unless configured?
 
-        merge(transports.map { assigned_in(it) })
+        transports.flat_map { assigned_in(it).items }
       end
 
       def issues(urls)
