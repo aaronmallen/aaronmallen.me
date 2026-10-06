@@ -1,16 +1,15 @@
+import { countText, setupListbox } from "./listbox.js";
 import { askForPerson } from "./person_dialog.js";
 import { learn } from "./social_expand.js";
 
 const ADD = "[data-social-mention-add]";
 const BODY = "[data-social-body]";
-const COUNT = "{count}";
 const NAME = "{name}";
 const CHOICE = "[role='option']";
 const GROUP = "[data-social-mention-group]";
 const OPTION = "[data-social-mention]";
 const REFRESH_KEYS = ["ArrowLeft", "ArrowRight", "End", "Home", "PageDown", "PageUp"];
 const SPACE = /^\s/;
-const STEPS = { ArrowDown: 1, ArrowUp: -1 };
 const TRIGGER = /(?:^|[\s(])@([^\s@{}()]*)$/;
 
 export function setupMentions(form) {
@@ -29,15 +28,25 @@ function setupList(form, list) {
   let start = 0;
 
   const shown = () => choices().filter((choice) => !choice.hidden);
-  const active = () => choices().find((choice) => choice.getAttribute("aria-selected") === "true");
 
-  const select = (option) => {
-    for (const other of choices()) other.setAttribute("aria-selected", String(other === option));
-    if (!option) return body?.removeAttribute("aria-activedescendant");
+  const choose = (option) => {
+    const textarea = body;
+    if (option === add) return invite(textarea);
 
-    body?.setAttribute("aria-activedescendant", option.id);
-    option.scrollIntoView({ block: "nearest" });
+    const end = textarea.selectionStart;
+
+    close();
+    mention(textarea, option, start, end);
   };
+
+  const { active, select, step } = setupListbox({
+    list,
+    owner: () => body,
+    choice: CHOICE,
+    options: choices,
+    shown,
+    choose,
+  });
 
   const close = () => {
     if (list.hidden) return;
@@ -77,7 +86,7 @@ function setupList(form, list) {
     show(textarea);
     start = textarea.selectionStart - query.length - 1;
     select(visible.includes(keep) ? keep : visible[0]);
-    say(status, plural(status, visible.length - 1));
+    say(status, countText(status, "socialMentionResults", visible.length - 1));
   };
 
   const mention = (textarea, option, from, to) => {
@@ -113,27 +122,10 @@ function setupList(form, list) {
     });
   };
 
-  const choose = (option) => {
-    const textarea = body;
-    if (option === add) return invite(textarea);
-
-    const end = textarea.selectionStart;
-
-    close();
-    mention(textarea, option, start, end);
-  };
-
-  const move = (step) => {
-    const visible = shown();
-    const at = visible.indexOf(active());
-    select(visible[Math.min(Math.max(at + step, 0), visible.length - 1)]);
-  };
-
   const steer = (event) => {
-    if (event.key in STEPS) move(STEPS[event.key]);
-    else if ((event.key === "Enter" || event.key === "Tab") && active()) choose(active());
+    if ((event.key === "Enter" || event.key === "Tab") && active()) choose(active());
     else if (event.key === "Escape") close();
-    else return;
+    else if (!step(event)) return;
 
     event.preventDefault();
   };
@@ -171,27 +163,6 @@ function setupList(form, list) {
   parts.addEventListener("click", (event) => {
     if (event.target.matches(BODY)) refresh(event.target);
   });
-
-  list.addEventListener("mousedown", (event) => event.preventDefault());
-
-  list.addEventListener("click", (event) => {
-    const option = event.target.closest(CHOICE);
-    if (!option) return;
-
-    event.preventDefault();
-    choose(option);
-  });
-
-  list.addEventListener("mousemove", (event) => {
-    const option = event.target.closest(CHOICE);
-    if (option && option !== active()) select(option);
-  });
-}
-
-function plural(status, count) {
-  const template = count === 1 ? status.dataset.socialMentionResultsOne : status.dataset.socialMentionResultsOther;
-
-  return template.replace(COUNT, String(count));
 }
 
 function say(status, text) {

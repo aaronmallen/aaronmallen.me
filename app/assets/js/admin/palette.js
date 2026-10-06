@@ -1,7 +1,7 @@
 import { openDialog } from "./dialog.js";
 import { bind } from "./keys.js";
+import { countText, setupListbox } from "./listbox.js";
 
-const COUNT = "{count}";
 const DELAY = 150;
 const FOUND = "[data-palette-found]";
 const NO_TASK = "no_task";
@@ -29,28 +29,25 @@ function setupDialog(dialog) {
   const all = dialog.querySelector("[data-palette-all]");
   const views = dialog.querySelector("[data-palette-views]");
   const filled = new Set();
-  let options = [...dialog.querySelectorAll(OPTION)];
+  let options = [];
   let task = null;
   let asked = "";
   let controller = null;
   let timer = null;
 
   const shown = () => options.filter((option) => !option.hidden);
-  const active = () => options.find((option) => option.getAttribute("aria-selected") === "true");
 
-  const select = (option) => {
-    for (const other of options) other.setAttribute("aria-selected", String(other === option));
-
-    if (!option) return query.removeAttribute("aria-activedescendant");
-
-    query.setAttribute("aria-activedescendant", option.id);
-    option.scrollIntoView({ block: "nearest" });
-  };
-
-  const announce = (count) => {
-    const template = count === 1 ? status.dataset.paletteResultsOne : status.dataset.paletteResultsOther;
-    status.textContent = template.replace(COUNT, String(count));
-  };
+  const { active, select, step } = setupListbox({
+    list,
+    owner: () => query,
+    choice: OPTION,
+    options: () => options,
+    shown,
+    choose: (option) => {
+      select(option);
+      run();
+    },
+  });
 
   const filter = () => {
     const text = query.value.trim().toLowerCase();
@@ -62,16 +59,13 @@ function setupDialog(dialog) {
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
     const visible = shown();
-    announce(visible.filter((option) => option !== all).length);
+    status.textContent = countText(status, "paletteResults", visible.filter((option) => option !== all).length);
     select(visible[0]);
   };
 
-  const move = (step) => {
-    const visible = shown();
-    if (visible.length === 0) return;
-
-    const at = visible.indexOf(active());
-    select(visible[Math.min(Math.max(at + step, 0), visible.length - 1)]);
+  const rebuild = () => {
+    options = [...dialog.querySelectorAll(OPTION)];
+    filter();
   };
 
   const run = () => {
@@ -91,36 +85,30 @@ function setupDialog(dialog) {
     for (const row of dialog.querySelectorAll(FOUND)) row.remove();
     for (const { kind, hits } of found) kinds.get(kind)?.append(...hits.map((hit) => foundRow(kinds.get(kind), hit)));
 
-    options = [...dialog.querySelectorAll(OPTION)];
-    filter();
+    rebuild();
+  };
+
+  const load = (holder, url, place) => {
+    if (filled.has(holder)) return;
+
+    filled.add(holder);
+    fetchJSON(url)
+      .then(({ rows }) => {
+        place(rows);
+        rebuild();
+      })
+      .catch(() => filled.delete(holder));
   };
 
   const fill = () => {
     for (const source of sources) {
-      if (filled.has(source)) continue;
-
-      filled.add(source);
-      fetchJSON(source.dataset.paletteFrom)
-        .then(({ rows }) => {
-          source.after(...rows.map((row) => actionRow(source, row)));
-          options = [...dialog.querySelectorAll(OPTION)];
-          filter();
-        })
-        .catch(() => filled.delete(source));
+      load(source, source.dataset.paletteFrom, (rows) => source.after(...rows.map((row) => actionRow(source, row))));
     }
   };
 
   const fillViews = () => {
-    if (!views || filled.has(views)) return;
-
-    filled.add(views);
-    fetchJSON(views.dataset.paletteViews)
-      .then(({ rows }) => {
-        views.append(...rows.map((row) => viewRow(views, row)));
-        options = [...dialog.querySelectorAll(OPTION)];
-        filter();
-      })
-      .catch(() => filled.delete(views));
+    if (views)
+      load(views, views.dataset.paletteViews, (rows) => views.append(...rows.map((row) => viewRow(views, row))));
   };
 
   const stop = () => {
@@ -182,20 +170,7 @@ function setupDialog(dialog) {
     filter();
     search();
   });
-  query.addEventListener("keydown", (event) => steer(event, { move, run, select, shown }));
-
-  list.addEventListener("click", (event) => {
-    const option = event.target.closest(OPTION);
-    if (!option) return;
-
-    select(option);
-    run();
-  });
-
-  list.addEventListener("mousemove", (event) => {
-    const option = event.target.closest(OPTION);
-    if (option && option !== active()) select(option);
-  });
+  query.addEventListener("keydown", (event) => steer(event, { run, select, shown, step }));
 
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) dialog.close();
@@ -203,7 +178,7 @@ function setupDialog(dialog) {
 
   dialog.addEventListener("close", stop);
 
-  filter();
+  rebuild();
 }
 
 function actionRow(source, { id, title, href }) {
@@ -301,14 +276,11 @@ function seeAll(route, text) {
   return `${route}?${new URLSearchParams({ q: text })}`;
 }
 
-function steer(event, { move, run, select, shown }) {
-  const steps = { ArrowDown: 1, ArrowUp: -1 };
-
-  if (event.key in steps) move(steps[event.key]);
-  else if (event.key === "Home") select(shown()[0]);
+function steer(event, { run, select, shown, step }) {
+  if (event.key === "Home") select(shown()[0]);
   else if (event.key === "End") select(shown().at(-1));
   else if (event.key === "Enter") run();
-  else return;
+  else if (!step(event)) return;
 
   event.preventDefault();
 }
