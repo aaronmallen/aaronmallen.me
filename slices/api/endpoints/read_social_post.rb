@@ -5,10 +5,12 @@ module API
     class ReadSocialPost < Endpoint
       KIND = Blog::Types::RecordKind["social_post"]
       SCHEMA = Schema.by_id
+      SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
       SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
       REPLY = Schema.widen(
         Serializers::SocialPost::SCHEMA,
+        suggestion_id: Schema.nullable(Schema::ID).merge(description: SUGGESTION),
         suggestion_edits: Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
         record_links: Serializers::Link::GROUPS,
       ).freeze
@@ -30,13 +32,9 @@ module API
 
       def answered(social_post)
         serialized(Serializers::SocialPost, social_post).merge(
-          suggestion_edits: serialized(Serializers::SuggestionEdit, open_edits(social_post)),
+          **suggested(suggestion_for_social_post.call(social_post.id)),
           record_links: linked(KIND, social_post.id),
         )
-      end
-
-      def open_edits(social_post)
-        suggestion_for_social_post.call(social_post.id)&.open_edits || Blog::Constants::EMPTY_ARRAY
       end
     end
   end

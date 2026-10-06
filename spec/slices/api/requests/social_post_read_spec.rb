@@ -50,7 +50,8 @@ RSpec.describe "API reading a social post", type: :request do
       "id" => social_post.id, "status" => "posted", "post_id" => nil, "targets" => %w[mastodon bluesky],
       "posted_at" => social_post.posted_at.utc.iso8601, "created_at" => social_post.created_at.utc.iso8601,
       "updated_at" => social_post.updated_at.utc.iso8601, "parts" => [social_post.parts.first.body],
-      "deliveries" => [sent_delivery, waiting_delivery], "suggestion_edits" => [], "record_links" => {},
+      "deliveries" => [sent_delivery, waiting_delivery], "suggestion_id" => nil, "suggestion_edits" => [],
+      "record_links" => {},
     }
   end
 
@@ -116,6 +117,21 @@ RSpec.describe "API reading a social post", type: :request do
       Suggestions::Slice["repos.suggestion_repo"].reject([suggestion.edits.last.id])
 
       expect(read(social_post.id).fetch("suggestion_edits")).to eq([open_edit(suggestion.edits.first)])
+    end
+
+    it "names the suggestion that holds the open edits" do
+      social_post = compose("a cat")
+      suggestion = suggest(social_post, typo("cat", "dog"))
+
+      expect(read(social_post.id).fetch("suggestion_id")).to eq(suggestion.id)
+    end
+
+    it "gives a null suggestion_id once every edit is settled" do
+      social_post = compose("a cat")
+      suggestion = suggest(social_post, typo("cat", "dog"))
+      Suggestions::Slice["repos.suggestion_repo"].reject(suggestion.edits.map(&:id))
+
+      expect(read(social_post.id).fetch("suggestion_id")).to be_nil
     end
 
     it "answers the records linked to the social post, grouped by kind" do

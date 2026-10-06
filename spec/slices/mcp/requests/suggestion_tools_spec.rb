@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP suggestion tools", type: :request do
+  def accept_first(read)
+    edit_ids = [read.dig("suggestion_edits", 0, "id")]
+    mcp_call("accept_suggestion_edits", suggestion_id: read.fetch("suggestion_id"), edit_ids:)
+  end
+
   def compose(status, *parts, posted_at: nil, targets: %w[mastodon])
     Social::Slice["repos.social_post_repo"].create_with_parts(parts:, posted_at:, status:, targets:)
   end
@@ -88,6 +93,23 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
       expect(mcp_answer("accept_suggestion_edits", suggestion_id: suggestion.id).fetch("stale"))
         .to eq(suggestion.edits.map(&:id))
+    end
+
+    it "accepts an edit through the suggestion_id read_post gives" do
+      post = create(:post, :draft, body: "teh cat sta")
+      suggest(post, edit("teh", "the"), edit("sta", "sat"))
+      accept_first(mcp_answer("read_post", id: post.id))
+
+      expect(post_body(post.id)).to eq("the cat sta")
+    end
+
+    it "accepts through the suggestion_id read_social_post gives" do
+      social_post = compose("draft", "teh one")
+      suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion_id = mcp_answer("read_social_post", id: social_post.id).fetch("suggestion_id")
+      mcp_call("accept_suggestion_edits", suggestion_id:)
+
+      expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
     end
 
     it "writes into an unsent social post" do

@@ -8,12 +8,14 @@ module API
 
       EDIT_NOTES = "the notes left on each change to the published post, newest first"
       RECEIVED = "the webmentions the post has received"
+      SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
       SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
       REPLY = Schema.widen(
         Serializers::PostDetail::SCHEMA,
         webmentions_received: { type: "integer", description: RECEIVED },
         edit_notes: Schema.list(Serializers::PostEdit.reference).merge(description: EDIT_NOTES),
+        suggestion_id: Schema.nullable(Schema::ID).merge(description: SUGGESTION),
         suggestion_edits: Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
         record_links: Serializers::Link::GROUPS,
       ).freeze
@@ -39,12 +41,10 @@ module API
         serialized(Serializers::PostDetail, post).merge(
           webmentions_received: received_webmention_count.call(post.id),
           edit_notes: serialized(Serializers::PostEdit, edits_newest_first.call(post.id)),
-          suggestion_edits: serialized(Serializers::SuggestionEdit, open_edits(post)),
+          **suggested(suggestion_for_post.call(post.id)),
           record_links: linked(KIND, post.id),
         )
       end
-
-      def open_edits(post) = suggestion_for_post.call(post.id)&.open_edits || Blog::Constants::EMPTY_ARRAY
     end
   end
 end

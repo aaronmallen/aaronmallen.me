@@ -45,5 +45,11 @@ module API
     def page_of(number) = Blog::Page.new(number:, size: settings.page_size[:mcp])
 
     def serialized(serializer, object, **params) = serializer.new(object, params:).serializable_hash
+
+    def suggested(suggestion)
+      edits = suggestion&.open_edits || Blog::Constants::EMPTY_ARRAY
+
+      { suggestion_id: (suggestion.id if edits.any?), suggestion_edits: serialized(Serializers::SuggestionEdit, edits) }
+    end
   end
 end
