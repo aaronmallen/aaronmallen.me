@@ -12,7 +12,7 @@ module Links
       FIELDS = %i[other_kind other_id].freeze
 
       include Deps[
-        "records",
+        records: "queries.linkable_records",
         contract: "contracts.record_link_contract",
         record_link_repo: "repos.record_link_repo",
       ]

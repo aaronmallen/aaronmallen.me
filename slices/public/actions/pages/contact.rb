@@ -6,7 +6,7 @@ module Public
       class Contact < Action
         SENT = Blog::Constants::CHECKED
 
-        include Deps["contact_stamp"]
+        include Deps[issue_stamp: "operations.issue_contact_stamp"]
 
         before :forbid_caching
 
@@ -14,7 +14,7 @@ module Public
           response.render(
             view,
             sent: Blog::Types::Checkbox[request.params[:sent]],
-            values: { ContactStamp::FIELD => contact_stamp.issue },
+            values: { UI::Views::Pages::Contact::STAMP => issue_stamp.call },
           )
         end
       end

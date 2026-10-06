@@ -95,7 +95,7 @@ RSpec.describe Links::Queries::RecordLinks do
     it "cuts a long title" do
       link("journal_entry", create(:journal_entry, body: "word " * 100).id)
 
-      expect(only("journal_entry").title.length).to eq(Links::Records::TITLE_LIMIT)
+      expect(only("journal_entry").title.length).to eq(Links::Queries::LinkableRecords::TITLE_LIMIT)
     end
   end
 end

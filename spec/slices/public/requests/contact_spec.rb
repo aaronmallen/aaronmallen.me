@@ -367,7 +367,7 @@ RSpec.describe "Contact", type: :request do
 
     def rendered_stamp = page.find("input[name='message[stamp]']", visible: :all)
 
-    def signed_since_render?(stamp) = Public::Slice["contact_stamp"].fresh?(stamp, Time.now + minimum)
+    def signed_since_render?(stamp) = Public::Slice["operations.check_contact_stamp"].call(stamp, Time.now + minimum)
 
     it "rides the form as a hidden field" do
       get "/contact"

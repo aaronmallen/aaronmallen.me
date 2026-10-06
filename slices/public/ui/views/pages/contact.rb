@@ -9,6 +9,7 @@ module Public
           FORM_ID = "contact-form"
           HONEYPOT = :reference
           SENT_ICON = "fa-circle-check"
+          STAMP = Operations::IssueContactStamp::FIELD
           THROTTLED_ICON = "fa-hourglass-half"
 
           def initialize(
@@ -80,7 +81,7 @@ module Public
             input_row(:subject, ".fields.subject", ".placeholders.subject", maxlength: ::Contact::MessageLimits::MAX_SUBJECT)
             body_row
             honeypot
-            input(type: "hidden", name: field_name(ContactStamp::FIELD), value: @values[ContactStamp::FIELD])
+            input(type: "hidden", name: field_name(STAMP), value: @values[STAMP])
           end
 
           def honeypot

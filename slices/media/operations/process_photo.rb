@@ -3,8 +3,8 @@
 require "vips"
 
 module Media
-  module Photos
-    class Processor
+  module Operations
+    class ProcessPhoto
       LONG_EDGE = 2560
       MAX_PIXELS = 100_000_000
       PAGE_HEIGHT = "page-height"

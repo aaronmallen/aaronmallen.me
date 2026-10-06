@@ -11,7 +11,7 @@ module Media
         "store.client",
         contract: "contracts.photo_contract",
         photo_repo: "repos.photo_repo",
-        processor: "photos.processor",
+        processor: "operations.process_photo",
       ]
 
       def call(file)
@@ -35,7 +35,7 @@ module Media
         pixels = processor.pixels(bytes, type)
         return Failure([:unreadable]) unless pixels
 
-        pixels > Photos::Processor::MAX_PIXELS ? Failure([:oversized]) : Success(pixels)
+        pixels > ProcessPhoto::MAX_PIXELS ? Failure([:oversized]) : Success(pixels)
       end
 
       def process(bytes, type)

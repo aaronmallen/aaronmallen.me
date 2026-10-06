@@ -28,7 +28,7 @@ module OpenAPI
     ["the body is not JSON: #{body[0, 80]}"]
   end
 
-  def document = @document ||= JSON.parse(JSON.generate(API::Slice["document"].call))
+  def document = @document ||= JSON.parse(JSON.generate(API::Slice["operations.build_document"].call))
 
   def operation(path, verb)
     template = templates.find { path.match?(it.last) }&.first

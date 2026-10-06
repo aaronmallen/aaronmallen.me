@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
@@ -46,13 +46,14 @@ stores nothing, and the sender reads the same confirmation a real one reads. Tel
 next request how to pass. The `spam` status is what the operator marks after reading, so a catch is dropped rather
 than filed.
 
-**A signed stamp times the form.** The honeypot let 14 spam messages through in the first week, so #504 added a
-timer beside it. The contact page draws a hidden `stamp` field: the time it rendered, in milliseconds, and an HMAC of
-that time keyed by `app_secret`. `Public::ContactStamp` signs and checks it. `Messages::Create` checks it beside the
-honeypot, and a post sent sooner than `minimum_submit_seconds` (3 unless set), later than `stamp_expiry_hours` (24
-unless set), or with no stamp or a forged one, stores nothing and reads as sent, for the same reason a filled
-honeypot does. A form sent back with errors carries a new stamp. The stamp needs no cookie, no session and no script,
-and the page already sends `no-store`, so no cache hands one stamp to many readers.
+**A signed stamp times the form.** The honeypot let 14 spam messages through in the first week, so #504 added a timer
+beside it. The contact page draws a hidden `stamp` field: the time it rendered, in milliseconds, and an HMAC of that
+time keyed by `app_secret`. `Public::Operations::IssueContactStamp` signs it and `Public::Operations::CheckContactStamp`
+checks it (#532). `Messages::Create` checks it beside the honeypot, and a post sent sooner than `minimum_submit_seconds`
+(3 unless set), later than `stamp_expiry_hours` (24 unless set), or with no stamp or a forged one, stores nothing and
+reads as sent, for the same reason a filled honeypot does. A form sent back with errors carries a new stamp. The stamp
+needs no cookie, no session and no script, and the page already sends `no-store`, so no cache hands one stamp to many
+readers.
 
 **The throttle counts stored messages by hash over a window.** `messages.visitor_hash` holds `HashVisitor` of the
 address alone, since a sender writes the user agent and a new one each post would make a new sender (AA-708). There

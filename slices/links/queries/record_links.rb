@@ -3,7 +3,7 @@
 module Links
   module Queries
     class RecordLinks
-      include Deps["records", record_link_repo: "repos.record_link_repo"]
+      include Deps[records: "queries.linkable_records", record_link_repo: "repos.record_link_repo"]
 
       def call(kind, id)
         id = Blog::Types::IdParam[id]
