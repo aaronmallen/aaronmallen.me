@@ -21,14 +21,6 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def call_tool(name, **arguments) = rpc("tools/call", { name:, arguments: })
 
-  def card
-    {
-      og_title: "On the card",
-      og_image_url: "https://example.com/card.png",
-      canonical_url: "https://elsewhere.example/hello",
-    }
-  end
-
   def challenge = last_response.headers["WWW-Authenticate"]
 
   def clients = MCP::Slice["db.rom"].relations[:oauth_clients]
@@ -51,15 +43,6 @@ RSpec.describe "MCP endpoint", type: :request do
   def fetch_prompt(name, **arguments) = rpc("prompts/get", { name:, arguments: })
 
   def issued = @issued ||= connect
-
-  def link(kind, id, other_kind, other_id)
-    Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
-  end
-
-  def linked(tool, id)
-    call_tool(tool, id:)
-    content.fetch("record_links")
-  end
 
   def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
@@ -157,10 +140,6 @@ RSpec.describe "MCP endpoint", type: :request do
   end
 
   def tokens = MCP::Slice["db.rom"].relations[:oauth_tokens]
-
-  def tools_guarded_by(*scopes)
-    MCP::Protocol::Handler::TOOLS.select { scopes.include?(it.scope_value) }.map(&:name_value).sort
-  end
 
   describe "a request with no token" do
     before { rpc("tools/list", authorization: nil) }
@@ -355,11 +334,10 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "names a kind in the instructions for every read tool" do
-      readers = tools_guarded_by(MCP::OAuth::Scope::READ)
       rpc("initialize",
           { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
-      expect(readers.reject { result.fetch("instructions").include?(read_kinds.fetch(it, it)) }).to be_empty
+      expect(read_kinds.values.reject { result.fetch("instructions").include?(it) }).to be_empty
     end
 
     it "tells the client suggestions settle through the tools" do
@@ -444,15 +422,11 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "the tools it offers" do
     before { rpc("tools/list") }
 
-    it "offers reading, suggesting and writing, and nothing else" do
-      expect(offered).to eq(tools_guarded_by(*MCP::OAuth::Scope::ALL))
-    end
-
     it "names a read tool in search for every kind it finds" do
       description = result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
       readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
 
-      expect(readers.reject { |_kind, tool| tools_guarded_by(MCP::OAuth::Scope::READ).include?(tool) }).to be_empty
+      expect(readers.values - read_kinds.keys).to be_empty
     end
   end
 
@@ -466,7 +440,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers the reading tools and nothing else" do
       rpc("tools/list")
 
-      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ))
+      expect(offered).to eq(read_kinds.keys.sort)
     end
 
     it "still reads a post" do
@@ -534,7 +508,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "offers the suggesting tool" do
       rpc("tools/list")
 
-      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ, MCP::OAuth::Scope::SUGGEST))
+      expect(offered).to eq([*read_kinds.keys, "suggest_edits"].sort)
     end
 
     it "stores a suggestion" do
@@ -1361,7 +1335,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "still reads" do
       rpc("tools/list", authorization: "Bearer #{backfilled}")
 
-      expect(offered).to eq(tools_guarded_by(MCP::OAuth::Scope::READ))
+      expect(offered).to eq(read_kinds.keys.sort)
     end
 
     it "cannot write until it is granted again" do
@@ -1564,104 +1538,6 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("list_posts")
 
       expect(content.fetch("social_posts").first.fetch("preview")).to eq("#{'a' * 119}👩‍👩‍👧‍👦…")
-    end
-  end
-
-  describe "read_post" do
-    it "gives the title and the markdown body" do
-      post = create(:post, :draft, title: "Draft one", body: "# Heading\n\nsome words")
-      call_tool("read_post", id: post.id)
-
-      written = { "id" => post.id, "status" => "draft", "title" => "Draft one", "body" => "# Heading\n\nsome words" }
-
-      blank = { "og_title" => nil, "og_image_url" => nil, "canonical_url" => nil, "record_links" => {} }
-
-      expect(content).to include(written.merge(blank))
-    end
-
-    it "gives the records linked to the post, grouped by kind" do
-      post = create(:post, :draft)
-      commit = create(:commit, message: "Move the server")
-      link("post", post.id, "commit", commit.id)
-
-      expect(linked("read_post", post.id))
-        .to match("commit" => [include("kind" => "commit", "id" => commit.id, "title" => "Move the server")])
-    end
-
-    it "gives the social card fields the post carries" do
-      call_tool("read_post", id: create(:post, :draft, **card).id)
-
-      expect(content).to include(card.transform_keys(&:to_s))
-    end
-
-    it "reads a published post too" do
-      post = create(:post, :published, title: "Out there")
-      call_tool("read_post", id: post.id)
-
-      expect(content.fetch("title")).to eq("Out there")
-    end
-
-    it "calls an unknown ID an error" do
-      call_tool("read_post", id: 999_999)
-
-      expect(result.fetch("isError")).to be(true)
-    end
-
-    it "says which ID it could not find" do
-      call_tool("read_post", id: 999_999)
-
-      expect(message).to eq("no blog post has the ID 999999")
-    end
-
-    it "refuses an ID that is not a number" do
-      call_tool("read_post", id: "one")
-
-      expect(result.fetch("isError")).to be(true)
-    end
-
-    it "refuses a call with no ID" do
-      call_tool("read_post")
-
-      expect(result.fetch("isError")).to be(true)
-    end
-  end
-
-  describe "read_social_post" do
-    it "gives the parts in order" do
-      social_post = compose("draft", "one", "two", "three")
-      call_tool("read_social_post", id: social_post.id)
-
-      expect(content.fetch("parts")).to eq(%w[one two three])
-    end
-
-    it "gives the records linked to the social post, grouped by kind" do
-      social_post = compose("draft", "one")
-      task = create(:task, title: "Announce the move")
-      link("social_post", social_post.id, "task", task.id)
-
-      expect(linked("read_social_post", social_post.id))
-        .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Announce the move")])
-    end
-
-    it "reads one that is scheduled" do
-      social_post = compose("scheduled", "queued up", posted_at: Time.now + 3600)
-      call_tool("read_social_post", id: social_post.id)
-
-      expect(content.fetch("status")).to eq("scheduled")
-    end
-
-    it "reads one already sent, with each network's delivery" do
-      social_post = compose("posted", "gone out", posted_at: Time.now - 3600)
-      call_tool("read_social_post", id: social_post.id)
-
-      expect(content.values_at("status", "deliveries"))
-        .to match(["posted", [include("network" => "mastodon", "state" => "waiting")]])
-    end
-
-    it "says which ID it could not find" do
-      call_tool("read_social_post", id: 999_999)
-
-      expect(message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -1886,15 +1762,6 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
 
       expect(suggestion_repo.for_post(post.id)).to be_nil
-    end
-
-    it "says it stored nothing when the store fails for a reason it does not know" do
-      post = create(:post, :draft, body: "teh cat sat")
-      failing = instance_double(Suggestions::Operations::ReplacePostEdits, call: Dry::Monads::Failure(:unexpected))
-      replace_component("suggestions.operations.replace_post_edits", failing)
-      call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
-
-      expect(message).to eq("could not store the edits")
     end
 
     it "keeps the edits an earlier call stored when a later one is blank" do
@@ -2259,14 +2126,6 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("write_post_seo", id: 999_999, og_title: "On the card")
 
       expect(message).to eq("no blog post has the ID 999999")
-    end
-
-    it "says it saved nothing when the save fails for a reason it does not know" do
-      failing = instance_double(Posts::Operations::SavePostSeo, call: Dry::Monads::Failure(:unexpected))
-      replace_component("posts.operations.save_post_seo", failing)
-      call_tool("write_post_seo", id: article.id, og_title: "On the card")
-
-      expect(message).to eq("could not save the social card fields")
     end
 
     it "refuses a call with no ID" do

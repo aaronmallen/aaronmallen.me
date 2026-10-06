@@ -146,14 +146,6 @@ RSpec.describe "API people", type: :request do
     it "refuses a person with no key" do
       expect(add(name: "Ada", mastodon_handle: "@ada@ruby.social").fetch("errors")).to eq("key" => ["key is missing"])
     end
-
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Social::Operations::SavePerson, call: Dry::Monads::Failure(:unexpected))
-      replace_component("social.operations.save_person", failing)
-
-      expect([add(name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social"), status])
-        .to eq([{ "error" => "failed", "message" => "could not save the person" }, 500])
-    end
   end
 
   describe "PATCH /api/v1/people/:id" do

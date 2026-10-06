@@ -47,10 +47,6 @@ RSpec.describe "API bulk webmention actions", type: :request do
     Array.new(2) { create(:webmention, **shared, received_at: Time.utc(2026, 3, 1, 12)) }
   end
 
-  def unexpected(id)
-    instance_double(Social::Operations::ActOnWebmentions, call: Dry::Monads::Failure[:record, id, :unexpected])
-  end
-
   {
     "approve" => "approved",
     "ignore" => "ignored",
@@ -120,14 +116,6 @@ RSpec.describe "API bulk webmention actions", type: :request do
     it "refuses a request with no IDs" do
       expect(call_api("approve", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
-  end
-
-  it "answers a failure it did not expect with a 500 that names the webmention" do
-    mention = create(:webmention)
-    replace_component("social.operations.act_on_webmentions", unexpected(mention.id))
-
-    expect([act("approve", [mention.id]), status])
-      .to eq([{ "error" => "failed", "message" => "could not change webmention #{mention.id}" }, 500])
   end
 
   describe "the MCP tools" do

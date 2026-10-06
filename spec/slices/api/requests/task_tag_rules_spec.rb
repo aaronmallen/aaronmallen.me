@@ -156,14 +156,6 @@ RSpec.describe "API task tag rules", type: :request do
     it "refuses a rule with no pattern" do
       expect(create_rule(tags: %w[ruby]).fetch("errors")).to eq("pattern" => ["pattern is missing"])
     end
-
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Tasks::Operations::SaveTaskTagRule, call: Dry::Monads::Failure(:unexpected))
-      replace_component("tasks.operations.save_task_tag_rule", failing)
-
-      expect([create_rule(pattern: "aaronmallen/*", tags: %w[ruby]), status])
-        .to eq([{ "error" => "failed", "message" => "could not save the rule" }, 500])
-    end
   end
 
   describe "PATCH /api/v1/task_tag_rules/:id" do

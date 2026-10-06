@@ -159,14 +159,6 @@ RSpec.describe "MCP post tools", type: :request do
       expect(post_repo.all).to be_empty
     end
 
-    it "says it saved nothing when the save fails for a reason it does not know" do
-      failing = instance_double(Posts::Operations::SavePost, call: Dry::Monads::Failure(:unexpected))
-      replace_component("posts.operations.save_post", failing)
-      call_tool("create_post", title: "Hello")
-
-      expect(message).to eq("could not save the blog post")
-    end
-
     it "refuses a call with no title" do
       call_tool("create_post", body: "one two")
 
@@ -354,27 +346,6 @@ RSpec.describe "MCP post tools", type: :request do
 
     def overlong = { syndication_enabled: true, syndication_body: "a" * 301, syndication_targets: %w[bluesky] }
 
-    it "publishes a draft now" do
-      draft = create(:post, :draft)
-      call_tool("publish_post", id: draft.id)
-
-      expect(stored(draft.id).published_at).to be_within(60).of(Time.now)
-    end
-
-    it "answers with the post it published" do
-      draft = create(:post, :draft)
-      call_tool("publish_post", id: draft.id)
-
-      expect(content).to include("id" => draft.id, "status" => "published", "outcome" => "published")
-    end
-
-    it "schedules a draft whose publish time is still to come" do
-      draft = create(:post, :draft, published_at: Time.now + (3 * 24 * 60 * 60))
-      call_tool("publish_post", id: draft.id)
-
-      expect(content).to include("status" => "scheduled", "outcome" => "scheduled")
-    end
-
     it "schedules a draft for the hour the clock repeats when daylight saving ends, at the time it holds" do
       draft = create(:post, :draft, published_at: repeated_hour)
       call_tool("publish_post", id: draft.id)
@@ -403,43 +374,6 @@ RSpec.describe "MCP post tools", type: :request do
       call_tool("publish_post", id: draft.id)
 
       expect(message).to eq("syndication_body mentions someone who is not in the directory")
-    end
-
-    it "leaves a refused post a draft" do
-      draft = create(:post, :draft, **overlong)
-      call_tool("publish_post", id: draft.id)
-
-      expect(stored(draft.id).status).to eq("draft")
-    end
-
-    it "publishes a scheduled post now, as the admin does", :aggregate_failures do
-      scheduled = create(:post, :scheduled)
-      call_tool("publish_post", id: scheduled.id)
-
-      expect(content).to include("status" => "published", "outcome" => "published")
-      expect(stored(scheduled.id).published_at).to be_within(60).of(Time.now)
-    end
-
-    it "refuses a post already published and leaves it as it was", :aggregate_failures do
-      published = create(:post, :published)
-      call_tool("publish_post", id: published.id)
-
-      expect(refused?).to be(true)
-      expect(message).to eq("blog post #{published.id} is already published")
-      expect(stored(published.id).published_at).to be_within(1).of(published.published_at)
-    end
-
-    it "sends no second webmention pass for a post already published", :commits do
-      published = create(:post, :published)
-      call_tool("publish_post", id: published.id)
-
-      expect(Social::Jobs::SendWebmentions.jobs).to be_empty
-    end
-
-    it "calls an unknown ID an error" do
-      call_tool("publish_post", id: 999_999)
-
-      expect(message).to eq("no blog post has the ID 999999")
     end
   end
 

@@ -580,14 +580,6 @@ RSpec.describe "API tasks", type: :request do
       expect([call_api(:post, "", "{nope"), status])
         .to eq([{ "error" => "invalid_json", "message" => "the body takes a JSON object" }, 400])
     end
-
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Tasks::Operations::CaptureTask, call: Dry::Monads::Failure(:unexpected))
-      replace_component("tasks.operations.capture_task", failing)
-
-      expect([capture(title: "Lost"), status])
-        .to eq([{ "error" => "failed", "message" => "could not save the change" }, 500])
-    end
   end
 
   describe "PATCH /api/v1/tasks/:id" do

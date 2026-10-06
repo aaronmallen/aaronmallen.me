@@ -49,6 +49,12 @@ RSpec.describe "API publishing a post", type: :request do
       expect(stored(published).published_at).to be_within(1).of(published.published_at)
     end
 
+    it "sends no second webmention pass for a post already published", :commits do
+      publish(create(:post, :published).id)
+
+      expect(Social::Jobs::SendWebmentions.jobs).to be_empty
+    end
+
     it "refuses a post that fails the editor's checks and leaves it a draft", :aggregate_failures do
       draft = create(:post, :draft, **overlong)
       message = "syndication_body runs over a network's limit"

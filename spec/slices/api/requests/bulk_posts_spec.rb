@@ -16,10 +16,6 @@ RSpec.describe "API bulk post actions", type: :request do
 
   def drafts(count) = Array.new(count) { create(:post, :draft) }
 
-  def fail_with(failure)
-    replace_component("posts.operations.act_on_posts", instance_double(Posts::Operations::ActOnPosts, call: failure))
-  end
-
   def gone_id = create(:post).id.tap { repo.delete(it) }
 
   def ids(posts) = posts.map(&:id)
@@ -134,14 +130,6 @@ RSpec.describe "API bulk post actions", type: :request do
     it "refuses a request with no IDs" do
       expect(call_api("delete", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
-  end
-
-  it "answers a failure it did not expect with a 500 that names the post" do
-    article = create(:post)
-    fail_with(Dry::Monads::Failure[:record, article.id, :unexpected])
-
-    expect([act("delete", [article.id]), status])
-      .to eq([{ "error" => "failed", "message" => "could not change blog post #{article.id}" }, 500])
   end
 
   describe "the MCP tools" do

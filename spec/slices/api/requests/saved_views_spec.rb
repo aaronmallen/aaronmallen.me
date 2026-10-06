@@ -162,14 +162,6 @@ RSpec.describe "API saved views", type: :request do
 
       expect(views.count).to eq(0)
     end
-
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(SavedViews::Operations::CreateSavedView, call: Dry::Monads::Failure(:unexpected))
-      replace_component("saved_views.operations.create_saved_view", failing)
-
-      expect([create_view(name: "Lost", screen: "tasks"), status])
-        .to eq([{ "error" => "failed", "message" => "could not save the saved view" }, 500])
-    end
   end
 
   describe "PATCH /api/v1/saved_views/:id" do

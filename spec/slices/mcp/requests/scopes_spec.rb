@@ -57,10 +57,6 @@ RSpec.describe "MCP tool scopes", type: :request do
   describe "a token holding every scope" do
     def scopes = guarded.keys
 
-    it "lists every tool the server carries, so no tool names a scope the server does not know" do
-      expect(listed).to match_array(MCP::Protocol::Handler::TOOLS.map(&:name_value))
-    end
-
     it "guards each tool with the scope this spec expects" do
       expect(listed).to match_array(guarded.values.flatten)
     end

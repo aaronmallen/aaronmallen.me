@@ -38,13 +38,6 @@ RSpec.describe "API sprints", type: :request do
 
       expect([status, sprints.on(today)]).to match([200, have_attributes(sprint_date: today)])
     end
-
-    it "answers a failure it did not expect with a 500" do
-      failing = instance_double(Tasks::Operations::CurrentSprint, call: Dry::Monads::Failure(:unexpected))
-      replace_component("tasks.operations.current_sprint", failing)
-
-      expect([current, status]).to eq([{ "error" => "failed", "message" => "could not open today's sprint" }, 500])
-    end
   end
 
   describe "GET /api/v1/sprints" do

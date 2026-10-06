@@ -121,6 +121,12 @@ RSpec.describe "API reading webmentions", type: :request do
       expect(ids(list(post_id: create(:post).id))).to eq([])
     end
 
+    it "lists a webmention under its Chicago day and gives received_at in UTC" do
+      create(:webmention, received_at: Blog::TimeZone.local_time(2026, 3, 31, 23, 30))
+
+      expect(list.fetch("webmentions").map { it.fetch("received_at") }).to eq(["2026-04-01T04:30:00Z"])
+    end
+
     it "refuses a post_id that is not a number with a 422" do
       expect([list(post_id: "abc").fetch("errors").keys, status]).to eq([%w[post_id], 422])
     end

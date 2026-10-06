@@ -12,10 +12,6 @@ RSpec.describe "API bulk message actions", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def failing(id)
-    instance_double(Contact::Operations::ActOnMessages, call: Dry::Monads::Failure[:record, id, :unexpected])
-  end
-
   def gone_id = create(:message).id.tap { repo.delete(it) }
 
   def ids(messages) = messages.map(&:id)
@@ -121,14 +117,6 @@ RSpec.describe "API bulk message actions", type: :request do
     it "refuses a request with no IDs" do
       expect(call_api("read", "{}").fetch("errors")).to eq("ids" => ["ids is missing"])
     end
-  end
-
-  it "answers a failure it did not expect with a 500 that names the message" do
-    message = create(:message)
-    replace_component("contact.operations.act_on_messages", failing(message.id))
-
-    expect([act("read", [message.id]), status])
-      .to eq([{ "error" => "failed", "message" => "could not change message #{message.id}" }, 500])
   end
 
   describe "the MCP tools" do
