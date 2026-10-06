@@ -13,7 +13,11 @@ module Admin
 
           CARDS = { LIVE => [".live_label", ".live_title"], ARCHIVED => [".archived_label", ".archived_title"] }.freeze
           EMPTY = { LIVE => ".empty.live", ARCHIVED => ".empty.archived", WORK => ".empty.work" }.freeze
-          FILTERS = { LIVE => ".live", ARCHIVED => ".archived", WORK => ".work" }.freeze
+          FILTERS = {
+            LIVE => "ui.views.projects.index.live",
+            ARCHIVED => "ui.views.projects.index.archived",
+            WORK => "ui.views.projects.index.work",
+          }.freeze
           SEPARATOR = " · "
 
           def initialize(
@@ -55,13 +59,14 @@ module Admin
           end
 
           def filter_form
-            form(action: path(:admin_projects), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "filter", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_projects),
+              name: "filter",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
 
           def rows
             return Empty { t(EMPTY.fetch(@filter)) } if @projects.empty?

@@ -283,7 +283,6 @@ en:
           today: "Today"
           yesterday: "Yesterday"
         filters:
-          apply: "Filter"
           contains: "Contains"
           contains_hint: "Add tag:ruby to search by tag, or repo:owner/name to search one repo."
           contains_placeholder: "grep activity…"
@@ -403,6 +402,8 @@ en:
           one: "Untouched for %{count} day"
           other: "Untouched for %{count} days"
         write: "Write"
+      auto_form:
+        apply: "Apply"
       bulk_bar:
         all: "Select all"
         ticked: "%{count} ticked"
@@ -1196,7 +1197,6 @@ en:
           preview: "What each network gets"
           remove: "Remove this part"
         queue:
-          apply: "Filter"
           drafts: "drafts"
           empty:
             drafts: "No drafts yet."
@@ -1450,7 +1450,6 @@ en:
           title:
             blank: "Write the task down first."
         filters:
-          apply: "Filter"
           search: "Search tasks"
           search_placeholder: "search · tag:site…"
         grip:
@@ -1630,7 +1629,6 @@ en:
           other: "%{count} words"
       time_report:
         filters:
-          apply: "Show"
           by: "Group by"
           from: "From"
           groupings:
@@ -1769,7 +1767,6 @@ en:
       analytics:
         show:
           aggregators: "Feed aggregators"
-          apply: "Apply"
           change: "%{percent}% vs. previous %{count} days"
           direct: "direct"
           geography: "Geography"
@@ -1821,7 +1818,6 @@ en:
           back: "Back to the decision"
           kicker: "Edit decision"
         index:
-          apply: "Filter"
           counts:
             dropped: "%{count} dropped"
             open: "%{count} open"
@@ -1877,7 +1873,6 @@ en:
             other: "%{count} words"
       messages:
         index:
-          apply: "Filter"
           empty:
             read: "Nothing read yet."
             spam: "No spam."
@@ -1905,7 +1900,6 @@ en:
           token: "@{%{key}}"
       posts:
         analytics:
-          apply: "Apply"
           bounce: "%{percent}% bounce rate"
           clicks: "Outbound clicks"
           devices: "Devices"
@@ -1940,7 +1934,6 @@ en:
         index:
           all: "all"
           analytics: "Analytics for %{title}"
-          apply: "Filter"
           draft_count:
             one: "%{count} draft"
             other: "%{count} drafts"
@@ -1981,7 +1974,6 @@ en:
           title: "New post"
       projects:
         index:
-          apply: "Filter"
           archive_note: "Archiving keeps the repo link and history but removes the project from /projects and from the featured grid."
           archived: "archived"
           archived_count: "%{count} archived"
@@ -2020,7 +2012,6 @@ en:
       search:
         index:
           all: "All kinds"
-          apply: "Search"
           empty: "Type a phrase to search every record."
           filter: "Kind"
           heading: "Search"
@@ -2067,7 +2058,6 @@ en:
           queued: "%{count} queued"
       tags:
         index:
-          apply: "Filter"
           aside: "Click a tag to rename it, recolour it or take it away."
           count:
             private:
@@ -2238,7 +2228,6 @@ en:
             zero: "No live tokens"
       webmentions:
         index:
-          apply: "Filter"
           approved: "approved"
           empty:
             approved: "Nothing approved yet."

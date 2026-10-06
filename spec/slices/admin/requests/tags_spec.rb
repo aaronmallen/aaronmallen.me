@@ -211,6 +211,12 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css("form[role='search'] input[name='scope'][value='private']", visible: :all)
       end
 
+      it "submits the search as a get on change" do
+        get "/admin/tags"
+
+        expect(page).to have_css("form[method='get'][action='/admin/tags'][role='search'][data-autosubmit]")
+      end
+
       it "counts only the tags on the tab" do
         get "/admin/tags", scope: "private"
 

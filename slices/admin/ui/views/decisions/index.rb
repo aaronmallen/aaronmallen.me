@@ -13,7 +13,11 @@ module Admin
 
           COUNTS = { OPEN => ".counts.open", RESOLVED => ".counts.resolved", DROPPED => ".counts.dropped" }.freeze
           EMPTIES = { OPEN => ".empty.open", RESOLVED => ".empty.resolved", DROPPED => ".empty.dropped" }.freeze
-          FILTERS = { OPEN => ".open", RESOLVED => ".resolved", DROPPED => ".dropped" }.freeze
+          FILTERS = {
+            OPEN => "ui.views.decisions.index.open",
+            RESOLVED => "ui.views.decisions.index.resolved",
+            DROPPED => "ui.views.decisions.index.dropped",
+          }.freeze
           SEPARATOR = " · "
           TITLES = { OPEN => ".titles.open", RESOLVED => ".titles.resolved", DROPPED => ".titles.dropped" }.freeze
 
@@ -37,13 +41,14 @@ module Admin
           private
 
           def filter_form
-            form(action: path(:admin_decisions), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "status", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_decisions),
+              name: "status",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
 
           def new_link
             CreateLink(href: path(:admin_new_decision), label: t(".new_decision"))

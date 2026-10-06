@@ -10,7 +10,11 @@ module Admin
           LABELS = {
             views: ".views", visitors: ".visitors", readers: ".readers", read_throughs: ".read_throughs",
           }.freeze
-          RANGES = { "7" => ".range_7", "14" => ".range_14", "30" => ".range_30" }.freeze
+          RANGES = {
+            "7" => "ui.views.posts.analytics.range_7",
+            "14" => "ui.views.posts.analytics.range_14",
+            "30" => "ui.views.posts.analytics.range_30",
+          }.freeze
           SEPARATOR = " · "
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
@@ -65,13 +69,14 @@ module Admin
           def month = l(Blog::TimeZone.today, format: :month)
 
           def range_form
-            form(action: path(:admin_post_analytics, id: @post.id), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".range"), name: "range", options: range_options, selected: @range.to_s)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_post_analytics, id: @post.id),
+              name: "range",
+              options: RANGES,
+              selected: @range.to_s,
+              label: t(".range"),
+            )
           end
-
-          def range_options = RANGES.transform_values { t(it) }
 
           def referrers = rows(:referrers) { it[:host] || t(".direct") }
 

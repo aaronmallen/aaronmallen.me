@@ -10,7 +10,11 @@ module Admin
           QUEUED = Blog::Types::SocialQueue["queued"]
 
           EMPTIES = { QUEUED => ".empty.queued", POSTED => ".empty.posted", DRAFTS => ".empty.drafts" }.freeze
-          FILTERS = { QUEUED => ".queued", POSTED => ".posted", DRAFTS => ".drafts" }.freeze
+          FILTERS = {
+            QUEUED => "ui.components.social.queue.queued",
+            POSTED => "ui.components.social.queue.posted",
+            DRAFTS => "ui.components.social.queue.drafts",
+          }.freeze
 
           prop :filter, Blog::Types::String
           prop :now, Blog::Types::Time
@@ -32,13 +36,14 @@ module Admin
           def count(social_post) = @suggestion_counts.fetch(social_post.id, 0)
 
           def filter_form
-            form(action: path(:admin_social), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "filter", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_social),
+              name: "filter",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
         end
       end
     end

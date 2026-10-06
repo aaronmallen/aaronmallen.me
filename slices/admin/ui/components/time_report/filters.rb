@@ -35,11 +35,10 @@ module Admin
           end
 
           def filter_form
-            form(action: path(:admin_time), method: "get", data: { autosubmit: "" }) do
+            AutoForm(action: path(:admin_time)) do
               div(class: "form-stack") do
                 grouping
                 dates
-                noscript { Button(type: "submit", small: true) { t(".apply") } }
               end
             end
           end

@@ -12,8 +12,12 @@ module Admin
           PUBLISHED = Blog::Types::PostStatus["published"]
           SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
-          FILTERS = { ALL => ".all", PUBLISHED => ".published", DRAFT => ".drafts",
-                      SCHEDULED => ".scheduled" }.freeze
+          FILTERS = {
+            ALL => "ui.views.posts.index.all",
+            PUBLISHED => "ui.views.posts.index.published",
+            DRAFT => "ui.views.posts.index.drafts",
+            SCHEDULED => "ui.views.posts.index.scheduled",
+          }.freeze
           MENTION_COLOR = :pink
           SEPARATOR = " · "
           UNIQUE_READERS = { true => ".final_unique_readers", false => ".unique_readers" }.freeze
@@ -56,13 +60,14 @@ module Admin
           def count(status) = @counts.fetch(status, 0)
 
           def filter_form
-            form(action: path(:admin_posts), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "status", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_posts),
+              name: "status",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
 
           def list
             @posts.rows.empty? ? Empty { t(".empty") } : rows

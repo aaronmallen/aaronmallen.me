@@ -131,6 +131,20 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
         expect(page).to have_css("form[method='get'][action='/admin/posts'][data-autosubmit] .seg")
       end
 
+      it "keeps the filter usable without script" do
+        get "/admin/posts"
+
+        expect(page).to have_css(
+          "form[action='/admin/posts'] noscript button[type='submit']", text: "Apply", visible: :all,
+        )
+      end
+
+      it "sends no token with the filter" do
+        get "/admin/posts"
+
+        expect(page).to have_no_css("form[action='/admin/posts'] input[name='_csrf_token']", visible: :all)
+      end
+
       it "links New post to the editor" do
         get "/admin/posts"
 

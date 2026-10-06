@@ -18,7 +18,12 @@ module Admin
             IGNORED => ".empty.ignored",
             SPAM => ".empty.spam",
           }.freeze
-          FILTERS = { PENDING => ".pending", APPROVED => ".approved", IGNORED => ".ignored", SPAM => ".spam" }.freeze
+          FILTERS = {
+            PENDING => "ui.views.webmentions.index.pending",
+            APPROVED => "ui.views.webmentions.index.approved",
+            IGNORED => "ui.views.webmentions.index.ignored",
+            SPAM => "ui.views.webmentions.index.spam",
+          }.freeze
           SEPARATOR = " · "
 
           def initialize(counts:, filter:, inbox:, posts:, settings:)
@@ -44,13 +49,14 @@ module Admin
           def count(status) = @counts.fetch(status, 0)
 
           def filter_form
-            form(action: path(:admin_webmentions), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "status", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_webmentions),
+              name: "status",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
 
           def inbox
             Card(title: t(".inbox"), data: { key_list: true }) { rows }

@@ -53,12 +53,11 @@ module Admin
           end
 
           def filter_form
-            form(action: path(:admin_activity), method: "get", data: { autosubmit: "" }) do
+            AutoForm(action: path(:admin_activity)) do
               div(class: "form-stack") do
                 dates
                 include_types
                 text_field
-                noscript { Button(type: "submit", small: true) { t(".apply") } }
               end
             end
           end

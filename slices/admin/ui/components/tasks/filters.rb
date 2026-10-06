@@ -13,13 +13,9 @@ module Admin
 
           def view_template
             SavedViews(**@saved_views)
-            form(
-              action: path(:admin_tasks), method: "get", role: "search", class: "tasks-filters",
-              data: { autosubmit: "" },
-            ) do
+            AutoForm(action: path(:admin_tasks), role: "search", class: "tasks-filters") do
               input(type: "hidden", name: "filter", value: @tab)
               search_field
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
             end
           end
 

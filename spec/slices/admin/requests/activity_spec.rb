@@ -83,6 +83,12 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "submits the filters as a get" do
         expect(page).to have_css("form[method='get'][action='/admin/activity'][data-autosubmit]")
       end
+
+      it "puts the Apply button after the filters" do
+        expect(page).to have_css(
+          "form[action='/admin/activity'] > .form-stack + noscript button", text: "Apply", visible: :all,
+        )
+      end
     end
 
     describe "the timeline" do

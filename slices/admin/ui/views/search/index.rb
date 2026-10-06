@@ -30,15 +30,11 @@ module Admin
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
           def filter_form
-            form(
-              action: path(:admin_search), method: "get", role: "search", class: "search-filters",
-              data: { autosubmit: "" },
-            ) do
+            AutoForm(action: path(:admin_search), role: "search", class: "search-filters") do
               label(class: "sr-only", for: QUERY_ID) { t(".query") }
               Input(type: "search", id: QUERY_ID, name: "q", value: @query, placeholder: t(".placeholder"))
               label(class: "sr-only", for: KIND_ID) { t(".filter") }
               Select(id: KIND_ID, name: "kind", options: kind_options, selected: @kind || ALL)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
             end
           end
 

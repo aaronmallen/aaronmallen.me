@@ -7,7 +7,11 @@ module Admin
         class Show < View
           include Components::Analytics
 
-          RANGES = { "7" => ".range_7", "14" => ".range_14", "30" => ".range_30" }.freeze
+          RANGES = {
+            "7" => "ui.views.analytics.show.range_7",
+            "14" => "ui.views.analytics.show.range_14",
+            "30" => "ui.views.analytics.show.range_30",
+          }.freeze
           SIGNED = "%+d"
 
           def initialize(
@@ -69,13 +73,14 @@ module Admin
           def per_visit = @stats.fetch(:per_visit)
 
           def range_form
-            form(action: path(:admin_analytics), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".range"), name: "range", options: range_options, selected: @range.to_s)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_analytics),
+              name: "range",
+              options: RANGES,
+              selected: @range.to_s,
+              label: t(".range"),
+            )
           end
-
-          def range_options = RANGES.transform_values { t(it) }
 
           def read_time = @stats.fetch(:read_time)
 

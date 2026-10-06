@@ -10,7 +10,11 @@ module Admin
           UNREAD = Blog::Types::MessageStatus["unread"]
 
           EMPTIES = { UNREAD => ".empty.unread", READ => ".empty.read", SPAM => ".empty.spam" }.freeze
-          FILTERS = { UNREAD => ".unread", READ => ".read", SPAM => ".spam" }.freeze
+          FILTERS = {
+            UNREAD => "ui.views.messages.index.unread",
+            READ => "ui.views.messages.index.read",
+            SPAM => "ui.views.messages.index.spam",
+          }.freeze
 
           def initialize(count:, filter:, messages:)
             super()
@@ -29,13 +33,14 @@ module Admin
           private
 
           def filter_form
-            form(action: path(:admin_messages), method: "get", data: { autosubmit: "" }) do
-              SegmentedControl(label: t(".filter"), name: "status", options: filter_options, selected: @filter)
-              noscript { Button(type: "submit", small: true) { t(".apply") } }
-            end
+            FilterSwitch(
+              action: path(:admin_messages),
+              name: "status",
+              options: FILTERS,
+              selected: @filter,
+              label: t(".filter"),
+            )
           end
-
-          def filter_options = FILTERS.transform_values { t(it) }
 
           def rows
             return Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
