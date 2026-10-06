@@ -4,7 +4,7 @@ module Record
   module Operations
     class ImportCommits < Blog::Operation
       STALLED_AFTER = 2 * 60 * 60
-      SYNC = Repos::SyncStateRepo::COMMITS
+      SYNC = Blog::Types::SyncName["commits"]
 
       include Deps[
         "github.client",

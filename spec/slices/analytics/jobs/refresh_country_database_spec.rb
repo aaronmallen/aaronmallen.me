@@ -17,7 +17,7 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
 
   def download = a_request(:get, GeoLite2Database::DOWNLOAD_URL).with(query: hash_including({}))
 
-  def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::COUNTRY_DATABASE)
+  def failure = sync_state_repo.failure(Blog::Types::SyncName["country_database"])
 
   def lookup(address) = Analytics::Slice["geo.countries"].code(address)
 

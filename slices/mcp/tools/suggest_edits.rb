@@ -102,7 +102,7 @@ module MCP
         def stored(result, target)
           case result
           in Success(suggestion)
-            answer(suggestion_id: suggestion.id, target:, edits: suggestion.edits.length, status: "pending")
+            answer(suggestion_id: suggestion.id, target:, edits: suggestion.edits.length, status: Blog::Types::SuggestionEditStatus["pending"])
           in Failure[:invalid, errors] then refuse(complaint(errors))
           else refuse(UNSTORED)
           end

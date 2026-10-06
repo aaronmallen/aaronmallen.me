@@ -16,7 +16,7 @@ module Record
 
         case result
         in Failure(:lock_busy) then nil
-        else record_sync_outcome.call(Repos::SyncStateRepo::COMMITS, result)
+        else record_sync_outcome.call(Blog::Types::SyncName["commits"], result)
         end
       end
     end

@@ -3,7 +3,7 @@
 module Record
   module Operations
     class ReapSyncStates < Blog::Operation
-      SYNCS = [Repos::SyncStateRepo::COMMITS].freeze
+      SYNCS = [Blog::Types::SyncName["commits"]].freeze
 
       include Deps[
         "github.client",

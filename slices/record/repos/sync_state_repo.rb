@@ -3,15 +3,9 @@
 module Record
   module Repos
     class SyncStateRepo < Blog::DB::Repo
-      ANALYTICS_ROLLUP = "analytics_rollup"
-      BACKUPS = "backups"
-      COMMITS = "commits"
-      COUNTRY_DATABASE = "country_database"
-      FAILURE = "failure"
-      ISSUES = "issues"
-      LINEAR_ISSUES = "linear_issues"
+      COMMITS = Blog::Types::SyncName["commits"]
+      FAILURE = Blog::Types::SyncStateKind["failure"]
       PAGE_LIMIT = "page_limit"
-      PROJECTS = "projects"
 
       def clear_failure(sync, repo: nil) = failure_row(sync, repo).delete
 

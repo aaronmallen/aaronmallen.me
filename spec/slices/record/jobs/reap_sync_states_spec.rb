@@ -11,7 +11,7 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     stub_repos(github_repository(repo))
   end
 
-  def commits_sync = Record::Repos::SyncStateRepo::COMMITS
+  def commits_sync = Blog::Types::SyncName["commits"]
 
   def leave_traces(name)
     commit_repo.record_backfilled_to(name, at: Time.now - 3600)

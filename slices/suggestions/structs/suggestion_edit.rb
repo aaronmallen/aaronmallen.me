@@ -4,8 +4,8 @@ module Suggestions
   module Structs
     class SuggestionEdit < Blog::DB::Struct
       FIRST_PART = 1
-      PENDING = "pending"
-      STALE = "stale"
+      PENDING = Blog::Types::SuggestionEditStatus["pending"]
+      STALE = Blog::Types::SuggestionEditStatus["stale"]
 
       def applies_to?(body) = body.to_s.scan(original).length == 1
 

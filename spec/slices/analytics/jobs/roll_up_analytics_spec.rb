@@ -7,7 +7,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   let(:today) { Blog::TimeZone.today }
   let(:visitor_hash) { Digest::SHA256.hexdigest("203.0.113.7 Mozilla/5.0") }
 
-  def analytics_rollup = Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP
+  def analytics_rollup = Blog::Types::SyncName["analytics_rollup"]
 
   def click(view, link_host: "docs.example", link_path: "/guide", **)
     create(:analytics_click, event_id: view.id, link_host:, link_path:, **)

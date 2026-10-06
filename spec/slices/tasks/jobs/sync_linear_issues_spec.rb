@@ -15,7 +15,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
-  def failure(name = Record::Repos::SyncStateRepo::LINEAR_ISSUES) = sync_state_repo.failure(name)
+  def failure(name = Blog::Types::SyncName["linear_issues"]) = sync_state_repo.failure(name)
 
   def imported = repo.by_id(sources.at("linear", "L_one").pluck(:task_id).first)
 
@@ -67,7 +67,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
 
     it "clears a failure the last run left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::LINEAR_ISSUES, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil
@@ -644,7 +644,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
 
     it "lets the run clear a failure the last run left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::LINEAR_ISSUES, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil
@@ -779,7 +779,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(failure).to include(reason: "rate_limited")
-      expect(failure(Record::Repos::SyncStateRepo::ISSUES)).to be_nil
+      expect(failure(Blog::Types::SyncName["issues"])).to be_nil
     end
 
     it "records a check Linear fails rather than cancel the task", :aggregate_failures do
@@ -846,7 +846,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       stub_github(GitHubGraphQL::ASSIGNED_QUERY, { status: 500 })
       both
 
-      expect(failure(Record::Repos::SyncStateRepo::ISSUES)).to include(reason: "github_failed")
+      expect(failure(Blog::Types::SyncName["issues"])).to include(reason: "github_failed")
       expect([failure, imported]).to match([nil, be_truthy])
     end
   end

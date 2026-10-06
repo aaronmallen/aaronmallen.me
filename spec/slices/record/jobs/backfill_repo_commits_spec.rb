@@ -19,7 +19,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def commit_repo = Record::Slice["repos.commit_repo"]
 
-  def commits_sync = Record::Repos::SyncStateRepo::COMMITS
+  def commits_sync = Blog::Types::SyncName["commits"]
 
   def day = Record::CommitEdge::OVERLAP
 

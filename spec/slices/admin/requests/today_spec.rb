@@ -757,7 +757,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       def record_commit_failure(reason, at: failed_at, message: nil, repo: nil)
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, reason, at:, message:, repo:)
+        sync_state_repo.record_failure(Blog::Types::SyncName["commits"], reason, at:, message:, repo:)
       end
 
       def refresh_country_database_answered(response)
@@ -842,21 +842,21 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       it "reports the nightly analytics rollup" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP, :rollup_failed, at: failed_at)
+        sync_state_repo.record_failure(Blog::Types::SyncName["analytics_rollup"], :rollup_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines).to eq(["Analytics rollup failed at Jan 7, 2026, 09:30 · The days wouldn't roll up"])
       end
 
       it "reports a failed database backup" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed, at: failed_at)
+        sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines).to eq(["Database backup failed at Jan 7, 2026, 09:30 · The dump wouldn't upload"])
       end
 
       it "puts the failure time in a time tag" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed, at: failed_at)
+        sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
         get "/admin"
 
         expect(page.find(".sync-failure time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
@@ -927,7 +927,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "keeps one repository's failure while another imports cleanly" do
         record_commit_failure(:rate_limited, repo: "aaronmallen/one")
-        sync_state_repo.clear_failure(Record::Repos::SyncStateRepo::COMMITS, repo: "aaronmallen/two")
+        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"], repo: "aaronmallen/two")
         get "/admin"
 
         expect(failure_lines.size).to eq(1)
@@ -935,7 +935,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "lists both syncs when both failed" do
         record_commit_failure(:rate_limited)
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::PROJECTS, :github_failed, at: failed_at)
+        sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :github_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines.size).to eq(2)
@@ -967,7 +967,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "drops the line once the sync succeeds" do
         record_commit_failure(:rate_limited)
-        sync_state_repo.clear_failure(Record::Repos::SyncStateRepo::COMMITS)
+        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"])
         get "/admin"
 
         expect(page).to have_no_css(".sync-failures")
@@ -997,7 +997,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "drops the streak once the sync recovers and fails again" do
         fail_twice(:github_failed)
-        sync_state_repo.clear_failure(Record::Repos::SyncStateRepo::COMMITS)
+        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"])
         record_commit_failure(:github_failed)
         get "/admin"
 

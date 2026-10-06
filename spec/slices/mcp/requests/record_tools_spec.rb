@@ -153,7 +153,7 @@ RSpec.describe "MCP record tools", type: :request do
 
     def fail_commits(day, message)
       sync_state_repo.record_failure(
-        Record::Repos::SyncStateRepo::COMMITS, :github_failed, at: Time.utc(2026, 3, day, 8), message:,
+        Blog::Types::SyncName["commits"], :github_failed, at: Time.utc(2026, 3, day, 8), message:,
       )
     end
 

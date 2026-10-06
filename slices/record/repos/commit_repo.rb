@@ -5,11 +5,11 @@ module Record
     class CommitRepo < Blog::DB::Repo
       include Dry::Monads[:result]
 
-      BACKFILL_KIND = "backfill"
+      BACKFILL_KIND = Blog::Types::SyncStateKind["backfill"]
       IMPORT_LOCK = 303_303
       NONE = Blog::Constants::EMPTY_ARRAY
       REPO_DAYS = 30
-      SYNC_KIND = "commits"
+      SYNC_KIND = Blog::Types::SyncStateKind["commits"]
 
       def backfilled_to(repo) = state_at(BACKFILL_KIND, repo)
 

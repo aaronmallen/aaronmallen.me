@@ -14,7 +14,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     project
   end
 
-  def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::PROJECTS)
+  def failure = sync_state_repo.failure(Blog::Types::SyncName["projects"])
 
   def html = { body: "<html>maintenance</html>", headers: { "Content-Type" => "text/html" } }
 
@@ -84,7 +84,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "clears the failure an earlier refresh left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::PROJECTS, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       refresh
 
       expect(failure).to be_nil
@@ -154,7 +154,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "records the refresh that never ran rather than clearing the failure" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::PROJECTS, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       refresh
 
       expect(failure).to include(reason: "not_configured")

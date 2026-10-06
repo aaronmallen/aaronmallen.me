@@ -12,7 +12,7 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
     nil
   end
 
-  def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::BACKUPS)
+  def failure = sync_state_repo.failure(Blog::Types::SyncName["backups"])
 
   def upload = a_request(:put, %r{\A#{backup_store_url}/database-\d{8}T\d{6}Z\.dump\z})
 
@@ -61,7 +61,7 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
     end
 
     it "clears a failure an earlier run left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed)
+      sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed)
       back_up
 
       expect(failure).to be_nil

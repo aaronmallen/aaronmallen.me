@@ -5,7 +5,7 @@ module Record
     class RecordRollupSyncOutcome
       include Deps[record_sync_outcome: "operations.record_sync_outcome"]
 
-      def call(result) = record_sync_outcome.call(Repos::SyncStateRepo::ANALYTICS_ROLLUP, result)
+      def call(result) = record_sync_outcome.call(Blog::Types::SyncName["analytics_rollup"], result)
     end
   end
 end

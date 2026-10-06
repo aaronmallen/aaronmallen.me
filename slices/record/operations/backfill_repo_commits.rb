@@ -5,7 +5,7 @@ module Record
     class BackfillRepoCommits < Blog::Operation
       GROUNDED = :repository_start
       RESERVE = 1_000
-      SYNC = Repos::SyncStateRepo::COMMITS
+      SYNC = Blog::Types::SyncName["commits"]
 
       include Deps[
         "github.client",

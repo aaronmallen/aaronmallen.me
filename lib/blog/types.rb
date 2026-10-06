@@ -128,6 +128,11 @@ module Blog
     SocialPostStatus = Types::String.enum("draft", "scheduled", "posted")
     SocialQueue = Types::String.enum("queued", "posted", "drafts")
     SocialQueueParam = SocialQueue.fallback(SocialQueue.values.first)
+    SuggestionEditStatus = Types::String.enum("pending", "accepted", "rejected", "stale")
+    SyncName = Types::String.enum(
+      "analytics_rollup", "commits", "country_database", "projects", "issues", "linear_issues", "backups",
+    )
+    SyncStateKind = Types::String.enum("commits", "backfill", "failure")
     Tag = Types::String.constrained(format: SLUG_FORMAT)
     TagColor = Types::String.enum("mk-pink", "mk-green", "mk-blue", "mk-violet", "mk-sand", "mk-orange")
     TagList = Types::Array.of(Types::String).constructor do |tags|

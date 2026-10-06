@@ -5,7 +5,7 @@ module Record
     class RecordProjectsSyncOutcome
       include Deps[record_sync_outcome: "operations.record_sync_outcome"]
 
-      def call(result) = record_sync_outcome.call(Repos::SyncStateRepo::PROJECTS, result)
+      def call(result) = record_sync_outcome.call(Blog::Types::SyncName["projects"], result)
     end
   end
 end

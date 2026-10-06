@@ -12,7 +12,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     stub_repos(github_repository(repo))
   end
 
-  def commits_sync = Record::Repos::SyncStateRepo::COMMITS
+  def commits_sync = Blog::Types::SyncName["commits"]
 
   def day = 24 * 60 * 60
 

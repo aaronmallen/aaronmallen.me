@@ -17,7 +17,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
-  def failure = sync_state_repo.failure(Record::Repos::SyncStateRepo::ISSUES)
+  def failure = sync_state_repo.failure(Blog::Types::SyncName["issues"])
 
   def imported(id = "I_seven") = repo.by_id(sources.at("github", id).pluck(:task_id).first)
 
@@ -80,7 +80,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "clears a failure the last run left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil
@@ -622,7 +622,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     it "lets the run clear a failure the last run left" do
       tracked(:canceled, state: "deleted")
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       stub_assigned(issue)
       sync
 
@@ -653,7 +653,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "lets the run clear a failure the last run left" do
-      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited)
+      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil

@@ -3,11 +3,11 @@
 module Suggestions
   module Repos
     class SuggestionRepo < Blog::DB::Repo
-      ACCEPTED = "accepted"
+      ACCEPTED = Blog::Types::SuggestionEditStatus["accepted"]
       EDIT_FIELDS = %i[original replacement reason part].freeze
-      PENDING = "pending"
-      REJECTED = "rejected"
-      STALE = "stale"
+      PENDING = Blog::Types::SuggestionEditStatus["pending"]
+      REJECTED = Blog::Types::SuggestionEditStatus["rejected"]
+      STALE = Blog::Types::SuggestionEditStatus["stale"]
       OPEN = [PENDING, STALE].freeze
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
