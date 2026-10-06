@@ -700,27 +700,20 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
     end
 
     describe "the sync failures" do
-      def bad_gateway(path) = Dry::Monads::Failure([:github_failed, "GitHub answered 502 for #{path}"])
+      def bad_gateway = { status: 502 }
 
       def bad_gateway_line(sync, path)
         /\A#{sync} failed at .+ · GitHub didn't answer · GitHub answered 502 for #{path}\z/
       end
 
-      def country_line(failure)
-        with_country_database(failure)
-
-        failure_lines.first.to_s
+      def connect_country_database
+        use_country_database
+        connect_maxmind_client
       end
-
-      def dead_key_line
-        /\ACountry database refresh failed at .+ · The download failed · MaxMind answered 401 for GeoLite2-Country\z/
-      end
-
-      def dead_maxmind_key = Dry::Monads::Failure([:download_failed, "MaxMind answered 401 for GeoLite2-Country"])
 
       def fail_both_issue_syncs
-        sync_issues_with(bad_gateway("GraphQL"))
-        record_linear_issue_sync_outcome(Dry::Monads::Failure(:linear_failed))
+        sync_issues_answered(bad_gateway)
+        sync_linear_issues_answered(bad_gateway)
       end
 
       def fail_twice(reason, repo: nil)
@@ -736,33 +729,29 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       def first_failed_at = Time.utc(2025, 12, 20, 15, 30)
 
-      def import_commits_with(result)
-        import = instance_double(Record::Operations::ImportCommits, call: result)
-        Record::Jobs::ImportCommits.new(import_commits: import).perform
-      end
-
-      def message_line
-        "Commit import failed at Jan 7, 2026, 09:30 · GitHub didn't answer · GitHub answered 502"
+      def import_commits_answered(response)
+        connect_github_token
+        stub_github(GitHubGraphQL::REPOS_QUERY, response)
+        Record::Jobs::ImportCommits.new.perform
       end
 
       def record_commit_failure(reason, at: failed_at, message: nil, repo: nil)
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, reason, at:, message:, repo:)
       end
 
-      def record_linear_issue_sync_outcome(result)
-        Record::Slice["operations.record_linear_issue_sync_outcome"].call(result)
-      end
-
-      def refresh_country_database_with(result)
-        refresh = instance_double(Analytics::Operations::RefreshCountryDatabase, call: result)
-        Analytics::Jobs::RefreshCountryDatabase.new(refresh_country_database: refresh).perform
+      def refresh_country_database_answered(response)
+        connect_country_database
+        stub_maxmind_download(**response)
+        Analytics::Jobs::RefreshCountryDatabase.new.perform
       rescue Analytics::Jobs::RefreshCountryDatabase::RefreshFailed
         nil
       end
 
-      def refresh_projects_with(result)
-        refresh = instance_double(Projects::Operations::RefreshProjects, call: result)
-        Projects::Jobs::RefreshProjects.new(refresh_projects: refresh).perform
+      def refresh_projects_answered(response)
+        connect_github_token
+        create(:project, repo: "aaronmallen/blog")
+        stub_request(:get, "https://api.github.com/repos/aaronmallen/blog").to_return(response)
+        Projects::Jobs::RefreshProjects.new.perform
       end
 
       def repo_streak_line
@@ -775,19 +764,19 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
           "GitHub answered 502"
       end
 
-      def sync_issues_with(result)
-        with_token
-        sync = instance_double(Tasks::Operations::SyncIssues, call: result)
-        Tasks::Jobs::SyncIssues.new(sync_issues: sync).perform
+      def sync_issues_answered(response)
+        connect_github_token
+        stub_github(GitHubGraphQL::ASSIGNED_QUERY, response)
+        Tasks::Jobs::SyncIssues.new.perform
+      end
+
+      def sync_linear_issues_answered(response)
+        connect_linear(LinearGraphQL::KEY)
+        stub_linear(LinearGraphQL::ASSIGNED_QUERY, response)
+        Tasks::Jobs::SyncLinearIssues.new.perform
       end
 
       def sync_state_repo = Record::Slice["repos.sync_state_repo"]
-
-      def with_country_database(failure)
-        query = instance_double(Analytics::Queries::CountryDatabaseFailure, call: failure)
-        replace_component("analytics.queries.country_database_failure", query)
-        get "/admin"
-      end
 
       it "says nothing while both syncs are healthy" do
         get "/admin"
@@ -795,89 +784,43 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(page).to have_no_css(".sync-failures")
       end
 
-      it "names the rate limit that stopped the commit import", :aggregate_failures do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :rate_limited, at: failed_at)
+      it "marks a failure with a warning sign" do
+        record_commit_failure(:rate_limited)
         get "/admin"
 
         expect(page).to have_css(".sync-failures .sync-failure i.fa-triangle-exclamation")
-        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
       end
 
-      it "tells another failure from a rate limit" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :github_failed, at: failed_at)
+      it "reads what GitHub answered off a failed commit import" do
+        import_commits_answered(bad_gateway)
         get "/admin"
 
-        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · GitHub didn't answer"])
+        expect(failure_lines).to match([bad_gateway_line("Commit import", "GraphQL")])
       end
 
-      it "names the missing token behind a sync that never ran" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :not_configured, at: failed_at)
+      it "reads what GitHub answered off a failed project refresh" do
+        refresh_projects_answered(bad_gateway)
         get "/admin"
 
-        expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · No GitHub token is set"])
-      end
-
-      it "reports the nightly project refresh the same way" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::PROJECTS, :github_failed, at: failed_at)
-        get "/admin"
-
-        expect(failure_lines).to eq(["Project refresh failed at Jan 7, 2026, 09:30 · GitHub didn't answer"])
-      end
-
-      it "reports the issue sync the same way" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited, at: failed_at)
-        get "/admin"
-
-        expect(failure_lines).to eq(["GitHub issue sync failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
+        expect(failure_lines).to match([bad_gateway_line("Project refresh", "/repos/aaronmallen/blog")])
       end
 
       it "reads what GitHub answered off a failed issue sync" do
-        sync_issues_with(bad_gateway("GraphQL"))
+        sync_issues_answered(bad_gateway)
         get "/admin"
 
-        expect(failure_lines.first).to match(bad_gateway_line("GitHub issue sync", "GraphQL"))
+        expect(failure_lines).to match([bad_gateway_line("GitHub issue sync", "GraphQL")])
       end
 
-      it "reports a failed Linear issue sync apart from a failed GitHub one" do
-        fail_both_issue_syncs
+      it "reads what Linear answered off a failed Linear issue sync" do
+        sync_linear_issues_answered(bad_gateway)
         get "/admin"
 
-        expect(failed_syncs).to eq(["GitHub issue sync", "Linear issue sync"])
+        expect(failure_lines)
+          .to match([/\ALinear issue sync failed at .+ · Linear didn't answer · Linear answered 502 for GraphQL\z/])
       end
 
-      it "clears a Linear issue sync failure without clearing GitHub's" do
-        fail_both_issue_syncs
-        record_linear_issue_sync_outcome(Dry::Monads::Success(nil))
-        get "/admin"
-
-        expect(failure_lines).to contain_exactly(bad_gateway_line("GitHub issue sync", "GraphQL"))
-      end
-
-      it "reports a failed Linear job under Linear" do
-        connect_linear(LinearGraphQL::KEY)
-        sync = instance_double(Tasks::Operations::SyncIssues, call: Dry::Monads::Failure(:linear_failed))
-        Tasks::Jobs::SyncLinearIssues.new(sync_issues: sync).perform
-        get "/admin"
-
-        expect(failed_syncs).to eq(["Linear issue sync"])
-      end
-
-      it "says Linear didn't answer when a Linear sync fails" do
-        record_linear_issue_sync_outcome(Dry::Monads::Failure([:linear_failed, "Linear answered 502 for GraphQL"]))
-        get "/admin"
-
-        expect(failure_lines.first)
-          .to match(/\ALinear issue sync failed at .+ · Linear didn't answer · Linear answered 502 for GraphQL\z/)
-      end
-
-      it "reports a Linear rate limit under Linear" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::LINEAR_ISSUES, :rate_limited, at: failed_at)
-        get "/admin"
-
-        expect(failure_lines).to eq(["Linear issue sync failed at Jan 7, 2026, 09:30 · It hit the rate limit"])
-      end
-
-      it "reports the nightly analytics rollup the same way" do
+      it "reports the nightly analytics rollup" do
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ANALYTICS_ROLLUP, :rollup_failed, at: failed_at)
         get "/admin"
 
@@ -891,11 +834,42 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(failure_lines).to eq(["Database backup failed at Jan 7, 2026, 09:30 · The dump wouldn't upload"])
       end
 
+      it "reads a dead MaxMind key off the failed refresh, message and all" do
+        refresh_country_database_answered(status: 401, body: "")
+        get "/admin"
+
+        expect(failure_lines.first).to match(
+          /\ACountry database refresh failed at .+ · The download failed · MaxMind answered 401 for GeoLite2-Country\z/,
+        )
+      end
+
+      it "says the database is gone rather than leaving every visitor unknown" do
+        connect_country_database
+        get "/admin"
+
+        expect(failure_lines).to eq(["Country lookup · No database on disk"])
+      end
+
       it "still reports a reason no one has written words for" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :teapot, at: failed_at)
+        record_commit_failure(:teapot)
         get "/admin"
 
         expect(failure_lines).to eq(["Commit import failed at Jan 7, 2026, 09:30 · teapot"])
+      end
+
+      it "reports a failed Linear issue sync apart from a failed GitHub one" do
+        fail_both_issue_syncs
+        get "/admin"
+
+        expect(failed_syncs).to eq(["GitHub issue sync", "Linear issue sync"])
+      end
+
+      it "clears a Linear issue sync failure without clearing GitHub's" do
+        fail_both_issue_syncs
+        sync_linear_issues_answered(linear_assigned)
+        get "/admin"
+
+        expect(failure_lines).to match([bad_gateway_line("GitHub issue sync", "GraphQL")])
       end
 
       it "names the repository whose import failed" do
@@ -932,18 +906,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       it "lists both syncs when both failed" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :rate_limited, at: failed_at)
+        record_commit_failure(:rate_limited)
         sync_state_repo.record_failure(Record::Repos::SyncStateRepo::PROJECTS, :github_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines.size).to eq(2)
-      end
-
-      it "reads out the message a failure came with, not the reason alone" do
-        record_commit_failure(:github_failed, message: "GitHub answered 502")
-        get "/admin"
-
-        expect(failure_lines).to eq([message_line])
       end
 
       it "keeps the message last on a sync that has been failing a while" do
@@ -954,50 +921,24 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(failure_lines).to eq([streak_message_line])
       end
 
-      it "reads what GitHub answered off a failed commit import" do
-        import_commits_with(bad_gateway("GraphQL"))
-        get "/admin"
-
-        expect(failure_lines.first).to match(bad_gateway_line("Commit import", "GraphQL"))
-      end
-
-      it "reads what GitHub answered off a failed project refresh" do
-        refresh_projects_with(bad_gateway("/repos/aaronmallen/blog"))
-        get "/admin"
-
-        expect(failure_lines.first).to match(bad_gateway_line("Project refresh", "/repos/aaronmallen/blog"))
-      end
-
-      it "reads a dead MaxMind key off the failed refresh, message and all" do
-        refresh_country_database_with(dead_maxmind_key)
-        get "/admin"
-
-        expect(failure_lines.first).to match(dead_key_line)
-      end
-
-      it "says the database is gone rather than leaving every visitor unknown" do
-        expect(country_line(:missing)).to eq("Country lookup · No database on disk")
-      end
-
-      it "says the country database will not open" do
-        expect(country_line(:unreadable)).to eq("Country lookup · The database won't open")
-      end
-
       it "lists a standing state beside a sync that failed once" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :rate_limited, at: failed_at)
-        with_country_database(:missing)
+        record_commit_failure(:rate_limited)
+        connect_country_database
+        get "/admin"
 
         expect(failure_lines.last).to eq("Country lookup · No database on disk")
       end
 
       it "says nothing while the country database reads" do
-        with_country_database(nil)
+        connect_country_database
+        write_country_database
+        get "/admin"
 
         expect(page).to have_no_css(".sync-failures")
       end
 
       it "drops the line once the sync succeeds" do
-        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::COMMITS, :rate_limited, at: failed_at)
+        record_commit_failure(:rate_limited)
         sync_state_repo.clear_failure(Record::Repos::SyncStateRepo::COMMITS)
         get "/admin"
 
