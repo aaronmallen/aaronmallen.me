@@ -38,7 +38,7 @@ module Admin
 
           def meta
             Pill(color: :sand) { t(".kind") }
-            span { dotted(@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)) }
+            span { Stamped(text: dotted(@message.reply_to, Stamped::MARK), at: @message.received_at) }
           end
 
           def reply_href = "mailto:#{address}?subject=#{ERB::Util.url_encode(t('.subject', subject: @message.subject))}"

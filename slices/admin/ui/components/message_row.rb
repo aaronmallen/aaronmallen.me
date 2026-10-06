@@ -35,7 +35,7 @@ module Admin
           { aria: { keyshortcuts: READ_KEY }, data: { key: READ_KEY, key_label: t(".read_key") } }
         end
 
-        def meta = dotted(@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium))
+        def meta = Stamped(text: dotted(@message.reply_to, Stamped::MARK), at: @message.received_at)
 
         def move(status, label_key, variant)
           Form(action: path(:admin_mark_message, id: @message.id, status:)) do

@@ -86,18 +86,22 @@ module Admin
           end
         end
 
+        def repos = "#{DOT}#{t('.repos', count: @repos)}"
+
+        def stamped(text, format) = Stamped(text: "#{text}#{repos}", at: @last_synced_at, format:)
+
         def sub_line
           p(class: "commits-sub") do
             Icon("fa-brands fa-github commits-sub-icon")
-            plain "#{synced}#{DOT}#{t('.repos', count: @repos)}"
+            synced
           end
         end
 
         def synced
-          return t(".never_synced") unless @last_synced_at
-          return t(".synced_on", at: l(Blog::TimeZone.local(@last_synced_at), format: :medium)) unless synced_today?
+          return plain("#{t('.never_synced')}#{repos}") unless @last_synced_at
+          return stamped(t(".synced_on", at: Stamped::MARK), :medium) unless synced_today?
 
-          t(".synced_today", time: l(Blog::TimeZone.local(@last_synced_at), format: :clock))
+          stamped(t(".synced_today", time: Stamped::MARK), :clock)
         end
 
         def synced_today? = Blog::TimeZone.today(@last_synced_at) == @today

@@ -72,7 +72,7 @@ module MCP
 
           def render_new_client
             p(class: "connect-notice", role: "note") do
-              t(".new_client", time: l(Blog::TimeZone.local(@registered_at), format: :medium))
+              Stamped(text: t(".new_client", time: Stamped::MARK), at: @registered_at)
             end
           end
 

@@ -45,7 +45,7 @@ module Admin
 
           def meta
             Pill(color: :pink) { t(".kind") }
-            span { dotted(t(TYPES.fetch(@mention.type)), path(:post, slug: @slug), received) }
+            span { Stamped(text: summary, at: @mention.received_at) }
           end
 
           def moderate(verdict, label_key, variant, **attributes)
@@ -55,7 +55,7 @@ module Admin
             end
           end
 
-          def received = l(Blog::TimeZone.local(@mention.received_at), format: :medium)
+          def summary = dotted(t(TYPES.fetch(@mention.type)), path(:post, slug: @slug), Stamped::MARK)
         end
       end
     end

@@ -8,6 +8,8 @@ RSpec.describe "Admin inbox", type: :request do
 
   def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
+  def arrived = Time.utc(2026, 9, 7, 17, 30)
+
   def inbox
     get "/admin/inbox"
     page.all(".li .li-title").map(&:text)
@@ -35,6 +37,15 @@ RSpec.describe "Admin inbox", type: :request do
       get "/admin/inbox"
 
       expect(page.all(".li .pill").map(&:text)).to contain_exactly("issue", "message", "webmention")
+    end
+
+    it "puts when each row arrived in a time tag" do
+      synced(created_at: arrived)
+      create(:message, received_at: arrived)
+      create(:webmention, received_at: arrived)
+      get "/admin/inbox"
+
+      expect(page.all(".wm-meta time").map { it[:datetime] }).to eq(["2026-09-07T12:30:00-05:00"] * 3)
     end
 
     it "draws the kind pills without an icon" do

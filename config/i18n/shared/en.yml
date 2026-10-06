@@ -21,6 +21,7 @@ en:
       clock: "%H:%M"
       day: "%b %-d, %Y"
       medium: "%b %-d, %Y, %H:%M"
+      short: "%b %-d · %H:%M"
   ui:
     components:
       main_nav:

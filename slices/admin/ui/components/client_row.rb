@@ -7,21 +7,26 @@ module Admin
         prop :client, Blog::Types::Instance(ROM::Struct)
 
         def view_template
-          ListItem(title: name, sub:) { revoke_form }
+          ListItem(title: name) do |item|
+            item.meta { p(class: "li-sub") { sub } }
+            revoke_form
+          end
         end
 
         private
 
-        def connected = t(".connected", time: l(Blog::TimeZone.local(@client.created_at), format: :medium))
+        def connected
+          Stamped(text: dotted(redirect_host, t(".connected", time: Stamped::MARK)), at: @client.created_at)
+        end
 
         def host
           Blog::Types::Normalized::Host.call(@client.redirect_uris.first) { Blog::Constants::EMPTY_STRING }
         end
 
         def last_used
-          return t(".never_used") if @client.last_used_at.nil?
+          return plain(t(".never_used")) if @client.last_used_at.nil?
 
-          t(".last_used", time: l(Blog::TimeZone.local(@client.last_used_at), format: :medium))
+          Stamped(text: t(".last_used", time: Stamped::MARK), at: @client.last_used_at)
         end
 
         def name
@@ -49,7 +54,11 @@ module Admin
           end
         end
 
-        def sub = dotted(redirect_host, connected, last_used)
+        def sub
+          connected
+          plain(DOT)
+          last_used
+        end
       end
     end
   end

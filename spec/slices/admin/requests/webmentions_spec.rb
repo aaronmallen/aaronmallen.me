@@ -136,6 +136,13 @@ RSpec.describe "Admin webmentions", type: :request do
         .and have_css(".wm-meta", text: "/writing/hello · Sep 7, 2026, 12:30")
     end
 
+    it "puts when it arrived in a time tag" do
+      create(:webmention, post: target, received_at: Time.utc(2026, 9, 7, 17, 30))
+      get "/admin/webmentions"
+
+      expect(page.find(".wm-meta time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+    end
+
     { reply: "pink", like: "sand", repost: "green", mention: "blue" }.each do |type, color|
       it "colors the #{type} pill #{color}" do
         create(:webmention, type, post: target)

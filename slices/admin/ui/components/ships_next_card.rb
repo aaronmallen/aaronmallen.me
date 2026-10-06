@@ -22,25 +22,21 @@ module Admin
         private
 
         def post_row(post)
-          ListItem(
-            title: post.title,
-            href: path(:admin_edit_post, id: post.id),
-            sub: l(Blog::TimeZone.local(post.published_at), format: :medium),
-          )
+          ListItem(title: post.title, href: path(:admin_edit_post, id: post.id)) do |item|
+            item.meta { p(class: "li-sub") { Moment(at: post.published_at) } }
+          end
         end
 
         def social_row(social_post)
-          ListItem(
-            title: @summaries.fetch(social_post.id),
-            href: path(:admin_social, filter: QUEUE_FILTER),
-            sub: social_sub(social_post),
-          )
+          ListItem(title: @summaries.fetch(social_post.id), href: path(:admin_social, filter: QUEUE_FILTER)) do |item|
+            item.meta { p(class: "li-sub") { social_sub(social_post) } }
+          end
         end
 
         def social_sub(social_post)
           networks = social_post.targets.map { t(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
 
-          dotted(l(Blog::TimeZone.local(social_post.posted_at), format: :medium), networks)
+          Stamped(text: dotted(Stamped::MARK, networks), at: social_post.posted_at)
         end
       end
     end

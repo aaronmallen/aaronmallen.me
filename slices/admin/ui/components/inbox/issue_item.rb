@@ -35,7 +35,7 @@ module Admin
             Pill(color: :green) { t(".kind") }
             Tasks::SourceLink(source: @task.source)
             @task.tags.each { Tag(tag: it) }
-            span { l(Blog::TimeZone.local(@task.created_at), format: :medium) }
+            Moment(at: @task.created_at)
           end
 
           def move(filter, label_key)

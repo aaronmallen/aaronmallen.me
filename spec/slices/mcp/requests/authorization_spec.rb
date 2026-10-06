@@ -270,6 +270,10 @@ RSpec.describe "OAuth authorization", type: :request do
     it "says the client is new and when it registered" do
       expect(page.find(".connect-notice").text).to eq(copy(:new_client, time: "Sep 3, 2026, 10:04"))
     end
+
+    it "puts when it registered in a time tag" do
+      expect(page.find(".connect-notice time")[:datetime]).to eq("2026-09-03T10:04:00-05:00")
+    end
   end
 
   describe "when the client holds a token" do

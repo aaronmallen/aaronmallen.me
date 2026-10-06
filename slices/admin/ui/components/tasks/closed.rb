@@ -20,10 +20,8 @@ module Admin
           private
 
           def at
-            local = Blog::TimeZone.local(@task.completed_at)
-
             span(class: "task-finished") do
-              t(AT.fetch(@task.status), date: l(local.to_date, format: :short), time: l(local, format: :clock))
+              Stamped(text: t(AT.fetch(@task.status), time: Stamped::MARK), at: @task.completed_at, format: :short)
             end
           end
 

@@ -92,6 +92,13 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page.find(".li", text: "Pick a queue")).to have_css(".li-sub", text: "1 option")
       end
 
+      it "puts when each decision opened in a time tag" do
+        create(:decision, title: "Dated", created_at: Time.utc(2026, 9, 7, 17, 30))
+        get "/admin/decisions"
+
+        expect(page.find(".li", text: "Dated").find(".li-sub time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+      end
+
       it "says decisions is where you are" do
         get "/admin/decisions"
 

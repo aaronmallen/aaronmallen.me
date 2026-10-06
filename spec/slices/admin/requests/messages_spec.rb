@@ -110,6 +110,10 @@ RSpec.describe "Admin messages", type: :request do
         expect(page).to have_css(".msg-body", text: "How?")
         expect(page).to have_css(".li-sub", text: "ada@example.com · Sep 7, 2026, 12:30")
       end
+
+      it "puts when it arrived in a time tag" do
+        expect(page.find(".li-sub time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+      end
     end
 
     it "counts the messages it lists" do

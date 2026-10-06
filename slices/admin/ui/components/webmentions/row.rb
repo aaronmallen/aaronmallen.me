@@ -57,7 +57,7 @@ module Admin
           def meta
             div(class: "wm-meta") do
               Pill(color: type.color) { t(type.label_key) }
-              span { dotted(path(:post, slug: @slug), l(Blog::TimeZone.local(@mention.received_at), format: :medium)) }
+              span { Stamped(text: dotted(path(:post, slug: @slug), Stamped::MARK), at: @mention.received_at) }
             end
           end
 

@@ -128,6 +128,12 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
         expect(times).to eq(["scheduled · 09:00", "posted · 08:00", "scheduled · 10:00"])
       end
 
+      it "puts each post and social post time in a time tag" do
+        datetimes = panel.all(".li-sub time").map { it[:datetime] }
+
+        expect(datetimes).to eq([9, 8, 10].map { at(day, it).iso8601 })
+      end
+
       it "links a queued social post to its editor and a sent one to the posted queue" do
         hrefs = panel.find(".cal-group", text: "Social posts").all("a.li-title").map { it[:href] }
 

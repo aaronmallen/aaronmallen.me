@@ -100,6 +100,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(card("What ships next")).to have_css(".li-sub", exact_text: "Jan 7, 2030, 09:30")
       end
 
+      it "puts the publish time in a time tag" do
+        create(:post, :scheduled, published_at: Time.utc(2030, 1, 7, 15, 30))
+        get "/admin"
+
+        expect(card("What ships next").find(".li-sub time")[:datetime]).to eq("2030-01-07T09:30:00-06:00")
+      end
+
       it "shows an empty state without scheduled posts" do
         get "/admin"
 
@@ -144,6 +151,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
         expect(card("What ships next"))
           .to have_css(".li-sub", exact_text: "Jan 7, 2030, 09:30 · Mastodon + Bluesky")
+      end
+
+      it "puts a social post's time in a time tag" do
+        schedule_social("Social", at: Time.utc(2030, 1, 7, 15, 30))
+        get "/admin"
+
+        expect(card("What ships next").find(".li-sub time")[:datetime]).to eq("2030-01-07T09:30:00-06:00")
       end
 
       it "shortens a long social post to one line" do
@@ -675,6 +689,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(commits_card).to have_css(".commits-sub", text: "Last synced Jan 7, 2026, 09:30")
       end
 
+      it "puts the sync time in a time tag" do
+        record_sync(at: Time.utc(2026, 1, 7, 15, 30))
+        get "/admin"
+
+        expect(commits_card.find(".commits-sub time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
+      end
+
       it "counts the repos pushed to in the last thirty days" do
         create_commit(repo: "aaronmallen/blog", commit_date: today)
         create_commit(repo: "aaronmallen/blog", commit_date: today - 29)
@@ -832,6 +853,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
 
         expect(failure_lines).to eq(["Database backup failed at Jan 7, 2026, 09:30 · The dump wouldn't upload"])
+      end
+
+      it "puts the failure time in a time tag" do
+        sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed, at: failed_at)
+        get "/admin"
+
+        expect(page.find(".sync-failure time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
       end
 
       it "reads a dead MaxMind key off the failed refresh, message and all" do

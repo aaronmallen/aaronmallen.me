@@ -17,11 +17,16 @@ module Admin
         def failure_line(failure)
           p(class: "sync-failure") do
             Icon("fa-solid fa-triangle-exclamation sync-failure-icon")
-            plain line(failure)
+            line(failure)
           end
         end
 
-        def line(failure) = with_message(failure, reason_line(failure))
+        def line(failure)
+          text = with_message(failure, reason_line(failure))
+          return plain(text) unless failure[:at]
+
+          Stamped(text:, at: failure[:at])
+        end
 
         def line_key(failure)
           return failure[:repo] ? ".repo_repeat_line" : ".repeat_line" if repeating?(failure)
@@ -36,7 +41,7 @@ module Admin
         def reason_line(failure)
           return t(".state_line", reason: reason(failure), sync: sync(failure)) unless failure[:at]
 
-          at = l(Blog::TimeZone.local(failure[:at]), format: :medium)
+          at = Stamped::MARK
           since = failure[:since] && l(Blog::TimeZone.today(failure[:since]), format: :medium)
 
           t(line_key(failure), at:, reason: reason(failure), repo: failure[:repo], since:, sync: sync(failure))

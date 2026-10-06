@@ -48,17 +48,19 @@ module Admin
 
           def date = @day.date
 
-          def dated(record, time)
-            t(".dated", status: status(record), time: l(Blog::TimeZone.local(time), format: :clock))
+          def dated(record, at)
+            Stamped(text: t(".dated", status: status(record), time: Stamped::MARK), at:, format: :clock)
           end
 
           def empty? = !@day.sprint && @day.posts.empty? && @day.social_posts.empty? && !@day.journal
 
           def entry(kind, record, item, movable: record.status == SCHEDULED)
-            row = { **item, data: { calendar_item: "#{kind}-#{record.id}" } }
-            return ListItem(**row) unless movable
+            at = item[:at]
 
-            ListItem(**row) { move_form(kind, record.id, item[:title]) }
+            ListItem(**item.except(:at), data: { calendar_item: "#{kind}-#{record.id}" }) do |row|
+              row.meta { p(class: "li-sub") { dated(record, at) } } if at
+              move_form(kind, record.id, item[:title]) if movable
+            end
           end
 
           def grip(title)
@@ -100,7 +102,7 @@ module Admin
           end
 
           def post_item(post)
-            { title: post.title, href: path(:admin_edit_post, id: post.id), sub: dated(post, post.published_at) }
+            { title: post.title, href: path(:admin_edit_post, id: post.id), at: post.published_at }
           end
 
           def posts
@@ -119,7 +121,7 @@ module Admin
             {
               title: Blog::Truncation.cut(social_post.parts.first&.body.to_s, keep: TEXT_LIMIT),
               href: social_href(social_post),
-              sub: dated(social_post, social_post.posted_at),
+              at: social_post.posted_at,
             }
           end
 

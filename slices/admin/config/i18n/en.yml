@@ -1391,8 +1391,8 @@ en:
           untag: "Untag"
         closed:
           canceled: "canceled"
-          canceled_at: "canceled %{date} · %{time}"
-          done_at: "done %{date} · %{time}"
+          canceled_at: "canceled %{time}"
+          done_at: "done %{time}"
         controls:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."

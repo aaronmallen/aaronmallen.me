@@ -152,6 +152,14 @@ RSpec.describe "Admin MCP clients", type: :request do
       expect(row).to have_text("last used #{Blog::TimeZone.local(used).strftime('%b %-d, %Y, %H:%M')}")
     end
 
+    it "puts when the client connected and was last used in time tags" do
+      connect(client_name: "Claude", created_at: connected, last_used_at: used)
+      get "/admin/clients"
+
+      expect(row.all(".li-sub time").map { it[:datetime] })
+        .to eq([Blog::TimeZone.local(connected).iso8601, Blog::TimeZone.local(used).iso8601])
+    end
+
     it "says a client that never made a request has never been used" do
       connect(client_name: "Claude", last_used_at: nil)
       get "/admin/clients"

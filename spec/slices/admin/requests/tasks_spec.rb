@@ -879,6 +879,14 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".task-finished", text: "done Sep 18 · 11:20")
       end
 
+      it "puts the time a task was finished in a time tag" do
+        at = Blog::TimeZone.local_time(2026, 9, 18, 11, 20)
+        create(:task, :done, completed_at: at, title: "Filed already")
+        get "/admin/tasks", filter: "completed"
+
+        expect(page.find(".task-finished time")[:datetime]).to eq(at.iso8601)
+      end
+
       it "offers a start on an open task", :aggregate_failures do
         create(:task)
         get "/admin/tasks", filter: "next"
