@@ -1695,6 +1695,14 @@
 
 @utility time-tasks {
   @apply pb-3 pl-6;
+
+  & a.li-title {
+    @apply inline-flex min-h-6 items-center;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
 }
 
 @utility time-task-hours {

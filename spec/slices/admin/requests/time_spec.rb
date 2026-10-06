@@ -56,9 +56,13 @@ RSpec.describe "Admin time", type: :request do
         expect(page).to have_css("#command-palette-time i.fa-clock", visible: :all)
       end
 
-      it "covers the last seven days by project" do
-        expect([page.find_field("From").value, page.find_field("To").value, page.find_field("Project")])
+      it "covers the last seven days by tag" do
+        expect([page.find_field("From").value, page.find_field("To").value, page.find_field("Tag")])
           .to match([(today - 6).iso8601, today.iso8601, be_checked])
+      end
+
+      it "offers tag first, then project, then day" do
+        expect(page.all("[role='radiogroup'] .seg-option").map(&:text)).to eq(%w[Tag Project Day])
       end
 
       it "marks the seven day preset current" do
@@ -155,6 +159,12 @@ RSpec.describe "Admin time", type: :request do
       it "explains why the rows add up to more than the total" do
         expect(page).to have_css(".hint", text: "counts under both")
       end
+
+      it "groups by tag when the URL names no grouping" do
+        visit_time(from: "2026-03-02", to: "2026-03-08")
+
+        expect(rows).to eq([["ruby", "1h 30m"], ["site", "1h 00m"], ["No tag", "15m"]])
+      end
     end
 
     describe "a range grouped by day" do
@@ -179,10 +189,10 @@ RSpec.describe "Admin time", type: :request do
       expect([page.find_field("From").value, page.find_field("To").value]).to eq(%w[2026-03-02 2026-03-02])
     end
 
-    it "falls back to the last seven days by project on values it cannot read" do
+    it "falls back to the last seven days by tag on values it cannot read" do
       visit_time(from: "nope", to: "2026-13-40", by: "year")
 
-      expect([page.find_field("From").value, page.find_field("Project")]).to match([(today - 6).iso8601, be_checked])
+      expect([page.find_field("From").value, page.find_field("Tag")]).to match([(today - 6).iso8601, be_checked])
     end
   end
 end

@@ -152,7 +152,7 @@ module Blog
     TextList = Types::Array.of(Types::String).constructor do |values|
       [*values].map { TrimmedText[it] }.reject(&:empty?)
     end
-    TimeGrouping = Types::String.enum("project", "tag", "day")
+    TimeGrouping = Types::String.enum("tag", "project", "day")
     TimeGroupingParam = TimeGrouping.fallback(TimeGrouping.values.first)
     TrimmedText = Text.constructor(&:strip)
     UploadParam = Types::Interface(:read, :rewind, :size).optional.constructor do |value|

@@ -11,7 +11,7 @@ module API
           by: {
             type: "string",
             enum: Blog::Types::TimeGrouping.values,
-            description: "sum the time by project, tag or day; project when left out",
+            description: "sum the time by tag, project or day; tag when left out",
           },
         },
         required: %w[from to],

@@ -50,12 +50,8 @@ RSpec.describe "API time report", type: :request do
     before { link(worked("Out of range", at(20, 9), at(20, 10)), site) }
 
     it "answers the range, the grouping and the total, each task counted once" do
-      expect(read(**range).slice("from", "to", "by", "seconds"))
+      expect(read(**range, by: "project").slice("from", "to", "by", "seconds"))
         .to eq("from" => "2026-03-02", "to" => "2026-03-08", "by" => "project", "seconds" => 6300)
-    end
-
-    it "groups by project when no grouping is given" do
-      expect(read(**range).fetch("by")).to eq("project")
     end
 
     it "sums each project, with the tasks that have no project last" do
@@ -64,12 +60,12 @@ RSpec.describe "API time report", type: :request do
     end
 
     it "flags the projects that share time with another" do
-      expect(groups(**range).map { it.values_at("name", "shared") })
+      expect(groups(**range, by: "project").map { it.values_at("name", "shared") })
         .to eq([["gem", true], ["site", true], [nil, false]])
     end
 
     it "lists each group's tasks with their time and whether that time is shared" do
-      site_tasks = groups(**range).find { it.fetch("name") == "site" }.fetch("tasks")
+      site_tasks = groups(**range, by: "project").find { it.fetch("name") == "site" }.fetch("tasks")
 
       expect(site_tasks.map { it.values_at("id", "title", "seconds", "shared") })
         .to eq([[tasks[:both].id, "Ship the shared work", 3600, true],
@@ -97,6 +93,14 @@ RSpec.describe "API time report", type: :request do
     it "sums each tag, with the untagged tasks last" do
       expect(groups(**range, by: "tag").map { it.values_at("key", "name", "seconds") })
         .to eq([%w[ruby ruby] + [5400], %w[site site] + [3600], [nil, nil, 900]])
+    end
+
+    it "groups by tag when no grouping is given" do
+      expect(read(**range)).to eq(read(**range, by: "tag"))
+    end
+
+    it "groups the MCP tool by tag when no grouping is given" do
+      expect(mcp_answer("read_time_report", **range)).to eq(read(**range, by: "tag"))
     end
 
     it "gives the sums the time screen shows" do
