@@ -11,11 +11,11 @@ module Admin
         include Deps[pause_task: "tasks.operations.pause_task"]
 
         def handle(request, response)
-          case pause_task.call(record_id(request))
-          in Success(_) then answer(request, response, STOPPED)
+          result = pause_task.call(record_id(request))
+
+          case result
           in Failure(:idle) then answer(request, response, IDLE)
-          in Failure(:not_found) then halt 404
-          else halt 500
+          else settle(response, result, STOPPED, back_path(request))
           end
         end
 
@@ -23,8 +23,10 @@ module Admin
 
         def answer(request, response, key)
           toast(response, key)
-          response.redirect_to(back_here(request) || tasks_path(request))
+          response.redirect_to(back_path(request))
         end
+
+        def back_path(request) = back_here(request) || tasks_path(request)
       end
     end
   end

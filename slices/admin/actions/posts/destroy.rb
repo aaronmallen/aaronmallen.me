@@ -9,14 +9,7 @@ module Admin
         include Deps[delete_post: "posts.operations.delete_post"]
 
         def handle(request, response)
-          case delete_post.call(record_id(request))
-          in Success(_)
-            toast(response, DELETED)
-            response.redirect_to(routes.path(:admin_posts))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          settle(response, delete_post.call(record_id(request)), DELETED, routes.path(:admin_posts))
         end
       end
     end

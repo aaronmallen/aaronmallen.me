@@ -11,19 +11,14 @@ module Admin
 
       private
 
-      def back_to_record(request, response, id, key)
-        toast(response, key)
-        response.redirect_to(record_path(request, id))
-      end
-
       def link(request, response)
         id = record_id(request)
 
-        case link_records.call(self.class::KIND, id, Blog::Types::Fields[request.params[:record]])
-        in Success(_) then back_to_record(request, response, id, self.class::LINKED)
-        in Failure(:not_found) then halt 404
+        result = link_records.call(self.class::KIND, id, Blog::Types::Fields[request.params[:record]])
+
+        case result
         in Failure[:invalid, errors] then refuse_link(request, response, id, errors)
-        else halt 500
+        else settle(response, result, self.class::LINKED, record_path(request, id))
         end
       end
 
@@ -42,11 +37,8 @@ module Admin
         id = record_id(request)
         params = request.params
 
-        case unlink_records.call(self.class::KIND, id, params[:other_kind], params[:other_id])
-        in Success(_) then back_to_record(request, response, id, self.class::UNLINKED)
-        in Failure(:not_found) then halt 404
-        else halt 500
-        end
+        result = unlink_records.call(self.class::KIND, id, params[:other_kind], params[:other_id])
+        settle(response, result, self.class::UNLINKED, record_path(request, id))
       end
     end
   end

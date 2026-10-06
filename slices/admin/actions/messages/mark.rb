@@ -15,23 +15,13 @@ module Admin
         def handle(request, response)
           status = request.params[:status]
 
-          case mark_message.call(record_id(request), status)
-          in Success(_)
-            marked(request, response, status)
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          result = mark_message.call(record_id(request), status)
+          settle(response, result, TOASTS.fetch(status), routes.path(:admin_messages, status: filter(request)))
         end
 
         private
 
         def filter(request) = Blog::Types::MessageStatusParam[request.params[:filter]]
-
-        def marked(request, response, status)
-          toast(response, TOASTS.fetch(status))
-          response.redirect_to(routes.path(:admin_messages, status: filter(request)))
-        end
       end
     end
   end

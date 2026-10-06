@@ -18,11 +18,11 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:entry]]
 
-          case update_journal_entry.call(id, params)
-          in Success(_) then updated(response)
-          in Failure(:not_found) then halt 404
+          result = update_journal_entry.call(id, params)
+
+          case result
           in Failure[:invalid, errors] then invalid(response, id, params, errors)
-          else halt 500
+          else settle(response, result, UPDATED, routes.path(:admin_journal))
           end
         end
 
@@ -38,11 +38,6 @@ module Admin
         def invalid(response, id, params, errors)
           response.status = 422
           response.render(index_view, **summarize_journal.call, editing: editing(id, params, errors))
-        end
-
-        def updated(response)
-          toast(response, UPDATED)
-          response.redirect_to(routes.path(:admin_journal))
         end
       end
     end

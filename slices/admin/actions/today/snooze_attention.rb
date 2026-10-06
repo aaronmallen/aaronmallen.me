@@ -12,14 +12,8 @@ module Admin
           kind = request.params[:kind]
           halt 404 unless Blog::Types::AttentionKind.valid?(kind)
 
-          case snooze_attention.call(kind, Blog::Types::IdParam[request.params[:record_id]])
-          in Success(_)
-            toast(response, SNOOZED)
-            response.redirect_to(routes.path(:admin_root))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          result = snooze_attention.call(kind, Blog::Types::IdParam[request.params[:record_id]])
+          settle(response, result, SNOOZED, routes.path(:admin_root))
         end
       end
     end

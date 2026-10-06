@@ -11,11 +11,11 @@ module Admin
         include Deps[cancel_task: "tasks.operations.cancel_task"]
 
         def handle(request, response)
-          case cancel_task.call(record_id(request))
-          in Success(_) then done(request, response, CANCELED)
+          result = cancel_task.call(record_id(request))
+
+          case result
           in Failure(:closed) then done(request, response, CLOSED)
-          in Failure(:not_found) then halt 404
-          else halt 500
+          else settle(response, result, CANCELED, tasks_path(request))
           end
         end
 

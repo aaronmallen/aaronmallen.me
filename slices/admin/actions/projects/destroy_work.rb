@@ -10,14 +10,8 @@ module Admin
         include Deps[delete_work_entry: "projects.operations.delete_work_entry"]
 
         def handle(request, response)
-          case delete_work_entry.call(record_id(request))
-          in Success(_)
-            toast(response, REMOVED)
-            response.redirect_to(routes.path(:admin_projects, filter: WORK))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          result = delete_work_entry.call(record_id(request))
+          settle(response, result, REMOVED, routes.path(:admin_projects, filter: WORK))
         end
       end
     end

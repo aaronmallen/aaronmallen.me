@@ -10,14 +10,7 @@ module Admin
         include Deps[delete_task: "tasks.operations.delete_task"]
 
         def handle(request, response)
-          case delete_task.call(record_id(request))
-          in Success(_)
-            toast(response, DELETED)
-            response.redirect_to(tasks_path(request))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          settle(response, delete_task.call(record_id(request)), DELETED, tasks_path(request))
         end
       end
     end

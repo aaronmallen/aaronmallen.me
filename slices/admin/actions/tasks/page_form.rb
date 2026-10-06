@@ -18,11 +18,6 @@ module Admin
           else halt 500
           end
         end
-
-        def written(request, response, key)
-          toast(response, key)
-          response.redirect_to(tasks_path(request))
-        end
       end
     end
   end

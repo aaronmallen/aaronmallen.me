@@ -9,13 +9,11 @@ module Admin
         include Deps[mark_task_seen: "tasks.operations.mark_task_seen"]
 
         def handle(request, response)
-          case mark_task_seen.call(record_id(request))
-          in Success(_)
-            toast(response, SEEN)
-            response.redirect_to(routes.path(:admin_inbox))
-          in Failure(:not_found | :unsourced)
-            halt 404
-          else halt 500
+          result = mark_task_seen.call(record_id(request))
+
+          case result
+          in Failure(:unsourced) then halt 404
+          else settle(response, result, SEEN, routes.path(:admin_inbox))
           end
         end
       end

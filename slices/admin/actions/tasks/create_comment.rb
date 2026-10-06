@@ -17,12 +17,12 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:comment]]
 
-          case add_task_comment.call(record_id(request), params)
-          in Success(_) then written(request, response, ADDED)
-          in Failure(:not_found) then halt 404
+          result = add_task_comment.call(record_id(request), params)
+
+          case result
           in Failure[:invalid, errors]
             refuse(request, response, commenting: { id: nil, body: Blog::Types::Text[params[:body]], errors: })
-          else halt 500
+          else settle(response, result, ADDED, tasks_path(request))
           end
         end
       end

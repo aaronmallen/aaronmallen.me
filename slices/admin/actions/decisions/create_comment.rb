@@ -16,11 +16,11 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:comment]]
 
-          case add_decision_comment.call(record_id(request), params)
-          in Success(_) then to_decision(request, response, ADDED)
-          in Failure(:not_found) then halt 404
+          result = add_decision_comment.call(record_id(request), params)
+
+          case result
           in Failure[:invalid, errors] then refuse_form(request, response, { name: :comment, params:, errors: })
-          else halt 500
+          else settle(response, result, ADDED, decision_path(request))
           end
         end
       end

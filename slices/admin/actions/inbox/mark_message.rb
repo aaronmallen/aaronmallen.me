@@ -11,14 +11,8 @@ module Admin
         def handle(request, response)
           status = request.params[:status]
 
-          case mark_message.call(record_id(request), status)
-          in Success(_)
-            toast(response, "#{TOASTS}.#{status}")
-            response.redirect_to(routes.path(:admin_inbox))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          result = mark_message.call(record_id(request), status)
+          settle(response, result, "#{TOASTS}.#{status}", routes.path(:admin_inbox))
         end
       end
     end

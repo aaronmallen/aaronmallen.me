@@ -17,11 +17,11 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:person]]
 
-          case save_person.call(params, id:)
-          in Success(_) then saved(response)
-          in Failure(:not_found) then halt 404
+          result = save_person.call(params, id:)
+
+          case result
           in Failure[:invalid, errors] then invalid(response, person_by_id.call(id), params, errors)
-          else halt 500
+          else settle(response, result, SAVED, routes.path(:admin_people))
           end
         end
 
@@ -32,11 +32,6 @@ module Admin
 
           response.status = 422
           response.render(edit_view, **build_person_editor.call(person:, params:, errors:))
-        end
-
-        def saved(response)
-          toast(response, SAVED)
-          response.redirect_to(routes.path(:admin_people))
         end
       end
     end

@@ -19,11 +19,11 @@ module Admin
           params = Blog::Types::Fields[request.params[:tag]]
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
-          case save_tag.call(params, scope:, id:)
-          in Success(_) then saved(response, scope, params)
-          in Failure(:not_found) then halt 404
+          result = save_tag.call(params, scope:, id:)
+
+          case result
           in Failure[:invalid, errors] then invalid(request, response, scope, editing(id, params, errors))
-          else halt 500
+          else settle(response, result, saved_key(params), routes.path(:admin_tags, scope:))
           end
         end
 
@@ -37,10 +37,7 @@ module Admin
           response.render(index_view, **build_tags_page.call(scope:, page:, editing:))
         end
 
-        def saved(response, scope, params)
-          toast(response, Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED)
-          response.redirect_to(routes.path(:admin_tags, scope:))
-        end
+        def saved_key(params) = Blog::Types::Text[params[:color]].empty? ? RENAMED : RECOLOURED
       end
     end
   end

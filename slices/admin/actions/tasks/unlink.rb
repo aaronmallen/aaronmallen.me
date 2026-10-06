@@ -12,14 +12,7 @@ module Admin
         def handle(request, response)
           other_id = Blog::Types::IdParam[request.params[:other_id]] || halt(404)
 
-          case unlink_task.call(record_id(request), other_id)
-          in Success(_)
-            toast(response, UNLINKED)
-            response.redirect_to(tasks_path(request))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          settle(response, unlink_task.call(record_id(request), other_id), UNLINKED, tasks_path(request))
         end
       end
     end

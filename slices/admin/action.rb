@@ -41,6 +41,16 @@ module Admin
       response.redirect_to(routes.path(:admin_sign_in))
     end
 
+    def settle(response, result, key, path)
+      case result
+      in Success(_)
+        toast(response, key)
+        response.redirect_to(path)
+      in Failure(:not_found) then halt 404
+      else halt 500
+      end
+    end
+
     def sign_in_required? = true
 
     def toast(response, key, **)

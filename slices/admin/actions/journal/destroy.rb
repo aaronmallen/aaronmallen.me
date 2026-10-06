@@ -9,14 +9,7 @@ module Admin
         include Deps[delete_journal_entry: "record.operations.delete_journal_entry"]
 
         def handle(request, response)
-          case delete_journal_entry.call(record_id(request))
-          in Success(_)
-            toast(response, DELETED)
-            response.redirect_to(routes.path(:admin_journal))
-          in Failure(:not_found)
-            halt 404
-          else halt 500
-          end
+          settle(response, delete_journal_entry.call(record_id(request)), DELETED, routes.path(:admin_journal))
         end
       end
     end

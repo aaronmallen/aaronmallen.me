@@ -20,11 +20,11 @@ module Admin
           id = edit_id(request)
           params = Blog::Types::Fields[request.params[:edit]]
 
-          case revise_edit_note.call(post.id, id, params)
-          in Success(_) then saved(response, post)
-          in Failure(:not_found) then halt 404
+          result = revise_edit_note.call(post.id, id, params)
+
+          case result
           in Failure[:invalid, errors] then invalid(response, post, id:, note: params[:note], errors:)
-          else halt 500
+          else settle(response, result, SAVED, post_path(post))
           end
         end
 
@@ -40,10 +40,7 @@ module Admin
 records: list_record_links.call(KIND, post.id))
         end
 
-        def saved(response, post)
-          toast(response, SAVED)
-          response.redirect_to(routes.path(:admin_edit_post, id: post.id))
-        end
+        def post_path(post) = routes.path(:admin_edit_post, id: post.id)
       end
     end
   end

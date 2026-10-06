@@ -47,13 +47,11 @@ module Admin
         end
 
         def link(request, response, id, params)
-          case link_tasks.call(id, params)
-          in Success(_)
-            toast(response, LINKED)
-            response.redirect_to(tasks_path(request))
-          in Failure(:not_found) then halt 404
+          result = link_tasks.call(id, params)
+
+          case result
           in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
-          else halt 500
+          else settle(response, result, LINKED, tasks_path(request))
           end
         end
       end

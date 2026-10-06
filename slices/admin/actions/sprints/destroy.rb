@@ -11,11 +11,11 @@ module Admin
         include Deps[drop_sprint: "tasks.operations.drop_sprint"]
 
         def handle(request, response)
-          case drop_sprint.call(record_id(request))
-          in Success(_) then done(response, DROPPED)
+          result = drop_sprint.call(record_id(request))
+
+          case result
           in Failure(:started) then done(response, STARTED)
-          in Failure(:not_found) then halt 404
-          else halt 500
+          else settle(response, result, DROPPED, upcoming_path)
           end
         end
 
@@ -23,8 +23,10 @@ module Admin
 
         def done(response, key)
           toast(response, key)
-          response.redirect_to(routes.path(:admin_tasks, filter: UPCOMING))
+          response.redirect_to(upcoming_path)
         end
+
+        def upcoming_path = routes.path(:admin_tasks, filter: UPCOMING)
       end
     end
   end

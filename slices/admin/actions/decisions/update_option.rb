@@ -17,12 +17,12 @@ module Admin
           option_id = Blog::Types::IdParam[request.params[:option_id]] || halt(404)
           params = Blog::Types::Fields[request.params[:option]]
 
-          case edit_decision_option.call(record_id(request), option_id, params)
-          in Success(_) then to_decision(request, response, SAVED)
-          in Failure(:not_found) then halt 404
+          result = edit_decision_option.call(record_id(request), option_id, params)
+
+          case result
           in Failure[:invalid, errors]
             refuse_form(request, response, { name: :option, id: option_id, params:, errors: })
-          else halt 500
+          else settle(response, result, SAVED, decision_path(request))
           end
         end
       end

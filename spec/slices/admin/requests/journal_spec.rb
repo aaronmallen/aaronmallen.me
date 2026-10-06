@@ -756,6 +756,20 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(page).to have_css(".journal-streak", exact_text: "Wrote on 1 of the last 30 days")
       end
 
+      it "answers 404 for an entry that is gone" do
+        delete_entry(entry.id + 1)
+
+        expect([last_response.status, repo.count]).to eq([404, 1])
+      end
+
+      it "answers with a server error when the delete fails", :aggregate_failures do
+        replace_component("record.operations.delete_journal_entry", ->(_id) { Dry::Monads::Failure(:unexpected) })
+        delete_entry
+
+        expect([last_response.status, repo.count]).to eq([500, 1])
+        expect(last_response.headers["Location"]).to be_nil
+      end
+
       it "rejects a delete without a CSRF token" do
         post "/admin/journal/#{entry.id}/delete"
 

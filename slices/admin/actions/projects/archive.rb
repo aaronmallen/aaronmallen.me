@@ -12,23 +12,15 @@ module Admin
         def handle(request, response)
           id = record_id(request)
 
-          case archive_project.call(id)
-          in Success(_)
-            archived(request, response)
-          in Failure(:not_started)
-            not_started(response, id)
-          in Failure(:not_found)
-            halt 404
-          else halt 500
+          result = archive_project.call(id)
+
+          case result
+          in Failure(:not_started) then not_started(response, id)
+          else settle(response, result, ARCHIVED, routes.path(:admin_projects, filter: filter(request)))
           end
         end
 
         private
-
-        def archived(request, response)
-          toast(response, ARCHIVED)
-          response.redirect_to(routes.path(:admin_projects, filter: filter(request)))
-        end
 
         def filter(request) = Blog::Types::ProjectFilterParam[request.params[:filter]]
 

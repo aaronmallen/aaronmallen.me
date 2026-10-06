@@ -17,12 +17,12 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:option]]
 
-          case add_decision_option.call(record_id(request), params)
-          in Success(_) then to_decision(request, response, ADDED)
+          result = add_decision_option.call(record_id(request), params)
+
+          case result
           in Failure(:closed) then to_decision(request, response, CLOSED)
-          in Failure(:not_found) then halt 404
           in Failure[:invalid, errors] then refuse_form(request, response, { name: :add_option, params:, errors: })
-          else halt 500
+          else settle(response, result, ADDED, decision_path(request))
           end
         end
       end

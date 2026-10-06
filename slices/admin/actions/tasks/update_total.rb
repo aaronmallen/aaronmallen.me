@@ -17,11 +17,11 @@ module Admin
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:total]]
 
-          case set_task_total.call(record_id(request), params)
-          in Success(_) then written(request, response, SAVED)
-          in Failure(:not_found) then halt 404
+          result = set_task_total.call(record_id(request), params)
+
+          case result
           in Failure[:invalid, errors] then refuse(request, response, totaling: { values: params, errors: })
-          else halt 500
+          else settle(response, result, SAVED, tasks_path(request))
           end
         end
       end

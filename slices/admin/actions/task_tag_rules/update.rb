@@ -18,11 +18,11 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:rule]]
 
-          case save_task_tag_rule.call(params, id:)
-          in Success(_) then saved(response)
-          in Failure(:not_found) then halt 404
+          result = save_task_tag_rule.call(params, id:)
+
+          case result
           in Failure[:invalid, errors] then invalid(response, id, params, errors)
-          else halt 500
+          else settle(response, result, SAVED, routes.path(:admin_task_tag_rules))
           end
         end
 
@@ -33,11 +33,6 @@ module Admin
 
           response.status = 422
           response.render(index_view, adding: BLANK, editing:, rules: task_tag_rules.call)
-        end
-
-        def saved(response)
-          toast(response, SAVED)
-          response.redirect_to(routes.path(:admin_task_tag_rules))
         end
       end
     end

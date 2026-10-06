@@ -20,13 +20,13 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:task]]
 
-          case save_task.call(id, params)
-          in Success(_) then done(request, response, SAVED)
+          result = save_task.call(id, params)
+
+          case result
           in Failure(:closed) then done(request, response, CLOSED)
           in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
-          in Failure(:not_found) then halt 404
           in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
-          else halt 500
+          else settle(response, result, SAVED, tasks_path(request))
           end
         end
 
