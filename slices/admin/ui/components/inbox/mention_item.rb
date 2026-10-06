@@ -8,7 +8,6 @@ module Admin
           APPROVED = Blog::Types::WebmentionStatus["approved"]
           IGNORED = Blog::Types::WebmentionStatus["ignored"]
           OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
-          SEPARATOR = " · "
           SPAM = Blog::Types::WebmentionStatus["spam"]
           TYPES = {
             Blog::Types::WebmentionType["like"] => ".types.like",
@@ -46,7 +45,7 @@ module Admin
 
           def meta
             Pill(color: :pink) { t(".kind") }
-            span { [t(TYPES.fetch(@mention.type)), path(:post, slug: @slug), received].join(SEPARATOR) }
+            span { dotted(t(TYPES.fetch(@mention.type)), path(:post, slug: @slug), received) }
           end
 
           def moderate(verdict, label_key, variant, **attributes)

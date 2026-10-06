@@ -24,7 +24,6 @@ module Admin
             IGNORED => "ui.views.webmentions.index.ignored",
             SPAM => "ui.views.webmentions.index.spam",
           }.freeze
-          SEPARATOR = " · "
 
           def initialize(counts:, filter:, inbox:, posts:, settings:)
             super()
@@ -81,10 +80,10 @@ module Admin
           end
 
           def sub
-            [
+            dotted(
               t(".pending_count", count: count(PENDING)),
               t(".shown_count", count: count(APPROVED)),
-            ].join(SEPARATOR)
+            )
           end
         end
       end

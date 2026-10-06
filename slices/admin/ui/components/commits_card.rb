@@ -7,7 +7,6 @@ module Admin
     module Components
       class CommitsCard < Component
         COMMIT = Blog::Types::ActivityKind["commit"]
-        SEPARATOR = " · "
         SHA_LENGTH = 7
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -62,7 +61,7 @@ module Admin
         def entry_main(commit)
           div(class: "commit-main") do
             p(class: "commit-message") { CommitMessage.subject(commit.message) }
-            p(class: "commit-meta") { "#{commit.repo}#{SEPARATOR}#{l(commit.commit_time, format: :clock)}" }
+            p(class: "commit-meta") { "#{commit.repo}#{DOT}#{l(commit.commit_time, format: :clock)}" }
           end
         end
 
@@ -90,7 +89,7 @@ module Admin
         def sub_line
           p(class: "commits-sub") do
             Icon("fa-brands fa-github commits-sub-icon")
-            plain "#{synced}#{SEPARATOR}#{t('.repos', count: @repos)}"
+            plain "#{synced}#{DOT}#{t('.repos', count: @repos)}"
           end
         end
 

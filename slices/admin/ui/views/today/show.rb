@@ -9,7 +9,6 @@ module Admin
 
           ORIGIN = Blog::Types::TaskOrigin["today"]
           QUEUE_KINDS = { posts: ".queue_posts", social_posts: ".queue_social_posts" }.freeze
-          SEPARATOR = " · "
 
           def initialize(
             attention:, commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:,
@@ -68,7 +67,7 @@ module Admin
           def queue_kinds
             waiting = QUEUE_KINDS.select { |kind, _key| queue[kind].positive? }
 
-            waiting.map { |kind, key| t(key, count: queue[kind]) }.join(SEPARATOR)
+            dotted(*waiting.map { |kind, key| t(key, count: queue[kind]) })
           end
 
           def queue_stat
@@ -115,12 +114,12 @@ module Admin
           end
 
           def sub
-            [
+            dotted(
               t(".sub_tasks", done: sprint_done, total: sprint_tasks.size),
               t(".sub_commits", count: @commit_totals[:commits]),
               t(".sub_entries", count: @journal[:entries].size),
               t(".sub_scheduled", count: queue[:today]),
-            ].join(SEPARATOR)
+            )
           end
         end
       end

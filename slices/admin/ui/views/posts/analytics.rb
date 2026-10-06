@@ -10,7 +10,6 @@ module Admin
           LABELS = {
             views: ".views", visitors: ".visitors", readers: ".readers", read_throughs: ".read_throughs",
           }.freeze
-          SEPARATOR = " · "
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
           def initialize(
@@ -91,7 +90,7 @@ module Admin
             unique_readers
           end
 
-          def sub = [t(".sub", count: @range), path(:post, slug: @post.slug)].join(SEPARATOR)
+          def sub = dotted(t(".sub", count: @range), path(:post, slug: @post.slug))
 
           def unique_readers
             readers, final = @unique_readers.values_at(:readers, :final)

@@ -8,7 +8,6 @@ module Admin
           AT = "@"
           ENCODED_AT = "%40"
           READ = Blog::Types::MessageStatus["read"]
-          SEPARATOR = " · "
           SPAM = Blog::Types::MessageStatus["spam"]
 
           prop :message, Blog::Types::Instance(ROM::Struct)
@@ -39,7 +38,7 @@ module Admin
 
           def meta
             Pill(color: :sand) { t(".kind") }
-            span { [@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)].join(SEPARATOR) }
+            span { dotted(@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)) }
           end
 
           def reply_href = "mailto:#{address}?subject=#{ERB::Util.url_encode(t('.subject', subject: @message.subject))}"

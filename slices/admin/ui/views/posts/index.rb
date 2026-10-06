@@ -19,7 +19,6 @@ module Admin
             SCHEDULED => "ui.views.posts.index.scheduled",
           }.freeze
           MENTION_COLOR = :pink
-          SEPARATOR = " · "
           UNIQUE_READERS = { true => ".final_unique_readers", false => ".unique_readers" }.freeze
 
           def initialize(
@@ -111,7 +110,7 @@ module Admin
           def row_sub(post)
             date = l(Blog::TimeZone.today(post.published_at || post.updated_at), format: :medium)
             words = t(".words", count: @word_counts.fetch(post.id))
-            [path(:post, slug: post.slug), date, words, *readership(post)].join(SEPARATOR)
+            dotted(path(:post, slug: post.slug), date, words, *readership(post))
           end
 
           def rows
@@ -122,11 +121,11 @@ module Admin
           end
 
           def sub
-            [
+            dotted(
               t(".published_count", count: count(PUBLISHED)),
               t(".draft_count", count: count(DRAFT)),
               t(".scheduled_count", count: count(SCHEDULED)),
-            ].join(SEPARATOR)
+            )
           end
 
           def tally(name, post) = @readership.fetch(name).fetch(post.id)

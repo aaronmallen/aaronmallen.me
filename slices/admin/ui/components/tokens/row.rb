@@ -5,8 +5,6 @@ module Admin
     module Components
       module Tokens
         class Row < Component
-          SEPARATOR = " · "
-
           prop :token, Blog::Types::Instance(ROM::Struct)
 
           def view_template
@@ -47,7 +45,7 @@ module Admin
 
           def sub
             minted
-            plain(SEPARATOR)
+            plain(DOT)
             last_used
           end
         end

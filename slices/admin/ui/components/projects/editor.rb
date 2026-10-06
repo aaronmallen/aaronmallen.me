@@ -5,9 +5,6 @@ module Admin
     module Components
       module Projects
         class Editor < Component
-          SEPARATOR = " · "
-          WRITING = /\S/
-
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
@@ -55,7 +52,7 @@ module Admin
             }
           end
 
-          def named? = @values[:name].match?(WRITING)
+          def named? = written?(@values[:name])
 
           def page_head
             EditorHead(label: t(".name"), field: :name, errors: @errors, error: FieldError, **name_attributes) do |head|
@@ -74,16 +71,16 @@ module Admin
           end
 
           def sub_release
-            return unless release.to_s.match?(WRITING)
+            return unless written?(release)
 
-            plain SEPARATOR
+            plain DOT
             span { release }
           end
 
           def text(field, placeholder_key)
             value = @values[field]
 
-            value.match?(WRITING) ? value : t(placeholder_key)
+            written?(value) ? value : t(placeholder_key)
           end
         end
       end

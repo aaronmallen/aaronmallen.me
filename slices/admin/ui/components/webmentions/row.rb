@@ -21,7 +21,6 @@ module Admin
             REPOST => Type.new(color: :green, icon: "fa-solid fa-retweet", label_key: ".types.repost"),
             MENTION => Type.new(color: :blue, icon: "fa-solid fa-at", label_key: ".types.mention"),
           }.freeze
-          SEPARATOR = " · "
 
           prop :mention, Blog::Types::Instance(ROM::Struct)
           prop :slug, Blog::Types::String
@@ -58,7 +57,7 @@ module Admin
           def meta
             div(class: "wm-meta") do
               Pill(color: type.color) { t(type.label_key) }
-              span { [path(:post, slug: @slug), l(Blog::TimeZone.local(@mention.received_at), format: :medium)].join(SEPARATOR) }
+              span { dotted(path(:post, slug: @slug), l(Blog::TimeZone.local(@mention.received_at), format: :medium)) }
             end
           end
 

@@ -8,7 +8,6 @@ module Admin
           DRAFT = Blog::Types::SocialIntent["draft"]
           MODES = Blog::Types::SocialMode.values.to_h { [it, ".#{it}"] }.freeze
           SEND = Blog::Types::SocialIntent["send"]
-          WRITING = /\S/
 
           prop :counts, Blog::Types::Array.of(Blog::Types::Hash)
           prop :errors, Blog::Types::Hash
@@ -38,7 +37,7 @@ module Admin
             Button(small: true, data: { social_add: "" }, icon: "fa-solid fa-plus") { t(".add") }
           end
 
-          def blank? = @values[:parts].none? { it.match?(WRITING) }
+          def blank? = @values[:parts].none? { written?(it) }
 
           def button_label(icon, text_key, **)
             span(class: "btn-label", **) do

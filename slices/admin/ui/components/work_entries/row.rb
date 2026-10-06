@@ -5,8 +5,6 @@ module Admin
     module Components
       module WorkEntries
         class Row < Component
-          WRITING = /\S/
-
           WORK = Blog::Types::ProjectFilter["work"]
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
@@ -42,8 +40,6 @@ module Admin
           def sub = t(".sub", from: @entry.from_year, org: @entry.org, to:)
 
           def to = @entry.current? ? t(".current") : @entry.to_year
-
-          def written?(value) = value.to_s.match?(WRITING)
         end
       end
     end

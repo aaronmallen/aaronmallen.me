@@ -10,7 +10,6 @@ module Admin
           EDIT_ICON = "fa-regular fa-pen-to-square"
           MONO = { class: "mono" }.freeze
           RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
-          WRITING = /\S/
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
@@ -79,8 +78,6 @@ module Admin
           end
 
           def stars_label = t(".stars", count: @project.stars, stars: Blog::Figures.count(@project.stars))
-
-          def written?(value) = value.to_s.match?(WRITING)
         end
       end
     end

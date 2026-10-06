@@ -5,7 +5,6 @@ module Admin
     module Components
       class ShipsNextCard < Component
         QUEUE_FILTER = Blog::Types::SocialQueue["queued"]
-        SEPARATOR = " · "
 
         prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :social_posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -41,7 +40,7 @@ module Admin
         def social_sub(social_post)
           networks = social_post.targets.map { t(Structs::Network::LABELS.fetch(it)) }.join(Structs::Network::SEPARATOR)
 
-          [l(Blog::TimeZone.local(social_post.posted_at), format: :medium), networks].join(SEPARATOR)
+          dotted(l(Blog::TimeZone.local(social_post.posted_at), format: :medium), networks)
         end
       end
     end

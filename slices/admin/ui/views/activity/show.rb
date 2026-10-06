@@ -7,8 +7,6 @@ module Admin
         class Show < View
           include Components::Activity
 
-          SEPARATOR = " · "
-
           def initialize(events:, filters:, saved_views:, totals:, older:, newer:)
             super()
             @events = events
@@ -42,10 +40,10 @@ module Admin
           end
 
           def sub
-            [
+            dotted(
               t(".span", from: date(@filters[:from]), to: date(@filters[:to])),
               t(".across", events: t(".events", count: @totals[:events]), days: t(".days", count: @totals[:days])),
-            ].join(SEPARATOR)
+            )
           end
 
           def timeline

@@ -18,7 +18,6 @@ module Admin
             RESOLVED => "ui.views.decisions.index.resolved",
             DROPPED => "ui.views.decisions.index.dropped",
           }.freeze
-          SEPARATOR = " · "
           TITLES = { OPEN => ".titles.open", RESOLVED => ".titles.resolved", DROPPED => ".titles.dropped" }.freeze
 
           def initialize(counts:, decisions:, filter:)
@@ -60,7 +59,7 @@ module Admin
             @decisions.rows.each { Row(decision: it) }
           end
 
-          def sub = COUNTS.map { |status, key| t(key, count: @counts.fetch(status, 0)) }.join(SEPARATOR)
+          def sub = dotted(*COUNTS.map { |status, key| t(key, count: @counts.fetch(status, 0)) })
         end
       end
     end

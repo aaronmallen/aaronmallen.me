@@ -5,7 +5,6 @@ module Blog
     module Components
       class ProjectCard < Component
         STARS = :stars
-        WRITING = /\S/
 
         prop :name, Blog::Types::String
         prop :tagline, Blog::Types::String.optional
@@ -35,7 +34,7 @@ module Blog
         end
 
         def meta_part(part, index)
-          plain t(".separator") if index.positive?
+          plain DOT if index.positive?
           part == STARS ? stars : plain(part)
         end
 
@@ -51,8 +50,6 @@ module Blog
             t(".stars", stars: Figures.count(@stars))
           end
         end
-
-        def written?(value) = value.to_s.match?(WRITING)
       end
     end
   end

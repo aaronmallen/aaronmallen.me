@@ -5,8 +5,6 @@ module Admin
     module Components
       module Social
         class MentionOption < Component
-          HANDLE_SEPARATOR = " · "
-
           prop :person, Blog::Types::Instance(ROM::Struct)
 
           def self.group_of(person)
@@ -21,7 +19,7 @@ module Admin
               aria: { selected: "false" }, data:,
             ) do
               span(class: "compose-mention-name") { @person.name }
-              span(class: "compose-mention-handles") { handles.join(HANDLE_SEPARATOR) }
+              span(class: "compose-mention-handles") { dotted(*handles) }
             end
           end
 

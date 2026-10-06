@@ -6,7 +6,6 @@ module Admin
       class TodayJournalCard < Component
         BODY_HEIGHT = "160px"
         FORM_ID = "today-journal-entry"
-        SEPARATOR = " · "
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :body, Blog::Types::String
@@ -63,7 +62,7 @@ module Admin
         def meta
           p(class: "journal-words") do
             Icon("fa-solid fa-lock today-journal-lock")
-            plain "#{t('.private')}#{SEPARATOR}"
+            plain "#{t('.private')}#{DOT}"
             span(data: { journal_words: "", one: t(".words.one"), other: t(".words.other") }) do
               t(".words", count: @word_count)
             end

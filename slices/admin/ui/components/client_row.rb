@@ -4,8 +4,6 @@ module Admin
   module UI
     module Components
       class ClientRow < Component
-        SEPARATOR = " · "
-
         prop :client, Blog::Types::Instance(ROM::Struct)
 
         def view_template
@@ -51,7 +49,7 @@ module Admin
           end
         end
 
-        def sub = [redirect_host, connected, last_used].compact.join(SEPARATOR)
+        def sub = dotted(redirect_host, connected, last_used)
       end
     end
   end

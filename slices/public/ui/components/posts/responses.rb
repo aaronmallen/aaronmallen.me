@@ -10,7 +10,6 @@ module Public
             Blog::Types::WebmentionType["repost"] => ".reposts",
           }.freeze
           REL = "nofollow ugc noopener"
-          SEPARATOR = " · "
 
           prop :responses, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
@@ -31,7 +30,7 @@ module Public
             labels = COUNT_KEYS.filter_map { |type, key| t(key, count: @counts[type]) if @counts[type] }
             return if labels.empty?
 
-            p(class: "post-response-counts") { labels.join(SEPARATOR) }
+            p(class: "post-response-counts") { dotted(*labels) }
           end
 
           def excerpt(mention)

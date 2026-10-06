@@ -18,7 +18,6 @@ module Admin
             Blog::Types::NetworkName["mastodon"] => :violet,
           }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
-          WRITING = /\S/
 
           prop :social_post, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
@@ -58,7 +57,7 @@ module Admin
             end
           end
 
-          def failing?(delivery) = !delivery.nil? && (delivery.failed || delivery.error.to_s.match?(WRITING))
+          def failing?(delivery) = !delivery.nil? && (delivery.failed || written?(delivery.error))
 
           def failure_text(delivery)
             error = delivery.error.to_s.strip
@@ -69,7 +68,7 @@ module Admin
 
           def failures
             @social_post.deliveries.each do |delivery|
-              next unless delivery.error.to_s.match?(WRITING)
+              next unless written?(delivery.error)
 
               p(class: "sq-fail") { failure_text(delivery) }
             end

@@ -12,7 +12,6 @@ module Admin
             Blog::Types::WebmentionType["repost"] => ".types.repost",
           }.freeze
           PENDING = Blog::Types::WebmentionStatus["pending"]
-          SEPARATOR = " · "
 
           prop :count, Blog::Types::Integer
           prop :mentions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -38,7 +37,7 @@ module Admin
           end
 
           def sub(mention)
-            [t(TYPES.fetch(mention.type)), mention.excerpt.to_s.strip].reject(&:empty?).join(SEPARATOR)
+            dotted(t(TYPES.fetch(mention.type)), mention.excerpt.to_s.strip)
           end
         end
       end

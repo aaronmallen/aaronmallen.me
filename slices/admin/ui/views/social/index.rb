@@ -8,7 +8,6 @@ module Admin
           include Components::Social
 
           ACCOUNTS_SEPARATOR = " and "
-          SEPARATOR = " · "
 
           def initialize(
             accounts:, filter:, items:, now:, queued:, records:, suggestion_counts:, suggestions:, writing: false,
@@ -62,7 +61,7 @@ module Admin
             Queue(filter: @filter, **@queue)
           end
 
-          def sub = [cross_posting, t(".queued", count: @queued)].join(SEPARATOR)
+          def sub = dotted(cross_posting, t(".queued", count: @queued))
 
           def suggestions
             Suggestions(filter: @filter, **@suggestions) if @suggestions[:edits].any?

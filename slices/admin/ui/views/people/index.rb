@@ -5,8 +5,6 @@ module Admin
     module Views
       module People
         class Index < View
-          SEPARATOR = " · "
-
           def initialize(people:)
             super()
             @people = people
@@ -33,7 +31,7 @@ module Admin
           end
 
           def sub(person)
-            [t(".token", key: person.key), person.mastodon_handle, bluesky(person)].compact.join(SEPARATOR)
+            dotted(t(".token", key: person.key), person.mastodon_handle, bluesky(person))
           end
         end
       end

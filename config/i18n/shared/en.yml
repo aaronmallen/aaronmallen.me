@@ -43,7 +43,6 @@ en:
         tags:
           label: "Tags"
       project_card:
-        separator: " · "
         stars: "★ %{stars}"
         stars_label:
           one: "%{stars} star"

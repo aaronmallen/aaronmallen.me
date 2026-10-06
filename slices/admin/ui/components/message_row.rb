@@ -6,7 +6,6 @@ module Admin
       class MessageRow < Component
         READ = Blog::Types::MessageStatus["read"]
         READ_KEY = "r"
-        SEPARATOR = " · "
         SPAM = Blog::Types::MessageStatus["spam"]
         UNREAD = Blog::Types::MessageStatus["unread"]
 
@@ -36,7 +35,7 @@ module Admin
           { aria: { keyshortcuts: READ_KEY }, data: { key: READ_KEY, key_label: t(".read_key") } }
         end
 
-        def meta = [@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)].join(SEPARATOR)
+        def meta = dotted(@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium))
 
         def move(status, label_key, variant)
           Form(action: path(:admin_mark_message, id: @message.id, status:)) do

@@ -4,8 +4,6 @@ module Admin
   module UI
     module Components
       class DraftsCard < Component
-        SEPARATOR = " · "
-
         prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :counts, Blog::Types::Hash
 
@@ -25,7 +23,7 @@ module Admin
           counts = @counts.fetch(post.id)
           words = t(".words", count: counts[:words])
           read_time = t(".read_time", count: counts[:read_time])
-          [words, read_time].join(SEPARATOR)
+          dotted(words, read_time)
         end
       end
     end

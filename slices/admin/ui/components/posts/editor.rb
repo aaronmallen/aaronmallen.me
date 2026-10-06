@@ -7,7 +7,6 @@ module Admin
         class Editor < Component
           BODY_HEIGHT = "520px"
           PUBLISHED = Blog::Types::PostStatus["published"]
-          SEPARATOR = " · "
 
           prop :post, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
@@ -93,11 +92,11 @@ module Admin
             writing = "#{path(:writing)}/"
 
             span(data: { editor_path: writing }) { writing + slug }
-            plain SEPARATOR
+            plain DOT
             span(data: { editor_words: "", one: t(".words.one"), other: t(".words.other") }) do
               t(".words", count: word_count)
             end
-            plain SEPARATOR
+            plain DOT
             span(**read_time_attributes) { t(".read_time", count: read_time) }
           end
 

@@ -4,8 +4,6 @@ module Admin
   module UI
     module Components
       class DayHead < Component
-        SEPARATOR = " · "
-
         prop :date, Blog::Types::Date
         prop :today, Blog::Types::Date
         prop :count, Blog::Types::Integer.optional, default: nil
@@ -32,7 +30,7 @@ module Admin
 
         def days_ago = (@today - @date).to_i
 
-        def note = [ago, @count&.to_s].compact.join(SEPARATOR)
+        def note = dotted(ago, @count&.to_s)
       end
     end
   end

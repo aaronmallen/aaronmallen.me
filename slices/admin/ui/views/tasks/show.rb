@@ -8,7 +8,6 @@ module Admin
           include Components::Tasks
 
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
-          KICKER_SEPARATOR = " · "
           PREFIX = "#"
           STATUSES = {
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle", ".statuses.open"],
@@ -88,7 +87,7 @@ module Admin
 
           def key = PREFIX + @task.id.to_s
 
-          def kicker = [key, reference].compact.join(KICKER_SEPARATOR)
+          def kicker = dotted(key, reference)
 
           def linked
             RecordLinks::Section(

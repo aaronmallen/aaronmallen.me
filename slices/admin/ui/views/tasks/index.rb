@@ -30,7 +30,6 @@ module Admin
           }.freeze
           LIST = { data: { key_list: true } }.freeze
           LIVE = { class: "card-live" }.freeze
-          SEPARATOR = " · "
           TITLES = {
             Blog::Types::TaskFilter["today"] => ".today",
             Blog::Types::TaskFilter["next"] => ".next",
@@ -118,7 +117,7 @@ module Admin
             counts = [t(".open", count: filtering? ? @tasks.rows.size : @counts.fetch(@tab))]
             counts << t(".carried_in", count: carried) if today? && carried.positive?
 
-            counts.join(SEPARATOR)
+            dotted(*counts)
           end
 
           def pager = Pager(page: @tasks, route: :admin_tasks, params: pager_params)
@@ -146,13 +145,13 @@ module Admin
           def scheduled = (@today if today?)
 
           def sub
-            [
+            dotted(
               t(".sprint_on", date: l(@today, format: :long)),
               t(".open_in_today", count: @counts.fetch(TODAY)),
               t(".carried_in", count: carried),
               t(".finished_today", count: @counts.fetch(FINISHED_TODAY)),
               t(".upcoming_count", count: @counts.fetch(UPCOMING)),
-            ].join(SEPARATOR)
+            )
           end
 
           def today? = @tab == TODAY

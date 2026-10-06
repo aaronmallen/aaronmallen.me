@@ -7,7 +7,6 @@ module Admin
         class Row < Component
           LAST_SEPARATOR = " and "
           LIST_SEPARATOR = ", "
-          SEPARATOR = " · "
           KINDS = %i[posts projects journal_entries tasks decisions task_tag_rules].freeze
           USE_KEYS = KINDS.to_h { [it, ".uses.#{it}"] }.freeze
 
@@ -126,7 +125,7 @@ module Admin
           def uses
             return t(".unused") if held.zero?
 
-            counts.join(SEPARATOR)
+            dotted(*counts)
           end
         end
       end

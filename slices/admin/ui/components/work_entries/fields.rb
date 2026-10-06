@@ -6,7 +6,6 @@ module Admin
       module WorkEntries
         class Fields < Component
           ROWS = 3
-          WRITING = /\S/
 
           VALUES = Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
 
@@ -50,7 +49,7 @@ module Admin
             add_button
           end
 
-          def filled?(name) = @values[name].to_s.match?(WRITING)
+          def filled?(name) = written?(@values[name])
 
           def input_field(name, label_key, placeholder_key, **extra)
             Field(label: t(label_key), name:, errors: @errors, error: FieldError) do |control|

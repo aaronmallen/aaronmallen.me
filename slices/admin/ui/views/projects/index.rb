@@ -18,7 +18,6 @@ module Admin
             ARCHIVED => "ui.views.projects.index.archived",
             WORK => "ui.views.projects.index.work",
           }.freeze
-          SEPARATOR = " · "
 
           def initialize(
             archived_count:, featured_count:, filter:, live_count:, projects:, stars:,
@@ -78,12 +77,12 @@ module Admin
           end
 
           def sub
-            [
+            dotted(
               t(".live_count", count: @live_count),
               t(".featured_count", count: @featured_count),
               t(".archived_count", count: @archived_count),
               t(".stars_count", count: @stars, stars: Blog::Figures.count(@stars)),
-            ].join(SEPARATOR)
+            )
           end
 
           def work

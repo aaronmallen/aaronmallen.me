@@ -12,7 +12,6 @@ module Admin
             entry_date: nil,
             tags: Blog::Constants::EMPTY_STRING,
           }.freeze
-          SEPARATOR = " · "
 
           def initialize(
             days:, entries:, saved_views:, streak:, today:, words:, editing: nil, errors: Blog::Constants::EMPTY_HASH,
@@ -65,12 +64,12 @@ module Admin
           def search = @search.strip
 
           def sub
-            [
+            dotted(
               t(".private"),
               t(".never_public"),
               t(".entries", count: @counts[:entries]),
               t(".words", count: @counts[:words]),
-            ].join(SEPARATOR)
+            )
           end
         end
       end

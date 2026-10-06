@@ -5,6 +5,7 @@ module Blog
     class Component < Phlex::Hanami::Component
       include Phlex::Hanami::Props
       include Components
+      include Wording
     end
   end
 end

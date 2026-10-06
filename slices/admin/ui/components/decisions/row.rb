@@ -5,8 +5,6 @@ module Admin
     module Components
       module Decisions
         class Row < Component
-          SEPARATOR = " · "
-
           prop :decision, Blog::Types::Instance(ROM::Struct)
 
           def view_template
@@ -16,10 +14,10 @@ module Admin
           private
 
           def sub
-            [
+            dotted(
               t(".options", count: @decision.options.size),
               t(".opened", date: l(Blog::TimeZone.local(@decision.created_at), format: :medium)),
-            ].join(SEPARATOR)
+            )
           end
         end
       end
