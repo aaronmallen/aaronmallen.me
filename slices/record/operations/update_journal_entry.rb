@@ -19,7 +19,7 @@ module Record
 
       private
 
-      def find(id) = journal_entry_repo.by_id(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(journal_entry_repo.by_id(id) && id)
 
       def form(params) = { body: params[:body], tags: params[:tags] }
 

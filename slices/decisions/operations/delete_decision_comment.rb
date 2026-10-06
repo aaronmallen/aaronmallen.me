@@ -12,15 +12,11 @@ module Decisions
 
       def call(decision_id, id)
         transaction do
-          count = step removed(decision_comment_repo.delete_on_decision(decision_id, id))
+          count = step affected(decision_comment_repo.delete_on_decision(decision_id, id))
           release_photos.call(PHOTO_OWNER, id)
           count
         end
       end
-
-      private
-
-      def removed(count) = count.positive? ? Success(count) : Failure(:not_found)
     end
   end
 end

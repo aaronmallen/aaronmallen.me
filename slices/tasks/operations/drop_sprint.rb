@@ -26,9 +26,7 @@ module Tasks
       end
 
       def find(id)
-        sprint = sprint_repo.by_id(id)
-
-        sprint ? Success(sprint) : Failure(:not_found)
+        found(sprint_repo.by_id(id))
       end
     end
   end

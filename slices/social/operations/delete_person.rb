@@ -14,9 +14,7 @@ module Social
       private
 
       def find(id)
-        person = person_repo.by_id(id)
-
-        person ? Success(person) : Failure(:not_found)
+        found(person_repo.by_id(id))
       end
     end
   end

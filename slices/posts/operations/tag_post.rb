@@ -15,7 +15,7 @@ module Posts
 
       private
 
-      def find(id) = post_repo.by_id_for_update(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(post_repo.by_id_for_update(id) && id)
     end
   end
 end

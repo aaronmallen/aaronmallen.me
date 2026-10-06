@@ -23,9 +23,7 @@ module Posts
       private
 
       def find(id)
-        post = post_repo.by_id_for_update(id)
-
-        post ? Success(post) : Failure(:not_found)
+        found(post_repo.by_id_for_update(id))
       end
 
       def given(post, params) = FIELDS.to_h { [it, params.key?(it) ? params[it] : post.public_send(it).to_s] }

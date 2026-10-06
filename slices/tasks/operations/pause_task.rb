@@ -21,10 +21,7 @@ module Tasks
       private
 
       def find(id)
-        task = task_repo.by_id(id)
-        return Failure(:not_found) unless task
-
-        task.in_progress? ? Success(task) : Failure(:idle)
+        found(task_repo.by_id(id)).bind { it.in_progress? ? Success(it) : Failure(:idle) }
       end
     end
   end

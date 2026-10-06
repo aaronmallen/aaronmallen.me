@@ -9,15 +9,11 @@ module Posts
 
       def call(id)
         transaction do
-          post = step deleted(post_repo.delete(id))
+          post = step found(post_repo.delete(id))
           release_photos.call(PHOTO_OWNER, post.id)
           post
         end
       end
-
-      private
-
-      def deleted(post) = post ? Success(post) : Failure(:not_found)
     end
   end
 end

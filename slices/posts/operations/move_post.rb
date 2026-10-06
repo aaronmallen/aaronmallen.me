@@ -21,9 +21,7 @@ module Posts
       private
 
       def scheduled(post)
-        return Failure(:not_found) unless post
-
-        post.status == SCHEDULED ? Success(post) : Failure(:not_scheduled)
+        found(post).bind { it.status == SCHEDULED ? Success(it) : Failure(:not_scheduled) }
       end
     end
   end

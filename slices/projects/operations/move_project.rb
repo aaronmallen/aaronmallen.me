@@ -18,9 +18,7 @@ module Projects
       private
 
       def locate(live, id)
-        index = live.index { it.id == id }
-
-        index ? Success(index) : Failure(:not_found)
+        found(live.index { it.id == id })
       end
 
       def neighbour(live, index)

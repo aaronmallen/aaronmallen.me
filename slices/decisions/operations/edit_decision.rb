@@ -25,8 +25,7 @@ module Decisions
       private
 
       def find(id)
-        decision = decision_repo.by_id_for_update(id)
-        decision ? Success(decision) : Failure(:not_found)
+        found(decision_repo.by_id_for_update(id))
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }.merge(params.slice(:tags))

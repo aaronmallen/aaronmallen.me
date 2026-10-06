@@ -21,7 +21,7 @@ module Tasks
 
       private
 
-      def find(id) = task_repo.exist?(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(task_repo.exist?(id) && id)
 
       def validate(params)
         validated(contract.call({ hours: params[:hours], minutes: params[:minutes] }, required: true))

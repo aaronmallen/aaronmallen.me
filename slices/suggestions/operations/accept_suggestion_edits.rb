@@ -70,8 +70,7 @@ module Suggestions
       def editable(record) = record ? Success(record) : Failure(:already_posted)
 
       def find(id)
-        suggestion = suggestion_repo.by_id(id)
-        suggestion ? Success(suggestion) : Failure(:not_found)
+        found(suggestion_repo.by_id(id))
       end
 
       def fits?(body, targets)
@@ -103,10 +102,7 @@ module Suggestions
       def still_pending(edits) = suggestion_repo.lock_pending(edits.map(&:id))
 
       def unpublished(post)
-        return Failure(:not_found) unless post
-        return Failure(:published) if post.status == PUBLISHED
-
-        Success(post)
+        found(post).bind { it.status == PUBLISHED ? Failure(:published) : Success(it) }
       end
     end
   end

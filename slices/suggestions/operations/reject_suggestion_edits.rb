@@ -26,8 +26,7 @@ module Suggestions
       end
 
       def find(id)
-        suggestion = suggestion_repo.by_id(id)
-        suggestion ? Success(suggestion) : Failure(:not_found)
+        found(suggestion_repo.by_id(id))
       end
 
       def unsent(suggestion)

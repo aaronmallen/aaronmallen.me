@@ -14,8 +14,6 @@ module Social
 
       private
 
-      def found(mention) = mention ? Success(mention) : Failure(:not_found)
-
       def moderated(id, verdict, reason)
         case verdict
         when APPROVED then webmention_repo.approve(id)

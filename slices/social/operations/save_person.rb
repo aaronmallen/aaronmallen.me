@@ -24,8 +24,7 @@ module Social
       def find(id)
         return Success(nil) unless id
 
-        person = person_repo.by_id(id)
-        person ? Success(person) : Failure(:not_found)
+        found(person_repo.by_id(id))
       end
 
       def lookup(handle)

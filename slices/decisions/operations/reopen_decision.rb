@@ -22,10 +22,7 @@ module Decisions
       private
 
       def find(id)
-        decision = decision_repo.by_id_for_update(id)
-        return Failure(:not_found) unless decision
-
-        decision.closed? ? Success(decision) : Failure(:open)
+        found(decision_repo.by_id_for_update(id)).bind { it.closed? ? Success(it) : Failure(:open) }
       end
     end
   end

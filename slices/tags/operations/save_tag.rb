@@ -19,7 +19,7 @@ module Tags
       def find(id, scope)
         return Success(nil) unless id
 
-        tag_repo.find_in(scope, id) ? Success(id) : Failure(:not_found)
+        found(tag_repo.find_in(scope, id) && id)
       end
 
       def form(params) = { color: params[:color], name: params[:name] }

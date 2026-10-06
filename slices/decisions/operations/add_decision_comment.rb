@@ -25,7 +25,7 @@ module Decisions
 
       private
 
-      def find(id) = decision_repo.exist?(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(decision_repo.exist?(id) && id)
 
       def validate(params) = validated(contract.call(body: params[:body]))
     end

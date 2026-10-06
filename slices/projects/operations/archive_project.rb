@@ -14,9 +14,7 @@ module Projects
       private
 
       def find(id)
-        project = project_repo.by_id(id)
-
-        project ? Success(project) : Failure(:not_found)
+        found(project_repo.by_id(id))
       end
 
       def started(project, on)

@@ -25,8 +25,7 @@ module MCP
       end
 
       def find(id)
-        client = client_repo.connected_by_id_for_update(id)
-        client ? Success(client) : Failure(:not_found)
+        found(client_repo.connected_by_id_for_update(id))
       end
     end
   end

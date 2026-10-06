@@ -25,9 +25,7 @@ module Posts
       end
 
       def unpublished(post)
-        return Failure(:not_found) unless post
-
-        post.status == PUBLISHED ? Failure(:published) : Success(post)
+        found(post).bind { it.status == PUBLISHED ? Failure(:published) : Success(it) }
       end
     end
   end

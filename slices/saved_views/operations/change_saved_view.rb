@@ -15,9 +15,7 @@ module SavedViews
       private
 
       def find(id)
-        view = saved_view_repo.by_id(id)
-
-        view ? Success(view) : Failure(:not_found)
+        found(saved_view_repo.by_id(id))
       end
 
       def form(view, params)

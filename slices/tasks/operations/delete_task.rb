@@ -17,16 +17,12 @@ module Tasks
         transaction do
           comment_ids = task_comment_repo.ids_for_task(id)
           work_session_repo.close(id, at)
-          task = step deleted(task_repo.delete(id))
+          task = step found(task_repo.delete(id))
           release_photos.call(TASK_OWNER, id)
           release_photos.call(COMMENT_OWNER, comment_ids)
           task
         end
       end
-
-      private
-
-      def deleted(task) = task ? Success(task) : Failure(:not_found)
     end
   end
 end

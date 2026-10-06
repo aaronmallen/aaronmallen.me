@@ -23,10 +23,7 @@ module Suggestions
       private
 
       def unpublished(post)
-        return Failure(:not_found) unless post
-        return Failure(:published) if post.status == PUBLISHED
-
-        Success(post)
+        found(post).bind { it.status == PUBLISHED ? Failure(:published) : Success(it) }
       end
     end
   end

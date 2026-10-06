@@ -30,9 +30,7 @@ module Admin
       private
 
       def find(id)
-        task = task_by_id.call(id)
-
-        task ? Success(task) : Failure(:not_found)
+        found(task_by_id.call(id))
       end
 
       def note_html(note)

@@ -30,7 +30,7 @@ module Links
         id = Blog::Types::IdParam[id]
         known = id && Blog::Types::RecordKind.valid?(kind) && records.named(kind, [id]).any?
 
-        known ? Success([kind, id]) : Failure(:not_found)
+        found(known && [kind, id])
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }

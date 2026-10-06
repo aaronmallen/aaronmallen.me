@@ -10,8 +10,7 @@ module API
       private
 
       def revoke(id)
-        token = token_repo.revoke(id)
-        token ? Success(token) : Failure(:not_found)
+        found(token_repo.revoke(id))
       end
     end
   end

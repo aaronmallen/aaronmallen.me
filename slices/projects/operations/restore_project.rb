@@ -13,8 +13,7 @@ module Projects
       private
 
       def find(id)
-        project = project_repo.by_id(id)
-        project&.archived? ? Success(id) : Failure(:not_found)
+        found(project_repo.by_id(id)&.archived? && id)
       end
     end
   end

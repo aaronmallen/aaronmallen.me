@@ -24,7 +24,7 @@ module Tasks
 
       private
 
-      def find(id) = task_repo.by_id(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(task_repo.by_id(id) && id)
     end
   end
 end

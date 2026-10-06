@@ -14,7 +14,7 @@ module Decisions
 
       private
 
-      def find(decision_id, id) = decision_option_repo.on_decision(decision_id, id) ? Success(id) : Failure(:not_found)
+      def find(decision_id, id) = found(decision_option_repo.on_decision(decision_id, id) && id)
 
       def remove(id)
         Success(transaction { decision_option_repo.delete(id) })

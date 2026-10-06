@@ -28,7 +28,7 @@ module Social
       end
 
       def give_up(social_post_id, network)
-        step found(social_post_id)
+        step found(social_post_repo.by_id(social_post_id))
 
         transaction do
           social_post_repo.record_delivery(social_post_id, network, failed: true)
@@ -53,12 +53,6 @@ module Social
       def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
 
       def expanded(social_post, network) = expand_for_network.call(social_post.parts.map(&:body), network)
-
-      def found(social_post_id)
-        social_post = social_post_repo.by_id(social_post_id)
-
-        social_post ? Success(social_post) : Failure(:not_found)
-      end
 
       def refuse(social_post, network, reason, error)
         transaction do
@@ -105,12 +99,12 @@ module Social
       end
 
       def targeted(social_post_id, network)
-        social_post = social_post_repo.by_id(social_post_id)
-        return Failure(:not_found) unless social_post
-        return Failure(:not_due) unless due?(social_post)
-        return Failure(:not_targeted) unless social_post.targets.include?(network)
+        found(social_post_repo.by_id(social_post_id)).bind do |social_post|
+          next Failure(:not_due) unless due?(social_post)
+          next Failure(:not_targeted) unless social_post.targets.include?(network)
 
-        Success(social_post)
+          Success(social_post)
+        end
       end
 
       def web_url(remote)

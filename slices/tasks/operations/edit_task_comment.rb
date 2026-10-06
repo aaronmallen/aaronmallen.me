@@ -23,7 +23,7 @@ module Tasks
 
       private
 
-      def find(task_id, id) = task_comment_repo.local?(task_id, id) ? Success(id) : Failure(:not_found)
+      def find(task_id, id) = found(task_comment_repo.local?(task_id, id) && id)
 
       def validate(params) = validated(contract.call(body: params[:body]))
     end

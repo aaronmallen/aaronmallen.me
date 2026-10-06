@@ -16,7 +16,7 @@ module Activity
       private
 
       def find(kind, record_id)
-        attention_repo.listed?(kind:, record_id:) ? Success(kind) : Failure(:not_found)
+        found(attention_repo.listed?(kind:, record_id:) && kind)
       end
     end
   end

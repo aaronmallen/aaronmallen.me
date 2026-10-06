@@ -28,7 +28,7 @@ module Decisions
         decision = decision_repo.by_id_for_update(decision_id)
         option = decision && decision_option_repo.on_decision(decision_id, id)
 
-        option ? Success([decision, option]) : Failure(:not_found)
+        found(option && [decision, option])
       end
 
       def revise(decision, option, title:, body:, note:)

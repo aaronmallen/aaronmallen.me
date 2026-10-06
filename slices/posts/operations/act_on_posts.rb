@@ -23,11 +23,7 @@ module Posts
       private
 
       def delete_draft(id)
-        post = post_repo.by_id_for_update(id)
-        return Failure(:not_found) unless post
-        return Failure(:not_draft) unless post.status == DRAFT
-
-        delete_post.call(id)
+        found(post_repo.by_id_for_update(id)).bind { it.status == DRAFT ? delete_post.call(id) : Failure(:not_draft) }
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }

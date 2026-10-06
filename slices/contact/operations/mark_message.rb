@@ -13,7 +13,7 @@ module Contact
 
       private
 
-      def find(id) = message_repo.by_id(id).then { it ? Success(it) : Failure(:not_found) }
+      def find(id) = found(message_repo.by_id(id))
     end
   end
 end

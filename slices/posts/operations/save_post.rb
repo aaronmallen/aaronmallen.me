@@ -44,8 +44,7 @@ module Posts
       def find(id)
         return Success(nil) unless id
 
-        post = post_repo.by_id_for_update(id)
-        post ? Success(post) : Failure(:not_found)
+        found(post_repo.by_id_for_update(id))
       end
 
       def form(params)

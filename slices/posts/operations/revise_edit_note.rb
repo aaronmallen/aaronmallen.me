@@ -24,7 +24,7 @@ module Posts
       def find(post_id, id)
         post = post_repo.by_id_for_update(post_id)
 
-        post && post_edit_repo.on_post?(post_id, id) ? Success(post) : Failure(:not_found)
+        found(post && post_edit_repo.on_post?(post_id, id) && post)
       end
     end
   end

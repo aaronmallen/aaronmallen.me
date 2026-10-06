@@ -30,7 +30,7 @@ module Tasks
 
       private
 
-      def find(id) = work_session_repo.lock_task(id) ? Success(id) : Failure(:not_found)
+      def find(id) = found(work_session_repo.lock_task(id) && id)
     end
   end
 end

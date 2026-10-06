@@ -23,9 +23,7 @@ module Tasks
       end
 
       def find(id)
-        task = task_repo.by_id(id)
-
-        task ? Success(task) : Failure(:not_found)
+        found(task_repo.by_id(id))
       end
 
       def place(task, after_id) = task_repo.place(task, after_id) ? Success(task.id) : Failure(:not_placed)

@@ -9,15 +9,11 @@ module Tasks
 
       def call(task_id, id)
         transaction do
-          count = step removed(task_comment_repo.delete_local(task_id, id))
+          count = step affected(task_comment_repo.delete_local(task_id, id))
           release_photos.call(PHOTO_OWNER, id)
           count
         end
       end
-
-      private
-
-      def removed(count) = count.positive? ? Success(count) : Failure(:not_found)
     end
   end
 end

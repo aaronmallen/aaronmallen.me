@@ -5,11 +5,7 @@ module Tasks
     class DeleteTaskTagRule < Blog::Operation
       include Deps[task_tag_rule_repo: "repos.task_tag_rule_repo"]
 
-      def call(id) = step deleted(task_tag_rule_repo.delete(id))
-
-      private
-
-      def deleted(rule) = rule ? Success(rule) : Failure(:not_found)
+      def call(id) = step found(task_tag_rule_repo.delete(id))
     end
   end
 end

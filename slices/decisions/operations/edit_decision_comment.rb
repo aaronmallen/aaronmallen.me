@@ -24,7 +24,7 @@ module Decisions
       private
 
       def find(decision_id, id)
-        decision_comment_repo.on_decision?(decision_id, id) ? Success(id) : Failure(:not_found)
+        found(decision_comment_repo.on_decision?(decision_id, id) && id)
       end
 
       def validate(params) = validated(contract.call(body: params[:body]))

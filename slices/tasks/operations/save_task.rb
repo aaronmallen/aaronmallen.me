@@ -29,7 +29,7 @@ module Tasks
 
       private
 
-      def find(id) = (task = task_repo.by_id(id)) ? Success(task) : Failure(:not_found)
+      def find(id) = found(task_repo.by_id(id))
 
       def form(params) = FIELDS.to_h { [it, params[it]] }
 

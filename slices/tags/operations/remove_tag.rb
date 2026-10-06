@@ -24,9 +24,7 @@ module Tags
       end
 
       def find(id, scope)
-        tag = tag_repo.find_in(scope, id)
-
-        tag ? Success(tag) : Failure(:not_found)
+        found(tag_repo.find_in(scope, id))
       end
     end
   end

@@ -39,7 +39,7 @@ module Tasks
       def find(id)
         return Success(nil) unless id
 
-        task_tag_rule_repo.by_id(id) ? Success(id) : Failure(:not_found)
+        found(task_tag_rule_repo.by_id(id) && id)
       end
 
       def persist(id, fields, now)

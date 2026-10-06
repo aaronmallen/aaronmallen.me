@@ -44,8 +44,7 @@ module Projects
       def find(id)
         return Success(nil) unless id
 
-        project = project_repo.by_id(id)
-        project ? Success(project) : Failure(:not_found)
+        found(project_repo.by_id(id))
       end
 
       def form(params)

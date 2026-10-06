@@ -26,9 +26,7 @@ module Tasks
       end
 
       def find(task_id, id)
-        session = work_session_repo.find(task_id, id)
-
-        session ? Success(session) : Failure(:not_found)
+        found(work_session_repo.find(task_id, id))
       end
 
       def future(time, now) = ([FUTURE] if time && time > now)

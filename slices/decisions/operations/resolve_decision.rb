@@ -20,10 +20,7 @@ module Decisions
       private
 
       def find(id)
-        decision = decision_repo.by_id_for_update(id)
-        return Failure(:not_found) unless decision
-
-        decision.open? ? Success(decision) : Failure(:closed)
+        found(decision_repo.by_id_for_update(id)).bind { it.open? ? Success(it) : Failure(:closed) }
       end
 
       def persist(id, option_id:, reason:)

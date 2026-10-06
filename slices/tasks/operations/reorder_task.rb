@@ -18,9 +18,7 @@ module Tasks
       private
 
       def find(id)
-        task = task_repo.by_id(id)
-
-        task ? Success(task) : Failure(:not_found)
+        found(task_repo.by_id(id))
       end
 
       def neighbour(task, direction)

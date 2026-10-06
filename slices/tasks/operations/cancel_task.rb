@@ -21,10 +21,7 @@ module Tasks
       private
 
       def find(id)
-        task = task_repo.by_id(id)
-        return Failure(:not_found) unless task
-
-        task.closed? ? Failure(:closed) : Success(task)
+        found(task_repo.by_id(id)).bind { it.closed? ? Failure(:closed) : Success(it) }
       end
     end
   end
