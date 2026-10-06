@@ -29,10 +29,6 @@ module API
         enum: Blog::Types::SavedViewScreen.values,
         description: "the admin screen the view opens",
       }.freeze
-
-      module_function
-
-      def missing(id) = "no saved view has the ID #{id}"
     end
   end
 end

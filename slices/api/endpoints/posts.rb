@@ -48,8 +48,6 @@ module API
 
       def form_complaints(errors) = errors.to_h { |field, (code)| [field, ["#{field} #{field_reason(field, code)}"]] }
 
-      def missing(id) = "no blog post has the ID #{id}"
-
       def missing_edit(id, edit_id) = "blog post #{id} has no edit with the ID #{edit_id}"
     end
   end

@@ -6,10 +6,6 @@ module API
     module Webmentions
       BULK = Schema.bulk("webmentions")
       ID = Schema::ID
-
-      module_function
-
-      def missing(id) = "no webmention has the ID #{id}"
     end
   end
 end

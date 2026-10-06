@@ -11,7 +11,7 @@ module API
       def handle(id:)
         case delete_journal_entry.call(id)
         in Success(_) then Success(id:, deleted: true)
-        in Failure(:not_found) then not_found(JournalEntries.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("journal entry", id))
         else failed("could not delete the journal entry")
         end
       end

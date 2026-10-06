@@ -11,7 +11,7 @@ module API
       def handle(id:)
         case delete_person.call(id)
         in Success(_) then Success(id:, deleted: true)
-        in Failure(:not_found) then not_found(People.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("person", id))
         else failed("could not delete the person")
         end
       end

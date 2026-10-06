@@ -23,10 +23,10 @@ module API
 
       def handle(id:, **fields)
         task = task_by_id.call(id)
-        return not_found(Tasks.missing(id)) if task.nil?
+        return not_found(Wording.missing("task", id)) if task.nil?
 
         case save_task.call(id, form(task, fields))
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
         in result then placed(result, id)
         end
       end

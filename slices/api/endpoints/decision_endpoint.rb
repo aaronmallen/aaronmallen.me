@@ -15,18 +15,12 @@ module API
 
       def closed(id) = invalid(id: [format(CLOSED, id)])
 
-      def rejected(errors)
-        complaints = Wording.complaints(errors, Decisions::COMPLAINTS)
-
-        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
-      end
-
       def settled(result, id)
         case result
         in Success(*) then answered(id)
-        in Failure(:not_found) then not_found(Decisions.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("decision", id))
         in Failure(:closed) then closed(id)
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Decisions::COMPLAINTS)
         else failed(Wording::UNSAVED)
         end
       end

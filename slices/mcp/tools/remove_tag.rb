@@ -23,7 +23,7 @@ module MCP
           in Success(_) then answer(id:, removed: true)
           in Failure[:last_tag_of_rules, patterns]
             refuse("tag #{id} is the only tag on #{RULES.fetch(patterns.one?)} #{patterns.join(', ')}")
-          in Failure(:not_found) then refuse("no tag has the ID #{id}")
+          in Failure(:not_found) then refuse(API::Wording.missing("tag", id))
           else refuse(UNREMOVED)
           end
         end

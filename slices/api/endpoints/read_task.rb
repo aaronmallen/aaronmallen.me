@@ -23,7 +23,7 @@ module API
 
       def handle(id:)
         task = task_by_id.call(id)
-        return not_found(Tasks.missing(id)) if task.nil?
+        return not_found(Wording.missing("task", id)) if task.nil?
 
         task_reply(task, timeline: task_timeline.call(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it) })
       end

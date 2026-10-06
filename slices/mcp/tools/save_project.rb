@@ -50,7 +50,7 @@ module MCP
       class << self
         def call(server_context:, id: nil, **fields)
           current = id && dep(:project_by_id, server_context).call(id)
-          return refuse("no project has the ID #{id}") if id && current.nil?
+          return refuse(API::Wording.missing("project", id)) if id && current.nil?
 
           saved(dep(:save_project, server_context).call(form(current, fields), id:), id)
         end
@@ -83,7 +83,7 @@ module MCP
           case result
           in Success(project) then answer(ListProjects.summary(project))
           in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
-          in Failure(:not_found) then refuse("no project has the ID #{id}")
+          in Failure(:not_found) then refuse(API::Wording.missing("project", id))
           else refuse(UNSAVED)
           end
         end

@@ -15,7 +15,7 @@ module API
 
       def handle(id:, **fields)
         person = person_by_id.call(id)
-        return not_found(People.missing(id)) if person.nil?
+        return not_found(Wording.missing("person", id)) if person.nil?
 
         saved(id, save_person.call(person.to_h.slice(*People::FIELDS).merge(fields), id:))
       end
@@ -26,7 +26,7 @@ module API
         case result
         in Success(person) then Success(serialized(Serializers::Person, person))
         in Failure[:invalid, errors] then invalid(Wording.complaints(errors, People::COMPLAINTS, named: true))
-        in Failure(:not_found) then not_found(People.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("person", id))
         else failed(People::UNSAVED)
         end
       end

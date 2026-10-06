@@ -13,7 +13,7 @@ module MCP
       class << self
         def call(id:, server_context:)
           post = dep(:post_by_id, server_context).call(id)
-          return refuse("no blog post has the ID #{id}") if post.nil?
+          return refuse(API::Wording.missing("blog post", id)) if post.nil?
 
           answer(id: post.id, announcement: dep(:compose_announcement, server_context).call(post))
         end

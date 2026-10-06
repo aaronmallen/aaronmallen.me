@@ -31,7 +31,7 @@ module MCP
         def rejected(id, result)
           case result
           in Success(*rejected) then answer(suggestion_id: id, rejected: rejected.map(&:id))
-          in Failure(:not_found) then refuse(format(AcceptSuggestionEdits::UNKNOWN, id))
+          in Failure(:not_found) then refuse(API::Wording.missing("suggestion", id))
           in Failure(:nothing_open) then refuse("suggestion #{id} has no open edit with those IDs")
           in Failure(:already_posted) then refuse(format(AcceptSuggestionEdits::SENT, id))
           else refuse("could not reject the edits")

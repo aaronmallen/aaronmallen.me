@@ -27,7 +27,7 @@ module API
         case capture_task.call({ title:, note:, tags: Wording.tag_list(tags) }, filter: list, sprint_on:)
         in Success[_, task, *] then answered(task.id)
         in Failure(:past) | Failure(:invalid) then sprint_past
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
         else failed(Wording::UNSAVED)
         end
       end

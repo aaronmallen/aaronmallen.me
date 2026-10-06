@@ -11,7 +11,7 @@ module API
 
       def handle(id:)
         project = project_by_id.call(id)
-        return not_found(Projects.missing(id)) if project.nil?
+        return not_found(Wording.missing("project", id)) if project.nil?
 
         Success(serialized(Serializers::Project, project).merge(record_links: linked(KIND, project.id)))
       end

@@ -15,8 +15,12 @@ module MCP
       class << self
         def call(id:, server_context:)
           message = dep(:message_by_id, server_context).call(id)
-          return refuse("no message has the ID #{id}") if message.nil?
+          message ? answered(message) : refuse(API::Wording.missing("message", id))
+        end
 
+        private
+
+        def answered(message)
           answer(
             id: message.id,
             subject: Untrusted.call(message.subject),

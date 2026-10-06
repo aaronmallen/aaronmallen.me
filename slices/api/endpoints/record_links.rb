@@ -20,8 +20,6 @@ module API
 
       module_function
 
-      def missing(kind, id) = "no #{name(kind)} has the ID #{id}"
-
       def name(kind) = kind.tr("_", " ")
 
       def unlinked(kind, id, other_kind, other_id)

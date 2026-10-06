@@ -4,7 +4,6 @@
 module API
   module Endpoints
     class TaskEndpoint < Endpoint
-      CLOSED = "task %s is already done or canceled"
       KIND = "task"
 
       REPLY = Schema.widen(
@@ -25,22 +24,16 @@ module API
 
       def placed(result, id)
         case result
-        in Failure(:closed) then invalid(id: [format(CLOSED, id)])
         in Failure(:past | :invalid) then sprint_past
         else settled(result, id)
         end
       end
 
-      def rejected(errors)
-        complaints = Wording.complaints(errors, Tasks::COMPLAINTS)
-
-        Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
-      end
-
       def settled(result, id)
         case result
         in Success(*) then answered(id)
-        in Failure(:not_found) then not_found(Tasks.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("task", id))
+        in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
         else failed(Wording::UNSAVED)
         end
       end

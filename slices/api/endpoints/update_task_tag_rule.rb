@@ -23,7 +23,7 @@ module API
 
       def handle(id:, **fields)
         rule = task_tag_rules.call.find { it.id == id }
-        return not_found(TaskTagRules.missing(id)) if rule.nil?
+        return not_found(Wording.missing("task tag rule", id)) if rule.nil?
 
         saved(id, save_task_tag_rule.call(form(rule, fields), id:))
       end
@@ -40,7 +40,7 @@ module API
         case result
         in Success(rule) then Success(serialized(Serializers::TaskTagRule, rule))
         in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskTagRules::COMPLAINTS))
-        in Failure(:not_found) then not_found(TaskTagRules.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("task tag rule", id))
         else failed(TaskTagRules::UNSAVED)
         end
       end

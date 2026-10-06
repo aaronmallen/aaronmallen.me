@@ -13,7 +13,7 @@ module API
 
       def handle(id:, **worked)
         case set_task_total.call(id, worked)
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
         in result then settled(result, id)
         end
       end

@@ -35,7 +35,7 @@ module API
 
       def handle(id:)
         decision = decision_by_id.call(id)
-        return not_found(Decisions.missing(id)) if decision.nil?
+        return not_found(Wording.missing("decision", id)) if decision.nil?
 
         Success(answered(decision, decision_timeline.call(decision.id)))
       end

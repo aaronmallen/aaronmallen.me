@@ -39,10 +39,6 @@ module API
         items: { type: "string" },
         description: "the private tags the rule gives, lowercase words joined by hyphens; a new one is made",
       }.freeze
-
-      module_function
-
-      def missing(id) = "no task tag rule has the ID #{id}"
     end
   end
 end

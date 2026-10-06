@@ -16,7 +16,7 @@ module API
       def handle(id:)
         mention = webmention_by_id.call(id)
         post = mention && post_by_id.call(mention.post_id)
-        return not_found(Webmentions.missing(id)) if post.nil?
+        return not_found(Wording.missing("webmention", id)) if post.nil?
 
         Success(answered(mention, post))
       end

@@ -52,7 +52,7 @@ module API
         return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
 
         view = saved_view_by_id.call(id)
-        return not_found(SavedViews.missing(id)) if view.nil?
+        return not_found(Wording.missing("saved view", id)) if view.nil?
 
         case reader(view.screen).call(view.filters, page:, continue_to: cursor)
         in Success(found) then Success(answered(view, found))

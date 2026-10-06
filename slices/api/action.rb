@@ -11,6 +11,7 @@ module API
     CREATED = 201
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     OK = 200
+    SEPARATOR = ","
     STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
     UNAUTHORIZED = 401
 
@@ -68,5 +69,7 @@ module API
         halt UNAUTHORIZED, JSON.generate(error)
       end
     end
+
+    def split(values) = values.is_a?(String) ? values.split(SEPARATOR) : values
   end
 end

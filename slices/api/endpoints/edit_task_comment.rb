@@ -21,7 +21,7 @@ module API
         case edit_task_comment.call(id, comment_id, { body: })
         in Success(comment) then Success(serialized(Serializers::TaskComment, comment))
         in Failure(:not_found) then not_found(Tasks.missing_comment(id, comment_id))
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
         else failed(Wording::UNSAVED)
         end
       end

@@ -36,7 +36,7 @@ module MCP
         in Success[_, social_post] then answer(social_post_entry(social_post, server_context))
         in Failure[:invalid, errors] then refuse(complaint(errors, params, server_context))
         in Failure(:already_posted) then refuse("social post #{id} has gone out, so nothing was saved")
-        in Failure(:not_found) then refuse("no social post has the ID #{id}")
+        in Failure(:not_found) then refuse(API::Wording.missing("social post", id))
         else refuse(UNSAVED)
         end
       end

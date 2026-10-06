@@ -5,6 +5,7 @@ module API
   module Endpoints
     module Tasks
       BULK = Schema.bulk("tasks")
+      CLOSED = "task %s is already done or canceled"
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
       ID = Schema::ID
       LISTS = Blog::Types::TaskFilter.values.freeze
@@ -50,8 +51,6 @@ module API
       }.freeze
 
       module_function
-
-      def missing(id) = "no task has the ID #{id}"
 
       def missing_comment(id, comment_id) = "task #{id} has no comment with the ID #{comment_id}"
 

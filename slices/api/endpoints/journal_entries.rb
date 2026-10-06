@@ -20,10 +20,6 @@ module API
         items: { type: "string" },
         description: "tag names, such as ruby or health, in lowercase letters, numbers and single dashes",
       }.freeze
-
-      module_function
-
-      def missing(id) = "no journal entry has the ID #{id}"
     end
   end
 end

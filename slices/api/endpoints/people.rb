@@ -40,10 +40,6 @@ module API
         ),
         bluesky_handle: Schema.nullable({ type: "string", description: BLUESKY_HANDLE }),
       }.freeze
-
-      module_function
-
-      def missing(id) = "no person has the ID #{id}"
     end
   end
 end

@@ -11,7 +11,7 @@ module API
 
       def handle(id:)
         entry = work_entry_by_id.call(id)
-        return not_found(WorkEntries.missing(id)) if entry.nil?
+        return not_found(Wording.missing("work entry", id)) if entry.nil?
 
         Success(serialized(Serializers::WorkEntry, entry).merge(record_links: linked(KIND, entry.id)))
       end

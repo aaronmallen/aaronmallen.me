@@ -13,7 +13,7 @@ module API
       def handle(id:)
         case publish_draft.call(id)
         in Success[outcome, post] then Success(serialized(Serializers::Post, post).merge(outcome: outcome.to_s))
-        in Failure(:not_found) then not_found(Posts.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("blog post", id))
         in Failure(:published) then invalid(id: [format(PUBLISHED, id)])
         in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
         else failed(Wording::UNSAVED)

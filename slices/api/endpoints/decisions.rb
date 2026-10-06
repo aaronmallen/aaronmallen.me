@@ -27,8 +27,6 @@ module API
 
       module_function
 
-      def missing(id) = "no decision has the ID #{id}"
-
       def missing_comment(id, comment_id) = "decision #{id} has no comment with the ID #{comment_id}"
 
       def missing_option(id, option_id) = "decision #{id} has no option with the ID #{option_id}"

@@ -6,7 +6,6 @@ module MCP
       EMPTY_PART = "the edits would leave part %s of the social post under suggestion %s empty; nothing changed"
       PUBLISHED = "the blog post under suggestion %s is published; its edits can no longer apply"
       SENT = "the social post under suggestion %s has been sent"
-      UNKNOWN = "no suggestion has the ID %s"
 
       SCHEMA = {
         additionalProperties: false,
@@ -32,7 +31,7 @@ module MCP
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)
           suggestion = dep(:suggestion_by_id, server_context).call(suggestion_id)
-          return refuse(format(UNKNOWN, suggestion_id)) if suggestion.nil?
+          return refuse(API::Wording.missing("suggestion", suggestion_id)) if suggestion.nil?
 
           accepted(suggestion_id, dep(:accept_suggestion_edits, server_context).call(suggestion_id, ids: edit_ids))
         end

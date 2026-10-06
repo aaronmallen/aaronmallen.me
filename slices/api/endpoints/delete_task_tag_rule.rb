@@ -11,7 +11,7 @@ module API
       def handle(id:)
         case delete_task_tag_rule.call(id)
         in Success(_) then Success(id:, deleted: true)
-        in Failure(:not_found) then not_found(TaskTagRules.missing(id))
+        in Failure(:not_found) then not_found(Wording.missing("task tag rule", id))
         else failed("could not delete the rule")
         end
       end

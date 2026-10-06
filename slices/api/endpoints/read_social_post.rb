@@ -28,7 +28,7 @@ module API
 
       def handle(id:)
         social_post = social_post_by_id.call(id)
-        return not_found(SocialPosts.missing(id)) if social_post.nil?
+        return not_found(Wording.missing("social post", id)) if social_post.nil?
 
         Success(answered(social_post))
       end

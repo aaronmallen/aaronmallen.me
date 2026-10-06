@@ -18,7 +18,7 @@ module API
       def handle(title:, problem:, tags: nil)
         case open_decision.call({ title:, problem:, tags: Wording.tag_list(tags) })
         in Success(decision) then answered(decision.id)
-        in Failure[:invalid, errors] then rejected(errors)
+        in Failure[:invalid, errors] then rejected(errors, Decisions::COMPLAINTS)
         else failed(Wording::UNSAVED)
         end
       end

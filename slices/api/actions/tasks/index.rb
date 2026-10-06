@@ -5,7 +5,6 @@ module API
     module Tasks
       class Index < Action
         LISTED = %i[lists statuses].freeze
-        SEPARATOR = ","
 
         include Deps[endpoint: "endpoints.list_tasks"]
 
@@ -14,16 +13,10 @@ module API
         private
 
         def listing(request)
-          found = query(request, :from, :lists, :page, :query, :sprint_on, :statuses, :tag, :to)
-          pages = found.slice(:page).transform_values { whole(it) }
-          listed = found.slice(*LISTED).transform_values { split(it) }
+          found = paged_query(request, :from, :lists, :query, :sprint_on, :statuses, :tag, :to)
 
-          found.merge(pages, listed)
+          found.merge(found.slice(*LISTED).transform_values { split(it) })
         end
-
-        def split(values) = values.is_a?(String) ? values.split(SEPARATOR) : values
-
-        def whole(page) = Integer(page, 10, exception: false) || page
       end
     end
   end

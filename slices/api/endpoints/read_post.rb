@@ -30,7 +30,7 @@ module API
 
       def handle(id:)
         post = post_by_id.call(id)
-        return not_found(Posts.missing(id)) if post.nil?
+        return not_found(Wording.missing("blog post", id)) if post.nil?
 
         Success(answered(post))
       end

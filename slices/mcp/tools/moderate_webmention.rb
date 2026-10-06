@@ -34,7 +34,7 @@ module MCP
         def call(id:, verdict:, server_context:, reason: nil)
           case dep(:moderate_webmention, server_context).call(id, verdict, reason:)
           in Success(mention) then answer(id: mention.id, status: mention.status)
-          in Failure(:not_found) then refuse("no webmention has the ID #{id}")
+          in Failure(:not_found) then refuse(API::Wording.missing("webmention", id))
           else refuse("could not moderate the webmention")
           end
         end

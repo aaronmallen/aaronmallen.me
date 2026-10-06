@@ -12,7 +12,7 @@ module API
       def handle(ids:)
         case act_on_messages.call({ act: self.class::ACT, ids: })
         in Success[*messages] then Success(messages: answered(messages))
-        in Failure[:record, id, :not_found] then invalid(ids: [Messages.missing(id)])
+        in Failure[:record, id, :not_found] then invalid(ids: [Wording.missing("message", id)])
         in Failure[:record, id, _] then failed(format(Messages::UNCHANGED, id))
         in Failure[:invalid, errors] then invalid(flat(errors))
         else failed(Wording::UNSAVED)

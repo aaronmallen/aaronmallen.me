@@ -19,7 +19,7 @@ module API
 
       def handle(id:, tags:)
         decision = decision_by_id.call(id)
-        return not_found(Decisions.missing(id)) if decision.nil?
+        return not_found(Wording.missing("decision", id)) if decision.nil?
 
         retag(decision, decision.tags.map(&:name) + tags)
       end

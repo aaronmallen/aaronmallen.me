@@ -44,6 +44,12 @@ module API
 
     def page_of(number) = Blog::Page.new(number:, size: settings.page_size[:mcp])
 
+    def rejected(errors, table)
+      complaints = Wording.complaints(errors, table)
+
+      Failure(Refusal.invalid(complaints, message: Wording.summary(complaints)))
+    end
+
     def serialized(serializer, object, **params) = serializer.new(object, params:).serializable_hash
 
     def suggested(suggestion)

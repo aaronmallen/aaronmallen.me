@@ -20,7 +20,7 @@ module MCP
         def call(id:, status:, server_context:)
           case dep(:mark_message, server_context).call(id, status)
           in Success(message) then answer(id: message.id, status: message.status)
-          in Failure(:not_found) then refuse("no message has the ID #{id}")
+          in Failure(:not_found) then refuse(API::Wording.missing("message", id))
           else refuse("could not mark the message")
           end
         end

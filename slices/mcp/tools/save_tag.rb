@@ -42,7 +42,7 @@ module MCP
 
         private
 
-        def missing(id) = "no tag has the ID #{id}"
+        def missing(id) = API::Wording.missing("tag", id)
 
         def saved(result, id)
           case result
