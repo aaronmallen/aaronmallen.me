@@ -5,6 +5,7 @@ RSpec.describe "API reach", type: :app do
     {
       "saved_views.operations.rename_saved_view" => "the admin renames a view; PATCH changes it in one step",
       "tasks.operations.place_task" => "the admin's drag places a task; reorder_task moves one a place up or down",
+      "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
     }
   end
