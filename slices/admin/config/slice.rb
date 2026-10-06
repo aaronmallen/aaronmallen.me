@@ -22,7 +22,7 @@ module Admin
     import keys: %w[
       queries.clicks_between queries.country_database_failure queries.devices_between queries.feed_subscribers_between
       queries.first_days queries.page_between queries.reach_between queries.read_throughs_between
-      queries.readers_by_path queries.scroll_depths_between queries.sources_between queries.summary_between
+      queries.scroll_depths_between queries.sources_between queries.summary_between queries.unique_readers
       queries.view_totals queries.views_by_path queries.visitors_for_day queries.weekday_hours
     ], from: :analytics
 

@@ -53,8 +53,8 @@ module MCP
     import keys: %w[
       operations.hash_visitor queries.clicks_between queries.devices_between queries.feed_subscribers_between
       queries.first_days queries.hourly_between queries.navigation_between queries.page_between queries.reach_between
-      queries.read_spread_between queries.read_throughs_between queries.readers_by_path queries.scroll_depths_between
-      queries.sources_between queries.summary_between queries.weekday_hours
+      queries.read_spread_between queries.read_throughs_between queries.scroll_depths_between queries.sources_between
+      queries.summary_between queries.unique_readers queries.weekday_hours
     ], from: :analytics
 
     import keys: %w[operations.read_photo], from: :media

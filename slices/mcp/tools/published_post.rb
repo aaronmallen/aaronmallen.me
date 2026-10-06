@@ -12,15 +12,15 @@ module MCP
                     "after it went out, each counted once by a hash kept for those months, and final, true once " \
                     "the count can no longer change. readers is null for a post that went out too long before the " \
                     "site began counting. ".freeze
-      QUERIES = %i[first_days readers_by_path].freeze
+      QUERIES = %i[first_days unique_readers].freeze
 
       module_function
 
-      def call(post, path, days, first_days:, readers_by_path:)
+      def call(post, path, days, first_days:, unique_readers:)
         {
           since_publish: since_publish(days, Blog::TimeZone.today(post.published_at)),
           first_days: first_days.call(path),
-          unique_readers: Analytics::UniqueReaders.read(post, readers_by_path),
+          unique_readers: unique_readers.call([post]).fetch(post.id),
         }
       end
 

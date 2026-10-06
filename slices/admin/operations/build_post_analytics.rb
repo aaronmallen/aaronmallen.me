@@ -12,9 +12,9 @@ module Admin
         page_between: "analytics.queries.page_between",
         reach_between: "analytics.queries.reach_between",
         read_throughs_between: "analytics.queries.read_throughs_between",
-        readers_by_path: "analytics.queries.readers_by_path",
         scroll_depths_between: "analytics.queries.scroll_depths_between",
         sources_between: "analytics.queries.sources_between",
+        unique_readers: "analytics.queries.unique_readers",
       ]
 
       def call(post:, range:)
@@ -28,7 +28,7 @@ module Admin
           **counts(page, window),
           **breakdowns(page, window),
           first_days: first_days.call(window.fetch(:path)),
-          unique_readers: unique_readers(post),
+          unique_readers: unique_readers.call([post]).fetch(post.id),
         }
       end
 
@@ -56,8 +56,6 @@ module Admin
           readers: reach_between.call(from: Date.new(to.year, to.month), to:, path:),
         }
       end
-
-      def unique_readers(post) = Analytics::UniqueReaders.read(post, readers_by_path)
     end
   end
 end

@@ -13,7 +13,7 @@ module API
       queries.activity_counts_by_month queries.activity_filters queries.review queries.stalled_list
     ], from: :activity
 
-    import keys: %w[queries.readers_by_path queries.views_by_post], from: :analytics
+    import keys: %w[queries.unique_readers queries.views_by_post], from: :analytics
 
     import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact
 

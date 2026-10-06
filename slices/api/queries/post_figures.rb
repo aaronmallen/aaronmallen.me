@@ -4,7 +4,7 @@ module API
   module Queries
     class PostFigures
       include Deps[
-        readers_by_path: "analytics.queries.readers_by_path",
+        unique_readers: "analytics.queries.unique_readers",
         views_by_post: "analytics.queries.views_by_post",
         webmention_counts_by_post: "social.queries.webmention_counts_by_post",
       ]
@@ -19,18 +19,10 @@ module API
 
         {
           **COUNTS.transform_values { |key| figures.transform_values { it.fetch(key) } },
-          unique_reader_counts: unique_readers(posts),
+          unique_reader_counts: unique_readers.call(posts),
           webmention_counts: webmention_counts_by_post.call(ids),
           word_counts: posts.to_h { [it.id, ::Posts::Markdown.word_count(it.body)] },
         }
-      end
-
-      private
-
-      def unique_readers(posts)
-        counts = readers_by_path.call(posts.map { Analytics::UniqueReaders.path(it) })
-
-        posts.to_h { [it.id, Analytics::UniqueReaders.of(it, counts)] }
       end
     end
   end
