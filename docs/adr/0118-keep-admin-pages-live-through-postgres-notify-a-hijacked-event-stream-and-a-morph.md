@@ -75,11 +75,15 @@ stream. The toast sits outside what the morph touches.
   idiomorph matches it by record and the row the key map has focused keeps its focus when a new row lands above.
 - **Reconnects catch up.** After every `open` but the first, `live.js` refetches once. When the stream ends for good,
   as it does when the tunnel answers 502 during a deploy, `live.js` opens a new one after a growing wait.
+- **Pages left behind let go.** `live.js` closes its stream on `pagehide` and opens it again when the page comes back
+  from the back-forward cache. Chrome keeps a stream open after the tab moves on, so without this the seventh page
+  visit in a tab waits on the six-connection limit of HTTP/1.1.
 
-**Setup runs again after each morph.** `app.js` exports one `setup` that runs every module, and `live.js` calls it
-after each morph. Each module keeps a `WeakSet` of the elements it set up and skips them, as `task_order.js` does
-today, and binds a listener on the document once behind a flag of its own. idiomorph keeps the nodes it matches and
-their listeners, so only new nodes get set up. #638 brings the other modules into this shape.
+**Setup runs again after each morph.** `app.js` runs one `setup` that runs every module on load, and again whenever
+an `admin:morphed` event fires on the document. `live.js` dispatches that event after each morph, so it need not
+import `app.js`, which imports it. Each module keeps a `WeakSet` of the elements it set up and skips them, as
+`task_order.js` does today, and binds a listener on the document once behind a flag of its own. idiomorph keeps the
+nodes it matches and their listeners, so only new nodes get set up. #638 brings the other modules into this shape.
 
 With scripts off, nothing opens a stream and every page works as it does today.
 

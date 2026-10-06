@@ -20,7 +20,7 @@ module Admin
         prop :bulk, Blog::Types::String.optional, default: nil
 
         def view_template
-          ListItem(title: @message.subject, pick:) do |item|
+          ListItem(id: "message-#{@message.id}", title: @message.subject, pick:) do |item|
             item.body { p(class: "msg-body") { @message.body } }
             item.meta { p(class: "li-sub") { meta } }
             MOVES.fetch(@message.status).each { move(*it) }

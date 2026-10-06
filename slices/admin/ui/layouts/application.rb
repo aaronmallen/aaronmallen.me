@@ -26,7 +26,7 @@ module Admin
 
           MainNav(session:)
           ContextBar(current: navigation.current, alert: navigation.alert?) if navigation
-          main(id: "main", class: "adm-main", &)
+          main(id: "main", class: "adm-main", data: { live: (path(:admin_events) if navigation) }, &)
           Toast(message: toast_message) if toast_message
           navigation ? render_signed_in_tail(navigation) : Footer()
         end

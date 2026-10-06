@@ -29,7 +29,8 @@ module Admin
 
           def view_template
             ListItem(
-              title: @mention.author_label, href: @mention.source_url, icon: type.icon, link: OUTBOUND, pick:,
+              id: "webmention-#{@mention.id}", title: @mention.author_label, href: @mention.source_url, icon: type.icon,
+              link: OUTBOUND, pick:,
             ) do |item|
               item.body { excerpt }
               item.meta do

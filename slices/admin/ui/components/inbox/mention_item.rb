@@ -20,7 +20,9 @@ module Admin
           prop :slug, Blog::Types::String
 
           def view_template
-            ListItem(title: @mention.author_label, href: @mention.source_url, link: OUTBOUND) do |item|
+            ListItem(
+              id: "webmention-#{@mention.id}", title: @mention.author_label, href: @mention.source_url, link: OUTBOUND,
+            ) do |item|
               item.body { excerpt }
               item.meta { p(class: "wm-meta") { meta } }
               actions

@@ -173,6 +173,7 @@ function setupDialog(dialog) {
   query.addEventListener("keydown", (event) => steer(event, { run, select, shown, step }));
 
   dialog.addEventListener("close", finder.stop);
+  document.addEventListener("admin:morphed", () => filled.clear());
 
   rebuild();
   return open;

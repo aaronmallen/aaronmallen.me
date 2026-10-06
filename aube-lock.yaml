@@ -17,6 +17,9 @@ importers:
       hanami-assets:
         specifier: ^3.0.0
         version: 3.0.0(esbuild@0.28.2)
+      idiomorph:
+        specifier: ^0.8.0
+        version: 0.8.0
     devDependencies:
       '@tailwindcss/cli':
         specifier: ^4.3.3
@@ -431,6 +434,9 @@ packages:
     engines: {node: '>=22'}
     peerDependencies:
       esbuild: '>=0.28.1'
+
+  idiomorph@0.8.0:
+    resolution: {integrity: sha512-R47JBL+6jHDQvcnbppIUtXXcxi5h6+wuCEEZXnRhUltsgzPFKzThL5PuHppP9ypJuy+7WawcY1TsSBD/iQbMhw==}
 
   is-extglob@2.1.1:
     resolution: {integrity: sha512-SbKbANkN603Vi4jEZv49LeVJMn4yGwsbzZworEoyEiutsN3nJYdbO36zfhGJ6QEDpOZIFkDtnq5JRxmvl3jsoQ==}
@@ -900,6 +906,8 @@ snapshots:
       esbuild: 0.28.2
       fs-extra: 11.4.0
       glob: 13.0.6
+
+  idiomorph@0.8.0: {}
 
   is-extglob@2.1.1: {}
 

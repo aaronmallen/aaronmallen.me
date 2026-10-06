@@ -5,6 +5,7 @@ module Admin
     module Components
       class ListItem < Component
         prop :title, Blog::Types::String
+        prop :id, Blog::Types::String.optional, default: nil
         prop :href, Blog::Types::String.optional
         prop :sub, Blog::Types::String.optional
         prop :icon, Blog::Types::String.optional, default: nil
@@ -30,7 +31,7 @@ module Admin
         def view_template(&)
           side = capture(&)
 
-          div(class: "li", data: { key_row: true, **@data }) do
+          div(id: @id, class: "li", data: { key_row: true, **@data }) do
             @pick ? render_picked : render_body
             div(class: "li-side") { raw(safe(side)) } unless side.empty?
           end

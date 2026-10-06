@@ -15,7 +15,7 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: @task.title, href: path(:admin_task, id: @task.id)) do |item|
+            ListItem(id: "issue-#{@task.id}", title: @task.title, href: path(:admin_task, id: @task.id)) do |item|
               item.meta { p(class: "wm-meta") { meta } }
               actions
             end

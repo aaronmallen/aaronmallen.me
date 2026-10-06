@@ -13,7 +13,7 @@ module Admin
           prop :message, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: @message.subject) do |item|
+            ListItem(id: "message-#{@message.id}", title: @message.subject) do |item|
               item.body { p(class: "msg-body") { @message.body } }
               item.meta { p(class: "wm-meta") { meta } }
               actions

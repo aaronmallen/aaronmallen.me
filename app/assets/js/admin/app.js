@@ -7,6 +7,7 @@ import { setupDialogs } from "./dialog.js";
 import { setupEditNotes } from "./edit_note.js";
 import { setupJournals } from "./journal.js";
 import { setupKeys } from "./keys.js";
+import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupPalette } from "./palette.js";
 import { setupPersonForms } from "./person_form.js";
@@ -47,4 +48,5 @@ function setup() {
 }
 
 setup();
+setupLive();
 document.addEventListener("admin:morphed", setup);
