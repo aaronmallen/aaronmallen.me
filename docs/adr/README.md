@@ -116,6 +116,7 @@ one.
 | [0109][0109] | Let Cloudflare keep a published photo for one day | ![Active][active] | 2026-10-04 |
 | [0110][0110] | Take subscriber counts only from the feed aggregators we name | ![Active][active] | 2026-10-04 |
 | [0111][0111] | Send Strict-Transport-Security from the app, for the apex alone | ![Active][active] | 2026-10-04 |
+| [0112][0112] | Give every tag rule a provider, and match Linear issues by workspace and team | ![Active][active] | 2026-10-06 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -228,6 +229,7 @@ one.
 [0109]: 0109-let-cloudflare-keep-a-published-photo-for-one-day.md
 [0110]: 0110-take-subscriber-counts-only-from-the-feed-aggregators-we-name.md
 [0111]: 0111-send-strict-transport-security-from-the-app-for-the-apex-alone.md
+[0112]: 0112-give-every-tag-rule-a-provider-and-match-linear-issues-by-workspace-and-team.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

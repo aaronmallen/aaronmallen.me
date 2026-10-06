@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, record, tasks]
 issue: "#389"
+amended: ["#506"]
 tags: [tasks, tags, rules, imports, sync, github, linear, providers, repos]
 ---
 
@@ -24,12 +25,14 @@ provider's client. [ADR 0066][0066] keeps an imported task's origin, URL include
 ## Decision
 
 **Rules live in their own table in the `tasks` slice.** A rule holds a pattern and its tags. A pattern names one
-repo (`owner/name`) or every repo of an owner (`owner/*`), and ignores case. A rule's tags sit in a join table to
-private tags, the way `task_tags` holds a task's. Rules stack: an issue takes the tags of every rule it matches.
+repo (`owner/name`) or every repo of an owner (`owner/*`), and ignores case. Since #506 a rule also names a provider,
+and a Linear pattern names a team (`workspace/team`) or every team of a workspace, as [ADR 0112][0112] says. A rule's
+tags sit in a join table to private tags, the way `task_tags` holds a task's. Rules stack: an issue takes the tags of
+every rule it matches.
 
 **Each client hands over a neutral origin.** The GitHub client sets `origin` to the issue's `nameWithOwner`. The
-Linear client sets none, so Linear issues match no rule. `SyncIssues` reads `origin` without knowing which provider
-filled it.
+Linear client set none, so Linear issues matched no rule, until #506 gave the Linear client an `origin` of
+`workspace/team`. `SyncIssues` reads `origin` without knowing which provider filled it.
 
 **Rule tags join label tags at import.** `import` adds the tags of every matching rule beside the label tags, in the
 same transaction. `follow` reads no rule, so a tag the owner removes stays off, as [ADR 0077][0077] holds for labels.
@@ -69,10 +72,12 @@ owner tags those by hand, or deletes the rule and creates it again.
 
 Nothing records which tags came from a rule, a label or the owner, so no later change can tell them apart.
 
-A new provider that wants rule tags has to hand over an `origin` in the same `owner/name` shape.
+A new provider that wants rule tags has to hand over an `origin` in the same `owner/name` shape. Since #506 it also
+needs a rule provider of its own, as [ADR 0112][0112] says.
 
 [0066]: 0066-keep-an-imported-tasks-origin-in-a-task-sources-table.md
 [0070]: 0070-share-one-issue-sync-across-providers-and-run-each-provider-as-its-own-job.md
 [0077]: 0077-tag-an-imported-task-from-its-labels-only-on-import.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
+[0112]: 0112-give-every-tag-rule-a-provider-and-match-linear-issues-by-workspace-and-team.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
