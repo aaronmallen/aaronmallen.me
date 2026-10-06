@@ -17,7 +17,6 @@ module MCP
       CONTEXT = {
         accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
         add_work_entry: "projects.operations.add_work_entry",
-        all_tags: "tags.queries.all",
         analytics_between: "analytics.queries.summary_between",
         archive_project: "projects.operations.archive_project",
         archived_projects: "projects.queries.archived",

@@ -5,10 +5,8 @@ module MCP
     class RestoreProject < Base
       UNRESTORED = "could not restore the project"
 
-      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
-
       description "Restore one archived project to /projects as active"
-      input_schema(SCHEMA)
+      input_schema(API::Schema.by_id)
       scope OAuth::Scope::WRITE
 
       class << self

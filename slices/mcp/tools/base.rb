@@ -39,14 +39,6 @@ module MCP
 
         def dep(name, server_context) = server_context.fetch(name)
 
-        def every_tag(server_context)
-          Blog::Types::TagScope.values.flat_map { dep(:all_tags, server_context).call(scope: it) }.sort_by(&:name)
-        end
-
-        def every_tag_usage(server_context)
-          Blog::Types::TagScope.values.map { dep(:tag_usage, server_context).call(scope: it) }.reduce(:merge)
-        end
-
         def hand_over(endpoint, input, server_context, &shape)
           case dep(endpoint, server_context).call(input)
           in Success(payload) then answer(shape ? yield(payload) : payload)
@@ -56,13 +48,7 @@ module MCP
 
         def page(number, server_context) = Blog::Page.new(number:, size: dep(:page_size, server_context))
 
-        def record_links(kind, id, server_context)
-          dep(:list_links, server_context).call(kind:, id:).value!.fetch(:links)
-        end
-
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
-
-        def refuse_long_range = refuse(Blog::DayWindow::TOO_LONG)
 
         def synced(payload, server_context)
           Untrusted.synced(payload) { dep(:synced_task_ids, server_context).call(it) }

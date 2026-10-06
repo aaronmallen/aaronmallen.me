@@ -3,10 +3,8 @@
 module MCP
   module Tools
     class DeletePost < Base
-      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
-
       description "Delete one blog post, in any status, for good"
-      input_schema(SCHEMA)
+      input_schema(API::Schema.by_id)
       scope OAuth::Scope::WRITE
 
       class << self

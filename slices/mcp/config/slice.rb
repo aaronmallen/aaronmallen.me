@@ -95,7 +95,7 @@ module MCP
     ], from: :suggestions
 
     import keys: %w[
-      operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.matching_count
+      operations.remove_tag operations.save_tag queries.by_id queries.matching queries.matching_count
       queries.usage
     ], from: :tags
 

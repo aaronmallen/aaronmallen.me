@@ -5,10 +5,8 @@ module MCP
     class DeleteWorkEntry < Base
       UNDELETED = "could not remove the role"
 
-      SCHEMA = { additionalProperties: false, properties: { id: API::Schema::ID }, required: ["id"] }.freeze
-
       description "Remove one role from the work list on /projects for good"
-      input_schema(SCHEMA)
+      input_schema(API::Schema.by_id)
       scope OAuth::Scope::WRITE
 
       class << self
