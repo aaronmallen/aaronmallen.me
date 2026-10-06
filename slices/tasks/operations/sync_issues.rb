@@ -72,6 +72,7 @@ module Tasks
       def follow(source, issue, now)
         state = issue.fetch(:remote_state)
         task = task_repo.by_id(source.task_id)
+        return unless task
 
         transaction do
           task = settle(task, state, source.remote_state, now) unless state == source.remote_state

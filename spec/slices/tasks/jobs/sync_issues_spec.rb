@@ -576,6 +576,29 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "a tracked task deleted while the run waits on GitHub" do
+    before do
+      task = tracked
+      stub_github(GitHubGraphQL::ASSIGNED_QUERY) do
+        Tasks::Slice["operations.delete_task"].call(task.id)
+        github_issue_search(issue(title: "Renamed"), github_issue("I_eight", number: 8))
+      end
+    end
+
+    it "lets the rest of the run import" do
+      sync
+
+      expect(imported("I_eight").status).to eq("open")
+    end
+
+    it "lets the run clear a failure the last run left" do
+      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::ISSUES, :rate_limited)
+      sync
+
+      expect(failure).to be_nil
+    end
+  end
+
   describe "an issue moved to another repository" do
     let(:moved_url) { "https://github.com/aaronmallen/elsewhere/issues/3" }
 

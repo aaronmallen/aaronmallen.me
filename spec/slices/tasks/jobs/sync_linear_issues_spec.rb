@@ -383,6 +383,31 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "a tracked task deleted while the run waits on Linear" do
+    before do
+      task = tracked
+      stub_linear(LinearGraphQL::ASSIGNED_QUERY) do
+        Tasks::Slice["operations.delete_task"].call(task.id)
+        linear_assigned(issue(title: "Renamed"), linear_issue("L_two", key: "ABC-2"))
+      end
+    end
+
+    def other = repo.by_id(sources.at("linear", "L_two").pluck(:task_id).first)
+
+    it "lets the rest of the run import" do
+      sync
+
+      expect(other.status).to eq("open")
+    end
+
+    it "lets the run clear a failure the last run left" do
+      sync_state_repo.record_failure(Record::Repos::SyncStateRepo::LINEAR_ISSUES, :rate_limited)
+      sync
+
+      expect(failure).to be_nil
+    end
+  end
+
   describe "an archived issue" do
     it "leaves its task as it was" do
       task = tracked(:done, state: "completed")
