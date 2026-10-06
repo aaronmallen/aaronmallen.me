@@ -96,9 +96,10 @@ module MCP
         "messages, photos, the inbox, attention, the calendar, the review, suggestions, analytics and the whole",
         "activity feed. Search every kind by its words, and look up accounts on Mastodon and Bluesky. Suggest edits to",
         "a post or social post, and settle suggestions with accept_suggestion_edits and reject_suggestion_edits or",
-        "leave them for the owner in the admin. Make any change the admin makes, publishing, sending and deleting",
-        "included, save minting and revoking API tokens and MCP clients. A published post or a sent social post cannot",
-        "be called back. The tool list holds only what this connection was granted.",
+        "leave them for the owner in the admin. Make any change the admin makes, save minting and revoking API tokens",
+        "and MCP clients. The write permission grants edits, publish grants publishing posts and sending social posts,",
+        "and delete grants every tool that removes a record for good. A published post or a sent social post cannot be",
+        "called back. The tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze

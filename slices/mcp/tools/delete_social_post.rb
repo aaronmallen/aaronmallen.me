@@ -5,7 +5,7 @@ module MCP
     class DeleteSocialPost < Base
       description "Delete one social post that has not gone out. A post a network has already taken stays"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::WRITE
+      scope OAuth::Scope::DELETE
 
       class << self
         def call(id:, server_context:)

@@ -6,8 +6,10 @@ module MCP
       READ = "read"
       SUGGEST = "suggest"
       WRITE = "write"
+      PUBLISH = "publish"
+      DELETE = "delete"
 
-      ALL = [READ, SUGGEST, WRITE].freeze
+      ALL = [READ, SUGGEST, WRITE, PUBLISH, DELETE].freeze
       DEFAULT = [READ].freeze
       SEPARATOR = " "
 

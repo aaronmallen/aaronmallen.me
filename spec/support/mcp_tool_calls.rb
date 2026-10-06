@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module MCPToolCalls
-  SCOPES = "read suggest write"
+  SCOPES = "read suggest write publish delete"
 
   def mcp_answer(name, **) = JSON.parse(mcp_text(name, **))
 

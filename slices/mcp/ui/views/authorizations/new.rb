@@ -9,7 +9,7 @@ module MCP
 
           APPROVE = Operations::Authorize::APPROVE
           CANCEL = Operations::Authorize::CANCEL
-          WRITE = OAuth::Scope::WRITE
+          PUBLISH = OAuth::Scope::PUBLISH
 
           prop :client_name, Blog::Types::String.optional
           prop :fields, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
@@ -55,7 +55,7 @@ module MCP
             li(class: "li") do
               div(class: "li-main") do
                 span(class: "li-title") { t(scope_key(scope)) }
-                span(class: "connect-warn") { t(".write_warning") } if scope == WRITE
+                span(class: "connect-warn") { t(".publish_warning") } if scope == PUBLISH
               end
             end
           end

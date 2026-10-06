@@ -15,7 +15,7 @@ module MCP
       description "Remove one tag for good from its scope. #{TAG_KINDS}. Every record that carries the tag loses it. " \
                   "A tag that is the only tag on a task tag rule stays until the rule takes another tag or goes"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope OAuth::Scope::DELETE
 
       class << self
         def call(id:, scope:, server_context:)

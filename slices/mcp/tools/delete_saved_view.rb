@@ -4,7 +4,7 @@ module MCP
   module Tools
     class DeleteSavedView < Base
       description "Delete one saved view for good. It cannot come back"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: OAuth::Scope::DELETE
     end
   end
 end

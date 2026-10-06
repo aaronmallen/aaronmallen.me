@@ -226,12 +226,36 @@ RSpec.describe "OAuth authorization", type: :request do
       authorize(scope: "read write")
     end
 
-    it "warns that it can publish and send for good" do
-      expect(page.find(".connect-warn").text).to eq(copy(:write_warning))
+    it "keeps publishing, sending and deleting out of the write grant" do
+      expect(page.find("li", text: "Make any change the admin makes").text)
+        .to include("short of publishing, sending and deleting")
     end
 
-    it "puts the warning on the write grant" do
-      expect(page.find("li", text: "Make any change the admin makes")).to have_css(".connect-warn")
+    it "shows no warning" do
+      expect(page).to have_no_css(".connect-warn")
+    end
+  end
+
+  describe "when the client asks to publish and delete" do
+    before do
+      sign_in_to_admin
+      authorize(scope: "read write publish delete")
+    end
+
+    it "shows a line for publishing" do
+      expect(page).to have_css("li", text: copy(:"scopes.publish"))
+    end
+
+    it "shows a line for deleting" do
+      expect(page).to have_css("li", text: copy(:"scopes.delete"))
+    end
+
+    it "warns that it can publish and send for good" do
+      expect(page.find(".connect-warn").text).to eq(copy(:publish_warning))
+    end
+
+    it "puts the warning on the publish grant" do
+      expect(page.find("li", text: copy(:"scopes.publish"))).to have_css(".connect-warn")
     end
   end
 
@@ -439,21 +463,21 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "grants every scope a client asks for by name" do
-      approve_authorization(authorize_path(scope: "read suggest write"))
+      approve_authorization(authorize_path(scope: "read suggest write publish delete"))
 
-      expect(code[:scopes]).to eq(%w[read suggest write])
+      expect(code[:scopes]).to eq(%w[read suggest write publish delete])
     end
 
     it "drops a scope it does not know" do
-      approve_authorization(authorize_path(scope: "read publish"))
+      approve_authorization(authorize_path(scope: "read erase"))
 
       expect(code[:scopes]).to eq(%w[read])
     end
 
     it "shows what the token will carry, not what the client asked for" do
-      authorize(scope: "read publish")
+      authorize(scope: "read erase")
 
-      expect(page).to have_no_text("publish")
+      expect(page).to have_no_text("erase")
     end
   end
 

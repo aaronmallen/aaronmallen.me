@@ -5,7 +5,9 @@ RSpec.describe "MCP record tools", type: :request do
 
   def access_token
     @access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::SecretToken.generate, scope: "read write",
+      Spec::DB::Factories[:mcp].create(:oauth_client),
+      verifier: Blog::SecretToken.generate,
+      scope: "read write publish delete",
     ).fetch("access_token")
   end
 

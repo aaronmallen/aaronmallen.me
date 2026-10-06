@@ -122,7 +122,7 @@ RSpec.describe "MCP endpoint", type: :request do
     post "/mcp", JSON.generate({ jsonrpc: "2.0", id:, method:, params: }.compact), sent
   end
 
-  def scopes = "read suggest write"
+  def scopes = "read suggest write publish delete"
 
   def social_post_repo = Social::Slice["repos.social_post_repo"]
 
@@ -330,7 +330,16 @@ RSpec.describe "MCP endpoint", type: :request do
           { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
 
       expect(result.fetch("instructions"))
-        .to include("Read everything").and(include("publishing, sending and deleting included"))
+        .to include("Read everything").and(include("Make any change the admin makes"))
+    end
+
+    it "tells the client which permission grants publishing, sending and deleting" do
+      rpc("initialize",
+          { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "Claude", version: "1" } })
+
+      expect(result.fetch("instructions"))
+        .to include("publish grants publishing posts and sending social posts")
+        .and(include("delete grants every tool that removes a record for good"))
     end
 
     it "names a kind in the instructions for every read tool" do

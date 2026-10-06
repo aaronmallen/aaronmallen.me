@@ -24,7 +24,7 @@ module MCP
                   "The post is refused if a part runs over a network's limit, naming each such part and network, " \
                   "or if a network has no credentials"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope OAuth::Scope::PUBLISH
 
       class << self
         include SocialPostAnswer
