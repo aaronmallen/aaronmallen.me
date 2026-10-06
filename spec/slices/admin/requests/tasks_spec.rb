@@ -2180,6 +2180,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to eq(["Ship the search"])
       end
 
+      it "narrows to tasks that carry every tag, in any case" do
+        create(:task, title: "Ship the admin search", tags: %w[admin ruby])
+        search("tag:ADMIN tag:ruby")
+
+        expect(titles).to eq(["Ship the admin search"])
+      end
+
       it "reads type: as plain text" do
         search("type:chore")
 

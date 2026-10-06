@@ -109,7 +109,7 @@ module Tasks
       def tagged(names)
         return none if unmatchable?(names)
 
-        where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+        where(id: task_tags.holding_every(names).dataset)
       end
 
       def titled(text) = containing(text, :title)
@@ -132,16 +132,6 @@ module Tasks
       def unfinished_in(sprint_ids) = where(sprint_id: sprint_ids).open
 
       def unsourced = exclude(id: task_sources.task_ids)
-
-      private
-
-      def holding_every(names)
-        owner = task_tags[:task_id].qualified
-        name = tags[:name].qualified
-        matched = task_tags.unordered.join(:tag).where(name => names)
-
-        matched.group(owner).having(Sequel.function(:count, name).distinct => names.length).select(owner)
-      end
     end
   end
 end

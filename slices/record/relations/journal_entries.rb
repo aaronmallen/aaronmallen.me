@@ -33,20 +33,10 @@ module Record
       def tagged(names)
         return none if unmatchable?(names)
 
-        where(id: holding_every(names.map { it.to_s.downcase }.uniq).dataset)
+        where(id: journal_entry_tags.holding_every(names).dataset)
       end
 
       def word_total = unordered.sum(WORDS).to_i
-
-      private
-
-      def holding_every(names)
-        owner = journal_entry_tags[:journal_entry_id].qualified
-        name = tags[:name].qualified
-        matched = journal_entry_tags.unordered.join(:tag).where(name => names)
-
-        matched.group(owner).having(Sequel.function(:count, name).distinct => names.length).select(owner)
-      end
     end
   end
 end
