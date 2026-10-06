@@ -77,12 +77,9 @@ module Admin
           end
 
           def row(task, list)
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                span(class: "li-title") { task.title }
-                meta(task, list)
-              end
-              div(class: "li-side") { pull_form(task, list) }
+            ListItem(title: task.title) do |item|
+              item.meta { meta(task, list) }
+              pull_form(task, list)
             end
           end
 

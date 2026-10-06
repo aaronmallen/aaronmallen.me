@@ -6,7 +6,7 @@ RSpec.describe "Admin webmentions", type: :request do
   let(:repo) { Social::Slice["repos.webmention_repo"] }
   let(:target) { create(:post, :published, slug: "hello", title: "Hello") }
 
-  def authors = page.all(".wm-author .li-title").map(&:text)
+  def authors = page.all(".li-head .li-title").map(&:text)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -111,7 +111,13 @@ RSpec.describe "Admin webmentions", type: :request do
       it "links the author to the source in a new tab" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".wm-author a[target='_blank'][rel='noopener noreferrer']", text: "Ada")
+        expect(page).to have_css(".li-head a[target='_blank'][rel='noopener noreferrer']", text: "Ada")
+      end
+
+      it "marks the kind of mention before the author" do
+        get "/admin/webmentions"
+
+        expect(page).to have_css(".li-head i.li-icon[aria-hidden='true'] + a.li-title", text: "Ada")
       end
 
       it "says webmentions is where you are" do

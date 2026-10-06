@@ -7,6 +7,7 @@ module Admin
         class MentionItem < Component
           APPROVED = Blog::Types::WebmentionStatus["approved"]
           IGNORED = Blog::Types::WebmentionStatus["ignored"]
+          OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
           SEPARATOR = " · "
           SPAM = Blog::Types::WebmentionStatus["spam"]
           TYPES = {
@@ -20,13 +21,10 @@ module Admin
           prop :slug, Blog::Types::String
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                author
-                excerpt
-                p(class: "wm-meta") { meta }
-              end
-              div(class: "li-side") { actions }
+            ListItem(title: @mention.author_label, href: @mention.source_url, link: OUTBOUND) do |item|
+              item.body { excerpt }
+              item.meta { p(class: "wm-meta") { meta } }
+              actions
             end
           end
 
@@ -37,15 +35,6 @@ module Admin
             moderate(IGNORED, ".ignore", nil)
             moderate(SPAM, ".spam", :warn, class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
-            end
-          end
-
-          def author
-            a(
-              class: "li-title", href: @mention.source_url, target: "_blank", rel: "noopener noreferrer",
-              data: { key_open: true },
-            ) do
-              @mention.author_label
             end
           end
 

@@ -8,6 +8,7 @@ module Admin
           ARCHIVE = [:admin_archive_project, ".archive", "fa-solid fa-box-archive", :gh].freeze
           ARCHIVED_TAB = Blog::Types::ProjectFilter["archived"]
           EDIT_ICON = "fa-regular fa-pen-to-square"
+          MONO = { class: "mono" }.freeze
           RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
           WRITING = /\S/
 
@@ -17,15 +18,10 @@ module Admin
           prop :last, Blog::Types::Bool, default: false
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                a(class: "li-title mono", href: path(:admin_edit_project, id: @project.id), data: { key_open: true }) do
-                  @project.name
-                end
-                p(class: "proj-tagline") { @project.tagline } if written?(@project.tagline)
-                meta
-              end
-              div(class: "li-side") { side }
+            ListItem(title: @project.name, href: path(:admin_edit_project, id: @project.id), link: MONO) do |item|
+              item.body { p(class: "proj-tagline") { @project.tagline } } if written?(@project.tagline)
+              item.meta { meta }
+              side
             end
           end
 

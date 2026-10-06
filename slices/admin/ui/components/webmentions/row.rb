@@ -9,6 +9,7 @@ module Admin
           IGNORED = Blog::Types::WebmentionStatus["ignored"]
           LIKE = Blog::Types::WebmentionType["like"]
           MENTION = Blog::Types::WebmentionType["mention"]
+          OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
           REPLY = Blog::Types::WebmentionType["reply"]
           REPOST = Blog::Types::WebmentionType["repost"]
           SPAM = Blog::Types::WebmentionStatus["spam"]
@@ -28,12 +29,15 @@ module Admin
           prop :bulk, Blog::Types::String
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "wm-lead") do
-                pick
-                main
+            ListItem(
+              title: @mention.author_label, href: @mention.source_url, icon: type.icon, link: OUTBOUND, pick:,
+            ) do |item|
+              item.body { excerpt }
+              item.meta do
+                meta
+                spam_reason
               end
-              div(class: "li-side") { actions }
+              actions
             end
           end
 
@@ -45,31 +49,10 @@ module Admin
             spam unless @mention.status == SPAM
           end
 
-          def author
-            div(class: "wm-author") do
-              Icon([type.icon, "wm-type-icon"])
-              a(
-                class: "li-title", href: @mention.source_url, target: "_blank", rel: "noopener noreferrer",
-                data: { key_open: true },
-              ) do
-                @mention.author_label
-              end
-            end
-          end
-
           def excerpt
             text = @mention.excerpt.to_s.strip
 
             p(class: ["wm-excerpt", ("quiet" if text.empty?)]) { text.empty? ? t(".no_content") : text }
-          end
-
-          def main
-            div(class: "li-main") do
-              author
-              excerpt
-              meta
-              spam_reason
-            end
           end
 
           def meta
@@ -87,7 +70,7 @@ module Admin
             end
           end
 
-          def pick = BulkCheck(form: @bulk, value: @mention.id, label: t(".pick", author: @mention.author_label))
+          def pick = { form: @bulk, value: @mention.id, label: t(".pick", author: @mention.author_label) }
 
           def spam
             moderation(:admin_spam_webmention, ".spam", :warn, class: "wm-spam") do

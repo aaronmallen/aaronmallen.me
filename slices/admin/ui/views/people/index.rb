@@ -27,10 +27,9 @@ module Admin
           end
 
           def row(person)
-            ListItem(
-              title: person.name, href: path(:admin_edit_person, id: person.id), sub: sub(person),
-              beside: Components::People::ProfileLinks.new(person:),
-            )
+            ListItem(title: person.name, href: path(:admin_edit_person, id: person.id), sub: sub(person)) do |item|
+              item.beside { Components::People::ProfileLinks(person:) }
+            end
           end
 
           def sub(person)

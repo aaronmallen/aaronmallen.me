@@ -73,6 +73,13 @@ RSpec.describe "Admin people", type: :request do
           .to eq(["fa-brands fa-bluesky", "fa-brands fa-mastodon"])
       end
 
+      it "draws no side column on a row with nothing beside it" do
+        create(:person)
+        get "/admin/people"
+
+        expect(page).to have_css(".li").and have_no_css(".li-side")
+      end
+
       it "shows only the icon of the one network someone is on" do
         create(:person, mastodon_handle: "@ada@ruby.social")
         get "/admin/people"

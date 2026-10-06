@@ -14,13 +14,10 @@ module Admin
           prop :message, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                span(class: "li-title") { @message.subject }
-                p(class: "msg-body") { @message.body }
-                p(class: "wm-meta") { meta }
-              end
-              div(class: "li-side") { actions }
+            ListItem(title: @message.subject) do |item|
+              item.body { p(class: "msg-body") { @message.body } }
+              item.meta { p(class: "wm-meta") { meta } }
+              actions
             end
           end
 

@@ -15,12 +15,9 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                a(class: "li-title", href: path(:admin_task, id: @task.id), data: { key_open: true }) { @task.title }
-                p(class: "wm-meta") { meta }
-              end
-              div(class: "li-side") { actions }
+            ListItem(title: @task.title, href: path(:admin_task, id: @task.id)) do |item|
+              item.meta { p(class: "wm-meta") { meta } }
+              actions
             end
           end
 

@@ -21,12 +21,10 @@ module Admin
         prop :bulk, Blog::Types::String.optional, default: nil
 
         def view_template
-          div(class: "li", data: { key_row: true }) do
-            div(class: "msg-lead") do
-              pick if @bulk
-              main
-            end
-            div(class: "li-side") { MOVES.fetch(@message.status).each { move(*it) } }
+          ListItem(title: @message.subject, pick:) do |item|
+            item.body { p(class: "msg-body") { @message.body } }
+            item.meta { p(class: "li-sub") { meta } }
+            MOVES.fetch(@message.status).each { move(*it) }
           end
         end
 
@@ -38,14 +36,6 @@ module Admin
           { aria: { keyshortcuts: READ_KEY }, data: { key: READ_KEY, key_label: t(".read_key") } }
         end
 
-        def main
-          div(class: "li-main") do
-            span(class: "li-title") { @message.subject }
-            p(class: "msg-body") { @message.body }
-            p(class: "li-sub") { meta }
-          end
-        end
-
         def meta = [@message.reply_to, l(Blog::TimeZone.local(@message.received_at), format: :medium)].join(SEPARATOR)
 
         def move(status, label_key, variant)
@@ -55,7 +45,7 @@ module Admin
           end
         end
 
-        def pick = BulkCheck(form: @bulk, value: @message.id, label: t(".pick", subject: @message.subject))
+        def pick = @bulk && { form: @bulk, value: @message.id, label: t(".pick", subject: @message.subject) }
       end
     end
   end

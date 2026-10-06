@@ -13,13 +13,10 @@ module Admin
           prop :linking, Blog::Types::Bool, default: false
 
           def view_template
-            div(class: "li", data: { key_row: true }) do
-              div(class: "li-main") do
-                span(class: "li-title") { @entry.role }
-                p(class: "li-sub") { sub }
-                p(class: "proj-tagline") { @entry.blurb } if written?(@entry.blurb)
-              end
-              side
+            ListItem(title: @entry.role, sub:) do |item|
+              item.body { p(class: "proj-tagline") { @entry.blurb } } if written?(@entry.blurb)
+              links
+              remove
             end
           end
 
@@ -41,13 +38,6 @@ module Admin
           end
 
           def remove_path = path(:admin_delete_work_entry, id: @entry.id)
-
-          def side
-            div(class: "li-side") do
-              links
-              remove
-            end
-          end
 
           def sub = t(".sub", from: @entry.from_year, org: @entry.org, to:)
 
