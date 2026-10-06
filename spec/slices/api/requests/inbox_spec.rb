@@ -23,8 +23,8 @@ RSpec.describe "API inbox", type: :request do
 
   def status = last_response.status
 
-  def synced(*traits, title: "A synced issue", created_at: Time.now, seen_at: nil)
-    create(:task, *traits, title:, list: "external", created_at:).tap do |task|
+  def synced(*traits, title: "A synced issue", created_at: Time.now, seen_at: nil, tags: [])
+    create(:task, *traits, title:, list: "external", created_at:, tags:).tap do |task|
       create(:task_source, task:, seen_at:, url: issue_url)
     end
   end
@@ -32,7 +32,7 @@ RSpec.describe "API inbox", type: :request do
   describe "with one row of each kind" do
     let!(:records) do
       {
-        task: synced(title: "Oldest", created_at: Time.now - 120),
+        task: synced(title: "Oldest", created_at: Time.now - 120, tags: %w[home]),
         message: create(:message, subject: "Middle", body: "Hello there", received_at: Time.now - 60),
         webmention: create(:webmention, author_name: "Newest", excerpt: "Nice post", source_url:,
                                         received_at: Time.now),
@@ -54,6 +54,15 @@ RSpec.describe "API inbox", type: :request do
 
     it "gives each row its time" do
       expect(Time.iso8601(rows[1].fetch("at"))).to be_within(1).of(records[:message].received_at)
+    end
+
+    it "gives each row what the Inbox screen shows for its kind, and null for what does not fit" do
+      post_id = records[:webmention].post_id
+      reply_to = records[:message].reply_to
+      source = { "provider" => "github", "reference" => "aaronmallen/aaronmallen.me#1" }
+
+      expect(rows.map { it.values_at("tags", "source", "type", "post_id", "reply_to") })
+        .to eq([[nil, nil, "mention", post_id, nil], [nil, nil, nil, nil, reply_to], [%w[home], source, nil, nil, nil]])
     end
 
     it "lists the rows the Inbox screen shows, in the same order" do

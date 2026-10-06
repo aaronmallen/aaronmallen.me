@@ -4,7 +4,8 @@ module MCP
   module Tools
     module Untrusted
       ACTIVITY = { "comment" => %w[name], "webmention" => %w[name excerpt] }.freeze
-      INBOX = { "message" => %w[title excerpt], "webmention" => %w[title excerpt url], "task" => %w[title] }.freeze
+      INBOX = { "message" => %w[title excerpt reply_to], "webmention" => %w[title excerpt url],
+                "task" => %w[title] }.freeze
       LOCAL = API::Serializers::TaskComment::LOCAL
       TASK_SHAPES = {
         API::Serializers::Task => ->(entry) { entry.fetch("source").nil? ? %w[note] : %w[note title] },
