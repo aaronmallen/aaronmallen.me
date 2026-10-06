@@ -416,6 +416,44 @@ RSpec.describe "API decisions", type: :request do
     it "refuses an unknown status with a 422 naming the field" do
       expect([list("status=done").fetch("errors").keys, status]).to eq([["status"], 422])
     end
+
+    it "keeps the decisions whose title holds the words, in any case" do
+      queue = create(:decision, title: "Pick a Job Queue", created_at: at(8))
+
+      expect(listed("query=job+queue")).to eq([queue.id])
+    end
+
+    it "keeps the decisions whose problem holds the words" do
+      piled = create(:decision, problem: "Jobs pile up", created_at: at(8))
+
+      expect(listed("query=pile")).to eq([piled.id])
+    end
+
+    it "narrows by words, status and tag together" do
+      kept = create(:decision, title: "Pick a queue", created_at: at(8))
+      create(:decision, title: "Pick a queue", status: "dropped", created_at: at(7))
+      tag(kept, "queues")
+      tag(create(:decision, title: "Pick a queue", created_at: at(6)), "ruby")
+
+      expect(listed("query=queue&status=open&tag=queues")).to eq([kept.id])
+    end
+
+    it "lists every decision when the words are blank" do
+      expect(listed("query=+")).to eq([dropped.id, open_one.id])
+    end
+
+    it "counts the decisions in each status, zero when none" do
+      expect(list.fetch("counts")).to eq("open" => 1, "resolved" => 0, "dropped" => 1)
+    end
+
+    it "counts the decisions with the words and tag given, whatever the status asked for" do
+      call_api(:post, "/#{decision.id}/resolve", { option_id: option.id, reason: "It runs today" })
+      [decision, create(:decision, title: "Pick a queue")].each { tag(it, "queues") }
+      tag(create(:decision, title: "Pick a queue"), "ruby")
+
+      expect(list("query=queue&tag=queues&status=dropped").fetch("counts"))
+        .to eq("open" => 1, "resolved" => 1, "dropped" => 0)
+    end
   end
 
   describe "GET /api/v1/decisions/:id" do
@@ -499,6 +537,12 @@ RSpec.describe "API decisions", type: :request do
       create(:decision)
 
       expect(mcp_answer("list_decisions", status: "open")).to eq(list("status=open"))
+    end
+
+    it "finds decisions by their words as list_decisions does" do
+      create(:decision, title: "Pick a queue")
+
+      expect(mcp_answer("list_decisions", query: "queue")).to eq(list("query=queue"))
     end
 
     it "reads a decision as read_decision does" do

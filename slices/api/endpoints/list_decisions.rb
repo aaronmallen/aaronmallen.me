@@ -7,6 +7,7 @@ module API
         additionalProperties: false,
         properties: {
           page: Blog::Paging::PAGE,
+          query: { type: "string", description: "words to find in the title or problem" },
           status: {
             type: "string",
             enum: Blog::Types::DecisionStatus.values,
@@ -16,19 +17,37 @@ module API
         },
       }.freeze
 
+      COUNTS = Schema.object(Blog::Types::DecisionStatus.values.to_h { [it.to_sym, Schema::INTEGER] }).merge(
+        description: "how many decisions with the query and tag given sit in each status, whatever status asks for",
+      ).freeze
+
       REPLY = Schema.object(
-        { count: Schema::INTEGER, decisions: Schema.list(Serializers::Decision.reference), partial: Schema::BOOLEAN },
+        {
+          count: Schema::INTEGER,
+          counts: COUNTS,
+          decisions: Schema.list(Serializers::Decision.reference),
+          partial: Schema::BOOLEAN,
+        },
         optional: { next_page: Schema::INTEGER },
       ).freeze
 
-      include Deps["settings", find_decisions: "decisions.queries.find_decisions"]
+      include Deps[
+        "settings",
+        find_decisions: "decisions.queries.find_decisions",
+        found_decision_counts: "decisions.queries.found_decision_counts",
+      ]
 
-      def handle(page: 1, status: nil, tag: nil)
-        found = find_decisions.call(page: page_of(page), status:, tag: tag&.downcase)
+      def handle(page: 1, query: nil, status: nil, tag: nil)
+        filters = { tag: tag&.downcase, text: query.to_s.strip.then { it unless it.empty? } }
+        found = find_decisions.call(page: page_of(page), status:, **filters)
 
         Success(
-          { count: found.rows.length, decisions: serialized(Serializers::Decision, found.rows),
-            **Blog::Paging.fields(found) },
+          {
+            count: found.rows.length,
+            counts: found_decision_counts.call(**filters),
+            decisions: serialized(Serializers::Decision, found.rows),
+            **Blog::Paging.fields(found),
+          },
         )
       end
     end

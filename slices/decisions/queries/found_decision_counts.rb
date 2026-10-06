@@ -2,10 +2,10 @@
 
 module Decisions
   module Queries
-    class FindDecisions
+    class FoundDecisionCounts
       include Deps[decision_repo: "repos.decision_repo"]
 
-      def call(page:, status: nil, tag: nil, text: nil) = decision_repo.listed(page, status:, tag:, text:)
+      def call(tag: nil, text: nil) = decision_repo.count_found(tag:, text:)
     end
   end
 end
