@@ -171,13 +171,37 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
     end
 
-    it "sends no more than the top #{MCP::Tools::ReadAnalytics::TOP} paths" do
-      day = roll_up(today - 1, views: 100, visitors: 50).day
-      (MCP::Tools::ReadAnalytics::TOP + 1).times do
-        create(:analytics_rollup_path, day:, views: 2, visitors: 1, bounces: 0)
+    describe "more paths and referrers than it sends" do
+      let(:top) { MCP::Tools::ReadAnalytics::TOP }
+
+      def hosts = read.fetch("referrers").map { it.fetch("host") }
+
+      def paths = read.fetch("paths").map { it.fetch("path") }
+
+      before do
+        day = roll_up(today - 1, views: 1_000, visitors: 500).day
+        (top + 1).times do |n|
+          create(:analytics_rollup_path, day:, path: "/writing/rolled-#{n}", views: n + 2, visitors: 1, bounces: 0)
+          create(:analytics_rollup_referrer, day:, host: "rolled-#{n}.example", views: n + 2, visitors: n + 2)
+        end
       end
 
-      expect(read.fetch("paths").length).to eq(MCP::Tools::ReadAnalytics::TOP)
+      it "sends no more than the top #{MCP::Tools::ReadAnalytics::TOP} of each", :aggregate_failures do
+        expect(paths.length).to eq(top)
+        expect(hosts.length).to eq(top)
+      end
+
+      it "leaves out the path with the fewest views and the referrer with the fewest visitors", :aggregate_failures do
+        expect(paths).not_to include("/writing/rolled-0")
+        expect(hosts).not_to include("rolled-0.example")
+      end
+
+      it "ranks today's path and referrer among the rolled up ones and still sends the top", :aggregate_failures do
+        (top + 3).times { create(:analytics_event, path: "/writing/fresh", referrer_host: "fresh.example") }
+
+        expect(paths.values_at(0, top)).to eq(["/writing/fresh", nil])
+        expect(hosts.values_at(0, top)).to eq(["fresh.example", nil])
+      end
     end
 
     it "names the time zone its days run on" do
@@ -281,6 +305,29 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       answer = mcp_answer("read_analytics", from: today.iso8601, to: today.iso8601, path: "/writing/hello")
 
       expect(answer).not_to have_key("weekday_hours")
+    end
+
+    describe "on the day the clocks go forward" do
+      let(:now) { Blog::TimeZone.local_time(2026, 3, 9, 12, 0) }
+
+      before { create(:analytics_event, occurred_at: Blog::TimeZone.local_time(2026, 3, 8, 3, 30)) }
+
+      it "counts a visit in its Chicago hour" do
+        expect(grid.fetch("hours")[3].fetch("sunday")).to eq(1)
+      end
+    end
+
+    describe "on the day the clocks go back" do
+      let(:now) { Blog::TimeZone.local_time(2026, 11, 2, 12, 0) }
+
+      before do
+        create(:analytics_event, occurred_at: Time.utc(2026, 11, 1, 6, 30))
+        create(:analytics_event, occurred_at: Time.utc(2026, 11, 1, 7, 30))
+      end
+
+      it "counts both passes through 1:30 in Sunday's 1 row" do
+        expect(grid.fetch("hours")[1].fetch("sunday")).to eq(2)
+      end
     end
   end
 
