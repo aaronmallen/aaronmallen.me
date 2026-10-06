@@ -72,6 +72,46 @@ RSpec.describe "API attention", :frozen_clock, type: :request do
     expect(rows).to eq([])
   end
 
+  it "leaves out a task carried twice" do
+    create(:task, :carried)
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out a done task, however often it was carried" do
+    create(:task, :done, carried_count: 5)
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out a draft edited yesterday" do
+    create(:post, :draft, updated_at: days_ago(1))
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out a published post, however old" do
+    create(:post, :published, updated_at: days_ago(60))
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out a someday task once closed" do
+    create(:task, :someday, :done, updated_at: days_ago(120))
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out an old task on the next list" do
+    create(:task, updated_at: days_ago(120))
+
+    expect(rows).to eq([])
+  end
+
+  it "leaves out the journal when it has no entries" do
+    expect(rows).to eq([])
+  end
+
   it "follows the limits in settings" do
     create(:task, :carried, title: "Carried twice")
     change_attention_limit(:carried_count, to: 2)
