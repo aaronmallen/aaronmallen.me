@@ -26,8 +26,9 @@ RSpec.describe Record::Linear::Client do
 
   describe "the open issues assigned to me" do
     let(:listed) do
-      { body: "It broke", comments: [], id: "issue-one", key: "ABC-4", labels: [], reference: "ABC-4",
-        remote_state: "open", title: "Fix it", url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
+      { body: "It broke", comments: [], id: "issue-one", key: "ABC-4", labels: [], origin: "aaronmallen/ABC",
+        reference: "ABC-4", remote_state: "open", title: "Fix it",
+        url: "https://linear.app/aaronmallen/issue/abc-4/sync-my-issues" }
     end
 
     it "lists each one with its id, key, reference, title, description and URL" do
@@ -129,8 +130,9 @@ RSpec.describe Record::Linear::Client do
     it "reports an issue still assigned to me, with its title and description" do
       stub_known(known(title: "Renamed", description: "Edited"))
 
-      renamed = { body: "Edited", comments: [], id: "issue-known", key: "ABC-7", labels: [], reference: "ABC-7",
-                  remote_state: "open", title: "Renamed", url: known_url }
+      renamed = { body: "Edited", comments: [], id: "issue-known", key: "ABC-7", labels: [],
+                  origin: "aaronmallen/ABC", reference: "ABC-7", remote_state: "open", title: "Renamed",
+                  url: known_url }
 
       expect(check).to eq([renamed])
     end

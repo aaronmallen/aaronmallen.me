@@ -90,7 +90,7 @@ module Tasks
       def import(provider, issue, now)
         transaction do
           task = task_repo.append(**copy(issue), list: EXTERNAL)
-          label(task, issue, now)
+          label(task, tags(provider, issue), now)
           source = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
           follow(task_source_repo.create(**source), issue, now)
         end
@@ -103,7 +103,7 @@ module Tasks
         task_comment_repo.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
       end
 
-      def label(task, issue, now) = task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, tags(issue)) }
+      def label(task, names, now) = task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, names) }
 
       def listening?(task, issue) = issue.key?(:comments) && !task.closed?
 
@@ -144,10 +144,10 @@ module Tasks
         end.value_or(task)
       end
 
-      def tags(issue)
+      def tags(provider, issue)
         labeled = issue.fetch(:labels, Blog::Constants::EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
 
-        [*labeled, *task_tag_rule_repo.tag_names_for(issue[:origin])].uniq
+        [*labeled, *task_tag_rule_repo.tag_names_for(provider, issue[:origin])].uniq
       end
 
       def tracked(provider) = task_source_repo.for_provider(provider).to_h { [it.remote_id, it] }

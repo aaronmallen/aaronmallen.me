@@ -5,6 +5,7 @@ module Tasks
     class TaskTagRuleContract < Blog::Contract
       params do
         required(:pattern).filled(Blog::Types::Normalized::RepoPattern)
+        optional(:provider).maybe(Blog::Types::TaskSourceProvider)
         required(:tags).value(Blog::Types::TagList, :filled?)
       end
 

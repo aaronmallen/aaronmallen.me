@@ -2933,7 +2933,8 @@ CREATE TABLE public.task_tag_rules (
     id integer NOT NULL,
     pattern public.repo_pattern NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    provider public.task_source_provider NOT NULL
 );
 
 
@@ -4402,10 +4403,10 @@ CREATE INDEX task_tag_rule_tags_tag_id_index ON public.task_tag_rule_tags USING 
 
 
 --
--- Name: task_tag_rules_pattern_index; Type: INDEX; Schema: public; Owner: -
+-- Name: task_tag_rules_provider_pattern_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX task_tag_rules_pattern_index ON public.task_tag_rules USING btree (pattern);
+CREATE UNIQUE INDEX task_tag_rules_provider_pattern_index ON public.task_tag_rules USING btree (provider, pattern);
 
 
 --
@@ -5177,4 +5178,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261004000414_count_review_carries_from_task_events.rb'),
 ('20261004000415_refuse_a_tag_delete_that_empties_a_task_tag_rule.rb'),
 ('20261004000419_create_post_tag_removals.rb'),
-('20261004000461_add_single_author_hosts_to_webmention_settings.rb');
+('20261004000461_add_single_author_hosts_to_webmention_settings.rb'),
+('20261006000507_add_provider_to_task_tag_rules.rb');

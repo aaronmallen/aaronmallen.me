@@ -3,7 +3,8 @@
 module Tasks
   module Operations
     class SaveTaskTagRule < Blog::Operation
-      FIELDS = %i[pattern tags].freeze
+      FIELDS = %i[pattern provider tags].freeze
+      GITHUB = Blog::Types::TaskSourceProvider["github"]
       TAKEN = "taken"
 
       include Deps[
@@ -22,7 +23,7 @@ module Tasks
       private
 
       def create(fields, now)
-        rule = task_tag_rule_repo.create(pattern: fields[:pattern])
+        rule = task_tag_rule_repo.create(pattern: fields[:pattern], provider: fields[:provider] || GITHUB)
         tag_ids = task_tag_rule_repo.replace_tags(rule.id, fields[:tags])
         task_ids = task_tag_rule_repo.matching_task_ids(rule)
         task_event_repo.track(task_ids, now, seen: false) { task_tag_rule_repo.tag_tasks(task_ids, tag_ids) }
@@ -30,7 +31,7 @@ module Tasks
       end
 
       def edit(id, fields)
-        task_tag_rule_repo.update(id, pattern: fields[:pattern])
+        task_tag_rule_repo.update(id, **fields.slice(:pattern, :provider).compact)
         task_tag_rule_repo.replace_tags(id, fields[:tags])
         id
       end

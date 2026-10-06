@@ -143,7 +143,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     def events = Tasks::Slice["relations.task_events"].for_task(imported.id).to_a
 
-    def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: })
+    def rule(pattern, tags, **) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags:, ** })
 
     it "imports with the tags of every rule it matches beside its label tags" do
       stub_assigned(issue(labels: { nodes: [{ name: "Bug Fix" }] }))
@@ -162,6 +162,14 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     it "matches the repo whatever its case" do
       stub_assigned(issue(repo: "AaronMallen/AaronMallen.me"))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("hanami", "projects", "ruby")
+    end
+
+    it "takes no tags from a Linear rule for its owner" do
+      rule("aaronmallen/*", "linear", provider: "linear")
+      stub_assigned(issue)
       sync
 
       expect(imported.tags.map(&:name)).to contain_exactly("hanami", "projects", "ruby")

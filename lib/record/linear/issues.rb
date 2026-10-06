@@ -55,6 +55,7 @@ module Record
         "backlog" => OPEN, "canceled" => NOT_PLANNED, "completed" => COMPLETED, "started" => STARTED,
         "triage" => OPEN, "unstarted" => OPEN,
       }.freeze
+      URL = %r{\Ahttps://linear\.app/(?<workspace>[^/]+)/issue/(?<team>[^/]+)-\d+(?:/|\z)}
 
       def assigned_issues
         return unless configured?
@@ -90,11 +91,12 @@ module Record
 
       def issue(node, viewer)
         key = node.fetch("identifier")
+        url = node.fetch("url")
 
         {
           body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), key:, labels: labels(node), reference: key,
-          remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
+          id: node.fetch("id"), key:, labels: labels(node), origin: origin(url, key), reference: key,
+          remote_state: remote_state(node, viewer), title: node.fetch("title"), url:,
         }
       end
 
@@ -106,6 +108,13 @@ module Record
       end
 
       def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
+
+      def origin(url, key)
+        workspace = url[URL, :workspace]
+        team = key[/\A[^-]+(?=-\d+\z)/]
+
+        "#{workspace}/#{team}" if workspace && team
+      end
 
       def remote_state(node, viewer)
         return DELETED if node["trashed"]

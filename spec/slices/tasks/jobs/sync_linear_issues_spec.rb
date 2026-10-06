@@ -132,10 +132,46 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
-  describe "a new issue while tag rules exist" do
-    it "takes no rule tags" do
-      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "aaronmallen/*", tags: "projects" })
-      stub_assigned(issue)
+  describe "a new issue in a team with tag rules" do
+    before do
+      create(:tag, :private, name: "bug-fix")
+      rule("acme/eng", "ruby, hanami")
+      rule("acme/*", "projects, ruby")
+      rule("acme/*", "github", provider: "github")
+    end
+
+    def acme(key = "ENG-12", workspace: "acme", **)
+      issue(key:, url: "https://linear.app/#{workspace}/issue/#{key.downcase}/sync-my-issues", **)
+    end
+
+    def rule(pattern, tags, provider: "linear")
+      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, provider:, tags: })
+    end
+
+    it "imports with the tags of every Linear rule it matches beside its label tags" do
+      stub_assigned(acme(labels: { nodes: [{ name: "Bug Fix" }] }))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("bug-fix", "hanami", "projects", "ruby")
+    end
+
+    it "takes only the workspace rule's tags when the issue comes from another team" do
+      stub_assigned(acme("OPS-3"))
+      sync
+
+      expect(imported.tags.map(&:name)).to contain_exactly("projects", "ruby")
+    end
+
+    it "takes no rule tags when the issue comes from another workspace" do
+      stub_assigned(acme(workspace: "octocat"))
+      sync
+
+      expect(imported.tags).to be_empty
+    end
+
+    it "takes no rule tags once imported" do
+      tracked
+      stub_assigned(acme)
       sync
 
       expect(imported.tags).to be_empty
