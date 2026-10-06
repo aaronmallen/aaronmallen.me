@@ -1,5 +1,9 @@
+import { fresh } from "./fresh.js";
+
+const ready = new WeakSet();
+
 export function setupWorkForms() {
-  for (const form of document.querySelectorAll("form[data-work-form]")) {
+  for (const form of fresh(ready, document.querySelectorAll("form[data-work-form]"))) {
     setupWorkForm(form);
   }
 }

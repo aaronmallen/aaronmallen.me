@@ -1,3 +1,5 @@
+import { fresh } from "./fresh.js";
+
 const FIELD = [
   "input:not([type=button], [type=checkbox], [type=color], [type=file], [type=image], [type=radio], [type=range], " +
     "[type=reset], [type=submit])",
@@ -12,6 +14,8 @@ const ROWS = "[data-key-list] [data-key-row]";
 const STEPS = { j: 1, k: -1 };
 
 const chords = [];
+const ready = new WeakSet();
+let bound = false;
 let pending = "";
 
 export function bind(matches, run) {
@@ -19,13 +23,16 @@ export function bind(matches, run) {
 }
 
 export function setupKeys() {
-  document.addEventListener("keydown", press);
+  if (!bound) {
+    bound = true;
+    document.addEventListener("keydown", press);
+  }
 
-  const help = document.querySelector("[data-key-help]");
-  if (!help) return;
-
-  for (const trigger of document.querySelectorAll("[data-key-help-open]")) {
-    trigger.addEventListener("click", () => fillHelp(help));
+  for (const trigger of fresh(ready, document.querySelectorAll("[data-key-help-open]"))) {
+    trigger.addEventListener("click", () => {
+      const help = document.querySelector("[data-key-help]");
+      if (help) fillHelp(help);
+    });
   }
 }
 

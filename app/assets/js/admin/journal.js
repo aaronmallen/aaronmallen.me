@@ -1,13 +1,17 @@
+import { fresh } from "./fresh.js";
+
 const WORDS = /\S+/g;
 const BLANK = /^\s*$/;
 const WRITE = "input[type='radio'][value='write']";
 
+const ready = new WeakSet();
+
 export function setupJournals() {
-  for (const form of document.querySelectorAll("form[data-journal-entry]")) {
+  for (const form of fresh(ready, document.querySelectorAll("form[data-journal-entry]"))) {
     setupJournal(form);
   }
 
-  for (const entry of document.querySelectorAll("[data-journal-item]")) {
+  for (const entry of fresh(ready, document.querySelectorAll("[data-journal-item]"))) {
     setupEntry(entry);
   }
 }

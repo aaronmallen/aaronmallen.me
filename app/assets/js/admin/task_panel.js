@@ -1,5 +1,6 @@
 import { setupConfirms } from "./confirm.js";
 import { focusField, openDialog, showDialog } from "./dialog.js";
+import { fresh } from "./fresh.js";
 import { plain, setupPost, setupVisit } from "./in_place.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
@@ -10,11 +11,22 @@ const FIND = "[data-task-find]";
 const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
 const READ = "[data-task-read]";
 
-export function setupTaskPanel() {
-  const panel = document.querySelector("[data-task-panel]");
-  const body = document.querySelector("[data-task-modal-body]");
+const ready = new WeakSet();
+let bound = false;
+let follow = null;
 
-  if (panel && body) setupPanel(panel, body.closest("dialog"));
+export function setupTaskPanel() {
+  const body = document.querySelector("[data-task-modal-body]");
+  if (!body) return;
+
+  for (const panel of fresh(ready, document.querySelectorAll("[data-task-panel]"))) {
+    follow = setupPanel(panel, body.closest("dialog"));
+  }
+
+  if (bound || !follow) return;
+
+  bound = true;
+  document.addEventListener("click", (event) => follow(event));
 }
 
 function bind(root) {
@@ -91,7 +103,7 @@ function setupPanel(panel, modal) {
     invalid: showEdit,
   });
 
-  document.addEventListener("click", (event) => {
+  const click = (event) => {
     const link = event.target.closest(LINKS);
     if (!link || event.defaultPrevented || !plain(event)) return;
 
@@ -113,7 +125,7 @@ function setupPanel(panel, modal) {
       if (!panel.open) opener = link;
       visit(link.href, READ, read);
     }
-  });
+  };
 
   panel.addEventListener("submit", (event) => {
     const find = event.submitter?.closest(FIND);
@@ -141,4 +153,6 @@ function setupPanel(panel, modal) {
     created = null;
     opener?.focus();
   });
+
+  return click;
 }

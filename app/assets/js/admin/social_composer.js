@@ -1,11 +1,14 @@
+import { fresh } from "./fresh.js";
 import { renderCounts, selectedTargets } from "./social_counts.js";
 import { expand, mentions } from "./social_expand.js";
 import { setupMentions } from "./social_mentions.js";
 
 const SCHEDULE = "schedule";
 
+const ready = new WeakSet();
+
 export function setupSocialComposers() {
-  for (const form of document.querySelectorAll("form[data-social-composer]")) {
+  for (const form of fresh(ready, document.querySelectorAll("form[data-social-composer]"))) {
     setupComposer(form);
   }
 }

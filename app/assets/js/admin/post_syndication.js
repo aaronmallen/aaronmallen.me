@@ -1,10 +1,13 @@
 import { setupFetch } from "./fetching.js";
+import { fresh } from "./fresh.js";
 import { renderCounts, selectedTargets } from "./social_counts.js";
 
 const SOURCES = "[data-editor-title], [data-editor-slug]";
 
+const ready = new WeakSet();
+
 export function setupPostSyndication() {
-  for (const card of document.querySelectorAll("[data-syndication]")) {
+  for (const card of fresh(ready, document.querySelectorAll("[data-syndication]"))) {
     setupCard(card);
   }
 }

@@ -1,21 +1,33 @@
-export function setupCommitImports() {
-  for (const form of document.querySelectorAll("form[data-commits-import]")) {
-    const button = form.querySelector("button");
+import { fresh } from "./fresh.js";
 
-    if (!button.disabled) setupCommitImport(form, button);
+const FORM = "form[data-commits-import]";
+
+const ready = new WeakSet();
+let bound = false;
+
+export function setupCommitImports() {
+  const forms = [...document.querySelectorAll(FORM)].filter((form) => !button(form).disabled);
+
+  for (const form of fresh(ready, forms)) {
+    form.addEventListener("submit", () => setImporting(form, true));
   }
+
+  if (bound) return;
+
+  bound = true;
+  window.addEventListener("pageshow", () => {
+    for (const form of document.querySelectorAll(FORM)) {
+      if (ready.has(form)) setImporting(form, false);
+    }
+  });
 }
 
-function setupCommitImport(form, button) {
-  const idle = form.querySelector("[data-commits-idle]");
-  const busy = form.querySelector("[data-commits-busy]");
+function button(form) {
+  return form.querySelector("button");
+}
 
-  const setImporting = (importing) => {
-    idle.hidden = importing;
-    busy.hidden = !importing;
-    button.disabled = importing;
-  };
-
-  form.addEventListener("submit", () => setImporting(true));
-  window.addEventListener("pageshow", () => setImporting(false));
+function setImporting(form, importing) {
+  form.querySelector("[data-commits-idle]").hidden = importing;
+  form.querySelector("[data-commits-busy]").hidden = !importing;
+  button(form).disabled = importing;
 }

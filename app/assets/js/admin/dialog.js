@@ -1,7 +1,11 @@
+import { fresh } from "./fresh.js";
+
 const ACCEPT = "accept";
 const INVALID = "[aria-invalid='true']";
 
 export const FIELD = "input:not([type=hidden]), textarea, select";
+
+const ready = new WeakSet();
 
 export function ask(dialog, { opener, focus, accept, refocus = "always" }) {
   const back = opener ?? document.activeElement;
@@ -41,26 +45,26 @@ export function showDialog(dialog) {
 }
 
 export function setupDialogs() {
-  for (const trigger of document.querySelectorAll("[data-dialog-open]")) {
+  for (const trigger of fresh(ready, document.querySelectorAll("[data-dialog-open]"))) {
     trigger.addEventListener("click", (event) => {
       if (openDialog(trigger.dataset.dialogOpen)) event.preventDefault();
     });
   }
 
-  for (const dialog of document.querySelectorAll("[data-dialog]")) {
+  for (const dialog of fresh(ready, document.querySelectorAll("[data-dialog]"))) {
     dialog.addEventListener("close", () => {
       dialog.hidden = true;
     });
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog && dialog.dataset.dialog !== "static") dialog.close();
     });
+  }
 
-    for (const close of dialog.querySelectorAll("[data-dialog-close]")) {
-      close.addEventListener("click", () => dialog.close());
-    }
+  for (const close of fresh(ready, document.querySelectorAll("[data-dialog] [data-dialog-close]"))) {
+    close.addEventListener("click", () => close.closest("[data-dialog]").close());
+  }
 
-    for (const accept of dialog.querySelectorAll("[data-dialog-accept]")) {
-      accept.addEventListener("click", () => dialog.close(ACCEPT));
-    }
+  for (const accept of fresh(ready, document.querySelectorAll("[data-dialog] [data-dialog-accept]"))) {
+    accept.addEventListener("click", () => accept.closest("[data-dialog]").close(ACCEPT));
   }
 }

@@ -1,35 +1,32 @@
+import { fresh } from "./fresh.js";
 import { plain } from "./in_place.js";
 
+const LINK = "[data-pool]";
+
+const ready = new WeakSet();
+
 export function setupPools() {
-  for (const pools of document.querySelectorAll("[data-pools]")) {
-    setupPool(pools);
-  }
-}
-
-function setupPool(pools) {
-  const links = pools.querySelectorAll("[data-pool]");
-  const panels = pools.querySelectorAll("[data-pool-panel]");
-
-  for (const link of links) {
-    link.addEventListener("click", (event) => {
-      if (!plain(event)) return;
+  for (const pools of fresh(ready, document.querySelectorAll("[data-pools]"))) {
+    pools.addEventListener("click", (event) => {
+      const link = event.target.closest(LINK);
+      if (!link || !plain(event)) return;
 
       event.preventDefault();
-      show(link.dataset.pool, links, panels);
+      show(pools, link.dataset.pool);
       history.replaceState(history.state, "", link.href);
     });
   }
 }
 
-function show(pool, links, panels) {
-  for (const link of links) {
+function show(pools, pool) {
+  for (const link of pools.querySelectorAll(LINK)) {
     const current = link.dataset.pool === pool;
     link.classList.toggle("current", current);
     if (current) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   }
 
-  for (const panel of panels) {
+  for (const panel of pools.querySelectorAll("[data-pool-panel]")) {
     panel.hidden = panel.dataset.poolPanel !== pool;
   }
 }

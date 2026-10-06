@@ -1,3 +1,4 @@
+import { fresh } from "./fresh.js";
 import { bind } from "./keys.js";
 import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
@@ -9,18 +10,20 @@ const ROW = "[data-task-order]";
 
 const ready = new WeakSet();
 const saves = [];
+let bound = false;
 let saving = false;
 
 export function setupTaskOrder(root = document) {
-  for (const grip of root.querySelectorAll(GRIP)) {
-    if (ready.has(grip)) continue;
+  for (const grip of root.querySelectorAll(GRIP)) grip.hidden = false;
 
-    ready.add(grip);
-    grip.hidden = false;
+  for (const grip of fresh(ready, root.querySelectorAll(GRIP))) {
     grip.addEventListener("pointerdown", (event) => drag(event, grip));
   }
 
-  if (root === document) bind(nudges, nudge);
+  if (bound) return;
+
+  bound = true;
+  bind(nudges, nudge);
 }
 
 function after(row) {

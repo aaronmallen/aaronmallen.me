@@ -1,5 +1,6 @@
 import { openDialog, showDialog } from "./dialog.js";
 import { json, setupFetch } from "./fetching.js";
+import { fresh } from "./fresh.js";
 import { bind } from "./keys.js";
 import { countText, setupListbox } from "./listbox.js";
 
@@ -13,10 +14,28 @@ const SLASH_CODES = ["Slash", "NumpadDivide"];
 const TASK = "[data-task-read]";
 const TITLE = "{title}";
 
-export function setupPalette() {
-  const dialog = document.querySelector("[data-palette]");
+const ready = new WeakSet();
+let bound = false;
+let palette = null;
 
-  if (dialog) setupDialog(dialog);
+export function setupPalette() {
+  for (const dialog of fresh(ready, document.querySelectorAll("[data-palette]"))) {
+    palette = { dialog, open: setupDialog(dialog) };
+  }
+
+  for (const trigger of fresh(ready, document.querySelectorAll("[data-palette-open]"))) {
+    trigger.addEventListener("click", () => palette?.open());
+  }
+
+  if (bound) return;
+
+  bound = true;
+  bind(opens, (event) => {
+    if (!palette || palette.dialog.open) return;
+
+    event.preventDefault();
+    palette.open();
+  });
 }
 
 function setupDialog(dialog) {
@@ -147,17 +166,6 @@ function setupDialog(dialog) {
     query.focus();
   };
 
-  for (const trigger of document.querySelectorAll("[data-palette-open]")) {
-    trigger.addEventListener("click", open);
-  }
-
-  bind(opens, (event) => {
-    if (dialog.open) return;
-
-    event.preventDefault();
-    open();
-  });
-
   query.addEventListener("input", () => {
     filter();
     search();
@@ -167,6 +175,7 @@ function setupDialog(dialog) {
   dialog.addEventListener("close", finder.stop);
 
   rebuild();
+  return open;
 }
 
 function actionRow(source, { id, title, href }) {

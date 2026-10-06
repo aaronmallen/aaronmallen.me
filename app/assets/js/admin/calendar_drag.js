@@ -18,8 +18,6 @@ export function armGrips(root) {
 export function setupCalendarDrag(calendar) {
   let busy = false;
 
-  armGrips(calendar);
-
   calendar.addEventListener("pointerdown", (event) => {
     const grip = event.target.closest(GRIP);
     if (!grip || busy) return;

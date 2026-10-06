@@ -1,31 +1,50 @@
+import { fresh } from "./fresh.js";
+
 const ACTS = "[data-bulk-acts]";
 const ALL = "[data-bulk-all]";
 const COUNT = "[data-bulk-count]";
+const FORM = "form[data-bulk]";
+
+const ready = new WeakSet();
+let bound = false;
 
 export function setupBulk(root = document) {
-  for (const form of root.querySelectorAll("form[data-bulk]")) {
-    const all = form.querySelector(ALL);
-    const box = all.querySelector("input");
-    const sync = () => show(form, box);
+  for (const form of root.querySelectorAll(FORM)) {
+    form.querySelector(ALL).hidden = false;
+    show(form);
+  }
 
-    all.hidden = false;
+  for (const form of fresh(ready, root.querySelectorAll(FORM))) {
+    const box = all(form);
+
     box.addEventListener("change", () => {
       for (const pick of picks(form)) pick.checked = box.checked;
-      sync();
+      show(form);
     });
-    document.addEventListener("change", (event) => {
-      if (event.target.form === form && event.target !== box) sync();
-    });
-    window.addEventListener("pageshow", sync);
-    sync();
   }
+
+  if (bound) return;
+
+  bound = true;
+  document.addEventListener("change", (event) => {
+    const form = event.target.form;
+    if (form?.matches(FORM) && event.target !== all(form)) show(form);
+  });
+  window.addEventListener("pageshow", () => {
+    for (const form of document.querySelectorAll(FORM)) show(form);
+  });
+}
+
+function all(form) {
+  return form.querySelector(ALL).querySelector("input");
 }
 
 function picks(form) {
   return [...form.elements].filter((element) => element.name === form.dataset.bulk);
 }
 
-function show(form, box) {
+function show(form) {
+  const box = all(form);
   const shown = picks(form);
   const ticked = shown.filter((pick) => pick.checked).length;
   const count = form.querySelector(COUNT);

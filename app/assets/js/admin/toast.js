@@ -1,7 +1,11 @@
+import { fresh } from "./fresh.js";
+
 const DURATION = 2400;
 
+const ready = new WeakSet();
+
 export function setupToasts() {
-  for (const region of document.querySelectorAll("[data-toast]")) {
+  for (const region of fresh(ready, document.querySelectorAll("[data-toast]"))) {
     play(region);
   }
 }

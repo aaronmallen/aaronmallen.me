@@ -1,11 +1,17 @@
 import { armGrips, setupCalendarDrag } from "./calendar_drag.js";
+import { fresh } from "./fresh.js";
 import { plain, setupVisit } from "./in_place.js";
 
+const CALENDAR = "[data-calendar]";
 const DAY = "a[data-calendar-day]";
 const PANEL = "[data-calendar-panel]";
 
+const ready = new WeakSet();
+
 export function setupCalendars() {
-  for (const calendar of document.querySelectorAll("[data-calendar]")) {
+  for (const calendar of document.querySelectorAll(CALENDAR)) armGrips(calendar);
+
+  for (const calendar of fresh(ready, document.querySelectorAll(CALENDAR))) {
     setupCalendar(calendar);
   }
 }

@@ -6,7 +6,13 @@ import { fillField, typed } from "./person_field.js";
 const MINIMUM = 2;
 const PICK = "[data-person-pick]";
 
+const ready = new WeakSet();
+
 export function setupPersonSearch(search, name) {
+  search.hidden = false;
+  if (ready.has(search)) return;
+
+  ready.add(search);
   const field = search.closest(".field").querySelector("[data-person-field]");
   const input = search.querySelector("[data-person-search-input]");
   const list = search.querySelector("[data-person-search-results]");
@@ -63,8 +69,6 @@ export function setupPersonSearch(search, name) {
     done: (html, query) => answer(query, options(html)),
     failed: (_error, query) => answer(query, []),
   });
-
-  search.hidden = false;
 
   input.addEventListener("input", () => {
     const query = input.value.trim();

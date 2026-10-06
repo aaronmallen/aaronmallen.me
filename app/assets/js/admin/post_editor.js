@@ -1,9 +1,12 @@
+import { fresh } from "./fresh.js";
 import { slugify } from "./slug.js";
 
 const WORD = /[\p{L}\p{N}]/u;
 
+const ready = new WeakSet();
+
 export function setupPostEditors() {
-  for (const form of document.querySelectorAll("form[data-post-editor]")) {
+  for (const form of fresh(ready, document.querySelectorAll("form[data-post-editor]"))) {
     setupPostEditor(form);
   }
 }
