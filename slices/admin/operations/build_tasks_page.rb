@@ -7,7 +7,7 @@ module Admin
 
       CARRIED = :carried_in
       COMPLETED = Blog::Types::TaskTab["completed"]
-      FIELDS = %i[tag].freeze
+      FIELDS = %i[tag contributor agent model].freeze
       FINISHED_TODAY = :finished_today
       NEXT = Blog::Types::TaskFilter["next"]
       TODAY = Blog::Types::TaskTab["today"]

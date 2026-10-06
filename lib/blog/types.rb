@@ -189,6 +189,8 @@ module Blog
     Year = Types::String.constrained(format: /\A[1-9]\d{3}\z/)
 
     module Normalized
+      ContributorKind = Types::ContributorKind.constructor { |value| Normalizers::Tag[value.to_s] }
+      ContributorSlug = Types::ContributorSlug.constructor { |value| Normalizers::Tag[value.to_s] }
       GithubRepo = Types::Repo.constructor { |url| Normalizers::Repo[url.to_s.strip[%r{\Ahttps?://(?:www\.)?github\.com/([a-z0-9][a-z0-9-]*/[a-z0-9._-]+?)(?:\.git)?/?\z}i, 1]] }
       Host = Types::String.constructor do |url|
         URI.parse(Normalizers::Url[url]).hostname.to_s.downcase

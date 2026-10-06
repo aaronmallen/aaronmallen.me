@@ -3,6 +3,9 @@
 module Blog
   module SearchQuery
     FIELDS = {
+      agent: [:agents, Blog::Types::Normalized::ContributorSlug],
+      contributor: [:contributors, Blog::Types::Normalized::ContributorKind],
+      model: [:models, Blog::Types::Normalized::ContributorSlug],
       repo: [:repos, Blog::Types::Normalized::Repo],
       tag: [:tags, Blog::Types::Normalized::Tag],
     }.freeze

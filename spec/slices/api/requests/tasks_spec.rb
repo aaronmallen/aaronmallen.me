@@ -223,6 +223,47 @@ RSpec.describe "API tasks", type: :request do
       expect(titles(list(query: "feed"))).to contain_exactly("Fix the feed", "Write a post")
     end
 
+    describe "by contributor" do
+      before do
+        create(:task, title: "mine by default")
+        create(:task_contributor, :owner, task_id: create(:task, title: "mine").id)
+        create(:task_contributor, task_id: create(:task, title: "claude").id)
+        create(:task_contributor, model: "claude-sonnet-5", task_id: create(:task, title: "sonnet").id)
+        create(:task_contributor, agent: "codex", model: "gpt-6", task_id: create(:task, title: "codex").id)
+        shared = create(:task, title: "shared")
+        create(:task_contributor, :owner, task_id: shared.id)
+        create(:task_contributor, task_id: shared.id)
+      end
+
+      it "keeps the tasks that list the owner, default included" do
+        expect(titles(list(contributor: "owner"))).to contain_exactly("mine by default", "mine", "shared")
+      end
+
+      it "keeps the tasks any agent worked on" do
+        expect(titles(list(contributor: "agent"))).to contain_exactly("claude", "sonnet", "codex", "shared")
+      end
+
+      it "keeps the tasks one agent worked on, in any case" do
+        expect(titles(list(agent: " Codex "))).to eq(%w[codex])
+      end
+
+      it "keeps the tasks one model worked on" do
+        expect(titles(list(model: "claude-opus-5-5"))).to contain_exactly("claude", "shared")
+      end
+
+      it "combines an agent and a model with the owner" do
+        expect(titles(list(contributor: "owner", agent: "claude-code", model: "claude-opus-5-5"))).to eq(%w[shared])
+      end
+
+      it "answers no tasks for an agent nothing lists" do
+        expect(list(agent: "nobody").fetch("total")).to eq(0)
+      end
+
+      it "refuses a contributor it does not know with a 422" do
+        expect([list(contributor: "someone").fetch("errors").keys, status]).to eq([%w[contributor], 422])
+      end
+    end
+
     describe "every filter at once" do
       def match(title, **fields)
         defaults = { tags: %w[admin], note: "the feed", created_at: at(today - 30), completed_at: at(today - 1) }

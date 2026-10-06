@@ -2160,7 +2160,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       before do
         create(:task, title: "Email the accountant", tags: %w[admin])
-        create(:task, title: "Ship the search", tags: %w[ruby])
+        create(:task_contributor, task_id: create(:task, title: "Ship the search", tags: %w[ruby]).id)
         create(:task, :someday, title: "Learn Elixir", tags: %w[elixir])
       end
 
@@ -2193,6 +2193,49 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         search("tag:ADMIN tag:ruby")
 
         expect(titles).to eq(["Ship the admin search"])
+      end
+
+      it "keeps the tasks that list the owner, default included" do
+        search("contributor:owner")
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "keeps the tasks an agent worked on" do
+        search("contributor:Agent")
+
+        expect(titles).to eq(["Ship the search"])
+      end
+
+      it "keeps the tasks one agent worked on" do
+        search("agent:claude-code")
+
+        expect(titles).to eq(["Ship the search"])
+      end
+
+      it "keeps the tasks one model worked on" do
+        search("model:claude-opus-5-5")
+
+        expect(titles).to eq(["Ship the search"])
+      end
+
+      it "finds nothing for a model nothing lists" do
+        search("model:gpt-6")
+
+        expect(titles).to be_empty
+      end
+
+      it "finds nothing for a contributor it does not know" do
+        search("contributor:someone")
+
+        expect(titles).to be_empty
+      end
+
+      it "narrows the completed tab the same way" do
+        create(:task, :done, title: "Finished by hand", completed_at: Time.now)
+        search("contributor:owner", filter: "completed")
+
+        expect(titles).to eq(["Finished by hand"])
       end
 
       it "reads type: as plain text" do

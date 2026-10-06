@@ -4,6 +4,7 @@ module API
   module Endpoints
     class ListTasks < Endpoint
       BAD_SPRINT_DAY = "give sprint_on as a day, such as 2026-01-01"
+      CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       LISTS = Blog::Types::TaskList.values.freeze
       OPEN = [Blog::Types::TaskStatus["open"], Blog::Types::TaskStatus["in_progress"]].freeze
       STATUSES = Blog::Types::TaskStatus.values.freeze
@@ -12,11 +13,18 @@ module API
         additionalProperties: false,
         properties: {
           **Blog::DayWindow::WINDOW,
+          agent: { type: "string", description: "an agent, such as claude-code; only the tasks it worked on" },
+          contributor: {
+            type: "string",
+            enum: CONTRIBUTORS,
+            description: "owner or agent; owner also keeps every task that lists no contributors",
+          },
           lists: {
             type: "array",
             items: { type: "string", enum: LISTS },
             description: "next, someday or external; open tasks unless you name statuses; every list when left out",
           },
+          model: { type: "string", description: "a model, such as claude-opus-5-5; only the tasks it worked on" },
           page: Blog::Paging::PAGE,
           query: { type: "string", description: "words to find in the title or note" },
           sprint_on: { type: "string", description: "a sprint day, as YYYY-MM-DD; only the tasks planned into it" },
@@ -53,6 +61,10 @@ module API
 
       private
 
+      def credits(contributor: nil, agent: nil, model: nil)
+        { contributors: named(contributor), agents: named(agent), models: named(model) }
+      end
+
       def listed(filters, from, to, number)
         found = find_tasks.call(**filters, from:, to:, page: page_of(number))
         rows = found.paged.rows
@@ -65,11 +77,12 @@ module API
         }
       end
 
-      def narrowed(lists: [], query: nil, sprint_on: nil, statuses: [], tag: nil)
-        named = statuses.empty? && lists.any? ? OPEN : statuses
-        tags = [tag.to_s.strip.downcase].reject(&:empty?)
+      def named(value) = [value.to_s.strip.downcase].reject(&:empty?)
 
-        { lists:, sprint_on:, statuses: named, tags:, text: query.to_s.strip }
+      def narrowed(lists: [], query: nil, sprint_on: nil, statuses: [], tag: nil, **credited)
+        kept = statuses.empty? && lists.any? ? OPEN : statuses
+
+        { lists:, sprint_on:, statuses: kept, tags: named(tag), text: query.to_s.strip, **credits(**credited) }
       end
     end
   end

@@ -34,6 +34,14 @@ RSpec.describe "MCP task tools", type: :request do
     expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => task.id)])
   end
 
+  it "lists only the tasks that list the owner, default included" do
+    mine = create(:task)
+    create(:task_contributor, task_id: create(:task).id)
+    call_tool("list_tasks", contributor: "owner")
+
+    expect(JSON.parse(message)).to include("total" => 1, "tasks" => [include("id" => mine.id)])
+  end
+
   describe "capture_task with a note" do
     let(:photo) { create(:photo) }
     let(:note) { "![The gutter](/media/#{photo.key})" }

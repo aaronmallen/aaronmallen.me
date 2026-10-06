@@ -6,7 +6,7 @@ module API
   module Queries
     class SavedViewTasks
       COMPLETED = Blog::Types::TaskTab["completed"]
-      FIELDS = %i[tag].freeze
+      FIELDS = %i[tag contributor agent model].freeze
       TODAY = Blog::Types::TaskTab["today"]
       UPCOMING = Blog::Types::TaskTab["upcoming"]
 

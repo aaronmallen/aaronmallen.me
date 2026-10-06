@@ -4,6 +4,7 @@ module Tasks
   module Relations
     class Tasks < Blog::DB::Relation
       COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
+      CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
       CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
@@ -28,6 +29,13 @@ module Tasks
       end
 
       def closed = where(status: CLOSED)
+
+      def credited(contributors: [], agents: [], models: [])
+        return none if unmatchable?(agents, models) || (contributors - CONTRIBUTORS).any?
+
+        terms = [*contributors.map { { kind: it } }, *agents.map { { agent: it } }, *models.map { { model: it } }]
+        terms.reduce(self) { |tasks, term| tasks.where(task_contributors.crediting(term)) }
+      end
 
       def detailed
         combine(:contributors, :running_session, :source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
@@ -98,8 +106,8 @@ module Tasks
           .order(self[:position].desc, self[:id].desc)
       end
 
-      def searched(tags: [], text: "")
-        found = self
+      def searched(tags: [], text: "", **credits)
+        found = credited(**credits)
         found = found.matching(text) unless text.empty?
         tags.empty? ? found : found.tagged(tags)
       end

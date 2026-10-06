@@ -58,6 +58,12 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(names.drop(2)).to eq(names.drop(2).sort)
   end
 
+  it "lets a task listing filter by contributor, agent and model" do
+    names = document.dig("paths", "/tasks", "get", "parameters").map { it.fetch("name") }
+
+    expect(names).to include("contributor", "agent", "model")
+  end
+
   it "gives each operation one ID" do
     expect(operation_ids).to eq(operation_ids.uniq)
   end

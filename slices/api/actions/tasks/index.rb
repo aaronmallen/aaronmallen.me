@@ -13,7 +13,9 @@ module API
         private
 
         def listing(request)
-          found = paged_query(request, :from, :lists, :query, :sprint_on, :statuses, :tag, :to)
+          found = paged_query(
+            request, :agent, :contributor, :from, :lists, :model, :query, :sprint_on, :statuses, :tag, :to,
+          )
 
           found.merge(found.slice(*LISTED).transform_values { split(it) })
         end

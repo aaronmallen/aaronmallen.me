@@ -67,6 +67,14 @@ RSpec.describe "API saved view records", type: :request do
       expect(ids(records(filter: "next", q: "tag:ops deploy"))).to eq([tagged.id])
     end
 
+    it "narrows by the contributor terms in its search" do
+      credited = create(:task, title: "ship the deploy")
+      create(:task_contributor, task_id: credited.id)
+      create(:task, title: "ship the deploy")
+
+      expect(ids(records(filter: "next", q: "agent:claude-code model:claude-opus-5-5"))).to eq([credited.id])
+    end
+
     it "reads today's sprint when no list is saved, giving each task its sprint day" do
       sprint = create(:sprint, sprint_date: today)
       task = create(:task, :in_sprint, sprint_id: sprint.id)
