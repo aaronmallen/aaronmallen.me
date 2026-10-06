@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245"]
+amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524"]
 tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
 ---
 
@@ -58,7 +58,11 @@ the one exception, and AA-584 records why.
   while `social` imports operations and queries from `posts`. A client that a provider registers is not a feature
   dependency: social never calls back into posts through it. An edge whose every key names a provider in the source
   slice does not count toward a cycle, and an edge that carries one operation, query or repo key still does. AA-571
-  added this, and #245 added `links.tagger`.
+  added this, and #245 added `links.tagger`. #524 turned the tagger into `operations.tag_links`, and fb99a1e8 had
+  already added `queries.mention_directory`, so the edge from `posts` to `social` now carries an operation and a
+  query beside `networks.all`, and it counts. Posts and social form a cycle the way `admin` and `mcp` do: posts calls
+  both keys from `PostContract` to measure the text social sends, neither writes a record, and neither calls back
+  into posts.
 - **A job constant enqueued from `after_commit`.** Publishing announces, and social decides what to do about it.
   `PublishPost` enqueues `Social::Jobs::SyndicatePost` and `Social::Jobs::SendWebmentions` inside
   `post_repo.after_commit`, and `SavePost` enqueues the second, so posts calls no social operation. A job crosses

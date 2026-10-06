@@ -4,9 +4,9 @@ module Admin
   module Operations
     class CountNetworkLengths
       include Deps[
-        link_tagger: "social.links.tagger",
         mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
+        tag_links: "social.operations.tag_links",
       ]
 
       def call(bodies)
@@ -21,7 +21,7 @@ module Admin
 
       def measure(directory, body, name)
         client = networks.fetch(name)
-        sent = directory.expand(link_tagger.call(body, name), name).text
+        sent = directory.expand(tag_links.call(body, name), name).text
 
         Structs::NetworkCount.new(
           count: client.count(sent), over: !client.within_limit?(sent), text: directory.expand(body, name).text,

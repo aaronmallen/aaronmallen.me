@@ -13,9 +13,9 @@ module Social
       UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
-        link_tagger: "links.tagger",
         mention_directory: "queries.mention_directory",
         networks: "networks.all",
+        tag_links: "operations.tag_links",
       ]
 
       params do
@@ -49,7 +49,7 @@ module Social
         directory = mention_directory.call(parts)
         over = targets.any? do |name|
           parts.any? do |body|
-            !networks.fetch(name).within_limit?(directory.expand(link_tagger.call(body, name), name).text)
+            !networks.fetch(name).within_limit?(directory.expand(tag_links.call(body, name), name).text)
           end
         end
         key(:parts).failure(TOO_LONG) if over

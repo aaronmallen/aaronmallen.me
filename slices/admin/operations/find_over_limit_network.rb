@@ -4,10 +4,10 @@ module Admin
   module Operations
     class FindOverLimitNetwork
       include Deps[
-        link_tagger: "social.links.tagger",
         list_networks: "operations.list_networks",
         mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
+        tag_links: "social.operations.tag_links",
       ]
 
       def call(social_post, edit)
@@ -30,7 +30,7 @@ module Admin
 
       def part_body(social_post, edit) = social_post.parts.map(&:body)[edit.part_number - 1]
 
-      def sent(directory, body, name) = directory.expand(link_tagger.call(body, name), name).text
+      def sent(directory, body, name) = directory.expand(tag_links.call(body, name), name).text
     end
   end
 end

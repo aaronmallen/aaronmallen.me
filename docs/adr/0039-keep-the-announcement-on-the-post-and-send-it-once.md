@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [posts, social, admin, db]
 issue: AA-646
-amended: ["#245"]
+amended: ["#245", "#524"]
 tags: [posts, social, syndication, announcement, limits, mastodon, bluesky]
 ---
 
@@ -36,9 +36,9 @@ title, a blank line and the post's URL when it does not. Posts exports it and so
 import direction that already stood.
 
 **The editor checks what will send, when the post is published.** `Posts::Contracts::PostContract` composes the
-text, tags its links for each picked network through `social.links.tagger`, and asks that network's client
-`within_limit?` through `social.networks.all`. It runs only when the intent is publish and the switch is on. The
-editor, the counters and the preview measure the same composed text (AA-376).
+text, tags its links for each picked network through `social.operations.tag_links` (#524), and asks that network's
+client `within_limit?` through `social.networks.all`. It runs only when the intent is publish and the switch is on.
+The editor, the counters and the preview measure the same composed text (AA-376).
 
 **A post cross-posts once.** `Posts::Operations::PublishPost` enqueues `Social::Jobs::SyndicatePost` after commit.
 `Social::Operations::QueueSyndication` refuses with `already_queued` when any social post already names the post, so
@@ -68,7 +68,8 @@ A draft can hold text over a limit. The editor refuses it only when the author p
 
 Posts imports `networks.all` from social to read the limits, and `links.tagger` to measure the text social sends
 (#245). Both keys are a provider's, and the record on how slices reach each other covers why they do not count as a
-cycle (AA-571).
+cycle (AA-571). #524 made the tagger the operation `operations.tag_links`, so the edge now carries an operation and a
+query, and counts as a cycle, which that record names.
 
 A new network needs a client that answers `within_limit?` and `configured?`, registered in `networks.all`. Without the
 first, the editor cannot check the card for it.

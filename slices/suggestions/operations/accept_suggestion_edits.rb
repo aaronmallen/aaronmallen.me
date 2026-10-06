@@ -6,7 +6,6 @@ module Suggestions
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[
-        link_tagger: "social.links.tagger",
         lock_editable_social_post: "social.operations.lock_editable_social_post",
         lock_post: "posts.operations.lock_post",
         mention_directory: "social.queries.mention_directory",
@@ -14,6 +13,7 @@ module Suggestions
         replace_social_post_parts: "social.operations.replace_social_post_parts",
         revise_post_body: "posts.operations.revise_post_body",
         suggestion_repo: "repos.suggestion_repo",
+        tag_links: "social.operations.tag_links",
       ]
 
       def call(suggestion_id, ids: nil)
@@ -80,7 +80,7 @@ module Suggestions
 
         directory = mention_directory.call([body])
 
-        targets.all? { networks.fetch(it).within_limit?(directory.expand(link_tagger.call(body, it), it).text) }
+        targets.all? { networks.fetch(it).within_limit?(directory.expand(tag_links.call(body, it), it).text) }
       end
 
       def outcome(sifted)

@@ -7,7 +7,7 @@ module Suggestions
     import keys: %w[operations.lock_post operations.revise_post_body], from: :posts
 
     import keys: %w[
-      links.tagger networks.all operations.lock_editable_social_post operations.replace_social_post_parts
+      networks.all operations.lock_editable_social_post operations.replace_social_post_parts operations.tag_links
       queries.mention_directory
     ], from: :social
 
