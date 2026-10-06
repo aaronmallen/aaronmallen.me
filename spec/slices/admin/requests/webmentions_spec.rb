@@ -207,11 +207,20 @@ RSpec.describe "Admin webmentions", type: :request do
         end
       end
 
-      it "clears the note when ignoring a spam mention" do
-        spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
-        post "/admin/webmentions/#{spam.id}/ignore", _csrf_token: admin_csrf_token
+      { "approve" => "approved", "ignore" => "ignored" }.each do |action, status|
+        it "clears the note when #{action.chomp('e')}ing a spam mention" do
+          spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
+          post "/admin/webmentions/#{spam.id}/#{action}", _csrf_token: admin_csrf_token
 
-        expect(repo.by_status("ignored").map(&:spam_reason)).to eq([nil])
+          expect(repo.by_status(status).map(&:spam_reason)).to eq([nil])
+        end
+      end
+
+      it "clears the note when marking a spam mention as spam again without one" do
+        spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
+        post "/admin/webmentions/#{spam.id}/spam", _csrf_token: admin_csrf_token
+
+        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
       it "offers a note field beside Spam" do

@@ -24,6 +24,11 @@ RSpec.describe "Admin tags", type: :request do
 
   def stored(id) = every_tag.find { it.id == id }
 
+  def uses_of(name, scope)
+    get("/admin/tags", scope:)
+    Capybara.string(last_response.body).find(".tag-row", text: "##{name}").find(".tag-uses").text
+  end
+
   describe "signed in" do
     before { sign_in_to_admin }
 
@@ -222,6 +227,13 @@ RSpec.describe "Admin tags", type: :request do
 
         expect(page).to have_css(".page-head-sub", text: "1 tag")
       end
+
+      it "holds a name a post and a task carry as one tag on each tab" do
+        create(:post, tags: %w[hanakai])
+        create(:task, tags: %w[hanakai])
+
+        expect(%w[public private].map { uses_of("hanakai", it) }).to eq(["1 post", "1 task"])
+      end
     end
 
     it "says something useful when there is no tag yet" do
@@ -260,6 +272,14 @@ RSpec.describe "Admin tags", type: :request do
         %w[one two three four five six].each { add(it) }
 
         expect(every_tag.map(&:color).uniq).to match_array(Blog::Types::TagColor.values)
+      end
+
+      it "gives it the colour its own scope uses least" do
+        (Blog::Types::TagColor.values - %w[mk-orange]).each { create(:tag, :private, color: it) }
+        2.times { create(:tag, color: "mk-orange") }
+        add("fresh", scope: "private")
+
+        expect(named("fresh").color).to eq("mk-orange")
       end
 
       it "refuses a blank name" do
@@ -669,6 +689,13 @@ RSpec.describe "Admin tags", type: :request do
 
         expect(named("hanami")).to be_nil
         expect(tags_of("hanami/*")).to eq(%w[projects])
+      end
+
+      it "takes away the tag once its rules are gone" do
+        rules.each { send_to("/admin/tasks/rules/#{it.id}/delete") }
+        remove("ruby")
+
+        expect(named("ruby")).to be_nil
       end
     end
 
