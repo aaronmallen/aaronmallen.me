@@ -14,9 +14,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :subject, :body, :reply_to, :status, :received_at
-
-      def received_at(message) = stamp(message.received_at)
+      schema_attributes
+      stamps :received_at
     end
   end
 end

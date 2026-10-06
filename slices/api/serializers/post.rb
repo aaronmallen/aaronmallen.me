@@ -15,13 +15,9 @@ module API
         },
       ).freeze
 
-      attributes :id, :title, :slug, :status, :published_at, :tags, :updated_at
-
-      def published_at(post) = stamp(post.published_at)
-
-      def tags(post) = post.tags.map(&:name)
-
-      def updated_at(post) = stamp(post.updated_at)
+      schema_attributes
+      stamps :published_at, :updated_at
+      tag_names
     end
   end
 end

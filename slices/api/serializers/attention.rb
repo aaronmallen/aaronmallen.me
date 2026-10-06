@@ -15,7 +15,7 @@ module API
         },
       ).freeze
 
-      attributes :kind, :record_id, :title, :carried_count, :days
+      schema_attributes
 
       def carried_count(row) = carried?(row) ? row.days : nil
 

@@ -14,11 +14,10 @@ module API
         },
       ).freeze
 
-      attributes :kind, :id, :occurred_at, :body
+      schema_attributes
+      stamps :occurred_at
 
       def id(entry) = entry.source_id
-
-      def occurred_at(entry) = stamp(entry.occurred_at)
     end
   end
 end

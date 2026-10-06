@@ -13,7 +13,7 @@ module API
         },
       ).freeze
 
-      attributes :kind, :id, :title, :match, :date
+      schema_attributes
 
       def date(hit) = day(hit.day)
 

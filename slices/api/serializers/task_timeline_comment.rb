@@ -17,13 +17,12 @@ module API
         },
       ).freeze
 
-      attributes :kind, :id, :occurred_at, :body, :author, :source, :url
+      schema_attributes
+      stamps :occurred_at
 
       def author(entry) = entry.synced? ? entry.author : Blog::Owner.full_name
 
       def id(entry) = entry.source_id
-
-      def occurred_at(entry) = stamp(entry.occurred_at)
 
       def source(entry) = entry.provider || TaskComment::LOCAL
     end

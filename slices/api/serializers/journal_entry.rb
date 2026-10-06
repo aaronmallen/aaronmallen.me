@@ -3,8 +3,6 @@
 module API
   module Serializers
     class JournalEntry < Serializer
-      TIME_FORMAT = "%H:%M"
-
       SCHEMA = Schema.object(
         {
           id: Schema::INTEGER,
@@ -17,17 +15,13 @@ module API
         },
       ).freeze
 
-      attributes :id, :date, :time, :body, :tags, :created_at, :updated_at
-
-      def created_at(entry) = stamp(entry.created_at)
+      schema_attributes
+      stamps :created_at, :updated_at
+      tag_names
 
       def date(entry) = day(entry.entry_date)
 
-      def tags(entry) = entry.tags.map(&:name)
-
-      def time(entry) = entry.entry_time.strftime(TIME_FORMAT)
-
-      def updated_at(entry) = stamp(entry.updated_at)
+      def time(entry) = clock(entry.entry_time)
     end
   end
 end

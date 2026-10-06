@@ -15,7 +15,7 @@ module API
         },
       ).freeze
 
-      attributes :id, :org, :role, :blurb, :from_year, :to_year
+      schema_attributes
       attribute :current, &:current?
     end
   end

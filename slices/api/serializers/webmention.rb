@@ -18,10 +18,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :post_id, :type, :status, :source_url, :author_name, :author_url, :excerpt, :spam_reason
-      attributes :received_at
-
-      def received_at(mention) = stamp(mention.received_at)
+      schema_attributes
+      stamps :received_at
     end
   end
 end

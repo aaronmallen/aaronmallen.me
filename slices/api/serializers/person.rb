@@ -15,11 +15,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :key, :name, :mastodon_handle, :bluesky_handle, :created_at, :updated_at
-
-      def created_at(person) = stamp(person.created_at)
-
-      def updated_at(person) = stamp(person.updated_at)
+      schema_attributes
+      stamps :created_at, :updated_at
     end
   end
 end

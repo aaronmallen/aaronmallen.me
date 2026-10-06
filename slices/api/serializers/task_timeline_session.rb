@@ -19,16 +19,11 @@ module API
         },
       ).freeze
 
-      attributes :kind, :id, :occurred_at, :started_at, :ended_at, :seconds
+      schema_attributes
       attribute :running, &:running?
-
-      def ended_at(entry) = stamp(entry.ended_at)
+      stamps :ended_at, :occurred_at, started_at: :occurred_at
 
       def id(entry) = entry.source_id
-
-      def occurred_at(entry) = stamp(entry.occurred_at)
-
-      def started_at(entry) = stamp(entry.occurred_at)
     end
   end
 end

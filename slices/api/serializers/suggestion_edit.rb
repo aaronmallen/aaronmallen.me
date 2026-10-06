@@ -16,7 +16,7 @@ module API
         },
       ).freeze
 
-      attributes :id, :part, :original, :replacement, :reason, :status
+      schema_attributes
     end
   end
 end

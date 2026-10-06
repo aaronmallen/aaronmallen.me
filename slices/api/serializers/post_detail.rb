@@ -31,22 +31,13 @@ module API
         },
       ).freeze
 
-      attributes :id, :title, :slug, :status, :summary, :tags, :body, :published_at, :created_at, :updated_at
-      attributes :og_title, :og_image_url, :canonical_url
-      attributes :syndication_enabled, :syndication_body, :syndication_targets, :webmentions_enabled
-      attributes :word_count, :read_time
-
-      def created_at(post) = stamp(post.created_at)
-
-      def published_at(post) = stamp(post.published_at)
+      schema_attributes
+      stamps :created_at, :published_at, :updated_at
+      tag_names
 
       def summary(post) = post.written_summary.to_s
 
       def syndication_targets(post) = post.syndication_targets.to_a
-
-      def tags(post) = post.tags.map(&:name)
-
-      def updated_at(post) = stamp(post.updated_at)
 
       def word_count(post) = ::Posts::Markdown.word_count(post.body)
     end

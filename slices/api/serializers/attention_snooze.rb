@@ -11,9 +11,8 @@ module API
         },
       ).freeze
 
-      attributes :kind, :record_id, :ends_at
-
-      def ends_at(snooze) = stamp(snooze.ends_at)
+      schema_attributes
+      stamps :ends_at
     end
   end
 end

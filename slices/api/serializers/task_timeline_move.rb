@@ -18,11 +18,10 @@ module API
         },
       ).freeze
 
-      attributes :kind, :occurred_at, :from_list, :from_sprint_on, :to_list, :to_sprint_on
+      schema_attributes
+      stamps :occurred_at
 
       def from_sprint_on(entry) = day(entry.from_sprint_on)
-
-      def occurred_at(entry) = stamp(entry.occurred_at)
 
       def to_sprint_on(entry) = day(entry.to_sprint_on)
     end

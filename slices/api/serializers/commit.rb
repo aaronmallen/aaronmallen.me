@@ -3,8 +3,6 @@
 module API
   module Serializers
     class Commit < Serializer
-      TIME_FORMAT = "%H:%M"
-
       SCHEMA = Schema.object(
         {
           id: Schema::INTEGER,
@@ -19,11 +17,11 @@ module API
         },
       ).freeze
 
-      attributes :id, :sha, :repo, :branch, :message, :date, :time, :additions, :deletions
+      schema_attributes
 
       def date(commit) = day(commit.commit_date)
 
-      def time(commit) = commit.commit_time.strftime(TIME_FORMAT)
+      def time(commit) = clock(commit.commit_time)
     end
   end
 end

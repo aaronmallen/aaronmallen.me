@@ -9,9 +9,8 @@ module API
         { kind: { type: "string", enum: KINDS }, occurred_at: Schema::STAMP, tag: Schema::STRING },
       ).freeze
 
-      attributes :kind, :occurred_at, :tag
-
-      def occurred_at(entry) = stamp(entry.occurred_at)
+      schema_attributes
+      stamps :occurred_at
 
       def tag(entry) = entry.tag_name
     end

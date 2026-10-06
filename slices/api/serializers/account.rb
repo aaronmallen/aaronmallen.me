@@ -11,7 +11,7 @@ module API
         },
       ).freeze
 
-      attributes :handle, :name, :avatar
+      schema_attributes
     end
   end
 end

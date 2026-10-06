@@ -12,7 +12,7 @@ module API
         },
       ).freeze
 
-      attributes :id, :name, :screen, :filters
+      schema_attributes
     end
   end
 end

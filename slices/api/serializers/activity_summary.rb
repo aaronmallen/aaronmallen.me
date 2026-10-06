@@ -28,7 +28,7 @@ module API
         },
       ).freeze
 
-      attributes :from, :to, :kinds, :months, :repos
+      schema_attributes
 
       def from(summary) = day(summary.fetch(:from))
 

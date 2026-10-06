@@ -47,13 +47,10 @@ module API
         },
       ).freeze
 
-      attributes :id, :title, :note, :status, :list, :sprint_on, :position, :tags, :links
+      schema_attributes
       attribute :blocked, &:blocked?
-      attributes :carried_count, :worked_seconds, :source, :created_at, :updated_at, :completed_at
-
-      def completed_at(task) = stamp(task.completed_at)
-
-      def created_at(task) = stamp(task.created_at)
+      stamps :completed_at, :created_at, :updated_at
+      tag_names
 
       def links(task)
         task.links.map { { label: it.label, id: it.task.id, title: it.task.title, status: it.task.status } }
@@ -73,10 +70,6 @@ module API
       end
 
       def sprint_on(task) = day(params.fetch(:sprint_on) { task.sprint&.sprint_date })
-
-      def tags(task) = task.tags.map(&:name)
-
-      def updated_at(task) = stamp(task.updated_at)
     end
   end
 end

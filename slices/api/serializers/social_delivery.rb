@@ -24,7 +24,7 @@ module API
         },
       ).freeze
 
-      attributes :network, :state, :url, :error, :likes, :reposts, :replies
+      schema_attributes
 
       def error(entry) = entry.delivery&.error
 

@@ -12,11 +12,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :note, :created_at, :updated_at
-
-      def created_at(edit) = stamp(edit.created_at)
-
-      def updated_at(edit) = stamp(edit.updated_at)
+      schema_attributes
+      stamps :created_at, :updated_at
     end
   end
 end

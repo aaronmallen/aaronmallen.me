@@ -12,9 +12,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :pattern, :provider, :tags
-
-      def tags(rule) = rule.tags.map(&:name)
+      schema_attributes
+      tag_names
     end
   end
 end

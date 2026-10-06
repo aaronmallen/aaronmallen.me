@@ -17,15 +17,11 @@ module API
         },
       ).freeze
 
-      attributes :id, :title, :problem, :status, :resolved_option_id, :tags, :options, :created_at, :updated_at
-
-      def created_at(decision) = stamp(decision.created_at)
+      schema_attributes
+      stamps :created_at, :updated_at
+      tag_names
 
       def options(decision) = DecisionOption.new(decision.options).serializable_hash
-
-      def tags(decision) = decision.tags.map(&:name)
-
-      def updated_at(decision) = stamp(decision.updated_at)
     end
   end
 end

@@ -12,11 +12,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :body, :created_at, :updated_at
-
-      def created_at(comment) = stamp(comment.created_at)
-
-      def updated_at(comment) = stamp(comment.updated_at)
+      schema_attributes
+      stamps :created_at, :updated_at
     end
   end
 end

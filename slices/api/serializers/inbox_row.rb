@@ -30,9 +30,8 @@ module API
         },
       ).freeze
 
-      attributes :kind, :id, :at, :title, :excerpt, :url, :tags, :source, :type, :post_id, :reply_to
-
-      def at(row) = stamp(row.at)
+      schema_attributes
+      stamps :at
 
       def excerpt(row)
         case row.kind
@@ -61,7 +60,7 @@ module API
       end
 
       def tags(row)
-        row.record.tags.map(&:name) if row.kind == :task
+        tag_names(row.record) if row.kind == :task
       end
 
       def title(row)

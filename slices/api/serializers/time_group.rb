@@ -25,7 +25,7 @@ module API
         },
       ).freeze
 
-      attributes :key, :name, :seconds, :shared, :tasks
+      schema_attributes
 
       def key(group) = group.key.is_a?(Date) ? day(group.key) : group.key
 

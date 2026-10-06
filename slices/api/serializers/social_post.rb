@@ -17,9 +17,8 @@ module API
         },
       ).freeze
 
-      attributes :id, :status, :post_id, :targets, :posted_at, :created_at, :updated_at, :parts, :deliveries
-
-      def created_at(social_post) = stamp(social_post.created_at)
+      schema_attributes
+      stamps :created_at, :posted_at, :updated_at
 
       def deliveries(social_post)
         entries = social_post.targets.map do |network|
@@ -31,11 +30,7 @@ module API
 
       def parts(social_post) = social_post.parts.map(&:body)
 
-      def posted_at(social_post) = stamp(social_post.posted_at)
-
       def targets(social_post) = social_post.targets.to_a
-
-      def updated_at(social_post) = stamp(social_post.updated_at)
     end
   end
 end

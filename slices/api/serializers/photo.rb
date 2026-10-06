@@ -11,7 +11,7 @@ module API
         },
       ).freeze
 
-      attributes :url, :width, :height
+      schema_attributes
     end
   end
 end

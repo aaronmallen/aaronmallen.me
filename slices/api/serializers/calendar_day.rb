@@ -20,7 +20,7 @@ module API
         },
       ).freeze
 
-      attributes :date, :sprint, :posts, :social_posts, :journal
+      schema_attributes
 
       def date(found) = day(found.date)
 

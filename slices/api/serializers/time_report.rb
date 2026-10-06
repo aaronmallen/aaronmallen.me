@@ -13,7 +13,7 @@ module API
         },
       ).freeze
 
-      attributes :from, :to, :by, :seconds, :groups
+      schema_attributes
 
       def from(report) = day(report.from)
 

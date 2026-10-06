@@ -23,18 +23,13 @@ module API
         },
       ).freeze
 
-      attributes :id, :name, :tagline, :status, :featured, :started_on, :archived_on, :tags
-      attributes :repo, :url, :og_image_url, :stars, :release, :created_at, :updated_at
+      schema_attributes
+      stamps :created_at, :updated_at
+      tag_names
 
       def archived_on(project) = day(project.archived_on)
 
-      def created_at(project) = stamp(project.created_at)
-
       def started_on(project) = day(project.started_on)
-
-      def tags(project) = project.tags.map(&:name)
-
-      def updated_at(project) = stamp(project.updated_at)
     end
   end
 end

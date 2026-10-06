@@ -63,10 +63,7 @@ module API
         },
       ).freeze
 
-      attributes(
-        :period, :from, :to, :totals, :done, :carried, :posts, :social_posts, :journal, :commits, :decisions, :worked,
-        :note,
-      )
+      schema_attributes
 
       def carried(review)
         review.carried.map do |task|

@@ -11,11 +11,10 @@ module API
         },
       ).freeze
 
-      attributes :option, :reason, :resolved_at
+      schema_attributes
+      stamps resolved_at: :occurred_at
 
       def option(_resolved) = DecisionOption.new(params.fetch(:option)).serializable_hash
-
-      def resolved_at(resolved) = stamp(resolved.occurred_at)
     end
   end
 end

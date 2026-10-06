@@ -18,7 +18,7 @@ module API
         optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Schema.list(reference)] },
       ).freeze
 
-      attributes :kind, :id, :title, :day, :url
+      schema_attributes
 
       def day(link) = super(link.day)
     end
