@@ -435,6 +435,48 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "an issue's links" do
+    def links
+      remote = sources.pluck(:task_id, :remote_id).to_h
+
+      Tasks::Slice["relations.task_links"].pluck(:from_task_id, :type, :to_task_id).map do |from, type, to|
+        [remote[from], type, remote[to]]
+      end
+    end
+
+    def node(id, key, **) = linear_issue(id, key:, **)
+
+    def outward(type, id) = linear_related({ type:, relatedIssue: { id: } })
+
+    {
+      "blocks" => %w[L_one blocks L_two], "related" => %w[L_one relates L_two],
+      "duplicate" => %w[L_one duplicates L_two],
+    }.each do |type, link|
+      it "turns a #{type} relation into a matching link" do
+        stub_assigned(issue(relations: outward(type, "L_two")), node("L_two", "ABC-2"))
+        sync
+
+        expect(links).to eq([link])
+      end
+    end
+
+    it "gives a child a parent link from its parent" do
+      stub_assigned(issue(parent: { id: "L_two" }), node("L_two", "ABC-2", children: linear_related({ id: "L_one" })))
+      sync
+
+      expect(links).to eq([%w[L_two parent L_one]])
+    end
+
+    it "imports the other end when it is not in the app and keeps it open", :aggregate_failures do
+      stub_assigned(issue(relations: outward("blocks", "L_two")))
+      stub_known(node("L_two", "ABC-2", assignee: "someone-else"))
+      2.times { sync }
+
+      expect(status(repo.by_id(sources.at("linear", "L_two").pluck(:task_id).first))).to eq("open")
+      expect(links).to eq([%w[L_one blocks L_two]])
+    end
+  end
+
   describe "an issue whose title is blank once cleaned" do
     it "imports with its key as the title" do
       stub_assigned(issue(title: "\u0000 \u0000"))
@@ -652,6 +694,14 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(status(task)).to eq("canceled")
+    end
+
+    it "marks the task done when the issue was also completed" do
+      task = tracked
+      stub_known(issue(assignee: "someone-else", state: "completed"))
+      sync
+
+      expect(status(task)).to eq("done")
     end
 
     it "reopens the task when the issue is assigned back to me" do

@@ -127,10 +127,9 @@ module Record
       end
 
       def remote_state(node, viewer)
-        return UNASSIGNED unless node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer }
-        return OPEN unless node.fetch("state") == "CLOSED"
+        return CLOSE_REASONS.fetch(node["stateReason"], COMPLETED) if node.fetch("state") == "CLOSED"
 
-        CLOSE_REASONS.fetch(node["stateReason"], COMPLETED)
+        node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer } ? OPEN : UNASSIGNED
       end
 
       def vanished(id, url)

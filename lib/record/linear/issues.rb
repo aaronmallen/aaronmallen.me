@@ -56,6 +56,7 @@ module Record
       STARTED = Blog::Types::TaskSourceState["started"]
       UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
 
+      CLOSED = [COMPLETED, NOT_PLANNED].freeze
       ID_BATCH_SIZE = 25
       INVERSE_KINDS = { "blocks" => "blocked_by", "duplicate" => "duplicated_by", "related" => "relates" }.freeze
       KINDS = { "blocks" => "blocks", "duplicate" => "duplicates", "related" => "relates" }.freeze
@@ -147,9 +148,11 @@ module Record
 
       def remote_state(node, viewer)
         return DELETED if node["trashed"]
-        return UNASSIGNED unless node.dig("assignee", "id") == viewer
 
-        STATE_TYPES.fetch(node.dig("state", "type"), OPEN)
+        state = STATE_TYPES.fetch(node.dig("state", "type"), OPEN)
+        return state if CLOSED.include?(state) || node.dig("assignee", "id") == viewer
+
+        UNASSIGNED
       end
     end
   end

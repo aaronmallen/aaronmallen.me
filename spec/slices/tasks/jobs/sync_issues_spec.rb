@@ -506,6 +506,230 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "an issue's links" do
+    let(:other) { "MDQ6VXNlcjE=" }
+
+    def drop_relation
+      stub_assigned(issue)
+      stub_known(node("I_one", 1, assignees: [other]))
+    end
+
+    def hold(id, *traits, state: "open")
+      task = create(:task, *traits, list: "external")
+      create(:task_source, remote_id: id, remote_state: state, task:)
+
+      repo.by_id(task.id)
+    end
+
+    def links
+      remote = sources.pluck(:task_id, :remote_id).to_h
+
+      rows = Tasks::Slice["relations.task_links"].pluck(:from_task_id, :type, :to_task_id, :synced)
+
+      rows.map { |from, type, to, synced| [remote[from], type, remote[to], synced] }
+    end
+
+    def node(id, number, **) = github_issue(id, number:, **)
+
+    def pair(**) = [issue(blockedBy: github_related("I_one")), node("I_one", 1, **)]
+
+    it "blocks a task its blocker blocks once both are in" do
+      stub_assigned(*pair(blocking: github_related("I_seven")))
+      sync
+
+      expect(imported).to be_blocked
+    end
+
+    it "links two related issues imported in the same run" do
+      stub_assigned(*pair(blocking: github_related("I_seven")))
+      sync
+
+      expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+    end
+
+    it "links an issue imported in the run to a task already here" do
+      hold("I_one")
+      stub_known(node("I_one", 1, blocking: github_related("I_seven")))
+      stub_assigned(issue(blockedBy: github_related("I_one")))
+      sync
+
+      expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+    end
+
+    it "gives a sub-issue a parent link from its parent" do
+      stub_assigned(issue(parent: { id: "I_one" }), node("I_one", 1, subIssues: github_related("I_seven")))
+      sync
+
+      expect(links).to eq([["I_one", "parent", "I_seven", true]])
+    end
+
+    it "keeps a parent link while the parent names the child, though GitHub hides the parent from the child" do
+      stub_assigned(issue(parent: { id: "I_one" }), node("I_one", 1, subIssues: github_related("I_seven")))
+      sync
+      stub_assigned(issue, node("I_one", 1, subIssues: github_related("I_seven")))
+      sync
+
+      expect(links).to eq([["I_one", "parent", "I_seven", true]])
+    end
+
+    it "keeps the strongest kind when upstream gives one pair two" do
+      stub_assigned(issue(parent: { id: "I_one" }, blockedBy: github_related("I_one")), node("I_one", 1))
+      sync
+
+      expect(links).to eq([["I_one", "parent", "I_seven", true]])
+    end
+
+    context "when the other end is not in the app" do
+      before do
+        stub_assigned(issue(blockedBy: github_related("I_one")))
+        neighbor = node("I_one", 1, assignees: [other], blockedBy: github_related("I_two"))
+        stub_known(neighbor, node("I_two", 2, assignees: [other]))
+      end
+
+      it "imports it and links it", :aggregate_failures do
+        sync
+
+        expect(imported("I_one")).to have_attributes(list: "external", status: "open")
+        expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+      end
+
+      it "does not pull in the imported issue's own relations" do
+        2.times { sync }
+
+        expect(sources.pluck(:remote_id)).to contain_exactly("I_seven", "I_one")
+      end
+
+      it "keeps the imported task open while a synced link holds it" do
+        2.times { sync }
+
+        expect(imported("I_one").status).to eq("open")
+      end
+
+      it "drops the link once the relation goes upstream" do
+        sync
+        drop_relation
+        sync
+
+        expect(links).to be_empty
+      end
+
+      it "keeps the imported task open on the run that drops its last synced link" do
+        sync
+        drop_relation
+        sync
+
+        expect(imported("I_one").status).to eq("open")
+      end
+
+      it "cancels the imported task on the run after its last synced link goes" do
+        sync
+        drop_relation
+        2.times { sync }
+
+        expect(imported("I_one").status).to eq("canceled")
+      end
+    end
+
+    it "does not import a closed issue at the other end" do
+      stub_assigned(issue(blockedBy: github_related("I_one")))
+      stub_known(node("I_one", 1, assignees: [other], state: "CLOSED", stateReason: "COMPLETED"))
+      sync
+
+      expect(sources.pluck(:remote_id)).to eq(%w[I_seven])
+    end
+
+    it "does not import an issue GitHub cannot find" do
+      stub_assigned(issue(blockedBy: github_related("I_one")))
+      sync
+
+      expect(sources.pluck(:remote_id)).to eq(%w[I_seven])
+    end
+
+    it "reports a failed lookup of the other end and still links the rest", :aggregate_failures do
+      stub_assigned(issue(blockedBy: github_related("I_one", "I_two")), node("I_one", 1))
+      stub_github(GitHubGraphQL::ISSUES_QUERY, github_errors("RATE_LIMITED", data: { rateLimit: github_rate_limit }))
+      sync
+
+      expect(failure).to include(reason: "rate_limited")
+      expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+    end
+
+    it "removes a synced link once the relation goes upstream" do
+      stub_assigned(*pair(blocking: github_related("I_seven")))
+      sync
+      stub_assigned(issue, node("I_one", 1))
+      sync
+
+      expect(links).to be_empty
+    end
+
+    it "changes a synced link whose kind changes upstream" do
+      stub_assigned(*pair)
+      sync
+      stub_assigned(issue(parent: { id: "I_one" }), node("I_one", 1))
+      sync
+
+      expect(links).to eq([["I_one", "parent", "I_seven", true]])
+    end
+
+    it "leaves a synced link alone while GitHub leaves the relations out" do
+      stub_assigned(*pair)
+      sync
+      stub_assigned(issue.except(:blockedBy), node("I_one", 1).except(:blocking))
+      sync
+
+      expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+    end
+
+    context "with a link I made by hand" do
+      before { create(:task_link, :relates, from_task_id: tracked.id, to_task_id: hold("I_one").id) }
+
+      it "keeps it and adds no synced link on its pair" do
+        stub_assigned(*pair)
+        sync
+
+        expect(links).to eq([["I_seven", "relates", "I_one", false]])
+      end
+
+      it "keeps it when upstream names no relation" do
+        stub_assigned(issue, node("I_one", 1))
+        sync
+
+        expect(links).to eq([["I_seven", "relates", "I_one", false]])
+      end
+    end
+
+    it "adds no parent to a task that has one by hand" do
+      create(:task_link, :parent, from_task_id: create(:task).id, to_task_id: tracked.id)
+      stub_assigned(issue(parent: { id: "I_one" }), node("I_one", 1))
+      sync
+
+      expect(links.select(&:last)).to be_empty
+    end
+
+    context "with a closed task" do
+      before do
+        blocker = hold("I_one", :done, state: "completed")
+        create(:task_link, from_task_id: blocker.id, to_task_id: tracked.id, synced: true)
+      end
+
+      it "keeps its synced link when upstream drops the relation" do
+        stub_assigned(issue)
+        sync
+
+        expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+      end
+
+      it "does not refresh its links from upstream" do
+        stub_assigned(issue)
+        stub_known(node("I_one", 1, state: "CLOSED", stateReason: "COMPLETED", subIssues: github_related("I_seven")))
+        sync
+
+        expect(links).to eq([["I_one", "blocks", "I_seven", true]])
+      end
+    end
+  end
+
   describe "an issue closed on GitHub" do
     it "marks the task done when it closed as completed" do
       task = tracked
@@ -629,12 +853,28 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(repo.by_id(task.id).status).to eq("canceled")
     end
 
+    it "marks the task done when the issue was also closed as completed" do
+      task = tracked
+      stub_known(issue(assignees: ["MDQ6VXNlcjE="], state: "CLOSED", stateReason: "COMPLETED"))
+      sync
+
+      expect(repo.by_id(task.id).status).to eq("done")
+    end
+
     it "leaves a task I finished done" do
       task = tracked(:done)
       stub_known(issue(assignees: ["MDQ6VXNlcjE="]))
       sync
 
       expect(repo.by_id(task.id).status).to eq("done")
+    end
+
+    it "leaves the task canceled when the issue closes after it was taken off me" do
+      task = tracked(:canceled, state: "unassigned")
+      stub_known(issue(assignees: ["MDQ6VXNlcjE="], state: "CLOSED", stateReason: "COMPLETED"))
+      sync
+
+      expect(repo.by_id(task.id).status).to eq("canceled")
     end
 
     it "reopens the task when the issue is assigned back to me" do

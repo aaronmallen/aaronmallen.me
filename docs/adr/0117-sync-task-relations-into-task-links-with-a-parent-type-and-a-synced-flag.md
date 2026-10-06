@@ -53,15 +53,19 @@ share.
 through `task_sources` under the run's provider, so the links of two issues imported in one run land in that run. For
 each task still open after the run follows it, the sync turns every relation into one synced row (`blocked_by` as a
 `blocks` row from the other end, and so on), updates a synced row whose type changed, and deletes each synced row
-touching the task that no relation names. A closed task keeps its links, and the sync reads none of its relations,
-as `SyncComments` skips a closed task's comments. When upstream gives one pair two kinds, `parent` wins, then
-`blocks`, `duplicates` and `relates`.
+touching the task that no relation names. A synced row stays while either end names it, so a link the run reads from
+one side only holds. The sync adds, changes and deletes no link that touches a closed task, and reads none of a
+closed task's relations, as `SyncComments` skips a closed task's comments. When upstream gives one pair two kinds,
+`parent` wins, then `blocks`, `duplicates` and `relates`.
 
 **The other end of a relation comes in one hop out.** When no task holds a relation's remote id, the sync imports
 the issue through `client.issues` and the usual `import`, so labels and tag rules apply as for any import
 ([ADR 0103][0103], [ADR 0112][0112]). Only relations of assigned issues import. Relations of an issue the sync reads
 through `client.issues` link to tasks already here and pull in nothing new, which stops the walk at one hop on every
-run, not only the first.
+run, not only the first. An issue that comes back closed, or that the provider cannot find, stays out. When that
+lookup fails, the run still writes the links it can resolve and reports the failure. Both clients report a closed
+issue as closed before they look at its assignee, so a relation import closed upstream closes here too. A task
+already canceled as `unassigned` keeps that state when its issue closes later.
 
 **A task held by a synced link stays open while unassigned.** `SyncIssues` reads `unassigned` as `open` for a task
 that holds a synced link, and stores `open`. Once its last synced link goes, the next run sees `unassigned` and
@@ -93,6 +97,10 @@ until the operator removes the synced one. A parent and child cannot also block 
 A task that was assigned, holds a synced link and is then taken off the operator stays open, since the sync cannot
 tell it from a relation import. Tasks imported one hop out fill the external list with issues the operator does not
 own.
+
+When GitHub hides an issue's parent, the child reports no parent rather than leaving `relations` out. The synced
+parent link holds while the run reads the parent and the parent still names the child, but goes when the parent is
+hidden too.
 
 Each relation connection reads one page, so the links of an issue with more relations than a page holds stop
 changing until it has fewer. The added fields raise the cost of GitHub's 100-node lookup and Linear's
