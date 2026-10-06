@@ -101,6 +101,12 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         expect(page).to have_css(".seg input[name='range'][value='30'][checked]")
       end
 
+      it "offers the 7, 14 and 30 day ranges" do
+        get "/admin/analytics"
+
+        expect(page.all(".seg-option").map(&:text)).to eq(%w[7d 14d 30d])
+      end
+
       it "falls back to 7 days for a range it doesn't know" do
         get "/admin/analytics", range: "90"
 
@@ -493,8 +499,8 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "says there is nothing in the cards", :aggregate_failures do
         expect(page).to have_css(".empty", exact_text: message("components.analytics.pages_card.empty"))
-        expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_referrers"))
-        expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_countries"))
+        expect(page).to have_css(".empty", exact_text: message("components.analytics.referrers_card.empty"))
+        expect(page).to have_css(".empty", exact_text: message("components.analytics.countries_card.empty"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_mentions"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_aggregators"))
       end

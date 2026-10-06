@@ -161,6 +161,10 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(stat("Read-throughs")).to have_css(".stat-value", exact_text: "23")
       end
 
+      it "offers the 7, 14 and 30 day ranges" do
+        expect(page.all(".seg-option").map(&:text)).to eq(%w[7d 14d 30d])
+      end
+
       it "keeps the chosen range in the control" do
         expect(page).to have_css(".seg input[name='range'][value='14'][checked]")
       end
@@ -221,7 +225,8 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
       it "says there is nothing in the cards", :aggregate_failures do
         %w[
           components.analytics.scroll_card.empty views.posts.analytics.no_devices views.posts.analytics.no_sources
-          views.posts.analytics.no_referrers views.posts.analytics.no_countries views.posts.analytics.no_clicks
+          components.analytics.referrers_card.empty components.analytics.countries_card.empty
+          views.posts.analytics.no_clicks
         ].each { expect(page).to have_css(".empty", exact_text: message(it)) }
       end
     end

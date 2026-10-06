@@ -10,11 +10,6 @@ module Admin
           LABELS = {
             views: ".views", visitors: ".visitors", readers: ".readers", read_throughs: ".read_throughs",
           }.freeze
-          RANGES = {
-            "7" => "ui.views.posts.analytics.range_7",
-            "14" => "ui.views.posts.analytics.range_14",
-            "30" => "ui.views.posts.analytics.range_30",
-          }.freeze
           SEPARATOR = " · "
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
@@ -54,8 +49,6 @@ module Admin
 
           def clicks = @clicks.map { { count: it[:clicks], label: it.values_at(:link_host, :link_path).join } }
 
-          def countries = rows(:countries) { it[:country_code] || t(".unknown_country") }
-
           def devices = rows(:devices) { it[:device_class] }
 
           def figure(key, change: nil) = Stat(key: t(LABELS.fetch(key)), value: Blog::Figures.count(stat(key)), change:)
@@ -78,11 +71,9 @@ module Admin
             )
           end
 
-          def referrers = rows(:referrers) { it[:host] || t(".direct") }
-
           def right_cards
-            MeterCard(color: :blue, empty: t(".no_referrers"), rows: referrers, title: t(".referrers"))
-            MeterCard(color: :violet, empty: t(".no_countries"), rows: countries, title: t(".geography"))
+            ReferrersCard(rows: @breakdowns.fetch(:referrers))
+            CountriesCard(rows: @breakdowns.fetch(:countries))
             MeterCard(color: :pink, empty: t(".no_clicks"), rows: clicks, title: t(".clicks"))
           end
 

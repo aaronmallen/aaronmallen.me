@@ -7,11 +7,6 @@ module Admin
         class Show < View
           include Components::Analytics
 
-          RANGES = {
-            "7" => "ui.views.analytics.show.range_7",
-            "14" => "ui.views.analytics.show.range_14",
-            "30" => "ui.views.analytics.show.range_30",
-          }.freeze
           SIGNED = "%+d"
 
           def initialize(
@@ -57,10 +52,6 @@ module Admin
             change ? t(".change", count: @range, percent: format(SIGNED, change)) : t(".no_prior")
           end
 
-          def countries
-            @countries.map { { count: it[:visitors], label: it[:country_code] || t(".unknown_country") } }
-          end
-
           def feed_cards
             FeedCard(**@feed.slice(:days, :latest))
             MeterCard(color: :blue, empty: t(".no_aggregators"), rows: aggregators, title: t(".aggregators"))
@@ -84,11 +75,9 @@ module Admin
 
           def read_time = @stats.fetch(:read_time)
 
-          def referrers = @referrers.map { { count: it[:visitors], label: it[:host] || t(".direct") } }
-
           def side_cards
-            MeterCard(color: :blue, empty: t(".no_referrers"), rows: referrers, title: t(".referrers"))
-            MeterCard(color: :violet, empty: t(".no_countries"), rows: countries, title: t(".geography"))
+            ReferrersCard(rows: @referrers)
+            CountriesCard(rows: @countries)
             MeterCard(
               color: :pink, empty: t(".no_mentions"), rows: mentioned_posts, title: t(".mentioned_posts"),
             )
