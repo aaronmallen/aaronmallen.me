@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "../lib/blog/concurrency"
+require_relative "../lib/blog/params_guard"
 
 rackup File.expand_path("../.config/config.ru", File.dirname(__FILE__))
 port ENV.fetch("HANAMI_PORT", 2300), ENV.fetch("HANAMI_HOST", "127.0.0.1")
@@ -11,6 +12,7 @@ threads min_threads_count, max_threads_count
 puma_concurrency = Integer(ENV.fetch("HANAMI_WEB_CONCURRENCY", 0))
 puma_cluster_mode = puma_concurrency > 1
 workers puma_concurrency
+http_content_length_limit Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT
 
 if puma_cluster_mode
   before_fork do
