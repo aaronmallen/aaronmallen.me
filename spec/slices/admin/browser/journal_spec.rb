@@ -17,7 +17,7 @@ RSpec.describe "Admin journal", type: :feature do
     evaluate_script(<<~JS)
       (() => {
         const bar = document.querySelector(".ctx-bar").getBoundingClientRect().bottom;
-        return [...document.querySelectorAll(".journal-day-head")]
+        return [...document.querySelectorAll(".day-head")]
           .some((head) => Math.abs(head.getBoundingClientRect().top - bar) < 1);
       })()
     JS

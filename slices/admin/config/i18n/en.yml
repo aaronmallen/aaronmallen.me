@@ -276,12 +276,6 @@ en:
   ui:
     components:
       activity:
-        day:
-          days_ago:
-            one: "%{count} day ago"
-            other: "%{count} days ago"
-          today: "Today"
-          yesterday: "Yesterday"
         filters:
           contains: "Contains"
           contains_hint: "Add tag:ruby to search by tag, or repo:owner/name to search one repo."
@@ -477,6 +471,12 @@ en:
       confirm_dialog:
         accept: "Yes"
         decline: "No"
+      day_head:
+        days_ago:
+          one: "%{count} day ago"
+          other: "%{count} days ago"
+        today: "Today"
+        yesterday: "Yesterday"
       decisions:
         closing:
           drop: "Drop"
@@ -606,12 +606,6 @@ en:
           spam: "Spam"
           subject: "Re: %{subject}"
       journal:
-        day:
-          days_ago:
-            one: "%{count} day ago"
-            other: "%{count} days ago"
-          today: "Today"
-          yesterday: "Yesterday"
         entry:
           body: "Entry text"
           cancel: "Cancel"
@@ -1386,10 +1380,6 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{date} · %{time}"
           done_at: "done %{date} · %{time}"
-        completed_day:
-          days_ago: "%{count} days ago"
-          today: "Today"
-          yesterday: "Yesterday"
         controls:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."

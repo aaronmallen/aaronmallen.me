@@ -40,7 +40,7 @@ RSpec.describe "API saved view records", type: :request do
   def screen_rows(filters)
     get "/admin/activity", filters
     Capybara.string(last_response.body).all(".activity-day").flat_map do |day|
-      day.all(".activity-event-name").map { [day.find(".activity-day-date")[:datetime], it.text] }
+      day.all(".activity-event-name").map { [day.find(".day-date")[:datetime], it.text] }
     end
   end
 

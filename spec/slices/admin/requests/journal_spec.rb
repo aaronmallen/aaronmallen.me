@@ -11,7 +11,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
   def day_bodies(date) = page.all(".journal-day:has(time[datetime='#{date.iso8601}']) .journal-entry-body").map(&:text)
 
-  def day_dates = page.all(".journal-day-date").map { it["datetime"] }
+  def day_dates = page.all(".day-date").map { it["datetime"] }
 
   def entries = repo.between(from: today - 30, to: today)
 
@@ -168,7 +168,14 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         create(:journal_entry, entry_date: Date.new(2026, 9, 3))
         get "/admin/journal"
 
-        expect(page).to have_css("h2.journal-day-head time.journal-day-date", exact_text: "Thursday, September 3, 2026")
+        expect(page).to have_css("h2.day-head time.day-date", exact_text: "Thursday, September 3, 2026")
+      end
+
+      it "anchors each day by its date" do
+        create(:journal_entry, entry_date: Date.new(2026, 9, 3))
+        get "/admin/journal"
+
+        expect(page).to have_css("section.journal-day#day-2026-09-03 h2.day-head")
       end
 
       { 0 => "Today", 1 => "Yesterday", 3 => "3 days ago" }.each do |days, label|
@@ -176,7 +183,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
           create(:journal_entry, entry_date: today - days)
           get "/admin/journal"
 
-          expect(page).to have_css(".journal-day-head .journal-day-rule + .journal-day-ago", exact_text: label)
+          expect(page).to have_css(".day-head .day-rule + .day-note", exact_text: label)
         end
       end
 

@@ -2305,7 +2305,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "the archive" do
-      def day_heads = page.all(".task-day-date").map(&:text)
+      def day_heads = page.all(".day-date").map(&:text)
 
       def finished(title, days, hour, **)
         day = Blog::TimeZone.today - days
@@ -2344,10 +2344,16 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says how long ago each day was and what it holds" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page.all(".task-day-count").map(&:text))
-          .to eq(["#{i18n.t('ui.components.tasks.completed_day.today')} · 1",
-                  "#{i18n.t('ui.components.tasks.completed_day.yesterday')} · 2",
-                  "#{i18n.t('ui.components.tasks.completed_day.days_ago', count: 2)} · 1"])
+        expect(page.all(".day-note").map(&:text))
+          .to eq(["#{i18n.t('ui.components.day_head.today')} · 1",
+                  "#{i18n.t('ui.components.day_head.yesterday')} · 2",
+                  "#{i18n.t('ui.components.day_head.days_ago', count: 2)} · 1"])
+      end
+
+      it "heads each day on the sunk ground" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".day-head.sunk", count: 3)
       end
 
       it "counts every finished task on the tab" do

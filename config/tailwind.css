@@ -1285,24 +1285,28 @@
   @apply mt-3 flex justify-end;
 }
 
-@utility journal-day {
-  @apply flex flex-col gap-3 scroll-mt-ctx-bar;
-}
-
-@utility journal-day-head {
+@utility day-head {
   @apply sticky top-ctx-bar z-10 flex items-center gap-3 bg-ground py-2;
+
+  &.sunk {
+    @apply bg-ground-sunk;
+  }
 }
 
-@utility journal-day-date {
+@utility day-date {
   @apply font-display text-card-title font-bold text-ink;
 }
 
-@utility journal-day-rule {
+@utility day-rule {
   @apply h-px flex-1 bg-line;
 }
 
-@utility journal-day-ago {
+@utility day-note {
   @apply shrink-0 meta;
+}
+
+@utility journal-day {
+  @apply flex flex-col gap-3 scroll-mt-ctx-bar;
 }
 
 @utility journal-entry {
@@ -1413,22 +1417,6 @@
 
 @utility activity-day {
   @apply flex flex-col;
-}
-
-@utility activity-day-head {
-  @apply sticky top-ctx-bar z-10 flex items-center gap-3 bg-ground py-2;
-}
-
-@utility activity-day-date {
-  @apply font-display text-card-title font-bold text-ink;
-}
-
-@utility activity-day-rule {
-  @apply h-px flex-1 bg-line;
-}
-
-@utility activity-day-count {
-  @apply shrink-0 meta;
 }
 
 @utility activity-event {
@@ -2601,22 +2589,6 @@
 
 @utility task-day {
   @apply flex flex-col;
-}
-
-@utility task-day-head {
-  @apply sticky top-ctx-bar z-10 flex items-center gap-3 bg-ground-sunk py-2;
-}
-
-@utility task-day-date {
-  @apply font-display text-card-title font-bold text-ink;
-}
-
-@utility task-day-rule {
-  @apply h-px flex-1 bg-line;
-}
-
-@utility task-day-count {
-  @apply shrink-0 meta;
 }
 
 @utility task-note {

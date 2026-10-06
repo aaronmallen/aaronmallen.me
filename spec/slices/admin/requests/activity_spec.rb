@@ -100,7 +100,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "groups the days newest first" do
-        expect(page.all(".activity-day-date").map { it["datetime"] }).to eq([today.iso8601, (today - 1).iso8601])
+        expect(page.all(".day-date").map { it["datetime"] }).to eq([today.iso8601, (today - 1).iso8601])
       end
 
       it "orders a day's events newest first" do
@@ -112,11 +112,15 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "heads today with its relative label and count" do
-        expect(page).to have_css(".activity-day-count", text: "Today · 2")
+        expect(page).to have_css(".day-note", text: "Today · 2")
       end
 
       it "heads yesterday with its relative label" do
-        expect(page).to have_css(".activity-day-count", text: "Yesterday · 1")
+        expect(page).to have_css(".day-note", text: "Yesterday · 1")
+      end
+
+      it "heads each day on the page ground" do
+        expect(page).to have_no_css(".day-head.sunk")
       end
 
       it "shows the time each event happened" do
@@ -464,7 +468,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "heads it with how long ago it was" do
-        expect(page).to have_css(".activity-day-count", text: "3 days ago · 1")
+        expect(page).to have_css(".day-note", text: "3 days ago · 1")
       end
     end
 
@@ -565,7 +569,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "stops near the page size and finishes the day it is on" do
         visit_activity(range)
 
-        expect(page.all(".activity-day-date").map { it["datetime"] }).to eq([today.iso8601, (today - 1).iso8601])
+        expect(page.all(".day-date").map { it["datetime"] }).to eq([today.iso8601, (today - 1).iso8601])
       end
 
       it "shows the rest of the range on the older page" do
