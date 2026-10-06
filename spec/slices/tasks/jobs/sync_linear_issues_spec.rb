@@ -36,9 +36,9 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
   def sync = described_class.new.perform
 
-  def tracked(*traits, state: "open", **)
+  def tracked(*traits, state: "open", checked_at: nil, **)
     task = create(:task, *traits, list: "external", title: "Sync my issues", note: "Keep them in step", **)
-    create(:task_source, provider: "linear", remote_id: "L_one", url:, remote_state: state, task:)
+    create(:task_source, provider: "linear", remote_id: "L_one", url:, remote_state: state, checked_at:, task:)
 
     repo.by_id(task.id)
   end
@@ -82,6 +82,12 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
       expect(imported).to have_attributes(list: nil, status: "in_progress")
       expect(imported.source.remote_state).to eq("started")
+    end
+
+    it "arrives unseen" do
+      sync
+
+      expect(imported.source.seen_at).to be_nil
     end
 
     it "stays one task in progress when the job runs twice", :aggregate_failures do
@@ -276,6 +282,22 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       expect(comments(task).map(&:id)).to include(mine.id)
     end
 
+    it "reach a task its issue reopens" do
+      task = tracked(:done, state: "completed")
+      stub_assigned(discussed(linear_comment("c1")))
+      sync
+
+      expect(comments(task).map(&:remote_id)).to eq(%w[c1])
+    end
+
+    it "stop at a task its issue cancels" do
+      task = tracked
+      stub_known(discussed(linear_comment("c1"), state: "canceled"))
+      sync
+
+      expect(comments(task)).to be_empty
+    end
+
     it "stop coming to a task I finished" do
       task = tracked(:done)
       stub_assigned(discussed(linear_comment("c1")))
@@ -313,12 +335,21 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
   end
 
   describe "an issue that moves between states" do
-    it "puts its task in progress when it starts" do
+    it "puts its task in progress when it starts", :aggregate_failures do
       task = tracked
       stub_assigned(issue(state: "started"))
       sync
 
-      expect(status(task)).to eq("in_progress")
+      expect(repo.by_id(task.id)).to have_attributes(list: nil, status: "in_progress")
+      expect(repo.by_id(task.id).sprint_id).not_to be_nil
+    end
+
+    it "leaves an unseen task unseen as it moves into Today" do
+      task = tracked
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(repo.by_id(task.id).source.seen_at).to be_nil
     end
 
     %w[triage backlog unstarted].each do |type|
@@ -345,6 +376,144 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(status(task)).to eq("canceled")
+    end
+  end
+
+  describe "an issue reopened while I work on its closed task" do
+    it "leaves the task in progress" do
+      task = tracked(:in_progress, state: "completed")
+      stub_assigned(issue)
+      sync
+
+      expect(status(task)).to eq("in_progress")
+    end
+  end
+
+  describe "a started issue whose task I moved to a list" do
+    it "leaves the task open while the issue stays started" do
+      task = tracked(:in_progress, state: "started")
+      Tasks::Slice["operations.move_task"].call(task.id, "external")
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(repo.by_id(task.id)).to have_attributes(list: "external", status: "open")
+    end
+  end
+
+  describe "a synced issue's work session" do
+    def sessions(task) = Tasks::Slice["relations.work_sessions"].for_task(task.id).to_a
+
+    def started(task) = create(:work_session, task_id: task.id, started_at: Time.now - 3600)
+
+    it "opens when the issue starts, at the time of the sync" do
+      task = tracked
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(sessions(task)).to match([include(started_at: be_within(5).of(Time.now), ended_at: nil)])
+    end
+
+    it "opens when a new issue arrives already started" do
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(sessions(imported)).to match([include(started_at: be_within(5).of(Time.now), ended_at: nil)])
+    end
+
+    it "ends when the issue completes" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      stub_known(issue(state: "completed"))
+      sync
+
+      expect(sessions(task)).to match([include(ended_at: be_within(5).of(Time.now))])
+    end
+
+    it "adds its length to the total when the issue completes" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      stub_known(issue(state: "completed"))
+      sync
+
+      expect(repo.by_id(task.id).worked_seconds).to be_within(5).of(3600)
+    end
+
+    it "ends when the issue is canceled" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      stub_known(issue(state: "canceled"))
+      sync
+
+      expect(sessions(task)).to match([include(ended_at: be_within(5).of(Time.now))])
+    end
+
+    it "ends when the issue goes back to open" do
+      task = tracked(:in_progress, state: "started")
+      started(task)
+      stub_assigned(issue)
+      sync
+
+      expect(sessions(task)).to match([include(ended_at: be_within(5).of(Time.now))])
+    end
+  end
+
+  describe "a synced issue's events" do
+    def changed(from, to) = [[from, to, be_within(5).of(Time.now)]]
+
+    def events(task) = Tasks::Slice["relations.task_events"].for_task(task.id)
+
+    def statuses(task)
+      found = events(task).where(kind: "status_changed").in_order
+
+      found.to_a.map { [it[:from_status], it[:to_status], it[:occurred_at]] }
+    end
+
+    it "records a start at the time of the sync" do
+      task = tracked
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(statuses(task)).to match(changed("open", "in_progress"))
+    end
+
+    it "records a pause when the issue goes back to open" do
+      task = tracked(:in_progress, state: "started")
+      stub_assigned(issue)
+      sync
+
+      expect(statuses(task)).to match(changed("in_progress", "open"))
+    end
+
+    it "records a complete" do
+      task = tracked(:in_progress, state: "started")
+      stub_known(issue(state: "completed"))
+      sync
+
+      expect(statuses(task)).to match(changed("in_progress", "done"))
+    end
+
+    it "records a cancel" do
+      task = tracked
+      stub_known(issue(state: "canceled"))
+      sync
+
+      expect(statuses(task)).to match(changed("open", "canceled"))
+    end
+
+    it "records a reopen" do
+      task = tracked(:done, state: "completed")
+      stub_assigned(issue)
+      sync
+
+      expect(statuses(task)).to match(changed("done", "open"))
+    end
+
+    it "records the tags a new issue arrives with" do
+      create(:tag, :private, name: "bug-fix")
+      stub_assigned(issue(labels: { nodes: [{ name: "Bug Fix" }] }))
+      sync
+
+      expect(events(imported).to_a.map { [it[:kind], it[:tag_name]] }).to eq([%w[tagged bug-fix]])
     end
   end
 
@@ -408,6 +577,43 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "a deleted issue assigned to me again" do
+    it "reopens its task instead of importing another" do
+      task = tracked(:canceled, state: "deleted")
+      stub_assigned(issue)
+      sync
+
+      expect(imported).to have_attributes(id: task.id, status: "open")
+    end
+  end
+
+  describe "an issue checked an hour ago" do
+    %w[completed not_planned unassigned].each do |state|
+      it "is not asked about while #{state}" do
+        tracked(:canceled, state:, checked_at: Time.now - 3600)
+        sync
+
+        expect(linear_request(LinearGraphQL::ISSUES_QUERY)).not_to have_been_made
+      end
+    end
+
+    it "is asked about again while started" do
+      tracked(:in_progress, state: "started", checked_at: Time.now - 3600)
+      sync
+
+      expect(linear_request(LinearGraphQL::ISSUES_QUERY, ids: %w[L_one])).to have_been_made
+    end
+  end
+
+  describe "another provider's issue" do
+    it "is not asked about" do
+      create(:task_source, provider: "github", remote_id: "I_seven")
+      sync
+
+      expect(linear_request(LinearGraphQL::ISSUES_QUERY)).not_to have_been_made
+    end
+  end
+
   describe "an archived issue" do
     it "leaves its task as it was" do
       task = tracked(:done, state: "completed")
@@ -436,6 +642,22 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(status(task)).to eq("done")
+    end
+
+    it "holds while the issue stays started" do
+      task = tracked(:done, state: "started")
+      stub_assigned(issue(state: "started"))
+      sync
+
+      expect(status(task)).to eq("done")
+    end
+
+    it "gives way when the issue goes back to open" do
+      task = tracked(:done, state: "started")
+      stub_assigned(issue)
+      sync
+
+      expect(status(task)).to eq("open")
     end
 
     it "gives way when the issue's state changes" do
