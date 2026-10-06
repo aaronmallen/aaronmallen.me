@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp]
 issue: AA-679
-amended: ["#463"]
+amended: ["#463", "#573"]
 tags: [mcp, transport, json-rpc, sdk, cors, sessions, hanami-actions]
 ---
 
@@ -29,8 +29,10 @@ token holds.
 `/mcp` is one Hanami action, `MCP::Actions::Messages::Create`, on one `POST` route in
 `slices/mcp/config/routes.rb`, with an `OPTIONS` preflight beside it. Each request stands alone.
 
-- The action checks the bearer token through `Operations::Authenticate`, reads at most 1 MiB of the body, and hands
-  the raw string to `MCP::Protocol::Handler#call`.
+- The action checks the bearer token through `Operations::Authenticate`, reads at most
+  `Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT` of the body, and hands the raw string to `MCP::Protocol::Handler#call`.
+  Since #573 that is the cap `ParamsGuard` sets on `/mcp`, room for a 25 MB photo in base64, so `upload_photo`
+  takes the photos `POST /api/v1/photos` takes. It read 1 MiB before, which cut off any photo over about 750 KB.
 - The handler builds a new `ScopedServer` for that token's scopes and calls `handle_json` with no session. A
   notification answers 202 with no body, and anything else answers `application/json`.
 - The handler refuses a JSON-RPC batch with `-32600` before the server sees it (AA-698).
@@ -70,8 +72,8 @@ Each request builds a server and registers every tool on it. On a site with one 
 is paid on every call.
 
 We copy what the transport would have given us. AA-698 added the batch refusal once it found one body could carry
-thousands of tool calls, and the 1 MiB cap and the CORS headers are ours to keep in step with the MCP
-spec.
+thousands of tool calls, and the body cap and the CORS headers are ours to keep in step with the MCP
+spec. The cap comes from `ParamsGuard`, so a change to the upload limit moves both.
 
 `ScopedServer` overrides the SDK's private `call_tool` to refuse a withheld tool with a message that tells the
 operator to connect again. A private method can change in any release, so each SDK upgrade has to check that

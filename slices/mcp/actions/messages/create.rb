@@ -8,7 +8,7 @@ module MCP
         AUTHORIZATION = "HTTP_AUTHORIZATION"
         CHALLENGE = "WWW-Authenticate"
         EXPOSED_HEADERS = "Access-Control-Expose-Headers"
-        MAX_BYTES = 1_048_576
+        MAX_BYTES = Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT
         NO_BODY = ""
         UNAUTHORIZED = 401
         UNEXPECTED = { error: INVALID_REQUEST }.freeze

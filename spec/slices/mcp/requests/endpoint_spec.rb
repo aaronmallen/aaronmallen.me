@@ -2118,6 +2118,36 @@ RSpec.describe "MCP endpoint", type: :request do
     end
   end
 
+  describe "upload_photo" do
+    let(:stored) { {} }
+
+    def comment(size) = "\xFF\xFE".b + [size + 2].pack("n") + ("\0" * size)
+
+    def padded(bytes, megabytes)
+      segments = Array.new((megabytes * 1024 * 1024 / 65_533) + 1) { comment(65_531) }
+      bytes.byteslice(0, 2) + segments.join + bytes.byteslice(2..)
+    end
+
+    def photo = padded(Hanami.app.root.join("spec/fixtures/photos/rotated_with_gps.jpg").binread, 2)
+
+    before do
+      connect_media_store
+      stub_request(:put, %r{\Ahttps://store\.example(?::443)?/photos/}).to_return do |request|
+        stored[File.basename(request.uri.path)] = request.body
+        { status: 200 }
+      end
+    end
+
+    it "stores a photo of 2 MB and answers its reference", :aggregate_failures do
+      call_tool("upload_photo", data: Base64.strict_encode64(photo), filename: "photo.jpg")
+      row = Media::Slice["relations.photos"].one
+
+      expect(photo.bytesize).to be > 2 * 1024 * 1024
+      expect(stored.keys).to contain_exactly(end_with(".jpg"))
+      expect(content).to eq("url" => Blog::Site.url("/media/#{row[:key]}"), "width" => 20, "height" => 40)
+    end
+  end
+
   describe "write_post_seo" do
     def article = @article ||= create(:post, :published)
 
