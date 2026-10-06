@@ -1,7 +1,8 @@
+import { setupFetch } from "./fetching.js";
+import { parse } from "./in_place.js";
 import { countText, setupListbox } from "./listbox.js";
 import { fillField, typed } from "./person_field.js";
 
-const DELAY = 300;
 const MINIMUM = 2;
 const PICK = "[data-person-pick]";
 
@@ -11,8 +12,6 @@ export function setupPersonSearch(search, name) {
   const list = search.querySelector("[data-person-search-results]");
   const status = search.querySelector("[data-person-search-status]");
   const picks = () => [...list.querySelectorAll(PICK)];
-  let controller = null;
-  let timer = null;
 
   const choose = (pick) => {
     fillField(field, pick.dataset.personPick);
@@ -25,8 +24,7 @@ export function setupPersonSearch(search, name) {
   const { active, select, step } = setupListbox({ list, owner: () => input, choice: PICK, options: picks, choose });
 
   const close = () => {
-    clearTimeout(timer);
-    controller?.abort();
+    finder.stop();
     select(null);
     list.hidden = true;
     list.replaceChildren();
@@ -55,31 +53,24 @@ export function setupPersonSearch(search, name) {
     return [row];
   };
 
-  const ask = async (query) => {
-    controller?.abort();
-    controller = new AbortController();
-    const url = `${search.dataset.personSearchUrl}?${new URLSearchParams({ q: query })}`;
-
-    let rows;
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-      rows = parse(await response.text());
-    } catch (error) {
-      if (error.name === "AbortError") return;
-      rows = [];
-    }
-
+  const answer = (query, rows) => {
     if (input.value.trim() === query) show(rows.length ? rows : failed());
   };
+
+  const finder = setupFetch({
+    request: (query) => ({ url: `${search.dataset.personSearchUrl}?${new URLSearchParams({ q: query })}` }),
+    read: (response) => response.text(),
+    done: (html, query) => answer(query, options(html)),
+    failed: (_error, query) => answer(query, []),
+  });
 
   search.hidden = false;
 
   input.addEventListener("input", () => {
-    clearTimeout(timer);
     const query = input.value.trim();
     if (query.length < MINIMUM) return close();
 
-    timer = setTimeout(() => ask(query), DELAY);
+    finder.later(query);
   });
 
   input.addEventListener("keydown", (event) => {
@@ -100,8 +91,6 @@ export function setupPersonSearch(search, name) {
   });
 }
 
-function parse(html) {
-  const found = new DOMParser().parseFromString(html, "text/html");
-
-  return [...found.body.querySelectorAll("[role='option']")];
+function options(html) {
+  return [...parse(html).body.querySelectorAll("[role='option']")];
 }

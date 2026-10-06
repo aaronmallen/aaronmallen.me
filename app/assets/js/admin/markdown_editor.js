@@ -1,5 +1,6 @@
+import { setupFetch } from "./fetching.js";
+
 const BRACKET = 2;
-const DELAY = 300;
 const EDITOR = "[data-markdown-editor]";
 const PHOTO = "photo";
 const TOKEN = "_csrf_token";
@@ -22,8 +23,6 @@ function setupMarkdownEditor(editor) {
   const panels = editor.querySelectorAll("[data-editor-view]");
   const radios = [...editor.querySelectorAll("input[type='radio']")];
   const whole = preview.hasAttribute("data-editor-preview-form");
-  let timer;
-  let controller;
   let stale = !preview.hasChildNodes();
 
   const payload = () => {
@@ -32,29 +31,13 @@ function setupMarkdownEditor(editor) {
     return new URLSearchParams({ [TOKEN]: tokenFor(body), markdown: body.value });
   };
 
-  const refresh = async () => {
-    controller?.abort();
-    controller = new AbortController();
-    const { signal } = controller;
-
-    try {
-      const response = await fetch(preview.dataset.editorPreview, {
-        method: "POST",
-        body: payload(),
-        redirect: "manual",
-        signal,
-      });
-      if (!response.ok) return;
-
-      const html = await response.text();
-      if (signal.aborted) return;
-
+  const refresh = setupFetch({
+    request: () => ({ url: preview.dataset.editorPreview, method: "POST", body: payload(), redirect: "manual" }),
+    done: (html) => {
       preview.innerHTML = html;
       stale = false;
-    } catch (error) {
-      if (error.name !== "AbortError") throw error;
-    }
-  };
+    },
+  });
 
   const view = () => radios.find((radio) => radio.checked)?.value;
 
@@ -79,8 +62,8 @@ function setupMarkdownEditor(editor) {
   for (const radio of radios) {
     radio.addEventListener("change", () => {
       renderView();
-      clearTimeout(timer);
-      if (showing() && stale) refresh();
+      if (showing() && stale) refresh.now();
+      else refresh.stop();
     });
   }
 
@@ -88,8 +71,8 @@ function setupMarkdownEditor(editor) {
     if (event.target.type === "radio" && event.target.closest(EDITOR)) return;
 
     stale = true;
-    clearTimeout(timer);
-    if (showing()) timer = setTimeout(refresh, DELAY);
+    if (showing()) refresh.later();
+    else refresh.stop();
   });
 
   renderView();

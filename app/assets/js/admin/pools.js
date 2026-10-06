@@ -1,3 +1,5 @@
+import { plain } from "./in_place.js";
+
 export function setupPools() {
   for (const pools of document.querySelectorAll("[data-pools]")) {
     setupPool(pools);
@@ -10,7 +12,7 @@ function setupPool(pools) {
 
   for (const link of links) {
     link.addEventListener("click", (event) => {
-      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (!plain(event)) return;
 
       event.preventDefault();
       show(link.dataset.pool, links, panels);

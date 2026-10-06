@@ -1,5 +1,6 @@
 import { setupConfirms } from "./confirm.js";
 import { openDialog } from "./dialog.js";
+import { plain, setupPost, setupVisit } from "./in_place.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupTaskKeys } from "./task_key.js";
 import { setupTaskOrder } from "./task_order.js";
@@ -43,45 +44,15 @@ function here() {
   return window.location.pathname + window.location.search;
 }
 
-async function load(url, selector) {
-  const response = await fetch(url);
-  if (!response.ok) return null;
-
-  return part(await response.text(), selector);
-}
-
-function part(html, selector) {
-  return new DOMParser().parseFromString(html, "text/html").querySelector(selector);
-}
-
-function plain(event) {
-  return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
-}
-
 function setupPanel(panel, modal) {
   const panelBody = panel.querySelector("[data-task-panel-body]");
   const modalBody = modal.querySelector("[data-task-modal-body]");
   const modalTitle = modal.querySelector("[data-task-modal-title]");
+  const visit = setupVisit();
   let opener = null;
   let created = null;
-  let latest = 0;
-  let saving = false;
 
-  const visit = (url, work) => {
-    const ticket = ++latest;
-
-    work(url, ticket)
-      .catch(() => false)
-      .then((done) => {
-        if (!done && ticket === latest) window.location.assign(url);
-      });
-  };
-
-  const read = async (url, ticket, keep = false) => {
-    const task = await load(url, READ);
-    if (ticket !== latest) return true;
-    if (!task) return false;
-
+  const read = (task, keep = false) => {
     const scroll = keep ? panel.scrollTop : 0;
     const field = keep ? document.activeElement?.name : null;
 
@@ -96,7 +67,6 @@ function setupPanel(panel, modal) {
     const focus = (field && task.querySelector(`[name="${field}"]`)) || panelBody;
     focus.focus({ preventScroll: true });
     panel.scrollTop = scroll;
-    return true;
   };
 
   const showEdit = (edit) => {
@@ -110,36 +80,21 @@ function setupPanel(panel, modal) {
     (edit.querySelector(INVALID) ?? edit.querySelector(FIELD))?.focus();
   };
 
-  const edit = async (url, ticket) => {
-    const form = await load(url, EDIT);
-    if (ticket !== latest) return true;
-    if (!form) return false;
-
+  const edit = (form) => {
     panel.close();
     showEdit(form);
-    return true;
   };
 
-  const save = async (form) => {
-    let response;
+  const post = setupPost({
+    selector: EDIT,
+    saved: (response) => {
+      if (response.type !== "opaqueredirect") return false;
 
-    try {
-      response = await fetch(form.action, {
-        method: "POST",
-        body: new URLSearchParams(new FormData(form)),
-        redirect: "manual",
-      });
-    } catch {
-      return form.submit();
-    }
-
-    if (response.type === "opaqueredirect") return window.location.assign(here());
-
-    const edit = response.status === 422 ? part(await response.text(), EDIT) : null;
-    if (!edit) return form.submit();
-
-    showEdit(edit);
-  };
+      window.location.assign(here());
+      return true;
+    },
+    invalid: showEdit,
+  });
 
   document.addEventListener("click", (event) => {
     const link = event.target.closest(LINKS);
@@ -157,11 +112,11 @@ function setupPanel(panel, modal) {
 
       event.preventDefault();
       if (!dialog) opener = link;
-      visit(link.href, edit);
+      visit(link.href, EDIT, edit);
     } else {
       event.preventDefault();
       if (!panel.open) opener = link;
-      visit(link.href, read);
+      visit(link.href, READ, read);
     }
   });
 
@@ -170,7 +125,7 @@ function setupPanel(panel, modal) {
     if (!find) return;
 
     event.preventDefault();
-    visit(findUrl(event.target, find), (href, ticket) => read(href, ticket, true));
+    visit(findUrl(event.target, find), READ, (task) => read(task, true));
   });
 
   panel.addEventListener("close", () => opener?.focus());
@@ -180,12 +135,7 @@ function setupPanel(panel, modal) {
     if (!created || !form.matches(`${EDIT} form.task-form`)) return;
 
     event.preventDefault();
-    if (saving) return;
-
-    saving = true;
-    save(form).finally(() => {
-      saving = false;
-    });
+    post(form);
   });
 
   modal.addEventListener("close", () => {

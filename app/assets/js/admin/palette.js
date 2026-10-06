@@ -1,7 +1,9 @@
 import { openDialog } from "./dialog.js";
+import { json, setupFetch } from "./fetching.js";
 import { bind } from "./keys.js";
 import { countText, setupListbox } from "./listbox.js";
 
+const ACCEPT = { Accept: "application/json" };
 const DELAY = 150;
 const FOUND = "[data-palette-found]";
 const NO_TASK = "no_task";
@@ -32,8 +34,6 @@ function setupDialog(dialog) {
   let options = [];
   let task = null;
   let asked = "";
-  let controller = null;
-  let timer = null;
 
   const shown = () => options.filter((option) => !option.hidden);
 
@@ -52,7 +52,7 @@ function setupDialog(dialog) {
   const filter = () => {
     const text = query.value.trim().toLowerCase();
 
-    if (all) all.dataset.paletteHref = seeAll(all.dataset.paletteAll, query.value.trim());
+    if (all) all.dataset.paletteHref = searchUrl(all.dataset.paletteAll, query.value.trim());
 
     for (const option of options) option.hidden = !matches(option, text) || !applies(option, task);
 
@@ -111,33 +111,25 @@ function setupDialog(dialog) {
       load(views, views.dataset.paletteViews, (rows) => views.append(...rows.map((row) => viewRow(views, row))));
   };
 
-  const stop = () => {
-    clearTimeout(timer);
-    controller?.abort();
-    controller = null;
-  };
-
-  const ask = async (text) => {
-    controller = new AbortController();
-    const { signal } = controller;
-
-    try {
-      const found = await fetchFound(dialog.dataset.paletteSearch, text, signal);
-      if (!signal.aborted) show(found);
-    } catch {
-      if (!signal.aborted) asked = "";
-    }
-  };
+  const finder = setupFetch({
+    delay: DELAY,
+    request: (text) => ({ url: searchUrl(dialog.dataset.paletteSearch, text), headers: ACCEPT, redirect: "manual" }),
+    read: json,
+    done: ({ groups }) => show(groups),
+    failed: () => {
+      asked = "";
+    },
+  });
 
   const search = () => {
     const text = query.value.trim();
     if (text === asked) return;
 
-    stop();
+    finder.stop();
     asked = text;
     if (text === "") return show([]);
 
-    timer = setTimeout(() => ask(text), DELAY);
+    finder.later(text);
   };
 
   const open = () => {
@@ -148,7 +140,7 @@ function setupDialog(dialog) {
     aim(options, task);
     if (!task) fill();
     fillViews();
-    stop();
+    finder.stop();
     asked = "";
     show([]);
     dialog.showModal();
@@ -176,7 +168,7 @@ function setupDialog(dialog) {
     if (event.target === dialog) dialog.close();
   });
 
-  dialog.addEventListener("close", stop);
+  dialog.addEventListener("close", finder.stop);
 
   rebuild();
 }
@@ -212,17 +204,8 @@ function applies(option, task) {
   return act(task, needs) !== "";
 }
 
-async function fetchFound(route, text, signal) {
-  const { groups } = await fetchJSON(`${route}?${new URLSearchParams({ q: text })}`, signal);
-
-  return groups;
-}
-
-async function fetchJSON(url, signal) {
-  const response = await fetch(url, { headers: { Accept: "application/json" }, redirect: "manual", signal });
-  if (!response.ok) throw new Error(`palette answered ${response.status} for ${url}`);
-
-  return response.json();
+async function fetchJSON(url) {
+  return json(await fetch(url, { headers: ACCEPT, redirect: "manual" }));
 }
 
 function foundRow(group, { id, title, match, date, href }) {
@@ -272,7 +255,7 @@ function post(option, token) {
   form.submit();
 }
 
-function seeAll(route, text) {
+function searchUrl(route, text) {
   return `${route}?${new URLSearchParams({ q: text })}`;
 }
 

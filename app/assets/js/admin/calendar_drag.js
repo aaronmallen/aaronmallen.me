@@ -1,3 +1,4 @@
+import { parse } from "./in_place.js";
 import { showToast } from "./toast.js";
 
 const DAY = "a[data-calendar-day]";
@@ -102,7 +103,7 @@ async function move(calendar, grip, day) {
   let page = null;
   try {
     const response = await fetch(form.action, { method: "POST", body });
-    if (response.ok) page = new DOMParser().parseFromString(await response.text(), "text/html");
+    if (response.ok) page = parse(await response.text());
   } catch {
     page = null;
   }

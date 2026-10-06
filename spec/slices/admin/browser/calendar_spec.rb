@@ -30,4 +30,24 @@ RSpec.describe "Admin calendar", type: :feature do
   it "moves focus to the panel" do
     expect(page).to have_css("[data-calendar-panel='2026-07-14']:focus")
   end
+
+  describe "when an earlier day answers after a later one" do
+    def open_day(date) = find(".cal-day:has(time[datetime='#{date}']) a.cal-link").click
+
+    before do
+      panel.assert_matches_selector("[data-calendar-panel='2026-07-14']")
+      hold = request_gate.hold("/admin/calendar")
+      open_day("2026-07-15")
+      hold.wait_for_arrival
+      open_day("2026-07-16")
+      panel.assert_matches_selector("[data-calendar-panel='2026-07-16']")
+      hold.release
+      page.driver.wait_for_network_idle
+    end
+
+    it "keeps the later day's panel", :aggregate_failures do
+      expect(panel).to match_selector("[data-calendar-panel='2026-07-16']")
+      expect(page).to have_current_path("/admin/calendar?day=2026-07-16")
+    end
+  end
 end
