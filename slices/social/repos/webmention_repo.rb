@@ -40,6 +40,13 @@ module Social
 
       def count_receipts_since(time) = webmention_receipts.received_since(time).count
 
+      def count_received_in(from:, to:, post_id: nil)
+        days = in_days(from, to)
+        days = days.for_post(post_id) if post_id
+
+        Blog::Types::WebmentionStatus.values.to_h { [it, 0] }.merge(tallied(days.counts_by(:status), :status))
+      end
+
       def counted_for(post_id) = tallied(approved_for(post_id, COUNTED_TYPES).counts_by(:type), :type)
 
       def delete_by_source(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).delete
@@ -113,7 +120,9 @@ module Social
       end
 
       def in_days(from, to)
-        webmentions.received_since(Blog::TimeZone.day_start(from)).received_before(Blog::TimeZone.day_start(to + 1))
+        days = webmentions
+        days = days.received_since(Blog::TimeZone.day_start(from)) if from
+        to ? days.received_before(Blog::TimeZone.day_start(to + 1)) : days
       end
 
       def stored_settings = webmention_settings.by_pk(SETTINGS_ID).one

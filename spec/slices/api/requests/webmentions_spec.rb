@@ -5,6 +5,10 @@ RSpec.describe "API reading webmentions", type: :request do
 
   def at(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, 12, 0)
 
+  def counts(pending: 0, approved: 0, ignored: 0, spam: 0)
+    { "pending" => pending, "approved" => approved, "ignored" => ignored, "spam" => spam }
+  end
+
   def fields(mention)
     {
       "id" => mention.id,
@@ -49,8 +53,52 @@ RSpec.describe "API reading webmentions", type: :request do
 
       expect(list).to eq(
         "from" => "2026-03-01", "to" => "2026-03-31", "time_zone" => "America/Chicago",
-        "webmentions" => [fields(mention)], "partial" => false,
+        "counts" => counts(spam: 1), "webmentions" => [fields(mention)], "partial" => false,
       )
+    end
+
+    it "lists every webmention, newest first, when given no range" do
+      older = create(:webmention, received_at: at(Date.new(2024, 3, 2)))
+      newer = create(:webmention, received_at: at(Date.new(2026, 3, 20)))
+
+      answer = get_json("/api/v1/webmentions")
+
+      expect([ids(answer), answer.values_at("from", "to"), status]).to eq([[newer.id, older.id], [nil, nil], 200])
+    end
+
+    it "pages through every webmention in one status when given no range" do
+      kept = 1.upto(3).map { create(:webmention, received_at: at(Date.new(2020, 1, it))) }.reverse
+      create(:webmention, :spam)
+      lower_page_size(:mcp, to: 2)
+
+      pages = [1, 2].flat_map { ids(get_json("/api/v1/webmentions", { status: "pending", page: it })) }
+
+      expect(pages).to eq(kept.map(&:id))
+    end
+
+    it "lists every webmention from a day on when given only from" do
+      create(:webmention, received_at: at(Date.new(2026, 2, 28)))
+      kept = create(:webmention, received_at: at(Date.new(2026, 5, 1)))
+
+      expect(ids(get_json("/api/v1/webmentions", { from: "2026-03-01" }))).to eq([kept.id])
+    end
+
+    it "counts the webmentions in the range by status, whatever the status asked for" do
+      create(:webmention, received_at: at(Date.new(2026, 3, 2)))
+      create(:webmention, :spam, received_at: at(Date.new(2026, 3, 3)))
+      create(:webmention, :spam, received_at: at(Date.new(2026, 3, 4)))
+      create(:webmention, :approved, received_at: at(Date.new(2026, 4, 1)))
+
+      expect(list(status: "pending").fetch("counts")).to eq(counts(pending: 1, spam: 2))
+    end
+
+    it "counts every webmention one post got when given no range" do
+      mention = create(:webmention, :ignored, received_at: at(Date.new(2020, 3, 2)))
+      create(:webmention, post_id: mention.post_id)
+      create(:webmention)
+
+      expect(get_json("/api/v1/webmentions", { post_id: mention.post_id }).fetch("counts"))
+        .to eq(counts(pending: 1, ignored: 1))
     end
 
     it "narrows to the webmentions one post got" do
@@ -109,6 +157,14 @@ RSpec.describe "API reading webmentions", type: :request do
 
       expect(trusted(mcp_answer("list_webmentions", **range, post_id: mention.post_id)))
         .to eq(list(post_id: mention.post_id))
+    end
+
+    it "answers list_webmentions with no range as GET /api/v1/webmentions does" do
+      create(:webmention, received_at: at(Date.new(2020, 3, 2)))
+      create(:webmention, :spam)
+
+      expect(trusted(mcp_answer("list_webmentions", status: "pending")))
+        .to eq(get_json("/api/v1/webmentions", { status: "pending" }))
     end
 
     it "answers read_webmention as GET /api/v1/webmentions/:id does" do

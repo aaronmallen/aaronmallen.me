@@ -39,6 +39,7 @@ module MCP
         mark_message: "contact.operations.mark_message",
         matching_tags: "tags.queries.matching",
         message_by_id: "contact.queries.by_id",
+        message_counts_between: "contact.queries.counts_received_between",
         messages_between: "contact.queries.received_between",
         moderate_webmention: "social.operations.moderate_webmention",
         move_project: "projects.operations.move_project",

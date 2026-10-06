@@ -57,7 +57,9 @@ module MCP
       queries.sources_between queries.summary_between queries.weekday_hours
     ], from: :analytics
 
-    import keys: %w[operations.mark_message queries.by_id queries.received_between], from: :contact
+    import keys: %w[
+      operations.mark_message queries.by_id queries.counts_received_between queries.received_between
+    ], from: :contact
 
     import keys: %w[
       operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id

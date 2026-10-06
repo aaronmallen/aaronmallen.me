@@ -18,33 +18,35 @@ module MCP
           page: Blog::Paging::PAGE,
           status: STATUS,
         },
-        required: %w[from to],
       }.freeze
 
-      description "List the messages people sent through the contact form over a range, newest first: " \
+      description "List the messages people sent through the contact form, newest first: " \
                   "the ID, subject, reply address, status and when it came in. " \
+                  "counts gives how many messages in the range sit in each status. " \
                   "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
+                  "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
+                  "Leave both out to list every message. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(from:, to:, server_context:, status: nil, page: 1)
-          case Blog::DayWindow.days(from, to)
-          in Success[first, last] then listed(first..last, status, page(page, server_context), server_context)
+        def call(server_context:, from: nil, to: nil, status: nil, page: 1)
+          case Blog::DayWindow.open_days(from, to)
+          in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
           in Failure(message) then refuse(message)
           end
         end
 
         private
 
-        def listed(range, status, page, server_context)
-          found = dep(:messages_between, server_context).call(from: range.first, to: range.last, page:, status:)
+        def listed(first, last, status, page, server_context)
+          found = dep(:messages_between, server_context).call(from: first, to: last, page:, status:)
 
           answer(
-            from: range.first.iso8601,
-            to: range.last.iso8601,
+            from: first&.iso8601,
+            to: last&.iso8601,
+            counts: dep(:message_counts_between, server_context).call(from: first, to: last),
             messages: found.rows.map { summary(it) },
             **Blog::Paging.fields(found),
           )

@@ -14,6 +14,8 @@ RSpec.describe "MCP contact message tools", type: :request do
       mcp_answer("list_messages", from: from.iso8601, to: to.iso8601, **).fetch("messages")
     end
 
+    def listed_ids(**) = mcp_answer("list_messages", **).fetch("messages").map { it.fetch("id") }
+
     it "lists the messages in the range, newest first" do
       older = create(:message, received_at: at(today - 3, 9))
       newer = create(:message, received_at: at(today - 1, 9))
@@ -41,6 +43,47 @@ RSpec.describe "MCP contact message tools", type: :request do
       spam = create(:message, :spam, received_at: at(today, 0))
 
       expect(listed(status: "spam").map { it.fetch("id") }).to eq([spam.id])
+    end
+
+    it "lists every message, newest first, when given no range" do
+      older = create(:message, received_at: at(today - 900, 9))
+      newer = create(:message, received_at: at(today, 0))
+
+      answer = mcp_answer("list_messages")
+
+      expect([answer.fetch("messages").map { it.fetch("id") }, answer.values_at("from", "to")])
+        .to eq([[newer.id, older.id], [nil, nil]])
+    end
+
+    it "pages through every message in one status when given no range" do
+      kept = 1.upto(3).map { create(:message, :spam, received_at: at(today - 900 - it, 9)) }
+      create(:message, received_at: at(today, 0))
+      lower_page_size(:mcp, to: 2)
+
+      expect([1, 2].flat_map { listed_ids(status: "spam", page: it) }).to eq(kept.map(&:id))
+    end
+
+    it "lists every message up to a day when given only to" do
+      kept = create(:message, received_at: at(today - 900, 9))
+      create(:message, received_at: at(today, 0))
+
+      expect(listed_ids(to: (today - 1).iso8601)).to eq([kept.id])
+    end
+
+    it "counts the messages in the range by status, whatever the status asked for" do
+      create(:message, received_at: at(today, 0))
+      create(:message, :spam, received_at: at(today - 1, 9))
+      create(:message, :spam, received_at: at(today - 30, 9))
+
+      expect(mcp_answer("list_messages", from: (today - 6).iso8601, to: today.iso8601, status: "spam").fetch("counts"))
+        .to eq("unread" => 1, "read" => 0, "spam" => 1)
+    end
+
+    it "counts every message when given no range" do
+      create(:message, :read, received_at: at(today - 900, 9))
+      create(:message, :spam)
+
+      expect(mcp_answer("list_messages").fetch("counts")).to eq("unread" => 0, "read" => 1, "spam" => 1)
     end
 
     it "refuses a status the admin does not have" do
