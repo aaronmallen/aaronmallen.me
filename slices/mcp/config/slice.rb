@@ -47,7 +47,7 @@ module MCP
       endpoints.summarize_activity endpoints.sync_issues endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks
       endpoints.unlink_records endpoints.unlink_task endpoints.untag_decision endpoints.untag_tasks
       endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view
-      endpoints.update_task_tag_rule endpoints.update_work_session endpoints.upload_photo
+      endpoints.update_task_tag_rule endpoints.update_work_session endpoints.upload_photo queries.post_figures
     ], from: :api
 
     import keys: %w[
@@ -65,7 +65,7 @@ module MCP
 
     import keys: %w[
       operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id
-      queries.by_ids queries.dated_between queries.published_by_slug
+      queries.by_ids queries.count_dated_between queries.dated_between queries.published_by_slug
     ], from: :posts
 
     import keys: %w[

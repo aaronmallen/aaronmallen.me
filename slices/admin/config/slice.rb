@@ -23,12 +23,12 @@ module Admin
       queries.clicks_between queries.country_database_failure queries.devices_between queries.feed_subscribers_between
       queries.first_days queries.page_between queries.reach_between queries.read_throughs_between
       queries.readers_by_path queries.scroll_depths_between queries.sources_between queries.summary_between
-      queries.view_totals queries.views_by_path queries.views_by_post queries.visitors_for_day queries.weekday_hours
+      queries.view_totals queries.views_by_path queries.visitors_for_day queries.weekday_hours
     ], from: :analytics
 
     import keys: %w[
       operations.mint_token operations.revoke_token queries.calendar queries.inbox queries.inbox_count
-      queries.live_tokens
+      queries.live_tokens queries.post_figures
     ], from: :api
 
     import keys: %w[
@@ -89,7 +89,7 @@ module Admin
       queries.pending_webmentions queries.people queries.person_by_id queries.queued_social_posts
       queries.received_webmention_count
       queries.social_post_by_id queries.social_post_counts_by_status queries.social_posts_by_filter
-      queries.webmention_counts_by_post queries.webmention_counts_by_status queries.webmention_settings
+      queries.webmention_counts_by_status queries.webmention_settings
       queries.webmentions_by_status queries.webmentions_received_between queries.webmentions_received_by_post
     ], from: :social
 

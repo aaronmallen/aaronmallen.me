@@ -2,10 +2,10 @@
 
 module Posts
   module Queries
-    class DatedBetween
+    class CountDatedBetween
       include Deps[post_repo: "repos.post_repo"]
 
-      def call(from:, to:, page:, status: nil) = post_repo.dated_between(from:, to:, page:, status:)
+      def call(from:, to:) = post_repo.count_dated_between(from:, to:)
     end
   end
 end

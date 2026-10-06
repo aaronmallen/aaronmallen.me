@@ -43,11 +43,17 @@ module Posts
 
       def count_by_status = posts.counts_by_status.to_a.to_h { [it.status, it.count] }
 
-      def dated_between(from:, to:, page:)
-        first = from && Blog::TimeZone.day_start(from)
-        last = to && Blog::TimeZone.day_start(to + 1)
+      def count_dated_between(from:, to:)
+        counted = posts.dated_between(*day_bounds(from, to)).counts_by_status.to_a
 
-        page.fill(with_tags.dated_between(first, last).newest_first.paged(page).to_a)
+        Blog::Types::PostStatus.values.to_h { [it, 0] }.merge(counted.to_h { [it.status, it.count] })
+      end
+
+      def dated_between(from:, to:, page:, status: nil)
+        found = with_tags.dated_between(*day_bounds(from, to))
+        found = found.with_status(status) if status
+
+        page.fill(found.newest_first.paged(page).to_a)
       end
 
       def due_scheduled(time) = with_tags.due_at(time).oldest_first.to_a
@@ -87,6 +93,8 @@ module Posts
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
+
+      def day_bounds(from, to) = [from && Blog::TimeZone.day_start(from), to && Blog::TimeZone.day_start(to + 1)]
 
       def publish_where(candidates, id, at)
         by_id(id) if candidates.publish(at).any?

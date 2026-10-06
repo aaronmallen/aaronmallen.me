@@ -1388,12 +1388,13 @@ RSpec.describe "MCP endpoint", type: :request do
     def listed_draft(post)
       {
         "id" => post.id, "draft" => true, "published_at" => nil, "slug" => post.slug, "status" => "draft",
-        "tags" => [], "title" => post.title, "updated_at" => post.updated_at.utc.iso8601,
+        "tags" => [], "title" => post.title, "updated_at" => post.updated_at.utc.iso8601, "word_count" => 0,
+        "views" => 0, "visitors" => 0, "readers" => 0, "read_throughs" => 0, "webmentions_received" => 0,
       }
     end
 
-    it "gives each blog post its ID, slug, tags, title, status, publish time and update time" do
-      post = create(:post, :draft, title: "A draft")
+    it "gives each blog post its ID, slug, tags, title, status, times, words and readership" do
+      post = create(:post, :draft, title: "A draft", body: "")
       call_tool("list_posts")
 
       expect(content.fetch("posts").first).to eq(listed_draft(post))

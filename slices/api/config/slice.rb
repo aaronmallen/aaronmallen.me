@@ -13,6 +13,8 @@ module API
       queries.activity_counts_by_month queries.activity_filters queries.review queries.stalled_list
     ], from: :activity
 
+    import keys: %w[queries.readers_by_path queries.views_by_post], from: :analytics
+
     import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact
 
     import keys: %w[
@@ -51,8 +53,8 @@ module API
       operations.act_on_webmentions operations.delete_person operations.measure_parts operations.save_person
       operations.search_accounts queries.calendar_social_posts queries.pending_webmention_count
       queries.pending_webmentions queries.people queries.person_by_id queries.received_webmention_count
-      queries.social_post_by_id queries.webmention_by_id queries.webmention_counts_received_in
-      queries.webmentions_received_in
+      queries.social_post_by_id queries.webmention_by_id queries.webmention_counts_by_post
+      queries.webmention_counts_received_in queries.webmentions_received_in
     ], from: :social
 
     import keys: %w[queries.for_post queries.for_social_post], from: :suggestions
@@ -98,6 +100,7 @@ module API
       endpoints.update_journal_entry endpoints.update_person endpoints.update_post_edit_note endpoints.update_saved_view
       endpoints.update_task_tag_rule endpoints.update_work_session endpoints.upload_photo operations.mint_token
       operations.revoke_token queries.calendar queries.inbox queries.inbox_count queries.live_tokens
+      queries.post_figures
     ]
   end
 end

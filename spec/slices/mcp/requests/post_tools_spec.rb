@@ -487,4 +487,83 @@ RSpec.describe "MCP post tools", type: :request do
       expect(message).to eq("no blog post has the ID 999999")
     end
   end
+
+  describe "list_posts" do
+    let(:today) { Blog::TimeZone.today }
+
+    def admin_row(slug)
+      sign_in_to_admin
+      get "/admin/posts"
+      Capybara.string(last_response.body).find(".li-sub", text: "/writing/#{slug} ").text.split(" · ").drop(2)
+    end
+
+    def figures(row) = row.slice(*%w[word_count views visitors readers read_throughs webmentions_received])
+
+    def listed(**) = mcp_answer("list_posts", **)
+
+    def read_post(views: 8, visitors: 5, read_throughs: 4, readers: 2)
+      post = create(:post, :published, slug: "hello", body: "one two three", published_at: days_ago(5))
+      create(:analytics_rollup, day: today)
+      create(:analytics_rollup_path, day: today, path: "/writing/hello", views:, visitors:, bounces: 0, read_throughs:)
+      readers.times { create(:post_reader_hash, path: "/writing/hello") }
+      post
+    end
+
+    def row(post, **) = listed(**).fetch("posts").find { it.fetch("id") == post.id }
+
+    def unseen(words) = { "word_count" => words, **%w[views visitors readers read_throughs].to_h { [it, 0] } }
+
+    def worded(row)
+      units = ["words", "views", "visitors", "unique readers", "read-throughs"]
+
+      figures(row).values.zip(units).map { |count, unit| "#{count} #{unit}" }
+    end
+
+    it "keeps only the blog posts in the status given" do
+      create(:post, :published)
+      draft = create(:post, :draft)
+
+      expect(listed(status: "draft").fetch("posts").map { it.fetch("id") }).to eq([draft.id])
+    end
+
+    it "counts the blog posts in each status, whatever status asks for" do
+      2.times { create(:post, :published) }
+      create(:post, :draft)
+
+      expect(listed(status: "draft").fetch("counts")).to eq("draft" => 1, "scheduled" => 0, "published" => 2)
+    end
+
+    it "counts only the blog posts in the range" do
+      create(:post, :published, published_at: days_ago(10))
+      create(:post, :published, published_at: days_ago(1))
+
+      expect(listed(from: (today - 3).iso8601).fetch("counts")).to include("published" => 1)
+    end
+
+    it "gives each blog post its words, readership and webmentions received" do
+      post = read_post
+      [nil, :spam].each { create(:webmention, *it, post:) }
+      shown = { "views" => 8, "visitors" => 5, "readers" => 2, "read_throughs" => 4, "webmentions_received" => 2 }
+
+      expect(figures(row(post))).to eq("word_count" => 3, **shown)
+    end
+
+    it "gives a blog post nobody saw nothing but its words" do
+      post = create(:post, :draft, body: "one two")
+
+      expect(figures(row(post))).to eq(**unseen(2), "webmentions_received" => 0)
+    end
+
+    it "gives a blog post too old to count no readers" do
+      post = create(:post, :published, published_at: days_ago(400))
+
+      expect(row(post).fetch("readers")).to be_nil
+    end
+
+    it "matches the admin's row for the same post" do
+      found = row(read_post)
+
+      expect(admin_row("hello")).to eq(worded(found.except("webmentions_received")))
+    end
+  end
 end
