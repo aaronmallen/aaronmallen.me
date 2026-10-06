@@ -77,10 +77,6 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       it "says no time was logged" do
         expect(page).to have_css("#time-groups .empty", text: "No time logged")
       end
-
-      it "renders without a missing translation" do
-        expect(last_response.body).not_to include("translation_missing")
-      end
     end
 
     describe "a range grouped by project" do

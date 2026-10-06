@@ -151,13 +151,6 @@ RSpec.describe "Admin sessions", type: :request do
       expect(token.value).to match(/\A\h{64}\z/)
     end
 
-    it "renders every admin string from translations" do
-      sign_in
-      follow_redirect!
-
-      expect(last_response.body).not_to include("translation_missing")
-    end
-
     it "sets a session cookie that expires in 30 days" do
       now = Time.at(Time.now.to_i)
       allow(Time).to receive(:now).and_return(now)

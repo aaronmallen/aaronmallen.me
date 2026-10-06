@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-662
-amended: ["#17", "#255"]
+amended: ["#17", "#255", "#606"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -73,7 +73,7 @@ One contract serves a form and an MCP tool, and each words the same code for its
 
 A new rule touches three places: the contract, the form's `MESSAGES` table and the slice's locale file. Miss the
 row and the form shows "Check this field." while every spec passes. Miss the locale key and the page shows a
-missing translation, which `spec/requests/translations_spec.rb` catches only on the paths it renders.
+missing translation, which fails any request spec that renders that page (#606).
 
 A field shows only its first code. A field failing two checks names one, and fixing it can bring up the next.
 

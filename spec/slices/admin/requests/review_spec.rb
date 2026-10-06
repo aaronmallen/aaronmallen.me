@@ -72,10 +72,6 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "offers no way back to a week it already shows" do
         expect(page).to have_no_link("This week")
       end
-
-      it "renders without a missing translation" do
-        expect(last_response.body).not_to include("translation_missing")
-      end
     end
 
     describe "a week with records" do
@@ -153,10 +149,6 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
         expect([row.find(".meter-count").text, card("worked").find(".review-total").text]).to eq(["1h 00m", "1h 00m"])
       end
-
-      it "renders without a missing translation" do
-        expect(last_response.body).not_to include("translation_missing")
-      end
     end
 
     describe "the week's arrows" do
@@ -213,10 +205,6 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
       it "switches back to the week that holds the day" do
         expect(page).to have_link("Week", href: "/admin/review?day=2026-09-16")
-      end
-
-      it "renders without a missing translation" do
-        expect(last_response.body).not_to include("translation_missing")
       end
     end
 

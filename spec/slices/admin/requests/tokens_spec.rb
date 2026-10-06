@@ -298,12 +298,4 @@ RSpec.describe "Admin API tokens", type: :request do
 
     expect(page).to have_css("[data-palette-href='/admin/tokens']", visible: :all)
   end
-
-  it "renders without a missing translation" do
-    sign_in_to_admin
-    minted
-    mint("")
-
-    expect(last_response.body).not_to include("translation_missing")
-  end
 end
