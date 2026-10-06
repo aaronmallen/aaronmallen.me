@@ -18,19 +18,23 @@ module MCP
       RETRYING = "retrying"
       SENDING = "sending"
       SENT = "sent"
+      TOO_LONG = "too_long"
       UNSAVED = "could not save the social post"
       WAITING = "waiting"
 
       private
 
-      def complaint(errors)
-        errors.map { |field, (token)| "#{field} #{COMPLAINTS.fetch(token, token)}" }.join("; ")
+      def complaint(errors, params, server_context)
+        errors.map do |field, (token)|
+          said = "#{field} #{COMPLAINTS.fetch(token, token)}"
+          token == TOO_LONG ? "#{said}: #{overruns(params, server_context)}" : said
+        end.join("; ")
       end
 
-      def composed(result, id)
+      def composed(result, id, params, server_context)
         case result
-        in Success[_, social_post] then answer(social_post_entry(social_post))
-        in Failure[:invalid, errors] then refuse(complaint(errors))
+        in Success[_, social_post] then answer(social_post_entry(social_post, server_context))
+        in Failure[:invalid, errors] then refuse(complaint(errors, params, server_context))
         in Failure(:already_posted) then refuse("social post #{id} has gone out, so nothing was saved")
         in Failure(:not_found) then refuse("no social post has the ID #{id}")
         else refuse(UNSAVED)
@@ -59,7 +63,25 @@ module MCP
         found.error ? RETRYING : SENDING
       end
 
-      def social_post_entry(social_post)
+      def lengths(social_post, server_context)
+        measured = dep(:measure_parts, server_context).call(social_post.parts.map(&:body), social_post.targets.to_a)
+
+        measured.map { |part| part.transform_values(&:counted) }
+      end
+
+      def overrun(length)
+        return "part #{length.part} has too many bytes for #{length.network}" if length.count <= length.limit
+
+        "part #{length.part} runs #{length.count} of #{length.limit} on #{length.network}"
+      end
+
+      def overruns(params, server_context)
+        measured = dep(:measure_parts, server_context).call(*params.values_at(:parts, :targets))
+
+        measured.flat_map(&:values).select(&:over).map { overrun(it) }.join(", ")
+      end
+
+      def social_post_entry(social_post, server_context)
         {
           id: social_post.id,
           status: social_post.status,
@@ -67,6 +89,7 @@ module MCP
           posted_at: social_post.posted_at&.utc&.iso8601,
           created_at: social_post.created_at.utc.iso8601,
           parts: social_post.parts.map(&:body),
+          lengths: lengths(social_post, server_context),
           deliveries: social_post.targets.map { delivery(social_post, it) },
         }
       end

@@ -12,6 +12,13 @@ RSpec.describe "API reading a social post", type: :request do
     create(:social_post_delivery, social_post_id: social_post.id, network:, **)
   end
 
+  def lengths(social_post)
+    social_post.parts.map do |part|
+      { "mastodon" => { "count" => part.body.length, "limit" => 500 },
+        "bluesky" => { "count" => part.body.length, "limit" => 300 } }
+    end
+  end
+
   def link(id, other_kind, other_id)
     Links::Slice["operations.link_records"].call("social_post", id, { other_kind:, other_id: }).value!
   end
@@ -51,7 +58,7 @@ RSpec.describe "API reading a social post", type: :request do
       "posted_at" => social_post.posted_at.utc.iso8601, "created_at" => social_post.created_at.utc.iso8601,
       "updated_at" => social_post.updated_at.utc.iso8601, "parts" => [social_post.parts.first.body],
       "deliveries" => [sent_delivery, waiting_delivery], "suggestion_id" => nil, "suggestion_edits" => [],
-      "record_links" => {},
+      "lengths" => lengths(social_post), "record_links" => {},
     }
   end
 

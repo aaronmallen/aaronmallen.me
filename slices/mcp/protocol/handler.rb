@@ -38,6 +38,7 @@ module MCP
         live_projects: "projects.queries.live",
         mark_message: "contact.operations.mark_message",
         matching_tags: "tags.queries.matching",
+        measure_parts: "social.operations.measure_parts",
         message_by_id: "contact.queries.by_id",
         message_counts_between: "contact.queries.counts_received_between",
         messages_between: "contact.queries.received_between",

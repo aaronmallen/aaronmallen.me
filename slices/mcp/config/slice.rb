@@ -81,10 +81,10 @@ module MCP
     ], from: :record
 
     import keys: %w[
-      operations.compose_social_post operations.delete_social_post operations.moderate_webmention
-      operations.update_webmention_settings queries.editable_social_post queries.pending_webmention_count
-      queries.social_posts_dated_between queries.unsent_social_posts queries.webmention_settings
-      queries.webmentions_received_between queries.webmentions_received_by_post
+      operations.compose_social_post operations.delete_social_post operations.measure_parts
+      operations.moderate_webmention operations.update_webmention_settings queries.editable_social_post
+      queries.pending_webmention_count queries.social_posts_dated_between queries.unsent_social_posts
+      queries.webmention_settings queries.webmentions_received_between queries.webmentions_received_by_post
     ], from: :social
 
     import keys: %w[

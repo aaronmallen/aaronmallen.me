@@ -91,6 +91,14 @@ RSpec.describe "MCP social tools", type: :request do
       expect(delivery("bluesky")).to include("state" => "failed", "error" => "rate limited")
     end
 
+    it "gives each part's length and limit on each network it targets" do
+      draft = create(:social_post, :draft, targets: %w[bluesky], created_at: at(Date.new(2026, 3, 5)))
+      call_tool("list_social_posts", **range)
+      count = stored(draft.id).parts.first.body.length
+
+      expect(listed.first.fetch("lengths")).to eq([{ "bluesky" => { "count" => count, "limit" => 300 } }])
+    end
+
     it "calls a network with no delivery yet waiting" do
       create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon])
       call_tool("list_social_posts", **range)
@@ -136,6 +144,15 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("create_social_post", parts: %w[hello], targets: %w[mastodon])
 
       expect(content).to include("status" => "draft", "parts" => %w[hello], "posted_at" => nil)
+    end
+
+    it "gives each part's length and limit on each network it targets" do
+      call_tool("create_social_post", parts: ["a" * 400, "hi"], targets: %w[mastodon bluesky])
+
+      long = { "mastodon" => { "count" => 400, "limit" => 500 }, "bluesky" => { "count" => 400, "limit" => 300 } }
+      short = { "mastodon" => { "count" => 2, "limit" => 500 }, "bluesky" => { "count" => 2, "limit" => 300 } }
+
+      expect(content.fetch("lengths")).to eq([long, short])
     end
 
     it "refuses a post with no text, as the admin does" do
@@ -210,6 +227,12 @@ RSpec.describe "MCP social tools", type: :request do
       expect(stored(draft.id)).to have_attributes(targets: %w[mastodon bluesky], parts: [have_attributes(body: "old")])
     end
 
+    it "gives the lengths of the parts it saved" do
+      call_tool("update_social_post", id: draft.id, parts: %w[new])
+
+      expect(content.fetch("lengths")).to eq([{ "mastodon" => { "count" => 3, "limit" => 500 } }])
+    end
+
     it "leaves a queued post a draft, as saving a draft in the admin does" do
       queued = create(:social_post, :scheduled)
       call_tool("update_social_post", id: queued.id, parts: %w[new])
@@ -240,6 +263,13 @@ RSpec.describe "MCP social tools", type: :request do
   describe "send_social_post" do
     def draft = @draft ||= social_post_repo.create_with_parts(parts: %w[hi], status: "draft", targets: %w[mastodon])
 
+    def over(detail) = "parts has a part over the limit for a network you picked: #{detail}"
+
+    def send_both(*parts)
+      long = social_post_repo.create_with_parts(parts:, status: "draft", targets: %w[mastodon bluesky])
+      call_tool("send_social_post", id: long.id)
+    end
+
     it "queues the post to go out now" do
       call_tool("send_social_post", id: draft.id)
 
@@ -262,7 +292,28 @@ RSpec.describe "MCP social tools", type: :request do
       long = social_post_repo.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
       call_tool("send_social_post", id: long.id)
 
-      expect(message).to eq("parts has a part over the limit for a network you picked")
+      expect(message).to eq(over("part 1 runs 501 of 500 on mastodon"))
+    end
+
+    it "names only the network a part runs over when it fits the other" do
+      send_both("hi", "a" * 400)
+
+      expect(message).to eq(over("part 2 runs 400 of 300 on bluesky"))
+    end
+
+    it "says a part has too many bytes when it fits the count but not the bytes" do
+      send_both("\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}" * 121)
+
+      expect(message).to eq(over("part 1 has too many bytes for bluesky"))
+    end
+
+    it "names each part and network over its limit" do
+      send_both("a" * 501, "b" * 301)
+
+      runs = ["part 1 runs 501 of 500 on mastodon", "part 1 runs 501 of 300 on bluesky",
+              "part 2 runs 301 of 300 on bluesky"]
+
+      expect(message).to eq(over(runs.join(", ")))
     end
 
     it "leaves an over limit post a draft" do

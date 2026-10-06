@@ -23,7 +23,8 @@ module MCP
       }.freeze
 
       description "Write a new social post and save it as a draft. Nothing goes out until send_social_post " \
-                  "queues it"
+                  "queues it. The answer gives each part's length and limit on each network, so a long part " \
+                  "shows before you send"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -31,7 +32,11 @@ module MCP
         include SocialPostAnswer
 
         def call(parts:, targets:, server_context:)
-          composed(dep(:compose_social_post, server_context).call({ parts:, targets: }, intent: DRAFT), nil)
+          params = { parts:, targets: }
+
+          result = dep(:compose_social_post, server_context).call(params, intent: DRAFT)
+
+          composed(result, nil, params, server_context)
         end
       end
     end

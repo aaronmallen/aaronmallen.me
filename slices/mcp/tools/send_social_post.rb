@@ -21,7 +21,8 @@ module MCP
 
       description "Queue one social post that has not gone out, to send now or at a set time, the way the admin " \
                   "does. It goes out to every network it targets, and a sent post cannot be called back. " \
-                  "The post is refused if a part runs over a network's limit or a network has no credentials"
+                  "The post is refused if a part runs over a network's limit, naming each such part and network, " \
+                  "or if a network has no credentials"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -37,7 +38,9 @@ module MCP
             schedule_at:,
           }
 
-          composed(dep(:compose_social_post, server_context).call(params, intent: SEND, id:), id)
+          result = dep(:compose_social_post, server_context).call(params, intent: SEND, id:)
+
+          composed(result, id, params, server_context)
         end
       end
     end

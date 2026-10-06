@@ -13,8 +13,9 @@ module MCP
       }.freeze
 
       description "List social posts over a range of days, newest first, sent and unsent alike: each with its " \
-                  "status, its parts in order and, per network it targets, how delivery stands (waiting, " \
-                  "sending, retrying, sent or failed) with the link, error and engagement counts. " \
+                  "status, its parts in order, each part's length and limit on each network it targets and, " \
+                  "per network, how delivery stands (waiting, sending, retrying, sent or failed) with the link, " \
+                  "error and engagement counts. " \
                   "A post falls on the day it went out or is set to go out, and a draft on the day it was made. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
@@ -38,7 +39,7 @@ module MCP
           answer(
             from: first.iso8601,
             to: last.iso8601,
-            social_posts: found.rows.map { social_post_entry(it) },
+            social_posts: found.rows.map { social_post_entry(it, server_context) },
             **Blog::Paging.fields(found),
           )
         end

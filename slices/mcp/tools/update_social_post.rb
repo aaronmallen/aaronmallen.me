@@ -25,7 +25,8 @@ module MCP
 
       description "Change the parts or the networks of one social post that has not gone out. A field you " \
                   "leave out keeps what it has. The edit leaves the post a draft, the way saving a draft in " \
-                  "the admin does, so a queued post waits until send_social_post queues it again"
+                  "the admin does, so a queued post waits until send_social_post queues it again. The answer " \
+                  "gives each part's length and limit on each network"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -36,7 +37,9 @@ module MCP
           stored = dep(:editable_social_post, server_context).call(id)
           params = { parts: stored&.parts&.map(&:body), targets: stored&.targets.to_a }.merge(fields)
 
-          composed(dep(:compose_social_post, server_context).call(params, intent: DRAFT, id:), id)
+          result = dep(:compose_social_post, server_context).call(params, intent: DRAFT, id:)
+
+          composed(result, id, params, server_context)
         end
       end
     end
