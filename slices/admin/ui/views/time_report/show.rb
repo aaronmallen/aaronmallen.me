@@ -7,11 +7,8 @@ module Admin
         class Show < View
           include Components::TimeReport
 
-          def initialize(report:, today:)
-            super()
-            @report = report
-            @today = today
-          end
+          prop :report, Blog::Types::Instance(::Tasks::Structs::TimeReport)
+          prop :today, Blog::Types::Date
 
           def view_template
             PageHead(title: t(".heading"), sub:)

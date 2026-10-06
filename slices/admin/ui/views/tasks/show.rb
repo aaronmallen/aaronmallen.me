@@ -16,17 +16,14 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
           }.freeze
 
-          def initialize(task:, note_html:, linking:, records:, timeline:, forms:, filter:, origin:)
-            super()
-            @task = task
-            @note_html = note_html
-            @linking = linking
-            @records = records
-            @timeline = timeline
-            @forms = forms
-            @filter = filter
-            @origin = origin
-          end
+          prop :task, Blog::Types::Instance(ROM::Struct)
+          prop :note_html, Blog::Types::String.optional
+          prop :linking, Blog::Types::Hash
+          prop :records, Blog::Types::Hash
+          prop :timeline, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :forms, Blog::Types::Hash
+          prop :filter, Blog::Types::String
+          prop :origin, Blog::Types::TaskOrigin
 
           def view_template
             article(class: "read-page", data: { task_read: @task.id }) do

@@ -5,10 +5,7 @@ module Admin
     module Views
       module Clients
         class Index < View
-          def initialize(clients:)
-            super()
-            @clients = clients
-          end
+          prop :clients, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @clients.size))

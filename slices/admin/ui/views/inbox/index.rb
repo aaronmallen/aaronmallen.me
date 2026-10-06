@@ -7,11 +7,8 @@ module Admin
         class Index < View
           include Components::Inbox
 
-          def initialize(rows:, slugs:)
-            super()
-            @rows = rows
-            @slugs = slugs
-          end
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Queries::Inbox::Row))
+          prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size))

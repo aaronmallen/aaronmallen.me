@@ -7,12 +7,9 @@ module Admin
         class Show < View
           SHA_LENGTH = 7
 
-          def initialize(commit:, body_html:, records:)
-            super()
-            @commit = commit
-            @body_html = body_html
-            @records = records
-          end
+          prop :commit, Blog::Types::Instance(ROM::Struct)
+          prop :body_html, Blog::Types::String.optional
+          prop :records, Blog::Types::Hash
 
           def view_template
             PageHead(title: subject, sub:, sub_icon: "fa-solid fa-code-commit") { github_link }

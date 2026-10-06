@@ -7,15 +7,12 @@ module Admin
         class Show < View
           include Components::Activity
 
-          def initialize(events:, filters:, saved_views:, totals:, older:, newer:)
-            super()
-            @events = events
-            @filters = filters
-            @saved_views = saved_views
-            @totals = totals
-            @older = older
-            @newer = newer
-          end
+          prop :events, Blog::Types::Array.of(Blog::Types::Instance(Structs::ActivityEvent))
+          prop :filters, Blog::Types::Hash
+          prop :saved_views, Blog::Types::Hash
+          prop :totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
+          prop :older, Blog::Types::Date.optional
+          prop :newer, Blog::Types::Date.optional
 
           def view_template
             PageHead(title: t(".heading"), sub:)

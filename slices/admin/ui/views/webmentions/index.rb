@@ -25,14 +25,11 @@ module Admin
             SPAM => "ui.views.webmentions.index.spam",
           }.freeze
 
-          def initialize(counts:, filter:, inbox:, posts:, settings:)
-            super()
-            @counts = counts
-            @filter = filter
-            @inbox = inbox
-            @posts = posts
-            @settings = settings
-          end
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :filter, Blog::Types::WebmentionStatus
+          prop :inbox, Blog::Types::Hash
+          prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :settings, Blog::Types::Instance(ROM::Struct)
 
           def view_template
             PageHead(title: t(".heading"), sub:) { filter_form }

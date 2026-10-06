@@ -19,21 +19,16 @@ module Admin
             WORK => "ui.views.projects.index.work",
           }.freeze
 
-          def initialize(
-            archived_count:, featured_count:, filter:, live_count:, projects:, stars:,
-            work_entries:, work_errors:, work_links:, work_values:
-          )
-            super()
-            @archived_count = archived_count
-            @featured_count = featured_count
-            @filter = filter
-            @live_count = live_count
-            @projects = projects
-            @stars = stars
-            @work_entries = work_entries
-            @work_form = { values: work_values, errors: work_errors }
-            @work_links = work_links
-          end
+          prop :archived_count, Blog::Types::Integer
+          prop :featured_count, Blog::Types::Integer
+          prop :filter, Blog::Types::ProjectFilter
+          prop :live_count, Blog::Types::Integer
+          prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :stars, Blog::Types::Integer
+          prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :work_errors, Blog::Types::Hash
+          prop :work_links, Blog::Types::Hash.optional
+          prop :work_values, Blog::Types::Hash
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
@@ -90,7 +85,7 @@ module Admin
               Card(label: t(".work_label"), title: t(".work_title"), data: { key_list: true }) { work_rows }
               SideStack do
                 work_linked if @work_links
-                Components::WorkEntries::EntryForm(**@work_form)
+                Components::WorkEntries::EntryForm(values: @work_values, errors: @work_errors)
               end
             end
           end

@@ -7,11 +7,8 @@ module Admin
         class Edit < View
           include Components::Posts
 
-          def initialize(records:, **editor)
-            super()
-            @editor = editor
-            @records = records
-          end
+          prop :records, Blog::Types::Hash
+          prop :editor, Blog::Types::Hash, :**
 
           def view_template
             content_for(:title, @editor[:post].title)

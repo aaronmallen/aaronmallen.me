@@ -10,12 +10,9 @@ module Admin
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           SCOPE = "new"
 
-          def initialize(errors:, values:, origin:)
-            super()
-            @errors = errors
-            @values = values
-            @origin = origin
-          end
+          prop :errors, Blog::Types::Hash
+          prop :values, Blog::Types::Hash
+          prop :origin, Blog::Types::TaskOrigin
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub")) { back }

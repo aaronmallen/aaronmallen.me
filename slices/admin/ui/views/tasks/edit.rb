@@ -10,13 +10,11 @@ module Admin
           PREFIX = "#"
           TAG_SEPARATOR = ", "
 
-          def initialize(task:, errors:, values:, filter:, origin:)
-            super()
-            @task = task
-            @errors = errors
-            @values = values || stored
-            @returns = { filter:, origin: }
-          end
+          prop :task, Blog::Types::Instance(ROM::Struct)
+          prop :errors, Blog::Types::Hash
+          prop(:values, Blog::Types::Hash) { it || stored }
+          prop :filter, Blog::Types::String
+          prop :origin, Blog::Types::TaskOrigin
 
           def view_template
             PageHead(title: @task.title, sub: t(".sub", key:)) { back }
@@ -24,7 +22,7 @@ module Admin
             Card(label: t(".label"), title: t(".title")) do
               div(class: "task-edit", data: { task_edit: @task.id }) do
                 TaskForm(
-                  errors: @errors, returns: @returns, scope:, task: @task, today: Blog::TimeZone.today,
+                  errors: @errors, returns:, scope:, task: @task, today: Blog::TimeZone.today,
                   values: @values, autofocus: true,
                 ) { foot }
                 delete_form
@@ -43,7 +41,7 @@ module Admin
               action: path(:admin_delete_task, id: @task.id), id: delete_id,
               data: { confirm: t(".confirm_delete", task: @task.title) },
             ) do
-              @returns.each { |name, value| input(type: "hidden", name:, value:) }
+              returns.each { |name, value| input(type: "hidden", name:, value:) }
             end
           end
 
@@ -61,6 +59,8 @@ module Admin
 
           def key = PREFIX + @task.id.to_s
 
+          def returns = { filter: @filter, origin: @origin }
+
           def scope = "task-#{@task.id}"
 
           def stored
@@ -73,7 +73,7 @@ module Admin
             }
           end
 
-          def task_path = path(:admin_task, id: @task.id, **@returns)
+          def task_path = path(:admin_task, id: @task.id, **returns)
         end
       end
     end

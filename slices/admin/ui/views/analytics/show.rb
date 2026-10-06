@@ -9,21 +9,18 @@ module Admin
 
           SIGNED = "%+d"
 
-          def initialize(
-            change:, countries:, feed:, paths:, per_visit:, range:, read_time:, referrers:, series:, totals:,
-            webmentions:, weekday_hours:
-          )
-            super()
-            @countries = countries
-            @feed = feed
-            @paths = paths
-            @range = range
-            @referrers = referrers
-            @series = series
-            @stats = { change:, per_visit:, read_time:, **totals }
-            @webmentions = webmentions
-            @weekday_hours = weekday_hours
-          end
+          prop :change, Blog::Types::Integer.optional, reader: :private
+          prop :countries, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :feed, Blog::Types::Hash
+          prop :paths, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :per_visit, Blog::Types::Float, reader: :private
+          prop :range, Blog::Types::AnalyticsRange
+          prop :read_time, Blog::Types::Integer, reader: :private
+          prop :referrers, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :series, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
+          prop :webmentions, Blog::Types::Hash
+          prop :weekday_hours, Blog::Types::Hash
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @range)) { range_form }
@@ -46,8 +43,6 @@ module Admin
             @feed.fetch(:aggregators).map { { count: it[:subscribers], label: it[:aggregator] } }
           end
 
-          def change = @stats.fetch(:change)
-
           def change_text
             change ? t(".change", count: @range, percent: format(SIGNED, change)) : t(".no_prior")
           end
@@ -61,8 +56,6 @@ module Admin
             @webmentions.fetch(:posts).map { { count: it[:count], label: it[:title] } }
           end
 
-          def per_visit = @stats.fetch(:per_visit)
-
           def range_form
             FilterSwitch(
               action: path(:admin_analytics),
@@ -72,8 +65,6 @@ module Admin
               label: t(".range"),
             )
           end
-
-          def read_time = @stats.fetch(:read_time)
 
           def side_cards
             ReferrersCard(rows: @referrers)
@@ -91,7 +82,7 @@ module Admin
             webmentions_stat
           end
 
-          def views = @stats.fetch(:views)
+          def views = @totals.fetch(:views)
 
           def views_stat
             Stat(
@@ -102,7 +93,7 @@ module Admin
             )
           end
 
-          def visitors = @stats.fetch(:visitors)
+          def visitors = @totals.fetch(:visitors)
 
           def webmentions_stat
             Stat(

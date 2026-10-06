@@ -7,10 +7,7 @@ module Admin
         class Edit < View
           include Components::Decisions
 
-          def initialize(**editor)
-            super()
-            @editor = editor
-          end
+          prop :editor, Blog::Types::Hash, :**
 
           def view_template
             decision = @editor[:decision]

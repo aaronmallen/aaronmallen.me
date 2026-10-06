@@ -16,12 +16,9 @@ module Admin
             SPAM => "ui.views.messages.index.spam",
           }.freeze
 
-          def initialize(count:, filter:, messages:)
-            super()
-            @count = count
-            @filter = filter
-            @messages = messages
-          end
+          prop :count, Blog::Types::Integer
+          prop :filter, Blog::Types::MessageStatus
+          prop :messages, Blog::Types::Instance(Blog::Paged)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }

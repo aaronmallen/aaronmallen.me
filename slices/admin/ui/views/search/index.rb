@@ -11,12 +11,9 @@ module Admin
           KINDS_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           QUERY_ID = "search-q"
 
-          def initialize(kind:, query:, results:)
-            super()
-            @kind = kind
-            @query = query
-            @results = results
-          end
+          prop :kind, Blog::Types::SearchKind.optional
+          prop :query, Blog::Types::String
+          prop :results, Blog::Types::Instance(Blog::Paged)
 
           def view_template
             PageHead(title: t(".heading"), sub: (t(".sub", query: @query) unless @query.empty?)) { filter_form }

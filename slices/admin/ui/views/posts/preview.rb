@@ -9,10 +9,7 @@ module Admin
 
           layout nil
 
-          def initialize(**preview)
-            super()
-            @preview = preview
-          end
+          prop :preview, Blog::Types::Hash, :**
 
           def view_template
             Preview(**@preview)

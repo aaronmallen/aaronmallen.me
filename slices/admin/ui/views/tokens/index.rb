@@ -9,13 +9,10 @@ module Admin
 
           MINTED = "minted_token"
 
-          def initialize(errors:, minted:, name:, tokens:)
-            super()
-            @errors = errors
-            @minted = minted
-            @name = name
-            @tokens = tokens
-          end
+          prop :errors, Blog::Types::Hash
+          prop :minted, Blog::Types::String.optional
+          prop :name, Blog::Types::String
+          prop :tokens, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @tokens.size))

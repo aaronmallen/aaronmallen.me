@@ -12,20 +12,21 @@ module Admin
           }.freeze
           UNIQUE_NOTES = { true => ".final", false => ".first_year" }.freeze
 
-          def initialize(
-            post:, range:, views:, visitors:, bounces:, readers:, read_throughs:, scroll:, clicks:, countries:,
-            devices:, referrers:, sources:, first_days:, unique_readers:
-          )
-            super()
-            @post = post
-            @range = range
-            @stats = { views:, visitors:, bounces:, readers:, read_throughs: }
-            @scroll = scroll
-            @first_days = first_days
-            @unique_readers = unique_readers
-            @clicks = clicks
-            @breakdowns = { countries:, devices:, referrers:, sources: }
-          end
+          prop :post, Blog::Types::Instance(ROM::Struct)
+          prop :range, Blog::Types::AnalyticsRange
+          prop :views, Blog::Types::Integer
+          prop :visitors, Blog::Types::Integer
+          prop :bounces, Blog::Types::Integer
+          prop :readers, Blog::Types::Integer
+          prop :read_throughs, Blog::Types::Integer
+          prop :scroll, Blog::Types::Hash
+          prop :clicks, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :countries, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :devices, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :referrers, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :sources, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :first_days, Blog::Types::Hash
+          prop :unique_readers, Blog::Types::Hash
 
           def view_template
             PageHead(title: @post.title, kicker: t(".kicker"), sub:) do
@@ -48,9 +49,13 @@ module Admin
 
           def clicks = @clicks.map { { count: it[:clicks], label: it.values_at(:link_host, :link_path).join } }
 
-          def devices = rows(:devices) { it[:device_class] }
+          def devices = rows(@devices) { it[:device_class] }
 
           def figure(key, change: nil) = Stat(key: t(LABELS.fetch(key)), value: Blog::Figures.count(stat(key)), change:)
+
+          def figures
+            { views: @views, visitors: @visitors, bounces: @bounces, readers: @readers, read_throughs: @read_throughs }
+          end
 
           def left_cards
             ScrollCard(reached: @scroll.fetch(:reached), views: @scroll.fetch(:views))
@@ -71,16 +76,16 @@ module Admin
           end
 
           def right_cards
-            ReferrersCard(rows: @breakdowns.fetch(:referrers))
-            CountriesCard(rows: @breakdowns.fetch(:countries))
+            ReferrersCard(rows: @referrers)
+            CountriesCard(rows: @countries)
             MeterCard(color: :pink, empty: t(".no_clicks"), rows: clicks, title: t(".clicks"))
           end
 
-          def rows(name) = @breakdowns.fetch(name).map { { count: it[:visitors], label: yield(it) } }
+          def rows(list) = list.map { { count: it[:visitors], label: yield(it) } }
 
-          def sources = rows(:sources) { it[:source] }
+          def sources = rows(@sources) { it[:source] }
 
-          def stat(key) = @stats.fetch(key).to_i
+          def stat(key) = figures.fetch(key).to_i
 
           def stats
             figure(:views)

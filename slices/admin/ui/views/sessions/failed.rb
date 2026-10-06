@@ -13,10 +13,7 @@ module Admin
           }.freeze
           UNEXPECTED = ".unexpected"
 
-          def initialize(reason:)
-            super()
-            @reason = reason
-          end
+          prop :reason, Blog::Types::Symbol
 
           def view_template
             PageHead(title: t(".heading"), sub: t(MESSAGES.fetch(@reason, UNEXPECTED)))

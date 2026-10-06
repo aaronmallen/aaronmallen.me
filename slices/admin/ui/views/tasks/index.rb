@@ -39,16 +39,16 @@ module Admin
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
-          def initialize(counts:, filters:, lead:, planned:, pool:, pools:, tab:, tasks:, today:, waiting:)
-            super()
-            @counts = counts
-            @filters = filters
-            @lead = lead
-            @plan = { planned:, pool:, pools:, waiting: }
-            @tab = tab
-            @tasks = tasks
-            @today = today
-          end
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String | Blog::Types::Symbol, Blog::Types::Integer)
+          prop :filters, Blog::Types::Hash
+          prop :lead, Blog::Types::Integer.optional
+          prop :planned, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :pool, Blog::Types::String
+          prop :pools, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)))
+          prop :tab, Blog::Types::TaskTab
+          prop :tasks, Blog::Types::Instance(Blog::Paged)
+          prop :today, Blog::Types::Date
+          prop :waiting, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
@@ -125,7 +125,7 @@ module Admin
           def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
 
           def planner
-            Planner(counts: @counts, date: @today, pool: @plan[:pool], pools: @plan[:pools])
+            Planner(counts: @counts, date: @today, pool: @pool, pools: @pools)
           end
 
           def planning? = today? && @tasks.rows.empty? && !filtering?
@@ -157,7 +157,7 @@ module Admin
           def today? = @tab == TODAY
 
           def upcoming
-            UpcomingSprints(planned: @plan[:planned], today: @today, waiting: @plan[:waiting])
+            UpcomingSprints(planned: @planned, today: @today, waiting: @waiting)
           end
 
           def upcoming? = @tab == UPCOMING

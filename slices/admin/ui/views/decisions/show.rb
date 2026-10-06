@@ -7,13 +7,10 @@ module Admin
         class Show < View
           include Components::Decisions
 
-          def initialize(decision:, form:, timeline:, records:)
-            super()
-            @decision = decision
-            @form = form
-            @timeline = timeline
-            @records = records
-          end
+          prop :decision, Blog::Types::Instance(ROM::Struct)
+          prop :form, Blog::Types::Hash
+          prop :timeline, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :records, Blog::Types::Hash
 
           def view_template
             article(class: "read-page", data: { decision_read: @decision.id }) do

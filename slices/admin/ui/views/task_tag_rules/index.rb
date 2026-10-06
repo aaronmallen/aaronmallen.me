@@ -15,12 +15,9 @@ module Admin
           }.freeze
           TYPED = %i[pattern provider tags].freeze
 
-          def initialize(adding:, editing:, rules:)
-            super()
-            @adding = adding
-            @editing = editing
-            @rules = rules
-          end
+          prop :adding, Blog::Types::Hash
+          prop :editing, Blog::Types::Hash.optional
+          prop :rules, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @rules.size)) { back }

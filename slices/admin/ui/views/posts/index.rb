@@ -21,20 +21,16 @@ module Admin
           MENTION_COLOR = :pink
           UNIQUE_READERS = { true => ".final_unique_readers", false => ".unique_readers" }.freeze
 
-          def initialize(
-            counts:, filter:, posts:, read_through_counts:, saved_views:, unique_reader_counts:, view_counts:,
-            visitor_counts:, webmention_counts:, word_counts:
-          )
-            super()
-            @counts = counts
-            @filter = filter
-            @posts = posts
-            @saved_views = saved_views
-            @readership = { read_throughs: read_through_counts, views: view_counts, visitors: visitor_counts }
-            @unique_reader_counts = unique_reader_counts
-            @webmention_counts = webmention_counts
-            @word_counts = word_counts
-          end
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :filter, Blog::Types::PostFilter
+          prop :posts, Blog::Types::Instance(Blog::Paged)
+          prop :read_through_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
+          prop :saved_views, Blog::Types::Hash
+          prop :unique_reader_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
+          prop :view_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
+          prop :visitor_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
+          prop :webmention_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
+          prop :word_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
@@ -128,7 +124,9 @@ module Admin
             )
           end
 
-          def tally(name, post) = @readership.fetch(name).fetch(post.id)
+          def tallies = { read_throughs: @read_through_counts, views: @view_counts, visitors: @visitor_counts }
+
+          def tally(name, post) = tallies.fetch(name).fetch(post.id)
 
           def unique_readers(post)
             readers, final = @unique_reader_counts.fetch(post.id).values_at(:readers, :final)

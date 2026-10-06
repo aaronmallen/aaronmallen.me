@@ -7,10 +7,7 @@ module Admin
         class Preview < View
           layout nil
 
-          def initialize(html:)
-            super()
-            @html = html
-          end
+          prop :html, Blog::Types::String
 
           def view_template
             div(class: "post-body") { raw(safe(@html)) }

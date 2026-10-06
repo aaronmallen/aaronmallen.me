@@ -9,10 +9,7 @@ module Admin
 
           layout nil
 
-          def initialize(person:)
-            super()
-            @person = person
-          end
+          prop :person, Blog::Types::Instance(ROM::Struct)
 
           def view_template
             MentionOption(person: @person)

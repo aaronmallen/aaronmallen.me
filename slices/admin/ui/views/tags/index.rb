@@ -16,17 +16,14 @@ module Admin
           TITLES = { PUBLIC => ".title.public", PRIVATE => ".title.private" }.freeze
           SEARCH_ID = "tags-q"
 
-          def initialize(count:, editing:, errors:, name:, query:, scope:, tags:, usage:)
-            super()
-            @count = count
-            @editing = editing
-            @errors = errors
-            @name = name
-            @query = query
-            @scope = scope
-            @tags = tags
-            @usage = usage
-          end
+          prop :count, Blog::Types::Integer
+          prop :editing, Blog::Types::Hash.optional
+          prop :errors, Blog::Types::Hash
+          prop :name, Blog::Types::String
+          prop :query, Blog::Types::String
+          prop :scope, Blog::Types::TagScope
+          prop :tags, Blog::Types::Instance(Blog::Paged)
+          prop :usage, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(COUNTS.fetch(@scope), count: @count)) do

@@ -20,12 +20,9 @@ module Admin
           }.freeze
           TITLES = { OPEN => ".titles.open", RESOLVED => ".titles.resolved", DROPPED => ".titles.dropped" }.freeze
 
-          def initialize(counts:, decisions:, filter:)
-            super()
-            @counts = counts
-            @decisions = decisions
-            @filter = filter
-          end
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :decisions, Blog::Types::Instance(Blog::Paged)
+          prop :filter, Blog::Types::DecisionStatus
 
           def view_template
             PageHead(title: t(".heading"), sub:) do

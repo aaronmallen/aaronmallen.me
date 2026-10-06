@@ -7,10 +7,7 @@ module Admin
         class New < View
           include Components::People
 
-          def initialize(**editor)
-            super()
-            @editor = editor
-          end
+          prop :editor, Blog::Types::Hash, :**
 
           def view_template = Editor(**@editor)
         end

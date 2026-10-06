@@ -13,27 +13,24 @@ module Admin
             tags: Blog::Constants::EMPTY_STRING,
           }.freeze
 
-          def initialize(
-            days:, entries:, saved_views:, streak:, today:, words:, editing: nil, errors: Blog::Constants::EMPTY_HASH,
-            search: Blog::Constants::EMPTY_STRING, values: BLANK_ENTRY, writing: false
-          )
-            super()
-            @counts = { entries:, words: }
-            @days = days
-            @editing = editing
-            @errors = errors
-            @search = search
-            @rail = { saved_views:, streak: }
-            @today = today
-            @values = values
-            @writing = writing
-          end
+          prop :days, Blog::Types::Instance(Blog::DayPaged)
+          prop :entries, Blog::Types::Integer
+          prop :saved_views, Blog::Types::Hash
+          prop :streak, Blog::Types::Hash
+          prop :today, Blog::Types::Date
+          prop :words, Blog::Types::Integer
+          prop :editing, Blog::Types::Hash.optional
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :search, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
+          prop :values, Blog::Types::Hash, default: BLANK_ENTRY
+          prop :writing, Blog::Types::Bool, default: false
 
           def view_template
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock")
 
             Split do
-              Filters(search:, entry_date: entry_date.iso8601, today: @today, errors: @errors, **@rail)
+              Filters(search:, entry_date: entry_date.iso8601, today: @today, errors: @errors,
+                      saved_views: @saved_views, streak: @streak)
               div(class: "journal-main") do
                 new_entry
                 days
@@ -67,8 +64,8 @@ module Admin
             dotted(
               t(".private"),
               t(".never_public"),
-              t(".entries", count: @counts[:entries]),
-              t(".words", count: @counts[:words]),
+              t(".entries", count: @entries),
+              t(".words", count: @words),
             )
           end
         end

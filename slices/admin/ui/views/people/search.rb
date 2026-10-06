@@ -9,10 +9,7 @@ module Admin
 
           layout nil
 
-          def initialize(**results)
-            super()
-            @results = results
-          end
+          prop :results, Blog::Types::Hash, :**
 
           def view_template = SearchResults(**@results)
         end

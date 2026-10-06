@@ -10,22 +10,20 @@ module Admin
           ORIGIN = Blog::Types::TaskOrigin["today"]
           QUEUE_KINDS = { posts: ".queue_posts", social_posts: ".queue_social_posts" }.freeze
 
-          def initialize(
-            attention:, commits:, commit_totals:, entries:, posts:, queue:, social:, sprint:, sync_failures:,
-            visitors:, webmentions:, body: Blog::Constants::EMPTY_STRING, errors: Blog::Constants::EMPTY_HASH,
-            tags: Blog::Constants::EMPTY_STRING
-          )
-            super()
-            @attention = attention
-            @commits = commits
-            @commit_totals = commit_totals
-            @journal = { body:, entries:, errors:, tags:, word_count: Blog::Figures.words(body) }
-            @publishing = { posts:, queue:, social: }
-            @sprint = sprint
-            @sync_failures = sync_failures
-            @visitors = visitors
-            @webmentions = webmentions
-          end
+          prop :attention, Blog::Types::Array.of(Blog::Types::Instance(::Activity::Structs::StalledRow))
+          prop :commits, Blog::Types::Hash
+          prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
+          prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :posts, Blog::Types::Hash, reader: :private
+          prop :queue, Blog::Types::Hash, reader: :private
+          prop :social, Blog::Types::Hash, reader: :private
+          prop :sprint, Blog::Types::Hash
+          prop :sync_failures, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :visitors, Blog::Types::Integer
+          prop :webmentions, Blog::Types::Hash
+          prop :body, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :tags, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
 
           def view_template
             content_for(:title, t(".heading"))
@@ -55,14 +53,14 @@ module Admin
             sign_out_form
           end
 
-          def main_cards
-            TodayJournalCard(**@journal)
-            CommitsCard(**@commits)
+          def journal
+            { body: @body, entries: @entries, errors: @errors, tags: @tags, word_count: Blog::Figures.words(@body) }
           end
 
-          def posts = @publishing[:posts]
-
-          def queue = @publishing[:queue]
+          def main_cards
+            TodayJournalCard(**journal)
+            CommitsCard(**@commits)
+          end
 
           def queue_kinds
             waiting = QUEUE_KINDS.select { |kind, _key| queue[kind].positive? }
@@ -88,8 +86,6 @@ module Admin
               Button(type: "submit") { t(".sign_out") }
             end
           end
-
-          def social = @publishing[:social]
 
           def sprint_done = sprint_tasks.count(&:closed?)
 
@@ -117,7 +113,7 @@ module Admin
             dotted(
               t(".sub_tasks", done: sprint_done, total: sprint_tasks.size),
               t(".sub_commits", count: @commit_totals[:commits]),
-              t(".sub_entries", count: @journal[:entries].size),
+              t(".sub_entries", count: @entries.size),
               t(".sub_scheduled", count: queue[:today]),
             )
           end

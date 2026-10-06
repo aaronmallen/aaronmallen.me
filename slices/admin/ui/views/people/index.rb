@@ -5,10 +5,7 @@ module Admin
     module Views
       module People
         class Index < View
-          def initialize(people:)
-            super()
-            @people = people
-          end
+          prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @people.size)) { new_person }

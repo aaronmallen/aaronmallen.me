@@ -9,20 +9,16 @@ module Admin
 
           ACCOUNTS_SEPARATOR = " and "
 
-          def initialize(
-            accounts:, filter:, items:, now:, queued:, records:, suggestion_counts:, suggestions:, writing: false,
-            **composer
-          )
-            super()
-            @accounts = accounts
-            @composer = composer
-            @filter = filter
-            @queue = { page: items, now:, suggestion_counts: }
-            @queued = queued
-            @records = records
-            @suggestions = suggestions
-            @writing = writing
-          end
+          prop :accounts, Blog::Types::Array.of(Blog::Types::String)
+          prop :filter, Blog::Types::SocialQueue
+          prop :items, Blog::Types::Instance(Blog::Paged)
+          prop :now, Blog::Types::Time
+          prop :queued, Blog::Types::Integer
+          prop :records, Blog::Types::Hash.optional
+          prop :suggestion_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
+          prop :suggestions, Blog::Types::Hash
+          prop :writing, Blog::Types::Bool, default: false
+          prop :composer, Blog::Types::Hash, :**
 
           def view_template
             PageHead(title: t(".heading"), sub:)
@@ -58,7 +54,7 @@ module Admin
           end
 
           def queue
-            Queue(filter: @filter, **@queue)
+            Queue(filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
           end
 
           def sub = dotted(cross_posting, t(".queued", count: @queued))

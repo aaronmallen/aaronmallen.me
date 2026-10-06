@@ -9,13 +9,12 @@ module Admin
 
           MONTH = Blog::Types::ReviewPeriod["month"]
 
-          def initialize(review:, note:, on:, today:, note_body: nil, errors: Blog::Constants::EMPTY_HASH)
-            super()
-            @review = review
-            @note = { body: note_body || note&.body || Blog::Constants::EMPTY_STRING, saved: !note.nil?, errors: }
-            @on = on
-            @today = today
-          end
+          prop :review, Blog::Types::Instance(::Activity::Structs::Review)
+          prop :note, Blog::Types::Instance(ROM::Struct).optional
+          prop :on, Blog::Types::Date
+          prop :today, Blog::Types::Date
+          prop :note_body, Blog::Types::String.optional
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
@@ -29,7 +28,7 @@ module Admin
               SideStack { record_cards }
             end
 
-            NoteCard(**@note, period: @review.period, to: @review.to)
+            NoteCard(**note_card)
           end
 
           private
@@ -37,6 +36,16 @@ module Admin
           def commit_count = @review.commits.values.sum { it[:commits] }
 
           def done_count = @review.done.values.sum(&:size)
+
+          def note_card
+            {
+              body: @note_body || @note&.body || Blog::Constants::EMPTY_STRING,
+              errors: @errors,
+              period: @review.period,
+              saved: !@note.nil?,
+              to: @review.to,
+            }
+          end
 
           def record_cards
             PublishedCard(posts: @review.posts, social_posts: @review.social_posts)
