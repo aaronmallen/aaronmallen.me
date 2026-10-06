@@ -3,7 +3,6 @@
 module Analytics
   module Queries
     class PageBetween
-      COUNTS = %i[views visitors].freeze
       FIGURES = %i[views visitors read_seconds].freeze
       COUNTED = [*FIGURES, :bounces].freeze
       RANKED = { countries: :country_code, referrers: :host }.freeze
@@ -26,12 +25,6 @@ module Analytics
 
       private
 
-      def combined(rows, key)
-        rows.group_by { it.fetch(key) }.map do |value, found|
-          { key => value, **COUNTS.to_h { |count| [count, found.sum { it.fetch(count) }] } }
-        end
-      end
-
       def days(window, live)
         found = rollup_repo.page_days(**window).to_h { [it.day, figures(it)] }
         live.each { found[it.day] = live_day(it, window.fetch(:path)) }
@@ -52,7 +45,7 @@ module Analytics
         rolled = rollup_repo.public_send(:"page_#{name}", **window).map(&:to_h)
         rows = rolled + live_rows(:"page_#{name}", window.fetch(:path), live)
 
-        combined(rows, key).sort_by { [-it.fetch(:visitors), -it.fetch(:views), it.fetch(key).to_s] }
+        RankedRows.call(rows, key:)
       end
     end
   end
