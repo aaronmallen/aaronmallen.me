@@ -118,14 +118,12 @@ module Admin
         def head(comment)
           div(class: "comment-head") do
             span(class: "comment-author") { comment.synced? ? @author&.call(comment) : plain(Blog::Owner.full_name) }
-            time(class: "timeline-time", datetime: comment.occurred_at.iso8601) { stamp(comment.occurred_at) }
+            Moment(at: comment.occurred_at, class: "timeline-time")
             comment.synced? ? @source&.call(comment) : acts(comment)
           end
         end
 
         def mine?(id) = @form.key?(:id) && @form[:id] == id
-
-        def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
       end
     end
   end

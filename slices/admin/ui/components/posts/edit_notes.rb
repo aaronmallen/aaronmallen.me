@@ -51,15 +51,13 @@ module Admin
 
           def item(edit)
             li(class: "edit-note", id: self.class.scope(edit.id)) do
-              time(class: "edit-note-time", datetime: edit.created_at.iso8601) { stamp(edit.created_at) }
+              Moment(at: edit.created_at, class: "edit-note-time")
               div(class: "post-body edit-note-body") { raw(safe(::Posts::Markdown.to_html(edit.note).strip)) }
               edit_form(edit)
             end
           end
 
           def mine?(id) = @noting.key?(:id) && @noting[:id] == id
-
-          def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
         end
       end
     end

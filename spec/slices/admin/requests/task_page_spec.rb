@@ -171,6 +171,13 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         expect(facts[label(:completed)]).to eq(stamp(done.completed_at))
       end
 
+      it "names each date's instant in local time" do
+        read
+
+        expect(page.all(".task-fact time").map { it[:datetime] })
+          .to eq([task.created_at, task.updated_at].map { Blog::TimeZone.local(it).iso8601 })
+      end
+
       it "leaves completed off an open task" do
         read
 

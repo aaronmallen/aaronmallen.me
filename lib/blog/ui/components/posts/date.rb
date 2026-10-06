@@ -8,9 +8,7 @@ module Blog
           prop :time, Blog::Types::Time
 
           def view_template
-            time(class: "dt-published", datetime: TimeZone.local(@time).iso8601) do
-              l(TimeZone.today(@time), format: :medium)
-            end
+            Moment(at: @time, format: :day, class: "dt-published")
           end
         end
       end

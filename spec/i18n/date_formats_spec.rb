@@ -16,7 +16,7 @@ RSpec.describe "The date and time formats", type: :app do
     end
   end
 
-  { clock: "21:30", medium: "Sep 7, 2026, 21:30" }.each do |format, text|
+  { clock: "21:30", day: "Sep 7, 2026", medium: "Sep 7, 2026, 21:30" }.each do |format, text|
     it "reads a Chicago time in the #{format} format as #{text}" do
       expect(Admin::Slice["i18n"].l(time, format:)).to eq(text)
     end

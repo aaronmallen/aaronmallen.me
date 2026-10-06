@@ -45,7 +45,7 @@ RSpec.describe "Admin post edit notes", type: :request do
         edit = create(:post_edit, post: article, created_at: Time.utc(2026, 9, 1, 15))
         read
 
-        expect(card.find("li#post-edit-#{edit.id} time")["datetime"]).to eq(edit.created_at.iso8601)
+        expect(card.find("li#post-edit-#{edit.id} time")["datetime"]).to eq(Blog::TimeZone.local(edit.created_at).iso8601)
       end
 
       it "renders the note as Markdown" do

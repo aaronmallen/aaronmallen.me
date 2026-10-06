@@ -19,6 +19,7 @@ en:
   time:
     formats:
       clock: "%H:%M"
+      day: "%b %-d, %Y"
       medium: "%b %-d, %Y, %H:%M"
   ui:
     components:

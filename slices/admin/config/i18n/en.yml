@@ -1661,8 +1661,8 @@ en:
           title: "Your new token"
         row:
           confirm_revoke: "Revoke %{token}? Any client using it loses the API at once."
-          last_used: "last used %{time}"
-          minted: "minted %{time}"
+          last_used: "last used"
+          minted: "minted"
           never_used: "never used"
           revoke: "Revoke"
       webmentions:

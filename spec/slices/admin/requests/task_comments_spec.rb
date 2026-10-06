@@ -98,7 +98,7 @@ RSpec.describe "Admin task comments", type: :request do
         read
 
         expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: Blog::Owner.full_name)
-        expect(comment_on_page(comment).find("time")["datetime"]).to eq(comment.created_at.iso8601)
+        expect(comment_on_page(comment).find("time")["datetime"]).to eq(Blog::TimeZone.local(comment.created_at).iso8601)
       end
 
       it "offers edit on a local comment" do
@@ -157,7 +157,7 @@ RSpec.describe "Admin task comments", type: :request do
       end
 
       it "shows its time" do
-        expect(comment_on_page(comment).find("time")["datetime"]).to eq(comment.created_at.iso8601)
+        expect(comment_on_page(comment).find("time")["datetime"]).to eq(Blog::TimeZone.local(comment.created_at).iso8601)
       end
 
       it "turns a remote image into a link to it", :aggregate_failures do

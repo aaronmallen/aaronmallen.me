@@ -59,15 +59,15 @@ module Admin
           def fact(label_key, value)
             div(class: "task-fact") do
               dt { t(label_key) }
-              dd { value }
+              dd { value.is_a?(Time) ? Moment(at: value) : plain(value) }
             end
           end
 
           def fact_values
             {
-              ".created" => stamp(@task.created_at),
-              ".updated" => stamp(@task.updated_at),
-              ".completed" => @task.completed_at && stamp(@task.completed_at),
+              ".created" => @task.created_at,
+              ".updated" => @task.updated_at,
+              ".completed" => @task.completed_at,
               ".sprint" => sprint_day,
               ".carried" => t(".carried_count", count: @task.carried_count),
               ".worked" => Blog::Figures.hours(@task.worked_seconds),
@@ -124,8 +124,6 @@ module Admin
           def reference = @task.source && ::Tasks::SourceReference.for(@task.source).key
 
           def sprint_day = @task.sprint ? l(@task.sprint.sprint_date, format: :medium) : t(".unscheduled")
-
-          def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
 
           def status
             color, icon, label_key = STATUSES.fetch(@task.status)

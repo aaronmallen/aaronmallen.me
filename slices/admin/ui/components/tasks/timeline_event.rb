@@ -21,7 +21,7 @@ module Admin
             li(class: "timeline-event", id:, data: { task_event: @entry.kind }) do
               Icon(["timeline-event-icon", icon])
               span(class: "timeline-event-text") { @entry.session? ? session : event }
-              time(class: "timeline-time", datetime: @entry.occurred_at.iso8601) { stamp(@entry.occurred_at) }
+              Moment(at: @entry.occurred_at, class: "timeline-time")
               yield if block_given?
             end
           end
@@ -54,8 +54,6 @@ module Admin
             plain(t(".running"))
             Pill(color: :blue) { t(".running_pill") }
           end
-
-          def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
 
           def status_name(status) = status && t(STATUSES.fetch(status))
         end

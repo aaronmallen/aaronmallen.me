@@ -23,9 +23,7 @@ module Public
             p(class: "post-edit-date") do
               plain t(".edited")
               whitespace
-              time(class: ("dt-updated" if updated), datetime: Blog::TimeZone.local(time).iso8601) do
-                l(Blog::TimeZone.today(time), format: :medium)
-              end
+              Moment(at: time, format: :day, class: ("dt-updated" if updated))
             end
           end
 

@@ -201,6 +201,13 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(row).to have_text("last used #{stamp(used)}")
     end
 
+    it "names when I minted the token in local time" do
+      token = minted[:token]
+      get "/admin/tokens"
+
+      expect(row.find("time")[:datetime]).to eq(Blog::TimeZone.local(token.created_at).iso8601)
+    end
+
     it "says a token no client has used has never been used" do
       minted
       get "/admin/tokens"

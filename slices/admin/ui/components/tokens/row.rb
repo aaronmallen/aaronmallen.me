@@ -10,18 +10,21 @@ module Admin
           prop :token, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: @token.name, sub:) { revoke_form }
+            ListItem(title: @token.name) do |item|
+              item.meta { p(class: "li-sub") { sub } }
+              revoke_form
+            end
           end
 
           private
 
           def last_used
-            return t(".never_used") if @token.last_used_at.nil?
+            return plain(t(".never_used")) if @token.last_used_at.nil?
 
-            t(".last_used", time: stamp(@token.last_used_at))
+            stamped(".last_used", @token.last_used_at)
           end
 
-          def minted = t(".minted", time: stamp(@token.created_at))
+          def minted = stamped(".minted", @token.created_at)
 
           def revoke_attributes
             {
@@ -36,9 +39,17 @@ module Admin
             end
           end
 
-          def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
+          def stamped(key, time)
+            plain(t(key))
+            whitespace
+            Moment(at: time)
+          end
 
-          def sub = [minted, last_used].join(SEPARATOR)
+          def sub
+            minted
+            plain(SEPARATOR)
+            last_used
+          end
         end
       end
     end
