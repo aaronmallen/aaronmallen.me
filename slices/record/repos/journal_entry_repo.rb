@@ -12,8 +12,8 @@ module Record
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
       commands delete: :by_pk
 
-      def between(from:, to:, limit: nil)
-        found = with_tags.between(from, to).newest_first
+      def between(from:, to:, limit: nil, tag: nil)
+        found = searched(with_tags, tags: Array(tag)).between(from, to).newest_first
 
         (limit ? found.limit(limit) : found).to_a
       end

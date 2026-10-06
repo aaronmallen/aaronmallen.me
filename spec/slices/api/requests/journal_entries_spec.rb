@@ -57,9 +57,10 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "describes the window with a 200" do
-      window = { "from" => "2026-03-01", "to" => "2026-03-31", "count" => 0, "partial" => false, "entries" => [] }
+      stats = { "entries" => 0, "words" => 0, "streak" => { "days" => 30, "written" => 0 } }
+      window = { "from" => "2026-03-01", "to" => "2026-03-31", "count" => 0, "partial" => false }
 
-      expect([march, status]).to eq([window, 200])
+      expect([march, status]).to eq([window.merge("stats" => stats, "entries" => []), 200])
     end
 
     it "answers the body as the markdown it was written in" do
@@ -72,6 +73,33 @@ RSpec.describe "API journal entries", type: :request do
       create(:journal_entry, entry_date: Date.new(2026, 4, 1))
 
       expect(march.fetch("entries")).to be_empty
+    end
+
+    it "keeps only the entries that carry the tag" do
+      create(:journal_entry, entry_date: Date.new(2026, 3, 1))
+      kept = create(:journal_entry, entry_date: Date.new(2026, 3, 2), tags: %w[health ruby])
+      create(:journal_entry, entry_date: Date.new(2026, 3, 3), tags: %w[ruby])
+
+      expect(list(from: "2026-03-01", to: "2026-03-31", tag: "Health").fetch("entries").map { it.fetch("id") })
+        .to eq([kept.id])
+    end
+
+    it "counts the whole journal, whatever the window and tag" do
+      create(:journal_entry, entry_date: today, body: "one two three")
+      create(:journal_entry, entry_date: today - 1, body: "four five")
+      create(:journal_entry, entry_date: today - 40, body: "six")
+
+      expect(list(from: "2026-03-01", to: "2026-03-31", tag: "health").fetch("stats"))
+        .to eq("entries" => 3, "words" => 6, "streak" => { "days" => 30, "written" => 2 })
+    end
+
+    it "gives the stats the admin's journal shows" do
+      create(:journal_entry, entry_date: today, body: "one two")
+      create(:journal_entry, entry_date: today - 2, body: "three")
+      admin = Admin::Slice["operations.summarize_journal"].call
+
+      expect(list(from: "2026-03-01", to: "2026-03-31").fetch("stats"))
+        .to eq(JSON.parse(JSON.generate(admin.slice(:entries, :words, :streak))))
     end
 
     it "stops at the row cap and says where to go on" do
@@ -273,6 +301,14 @@ RSpec.describe "API journal entries", type: :request do
     it "list as list_journal_entries does" do
       create(:journal_entry, entry_date: Date.new(2026, 3, 2), tags: %w[health])
       window = { from: "2026-03-01", to: "2026-03-31" }
+
+      expect(list(**window)).to eq(mcp_answer("list_journal_entries", **window))
+    end
+
+    it "list by tag as list_journal_entries does" do
+      create(:journal_entry, entry_date: Date.new(2026, 3, 2), tags: %w[health])
+      create(:journal_entry, entry_date: Date.new(2026, 3, 3))
+      window = { from: "2026-03-01", to: "2026-03-31", tag: "health" }
 
       expect(list(**window)).to eq(mcp_answer("list_journal_entries", **window))
     end

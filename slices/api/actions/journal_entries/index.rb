@@ -6,7 +6,7 @@ module API
       class Index < Action
         include Deps[endpoint: "endpoints.list_journal_entries"]
 
-        def handle(request, response) = answer(response, endpoint.call(query(request, :from, :to)))
+        def handle(request, response) = answer(response, endpoint.call(query(request, :from, :to, :tag)))
       end
     end
   end

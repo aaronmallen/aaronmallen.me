@@ -39,7 +39,8 @@ module API
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.save_review_note
       operations.update_journal_entry queries.commit_by_id queries.journal_days queries.journal_days_between
-      queries.journal_entries_between queries.journal_entry_by_id queries.review_note
+      queries.journal_entries_between queries.journal_entry_by_id queries.journal_entry_count queries.journal_streak
+      queries.journal_word_count queries.review_note
     ], from: :record
 
     import keys: %w[
