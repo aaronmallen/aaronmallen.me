@@ -69,6 +69,7 @@ module MCP
         save_project: "projects.operations.save_project",
         save_tag: "tags.operations.save_tag",
         scroll_depths_between: "analytics.queries.scroll_depths_between",
+        social_post_counts_between: "social.queries.social_post_counts_dated_between",
         social_posts_dated_between: "social.queries.social_posts_dated_between",
         sources_between: "analytics.queries.sources_between",
         suggestion_by_id: "suggestions.queries.by_id",

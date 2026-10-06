@@ -6,6 +6,11 @@ module Social
       DRAFT = Blog::Types::SocialPostStatus["draft"]
       POSTED = Blog::Types::SocialPostStatus["posted"]
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
+      QUEUES = {
+        Blog::Types::SocialQueue["queued"] => SCHEDULED,
+        Blog::Types::SocialQueue["posted"] => POSTED,
+        Blog::Types::SocialQueue["drafts"] => DRAFT,
+      }.freeze
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
       commands update: :by_pk, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[updated_at] } }
@@ -31,7 +36,13 @@ module Social
 
       def claimed?(id) = social_post_deliveries.for_social_post(id).exist?
 
-      def count_by_status = social_posts.counts_by_status.to_a.to_h { [it.status, it.count] }
+      def count_by_status = count_statuses(social_posts)
+
+      def count_dated_between(from:, to:)
+        counted = count_statuses(social_posts.dated_between(*day_bounds(from, to)))
+
+        QUEUES.transform_values { counted.fetch(it, 0) }
+      end
 
       def create_with_parts(parts:, **attrs)
         social_post = transaction do
@@ -43,8 +54,9 @@ module Social
         by_id(social_post.id)
       end
 
-      def dated_between(from:, to:, page:)
-        days = social_posts.dated_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
+      def dated_between(from:, to:, page:, queue: nil)
+        days = social_posts.dated_between(*day_bounds(from, to))
+        days = days.with_status(QUEUES.fetch(queue)) if queue
 
         page_of(days.newest_dated_first, page)
       end
@@ -105,6 +117,10 @@ module Social
       end
 
       private
+
+      def count_statuses(found) = found.counts_by_status.to_a.to_h { [it.status, it.count] }
+
+      def day_bounds(from, to) = [from && Blog::TimeZone.day_start(from), to && Blog::TimeZone.day_start(to + 1)]
 
       def insert_parts(social_post_id, parts)
         rows = parts.each_with_index.map { |body, index| { social_post_id:, position: index + 1, body: } }

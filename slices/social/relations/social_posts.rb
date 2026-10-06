@@ -17,7 +17,10 @@ module Social
 
       def counts_by_status = unordered.select(:status) { integer.count(id).as(:count) }.group(:status)
 
-      def dated_between(from, to) = where(DATED => from...to)
+      def dated_between(from, to)
+        started = from ? where(DATED => from..) : self
+        to ? started.where(DATED => ...to) : started
+      end
 
       def due_at(time) = with_status(SCHEDULED).where { posted_at <= time }
 

@@ -42,6 +42,11 @@ RSpec.describe "MCP social tools", type: :request do
 
     def listed = content.fetch("social_posts")
 
+    def listed_ids(**)
+      call_tool("list_social_posts", **)
+      listed.map { it.fetch("id") }
+    end
+
     def range = { from: "2026-03-01", to: "2026-03-31" }
 
     it "lists sent and unsent posts in the range, newest first" do
@@ -112,6 +117,75 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("list_social_posts", **range)
 
       expect(listed.first.fetch("deliveries").first.fetch("state")).to eq("retrying")
+    end
+
+    it "keeps only the queue asked for" do
+      create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 2)))
+      queued = create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 20)))
+      create(:social_post, :draft, created_at: at(Date.new(2026, 3, 10)))
+
+      expect(listed_ids(**range, queue: "queued")).to eq([queued.id])
+    end
+
+    it "keeps the drafts and the posted ones apart" do
+      sent = create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 2)))
+      draft = create(:social_post, :draft, created_at: at(Date.new(2026, 3, 10)))
+
+      expect([listed_ids(**range, queue: "drafts"), listed_ids(**range, queue: "posted")])
+        .to eq([[draft.id], [sent.id]])
+    end
+
+    it "lists every social post, newest first, when given no range" do
+      older = create(:social_post, :posted, posted_at: at(Date.new(2020, 3, 2)))
+      newer = create(:social_post, :scheduled, posted_at: at(Date.new(2030, 3, 2)))
+      call_tool("list_social_posts")
+
+      expect([listed.map { it.fetch("id") }, content.values_at("from", "to")]).to eq([[newer.id, older.id], [nil, nil]])
+    end
+
+    it "pages through every post in one queue when given no range" do
+      kept = 1.upto(3).map { create(:social_post, :posted, posted_at: at(Date.new(2020, 1, it))) }.reverse
+      create(:social_post, :draft)
+      lower_page_size(:mcp, to: 2)
+
+      expect([1, 2].flat_map { listed_ids(queue: "posted", page: it) }).to eq(kept.map(&:id))
+    end
+
+    it "lists every social post from a day on when given only from" do
+      create(:social_post, :posted, posted_at: at(Date.new(2026, 2, 28)))
+      kept = create(:social_post, :scheduled, posted_at: at(Date.new(2030, 3, 2)))
+
+      expect(listed_ids(from: "2026-03-01")).to eq([kept.id])
+    end
+
+    it "lists every social post up to a day when given only to" do
+      kept = create(:social_post, :posted, posted_at: at(Date.new(2020, 3, 2)))
+      create(:social_post, :posted, posted_at: at(Date.new(2026, 3, 2)))
+
+      expect(listed_ids(to: "2026-03-01")).to eq([kept.id])
+    end
+
+    it "counts the posts in the range by queue, whatever the queue asked for" do
+      2.upto(3) { create(:social_post, :posted, posted_at: at(Date.new(2026, 3, it))) }
+      create(:social_post, :draft, created_at: at(Date.new(2026, 3, 10)))
+      create(:social_post, :scheduled, posted_at: at(Date.new(2026, 4, 2)))
+      call_tool("list_social_posts", **range, queue: "drafts")
+
+      expect(content.fetch("counts")).to eq("queued" => 0, "posted" => 2, "drafts" => 1)
+    end
+
+    it "counts every social post when given no range" do
+      create(:social_post, :posted, posted_at: at(Date.new(2020, 3, 2)))
+      create(:social_post, :scheduled, posted_at: at(Date.new(2030, 3, 2)))
+      call_tool("list_social_posts")
+
+      expect(content.fetch("counts")).to eq("queued" => 1, "posted" => 1, "drafts" => 0)
+    end
+
+    it "refuses a queue the admin does not have" do
+      call_tool("list_social_posts", queue: "archived")
+
+      expect(message).to include("/queue")
     end
 
     it "refuses a day it cannot read" do
