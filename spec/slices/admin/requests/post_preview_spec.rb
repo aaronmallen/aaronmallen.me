@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin post preview", type: :request do
+RSpec.describe "Admin post preview", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
   def preview(token: admin_csrf_token, **fields)

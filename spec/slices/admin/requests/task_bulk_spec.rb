@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin bulk task actions", type: :request do
+RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Tasks::Slice["repos.task_repo"] }
 

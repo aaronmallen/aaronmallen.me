@@ -1598,15 +1598,15 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("read_post", id: 404)
+      call_tool("read_post", id: 999_999)
 
       expect(result.fetch("isError")).to be(true)
     end
 
     it "says which ID it could not find" do
-      call_tool("read_post", id: 404)
+      call_tool("read_post", id: 999_999)
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
 
     it "refuses an ID that is not a number" do
@@ -1655,9 +1655,9 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "says which ID it could not find" do
-      call_tool("read_social_post", id: 404)
+      call_tool("read_social_post", id: 999_999)
 
-      expect(message).to eq("no social post has the ID 404")
+      expect(message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -1740,9 +1740,9 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "calls an unknown blog post an error" do
-      call_tool("suggest_edits", target: "post", id: 404, edits: [typo])
+      call_tool("suggest_edits", target: "post", id: 999_999, edits: [typo])
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
 
     it "refuses a published blog post" do
@@ -1774,9 +1774,9 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "calls an unknown social post an error" do
-      call_tool("suggest_edits", target: "social_post", id: 404, edits: [typo])
+      call_tool("suggest_edits", target: "social_post", id: 999_999, edits: [typo])
 
-      expect(message).to eq("no unsent social post has the ID 404")
+      expect(message).to eq("no unsent social post has the ID 999999")
     end
 
     it "does not touch a social post already sent" do
@@ -2238,9 +2238,9 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("write_post_seo", id: 404, og_title: "On the card")
+      call_tool("write_post_seo", id: 999_999, og_title: "On the card")
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
 
     it "says it saved nothing when the save fails for a reason it does not know" do

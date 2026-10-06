@@ -71,7 +71,7 @@ RSpec.describe "MCP contact message tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("read_message", id: 404)).to eq("no message has the ID 404")
+      expect(mcp_text("read_message", id: 999_999)).to eq("no message has the ID 999999")
     end
   end
 
@@ -90,7 +90,7 @@ RSpec.describe "MCP contact message tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("mark_message", id: 404, status: "read")).to eq("no message has the ID 404")
+      expect(mcp_text("mark_message", id: 999_999, status: "read")).to eq("no message has the ID 999999")
     end
 
     it "refuses a status the admin does not have" do

@@ -225,9 +225,9 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "refuses an unknown ID" do
-      call_tool("update_social_post", id: 404, parts: %w[new])
+      call_tool("update_social_post", id: 999_999, parts: %w[new])
 
-      expect(message).to eq("no social post has the ID 404")
+      expect(message).to eq("no social post has the ID 999999")
     end
 
     it "refuses empty text and keeps what was there" do
@@ -292,9 +292,9 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "refuses an unknown ID" do
-      call_tool("send_social_post", id: 404)
+      call_tool("send_social_post", id: 999_999)
 
-      expect(message).to eq("no social post has the ID 404")
+      expect(message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -332,9 +332,9 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "refuses an unknown ID" do
-      call_tool("delete_social_post", id: 404)
+      call_tool("delete_social_post", id: 999_999)
 
-      expect(message).to eq("no social post has the ID 404")
+      expect(message).to eq("no social post has the ID 999999")
     end
   end
 
@@ -471,9 +471,9 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "refuses an unknown ID" do
-      call_tool("moderate_webmention", id: 404, verdict: "spam")
+      call_tool("moderate_webmention", id: 999_999, verdict: "spam")
 
-      expect(message).to eq("no webmention has the ID 404")
+      expect(message).to eq("no webmention has the ID 999999")
     end
   end
 

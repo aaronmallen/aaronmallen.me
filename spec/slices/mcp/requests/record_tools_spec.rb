@@ -137,9 +137,9 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("read_commit", id: 404)
+      call_tool("read_commit", id: 999_999)
 
-      expect([error?, message]).to eq([true, "no commit has the ID 404"])
+      expect([error?, message]).to eq([true, "no commit has the ID 999999"])
     end
   end
 

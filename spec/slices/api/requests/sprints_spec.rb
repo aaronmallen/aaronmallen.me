@@ -147,7 +147,8 @@ RSpec.describe "API sprints", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([drop(404), status]).to eq([{ "error" => "not_found", "message" => "no sprint has the ID 404" }, 404])
+      expect([drop(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no sprint has the ID 999999" }, 404])
     end
 
     it "refuses an ID that is not a number with a 422" do

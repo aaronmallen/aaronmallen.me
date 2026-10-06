@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin time", type: :request do
+RSpec.describe "Admin time", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:site) { create(:project, name: "site") }
   let(:gem) { create(:project, name: "gem") }

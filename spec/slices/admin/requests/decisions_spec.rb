@@ -200,7 +200,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "answers 404 for a decision that isn't there" do
-        get "/admin/decisions/404404"
+        get "/admin/decisions/999999"
 
         expect(last_response.status).to eq(404)
       end
@@ -307,7 +307,7 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "answers 404 for a decision that isn't there" do
-        send_to("/admin/decisions/404404", decision: { title: "Pick a queue", problem: "Jobs pile up" })
+        send_to("/admin/decisions/999999", decision: { title: "Pick a queue", problem: "Jobs pile up" })
 
         expect(last_response.status).to eq(404)
       end

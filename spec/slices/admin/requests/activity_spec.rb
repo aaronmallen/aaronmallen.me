@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin activity", type: :request do
+RSpec.describe "Admin activity", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:today) { Blog::TimeZone.today }
   let(:week_ago) { today - 6 }

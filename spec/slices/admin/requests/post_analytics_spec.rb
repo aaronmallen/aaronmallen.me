@@ -2,7 +2,7 @@
 
 require "digest"
 
-RSpec.describe "Admin post analytics", type: :request do
+RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:today) { Blog::TimeZone.today }
@@ -323,7 +323,7 @@ RSpec.describe "Admin post analytics", type: :request do
     end
 
     it "answers 404 for a post that isn't there" do
-      get "/admin/posts/404404/analytics"
+      get "/admin/posts/999999/analytics"
 
       expect(last_response.status).to eq(404)
     end

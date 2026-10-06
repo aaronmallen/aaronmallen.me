@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin task page", type: :request do
+RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Tasks::Slice["repos.task_repo"] }
@@ -50,7 +50,7 @@ RSpec.describe "Admin task page", type: :request do
     before { sign_in_to_admin }
 
     it "answers 404 for a task that isn't there" do
-      get "/admin/tasks/404404"
+      get "/admin/tasks/999999"
 
       expect(last_response.status).to eq(404)
     end

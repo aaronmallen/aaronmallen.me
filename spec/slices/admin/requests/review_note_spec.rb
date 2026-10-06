@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin review note", type: :request do
+RSpec.describe "Admin review note", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Record::Slice["repos.journal_entry_repo"] }
   let(:sunday) { Date.new(2026, 9, 20) }

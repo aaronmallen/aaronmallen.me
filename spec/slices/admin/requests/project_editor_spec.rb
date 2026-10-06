@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin project editor", type: :request do
+RSpec.describe "Admin project editor", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Projects::Slice["repos.project_repo"] }

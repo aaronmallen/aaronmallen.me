@@ -225,7 +225,7 @@ RSpec.describe "Admin task comments", type: :request do
       end
 
       it "answers 404 for a task that isn't there" do
-        add("Hello", id: 404_404)
+        add("Hello", id: 999_999)
 
         expect(last_response.status).to eq(404)
       end

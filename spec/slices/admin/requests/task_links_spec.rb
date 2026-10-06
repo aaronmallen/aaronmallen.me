@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin task links", type: :request do
+RSpec.describe "Admin task links", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Tasks::Slice["repos.task_repo"] }

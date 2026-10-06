@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin journal", type: :request do
+RSpec.describe "Admin journal", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
   let(:repo) { Record::Slice["repos.journal_entry_repo"] }
@@ -497,12 +497,11 @@ RSpec.describe "Admin journal", type: :request do
 
     describe "saving an entry" do
       it "saves it under today with the time of saving", :aggregate_failures do
-        before = Blog::TimeZone.local(Time.now - 1)
         save(body: "walked", entry_date: today.iso8601)
         entry = repo.today.first
 
         expect(entry).to have_attributes(body: "walked", entry_date: today)
-        expect(entry.entry_time.strftime("%H:%M:%S")).to be >= before.strftime("%H:%M:%S")
+        expect(entry.entry_time.strftime("%H:%M:%S")).to eq(Blog::TimeZone.local(now).strftime("%H:%M:%S"))
       end
 
       it "returns to the journal with the toast", :aggregate_failures do
@@ -521,12 +520,11 @@ RSpec.describe "Admin journal", type: :request do
       end
 
       it "files a backdated entry under the chosen date with the time of saving", :aggregate_failures do
-        now = Blog::TimeZone.local(Time.now)
         save(body: "remembered", entry_date: (today - 4).iso8601)
         entry = entries.find { it.entry_date == today - 4 }
 
         expect(entry.body).to eq("remembered")
-        expect(entry.entry_time.strftime("%H:%M")).to eq(now.strftime("%H:%M")).or eq((now + 60).strftime("%H:%M"))
+        expect(entry.entry_time.strftime("%H:%M:%S")).to eq(Blog::TimeZone.local(now).strftime("%H:%M:%S"))
       end
 
       it "saves under today without an entry date" do

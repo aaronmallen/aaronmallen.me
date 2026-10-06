@@ -133,9 +133,9 @@ RSpec.describe "MCP project and work entry tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("read_project", id: 404)
+      call_tool("read_project", id: 999_999)
 
-      expect([error?, message]).to eq([true, "no project has the ID 404"])
+      expect([error?, message]).to eq([true, "no project has the ID 999999"])
     end
   end
 
@@ -159,9 +159,9 @@ RSpec.describe "MCP project and work entry tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("read_work_entry", id: 404)
+      call_tool("read_work_entry", id: 999_999)
 
-      expect([error?, message]).to eq([true, "no work entry has the ID 404"])
+      expect([error?, message]).to eq([true, "no work entry has the ID 999999"])
     end
   end
 

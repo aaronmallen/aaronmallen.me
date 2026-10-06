@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin commit page", type: :request do
+RSpec.describe "Admin commit page", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:today) { Blog::TimeZone.today }
@@ -34,7 +34,7 @@ RSpec.describe "Admin commit page", type: :request do
     before { sign_in_to_admin }
 
     it "answers 404 for a commit that isn't there" do
-      get "/admin/commits/404404"
+      get "/admin/commits/999999"
 
       expect(last_response.status).to eq(404)
     end

@@ -326,9 +326,9 @@ RSpec.describe "MCP post tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("update_post", id: 404, body: "two")
+      call_tool("update_post", id: 999_999, body: "two")
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
   end
 
@@ -423,9 +423,9 @@ RSpec.describe "MCP post tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("publish_post", id: 404)
+      call_tool("publish_post", id: 999_999)
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
   end
 
@@ -445,9 +445,9 @@ RSpec.describe "MCP post tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("delete_post", id: 404)
+      call_tool("delete_post", id: 999_999)
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
   end
 
@@ -482,9 +482,9 @@ RSpec.describe "MCP post tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      call_tool("compose_announcement", id: 404)
+      call_tool("compose_announcement", id: 999_999)
 
-      expect(message).to eq("no blog post has the ID 404")
+      expect(message).to eq("no blog post has the ID 999999")
     end
   end
 end

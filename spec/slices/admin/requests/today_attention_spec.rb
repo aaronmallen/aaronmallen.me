@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin today needs attention", type: :request do
+RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
   let(:today) { Blog::TimeZone.today }
 
   def card = page.find("section.card[data-attention]")
@@ -147,12 +147,11 @@ RSpec.describe "Admin today needs attention", type: :request do
     end
 
     it "ends the snooze a week out", :aggregate_failures do
-      before = Time.now
       get "/admin"
       snooze("Old draft")
 
       expect(snoozes.map { it[:kind] }).to eq(["draft"])
-      expect(snoozes.first[:ends_at]).to be_between(before + week, Time.now + week)
+      expect(snoozes.first[:ends_at]).to be_within(0.001).of(now + week)
     end
 
     it "moves the end out a week when snoozed again" do

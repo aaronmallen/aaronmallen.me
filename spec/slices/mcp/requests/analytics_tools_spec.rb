@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "MCP analytics tools", type: :request do
+RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
   def roll_up(day, views:, visitors:)
     create(:analytics_rollup, day:, views:, visitors:, read_seconds: views * 10)
   end

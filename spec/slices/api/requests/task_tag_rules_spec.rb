@@ -203,8 +203,8 @@ RSpec.describe "API task tag rules", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([update_rule(404, tags: %w[ruby]), status])
-        .to eq([{ "error" => "not_found", "message" => "no task tag rule has the ID 404" }, 404])
+      expect([update_rule(999_999, tags: %w[ruby]), status])
+        .to eq([{ "error" => "not_found", "message" => "no task tag rule has the ID 999999" }, 404])
     end
   end
 
@@ -218,8 +218,8 @@ RSpec.describe "API task tag rules", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([delete_rule(404), status])
-        .to eq([{ "error" => "not_found", "message" => "no task tag rule has the ID 404" }, 404])
+      expect([delete_rule(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no task tag rule has the ID 999999" }, 404])
     end
   end
 
@@ -296,7 +296,7 @@ RSpec.describe "API task tag rules", type: :request do
     end
 
     it "answer a missing rule with the message the endpoint gives" do
-      expect(mcp_text("save_task_tag_rule", id: 404, tags: %w[ruby])).to eq("no task tag rule has the ID 404")
+      expect(mcp_text("save_task_tag_rule", id: 999_999, tags: %w[ruby])).to eq("no task tag rule has the ID 999999")
     end
   end
 end

@@ -93,8 +93,8 @@ RSpec.describe "API reading webmentions", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([read(404), status])
-        .to eq([{ "error" => "not_found", "message" => "no webmention has the ID 404" }, 404])
+      expect([read(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no webmention has the ID 999999" }, 404])
     end
 
     it "refuses an ID that is not a number with a 422" do
@@ -125,7 +125,7 @@ RSpec.describe "API reading webmentions", type: :request do
     end
 
     it "refuses an unknown ID with the message the endpoint gives" do
-      expect(mcp_text("read_webmention", id: 404)).to eq(read(404).fetch("message"))
+      expect(mcp_text("read_webmention", id: 999_999)).to eq(read(999_999).fetch("message"))
     end
   end
 end

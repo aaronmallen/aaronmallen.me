@@ -141,8 +141,8 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([read(404), status])
-        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 404" }, 404])
+      expect([read(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 999999" }, 404])
     end
 
     it "refuses an ID that is not a number with a 422" do
@@ -264,8 +264,8 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([delete_entry(404), status])
-        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 404" }, 404])
+      expect([delete_entry(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no journal entry has the ID 999999" }, 404])
     end
   end
 

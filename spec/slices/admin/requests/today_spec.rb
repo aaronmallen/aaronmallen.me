@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "Admin today", type: :request do
+RSpec.describe "Admin today", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
   let(:repo) { Record::Slice["repos.journal_entry_repo"] }
@@ -1120,12 +1120,11 @@ RSpec.describe "Admin today", type: :request do
 
     describe "saving an entry" do
       it "files it under today with the time of saving", :aggregate_failures do
-        before_save = Blog::TimeZone.local(Time.now - 1)
         save(body: "walked")
         entry = repo.today.first
 
         expect(entry).to have_attributes(body: "walked", entry_date: today)
-        expect(entry.entry_time.strftime("%H:%M:%S")).to be >= before_save.strftime("%H:%M:%S")
+        expect(entry.entry_time.strftime("%H:%M:%S")).to eq(Blog::TimeZone.local(now).strftime("%H:%M:%S"))
       end
 
       it "returns to Today with the toast", :aggregate_failures do

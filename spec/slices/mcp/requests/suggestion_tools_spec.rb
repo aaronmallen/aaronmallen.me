@@ -182,7 +182,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("accept_suggestion_edits", suggestion_id: 404)).to eq("no suggestion has the ID 404")
+      expect(mcp_text("accept_suggestion_edits", suggestion_id: 999_999)).to eq("no suggestion has the ID 999999")
     end
   end
 
@@ -208,7 +208,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       suggestion = suggest(post, edit("teh", "the"))
 
-      expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [404]))
+      expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [999_999]))
         .to eq("suggestion #{suggestion.id} has no open edit with those IDs")
     end
 
@@ -224,12 +224,12 @@ RSpec.describe "MCP suggestion tools", type: :request do
       social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
       suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
 
-      expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [404]))
+      expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [999_999]))
         .to eq("the social post under suggestion #{suggestion.id} has been sent")
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("reject_suggestion_edits", suggestion_id: 404)).to eq("no suggestion has the ID 404")
+      expect(mcp_text("reject_suggestion_edits", suggestion_id: 999_999)).to eq("no suggestion has the ID 999999")
     end
   end
 end

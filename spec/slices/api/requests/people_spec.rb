@@ -73,7 +73,8 @@ RSpec.describe "API people", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([read(404), status]).to eq([{ "error" => "not_found", "message" => "no person has the ID 404" }, 404])
+      expect([read(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
     end
   end
 
@@ -192,8 +193,8 @@ RSpec.describe "API people", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([edit(404, name: "Ada"), status])
-        .to eq([{ "error" => "not_found", "message" => "no person has the ID 404" }, 404])
+      expect([edit(999_999, name: "Ada"), status])
+        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
     end
   end
 
@@ -206,7 +207,8 @@ RSpec.describe "API people", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([remove(404), status]).to eq([{ "error" => "not_found", "message" => "no person has the ID 404" }, 404])
+      expect([remove(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no person has the ID 999999" }, 404])
     end
   end
 
@@ -308,7 +310,7 @@ RSpec.describe "API people", type: :request do
     end
 
     it "answer a missing person with the message the endpoint gives" do
-      expect(mcp_text("read_person", id: 404)).to eq("no person has the ID 404")
+      expect(mcp_text("read_person", id: 999_999)).to eq("no person has the ID 999999")
     end
 
     describe "search_accounts" do

@@ -275,7 +275,8 @@ RSpec.describe "API saved view records", type: :request do
   end
 
   it "answers a missing view with a 404" do
-    expect([read(404), status]).to eq([{ "error" => "not_found", "message" => "no saved view has the ID 404" }, 404])
+    expect([read(999_999), status])
+      .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 999999" }, 404])
   end
 
   it "refuses a continue_to that is not a day with a 422" do
@@ -320,11 +321,11 @@ RSpec.describe "API saved view records", type: :request do
     end
 
     it "refuses a missing view with the message the endpoint gives" do
-      expect(mcp_text("read_saved_view", id: 404)).to eq(read(404).fetch("message"))
+      expect(mcp_text("read_saved_view", id: 999_999)).to eq(read(999_999).fetch("message"))
     end
 
     it "marks the refusal as an error" do
-      expect(mcp_call("read_saved_view", id: 404).fetch("isError")).to be(true)
+      expect(mcp_call("read_saved_view", id: 999_999).fetch("isError")).to be(true)
     end
   end
 end

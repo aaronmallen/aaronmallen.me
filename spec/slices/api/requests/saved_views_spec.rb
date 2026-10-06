@@ -216,8 +216,8 @@ RSpec.describe "API saved views", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([update_view(404, name: "New"), status])
-        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 404" }, 404])
+      expect([update_view(999_999, name: "New"), status])
+        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 999999" }, 404])
     end
   end
 
@@ -237,8 +237,8 @@ RSpec.describe "API saved views", type: :request do
     end
 
     it "answers an unknown ID with a 404" do
-      expect([delete_view(404), status])
-        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 404" }, 404])
+      expect([delete_view(999_999), status])
+        .to eq([{ "error" => "not_found", "message" => "no saved view has the ID 999999" }, 404])
     end
   end
 
@@ -277,9 +277,9 @@ RSpec.describe "API saved views", type: :request do
     end
 
     it "answer a missing view with the message the endpoint gives" do
-      missing = update_view(404, name: "New")
+      missing = update_view(999_999, name: "New")
 
-      expect(mcp_text("update_saved_view", id: 404, name: "New")).to eq(missing.fetch("message"))
+      expect(mcp_text("update_saved_view", id: 999_999, name: "New")).to eq(missing.fetch("message"))
     end
   end
 end
