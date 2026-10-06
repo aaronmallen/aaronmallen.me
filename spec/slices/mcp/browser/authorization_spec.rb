@@ -9,7 +9,7 @@ RSpec.describe "MCP authorization", type: :feature do
   def authorize_path
     params = {
       client_id: client.client_id,
-      code_challenge: MCP::OAuth::PKCE.challenge(MCP::OAuth::Secret.generate),
+      code_challenge: MCP::OAuth::PKCE.challenge(Blog::SecretToken.generate),
       code_challenge_method: "S256",
       redirect_uri:,
       resource: "https://aaronmallen.me/mcp",

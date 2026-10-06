@@ -5,7 +5,7 @@ require "timeout"
 RSpec.describe "OAuth token", type: :request do
   let(:client) { mcp_create(:oauth_client) }
   let(:code) { authorization_code }
-  let(:verifier) { MCP::OAuth::Secret.generate }
+  let(:verifier) { Blog::SecretToken.generate }
 
   def access_token = tokens.of_type("access").one
 
@@ -116,7 +116,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "stores the access token hashed" do
-      expect(access_token[:token_digest]).to eq(MCP::OAuth::Secret.digest(document.fetch("access_token")))
+      expect(access_token[:token_digest]).to eq(Blog::SecretToken.digest(document.fetch("access_token")))
     end
 
     it "stores no plain text token" do
@@ -191,7 +191,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "refuses another PKCE verifier" do
-      exchange(code_verifier: MCP::OAuth::Secret.generate)
+      exchange(code_verifier: Blog::SecretToken.generate)
 
       expect(document["error"]).to eq("invalid_grant")
     end
@@ -215,7 +215,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "refuses a code it never issued" do
-      exchange(code: MCP::OAuth::Secret.generate)
+      exchange(code: Blog::SecretToken.generate)
 
       expect(document["error"]).to eq("invalid_grant")
     end
@@ -243,7 +243,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "issues no token when it refuses" do
-      exchange(code_verifier: MCP::OAuth::Secret.generate)
+      exchange(code_verifier: Blog::SecretToken.generate)
 
       expect(tokens.count).to eq(0)
     end
@@ -284,26 +284,26 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "retires the refresh token it was given" do
-      digest = MCP::OAuth::Secret.digest(granted.fetch("refresh_token"))
+      digest = Blog::SecretToken.digest(granted.fetch("refresh_token"))
 
       expect(tokens.with_digest(digest).one[:revoked_at]).not_to be_nil
     end
 
     it "revokes the access token issued with the refresh token it was given" do
-      digest = MCP::OAuth::Secret.digest(granted.fetch("access_token"))
+      digest = Blog::SecretToken.digest(granted.fetch("access_token"))
 
       expect(tokens.with_digest(digest).one[:revoked_at]).not_to be_nil
     end
 
     it "leaves the access token it hands out live" do
-      digest = MCP::OAuth::Secret.digest(document.fetch("access_token"))
+      digest = Blog::SecretToken.digest(document.fetch("access_token"))
 
       expect(tokens.with_digest(digest).one[:revoked_at]).to be_nil
     end
 
     it "ties the new refresh token to the new access token" do
-      access = tokens.with_digest(MCP::OAuth::Secret.digest(document.fetch("access_token"))).one
-      refresh = tokens.with_digest(MCP::OAuth::Secret.digest(document.fetch("refresh_token"))).one
+      access = tokens.with_digest(Blog::SecretToken.digest(document.fetch("access_token"))).one
+      refresh = tokens.with_digest(Blog::SecretToken.digest(document.fetch("refresh_token"))).one
 
       expect(refresh[:access_token_id]).to eq(access[:id])
     end
@@ -327,7 +327,7 @@ RSpec.describe "OAuth token", type: :request do
       document
     end
 
-    def live?(token) = tokens.with_digest(MCP::OAuth::Secret.digest(token)).one[:revoked_at].nil?
+    def live?(token) = tokens.with_digest(Blog::SecretToken.digest(token)).one[:revoked_at].nil?
 
     before do
       other
@@ -361,7 +361,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "leaves the old access token to expire on its own" do
-      digest = MCP::OAuth::Secret.digest(granted.fetch("access_token"))
+      digest = Blog::SecretToken.digest(granted.fetch("access_token"))
 
       expect(tokens.with_digest(digest).one[:revoked_at]).to be_nil
     end
@@ -369,7 +369,7 @@ RSpec.describe "OAuth token", type: :request do
 
   describe "a refresh it refuses" do
     it "refuses a refresh token it never issued" do
-      refresh(MCP::OAuth::Secret.generate)
+      refresh(Blog::SecretToken.generate)
 
       expect(document["error"]).to eq("invalid_grant")
     end
@@ -558,7 +558,7 @@ RSpec.describe "OAuth token", type: :request do
 
   describe "a code exchange carrying a field it cannot read" do
     {
-      code: ["short", "#{MCP::OAuth::Secret.generate}\u0000", ""],
+      code: ["short", "#{Blog::SecretToken.generate}\u0000", ""],
       code_verifier: ["short", "a" * 129, "#{'a' * 42}/", ""],
       redirect_uri: ["https://claude.ai/\u0000", ""],
     }.each do |field, values|
@@ -574,7 +574,7 @@ RSpec.describe "OAuth token", type: :request do
     { grant_type: "unsupported_grant_type", code: "invalid_grant", code_verifier: "invalid_grant",
       redirect_uri: "invalid_grant" }.each do |field, error|
       it "answers #{error} for a #{field} sent as a list" do
-        exchange(field => [MCP::OAuth::Secret.generate])
+        exchange(field => [Blog::SecretToken.generate])
 
         expect(document["error"]).to eq(error)
       end
@@ -590,7 +590,7 @@ RSpec.describe "OAuth token", type: :request do
   describe "a refresh carrying a field it cannot read" do
     before { exchange }
 
-    ["short", "#{MCP::OAuth::Secret.generate}\n", ""].each do |value|
+    ["short", "#{Blog::SecretToken.generate}\n", ""].each do |value|
       it "refuses #{value.inspect} for refresh_token" do
         refresh(value)
 

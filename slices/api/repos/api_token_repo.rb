@@ -8,9 +8,9 @@ module API
 
       def live = api_tokens.live.newest_first.to_a
 
-      def live_by_token(token) = api_tokens.live.with_digest(Token.digest(token)).one
+      def live_by_token(token) = api_tokens.live.with_digest(Blog::SecretToken.digest(token)).one
 
-      def mint(token:, name:) = create(name:, token_digest: Token.digest(token))
+      def mint(token:, name:) = create(name:, token_digest: Blog::SecretToken.digest(token))
 
       def revoke(id, at: Time.now) = (update(id, revoked_at: at) if api_tokens.live.by_pk(id).exist?)
 

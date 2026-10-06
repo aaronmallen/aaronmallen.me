@@ -7,7 +7,7 @@ module API
 
       def call(params)
         fields = step validate(params)
-        value = Token.generate
+        value = Blog::SecretToken.generate
 
         { token: token_repo.mint(token: value, name: fields[:name]), value: }
       end

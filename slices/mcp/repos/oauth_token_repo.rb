@@ -8,13 +8,13 @@ module MCP
 
       commands :create, use: :timestamps, plugins_options: { timestamps: { timestamps: %i[created_at updated_at] } }
 
-      def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(OAuth::Secret.digest(token)).one
+      def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(Blog::SecretToken.digest(token)).one
 
       def delete_expired(at: Time.now) = oauth_tokens.expired(at:).delete
 
       def delete_for_client(oauth_client_id) = oauth_tokens.for_client(oauth_client_id).delete
 
-      def issue(token:, **attributes) = create(token_digest: OAuth::Secret.digest(token), **attributes)
+      def issue(token:, **attributes) = create(token_digest: Blog::SecretToken.digest(token), **attributes)
 
       def revoke(id, at: Time.now)
         oauth_tokens.burn(id, at:)&.tap do |token|

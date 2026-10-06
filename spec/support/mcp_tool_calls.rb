@@ -33,7 +33,7 @@ module MCPToolCalls
 
   def mcp_access_token
     @mcp_access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client), verifier: MCP::OAuth::Secret.generate, scope: SCOPES,
+      Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::SecretToken.generate, scope: SCOPES,
     ).fetch("access_token")
   end
 end

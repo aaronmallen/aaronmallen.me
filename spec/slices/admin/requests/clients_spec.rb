@@ -20,7 +20,7 @@ RSpec.describe "Admin MCP clients", type: :request do
 
   def stock_code(client)
     MCP::Slice["repos.oauth_code_repo"].issue(
-      code: MCP::OAuth::Secret.generate,
+      code: Blog::SecretToken.generate,
       code_challenge: "a" * 43,
       expires_at: Time.now + 60,
       oauth_client_id: client.id,
@@ -30,7 +30,7 @@ RSpec.describe "Admin MCP clients", type: :request do
 
   def stock_token(client, type:)
     MCP::Slice["repos.oauth_token_repo"].issue(
-      token: MCP::OAuth::Secret.generate,
+      token: Blog::SecretToken.generate,
       type:,
       oauth_client_id: client.id,
       expires_at: Time.now + 60,

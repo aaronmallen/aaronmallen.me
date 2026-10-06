@@ -2,7 +2,7 @@
 
 RSpec.describe "MCP endpoint", type: :request do
   let(:client) { mcp_create(:oauth_client) }
-  let(:verifier) { MCP::OAuth::Secret.generate }
+  let(:verifier) { Blog::SecretToken.generate }
 
   def access_token = issued.fetch("access_token")
 
@@ -203,19 +203,19 @@ RSpec.describe "MCP endpoint", type: :request do
 
   describe "a token it refuses" do
     it "refuses a token it never issued" do
-      rpc("tools/list", authorization: "Bearer #{MCP::OAuth::Secret.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "names the token as the problem" do
-      rpc("tools/list", authorization: "Bearer #{MCP::OAuth::Secret.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
 
       expect(document["error"]).to eq("invalid_token")
     end
 
     it "points at the resource metadata all the same" do
-      rpc("tools/list", authorization: "Bearer #{MCP::OAuth::Secret.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
 
       expect(challenge).to include(%(resource_metadata="#{metadata_url}"))
     end

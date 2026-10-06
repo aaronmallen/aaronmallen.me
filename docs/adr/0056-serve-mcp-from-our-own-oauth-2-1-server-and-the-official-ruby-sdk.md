@@ -40,7 +40,7 @@ the operator in through the admin's GitHub sign-in, locked to the owner's GitHub
 the client before it issues a code. Any other account gets no code and no token.
 
 - An access token lasts one hour and a refresh token 30 days (`MCP::Operations::IssueTokens`).
-- We store a SHA-256 digest of each token and code, never the value (`MCP::OAuth::Secret`).
+- We store a SHA-256 digest of each token and code, never the value (`Blog::SecretToken`).
 - A token is bound to this server. `MCP::Operations::Authorize` fills in the resource from the protected resource
   metadata when a client sends none, since RFC 8707 leaves it optional there, and `MCP::Operations::Authenticate`
   refuses a token that names no resource or another one (AA-408).

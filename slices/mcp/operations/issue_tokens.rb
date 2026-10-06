@@ -29,7 +29,7 @@ module MCP
       private
 
       def issue(type, lifetime, **held)
-        token = OAuth::Secret.generate
+        token = Blog::SecretToken.generate
 
         [token, token_repo.issue(token:, type:, expires_at: Time.now + lifetime, **held)]
       end

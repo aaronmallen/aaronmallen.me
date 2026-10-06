@@ -3,9 +3,10 @@
 require "digest"
 require "securerandom"
 
-module API
-  module Token
+module Blog
+  module SecretToken
     BYTES = 32
+    SHAPE = /\A[A-Za-z0-9_-]{43}\z/
 
     module_function
 

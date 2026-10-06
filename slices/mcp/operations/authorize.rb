@@ -101,7 +101,7 @@ module MCP
       end
 
       def issue(client:, issuer:, request:, redirect_uri:, scopes:)
-        OAuth::Secret.generate.tap do |code|
+        Blog::SecretToken.generate.tap do |code|
           code_repo.issue(
             code:,
             code_challenge: request[:code_challenge],

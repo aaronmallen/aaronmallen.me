@@ -915,7 +915,7 @@ RSpec.describe "Translations", type: :request do
 
   describe "the MCP authorization prompt" do
     let(:client) { Spec::DB::Factories[:mcp].create(:oauth_client) }
-    let(:verifier) { MCP::OAuth::Secret.generate }
+    let(:verifier) { Blog::SecretToken.generate }
 
     def authorize_path
       params = {
