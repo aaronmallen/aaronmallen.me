@@ -5,7 +5,29 @@ RSpec.describe "API page and ID bounds", type: :request do
 
   def headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
 
+  def ids(schema, parent = nil)
+    schema.flat_map do |key, value|
+      next [] unless value.is_a?(Hash)
+
+      id = key.end_with?("id") || (key == "items" && parent.to_s.end_with?("ids"))
+      (id ? [value] : []) + ids(value, key)
+    end
+  end
+
+  def inputs(operation)
+    parameters = operation.fetch("parameters").to_h { [it.fetch("name"), it.fetch("schema")] }
+
+    [parameters, operation.fetch("requestBody", {})]
+  end
+
   def largest = Blog::Constants::INTEGER_MAX
+
+  def openapi_inputs
+    get "/api/v1/openapi.json", nil, headers
+    JSON.parse(last_response.body).fetch("paths").values.flat_map(&:values).flat_map { inputs(it) }
+  end
+
+  def published_schemas = openapi_inputs + tool_inputs
 
   def read(path, query)
     get path, query, headers
@@ -18,6 +40,12 @@ RSpec.describe "API page and ID bounds", type: :request do
   end
 
   def status = last_response.status
+
+  def tool_inputs
+    headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
+    post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
+    JSON.parse(last_response.body).dig("result", "tools").map { it.fetch("inputSchema") }
+  end
 
   describe "paged endpoints" do
     {
@@ -80,6 +108,14 @@ RSpec.describe "API page and ID bounds", type: :request do
           end
         end
       end
+    end
+  end
+
+  describe "published ID schemas" do
+    it "bound every ID from 1 to the largest" do
+      bounds = published_schemas.flat_map { ids(it) }.map { it.slice("minimum", "maximum") }.uniq
+
+      expect(bounds).to eq([{ "minimum" => 1, "maximum" => largest }])
     end
   end
 end

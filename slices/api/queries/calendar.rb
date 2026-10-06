@@ -18,7 +18,6 @@ module API
       ]
 
       def call(from:, to:)
-        return Failure(Blog::DayWindow::BACKWARDS) if from > to
         return Failure(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(from, to)
 
         Success(days(from, to))
