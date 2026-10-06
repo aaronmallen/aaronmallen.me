@@ -16,21 +16,7 @@ RSpec.describe "Admin task tag rules", type: :request do
 
   def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
-  def sourced(repo)
-    create(:task, :external).tap do |task|
-      create(:task_source, task:, provider: "github", url: "https://github.com/#{repo}/issues/1")
-    end
-  end
-
-  def sourced_from_linear(workspace, key)
-    create(:task, :external).tap do |task|
-      create(:task_source, task:, provider: "linear", url: "https://linear.app/#{workspace}/issue/#{key}/a-title")
-    end
-  end
-
   def stored(id) = rules.find { it.id == id }
-
-  def tag_names(task) = Tasks::Slice["repos.task_repo"].by_id(task.id).tags.map(&:name)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -125,22 +111,6 @@ RSpec.describe "Admin task tag rules", type: :request do
         expect(rules.map { [it.provider, it.pattern] }).to eq([%w[linear acme/eng]])
       end
 
-      it "tags only the Linear tasks a Linear rule matches", :aggregate_failures do
-        eng = sourced_from_linear("acme", "ENG-12")
-        ops = sourced_from_linear("acme", "OPS-3")
-        github = sourced("acme/eng")
-        add("acme/eng", "work", provider: "linear")
-
-        expect([tag_names(eng), tag_names(ops), tag_names(github)]).to eq([%w[work], [], []])
-      end
-
-      it "holds a GitHub rule and a Linear rule for the same pattern" do
-        add("acme/*", "work")
-        add("acme/*", "work", provider: "linear")
-
-        expect(rules.map(&:provider)).to contain_exactly("github", "linear")
-      end
-
       it "stores it" do
         add("AaronMallen/*", "projects, ruby")
 
@@ -152,15 +122,6 @@ RSpec.describe "Admin task tag rules", type: :request do
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Rule added")
-      end
-
-      it "tags the tasks already imported from a matching repo", :aggregate_failures do
-        site = sourced("aaronmallen/aaronmallen.me")
-        stranger = sourced("octocat/hello-world")
-        add("aaronmallen/*", "projects")
-
-        expect(tag_names(site)).to eq(%w[projects])
-        expect(tag_names(stranger)).to be_empty
       end
 
       %w[aaronmallen */foo aaronmallen/foo/bar].each do |pattern|
@@ -236,13 +197,6 @@ RSpec.describe "Admin task tag rules", type: :request do
         expect(page).to have_css("[data-toast]", text: "Rule saved")
       end
 
-      it "tags no task already imported" do
-        site = sourced("aaronmallen/aaronmallen.me")
-        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen/*", tags: "projects, ruby" })
-
-        expect(tag_names(site)).to be_empty
-      end
-
       it "refuses a bad pattern and keeps the rule as it was", :aggregate_failures do
         send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "aaronmallen", tags: "ruby" })
 
@@ -287,14 +241,6 @@ RSpec.describe "Admin task tag rules", type: :request do
 
         expect(page.find("form[action='/admin/tasks/rules/#{existing.id}/delete']")["data-confirm"])
           .to include("aaronmallen/*")
-      end
-
-      it "leaves every task's tags as they were" do
-        site = sourced("aaronmallen/aaronmallen.me")
-        Tasks::Slice["repos.task_repo"].replace_tags(site.id, %w[projects])
-        send_to("/admin/tasks/rules/#{existing.id}/delete")
-
-        expect(tag_names(site)).to eq(%w[projects])
       end
 
       it "answers 404 for a rule that isn't there" do

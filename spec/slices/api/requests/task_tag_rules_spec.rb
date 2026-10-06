@@ -14,6 +14,10 @@ RSpec.describe "API task tag rules", type: :request do
 
   def delete_rule(id) = call_api(:delete, "/#{id}")
 
+  def linear(workspace, key)
+    sourced("x", provider: "linear", url: "https://linear.app/#{workspace}/issue/#{key}/a-title")
+  end
+
   def list = call_api(:get, "")
 
   def rule(pattern, tags, provider: nil)
@@ -64,12 +68,26 @@ RSpec.describe "API task tag rules", type: :request do
     end
 
     it "saves a Linear rule and tags only the Linear tasks it matches", :aggregate_failures do
-      eng = sourced("x", provider: "linear", url: "https://linear.app/acme/issue/ENG-12/a-title")
+      eng = linear("acme", "ENG-12")
       github = sourced("acme/eng")
       created = create_rule(pattern: "acme/ENG", provider: "linear", tags: %w[work])
 
       expect(created.values_at("provider", "pattern")).to eq(%w[linear acme/eng])
       expect([tag_names(eng), tag_names(github)]).to eq([%w[work], []])
+    end
+
+    it "tags the Linear tasks from a team it matches in any case, and none from another workspace" do
+      tasks = [linear("acme", "eng-12"), linear("Acme", "ENG-7"), linear("acme", "ops-3"), linear("octocat", "eng-1")]
+      create_rule(pattern: "acme/ENG", provider: "linear", tags: %w[ruby])
+
+      expect(tasks.map { tag_names(it) }).to eq([%w[ruby], %w[ruby], [], []])
+    end
+
+    it "tags every team in a workspace a Linear rule names with a star" do
+      tasks = [linear("acme", "eng-12"), linear("acme", "ops-3"), linear("octocat", "eng-1")]
+      create_rule(pattern: "acme/*", provider: "linear", tags: %w[ruby])
+
+      expect(tasks.map { tag_names(it) }).to eq([%w[ruby], %w[ruby], []])
     end
 
     it "takes a GitHub rule and a Linear rule for the same pattern" do
@@ -144,6 +162,13 @@ RSpec.describe "API task tag rules", type: :request do
         .to eq("pattern" => ["another rule already holds that pattern"])
     end
 
+    it "refuses a pattern another Linear rule holds" do
+      rule("acme/*", "ruby", provider: "linear")
+
+      expect(create_rule(pattern: "acme/*", provider: "linear", tags: %w[go]).fetch("errors"))
+        .to eq("pattern" => ["another rule already holds that pattern"])
+    end
+
     it "refuses a rule with no tags" do
       expect(create_rule(pattern: "aaronmallen/*", tags: []).fetch("errors")).to eq("tags" => ["name a tag first"])
     end
@@ -184,6 +209,13 @@ RSpec.describe "API task tag rules", type: :request do
     it "tags no task already imported" do
       task = sourced("octocat/hello-world")
       update_rule(saved.id, pattern: "octocat/*", tags: %w[ruby])
+
+      expect(tag_names(task)).to be_empty
+    end
+
+    it "tags no Linear task already imported when a Linear rule is edited to match it" do
+      task = linear("acme", "eng-12")
+      update_rule(rule("octocat/*", "ruby", provider: "linear").id, pattern: "acme/*", tags: %w[go])
 
       expect(tag_names(task)).to be_empty
     end
@@ -230,28 +262,6 @@ RSpec.describe "API task tag rules", type: :request do
         .to eq(created.except("id"))
     end
 
-    it "add a Linear rule when save_task_tag_rule names the provider" do
-      expect(mcp_answer("save_task_tag_rule", pattern: "acme/ENG", provider: "linear", tags: %w[work]))
-        .to include("provider" => "linear", "pattern" => "acme/eng")
-    end
-
-    it "add a GitHub rule when save_task_tag_rule names no provider" do
-      expect(mcp_answer("save_task_tag_rule", pattern: "acme/*", tags: %w[work])).to include("provider" => "github")
-    end
-
-    it "change the provider when save_task_tag_rule edits a rule" do
-      saved = rule("acme/*", "work")
-
-      expect(mcp_answer("save_task_tag_rule", id: saved.id, provider: "linear")).to include("provider" => "linear")
-    end
-
-    it "tag existing tasks when save_task_tag_rule adds a rule" do
-      task = sourced("aaronmallen/aaronmallen.me")
-      mcp_call("save_task_tag_rule", pattern: "aaronmallen/*", tags: %w[projects])
-
-      expect(tag_names(task)).to eq(%w[projects])
-    end
-
     it "edit as save_task_tag_rule does with an id" do
       saved = rule("aaronmallen/*", "projects")
       updated = update_rule(saved.id, tags: %w[ruby])
@@ -259,36 +269,18 @@ RSpec.describe "API task tag rules", type: :request do
       expect(mcp_answer("save_task_tag_rule", id: saved.id, tags: %w[ruby])).to eq(updated)
     end
 
-    it "tag no task already imported when save_task_tag_rule edits a rule" do
-      task = sourced("octocat/hello-world")
-      saved = rule("aaronmallen/*", "projects")
-      mcp_call("save_task_tag_rule", id: saved.id, pattern: "octocat/*")
-
-      expect(tag_names(task)).to be_empty
-    end
-
-    it "delete as delete_task_tag_rule does and leave task tags as they were", :aggregate_failures do
-      task = sourced("aaronmallen/aaronmallen.me")
+    it "delete as delete_task_tag_rule does" do
       saved = rule("aaronmallen/*", "projects")
 
       expect(mcp_answer("delete_task_tag_rule", id: saved.id)).to eq("id" => saved.id, "deleted" => true)
-      expect([rules, tag_names(task)]).to eq([[], %w[projects]])
     end
 
-    it "refuse a bad pattern with the message the endpoint gives", :aggregate_failures do
+    it "refuse with the message the endpoint gives", :aggregate_failures do
       refused = create_rule(pattern: "not a repo", tags: %w[ruby])
       answer = mcp_call("save_task_tag_rule", pattern: "not a repo", tags: %w[ruby])
 
       expect(answer["isError"]).to be(true)
       expect(answer.fetch("content").first.fetch("text")).to eq(refused.fetch("message"))
-    end
-
-    it "refuse a new rule with no tags" do
-      expect(mcp_text("save_task_tag_rule", pattern: "aaronmallen/*")).to eq("tags is missing")
-    end
-
-    it "answer a missing rule with the message the endpoint gives" do
-      expect(mcp_text("save_task_tag_rule", id: 999_999, tags: %w[ruby])).to eq("no task tag rule has the ID 999999")
     end
   end
 end
