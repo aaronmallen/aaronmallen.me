@@ -42,14 +42,7 @@ module Admin
 
           def default_list = @returns[:origin] == FROM_TODAY ? TODAY : NEXT
 
-          def field(name, label_key, **)
-            Field(label: t(label_key), id: FieldError.id_for(name, @scope)) do
-              Input(
-                **FieldError.control_attributes(name, @errors, @scope), name: "task[#{name}]", value: @values[name], **,
-              )
-              FieldError(field: name, errors: @errors, scope: @scope)
-            end
-          end
+          def error_props(name) = { name:, errors: @errors, error: FieldError, scope: @scope }
 
           def foot
             div(class: "task-form-foot") do
@@ -64,14 +57,13 @@ module Admin
           def form_id = ("task-#{@task.id}-form" if @task)
 
           def list_field
-            Field(label: t(".list"), id: FieldError.id_for(:list, @scope)) do
+            Field(label: t(".list"), **error_props(:list)) do |control|
               Select(
-                **FieldError.control_attributes(:list, @errors, @scope),
+                **control,
                 name: "task[list]",
                 options: lists.transform_values { t(it) },
                 selected: @values.fetch(:list) { default_list },
               )
-              FieldError(field: :list, errors: @errors, scope: @scope)
             end
           end
 
@@ -103,9 +95,17 @@ module Admin
 
           def scheduled = Blog::TimeZone.parse_day(@values[:sprint_on])
 
-          def tags_field = field(:tags, ".tags", placeholder: t(".tags_placeholder"))
+          def tags_field
+            Field(label: t(".tags"), **error_props(:tags)) do |control|
+              Input(**control, name: "task[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"))
+            end
+          end
 
-          def title_field = field(:title, ".title", autocomplete: "off", autofocus: @autofocus)
+          def title_field
+            Field(label: t(".title"), **error_props(:title)) do |control|
+              Input(**control, name: "task[title]", value: @values[:title], autocomplete: "off", autofocus: @autofocus)
+            end
+          end
         end
       end
     end

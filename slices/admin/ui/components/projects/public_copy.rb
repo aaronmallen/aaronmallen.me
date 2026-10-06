@@ -19,17 +19,10 @@ module Admin
 
           private
 
-          def field(name, label_key, &)
-            Field(label: t(label_key), id: FieldError.id_for(name)) do
-              yield
-              FieldError(field: name, errors: @errors)
-            end
-          end
-
           def og_image_url_field
-            field(:og_image_url, ".og_image_url") do
+            Field(label: t(".og_image_url"), name: :og_image_url, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:og_image_url, @errors),
+                **control,
                 type: "url",
                 name: "project[og_image_url]",
                 value: @values[:og_image_url],
@@ -40,9 +33,9 @@ module Admin
           end
 
           def tagline_field
-            field(:tagline, ".tagline") do
+            Field(label: t(".tagline"), name: :tagline, errors: @errors, error: FieldError) do |control|
               Textarea(
-                **FieldError.control_attributes(:tagline, @errors),
+                **control,
                 name: "project[tagline]",
                 rows: 2,
                 value: @values[:tagline],

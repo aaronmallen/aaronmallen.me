@@ -44,11 +44,11 @@ module Admin
           private
 
           def dates
-            Field(label: t(".from"), id: "activity-from") do
-              Input(type: "date", id: "activity-from", name: "from", value: @from.iso8601, max: @to.iso8601)
+            Field(label: t(".from"), id: "activity-from") do |control|
+              Input(**control, type: "date", name: "from", value: @from.iso8601, max: @to.iso8601)
             end
-            Field(label: t(".to"), id: "activity-to") do
-              Input(type: "date", id: "activity-to", name: "to", value: @to.iso8601, min: @from.iso8601)
+            Field(label: t(".to"), id: "activity-to") do |control|
+              Input(**control, type: "date", name: "to", value: @to.iso8601, min: @from.iso8601)
             end
           end
 
@@ -95,8 +95,8 @@ module Admin
           end
 
           def text_field
-            Field(label: t(".contains"), id: "activity-q") do
-              Input(type: "search", id: "activity-q", name: "q", value: @text, placeholder: t(".contains_placeholder"))
+            Field(label: t(".contains"), id: "activity-q") do |control|
+              Input(**control, type: "search", name: "q", value: @text, placeholder: t(".contains_placeholder"))
               Hint { t(".contains_hint") }
             end
           end

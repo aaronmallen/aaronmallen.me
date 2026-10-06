@@ -26,11 +26,11 @@ module Admin
           private
 
           def dates
-            Field(label: t(".from"), id: "time-from") do
-              Input(type: "date", id: "time-from", name: "from", value: @from.iso8601, max: @to.iso8601)
+            Field(label: t(".from"), id: "time-from") do |control|
+              Input(**control, type: "date", name: "from", value: @from.iso8601, max: @to.iso8601)
             end
-            Field(label: t(".to"), id: "time-to") do
-              Input(type: "date", id: "time-to", name: "to", value: @to.iso8601, min: @from.iso8601)
+            Field(label: t(".to"), id: "time-to") do |control|
+              Input(**control, type: "date", name: "to", value: @to.iso8601, min: @from.iso8601)
             end
           end
 

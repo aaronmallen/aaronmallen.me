@@ -55,11 +55,8 @@ module Admin
           def mine? = @timing[:id] == @entry.source_id
 
           def moment_field(field, label)
-            control = FieldError.control_attributes(field, errors, error_scope)
-
-            Field(label: t(label), id: control[:id]) do
+            Field(label: t(label), name: field, errors:, error: FieldError, scope: error_scope) do |control|
               Input(**control, type: "datetime-local", name: "session[#{field}]", value: value(field))
-              FieldError(field:, errors:, scope: error_scope)
             end
           end
 

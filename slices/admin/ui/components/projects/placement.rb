@@ -36,17 +36,10 @@ module Admin
             end
           end
 
-          def field(name, label_key, &)
-            Field(label: t(label_key), id: FieldError.id_for(name)) do
-              yield
-              FieldError(field: name, errors: @errors)
-            end
-          end
-
           def status_field
-            field(:status, ".status") do
+            Field(label: t(".status"), name: :status, errors: @errors, error: FieldError) do |control|
               Select(
-                **FieldError.control_attributes(:status, @errors),
+                **control,
                 name: "project[status]",
                 options: status_options,
                 selected: @values[:status],
@@ -57,9 +50,9 @@ module Admin
           def status_options = STATUSES.transform_values { t(it) }
 
           def tags_field
-            field(:tags, ".tags") do
+            Field(label: t(".tags"), name: :tags, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:tags, @errors),
+                **control,
                 name: "project[tags]",
                 value: @values[:tags],
                 placeholder: t(".tags_placeholder"),

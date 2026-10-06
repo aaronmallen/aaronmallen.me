@@ -29,21 +29,14 @@ module Admin
           end
 
           def blurb_field
-            field(:blurb, ".blurb") do
+            Field(label: t(".blurb"), name: :blurb, errors: @errors, error: FieldError) do |control|
               Textarea(
-                **FieldError.control_attributes(:blurb, @errors),
+                **control,
                 name: "work_entry[blurb]",
                 rows: ROWS,
                 placeholder: t(".blurb_placeholder"),
                 value: @values[:blurb],
               )
-            end
-          end
-
-          def field(name, label_key, &)
-            Field(label: t(label_key), id: FieldError.id_for(name)) do
-              yield
-              FieldError(field: name, errors: @errors)
             end
           end
 
@@ -59,9 +52,9 @@ module Admin
           def filled?(name) = @values[name].to_s.match?(WRITING)
 
           def input_field(name, label_key, placeholder_key, **extra)
-            field(name, label_key) do
+            Field(label: t(label_key), name:, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(name, @errors),
+                **control,
                 **extra,
                 name: "work_entry[#{name}]",
                 value: @values[name],

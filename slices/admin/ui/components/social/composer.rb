@@ -105,12 +105,8 @@ module Admin
 
           def schedule_field
             div(data: { social_later: "" }, hidden: !scheduling?) do
-              Field(label: t(".schedule_at"), id: FieldError.id_for(:schedule_at)) do
-                Input(
-                  type: "datetime-local", id: FieldError.id_for(:schedule_at), name: "social[schedule_at]",
-                  value: @values[:schedule_at],
-                )
-                FieldError(field: :schedule_at, errors: @errors)
+              Field(label: t(".schedule_at"), name: :schedule_at, errors: @errors, error: FieldError) do |control|
+                Input(type: "datetime-local", **control, name: "social[schedule_at]", value: @values[:schedule_at])
               end
             end
           end

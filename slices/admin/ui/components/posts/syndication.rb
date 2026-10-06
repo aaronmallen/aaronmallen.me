@@ -32,7 +32,6 @@ module Admin
 
           def body_attributes
             {
-              **FieldError.control_attributes(FIELD, @errors),
               class: "compose-body",
               name: "post[syndication_body]",
               placeholder: @preview.empty? ? t(".placeholder") : @preview,
@@ -41,11 +40,10 @@ module Admin
           end
 
           def text_field
-            Field(label: t(".text"), id: "post-#{FIELD}") do
-              Textarea(value: @body, **body_attributes)
+            Field(label: t(".text"), name: FIELD, errors: @errors, error: FieldError) do |control|
+              Textarea(**control, value: @body, **body_attributes)
               Social::Counts(counts: @counts, networks: @networks)
               Social::Directory(people: @people)
-              FieldError(field: FIELD, errors: @errors)
             end
           end
         end

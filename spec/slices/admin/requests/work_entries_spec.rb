@@ -206,6 +206,13 @@ RSpec.describe "Admin work history", type: :request do
         end
       end
 
+      it "labels the refused field and points it at its error", :aggregate_failures do
+        add(**fields(org: " "))
+
+        expect(page.find_field("Organization")["aria-describedby"]).to eq("work-entry-org-error")
+        expect(page).to have_css("#work-entry-org-error.field-error", text: field_error("org.blank"))
+      end
+
       it "stores nothing when it refuses" do
         add(**fields(org: " "))
 

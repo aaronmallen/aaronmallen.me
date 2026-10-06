@@ -20,35 +20,35 @@ module Admin
           def view_template
             div(class: "rule-fields") do
               provider_field
-              field(:pattern, @pattern)
-              field(:tags, @tags)
+              text_field(:pattern, @pattern)
+              text_field(:tags, @tags)
             end
           end
 
           private
 
-          def field(name, value)
-            Field(label: t(LABELS.fetch(name)), id: FieldError.id_for(name, @scope)) do
+          def error_props(name) = { name:, errors: @errors, error: FieldError, scope: @scope }
+
+          def provider_field
+            Field(label: t(".provider"), **error_props(:provider)) do |control|
+              Select(
+                **control,
+                name: "rule[provider]",
+                options: PROVIDERS.transform_values { t(it) },
+                selected: @provider,
+              )
+            end
+          end
+
+          def text_field(name, value)
+            Field(label: t(LABELS.fetch(name)), **error_props(name)) do |control|
               Input(
-                **FieldError.control_attributes(name, @errors, @scope),
+                **control,
                 autocomplete: "off",
                 name: "rule[#{name}]",
                 placeholder: t(PLACEHOLDERS.fetch(name)),
                 value:,
               )
-              FieldError(field: name, errors: @errors, scope: @scope)
-            end
-          end
-
-          def provider_field
-            Field(label: t(".provider"), id: FieldError.id_for(:provider, @scope)) do
-              Select(
-                **FieldError.control_attributes(:provider, @errors, @scope),
-                name: "rule[provider]",
-                options: PROVIDERS.transform_values { t(it) },
-                selected: @provider,
-              )
-              FieldError(field: :provider, errors: @errors, scope: @scope)
             end
           end
         end

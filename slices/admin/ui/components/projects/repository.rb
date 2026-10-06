@@ -24,13 +24,6 @@ module Admin
 
           private
 
-          def field(name, label_key, &)
-            Field(label: t(label_key), id: FieldError.id_for(name)) do
-              yield
-              FieldError(field: name, errors: @errors)
-            end
-          end
-
           def from_github
             read_only(t(".stars"), Blog::Figures.count(@stars))
             read_only(t(".release"), @release.to_s.empty? ? t(".none") : @release)
@@ -43,9 +36,9 @@ module Admin
           end
 
           def repo_field
-            field(:repo, ".repo") do
+            Field(label: t(".repo"), name: :repo, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:repo, @errors),
+                **control,
                 name: "project[repo]",
                 value: @values[:repo],
                 placeholder: t(".repo_placeholder"),
@@ -55,9 +48,9 @@ module Admin
           end
 
           def started_on_field
-            field(:started_on, ".started_on") do
+            Field(label: t(".started_on"), name: :started_on, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:started_on, @errors),
+                **control,
                 name: "project[started_on]",
                 value: @values[:started_on],
                 placeholder: t(".started_on_placeholder"),
@@ -66,9 +59,9 @@ module Admin
           end
 
           def url_field
-            field(:url, ".url") do
+            Field(label: t(".url"), name: :url, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:url, @errors),
+                **control,
                 type: "url",
                 name: "project[url]",
                 value: @values[:url],

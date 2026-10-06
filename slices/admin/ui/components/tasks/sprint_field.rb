@@ -10,8 +10,8 @@ module Admin
           prop :scheduled, Blog::Types::Date.optional, default: nil
 
           def view_template
-            Field(label: t(".label"), id:) do
-              Input(type: "date", id:, name: "task[sprint_on]", min: earliest.iso8601, value: @scheduled&.iso8601)
+            Field(label: t(".label"), id:) do |control|
+              Input(**control, type: "date", name: "task[sprint_on]", min: earliest.iso8601, value: @scheduled&.iso8601)
               Hint { t(hint) }
             end
           end

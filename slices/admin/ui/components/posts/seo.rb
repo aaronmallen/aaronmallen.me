@@ -21,30 +21,23 @@ module Admin
           private
 
           def canonical_url_field
-            field(:canonical_url, ".canonical_url") do
-              url_input(:canonical_url, ".canonical_url_placeholder")
+            Field(label: t(".canonical_url"), name: :canonical_url, errors: @errors, error: FieldError) do |control|
+              url_input(control, :canonical_url, ".canonical_url_placeholder")
               Hint { t(".canonical_url_note") }
             end
           end
 
-          def field(name, label_key, &)
-            Field(label: t(label_key), id: "post-#{name}") do
-              yield
-              FieldError(field: name, errors: @errors)
-            end
-          end
-
           def og_image_url_field
-            field(:og_image_url, ".og_image_url") do
-              url_input(:og_image_url, ".og_image_url_placeholder")
+            Field(label: t(".og_image_url"), name: :og_image_url, errors: @errors, error: FieldError) do |control|
+              url_input(control, :og_image_url, ".og_image_url_placeholder")
               Hint { t(".og_image_url_note") }
             end
           end
 
           def og_title_field
-            field(:og_title, ".og_title") do
+            Field(label: t(".og_title"), name: :og_title, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:og_title, @errors),
+                **control,
                 name: "post[og_title]",
                 value: @values[:og_title],
                 placeholder: placeholder,
@@ -59,9 +52,9 @@ module Admin
             given.empty? ? t(".og_title_placeholder") : given
           end
 
-          def url_input(name, placeholder_key)
+          def url_input(control, name, placeholder_key)
             Input(
-              **FieldError.control_attributes(name, @errors),
+              **control,
               type: "url",
               name: "post[#{name}]",
               value: @values[name],

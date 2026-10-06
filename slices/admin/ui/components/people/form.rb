@@ -24,10 +24,10 @@ module Admin
           def view_template
             render Blog::UI::Components::Form.new(action: form_action, data: { person_form: @person ? EDIT : NEW }) do
               div(class: "form-stack") do
-                field(:name)
-                field(:key) { Hint { t(".key_note") } }
-                field(:mastodon_handle)
-                field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
+                input_field(:name)
+                input_field(:key) { Hint { t(".key_note") } }
+                input_field(:mastodon_handle)
+                input_field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
                 FieldError(field: :handles, errors: @errors)
                 actions
               end
@@ -53,25 +53,26 @@ module Admin
             end
           end
 
-          def field(name, &)
+          def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
+
+          def input_field(name)
             label_key, placeholder_key = FIELDS.fetch(name)
 
-            Field(label: t(label_key), id: FieldError.id_for(name)) do
+            Field(label: t(label_key), name:, errors: @errors, error: FieldError) do |control, field|
               Input(
-                **FieldError.control_attributes(name, @errors),
+                **control,
                 autocomplete: "off",
                 name: "person[#{name}]",
                 placeholder: t(placeholder_key),
                 value: @values[name],
                 data: { person_field: name },
               )
-              FieldError(field: name, errors: @errors)
-              search(name)
-              yield if block_given?
+              field.after do
+                search(name)
+                yield if block_given?
+              end
             end
           end
-
-          def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
 
           def search(name)
             network = SEARCHES[name]

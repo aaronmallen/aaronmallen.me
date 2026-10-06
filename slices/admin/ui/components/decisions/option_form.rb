@@ -53,7 +53,6 @@ module Admin
 
           def title_attributes
             {
-              **FieldError.control_attributes(:title, @errors, scope),
               name: "option[title]",
               value: value(:title),
               placeholder: t(".title_placeholder"),
@@ -62,9 +61,8 @@ module Admin
           end
 
           def title_field
-            Field(label: t(".title"), id: FieldError.id_for(:title, scope)) do
-              Input(**title_attributes)
-              FieldError(field: :title, errors: @errors, scope:)
+            Field(label: t(".title"), name: :title, errors: @errors, error: FieldError, scope:) do |control|
+              Input(**control, **title_attributes)
             end
           end
 

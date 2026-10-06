@@ -28,9 +28,9 @@ module Admin
           private
 
           def date_field
-            Field(label: t(".entry_date"), id: FieldError.id_for(:entry_date)) do
+            Field(label: t(".entry_date"), name: :entry_date, errors: @errors, error: FieldError) do |control|
               Input(
-                **FieldError.control_attributes(:entry_date, @errors),
+                **control,
                 type: "date",
                 name: "entry[entry_date]",
                 value: @entry_date,
@@ -38,15 +38,13 @@ module Admin
                 form: NewEntry::FORM_ID,
                 data: { journal_date: "" },
               )
-              FieldError(field: :entry_date, errors: @errors)
             end
           end
 
           def search_field
             form(action: path(:admin_journal), method: "get", role: "search") do
-              Field(label: t(".search"), id: "journal-search") do
-                Input(type: "search", id: "journal-search", name: "q", value: @search,
-                      placeholder: t(".search_placeholder"))
+              Field(label: t(".search"), id: "journal-search") do |control|
+                Input(**control, type: "search", name: "q", value: @search, placeholder: t(".search_placeholder"))
               end
             end
           end

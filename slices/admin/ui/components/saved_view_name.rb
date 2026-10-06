@@ -11,8 +11,10 @@ module Admin
         prop :value, Blog::Types::String.optional, default: nil
 
         def view_template
-          Field(label: t(".name"), id: @id) do
-            Input(id: @id, name: "saved_view[name]", value: @value, required: true, maxlength: MAX, autocomplete: "off")
+          Field(label: t(".name"), id: @id) do |control|
+            Input(
+              **control, name: "saved_view[name]", value: @value, required: true, maxlength: MAX, autocomplete: "off",
+            )
           end
           Button(type: "submit", variant: :pri, small: true) do
             i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })

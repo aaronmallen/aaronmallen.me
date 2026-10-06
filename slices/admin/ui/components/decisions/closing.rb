@@ -25,17 +25,17 @@ module Admin
 
           private
 
-          def choice_attributes(errors, scope)
-            { name: "decision[option_id]", options: choices, selected: value(:resolve, :option_id), required: true,
-              **FieldError.control_attributes(:option_id, errors, scope) }
-          end
-
           def choice_field(errors)
             scope = scope_for(:resolve)
 
-            Field(label: t(".option"), id: FieldError.id_for(:option_id, scope)) do
-              Select(**choice_attributes(errors, scope))
-              FieldError(field: :option_id, errors:, scope:)
+            Field(label: t(".option"), name: :option_id, errors:, error: FieldError, scope:) do |control|
+              Select(
+                **control,
+                name: "decision[option_id]",
+                options: choices,
+                selected: value(:resolve, :option_id),
+                required: true,
+              )
             end
           end
 

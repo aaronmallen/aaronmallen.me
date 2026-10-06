@@ -51,24 +51,19 @@ module Admin
           end
 
           def tags_field
-            Field(label: t(".tags"), id: FieldError.id_for(:tags)) do
-              Input(
-                name: "decision[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"),
-                **FieldError.control_attributes(:tags, @errors),
-              )
-              FieldError(field: :tags, errors: @errors)
+            Field(label: t(".tags"), name: :tags, errors: @errors, error: FieldError) do |control|
+              Input(name: "decision[tags]", value: @values[:tags], placeholder: t(".tags_placeholder"), **control)
             end
           end
 
           def title_attributes
             { name: "decision[title]", value: @values[:title], placeholder: t(".title_placeholder"),
-              autofocus: @decision.nil?, **FieldError.control_attributes(:title, @errors) }
+              autofocus: @decision.nil? }
           end
 
           def title_field
-            Field(label: t(".title"), id: FieldError.id_for(:title)) do
-              Input(**title_attributes)
-              FieldError(field: :title, errors: @errors)
+            Field(label: t(".title"), name: :title, errors: @errors, error: FieldError) do |control|
+              Input(**title_attributes, **control)
             end
           end
         end

@@ -26,12 +26,10 @@ module Admin
 
           def part(field, shown)
             label, max = PARTS.fetch(field)
-            control = FieldError.control_attributes(field, @errors, @scope)
             value = @values.key?(field) ? @values[field] : shown
 
-            Field(label: t(label), id: control[:id]) do
+            Field(label: t(label), name: field, errors: @errors, error: FieldError, scope: @scope) do |control|
               Input(**control, min: 0, max:, step: 1, type: "number", name: "#{@name}[#{field}]", value: value.to_s)
-              FieldError(field:, errors: @errors, scope: @scope)
             end
           end
         end

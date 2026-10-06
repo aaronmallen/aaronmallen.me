@@ -36,9 +36,12 @@ module Admin
           end
 
           def hosts
-            Field(label: t(".single_author_hosts"), id: HOSTS_ID) do
+            Field(label: t(".single_author_hosts"), id: HOSTS_ID) do |control|
               Textarea(
-                id: HOSTS_ID, name: "settings[single_author_hosts]", rows: 3, placeholder: t(".hosts_placeholder"),
+                **control,
+                name: "settings[single_author_hosts]",
+                rows: 3,
+                placeholder: t(".hosts_placeholder"),
                 value: @settings.single_author_hosts.join("\n"),
               )
               Hint { t(".hosts_hint") }
