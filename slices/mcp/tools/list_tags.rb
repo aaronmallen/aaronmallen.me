@@ -5,24 +5,29 @@ module MCP
     class ListTags < Base
       SCHEMA = {
         additionalProperties: false,
-        properties: { page: Blog::Paging::PAGE, scope: TAG_SCOPE },
+        properties: {
+          page: Blog::Paging::PAGE,
+          query: { type: "string", description: "part of a tag's name; only tags whose name holds it come back" },
+          scope: TAG_SCOPE,
+        },
         required: ["scope"],
       }.freeze
 
       description "List the tags in one scope by name with their colour, how many records carry each, and that " \
-                  "count split by kind. Public tags go on posts and projects; private tags go on journal entries " \
-                  "and tasks. A tag nothing carries counts zero. #{Blog::Paging::USAGE}"
+                  "count split by kind. #{TAG_KINDS}. A tag nothing carries counts zero. Give query to keep only " \
+                  "the tags whose name holds it; count holds how many tags match. #{Blog::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
-        def call(scope:, server_context:, page: 1)
+        def call(scope:, server_context:, page: 1, query: nil)
+          text = Blog::Types::TrimmedText[query].downcase
           usage = dep(:tag_usage, server_context).call(scope:)
-          requested = page(page, server_context)
-          tags = dep(:matching_tags, server_context).call(scope:, text: Blog::Constants::EMPTY_STRING, page: requested)
+          tags = dep(:matching_tags, server_context).call(scope:, text:, page: page(page, server_context))
 
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
+            count: dep(:matching_tag_count, server_context).call(scope:, text:),
             **Blog::Paging.fields(tags),
           )
         end

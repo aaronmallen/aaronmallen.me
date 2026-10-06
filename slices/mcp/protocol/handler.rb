@@ -38,6 +38,7 @@ module MCP
         hourly_between: "analytics.queries.hourly_between",
         live_projects: "projects.queries.live",
         mark_message: "contact.operations.mark_message",
+        matching_tag_count: "tags.queries.matching_count",
         matching_tags: "tags.queries.matching",
         measure_parts: "social.operations.measure_parts",
         message_by_id: "contact.queries.by_id",

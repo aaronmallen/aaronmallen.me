@@ -12,9 +12,8 @@ module MCP
         required: %w[id scope],
       }.freeze
 
-      description "Remove one tag for good from its scope. Public tags go on posts and projects; private tags go " \
-                  "on journal entries and tasks. Every record that carries the tag loses it. A tag that is the only " \
-                  "tag on a task tag rule stays until the rule takes another tag or goes"
+      description "Remove one tag for good from its scope. #{TAG_KINDS}. Every record that carries the tag loses it. " \
+                  "A tag that is the only tag on a task tag rule stays until the rule takes another tag or goes"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 

@@ -25,10 +25,10 @@ module MCP
         required: ["scope"],
       }.freeze
 
-      description "Add a tag to a scope, or rename or recolour one in it when you give its id. Public tags go on " \
-                  "posts and projects; private tags go on journal entries and tasks. A new tag needs a name and " \
-                  "takes the least used colour in its scope unless you give one. On a change, a field you leave " \
-                  "out keeps what it has, and a rename follows the tag onto every record that carries it"
+      description "Add a tag to a scope, or rename or recolour one in it when you give its id. #{TAG_KINDS}. A new " \
+                  "tag needs a name and takes the least used colour in its scope unless you give one. On a change, a " \
+                  "field you leave out keeps what it has, and a rename follows the tag onto every record that " \
+                  "carries it"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 

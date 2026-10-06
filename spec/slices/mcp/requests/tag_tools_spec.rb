@@ -38,6 +38,15 @@ RSpec.describe "MCP tag tools", type: :request do
     end
   end
 
+  it "names every kind each scope covers in every tag tool", :aggregate_failures do
+    rpc("tools/list")
+    tools = JSON.parse(last_response.body).dig("result", "tools").select { it.fetch("name").end_with?("_tag", "_tags") }
+    texts = tools.flat_map { [it.fetch("description"), it.dig("inputSchema", "properties", "scope", "description")] }
+
+    expect(tools.map { it.fetch("name") }).to include("list_tags", "save_tag", "remove_tag")
+    expect(texts).to all(include("posts and projects", "journal entries, tasks, decisions and task tag rules"))
+  end
+
   describe "list_tags" do
     before do
       create(:post, tags: %w[ruby])
@@ -64,6 +73,33 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "counts a tag nothing carries as zero" do
       expect(named("unused")).to include("count" => 0, "by_kind" => {})
+    end
+
+    it "counts every tag in the scope" do
+      expect(content.fetch("count")).to eq(3)
+    end
+
+    describe "with a query" do
+      before { call_tool("list_tags", scope: "public", query: " RU ") }
+
+      it "lists only the tags whose name holds it" do
+        expect(content.fetch("tags").map { it.fetch("name") }).to eq(%w[ruby])
+      end
+
+      it "counts the tags that match" do
+        expect(content.fetch("count")).to eq(1)
+      end
+
+      it "keeps each match's record count" do
+        expect(named("ruby")).to include("count" => 3)
+      end
+    end
+
+    it "lists nothing for a query no tag name holds", :aggregate_failures do
+      call_tool("list_tags", scope: "public", query: "go")
+
+      expect(content.fetch("tags")).to be_empty
+      expect(content.fetch("count")).to eq(0)
     end
 
     describe "in the private scope" do

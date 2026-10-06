@@ -6,10 +6,12 @@ require "json"
 module MCP
   module Tools
     class Base < Tool
+      PRIVATE_KINDS = "journal entries, tasks, decisions and task tag rules"
+      TAG_KINDS = "Public tags go on posts and projects; private tags go on #{PRIVATE_KINDS}".freeze
       TAG_SCOPE = {
         type: "string",
         enum: Blog::Types::TagScope.values,
-        description: "public holds the tags on posts and projects; private holds those on journal entries and tasks",
+        description: "public holds the tags on posts and projects; private holds those on #{PRIVATE_KINDS}",
       }.freeze
       TEXT = "text"
 
