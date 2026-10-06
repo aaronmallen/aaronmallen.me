@@ -19,8 +19,10 @@ module Admin
             Form(id: FORM_ID, action: path(:admin_create_journal_entry), data: form_data) do
               Card(title:) do |card|
                 card.side { words }
-                body_field
-                tags_field
+                EntryFields(
+                  body: @values[:body], tags: @values[:tags], errors: @errors, height: BODY_HEIGHT,
+                  label: t(".body"), placeholder: t(".placeholder"), autofocus: @autofocus,
+                )
                 div(class: "journal-new-foot") { save_button }
               end
             end
@@ -28,39 +30,14 @@ module Admin
 
           private
 
-          def blank? = !@values[:body].match?(/\S/)
-
-          def body_field
-            div(class: "journal-editor") { MarkdownEditor(**body_props) }
-            FieldError(field: :body, errors: @errors)
-          end
-
-          def body_props
-            {
-              **FieldError.control_attributes(:body, @errors),
-              name: "entry[body]", value: @values[:body], height: BODY_HEIGHT, renderer: "posts",
-              label: t(".body"), placeholder: t(".placeholder"), autofocus: @autofocus, data: { journal_body: "" },
-            }
-          end
-
           def form_data = { journal_entry: "", today: @today.iso8601, today_label: t(".today") }
 
           def save_button
-            Button(variant: :pri, type: "submit", disabled: blank?, data: { journal_save: "" }) do
+            blank = EntryFields.blank?(@values[:body])
+            Button(variant: :pri, type: "submit", disabled: blank, data: { journal_save: "" }) do
               i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
               span { t(".save") }
             end
-          end
-
-          def tags_field
-            label(class: "sr-only", for: FieldError.id_for(:tags)) { t(".tags") }
-            Input(
-              **FieldError.control_attributes(:tags, @errors),
-              name: "entry[tags]",
-              value: @values[:tags],
-              placeholder: t(".tags_placeholder"),
-            )
-            FieldError(field: :tags, errors: @errors)
           end
 
           def title = @date == @today ? t(".today") : l(@date, format: :full)

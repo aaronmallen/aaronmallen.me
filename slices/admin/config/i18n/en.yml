@@ -614,6 +614,7 @@ en:
           edit: "Edit"
           links: "Links"
           save: "Save"
+        entry_fields:
           tags: "Tags"
           tags_placeholder: "ruby, health"
         field_error:
@@ -634,8 +635,6 @@ en:
           body: "Entry"
           placeholder: "Unfiltered. Nobody is reading this but you."
           save: "Save entry"
-          tags: "Tags"
-          tags_placeholder: "ruby, health"
           today: "Today"
           words:
             one: "%{count} word"
@@ -1610,8 +1609,6 @@ en:
         placeholder: "What happened? Only you will ever read this."
         private: "private"
         save: "Save entry"
-        tags: "Tags"
-        tags_placeholder: "ruby, health"
         title: "Journal"
         today: "%{count} today"
         words:

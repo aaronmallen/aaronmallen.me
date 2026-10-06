@@ -33,19 +33,6 @@ module Admin
 
           def body = editing? ? @editing[:body] : @entry.body
 
-          def body_field
-            div(class: "journal-editor") { MarkdownEditor(**body_props) }
-            FieldError(field: :body, errors:, scope:)
-          end
-
-          def body_props
-            {
-              **FieldError.control_attributes(:body, errors, scope),
-              name: "entry[body]", value: body, height: BODY_HEIGHT, renderer: "posts", label: t(".body"),
-              data: { journal_body: "" },
-            }
-          end
-
           def delete_attributes
             {
               action: path(:admin_delete_journal_entry, id: @entry.id),
@@ -70,8 +57,7 @@ module Admin
 
           def edit_form
             Form(**edit_attributes) do
-              body_field
-              tags_field
+              EntryFields(body:, tags:, errors:, scope:, height: BODY_HEIGHT, label: t(".body"))
               div(class: "journal-edit-foot") do
                 Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }
                 save_button
@@ -114,7 +100,7 @@ module Admin
           def records = @editing&.fetch(:records, nil)
 
           def save_button
-            blank = !body.match?(/\S/)
+            blank = EntryFields.blank?(body)
             Button(variant: :pri, small: true, type: "submit", disabled: blank, data: { journal_save: "" }) do
               t(".save")
             end
@@ -123,17 +109,6 @@ module Admin
           def scope = "journal-edit-#{@entry.id}"
 
           def tags = editing? ? @editing[:tags] : @entry.tags.map(&:name).join(TAG_SEPARATOR)
-
-          def tags_field
-            label(class: "sr-only", for: FieldError.id_for(:tags, scope)) { t(".tags") }
-            Input(
-              **FieldError.control_attributes(:tags, errors, scope),
-              value: tags,
-              name: "entry[tags]",
-              placeholder: t(".tags_placeholder"),
-            )
-            FieldError(field: :tags, errors:, scope:)
-          end
         end
       end
     end

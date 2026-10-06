@@ -24,23 +24,12 @@ module Admin
 
         private
 
-        def body_field
-          div(class: "journal-editor") { MarkdownEditor(**body_props) }
-          Journal::FieldError(field: :body, errors: @errors)
-        end
-
-        def body_props
-          {
-            **Journal::FieldError.control_attributes(:body, @errors),
-            name: "entry[body]", value: @body, height: BODY_HEIGHT, renderer: "posts", label: t(".body"),
-            placeholder: t(".placeholder"), data: { journal_body: "" },
-          }
-        end
-
         def entry_form
           Form(**form_attributes) do
-            body_field
-            tags_field
+            Journal::EntryFields(
+              body: @body, tags: @tags, errors: @errors, height: BODY_HEIGHT, label: t(".body"),
+              placeholder: t(".placeholder"),
+            )
             foot
           end
         end
@@ -82,21 +71,11 @@ module Admin
         end
 
         def save_button
-          Button(variant: :pri, type: "submit", disabled: !@body.match?(/\S/), data: { journal_save: "" }) do
+          blank = Journal::EntryFields.blank?(@body)
+          Button(variant: :pri, type: "submit", disabled: blank, data: { journal_save: "" }) do
             i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
             span { t(".save") }
           end
-        end
-
-        def tags_field
-          label(class: "sr-only", for: Journal::FieldError.id_for(:tags)) { t(".tags") }
-          Input(
-            **Journal::FieldError.control_attributes(:tags, @errors),
-            name: "entry[tags]",
-            value: @tags,
-            placeholder: t(".tags_placeholder"),
-          )
-          Journal::FieldError(field: :tags, errors: @errors)
         end
       end
     end
