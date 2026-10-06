@@ -28,9 +28,7 @@ module Admin
           end
 
           def mark
-            Pill(color: :sand) do
-              IconLabel(icon: "fa-solid fa-ban") { t(".canceled") }
-            end
+            Pill(color: :sand, icon: "fa-solid fa-ban") { t(".canceled") }
           end
         end
       end

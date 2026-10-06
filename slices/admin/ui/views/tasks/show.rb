@@ -130,9 +130,7 @@ module Admin
           def status
             color, icon, label_key = STATUSES.fetch(@task.status)
 
-            Pill(color:) do
-              IconLabel(icon:) { t(label_key) }
-            end
+            Pill(color:, icon:) { t(label_key) }
           end
 
           def tag_path(tag) = path(:admin_tasks, filter: @filter, q: "tag:#{tag.name}")

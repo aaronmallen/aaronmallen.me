@@ -32,17 +32,13 @@ module Admin
           private
 
           def blocked
-            Pill(color: :pink) do
-              IconLabel(icon: "fa-solid fa-lock") { t(".blocked") }
-            end
+            Pill(color: :pink, icon: "fa-solid fa-lock") { t(".blocked") }
           end
 
           def blocked? = !@task.closed? && @task.blocked?
 
           def carried
-            Pill(color: :sand) do
-              IconLabel(icon: "fa-solid fa-rotate-left") { t(".carried", count: @task.carried_count) }
-            end
+            Pill(color: :sand, icon: "fa-solid fa-rotate-left") { t(".carried", count: @task.carried_count) }
           end
 
           def carried? = !@task.closed? && @task.carried_count.positive?
@@ -62,9 +58,7 @@ module Admin
           end
 
           def in_progress
-            Pill(color: :blue) do
-              IconLabel(icon: "fa-solid fa-circle-play") { t(".in_progress") }
-            end
+            Pill(color: :blue, icon: "fa-solid fa-circle-play") { t(".in_progress") }
           end
 
           def meta
@@ -92,9 +86,9 @@ module Admin
           end
 
           def scheduled_pill
-            Pill(color: :orange) do
-              IconLabel(icon: "fa-regular fa-calendar") { t(".scheduled", date: l(@scheduled, format: :short)) }
-            end
+            date = l(@scheduled, format: :short)
+
+            Pill(color: :orange, icon: "fa-regular fa-calendar") { t(".scheduled", date:) }
           end
 
           def side

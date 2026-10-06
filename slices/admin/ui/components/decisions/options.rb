@@ -24,9 +24,7 @@ module Admin
           end
 
           def chosen
-            Pill(color: :green) do
-              IconLabel(icon: "fa-solid fa-check") { t(".chosen") }
-            end
+            Pill(color: :green, icon: "fa-solid fa-check") { t(".chosen") }
           end
 
           def chosen?(option) = option.id == @decision.resolved_option_id

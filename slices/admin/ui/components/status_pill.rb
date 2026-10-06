@@ -19,9 +19,7 @@ module Admin
         def view_template
           color, icon, label_key = STATUSES.fetch(@status)
 
-          Pill(color:) do
-            IconLabel(icon:) { t(label_key) }
-          end
+          Pill(color:, icon:) { t(label_key) }
         end
       end
     end

@@ -37,6 +37,13 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page.all(".li .pill").map(&:text)).to contain_exactly("issue", "message", "webmention")
     end
 
+    it "draws the kind pills without an icon" do
+      create(:message)
+      get "/admin/inbox"
+
+      expect(page).to have_css(".li .pill", exact_text: "message").and have_no_css(".li .pill i")
+    end
+
     it "counts the rows" do
       create(:message)
       synced

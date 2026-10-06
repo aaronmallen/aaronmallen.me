@@ -8,12 +8,19 @@ module Blog
         TAG_COLORS = COLORS.to_h { [Blog::Types::TagColor["mk-#{it}"], it] }.freeze
 
         prop :color, Blog::Types::Symbol.enum(*COLORS).optional
+        prop :icon, Icon::NAME.optional, default: nil
 
         def self.for_tag_color(value) = TAG_COLORS[value]
 
         def view_template(&)
-          span(class: ["pill", @color&.to_s], &)
+          return span(class: classes, &) unless @icon
+
+          span(class: classes) { IconLabel(icon: @icon, &) }
         end
+
+        private
+
+        def classes = ["pill", @color&.to_s]
       end
     end
   end

@@ -159,6 +159,13 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".li-side .pill.orange", text: "featured")
       end
 
+      it "draws the featured pill's icon hidden beside its label" do
+        create(:project, :featured)
+        get "/admin/projects"
+
+        expect(page).to have_css(".pill.orange > i.fa-star[aria-hidden='true'] + span", exact_text: "featured")
+      end
+
       it "leaves the featured pill off an unfeatured project" do
         project
         get "/admin/projects"

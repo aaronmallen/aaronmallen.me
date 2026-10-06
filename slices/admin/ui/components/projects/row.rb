@@ -49,9 +49,7 @@ module Admin
           end
 
           def featured
-            Pill(color: :orange) do
-              IconLabel(icon: "fa-solid fa-star") { t(".featured") }
-            end
+            Pill(color: :orange, icon: "fa-solid fa-star") { t(".featured") }
           end
 
           def meta
