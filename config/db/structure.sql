@@ -490,6 +490,22 @@ $$;
 
 
 --
+-- Name: notify_admin_change(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.notify_admin_change() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  IF TG_OP <> 'UPDATE' OR OLD IS DISTINCT FROM NEW THEN
+    PERFORM pg_notify('admin_changes', TG_TABLE_NAME);
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+
+--
 -- Name: post_tags_record_removal(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -4658,10 +4674,129 @@ CREATE INDEX work_sessions_task_id_started_at_index ON public.work_sessions USIN
 
 
 --
+-- Name: analytics_rollup_clicks analytics_rollup_clicks_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_clicks_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_clicks FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_countries analytics_rollup_countries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_countries_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_countries FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_devices analytics_rollup_devices_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_devices_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_devices FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_page_countries analytics_rollup_page_countries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_page_countries_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_page_countries FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_page_referrers analytics_rollup_page_referrers_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_page_referrers_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_page_referrers FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_paths analytics_rollup_paths_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_paths_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_paths FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_reach analytics_rollup_reach_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_reach_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_reach FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_referrers analytics_rollup_referrers_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_referrers_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_referrers FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_scroll_depths analytics_rollup_scroll_depths_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_scroll_depths_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_scroll_depths FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollup_sources analytics_rollup_sources_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollup_sources_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollup_sources FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: analytics_rollups analytics_rollups_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER analytics_rollups_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.analytics_rollups FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: attention_snoozes attention_snoozes_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER attention_snoozes_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.attention_snoozes FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: commits commits_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER commits_drop_record_links AFTER DELETE ON public.commits FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('commit');
+
+
+--
+-- Name: commits commits_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER commits_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.commits FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: decision_comments decision_comments_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER decision_comments_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.decision_comments FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: decision_events decision_events_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER decision_events_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.decision_events FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: decision_options decision_options_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER decision_options_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.decision_options FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: decision_tags decision_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER decision_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.decision_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -4672,10 +4807,80 @@ CREATE TRIGGER decisions_drop_record_links AFTER DELETE ON public.decisions FOR 
 
 
 --
+-- Name: decisions decisions_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER decisions_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.decisions FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: journal_entries journal_entries_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER journal_entries_drop_record_links AFTER DELETE ON public.journal_entries FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('journal_entry');
+
+
+--
+-- Name: journal_entries journal_entries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER journal_entries_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.journal_entries FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: journal_entry_tags journal_entry_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER journal_entry_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.journal_entry_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: messages messages_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER messages_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.messages FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: oauth_clients oauth_clients_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER oauth_clients_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.oauth_clients FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: oauth_tokens oauth_tokens_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER oauth_tokens_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.oauth_tokens FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: people people_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER people_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.people FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: photos photos_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER photos_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.photos FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: post_edits post_edits_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_edits_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.post_edits FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: post_tags post_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.post_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -4714,10 +4919,24 @@ CREATE TRIGGER posts_lock_published_slug BEFORE UPDATE OF slug ON public.posts F
 
 
 --
+-- Name: posts posts_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER posts_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.posts FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: posts posts_record_deletion; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER posts_record_deletion AFTER DELETE ON public.posts FOR EACH ROW WHEN ((old.status = 'published'::public.post_status)) EXECUTE FUNCTION public.posts_record_deletion();
+
+
+--
+-- Name: project_tags project_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER project_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.project_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -4728,10 +4947,52 @@ CREATE TRIGGER projects_drop_record_links AFTER DELETE ON public.projects FOR EA
 
 
 --
+-- Name: projects projects_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER projects_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: record_links record_links_find_records; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER record_links_find_records BEFORE INSERT OR UPDATE OF left_kind, left_id, right_kind, right_id ON public.record_links FOR EACH ROW EXECUTE FUNCTION public.record_links_find_records();
+
+
+--
+-- Name: record_links record_links_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER record_links_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.record_links FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: review_notes review_notes_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER review_notes_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.review_notes FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: saved_views saved_views_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER saved_views_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.saved_views FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: social_post_deliveries social_post_deliveries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER social_post_deliveries_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.social_post_deliveries FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: social_post_parts social_post_parts_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER social_post_parts_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.social_post_parts FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -4742,10 +5003,108 @@ CREATE TRIGGER social_posts_drop_record_links AFTER DELETE ON public.social_post
 
 
 --
+-- Name: social_posts social_posts_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER social_posts_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.social_posts FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: sprints sprints_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sprints_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.sprints FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: suggestion_edits suggestion_edits_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER suggestion_edits_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.suggestion_edits FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: suggestions suggestions_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER suggestions_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.suggestions FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: sync_states sync_states_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sync_states_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.sync_states FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: tags tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_comments task_comments_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_comments_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_comments FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_contributors task_contributors_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_contributors_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_contributors FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_events task_events_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_events_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_events FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_links task_links_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_links_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_links FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_sources task_sources_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_sources_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_sources FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_tag_rule_tags task_tag_rule_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_tag_rule_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_tag_rule_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: tags task_tag_rules_last_tag; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER task_tag_rules_last_tag BEFORE DELETE ON public.tags FOR EACH ROW EXECUTE FUNCTION public.task_tag_rules_last_tag();
+
+
+--
+-- Name: task_tag_rules task_tag_rules_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_tag_rules_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_tag_rules FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: task_tags task_tags_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER task_tags_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.task_tags FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -4763,10 +5122,45 @@ CREATE TRIGGER tasks_drop_record_links AFTER DELETE ON public.tasks FOR EACH ROW
 
 
 --
+-- Name: tasks tasks_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER tasks_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.tasks FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: webmention_settings webmention_settings_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER webmention_settings_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.webmention_settings FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: webmentions webmentions_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER webmentions_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.webmentions FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: work_entries work_entries_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER work_entries_drop_record_links AFTER DELETE ON public.work_entries FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('work_entry');
+
+
+--
+-- Name: work_entries work_entries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER work_entries_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.work_entries FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: work_sessions work_sessions_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER work_sessions_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.work_sessions FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
 
 
 --
@@ -5286,4 +5680,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261006000618_create_task_contributors.rb'),
 ('20261006000623_add_contributors_to_activity_views.rb'),
 ('20261006000632_add_parent_to_task_link_type.rb'),
-('20261006000633_add_synced_and_one_parent_to_task_links.rb');
+('20261006000633_add_synced_and_one_parent_to_task_links.rb'),
+('20261006000639_notify_admin_changes.rb');
