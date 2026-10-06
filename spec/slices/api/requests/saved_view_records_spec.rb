@@ -10,7 +10,8 @@ RSpec.describe "API saved view records", type: :request do
       "kind" => "commit", "source_id" => commit.id, "date" => today.iso8601, "time" => "09:00",
       "name" => commit.message, "link" => nil, "repo" => commit.repo, "sha" => commit.sha,
       "additions" => commit.additions, "deletions" => commit.deletions, "status" => nil, "targets" => nil,
-      "excerpt" => nil, "task_id" => nil, "decision_id" => nil, "worked_seconds" => nil, "tags" => [],
+      "excerpt" => nil, "task_id" => nil, "decision_id" => nil, "worked_seconds" => nil, "views" => nil,
+      "tags" => [],
     }
   end
 
@@ -188,6 +189,14 @@ RSpec.describe "API saved view records", type: :request do
       expect(first_record("activity")).to eq(commit_row(commit))
     end
 
+    it "gives a post the views the admin screen counts for it" do
+      create(:post, :published, slug: "hello", published_at: at(today, 9))
+      create(:analytics_rollup, day: today)
+      create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 12, visitors: 8, bounces: 2)
+
+      expect(first_record("activity", types: { post: "1" })).to include("link" => "/writing/hello", "views" => 12)
+    end
+
     it "gives a finished work session its task and the seconds it ran" do
       task = create(:task, title: "Write it", tags: %w[ops])
       create(:work_session, task_id: task.id, started_at: at(today, 9), ended_at: at(today, 10))
@@ -295,12 +304,15 @@ RSpec.describe "API saved view records", type: :request do
     before do
       create(:task, tags: %w[ops])
       create(:post, :draft, tags: %w[ruby])
+      create(:post, :published, slug: "hello", published_at: at(today, 9))
+      create(:analytics_rollup, day: today)
+      create(:analytics_rollup_path, day: today, path: "/writing/hello", views: 12, visitors: 8, bounces: 2)
       create(:journal_entry, body: "a run")
       create(:commit)
     end
 
     {
-      "activity" => { types: { commit: "1" } },
+      "activity" => { types: { commit: "1", post: "1" } },
       "journal" => { q: "run" },
       "posts" => { status: "draft" },
       "tasks" => { filter: "next" },

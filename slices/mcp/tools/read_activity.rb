@@ -13,8 +13,9 @@ module MCP
                   "is the decision's title, its status what happened, and its excerpt the reason, the edit " \
                   "note or else the option's title. " \
                   "Each row carries its kind, source_id, day, time, name and tags, and link, repo, sha, additions, " \
-                  "deletions, status, targets, excerpt, task_id, decision_id and worked_seconds, null where its " \
-                  "kind holds none. source_id is the ID of the row's own record, the one its kind's read tool " \
+                  "deletions, status, targets, excerpt, task_id, decision_id, worked_seconds and views, null where " \
+                  "its kind holds none. A post's views count the last 90 days, as the admin's activity screen " \
+                  "does. source_id is the ID of the row's own record, the one its kind's read tool " \
                   "takes: read_commit for a commit, read_post for a post, read_journal_entry for a journal entry, " \
                   "read_social_post for a social post, read_webmention for a webmention, read_task for a task and " \
                   "read_project for a project. A comment, session or decision event names its task or decision " \

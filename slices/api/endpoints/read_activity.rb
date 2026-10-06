@@ -40,7 +40,7 @@ module API
         optional: { continue_to: Schema::DAY },
       ).freeze
 
-      include Deps[activity_between: "activity.queries.activity_between"]
+      include Deps[activity_between: "activity.queries.activity_between", activity_views: "queries.activity_views"]
 
       def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil)
         case Blog::DayWindow.days(from, to)
@@ -80,7 +80,7 @@ module API
           to: last.iso8601,
           count: rows.length,
           **page.except(:rows),
-          activity: serialized(Serializers::Activity, rows),
+          activity: serialized(Serializers::Activity, rows, views: activity_views.call(rows)),
         }
       end
     end

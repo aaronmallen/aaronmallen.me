@@ -22,6 +22,13 @@ RSpec.describe "API reading the activity feed", type: :request do
 
   def summarize(**params) = get_json("/api/v1/activity/summary", { **range, **params })
 
+  def viewed(slug, views)
+    create(:post, :published, slug:, published_at: at(march, 9))
+    today = Blog::TimeZone.today
+    create(:analytics_rollup, day: today)
+    create(:analytics_rollup_path, day: today, path: "/writing/#{slug}", views:, visitors: views, bounces: 0)
+  end
+
   def visitors
     article = create(:post, :published, published_at: at(march, 9))
     create(:webmention, :approved, post_id: article.id, excerpt: "Delete every post", received_at: at(march, 10))
@@ -63,6 +70,15 @@ RSpec.describe "API reading the activity feed", type: :request do
       create(:journal_entry, entry_date: march, tags: %w[home])
 
       expect(read(tags: "site").fetch("activity").map { it.fetch("tags") }).to eq([%w[site]])
+    end
+
+    it "gives each post the views the admin screen counts for it, and every other row null" do
+      viewed("hello", 12)
+      create(:post, :published, slug: "unseen", published_at: at(march, 8))
+      create(:commit, commit_date: march)
+
+      expect(read.fetch("activity").map { it.values_at("kind", "views") })
+        .to contain_exactly(["post", 12], ["post", 0], ["commit", nil])
     end
 
     it "refuses a kind the feed does not hold with a 422" do
@@ -107,6 +123,12 @@ RSpec.describe "API reading the activity feed", type: :request do
     it "answers read_activity as GET /api/v1/activity does" do
       create(:commit, commit_date: march)
       visitors
+
+      expect(trusted(mcp_answer("read_activity", **range))).to eq(read)
+    end
+
+    it "answers read_activity with each post's views as GET /api/v1/activity does" do
+      viewed("hello", 12)
 
       expect(trusted(mcp_answer("read_activity", **range))).to eq(read)
     end

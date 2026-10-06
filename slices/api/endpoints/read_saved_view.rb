@@ -5,10 +5,11 @@ module API
     class ReadSavedView < Endpoint
       BAD_DAY = "give continue_to as a day, such as 2026-01-01"
       NO_SPRINT = "could not open today's sprint"
+      ACTIVITY = Blog::Types::SavedViewScreen["activity"]
       TASKS = Blog::Types::SavedViewScreen["tasks"]
 
       SERIALIZERS = {
-        Blog::Types::SavedViewScreen["activity"] => Serializers::Activity,
+        ACTIVITY => Serializers::Activity,
         Blog::Types::SavedViewScreen["journal"] => Serializers::JournalEntry,
         Blog::Types::SavedViewScreen["posts"] => Serializers::Post,
         TASKS => Serializers::Task,
@@ -38,6 +39,7 @@ module API
       ).freeze
 
       include Deps[
+        activity_views: "queries.activity_views",
         saved_view_activity: "queries.saved_view_activity",
         saved_view_by_id: "saved_views.queries.by_id",
         saved_view_journal: "queries.saved_view_journal",
@@ -73,7 +75,7 @@ module API
 
       def reader(screen)
         {
-          Blog::Types::SavedViewScreen["activity"] => saved_view_activity,
+          ACTIVITY => saved_view_activity,
           Blog::Types::SavedViewScreen["journal"] => saved_view_journal,
           Blog::Types::SavedViewScreen["posts"] => saved_view_posts,
           TASKS => saved_view_tasks,
@@ -81,6 +83,7 @@ module API
       end
 
       def records(screen, rows, found)
+        return serialized(Serializers::Activity, rows, views: activity_views.call(rows)) if screen == ACTIVITY
         return serialized(SERIALIZERS.fetch(screen), rows) unless screen == TASKS
 
         sprint_on = found.fetch(:sprint_on)

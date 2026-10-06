@@ -3,7 +3,9 @@
 module API
   module Serializers
     class Activity < Serializer
+      POST = Blog::Types::ActivityKind["post"]
       TIME_FORMAT = "%H:%M"
+      VIEWS = "a post's views over the last 90 days, or null for any other kind"
 
       SCHEMA = Schema.object(
         {
@@ -23,12 +25,13 @@ module API
           task_id: Schema.nullable(Schema::INTEGER),
           decision_id: Schema.nullable(Schema::INTEGER),
           worked_seconds: Schema.nullable(Schema::INTEGER),
+          views: Schema.nullable(Schema::INTEGER).merge(description: VIEWS),
           tags: Schema::TAGS,
         },
       ).freeze
 
       attributes :kind, :source_id, :date, :time, :name, :link, :repo, :sha, :additions, :deletions, :status
-      attributes :targets, :excerpt, :task_id, :decision_id, :worked_seconds, :tags
+      attributes :targets, :excerpt, :task_id, :decision_id, :worked_seconds, :views, :tags
 
       def date(row) = day(row.occurred_on)
 
@@ -39,6 +42,8 @@ module API
       def targets(row) = row.targets&.to_a
 
       def time(row) = row.occurred_at.strftime(TIME_FORMAT)
+
+      def views(row) = (params.fetch(:views).fetch(row.link, 0) if row.type == POST)
     end
   end
 end
