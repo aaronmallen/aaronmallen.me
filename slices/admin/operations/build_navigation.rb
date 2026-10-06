@@ -7,7 +7,7 @@ module Admin
 
       def call(current_path:)
         Structs::Navigation.new(
-          sections: list_sections.call(current_path:), actions: list_actions.call(current_path:),
+          sections: list_sections.call(current_path:), actions: list_actions.call,
         )
       end
     end

@@ -7,8 +7,6 @@ RSpec.describe "Admin palette actions", type: :request do
 
   def actions = group.all("[data-palette-option]", visible: :all)
 
-  def entry(**) = Admin::Operations::ListActions::Entry.new(**)
-
   def group = page.find("[aria-labelledby='command-palette-group-actions']", visible: :all)
 
   before { sign_in_to_admin }
@@ -129,54 +127,6 @@ RSpec.describe "Admin palette actions", type: :request do
     it "posts each row and shows it only with no task on screen" do
       expect(rows.map { [it["data-palette-post"].nil?, it["data-palette-needs"]] })
         .to eq([[false, "no_task"], [false, "no_task"]])
-    end
-  end
-
-  describe "adding an entry" do
-    before do
-      stub_const(
-        "Admin::Operations::ListActions::ALL",
-        [
-          *Admin::Operations::ListActions::ALL.reject { it.name == :new_post },
-          entry(name: :new_post, icon: "fa-eye", route: :admin_posts),
-        ],
-      )
-      get "/admin"
-    end
-
-    it "draws its row after the rest", :aggregate_failures do
-      row = actions.last
-
-      expect(row[:id]).to eq("command-palette-new-post")
-      expect(row).to have_css(".pal-r-label", text: "New post")
-      expect(row["data-palette-href"]).to eq("/admin/posts")
-      expect(row["data-palette-text"]).to eq("new post, write a post, draft a post")
-    end
-  end
-
-  describe "an entry that applies only some of the time" do
-    before do
-      stub_const(
-        "Admin::Operations::ListActions::ALL",
-        [
-          entry(
-            name: :create_task, icon: "fa-list-check", route: :admin_new_task,
-            shows: ->(current_path) { current_path == "/admin/posts" },
-          ),
-        ],
-      )
-    end
-
-    it "shows where it applies" do
-      get "/admin/posts"
-
-      expect(actions.map { it[:id] }).to eq(%w[command-palette-create-task])
-    end
-
-    it "hides where it does not" do
-      get "/admin"
-
-      expect(page).to have_no_css("#command-palette-group-actions", visible: :all)
     end
   end
 end

@@ -104,9 +104,9 @@ reach past ROM, and moving off Postgres would break every mapping at once.
 
 A constraint no form can break maps to nothing and raises. That is on purpose: it means a bug, not a bad entry.
 
-`Record::Operations::SaveJournalEntry` and `UpdateJournalEntry` break the lookup. They rescue any
-`CheckConstraintError` as `body: blank` and never ask for the name, so a new `CHECK` on `journal_entries` would
-answer as a blank body.
+`Record::Operations::SaveJournalEntry` and `UpdateJournalEntry` rescued any `CheckConstraintError` as `body: blank`
+and never asked for the name. The contract refuses every body the `non_blank_text` domain would, so nothing reached
+the rescue, and #607 took it out. A new `CHECK` on `journal_entries` now raises until it gets a mapping.
 
 A reader cannot learn every rule from the contract. The ones over stored state are in `config/db/structure.sql`.
 

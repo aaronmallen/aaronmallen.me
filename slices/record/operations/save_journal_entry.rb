@@ -21,15 +21,11 @@ module Record
 
       def form(params) = { body: params[:body], entry_date: params[:entry_date], tags: params[:tags] }
 
-      def invalid(field, code) = Failure([:invalid, { field => [code] }])
-
       def persist(attributes, now)
         time = Blog::TimeZone.local(now).strftime(TIME_FORMAT)
         id = transaction { write(attributes, time).id }
 
         Success(journal_entry_repo.by_id(id))
-      rescue ROM::SQL::CheckConstraintError
-        invalid(:body, Blog::Contract::BLANK)
       end
 
       def validate(params, now, latest)

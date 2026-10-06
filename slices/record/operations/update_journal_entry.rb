@@ -23,8 +23,6 @@ module Record
 
       def form(params) = { body: params[:body], tags: params[:tags] }
 
-      def invalid = Failure([:invalid, { body: [Blog::Contract::BLANK] }])
-
       def persist(id, attributes)
         transaction do
           journal_entry_repo.update(id, **attributes.except(:tags))
@@ -33,8 +31,6 @@ module Record
         end
 
         Success(journal_entry_repo.by_id(id))
-      rescue ROM::SQL::CheckConstraintError
-        invalid
       end
 
       def validate(params) = validated(contract.call(form(params)))

@@ -45,12 +45,12 @@ request and draws three parts from what it returns:
 from anywhere at all. Since #297 it binds those keys through the admin's one key map, `keys.js`, as
 [ADR 0101][0101] records.
 
-An action is an entry in `Admin::Operations::ListActions::ALL`: its name, icon, route and route params, the dialog
-it opens if it has one, and a `shows` check that takes the current path and hides the row where the action does not
-apply. A new action joins by adding its entry and the `label` and `text` locale keys `Structs::Action` reads for it.
-`Palette` draws a row per entry in list order, matches on the label and the text together, and `palette.js` runs any
-row from its `href` and `dialog`, so neither changes for a new action. The Actions group sits above the tasks, so
-a query that matches an action lists it first. #303 made the list, and it now holds these rows:
+An action is an entry in `Admin::Operations::ListActions::ALL`: its name, icon, route and route params, and the dialog
+it opens if it has one. Each entry once took a `shows` check on the current path, but none used it, and #607 dropped it.
+A new action joins by adding its entry and the `label` and `text` locale keys `Structs::Action` reads for it. `Palette`
+draws a row per entry in list order, matches on the label and the text together, and `palette.js` runs any row from its
+`href` and `dialog`, so neither changes for a new action. The Actions group sits above the tasks, so a query that
+matches an action lists it first. #303 made the list, and it now holds these rows:
 
 - "Create task" shuts the palette and opens the new task dialog on the page you are on, and goes to
   `/admin/tasks/new` when that page has no dialog.

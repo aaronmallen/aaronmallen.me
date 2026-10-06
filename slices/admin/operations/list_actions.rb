@@ -3,15 +3,13 @@
 module Admin
   module Operations
     class ListActions
-      Entry = Data.define(:name, :icon, :route, :params, :dialog, :shows, :post, :needs, :from, :from_params) do
+      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params) do
         def initialize(
-          name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, shows: nil, post: false,
-          needs: nil, from: nil, from_params: Blog::Constants::EMPTY_HASH
+          name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, post: false, needs: nil,
+          from: nil, from_params: Blog::Constants::EMPTY_HASH
         )
           super
         end
-
-        def shows?(current_path) = shows.nil? || shows.call(current_path)
       end
 
       ALL = [
@@ -45,8 +43,8 @@ module Admin
 
       include Deps["routes"]
 
-      def call(current_path:)
-        ALL.select { it.shows?(current_path) }.map do |entry|
+      def call
+        ALL.map do |entry|
           Structs::Action.new(
             name: entry.name, icon: entry.icon, path: path(entry.route, entry.params), dialog: entry.dialog,
             post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params),

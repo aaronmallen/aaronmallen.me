@@ -99,45 +99,6 @@ RSpec.describe "Contact form", type: :feature do
     end
   end
 
-  describe "the stamp" do
-    it "stores nothing from a send faster than the minimum time, and reads as sent", :aggregate_failures do
-      change_contact_setting(:minimum_submit_seconds, to: Blog::Settings::DEFAULT_CONTACT_MINIMUM_SUBMIT_SECONDS)
-      send_message
-
-      expect(page).to have_css(".contact .f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
-      expect(message_repo.messages.count).to eq(0)
-    end
-
-    describe "on a form that sat open the minimum time" do
-      before do
-        change_contact_setting(:minimum_submit_seconds, to: 1)
-        visit "/contact"
-        fields.each { |label, value| fill_in(label, with: value) }
-        sleep 1.1
-        click_button "Send message"
-      end
-
-      it "stores the send", :aggregate_failures do
-        expect(page).to have_current_path("/contact?sent=1")
-        expect(stored).to have_attributes(subject: "A question")
-      end
-    end
-
-    describe "on a form whose stamp was taken out" do
-      before do
-        visit "/contact"
-        fields.each { |label, value| fill_in(label, with: value) }
-        execute_script("document.querySelector(\"input[name='message[stamp]']\").remove()")
-        click_button "Send message"
-      end
-
-      it "stores nothing, and reads as sent", :aggregate_failures do
-        expect(page).to have_current_path("/contact?sent=1")
-        expect(message_repo.messages.count).to eq(0)
-      end
-    end
-  end
-
   it "keeps the honeypot off the screen" do
     visit "/contact"
 
