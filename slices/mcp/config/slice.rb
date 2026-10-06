@@ -97,6 +97,8 @@ module MCP
       operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.usage
     ], from: :tags
 
+    import keys: %w[queries.synced_task_ids], from: :tasks
+
     export %w[operations.revoke_client queries.connected_clients]
   end
 end

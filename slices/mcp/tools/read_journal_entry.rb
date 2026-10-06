@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class ReadJournalEntry < Base
-      description "Read one journal entry: its date, time, body, tags and the records linked to it, grouped by kind"
+      description "Read one journal entry: its date, time, body, tags and the records linked to it, grouped by kind. #{Untrusted::LINKS}"
       endpoint scope: OAuth::Scope::READ
     end
   end

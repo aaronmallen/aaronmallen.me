@@ -75,6 +75,7 @@ module MCP
         suggestion_by_id: "suggestions.queries.by_id",
         suggestions_between: "suggestions.queries.created_between",
         sync_failures: "record.queries.sync_failures",
+        synced_task_ids: "tasks.queries.synced_task_ids",
         tag_by_id: "tags.queries.by_id",
         tag_usage: "tags.queries.usage",
         unsent_social_posts: "social.queries.unsent_social_posts",

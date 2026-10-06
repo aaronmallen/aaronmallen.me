@@ -28,8 +28,8 @@ module Tasks
       queries.linkable_tasks
       queries.list_finished_tasks queries.list_tasks queries.open_task_counts
       queries.open_tasks_in_list queries.planned_tasks queries.sprints_after queries.sprints_between
-      queries.task_by_id queries.task_comments queries.task_tag_rules queries.task_timeline
-      queries.tasks_in_progress
+      queries.synced_task_ids queries.task_by_id queries.task_comments queries.task_tag_rules
+      queries.task_timeline queries.tasks_in_progress
       queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
     ]
   end

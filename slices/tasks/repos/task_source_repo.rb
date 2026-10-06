@@ -15,6 +15,8 @@ module Tasks
 
       def see(task_id, at) = task_sources.see(task_id, at)
 
+      def synced_task_ids(ids) = task_sources.where(task_id: ids).pluck(:task_id)
+
       def unseen_task_count = unseen.count
 
       def unseen_tasks = unseen.combine(:source, :tags).newest_first.to_a

@@ -23,7 +23,7 @@ module MCP
           input_schema(API::Endpoints.const_get(name.split("::").last, false)::SCHEMA)
           scope(scope)
           define_singleton_method(:call) do |server_context:, **input|
-            hand_over(endpoint_key, input, server_context) { answered(it) }
+            hand_over(endpoint_key, input, server_context) { synced(answered(it), server_context) }
           end
         end
 
@@ -61,6 +61,10 @@ module MCP
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
         def refuse_long_range = refuse(Blog::DayWindow::TOO_LONG)
+
+        def synced(payload, server_context)
+          Untrusted.synced(payload) { dep(:synced_task_ids, server_context).call(it) }
+        end
 
         def too_long?(first, last) = Blog::DayWindow.too_long?(first, last)
       end
