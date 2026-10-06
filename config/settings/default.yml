@@ -22,6 +22,8 @@ client_registration:
   throttle_window_minutes: <%= ENV["CLIENT_REGISTRATION_THROTTLE_WINDOW_MINUTES"].to_json %>
   total_throttle_limit: <%= ENV["CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT"].to_json %>
 contact:
+  minimum_submit_seconds: <%= ENV["CONTACT_MINIMUM_SUBMIT_SECONDS"].to_json %>
+  stamp_expiry_hours: <%= ENV["CONTACT_STAMP_EXPIRY_HOURS"].to_json %>
   throttle_limit: <%= ENV["CONTACT_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["CONTACT_THROTTLE_WINDOW_MINUTES"].to_json %>
   total_throttle_limit: <%= ENV["CONTACT_TOTAL_THROTTLE_LIMIT"].to_json %>

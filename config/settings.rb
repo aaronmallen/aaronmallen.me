@@ -8,6 +8,8 @@ module Blog
     DEFAULT_ANALYTICS_THROTTLE_LIMIT = 120
     DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT = 10
     DEFAULT_CLIENT_REGISTRATION_TOTAL_THROTTLE_LIMIT = 30
+    DEFAULT_CONTACT_MINIMUM_SUBMIT_SECONDS = 3
+    DEFAULT_CONTACT_STAMP_EXPIRY_HOURS = 24
     DEFAULT_CONTACT_THROTTLE_LIMIT = 3
     DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT = 20
     DEFAULT_STORE_REGION = "us-east-1"
@@ -22,6 +24,7 @@ module Blog
     end
 
     AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
+    MinimumSubmitSeconds = Types::Coercible::Integer.constrained(gteq: 0)
     OwnerName = Types::String.constrained(format: /\S/)
     PageSize = Types::Coercible::Integer.constrained(gt: 0)
     RedisCount = Types::Coercible::Integer.constrained(gteq: 0)
@@ -37,6 +40,7 @@ module Blog
     RedisTimeout = Types::Coercible::Float.constrained(gt: 0)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
+    StampExpiryHours = Types::Coercible::Integer.constrained(gteq: 1)
     ThrottleLimit = Types::Coercible::Integer.constrained(gteq: 1)
     ThrottleWindow = Types::Coercible::Integer.constrained(gteq: 1, lt: MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES)
 
@@ -106,6 +110,8 @@ module Blog
 
     setting :contact, default: {}, constructor: throttle(
       DEFAULT_CONTACT_THROTTLE_LIMIT,
+      minimum_submit_seconds?: unless_set(MinimumSubmitSeconds, DEFAULT_CONTACT_MINIMUM_SUBMIT_SECONDS),
+      stamp_expiry_hours?: unless_set(StampExpiryHours, DEFAULT_CONTACT_STAMP_EXPIRY_HOURS),
       total_throttle_limit?: unless_set(ThrottleLimit, DEFAULT_CONTACT_TOTAL_THROTTLE_LIMIT),
     )
 

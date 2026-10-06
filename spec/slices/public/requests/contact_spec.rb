@@ -12,9 +12,9 @@ RSpec.describe "Contact", type: :request do
 
   def error(key) = i18n.t(key, scope: "ui.components.contact_field_error")
 
-  def send_from(headers) = post("/contact", { message: fields }, headers)
+  def send_from(headers) = post("/contact", { message: stamped(fields) }, headers)
 
-  def send_message(**changes) = post("/contact", message: fields.merge(changes))
+  def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
   def sent_path = "/contact?sent=1"
 
@@ -328,7 +328,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "comes back unprocessable with the page when a field fails", :aggregate_failures do
-      post "/contact", { message: fields.merge(subject: "") }, "HTTP_ACCEPT" => "application/json"
+      post "/contact", { message: stamped(fields.merge(subject: "")) }, "HTTP_ACCEPT" => "application/json"
 
       expect(last_response.status).to eq(422)
       expect(last_response.content_type).to eq("text/html; charset=utf-8")
@@ -351,6 +351,103 @@ RSpec.describe "Contact", type: :request do
       follow_redirect!
 
       expect(page).to have_no_css(".f-e")
+    end
+  end
+
+  describe "the stamp" do
+    def caught(**message)
+      post("/contact", message:)
+
+      [last_response.status, last_response.headers["location"], message_repo.messages.count]
+    end
+
+    def minimum = Hanami.app["settings"].contact[:minimum_submit_seconds]
+
+    def redated(stamp) = stamp.sub(/\A\d+/) { (it.to_i - 60_000).to_s }
+
+    def rendered_stamp = page.find("input[name='message[stamp]']", visible: :all)
+
+    def signed_since_render?(stamp) = Public::Slice["contact_stamp"].fresh?(stamp, Time.now + minimum)
+
+    it "rides the form as a hidden field" do
+      get "/contact"
+
+      expect(rendered_stamp[:type]).to eq("hidden")
+    end
+
+    it "is signed for the moment the page was drawn" do
+      get "/contact"
+
+      expect(signed_since_render?(rendered_stamp.value)).to be(true)
+    end
+
+    it "lets a send through at the minimum time", :aggregate_failures do
+      send_message(stamp: contact_stamp(age: minimum))
+
+      expect(last_response.status).to eq(302)
+      expect(stored.first).to have_attributes(**fields)
+    end
+
+    it "lets a send through just inside the expiry" do
+      send_message(stamp: contact_stamp(age: (24 * 60 * 60) - 60))
+
+      expect(stored.first).to have_attributes(**fields)
+    end
+
+    it "sets no cookie on a send it takes or one it drops", :aggregate_failures do
+      send_message
+      expect(last_response.headers["set-cookie"]).to be_nil
+
+      send_message(stamp: contact_stamp(age: 0))
+      expect(last_response.headers["set-cookie"]).to be_nil
+    end
+
+    {
+      "sent sooner than the minimum time" => -> { stamped(fields, age: 1) },
+      "sent before it was drawn" => -> { stamped(fields, age: -60) },
+      "with no stamp" => -> { fields },
+      "with an empty stamp" => -> { fields.merge(stamp: "") },
+      "with a stamp that is not one" => -> { fields.merge(stamp: "soon") },
+      "with a stamp whose time was changed" => -> { fields.merge(stamp: redated(contact_stamp)) },
+      "with a stamp signed by another key" => -> { fields.merge(stamp: "#{contact_stamp[/\A\d+/]}--#{'0' * 64}") },
+      "with a stamp past the expiry" => -> { stamped(fields, age: (24 * 60 * 60) + 1) },
+    }.each do |named, message|
+      it "stores nothing #{named}, and reads as sent" do
+        expect(caught(**instance_exec(&message))).to eq([302, sent_path, 0])
+      end
+    end
+
+    it "drops a send faster than a minimum set in the settings" do
+      change_contact_setting(:minimum_submit_seconds, to: 30)
+
+      expect(caught(**stamped(fields, age: 10))).to eq([302, sent_path, 0])
+    end
+
+    it "drops a send older than an expiry set in the settings" do
+      change_contact_setting(:stamp_expiry_hours, to: 1)
+
+      expect(caught(**stamped(fields, age: 2 * 60 * 60))).to eq([302, sent_path, 0])
+    end
+
+    it "takes a send at once when the settings turn the wait off" do
+      change_contact_setting(:minimum_submit_seconds, to: 0)
+
+      expect(caught(**stamped(fields, age: 0))).to eq([302, sent_path, 1])
+    end
+
+    describe "on a form sent back with an error" do
+      let(:sent) { contact_stamp }
+
+      before { send_message(subject: " ", stamp: sent) }
+
+      it "is drawn new rather than handed back", :aggregate_failures do
+        expect(last_response.status).to eq(422)
+        expect(rendered_stamp.value).not_to eq(sent)
+      end
+
+      it "is signed for the moment the form came back" do
+        expect(signed_since_render?(rendered_stamp.value)).to be(true)
+      end
     end
   end
 
@@ -405,8 +502,8 @@ RSpec.describe "Contact", type: :request do
 
     before do
       (limit + 1).times do |sent|
-        post "/contact", { message: fields }, "HTTP_X_FORWARDED_FOR" => "203.0.113.#{sent + 1}",
-                                              "REMOTE_ADDR" => "127.0.0.1"
+        forged = { "HTTP_X_FORWARDED_FOR" => "203.0.113.#{sent + 1}", "REMOTE_ADDR" => "127.0.0.1" }
+        post "/contact", { message: stamped(fields) }, forged
       end
     end
 
@@ -423,7 +520,9 @@ RSpec.describe "Contact", type: :request do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 
     before do
-      (limit + 1).times { |sent| post "/contact", { message: fields }, "HTTP_USER_AGENT" => "Mozilla/5.0 x#{sent}" }
+      (limit + 1).times do |sent|
+        post "/contact", { message: stamped(fields) }, "HTTP_USER_AGENT" => "Mozilla/5.0 x#{sent}"
+      end
     end
 
     it "comes back refused once the limit is reached" do
@@ -439,7 +538,7 @@ RSpec.describe "Contact", type: :request do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 
     def send_from(address)
-      post("/contact", { message: fields }, "HTTP_USER_AGENT" => "Mozilla/5.0", "REMOTE_ADDR" => address)
+      post("/contact", { message: stamped(fields) }, "HTTP_USER_AGENT" => "Mozilla/5.0", "REMOTE_ADDR" => address)
     end
 
     before do
@@ -459,7 +558,9 @@ RSpec.describe "Contact", type: :request do
     before do
       settings = Hanami.app["settings"]
       allow(settings).to receive(:contact).and_return(settings.contact.merge(total_throttle_limit: limit))
-      (limit + 1).times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") }
+      (limit + 1).times do |sent|
+        post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}")
+      end
     end
 
     it "comes back refused" do
@@ -472,7 +573,11 @@ RSpec.describe "Contact", type: :request do
   end
 
   describe "a run of submissions from many addresses with no total limit set" do
-    before { 21.times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") } }
+    before do
+      21.times do |sent|
+        post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}")
+      end
+    end
 
     it "takes twenty from all senders together and refuses the next", :aggregate_failures do
       expect(last_response.status).to eq(429)
@@ -484,7 +589,9 @@ RSpec.describe "Contact", type: :request do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 
     before do
-      (limit + 1).times { |sent| post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}") }
+      (limit + 1).times do |sent|
+        post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "2001:db8:1:2::#{sent + 1}")
+      end
     end
 
     it "comes back refused once the limit is reached" do
@@ -506,8 +613,8 @@ RSpec.describe "Contact", type: :request do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 
     before do
-      limit.times { post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:2::1") }
-      post("/contact", { message: fields }, "REMOTE_ADDR" => "2001:db8:1:3::1")
+      limit.times { post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "2001:db8:1:2::1") }
+      post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "2001:db8:1:3::1")
     end
 
     it "goes through, since the first network spent only its own allowance" do
@@ -519,8 +626,8 @@ RSpec.describe "Contact", type: :request do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 
     before do
-      limit.times { post("/contact", { message: fields }, "REMOTE_ADDR" => "203.0.113.7") }
-      post("/contact", { message: fields }, "REMOTE_ADDR" => "::ffff:203.0.113.7")
+      limit.times { post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "203.0.113.7") }
+      post("/contact", { message: stamped(fields) }, "REMOTE_ADDR" => "::ffff:203.0.113.7")
     end
 
     it "shares the IPv4 address's allowance" do
@@ -688,8 +795,8 @@ RSpec.describe "Contact", type: :request do
     end
   end
 
-  describe "a submission with nothing in it" do
-    before { post("/contact") }
+  describe "a submission with nothing in it but its stamp" do
+    before { post("/contact", message: stamped({})) }
 
     it "comes back unprocessable" do
       expect(last_response.status).to eq(422)

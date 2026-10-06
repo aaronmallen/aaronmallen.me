@@ -80,6 +80,7 @@ module Public
             input_row(:subject, ".fields.subject", ".placeholders.subject", maxlength: ::Contact::MessageLimits::MAX_SUBJECT)
             body_row
             honeypot
+            input(type: "hidden", name: field_name(ContactStamp::FIELD), value: @values[ContactStamp::FIELD])
           end
 
           def honeypot

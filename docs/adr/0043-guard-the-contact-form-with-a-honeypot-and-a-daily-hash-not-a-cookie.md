@@ -5,8 +5,8 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463"]
-tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504"]
+tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
 # ADR 0043: Guard the contact form with a honeypot and a daily hash, not a cookie
@@ -31,7 +31,7 @@ and `analytics` exports it.
 ## Decision
 
 The public slice gains no session and sets no cookie. `/contact` takes a form guarded by a same-site check, a
-honeypot and a throttle counted on a daily hash of the sender's address.
+honeypot, a signed timer (#504) and a throttle counted on a daily hash of the sender's address.
 
 **No CSRF token, and a header check in its place.** A token stops another site spending a signed-in visitor's
 privilege, and `POST /contact` has no privilege to spend. What a forged post can still do is multiply the throttle:
@@ -45,6 +45,14 @@ it `hidden`, and keeps it off the tab order, out of the accessibility tree and a
 stores nothing, and the sender reads the same confirmation a real one reads. Telling a bot why it failed teaches the
 next request how to pass. The `spam` status is what the operator marks after reading, so a catch is dropped rather
 than filed.
+
+**A signed stamp times the form.** The honeypot let 14 spam messages through in the first week, so #504 added a
+timer beside it. The contact page draws a hidden `stamp` field: the time it rendered, in milliseconds, and an HMAC of
+that time keyed by `app_secret`. `Public::ContactStamp` signs and checks it. `Messages::Create` checks it beside the
+honeypot, and a post sent sooner than `minimum_submit_seconds` (3 unless set), later than `stamp_expiry_hours` (24
+unless set), or with no stamp or a forged one, stores nothing and reads as sent, for the same reason a filled
+honeypot does. A form sent back with errors carries a new stamp. The stamp needs no cookie, no session and no script,
+and the page already sends `no-store`, so no cache hands one stamp to many readers.
 
 **The throttle counts stored messages by hash over a window.** `messages.visitor_hash` holds `HashVisitor` of the
 address alone, since a sender writes the user agent and a new one each post would make a new sender (AA-708). There
@@ -123,12 +131,16 @@ NAT. Whoever writes first spends the others' share, and they can only wait.
 
 Everyone in one IPv6 /64 shares one allowance too, which on a shared network can take in strangers.
 
-The honeypot catches a bot that fills every field. One that renders the page skips it, and the throttle is all that
-is left. The throttle stops a repeat, not an attacker: a sender with many addresses passes until the total cap
-refuses everyone, real senders included, and midnight is a fresh count whatever the window says. The header check
-stops a browser on another site's page, not a script, since a post with neither header goes through.
+The honeypot catches a bot that fills every field. One that renders the page skips it, and the timer is next: it catches
+a bot that posts the moment it loads the form or never loads it, and passes one that fetches the page and waits. One
+stamp serves any number of posts until it expires (#504). Past both, the throttle is all that is left. The throttle
+stops a repeat, not an attacker: a sender with many addresses passes until the total cap refuses everyone, real senders
+included, and midnight is a fresh count whatever the window says. The header check stops a browser on another site's
+page, not a script, since a post with neither header goes through.
 
-Only stored rows count, so a bot that fills the honeypot leaves no trace at all.
+Only stored rows count, so a bot that fills the honeypot or fails the timer leaves no trace at all. A person who
+sends within the minimum time, or from a page left open past the expiry, loses the message and is told it went
+through (#504).
 
 The lock holds the whole table, so a flood makes every sender wait its turn.
 

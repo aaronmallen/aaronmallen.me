@@ -17,7 +17,7 @@ RSpec.describe "Translations", type: :request do
     "a subject and a body over the cap" => { reply_to: "a" * 255, subject: "a" * 201, body: "a" * 5001 },
   }.each do |named, message|
     it "renders the contact form's errors for #{named} without a missing translation", :aggregate_failures do
-      post "/contact", message: message
+      post "/contact", message: stamped(message)
 
       expect(last_response.status).to eq(422)
       expect(last_response.body).not_to include("translation_missing")
@@ -26,7 +26,7 @@ RSpec.describe "Translations", type: :request do
 
   it "renders the contact throttle without a missing translation", :aggregate_failures do
     message = { reply_to: "ada@example.com", subject: "A question", body: "How?" }
-    (Hanami.app["settings"].contact[:throttle_limit] + 1).times { post "/contact", message: message }
+    (Hanami.app["settings"].contact[:throttle_limit] + 1).times { post "/contact", message: stamped(message) }
 
     expect(last_response.status).to eq(429)
     expect(last_response.body).not_to include("translation_missing")

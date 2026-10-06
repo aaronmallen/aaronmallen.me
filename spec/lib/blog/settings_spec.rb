@@ -169,4 +169,40 @@ RSpec.describe Blog::Settings do
       end
     end
   end
+
+  describe "#contact" do
+    def contact_with(**variables)
+      stub_const("ENV", ENV.to_h.merge(variables))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:contact)
+      store = Hanami::Settings::CompositeStore.new({ contact: file }, Hanami.app.config.settings_store)
+      described_class.new(store).contact
+    end
+
+    it "waits 3 seconds and keeps a stamp for 24 hours when nothing is set", :aggregate_failures do
+      contact = contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => nil, "CONTACT_STAMP_EXPIRY_HOURS" => nil)
+
+      expect(contact[:minimum_submit_seconds]).to eq(3)
+      expect(contact[:stamp_expiry_hours]).to eq(24)
+    end
+
+    it "takes the wait and the expiry from the environment", :aggregate_failures do
+      contact = contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "10", "CONTACT_STAMP_EXPIRY_HOURS" => "2")
+
+      expect(contact[:minimum_submit_seconds]).to eq(10)
+      expect(contact[:stamp_expiry_hours]).to eq(2)
+    end
+
+    it "takes a wait of nothing, which turns the wait off" do
+      expect(contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "0")[:minimum_submit_seconds]).to eq(0)
+    end
+
+    it "refuses a negative wait" do
+      expect { contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "-1") }
+        .to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+
+    it "refuses an expiry under an hour" do
+      expect { contact_with("CONTACT_STAMP_EXPIRY_HOURS" => "0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+  end
 end

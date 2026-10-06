@@ -7,9 +7,11 @@ module Public
         HONEYPOT = UI::Views::Pages::Contact::HONEYPOT
         REJECTED = 422
         SENT = Pages::Contact::SENT
+        STAMP = ContactStamp::FIELD
         THROTTLED = 429
 
         include Deps[
+          "contact_stamp",
           contact_view: "ui.views.pages.contact",
           create_message: "contact.operations.create_message",
           hash_visitor: "analytics.operations.hash_visitor",
@@ -21,7 +23,7 @@ module Public
 
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:message]]
-          return confirm(response) if baited?(params)
+          return confirm(response) if baited?(params) || !contact_stamp.fresh?(params[STAMP])
 
           case create_message.call(params, visitor_hash: visitor_hash(request))
           in Success(_) then confirm(response)
@@ -47,7 +49,7 @@ module Public
         end
 
         def values(params)
-          %i[body reply_to subject].to_h { [it, params[it].to_s] }
+          %i[body reply_to subject].to_h { [it, params[it].to_s] }.merge(STAMP => contact_stamp.issue)
         end
 
         def visitor_hash(request)

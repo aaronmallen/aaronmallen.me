@@ -8,7 +8,7 @@ RSpec.describe "Contact messages", type: :request do
 
   def crlf_lines = Array.new(Contact::MessageLimits::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
 
-  def send_message(**changes) = post("/contact", message: fields.merge(changes))
+  def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
   def stored = message_repo.by_status(Blog::Types::MessageStatus["unread"])
 
@@ -192,7 +192,7 @@ RSpec.describe "Contact messages", type: :request do
 
     def send_in_thread(address)
       Thread.new do
-        Rack::MockRequest.new(app).post("/contact", params: { message: fields }, "REMOTE_ADDR" => address)
+        Rack::MockRequest.new(app).post("/contact", params: { message: stamped(fields) }, "REMOTE_ADDR" => address)
       end
     end
 
