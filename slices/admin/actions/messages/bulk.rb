@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Messages
-      class Bulk < Action
+      class Bulk < BulkAction
         DONE = {
           Blog::Types::MessageBulkAction["delete"] => "messages_page.toasts.bulk.deleted",
           Blog::Types::MessageBulkAction["read"] => "messages_page.toasts.bulk.read",
@@ -13,7 +13,6 @@ module Admin
         INVALID = "messages_page.toasts.bulk.invalid"
         REASONS = %i[not_found].freeze
 
-        include Actions::Bulk
         include Deps[
           "settings",
           message_by_id: "contact.queries.by_id",

@@ -3,11 +3,10 @@
 module Admin
   module Actions
     module Posts
-      class Publish < Action
+      class Publish < BulkAction
         FAILED = "posts_page.toasts.publish"
         TOASTS = "post_form.toasts"
 
-        include Actions::Bulk
         include Deps[
           "settings",
           post_by_id: "posts.queries.by_id",

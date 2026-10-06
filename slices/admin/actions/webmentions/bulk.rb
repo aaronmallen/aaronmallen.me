@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Webmentions
-      class Bulk < Action
+      class Bulk < BulkAction
         DONE = {
           Blog::Types::WebmentionVerdict["approved"] => "webmentions_page.toasts.bulk.approved",
           Blog::Types::WebmentionVerdict["ignored"] => "webmentions_page.toasts.bulk.ignored",
@@ -13,7 +13,6 @@ module Admin
         INVALID = "webmentions_page.toasts.bulk.invalid"
         REASONS = %i[not_found].freeze
 
-        include Actions::Bulk
         include Deps[
           "settings",
           operation: "social.operations.act_on_webmentions",

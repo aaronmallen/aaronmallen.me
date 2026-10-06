@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Posts
-      class Bulk < Action
+      class Bulk < BulkAction
         DONE = {
           Blog::Types::PostBulkAction["delete"] => "posts_page.toasts.bulk.deleted",
           Blog::Types::PostBulkAction["tag"] => "posts_page.toasts.bulk.tagged",
@@ -12,7 +12,6 @@ module Admin
         INVALID = "posts_page.toasts.bulk.invalid"
         REASONS = %i[not_draft not_found].freeze
 
-        include Actions::Bulk
         include Deps[
           "settings",
           operation: "posts.operations.act_on_posts",

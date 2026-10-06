@@ -3,7 +3,7 @@
 module Admin
   module Actions
     module Tasks
-      class Bulk < Action
+      class Bulk < BulkAction
         DONE = {
           Blog::Types::TaskBulkAction["cancel"] => "tasks_page.toasts.bulk.canceled",
           Blog::Types::TaskBulkAction["complete"] => "tasks_page.toasts.bulk.completed",
@@ -22,7 +22,6 @@ module Admin
         }.freeze
         REASONS = %i[closed not_found].freeze
 
-        include Actions::Bulk
         include Redirect
         include Deps[
           "settings",
