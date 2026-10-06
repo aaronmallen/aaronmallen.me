@@ -8,7 +8,10 @@ module Record
         MAX_ASSIGNEES = 10
         MAX_COMMENTS = 100
         MAX_LABELS = 50
+        MAX_RELATIONS = 100
         PAGE_SIZE = 100
+
+        RELATED = "pageInfo { hasNextPage } nodes { id }"
 
         FIELDS = <<~GRAPHQL.freeze
           ... on Issue {
@@ -17,6 +20,10 @@ module Record
             assignees(first: #{MAX_ASSIGNEES}) { nodes { id } }
             comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt author { login } } }
             labels(first: #{MAX_LABELS}) { nodes { name } }
+            blockedBy(first: #{MAX_RELATIONS}) { #{RELATED} }
+            blocking(first: #{MAX_RELATIONS}) { #{RELATED} }
+            parent { id }
+            subIssues(first: #{MAX_RELATIONS}) { #{RELATED} }
           }
         GRAPHQL
 
@@ -50,6 +57,7 @@ module Record
 
       CLOSE_REASONS = { "COMPLETED" => COMPLETED, "DUPLICATE" => NOT_PLANNED, "NOT_PLANNED" => NOT_PLANNED }.freeze
       ID_BATCH_SIZE = 100
+      RELATIONS = { "blockedBy" => "blocked_by", "blocking" => "blocks", "subIssues" => "parent_of" }.freeze
       URL = %r{\Ahttps://github\.com/(?<repo>[^/]+/[^/]+)/issues/(?<number>\d+)\z}
 
       def assigned_issues
@@ -86,6 +94,7 @@ module Record
           body: node["body"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
           id: node.fetch("id"), labels: labels(node), origin:, reference: "#{origin}##{node.fetch('number')}",
           remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
+          **relations(node),
         }
       end
 
@@ -106,6 +115,17 @@ module Record
         found && transport.get("/repos/#{found[:repo]}/issues/#{found[:number]}")&.fetch("html_url", nil)
       end
 
+      def related(node, field, kind) = node.dig(field, "nodes").map { { kind:, remote_id: it.fetch("id") } }
+
+      def relations(node)
+        return Blog::Constants::EMPTY_HASH unless RELATIONS.keys.all? { whole?(node[it]) }
+
+        parent = node["parent"]
+        found = RELATIONS.flat_map { |field, kind| related(node, field, kind) }
+
+        { relations: parent ? [{ kind: "child_of", remote_id: parent.fetch("id") }, *found] : found }
+      end
+
       def remote_state(node, viewer)
         return UNASSIGNED unless node.dig("assignees", "nodes").to_a.any? { it["id"] == viewer }
         return OPEN unless node.fetch("state") == "CLOSED"
@@ -119,6 +139,8 @@ module Record
 
         { id:, moved_to: found_at, remote_state: MOVED, url: }
       end
+
+      def whole?(page) = !page.nil? && !more?(page) && page.fetch("nodes").none?(&:nil?)
     end
   end
 end

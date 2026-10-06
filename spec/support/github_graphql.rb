@@ -30,8 +30,9 @@ module GitHubGraphQL
   end
 
   def github_issue(id, number: 1, repo: "aaronmallen/aaronmallen.me", assignees: [VIEWER_ID], **fields)
-    { assignees: { nodes: assignees.map { { id: it } } }, body: "Keep them in step", comments: { nodes: [] }, id:,
-      labels: { nodes: [] }, number:, repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil,
+    { assignees: { nodes: assignees.map { { id: it } } }, blockedBy: github_related, blocking: github_related,
+      body: "Keep them in step", comments: { nodes: [] }, id:, labels: { nodes: [] }, number:, parent: nil,
+      repository: { nameWithOwner: repo }, state: "OPEN", stateReason: nil, subIssues: github_related,
       title: "Sync my issues", url: "https://github.com/#{repo}/issues/#{number}" }.merge(fields)
   end
 
@@ -70,6 +71,8 @@ module GitHubGraphQL
 
     github_json(data: { rateLimit: github_rate_limit(remaining:), repository: })
   end
+
+  def github_related(*ids, more: false) = { nodes: ids.map { it && { id: it } }, pageInfo: { hasNextPage: more } }
 
   def github_repos_page(*repositories, more: false, remaining: 4999)
     page = { pageInfo: github_page_info(more, "repos-page-2"), nodes: repositories }

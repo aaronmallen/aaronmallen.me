@@ -419,6 +419,93 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
+  describe "an issue's relations" do
+    let(:client) { Tasks::Slice["record.github.client"] }
+    let(:found) { [] }
+
+    def collect(issues) = issues.tap { found.concat(it) }
+
+    def gather(name) = allow(client).to(receive(name).and_wrap_original { |read, *args| collect(read.call(*args)) })
+
+    def handed_over(id = "I_seven")
+      gather(:assigned_issues)
+      gather(:issues)
+      described_class.new(client:).perform
+      found.find { it[:id] == id }
+    end
+
+    def lookup_with(*fields)
+      a_request(:post, GitHubGraphQL::URL).with do |request|
+        query = JSON.parse(request.body)["query"]
+        query.include?(GitHubGraphQL::ISSUES_QUERY) && fields.all? { query.include?(it) }
+      end
+    end
+
+    it "come with an assigned issue as kind and remote id from the issue's side" do
+      stub_assigned(issue(blockedBy: github_related("I_one"), blocking: github_related("I_two", "I_three"),
+                          parent: { id: "I_four" }, subIssues: github_related("I_five")))
+
+      kinds = [%w[child_of I_four], %w[blocked_by I_one], %w[blocks I_two], %w[blocks I_three], %w[parent_of I_five]]
+
+      expect(handed_over[:relations]).to eq(kinds.map { |kind, remote_id| { kind:, remote_id: } })
+    end
+
+    it "come with an issue looked up by id" do
+      tracked
+      stub_known(issue(blocking: github_related("I_two"), assignees: ["MDQ6VXNlcjE="]))
+
+      expect(handed_over[:relations]).to eq([{ kind: "blocks", remote_id: "I_two" }])
+    end
+
+    it "come as an empty list for an issue with none" do
+      stub_assigned(issue)
+
+      expect(handed_over[:relations]).to eq([])
+    end
+
+    it "are asked for without tracked issues" do
+      stub_assigned(issue)
+      sync
+
+      expect(a_request(:post, GitHubGraphQL::URL).with { it.body.include?("tracked") }).not_to have_been_made
+    end
+
+    it "are asked for in the lookup by id" do
+      tracked
+      stub_known(issue)
+      sync
+
+      expect(lookup_with("blockedBy", "blocking", "parent", "subIssues")).to have_been_made.once
+    end
+
+    it "are left out when one kind runs past a page" do
+      stub_assigned(issue(blockedBy: github_related("I_one"), subIssues: github_related("I_five", more: true)))
+
+      expect(handed_over).not_to have_key(:relations)
+    end
+
+    it "are left out when GitHub hides an issue at the other end" do
+      stub_assigned(issue(blocking: github_related("I_two", nil)))
+
+      expect(handed_over).not_to have_key(:relations)
+    end
+
+    it "are left out when GitHub sends no relations" do
+      stub_assigned(issue.except(:blockedBy))
+
+      expect(handed_over).not_to have_key(:relations)
+    end
+
+    it "leave a rate limited check reported as before", :aggregate_failures do
+      task = tracked
+      stub_github(GitHubGraphQL::ISSUES_QUERY, github_errors("RATE_LIMITED", data: { rateLimit: github_rate_limit }))
+      sync
+
+      expect(failure).to include(reason: "rate_limited")
+      expect(repo.by_id(task.id).status).to eq("open")
+    end
+  end
+
   describe "an issue closed on GitHub" do
     it "marks the task done when it closed as completed" do
       task = tracked
