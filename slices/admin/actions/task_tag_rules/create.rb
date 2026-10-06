@@ -5,6 +5,7 @@ module Admin
     module TaskTagRules
       class Create < Action
         ADDED = "task_tag_rules_page.toasts.added"
+        TYPED = UI::Views::TaskTagRules::Index::TYPED
 
         include Deps[
           index_view: "ui.views.task_tag_rules.index",
@@ -30,7 +31,7 @@ module Admin
         end
 
         def invalid(response, params, errors)
-          adding = { errors:, pattern: Blog::Types::Text[params[:pattern]], tags: Blog::Types::Text[params[:tags]] }
+          adding = { errors:, **TYPED.to_h { [it, Blog::Types::Text[params[it]]] } }
 
           response.status = 422
           response.render(index_view, adding:, editing: nil, rules: task_tag_rules.call)

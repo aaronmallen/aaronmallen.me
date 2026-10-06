@@ -6,6 +6,7 @@ module Admin
       class Update < Action
         BLANK = UI::Views::TaskTagRules::Index::BLANK
         SAVED = "task_tag_rules_page.toasts.saved"
+        TYPED = UI::Views::TaskTagRules::Index::TYPED
 
         include Deps[
           index_view: "ui.views.task_tag_rules.index",
@@ -28,7 +29,7 @@ module Admin
         private
 
         def invalid(response, id, params, errors)
-          editing = { errors:, id:, pattern: Blog::Types::Text[params[:pattern]], tags: Blog::Types::Text[params[:tags]] }
+          editing = { errors:, id:, **TYPED.to_h { [it, Blog::Types::Text[params[it]]] } }
 
           response.status = 422
           response.render(index_view, adding: BLANK, editing:, rules: task_tag_rules.call)

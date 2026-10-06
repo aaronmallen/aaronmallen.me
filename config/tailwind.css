@@ -3007,7 +3007,7 @@
 }
 
 @utility rule-fields {
-  @apply grid grid-cols-2 gap-3;
+  @apply grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-3;
 
   @media (width < 43.75rem) {
     @apply grid-cols-1;
@@ -3024,13 +3024,21 @@
     @apply flex;
   }
 
-  &:focus-visible ~ .rule-pattern {
+  &:focus-visible ~ .rule-head .rule-pattern {
     @apply underline;
   }
 }
 
+@utility rule-head {
+  @apply col-start-1 row-start-1 flex min-w-0 items-center gap-2;
+}
+
+@utility rule-provider {
+  @apply shrink-0 font-mono text-meta text-ink-muted;
+}
+
 @utility rule-pattern {
-  @apply col-start-1 row-start-1 min-w-0 cursor-pointer font-mono text-li font-semibold text-ink-muted;
+  @apply min-w-0 cursor-pointer font-mono text-li font-semibold text-ink-muted;
   @apply hover:underline;
 
   @media (width < 43.75rem) {

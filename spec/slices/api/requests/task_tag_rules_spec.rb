@@ -16,7 +16,9 @@ RSpec.describe "API task tag rules", type: :request do
 
   def list = call_api(:get, "")
 
-  def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: }).value!
+  def rule(pattern, tags, provider: nil)
+    Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, provider:, tags: }).value!
+  end
 
   def rules = Tasks::Slice["queries.task_tag_rules"].call
 
@@ -39,6 +41,14 @@ RSpec.describe "API task tag rules", type: :request do
         .to eq([[first.id, "aaronmallen/*", ["projects"]], [later.id, "aaronmallen/aaronmallen.me", %w[hanami ruby]]])
     end
 
+    it "gives each rule's provider" do
+      rule("acme/*", "work")
+      rule("acme/ENG", "work", provider: "linear")
+
+      expect(list.fetch("task_tag_rules").map { it.values_at("provider", "pattern") })
+        .to eq([%w[github acme/*], %w[linear acme/eng]])
+    end
+
     it "answers an empty list with 200" do
       expect([list, status]).to eq([{ "task_tag_rules" => [] }, 200])
     end
@@ -48,8 +58,31 @@ RSpec.describe "API task tag rules", type: :request do
     it "saves the rule and answers it with 201", :aggregate_failures do
       created = create_rule(pattern: "AaronMallen/*", tags: %w[projects ruby])
 
-      expect(created.except("id")).to eq("pattern" => "aaronmallen/*", "tags" => %w[projects ruby])
+      expect(created.except("id"))
+        .to eq("pattern" => "aaronmallen/*", "provider" => "github", "tags" => %w[projects ruby])
       expect(status).to eq(201)
+    end
+
+    it "saves a Linear rule and tags only the Linear tasks it matches", :aggregate_failures do
+      eng = sourced("x", provider: "linear", url: "https://linear.app/acme/issue/ENG-12/a-title")
+      github = sourced("acme/eng")
+      created = create_rule(pattern: "acme/ENG", provider: "linear", tags: %w[work])
+
+      expect(created.values_at("provider", "pattern")).to eq(%w[linear acme/eng])
+      expect([tag_names(eng), tag_names(github)]).to eq([%w[work], []])
+    end
+
+    it "takes a GitHub rule and a Linear rule for the same pattern" do
+      create_rule(pattern: "acme/*", provider: "github", tags: %w[work])
+      create_rule(pattern: "acme/*", provider: "linear", tags: %w[work])
+
+      expect(rules.map(&:provider)).to contain_exactly("github", "linear")
+    end
+
+    it "refuses a provider it does not know with a 422 and saves nothing", :aggregate_failures do
+      expect([create_rule(pattern: "acme/*", provider: "jira", tags: %w[work]).fetch("errors").keys, status])
+        .to eq([%w[provider], 422])
+      expect(rules).to be_empty
     end
 
     it "tags every task already imported from a repo it matches" do
@@ -97,7 +130,7 @@ RSpec.describe "API task tag rules", type: :request do
     end
 
     it "refuses a bad pattern with a 422 naming the field and saves nothing", :aggregate_failures do
-      bad = "name one repo as owner/name, or every repo of an owner as owner/*"
+      bad = "name one repo or team as owner/name, or all of an owner's as owner/*"
 
       expect([create_rule(pattern: "not a repo", tags: %w[ruby]), status])
         .to eq([{ "error" => "invalid", "message" => bad, "errors" => { "pattern" => [bad] } }, 422])
@@ -138,7 +171,17 @@ RSpec.describe "API task tag rules", type: :request do
 
     it "replaces the tags and keeps the pattern" do
       expect(update_rule(saved.id, tags: %w[ruby hanami]))
-        .to eq("id" => saved.id, "pattern" => "aaronmallen/*", "tags" => %w[hanami ruby])
+        .to eq("id" => saved.id, "pattern" => "aaronmallen/*", "provider" => "github", "tags" => %w[hanami ruby])
+    end
+
+    it "changes the provider" do
+      expect(update_rule(saved.id, provider: "linear")).to include("provider" => "linear", "pattern" => "aaronmallen/*")
+    end
+
+    it "keeps the provider when it is left out" do
+      linear = rule("acme/*", "work", provider: "linear")
+
+      expect(update_rule(linear.id, tags: %w[ruby])).to include("provider" => "linear")
     end
 
     it "changes the pattern and keeps the tags" do
@@ -193,6 +236,21 @@ RSpec.describe "API task tag rules", type: :request do
 
       expect(mcp_answer("save_task_tag_rule", pattern: "aaronmallen/*", tags: %w[projects]).except("id"))
         .to eq(created.except("id"))
+    end
+
+    it "add a Linear rule when save_task_tag_rule names the provider" do
+      expect(mcp_answer("save_task_tag_rule", pattern: "acme/ENG", provider: "linear", tags: %w[work]))
+        .to include("provider" => "linear", "pattern" => "acme/eng")
+    end
+
+    it "add a GitHub rule when save_task_tag_rule names no provider" do
+      expect(mcp_answer("save_task_tag_rule", pattern: "acme/*", tags: %w[work])).to include("provider" => "github")
+    end
+
+    it "change the provider when save_task_tag_rule edits a rule" do
+      saved = rule("acme/*", "work")
+
+      expect(mcp_answer("save_task_tag_rule", id: saved.id, provider: "linear")).to include("provider" => "linear")
     end
 
     it "tag existing tasks when save_task_tag_rule adds a rule" do

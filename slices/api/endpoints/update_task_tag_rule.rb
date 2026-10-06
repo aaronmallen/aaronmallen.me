@@ -8,6 +8,7 @@ module API
         properties: {
           id: TaskTagRules::ID,
           pattern: TaskTagRules::PATTERN,
+          provider: TaskTagRules::PROVIDER,
           tags: TaskTagRules::TAGS.merge(description: "the whole set of tags, which replaces the old one"),
         },
         required: ["id"],
@@ -32,7 +33,7 @@ module API
       def form(rule, fields)
         tags = fields.fetch(:tags) { rule.tags.map(&:name) }
 
-        { pattern: fields.fetch(:pattern, rule.pattern), tags: Wording.tag_list(tags) }
+        { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags: Wording.tag_list(tags) }
       end
 
       def saved(id, result)

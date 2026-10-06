@@ -39,7 +39,8 @@ RSpec.describe "Admin task tag rules", type: :feature do
     row.find(".rule-pattern").click
     message = dismiss_confirm { editor.click_button "Delete" }
 
-    expect(message).to eq(translate("ui.components.task_tag_rules.row.confirm_delete", pattern: "aaronmallen/*"))
+    expect(message)
+      .to eq(translate("ui.components.task_tag_rules.row.confirm_delete", pattern: "aaronmallen/*", provider: "GitHub"))
   end
 
   it "keeps the rule when I don't confirm" do

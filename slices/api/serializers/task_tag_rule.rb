@@ -3,9 +3,16 @@
 module API
   module Serializers
     class TaskTagRule < Serializer
-      SCHEMA = Schema.object({ id: Schema::INTEGER, pattern: Schema::STRING, tags: Schema::TAGS }).freeze
+      SCHEMA = Schema.object(
+        {
+          id: Schema::INTEGER,
+          pattern: Schema::STRING,
+          provider: Endpoints::TaskTagRules::PROVIDER.except(:description),
+          tags: Schema::TAGS,
+        },
+      ).freeze
 
-      attributes :id, :pattern, :tags
+      attributes :id, :pattern, :provider, :tags
 
       def tags(rule) = rule.tags.map(&:name)
     end

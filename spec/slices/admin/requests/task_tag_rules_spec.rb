@@ -4,11 +4,13 @@ RSpec.describe "Admin task tag rules", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
 
-  def add(pattern, tags) = send_to("/admin/tasks/rules", rule: { pattern:, tags: })
+  def add(pattern, tags, provider: "github") = send_to("/admin/tasks/rules", rule: { pattern:, provider:, tags: })
 
   def message(field, key) = i18n.t(["ui.components.task_tag_rules.field_error", field, key].join("."))
 
-  def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: }).value!
+  def rule(pattern, tags, provider: nil)
+    Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, provider:, tags: }).value!
+  end
 
   def rules = Tasks::Slice["queries.task_tag_rules"].call
 
@@ -17,6 +19,12 @@ RSpec.describe "Admin task tag rules", type: :request do
   def sourced(repo)
     create(:task, :external).tap do |task|
       create(:task_source, task:, provider: "github", url: "https://github.com/#{repo}/issues/1")
+    end
+  end
+
+  def sourced_from_linear(workspace, key)
+    create(:task, :external).tap do |task|
+      create(:task_source, task:, provider: "linear", url: "https://linear.app/#{workspace}/issue/#{key}/a-title")
     end
   end
 
@@ -45,6 +53,14 @@ RSpec.describe "Admin task tag rules", type: :request do
         expect(page.all(".rule-tags").map { it.all(".tag").map(&:text) }).to eq([%w[#projects], %w[#hanami #ruby]])
       end
 
+      it "shows each rule's provider" do
+        rule("acme/ENG", "work", provider: "linear")
+        get "/admin/tasks/rules"
+
+        expect(page.all(".rule-row").map { it.find(".rule-provider").text })
+          .to eq(%w[GitHub GitHub Linear])
+      end
+
       it "counts them" do
         get "/admin/tasks/rules"
 
@@ -57,6 +73,14 @@ RSpec.describe "Admin task tag rules", type: :request do
 
         expect(form.find("input[name='rule[pattern]']").value).to eq("aaronmallen/aaronmallen.me")
         expect(form.find("input[name='rule[tags]']").value).to eq("hanami, ruby")
+      end
+
+      it "fills each editor with the rule's provider" do
+        linear = rule("acme/*", "work", provider: "linear")
+        get "/admin/tasks/rules"
+        form = page.find("form[action='/admin/tasks/rules/#{linear.id}']")
+
+        expect(form.find("select[name='rule[provider]'] option[selected]").value).to eq("linear")
       end
 
       it "sits under the tasks section" do
@@ -87,6 +111,36 @@ RSpec.describe "Admin task tag rules", type: :request do
     end
 
     describe "adding a rule" do
+      it "offers GitHub or Linear, with GitHub chosen", :aggregate_failures do
+        get "/admin/tasks/rules"
+        select = page.find(".rule-capture select[name='rule[provider]']")
+
+        expect(select.all("option").map { [it.value, it.text] }).to eq([%w[github GitHub], %w[linear Linear]])
+        expect(select.find("option[selected]").value).to eq("github")
+      end
+
+      it "stores the provider it is given" do
+        add("acme/ENG", "work", provider: "linear")
+
+        expect(rules.map { [it.provider, it.pattern] }).to eq([%w[linear acme/eng]])
+      end
+
+      it "tags only the Linear tasks a Linear rule matches", :aggregate_failures do
+        eng = sourced_from_linear("acme", "ENG-12")
+        ops = sourced_from_linear("acme", "OPS-3")
+        github = sourced("acme/eng")
+        add("acme/eng", "work", provider: "linear")
+
+        expect([tag_names(eng), tag_names(ops), tag_names(github)]).to eq([%w[work], [], []])
+      end
+
+      it "holds a GitHub rule and a Linear rule for the same pattern" do
+        add("acme/*", "work")
+        add("acme/*", "work", provider: "linear")
+
+        expect(rules.map(&:provider)).to contain_exactly("github", "linear")
+      end
+
       it "stores it" do
         add("AaronMallen/*", "projects, ruby")
 
@@ -151,8 +205,9 @@ RSpec.describe "Admin task tag rules", type: :request do
       end
 
       it "keeps what was typed after a refusal", :aggregate_failures do
-        add("aaronmallen", "ruby")
+        add("aaronmallen", "ruby", provider: "linear")
 
+        expect(page).to have_css("#rule-provider option[value='linear'][selected]")
         expect(page).to have_css("#rule-pattern[value='aaronmallen']")
         expect(page).to have_css("#rule-tags[value='ruby']")
       end
@@ -166,6 +221,12 @@ RSpec.describe "Admin task tag rules", type: :request do
 
         expect([stored(existing.id).pattern, stored(existing.id).tags.map(&:name)])
           .to eq(["aaronmallen/aaronmallen.me", %w[ruby]])
+      end
+
+      it "changes the provider" do
+        send_to("/admin/tasks/rules/#{existing.id}", rule: { pattern: "acme/*", provider: "linear", tags: "ruby" })
+
+        expect(stored(existing.id).provider).to eq("linear")
       end
 
       it "says so" do

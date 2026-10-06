@@ -10,8 +10,10 @@ module Admin
           BLANK = {
             errors: Blog::Constants::EMPTY_HASH,
             pattern: Blog::Constants::EMPTY_STRING,
+            provider: Blog::Types::TaskSourceProvider["github"],
             tags: Blog::Constants::EMPTY_STRING,
           }.freeze
+          TYPED = %i[pattern provider tags].freeze
 
           def initialize(adding:, editing:, rules:)
             super()

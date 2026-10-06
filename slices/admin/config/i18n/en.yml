@@ -189,7 +189,7 @@ en:
       renamed: "Tag renamed"
   task_tag_rules_page:
     toasts:
-      added: "Rule added · tasks from its repos now carry its tags"
+      added: "Rule added · the tasks it matches now carry its tags"
       deleted: "Rule deleted · every task keeps its tags"
       saved: "Rule saved · new imports take its tags"
   tasks_page:
@@ -1337,23 +1337,27 @@ en:
       task_tag_rules:
         capture:
           add: "Add rule"
-          note: "Adding a rule also tags every task already imported from its repos."
+          note: "Adding a rule also tags every task already imported that it matches."
         field_error:
           pattern:
-            blank: "Name a repo first."
-            format: "Name one repo as owner/name, or every repo of an owner as owner/*."
+            blank: "Name a repo or team first."
+            format: "Name one repo or team as owner/name, or all of an owner's as owner/*."
             taken: "Another rule already holds that pattern."
           tags:
             blank: "Name a tag first."
             format: "A tag is lowercase words joined by hyphens."
         fields:
-          pattern: "Repo"
+          pattern: "Repo or team"
           pattern_placeholder: "aaronmallen/*"
+          provider: "Provider"
+          providers:
+            github: "GitHub"
+            linear: "Linear"
           tags: "Tags"
           tags_placeholder: "ruby, projects"
         row:
           cancel: "Cancel"
-          confirm_delete: "Delete the rule for %{pattern}? Tasks keep the tags it gave them."
+          confirm_delete: "Delete the %{provider} rule for %{pattern}? Tasks keep the tags it gave them."
           delete: "Delete"
           edit: "Edit"
           note: "Saving changes only what new imports take. Tasks already imported keep the tags they have."
@@ -2103,9 +2107,9 @@ en:
           label: "Tasks"
           note: "Deleting a rule, or taking a tag out of one, takes no tag off a task."
           sub:
-            one: "%{count} rule · each gives its repos' issues private tags on import"
-            other: "%{count} rules · each gives its repos' issues private tags on import"
-          title: "Tags by repo"
+            one: "%{count} rule · each gives the issues it matches private tags on import"
+            other: "%{count} rules · each gives the issues it matches private tags on import"
+          title: "Tags by repo or team"
       tasks:
         index:
           archive: "Archive"

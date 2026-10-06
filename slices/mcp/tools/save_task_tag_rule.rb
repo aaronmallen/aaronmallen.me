@@ -11,8 +11,9 @@ module MCP
         },
       }.freeze
 
-      description "Add a task tag rule, or edit one when you give its id. A new rule needs a pattern and tags. " \
-                  "Adding a rule also tags every task already imported from a repo it matches. Editing one " \
+      description "Add a task tag rule, or edit one when you give its id. A new rule needs a pattern and tags, and " \
+                  "is a GitHub rule unless you name Linear as its provider. A rule matches only issues from its " \
+                  "own provider. Adding a rule also tags every task already imported that it matches. Editing one " \
                   "changes only what later imports take: it tags no task already imported. On an edit, a field " \
                   "you leave out keeps what it has, and tags replace the whole set"
       input_schema(SCHEMA)

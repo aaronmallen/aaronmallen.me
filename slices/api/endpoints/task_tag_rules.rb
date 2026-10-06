@@ -9,8 +9,8 @@ module API
 
       COMPLAINTS = {
         pattern: {
-          Blog::Contract::BLANK => "name a repo first",
-          Blog::Contract::FORMAT => "name one repo as owner/name, or every repo of an owner as owner/*",
+          Blog::Contract::BLANK => "name a repo or team first",
+          Blog::Contract::FORMAT => "name one repo or team as owner/name, or all of an owner's as owner/*",
           "taken" => "another rule already holds that pattern",
         },
         tags: {
@@ -21,7 +21,17 @@ module API
 
       PATTERN = {
         type: "string",
-        description: "one repo as owner/name, or every repo of an owner as owner/*; case does not matter",
+        description: [
+          "for GitHub, one repo as owner/name or every repo of an owner as owner/*;",
+          "for Linear, one team as workspace/team or every team of a workspace as workspace/*;",
+          "case does not matter",
+        ].join(" "),
+      }.freeze
+
+      PROVIDER = {
+        type: "string",
+        enum: Blog::Types::TaskSourceProvider.values,
+        description: "where the issues the rule matches come from",
       }.freeze
 
       TAGS = {

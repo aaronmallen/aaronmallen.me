@@ -13,7 +13,7 @@ module Admin
           def view_template
             div(class: "rule-row", data: { key_row: true }) do
               input(type: "checkbox", class: "sr-only rule-toggle", id: toggle_id, checked: editing?)
-              label(class: "rule-pattern", for: toggle_id) { @rule.pattern }
+              head
               p(class: "rule-tags") { @rule.tags.each { Tag(tag: it) } }
               acts
               editor
@@ -36,7 +36,7 @@ module Admin
           def delete
             Form(
               action: path(:admin_delete_task_tag_rule, id: @rule.id),
-              data: { confirm: t(".confirm_delete", pattern: @rule.pattern) },
+              data: { confirm: t(".confirm_delete", pattern: @rule.pattern, provider:) },
             ) do
               Button(variant: :warn, type: "submit", small: true) do
                 i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
@@ -67,6 +67,15 @@ module Admin
 
           def form_id = "rule-#{@rule.id}-form"
 
+          def head
+            div(class: "rule-head") do
+              span(class: "rule-provider") { provider }
+              label(class: "rule-pattern", for: toggle_id) { @rule.pattern }
+            end
+          end
+
+          def provider = t(Fields::PROVIDERS.fetch(@rule.provider))
+
           def save
             Button(variant: :pri, type: "submit", small: true, form: form_id) do
               i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
@@ -79,9 +88,12 @@ module Admin
           def toggle_id = "rule-#{@rule.id}-edit"
 
           def values
-            return @editing.slice(:errors, :pattern, :tags) if editing?
+            return @editing.slice(:errors, :pattern, :provider, :tags) if editing?
 
-            { errors: Blog::Constants::EMPTY_HASH, pattern: @rule.pattern, tags: @rule.tags.map(&:name).join(SEPARATOR) }
+            {
+              errors: Blog::Constants::EMPTY_HASH, pattern: @rule.pattern, provider: @rule.provider,
+              tags: @rule.tags.map(&:name).join(SEPARATOR),
+            }
           end
         end
       end
