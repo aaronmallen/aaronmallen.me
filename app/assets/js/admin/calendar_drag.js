@@ -1,4 +1,5 @@
 import { parse } from "./in_place.js";
+import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
 const DAY = "a[data-calendar-day]";
@@ -21,9 +22,8 @@ export function setupCalendarDrag(calendar) {
 
   calendar.addEventListener("pointerdown", (event) => {
     const grip = event.target.closest(GRIP);
-    if (!grip || busy || !event.isPrimary || event.button !== 0) return;
+    if (!grip || busy) return;
 
-    event.preventDefault();
     drag(calendar, grip, event, async (day) => {
       busy = true;
       try {
@@ -35,44 +35,31 @@ export function setupCalendarDrag(calendar) {
   });
 }
 
-function drag(calendar, grip, start, drop) {
+function drag(calendar, grip, press, drop) {
   const row = grip.closest(ITEM);
   const from = grip.closest(PANEL).dataset.calendarPanel;
-  const ghost = floating(row, start);
-  const mine = (other) => other.pointerId === start.pointerId;
+  let ghost = null;
   let over = null;
 
-  row.classList.add(DRAGGING);
-
   const move = (moved) => {
-    if (!mine(moved)) return;
-
     ghost.style.translate = `${moved.clientX + 12}px ${moved.clientY + 12}px`;
     over?.classList.remove(TARGET, REFUSED);
     over = dayAt(calendar, moved, from);
     over?.classList.add(refused(over) ? REFUSED : TARGET);
   };
 
-  const end = (done) => {
-    if (!mine(done)) return;
-
-    document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup", end);
-    document.removeEventListener("pointercancel", end);
-    row.classList.remove(DRAGGING);
+  const end = (done, cancelled) => {
     ghost.remove();
     over?.classList.remove(TARGET, REFUSED);
 
-    const day = done.type === "pointerup" ? dayAt(calendar, done, from) : null;
+    const day = cancelled ? null : dayAt(calendar, done, from);
     if (!day) return;
     if (refused(day)) return showToast(grip.dataset.calendarPast, { failed: true });
 
     drop(day.dataset.calendarDay);
   };
 
-  document.addEventListener("pointermove", move);
-  document.addEventListener("pointerup", end);
-  document.addEventListener("pointercancel", end);
+  if (followPointer(press, { element: row, dragging: DRAGGING, move, end })) ghost = floating(row, press);
 }
 
 function dayAt(calendar, event, from) {

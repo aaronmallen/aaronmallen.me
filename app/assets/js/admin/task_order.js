@@ -1,4 +1,5 @@
 import { bind } from "./keys.js";
+import { followPointer } from "./pointer.js";
 import { showToast } from "./toast.js";
 
 const DRAGGING = "task-dragging";
@@ -30,34 +31,18 @@ function after(row) {
 }
 
 function drag(event, grip) {
-  if (!event.isPrimary || event.button !== 0) return;
-
   const row = grip.closest(ROW);
   const before = peers(row);
-  const mine = (other) => other.pointerId === event.pointerId;
 
-  event.preventDefault();
-  row.classList.add(DRAGGING);
-
-  const move = (moved) => {
-    if (mine(moved)) slot(row, moved.clientY);
-  };
-
-  const end = (done) => {
-    if (!mine(done)) return;
-
-    document.removeEventListener("pointermove", move);
-    document.removeEventListener("pointerup", end);
-    document.removeEventListener("pointercancel", end);
-    row.classList.remove(DRAGGING);
-
-    if (done.type === "pointercancel") return restore(row, before);
-    if (peers(row).indexOf(row) !== before.indexOf(row)) save(row, before);
-  };
-
-  document.addEventListener("pointermove", move);
-  document.addEventListener("pointerup", end);
-  document.addEventListener("pointercancel", end);
+  followPointer(event, {
+    element: row,
+    dragging: DRAGGING,
+    move: (moved) => slot(row, moved.clientY),
+    end: (_done, cancelled) => {
+      if (cancelled) return restore(row, before);
+      if (peers(row).indexOf(row) !== before.indexOf(row)) save(row, before);
+    },
+  });
 }
 
 function nudge(event) {

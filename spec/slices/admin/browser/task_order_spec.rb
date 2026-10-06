@@ -53,12 +53,12 @@ RSpec.describe "Admin task order", type: :feature do
     page.driver.browser.page.command("Input.dispatchTouchEvent", type:, touchPoints: point ? [point] : [])
   end
 
-  def touch_drag(title, below:)
+  def touch_drag(title, below:, finish: "touchEnd")
     start, *steps = stroke(title, below)
 
     touch("touchStart", start)
     steps.each { touch("touchMove", it) }
-    touch("touchEnd", nil)
+    touch(finish, nil)
   end
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
@@ -127,6 +127,19 @@ RSpec.describe "Admin task order", type: :feature do
       wait_for_save
 
       expect(listed).to eq(%w[second first third])
+    end
+  end
+
+  describe "a drag the browser cancels" do
+    before do
+      page.driver.resize(390, 844)
+      touch_drag("first", below: "third", finish: "touchCancel")
+    end
+
+    it "puts the row back without saving", :aggregate_failures do
+      expect(page).to have_no_css(".task-dragging")
+      expect(shown).to eq(%w[first second third])
+      expect(request_gate.count(place_path)).to eq(0)
     end
   end
 

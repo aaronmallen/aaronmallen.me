@@ -46,6 +46,18 @@ RSpec.describe "Admin calendar drag", type: :feature do
     end
   end
 
+  def touch(type, point)
+    page.driver.browser.page.command("Input.dispatchTouchEvent", type:, touchPoints: point ? [point] : [])
+  end
+
+  def touch_cancel(title, onto)
+    from = box(grip(title))
+
+    touch("touchStart", { x: from["x"], y: from["y"] })
+    stroke(from, box(onto)).each { touch("touchMove", it) }
+    touch("touchCancel", nil)
+  end
+
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   before { sign_in_to_admin }
@@ -101,6 +113,21 @@ RSpec.describe "Admin calendar drag", type: :feature do
     it "moves to the sprint on the day it lands on", :aggregate_failures do
       expect(cell(target)).to have_css(".cal-mark.sprint")
       expect(sprint_on(task)).to eq(target)
+    end
+  end
+
+  describe "a drag the browser cancels" do
+    let!(:scheduled) { create(:post, :scheduled, title: "Stay scheduled", published_at: at(day, 9)) }
+
+    before do
+      open_day(day)
+      touch_cancel("Stay scheduled", cell(target))
+    end
+
+    it "leaves the post on its day", :aggregate_failures do
+      expect(page).to have_no_css(".cal-ghost, .cal-dragging, .cal-target")
+      expect(panel).to have_text("Stay scheduled")
+      expect(stored_post(scheduled).published_at).to eq(at(day, 9))
     end
   end
 
