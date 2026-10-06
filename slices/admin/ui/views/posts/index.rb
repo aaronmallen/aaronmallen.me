@@ -97,7 +97,7 @@ module Admin
             ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do
               PublishForm(post:, filter: @filter, page: @posts.number) if post.status == DRAFT
               analytics_link(post)
-              Tags(tags: post.tags)
+              post.tags.each { Tag(tag: it) }
               mentions(post)
               StatusPill(status: post.status)
             end

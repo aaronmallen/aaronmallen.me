@@ -512,11 +512,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page.all(".task-planner .task-meta .tag").map(&:text)).to eq(%w[#admin])
       end
 
-      it "links a tag on a task it offers to that list searched by the tag" do
+      it "links a tag on a task it offers to the tag's summary" do
         create(:task, title: "Email the accountant", list: "someday", tags: %w[admin])
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(page).to have_link("#admin", href: "/admin/tasks?filter=someday&q=tag:admin")
+        expect(page).to have_link("#admin", href: "/admin/tags/admin")
       end
 
       it "offers a pull straight into today" do
@@ -1547,11 +1547,11 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".task-meta .tag.#{hue}", text: "#ruby")
       end
 
-      it "links a tag on the row to its list searched by that tag" do
+      it "links a tag on the row to the tag's summary" do
         edit(tags: "ruby")
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_link("#ruby", href: "/admin/tasks?filter=next&q=tag:ruby")
+        expect(page).to have_link("#ruby", href: "/admin/tags/ruby")
       end
 
       it "draws no type on the row" do

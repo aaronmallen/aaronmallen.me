@@ -230,6 +230,13 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page.find(".read-meta")).to have_css(".tag", text: "#queues")
       end
 
+      it "links its tags to their summaries" do
+        Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, %w[queues])
+        get "/admin/decisions/#{decision.id}"
+
+        expect(page.find(".read-meta")).to have_link("#queues", href: "/admin/tags/queues")
+      end
+
       it "answers 404 for a decision that isn't there" do
         get "/admin/decisions/999999"
 

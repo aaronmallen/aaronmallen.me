@@ -79,6 +79,13 @@ RSpec.describe "Admin inbox", type: :request do
       expect(page.all(".li .tag").map(&:text)).to contain_exactly("#feeds", "#bugs")
     end
 
+    it "links a synced issue's tags to their summaries" do
+      create(:task_source, task: create(:task, :external, tags: %w[feeds bugs]))
+      get "/admin/inbox"
+
+      expect(page.all(".li a.tag").map { it[:href] }).to contain_exactly("/admin/tags/feeds", "/admin/tags/bugs")
+    end
+
     it "leaves out a task with no source" do
       create(:task, :external, title: "Sourceless")
 

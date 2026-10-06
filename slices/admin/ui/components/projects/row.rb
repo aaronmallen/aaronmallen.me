@@ -50,7 +50,7 @@ module Admin
           def meta
             p(class: "proj-meta") do
               repo if written?(@project.repo)
-              @project.tags.each { |tag| span { tag.name } }
+              @project.tags.each { Tag(tag: it) }
               stars
               span { @project.release } if written?(@project.release)
               archived_on if @project.archived_on

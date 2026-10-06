@@ -2923,14 +2923,13 @@
     @apply flex;
   }
 
-  &:focus-visible ~ .tag-name {
-    @apply underline;
+  &:focus-visible ~ .tag-acts .tag-pen {
+    @apply outline-2 outline-offset-2 outline-accent;
   }
 }
 
 @utility tag-name {
-  @apply col-start-1 row-start-1 min-w-0 cursor-pointer font-mono text-li font-semibold text-ink-muted;
-  @apply hover:underline;
+  @apply col-start-1 row-start-1 min-w-0 font-mono text-li font-semibold text-ink-muted;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;

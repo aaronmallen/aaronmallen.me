@@ -112,10 +112,17 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css(".tag-name .tag.#{hue}", text: "#ruby")
       end
 
-      it "links no tag anywhere" do
+      it "links each tag to its summary" do
         get "/admin/tags"
 
-        expect(page).to have_no_css(".tag-row a.tag")
+        expect(page.find(".tag-row", text: "#ruby")).to have_link("#ruby", href: "/admin/tags/ruby")
+      end
+
+      it "offers an edit button that opens the tag's form" do
+        get "/admin/tags"
+        toggle = page.find(".tag-row", text: "#ruby").find(".tag-toggle", visible: :all)[:id]
+
+        expect(page).to have_css("label.btn.tag-pen[for='#{toggle}']", text: "Edit")
       end
 
       it "says what carries a tag" do

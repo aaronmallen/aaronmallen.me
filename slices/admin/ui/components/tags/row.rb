@@ -18,7 +18,7 @@ module Admin
           def view_template
             div(class: "tag-row", data: { key_row: true }) do
               input(type: "checkbox", class: "sr-only tag-toggle", id: toggle_id, checked: editing?)
-              label(class: "tag-name", for: toggle_id) { Tag(tag: @tag) }
+              p(class: "tag-name") { Tag(tag: @tag) }
               p(class: "tag-uses") { uses }
               acts
               editor

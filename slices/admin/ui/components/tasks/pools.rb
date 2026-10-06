@@ -40,10 +40,10 @@ module Admin
 
           def from_today? = @origin == FROM_TODAY
 
-          def meta(task, list)
+          def meta(task)
             p(class: "task-meta") do
               SourceLink(source: task.source)
-              task.tags.each { Tag(tag: it, href: tag_path(it, list)) }
+              task.tags.each { Tag(tag: it) }
             end
           end
 
@@ -78,7 +78,7 @@ module Admin
 
           def row(task, list)
             ListItem(title: task.title) do |item|
-              item.meta { meta(task, list) }
+              item.meta { meta(task) }
               pull_form(task, list)
             end
           end
@@ -91,8 +91,6 @@ module Admin
           end
 
           def switch = SegmentedLinks(label: t(".pull_from"), items: LISTS.keys.map { pool_link(it) })
-
-          def tag_path(tag, list) = path(:admin_tasks, filter: list, q: "tag:#{tag.name}")
         end
       end
     end

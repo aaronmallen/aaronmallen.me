@@ -110,7 +110,7 @@ module Admin
               RecordKey(kind: "task", id: @task.id)
               status
               SourceLink(source: @task.source)
-              @task.tags.each { Tag(tag: it, href: tag_path(it)) }
+              @task.tags.each { Tag(tag: it) }
             end
           end
 
@@ -131,8 +131,6 @@ module Admin
 
             Pill(color:, icon:) { t(label_key) }
           end
-
-          def tag_path(tag) = path(:admin_tasks, filter: @filter, q: "tag:#{tag.name}")
 
           def today? = @origin == FROM_TODAY
         end

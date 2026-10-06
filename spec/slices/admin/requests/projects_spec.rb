@@ -116,11 +116,18 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".proj-tagline", exact_text: "A node package manager")
       end
 
-      it "shows the repo, the tags, the stars and the release" do
+      it "shows the repo, the stars and the release" do
         project
         get "/admin/projects"
 
-        expect(meta).to eq(["aaronmallen/aube", "rust", "21", "v1.0.0"])
+        expect(meta).to eq(["aaronmallen/aube", "21", "v1.0.0"])
+      end
+
+      it "links each tag to its summary" do
+        project
+        get "/admin/projects"
+
+        expect(page.find(".proj-meta")).to have_link("#rust", href: "/admin/tags/rust", class: "tag")
       end
 
       it "names the star count once, for a screen reader" do

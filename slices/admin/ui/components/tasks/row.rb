@@ -101,9 +101,7 @@ module Admin
 
           def tab = @tab || @filter
 
-          def tag_path(tag) = path(:admin_tasks, filter: tab, q: "tag:#{tag.name}")
-
-          def tags = @task.tags.each { Tag(tag: it, href: tag_path(it)) }
+          def tags = @task.tags.each { Tag(tag: it) }
 
           def task_title
             href = path(:admin_task, id: @task.id, filter: tab, origin: @origin)

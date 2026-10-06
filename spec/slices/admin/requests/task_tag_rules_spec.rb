@@ -39,6 +39,13 @@ RSpec.describe "Admin task tag rules", type: :request do
         expect(page.all(".rule-tags").map { it.all(".tag").map(&:text) }).to eq([%w[#projects], %w[#hanami #ruby]])
       end
 
+      it "links each rule's tags to their summaries" do
+        get "/admin/tasks/rules"
+
+        expect(page.all(".rule-tags a.tag").map { it[:href] })
+          .to eq(%w[/admin/tags/projects /admin/tags/hanami /admin/tags/ruby])
+      end
+
       it "shows each rule's provider" do
         rule("acme/ENG", "work", provider: "linear")
         get "/admin/tasks/rules"

@@ -129,10 +129,10 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       expect(page.all(".read-meta .tag").map(&:text)).to contain_exactly("#site", "#admin")
     end
 
-    it "links each tag to the list it came from searched by that tag" do
+    it "links each tag to its summary" do
       read(create(:task, tags: %w[site]), filter: "someday")
 
-      expect(page).to have_link("#site", href: "/admin/tasks?filter=someday&q=tag:site")
+      expect(page).to have_link("#site", href: "/admin/tags/site")
     end
 
     it "shows the GitHub issue it came from" do

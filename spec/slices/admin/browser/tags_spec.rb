@@ -5,7 +5,7 @@ RSpec.describe "Admin tags", type: :feature do
 
   def editor = find(".tag-editor", visible: :visible)
 
-  def open_editor(name) = find(".tag-row", text: "##{name}").find(".tag-name").click
+  def open_editor(name) = find(".tag-row", text: "##{name}").find(".tag-pen").click
 
   before do
     create(:tag, name: "ruby", color: "mk-blue")
@@ -14,8 +14,14 @@ RSpec.describe "Admin tags", type: :feature do
     visit "/admin/tags"
   end
 
-  it "keeps the editor shut until the tag is clicked" do
+  it "keeps the editor shut until the edit button is clicked" do
     expect(page).to have_no_css(".tag-editor", visible: :visible)
+  end
+
+  it "opens the tag's summary from the tag" do
+    find(".tag-row .tag-name a", text: "#ruby").click
+
+    expect(page).to have_current_path("/admin/tags/ruby")
   end
 
   describe "with the editor open" do

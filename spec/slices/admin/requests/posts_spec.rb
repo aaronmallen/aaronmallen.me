@@ -336,11 +336,11 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       end
 
       it "shows each tag in the colour it carries" do
-        expect(page.all(".li-side .post-tag.sand, .li-side .post-tag.green").map(&:text)).to eq(%w[hanami ruby])
+        expect(page.all(".li-side .tag.sand, .li-side .tag.green").map(&:text)).to eq(%w[#hanami #ruby])
       end
 
-      it "links each tag to its public page" do
-        expect(page.all(".li-side a.post-tag").map { it[:href] }).to eq(%w[/writing/tags/hanami /writing/tags/ruby])
+      it "links each tag to its summary" do
+        expect(page.all(".li-side a.tag").map { it[:href] }).to eq(%w[/admin/tags/hanami /admin/tags/ruby])
       end
 
       it "draws no tag as a pill" do

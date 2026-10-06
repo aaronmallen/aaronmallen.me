@@ -204,11 +204,11 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
           .to eq(%w[#health #ruby])
       end
 
-      it "links each tag to the journal searched by that tag" do
+      it "links each tag to its summary" do
         create(:journal_entry, body: "walked", tags: %w[health])
         get "/admin/journal"
 
-        expect(page).to have_link("#health", href: "/admin/journal?q=tag:health")
+        expect(page).to have_link("#health", href: "/admin/tags/health")
       end
 
       it "shows no tag as a pill" do
