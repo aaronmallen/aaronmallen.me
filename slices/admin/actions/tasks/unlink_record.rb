@@ -8,19 +8,14 @@ module Admin
         UNLINKED = "tasks_page.toasts.record_unlinked"
 
         include Redirect
+        include RecordLinking
         include Deps[unlink_records: "links.operations.unlink_records"]
 
-        def handle(request, response)
-          params = request.params
+        def handle(request, response) = unlink(request, response)
 
-          case unlink_records.call(KIND, record_id(request), params[:other_kind], params[:other_id])
-          in Success(_)
-            toast(response, UNLINKED)
-            response.redirect_to(tasks_path(request))
-          in Failure(:not_found) then halt 404
-          else halt 500
-          end
-        end
+        private
+
+        def record_path(request, _id) = tasks_path(request)
       end
     end
   end

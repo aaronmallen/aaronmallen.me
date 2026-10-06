@@ -7,18 +7,14 @@ module Admin
         KIND = Blog::Types::RecordKind["decision"]
         UNLINKED = "decisions_page.toasts.record_unlinked"
 
-        include PageForm
+        include RecordLinking
         include Deps[unlink_records: "links.operations.unlink_records"]
 
-        def handle(request, response)
-          params = request.params
+        def handle(request, response) = unlink(request, response)
 
-          case unlink_records.call(KIND, record_id(request), params[:other_kind], params[:other_id])
-          in Success(_) then to_decision(request, response, UNLINKED)
-          in Failure(:not_found) then halt 404
-          else halt 500
-          end
-        end
+        private
+
+        def record_path(_request, id) = routes.path(:admin_decision, id:)
       end
     end
   end

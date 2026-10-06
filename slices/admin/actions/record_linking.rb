@@ -20,7 +20,7 @@ module Admin
         id = record_id(request)
 
         case link_records.call(self.class::KIND, id, Blog::Types::Fields[request.params[:record]])
-        in Success(_) then back_to_record(request, response, id, LINKED)
+        in Success(_) then back_to_record(request, response, id, self.class::LINKED)
         in Failure(:not_found) then halt 404
         in Failure[:invalid, errors] then refuse_link(request, response, id, errors)
         else halt 500
@@ -43,7 +43,7 @@ module Admin
         params = request.params
 
         case unlink_records.call(self.class::KIND, id, params[:other_kind], params[:other_id])
-        in Success(_) then back_to_record(request, response, id, UNLINKED)
+        in Success(_) then back_to_record(request, response, id, self.class::UNLINKED)
         in Failure(:not_found) then halt 404
         else halt 500
         end
