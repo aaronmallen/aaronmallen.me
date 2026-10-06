@@ -85,6 +85,16 @@ RSpec.describe "API photo upload", type: :request do
       expect(stored.keys.first).to end_with(".jpg")
     end
 
+    it "sends the store no checksum header it does not need" do
+      upload(bytes_of("small.png"))
+
+      expect(a_request(:put, store_url).with { it.headers.keys.grep(/checksum/i).empty? }).to have_been_made
+    end
+
+    it "waits 30 seconds for the store to answer" do
+      expect(Media::Slice["store.client"].instance_variable_get(:@connection).config.http_read_timeout).to eq(30)
+    end
+
     it "takes base64 broken across lines" do
       upload(data: Base64.encode64(bytes_of("small.png")))
 
@@ -156,11 +166,27 @@ RSpec.describe "API photo upload", type: :request do
     end
   end
 
-  describe "with no store" do
+  shared_examples "no store" do
     it "answers 503 with the admin's reason" do
       expect([upload(bytes_of("small.png")), status])
         .to eq([{ "error" => "unavailable", "message" => message("unavailable") }, 503])
     end
+
+    it "reaches no store" do
+      upload(bytes_of("small.png"))
+
+      expect(a_request(:any, /.*/)).not_to have_been_made
+    end
+  end
+
+  describe "with no store" do
+    it_behaves_like "no store"
+  end
+
+  describe "with an endpoint that does not parse" do
+    before { connect_media_store(endpoint: "not a url") }
+
+    it_behaves_like "no store"
   end
 
   describe "the MCP tool" do

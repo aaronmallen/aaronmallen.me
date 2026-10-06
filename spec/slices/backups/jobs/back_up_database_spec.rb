@@ -49,6 +49,17 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
       expect(a_request(:delete, /.*/)).not_to have_been_made
     end
 
+    it "signs its requests with the backup key" do
+      back_up
+
+      expect(upload.with { it.headers["Authorization"].include?("Credential=backup-access-key/") }).to have_been_made
+    end
+
+    it "waits 300 seconds for the store to answer" do
+      expect(Backups::Slice["backup_store.client"].instance_variable_get(:@connection).config.http_read_timeout)
+        .to eq(300)
+    end
+
     it "clears a failure an earlier run left" do
       sync_state_repo.record_failure(Record::Repos::SyncStateRepo::BACKUPS, :upload_failed)
       back_up
@@ -124,6 +135,21 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
       back_up
 
       expect(Sidekiq.logger).to have_received(:warn).with(described_class::NOT_CONFIGURED)
+    end
+  end
+
+  describe "with only photo store settings" do
+    before do
+      connect_media_store
+      connect_backup_store(access_key: nil, bucket: nil, endpoint: nil, secret_key: nil)
+      allow(Sidekiq.logger).to receive(:warn)
+    end
+
+    it "reaches no store and runs no dump", :aggregate_failures do
+      back_up
+
+      expect(a_request(:any, /.*/)).not_to have_been_made
+      expect(failure).to be_nil
     end
   end
 end
