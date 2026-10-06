@@ -3,6 +3,15 @@
 module API
   module Serializers
     class TimeGroup < Serializer
+      TASK = Schema.object(
+        {
+          id: Schema::INTEGER,
+          title: Schema::STRING,
+          seconds: Schema::INTEGER,
+          shared: { type: "boolean", description: "whether this task's time also counts in another group" },
+        },
+      ).freeze
+
       SCHEMA = Schema.object(
         {
           key: {
@@ -12,16 +21,7 @@ module API
           name: Schema.nullable(Schema::STRING),
           seconds: Schema::INTEGER,
           shared: { type: "boolean", description: "whether some of this time also counts in another group" },
-          tasks: Schema.list(
-            Schema.object(
-              {
-                id: Schema::INTEGER,
-                title: Schema::STRING,
-                seconds: Schema::INTEGER,
-                shared: { type: "boolean", description: "whether this task's time also counts in another group" },
-              },
-            ),
-          ),
+          tasks: Schema.list(TASK),
         },
       ).freeze
 

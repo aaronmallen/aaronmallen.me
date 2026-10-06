@@ -1034,10 +1034,10 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "reads the tags of the whole window in the same statements as one row" do
-      create(:journal_entry, entry_date: today, tags: %w[health])
-      one = statements_to_read
-      create(:journal_entry, entry_date: today - 1, tags: %w[work])
       create(:task, :done, completed_at: at(16), tags: %w[home])
+      one = statements_to_read
+      [today, today - 1].each { create(:journal_entry, entry_date: it, tags: %w[health work]) }
+      create(:task, :done, completed_at: at(15), tags: %w[errands])
 
       expect(statements_to_read).to eq(one)
     end

@@ -5,6 +5,10 @@ module API
     class Review < Serializer
       OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
       NOTE = "the note kept on the period, or null when it has none"
+      CARRIED_TASK = Schema.object(
+        { id: Schema::INTEGER, title: Schema::STRING, carried_count: Schema::INTEGER, sprint_on: Schema::DAY },
+      ).freeze
+      DONE_TASK = Schema.object({ id: Schema::INTEGER, title: Schema::STRING, worked_seconds: Schema::INTEGER }).freeze
       RECORD = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, name: Schema::STRING }).freeze
 
       SCHEMA = Schema.object(
@@ -24,22 +28,11 @@ module API
             Schema.object(
               {
                 date: Schema::DAY,
-                tasks: Schema.list(
-                  Schema.object({ id: Schema::INTEGER, title: Schema::STRING, worked_seconds: Schema::INTEGER }),
-                ),
+                tasks: Schema.list(DONE_TASK),
               },
             ),
           ),
-          carried: Schema.list(
-            Schema.object(
-              {
-                id: Schema::INTEGER,
-                title: Schema::STRING,
-                carried_count: Schema::INTEGER,
-                sprint_on: Schema::DAY,
-              },
-            ),
-          ),
+          carried: Schema.list(CARRIED_TASK),
           posts: Schema.list(RECORD),
           social_posts: Schema.list(RECORD),
           journal: Schema.object({ entries: Schema.list(RECORD), words: Schema::INTEGER, streak: Schema::INTEGER }),

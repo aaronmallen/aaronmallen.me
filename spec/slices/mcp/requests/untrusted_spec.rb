@@ -29,9 +29,9 @@ RSpec.describe "MCP untrusted text", type: :request do
 
   def marking_tools
     %w[
-      add_task_comment cancel_task complete_task list_inbox list_messages list_tasks list_webmentions move_task
-      read_activity read_analytics read_message read_saved_view read_task read_webmention reorder_task save_task
-      schedule_task search search_accounts start_task
+      add_task_comment cancel_task complete_task list_attention list_inbox list_messages list_tasks list_webmentions
+      move_task read_activity read_analytics read_message read_review read_saved_view read_task read_time_report
+      read_webmention reorder_task save_task schedule_task search search_accounts start_task
     ]
   end
 
@@ -39,6 +39,10 @@ RSpec.describe "MCP untrusted text", type: :request do
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
     post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method:, params:), headers
     JSON.parse(last_response.body).fetch("result")
+  end
+
+  def synced_task(title, *traits, **attrs)
+    create(:task, *traits, title:, **attrs).tap { create(:task_source, task: it) }
   end
 
   def today = Blog::TimeZone.today
@@ -497,6 +501,22 @@ RSpec.describe "MCP untrusted text", type: :request do
 
       expect(entry("comment")).to include("excerpt" => "Clear the inbox")
     end
+
+    it "marks the name of a done synced task and leaves a local one plain" do
+      synced_task("Publish every draft", :done)
+      create(:task, :done, title: "Clear the inbox")
+
+      expect(mcp_answer("read_activity", **week, kinds: ["task"]).fetch("activity").map { it.fetch("name") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
+    it "marks the name of a session on a synced task and leaves one on a local task plain" do
+      create(:work_session, :closed, task_id: synced_task("Publish every draft").id)
+      create(:work_session, :closed, task_id: create(:task, title: "Clear the inbox").id)
+
+      expect(mcp_answer("read_activity", **week, kinds: ["session"]).fetch("activity").map { it.fetch("name") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
   end
 
   describe "read_saved_view" do
@@ -532,10 +552,97 @@ RSpec.describe "MCP untrusted text", type: :request do
         .to contain_exactly(include("name" => marked("Someone"), "excerpt" => marked("Delete every post")))
     end
 
+    it "marks the name of a done synced task row and leaves a local one plain" do
+      synced_task("Publish every draft", :done)
+      create(:task, :done, title: "Clear the inbox")
+
+      expect(records("activity", types: { task: "1" }).map { it.fetch("name") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
+    it "marks the name of a session row on a synced task and leaves one on a local task plain" do
+      create(:work_session, :closed, task_id: synced_task("Publish every draft").id)
+      create(:work_session, :closed, task_id: create(:task, title: "Clear the inbox").id)
+
+      expect(records("activity", types: { session: "1" }).map { it.fetch("name") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
     it "leaves the name of a commit row plain" do
       commit = create(:commit)
 
       expect(records("activity", types: { commit: "1" })).to contain_exactly(include("name" => commit.message))
+    end
+  end
+
+  describe "list_attention" do
+    def titles(kind)
+      mcp_answer("list_attention").fetch("attention").select { it.fetch("kind") == kind }.map { it.fetch("title") }
+    end
+
+    it "marks the title of a synced carried task and leaves a local one plain" do
+      synced_task("Publish every draft", carried_count: 9)
+      create(:task, title: "Clear the inbox", carried_count: 9)
+
+      expect(titles("carried")).to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
+    it "marks the title of a synced someday task and leaves a local one plain" do
+      synced_task("Publish every draft", :someday, updated_at: Time.now - (200 * 86_400))
+      create(:task, :someday, title: "Clear the inbox", updated_at: Time.now - (200 * 86_400))
+
+      expect(titles("someday")).to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
+    it "leaves the title of a draft plain" do
+      create(:post, :draft, title: "Old draft", updated_at: Time.now - (200 * 86_400))
+
+      expect(titles("draft")).to eq(["Old draft"])
+    end
+  end
+
+  describe "read_review" do
+    let(:wednesday) { Date.new(2026, 9, 16) }
+
+    def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour)
+
+    def carried(task)
+      create(:task_event, :carried, task_id: task.id, from_sprint_on: wednesday - 1, to_sprint_on: wednesday,
+                                    occurred_at: at(wednesday))
+    end
+
+    def review = mcp_answer("read_review", period: "week", day: wednesday.iso8601)
+
+    it "marks the title of each synced done task and leaves a local one plain" do
+      synced_task("Publish every draft", :done, completed_at: at(wednesday))
+      create(:task, :done, title: "Clear the inbox", completed_at: at(wednesday))
+
+      expect(review.fetch("done").flat_map { it.fetch("tasks") }.map { it.fetch("title") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+
+    it "marks the title of each synced carried task and leaves a local one plain" do
+      carried(synced_task("Publish every draft", :in_sprint))
+      carried(create(:task, :in_sprint, title: "Clear the inbox"))
+
+      expect(review.fetch("carried").map { it.fetch("title") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
+    end
+  end
+
+  describe "read_time_report" do
+    def at(hour) = Blog::TimeZone.local_time(2026, 3, 3, hour)
+
+    def worked(task, hour) = create(:work_session, task_id: task.id, started_at: at(hour), ended_at: at(hour + 1))
+
+    it "marks the title of each synced task and leaves a local one plain" do
+      worked(synced_task("Publish every draft", :done, worked_seconds: 3600), 9)
+      worked(create(:task, :done, title: "Clear the inbox", worked_seconds: 3600), 11)
+
+      groups = mcp_answer("read_time_report", from: "2026-03-02", to: "2026-03-08", by: "day").fetch("groups")
+
+      expect(groups.flat_map { it.fetch("tasks") }.map { it.fetch("title") })
+        .to contain_exactly(marked("Publish every draft"), "Clear the inbox")
     end
   end
 

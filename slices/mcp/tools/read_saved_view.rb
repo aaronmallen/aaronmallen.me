@@ -15,8 +15,9 @@ module MCP
                   "Reading a Today, Next, Someday or External tasks view claims today's sprint, starting it when " \
                   "today has none yet and carrying in what the day before left open, as read_current_sprint and " \
                   "the admin's task list do. A task's note, a synced task's title, a comment's name, its excerpt " \
-                  "when its task syncs from an issue, and a webmention's name and excerpt may come from someone " \
-                  "else and come marked untrusted. #{Untrusted::WARNING}"
+                  "when its task syncs from an issue, the name of a task or session row when its task syncs " \
+                  "from an issue, and a webmention's name and excerpt may come from someone else and come " \
+                  "marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::READ
 
       class << self

@@ -4,18 +4,27 @@ module MCP
   module Tools
     module Untrusted
       ACTIVITY = { "comment" => %w[name], "webmention" => %w[name excerpt] }.freeze
-      COMMENT = Blog::Types::ActivityKind["comment"]
-      COMMENTED_TASK = ->(entry) { [entry.fetch("task_id"), "excerpt"] if entry.fetch("kind") == COMMENT }
+      ACTIVITY_TASKS = {
+        "comment" => %w[task_id excerpt], "session" => %w[task_id name], "task" => %w[source_id name],
+      }.transform_keys { Blog::Types::ActivityKind[it] }.freeze
+      ACTIVITY_TASK = ->(entry) { ACTIVITY_TASKS[entry.fetch("kind")]&.then { |id, field| [entry.fetch(id), field] } }
+      ATTENTION_TASKS = %w[carried someday].map { Blog::Types::AttentionKind[it] }.freeze
+      ATTENTION_TASK = ->(row) { [row.fetch("record_id"), "title"] if ATTENTION_TASKS.include?(row.fetch("kind")) }
       INBOX = { "message" => %w[title excerpt reply_to], "webmention" => %w[title excerpt url],
                 "task" => %w[title] }.freeze
       LOCAL = API::Serializers::TaskComment::LOCAL
       LINKED_TASK = ->(entry) { [entry.fetch("id"), "title"] if entry.fetch("kind") == RECORD_TASK }
       RECORD_TASK = Blog::Types::RecordKind["task"]
+      TITLED_TASK = ->(entry) { [entry.fetch("id"), "title"] }
       SYNCED_TITLES = {
-        API::Serializers::Activity::SCHEMA => COMMENTED_TASK,
+        API::Serializers::Activity::SCHEMA => ACTIVITY_TASK,
+        API::Serializers::Attention::SCHEMA => ATTENTION_TASK,
         API::Serializers::Link::SCHEMA => LINKED_TASK,
+        API::Serializers::Review::CARRIED_TASK => TITLED_TASK,
+        API::Serializers::Review::DONE_TASK => TITLED_TASK,
         API::Serializers::SearchHit::SCHEMA => LINKED_TASK,
-        API::Serializers::Task::LINK => ->(entry) { [entry.fetch("id"), "title"] },
+        API::Serializers::Task::LINK => TITLED_TASK,
+        API::Serializers::TimeGroup::TASK => TITLED_TASK,
       }.transform_keys { it.fetch(:properties).keys.map(&:to_s).sort }.freeze
       TASK_SHAPES = {
         API::Serializers::Task => ->(entry) { entry.fetch("source").nil? ? %w[note] : %w[note title] },

@@ -20,8 +20,9 @@ module MCP
                   "read_project for a project. A comment, session or decision event names its task or decision " \
                   "through task_id or decision_id. " \
                   "#{Blog::DayWindow::PAGING_NOTE}. A year runs to far more than one answer, so walk it a month at " \
-                  "a time, newest first. A comment's name, its excerpt when its task syncs from an issue, and a " \
-                  "webmention's name and excerpt may come from someone else and come marked untrusted. " \
+                  "a time, newest first. A comment's name, its excerpt when its task syncs from an issue, the name " \
+                  "of a task or session when its task syncs from an issue, and a webmention's name and excerpt " \
+                  "may come from someone else and come marked untrusted. " \
                   "#{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::READ
 

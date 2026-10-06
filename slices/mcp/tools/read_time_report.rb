@@ -8,7 +8,8 @@ module MCP
                   "gives its key, its name, its seconds, whether its time also counts in another group, and the " \
                   "tasks behind it with their seconds. A task in two projects or under two tags counts in both, so " \
                   "the groups can add up to more than seconds, the range's total. Tasks with no project or tag sit " \
-                  "last, with a null key and name"
+                  "last, with a null key and name. The title of each task that syncs from an issue may come from " \
+                  "an issue tracker and comes marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::READ
     end
   end
