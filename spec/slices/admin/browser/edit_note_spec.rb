@@ -79,6 +79,14 @@ RSpec.describe "Admin edit note dialog", type: :feature do
         expect(saved_body).to eq("one")
       end
 
+      it "leaves the post unsaved on a click outside and hands focus to Save", :aggregate_failures do
+        page.driver.browser.mouse.click(x: 5, y: 5)
+
+        expect(page).to have_no_css("dialog[open]")
+        expect(focused_value).to eq("save")
+        expect(saved_body).to eq("one")
+      end
+
       it "leaves the post unsaved on Escape and hands focus to Save", :aggregate_failures do
         dialog.send_keys(:escape)
 

@@ -285,6 +285,15 @@ RSpec.describe "Admin tasks", type: :feature do
         expect(still_open?).to be(true)
       end
 
+      it "keeps the task open on a click outside and hands focus back", :aggregate_failures do
+        confirm_dialog
+        page.driver.browser.mouse.click(x: 5, y: 5)
+
+        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(focused_label).to eq(cancel)
+        expect(still_open?).to be(true)
+      end
+
       it "cancels the task when I say yes", :aggregate_failures do
         confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
 

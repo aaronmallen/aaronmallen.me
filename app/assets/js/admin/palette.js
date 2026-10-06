@@ -1,4 +1,4 @@
-import { openDialog } from "./dialog.js";
+import { openDialog, showDialog } from "./dialog.js";
 import { json, setupFetch } from "./fetching.js";
 import { bind } from "./keys.js";
 import { countText, setupListbox } from "./listbox.js";
@@ -143,7 +143,7 @@ function setupDialog(dialog) {
     finder.stop();
     asked = "";
     show([]);
-    dialog.showModal();
+    showDialog(dialog);
     query.focus();
   };
 
@@ -163,10 +163,6 @@ function setupDialog(dialog) {
     search();
   });
   query.addEventListener("keydown", (event) => steer(event, { run, select, shown, step }));
-
-  dialog.addEventListener("click", (event) => {
-    if (event.target === dialog) dialog.close();
-  });
 
   dialog.addEventListener("close", finder.stop);
 

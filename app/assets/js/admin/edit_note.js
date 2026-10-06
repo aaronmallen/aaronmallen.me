@@ -1,4 +1,4 @@
-const ACCEPT = "accept";
+import { ask } from "./dialog.js";
 
 export function setupEditNotes() {
   for (const dialog of document.querySelectorAll("[data-edit-note-dialog]")) {
@@ -21,38 +21,20 @@ function setupEditNote(form, dialog) {
   dialog.querySelector("[data-edit-note-slot]").append(field);
   card.hidden = true;
 
-  dialog.querySelector("[data-edit-note-accept]").addEventListener("click", () => dialog.close(ACCEPT));
-  dialog.querySelector("[data-edit-note-decline]").addEventListener("click", () => dialog.close());
-
   form.addEventListener("submit", (event) => {
     if (confirmed || !changed()) return;
 
     event.preventDefault();
-    ask(dialog, note, event.submitter, () => {
-      confirmed = true;
-      form.requestSubmit(event.submitter);
+    ask(dialog, {
+      opener: event.submitter,
+      focus: note,
+      refocus: "decline",
+      accept: () => {
+        confirmed = true;
+        form.requestSubmit(event.submitter);
+      },
     });
   });
-}
-
-function ask(dialog, note, submitter, accept) {
-  const opener = submitter ?? document.activeElement;
-
-  dialog.returnValue = "";
-  dialog.addEventListener(
-    "close",
-    () => {
-      dialog.hidden = true;
-      if (dialog.returnValue === ACCEPT) return accept();
-
-      opener?.focus();
-    },
-    { once: true },
-  );
-
-  dialog.hidden = false;
-  dialog.showModal();
-  note.focus();
 }
 
 function lines(text) {

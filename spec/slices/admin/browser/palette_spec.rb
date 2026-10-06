@@ -654,6 +654,25 @@ RSpec.describe "Admin command palette", type: :feature do
     end
   end
 
+  describe "clicking outside" do
+    before do
+      open_palette
+      page.assert_selector("dialog#command-palette[open]")
+      page.driver.browser.mouse.click(x: 5, y: 5)
+    end
+
+    it "closes the palette" do
+      expect(page).to have_no_css("dialog#command-palette[open]")
+    end
+
+    it "opens again with the keyboard" do
+      page.assert_no_selector("dialog#command-palette[open]")
+      open_palette
+
+      expect(page).to have_css("dialog#command-palette[open]")
+    end
+  end
+
   describe "on a phone" do
     def edge(selector, side) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().#{side}")
 

@@ -1,14 +1,12 @@
 import { setupConfirms } from "./confirm.js";
-import { openDialog } from "./dialog.js";
+import { focusField, openDialog, showDialog } from "./dialog.js";
 import { plain, setupPost, setupVisit } from "./in_place.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupTaskKeys } from "./task_key.js";
 import { setupTaskOrder } from "./task_order.js";
 
 const EDIT = "[data-task-edit]";
-const FIELD = "input:not([type=hidden]), textarea, select";
 const FIND = "[data-task-find]";
-const INVALID = "[aria-invalid='true']";
 const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
 const READ = "[data-task-read]";
 
@@ -59,10 +57,7 @@ function setupPanel(panel, modal) {
     panelBody.replaceChildren(task);
     bind(task);
 
-    if (!panel.open) {
-      panel.hidden = false;
-      panel.showModal();
-    }
+    if (!panel.open) showDialog(panel);
 
     const focus = (field && task.querySelector(`[name="${field}"]`)) || panelBody;
     focus.focus({ preventScroll: true });
@@ -77,7 +72,7 @@ function setupPanel(panel, modal) {
     bind(edit);
 
     if (!modal.open) openDialog(modal.id);
-    (edit.querySelector(INVALID) ?? edit.querySelector(FIELD))?.focus();
+    focusField(edit);
   };
 
   const edit = (form) => {

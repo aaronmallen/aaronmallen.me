@@ -1,10 +1,9 @@
+import { focusField, showDialog } from "./dialog.js";
 import { load, parse, setupPost } from "./in_place.js";
 import { fillField } from "./person_field.js";
 import { setupPersonForms } from "./person_form.js";
 
-const FIELD = "input:not([type=hidden]), textarea, select";
 const FORM = "form[data-person-form]";
-const INVALID = "[aria-invalid='true']";
 const NAME = "[data-person-field='name']";
 const REPLY = "mention";
 
@@ -34,7 +33,7 @@ async function ask(dialog, href, name, resolve) {
     body.replaceChildren(next);
     setupPersonForms(body);
     next.addEventListener("submit", submit);
-    (next.querySelector(INVALID) ?? next.querySelector(FIELD))?.focus();
+    focusField(next);
   };
 
   const post = setupPost({
@@ -69,8 +68,7 @@ async function ask(dialog, href, name, resolve) {
     { once: true },
   );
 
-  dialog.hidden = false;
-  dialog.showModal();
+  showDialog(dialog);
   show(form);
   prefill(form.querySelector(NAME), name);
 }

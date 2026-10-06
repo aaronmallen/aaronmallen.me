@@ -32,7 +32,9 @@ module Admin
           def view_template
             dialog(
               id: DIALOG_ID, class: "pal-b", aria: { label: t(".label") },
-              data: { palette: true, palette_search: path(:admin_palette_search), palette_token: csrf_token },
+              data: {
+                dialog: true, palette: true, palette_search: path(:admin_palette_search), palette_token: csrf_token,
+              },
             ) do
               div(class: "pal") do
                 query_box
@@ -152,9 +154,7 @@ module Admin
             search = path(:admin_search)
 
             row_group(SEE_ALL_GROUP, t(".search")) do
-              PaletteRow(
-                id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all"), href: search, all: search,
-              )
+              PaletteRow(id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all"), href: search, all: search)
             end
           end
 

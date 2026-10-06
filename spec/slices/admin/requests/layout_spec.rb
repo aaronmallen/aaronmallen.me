@@ -81,7 +81,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "draws the confirm dialog in the dialog shell with a foot and no head", :aggregate_failures do
       shell = "dialog#confirm-dialog.dialog[role='alertdialog'][aria-labelledby='confirm-dialog-message'][hidden]"
-      expect(page).to have_css("#{shell} > .dialog-box > .dialog-foot > button[data-confirm-accept]", visible: :all)
+      expect(page).to have_css("#{shell} > .dialog-box > .dialog-foot > button[data-dialog-accept]", visible: :all)
       expect(page).to have_no_css("dialog#confirm-dialog .dialog-head", visible: :all)
     end
 
