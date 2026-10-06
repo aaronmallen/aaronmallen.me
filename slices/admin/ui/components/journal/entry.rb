@@ -83,9 +83,8 @@ module Admin
 
             div(class: "journal-links", data: { journal_links: "" }) do
               RecordLinks::Section(
-                records:, scope: "journal-entry-#{id}-record", id:, fields: { to: @date.iso8601, edit: id },
-                unlink_route: :admin_unlink_journal_entry_record, find_path: path(:admin_journal),
-                link_path: path(:admin_link_journal_entry_record, id:),
+                records:, kind: "journal_entry", id:, fields: { to: @date.iso8601, edit: id },
+                find_path: path(:admin_journal),
               )
             end
           end

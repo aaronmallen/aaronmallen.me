@@ -8,11 +8,9 @@ module Admin
           KINDS = "ui.components.record_links.kinds"
 
           prop :records, Blog::Types::Hash
-          prop :scope, Blog::Types::String
-          prop :link_path, Blog::Types::String
+          prop :kind, Blog::Types::RecordKind
           prop :find_path, Blog::Types::String
           prop :id, Blog::Types::Integer
-          prop :unlink_route, Blog::Types::Symbol
           prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :label, Blog::Types::String.optional, default: nil
 
@@ -22,7 +20,7 @@ module Admin
             Card(label: @label || t(".label"), title: t(".title"), class: "record-links") do
               links.empty? ? Hint { t(".empty") } : links.each { |kind, rows| group(kind, rows) }
               Picker(
-                scope: @scope, link_path: @link_path, find_path: @find_path, fields: @fields,
+                scope:, link_path: path(:"admin_link_#{@kind}_record", id: @id), find_path: @find_path, fields: @fields,
                 **@records.slice(:query, :found, :errors),
               )
             end
@@ -47,6 +45,8 @@ module Admin
             end
           end
 
+          def scope = "#{@kind.tr('_', '-')}-#{@id}-record"
+
           def title(link)
             return span(class: "record-link-title") { link.title } unless link.url
 
@@ -56,7 +56,7 @@ module Admin
           def unlink_form(link)
             label = t(".remove", title: link.title)
 
-            Form(action: path(@unlink_route, id: @id, other_kind: link.kind, other_id: link.id)) do
+            Form(action: path(:"admin_unlink_#{@kind}_record", id: @id, other_kind: link.kind, other_id: link.id)) do
               @fields.compact.each { |name, value| input(type: "hidden", name: name.to_s, value:) }
               Button(
                 type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",

@@ -26,8 +26,7 @@ module Admin
             id = @editor[:post].id
 
             RecordLinks::Section(
-              records: @records, scope: "post-#{id}-record", id:, unlink_route: :admin_unlink_post_record,
-              link_path: path(:admin_link_post_record, id:), find_path: path(:admin_edit_post, id:),
+              records: @records, kind: "post", id:, find_path: path(:admin_edit_post, id:),
             )
           end
         end

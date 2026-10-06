@@ -103,9 +103,8 @@ module Admin
             id = entry.id
 
             RecordLinks::Section(
-              records: @work_links[:records], scope: "work-entry-#{id}-record", id:, fields: { filter: WORK, edit: id },
-              label: t(".work_linked", org: entry.org, role: entry.role), unlink_route: :admin_unlink_work_entry_record,
-              link_path: path(:admin_link_work_entry_record, id:), find_path: path(:admin_projects),
+              records: @work_links[:records], kind: "work_entry", id:, fields: { filter: WORK, edit: id },
+              label: t(".work_linked", org: entry.org, role: entry.role), find_path: path(:admin_projects),
             )
           end
 

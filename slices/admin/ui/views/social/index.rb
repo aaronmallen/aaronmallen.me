@@ -53,8 +53,7 @@ module Admin
             id = @composer[:editing]
 
             RecordLinks::Section(
-              records: @records, scope: "social-post-#{id}-record", id:, fields: { filter: @filter, edit: id },
-              unlink_route: :admin_unlink_social_post_record, link_path: path(:admin_link_social_post_record, id:),
+              records: @records, kind: "social_post", id:, fields: { filter: @filter, edit: id },
               find_path: path(:admin_social),
             )
           end

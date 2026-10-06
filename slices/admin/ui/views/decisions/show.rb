@@ -42,8 +42,7 @@ module Admin
             id = @decision.id
 
             RecordLinks::Section(
-              records: @records, scope: "decision-#{id}-record", id:, unlink_route: :admin_unlink_decision_record,
-              link_path: path(:admin_link_decision_record, id:), find_path: path(:admin_decision, id:),
+              records: @records, kind: "decision", id:, find_path: path(:admin_decision, id:),
             )
           end
 

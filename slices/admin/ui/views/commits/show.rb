@@ -44,8 +44,7 @@ module Admin
             id = @commit.id
 
             RecordLinks::Section(
-              records: @records, scope: "commit-#{id}-record", id:, unlink_route: :admin_unlink_commit_record,
-              link_path: path(:admin_link_commit_record, id:), find_path: path(:admin_commit, id:),
+              records: @records, kind: "commit", id:, find_path: path(:admin_commit, id:),
             )
           end
 

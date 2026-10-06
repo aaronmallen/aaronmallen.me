@@ -92,9 +92,8 @@ module Admin
 
           def linked
             RecordLinks::Section(
-              records: @records, scope: "task-#{@task.id}-record", fields: { filter: @filter, origin: @origin },
-              id: @task.id, unlink_route: :admin_unlink_task_record,
-              link_path: path(:admin_link_task_record, id: @task.id), find_path: path(:admin_task, id: @task.id),
+              records: @records, kind: "task", id: @task.id, fields: { filter: @filter, origin: @origin },
+              find_path: path(:admin_task, id: @task.id),
             )
           end
 
