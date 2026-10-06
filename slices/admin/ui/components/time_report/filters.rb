@@ -55,16 +55,12 @@ module Admin
             current = @to == @today && @from == @today - (days - 1)
             href = path(:admin_time, from: (@today - (days - 1)).iso8601, to: @today.iso8601, by: @by)
 
-            a(class: ["seg-option", ("current" if current)], href:, aria: { current: ("true" if current) }) do
-              t(".preset", count: days)
-            end
+            { href:, text: t(".preset", count: days), current: }
           end
 
           def presets
             Field(label: t(".range")) do
-              div(class: "seg", role: "group", aria: { label: t(".range") }) do
-                Blog::Constants::TIME_RANGES.each { preset(it) }
-              end
+              SegmentedLinks(label: t(".range"), items: Blog::Constants::TIME_RANGES.map { preset(it) })
             end
           end
         end

@@ -23,7 +23,7 @@ function show(pool, links, panels) {
   for (const link of links) {
     const current = link.dataset.pool === pool;
     link.classList.toggle("current", current);
-    if (current) link.setAttribute("aria-current", "true");
+    if (current) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   }
 

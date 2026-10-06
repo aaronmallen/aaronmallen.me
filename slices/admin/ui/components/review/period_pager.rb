@@ -24,7 +24,7 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            nav(class: "seg", aria: { label: t(".periods") }) { PERIODS.each_key { period_link(it) } }
+            SegmentedLinks(label: t(".periods"), items: PERIODS.keys.map { period_link(it) })
             nav(class: "review-pager", aria: { label: t(steps[:label]) }) { arrows }
           end
 
@@ -49,10 +49,11 @@ module Admin
           def month? = @period == MONTH
 
           def period_link(period)
-            current = period == @period
-
-            a(class: ["seg-option", ("current" if current)], href: href(period, (@on unless @on == @today)),
-              aria: { current: ("page" if current) }) { t(PERIODS.fetch(period)) }
+            {
+              href: href(period, (@on unless @on == @today)),
+              text: t(PERIODS.fetch(period)),
+              current: period == @period,
+            }
           end
 
           def step(day, rel:, label:, icon:)

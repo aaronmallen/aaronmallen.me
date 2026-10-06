@@ -73,10 +73,7 @@ module Admin
           end
 
           def scope_link(scope)
-            current = scope == @scope
-
-            a(class: ["seg-option", ("current" if current)], href: scope_path(scope),
-              aria: { current: ("page" if current) }) { t(SCOPES.fetch(scope)) }
+            { href: scope_path(scope), text: t(SCOPES.fetch(scope)), current: scope == @scope }
           end
 
           def scope_params(scope) = @query.empty? ? { scope: } : { scope:, q: @query }
@@ -84,7 +81,7 @@ module Admin
           def scope_path(scope) = path(:admin_tags, **scope_params(scope))
 
           def switch
-            nav(class: "seg", aria: { label: t(".scope") }) { SCOPES.each_key { scope_link(it) } }
+            SegmentedLinks(label: t(".scope"), items: SCOPES.keys.map { scope_link(it) })
           end
         end
       end

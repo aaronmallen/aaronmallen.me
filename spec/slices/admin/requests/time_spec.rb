@@ -66,7 +66,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
 
       it "marks the seven day preset current" do
-        expect(page).to have_css(".seg-option.current[aria-current='true']", text: "7d")
+        expect(page).to have_css(".seg-option.current[aria-current='page']", text: "7d")
       end
 
       it "says no time was logged" do

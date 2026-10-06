@@ -498,7 +498,10 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "marks the pool on show" do
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(page).to have_css(".task-planner .seg-option.current", exact_text: "someday · 0")
+        expect(page).to have_css(
+          ".task-planner nav.seg a.seg-option.current[aria-current='page'][data-pool='someday']",
+          exact_text: "someday · 0",
+        )
       end
 
       it "shows the tags of a task it offers, and no type", :aggregate_failures do

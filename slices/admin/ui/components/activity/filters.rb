@@ -69,12 +69,7 @@ module Admin
           end
 
           def preset(days)
-            current = preset_current?(days)
-
-            a(class: ["seg-option", ("current" if current)], href: preset_path(days),
-              aria: { current: ("true" if current) }) do
-              t(".preset", count: days)
-            end
+            { href: preset_path(days), text: t(".preset", count: days), current: preset_current?(days) }
           end
 
           def preset_current?(days) = @to == @today && @from == @today - (days - 1)
@@ -87,9 +82,7 @@ module Admin
 
           def presets
             Field(label: t(".range")) do
-              div(class: "seg", role: "group", aria: { label: t(".range") }) do
-                Blog::Constants::ACTIVITY_RANGES.each { preset(it) }
-              end
+              SegmentedLinks(label: t(".range"), items: Blog::Constants::ACTIVITY_RANGES.map { preset(it) })
             end
           end
 

@@ -52,12 +52,12 @@ module Admin
           end
 
           def pool_link(list)
-            current = list == @pool
-
-            a(class: ["seg-option", ("current" if current)], href: pool_path(list),
-              aria: { current: ("true" if current) }, data: { pool: list }) do
-              t(LISTS.fetch(list), count: @counts.fetch(list))
-            end
+            {
+              href: pool_path(list),
+              text: t(LISTS.fetch(list), count: @counts.fetch(list)),
+              current: list == @pool,
+              data: { pool: list },
+            }
           end
 
           def pool_path(list)
@@ -71,8 +71,7 @@ module Admin
               input(type: "hidden", name: "origin", value: @origin)
               input(type: "hidden", name: "pool", value: list)
               Button(variant: :pri, type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
-                i(class: "fa-solid fa-arrow-turn-up", aria: { hidden: "true" })
-                span { t(".pull") }
+                IconLabel(icon: "fa-solid fa-arrow-turn-up") { t(".pull") }
               end
             end
           end
@@ -94,11 +93,7 @@ module Admin
             div(class: "task-planner-list") { waiting.each { row(it, list) } }
           end
 
-          def switch
-            div(class: "seg", role: "group", aria: { label: t(".pull_from") }) do
-              LISTS.each_key { pool_link(it) }
-            end
-          end
+          def switch = SegmentedLinks(label: t(".pull_from"), items: LISTS.keys.map { pool_link(it) })
 
           def tag_path(tag, list) = path(:admin_tasks, filter: list, q: "tag:#{tag.name}")
         end

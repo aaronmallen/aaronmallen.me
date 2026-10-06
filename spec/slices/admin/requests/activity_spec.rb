@@ -689,7 +689,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "marks 7d active by default" do
         visit_activity
 
-        expect(page).to have_css(".seg-option.current", text: "7d")
+        expect(page).to have_css("nav.seg[aria-label='Range'] a.seg-option.current[aria-current='page']", text: "7d")
       end
 
       it "marks 30d active when the dates match it" do
