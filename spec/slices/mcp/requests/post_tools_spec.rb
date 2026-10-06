@@ -96,6 +96,12 @@ RSpec.describe "MCP post tools", type: :request do
       expect(message).to eq("title is empty")
     end
 
+    it "refuses a title made only of Unicode spaces" do
+      call_tool("create_post", title: "\u2003\u3000", slug: "hello")
+
+      expect(message).to eq("title is empty")
+    end
+
     it "refuses a slug another post holds, as the admin does", :aggregate_failures do
       create(:post, slug: "hello")
       call_tool("create_post", title: "Hello")
@@ -280,6 +286,14 @@ RSpec.describe "MCP post tools", type: :request do
       expect(message).to eq("edit_note is needed when the body of a published post changes: say what changed and why")
       expect(stored(published.id).body).to eq("one")
       expect(admin_save_published(published, body: "two")).to eq(admin_error(:edit_note, "blank"))
+    end
+
+    it "refuses an edit note made only of Unicode spaces and keeps the body", :aggregate_failures do
+      published = create(:post, :published, body: "one")
+      call_tool("update_post", id: published.id, body: "two", edit_note: "\u2003\u3000")
+
+      expect(message).to eq("edit_note is needed when the body of a published post changes: say what changed and why")
+      expect(stored(published.id).body).to eq("one")
     end
 
     it "refuses an edit note over 500 characters" do

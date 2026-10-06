@@ -224,6 +224,20 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(project_repo.live).to be_empty
     end
 
+    it "refuses a name made only of Unicode spaces, and saves nothing", :aggregate_failures do
+      call_tool("save_project", name: "\u2003\u3000")
+
+      expect(message).to eq("name: add a name")
+      expect(project_repo.live).to be_empty
+    end
+
+    it "keeps a name with Unicode spaces around real words as typed" do
+      call_tool("save_project", name: "\u2003Pick a queue\u00a0")
+      call_tool("read_project", id: content.fetch("id"))
+
+      expect(content.fetch("name")).to eq("\u2003Pick a queue\u00a0")
+    end
+
     it "refuses an ID no project has" do
       call_tool("save_project", id: 999_999, name: "ghost")
 

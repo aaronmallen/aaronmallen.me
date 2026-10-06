@@ -1846,6 +1846,20 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(message).to eq("edit 1: reason needs a character that is not a space")
     end
 
+    it "names the field when an original holds nothing but Unicode spaces" do
+      post = create(:post, :draft, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "\u2003\u3000" }])
+
+      expect(message).to eq("edit 1: original needs a character that is not a space")
+    end
+
+    it "names the field when a reason holds nothing but Unicode spaces" do
+      post = create(:post, :draft, body: "teh cat sat")
+      call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, reason: "\u2003\u3000" }])
+
+      expect(message).to eq("edit 1: reason needs a character that is not a space")
+    end
+
     it "answers a blank original as a tool error, not an internal one" do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: " " }])

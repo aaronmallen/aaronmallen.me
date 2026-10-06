@@ -132,6 +132,13 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(page).to have_css(".field-error", text: error("blank"))
     end
 
+    it "refuses a name made only of Unicode spaces and says why", :aggregate_failures do
+      mint("\u2003\u3000")
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".field-error", text: error("blank"))
+    end
+
     it "refuses a name over 100 characters and keeps what I typed", :aggregate_failures do
       mint("a" * 101)
 
