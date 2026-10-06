@@ -37,9 +37,9 @@ module MCP
                   "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
                   "hand-typed tags count too. sources leaves out visits with no tag. " \
                   "devices gives views and visitors by device class, ranked by visitors: one of " \
-                  "#{Analytics::Device::CLASSES.join(', ')}, worked out from the user agent when the view came in. " \
-                  "in-app means a browser inside another app, such as Mastodon, Bluesky or Reddit, which often " \
-                  "sends no referrer. Views from before the site kept a class are left out. " \
+                  "#{Blog::Types::DeviceClass.values.join(', ')}, worked out from the user agent when the view " \
+                  "came in. in-app means a browser inside another app, such as Mastodon, Bluesky or Reddit, which " \
+                  "often sends no referrer. Views from before the site kept a class are left out. " \
                   "Totals also give reach, which counts each reader once per Chicago calendar month and adds up " \
                   "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
@@ -61,9 +61,9 @@ module MCP
                   "page's referrers and countries always give visitors. A page nobody visited reads as zeros. " \
                   "#{PublishedPost::DESCRIPTION}" \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \
-                  "#{Analytics::Scroll::DEPTHS.join(', ')}%, the views that scrolled at least that far and their " \
-                  "share of those views, null when no view tracked it. Scroll depth is kept forever, and views " \
-                  "from before the site tracked it are left out. " \
+                  "#{Blog::Types::ScrollDepth.values.select(&:positive?).join(', ')}%, the views that scrolled at " \
+                  "least that far and their share of those views, null when no view tracked it. Scroll depth is " \
+                  "kept forever, and views from before the site tracked it are left out. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
                   "view, oldest first, each named by its start with its offset; a visitor counts once an hour by " \
                   "the daily hash. Give since as an ISO 8601 time to count only views from then: hours start " \

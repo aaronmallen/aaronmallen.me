@@ -59,7 +59,7 @@ module Analytics
         {
           **referrer(visit[:referrer], base_url),
           country_code: countries.code(address),
-          source: Ref.source(visit[Contracts::VisitContract::REF]),
+          source: Blog::Types::Normalized::RefSource.call(visit[Contracts::VisitContract::REF]) { nil },
           device_class: Device.classify(user_agent),
         }
       end

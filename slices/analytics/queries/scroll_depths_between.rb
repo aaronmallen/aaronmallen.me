@@ -11,7 +11,7 @@ module Analytics
         rows = rolled + live
         views = rows.sum { it.fetch(:views) }
 
-        { views:, reached: Scroll::DEPTHS.map { reached(it, rows, views) } }
+        { views:, reached: Blog::Types::ScrollDepth.values.select(&:positive?).map { reached(it, rows, views) } }
       end
 
       private

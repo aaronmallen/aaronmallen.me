@@ -54,6 +54,7 @@ module Blog
     DecisionStatus = Types::String.enum("open", "resolved", "dropped")
     DecisionStatusParam = DecisionStatus.fallback(DecisionStatus.values.first)
     DecisionTimelineKind = Types::String.enum("comment", *DecisionEventKind.values)
+    DeviceClass = Types::String.enum("desktop", "mobile", "tablet", "in-app")
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
@@ -114,6 +115,7 @@ module Blog
     ReviewPeriod = Types::String.enum("week", "month")
     ReviewPeriodParam = ReviewPeriod.fallback(ReviewPeriod.values.first)
     SavedViewScreen = Types::String.enum("activity", "journal", "posts", "tasks")
+    ScrollDepth = Types::Integer.enum(0, 25, 50, 75, 100)
     SearchKind = Types::String.enum(
       "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
     )
@@ -195,6 +197,9 @@ module Blog
 
         Types::NetworkName.values.select { found.include?(it) }
       end
+      RefSource = Types::String.constructor { |value| value.to_s.strip.downcase }.constrained(
+        format: /\A[a-z0-9]+(?:[._-][a-z0-9]+)*\z/, max_size: 32,
+      )
       Repo = Types::Repo.constructor { |value| Normalizers::Repo[value] }
       RepoPattern = Types::RepoPattern.constructor { |value| Normalizers::Repo[value] }
       Slug = Types::String.constructor do |text|

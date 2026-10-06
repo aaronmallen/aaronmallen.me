@@ -23,7 +23,7 @@ module Analytics
         optional(:title).value(:string, max_size?: MAX_TITLE)
         optional(:referrer).value(:string)
         optional(:read_seconds).value(:integer, gteq?: 0)
-        optional(:scroll_depth).value(:integer, included_in?: Analytics::Scroll::DEPTHS)
+        optional(:scroll_depth).value(Blog::Types::ScrollDepth.constrained(gt: 0))
         optional(:link_host).value(:string, max_size?: MAX_HOST, format?: HOST)
         optional(:link_path).value(:string, max_size?: MAX_PATH, format?: LINK_PATH)
         optional(:view_token).value(:string, format?: TOKEN)

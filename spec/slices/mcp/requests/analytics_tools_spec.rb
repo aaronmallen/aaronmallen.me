@@ -518,7 +518,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     it "gives no share for a page with no view that tracked scrolling" do
       expect(read_scroll).to eq(
         "views" => 0,
-        "reached" => Analytics::Scroll::DEPTHS.map { { "depth" => it, "views" => 0, "share" => nil } },
+        "reached" => [25, 50, 75, 100].map { { "depth" => it, "views" => 0, "share" => nil } },
       )
     end
 

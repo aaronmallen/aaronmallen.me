@@ -211,6 +211,12 @@ RSpec.describe "Visits", type: :request do
       expect(stored.first.source).to eq("reddit")
     end
 
+    it "stores a ref of 32 characters" do
+      view(ref: "a" * 32)
+
+      expect(stored.first.source).to eq("a" * 32)
+    end
+
     it "stores a hand-typed ref in lower case" do
       view(ref: " Mastodon ")
 
@@ -226,7 +232,7 @@ RSpec.describe "Visits", type: :request do
     [
       ["a ref with spaces in it", "news letter"],
       ["a ref with markup", "<b>x</b>"],
-      ["a ref past #{Analytics::Ref::MAX_SOURCE} characters", "a" * (Analytics::Ref::MAX_SOURCE + 1)],
+      ["a ref past 32 characters", "a" * 33],
       ["a blank ref", "  "],
       ["a null ref", nil],
     ].each do |named, ref|

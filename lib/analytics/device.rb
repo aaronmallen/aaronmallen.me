@@ -2,12 +2,6 @@
 
 module Analytics
   module Device
-    DESKTOP = "desktop"
-    IN_APP = "in-app"
-    MOBILE = "mobile"
-    TABLET = "tablet"
-    CLASSES = [DESKTOP, MOBILE, TABLET, IN_APP].freeze
-
     APPS = Regexp.union(
       /\bFB(?:AN|AV|_IAB)\b/, /\bInstagram\b/, /\bBarcelona\b/, /\bTwitter/, /\bLinkedInApp\b/, /\bReddit\b/,
       /\bBluesky\b/, /\bMastodon\b/, /\bIvory\b/, /\bIceCubes\b/, /\bTusky\b/, /\bMona\b/, /\bGraysky\b/,
@@ -24,10 +18,10 @@ module Analytics
 
     def self.classify(user_agent)
       case user_agent.to_s
-      when APPS then IN_APP
-      when TABLETS then TABLET
-      when PHONES then MOBILE
-      else DESKTOP
+      when APPS then Blog::Types::DeviceClass["in-app"]
+      when TABLETS then Blog::Types::DeviceClass["tablet"]
+      when PHONES then Blog::Types::DeviceClass["mobile"]
+      else Blog::Types::DeviceClass["desktop"]
       end
     end
   end
