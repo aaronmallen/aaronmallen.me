@@ -357,6 +357,84 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
+  describe "an issue's relations" do
+    let(:handed) { [] }
+
+    before do
+      client = Tasks::Slice["record.linear.client"]
+      %i[assigned_issues issues].each do |name|
+        allow(client).to(receive(name).and_wrap_original { |original, *args| keep(original.call(*args)) })
+      end
+    end
+
+    def handed_relations(id = "L_one") = handed.find { it[:id] == id }&.fetch(:relations, nil)
+
+    def inverse(type, id) = { type:, issue: { id: } }
+
+    def keep(issues) = issues.tap { handed.concat(it) }
+
+    def link(type, id) = { type:, relatedIssue: { id: } }
+
+    context "with every kind upstream" do
+      before do
+        outward = linear_related(link("blocks", "L_b"), link("related", "L_r"), link("duplicate", "L_d"))
+        inward = linear_related(inverse("blocks", "L_ib"), inverse("related", "L_ir"), inverse("duplicate", "L_id"))
+        stub_assigned(issue(parent: { id: "L_parent" }, children: linear_related({ id: "L_child" }),
+                            relations: outward, inverseRelations: inward))
+      end
+
+      it "are handed over by kind and remote id from the issue's own side" do
+        sync
+
+        expect(handed_relations.map(&:values)).to contain_exactly(
+          %w[child_of L_parent], %w[parent_of L_child], %w[blocks L_b], %w[relates L_r], %w[duplicates L_d],
+          %w[blocked_by L_ib], %w[relates L_ir], %w[duplicated_by L_id],
+        )
+      end
+    end
+
+    it "leave out similar issues" do
+      stub_assigned(issue(relations: linear_related(link("similar", "L_s")),
+                          inverseRelations: linear_related(inverse("similar", "L_is"))))
+      sync
+
+      expect(handed_relations).to eq([])
+    end
+
+    it "are handed over empty for an issue with none" do
+      stub_assigned(issue)
+      sync
+
+      expect(handed_relations).to eq([])
+    end
+
+    it "reach a tracked issue Linear reports through the check by id" do
+      tracked
+      stub_known(issue(relations: linear_related(link("blocks", "L_b"))))
+      sync
+
+      expect(handed_relations).to eq([{ kind: "blocks", remote_id: "L_b" }])
+    end
+
+    %w[children relations inverseRelations].each do |field|
+      it "are left out when #{field} holds more than one page" do
+        stub_assigned(issue(field.to_sym => linear_related({ id: "L_x" }, more: true)))
+        sync
+
+        expect(handed.find { it[:id] == "L_one" }).not_to have_key(:relations)
+      end
+    end
+
+    it "are asked for 10 a page, so a page of 25 issues stays under Linear's complexity limit", :aggregate_failures do
+      stub_assigned(issue)
+      sync
+
+      %w[children relations inverseRelations].each do |field|
+        expect(linear_request("#{field}(first: 10)")).to have_been_made
+      end
+    end
+  end
+
   describe "an issue whose title is blank once cleaned" do
     it "imports with its key as the title" do
       stub_assigned(issue(title: "\u0000 \u0000"))

@@ -31,14 +31,17 @@ module LinearGraphQL
   end
 
   def linear_issue(id, key: "ABC-1", state: "unstarted", assignee: VIEWER_ID, **fields)
-    { assignee: assignee && { id: assignee }, comments: { nodes: [] }, description: "Keep them in step", id:,
-      identifier: key, labels: { nodes: [] }, state: { type: state }, title: "Sync my issues", trashed: nil,
+    { assignee: assignee && { id: assignee }, children: linear_related, comments: { nodes: [] },
+      description: "Keep them in step", id:, identifier: key, inverseRelations: linear_related, labels: { nodes: [] },
+      parent: nil, relations: linear_related, state: { type: state }, title: "Sync my issues", trashed: nil,
       url: "https://linear.app/aaronmallen/issue/#{key.downcase}/sync-my-issues" }.merge(fields)
   end
 
   def linear_issues(*nodes, viewer: VIEWER_ID) = linear_json(data: { issues: { nodes: }, viewer: { id: viewer } })
 
   def linear_json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
+
+  def linear_related(*nodes, more: false) = { nodes:, pageInfo: { hasNextPage: more } }
 
   def linear_request(query, key: nil, **variables)
     a_request(:post, URL).with do |request|

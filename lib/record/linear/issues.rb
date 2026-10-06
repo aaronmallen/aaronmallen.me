@@ -7,12 +7,18 @@ module Record
         CLOSED_TYPES = '["completed", "canceled"]'
         MAX_COMMENTS = 100
         MAX_LABELS = 50
+        MAX_RELATIONS = 10
         PAGE_SIZE = 25
+        RELATED = "pageInfo { hasNextPage } nodes"
 
         FIELDS = <<~GRAPHQL.freeze
           id identifier url title description trashed state { type } assignee { id }
           comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt user { displayName } } }
           labels(first: #{MAX_LABELS}) { nodes { name } }
+          parent { id }
+          children(first: #{MAX_RELATIONS}) { #{RELATED} { id } }
+          relations(first: #{MAX_RELATIONS}) { #{RELATED} { type relatedIssue { id } } }
+          inverseRelations(first: #{MAX_RELATIONS}) { #{RELATED} { type issue { id } } }
         GRAPHQL
 
         ASSIGNED = <<~GRAPHQL.freeze
@@ -51,6 +57,9 @@ module Record
       UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
 
       ID_BATCH_SIZE = 25
+      INVERSE_KINDS = { "blocks" => "blocked_by", "duplicate" => "duplicated_by", "related" => "relates" }.freeze
+      KINDS = { "blocks" => "blocks", "duplicate" => "duplicates", "related" => "relates" }.freeze
+      RELATIONS = %w[children relations inverseRelations].freeze
       STATE_TYPES = {
         "backlog" => OPEN, "canceled" => NOT_PLANNED, "completed" => COMPLETED, "started" => STARTED,
         "triage" => OPEN, "unstarted" => OPEN,
@@ -96,7 +105,7 @@ module Record
         {
           body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
           id: node.fetch("id"), key:, labels: labels(node), origin: origin(url, key), reference: key,
-          remote_state: remote_state(node, viewer), title: node.fetch("title"), url:,
+          remote_state: remote_state(node, viewer), title: node.fetch("title"), url:, **relations(node),
         }
       end
 
@@ -114,6 +123,26 @@ module Record
         team = key[/\A[^-]+(?=-\d+\z)/]
 
         "#{workspace}/#{team}" if workspace && team
+      end
+
+      def related(node, field, side, kinds)
+        node.dig(field, "nodes").to_a.compact.filter_map do |relation|
+          kind = kinds[relation["type"]]
+          remote_id = relation.dig(side, "id")
+
+          { kind:, remote_id: } if kind && remote_id
+        end
+      end
+
+      def relations(node)
+        return {} unless RELATIONS.all? { node[it] && !more?(node[it]) }
+
+        parent = node.dig("parent", "id")
+        children = node.dig("children", "nodes").to_a.compact.map { { kind: "parent_of", remote_id: it.fetch("id") } }
+
+        { relations: [*([{ kind: "child_of", remote_id: parent }] if parent), *children,
+                      *related(node, "relations", "relatedIssue", KINDS),
+                      *related(node, "inverseRelations", "issue", INVERSE_KINDS)] }
       end
 
       def remote_state(node, viewer)
