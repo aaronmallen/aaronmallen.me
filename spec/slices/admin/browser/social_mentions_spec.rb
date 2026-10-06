@@ -17,7 +17,7 @@ RSpec.describe "Admin social mentions", type: :feature do
 
   def names = all("[data-social-mention]").map { it.find(".compose-mention-name").text }
 
-  def preview(network) = find("[data-social-preview-line='#{network}'] [data-social-preview-text]").text
+  def preview(network) = "[data-social-preview-line='#{network}'] [data-social-preview-text]"
 
   def type(*keys, index: 0) = body(index).send_keys(*keys)
 
@@ -42,13 +42,13 @@ RSpec.describe "Admin social mentions", type: :feature do
       it "offers everyone on @" do
         type "@"
 
-        expect(names).to eq(["Ada Lovelace", "Grace Hopper", "Alan Kay"])
+        expect { names }.to eventually(eq(["Ada Lovelace", "Grace Hopper", "Alan Kay"]))
       end
 
       it "groups people by the networks they are on" do
         type "@"
 
-        expect(groups).to eq(["mastodon and bluesky", "mastodon only", "bluesky only"])
+        expect { groups }.to eventually(eq(["mastodon and bluesky", "mastodon only", "bluesky only"]))
       end
 
       it "shows each person's handles" do
@@ -131,13 +131,13 @@ RSpec.describe "Admin social mentions", type: :feature do
       it "inserts the token on Enter" do
         type "hi @gr", :enter
 
-        expect(body.value).to eq("hi @{grace-hopper} ")
+        expect(body).to match_selector(:field, with: "hi @{grace-hopper} ")
       end
 
       it "inserts the token on Tab" do
         type "hi @", :down, :tab
 
-        expect(body.value).to eq("hi @{grace-hopper} ")
+        expect(body).to match_selector(:field, with: "hi @{grace-hopper} ")
       end
 
       it "keeps the focus in the text box after a choice" do
@@ -150,19 +150,19 @@ RSpec.describe "Admin social mentions", type: :feature do
         type "hi @gr", :escape
 
         expect(page).to have_no_css("[data-social-mentions]", visible: :visible)
-        expect(body.value).to eq("hi @gr")
+        expect(body).to match_selector(:field, with: "hi @gr")
       end
 
       it "leaves Enter alone once the list is shut" do
         type "@gr", :escape, :enter
 
-        expect(body.value).to eq("@gr\n")
+        expect(body).to match_selector(:field, with: "@gr\n")
       end
 
       it "replaces only the word at the caret" do
         type "@ad", :enter, "and @kay", :enter
 
-        expect(body.value).to eq("@{ada-lovelace} and @{alan-kay} ")
+        expect(body).to match_selector(:field, with: "@{ada-lovelace} and @{alan-kay} ")
       end
     end
 
@@ -171,7 +171,7 @@ RSpec.describe "Admin social mentions", type: :feature do
         type "@"
         find(".compose-mention", text: "Alan Kay").click
 
-        expect(body.value).to eq("@{alan-kay} ")
+        expect(body).to match_selector(:field, with: "@{alan-kay} ")
       end
 
       it "inserts the person tapped on a phone", :aggregate_failures do
@@ -180,7 +180,7 @@ RSpec.describe "Admin social mentions", type: :feature do
 
         expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
         find(".compose-mention", text: "Grace Hopper").click
-        expect(body.value).to eq("@{grace-hopper} ")
+        expect(body).to match_selector(:field, with: "@{grace-hopper} ")
       end
 
       it "fits the list inside a phone's width", :aggregate_failures do
@@ -218,14 +218,14 @@ RSpec.describe "Admin social mentions", type: :feature do
       it "shows each network's text with its handle in place", :aggregate_failures do
         type "hi @ad", :enter
 
-        expect(preview("mastodon")).to match(/\Ahi @person\d+@ruby\.social\z/)
-        expect(preview("bluesky")).to match(/\Ahi @person-\d+\.bsky\.social\z/)
+        expect(page).to have_css(preview("mastodon"), text: /\Ahi @person\d+@ruby\.social\z/)
+        expect(page).to have_css(preview("bluesky"), text: /\Ahi @person-\d+\.bsky\.social\z/)
       end
 
       it "shows a plain name where the person has no handle" do
         type "hi @kay", :enter
 
-        expect(preview("mastodon")).to eq("hi Alan Kay")
+        expect(page).to have_css(preview("mastodon"), exact_text: "hi Alan Kay")
       end
 
       it "drops the line of a network turned off" do
@@ -306,7 +306,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       type "hi @zed", :enter
 
       expect(dialog).to have_css("form[data-person-form='new']")
-      expect(body.value).to eq("hi @zed")
+      expect(body).to match_selector(:field, with: "hi @zed")
     end
 
     it "opens the dialog on Tab" do
@@ -320,7 +320,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       find("[data-social-mention-add]").click
 
       expect(dialog).to have_field("person[name]")
-      expect(body.value).to eq("hi @")
+      expect(body).to match_selector(:field, with: "hi @")
     end
 
     it "fills the name from what follows the @" do
@@ -365,7 +365,7 @@ RSpec.describe "Admin social mentions", type: :feature do
 
       expect(dialog).to have_css("#person-handles-error")
       expect(dialog).to have_field("person[name]", with: "zed")
-      expect(body.value).to eq("hi @zed")
+      expect(body).to match_selector(:field, with: "hi @zed")
     end
 
     describe "a good save" do
@@ -392,12 +392,12 @@ RSpec.describe "Admin social mentions", type: :feature do
       it "adds them to the list without a reload" do
         type "@"
 
-        expect(names).to eq(["Grace Hopper", "Zed Shaw"])
+        expect { names }.to eventually(eq(["Grace Hopper", "Zed Shaw"]))
       end
 
       it "previews their handle for each network", :aggregate_failures do
-        expect(preview("mastodon")).to eq("hi @zed@ruby.social")
-        expect(preview("bluesky")).to eq("hi Zed Shaw")
+        expect(page).to have_css(preview("mastodon"), exact_text: "hi @zed@ruby.social")
+        expect(page).to have_css(preview("bluesky"), exact_text: "hi Zed Shaw")
       end
     end
 
@@ -406,7 +406,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       dialog.find("[data-dialog-close]").click
 
       expect(page).to have_no_css("dialog#person-dialog[open]")
-      expect(body.value).to eq("hi @zed")
+      expect(body).to match_selector(:field, with: "hi @zed")
     end
 
     it "keeps the post text after Escape", :aggregate_failures do
@@ -414,7 +414,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       dialog.find_field("person[name]").send_keys(:escape)
 
       expect(page).to have_no_css("dialog#person-dialog[open]")
-      expect(body.value).to eq("hi @zed")
+      expect(body).to match_selector(:field, with: "hi @zed")
     end
   end
 end

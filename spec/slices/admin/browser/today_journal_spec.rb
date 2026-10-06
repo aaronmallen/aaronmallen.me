@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin today journal card", type: :feature do
-  let(:today) { Blog::TimeZone.today }
   let(:save_button) { find_button("Save entry", disabled: :all) }
   let(:words) { "#today-journal-entry [data-journal-words]" }
 

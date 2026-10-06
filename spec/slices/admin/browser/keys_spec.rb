@@ -150,7 +150,7 @@ RSpec.describe "Admin keys", type: :feature do
   end
 
   describe "x" do
-    let(:sprint) { create(:sprint, sprint_date: Blog::TimeZone.today) }
+    let(:sprint) { create(:sprint, sprint_date: today) }
 
     def done = Admin::Slice["i18n"].t("ui.components.tasks.controls.complete")
 
@@ -183,7 +183,7 @@ RSpec.describe "Admin keys", type: :feature do
 
     describe "under a planned sprint on Today" do
       before do
-        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        sprint = create(:sprint, sprint_date: today)
         create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
         visit "/admin"
         press("j", "j")
@@ -215,7 +215,7 @@ RSpec.describe "Admin keys", type: :feature do
     def help = find_by_id("key-help")
 
     before do
-      sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+      sprint = create(:sprint, sprint_date: today)
       create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
       create(:task, :in_sprint, sprint_id: sprint.id, title: "Write the brief")
       visit "/admin/tasks?filter=today"

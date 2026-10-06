@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin calendar drag", type: :feature do
-  let(:today) { Blog::TimeZone.today }
   let(:day) { (today + 2).month == today.month ? today + 1 : Date.new(today.year, today.month).next_month }
   let(:target) { day + 1 }
 

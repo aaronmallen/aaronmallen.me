@@ -189,7 +189,7 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "dates it" do
-      expect(page).to have_css(".pal-r .pal-r-sub", text: Blog::TimeZone.today.strftime("%b %-d, %Y"))
+      expect(page).to have_css(".pal-r .pal-r-sub", text: today.strftime("%b %-d, %Y"))
     end
   end
 

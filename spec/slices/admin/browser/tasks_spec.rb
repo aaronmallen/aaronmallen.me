@@ -176,7 +176,7 @@ RSpec.describe "Admin tasks", type: :feature do
       create_task("Ship the screen", list: "today")
 
       expect(page).to have_css(".task-title", text: "Ship the screen")
-      expect(repo.in_sprint(sprint_repo.on(Blog::TimeZone.today).id).map(&:title)).to eq(["Ship the screen"])
+      expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Ship the screen"])
     end
 
     it "drops the planner once the sprint holds a task" do
@@ -343,7 +343,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "moving an in-progress task out of today" do
     let(:message) { translate("ui.components.tasks.controls.confirm_move", task: "Ship the screen", list: "Next") }
-    let(:sprint) { sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today) }
+    let(:sprint) { sprint_repo.on(today) || create(:sprint, sprint_date: today) }
     let(:task) { repo.all_open.find { it.title == "Ship the screen" } }
 
     def row(title) = find(".task-title", exact_text: title).ancestor(".task")
@@ -409,7 +409,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "dropping a sprint" do
     before do
-      create(:sprint, sprint_date: Blog::TimeZone.today + 2)
+      create(:sprint, sprint_date: today + 2)
       visit "/admin/tasks?filter=upcoming"
     end
 
@@ -607,7 +607,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   describe "opening a task from Today" do
     before do
-      sprint = sprint_repo.on(Blog::TimeZone.today) || create(:sprint, sprint_date: Blog::TimeZone.today)
+      sprint = sprint_repo.on(today) || create(:sprint, sprint_date: today)
       create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship it")
       visit "/admin"
       open_task("Ship it")
@@ -626,8 +626,6 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "creating a task from Today" do
-    let(:today) { Blog::TimeZone.today }
-
     before do
       visit "/admin"
       click_link("Create Task")

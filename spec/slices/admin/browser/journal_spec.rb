@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin journal", type: :feature do
-  let(:today) { Blog::TimeZone.today }
   let(:save_button) { find_button("Save entry", disabled: :all) }
 
   def bottom(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().bottom")

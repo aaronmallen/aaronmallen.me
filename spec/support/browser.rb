@@ -104,7 +104,25 @@ module Spec
         path: Blog::SessionCookie::PATH,
       )
     end
+
+    def today = @today ||= Blog::TimeZone.today
   end
+end
+
+RSpec::Matchers.define :eventually do |expected|
+  supports_block_expectations
+
+  match do |reader|
+    Capybara.current_session.document.synchronize do
+      expected.matches?(reader.call) or raise Capybara::ExpectationNotMet
+    end
+  rescue Capybara::ExpectationNotMet
+    false
+  end
+
+  failure_message { expected.failure_message }
+
+  description { "eventually #{expected.description}" }
 end
 
 Capybara.app = Spec::Browser::RequestGate.new(Capybara.app)
@@ -129,6 +147,8 @@ RSpec.configure do |config|
   end
 
   config.include Spec::Browser, :browser
+
+  config.before(:each, :browser) { today }
 
   config.after(:each, :browser) { request_gate.reset }
 end

@@ -17,8 +17,10 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def at(hour, minute) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, minute)
+
   def calendars
-    { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{Blog::TimeZone.today.iso8601}" }
+    { "calendar" => "/admin/calendar", "calendar day" => "/admin/calendar?day=#{today.iso8601}" }
   end
 
   def composers
@@ -211,7 +213,6 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def seed_analytics
-    today = Blog::TimeZone.today
     create(:analytics_rollup, day: today, views: 300, visitors: 210, read_seconds: 9_000)
     create(:analytics_rollup_path, day: today, path: "/writing/a-very-long-slug-for-a-post", views: 120)
     create(:analytics_rollup_referrer, day: today, host: "news.ycombinator.com", views: 60)
@@ -219,13 +220,12 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def seed_calendar
-    today = Blog::TimeZone.today
     sprint = create(:sprint, sprint_date: today)
     create(:task, :in_sprint, sprint_id: sprint.id, title: "Plan the week ahead on the calendar screen")
     create(:task, :in_sprint, sprint_id: sprint.id, carried_count: 4, title: "A task that keeps slipping to tomorrow")
     create(:post, :published, title: "A post published today with a title too long to fit its cell",
-                              published_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 30))
-    create(:social_post, :posted, posted_at: Blog::TimeZone.local_time(today.year, today.month, today.day, 0, 45))
+                              published_at: at(0, 30))
+    create(:social_post, :posted, posted_at: at(0, 45))
   end
 
   def seed_links

@@ -195,8 +195,8 @@ RSpec.describe "Admin task order", type: :feature do
 
   describe "a sprint" do
     before do
-      soon = create(:sprint, sprint_date: Blog::TimeZone.today + 1)
-      later = create(:sprint, sprint_date: Blog::TimeZone.today + 2)
+      soon = create(:sprint, sprint_date: today + 1)
+      later = create(:sprint, sprint_date: today + 2)
       create(:task, :in_sprint, sprint_id: soon.id, title: "soon one", position: 1)
       create(:task, :in_sprint, sprint_id: soon.id, title: "soon two", position: 2)
       create(:task, :in_sprint, sprint_id: later.id, title: "later one", position: 3)
@@ -205,11 +205,13 @@ RSpec.describe "Admin task order", type: :feature do
 
     def sprint_titles(title) = find(".card", text: title).all(".task-title").map(&:text)
 
+    def sprints = [sprint_titles("soon two"), sprint_titles("later one")]
+
     it "keeps a dropped task in its own sprint", :aggregate_failures do
       drag("soon one", below: "later one")
       wait_for_save(title: "soon one")
 
-      expect([sprint_titles("soon two"), sprint_titles("later one")]).to eq([["soon two", "soon one"], ["later one"]])
+      expect { sprints }.to eventually(eq([["soon two", "soon one"], ["later one"]]))
       expect(repo.all_open.find { it.title == "soon one" }.sprint_id)
         .to eq(repo.all_open.find { it.title == "soon two" }.sprint_id)
     end

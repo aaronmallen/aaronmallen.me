@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin activity filters", type: :feature do
-  let(:today) { Blog::TimeZone.today }
-
   def at(hour) = Blog::TimeZone.local_time(today.year, today.month, today.day, hour, 0)
 
   before do

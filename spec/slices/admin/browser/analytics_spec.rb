@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin analytics chart", type: :feature do
   let(:peak) { page.all(".chart-bar")[5] }
-  let(:today) { Blog::TimeZone.today }
 
   def tips = page.all(".chart-tip", visible: :visible).map(&:text)
 
