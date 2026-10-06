@@ -24,9 +24,10 @@ module Admin
           private
 
           def dismiss
-            Button(variant: :gh, small: true, aria: { label: t(".close") }, data: { dialog_close: true }) do
-              i(class: "fa-solid fa-xmark", aria: { hidden: "true" })
-            end
+            Button(
+              variant: :gh, small: true, aria: { label: t(".close") }, data: { dialog_close: true },
+              icon: "fa-solid fa-xmark",
+            )
           end
 
           def head

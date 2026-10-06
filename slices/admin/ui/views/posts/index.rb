@@ -52,9 +52,10 @@ module Admin
           def analytics_link(post)
             label = t(".analytics", title: post.title)
 
-            a(class: "btn sm", href: path(:admin_post_analytics, id: post.id), title: label, aria: { label: }) do
-              i(class: "fa-solid fa-chart-simple", aria: { hidden: "true" })
-            end
+            Button(
+              href: path(:admin_post_analytics, id: post.id), title: label, aria: { label: }, small: true,
+              icon: "fa-solid fa-chart-simple",
+            )
           end
 
           def count(status) = @counts.fetch(status, 0)

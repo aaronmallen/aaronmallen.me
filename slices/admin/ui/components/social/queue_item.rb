@@ -43,7 +43,7 @@ module Admin
           def deliveries = @deliveries ||= @social_post.deliveries.to_h { [it.network, it] }
 
           def edit_link
-            a(class: "btn sm", href: edit_path, data: { social_edit: "", key_open: true }) { t(".edit") }
+            Button(href: edit_path, data: { social_edit: "", key_open: true }, small: true) { t(".edit") }
           end
 
           def edit_path = path(:admin_social, filter: @filter, edit: @social_post.id)

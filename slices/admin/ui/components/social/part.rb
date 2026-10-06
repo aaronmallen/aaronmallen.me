@@ -55,11 +55,9 @@ module Admin
 
           def remove_button
             Button(
-              variant: :gh, small: true, hidden: !@removable, aria: { label: t(".remove") },
+              variant: :gh, small: true, hidden: !@removable, icon: "fa-solid fa-xmark", aria: { label: t(".remove") },
               data: { social_remove: "" },
-            ) do
-              i(class: "fa-solid fa-xmark", aria: { hidden: "true" })
-            end
+            )
           end
         end
       end

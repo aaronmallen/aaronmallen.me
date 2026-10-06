@@ -91,9 +91,10 @@ module Admin
 
           Form(action: comment_route(:delete, comment), data:) do
             @fields&.call
-            Button(type: "submit", variant: :gh, small: true, title: label, aria: { label: }) do
-              i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-            end
+            Button(
+              type: "submit", variant: :gh, small: true, title: label, aria: { label: },
+              icon: "fa-regular fa-trash-can",
+            )
           end
         end
 

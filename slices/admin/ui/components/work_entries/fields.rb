@@ -22,9 +22,10 @@ module Admin
           private
 
           def add_button
-            Button(variant: :pri, type: "submit", disabled: !ready?, data: { work_add: "" }) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".add") }
+            Button(
+              variant: :pri, type: "submit", disabled: !ready?, data: { work_add: "" }, icon: "fa-solid fa-plus",
+            ) do
+              t(".add")
             end
           end
 

@@ -31,9 +31,10 @@ module Admin
           def day = l(@commit.commit_date, format: :medium)
 
           def github_link
-            a(class: "btn gh", href: github_url, target: "_blank", rel: "noopener noreferrer") do
-              i(class: "fa-brands fa-github", aria: { hidden: "true" })
-              plain t(".github")
+            Button(
+              href: github_url, target: "_blank", rel: "noopener noreferrer", variant: :gh, icon: "fa-brands fa-github",
+            ) do
+              t(".github")
             end
           end
 

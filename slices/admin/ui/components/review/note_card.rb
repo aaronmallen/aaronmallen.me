@@ -58,10 +58,7 @@ module Admin
           end
 
           def save_button
-            Button(variant: :pri, type: "submit") do
-              i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
-              span { t(@saved ? ".update" : ".save") }
-            end
+            Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@saved ? ".update" : ".save") }
           end
         end
       end

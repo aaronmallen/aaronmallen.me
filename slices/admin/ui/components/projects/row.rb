@@ -40,18 +40,12 @@ module Admin
           def change(route, label_key, icon, variant)
             Form(action: path(route, id: @project.id)) do
               input(type: "hidden", name: "filter", value: @filter)
-              Button(type: "submit", variant:, small: true) do
-                i(class: icon, aria: { hidden: "true" })
-                span { t(label_key) }
-              end
+              Button(type: "submit", variant:, small: true, icon:) { t(label_key) }
             end
           end
 
           def edit
-            a(class: "btn sm", href: path(:admin_edit_project, id: @project.id)) do
-              i(class: EDIT_ICON, aria: { hidden: "true" })
-              span { t(".edit") }
-            end
+            Button(href: path(:admin_edit_project, id: @project.id), small: true, icon: EDIT_ICON) { t(".edit") }
           end
 
           def featured

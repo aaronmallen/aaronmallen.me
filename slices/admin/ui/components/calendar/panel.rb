@@ -64,9 +64,10 @@ module Admin
           def grip(title)
             label = t(".drag", title:)
 
-            Button(small: true, class: "cal-grip", hidden: true, title: label, aria: { label: }, data: grip_data) do
-              i(class: "fa-solid fa-grip-vertical", aria: { hidden: "true" })
-            end
+            Button(
+              small: true, class: "cal-grip", hidden: true, title: label, aria: { label: }, data: grip_data,
+              icon: "fa-solid fa-grip-vertical",
+            )
           end
 
           def grip_data

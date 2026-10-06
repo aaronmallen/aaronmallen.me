@@ -29,10 +29,7 @@ module Admin
 
         def activity_link
           div(class: "commits-foot") do
-            a(class: "btn gh sm", href: activity_path) do
-              i(class: "fa-solid fa-timeline", aria: { hidden: "true" })
-              span { t(".activity") }
-            end
+            Button(href: activity_path, variant: :gh, small: true, icon: "fa-solid fa-timeline") { t(".activity") }
           end
         end
 
@@ -44,8 +41,7 @@ module Admin
 
         def button_label(state, icon, text, hidden: false)
           span(class: "btn-label", data: { "commits_#{state}": "" }, hidden:) do
-            i(class: icon, aria: { hidden: "true" })
-            span { text }
+            IconLabel(icon:) { text }
           end
         end
 

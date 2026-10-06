@@ -25,9 +25,10 @@ module Admin
             label = t(".publish", title: @post.title)
             aria = { label:, keyshortcuts: KEY }
 
-            Button(type: "submit", small: true, title: label, aria:, data: { key: KEY, key_label: t(".key") }) do
-              i(class: "fa-solid fa-arrow-up-right-from-square", aria: { hidden: "true" })
-            end
+            Button(
+              type: "submit", small: true, title: label, aria:, data: { key: KEY, key_label: t(".key") },
+              icon: "fa-solid fa-arrow-up-right-from-square",
+            )
           end
         end
       end

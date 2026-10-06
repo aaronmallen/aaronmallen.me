@@ -47,9 +47,11 @@ module Admin
           def foot
             div(class: "task-form-foot") do
               yield if block_given?
-              Button(variant: :pri, type: "submit", small: true) do
-                i(class: @task ? "fa-regular fa-floppy-disk" : "fa-solid fa-plus", aria: { hidden: "true" })
-                span { t(@task ? ".update" : ".save") }
+              Button(
+                variant: :pri, type: "submit", small: true,
+                icon: @task ? "fa-regular fa-floppy-disk" : "fa-solid fa-plus",
+              ) do
+                t(@task ? ".update" : ".save")
               end
             end
           end

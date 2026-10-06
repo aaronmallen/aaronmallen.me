@@ -28,9 +28,10 @@ module Admin
 
             Form(action: route(:admin_delete_task_session), data:) do
               return_fields
-              Button(type: "submit", variant: :gh, small: true, title: label, aria: { label: }) do
-                i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-              end
+              Button(
+                type: "submit", variant: :gh, small: true, title: label, aria: { label: },
+                icon: "fa-regular fa-trash-can",
+              )
             end
           end
 

@@ -25,10 +25,7 @@ module Admin
           private
 
           def act(value, icon, label, variant)
-            Button(type: "submit", variant:, small: true, name: ACT, value:) do
-              i(class: icon, aria: { hidden: "true" })
-              span { t(label) }
-            end
+            Button(type: "submit", variant:, small: true, name: ACT, value:, icon:) { t(label) }
           end
 
           def fields = { status: @filter, **Blog::Page.query(@page) }

@@ -27,9 +27,8 @@ module Admin
 
           def foot
             div(class: "sprint-foot") do
-              a(class: "btn gh", href: path(:admin_tasks)) do
-                i(class: "fa-solid fa-list-check", aria: { hidden: "true" })
-                span { t(open.empty? ? ".pull" : ".all_tasks") }
+              Button(href: path(:admin_tasks), variant: :gh, icon: "fa-solid fa-list-check") do
+                t(open.empty? ? ".pull" : ".all_tasks")
               end
             end
           end

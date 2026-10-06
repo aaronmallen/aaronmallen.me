@@ -11,7 +11,7 @@ module Admin
         def view_template(&)
           details(class: "saved-view-menu") do
             summary(class: ["btn", "sm", ("gh" if @quiet)], title: (@label if @quiet)) do
-              i(class: @icon, aria: { hidden: "true" })
+              Icon(@icon)
               span(class: ("sr-only" if @quiet)) { @label }
             end
             div(class: "saved-view-panel", &)

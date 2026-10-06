@@ -11,10 +11,7 @@ module Admin
           prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
-            a(class: "btn gh sm editor-back", href: path(:admin_people)) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".all_people") }
-            end
+            BackLink(href: path(:admin_people), variant: :gh, small: true, class: "editor-back") { t(".all_people") }
 
             PageHead(title: @person ? @person.name : t(".new_person"), sub: t(".sub"))
             Card { render Form.new(person: @person, values: @values, errors: @errors, searchable: @searchable) }

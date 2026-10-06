@@ -28,7 +28,7 @@ module Admin
 
           def head
             span(class: "wm-count") { t(".pending", count: @count) }
-            a(class: "btn pri sm", href: review_path) { t(".review") }
+            Button(href: review_path, variant: :pri, small: true) { t(".review") }
           end
 
           def review_path = path(:admin_webmentions, status: PENDING)

@@ -143,9 +143,9 @@ module Admin
 
             Form(action: path(:admin_unlink_task, id: @task.id, other_id: link.task.id)) do
               return_fields
-              Button(type: "submit", variant: :gh, small: true, title: label, aria: { label: }) do
-                i(class: "fa-solid fa-xmark", aria: { hidden: "true" })
-              end
+              Button(
+                type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",
+              )
             end
           end
         end

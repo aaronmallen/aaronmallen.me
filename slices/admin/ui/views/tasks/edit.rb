@@ -35,10 +35,7 @@ module Admin
           private
 
           def back
-            a(class: "btn", href: task_path) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".back") }
-            end
+            BackLink(href: task_path) { t(".back") }
           end
 
           def delete_form
@@ -53,11 +50,13 @@ module Admin
           def delete_id = "task-#{@task.id}-delete"
 
           def foot
-            Button(variant: :warn, type: "submit", small: true, form: delete_id, class: "task-form-delete") do
-              i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-              span { t(".delete") }
+            Button(
+              variant: :warn, type: "submit", small: true, form: delete_id, class: "task-form-delete",
+              icon: "fa-regular fa-trash-can",
+            ) do
+              t(".delete")
             end
-            a(class: "btn sm gh", href: task_path, data: { task_close: true }) { t(".cancel") }
+            Button(href: task_path, data: { task_close: true }, small: true, variant: :gh) { t(".cancel") }
           end
 
           def key = PREFIX + @task.id.to_s

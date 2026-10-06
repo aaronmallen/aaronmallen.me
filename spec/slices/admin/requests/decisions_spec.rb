@@ -122,6 +122,15 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page).to have_css("form[action='/admin/decisions'] textarea[name='decision[problem]']")
       end
 
+      it "links back to the list with a hidden arrow before the label", :aggregate_failures do
+        get "/admin/decisions/new"
+        back = page.find("a.btn[href='/admin/decisions']", text: "All decisions")
+
+        expect(back).to have_css("i.fa-solid.fa-arrow-left[aria-hidden='true']:first-child", visible: :all)
+        expect(back[:type]).to be_nil
+        expect(back[:disabled]).to be_nil
+      end
+
       it "saves it and goes to its page", :aggregate_failures do
         send_to("/admin/decisions", decision: { title: "Pick a host", problem: "The Pi is slow" })
         opened = Decisions::Slice["relations.decisions"].to_a.last

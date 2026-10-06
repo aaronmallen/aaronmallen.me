@@ -14,10 +14,7 @@ module Admin
 
           def view_template
             PageHead(title: t(".heading")) do
-              a(class: "btn", href: path(:admin_decisions)) do
-                i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-                span { t(".back") }
-              end
+              BackLink(href: path(:admin_decisions)) { t(".back") }
             end
 
             Editor(**@editor)

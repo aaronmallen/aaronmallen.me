@@ -35,10 +35,7 @@ module Admin
           private
 
           def back
-            a(class: "btn", href: path(:admin_tasks, filter: Blog::Types::TaskTab["external"])) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".back") }
-            end
+            BackLink(href: path(:admin_tasks, filter: Blog::Types::TaskTab["external"])) { t(".back") }
           end
 
           def rows

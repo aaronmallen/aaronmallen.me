@@ -91,9 +91,10 @@ module Admin
           end
 
           def links_link
-            a(class: "btn sm", href: path(:admin_journal, to: @date.iso8601, edit: @entry.id)) do
-              i(class: "fa-solid fa-link", aria: { hidden: "true" })
-              span { t(".links") }
+            Button(
+              href: path(:admin_journal, to: @date.iso8601, edit: @entry.id), small: true, icon: "fa-solid fa-link",
+            ) do
+              t(".links")
             end
           end
 

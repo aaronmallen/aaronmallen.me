@@ -22,35 +22,33 @@ module Admin
 
           private
 
-          def button_label(icon, text_key, **)
-            span(class: "btn-label", **) do
-              i(class: icon, aria: { hidden: "true" })
-              span { t(text_key) }
-            end
-          end
-
           def delete_button
-            Button(variant: :warn, type: "submit", form: DeleteForm::ID) do
-              button_label("fa-regular fa-trash-can", ".delete")
+            Button(variant: :warn, type: "submit", form: DeleteForm::ID, icon: "fa-regular fa-trash-can") do
+              t(".delete")
             end
           end
 
           def draft_and_publish_buttons
-            Button(type: "submit", name: "intent", value: DRAFT) do
-              button_label("fa-regular fa-floppy-disk", ".save_draft")
+            Button(type: "submit", name: "intent", value: DRAFT, icon: "fa-regular fa-floppy-disk") do
+              t(".save_draft")
             end
+            publish_button
+          end
+
+          def publish_button
             Button(variant: :pri, type: "submit", name: "intent", value: PUBLISH) do
-              later = @scheduling
-              button_label(
-                "fa-solid fa-arrow-up-right-from-square", ".publish", data: { editor_now: "" }, hidden: later,
-              )
-              button_label("fa-regular fa-clock", ".schedule", data: { editor_later: "" }, hidden: !later)
+              span(class: "btn-label", data: { editor_now: "" }, hidden: @scheduling) do
+                IconLabel(icon: "fa-solid fa-arrow-up-right-from-square") { t(".publish") }
+              end
+              span(class: "btn-label", data: { editor_later: "" }, hidden: !@scheduling) do
+                IconLabel(icon: "fa-regular fa-clock") { t(".schedule") }
+              end
             end
           end
 
           def save_button
-            Button(variant: :pri, type: "submit", name: "intent", value: SAVE) do
-              button_label("fa-regular fa-floppy-disk", ".save")
+            Button(variant: :pri, type: "submit", name: "intent", value: SAVE, icon: "fa-regular fa-floppy-disk") do
+              t(".save")
             end
           end
         end

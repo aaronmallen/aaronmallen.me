@@ -24,9 +24,7 @@ module Admin
             label = t(label_key, project: @project.name)
 
             Form(action: path(:admin_move_project, id: @project.id, direction:)) do
-              Button(type: "submit", disabled: held?(direction), class: "proj-caret", aria: { label: }) do
-                i(class: icon, aria: { hidden: "true" })
-              end
+              Button(type: "submit", disabled: held?(direction), class: "proj-caret", aria: { label: }, icon:)
             end
           end
 

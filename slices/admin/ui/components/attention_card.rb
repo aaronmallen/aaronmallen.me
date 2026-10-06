@@ -33,7 +33,7 @@ module Admin
 
         def draft(row)
           ListItem(title: row.title, href: edit_post_path(row), sub: t(".untouched", count: row.days)) do
-            a(class: "btn sm", href: edit_post_path(row)) { t(".open") }
+            Button(href: edit_post_path(row), small: true) { t(".open") }
             snooze(row)
           end
         end
@@ -41,16 +41,14 @@ module Admin
         def edit_post_path(row) = path(:admin_edit_post, id: row.record_id)
 
         def icon_button(label, icon)
-          Button(type: "submit", small: true, title: label, aria: { label: }) do
-            i(class: icon, aria: { hidden: "true" })
-          end
+          Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
         end
 
         def journal(row)
           href = "##{TodayJournalCard::FORM_ID}"
 
           ListItem(title: t(".journal"), href:, sub: t(".journal_gap", count: row.days)) do
-            a(class: "btn sm", href:) { t(".write") }
+            Button(href:, small: true) { t(".write") }
             snooze(row)
           end
         end

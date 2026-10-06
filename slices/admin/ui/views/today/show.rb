@@ -52,7 +52,7 @@ module Admin
 
           def head_actions
             CreateButton(origin: ORIGIN)
-            a(class: "btn", href: path(:admin_clients)) { t(".clients") }
+            Button(href: path(:admin_clients)) { t(".clients") }
             sign_out_form
           end
 

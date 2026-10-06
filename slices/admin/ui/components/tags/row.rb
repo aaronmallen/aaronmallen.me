@@ -31,7 +31,7 @@ module Admin
           def acts
             div(class: "tag-acts") do
               label(class: "btn sm tag-pen", for: toggle_id, title: t(".edit")) do
-                i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
+                Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }
               end
             end
@@ -89,10 +89,7 @@ module Admin
           def remove
             Form(**remove_attributes) do
               scope_field
-              Button(variant: :warn, type: "submit", small: true) do
-                i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-                span { t(".remove") }
-              end
+              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".remove") }
             end
           end
 
@@ -115,9 +112,8 @@ module Admin
           def rename_id = "tag-#{@tag.id}-form"
 
           def save
-            Button(variant: :pri, type: "submit", small: true, form: rename_id) do
-              i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
-              span { t(".save") }
+            Button(variant: :pri, type: "submit", small: true, form: rename_id, icon: "fa-regular fa-floppy-disk") do
+              t(".save")
             end
           end
 

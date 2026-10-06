@@ -27,10 +27,7 @@ module Admin
         private
 
         def act(value, icon, label, variant: nil, data: nil)
-          Button(type: "submit", variant:, small: true, name: ACT, value:, data:) do
-            i(class: icon, aria: { hidden: "true" })
-            span { t(label) }
-          end
+          Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) { t(label) }
         end
 
         def confirm = { confirm: t(".confirm_delete"), confirm_styled: true }

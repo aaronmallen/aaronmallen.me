@@ -36,10 +36,7 @@ module Admin
           private
 
           def back_link
-            a(class: "btn gh sm editor-back", href: path(:admin_posts)) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".all_posts") }
-            end
+            BackLink(href: path(:admin_posts), variant: :gh, small: true, class: "editor-back") { t(".all_posts") }
           end
 
           def body_editor_props

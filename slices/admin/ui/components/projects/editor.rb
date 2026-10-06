@@ -14,9 +14,8 @@ module Admin
           prop :featured, Blog::Types::Bool
 
           def view_template
-            a(class: "btn gh sm editor-back", href: path(:admin_projects)) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(".all_projects") }
+            BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
+              t(".all_projects")
             end
 
             StatusForm(project: @project) if @project

@@ -27,7 +27,7 @@ module Admin
           private
 
           def actions
-            a(class: "btn sm", href: reply_href) { t(".reply") }
+            Button(href: reply_href, small: true) { t(".reply") }
             mark(READ, ".read", :pri)
             mark(SPAM, ".spam", :warn)
           end

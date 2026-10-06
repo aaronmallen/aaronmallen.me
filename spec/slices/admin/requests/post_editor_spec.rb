@@ -337,6 +337,15 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_css(".page-head-actions button.warn[form='post-delete']", text: "Delete")
       end
 
+      it "draws a hidden trash icon before the Delete label" do
+        edit
+
+        expect(page).to have_css(
+          "button.btn.warn[type='submit'][form='post-delete'] > i.fa-trash-can[aria-hidden='true']:first-child",
+          visible: :all,
+        )
+      end
+
       it "posts the delete form with the CSRF token", :aggregate_failures do
         edit
 

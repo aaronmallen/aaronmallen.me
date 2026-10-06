@@ -46,9 +46,8 @@ module Admin
           private
 
           def act(value, icon, variant: nil, data: nil)
-            Button(type: "submit", variant:, small: true, name: ACT, value:, data:) do
-              i(class: icon, aria: { hidden: "true" })
-              span { t(LABELS.fetch(value)) }
+            Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) do
+              t(LABELS.fetch(value))
             end
           end
 

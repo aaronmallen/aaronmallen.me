@@ -11,9 +11,10 @@ module Admin
           prop :lead, Blog::Types::Integer.optional, default: nil
 
           def view_template
-            Button(small: true, class: "task-grip", hidden: true, title: label, aria:, data:) do
-              i(class: "fa-solid fa-grip-vertical", aria: { hidden: "true" })
-            end
+            Button(
+              small: true, class: "task-grip", hidden: true, title: label, aria:, data:,
+              icon: "fa-solid fa-grip-vertical",
+            )
           end
 
           private

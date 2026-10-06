@@ -58,9 +58,7 @@ module Admin
             aria = { label:, keyshortcuts: EDIT }
             data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
 
-            a(class: "btn sm", href:, title: label, aria:, data:) do
-              i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
-            end
+            Button(href:, title: label, aria:, data:, small: true, icon: "fa-regular fa-pen-to-square")
           end
 
           def in_progress

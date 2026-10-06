@@ -16,10 +16,7 @@ module Admin
             decision = @editor[:decision]
 
             PageHead(title: decision.title, kicker: t(".kicker")) do
-              a(class: "btn", href: path(:admin_decision, id: decision.id)) do
-                i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-                span { t(".back") }
-              end
+              BackLink(href: path(:admin_decision, id: decision.id)) { t(".back") }
             end
 
             Editor(**@editor)

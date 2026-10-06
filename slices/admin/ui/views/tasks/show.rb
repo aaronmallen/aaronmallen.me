@@ -45,10 +45,7 @@ module Admin
           private
 
           def back
-            a(class: "btn", href: back_path, data: { task_close: true }) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(today? ? ".back_today" : ".back_tasks") }
-            end
+            BackLink(href: back_path, data: { task_close: true }) { t(today? ? ".back_today" : ".back_tasks") }
           end
 
           def back_path = today? ? path(:admin_root) : path(:admin_tasks, filter: @filter)
@@ -56,10 +53,7 @@ module Admin
           def edit
             href = path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)
 
-            a(class: "btn", href:, data: { task_open_edit: true }) do
-              i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
-              span { t(".edit") }
-            end
+            Button(href:, data: { task_open_edit: true }, icon: "fa-regular fa-pen-to-square") { t(".edit") }
           end
 
           def fact(label_key, value)

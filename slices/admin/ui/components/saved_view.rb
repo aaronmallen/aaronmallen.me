@@ -30,10 +30,7 @@ module Admin
         def act(route, icon, label, variant: nil, data: nil, filters: Blog::Constants::EMPTY_HASH)
           Form(action: path(route, id: @view.id), data:) do
             SavedViewFields(return_to: @return_to, filters:)
-            Button(type: "submit", variant:, small: true) do
-              i(class: icon, aria: { hidden: "true" })
-              span { label }
-            end
+            Button(type: "submit", variant:, small: true, icon:) { label }
           end
         end
 

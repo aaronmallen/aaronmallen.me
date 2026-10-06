@@ -11,13 +11,10 @@ module Admin
         prop :dialog, Blog::Types::String.optional, default: nil
 
         def view_template
-          a(
-            class: "btn pri", href: @href, aria: { keyshortcuts: KEY },
+          Button(
+            href: @href, variant: :pri, icon: "fa-solid fa-plus", aria: { keyshortcuts: KEY },
             data: { dialog_open: @dialog, key: KEY, key_label: @label },
-          ) do
-            i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-            span { @label }
-          end
+          ) { @label }
         end
       end
     end

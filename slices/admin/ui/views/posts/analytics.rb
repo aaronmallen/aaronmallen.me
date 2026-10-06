@@ -36,7 +36,7 @@ module Admin
           def view_template
             PageHead(title: @post.title, kicker: t(".kicker"), sub:) do
               range_form
-              a(class: "btn", href: path(:admin_edit_post, id: @post.id)) { t(".edit") }
+              Button(href: path(:admin_edit_post, id: @post.id)) { t(".edit") }
             end
 
             Grid(columns: 4) { stats }

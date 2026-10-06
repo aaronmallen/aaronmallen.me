@@ -38,19 +38,13 @@ module Admin
 
           def actions
             div(class: "sg-actions") do
-              Button(variant: :pri, type: "submit") do
-                i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
-                span { t(@person ? ".save" : ".add") }
-              end
+              Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@person ? ".save" : ".add") }
               delete_button if @person
             end
           end
 
           def delete_button
-            Button(variant: :warn, type: "submit", form: DELETE_FORM) do
-              i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-              span { t(".delete") }
-            end
+            Button(variant: :warn, type: "submit", form: DELETE_FORM, icon: "fa-regular fa-trash-can") { t(".delete") }
           end
 
           def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)

@@ -55,6 +55,13 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_link("All projects", href: "/admin/projects", class: "editor-back")
       end
 
+      it "draws the back link as a small quiet button with the back arrow" do
+        expect(page).to have_css(
+          "a.btn.gh.sm.editor-back[href='/admin/projects'] > i.fa-arrow-left[aria-hidden='true']:first-child",
+          visible: :all,
+        )
+      end
+
       it "posts to the create route" do
         expect(page).to have_css("form[action='/admin/projects'][method='post']")
       end

@@ -31,10 +31,7 @@ module Admin
           private
 
           def back
-            a(class: "btn", href: back_path) do
-              i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-              span { t(today? ? ".back_today" : ".back_tasks") }
-            end
+            BackLink(href: back_path) { t(today? ? ".back_today" : ".back_tasks") }
           end
 
           def back_path = today? ? path(:admin_root) : path(:admin_tasks)

@@ -32,7 +32,7 @@ module Admin
 
           def arrows
             step(earlier, rel: "prev", label: steps[:previous], icon: "fa-arrow-left")
-            a(class: "btn", href: href(@period)) { t(steps[:current]) } unless current?
+            Button(href: href(@period)) { t(steps[:current]) } unless current?
             step(later, rel: "next", label: steps[:next], icon: "fa-arrow-right")
           end
 
@@ -57,8 +57,7 @@ module Admin
           end
 
           def step(day, rel:, label:, icon:)
-            a(class: "btn", href: href(@period, day), rel:) do
-              i(class: ["fa-solid", icon], aria: { hidden: "true" })
+            Button(href: href(@period, day), rel:, icon: ["fa-solid", icon]) do
               span(class: "sr-only") { t(label) }
             end
           end

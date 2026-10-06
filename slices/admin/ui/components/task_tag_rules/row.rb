@@ -25,7 +25,7 @@ module Admin
           def acts
             div(class: "rule-acts") do
               label(class: "btn sm rule-pen", for: toggle_id, title: t(".edit")) do
-                i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
+                Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }
               end
             end
@@ -38,10 +38,7 @@ module Admin
               action: path(:admin_delete_task_tag_rule, id: @rule.id),
               data: { confirm: t(".confirm_delete", pattern: @rule.pattern, provider:) },
             ) do
-              Button(variant: :warn, type: "submit", small: true) do
-                i(class: "fa-regular fa-trash-can", aria: { hidden: "true" })
-                span { t(".delete") }
-              end
+              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".delete") }
             end
           end
 
@@ -77,9 +74,8 @@ module Admin
           def provider = t(Fields::PROVIDERS.fetch(@rule.provider))
 
           def save
-            Button(variant: :pri, type: "submit", small: true, form: form_id) do
-              i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
-              span { t(".save") }
+            Button(variant: :pri, type: "submit", small: true, form: form_id, icon: "fa-regular fa-floppy-disk") do
+              t(".save")
             end
           end
 

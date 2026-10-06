@@ -47,9 +47,7 @@ module Admin
           def change(route, icon, label, variant: nil, data: nil, key: nil)
             Form(action: path(route, id: @task.id), data:) do
               origin_fields
-              Button(type: "submit", variant:, small: true, title: label, **keyed(key, label:)) do
-                i(class: icon, aria: { hidden: "true" })
-              end
+              Button(type: "submit", variant:, small: true, title: label, **keyed(key, label:), icon:)
             end
           end
 
@@ -67,8 +65,7 @@ module Admin
           end
 
           def done_label
-            i(class: "fa-solid fa-check", aria: { hidden: "true" })
-            span { t(".complete") }
+            IconLabel(icon: "fa-solid fa-check") { t(".complete") }
           end
 
           def keyed(key, **aria)
@@ -83,9 +80,7 @@ module Admin
 
             Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do
               origin_field
-              Button(type: "submit", small: true, title: label, **keyed(key, label:)) do
-                i(class: icon, aria: { hidden: "true" })
-              end
+              Button(type: "submit", small: true, title: label, **keyed(key, label:), icon:)
             end
           end
 

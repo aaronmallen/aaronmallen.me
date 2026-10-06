@@ -28,19 +28,15 @@ module Admin
           def confirm = t(".confirm_remove", org: @entry.org, role: @entry.role)
 
           def links
-            a(class: "btn sm", href: path(:admin_projects, filter: WORK, edit: @entry.id),
-              aria: { current: @linking && "true" }) do
-              i(class: "fa-solid fa-link", aria: { hidden: "true" })
-              span { t(".links") }
-            end
+            Button(
+              href: path(:admin_projects, filter: WORK, edit: @entry.id), small: true, icon: "fa-solid fa-link",
+              aria: { current: @linking && "true" },
+            ) { t(".links") }
           end
 
           def remove
             render Blog::UI::Components::Form.new(action: remove_path, data: { confirm: }) do
-              Button(type: "submit", variant: :warn, small: true) do
-                i(class: "fa-solid fa-trash-can", aria: { hidden: "true" })
-                span { t(".remove") }
-              end
+              Button(type: "submit", variant: :warn, small: true, icon: "fa-solid fa-trash-can") { t(".remove") }
             end
           end
 

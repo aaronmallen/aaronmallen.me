@@ -31,13 +31,9 @@ module Admin
 
           def head
             PageHead(title: @decision.title, kicker: t(".kicker")) do
-              a(class: "btn", href: path(:admin_decisions, status: @decision.status)) do
-                i(class: "fa-solid fa-arrow-left", aria: { hidden: "true" })
-                span { t(".back") }
-              end
-              a(class: "btn", href: path(:admin_edit_decision, id: @decision.id)) do
-                i(class: "fa-regular fa-pen-to-square", aria: { hidden: "true" })
-                span { t(".edit") }
+              BackLink(href: path(:admin_decisions, status: @decision.status)) { t(".back") }
+              Button(href: path(:admin_edit_decision, id: @decision.id), icon: "fa-regular fa-pen-to-square") do
+                t(".edit")
               end
             end
           end

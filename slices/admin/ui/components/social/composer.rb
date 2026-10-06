@@ -35,18 +35,14 @@ module Admin
           def action = editing? ? path(:admin_update_social_post, id: @editing) : path(:admin_create_social_post)
 
           def add_button
-            Button(small: true, data: { social_add: "" }) do
-              i(class: "fa-solid fa-plus", aria: { hidden: "true" })
-              span { t(".add") }
-            end
+            Button(small: true, data: { social_add: "" }, icon: "fa-solid fa-plus") { t(".add") }
           end
 
           def blank? = @values[:parts].none? { it.match?(WRITING) }
 
           def button_label(icon, text_key, **)
             span(class: "btn-label", **) do
-              i(class: icon, aria: { hidden: "true" })
-              span { t(text_key) }
+              IconLabel(icon:) { t(text_key) }
             end
           end
 
@@ -60,7 +56,7 @@ module Admin
             send_button
           end
 
-          def cancel_link = a(class: "btn sm", href: path(:admin_social)) { t(".cancel") }
+          def cancel_link = Button(href: path(:admin_social), small: true) { t(".cancel") }
 
           def draft_disabled? = blank? || @networks.none?(&:selected)
 

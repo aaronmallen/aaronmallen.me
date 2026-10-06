@@ -58,9 +58,9 @@ module Admin
 
             Form(action: path(@unlink_route, id: @id, other_kind: link.kind, other_id: link.id)) do
               @fields.compact.each { |name, value| input(type: "hidden", name: name.to_s, value:) }
-              Button(type: "submit", variant: :gh, small: true, title: label, aria: { label: }) do
-                i(class: "fa-solid fa-xmark", aria: { hidden: "true" })
-              end
+              Button(
+                type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",
+              )
             end
           end
         end
