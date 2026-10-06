@@ -121,6 +121,7 @@ one.
 | [0114][0114] | Grant publishing and deleting as scopes of their own | ![Active][active] | 2026-10-06 |
 | [0115][0115] | Keep task contributors in their own table, and list the owner when a task has none | ![Active][active] | 2026-10-06 |
 | [0116][0116] | Build the tag summary in the tags slice from each kind's tag lookup | ![Active][active] | 2026-10-06 |
+| [0117][0117] | Sync task relations into task_links, with a parent type and a synced flag | ![Active][active] | 2026-10-06 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -238,6 +239,7 @@ one.
 [0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
 [0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [0116]: 0116-build-the-tag-summary-in-the-tags-slice-from-each-kinds-tag-lookup.md
+[0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

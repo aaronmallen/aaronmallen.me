@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, lib, record, tasks]
 issue: "#43"
+amended: ["#631"]
 tags: [tasks, imports, sync, github, linear, providers, jobs, locks, sync-states, enums]
 ---
 
@@ -46,6 +47,10 @@ Linear's client maps each issue to a `remote_state` this way:
 | Archived | No change | No change |
 | Moved to another team | Same row, URL updated | Follows the state type |
 
+Since #631, a task that a synced link holds stays open when either provider takes it off the operator: `SyncIssues`
+reads its `unassigned` as `open`, and cancels it on the first run after its last synced link goes
+([ADR 0117][0117]).
+
 Linear archives closed issues on its own, so an archive says nothing the state type has not said already. Linear
 keeps an issue's id when it moves teams, so a move keeps the same row and task, and only the key and URL change.
 GitHub never reports `started`.
@@ -72,4 +77,5 @@ tasks current. Today shows the two failures apart.
 Linear runs every workspace under one job, one sync name and one lock. A failure in one workspace fails the whole
 Linear run, and Today shows it as one Linear failure.
 
+[0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

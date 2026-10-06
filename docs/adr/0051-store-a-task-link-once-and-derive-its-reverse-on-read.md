@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, tasks]
 issue: AA-761
+amended: ["#631"]
 tags: [postgres, schema, tasks, links, constraints]
 ---
 
@@ -28,6 +29,10 @@ type is a `task_link_type` enum of `blocks`, `relates` and `duplicates`, followi
 the task whose label is the type's own name, so "#1 blocked by #2" saves as `blocks` from #2 to #1. The reverse
 label is never stored. The tasks slice works it out from which end of the row a task sits on when it reads the
 links.
+
+A fourth type, `parent`, came with #631. It runs from parent to child and reads "parent of" and "child of". A partial
+unique index on `to_task_id` for `parent` rows holds a task to one parent, and a `synced` flag marks the links the
+issue sync owns, as [ADR 0117][0117] says.
 
 Postgres holds the three rules:
 
@@ -61,4 +66,5 @@ where it means "blocked by", and no constraint catches that.
 A **relates** row still has a direction, and it means nothing. Code must not treat `from_task_id` on a `relates`
 row as the side that made the link.
 
+[0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
