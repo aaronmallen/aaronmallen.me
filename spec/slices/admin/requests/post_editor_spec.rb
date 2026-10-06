@@ -220,9 +220,15 @@ RSpec.describe "Admin post editor", type: :request do
     end
 
     describe "editing a published post" do
-      let(:published) { create(:post, :published, slug: "hello") }
+      let(:published) { create(:post, :published, title: "Hello", slug: "hello", tags: %w[ruby hanami]) }
 
       before { get "/admin/posts/#{published.id}/edit" }
+
+      it "fills the form from the post", :aggregate_failures do
+        expect(page).to have_field("Title", with: "Hello")
+        expect(page).to have_field("Tags", with: "hanami, ruby")
+        expect(page).to have_field("Publish time (Chicago)", with: Blog::TimeZone.input_value(published.published_at))
+      end
 
       it "makes the slug read-only" do
         expect(page).to have_field("Slug", with: "hello", readonly: true)
@@ -283,6 +289,13 @@ RSpec.describe "Admin post editor", type: :request do
         get "/admin/posts/#{post.id}/edit"
 
         expect(page).to have_no_css(note_box)
+      end
+
+      it "leaves the publish time empty on a draft that has none" do
+        post = create(:post, :draft, published_at: nil)
+        get "/admin/posts/#{post.id}/edit"
+
+        expect(page).to have_field("Publish time (Chicago)", with: "")
       end
 
       it "uses the slugified title as the slug placeholder" do

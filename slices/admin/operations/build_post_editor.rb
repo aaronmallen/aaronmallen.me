@@ -4,8 +4,6 @@ module Admin
   module Operations
     class BuildPostEditor
       FIELDS = %i[title slug summary tags body publish_at og_title og_image_url canonical_url edit_note].freeze
-      SEO = %i[og_title og_image_url canonical_url].freeze
-      TAG_SEPARATOR = ", "
 
       include Deps[
         announcement: "posts.operations.compose_announcement",
@@ -56,14 +54,6 @@ module Admin
         edits_newest_first.call(post.id)
       end
 
-      def publish_at(post)
-        return Blog::Constants::EMPTY_STRING unless post.published_at
-
-        Blog::TimeZone.input_value(post.published_at)
-      end
-
-      def seo_from_post(post) = SEO.to_h { [it, post.public_send(it).to_s] }
-
       def suggestions(post)
         suggestion = suggestion_for_post.call(post.id) if post && post.status != PUBLISHED
 
@@ -113,16 +103,7 @@ module Admin
       def values_from_post(post)
         return FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] } unless post
 
-        {
-          title: post.title,
-          slug: post.slug,
-          summary: post.written_summary.to_s,
-          tags: post.tags.map(&:name).join(TAG_SEPARATOR),
-          body: post.body,
-          publish_at: publish_at(post),
-          **seo_from_post(post),
-          edit_note: Blog::Constants::EMPTY_STRING,
-        }
+        ::Posts::PostForm.call(post).slice(*FIELDS).merge(edit_note: Blog::Constants::EMPTY_STRING)
       end
 
       def webmentions(post, params)
