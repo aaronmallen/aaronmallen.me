@@ -9,7 +9,13 @@ module Admin
         def handle(request, response)
           params = request.params
 
-          response.render(view, **build_review_page.call(period: params[:period], day: params[:day]))
+          response.render(
+            view,
+            **build_review_page.call(
+              period: params[:period], day: params[:day],
+              contributor: params[:contributor], agent: params[:agent], model: params[:model],
+            ),
+          )
         end
       end
     end

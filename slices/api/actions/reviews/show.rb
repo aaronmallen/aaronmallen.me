@@ -6,7 +6,9 @@ module API
       class Show < Action
         include Deps[endpoint: "endpoints.read_review"]
 
-        def handle(request, response) = answer(response, endpoint.call(query(request, :period, :day)))
+        def handle(request, response)
+          answer(response, endpoint.call(query(request, :period, :day, :contributor, :agent, :model)))
+        end
       end
     end
   end

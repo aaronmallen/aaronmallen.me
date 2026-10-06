@@ -13,7 +13,7 @@ module Activity
 
       def decisions(from:, to:) = review_decisions.closed_between(from, to).to_a.reverse.uniq(&:decision_id).reverse
 
-      def done(from:, to:) = review_tasks.done_between(from, to).to_a
+      def done(from:, to:, **credits) = review_tasks.done_between(from, to).credited(**credits).to_a
 
       def records(from:, to:) = activities.between(from, to).with_types(RECORDS).oldest_first.to_a
 

@@ -21,7 +21,7 @@ en:
       post: "%{link} · %{status} · %{views}"
       session: "worked %{span}"
       social: "%{status} · %{networks}"
-      task: "done"
+      task: "done by %{contributors}"
       webmention: "on %{link}"
       webmention_excerpt: "on %{link} · %{excerpt}"
     views:
@@ -38,6 +38,9 @@ en:
   clients_page:
     toasts:
       revoked: "Access revoked · that client has to sign in again"
+  credits:
+    agent: "%{agent} on %{model}"
+    owner: "me"
   decisions_page:
     toasts:
       closed: "That decision is closed already"
@@ -278,7 +281,7 @@ en:
       activity:
         filters:
           contains: "Contains"
-          contains_hint: "Add tag:ruby to search by tag, or repo:owner/name to search one repo."
+          contains_hint: "Add tag:ruby to search by tag, repo:owner/name for one repo, or contributor:owner, agent:claude-code or model:claude-opus-5-5 for tasks by who did them."
           contains_placeholder: "grep activity…"
           include: "Include"
           types:
@@ -1089,6 +1092,15 @@ en:
             one: "Slipped %{count} day"
             other: "Slipped %{count} days"
           title: "Carried over"
+        contributor_filter:
+          agent: "Agent"
+          agents: "Agents"
+          any_agent: "Any agent"
+          any_model: "Any model"
+          anyone: "Anyone"
+          label: "Done by"
+          model: "Model"
+          owner: "Me"
         decisions_card:
           dropped: "Dropped · %{day}"
           empty: "No decisions closed."

@@ -8,7 +8,15 @@ module API
       CARRIED_TASK = Schema.object(
         { id: Schema::INTEGER, title: Schema::STRING, carried_count: Schema::INTEGER, sprint_on: Schema::DAY },
       ).freeze
-      DONE_TASK = Schema.object({ id: Schema::INTEGER, title: Schema::STRING, worked_seconds: Schema::INTEGER }).freeze
+      CREDITS = "who did the work; the owner when none is set"
+      DONE_TASK = Schema.object(
+        {
+          id: Schema::INTEGER,
+          title: Schema::STRING,
+          worked_seconds: Schema::INTEGER,
+          contributors: Schema.list(Task::CONTRIBUTOR).merge(description: CREDITS),
+        },
+      ).freeze
       RECORD = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, name: Schema::STRING }).freeze
 
       SCHEMA = Schema.object(
@@ -123,7 +131,14 @@ module API
 
       private
 
-      def done_task(task) = { id: task.task_id, title: task.title, worked_seconds: task.worked_seconds }
+      def done_task(task)
+        {
+          id: task.task_id,
+          title: task.title,
+          worked_seconds: task.worked_seconds,
+          contributors: Task.credits(task.contributors),
+        }
+      end
 
       def records(found) = found.map { { id: it.source_id, date: day(it.occurred_on), name: it.name } }
     end

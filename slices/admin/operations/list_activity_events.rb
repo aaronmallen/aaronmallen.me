@@ -15,7 +15,6 @@ module Admin
       LINES = {
         COMMENT => "activity_page.sub_lines.comment",
         JOURNAL => "activity_page.sub_lines.journal",
-        TASK => "activity_page.sub_lines.task",
       }.freeze
       MARKDOWN = [JOURNAL, COMMENT, DECISION_COMMENT].freeze
       NAME_LIMIT = 120
@@ -35,6 +34,7 @@ module Admin
         DECISION_COMMENT => :decision_comment_line,
         SESSION => :session_line,
         SOCIAL => :social_line,
+        TASK => :task_line,
         WEBMENTION => :webmention_line,
       }.freeze
 
@@ -158,6 +158,12 @@ module Admin
 
         builder = LINE_BUILDERS[row.type]
         builder ? send(builder, row) : i18n.t!(LINES.fetch(row.type), task: row.excerpt)
+      end
+
+      def task_line(row)
+        contributors = Credits.words(row.contributors) { |key, **words| i18n.t!(key, **words) }
+
+        i18n.t!("activity_page.sub_lines.task", contributors:)
       end
 
       def view_count(row, views) = i18n.t!("activity_page.views", count: views.fetch(row.link, 0))

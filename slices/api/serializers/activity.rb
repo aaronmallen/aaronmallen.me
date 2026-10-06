@@ -4,6 +4,7 @@ module API
   module Serializers
     class Activity < Serializer
       POST = Blog::Types::ActivityKind["post"]
+      CREDITS = "who did a task's work, the owner when it lists none, or null for any other kind"
       VIEWS = "a post's views over the last 90 days, or null for any other kind"
 
       SCHEMA = Schema.object(
@@ -26,10 +27,13 @@ module API
           worked_seconds: Schema.nullable(Schema::INTEGER),
           views: Schema.nullable(Schema::INTEGER).merge(description: VIEWS),
           tags: Schema::TAGS,
+          contributors: Schema.nullable(Schema.list(Task::CONTRIBUTOR)).merge(description: CREDITS),
         },
       ).freeze
 
       schema_attributes
+
+      def contributors(row) = row.contributors && Task.credits(row.contributors)
 
       def date(row) = day(row.occurred_on)
 

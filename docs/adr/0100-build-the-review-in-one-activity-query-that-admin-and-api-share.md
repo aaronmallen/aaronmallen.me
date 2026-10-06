@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api]
 issue: "#340"
+amended: ["#623"]
 tags: [activity, review, tasks, posts, social, journal, commits, time, exports]
 ---
 
@@ -31,6 +32,10 @@ It reads the other slices' tables in SQL and writes none of them.
 `activity` exports the query. `admin` imports it for the screen, and `api` imports it for the review endpoint that
 its MCP tool calls. The screen and the tool then run the same code over the same range, and read one set of numbers.
 
+The query takes contributor terms (#623). They narrow the done tasks alone, which `review_tasks` reads with each
+task's contributors, the owner when it lists none ([ADR 0115][0115]). The carried tasks, the time worked and the
+other sections stay whole, so the time report and the review still agree on hours.
+
 ## Alternatives
 
 **An admin operation beside its own API endpoint.** Each door would build the review itself. It loses because two
@@ -55,4 +60,5 @@ say so.
 [0003]: 0003-reach-another-slice-only-through-its-exports.md
 [0021]: 0021-let-sql-read-another-slices-tables-never-write-them.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
+[0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

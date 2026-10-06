@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -62,6 +62,12 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
   its `task_id` its task's, so it matches the task's tags and links to the task. The view gains a `worked_seconds`
   column, set on sessions alone, for the session's length. Moves, tag changes and status changes stay on the task's
   timeline and out of this view. The Activity screen shows sessions.
+- Task rows carry their contributors (#623), through
+  `config/db/migrate/20261006000623_add_contributors_to_activity_views.rb`. The view gains a `contributors` jsonb
+  column: each contributor of a done task as `{kind, agent, model}`, or the owner alone when the task lists none
+  ([ADR 0115][0115]). Every other kind holds `NULL`. `contributor:`, `agent:` and `model:` terms narrow the feed to
+  the tasks that match, as they narrow the task list, and so drop every other kind. Each term must match some
+  contributor on its own, so `agent:claude-code model:claude-opus-5-5` can match two rows of one task.
 
 A new content kind joins by giving its table an index on its day, adding a branch to the view's migration, and
 adding its name to `Blog::Types::ActivityKind`. It shows on the Activity screen only once it joins
@@ -101,4 +107,5 @@ The tag filter reads the join tables `record` and `tasks` own, and the `tags` ta
 The feed has a slice of its own, so a reader finds it under the name of the thing it answers. That slice costs a
 container and a `db` provider to hold one relation, and every reader of the feed costs an exported query.
 
+[0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

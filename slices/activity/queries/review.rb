@@ -10,11 +10,11 @@ module Activity
       POST = Blog::Types::ActivityKind["post"]
       SOCIAL = Blog::Types::ActivityKind["social"]
 
-      def call(period:, on: Blog::TimeZone.today)
+      def call(period:, on: Blog::TimeZone.today, credits: Blog::Constants::EMPTY_HASH)
         from, to = Blog::ReviewRange.call(Blog::Types::ReviewPeriod[period], on)
 
         Structs::Review.new(
-          period:, from:, to:, **tasks(from, to), **records(from, to),
+          period:, from:, to:, **tasks(from, to, credits), **records(from, to),
           commits: review_repo.commits(from:, to:), decisions: review_repo.decisions(from:, to:),
           worked: worked(from, to),
         )
@@ -32,8 +32,11 @@ module Activity
         }
       end
 
-      def tasks(from, to)
-        { done: review_repo.done(from:, to:).group_by(&:closed_on), carried: review_repo.carried(from:, to:) }
+      def tasks(from, to, credits)
+        {
+          done: review_repo.done(from:, to:, **credits).group_by(&:closed_on),
+          carried: review_repo.carried(from:, to:),
+        }
       end
 
       def worked(from, to)

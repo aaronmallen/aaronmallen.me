@@ -148,11 +148,51 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(day_names(today - 1)).to eq(["clear the gutters"])
       end
 
-      it "says only that it is done" do
+      it "says it is done by me when it lists no one" do
         create(:task, :done, completed_at: at(16))
         visit_activity
 
-        expect(event_subs).to eq(["done"])
+        expect(event_subs).to eq(["done by me"])
+      end
+
+      def credit_tasks
+        create(:task, :done, title: "Mine", completed_at: at(16))
+        shared = create(:task, :done, title: "Shared", completed_at: at(15))
+        create(:task_contributor, :owner, task_id: shared.id)
+        create(:task_contributor, task_id: shared.id)
+        sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(14))
+        create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
+        create(:journal_entry, body: "A note", entry_date: today, entry_time: "09:00")
+      end
+
+      it "says who did each task" do
+        credit_tasks
+        visit_activity(types: { task: "1" })
+
+        expect(event_subs).to eq(
+          ["done by me", "done by me, claude-code on claude-opus-5-5", "done by claude-code on claude-sonnet-5"],
+        )
+      end
+
+      it "keeps the tasks that list me, the default included, and drops every other kind" do
+        credit_tasks
+        visit_activity(q: "contributor:owner")
+
+        expect(event_names).to eq(%w[Mine Shared])
+      end
+
+      it "keeps the tasks an agent worked on" do
+        credit_tasks
+        visit_activity(q: "agent:claude-code")
+
+        expect(event_names).to eq(["Shared", "Sonnet's"])
+      end
+
+      it "keeps the tasks an agent worked on a model" do
+        credit_tasks
+        visit_activity(q: "model:claude-sonnet-5")
+
+        expect(event_names).to eq(["Sonnet's"])
       end
 
       it "leaves out a canceled task" do
@@ -299,7 +339,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         create(:work_session, task_id: done.id, started_at: at(9), ended_at: at(10))
         visit_activity
 
-        expect(event_subs).to contain_exactly("done", "worked 1h 00m")
+        expect(event_subs).to contain_exactly("done by me", "worked 1h 00m")
       end
 
       it "shows a session that crosses midnight on the day it started", :aggregate_failures do

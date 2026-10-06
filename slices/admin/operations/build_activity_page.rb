@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildActivityPage
-      FIELDS = %i[repo tag].freeze
+      FIELDS = %i[repo tag contributor agent model].freeze
 
       include Deps[
         "settings",
@@ -17,7 +17,7 @@ module Admin
         window = activity_filters.call(from:, to:, day:, types:)
         filters = { **window.except(:day), text: Blog::Types::Text[query] }
         search = filters.merge(**Blog::SearchQuery.parse(filters[:text], fields: FIELDS))
-        counts = activity_counts.call(**search.slice(:from, :to, :repos, :text, :tags))
+        counts = activity_counts.call(**search.except(:types))
 
         {
           **timeline(search, window[:day]),
@@ -38,7 +38,7 @@ module Admin
       def totals(search, counts)
         {
           events: counts.slice(*search[:types]).values.sum,
-          days: activity_day_count.call(**search.slice(:from, :to, :types, :repos, :text, :tags)),
+          days: activity_day_count.call(**search),
         }
       end
     end

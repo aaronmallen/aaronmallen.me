@@ -70,7 +70,10 @@ RSpec.describe "API review", type: :request do
     end
 
     it "groups the tasks done by day" do
-      task = { "id" => filled[:done].id, "title" => "Finish the review screen", "worked_seconds" => 5400 }
+      task = {
+        "id" => filled[:done].id, "title" => "Finish the review screen", "worked_seconds" => 5400,
+        "contributors" => [{ "kind" => "owner" }],
+      }
 
       expect(review.fetch("done")).to eq([{ "date" => "2026-09-16", "tasks" => [task] }])
     end
@@ -337,6 +340,57 @@ RSpec.describe "API review", type: :request do
                 "errors" => { "day" => ["give the day as a date, such as 2026-01-01"] } }
 
     expect([read(day: "2026-13-40"), status]).to eq([refusal, 422])
+  end
+
+  describe "contributors" do
+    let(:agent) { { "kind" => "agent", "agent" => "claude-code", "model" => "claude-opus-5-5" } }
+
+    before do
+      fill(wednesday, title: "Mine")
+      shared = create(:task, :done, title: "Shared", completed_at: at(wednesday))
+      create(:task_contributor, :owner, task_id: shared.id)
+      create(:task_contributor, task_id: shared.id)
+      sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(wednesday))
+      create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
+    end
+
+    def done_titles(**query)
+      read(day: wednesday.iso8601, **query).fetch("done").flat_map { it.fetch("tasks") }.map { it.fetch("title") }
+    end
+
+    it "lists who did each done task, the owner when it lists no one" do
+      tasks = read(day: wednesday.iso8601).fetch("done").first.fetch("tasks")
+
+      expect(tasks.to_h { it.values_at("title", "contributors") }).to include(
+        "Mine" => [{ "kind" => "owner" }], "Shared" => [{ "kind" => "owner" }, agent],
+      )
+    end
+
+    it "keeps the done tasks that list the owner, the default included" do
+      expect(done_titles(contributor: "owner")).to contain_exactly("Mine", "Shared")
+    end
+
+    it "keeps the done tasks an agent worked on, by agent or by model" do
+      both = contain_exactly("Shared", "Sonnet's")
+      found = [done_titles(contributor: "agent"), done_titles(agent: "claude-code")]
+
+      expect([*found, done_titles(model: "claude-sonnet-5")]).to match([both, both, ["Sonnet's"]])
+    end
+
+    it "counts only the done tasks it keeps and leaves the time worked and the carried tasks whole" do
+      totals = read(day: wednesday.iso8601, model: "claude-sonnet-5").fetch("totals")
+
+      expect(totals).to include("done" => 1, "carried" => 1, "worked_seconds" => 3600)
+    end
+
+    it "reads through read_review as the endpoint does" do
+      expect(mcp_answer("read_review", day: wednesday.iso8601, contributor: "agent"))
+        .to eq(read(day: wednesday.iso8601, contributor: "agent"))
+    end
+
+    it "refuses a contributor that is neither the owner nor an agent with a 422" do
+      expect([read(contributor: "robot").fetch("errors").keys, status]).to eq([%w[contributor], 422])
+    end
   end
 
   describe "the MCP tool" do

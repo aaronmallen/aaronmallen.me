@@ -5,7 +5,7 @@ require "dry/monads"
 module API
   module Queries
     class SavedViewActivity
-      FIELDS = %i[repo tag].freeze
+      FIELDS = %i[repo tag contributor agent model].freeze
 
       include Dry::Monads[:result]
       include Deps[

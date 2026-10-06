@@ -6,37 +6,37 @@ module Activity
       NONE = Blog::Constants::EMPTY_ARRAY
       TYPES = Blog::Types::ActivityKind.values
 
-      def between(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE, limit: nil)
-        found = narrowed(from:, to:, types:, repos:, text:, tags:).newest_first.with_tags
+      def between(from:, to:, limit: nil, **filters)
+        found = narrowed(from:, to:, **filters).newest_first.with_tags
 
         (limit ? found.limit(limit) : found).to_a
       end
 
-      def commit_totals(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
-        totalled = narrowed(from:, to:, types:, repos:, text:, tags:).commit_totals_by_repo
+      def commit_totals(from:, to:, **filters)
+        totalled = narrowed(from:, to:, **filters).commit_totals_by_repo
 
         totalled.to_a.to_h { [it.repo, it.to_h.except(:repo)] }
       end
 
-      def counts(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
-        found = narrowed(from:, to:, types:, repos:, text:, tags:).counts_by_type.to_a.to_h { [it.type, it.count] }
+      def contributor_names(column) = task_contributors.named(column).pluck(column)
+
+      def counts(from:, to:, types: TYPES, **filters)
+        found = narrowed(from:, to:, types:, **filters).counts_by_type.to_a.to_h { [it.type, it.count] }
 
         tally(found, types)
       end
 
-      def counts_by_day(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
-        narrowed(from:, to:, types:, repos:, text:, tags:).counts_by_day.to_a.to_h { [it.occurred_on, it.count] }
+      def counts_by_day(from:, to:, **filters)
+        narrowed(from:, to:, **filters).counts_by_day.to_a.to_h { [it.occurred_on, it.count] }
       end
 
-      def counts_by_month(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
-        tallied = narrowed(from:, to:, types:, repos:, text:, tags:).counts_by_month.to_a
+      def counts_by_month(from:, to:, types: TYPES, **filters)
+        tallied = narrowed(from:, to:, types:, **filters).counts_by_month.to_a
 
         tallied.map(&:month).uniq.sort.reverse.to_h { [it, month_counts(tallied, it, types)] }
       end
 
-      def day_count(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE)
-        narrowed(from:, to:, types:, repos:, text:, tags:).day_count
-      end
+      def day_count(from:, to:, **filters) = narrowed(from:, to:, **filters).day_count
 
       private
 
@@ -46,8 +46,8 @@ module Activity
         tally(tallied.select { it.month == month }.to_h { [it.type, it.count] }, types)
       end
 
-      def narrowed(from:, to:, types:, repos:, text:, tags:)
-        found = activities.between(from, to).with_types(types)
+      def narrowed(from:, to:, types: TYPES, repos: NONE, text: nil, tags: NONE, **credits)
+        found = activities.between(from, to).with_types(types).credited(**credits)
         found = found.in_repo(repos) unless repos.empty?
         found = found.tagged(tags) unless tags.empty?
 

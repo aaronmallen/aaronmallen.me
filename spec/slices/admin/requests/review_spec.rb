@@ -101,7 +101,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         group = card("done").find(".review-group", text: "Wednesday, September 16")
 
         expect([group.find_link("Finish the review screen")[:href], group.find(".li-sub").text])
-          .to eq(["/admin/tasks/#{filled[:done].id}", "1h 30m"])
+          .to eq(["/admin/tasks/#{filled[:done].id}", "1h 30m · me"])
       end
 
       it "links each carried task to its task and says how many days it slipped" do
@@ -168,6 +168,55 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
       it "switch to the month that holds the day" do
         expect(page).to have_link("Month", href: "/admin/review?period=month&day=2026-09-16")
+      end
+    end
+
+    describe "contributors" do
+      def done_subs = card("done").all(".li-sub").map(&:text)
+
+      def done_titles = card("done").all(".li-title").map(&:text)
+
+      before do
+        fill(wednesday, title: "Mine")
+        shared = create(:task, :done, title: "Shared", completed_at: at(wednesday))
+        create(:task_contributor, :owner, task_id: shared.id)
+        create(:task_contributor, task_id: shared.id)
+        sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(wednesday))
+        create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
+      end
+
+      it "names who did each done task" do
+        visit_review(day: "2026-09-16")
+
+        expect(done_subs).to contain_exactly(
+          "1h 30m · me", "0m · me, claude-code on claude-opus-5-5", "0m · claude-code on claude-sonnet-5",
+        )
+      end
+
+      it "keeps the done tasks that list me, the default included, and counts only those" do
+        visit_review(day: "2026-09-16", contributor: "owner")
+
+        expect([done_titles, page.find(".stat", text: "Done").find(".stat-value").text])
+          .to match([contain_exactly("Mine", "Shared"), "2"])
+      end
+
+      it "keeps the done tasks an agent worked on a model" do
+        visit_review(day: "2026-09-16", model: "claude-sonnet-5")
+
+        expect(done_titles).to eq(["Sonnet's"])
+      end
+
+      it "offers each agent and model the tasks name, with the one picked selected", :aggregate_failures do
+        visit_review(day: "2026-09-16", model: "claude-sonnet-5")
+
+        expect(page.all("#review-agent option").map(&:text)).to eq(["Any agent", "claude-code"])
+        expect(page.find("#review-model option[selected]").text).to eq("claude-sonnet-5")
+      end
+
+      it "keeps the filter on the arrows" do
+        visit_review(day: "2026-09-16", contributor: "agent")
+
+        expect(page).to have_link("Previous week", href: "/admin/review?day=2026-09-09&contributor=agent")
       end
     end
 

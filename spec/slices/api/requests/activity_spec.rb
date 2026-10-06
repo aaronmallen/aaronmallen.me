@@ -5,6 +5,19 @@ RSpec.describe "API reading the activity feed", type: :request do
 
   def at(day, hour = 12) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, 0)
 
+  def credited(title, *contributors)
+    task = create(:task, :done, title:, completed_at: at(march))
+    contributors.each { create(:task_contributor, *Array(it[:trait]), task_id: task.id, **it.except(:trait)) }
+    task
+  end
+
+  def credited_tasks
+    credited("Mine")
+    credited("Shared", { trait: :owner }, {})
+    credited("Sonnet's", { model: "claude-sonnet-5" })
+    create(:journal_entry, entry_date: march, body: "A note")
+  end
+
   def get_json(path, params = nil)
     get path, params, { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     JSON.parse(last_response.body)
@@ -13,6 +26,8 @@ RSpec.describe "API reading the activity feed", type: :request do
   def kinds(answer) = answer.fetch("activity").map { it.fetch("kind") }
 
   def march = Date.new(2026, 3, 10)
+
+  def names(answer) = answer.fetch("activity").map { it.fetch("name") }
 
   def range = { from: "2026-03-01", to: "2026-03-31" }
 
@@ -70,6 +85,41 @@ RSpec.describe "API reading the activity feed", type: :request do
       create(:journal_entry, entry_date: march, tags: %w[home])
 
       expect(read(tags: "site").fetch("activity").map { it.fetch("tags") }).to eq([%w[site]])
+    end
+
+    it "lists who did each task, the owner when it lists no one, and null on every other kind" do
+      credited_tasks
+
+      agent = { "kind" => "agent", "agent" => "claude-code", "model" => "claude-opus-5-5" }
+
+      expect(read.fetch("activity").to_h { [it.fetch("name"), it.fetch("contributors")] }).to include(
+        "Mine" => [{ "kind" => "owner" }], "Shared" => [{ "kind" => "owner" }, agent], "A note" => nil,
+      )
+    end
+
+    it "narrows to the tasks that list the owner, the default included, and drops every other kind" do
+      credited_tasks
+
+      expect(names(read(contributor: "owner"))).to contain_exactly("Mine", "Shared")
+    end
+
+    it "narrows to the tasks an agent worked on" do
+      credited_tasks
+
+      expect(names(read(contributor: "agent"))).to contain_exactly("Shared", "Sonnet's")
+    end
+
+    it "narrows to the tasks that name an agent or a model" do
+      credited_tasks
+
+      expect([names(read(agent: "Claude-Code")), names(read(model: "claude-sonnet-5"))])
+        .to match([contain_exactly("Shared", "Sonnet's"), ["Sonnet's"]])
+    end
+
+    it "refuses a contributor that is neither the owner nor an agent with a 422" do
+      read(contributor: "robot")
+
+      expect(status).to eq(422)
     end
 
     it "gives each post the views the admin screen counts for it, and every other row null" do
@@ -139,6 +189,12 @@ RSpec.describe "API reading the activity feed", type: :request do
 
       expect(trusted(mcp_answer("read_activity", **range, kinds: %w[webmention comment])))
         .to eq(read(kinds: "webmention,comment"))
+    end
+
+    it "answers read_activity narrowed by contributor as GET /api/v1/activity does" do
+      credited_tasks
+
+      expect(trusted(mcp_answer("read_activity", **range, agent: "claude-code"))).to eq(read(agent: "claude-code"))
     end
 
     it "answers summarize_activity as GET /api/v1/activity/summary does" do

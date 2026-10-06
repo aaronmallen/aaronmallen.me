@@ -895,6 +895,25 @@ CREATE TABLE public.task_comments (
 
 
 --
+-- Name: task_contributors; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.task_contributors (
+    id integer NOT NULL,
+    task_id integer NOT NULL,
+    kind public.contributor_kind NOT NULL,
+    agent public.contributor_slug,
+    model public.contributor_slug,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT task_contributors_kind_check CHECK ((num_nonnulls(agent, model) =
+CASE kind
+    WHEN 'owner'::public.contributor_kind THEN 0
+    ELSE 2
+END))
+);
+
+
+--
 -- Name: tasks; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -979,7 +998,8 @@ CREATE VIEW public.activities AS
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM public.commits
 UNION ALL
  SELECT 'post'::text AS type,
@@ -997,7 +1017,8 @@ UNION ALL
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM public.posts
   WHERE (posts.status = 'published'::public.post_status)
 UNION ALL
@@ -1016,7 +1037,8 @@ UNION ALL
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM public.journal_entries
 UNION ALL
  SELECT 'social'::text AS type,
@@ -1034,7 +1056,8 @@ UNION ALL
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM (public.social_posts
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
            FROM public.social_post_parts
@@ -1058,7 +1081,8 @@ UNION ALL
     webmentions.excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM (public.webmentions
      JOIN public.posts ON ((posts.id = webmentions.post_id)))
   WHERE (webmentions.status = 'approved'::public.webmention_status)
@@ -1078,7 +1102,10 @@ UNION ALL
     NULL::text AS excerpt,
     tasks.id AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    COALESCE(( SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object('kind', task_contributors.kind, 'agent', task_contributors.agent, 'model', task_contributors.model)) ORDER BY task_contributors.id) AS jsonb_agg
+           FROM public.task_contributors
+          WHERE (task_contributors.task_id = tasks.id)), '[{"kind": "owner"}]'::jsonb) AS contributors
    FROM public.tasks
   WHERE (tasks.status = 'done'::public.task_status)
 UNION ALL
@@ -1097,7 +1124,8 @@ UNION ALL
     projects.tagline AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM public.projects
 UNION ALL
  SELECT 'sprint'::text AS type,
@@ -1115,7 +1143,8 @@ UNION ALL
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM public.sprints
 UNION ALL
  SELECT 'suggestion'::text AS type,
@@ -1133,7 +1162,8 @@ UNION ALL
     NULL::text AS excerpt,
     NULL::integer AS task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM ((public.suggestions
      LEFT JOIN public.posts ON ((posts.id = suggestions.post_id)))
      LEFT JOIN LATERAL ( SELECT social_post_parts.body
@@ -1157,7 +1187,8 @@ UNION ALL
     tasks.title AS excerpt,
     task_comments.task_id,
     NULL::integer AS decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM (public.task_comments
      JOIN public.tasks ON ((tasks.id = task_comments.task_id)))
 UNION ALL
@@ -1176,7 +1207,8 @@ UNION ALL
     (COALESCE(decision_events.reason, decision_events.note, decision_options.title))::text AS excerpt,
     NULL::integer AS task_id,
     decision_events.decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM ((public.decision_events
      JOIN public.decisions ON ((decisions.id = decision_events.decision_id)))
      LEFT JOIN public.decision_options ON ((decision_options.id = decision_events.option_id)))
@@ -1196,7 +1228,8 @@ UNION ALL
     (decisions.title)::text AS excerpt,
     NULL::integer AS task_id,
     decision_comments.decision_id,
-    NULL::integer AS worked_seconds
+    NULL::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM (public.decision_comments
      JOIN public.decisions ON ((decisions.id = decision_comments.decision_id)))
 UNION ALL
@@ -1215,7 +1248,8 @@ UNION ALL
     NULL::text AS excerpt,
     work_sessions.task_id,
     NULL::integer AS decision_id,
-    (floor(EXTRACT(epoch FROM (work_sessions.ended_at - work_sessions.started_at))))::integer AS worked_seconds
+    (floor(EXTRACT(epoch FROM (work_sessions.ended_at - work_sessions.started_at))))::integer AS worked_seconds,
+    NULL::jsonb AS contributors
    FROM (public.work_sessions
      JOIN public.tasks ON ((tasks.id = work_sessions.task_id)))
   WHERE (work_sessions.ended_at IS NOT NULL);
@@ -2418,7 +2452,10 @@ CREATE VIEW public.review_tasks AS
     (title)::text AS title,
     (status)::text AS status,
     ((completed_at AT TIME ZONE 'America/Chicago'::text))::date AS closed_on,
-    worked_seconds
+    worked_seconds,
+    COALESCE(( SELECT jsonb_agg(jsonb_strip_nulls(jsonb_build_object('kind', task_contributors.kind, 'agent', task_contributors.agent, 'model', task_contributors.model)) ORDER BY task_contributors.id) AS jsonb_agg
+           FROM public.task_contributors
+          WHERE (task_contributors.task_id = tasks.id)), '[{"kind": "owner"}]'::jsonb) AS contributors
    FROM public.tasks;
 
 
@@ -2856,25 +2893,6 @@ ALTER TABLE public.task_comments ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
     NO MINVALUE
     NO MAXVALUE
     CACHE 1
-);
-
-
---
--- Name: task_contributors; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.task_contributors (
-    id integer NOT NULL,
-    task_id integer NOT NULL,
-    kind public.contributor_kind NOT NULL,
-    agent public.contributor_slug,
-    model public.contributor_slug,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT task_contributors_kind_check CHECK ((num_nonnulls(agent, model) =
-CASE kind
-    WHEN 'owner'::public.contributor_kind THEN 0
-    ELSE 2
-END))
 );
 
 
@@ -5256,4 +5274,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261004000461_add_single_author_hosts_to_webmention_settings.rb'),
 ('20261006000507_add_provider_to_task_tag_rules.rb'),
 ('20261006000517_add_unsent_webmention_targets_to_posts.rb'),
-('20261006000618_create_task_contributors.rb');
+('20261006000618_create_task_contributors.rb'),
+('20261006000623_add_contributors_to_activity_views.rb');

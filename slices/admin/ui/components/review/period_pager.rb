@@ -22,6 +22,7 @@ module Admin
           prop :from, Blog::Types::Date
           prop :to, Blog::Types::Date
           prop :today, Blog::Types::Date
+          prop :keep, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
             SegmentedLinks(label: t(".periods"), items: PERIODS.keys.map { period_link(it) })
@@ -41,7 +42,7 @@ module Admin
           def earlier = month? ? @on.prev_month : @on - WEEK
 
           def href(period, day = nil)
-            path(:admin_review, **{ period: (period if period == MONTH), day: day&.iso8601 }.compact)
+            path(:admin_review, **{ period: (period if period == MONTH), day: day&.iso8601 }.compact, **@keep)
           end
 
           def later = month? ? @on.next_month : @on + WEEK

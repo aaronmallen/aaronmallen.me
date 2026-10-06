@@ -59,6 +59,8 @@ module API
 
       schema_attributes
       attribute :blocked, &:blocked?
+      def self.credits(contributors) = contributors.map { it.to_h.transform_keys(&:to_sym) }
+
       stamps :completed_at, :created_at, :updated_at
       tag_names
 

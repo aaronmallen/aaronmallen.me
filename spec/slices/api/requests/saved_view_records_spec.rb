@@ -11,7 +11,7 @@ RSpec.describe "API saved view records", type: :request do
       "name" => commit.message, "link" => nil, "repo" => commit.repo, "sha" => commit.sha,
       "additions" => commit.additions, "deletions" => commit.deletions, "status" => nil, "targets" => nil,
       "excerpt" => nil, "task_id" => nil, "decision_id" => nil, "worked_seconds" => nil, "views" => nil,
-      "tags" => [],
+      "tags" => [], "contributors" => nil,
     }
   end
 
@@ -189,6 +189,15 @@ RSpec.describe "API saved view records", type: :request do
       create(:commit, repo: "aaronmallen/kept", message: "tidy")
 
       expect(records("activity", q: "repo:kept deploy").fetch("count")).to eq(1)
+    end
+
+    it "keeps a contributor filter in the view's search" do
+      create(:task, :done, title: "Mine", completed_at: at(today, 9))
+      sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(today, 10))
+      create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
+
+      expect(records("activity", q: "model:claude-sonnet-5").fetch("records").map { it.fetch("name") })
+        .to eq(["Sonnet's"])
     end
 
     it "gives a commit its whole message, repository, sha and lines" do

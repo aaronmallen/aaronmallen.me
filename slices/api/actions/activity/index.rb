@@ -11,7 +11,7 @@ module API
         private
 
         def listing(request)
-          found = query(request, :from, :to, :kinds, :repos, :tags, :text)
+          found = query(request, :from, :to, :kinds, :repos, :tags, :text, :contributor, :agent, :model)
 
           found.merge(found.slice(:kinds, :repos, :tags).transform_values { split(it) })
         end

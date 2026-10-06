@@ -3,6 +3,8 @@
 module Activity
   module Relations
     class ReviewTasks < Blog::DB::Relation
+      include Crediting
+
       DONE = Blog::Types::TaskStatus["done"]
 
       schema :review_tasks, infer: true

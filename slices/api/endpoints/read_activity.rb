@@ -9,6 +9,7 @@ module API
         additionalProperties: false,
         properties: {
           **Blog::DayWindow::WINDOW,
+          **Schema::CREDITS,
           kinds: {
             type: "array",
             items: { type: "string", enum: KINDS },
@@ -42,9 +43,11 @@ module API
 
       include Deps[activity_between: "activity.queries.activity_between", activity_views: "queries.activity_views"]
 
-      def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil)
+      def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
+        filters = { kinds:, repos:, tags:, text:, credits: Blog::ContributorTerms.call(**credited) }
+
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] then Success(window(first, last, { kinds:, repos:, tags:, text: }))
+        in Success[first, last] then Success(window(first, last, filters))
         in Failure(message) then invalid(from: [message], to: [message])
         end
       end
@@ -59,6 +62,7 @@ module API
           repos: Array(filters[:repos]),
           tags: Array(filters[:tags]),
           text: filters[:text],
+          **filters[:credits],
           limit:,
         )
       end

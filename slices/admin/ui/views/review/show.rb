@@ -15,10 +15,15 @@ module Admin
           prop :today, Blog::Types::Date
           prop :note_body, Blog::Types::String.optional
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :credits, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :choices, Blog::Types::Hash
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
-              PeriodPager(period: @review.period, on: @on, from: @review.from, to: @review.to, today: @today)
+              PeriodPager(
+                period: @review.period, on: @on, from: @review.from, to: @review.to, today: @today,
+                keep: ContributorFilter.query(@credits),
+              )
             end
 
             Grid(columns: 4) { stats }
@@ -47,6 +52,10 @@ module Admin
             }
           end
 
+          def place
+            { period: (@review.period if @review.period == MONTH), day: (@on.iso8601 unless @on == @today) }.compact
+          end
+
           def record_cards
             PublishedCard(posts: @review.posts, social_posts: @review.social_posts)
             JournalCard(journal: @review.journal)
@@ -68,7 +77,7 @@ module Admin
           end
 
           def task_cards
-            DoneCard(done: @review.done)
+            DoneCard(done: @review.done, credits: @credits, choices: @choices, keep: place)
             CarriedCard(carried: @review.carried)
             WorkedCard(worked: @review.worked)
           end

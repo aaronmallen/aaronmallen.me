@@ -3,6 +3,15 @@
 module API
   module Schema
     BOOLEAN = { type: "boolean" }.freeze
+    CREDITS = {
+      agent: { type: "string", description: "an agent, such as claude-code; only the tasks it worked on" },
+      contributor: {
+        type: "string",
+        enum: Blog::Types::ContributorKind.values,
+        description: "owner or agent; owner also keeps every task that lists no contributors",
+      },
+      model: { type: "string", description: "a model, such as claude-opus-5-5; only the tasks it worked on" },
+    }.freeze
     DAY = { type: "string", format: "date" }.freeze
     ID = { type: "integer", minimum: 1, maximum: Blog::Constants::INTEGER_MAX }.freeze
     INTEGER = { type: "integer" }.freeze

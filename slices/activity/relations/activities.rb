@@ -3,6 +3,8 @@
 module Activity
   module Relations
     class Activities < Blog::DB::Relation
+      include Crediting
+
       COMMENT = Blog::Types::ActivityKind["comment"]
       COMMIT = Blog::Types::ActivityKind["commit"]
       COMMIT_TOTALS = proc do
