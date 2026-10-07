@@ -5,6 +5,44 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+### Added
+
+- A Security page at `/admin/security` lists each sign-in, wrong account and failed GitHub callback with its time,
+  outcome, browser, OS, city, country and IP. Each live API token and MCP client lists the devices and cities it has
+  called from, with first and last seen, the call count and the last IP. The page sits in the admin menu and the
+  palette, and links to the Honeybadger project when `HONEYBADGER_PROJECT_URL` is set. A daily job deletes these
+  records after 90 days.
+- The attention list shows a sign-in, token or MCP client that turns up from a device or city it has not used before,
+  for 7 days or until snoozed. A credential's first device sets the baseline and does not show. The site keeps the
+  devices and cities it knows after the 90-day prune, so an old one does not come back as new, and `list_attention`
+  returns these rows.
+- The inbox head has Mark All As Seen and Snooze All for the rows on the page. Each row has a Snooze button with
+  quick picks and a date and time, and a Snoozed section lists what waits with a Wake now button. A woken row returns
+  to the top. `clear_inbox`, `snooze_inbox`, `snooze_inbox_row` and `wake_inbox_row`, and `POST /api/v1/inbox/seen`,
+  `/inbox/snooze`, `/inbox/snooze/all` and `/inbox/wake`, do the same.
+- `/projects` sorts public projects by stars and lists archived ones under Past Projects. The home page shows the
+  three active projects with the most stars.
+- A task rule can link synced issues to projects as well as tag them. An issue from a project's own repo links to that
+  project with no rule, and giving a project a repo links its past imports once.
+
+### Changed
+
+- A project is public or private, and archived when it has an archive date. Private projects stay off the site, and a
+  tag only they carry has no public page. The admin editor and `save_project` ask for the visibility, and the API and
+  MCP return it with a status of active or archived. Every project made before this release is public.
+- Task tag rules are task rules. The admin page, `save_task_rule`, `list_task_rules`, `delete_task_rule` and
+  `/api/v1/task_rules` replace the old names, which no longer answer.
+- An issue row in the inbox has an Edit button that opens the task dialog in place of its tag field. A seen
+  webmention leaves the inbox but stays pending on the Webmentions page.
+- A long title in an admin list wraps beside its buttons at desktop width rather than pushing them below it.
+- The weekly MaxMind refresh downloads GeoLite2 City in place of GeoLite2 Country. Analytics still keeps a country
+  only.
+
+### Removed
+
+- Projects no longer have a featured flag or a hand-set order, so the move controls and the `move_project` tool are
+  gone.
+
 ## [26.10.4] - 2026-10-07
 
 ### Added
