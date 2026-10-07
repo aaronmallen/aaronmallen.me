@@ -128,6 +128,7 @@ RSpec.describe "Admin screens", type: :feature do
       "search" => "/admin/search",
       "search results" => "/admin/search?q=accountant",
       "search by kind" => "/admin/search?q=quarterly&kind=task",
+      "security" => "/admin/security",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
@@ -209,7 +210,7 @@ RSpec.describe "Admin screens", type: :feature do
     create(:message, subject: "A question about the site")
     create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
     create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
-    create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude"))
+    seed_security(create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude")).oauth_client_id)
     person
   end
 
@@ -234,6 +235,16 @@ RSpec.describe "Admin screens", type: :feature do
     link.call("journal_entry", journal_entry.id, { other_kind: "post", other_id: draft.id })
     link.call("work_entry", work_entry.id, { other_kind: "project", other_id: project.id })
     link.call("social_post", social_post.id, { other_kind: "commit", other_id: commit.id })
+  end
+
+  def seed_security(client_id)
+    database = Security::Slice["db.rom"].gateways[:default].connection
+    place = { browser: "Firefox", os: "Linux", city: "Rio de Janeiro", country: "BR" }
+    address = "2001:db8::1234:5678"
+    database[:sign_ins].insert(outcome: "wrong_account", address:, user_agent: "Firefox", **place)
+    database[:sightings].insert(
+      oauth_client_id: client_id, calls: 1_204, last_address: address, last_user_agent: "Firefox", **place,
+    )
   end
 
   def seed_tasks

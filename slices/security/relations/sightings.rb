@@ -7,6 +7,8 @@ module Security
 
       schema :sightings, infer: true
 
+      def newest_first = order(self[:last_seen_at].desc, self[:id].desc)
+
       def sight(row, at:)
         update = excluded(%i[last_address last_user_agent last_seen_at]).merge(calls: Sequel[:sightings][:calls] + 1)
 

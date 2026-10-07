@@ -23,6 +23,7 @@ module Admin
         %i[people settings fa-address-book admin_people].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
         %i[tokens settings fa-key admin_tokens].freeze,
+        %i[security settings fa-shield-halved admin_security].freeze,
       ].freeze
 
       JUMPS = { today: "t", tasks: "k", journal: "j", posts: "p", activity: "a" }.freeze

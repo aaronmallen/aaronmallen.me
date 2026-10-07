@@ -824,6 +824,7 @@ en:
           posts: "posts"
           projects: "projects"
           review: "review"
+          security: "security"
           social: "social"
           tags: "tags"
           tasks: "tasks"
@@ -1209,6 +1210,24 @@ en:
       saved_views:
         label: "Saved views"
         save: "Save view"
+      security:
+        sighting_row:
+          calls:
+            one: "%{count} call"
+            other: "%{count} calls"
+          first_seen: "first seen %{time}"
+          last_seen: "last seen %{time}"
+          unknown_device: "Unknown device"
+          unknown_place: "Unknown place"
+        sign_in_row:
+          outcomes:
+            denied: "denied"
+            github_failed: "GitHub failed"
+            signed_in: "signed in"
+            unexpected: "unexpected error"
+            wrong_account: "wrong account"
+          unknown_device: "Unknown device"
+          unknown_place: "Unknown place"
       ships_next_card:
         empty: "Nothing scheduled."
         title: "What ships next"
@@ -2088,6 +2107,16 @@ en:
           query: "Search for"
           results: "Results"
           sub: "Matches for “%{query}”"
+      security:
+        show:
+          client: "MCP client"
+          heading: "Security"
+          honeybadger: "Errors on Honeybadger"
+          no_sightings: "Nothing has used it yet."
+          no_sign_ins: "No sign-ins yet."
+          sign_ins: "Sign-ins"
+          sub: "Each device and place that has reached the admin"
+          token: "API token"
       sessions:
         failed:
           denied: "GitHub sign-in did not finish. Try again."

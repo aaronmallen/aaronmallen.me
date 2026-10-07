@@ -133,6 +133,7 @@ module Blog
 
     setting :honeybadger, default: {}, constructor: Schema.schema(
       api_key?: Value,
+      project_url?: Value,
       report_data?: Types::Params::Bool.optional,
     )
 

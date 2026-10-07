@@ -74,7 +74,11 @@ module Admin
 
     import keys: %w[repos.search_queries], from: :search
 
-    import keys: %w[operations.record_sign_in], from: :security
+    import keys: %w[
+      operations.record_sign_in
+      repos.sighting_queries
+      repos.sign_in_queries
+    ], from: :security
 
     import keys: %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
