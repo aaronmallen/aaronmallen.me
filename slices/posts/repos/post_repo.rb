@@ -2,7 +2,7 @@
 
 module Posts
   module Repos
-    class PostRepo < Blog::DB::Repo
+    class PostRepo < DB::Repo
       ALL = Blog::Types::PostFilter["all"]
       SUMMARY = %i[id title slug webmentions_enabled].freeze
       TAG_SCOPE = Blog::Types::TagScope["public"]

@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class ReviewRepo < Blog::DB::Repo
+    class ReviewRepo < DB::Repo
       RECORDS = %w[post social journal].map { Blog::Types::ActivityKind[it] }.freeze
 
       def carried(from:, to:) = review_carries.per_task_between(from, to).to_a

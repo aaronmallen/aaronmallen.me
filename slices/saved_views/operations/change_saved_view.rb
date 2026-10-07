@@ -2,7 +2,7 @@
 
 module SavedViews
   module Operations
-    class ChangeSavedView < Blog::Operation
+    class ChangeSavedView < Operation
       include Deps[contract: "contracts.saved_view_contract", saved_view_repo: "repos.saved_view_repo"]
 
       def call(id, params)

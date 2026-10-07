@@ -2,7 +2,7 @@
 
 module Activity
   module Operations
-    class SnoozeAttention < Blog::Operation
+    class SnoozeAttention < Operation
       WEEK = 7 * 24 * 60 * 60
 
       include Deps[attention_repo: "repos.attention_repo"]

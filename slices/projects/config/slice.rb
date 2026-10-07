@@ -2,6 +2,8 @@
 
 module Projects
   class Slice < Hanami::Slice
+    autoloader.push_dir(Hanami.app.root.join("lib/projects"), namespace: Projects)
+
     import keys: %w[github.client operations.record_projects_sync_outcome], from: :record
 
     export %w[

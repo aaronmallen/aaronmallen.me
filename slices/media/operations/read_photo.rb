@@ -2,7 +2,7 @@
 
 module Media
   module Operations
-    class ReadPhoto < Blog::Operation
+    class ReadPhoto < Operation
       KEY = %r{([^/?#]+)/?(?:[?#].*)?\z}
 
       Read = Data.define(:photo, :stored)

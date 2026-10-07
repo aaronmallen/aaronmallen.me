@@ -2,7 +2,7 @@
 
 module Suggestions
   module Operations
-    class ReplacePostEdits < Blog::Operation
+    class ReplacePostEdits < Operation
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[

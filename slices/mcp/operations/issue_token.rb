@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class IssueToken < Blog::Operation
+    class IssueToken < Operation
       INVALID_CLIENT = "invalid_client"
       INVALID_GRANT = "invalid_grant"
       REJECT = :reject

@@ -2,7 +2,7 @@
 
 module Admin
   module Repos
-    class SessionValidityRepo < Blog::DB::Repo
+    class SessionValidityRepo < DB::Repo
       ROW_ID = 1
 
       def end_sessions(at: Time.now) = session_validity.end_sessions(ROW_ID, at)

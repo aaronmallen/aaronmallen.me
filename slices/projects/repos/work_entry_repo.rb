@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class WorkEntryRepo < Blog::DB::Repo
+    class WorkEntryRepo < DB::Repo
       stamped_commands :create
       commands delete: :by_pk
 

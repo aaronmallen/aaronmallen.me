@@ -2,7 +2,7 @@
 
 module SavedViews
   module Operations
-    class DeleteSavedView < Blog::Operation
+    class DeleteSavedView < Operation
       include Deps[saved_view_repo: "repos.saved_view_repo"]
 
       def call(id)

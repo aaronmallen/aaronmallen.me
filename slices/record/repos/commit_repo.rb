@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class CommitRepo < Blog::DB::Repo
+    class CommitRepo < DB::Repo
       include Dry::Monads[:result]
 
       BACKFILL_KIND = Blog::Types::SyncStateKind["backfill"]

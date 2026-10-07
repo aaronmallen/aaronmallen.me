@@ -2,7 +2,7 @@
 
 module Links
   module Operations
-    class LinkRecords < Blog::Operation
+    class LinkRecords < Operation
       CONSTRAINTS = {
         "record_links_order_check" => [:other_id, "self"],
         "record_links_pair_key" => [:other_id, "taken"],

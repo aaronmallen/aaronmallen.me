@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class DeleteWorkEntry < Blog::Operation
+    class DeleteWorkEntry < Operation
       include Deps[work_entry_repo: "repos.work_entry_repo"]
 
       def call(id)

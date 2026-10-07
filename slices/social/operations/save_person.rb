@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class SavePerson < Blog::Operation
+    class SavePerson < Operation
       BLUESKY = Blog::Types::NetworkName["bluesky"]
       FIELDS = %i[bluesky_handle key mastodon_handle name].freeze
       TAKEN = "taken"

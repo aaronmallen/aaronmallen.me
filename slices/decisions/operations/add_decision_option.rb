@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class AddDecisionOption < Blog::Operation
+    class AddDecisionOption < Operation
       FIELDS = %i[title body].freeze
       OPTION_ADDED = Blog::Types::DecisionEventKind["option_added"]
 

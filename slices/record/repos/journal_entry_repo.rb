@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class JournalEntryRepo < Blog::DB::Repo
+    class JournalEntryRepo < DB::Repo
       include Blog::Constants
 
       STREAK_DAYS = 30

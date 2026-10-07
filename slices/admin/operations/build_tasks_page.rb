@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class BuildTasksPage < Blog::Operation
+    class BuildTasksPage < Operation
       include Blog::Constants
 
       CARRIED = :carried_in

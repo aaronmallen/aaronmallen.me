@@ -2,7 +2,7 @@
 
 module Links
   module Repos
-    class RecordLinkRepo < Blog::DB::Repo
+    class RecordLinkRepo < DB::Repo
       KINDS = Blog::Types::RecordKind.values
 
       commands :create

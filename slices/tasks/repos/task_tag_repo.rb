@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskTagRepo < Blog::DB::Repo
+    class TaskTagRepo < DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       def add(task_id, name) = task_tags.add_missing([task_id], tags.claim([name], scope: TAG_SCOPE).values)

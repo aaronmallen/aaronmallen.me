@@ -2,7 +2,7 @@
 
 module Media
   module Repos
-    class PhotoRepo < Blog::DB::Repo
+    class PhotoRepo < DB::Repo
       commands :create
 
       def by_key(key) = photos.with_keys(key).one

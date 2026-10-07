@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class AttentionRepo < Blog::DB::Repo
+    class AttentionRepo < DB::Repo
       def listed?(kind:, record_id:) = attention.where(kind:, record_id:).exist?
 
       def snooze(kind:, record_id:, ends_at:, now:)

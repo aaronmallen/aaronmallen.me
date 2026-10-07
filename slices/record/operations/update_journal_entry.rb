@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class UpdateJournalEntry < Blog::Operation
+    class UpdateJournalEntry < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
 
       include Deps[

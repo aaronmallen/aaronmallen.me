@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class FeedFetchRepo < Blog::DB::Repo
+    class FeedFetchRepo < DB::Repo
       def delete_hashes_before(day) = feed_reader_hashes.before(day).delete
 
       def latest_subscribers(from:, to:) = feed_subscribers.between(from, to).latest_per_feed.to_a

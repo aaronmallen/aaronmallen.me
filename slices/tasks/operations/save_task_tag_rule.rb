@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SaveTaskTagRule < Blog::Operation
+    class SaveTaskTagRule < Operation
       FIELDS = %i[pattern provider tags].freeze
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       TAKEN = "taken"

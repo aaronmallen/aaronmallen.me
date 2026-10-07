@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class Authorize < Blog::Operation
+    class Authorize < Operation
       ACCESS_DENIED = "access_denied"
       APPROVE = Blog::Types::OAuthDecision["approve"]
       CANCEL = Blog::Types::OAuthDecision["cancel"]

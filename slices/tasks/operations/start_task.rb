@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class StartTask < Blog::Operation
+    class StartTask < Operation
       include Deps[
         current_sprint: "operations.current_sprint",
         task_event_repo: "repos.task_event_repo",

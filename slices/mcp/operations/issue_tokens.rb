@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class IssueTokens < Blog::Operation
+    class IssueTokens < Operation
       ACCESS_LIFETIME = 60 * 60
       BEARER = "Bearer"
       REFRESH_LIFETIME = 30 * 24 * 60 * 60

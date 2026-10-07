@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class RevokeClient < Blog::Operation
+    class RevokeClient < Operation
       include Deps[
         client_repo: "repos.oauth_client_repo",
         code_repo: "repos.oauth_code_repo",

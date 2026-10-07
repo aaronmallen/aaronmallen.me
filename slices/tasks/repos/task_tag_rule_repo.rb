@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskTagRuleRepo < Blog::DB::Repo
+    class TaskTagRuleRepo < DB::Repo
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       LINEAR = Blog::Types::TaskSourceProvider["linear"]
       TAG_SCOPE = Blog::Types::TagScope["private"]

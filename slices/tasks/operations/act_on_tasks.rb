@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class ActOnTasks < Blog::Operation
+    class ActOnTasks < Operation
       CANCEL = Blog::Types::TaskBulkAction["cancel"]
       COMPLETE = Blog::Types::TaskBulkAction["complete"]
       FIELDS = %i[act ids tag to].freeze

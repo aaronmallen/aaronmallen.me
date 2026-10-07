@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class SavePostSeo < Blog::Operation
+    class SavePostSeo < Operation
       include Deps[
         claim_post_photos: "operations.claim_post_photos",
         contract: "contracts.post_seo_contract",

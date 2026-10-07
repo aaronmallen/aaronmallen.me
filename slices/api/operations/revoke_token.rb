@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class RevokeToken < Blog::Operation
+    class RevokeToken < Operation
       include Deps[token_repo: "repos.api_token_repo"]
 
       def call(id) = step revoke(id)

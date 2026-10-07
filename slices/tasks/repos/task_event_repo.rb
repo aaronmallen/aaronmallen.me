@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskEventRepo < Blog::DB::Repo
+    class TaskEventRepo < DB::Repo
       def track(task_ids, at, seen: true, &) = task_events.track(task_ids, at, seen:, &)
     end
   end

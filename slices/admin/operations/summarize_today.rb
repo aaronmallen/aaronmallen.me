@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class SummarizeToday < Blog::Operation
+    class SummarizeToday < Operation
       COMMIT_LIMIT = 10
       COUNTRIES = "countries"
       DRAFT = Blog::Types::PostStatus["draft"]

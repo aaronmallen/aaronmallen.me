@@ -4,7 +4,7 @@ require "securerandom"
 
 module MCP
   module Operations
-    class RegisterClient < Blog::Operation
+    class RegisterClient < Operation
       INVALID_METADATA = "invalid_client_metadata"
       INVALID_REDIRECT_URI = "invalid_redirect_uri"
       NOT_AN_OBJECT = "the request body must be a JSON object"

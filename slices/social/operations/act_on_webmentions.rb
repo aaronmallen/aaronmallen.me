@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class ActOnWebmentions < Blog::Operation
+    class ActOnWebmentions < Operation
       FIELDS = %i[act ids].freeze
 
       include Deps[contract: "contracts.bulk_contract", moderate_webmention: "operations.moderate_webmention"]

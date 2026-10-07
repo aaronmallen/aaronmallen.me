@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthCodeRepo < Blog::DB::Repo
+    class OAuthCodeRepo < DB::Repo
       stamped_commands :create
 
       def burn(id, at: Time.now) = oauth_codes.burn(id, at:)

@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskContributorRepo < Blog::DB::Repo
+    class TaskContributorRepo < DB::Repo
       def add_missing(task_ids, contributors)
         rows = task_ids.product(contributors).map { |task_id, contributor| { task_id:, **contributor } }
 

@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsEventRepo < Blog::DB::Repo
+    class AnalyticsEventRepo < DB::Repo
       stamped_commands :create
 
       def claim(address_hash:, limit:, since:, **attrs)

@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SetTaskTotal < Blog::Operation
+    class SetTaskTotal < Operation
       include Deps[
         contract: "contracts.worked_contract",
         task_repo: "repos.task_repo",

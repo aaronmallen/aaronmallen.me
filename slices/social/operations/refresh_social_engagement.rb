@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class RefreshSocialEngagement < Blog::Operation
+    class RefreshSocialEngagement < Operation
       WINDOW = 30 * 24 * 60 * 60
 
       include Deps[networks: "networks.all", social_post_repo: "repos.social_post_repo"]

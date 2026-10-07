@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class AddTaskComment < Blog::Operation
+    class AddTaskComment < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
 
       include Deps[

@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class ActOnPosts < Blog::Operation
+    class ActOnPosts < Operation
       DRAFT = Blog::Types::PostStatus["draft"]
       FIELDS = %i[act ids tag].freeze
       TAG = Blog::Types::PostBulkAction["tag"]

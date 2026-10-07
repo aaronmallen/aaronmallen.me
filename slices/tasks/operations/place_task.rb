@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class PlaceTask < Blog::Operation
+    class PlaceTask < Operation
       include Deps[task_repo: "repos.task_repo"]
 
       def call(id, after_id)

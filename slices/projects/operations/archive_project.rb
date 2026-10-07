@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class ArchiveProject < Blog::Operation
+    class ArchiveProject < Operation
       include Deps[project_repo: "repos.project_repo"]
 
       def call(id, on: Blog::TimeZone.today)

@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class ResolveDecision < Blog::Operation
+    class ResolveDecision < Operation
       CHOICE = "decisions_resolved_option_fkey"
       EVENT = Blog::Types::DecisionEventKind["resolved"]
       FIELDS = %i[option_id reason].freeze

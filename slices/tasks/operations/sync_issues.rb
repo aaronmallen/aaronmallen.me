@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncIssues < Blog::Operation
+    class SyncIssues < Operation
       CLOSED = Structs::TaskSource::CLOSED
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY

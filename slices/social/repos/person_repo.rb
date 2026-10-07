@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class PersonRepo < Blog::DB::Repo
+    class PersonRepo < DB::Repo
       stamped_commands :create, :update
       commands delete: :by_pk
 

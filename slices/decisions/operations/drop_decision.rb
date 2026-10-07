@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class DropDecision < Blog::Operation
+    class DropDecision < Operation
       EVENT = Blog::Types::DecisionEventKind["dropped"]
       STATUS = Blog::Types::DecisionStatus["dropped"]
 

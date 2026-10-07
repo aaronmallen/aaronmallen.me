@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class MintToken < Blog::Operation
+    class MintToken < Operation
       include Deps[contract: "contracts.token_contract", token_repo: "repos.api_token_repo"]
 
       def call(params)

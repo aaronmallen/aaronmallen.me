@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class DeleteSocialPost < Blog::Operation
+    class DeleteSocialPost < Operation
       include Deps[social_post_repo: "repos.social_post_repo"]
 
       def call(id)

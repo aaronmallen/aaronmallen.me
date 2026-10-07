@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class ProjectRepo < Blog::DB::Repo
+    class ProjectRepo < DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["public"]
 
       stamped_commands :create, :update

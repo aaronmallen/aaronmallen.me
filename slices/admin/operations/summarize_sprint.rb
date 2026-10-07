@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class SummarizeSprint < Blog::Operation
+    class SummarizeSprint < Operation
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
         open_tasks_in_list: "tasks.queries.open_tasks_in_list",

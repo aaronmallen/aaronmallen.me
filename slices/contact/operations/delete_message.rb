@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class DeleteMessage < Blog::Operation
+    class DeleteMessage < Operation
       include Deps[message_repo: "repos.message_repo"]
 
       def call(id) = step found(message_repo.delete(id))

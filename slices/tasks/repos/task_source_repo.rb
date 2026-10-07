@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskSourceRepo < Blog::DB::Repo
+    class TaskSourceRepo < DB::Repo
       SYNC_LOCK = 303_304
       SYNC_LOCKS = { "github" => SYNC_LOCK, "linear" => 303_305 }.freeze
 

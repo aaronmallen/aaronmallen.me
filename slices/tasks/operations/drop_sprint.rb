@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class DropSprint < Blog::Operation
+    class DropSprint < Operation
       include Deps[sprint_repo: "repos.sprint_repo"]
 
       def call(id, now: Time.now)

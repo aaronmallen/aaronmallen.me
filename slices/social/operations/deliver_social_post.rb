@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class DeliverSocialPost < Blog::Operation
+    class DeliverSocialPost < Operation
       NO_CREDENTIALS = :no_credentials
       OVER_LIMIT = :over_limit
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]

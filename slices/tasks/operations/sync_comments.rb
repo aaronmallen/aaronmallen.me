@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncComments < Blog::Operation
+    class SyncComments < Operation
       FIELDS = %i[author body url].freeze
       VISIBLE = /[[:^space:]]/
 

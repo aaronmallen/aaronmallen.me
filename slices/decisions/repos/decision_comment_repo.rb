@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionCommentRepo < Blog::DB::Repo
+    class DecisionCommentRepo < DB::Repo
       stamped_commands :create, :update
 
       def delete_on_decision(decision_id, id) = on_decision(decision_id, id).delete

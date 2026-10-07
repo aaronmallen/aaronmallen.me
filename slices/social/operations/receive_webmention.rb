@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class ReceiveWebmention < Blog::Operation
+    class ReceiveWebmention < Operation
       MAX_URL = 2048
       TARGET_PATH = %r{\A#{Blog::Site::WRITING}/(?<slug>[^/]+)\z}
 

@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class SaveProject < Blog::Operation
+    class SaveProject < Operation
       include Deps[contract: "contracts.project_contract", project_repo: "repos.project_repo"]
 
       CONSTRAINTS = {

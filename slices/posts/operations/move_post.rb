@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class MovePost < Blog::Operation
+    class MovePost < Operation
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
       include Blog::DayMove

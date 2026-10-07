@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthTokenRepo < Blog::DB::Repo
+    class OAuthTokenRepo < DB::Repo
       stamped_commands :create
 
       def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(Blog::SecretToken.digest(token)).one

@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthClientRepo < Blog::DB::Repo
+    class OAuthClientRepo < DB::Repo
       def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
         oauth_clients.claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
       end

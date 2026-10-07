@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskCommentRepo < Blog::DB::Repo
+    class TaskCommentRepo < DB::Repo
       stamped_commands :create, :update
 
       def delete_local(task_id, id) = local(task_id, id).delete

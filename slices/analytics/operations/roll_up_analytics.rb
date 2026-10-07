@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class RollUpAnalytics < Blog::Operation
+    class RollUpAnalytics < Operation
       include Deps[event_repo: "repos.analytics_event_repo", rollup_repo: "repos.analytics_rollup_repo"]
 
       def call

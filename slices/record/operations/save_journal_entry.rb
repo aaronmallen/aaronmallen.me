@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class SaveJournalEntry < Blog::Operation
+    class SaveJournalEntry < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
       TIME_FORMAT = "%H:%M:%S"
 

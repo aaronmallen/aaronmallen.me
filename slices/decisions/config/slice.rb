@@ -2,6 +2,8 @@
 
 module Decisions
   class Slice < Hanami::Slice
+    autoloader.push_dir(Hanami.app.root.join("lib/decisions"), namespace: Decisions)
+
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
     export %w[

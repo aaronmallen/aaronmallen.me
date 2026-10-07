@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TimeReportRepo < Blog::DB::Repo
+    class TimeReportRepo < DB::Repo
       def closed_seconds(task_ids) = work_sessions.closed_seconds_by_task(task_ids)
 
       def project_ids(task_ids) = record_links.project_ids_by_task(task_ids)

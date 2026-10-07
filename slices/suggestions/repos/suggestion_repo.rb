@@ -2,7 +2,7 @@
 
 module Suggestions
   module Repos
-    class SuggestionRepo < Blog::DB::Repo
+    class SuggestionRepo < DB::Repo
       ACCEPTED = Blog::Types::SuggestionEditStatus["accepted"]
       EDIT_FIELDS = %i[original replacement reason part].freeze
       PENDING = Blog::Types::SuggestionEditStatus["pending"]

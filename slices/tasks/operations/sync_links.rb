@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncLinks < Blog::Operation
+    class SyncLinks < Operation
       ENDS = %i[from_task_id to_task_id].freeze
       FAILURES = [ROM::SQL::UniqueConstraintError, ROM::SQL::ForeignKeyConstraintError].freeze
       KINDS = Structs::Link::LABELS.each_with_object({}) do |(type, sides), kinds|

@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class RefreshProjects < Blog::Operation
+    class RefreshProjects < Operation
       include Deps[client: "record.github.client", project_repo: "repos.project_repo"]
 
       def call = step refresh

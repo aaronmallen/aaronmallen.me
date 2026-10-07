@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class UpdateWebmentionSettings < Blog::Operation
+    class UpdateWebmentionSettings < Operation
       include Deps[webmention_repo: "repos.webmention_repo"]
 
       def call(**attrs)

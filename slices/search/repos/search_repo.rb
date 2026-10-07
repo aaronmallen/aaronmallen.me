@@ -2,7 +2,7 @@
 
 module Search
   module Repos
-    class SearchRepo < Blog::DB::Repo
+    class SearchRepo < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
       def search(text:, page:, kinds:, per_kind:)

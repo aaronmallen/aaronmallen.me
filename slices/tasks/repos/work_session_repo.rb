@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class WorkSessionRepo < Blog::DB::Repo
+    class WorkSessionRepo < DB::Repo
       stamped_commands :update
 
       def close(task_id, at) = work_sessions.close(task_id, at)

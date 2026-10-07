@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class SocialPostRepo < Blog::DB::Repo
+    class SocialPostRepo < DB::Repo
       DRAFT = Blog::Types::SocialPostStatus["draft"]
       POSTED = Blog::Types::SocialPostStatus["posted"]
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]

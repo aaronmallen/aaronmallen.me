@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class ReviewNoteRepo < Blog::DB::Repo
+    class ReviewNoteRepo < DB::Repo
       def note(period, starts_on) = review_notes.of(period, starts_on).one
 
       def save_note(period:, starts_on:, body:, now:)

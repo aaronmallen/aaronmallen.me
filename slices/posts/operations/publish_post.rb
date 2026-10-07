@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class PublishPost < Blog::Operation
+    class PublishPost < Operation
       include Deps[post_repo: "repos.post_repo", queue_follow_up: "operations.queue_follow_up"]
 
       def call(id, at: Time.now, only_if_due: false)

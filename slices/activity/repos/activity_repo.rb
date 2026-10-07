@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class ActivityRepo < Blog::DB::Repo
+    class ActivityRepo < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
       TYPES = Blog::Types::ActivityKind.values
 

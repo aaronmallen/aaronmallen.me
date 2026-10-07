@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class TagTask < Blog::Operation
+    class TagTask < Operation
       include Deps[
         task_event_repo: "repos.task_event_repo",
         task_repo: "repos.task_repo",

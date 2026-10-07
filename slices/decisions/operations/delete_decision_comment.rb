@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class DeleteDecisionComment < Blog::Operation
+    class DeleteDecisionComment < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["decision_comment"]
 
       include Deps[

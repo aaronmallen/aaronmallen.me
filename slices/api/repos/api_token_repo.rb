@@ -2,7 +2,7 @@
 
 module API
   module Repos
-    class APITokenRepo < Blog::DB::Repo
+    class APITokenRepo < DB::Repo
       stamped_commands :create, :update
 
       def live = api_tokens.live.newest_first.to_a

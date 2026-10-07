@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class MarkMessage < Blog::Operation
+    class MarkMessage < Operation
       include Deps[message_repo: "repos.message_repo"]
 
       def call(id, status)

@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class UnlinkTask < Blog::Operation
+    class UnlinkTask < Operation
       include Deps[task_repo: "repos.task_repo"]
 
       def call(id, other_id)

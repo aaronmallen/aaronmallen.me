@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class ImportCommits < Blog::Operation
+    class ImportCommits < Operation
       STALLED_AFTER = 2 * 60 * 60
       SYNC = Blog::Types::SyncName["commits"]
 

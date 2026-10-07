@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class RefreshCountryDatabase < Blog::Operation
+    class RefreshCountryDatabase < Operation
       include Deps["geo.countries", "geo.geo_lite2.client"]
 
       def call

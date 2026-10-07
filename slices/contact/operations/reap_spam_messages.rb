@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class ReapSpamMessages < Blog::Operation
+    class ReapSpamMessages < Operation
       KEEP_FOR = 30 * 24 * 60 * 60
 
       include Deps[message_repo: "repos.message_repo"]

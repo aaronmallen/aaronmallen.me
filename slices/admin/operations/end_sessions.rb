@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class EndSessions < Blog::Operation
+    class EndSessions < Operation
       include Deps[session_validity_repo: "repos.session_validity_repo"]
 
       def call = session_validity_repo.end_sessions

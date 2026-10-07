@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskRepo < Blog::DB::Repo
+    class TaskRepo < DB::Repo
       CANCELED = Blog::Types::TaskStatus["canceled"]
       DONE = Blog::Types::TaskStatus["done"]
       EXTERNAL = Blog::Types::TaskList["external"]

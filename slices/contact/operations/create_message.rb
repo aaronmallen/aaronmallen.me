@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class CreateMessage < Blog::Operation
+    class CreateMessage < Operation
       include Deps["settings", contract: "contracts.message_contract", message_repo: "repos.message_repo"]
 
       def call(params, visitor_hash:)

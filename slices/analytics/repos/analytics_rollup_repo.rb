@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsRollupRepo < Blog::DB::Repo
+    class AnalyticsRollupRepo < DB::Repo
       ROWS = {
         analytics_rollup_referrers: :referrers,
         analytics_rollup_countries: :countries,

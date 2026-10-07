@@ -2,7 +2,7 @@
 
 module Suggestions
   module Operations
-    class AcceptSuggestionEdits < Blog::Operation
+    class AcceptSuggestionEdits < Operation
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[

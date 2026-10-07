@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionRepo < Blog::DB::Repo
+    class DecisionRepo < DB::Repo
       STATUSES = Blog::Types::DecisionStatus.values.freeze
       TAG_SCOPE = Blog::Types::TagScope["private"]
 

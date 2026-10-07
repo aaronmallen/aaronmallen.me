@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class PruneAnalyticsEvents < Blog::Operation
+    class PruneAnalyticsEvents < Operation
       RETENTION_DAYS = 90
 
       include Deps[

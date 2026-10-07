@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class VerifyWebmention < Blog::Operation
+    class VerifyWebmention < Operation
       GONE_STATUSES = [404, 410].freeze
       OK_STATUSES = (200..299)
       PUBLISHED = Blog::Types::PostStatus["published"]

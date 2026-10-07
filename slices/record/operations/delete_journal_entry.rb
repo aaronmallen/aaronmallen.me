@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class DeleteJournalEntry < Blog::Operation
+    class DeleteJournalEntry < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
 
       include Deps[journal_entry_repo: "repos.journal_entry_repo", release_photos: "media.operations.release_photos"]

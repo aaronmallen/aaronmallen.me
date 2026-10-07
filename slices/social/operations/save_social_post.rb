@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class SaveSocialPost < Blog::Operation
+    class SaveSocialPost < Operation
       include Deps[contract: "contracts.social_post_contract", social_post_repo: "repos.social_post_repo"]
 
       def call(id: nil, **attrs)

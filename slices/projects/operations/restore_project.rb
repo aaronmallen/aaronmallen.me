@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class RestoreProject < Blog::Operation
+    class RestoreProject < Operation
       include Deps[project_repo: "repos.project_repo"]
 
       def call(id)

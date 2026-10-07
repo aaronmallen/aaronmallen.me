@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class PostReaderHashRepo < Blog::DB::Repo
+    class PostReaderHashRepo < DB::Repo
       def live_counts(paths) = by_path(post_reader_hashes.for_paths(paths).counts_by_path)
 
       def record(path:, reader_hash:, since: Readers.window_opened_at)

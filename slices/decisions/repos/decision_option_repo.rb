@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionOptionRepo < Blog::DB::Repo
+    class DecisionOptionRepo < DB::Repo
       stamped_commands :create, :update
       commands delete: :by_pk
 

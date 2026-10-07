@@ -2,7 +2,7 @@
 
 module Posts
   module Repos
-    class PostEditRepo < Blog::DB::Repo
+    class PostEditRepo < DB::Repo
       stamped_commands :create, :update
 
       def edited_at(post_ids) = post_edits.edited_at(post_ids).to_a.to_h { [it.post_id, it.edited_at] }

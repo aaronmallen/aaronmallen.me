@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class DeleteWorkSession < Blog::Operation
+    class DeleteWorkSession < Operation
       RUNNING = "running"
 
       include Deps[work_session_repo: "repos.work_session_repo"]

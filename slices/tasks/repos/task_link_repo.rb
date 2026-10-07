@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskLinkRepo < Blog::DB::Repo
+    class TaskLinkRepo < DB::Repo
       def add_synced(from_task_id:, to_task_id:, type:)
         task_links.command(:create).call(from_task_id:, to_task_id:, type:, synced: true)
       end

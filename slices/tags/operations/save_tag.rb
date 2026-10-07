@@ -2,7 +2,7 @@
 
 module Tags
   module Operations
-    class SaveTag < Blog::Operation
+    class SaveTag < Operation
       TAKEN = "taken"
 
       include Deps[contract: "contracts.tag_contract", tag_repo: "repos.tag_repo"]

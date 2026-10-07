@@ -2,7 +2,7 @@
 
 module Tags
   module Repos
-    class TagRepo < Blog::DB::Repo
+    class TagRepo < DB::Repo
       stamped_commands :create, :update
       commands delete: :by_pk
 

@@ -2,7 +2,7 @@
 
 module SavedViews
   module Repos
-    class SavedViewRepo < Blog::DB::Repo
+    class SavedViewRepo < DB::Repo
       stamped_commands :create, :update
       commands delete: :by_pk
 

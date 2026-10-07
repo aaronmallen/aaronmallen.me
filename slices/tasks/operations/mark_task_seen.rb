@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class MarkTaskSeen < Blog::Operation
+    class MarkTaskSeen < Operation
       include Deps[task_repo: "repos.task_repo", task_source_repo: "repos.task_source_repo"]
 
       def call(id, at: Time.now)

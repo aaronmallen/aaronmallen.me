@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class MoveProject < Blog::Operation
+    class MoveProject < Operation
       include Deps[project_repo: "repos.project_repo"]
 
       OFFSETS = { Blog::Types::ProjectMove["up"] => -1, Blog::Types::ProjectMove["down"] => 1 }.freeze
