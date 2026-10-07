@@ -51,7 +51,7 @@ module MCP
 
       class << self
         def call(server_context:, id: nil, **fields)
-          current = id && dep(:project_by_id, server_context).call(id)
+          current = id && dep(:project_queries, server_context).by_id(id)
           return refuse(API::Wording.missing("project", id)) if id && current.nil?
 
           result = dep(:save_project, server_context).call(form(current, fields), id:)

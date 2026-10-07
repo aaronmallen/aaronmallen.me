@@ -7,7 +7,7 @@ module Tasks
       NONE = [nil].freeze
       PROJECT = Blog::Types::TimeGrouping["project"]
 
-      include Deps[linkable_projects: "projects.queries.linkable_projects", time_report_repo: "repos.time_report_repo"]
+      include Deps[project_queries: "projects.repos.project_queries", time_report_repo: "repos.time_report_repo"]
 
       def call(from:, to:, by:)
         grouping = Blog::Types::TimeGrouping[by]
@@ -45,7 +45,7 @@ module Tasks
 
       def project_keys(ids)
         project_ids = time_report_repo.project_ids(ids)
-        names = linkable_projects.named(project_ids.values.flatten.uniq).to_h { [it.id, it.title] }
+        names = project_queries.linkable(:projects, ids: project_ids.values.flatten.uniq).to_h { [it.id, it.title] }
 
         ->(id, _) { project_ids.fetch(id, NONE).map { [it, names[it]] } }
       end

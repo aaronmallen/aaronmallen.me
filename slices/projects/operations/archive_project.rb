@@ -3,18 +3,18 @@
 module Projects
   module Operations
     class ArchiveProject < Operation
-      include Deps[project_repo: "repos.project_repo"]
+      include Deps[project_mutations: "repos.project_mutations", project_queries: "repos.project_queries"]
 
       def call(id, on: Blog::TimeZone.today)
         project = step find(id)
         step started(project, on)
-        project_repo.update(id, archived_on: on)
+        project_mutations.update(id, archived_on: on)
       end
 
       private
 
       def find(id)
-        found(project_repo.by_id(id))
+        found(project_queries.by_id(id))
       end
 
       def started(project, on)

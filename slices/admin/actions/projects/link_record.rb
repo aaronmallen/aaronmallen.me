@@ -12,7 +12,7 @@ module Admin
           edit_view: "ui.views.projects.edit",
           link_records: "links.operations.link_records",
           list_record_links: "operations.list_record_links",
-          project_by_id: "projects.queries.by_id",
+          project_queries: "projects.repos.project_queries",
         ]
 
         def handle(request, response) = link(request, response)
@@ -22,7 +22,7 @@ module Admin
         def record_path(_request, id) = routes.path(:admin_edit_project, id:)
 
         def render_refused(request, response, id, errors)
-          project = project_by_id.call(id)
+          project = project_queries.by_id(id)
           halt 404 unless project
 
           response.render(edit_view, **build_project_editor.call(project:),

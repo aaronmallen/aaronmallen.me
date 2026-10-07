@@ -11,7 +11,7 @@ module Admin
           build_project_editor: "operations.build_project_editor",
           link_repo_tasks: "tasks.operations.link_repo_tasks",
           list_record_links: "operations.list_record_links",
-          project_by_id: "projects.queries.by_id",
+          project_queries: "projects.repos.project_queries",
           save_project: "projects.operations.save_project",
         ]
 
@@ -22,7 +22,7 @@ module Admin
           result = save(params, id)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, project_by_id.call(id), params, errors)
+          in Failure[:invalid, errors] then invalid(response, project_queries.by_id(id), params, errors)
           else settle(response, result, SAVED, routes.path(:admin_edit_project, id:))
           end
         end
@@ -38,7 +38,7 @@ module Admin
         end
 
         def save(params, id)
-          was = project_by_id.call(id)&.repo
+          was = project_queries.by_id(id)&.repo
 
           save_project.call(params, id:).bind { link_repo_tasks.call(it, was:) }
         end

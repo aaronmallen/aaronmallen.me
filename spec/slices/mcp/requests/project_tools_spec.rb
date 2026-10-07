@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP project and work entry tools", type: :request do
-  let(:project_repo) { Projects::Slice["repos.project_repo"] }
-  let(:work_entry_repo) { Projects::Slice["repos.work_entry_repo"] }
+  let(:project_queries) { Projects::Slice["repos.project_queries"] }
+  let(:work_entry_queries) { Projects::Slice["repos.work_entry_queries"] }
 
   def access_token
     @access_token ||= mcp_connect(
@@ -118,7 +118,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("save_project", name: "fresh", repo: "aaronmallen/fresh", visibility: "private", tags: %w[ruby cli])
 
       expect(content).to include("name" => "fresh", "visibility" => "private", "status" => "active")
-      expect(project_repo.by_id(content.fetch("id")).tags.map(&:name)).to contain_exactly("ruby", "cli")
+      expect(project_queries.by_id(content.fetch("id")).tags.map(&:name)).to contain_exactly("ruby", "cli")
     end
 
     describe "given a repo with issues already imported" do
@@ -145,7 +145,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("save_project", name: "fresh")
 
       expect(message).to eq("visibility: pick public or private")
-      expect(project_repo.live).to be_empty
+      expect(project_queries.live).to be_empty
     end
 
     it "refuses a visibility it does not know" do
@@ -158,14 +158,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       project = create(:project)
       call_tool("save_project", id: project.id, visibility: "private")
 
-      expect(project_repo.by_id(project.id).visibility).to eq("private")
+      expect(project_queries.by_id(project.id).visibility).to eq("private")
     end
 
     it "keeps every field a change leaves out", :aggregate_failures do
       project = create(:project, :private, tagline: "kept", started_on: Date.new(2024, 6, 1), tags: %w[ruby])
       call_tool("save_project", id: project.id, name: "renamed")
 
-      saved = project_repo.by_id(project.id)
+      saved = project_queries.by_id(project.id)
       expect(saved).to have_attributes(tagline: "kept", visibility: "private", started_on: project.started_on)
       expect(saved.tags.map(&:name)).to eq(%w[ruby])
     end
@@ -174,14 +174,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       project = create(:project, tagline: "gone soon")
       call_tool("save_project", id: project.id, tagline: "")
 
-      expect(project_repo.by_id(project.id).tagline).to be_nil
+      expect(project_queries.by_id(project.id).tagline).to be_nil
     end
 
     it "keeps an archived project archived" do
       project = create(:project, :archived)
       call_tool("save_project", id: project.id, name: "still archived")
 
-      expect(project_repo.by_id(project.id).archived_on).to eq(project.archived_on)
+      expect(project_queries.by_id(project.id).archived_on).to eq(project.archived_on)
     end
 
     it "refuses a repository another project tracks, with the reason the admin gives", :aggregate_failures do
@@ -209,14 +209,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("save_project", repo: "aaronmallen/nameless", visibility: "public")
 
       expect(message).to eq("name: add a name")
-      expect(project_repo.live).to be_empty
+      expect(project_queries.live).to be_empty
     end
 
     it "refuses a name made only of Unicode spaces, and saves nothing", :aggregate_failures do
       call_tool("save_project", name: "\u2003\u3000", visibility: "public")
 
       expect(message).to eq("name: add a name")
-      expect(project_repo.live).to be_empty
+      expect(project_queries.live).to be_empty
     end
 
     it "keeps a name with Unicode spaces around real words as typed" do
@@ -239,7 +239,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("archive_project", id: project.id)
 
       expect(content).to include("status" => "archived", "archived_on" => today.iso8601)
-      expect(project_repo.by_id(project.id).archived_on).to eq(today)
+      expect(project_queries.by_id(project.id).archived_on).to eq(today)
     end
 
     it "refuses a project whose start month has not come, as the admin does", :aggregate_failures do
@@ -247,7 +247,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("archive_project", id: project.id)
 
       expect(message).to eq("not archived: its start month has not come yet")
-      expect(project_repo.by_id(project.id).archived_on).to be_nil
+      expect(project_queries.by_id(project.id).archived_on).to be_nil
     end
 
     it "refuses an ID no project has" do
@@ -263,7 +263,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("restore_project", id: project.id)
 
       expect(content).to include("status" => "active")
-      expect(project_repo.by_id(project.id).archived_on).to be_nil
+      expect(project_queries.by_id(project.id).archived_on).to be_nil
     end
 
     it "refuses a project that is not archived" do
@@ -279,14 +279,14 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("add_work_entry", org: "Acme", role: "Engineer", from_year: 2019)
 
       expect(content).to include("org" => "Acme", "role" => "Engineer", "from_year" => 2019, "current" => true)
-      expect(work_entry_repo.all.map(&:org)).to eq(%w[Acme])
+      expect(work_entry_queries.all.map(&:org)).to eq(%w[Acme])
     end
 
     it "refuses an end year before the start, with the reason the admin gives", :aggregate_failures do
       call_tool("add_work_entry", org: "Acme", role: "Engineer", from_year: 2019, to_year: 2017)
 
       expect(message).to eq("to_year: the end year falls before the start year")
-      expect(work_entry_repo.all).to be_empty
+      expect(work_entry_queries.all).to be_empty
     end
 
     it "refuses a year that is not four digits" do
@@ -307,7 +307,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       entry = create(:work_entry)
       call_tool("delete_work_entry", id: entry.id)
 
-      expect(work_entry_repo.all).to be_empty
+      expect(work_entry_queries.all).to be_empty
     end
 
     it "refuses an ID no role has" do

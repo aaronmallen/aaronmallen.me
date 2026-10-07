@@ -25,7 +25,7 @@ module MCP
         end
 
         def listed(first, last, server_context)
-          entries = dep(:work_entries_between, server_context).call(from: first, to: last)
+          entries = dep(:work_entry_queries, server_context).between(from: first, to: last)
 
           answer(from: first.iso8601, to: last.iso8601, work_entries: entries.map { summary(it) })
         end

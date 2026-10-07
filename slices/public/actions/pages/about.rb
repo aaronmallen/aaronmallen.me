@@ -4,12 +4,12 @@ module Public
   module Actions
     module Pages
       class About < Action
-        include Deps[all_work_entries: "projects.queries.work_entries"]
+        include Deps[work_entry_queries: "projects.repos.work_entry_queries"]
 
         share_with_caches
 
         def handle(_request, response)
-          response[:work_entries] = all_work_entries.call
+          response[:work_entries] = work_entry_queries.all
         end
       end
     end

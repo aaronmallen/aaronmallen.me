@@ -6,7 +6,7 @@ module Links
 
     import keys: %w[repos.decision_queries], from: :decisions
     import keys: %w[queries.linkable_posts], from: :posts
-    import keys: %w[queries.linkable_projects queries.linkable_work_entries], from: :projects
+    import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
     import keys: %w[repos.commit_queries repos.journal_entry_queries], from: :record
     import keys: %w[queries.linkable_social_posts], from: :social
     import keys: %w[queries.linkable_tasks], from: :tasks

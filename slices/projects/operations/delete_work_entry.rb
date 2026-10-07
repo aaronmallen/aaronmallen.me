@@ -3,10 +3,10 @@
 module Projects
   module Operations
     class DeleteWorkEntry < Operation
-      include Deps[work_entry_repo: "repos.work_entry_repo"]
+      include Deps[work_entry_mutations: "repos.work_entry_mutations"]
 
       def call(id)
-        step found(work_entry_repo.delete(id))
+        step found(work_entry_mutations.delete(id))
       end
     end
   end

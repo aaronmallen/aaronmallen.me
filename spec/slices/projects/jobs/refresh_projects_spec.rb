@@ -3,7 +3,7 @@
 RSpec.describe Projects::Jobs::RefreshProjects do
   let(:api) { "https://api.github.com" }
   let(:project) { create(:project, repo:, stars: 3, release: "v1.0.0") }
-  let(:project_repo) { Projects::Slice["repos.project_repo"] }
+  let(:project_queries) { Projects::Slice["repos.project_queries"] }
   let(:repo) { "aaronmallen/aaronmallen.me" }
 
   def failure = sync_state_queries.failure(Blog::Types::SyncName["projects"])
@@ -20,7 +20,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
 
   def refresh = described_class.new.perform
 
-  def stored(project) = project_repo.by_id(project.id)
+  def stored(project) = project_queries.by_id(project.id)
 
   def stub_other(stars: 7, tag: "v3.1.0")
     stub_repo("aaronmallen/other", stars:)

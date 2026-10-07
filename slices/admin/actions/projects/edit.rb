@@ -9,11 +9,11 @@ module Admin
         include Deps[
           build_project_editor: "operations.build_project_editor",
           list_record_links: "operations.list_record_links",
-          project_by_id: "projects.queries.by_id",
+          project_queries: "projects.repos.project_queries",
         ]
 
         def handle(request, response)
-          project = project_by_id.call(record_id(request))
+          project = project_queries.by_id(record_id(request))
           not_found(response) unless project
 
           records = list_record_links.call(KIND, project.id, query: request.params[:record_q])

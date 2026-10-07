@@ -8,18 +8,17 @@ module Admin
       WORK = Blog::Types::ProjectFilter["work"]
 
       include Deps[
-        all_work_entries: "projects.queries.work_entries",
-        archived_projects: "projects.queries.archived",
         list_record_links: "operations.list_record_links",
-        live_projects: "projects.queries.live",
+        project_queries: "projects.repos.project_queries",
+        work_entry_queries: "projects.repos.work_entry_queries",
       ]
 
       def call(
         filter: Blog::Types::ProjectFilter["live"], params: nil, errors: Blog::Constants::EMPTY_HASH, linking: nil,
         records: Blog::Constants::EMPTY_HASH
       )
-        live = live_projects.call
-        archived = archived_projects.call
+        live = project_queries.live
+        archived = project_queries.archived
         entries = work_entries(filter)
 
         {
@@ -52,7 +51,7 @@ module Admin
       def work_entries(filter)
         return Blog::Constants::EMPTY_ARRAY unless filter == WORK
 
-        all_work_entries.call
+        work_entry_queries.all
       end
 
       def work_links(entries, id, records)

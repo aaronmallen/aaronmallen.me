@@ -3,7 +3,11 @@
 module Projects
   module Operations
     class RefreshProjects < Operation
-      include Deps[client: "record.github.client", project_repo: "repos.project_repo"]
+      include Deps[
+        client: "record.github.client",
+        project_mutations: "repos.project_mutations",
+        project_queries: "repos.project_queries",
+      ]
 
       def call = step refresh
 
@@ -12,7 +16,7 @@ module Projects
       def refresh
         return Failure(:not_configured) unless client.configured?
 
-        Success(project_repo.tracked.count { refreshed?(it) })
+        Success(project_queries.tracked.count { refreshed?(it) })
       rescue Record::GitHub::Client::RateLimited
         Failure(:rate_limited)
       rescue Record::GitHub::Client::Error => e
@@ -26,7 +30,7 @@ module Projects
         release = client.latest_release(project.repo)
         return false if project.stars == stars && project.release == release
 
-        project_repo.update(project.id, stars:, release:)
+        project_mutations.update(project.id, stars:, release:)
         true
       end
     end

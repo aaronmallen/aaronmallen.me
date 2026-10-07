@@ -8,7 +8,7 @@ module Tags
 
     import keys: %w[queries.by_tag], from: :posts
 
-    import keys: %w[queries.by_tag], from: :projects
+    import keys: %w[repos.project_queries], from: :projects
 
     import keys: %w[repos.journal_entry_queries], from: :record
 

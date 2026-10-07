@@ -543,7 +543,7 @@ RSpec.describe "Admin tags", type: :request do
         send_to("/admin/tags/#{named('ruby').id}/delete")
 
         expect(post_repo.by_id(post.id).tags.map(&:name)).to eq(%w[rails])
-        expect(Projects::Slice["repos.project_repo"].by_id(project.id).tags).to be_empty
+        expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
       end
 
       it "takes it off every private record that carried it", :aggregate_failures do

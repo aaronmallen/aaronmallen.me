@@ -8,7 +8,7 @@ module Tags
         decision_queries: "decisions.repos.decision_queries",
         posts_by_tag: "posts.queries.by_tag",
         journal_entry_queries: "record.repos.journal_entry_queries",
-        projects_by_tag: "projects.queries.by_tag",
+        project_queries: "projects.repos.project_queries",
         tag_repo: "repos.tag_repo",
       ]
 
@@ -17,7 +17,7 @@ module Tags
         return if tags.empty?
 
         Structs::Summary.new(
-          name:, tags:, posts: posts_by_tag.call(name), projects: projects_by_tag.call(name),
+          name:, tags:, posts: posts_by_tag.call(name), projects: project_queries.by_tag(name),
           tasks: tasks_by_tag.call(name), journal_entries: journal_entry_queries.by_tag(name),
           decisions: decision_queries.by_tag(name),
         )

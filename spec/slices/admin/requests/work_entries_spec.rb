@@ -3,7 +3,7 @@
 RSpec.describe "Admin work history", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Projects::Slice["repos.work_entry_repo"] }
+  let(:repo) { Projects::Slice["repos.work_entry_queries"] }
 
   def add(**fields)
     post "/admin/projects/work", _csrf_token: admin_csrf_token, work_entry: fields

@@ -6,7 +6,7 @@ module Tasks
 
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
-    import keys: %w[queries.linkable_projects], from: :projects
+    import keys: %w[repos.project_queries], from: :projects
 
     import keys: %w[
       github.client linear.client operations.record_issue_sync_outcome operations.record_linear_issue_sync_outcome

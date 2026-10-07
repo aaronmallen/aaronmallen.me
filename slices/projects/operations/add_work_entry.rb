@@ -5,11 +5,11 @@ module Projects
     class AddWorkEntry < Operation
       FIELDS = %i[blurb from_year org role to_year].freeze
 
-      include Deps[contract: "contracts.work_entry_contract", work_entry_repo: "repos.work_entry_repo"]
+      include Deps[contract: "contracts.work_entry_contract", work_entry_mutations: "repos.work_entry_mutations"]
 
       def call(params)
         fields = step validate(params)
-        work_entry_repo.create(**fields, position: work_entry_repo.next_position)
+        work_entry_mutations.create(**fields, position: work_entry_mutations.next_position)
       end
 
       private

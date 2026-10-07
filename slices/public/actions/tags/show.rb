@@ -6,7 +6,7 @@ module Public
       class Show < Action
         include Deps[
           "settings",
-          public_projects_by_tag: "projects.queries.public_by_tag",
+          project_queries: "projects.repos.project_queries",
           published_page_by_tag: "posts.queries.published_page_by_tag",
         ]
 
@@ -23,7 +23,7 @@ module Public
 
         def expose_listing(response, tag, page)
           posts = published_page_by_tag.call(tag, page)
-          projects = page.number == 1 ? public_projects_by_tag.call(tag) : []
+          projects = page.number == 1 ? project_queries.public_by_tag(tag) : []
           not_found(response) if posts.rows.empty? && projects.empty?
 
           response[:tag] = tag

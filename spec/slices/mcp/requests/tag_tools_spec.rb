@@ -258,7 +258,7 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").find { it.name == "ruby" }.id)
 
       expect(Posts::Slice["repos.post_repo"].by_id(post.id).tags.map(&:name)).to eq(%w[rails])
-      expect(Projects::Slice["repos.project_repo"].by_id(project.id).tags).to be_empty
+      expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
     end
 
     it "removes a private tag a task carries" do

@@ -16,9 +16,7 @@ module Public
 
     import keys: %w[repos.photo_queries store.client], from: :media
 
-    import keys: %w[
-      queries.public_archived queries.public_by_tag queries.public_grid queries.work_entries
-    ], from: :projects
+    import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
     import keys: %w[
       queries.edited_at queries.edits_for_post queries.edits_for_posts queries.last_deleted_at queries.last_untagged_at

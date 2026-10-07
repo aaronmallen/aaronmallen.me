@@ -38,7 +38,7 @@ module API
       queries.calendar_posts queries.edits_newest_first
     ], from: :posts
 
-    import keys: %w[queries.by_id queries.work_entry_by_id], from: :projects
+    import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.save_review_note

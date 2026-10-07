@@ -21,7 +21,6 @@ module MCP
         analytics_page_queries: "analytics.repos.analytics_page_queries",
         analytics_rollup_queries: "analytics.repos.analytics_rollup_queries",
         archive_project: "projects.operations.archive_project",
-        archived_projects: "projects.queries.archived",
         commit_queries: "record.repos.commit_queries",
         compose_announcement: "posts.operations.compose_announcement",
         compose_social_post: "social.operations.compose_social_post",
@@ -35,7 +34,6 @@ module MCP
         feed_fetch_queries: "analytics.repos.feed_fetch_queries",
         granted_scopes: "queries.granted_scopes",
         link_repo_tasks: "tasks.operations.link_repo_tasks",
-        live_projects: "projects.queries.live",
         live_tokens: "api.queries.live_tokens",
         mark_message: "contact.operations.mark_message",
         matching_tag_count: "tags.queries.matching_count",
@@ -48,7 +46,7 @@ module MCP
         post_figures: "api.queries.post_figures",
         post_reader_queries: "analytics.repos.post_reader_queries",
         posts_by_ids: "posts.queries.by_ids",
-        project_by_id: "projects.queries.by_id",
+        project_queries: "projects.repos.project_queries",
         published_post_by_slug: "posts.queries.published_by_slug",
         queue_commit_import: "record.operations.queue_commit_import",
         read_photo: "media.operations.read_photo",
@@ -74,7 +72,7 @@ module MCP
         webmention_settings: "social.queries.webmention_settings",
         webmentions_received_between: "social.queries.webmentions_received_between",
         webmentions_received_by_post: "social.queries.webmentions_received_by_post",
-        work_entries_between: "projects.queries.work_entries_between",
+        work_entry_queries: "projects.repos.work_entry_queries",
       }.freeze
       INSTRUCTIONS = [
         "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",

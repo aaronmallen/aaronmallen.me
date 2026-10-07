@@ -2,7 +2,7 @@
 
 projects = Projects::Slice
 
-if projects["queries.live"].call.empty? && projects["queries.archived"].call.empty?
+if projects["repos.project_queries"].live.empty? && projects["repos.project_queries"].archived.empty?
   save_project = projects["operations.save_project"]
   project = lambda do |name, tagline, repo, visibility, started_on, tags|
     params = { name:, tagline:, repo:, url: nil, visibility:, started_on:, tags:, og_image_url: nil }
@@ -17,7 +17,7 @@ if projects["queries.live"].call.empty? && projects["queries.archived"].call.emp
   Seeds.unwrap(projects["operations.archive_project"].call(retired.id, on: Date.new(2025, 2, 1)))
 end
 
-if projects["queries.work_entries"].call.empty?
+if projects["repos.work_entry_queries"].all.empty?
   [
     { org: "Example Corp", role: "Staff Engineer", blurb: "Platform and tooling.", from_year: "2022", to_year: nil },
     { org: "Sample Labs", role: "Senior Engineer", blurb: "Billing and reports.", from_year: "2018", to_year: "2022" },

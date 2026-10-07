@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Projects", type: :request do
-  let(:repo) { Projects::Slice["repos.project_repo"] }
+  let(:repo) { Projects::Slice["repos.project_queries"] }
 
   before { sign_in_to_admin }
 

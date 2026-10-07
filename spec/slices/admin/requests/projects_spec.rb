@@ -3,7 +3,7 @@
 RSpec.describe "Admin projects", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Projects::Slice["repos.project_repo"] }
+  let(:repo) { Projects::Slice["repos.project_queries"] }
 
   def meta = page.all(".proj-meta > span").map(&:text)
 

@@ -3,7 +3,11 @@
 module Projects
   module Operations
     class SaveProject < Operation
-      include Deps[contract: "contracts.project_contract", project_repo: "repos.project_repo"]
+      include Deps[
+        contract: "contracts.project_contract",
+        project_mutations: "repos.project_mutations",
+        project_queries: "repos.project_queries",
+      ]
 
       CONSTRAINTS = {
         "projects_archived_order_check" => [:started_on, "after_archived"],
@@ -20,10 +24,10 @@ module Projects
 
       def create_or_update(project, attributes)
         fields = attributes.except(:tags)
-        saved = project ? project_repo.update(project.id, fields) : project_repo.create(**fields)
-        project_repo.replace_tags(saved.id, attributes.fetch(:tags))
+        saved = project ? project_mutations.update(project.id, fields) : project_mutations.create(**fields)
+        project_mutations.replace_tags(saved.id, attributes.fetch(:tags))
 
-        project_repo.by_id(saved.id)
+        project_queries.by_id(saved.id)
       end
 
       def derive(repo, url)
@@ -38,7 +42,7 @@ module Projects
       def find(id)
         return Success(nil) unless id
 
-        found(project_repo.by_id(id))
+        found(project_queries.by_id(id))
       end
 
       def form(params)
@@ -57,7 +61,7 @@ module Projects
       def persist(id, attributes)
         transaction { save(step(find(id)), attributes) }
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
-        field, code = CONSTRAINTS[project_repo.violated_constraint(e)]
+        field, code = CONSTRAINTS[project_mutations.violated_constraint(e)]
         raise unless field
 
         Failure([:invalid, { field => [code] }])

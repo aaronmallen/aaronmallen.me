@@ -111,7 +111,7 @@ module Spec
         decision: [:decisions, "repos.decision_mutations", "repos.decision_queries"],
         journal_entry: [:record, "repos.journal_entry_mutations", "repos.journal_entry_queries"],
         post: [:posts, "repos.post_repo"],
-        project: [:projects, "repos.project_repo"],
+        project: [:projects, "repos.project_mutations", "repos.project_queries"],
         task: [:tasks, "repos.task_repo"],
       }.freeze
 

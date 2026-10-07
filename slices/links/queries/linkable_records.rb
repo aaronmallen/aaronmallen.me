@@ -3,7 +3,13 @@
 module Links
   module Queries
     class LinkableRecords
-      RELATIONS = { "commit" => :commits, "decision" => :decisions, "journal_entry" => :journal_entries }.freeze
+      RELATIONS = {
+        "commit" => :commits,
+        "decision" => :decisions,
+        "journal_entry" => :journal_entries,
+        "project" => :projects,
+        "work_entry" => :work_entries,
+      }.freeze
       TITLE_LIMIT = 120
       WORK = Blog::Types::ProjectFilter["work"]
 
@@ -14,8 +20,8 @@ module Links
         social_post: "social.queries.linkable_social_posts",
         journal_entry: "record.repos.journal_entry_queries",
         commit: "record.repos.commit_queries",
-        project: "projects.queries.linkable_projects",
-        work_entry: "projects.queries.linkable_work_entries",
+        project: "projects.repos.project_queries",
+        work_entry: "projects.repos.work_entry_queries",
         decision: "decisions.repos.decision_queries",
       ]
 

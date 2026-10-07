@@ -22,7 +22,7 @@ RSpec.describe "CSRF protection", type: :request do
     it "saves nothing" do
       post "/admin/projects", project: { name: "sneaky" }
 
-      expect(Projects::Slice["repos.project_repo"].live).to be_empty
+      expect(Projects::Slice["repos.project_queries"].live).to be_empty
     end
   end
 
@@ -73,7 +73,7 @@ RSpec.describe "CSRF protection", type: :request do
     end
 
     it "saves nothing" do
-      expect(Projects::Slice["repos.project_repo"].live).to be_empty
+      expect(Projects::Slice["repos.project_queries"].live).to be_empty
     end
   end
 
@@ -96,7 +96,7 @@ RSpec.describe "CSRF protection", type: :request do
     end
 
     it "saves nothing" do
-      expect(Projects::Slice["repos.project_repo"].live).to be_empty
+      expect(Projects::Slice["repos.project_queries"].live).to be_empty
     end
 
     it "sends no notice" do

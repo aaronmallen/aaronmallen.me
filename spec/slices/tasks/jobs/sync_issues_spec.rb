@@ -250,7 +250,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "links once to a project its repo and a rule both name" do
-      Projects::Slice["repos.project_repo"].update(blog.id, repo: "aaronmallen/aaronmallen.me")
+      Projects::Slice["repos.project_mutations"].update(blog.id, repo: "aaronmallen/aaronmallen.me")
       stub_assigned(issue)
       sync
 

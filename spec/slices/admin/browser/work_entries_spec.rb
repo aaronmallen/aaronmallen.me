@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin work history", type: :feature do
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Projects::Slice["repos.work_entry_repo"] }
+  let(:repo) { Projects::Slice["repos.work_entry_queries"] }
 
   before do
     sign_in_to_admin
