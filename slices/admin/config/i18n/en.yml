@@ -60,8 +60,6 @@ en:
   inbox_page:
     toasts:
       seen: "Marked seen"
-      tagged: "Tags saved"
-      tags_invalid: "Nothing saved · use letters, numbers and dashes in tags"
   journal_page:
     toasts:
       deleted: "Entry deleted"
@@ -593,6 +591,7 @@ en:
         version: "Version %{version}"
       inbox:
         issue_item:
+          edit: "Edit"
           kind: "issue"
           lists:
             next: "Next"
@@ -600,9 +599,6 @@ en:
             today: "Today"
           move: "Move to %{list}"
           seen: "Seen"
-          tag: "Tag"
-          tags: "Tags"
-          tags_placeholder: "hosting, queues"
         mention_item:
           approve: "Approve"
           ignore: "Ignore"

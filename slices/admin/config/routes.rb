@@ -69,7 +69,6 @@ module Admin
     )
     post "/inbox/tasks/:id/move/:filter", to: "inbox.move_task", as: :inbox_move_task, id: ID, filter: TASK_FILTER
     post "/inbox/tasks/:id/seen", to: "inbox.see_task", as: :inbox_see_task, id: ID
-    post "/inbox/tasks/:id/tags", to: "inbox.tag_task", as: :inbox_tag_task, id: ID
     post(
       "/inbox/webmentions/:id/moderate/:verdict",
       to: "inbox.moderate_webmention", as: :inbox_moderate_webmention, id: ID, verdict: INBOX_VERDICT,

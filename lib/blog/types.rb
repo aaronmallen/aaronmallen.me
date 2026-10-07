@@ -154,7 +154,7 @@ module Blog
     TaskList = Types::String.enum("next", "someday", "external")
     TaskListParam = TaskList.fallback(TaskList.values.first)
     TaskMove = Types::String.enum("up", "down")
-    TaskOrigin = Types::String.enum("tasks", "today")
+    TaskOrigin = Types::String.enum("tasks", "today", "inbox")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
     TaskSourceProvider = Types::String.enum("github", "linear")
     TaskSourceState = Types::String.enum(*%w[open completed not_planned unassigned moved deleted started])

@@ -10,7 +10,7 @@ module Admin
             Blog::Types::TaskFilter["next"] => ".lists.next",
             Blog::Types::TaskFilter["someday"] => ".lists.someday",
           }.freeze
-          TAG_SEPARATOR = ", "
+          ORIGIN = Blog::Types::TaskOrigin["inbox"]
 
           prop :task, Blog::Types::Instance(ROM::Struct)
 
@@ -25,10 +25,16 @@ module Admin
 
           def actions
             LISTS.each { |filter, label_key| move(filter, label_key) unless filter == @task.place }
-            tag
+            edit
             Form(action: path(:admin_inbox_see_task, id: @task.id)) do
               Button(type: "submit", small: true) { t(".seen") }
             end
+          end
+
+          def edit
+            href = path(:admin_edit_task, id: @task.id, origin: ORIGIN)
+
+            Button(href:, data: { task_open_edit: true }, small: true) { t(".edit") }
           end
 
           def meta
@@ -43,16 +49,6 @@ module Admin
 
             Form(action: path(:admin_inbox_move_task, id: @task.id, filter:)) do
               Button(type: "submit", small: true, aria: { label: t(".move", list:) }) { list }
-            end
-          end
-
-          def tag
-            Form(action: path(:admin_inbox_tag_task, id: @task.id), class: "wm-spam") do
-              Input(
-                name: "tags", value: @task.tags.map(&:name).join(TAG_SEPARATOR), placeholder: t(".tags_placeholder"),
-                aria: { label: t(".tags") },
-              )
-              Button(type: "submit", variant: :pri, small: true) { t(".tag") }
             end
           end
         end

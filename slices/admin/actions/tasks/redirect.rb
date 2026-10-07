@@ -5,6 +5,7 @@ module Admin
   module Actions
     module Tasks
       module Redirect
+        FROM_INBOX = Blog::Types::TaskOrigin["inbox"]
         FROM_TODAY = Blog::Types::TaskOrigin["today"]
 
         private
@@ -20,6 +21,8 @@ module Admin
         def task_tab(request) = Blog::Types::TaskTabParam[request.params[:filter]]
 
         def tasks_path(request, filter: nil, pool: nil)
+          return routes.path(:admin_inbox) if task_origin(request) == FROM_INBOX
+
           query = pool ? { pool: } : {}
           return routes.path(:admin_root, **query) if from_today?(request)
 

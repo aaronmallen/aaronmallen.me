@@ -266,7 +266,7 @@ RSpec.describe "Admin inbox", type: :request do
       it "offers the lists it is not on" do
         get "/admin/inbox"
 
-        expect(page.all(".li-side button").map(&:text)).to eq(%w[Today Next Someday Tag Seen])
+        expect(page.all(".li-side button").map(&:text)).to eq(%w[Today Next Someday Seen])
       end
 
       it "moves it and drops it", :aggregate_failures do
@@ -278,27 +278,31 @@ RSpec.describe "Admin inbox", type: :request do
         expect(inbox).to be_empty
       end
 
-      it "tags it and drops it", :aggregate_failures do
-        act("/admin/inbox/tasks/#{task.id}/tags", tags: "feeds, bugs")
-        follow_redirect!
+      it "offers Edit in place of a tag input", :aggregate_failures do
+        get "/admin/inbox"
 
-        expect(page).to have_css("[data-toast]", text: "Tags saved")
+        expect(page).to have_link("Edit", href: "/admin/tasks/#{task.id}/edit?origin=inbox")
+        expect(page).to have_no_field("tags")
+      end
+
+      it "tags it from the task form, drops it and stays on the inbox", :aggregate_failures do
+        act("/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", tags: "feeds, bugs" })
+
+        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/inbox"))
         expect(tasks.by_id(task.id).tags.map(&:name)).to contain_exactly("feeds", "bugs")
         expect(inbox).to be_empty
       end
 
-      it "keeps its title and list when tagged", :aggregate_failures do
-        act("/admin/inbox/tasks/#{task.id}/tags", tags: "feeds")
+      it "keeps it when the task form saves only a note" do
+        act("/admin/tasks/#{task.id}", origin: "inbox", task: { title: "Fix the feed", note: "Look at the cache" })
 
-        expect(tasks.by_id(task.id)).to have_attributes(title: "Fix the feed", list: "external")
+        expect(inbox).to eq(["Fix the feed"])
       end
 
-      it "keeps it when a tag will not save", :aggregate_failures do
-        act("/admin/inbox/tasks/#{task.id}/tags", tags: "not/a/tag")
-        follow_redirect!
+      it "answers 404 for the old tag route" do
+        act("/admin/inbox/tasks/#{task.id}/tags", tags: "feeds")
 
-        expect(page).to have_css("[data-toast]", text: "Nothing saved")
-        expect(inbox).to eq(["Fix the feed"])
+        expect(last_response.status).to eq(404)
       end
 
       it "marks it seen without moving it", :aggregate_failures do
@@ -317,7 +321,7 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "answers 404 for a task that isn't there", :aggregate_failures do
-        %w[move/next seen tags].each do |verb|
+        %w[move/next seen].each do |verb|
           act("/admin/inbox/tasks/0/#{verb}")
 
           expect(last_response.status).to eq(404), verb
