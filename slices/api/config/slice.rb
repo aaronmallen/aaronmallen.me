@@ -102,6 +102,7 @@ module API
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
       endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
       endpoints.snooze_attention
+      endpoints.snooze_inbox
       endpoints.snooze_inbox_row
       endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
@@ -111,6 +112,7 @@ module API
       endpoints.wake_inbox_row
       operations.clear_inbox
       operations.mint_token operations.revoke_token
+      operations.snooze_inbox
       operations.snooze_inbox_row
       operations.wake_inbox_row
       queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures

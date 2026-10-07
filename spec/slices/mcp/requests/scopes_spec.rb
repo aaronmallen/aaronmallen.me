@@ -25,6 +25,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project save_person
         save_project save_review_note save_tag save_task save_task_rule schedule_task set_task_total
         snooze_attention
+        snooze_inbox
         snooze_inbox_row
         start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task
         untag_decision untag_tasks update_journal_entry update_post update_post_edit_note update_saved_view

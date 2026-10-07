@@ -75,6 +75,9 @@ en:
           webmentions: "webmention"
       seen: "Marked seen"
       snoozed: "Snoozed until %{date} at %{time}"
+      snoozed_all:
+        one: "Snoozed %{count} row until %{date} at %{time}"
+        other: "Snoozed %{count} rows until %{date} at %{time}"
       woken: "Back in the inbox"
   journal_page:
     toasts:
@@ -637,11 +640,15 @@ en:
           confirm: "Mark every row here seen? Messages turn read, and webmentions stay pending on Webmentions."
           label: "Mark All As Seen"
         snooze:
+          open: "Snooze"
+          title: "Snooze until"
+        snooze_all:
+          label: "Snooze All"
+          title: "Snooze every row until"
+        snooze_form:
           later_today: "Later today"
           next_week: "Next week"
-          open: "Snooze"
           save: "Snooze"
-          title: "Snooze until"
           tomorrow: "Tomorrow morning"
           until: "Date and time"
         snoozed_list:

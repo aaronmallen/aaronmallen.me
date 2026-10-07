@@ -70,6 +70,7 @@ module Admin
     post "/inbox/tasks/:id/move/:filter", to: "inbox.move_task", as: :inbox_move_task, id: ID, filter: TASK_FILTER
     post "/inbox/seen", to: "inbox.see_all", as: :inbox_see_all
     post "/inbox/tasks/:id/seen", to: "inbox.see_task", as: :inbox_see_task, id: ID
+    post "/inbox/snooze/all", to: "inbox.snooze_all", as: :inbox_snooze_all
     post "/inbox/:kind/:id/snooze", to: "inbox.snooze", as: :inbox_snooze, id: ID
     post "/inbox/wake/:kind/:id", to: "inbox.wake", as: :inbox_wake, id: ID
     post(

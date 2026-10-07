@@ -2353,6 +2353,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "send_social_post" => { id: 1 },
         "set_task_total" => { id: 1, hours: 2 },
         "snooze_attention" => { kind: "journal" },
+        "snooze_inbox" => { messages: [1], snoozed_until: "2026-01-01T09:00" },
         "snooze_inbox_row" => { kind: "message", id: 1, snoozed_until: "2026-01-01T09:00" },
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
