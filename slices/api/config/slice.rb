@@ -111,8 +111,7 @@ module API
       operations.snooze_inbox
       operations.snooze_inbox_row
       operations.wake_inbox_row
-      queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
-      queries.snoozed_inbox
+      repos.api_token_queries repos.calendar_queries repos.inbox_queries repos.post_figure_queries
     ]
   end
 end

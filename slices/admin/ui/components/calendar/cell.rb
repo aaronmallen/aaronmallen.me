@@ -5,7 +5,7 @@ module Admin
     module Components
       module Calendar
         class Cell < Component
-          prop :day, Blog::Types::Instance(API::Queries::Calendar::Day)
+          prop :day, Blog::Types::Instance(API::Repos::CalendarQueries::Day)
           prop :month, Blog::Types::Date
           prop :picked, Blog::Types::Date
           prop :today, Blog::Types::Date

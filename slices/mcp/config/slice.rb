@@ -54,7 +54,7 @@ module MCP
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
       endpoints.update_work_session endpoints.upload_photo
       endpoints.wake_inbox_row
-      queries.live_tokens queries.post_figures
+      repos.api_token_queries repos.post_figure_queries
     ], from: :api
 
     import keys: %w[

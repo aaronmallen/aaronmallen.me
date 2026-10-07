@@ -3,8 +3,8 @@
 require "dry/monads"
 
 module API
-  module Queries
-    class Calendar
+  module Repos
+    class CalendarQueries < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
       Day = Data.define(:date, :sprint, :posts, :social_posts, :journal)
@@ -17,7 +17,7 @@ module API
         social_post_queries: "social.repos.social_post_queries",
       ]
 
-      def call(from:, to:)
+      def between(from:, to:)
         return Failure(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(from, to)
 
         Success(days(from, to))

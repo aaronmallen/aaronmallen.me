@@ -9,7 +9,7 @@ module Admin
             message: [:sand, ".kinds.message"], task: [:green, ".kinds.task"], webmention: [:pink, ".kinds.webmention"],
           }.freeze
 
-          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Queries::Inbox::Row))
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
 
           def view_template
             Card(title: t(".title"), id: "inbox-snoozed") do

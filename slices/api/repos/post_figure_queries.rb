@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module API
-  module Queries
-    class PostFigures
+  module Repos
+    class PostFigureQueries < DB::Repo
       include Deps[
         post_reader_queries: "analytics.repos.post_reader_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
@@ -12,7 +12,7 @@ module API
       COUNTS = { read_through_counts: :read_throughs, view_counts: :views, visitor_counts: :visitors }.freeze
       UNSEEN = COUNTS.values.to_h { [it, 0] }.freeze
 
-      def call(posts)
+      def figures(posts)
         ids = posts.map(&:id)
         seen = rollup_queries.views_by_post(ids)
         figures = ids.to_h { [it, seen.fetch(it, UNSEEN)] }

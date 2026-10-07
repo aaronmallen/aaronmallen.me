@@ -2,12 +2,10 @@
 
 module API
   module Repos
-    class APITokenRepo < DB::Repo
+    class APITokenMutations < DB::Repo
+      root :api_tokens
+
       stamped_commands :create, :update
-
-      def live = api_tokens.live.newest_first.to_a
-
-      def live_by_token(token) = api_tokens.live.with_digest(Blog::SecretToken.digest(token)).one
 
       def mint(token:, name:) = create(name:, token_digest: Blog::SecretToken.digest(token))
 

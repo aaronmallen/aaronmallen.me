@@ -7,7 +7,7 @@ module Admin
         class SeeAll < Component
           FIELDS = { task: "tasks[]", message: "messages[]", webmention: "webmentions[]" }.freeze
 
-          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Queries::Inbox::Row))
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
 
           def view_template
             Form(action: path(:admin_inbox_see_all), data: { confirm: t(".confirm"), confirm_styled: true }) do

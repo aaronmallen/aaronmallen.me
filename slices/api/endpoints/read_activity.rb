@@ -41,7 +41,10 @@ module API
         optional: { continue_to: Schema::DAY },
       ).freeze
 
-      include Deps[activity_queries: "activity.repos.activity_queries", activity_views: "queries.activity_views"]
+      include Deps[
+        activity_queries: "activity.repos.activity_queries",
+        activity_view_queries: "repos.activity_view_queries",
+      ]
 
       def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
         filters = { kinds:, repos:, tags:, text:, credits: Blog::ContributorTerms.call(**credited) }
@@ -84,7 +87,7 @@ module API
           to: last.iso8601,
           count: rows.length,
           **page.except(:rows),
-          activity: serialized(Serializers::Activity, rows, views: activity_views.call(rows)),
+          activity: serialized(Serializers::Activity, rows, views: activity_view_queries.views(rows)),
         }
       end
     end

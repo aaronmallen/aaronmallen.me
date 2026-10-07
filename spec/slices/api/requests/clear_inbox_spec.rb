@@ -36,7 +36,7 @@ RSpec.describe "API clear inbox", type: :request do
     later = create(:message, subject: "Later")
     clear(**everything)
 
-    expect(API::Slice["queries.inbox"].call.map { it.record.id }).to eq([later.id])
+    expect(API::Slice["repos.inbox_queries"].unseen.map { it.record.id }).to eq([later.id])
   end
 
   it "changes nothing when one row is gone and names it under its kind", :aggregate_failures do

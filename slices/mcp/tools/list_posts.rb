@@ -64,7 +64,7 @@ module MCP
         end
 
         def summaries(posts, server_context)
-          figures = dep(:post_figures, server_context).call(posts)
+          figures = dep(:post_figure_queries, server_context).figures(posts)
 
           posts.map { summary(it, figures) }
         end

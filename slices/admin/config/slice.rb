@@ -28,9 +28,8 @@ module Admin
       operations.mint_token operations.revoke_token
       operations.snooze_inbox
       operations.snooze_inbox_row
-      queries.calendar queries.inbox queries.inbox_count
-      queries.live_tokens queries.post_figures
-      operations.wake_inbox_row queries.snoozed_inbox
+      operations.wake_inbox_row
+      repos.api_token_queries repos.calendar_queries repos.inbox_queries repos.post_figure_queries
     ], from: :api
 
     import keys: %w[

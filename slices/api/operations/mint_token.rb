@@ -3,13 +3,13 @@
 module API
   module Operations
     class MintToken < Operation
-      include Deps[contract: "contracts.token_contract", token_repo: "repos.api_token_repo"]
+      include Deps[contract: "contracts.token_contract", api_token_mutations: "repos.api_token_mutations"]
 
       def call(params)
         fields = step validate(params)
         value = Blog::SecretToken.generate
 
-        { token: token_repo.mint(token: value, name: fields[:name]), value: }
+        { token: api_token_mutations.mint(token: value, name: fields[:name]), value: }
       end
 
       private

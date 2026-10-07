@@ -8,18 +8,18 @@ module API
       NO_TOKEN = "this endpoint takes a bearer API token"
       UNUSABLE_TOKEN = "the API token is unknown or revoked"
 
-      include Deps[token_repo: "repos.api_token_repo"]
+      include Deps["repos.api_token_mutations", "repos.api_token_queries"]
 
       def call(authorization)
         value = step read(authorization)
         token = step find(value)
-        token_repo.touch_last_used(token.id)
+        api_token_mutations.touch_last_used(token.id)
       end
 
       private
 
       def find(value)
-        token = token_repo.live_by_token(value)
+        token = api_token_queries.live_by_token(value)
         token ? Success(token) : Failure({ error: INVALID_TOKEN, error_description: UNUSABLE_TOKEN })
       end
 

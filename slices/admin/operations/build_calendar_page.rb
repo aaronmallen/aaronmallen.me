@@ -6,12 +6,12 @@ module Admin
       MONTH_PATTERN = /\A(\d{4})-(\d{2})\z/
       WEEK = 7
 
-      include Deps[calendar: "api.queries.calendar", task_queries: "tasks.repos.task_queries"]
+      include Deps[calendar_queries: "api.repos.calendar_queries", task_queries: "tasks.repos.task_queries"]
 
       def call(month: nil, day: nil, today: Blog::TimeZone.today)
         picked = Blog::Types::DateParam[day]
         first = first_of(picked || month_param(month) || today)
-        days = calendar.call(from: grid_start(first), to: grid_end(first)).value!
+        days = calendar_queries.between(from: grid_start(first), to: grid_end(first)).value!
         shown = days.find { it.date == (picked || chosen(first, today)) }
 
         { month: first, today:, days:, day: shown, tasks: tasks(shown) }

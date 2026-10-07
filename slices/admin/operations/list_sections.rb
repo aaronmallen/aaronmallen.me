@@ -28,7 +28,7 @@ module Admin
       JUMPS = { today: "t", tasks: "k", journal: "j", posts: "p", activity: "a" }.freeze
       ROOT = :today
 
-      include Deps["routes", inbox_count: "api.queries.inbox_count"]
+      include Deps["routes", inbox_queries: "api.repos.inbox_queries"]
 
       def call(current_path:)
         found = located
@@ -43,7 +43,7 @@ module Admin
 
       private
 
-      def count_for(name) = name == :inbox ? inbox_count.call : 0
+      def count_for(name) = name == :inbox ? inbox_queries.unseen_count : 0
 
       def covers?(name, path, current_path)
         return current_path == path if name == ROOT

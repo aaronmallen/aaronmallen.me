@@ -8,7 +8,7 @@ module Admin
 
         include Deps[
           index_view: "ui.views.tokens.index",
-          live_tokens: "api.queries.live_tokens",
+          api_token_queries: "api.repos.api_token_queries",
           mint_token: "api.operations.mint_token",
         ]
 
@@ -30,7 +30,7 @@ module Admin
           response.status = 422
           response.render(
             index_view,
-            errors:, minted: nil, name: params[:name].to_s, tokens: live_tokens.call,
+            errors:, minted: nil, name: params[:name].to_s, tokens: api_token_queries.live,
           )
         end
 

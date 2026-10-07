@@ -12,7 +12,7 @@ module MCP
       scope OAuth::Scope::READ
 
       class << self
-        def call(server_context:) = answer(tokens: dep(:live_tokens, server_context).call.map { entry(it) })
+        def call(server_context:) = answer(tokens: dep(:api_token_queries, server_context).live.map { entry(it) })
 
         private
 

@@ -4,7 +4,7 @@ module Admin
   module Operations
     class BuildPostsPage
       include Deps[
-        post_figures: "api.queries.post_figures",
+        post_figure_queries: "api.repos.post_figure_queries",
         post_queries: "posts.repos.post_queries",
       ]
 
@@ -12,7 +12,7 @@ module Admin
         chosen = Blog::Types::PostFilterParam[filter]
         posts = post_queries.by_filter(chosen, page)
 
-        { counts: post_queries.count_by_status, filter: chosen, posts:, **post_figures.call(posts.rows) }
+        { counts: post_queries.count_by_status, filter: chosen, posts:, **post_figure_queries.figures(posts.rows) }
       end
     end
   end

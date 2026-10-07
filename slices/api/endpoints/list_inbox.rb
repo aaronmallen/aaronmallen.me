@@ -6,9 +6,9 @@ module API
       SCHEMA = { additionalProperties: false }.freeze
       REPLY = Schema.object({ inbox: Schema.list(Serializers::InboxRow.reference) }).freeze
 
-      include Deps["queries.inbox"]
+      include Deps["repos.inbox_queries"]
 
-      def handle = Success(inbox: serialized(Serializers::InboxRow, inbox.call))
+      def handle = Success(inbox: serialized(Serializers::InboxRow, inbox_queries.unseen))
     end
   end
 end

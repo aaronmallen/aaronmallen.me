@@ -5,14 +5,13 @@ module Admin
     module Inbox
       class Index < Action
         include Deps[
-          inbox: "api.queries.inbox",
+          inbox_queries: "api.repos.inbox_queries",
           post_queries: "posts.repos.post_queries",
-          snoozed_inbox: "api.queries.snoozed_inbox",
         ]
 
         def handle(_request, response)
-          response[:rows] = inbox.call
-          response[:snoozed] = snoozed_inbox.call
+          response[:rows] = inbox_queries.unseen
+          response[:snoozed] = inbox_queries.snoozed
           response[:slugs] = post_queries.summaries.to_h { [it.id, it.slug] }
         end
       end

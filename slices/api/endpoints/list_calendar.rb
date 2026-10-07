@@ -13,10 +13,10 @@ module API
         { from: Schema::DAY, to: Schema::DAY, days: Schema.list(Serializers::CalendarDay.reference) },
       ).freeze
 
-      include Deps["queries.calendar"]
+      include Deps["repos.calendar_queries"]
 
       def handle(from:, to:)
-        found = Blog::DayWindow.days(from, to).bind { |first, last| calendar.call(from: first, to: last) }
+        found = Blog::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
 
         found.either(->(days) { Success(listed(days)) }, ->(message) { invalid(from: [message], to: [message]) })
       end

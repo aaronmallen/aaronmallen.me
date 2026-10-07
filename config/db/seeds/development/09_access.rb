@@ -2,7 +2,7 @@
 
 api = API::Slice
 
-if api["queries.live_tokens"].call.empty?
+if api["repos.api_token_queries"].live.empty?
   Seeds.unwrap(api["operations.mint_token"].call({ name: "Shortcuts on my phone" }))
   retired = Seeds.unwrap(api["operations.mint_token"].call({ name: "Old laptop" }))
   Seeds.unwrap(api["operations.revoke_token"].call(retired[:token].id))

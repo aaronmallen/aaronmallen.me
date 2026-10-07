@@ -10,7 +10,7 @@ RSpec.describe "API snooze inbox", type: :request do
 
   def everything = { tasks: [task.id], messages: [message.id], webmentions: [webmention.id] }
 
-  def inbox_ids = API::Slice["queries.inbox"].call.map { it.record.id }
+  def inbox_ids = API::Slice["repos.inbox_queries"].unseen.map { it.record.id }
 
   def snooze(**body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
