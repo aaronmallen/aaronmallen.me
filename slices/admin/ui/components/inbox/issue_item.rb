@@ -29,6 +29,7 @@ module Admin
             Form(action: path(:admin_inbox_see_task, id: @task.id)) do
               Button(type: "submit", small: true) { t(".seen") }
             end
+            Inbox::Snooze(kind: "task", id: @task.id)
           end
 
           def edit

@@ -222,6 +222,7 @@ module MCP
         Tools::SendSocialPost,
         Tools::SetTaskTotal,
         Tools::SnoozeAttention,
+        Tools::SnoozeInboxRow,
         Tools::StartTask,
         Tools::SuggestEdits,
         Tools::SummarizeActivity,

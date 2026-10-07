@@ -37,6 +37,7 @@ module Admin
             moderate(SPAM, ".spam", :warn, class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
             end
+            Inbox::Snooze(kind: "webmention", id: @mention.id)
           end
 
           def excerpt

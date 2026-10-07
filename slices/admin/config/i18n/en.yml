@@ -59,6 +59,8 @@ en:
       saved: "Decision saved"
   inbox_page:
     toasts:
+      invalid: "Pick a time first"
+      past: "A snooze ends after now"
       see_all:
         done:
           one: "Marked %{count} row seen"
@@ -72,6 +74,7 @@ en:
           tasks: "issue"
           webmentions: "webmention"
       seen: "Marked seen"
+      snoozed: "Snoozed until %{date} at %{time}"
   journal_page:
     toasts:
       deleted: "Entry deleted"
@@ -632,6 +635,14 @@ en:
         see_all:
           confirm: "Mark every row here seen? Messages turn read, and webmentions stay pending on Webmentions."
           label: "Mark All As Seen"
+        snooze:
+          later_today: "Later today"
+          next_week: "Next week"
+          open: "Snooze"
+          save: "Snooze"
+          title: "Snooze until"
+          tomorrow: "Tomorrow morning"
+          until: "Date and time"
       journal:
         entry:
           body: "Entry text"

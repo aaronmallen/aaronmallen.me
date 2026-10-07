@@ -26,6 +26,7 @@ module Admin
             Button(href: reply_href, small: true) { t(".reply") }
             mark(READ, ".read", :pri)
             mark(SPAM, ".spam", :warn)
+            Inbox::Snooze(kind: "message", id: @message.id)
           end
 
           def address = ERB::Util.url_encode(@message.reply_to).gsub(ENCODED_AT, AT)

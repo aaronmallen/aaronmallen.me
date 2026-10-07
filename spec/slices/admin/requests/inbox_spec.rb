@@ -266,7 +266,7 @@ RSpec.describe "Admin inbox", type: :request do
       it "offers the lists it is not on" do
         get "/admin/inbox"
 
-        expect(page.all(".li-side button").map(&:text)).to eq(%w[Today Next Someday Seen])
+        expect(page.all(".li-side button").map(&:text)).to eq(%w[Today Next Someday Seen Snooze])
       end
 
       it "moves it and drops it", :aggregate_failures do

@@ -2763,6 +2763,14 @@
   @apply flex flex-wrap items-center justify-end gap-2;
 }
 
+@utility snooze-form {
+  @apply flex flex-col gap-3;
+}
+
+@utility snooze-picks {
+  @apply flex flex-wrap gap-2;
+}
+
 @utility task-panel {
   @apply fixed inset-y-0 left-0 m-0 h-full max-h-full w-full max-w-palette overflow-x-hidden overflow-y-auto;
   @apply border-0 border-r border-line bg-ground p-0 shadow-palette;

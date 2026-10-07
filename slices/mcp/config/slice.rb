@@ -45,7 +45,9 @@ module MCP
       endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
       endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
-      endpoints.snooze_attention endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
+      endpoints.snooze_attention
+      endpoints.snooze_inbox_row
+      endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule

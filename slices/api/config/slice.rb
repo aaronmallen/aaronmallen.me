@@ -17,6 +17,7 @@ module API
     import keys: %w[
       operations.act_on_messages
       operations.mark_message
+      operations.snooze_messages
       queries.unread_message_count queries.unread_messages
     ], from: :contact
 
@@ -54,7 +55,9 @@ module API
       operations.act_on_webmentions
       operations.mark_webmention_seen
       operations.delete_person operations.measure_parts operations.save_person
-      operations.search_accounts queries.calendar_social_posts queries.people queries.person_by_id
+      operations.search_accounts
+      operations.snooze_webmentions
+      queries.calendar_social_posts queries.people queries.person_by_id
       queries.received_webmention_count queries.social_post_by_id queries.unseen_webmention_count
       queries.unseen_webmentions queries.webmention_by_id queries.webmention_counts_by_post
       queries.webmention_counts_received_in queries.webmentions_received_in
@@ -71,7 +74,9 @@ module API
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
       operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
       operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
-      operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
+      operations.schedule_task operations.set_task_total
+      operations.snooze_tasks
+      operations.start_task operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.list_finished_tasks queries.list_tasks
       queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
       queries.task_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
@@ -101,13 +106,16 @@ module API
       endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
       endpoints.schedule_task endpoints.search endpoints.search_accounts endpoints.set_task_total
-      endpoints.snooze_attention endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
+      endpoints.snooze_attention
+      endpoints.snooze_inbox_row
+      endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
       endpoints.update_work_session endpoints.upload_photo
       operations.clear_inbox
       operations.mint_token operations.revoke_token
+      operations.snooze_inbox_row
       queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
     ]
   end
