@@ -3,11 +3,11 @@
 module Admin
   module Operations
     class BuildSearchPage
-      include Deps["operations.link_search_hit", search: "search.queries.search"]
+      include Deps["operations.link_search_hit", search_queries: "search.repos.search_queries"]
 
       def call(query:, kind:, page:)
         text = Blog::Types::TrimmedText[query]
-        found = search.call(text:, page:, kinds: kind ? [kind] : Blog::Types::SearchKind.values)
+        found = search_queries.search(text:, page:, kinds: kind ? [kind] : Blog::Types::SearchKind.values)
 
         { kind:, query: text, results: found.with(rows: found.rows.map { result(it) }) }
       end

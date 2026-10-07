@@ -6,7 +6,7 @@ module Media
 
     export %w[
       operations.claim_photos operations.read_photo operations.release_photos operations.upload_photo
-      queries.published_photo store.client
+      repos.photo_queries store.client
     ]
   end
 end

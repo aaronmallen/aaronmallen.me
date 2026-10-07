@@ -597,7 +597,7 @@ RSpec.describe "Admin command palette", type: :feature do
 
     describe "after deleting a view and reloading" do
       before do
-        SavedViews::Slice["repos.saved_view_repo"].delete(drafts.id)
+        SavedViews::Slice["repos.saved_view_mutations"].delete(drafts.id)
         visit "/admin"
         open_palette
         query.send_keys(*"next".chars)

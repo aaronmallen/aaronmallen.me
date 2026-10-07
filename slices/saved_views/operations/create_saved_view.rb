@@ -3,12 +3,12 @@
 module SavedViews
   module Operations
     class CreateSavedView < Operation
-      include Deps[contract: "contracts.saved_view_contract", saved_view_repo: "repos.saved_view_repo"]
+      include Deps[contract: "contracts.saved_view_contract", saved_view_mutations: "repos.saved_view_mutations"]
 
       def call(params)
         fields = step validate(params)
 
-        saved_view_repo.create(**fields)
+        saved_view_mutations.create(**fields)
       end
 
       private

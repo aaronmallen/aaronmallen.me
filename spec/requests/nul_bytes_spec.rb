@@ -14,7 +14,7 @@ RSpec.describe "Text holding a NUL byte", type: :request do
 
   def status = last_response.status
 
-  def views = SavedViews::Slice["repos.saved_view_repo"].all
+  def views = SavedViews::Slice["repos.saved_view_queries"].all
 
   before { create(:task, title: "Ship the deploy", note: "deploy") }
 

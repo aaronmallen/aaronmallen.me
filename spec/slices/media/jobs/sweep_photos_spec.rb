@@ -69,7 +69,7 @@ RSpec.describe Media::Jobs::SweepPhotos do
 
     def save = Media::Slice["operations.claim_photos"].call("post", 1, "/media/#{photo.key}")
 
-    def save_holding_open = Media::Slice["repos.photo_repo"].transaction { save.tap { gate.pop } }
+    def save_holding_open = Media::Slice["repos.photo_mutations"].transaction { save.tap { gate.pop } }
 
     def wait_at_gate = Timeout.timeout(5) { sleep(0.01) until gate.num_waiting.positive? }
 

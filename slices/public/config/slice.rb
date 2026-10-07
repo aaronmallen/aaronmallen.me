@@ -14,7 +14,7 @@ module Public
 
     import keys: %w[operations.create_message], from: :contact
 
-    import keys: %w[queries.published_photo store.client], from: :media
+    import keys: %w[repos.photo_queries store.client], from: :media
 
     import keys: %w[queries.public_by_tag queries.public_grid queries.work_entries], from: :projects
 

@@ -9,7 +9,7 @@ module Public
         CACHE_NEVER = "private, no-store"
         NOT_FOUND = 404
 
-        include Deps[published_photo: "media.queries.published_photo", store: "media.store.client"]
+        include Deps[photo_queries: "media.repos.photo_queries", store: "media.store.client"]
 
         config.formats.clear
 
@@ -39,7 +39,7 @@ module Public
 
         def photo_key?(key) = ::Media::PhotoType::KEY.match?(key)
 
-        def published?(key) = photo_key?(key) && !published_photo.call(key).nil?
+        def published?(key) = photo_key?(key) && !photo_queries.published(key).nil?
 
         def serve(response, photo, cache_control)
           response.headers["Cache-Control"] = cache_control

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Search::Queries::Search do
+RSpec.describe Search::Repos::SearchQueries do
   let(:db) { Search::Slice["db.rom"].gateways[:default].connection }
   let(:page) { Blog::Page.new(number: 1, size: 20) }
 

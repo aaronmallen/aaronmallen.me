@@ -5,9 +5,9 @@ module Admin
     class ListPaletteSavedViews
       LABELS = Blog::Types::SavedViewScreen.values.to_h { [it, "ui.components.nav.sections.#{it}"] }.freeze
 
-      include Deps["i18n", "routes", saved_views: "saved_views.queries.all"]
+      include Deps["i18n", "routes", saved_view_queries: "saved_views.repos.saved_view_queries"]
 
-      def call = saved_views.call.map { row(it) }
+      def call = saved_view_queries.all.map { row(it) }
 
       private
 

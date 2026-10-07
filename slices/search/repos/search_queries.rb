@@ -2,10 +2,10 @@
 
 module Search
   module Repos
-    class SearchRepo < DB::Repo
+    class SearchQueries < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
-      def search(text:, page:, kinds:, per_kind:)
+      def search(text:, page:, kinds: Blog::Types::SearchKind.values, per_kind: nil)
         phrase = text.to_s.strip
         return page.fill(NONE) if phrase.empty?
 

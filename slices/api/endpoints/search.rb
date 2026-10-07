@@ -20,10 +20,10 @@ module API
         optional: { next_page: Schema::INTEGER },
       ).freeze
 
-      include Deps["settings", search: "search.queries.search"]
+      include Deps["settings", search_queries: "search.repos.search_queries"]
 
       def handle(query:, kind: nil, page: 1)
-        found = search.call(text: query, page: page_of(page), kinds: kind ? [kind] : KINDS)
+        found = search_queries.search(text: query, page: page_of(page), kinds: kind ? [kind] : KINDS)
         results = serialized(Serializers::SearchHit, found.rows)
 
         Success(count: results.length, results:, **Blog::Paging.fields(found))

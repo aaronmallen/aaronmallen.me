@@ -10,7 +10,7 @@ module Media
       include Deps[
         "store.client",
         contract: "contracts.photo_contract",
-        photo_repo: "repos.photo_repo",
+        photo_mutations: "repos.photo_mutations",
         processor: "operations.process_photo",
       ]
 
@@ -45,7 +45,7 @@ module Media
       end
 
       def save(processed, type)
-        record = photo_repo.create(
+        record = photo_mutations.create(
           key: key_for(type), width: processed.width, height: processed.height, byte_size: processed.body.bytesize,
         )
         step store(record.key, processed.body, type)

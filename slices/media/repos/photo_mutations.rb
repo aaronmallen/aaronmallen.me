@@ -2,10 +2,10 @@
 
 module Media
   module Repos
-    class PhotoRepo < DB::Repo
-      commands :create
+    class PhotoMutations < DB::Repo
+      root :photos
 
-      def by_key(key) = photos.with_keys(key).one
+      commands :create
 
       def claim(owner, owner_id, keys)
         photo_claims.for_owners(owner, owner_id).delete
@@ -21,8 +21,6 @@ module Media
         photos.unclaimed.by_pk(id).delete
       end
 
-      def published(key) = photos.published.with_keys(key).one
-
       def release(owner, owner_ids)
         claims = photo_claims.for_owners(owner, owner_ids)
         released = photos.where(id: claims.pluck(:photo_id)).to_a
@@ -30,8 +28,6 @@ module Media
 
         released
       end
-
-      def unclaimed_before(at) = photos.unclaimed.uploaded_before(at).to_a
     end
   end
 end

@@ -61,7 +61,7 @@ RSpec.describe "API saved views", type: :request do
 
     Blog::Types::SavedViewScreen.each_value do |screen|
       it "keeps every filter a #{screen} view reads" do
-        names = SavedViews::Slice["queries.screen_filters"].call(screen)
+        names = SavedViews::Slice["repos.saved_view_queries"].screen_filters(screen)
         filters = names.to_h { [it, it == "types" ? { "post" => "1" } : "x"] }
         create(:saved_view, screen:, filters: filters.merge("page" => "2"))
 

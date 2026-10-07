@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin saved views", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { SavedViews::Slice["repos.saved_view_repo"] }
+  let(:repo) { SavedViews::Slice["repos.saved_view_queries"] }
 
   def links = page.all(".saved-view-link").map(&:text)
 

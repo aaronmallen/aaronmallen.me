@@ -197,7 +197,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
 
       it "keeps the draft's photos claimed and in the store", :aggregate_failures do
         draft = create(:post, :draft, body: "![A photo](/media/#{photo.key})")
-        Media::Slice["repos.photo_repo"].claim("post", draft.id, [photo.key])
+        Media::Slice["repos.photo_mutations"].claim("post", draft.id, [photo.key])
         act("delete", [draft, create(:post, :published)])
 
         expect(claims.where(owner: "post").to_a.map { [it[:owner_id], it[:photo_id]] }).to eq([[draft.id, photo.id]])

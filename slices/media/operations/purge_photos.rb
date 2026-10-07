@@ -3,15 +3,15 @@
 module Media
   module Operations
     class PurgePhotos
-      include Deps["store.client", photo_repo: "repos.photo_repo"]
+      include Deps["store.client", photo_mutations: "repos.photo_mutations"]
 
       def call(photos) = photos.count { purge(it) }
 
       private
 
       def purge(photo)
-        photo_repo.transaction do
-          deleted = photo_repo.delete_unclaimed(photo.id).positive?
+        photo_mutations.transaction do
+          deleted = photo_mutations.delete_unclaimed(photo.id).positive?
           client.delete(photo.key) if deleted
           deleted
         end

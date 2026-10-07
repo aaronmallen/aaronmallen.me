@@ -17,11 +17,11 @@ module API
 
       include Deps[
         change_saved_view: "saved_views.operations.change_saved_view",
-        saved_view_by_id: "saved_views.queries.by_id",
+        saved_view_queries: "saved_views.repos.saved_view_queries",
       ]
 
       def handle(id:, name: nil, filters: nil)
-        view = saved_view_by_id.call(id)
+        view = saved_view_queries.by_id(id)
         return not_found(Wording.missing("saved view", id)) if view.nil?
 
         saved(id, change_saved_view.call(id, name: name || view.name, filters: filters || view.filters))

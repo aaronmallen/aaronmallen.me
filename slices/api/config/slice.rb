@@ -43,11 +43,11 @@ module API
     ], from: :record
 
     import keys: %w[
-      operations.change_saved_view operations.create_saved_view operations.delete_saved_view queries.all
-      queries.by_id
+      operations.change_saved_view operations.create_saved_view operations.delete_saved_view
+      repos.saved_view_queries
     ], from: :saved_views
 
-    import keys: %w[queries.search], from: :search
+    import keys: %w[repos.search_queries], from: :search
 
     import keys: %w[
       operations.act_on_webmentions operations.delete_person operations.measure_parts operations.save_person

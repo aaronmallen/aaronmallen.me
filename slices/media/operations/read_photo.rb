@@ -7,7 +7,7 @@ module Media
 
       Read = Data.define(:photo, :stored)
 
-      include Deps["store.client", photo_repo: "repos.photo_repo"]
+      include Deps["store.client", photo_queries: "repos.photo_queries"]
 
       def call(reference)
         key = reference.strip[KEY, 1] || reference
@@ -27,7 +27,7 @@ module Media
       end
 
       def find(key)
-        photo = photo_repo.by_key(key)
+        photo = photo_queries.by_key(key)
         photo ? Success(photo) : Failure([:missing, key])
       end
     end

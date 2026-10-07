@@ -2,13 +2,12 @@
 
 module SavedViews
   module Repos
-    class SavedViewRepo < DB::Repo
-      stamped_commands :create, :update
-      commands delete: :by_pk
-
+    class SavedViewQueries < DB::Repo
       def all(screen: nil) = (screen ? saved_views.on_screen(screen) : saved_views).in_list_order.to_a
 
       def by_id(id) = saved_views.by_pk(id).one
+
+      def screen_filters(screen) = Filters.names(screen)
     end
   end
 end

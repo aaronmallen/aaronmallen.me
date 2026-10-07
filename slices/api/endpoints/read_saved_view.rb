@@ -41,7 +41,7 @@ module API
       include Deps[
         activity_views: "queries.activity_views",
         saved_view_activity: "queries.saved_view_activity",
-        saved_view_by_id: "saved_views.queries.by_id",
+        saved_view_queries: "saved_views.repos.saved_view_queries",
         saved_view_journal: "queries.saved_view_journal",
         saved_view_posts: "queries.saved_view_posts",
         saved_view_tasks: "queries.saved_view_tasks",
@@ -51,7 +51,7 @@ module API
         cursor = continue_to && Blog::TimeZone.parse_day(continue_to)
         return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
 
-        view = saved_view_by_id.call(id)
+        view = saved_view_queries.by_id(id)
         return not_found(Wording.missing("saved view", id)) if view.nil?
 
         case reader(view.screen).call(view.filters, page:, continue_to: cursor)

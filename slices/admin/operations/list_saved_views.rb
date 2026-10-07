@@ -3,16 +3,16 @@
 module Admin
   module Operations
     class ListSavedViews
-      include Deps[saved_views: "saved_views.queries.all", screen_filters: "saved_views.queries.screen_filters"]
+      include Deps[saved_view_queries: "saved_views.repos.saved_view_queries"]
 
       def call(screen, params)
-        { screen:, views: saved_views.call(screen:), filters: current(screen, params) }
+        { screen:, views: saved_view_queries.all(screen:), filters: current(screen, params) }
       end
 
       private
 
       def current(screen, params)
-        screen_filters.call(screen).each_with_object({}) do |name, kept|
+        saved_view_queries.screen_filters(screen).each_with_object({}) do |name, kept|
           value = filter(params[name.to_sym])
           kept[name] = value unless value.empty?
         end

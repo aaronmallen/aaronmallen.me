@@ -10,10 +10,10 @@ module API
 
       REPLY = Schema.object({ saved_views: Schema.list(Serializers::SavedView.reference) }).freeze
 
-      include Deps[all_saved_views: "saved_views.queries.all"]
+      include Deps[saved_view_queries: "saved_views.repos.saved_view_queries"]
 
       def handle(screen: nil)
-        Success(saved_views: serialized(Serializers::SavedView, all_saved_views.call(screen:)))
+        Success(saved_views: serialized(Serializers::SavedView, saved_view_queries.all(screen:)))
       end
     end
   end

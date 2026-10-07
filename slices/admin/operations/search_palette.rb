@@ -6,10 +6,10 @@ module Admin
       PER_KIND = 5
       PAGE = Blog::Page.new(number: 1, size: Blog::Types::SearchKind.values.size * PER_KIND)
 
-      include Deps["i18n", "operations.link_search_hit", search: "search.queries.search"]
+      include Deps["i18n", "operations.link_search_hit", search_queries: "search.repos.search_queries"]
 
       def call(text)
-        search.call(text:, page: PAGE, per_kind: PER_KIND).rows.group_by(&:kind).map do |kind, hits|
+        search_queries.search(text:, page: PAGE, per_kind: PER_KIND).rows.group_by(&:kind).map do |kind, hits|
           { kind:, hits: hits.map { entry(it) } }
         end
       end

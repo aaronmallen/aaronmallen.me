@@ -6,7 +6,7 @@ module SavedViews
 
     export %w[
       operations.change_saved_view operations.create_saved_view operations.delete_saved_view
-      operations.rename_saved_view queries.all queries.by_id queries.screen_filters
+      operations.rename_saved_view repos.saved_view_queries
     ]
   end
 end
