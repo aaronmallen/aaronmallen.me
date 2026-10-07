@@ -13,7 +13,7 @@ module API
       ).freeze
 
       include Deps[
-        record_links: "links.queries.record_links",
+        record_link_queries: "links.repos.record_link_queries",
         task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
       ]

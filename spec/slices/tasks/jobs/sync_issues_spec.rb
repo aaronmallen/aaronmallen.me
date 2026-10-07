@@ -234,9 +234,11 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       rule("aaronmallen/*", tags: "ruby", projects: [blog.id])
     end
 
-    def links = Links::Slice["repos.record_link_repo"]
+    def links = Links::Slice["repos.record_link_mutations"]
 
-    def project_ids = links.partners("task", imported.id).filter_map { |kind, id| id if kind == "project" }
+    def partners = Links::Slice["repos.record_link_queries"].partners("task", imported.id)
+
+    def project_ids = partners.filter_map { |kind, id| id if kind == "project" }
 
     def rule(pattern, tags: "", projects: [])
       Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags:, projects: }).value!

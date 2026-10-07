@@ -1041,7 +1041,7 @@ RSpec.describe "Admin tasks", type: :feature do
       find(".record-picker-target", text: "Filing the quarterly taxes")
     end
 
-    def linked = Links::Slice["queries.record_links"].call("task", task.id)
+    def linked = Links::Slice["repos.record_link_queries"].for_record("task", task.id)
 
     def picker(name) = translate(["ui.components.record_links.picker", name].join("."))
 

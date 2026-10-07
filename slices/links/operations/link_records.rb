@@ -12,9 +12,9 @@ module Links
       FIELDS = %i[other_kind other_id].freeze
 
       include Deps[
-        records: "queries.linkable_records",
+        records: "repos.record_link_queries",
         contract: "contracts.record_link_contract",
-        record_link_repo: "repos.record_link_repo",
+        record_link_mutations: "repos.record_link_mutations",
       ]
 
       def call(kind, id, params)
@@ -36,9 +36,9 @@ module Links
       def form(params) = FIELDS.to_h { [it, params[it]] }
 
       def persist(side, other)
-        Success(transaction { record_link_repo.link(side, other) })
+        Success(transaction { record_link_mutations.link(side, other) })
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError => e
-        field, code = CONSTRAINTS[record_link_repo.violated_constraint(e)]
+        field, code = CONSTRAINTS[record_link_mutations.violated_constraint(e)]
         raise unless field
 
         Failure([:invalid, { field => [code] }])

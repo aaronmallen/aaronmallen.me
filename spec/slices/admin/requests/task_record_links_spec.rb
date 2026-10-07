@@ -25,6 +25,8 @@ RSpec.describe "Admin task record links", type: :request do
     Links::Slice["operations.link_records"].call("task", task.id, { other_kind: kind, other_id: id }).value!
   end
 
+  def linked(kind, id, other) = Links::Slice["repos.record_link_queries"].for_record(kind, id).fetch(other).map(&:id)
+
   def links = Links::Slice["relations.record_links"]
 
   def picks = section.all(".record-picker-target").map { it.find(".record-link-title").text }
@@ -196,7 +198,7 @@ RSpec.describe "Admin task record links", type: :request do
     it "stores it" do
       link
 
-      expect(Links::Slice["queries.record_links"].call("task", task.id).fetch("post").map(&:id)).to eq([post_record.id])
+      expect(linked("task", task.id, "post")).to eq([post_record.id])
     end
 
     it "comes back to the list that was open" do
@@ -221,7 +223,7 @@ RSpec.describe "Admin task record links", type: :request do
     it "shows on the post's side" do
       link
 
-      expect(Links::Slice["queries.record_links"].call("post", post_record.id).fetch("task").map(&:id)).to eq([task.id])
+      expect(linked("post", post_record.id, "task")).to eq([task.id])
     end
 
     it "answers 404 for a task that isn't there" do

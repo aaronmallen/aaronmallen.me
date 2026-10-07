@@ -9,7 +9,7 @@ module API
 
       include Deps[
         journal_entry_queries: "record.repos.journal_entry_queries",
-        record_links: "links.queries.record_links",
+        record_link_queries: "links.repos.record_link_queries",
       ]
 
       def handle(id:)

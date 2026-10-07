@@ -7,7 +7,10 @@ module API
       SCHEMA = Schema.by_id
       REPLY = Schema.widen(Serializers::Commit::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
-      include Deps[commit_queries: "record.repos.commit_queries", record_links: "links.queries.record_links"]
+      include Deps[
+        commit_queries: "record.repos.commit_queries",
+        record_link_queries: "links.repos.record_link_queries",
+      ]
 
       def handle(id:)
         commit = commit_queries.by_id(id)

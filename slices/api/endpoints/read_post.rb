@@ -22,7 +22,7 @@ module API
 
       include Deps[
         post_queries: "posts.repos.post_queries",
-        record_links: "links.queries.record_links",
+        record_link_queries: "links.repos.record_link_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]

@@ -21,7 +21,7 @@ module API
 
       include Deps[
         measure_parts: "social.operations.measure_parts",
-        record_links: "links.queries.record_links",
+        record_link_queries: "links.repos.record_link_queries",
         social_post_queries: "social.repos.social_post_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]

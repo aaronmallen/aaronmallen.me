@@ -21,7 +21,9 @@ RSpec.describe "Admin decision record links", type: :request do
     Links::Slice["operations.link_records"].call("decision", decision.id, { other_kind: kind, other_id: id }).value!
   end
 
-  def linked(kind) = Links::Slice["queries.record_links"].call("decision", decision.id).fetch(kind, []).map(&:id)
+  def linked(kind)
+    Links::Slice["repos.record_link_queries"].for_record("decision", decision.id).fetch(kind, []).map(&:id)
+  end
 
   def links = Links::Slice["relations.record_links"]
 
@@ -112,7 +114,7 @@ RSpec.describe "Admin decision record links", type: :request do
     it "shows on the task's side" do
       link
 
-      partners = Links::Slice["queries.record_links"].call("task", task.id)
+      partners = Links::Slice["repos.record_link_queries"].for_record("task", task.id)
 
       expect(partners.fetch("decision").map(&:id)).to eq([decision.id])
     end

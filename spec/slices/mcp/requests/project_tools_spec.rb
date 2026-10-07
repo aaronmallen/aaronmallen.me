@@ -134,7 +134,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       end
 
       it "leaves a link I removed off when a later change keeps the repo" do
-        Links::Slice["repos.record_link_repo"].unlink(["task", task], ["project", project.id])
+        Links::Slice["repos.record_link_mutations"].unlink(["task", task], ["project", project.id])
         call_tool("save_project", id: project.id, name: "renamed")
 
         expect(linked).to be_empty

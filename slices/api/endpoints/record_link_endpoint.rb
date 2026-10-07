@@ -17,7 +17,7 @@ module API
 
       REPLY = Schema.object({ kind: RecordLinks::KIND, id: Schema::INTEGER, links: Serializers::Link::GROUPS }).freeze
 
-      include Deps[record_links: "links.queries.record_links"]
+      include Deps[record_link_queries: "links.repos.record_link_queries"]
 
       private
 

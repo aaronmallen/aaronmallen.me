@@ -29,7 +29,7 @@ module API
       operations.reopen_decision operations.resolve_decision repos.decision_queries
     ], from: :decisions
 
-    import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links
+    import keys: %w[operations.link_records operations.unlink_records repos.record_link_queries], from: :links
 
     import keys: %w[operations.upload_photo], from: :media
 

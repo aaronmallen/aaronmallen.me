@@ -134,7 +134,7 @@ RSpec.describe "API record links", type: :request do
       link("post", post_record.id, other_kind: "journal_entry", other_id: entry.id)
 
       expect(titles(list("post", post_record.id)).fetch("journal_entry").first.length)
-        .to eq(Links::Queries::LinkableRecords::TITLE_LIMIT)
+        .to eq(Links::Repos::RecordLinkQueries::TITLE_LIMIT)
     end
 
     it "answers a record with no links with no groups" do

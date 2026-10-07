@@ -3,12 +3,12 @@
 module Links
   module Operations
     class UnlinkRecords < Operation
-      include Deps[record_link_repo: "repos.record_link_repo"]
+      include Deps[record_link_mutations: "repos.record_link_mutations"]
 
       def call(kind, id, other_kind, other_id)
         sides = step sides([kind, id], [other_kind, other_id])
 
-        step affected(record_link_repo.unlink(*sides))
+        step affected(record_link_mutations.unlink(*sides))
       end
 
       private

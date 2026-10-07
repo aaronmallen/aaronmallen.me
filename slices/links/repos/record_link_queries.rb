@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 module Links
-  module Queries
-    class LinkableRecords
+  module Repos
+    class RecordLinkQueries < DB::Repo
+      FOUND_LIMIT = 5
       RELATIONS = {
         "commit" => :commits,
         "decision" => :decisions,
@@ -28,17 +29,33 @@ module Links
         task: "tasks.repos.task_queries",
       ]
 
-      def matching(kind, text, limit:)
-        rows = RELATIONS.key?(kind) ? linkable(kind, text:, limit:) : query(kind).matching(text, limit:)
+      def find(text, limit: FOUND_LIMIT)
+        query = Blog::Types::TrimmedText[text]
+        return Blog::Constants::EMPTY_HASH if query.empty?
 
-        linked(kind, rows)
+        Blog::Types::RecordKind.values.to_h { [it, linked(it, rows(it, text: query, limit:))] }.reject { _2.empty? }
       end
 
-      def named(kind, ids) = linked(kind, RELATIONS.key?(kind) ? linkable(kind, ids:) : query(kind).named(ids))
+      def for_record(kind, id)
+        id = Blog::Types::IdParam[id]
+        return Blog::Constants::EMPTY_HASH unless id
+
+        ids = partners(kind, id).group_by(&:first).transform_values { it.map(&:last) }
+
+        Blog::Types::RecordKind.values.filter_map { [it, named(it, ids[it])] if ids.key?(it) }.to_h
+      end
+
+      def named(kind, ids) = linked(kind, rows(kind, ids:))
+
+      def partners(kind, id)
+        record_links.touching(kind, id).to_a.map do |link|
+          left = [link.left_kind, link.left_id]
+
+          left == [kind, id] ? [link.right_kind, link.right_id] : left
+        end
+      end
 
       private
-
-      def linkable(kind, **) = query(kind).linkable(RELATIONS.fetch(kind), **)
 
       def linked(kind, rows)
         rows.map do |row|
@@ -56,7 +73,7 @@ module Links
         end
       end
 
-      def query(kind) = public_send(kind)
+      def rows(kind, **) = public_send(kind).linkable(RELATIONS.fetch(kind), **)
 
       def url(kind, row)
         id = row.id

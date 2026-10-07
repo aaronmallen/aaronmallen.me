@@ -5,10 +5,10 @@ module Admin
     class ListRecordLinks
       include Blog::Constants
 
-      include Deps[find_records: "links.queries.find_records", record_links: "links.queries.record_links"]
+      include Deps[record_link_queries: "links.repos.record_link_queries"]
 
       def call(kind, id, query: nil, errors: EMPTY_HASH, except: EMPTY_ARRAY)
-        links = record_links.call(kind, id)
+        links = record_link_queries.for_record(kind, id)
         query = Blog::Types::TrimmedText[query]
 
         { links:, query:, errors:, found: found(query, except, taken(kind, id, links)) }
@@ -17,7 +17,7 @@ module Admin
       private
 
       def found(query, except, taken)
-        find_records.call(query).except(*except).filter_map do |kind, rows|
+        record_link_queries.find(query).except(*except).filter_map do |kind, rows|
           rows = rows.reject { taken.include?([kind, it.id]) }
 
           [kind, rows] unless rows.empty?

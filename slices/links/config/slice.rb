@@ -11,6 +11,6 @@ module Links
     import keys: %w[repos.social_post_queries], from: :social
     import keys: %w[repos.task_queries], from: :tasks
 
-    export %w[operations.link_records operations.unlink_records queries.find_records queries.record_links]
+    export %w[operations.link_records operations.unlink_records repos.record_link_queries]
   end
 end

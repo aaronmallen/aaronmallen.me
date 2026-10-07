@@ -94,7 +94,7 @@ RSpec.describe "API task rules", type: :request do
     it "keeps a project link a task already has once" do
       blog = create(:project)
       task = sourced("aaronmallen/aaronmallen.me")
-      Links::Slice["repos.record_link_repo"].link(["task", task.id], ["project", blog.id])
+      Links::Slice["repos.record_link_mutations"].link(["task", task.id], ["project", blog.id])
       create_rule(pattern: "aaronmallen/*", projects: [blog.id])
 
       expect(project_ids(task)).to eq([blog.id])

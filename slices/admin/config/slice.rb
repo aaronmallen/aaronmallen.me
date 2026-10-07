@@ -51,7 +51,7 @@ module Admin
     ], from: :record
 
     import keys: %w[
-      operations.link_records operations.unlink_records queries.find_records queries.record_links
+      operations.link_records operations.unlink_records repos.record_link_queries
     ], from: :links
 
     import keys: %w[operations.upload_photo store.client], from: :media

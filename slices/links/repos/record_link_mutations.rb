@@ -2,8 +2,10 @@
 
 module Links
   module Repos
-    class RecordLinkRepo < DB::Repo
+    class RecordLinkMutations < DB::Repo
       KINDS = Blog::Types::RecordKind.values
+
+      root :record_links
 
       commands :create
 
@@ -11,14 +13,6 @@ module Links
         (left_kind, left_id), (right_kind, right_id) = sorted(*sides)
 
         create(left_kind:, left_id:, right_kind:, right_id:)
-      end
-
-      def partners(kind, id)
-        record_links.touching(kind, id).to_a.map do |link|
-          left = [link.left_kind, link.left_id]
-
-          left == [kind, id] ? [link.right_kind, link.right_id] : left
-        end
       end
 
       def unlink(*sides) = record_links.between(*sorted(*sides).flatten).delete

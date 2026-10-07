@@ -7,7 +7,10 @@ module API
       SCHEMA = Schema.by_id
       REPLY = Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
-      include Deps[record_links: "links.queries.record_links", work_entry_queries: "projects.repos.work_entry_queries"]
+      include Deps[
+        record_link_queries: "links.repos.record_link_queries",
+        work_entry_queries: "projects.repos.work_entry_queries",
+      ]
 
       def handle(id:)
         entry = work_entry_queries.by_id(id)
