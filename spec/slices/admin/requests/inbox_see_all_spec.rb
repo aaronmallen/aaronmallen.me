@@ -66,7 +66,7 @@ RSpec.describe "Admin inbox Mark All As Seen", type: :request do
   end
 
   it "changes nothing when one row is gone and names it", :aggregate_failures do
-    gone = create(:message).id.tap { Contact::Slice["repos.message_repo"].delete(it) }
+    gone = create(:message).id.tap { Contact::Slice["repos.message_mutations"].delete(it) }
     see_all(tasks: [synced(title: "Kept").id], messages: [gone])
 
     expect(toast).to eq("Nothing changed · message #{gone} is gone")

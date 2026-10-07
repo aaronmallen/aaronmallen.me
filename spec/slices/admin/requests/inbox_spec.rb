@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin inbox", type: :request do
-  let(:messages) { Contact::Slice["repos.message_repo"] }
+  let(:messages) { Contact::Slice["repos.message_queries"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:tasks) { Tasks::Slice["repos.task_repo"] }
   let(:webmentions) { Social::Slice["repos.webmention_repo"] }

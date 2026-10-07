@@ -15,7 +15,7 @@ RSpec.describe "API clear inbox", type: :request do
 
   def everything = { tasks: [task.id], messages: [message.id], webmentions: [webmention.id] }
 
-  def marks = [task_unseen?, Contact::Slice["repos.message_repo"].by_id(message.id).status, webmention_marks]
+  def marks = [task_unseen?, Contact::Slice["repos.message_queries"].by_id(message.id).status, webmention_marks]
 
   def status = last_response.status
 

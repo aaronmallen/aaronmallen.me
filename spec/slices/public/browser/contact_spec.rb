@@ -8,7 +8,7 @@ RSpec.describe "Contact form", type: :feature do
     JS
   end
   let(:i18n) { Public::Slice["i18n"] }
-  let(:message_repo) { Contact::Slice["repos.message_repo"] }
+  let(:message_queries) { Contact::Slice["repos.message_queries"] }
 
   before { change_contact_setting(:minimum_submit_seconds, to: 0) }
 
@@ -22,7 +22,7 @@ RSpec.describe "Contact form", type: :feature do
     click_button "Send message"
   end
 
-  def stored = message_repo.by_status(Blog::Types::MessageStatus["unread"]).first
+  def stored = message_queries.by_status(Blog::Types::MessageStatus["unread"]).first
 
   def tab
     page.driver.browser.keyboard.type(:Tab)
@@ -41,7 +41,7 @@ RSpec.describe "Contact form", type: :feature do
     2.times { page.refresh }
 
     expect(page).to have_css(".contact .f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
-    expect(message_repo.messages.count).to eq(1)
+    expect(message_queries.messages.count).to eq(1)
   end
 
   it "stores what was typed" do
@@ -111,7 +111,7 @@ RSpec.describe "Contact form", type: :feature do
 
       expect(page).to have_css("#cf-email-error", exact_text: error("reply_to.format"))
       expect(page).to have_current_path("/contact")
-      expect(message_repo.messages.count).to eq(0)
+      expect(message_queries.messages.count).to eq(0)
     end
 
     it "asks for a subject that was left blank" do
@@ -207,7 +207,7 @@ RSpec.describe "Contact form", type: :feature do
 
       expect(page).to have_no_css("#cf-subject-error")
       expect(page).to have_current_path("/contact")
-      expect(message_repo.messages.count).to eq(0)
+      expect(message_queries.messages.count).to eq(0)
     end
   end
 end

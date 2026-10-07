@@ -3,14 +3,14 @@
 RSpec.describe "Contact messages", type: :request do
   let(:fields) { { reply_to: "ada@example.com", subject: "A question", body: "About the beacon" } }
   let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
-  let(:message_repo) { Contact::Slice["repos.message_repo"] }
+  let(:message_queries) { Contact::Slice["repos.message_queries"] }
   let(:sender) { Analytics::Slice["operations.hash_visitor"].call(address: "127.0.0.1") }
 
   def crlf_lines = Array.new(Contact::MessageLimits::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
 
   def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
-  def stored = message_repo.by_status(Blog::Types::MessageStatus["unread"])
+  def stored = message_queries.by_status(Blog::Types::MessageStatus["unread"])
 
   describe "a message" do
     it "is stored with the ends of every field trimmed" do
@@ -74,7 +74,7 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "gets the message stored" do
-      expect(message_repo.messages.count).to eq(limit + 1)
+      expect(message_queries.messages.count).to eq(limit + 1)
     end
   end
 
@@ -84,7 +84,7 @@ RSpec.describe "Contact messages", type: :request do
       post("/admin/messages/#{message.id}/mark/#{status}", _csrf_token: admin_csrf_token)
     end
 
-    def arrived = message_repo.messages.order(:id).to_a.last
+    def arrived = message_queries.messages.order(:id).to_a.last
 
     def mcp_mark(message, status) = mcp_call("mark_message", id: message.id, status:)
 
@@ -133,7 +133,7 @@ RSpec.describe "Contact messages", type: :request do
       mcp_mark(create(:message, reply_to: "ada@example.com"), "spam")
       send_message
 
-      expect { reap_after(31) }.to change { message_repo.messages.count }.from(2).to(0)
+      expect { reap_after(31) }.to change { message_queries.messages.count }.from(2).to(0)
     end
 
     it "files their next message as spam after the reaper deletes the one that marked them" do
@@ -166,7 +166,7 @@ RSpec.describe "Contact messages", type: :request do
 
       it "refuses the next sender, since spam counts toward the total", :aggregate_failures do
         expect(last_response.status).to eq(429)
-        expect(message_repo.messages.count).to eq(2)
+        expect(message_queries.messages.count).to eq(2)
       end
     end
 
@@ -222,7 +222,7 @@ RSpec.describe "Contact messages", type: :request do
     it "stores only the one it took" do
       sent_together(%w[127.0.0.1 127.0.0.1])
 
-      expect(message_repo.messages.count).to eq(1)
+      expect(message_queries.messages.count).to eq(1)
     end
   end
 
@@ -241,7 +241,7 @@ RSpec.describe "Contact messages", type: :request do
     it "stores only the one it took" do
       sent_together(%w[203.0.113.7 198.51.100.4])
 
-      expect(message_repo.messages.count).to eq(1)
+      expect(message_queries.messages.count).to eq(1)
     end
   end
 end

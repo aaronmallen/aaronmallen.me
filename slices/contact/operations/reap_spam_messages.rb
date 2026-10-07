@@ -5,9 +5,9 @@ module Contact
     class ReapSpamMessages < Operation
       KEEP_FOR = 30 * 24 * 60 * 60
 
-      include Deps[message_repo: "repos.message_repo"]
+      include Deps[message_mutations: "repos.message_mutations"]
 
-      def call(at: Time.now) = message_repo.delete_spam_marked_before(at - KEEP_FOR)
+      def call(at: Time.now) = message_mutations.delete_spam_marked_before(at - KEEP_FOR)
     end
   end
 end

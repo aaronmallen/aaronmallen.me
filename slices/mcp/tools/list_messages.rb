@@ -41,12 +41,12 @@ module MCP
         private
 
         def listed(first, last, status, page, server_context)
-          found = dep(:messages_between, server_context).call(from: first, to: last, page:, status:)
+          found = dep(:message_queries, server_context).received_between(from: first, to: last, page:, status:)
 
           answer(
             from: first&.iso8601,
             to: last&.iso8601,
-            counts: dep(:message_counts_between, server_context).call(from: first, to: last),
+            counts: dep(:message_queries, server_context).count_received_between(from: first, to: last),
             messages: found.rows.map { summary(it) },
             **Blog::Paging.fields(found),
           )

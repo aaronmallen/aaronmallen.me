@@ -3,7 +3,12 @@
 module Contact
   module Operations
     class CreateMessage < Operation
-      include Deps["settings", contract: "contracts.message_contract", message_repo: "repos.message_repo"]
+      include Deps[
+        "settings",
+        contract: "contracts.message_contract",
+        message_mutations: "repos.message_mutations",
+        message_queries: "repos.message_queries",
+      ]
 
       def call(params, visitor_hash:)
         step within_limits(visitor_hash)
@@ -16,8 +21,8 @@ module Contact
 
       def claim(attributes, visitor_hash:)
         limits = settings.contact
-        status = message_repo.sender_status(attributes[:reply_to])
-        message = message_repo.claim(
+        status = message_queries.sender_status(attributes[:reply_to])
+        message = message_mutations.claim(
           status:, visitor_hash:, since: window_opened_at,
           limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit], **attributes,
         )
@@ -38,8 +43,8 @@ module Contact
       def within_limits(visitor_hash)
         since = window_opened_at
         limits = settings.contact
-        under = message_repo.count_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
-                message_repo.count_since(since) < limits[:total_throttle_limit]
+        under = message_queries.count_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
+                message_queries.count_since(since) < limits[:total_throttle_limit]
 
         under ? Success(visitor_hash) : Failure([:throttled])
       end

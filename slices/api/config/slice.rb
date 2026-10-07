@@ -19,7 +19,7 @@ module API
       operations.mark_message
       operations.snooze_messages
       operations.wake_message
-      queries.snoozed_messages queries.unread_message_count queries.unread_messages
+      repos.message_queries
     ], from: :contact
 
     import keys: %w[

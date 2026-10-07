@@ -3,9 +3,9 @@
 module Contact
   module Operations
     class DeleteMessage < Operation
-      include Deps[message_repo: "repos.message_repo"]
+      include Deps[message_mutations: "repos.message_mutations"]
 
-      def call(id) = step found(message_repo.delete(id))
+      def call(id) = step found(message_mutations.delete(id))
     end
   end
 end

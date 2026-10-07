@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 contact = Contact::Slice
-return if Blog::Types::MessageStatus.values.any? { contact["queries.count_with_status"].call(it).positive? }
+return if Blog::Types::MessageStatus.values.any? { contact["repos.message_queries"].count_with_status(it).positive? }
 
 create_message = contact["operations.create_message"]
 hash_visitor = Analytics::Slice["operations.hash_visitor"]

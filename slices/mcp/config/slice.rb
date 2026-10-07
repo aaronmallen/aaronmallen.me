@@ -66,7 +66,7 @@ module MCP
     import keys: %w[operations.read_photo], from: :media
 
     import keys: %w[
-      operations.mark_message queries.by_id queries.counts_received_between queries.received_between
+      operations.mark_message repos.message_queries
     ], from: :contact
 
     import keys: %w[

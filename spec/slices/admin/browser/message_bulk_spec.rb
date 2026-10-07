@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin bulk message actions", type: :feature do
-  let(:repo) { Contact::Slice["repos.message_repo"] }
+  let(:repo) { Contact::Slice["repos.message_queries"] }
 
   def acts = find("[data-bulk-acts]", visible: :all)
 

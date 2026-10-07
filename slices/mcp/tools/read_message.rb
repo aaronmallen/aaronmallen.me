@@ -12,7 +12,7 @@ module MCP
 
       class << self
         def call(id:, server_context:)
-          message = dep(:message_by_id, server_context).call(id)
+          message = dep(:message_queries, server_context).by_id(id)
           message ? answered(message) : refuse(API::Wording.missing("message", id))
         end
 

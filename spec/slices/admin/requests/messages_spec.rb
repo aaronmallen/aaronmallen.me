@@ -3,7 +3,7 @@
 RSpec.describe "Admin messages", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Contact::Slice["repos.message_repo"] }
+  let(:repo) { Contact::Slice["repos.message_queries"] }
 
   def empty_text(status) = i18n.t(["ui.views.messages.index.empty", status].join("."))
 

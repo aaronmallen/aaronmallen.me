@@ -42,7 +42,7 @@ module Admin
     ], from: :decisions
 
     import keys: %w[
-      operations.act_on_messages operations.mark_message queries.by_id queries.by_status queries.count_with_status
+      operations.act_on_messages operations.mark_message repos.message_queries
     ], from: :contact
 
     import keys: %w[

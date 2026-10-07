@@ -6,7 +6,7 @@ module API
       Row = Data.define(:kind, :at, :record)
 
       include Deps[
-        unread_messages: "contact.queries.unread_messages",
+        message_queries: "contact.repos.message_queries",
         unseen_tasks: "tasks.queries.unseen_tasks",
         unseen_webmentions: "social.queries.unseen_webmentions",
       ]
@@ -21,7 +21,7 @@ module API
 
       def rows
         [
-          *unread_messages.call.map { row(:message, it.received_at, it) },
+          *message_queries.unread.map { row(:message, it.received_at, it) },
           *unseen_webmentions.call.map { row(:webmention, it.received_at, it) },
           *unseen_tasks.call.map { row(:task, it.created_at, it, it.source) },
         ]

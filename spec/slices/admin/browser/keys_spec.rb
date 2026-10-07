@@ -272,7 +272,7 @@ RSpec.describe "Admin keys", type: :feature do
   end
 
   describe "r on the messages list" do
-    let(:repo) { Contact::Slice["repos.message_repo"] }
+    let(:repo) { Contact::Slice["repos.message_queries"] }
     let!(:first) { create(:message, subject: "First", received_at: Time.now) }
     let!(:second) { create(:message, subject: "Second", received_at: Time.now - 60) }
 

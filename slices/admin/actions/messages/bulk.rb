@@ -15,8 +15,7 @@ module Admin
 
         include Deps[
           "settings",
-          message_by_id: "contact.queries.by_id",
-          messages_by_status: "contact.queries.by_status",
+          message_queries: "contact.repos.message_queries",
           operation: "contact.operations.act_on_messages",
         ]
 
@@ -24,12 +23,12 @@ module Admin
 
         def back(request)
           status = Blog::Types::MessageStatusParam[request.params[:status]]
-          page = landing(request) { messages_by_status.call(status, it).past_end? }
+          page = landing(request) { message_queries.page_by_status(status, it).past_end? }
 
           routes.path(:admin_messages, status:, **Blog::Page.query(page))
         end
 
-        def named(id) = { message: ["#{KEY}#{id}", message_by_id.call(id)&.subject].compact.join(" ") }
+        def named(id) = { message: ["#{KEY}#{id}", message_queries.by_id(id)&.subject].compact.join(" ") }
       end
     end
   end

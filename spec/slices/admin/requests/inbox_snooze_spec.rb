@@ -41,7 +41,7 @@ RSpec.describe "Admin inbox snooze", type: :request do
   def snoozed_until(kind)
     record = records.fetch(kind)
     case kind
-    when "message" then Contact::Slice["repos.message_repo"].by_id(record.id)
+    when "message" then Contact::Slice["repos.message_queries"].by_id(record.id)
     when "webmention" then Social::Slice["repos.webmention_repo"].by_id(record.id)
     else Tasks::Slice["repos.task_repo"].by_id(record.id).source
     end.snoozed_until

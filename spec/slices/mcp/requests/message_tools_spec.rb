@@ -3,7 +3,7 @@
 RSpec.describe "MCP contact message tools", type: :request do
   def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
-  def message_repo = Contact::Slice["repos.message_repo"]
+  def message_queries = Contact::Slice["repos.message_queries"]
 
   def today = Blog::TimeZone.today
 
@@ -123,7 +123,7 @@ RSpec.describe "MCP contact message tools", type: :request do
       message = create(:message)
       mcp_call("mark_message", id: message.id, status: "read")
 
-      expect(message_repo.by_id(message.id).status).to eq("read")
+      expect(message_queries.by_id(message.id).status).to eq("read")
     end
 
     it "marks a message spam and says so" do
@@ -146,7 +146,7 @@ RSpec.describe "MCP contact message tools", type: :request do
       message = create(:message)
       mcp_call("mark_message", id: message.id, status: "archived")
 
-      expect(message_repo.by_id(message.id).status).to eq("unread")
+      expect(message_queries.by_id(message.id).status).to eq("unread")
     end
   end
 end
