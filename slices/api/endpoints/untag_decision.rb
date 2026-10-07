@@ -10,7 +10,7 @@ module API
       }.freeze
 
       def handle(id:, tag:)
-        decision = decision_by_id.call(id)
+        decision = decision_queries.by_id(id)
         return not_found(Wording.missing("decision", id)) if decision.nil?
 
         names = decision.tags.map(&:name)

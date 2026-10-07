@@ -7,11 +7,11 @@ module API
       CLOSED = "decision %s is already resolved or dropped"
       REPLY = Serializers::Decision.reference
 
-      include Deps[decision_by_id: "decisions.queries.by_id"]
+      include Deps[decision_queries: "decisions.repos.decision_queries"]
 
       private
 
-      def answered(id) = Success(serialized(Serializers::Decision, decision_by_id.call(id)))
+      def answered(id) = Success(serialized(Serializers::Decision, decision_queries.by_id(id)))
 
       def closed(id) = invalid(id: [format(CLOSED, id)])
 

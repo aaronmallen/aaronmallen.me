@@ -20,8 +20,7 @@ module API
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
       operations.delete_decision_option operations.drop_decision operations.edit_decision
       operations.edit_decision_comment operations.edit_decision_option operations.open_decision
-      operations.reopen_decision operations.resolve_decision queries.by_id queries.comments queries.find_decisions
-      queries.found_decision_counts queries.timeline
+      operations.reopen_decision operations.resolve_decision repos.decision_queries
     ], from: :decisions
 
     import keys: %w[operations.link_records operations.unlink_records queries.record_links], from: :links

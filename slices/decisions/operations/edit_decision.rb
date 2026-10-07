@@ -8,7 +8,8 @@ module Decisions
 
       include Deps[
         contract: "contracts.decision_contract",
-        decision_repo: "repos.decision_repo",
+        decision_mutations: "repos.decision_mutations",
+        decision_queries: "repos.decision_queries",
         require_edit_note: "operations.require_edit_note",
       ]
 
@@ -17,15 +18,15 @@ module Decisions
 
         transaction do
           step revise(step(find(id)), **fields)
-          decision_repo.replace_tags(id, fields[:tags]) if fields.key?(:tags)
-          decision_repo.by_id(id)
+          decision_mutations.replace_tags(id, fields[:tags]) if fields.key?(:tags)
+          decision_queries.by_id(id)
         end
       end
 
       private
 
       def find(id)
-        found(decision_repo.by_id_for_update(id))
+        found(decision_mutations.by_id_for_update(id))
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }.merge(params.slice(:tags))
@@ -35,8 +36,8 @@ module Decisions
         return Success(decision) unless edited || decision.title != title
 
         kept = step require_edit_note.call(needed: edited && decision.closed?, note:)
-        decision_repo.update(decision.id, title:, problem:)
-        Success(decision_repo.record(decision.id, EDITED, note: kept))
+        decision_mutations.update(decision.id, title:, problem:)
+        Success(decision_mutations.record(decision.id, EDITED, note: kept))
       end
 
       def validate(params) = validated(contract.call(form(params)))

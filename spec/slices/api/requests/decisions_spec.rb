@@ -40,11 +40,11 @@ RSpec.describe "API decisions", type: :request do
     event(decision, "edited", 13, note: "Load grew more")
   end
 
-  def reload(decision) = Decisions::Slice["queries.by_id"].call(decision.id)
+  def reload(decision) = Decisions::Slice["repos.decision_queries"].by_id(decision.id)
 
   def status = last_response.status
 
-  def tag(decision, *names) = Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, names)
+  def tag(decision, *names) = Decisions::Slice["repos.decision_mutations"].replace_tags(decision.id, names)
 
   def whole_timeline
     [

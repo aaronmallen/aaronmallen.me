@@ -2,17 +2,16 @@
 
 module Decisions
   module Repos
-    class DecisionRepo < DB::Repo
+    class DecisionQueries < DB::Repo
       STATUSES = Blog::Types::DecisionStatus.values.freeze
-      TAG_SCOPE = Blog::Types::TagScope["private"]
-
-      stamped_commands :create, :update
 
       def by_id(id) = decisions.combine(:options, :tags).by_pk(id).one
 
-      def by_id_for_update(id) = decisions.by_pk(id).lock.one
-
       def by_tag(tag) = decisions.combine(:options, :tags).tagged(tag).newest_first.to_a
+
+      def comment_on_decision?(decision_id, id) = decision_comments.for_decision(decision_id).by_pk(id).exist?
+
+      def comments(decision_id) = decision_comments.for_decision(decision_id).oldest_first.to_a
 
       def count_by_status = count_statuses(decisions)
 
@@ -31,15 +30,13 @@ module Decisions
         page.fill(found.newest_first.paged(page).to_a)
       end
 
+      def option_on_decision(decision_id, id) = decision_options.for_decision(decision_id).by_pk(id).one
+
       def page_by_status(status, page)
         page.fill(decisions.combine(:options).with_status(status).newest_first.paged(page).to_a)
       end
 
-      def record(decision_id, kind, **) = decision_events.command(:create).call(decision_id:, kind:, **)
-
-      def replace_tags(id, names)
-        decision_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
-      end
+      def timeline(decision_id) = decision_timeline.for_decision(decision_id).oldest_first.to_a
 
       private
 

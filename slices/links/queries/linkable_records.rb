@@ -3,7 +3,7 @@
 module Links
   module Queries
     class LinkableRecords
-      RELATIONS = { "commit" => :commits, "journal_entry" => :journal_entries }.freeze
+      RELATIONS = { "commit" => :commits, "decision" => :decisions, "journal_entry" => :journal_entries }.freeze
       TITLE_LIMIT = 120
       WORK = Blog::Types::ProjectFilter["work"]
 
@@ -16,7 +16,7 @@ module Links
         commit: "record.repos.commit_queries",
         project: "projects.queries.linkable_projects",
         work_entry: "projects.queries.linkable_work_entries",
-        decision: "decisions.queries.linkable_decisions",
+        decision: "decisions.repos.decision_queries",
       ]
 
       def matching(kind, text, limit:)

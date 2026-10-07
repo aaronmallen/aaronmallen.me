@@ -10,7 +10,7 @@ RSpec.describe "Admin decisions", type: :request do
 
   def events(id = decision.id) = Decisions::Slice["relations.decision_events"].where(decision_id: id).order(:id).to_a
 
-  def reload(id = decision.id) = Decisions::Slice["repos.decision_repo"].by_id(id)
+  def reload(id = decision.id) = Decisions::Slice["repos.decision_queries"].by_id(id)
 
   def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
@@ -224,14 +224,14 @@ RSpec.describe "Admin decisions", type: :request do
       end
 
       it "shows its tags" do
-        Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, %w[queues])
+        Decisions::Slice["repos.decision_mutations"].replace_tags(decision.id, %w[queues])
         get "/admin/decisions/#{decision.id}"
 
         expect(page.find(".read-meta")).to have_css(".tag", text: "#queues")
       end
 
       it "links its tags to their summaries" do
-        Decisions::Slice["repos.decision_repo"].replace_tags(decision.id, %w[queues])
+        Decisions::Slice["repos.decision_mutations"].replace_tags(decision.id, %w[queues])
         get "/admin/decisions/#{decision.id}"
 
         expect(page.find(".read-meta")).to have_link("#queues", href: "/admin/tags/queues")

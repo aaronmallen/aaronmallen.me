@@ -18,7 +18,7 @@ module API
       }.freeze
 
       def handle(id:, tags:)
-        decision = decision_by_id.call(id)
+        decision = decision_queries.by_id(id)
         return not_found(Wording.missing("decision", id)) if decision.nil?
 
         retag(decision, decision.tags.map(&:name) + tags)

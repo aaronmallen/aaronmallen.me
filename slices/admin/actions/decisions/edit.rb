@@ -6,11 +6,11 @@ module Admin
       class Edit < Action
         include Deps[
           build_decision_editor: "operations.build_decision_editor",
-          decision_by_id: "decisions.queries.by_id",
+          decision_queries: "decisions.repos.decision_queries",
         ]
 
         def handle(request, response)
-          decision = decision_by_id.call(record_id(request))
+          decision = decision_queries.by_id(record_id(request))
           not_found(response) unless decision
 
           response.render(view, **build_decision_editor.call(decision:))

@@ -17,7 +17,7 @@ module API
       include Deps[edit_decision: "decisions.operations.edit_decision"]
 
       def handle(id:, **fields)
-        decision = decision_by_id.call(id)
+        decision = decision_queries.by_id(id)
         return not_found(Wording.missing("decision", id)) if decision.nil?
 
         params = { title: decision.title, problem: decision.problem }.merge(fields)

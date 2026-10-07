@@ -4,7 +4,7 @@ module Tags
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/tags"), namespace: Tags)
 
-    import keys: %w[queries.by_tag], from: :decisions
+    import keys: %w[repos.decision_queries], from: :decisions
 
     import keys: %w[queries.by_tag], from: :posts
 

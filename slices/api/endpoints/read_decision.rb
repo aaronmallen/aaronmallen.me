@@ -27,17 +27,15 @@ module API
       ).freeze
 
       include Deps[
-        decision_by_id: "decisions.queries.by_id",
-        decision_comments: "decisions.queries.comments",
-        decision_timeline: "decisions.queries.timeline",
+        decision_queries: "decisions.repos.decision_queries",
         record_links: "links.queries.record_links",
       ]
 
       def handle(id:)
-        decision = decision_by_id.call(id)
+        decision = decision_queries.by_id(id)
         return not_found(Wording.missing("decision", id)) if decision.nil?
 
-        Success(answered(decision, decision_timeline.call(decision.id)))
+        Success(answered(decision, decision_queries.timeline(decision.id)))
       end
 
       private
@@ -45,7 +43,7 @@ module API
       def answered(decision, timeline)
         serialized(Serializers::Decision, decision).merge(
           choice: choice(decision, timeline),
-          comments: serialized(Serializers::DecisionComment, decision_comments.call(decision.id)),
+          comments: serialized(Serializers::DecisionComment, decision_queries.comments(decision.id)),
           record_links: linked(KIND, decision.id),
           timeline: timeline.map { serialized(SERIALIZERS.fetch(it.kind), it) },
         )

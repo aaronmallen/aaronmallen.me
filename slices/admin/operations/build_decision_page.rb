@@ -8,16 +8,15 @@ module Admin
       KIND = Blog::Types::RecordKind["decision"]
 
       include Deps[
-        decision_by_id: "decisions.queries.by_id",
-        decision_timeline: "decisions.queries.timeline",
+        decision_queries: "decisions.repos.decision_queries",
         list_record_links: "operations.list_record_links",
       ]
 
       def call(id, form: EMPTY_HASH, records: EMPTY_HASH)
-        decision = decision_by_id.call(id)
+        decision = decision_queries.by_id(id)
         return unless decision
 
-        { decision:, form:, timeline: decision_timeline.call(decision.id),
+        { decision:, form:, timeline: decision_queries.timeline(decision.id),
           records: list_record_links.call(KIND, decision.id, **records) }
       end
     end

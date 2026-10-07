@@ -142,7 +142,7 @@ RSpec.describe "Admin tags", type: :request do
       it "counts each private kind a private tag is on" do
         create(:task, tags: %w[ruby])
         create(:journal_entry, tags: %w[ruby])
-        Decisions::Slice["repos.decision_repo"].replace_tags(create(:decision).id, %w[ruby])
+        Decisions::Slice["repos.decision_mutations"].replace_tags(create(:decision).id, %w[ruby])
         get "/admin/tags", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("1 journal entry · 1 task · 1 decision")

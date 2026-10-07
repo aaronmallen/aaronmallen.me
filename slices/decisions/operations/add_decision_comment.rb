@@ -8,8 +8,8 @@ module Decisions
       include Deps[
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.decision_comment_contract",
-        decision_comment_repo: "repos.decision_comment_repo",
-        decision_repo: "repos.decision_repo",
+        decision_comment_mutations: "repos.decision_comment_mutations",
+        decision_queries: "repos.decision_queries",
       ]
 
       def call(decision_id, params)
@@ -17,7 +17,7 @@ module Decisions
         fields = step validate(params)
 
         transaction do
-          comment = decision_comment_repo.create(decision_id:, body: fields[:body])
+          comment = decision_comment_mutations.create(decision_id:, body: fields[:body])
           claim_photos.call(PHOTO_OWNER, comment.id, comment.body)
           comment
         end
@@ -25,7 +25,7 @@ module Decisions
 
       private
 
-      def find(id) = found(decision_repo.exist?(id) && id)
+      def find(id) = found(decision_queries.exist?(id) && id)
 
       def validate(params) = validated(contract.call(body: params[:body]))
     end

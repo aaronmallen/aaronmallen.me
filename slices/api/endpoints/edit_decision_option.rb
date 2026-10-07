@@ -20,7 +20,7 @@ module API
       include Deps[edit_decision_option: "decisions.operations.edit_decision_option"]
 
       def handle(id:, option_id:, **fields)
-        option = decision_by_id.call(id)&.options&.find { it.id == option_id }
+        option = decision_queries.by_id(id)&.options&.find { it.id == option_id }
         return not_found(Decisions.missing_option(id, option_id)) if option.nil?
 
         result = edit_decision_option.call(id, option_id, { title: option.title, body: option.body }.merge(fields))

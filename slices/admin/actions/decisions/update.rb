@@ -9,7 +9,7 @@ module Admin
         include PageForm
         include Deps[
           build_decision_editor: "operations.build_decision_editor",
-          decision_by_id: "decisions.queries.by_id",
+          decision_queries: "decisions.repos.decision_queries",
           edit_decision: "decisions.operations.edit_decision",
         ]
 
@@ -27,7 +27,7 @@ module Admin
         private
 
         def invalid(request, response, params, errors)
-          decision = decision_by_id.call(record_id(request))
+          decision = decision_queries.by_id(record_id(request))
           halt 404 unless decision
 
           response.status = 422

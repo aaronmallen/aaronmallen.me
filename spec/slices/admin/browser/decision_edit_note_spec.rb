@@ -3,7 +3,7 @@
 RSpec.describe "Admin decision edit notes", type: :feature do
   let(:decision) { create(:decision, title: "Pick a queue", problem: "Jobs pile up") }
   let(:option) { create(:decision_option, decision_id: decision.id, title: "Sidekiq", body: "Runs today") }
-  let(:repo) { Decisions::Slice["repos.decision_repo"] }
+  let(:repo) { Decisions::Slice["repos.decision_queries"] }
 
   def confirm(note)
     dialog.fill_in "What changed and why", with: note

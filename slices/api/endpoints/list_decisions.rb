@@ -33,18 +33,17 @@ module API
 
       include Deps[
         "settings",
-        find_decisions: "decisions.queries.find_decisions",
-        found_decision_counts: "decisions.queries.found_decision_counts",
+        decision_queries: "decisions.repos.decision_queries",
       ]
 
       def handle(page: 1, query: nil, status: nil, tag: nil)
         filters = { tag: tag&.downcase, text: query.to_s.strip.then { it unless it.empty? } }
-        found = find_decisions.call(page: page_of(page), status:, **filters)
+        found = decision_queries.listed(page_of(page), status:, **filters)
 
         Success(
           {
             count: found.rows.length,
-            counts: found_decision_counts.call(**filters),
+            counts: decision_queries.count_found(**filters),
             decisions: serialized(Serializers::Decision, found.rows),
             **Blog::Paging.fields(found),
           },

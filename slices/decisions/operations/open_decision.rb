@@ -6,16 +6,20 @@ module Decisions
       FIELDS = %i[title problem tags].freeze
       OPENED = Blog::Types::DecisionEventKind["opened"]
 
-      include Deps[contract: "contracts.decision_contract", decision_repo: "repos.decision_repo"]
+      include Deps[
+        contract: "contracts.decision_contract",
+        decision_mutations: "repos.decision_mutations",
+        decision_queries: "repos.decision_queries",
+      ]
 
       def call(params)
         fields = step validate(params)
 
         transaction do
-          decision = decision_repo.create(**fields.except(:tags))
-          decision_repo.replace_tags(decision.id, fields.fetch(:tags))
-          decision_repo.record(decision.id, OPENED)
-          decision_repo.by_id(decision.id)
+          decision = decision_mutations.create(**fields.except(:tags))
+          decision_mutations.replace_tags(decision.id, fields.fetch(:tags))
+          decision_mutations.record(decision.id, OPENED)
+          decision_queries.by_id(decision.id)
         end
       end
 
