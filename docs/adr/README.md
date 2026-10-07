@@ -126,6 +126,7 @@ one.
 | [0119][0119] | Mark a project archived by its archive date, and keep visibility in its own enum | ![Active][active] | 2026-10-07 |
 | [0120][0120] | Mark webmentions seen apart from their status, and clear the inbox in one transaction | ![Active][active] | 2026-10-07 |
 | [0121][0121] | Keep inbox snoozes in a snoozed_until column on each record's table | ![Active][active] | 2026-10-07 |
+| [0122][0122] | Widen task tag rules into task rules that assign projects, and match a project's own repo | ![Active][active] | 2026-10-07 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -248,6 +249,7 @@ one.
 [0119]: 0119-mark-a-project-archived-by-its-archive-date-and-keep-visibility-in-its-own-enum.md
 [0120]: 0120-mark-webmentions-seen-apart-from-their-status-and-clear-the-inbox-in-one-transaction.md
 [0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
+[0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

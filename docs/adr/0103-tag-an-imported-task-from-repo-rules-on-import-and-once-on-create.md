@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, record, tasks]
 issue: "#389"
-amended: ["#506"]
+amended: ["#506", "#660"]
 tags: [tasks, tags, rules, imports, sync, github, linear, providers, repos]
 ---
 
@@ -50,7 +50,8 @@ as [ADR 0088][0088] says.
 
 **A field on projects.** A project already holds a `repo`, so it could hold that repo's tags too. It lost because a
 project names one repo and cannot say `owner/*`, a repo with no project could take no tags, and the owner means to
-rename projects or make them private apart from this work.
+rename projects or make them private apart from this work. Since #660 a project's repo links its issues to that
+project, and rules assign projects as well as tags, but the rules stay in `tasks`, as [ADR 0122][0122] says.
 
 **A map in the settings file.** Repo patterns and tags sit in `config/settings`. It lost because a change would take
 a deploy, the owner wants to edit rules in the admin and the MCP, and the one pass over existing tasks has no save to
@@ -80,4 +81,5 @@ needs a rule provider of its own, as [ADR 0112][0112] says.
 [0077]: 0077-tag-an-imported-task-from-its-labels-only-on-import.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0112]: 0112-give-every-tag-rule-a-provider-and-match-linear-issues-by-workspace-and-team.md
+[0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
