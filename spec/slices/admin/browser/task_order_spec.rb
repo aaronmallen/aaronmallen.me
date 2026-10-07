@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin task order", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
 
   def center(element)
     box = evaluate_script(<<~JS, element)

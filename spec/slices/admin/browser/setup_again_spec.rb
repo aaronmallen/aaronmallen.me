@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin scripts after new markup", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
 
   def active = evaluate_script("document.querySelector('[data-palette-option][aria-selected=\"true\"]').id")
 

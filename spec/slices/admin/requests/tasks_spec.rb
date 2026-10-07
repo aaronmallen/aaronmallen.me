@@ -3,14 +3,20 @@
 RSpec.describe "Admin tasks", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
-  let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
+  let(:sprint_repo) { Tasks::Slice["repos.sprint_queries"] }
 
   def capture(title, filter: nil, **fields)
     post "/admin/tasks", { _csrf_token: admin_csrf_token, filter:, task: { title:, **fields } }.compact
   end
 
   def empty_text(filter) = i18n.t(["ui.views.tasks.index.empty", filter].join("."))
+
+  def lose_the_roll
+    allow(sprint_repo).to receive(:by_id).and_return(nil)
+    replace_component("repos.sprint_queries", sprint_repo)
+    replace_component("tasks.repos.sprint_queries", sprint_repo)
+  end
 
   def move_keys = page.all(".task-acts form[action*='/move/']:has(button[data-key='m'])").map { it["action"] }
 
@@ -25,8 +31,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
     it "answers with a server error when the day's sprint cannot be rolled" do
       create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
-      allow(sprint_repo).to receive(:by_id).and_return(nil)
-      replace_component("repos.sprint_repo", sprint_repo)
+      lose_the_roll
       get "/admin/tasks"
 
       expect(last_response.status).to eq(500)
@@ -131,7 +136,9 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       {
-        "today" => -> { { list: nil, sprint_id: sprint_repo.claim(Blog::TimeZone.today).id } },
+        "today" => lambda {
+          { list: nil, sprint_id: Tasks::Slice["repos.sprint_mutations"].claim(Blog::TimeZone.today).id }
+        },
         "upcoming" => -> { { list: nil, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today + 1).id } },
         "next" => -> { { list: "next" } },
         "someday" => -> { { list: "someday" } },
@@ -270,7 +277,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "says something useful when nothing is imported" do
-        repo.delete(imported.id)
+        Tasks::Slice["repos.task_mutations"].delete(imported.id)
         get "/admin/tasks", filter: "external"
 
         expect(page).to have_css(".empty", exact_text: empty_text("external"))
@@ -372,7 +379,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "names external as the place of a linked task" do
         other = create(:task, title: "Write the post")
-        repo.link(other.id, imported.id, "relates")
+        Tasks::Slice["repos.task_mutations"].link(other.id, imported.id, "relates")
         get "/admin/tasks/#{other.id}", filter: "next"
 
         expect(page).to have_css(".task-link-place", exact_text: "external")
@@ -1728,8 +1735,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "answers with a server error when the day's sprint cannot be rolled" do
         task = create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today - 1))
-        allow(sprint_repo).to receive(:by_id).and_return(nil)
-        replace_component("repos.sprint_repo", sprint_repo)
+        lose_the_roll
         get "/admin/tasks/#{task.id}/edit"
 
         expect(last_response.status).to eq(500)

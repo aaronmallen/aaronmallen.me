@@ -68,7 +68,7 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
 
       expect(last_request.path).to eq("/admin")
       expect(titles).to eq(["Old draft"])
-      expect(Tasks::Slice["repos.task_repo"].by_id(task.id).list).to eq("next")
+      expect(Tasks::Slice["repos.task_queries"].by_id(task.id).list).to eq("next")
     end
 
     it "cancels the task and drops off the card", :aggregate_failures do
@@ -76,7 +76,7 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
 
       expect(last_request.path).to eq("/admin")
       expect(titles).to eq(["Old draft"])
-      expect(Tasks::Slice["repos.task_repo"].by_id(task.id).status).to eq("canceled")
+      expect(Tasks::Slice["repos.task_queries"].by_id(task.id).status).to eq("canceled")
     end
 
     it "asks before it cancels" do

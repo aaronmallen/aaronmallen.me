@@ -14,13 +14,13 @@ module API
 
       include Deps[
         record_links: "links.queries.record_links",
-        task_by_id: "tasks.queries.task_by_id",
-        task_comments: "tasks.queries.task_comments",
+        task_comment_queries: "tasks.repos.task_comment_queries",
+        task_queries: "tasks.repos.task_queries",
       ]
 
       private
 
-      def answered(id, **) = task_reply(task_by_id.call(id), **)
+      def answered(id, **) = task_reply(task_queries.detailed(id), **)
 
       def placed(result, id)
         case result
@@ -41,7 +41,7 @@ module API
       def sprint_past = invalid(sprint_on: [Tasks::SPRINT_PAST])
 
       def task_reply(task, **extra)
-        comments = serialized(Serializers::TaskComment, task_comments.call(task.id))
+        comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id))
 
         record_links = linked(KIND, task.id)
 

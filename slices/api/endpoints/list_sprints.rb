@@ -16,7 +16,7 @@ module API
         optional: { next_page: Schema::INTEGER },
       ).freeze
 
-      include Deps["settings", sprints_between: "tasks.queries.sprints_between"]
+      include Deps["settings", sprint_queries: "tasks.repos.sprint_queries"]
 
       def handle(from: nil, to: nil, page: 1)
         case Blog::DayWindow.open_days(from || opening(to), to)
@@ -28,7 +28,7 @@ module API
       private
 
       def listed(first, last, page)
-        found = sprints_between.call(from: first, to: last, page:)
+        found = sprint_queries.between(from: first, to: last, page:)
 
         { sprints: serialized(Serializers::Sprint, found.rows), **Blog::Paging.fields(found) }
       end

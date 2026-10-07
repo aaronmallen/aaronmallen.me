@@ -14,24 +14,15 @@ module Tasks
 
     export %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
-      operations.complete_task
-      operations.current_sprint operations.delete_task operations.delete_task_comment operations.delete_task_rule
-      operations.delete_work_session
-      operations.drop_sprint operations.edit_task_comment operations.edit_work_session operations.link_repo_tasks
-      operations.link_tasks operations.mark_task_seen operations.move_task operations.pause_task
-      operations.plan_sprint operations.place_task operations.queue_issue_sync operations.reopen_task
-      operations.reorder_task operations.save_task operations.save_task_rule operations.schedule_task
-      operations.set_task_total operations.snooze_tasks
-      operations.start_task
-      operations.unlink_task operations.wake_task
-      queries.counted_sprints_between queries.find_tasks queries.finished_task_counts queries.link_targets
-      queries.linkable_tasks
-      queries.list_finished_tasks queries.list_tasks queries.open_task_counts
-      queries.open_tasks_in_list queries.planned_tasks queries.sprints_after queries.sprints_between
-      queries.snoozed_tasks
-      queries.synced_task_ids queries.task_by_id queries.task_comments queries.task_rules
-      queries.task_timeline queries.tasks_by_tag queries.tasks_in_progress
-      queries.tasks_in_sprint queries.time_report queries.unseen_task_count queries.unseen_tasks
+      operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
+      operations.delete_task_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
+      operations.edit_work_session operations.link_repo_tasks operations.link_tasks operations.mark_task_seen
+      operations.move_task operations.pause_task operations.place_task operations.plan_sprint
+      operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.save_task
+      operations.save_task_rule operations.schedule_task operations.set_task_total operations.snooze_tasks
+      operations.start_task operations.unlink_task operations.wake_task
+      repos.sprint_queries repos.task_comment_queries repos.task_link_queries repos.task_queries
+      repos.task_rule_queries repos.task_source_queries repos.time_report_queries repos.work_session_queries
     ]
   end
 end

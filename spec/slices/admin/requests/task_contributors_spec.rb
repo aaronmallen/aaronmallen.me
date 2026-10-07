@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:task) { create(:task, title: "Ship the editor") }
   let(:new_agent) { "task[contributors][agents][new]" }
 

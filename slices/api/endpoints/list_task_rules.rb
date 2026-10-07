@@ -6,9 +6,9 @@ module API
       SCHEMA = { additionalProperties: false }.freeze
       REPLY = Schema.object({ task_rules: Schema.list(Serializers::TaskRule.reference) }).freeze
 
-      include Deps[task_rules: "tasks.queries.task_rules"]
+      include Deps[task_rule_queries: "tasks.repos.task_rule_queries"]
 
-      def handle = Success(task_rules: serialized(Serializers::TaskRule, task_rules.call))
+      def handle = Success(task_rules: serialized(Serializers::TaskRule, task_rule_queries.all))
     end
   end
 end

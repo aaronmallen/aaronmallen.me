@@ -6,7 +6,11 @@ module Tasks
       FUTURE = "future"
       ORDER = "order"
 
-      include Deps[contract: "contracts.work_session_contract", work_session_repo: "repos.work_session_repo"]
+      include Deps[
+        contract: "contracts.work_session_contract",
+        work_session_mutations: "repos.work_session_mutations",
+        work_session_queries: "repos.work_session_queries",
+      ]
 
       def call(task_id, id, params, now: Time.now)
         session = step find(task_id, id)
@@ -14,8 +18,8 @@ module Tasks
         started_at, ended_at = step ordered(session, fields, now)
 
         transaction do
-          work_session_repo.shift_total(task_id, change(session, started_at, ended_at))
-          work_session_repo.update(id, started_at:, ended_at:)
+          work_session_mutations.shift_total(task_id, change(session, started_at, ended_at))
+          work_session_mutations.update(id, started_at:, ended_at:)
         end
       end
 
@@ -26,7 +30,7 @@ module Tasks
       end
 
       def find(task_id, id)
-        found(work_session_repo.find(task_id, id))
+        found(work_session_queries.find(task_id, id))
       end
 
       def future(time, now) = ([FUTURE] if time && time > now)

@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
 
   def act(name, tasks, **params)
     ids = tasks.map { it.is_a?(Integer) ? it : it.id }
@@ -17,7 +17,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
     found.map { it.to_h.slice(:kind, :from_list, :to_list, :tag_name) }
   end
 
-  def gone_id = create(:task).id.tap { repo.delete(it) }
+  def gone_id = create(:task).id.tap { Tasks::Slice["repos.task_mutations"].delete(it) }
 
   def place(task) = repo.by_id(task.id).place
 
@@ -25,7 +25,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
 
   def tag_names(task) = Tasks::Slice["relations.task_tags"].names_by_task([task.id]).fetch(task.id, [])
 
-  def tagged(*names) = create(:task).tap { repo.replace_tags(it.id, names) }
+  def tagged(*names) = create(:task).tap { Tasks::Slice["repos.task_mutations"].replace_tags(it.id, names) }
 
   def tasks(count) = Array.new(count) { create(:task) }
 
@@ -197,7 +197,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       before { act("move", ticked, to: "today") }
 
       it "puts them in today's sprint", :aggregate_failures do
-        sprint = Tasks::Slice["repos.sprint_repo"].on(Blog::TimeZone.today)
+        sprint = Tasks::Slice["repos.sprint_queries"].on(Blog::TimeZone.today)
 
         expect(ticked.map { repo.by_id(it.id).sprint_id }).to eq([sprint.id, sprint.id])
         expect(ticked.map { place(it) }).to eq(%w[today today])

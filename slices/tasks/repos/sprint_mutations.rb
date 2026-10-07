@@ -2,17 +2,13 @@
 
 module Tasks
   module Repos
-    class SprintRepo < DB::Repo
+    class SprintMutations < DB::Repo
       EXTERNAL = Blog::Types::TaskList["external"]
       NEXT = Blog::Types::TaskList["next"]
 
+      root :sprints
+
       commands delete: :by_pk
-
-      def after(date) = sprints.dated_after(date).in_date_order.to_a
-
-      def between(first, last, page) = page.fill(sprints.dated_between(first, last).in_date_order.paged(page).to_a)
-
-      def by_id(id) = sprints.by_pk(id).one
 
       def carry_forward(sprint_id, at: Time.now)
         carried = tasks.unfinished_in(sprints.before_sprint(sprint_id).ids)
@@ -27,11 +23,7 @@ module Tasks
 
       def count_arrivals(id, arrived) = sprints.count_arrivals(id, arrived)
 
-      def counted_between(first, last) = sprints.dated_between(first, last).with_task_counts.in_date_order.to_a
-
       def lock_roll_over = sprints.lock_until_commit
-
-      def on(date) = sprints.on(date).one
 
       def release(sprint_id, at: Time.now)
         held = tasks.for_sprint(sprint_id)
@@ -43,6 +35,8 @@ module Tasks
       end
 
       private
+
+      def on(date) = sprints.on(date).one
 
       def return_to(held, list, at)
         held.pause(at)

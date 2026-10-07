@@ -3,8 +3,8 @@
 RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
   subject(:job) { described_class.new }
 
-  let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
-  let(:task_repo) { Tasks::Slice["repos.task_repo"] }
+  let(:sprint_repo) { Tasks::Slice["repos.sprint_queries"] }
+  let(:task_repo) { Tasks::Slice["repos.task_queries"] }
   let(:today) { Blog::TimeZone.today }
   let(:yesterday) { create(:sprint, sprint_date: today - 1) }
 
@@ -51,7 +51,7 @@ RSpec.describe Tasks::Jobs::RollOverSprint, :frozen_clock do
   it "raises when the roll fails, so the failure reaches the logs" do
     create(:task, :in_sprint, sprint_id: yesterday.id)
     allow(sprint_repo).to receive(:by_id).and_return(nil)
-    current_sprint = Tasks::Operations::CurrentSprint.new(sprint_repo:)
+    current_sprint = Tasks::Operations::CurrentSprint.new(sprint_queries: sprint_repo)
 
     expect { described_class.new(current_sprint:).perform }.to raise_error(described_class::RollOverFailed, "not_found")
   end

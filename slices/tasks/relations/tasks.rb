@@ -24,6 +24,8 @@ module Tasks
         end
       end
 
+      def beside(task) = (task.listed? ? in_list(task.list) : for_sprint(task.sprint_id)).open
+
       def carry_into(sprint_id)
         stamped(:update, result: :many).call(carried_count: Sequel[:carried_count] + 1, sprint_id:).size
       end

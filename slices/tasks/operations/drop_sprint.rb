@@ -3,7 +3,7 @@
 module Tasks
   module Operations
     class DropSprint < Operation
-      include Deps[sprint_repo: "repos.sprint_repo"]
+      include Deps[sprint_mutations: "repos.sprint_mutations", sprint_queries: "repos.sprint_queries"]
 
       def call(id, now: Time.now)
         sprint = step find(id)
@@ -18,15 +18,15 @@ module Tasks
 
       def drop(sprint, now)
         transaction do
-          sprint_repo.release(sprint.id, at: now)
-          sprint_repo.delete(sprint.id)
+          sprint_mutations.release(sprint.id, at: now)
+          sprint_mutations.delete(sprint.id)
         end
 
         sprint
       end
 
       def find(id)
-        found(sprint_repo.by_id(id))
+        found(sprint_queries.by_id(id))
       end
     end
   end

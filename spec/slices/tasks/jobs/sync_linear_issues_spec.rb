@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Tasks::Jobs::SyncLinearIssues do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:url) { "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues" }
 
-  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
+  def comments(task = imported) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
   before do
@@ -159,7 +159,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     it "keeps a tag I removed off on the next sync" do
       stub_assigned(labeled("Bug Fix"))
       sync
-      repo.replace_tags(imported.id, [])
+      Tasks::Slice["repos.task_mutations"].replace_tags(imported.id, [])
       sync
 
       expect(imported.tags).to be_empty
@@ -997,7 +997,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     let(:elsewhere) { Sequel.connect(connection.opts) }
 
     before do
-      lock = Tasks::Repos::TaskSourceRepo::SYNC_LOCKS.fetch("linear")
+      lock = Tasks::Repos::TaskSourceMutations::SYNC_LOCKS.fetch("linear")
       elsewhere.get(Sequel.function(:pg_try_advisory_lock, lock))
     end
 

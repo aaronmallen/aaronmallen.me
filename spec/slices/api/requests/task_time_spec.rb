@@ -37,7 +37,7 @@ RSpec.describe "API task time", type: :request do
 
   def status = last_response.status
 
-  def total(on = task) = Tasks::Slice["repos.task_repo"].by_id(on.id).worked_seconds
+  def total(on = task) = Tasks::Slice["repos.task_queries"].by_id(on.id).worked_seconds
 
   describe "POST /api/v1/tasks/:id/pause" do
     it "ends the open session and returns the task to open", :aggregate_failures do
@@ -75,7 +75,7 @@ RSpec.describe "API task time", type: :request do
         found = create(:task, state, completed_at: Time.now - 60)
 
         expect([act(found.id, "pause").fetch("message"), status]).to eq(["task #{found.id} is not in progress", 422])
-        expect(Tasks::Slice["repos.task_repo"].by_id(found.id)).to have_attributes(status: state.to_s)
+        expect(Tasks::Slice["repos.task_queries"].by_id(found.id)).to have_attributes(status: state.to_s)
       end
     end
   end
@@ -168,7 +168,7 @@ RSpec.describe "API task time", type: :request do
       remove(sessions(found).first, on: found)
 
       expect(sessions(found).map { it[:ended_at] }).to eq([nil])
-      expect([Tasks::Slice["repos.task_repo"].by_id(found.id).status, total(found)]).to eq(["in_progress", 600])
+      expect([Tasks::Slice["repos.task_queries"].by_id(found.id).status, total(found)]).to eq(["in_progress", 600])
     end
 
     it "answers a session on another task with a 404 and keeps it", :aggregate_failures do
@@ -232,7 +232,7 @@ RSpec.describe "API task time", type: :request do
 
     it "refuses hours past 9999 with a 422 and leaves the task open", :aggregate_failures do
       expect(act(task.id, "complete", hours: 10_000).fetch("errors")).to eq("hours" => ["hours run from 0 to 9999"])
-      expect(Tasks::Slice["repos.task_repo"].by_id(task.id).status).to eq("open")
+      expect(Tasks::Slice["repos.task_queries"].by_id(task.id).status).to eq("open")
     end
   end
 

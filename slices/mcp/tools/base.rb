@@ -51,7 +51,7 @@ module MCP
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 
         def synced(payload, server_context)
-          Untrusted.synced(payload) { dep(:synced_task_ids, server_context).call(it) }
+          Untrusted.synced(payload) { dep(:task_source_queries, server_context).synced_task_ids(it) }
         end
 
         def too_long?(first, last) = Blog::DayWindow.too_long?(first, last)

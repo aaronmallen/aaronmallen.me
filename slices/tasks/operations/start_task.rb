@@ -5,9 +5,9 @@ module Tasks
     class StartTask < Operation
       include Deps[
         current_sprint: "operations.current_sprint",
-        task_event_repo: "repos.task_event_repo",
-        task_repo: "repos.task_repo",
-        work_session_repo: "repos.work_session_repo",
+        task_event_mutations: "repos.task_event_mutations",
+        task_mutations: "repos.task_mutations",
+        work_session_mutations: "repos.work_session_mutations",
       ]
 
       def call(id, at: Time.now, seen: true)
@@ -15,9 +15,9 @@ module Tasks
 
         transaction do
           step find(id)
-          task_event_repo.track(id, at, seen:) do
-            work_session_repo.open(id, at)
-            task_repo.update(
+          task_event_mutations.track(id, at, seen:) do
+            work_session_mutations.open(id, at)
+            task_mutations.update(
               id,
               completed_at: nil,
               list: nil,
@@ -30,7 +30,7 @@ module Tasks
 
       private
 
-      def find(id) = found(work_session_repo.lock_task(id) && id)
+      def find(id) = found(work_session_mutations.lock_task(id) && id)
     end
   end
 end

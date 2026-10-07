@@ -655,7 +655,7 @@ RSpec.describe "Admin tags", type: :request do
 
       def rule(pattern, tags) = Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags: }).value!
 
-      def rules = Tasks::Slice["queries.task_rules"].call
+      def rules = Tasks::Slice["repos.task_rule_queries"].all
 
       def tags_of(pattern) = rules.find { it.pattern == pattern }.tags.map(&:name)
 

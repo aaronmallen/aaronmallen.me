@@ -5,8 +5,9 @@ module Tasks
     class SetTaskTotal < Operation
       include Deps[
         contract: "contracts.worked_contract",
-        task_repo: "repos.task_repo",
-        work_session_repo: "repos.work_session_repo",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+        work_session_mutations: "repos.work_session_mutations",
       ]
 
       def call(id, params, at: Time.now)
@@ -14,14 +15,14 @@ module Tasks
         fields = step validate(params)
 
         transaction do
-          work_session_repo.restart(id, at)
-          task_repo.update(id, worked_seconds: Contracts::WorkedContract.seconds(fields))
+          work_session_mutations.restart(id, at)
+          task_mutations.update(id, worked_seconds: Contracts::WorkedContract.seconds(fields))
         end
       end
 
       private
 
-      def find(id) = found(task_repo.exist?(id) && id)
+      def find(id) = found(task_queries.exist?(id) && id)
 
       def validate(params)
         validated(contract.call({ hours: params[:hours], minutes: params[:minutes] }, required: true))

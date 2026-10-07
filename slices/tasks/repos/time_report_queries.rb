@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Tasks
-  module Queries
-    class TimeReport
+  module Repos
+    class TimeReportQueries < DB::Repo
       DAY = Blog::Types::TimeGrouping["day"]
       NONE = [nil].freeze
       PROJECT = Blog::Types::TimeGrouping["project"]
 
-      include Deps[project_queries: "projects.repos.project_queries", time_report_repo: "repos.time_report_repo"]
+      include Deps[project_queries: "projects.repos.project_queries"]
 
-      def call(from:, to:, by:)
+      def report(from:, to:, by:)
         grouping = Blog::Types::TimeGrouping[by]
         tasks, pieces = worked(from, to)
 
@@ -44,7 +44,7 @@ module Tasks
       end
 
       def project_keys(ids)
-        project_ids = time_report_repo.project_ids(ids)
+        project_ids = record_links.project_ids_by_task(ids)
         names = project_queries.linkable(:projects, ids: project_ids.values.flatten.uniq).to_h { [it.id, it.title] }
 
         ->(id, _) { project_ids.fetch(id, NONE).map { [it, names[it]] } }
@@ -55,7 +55,7 @@ module Tasks
       end
 
       def spread(rows, tasks)
-        closed = time_report_repo.closed_seconds(rows.map { it[:task_id] }.uniq)
+        closed = work_sessions.closed_seconds_by_task(rows.map { it[:task_id] }.uniq)
 
         rows.map do |row|
           id, seconds = row.values_at(:task_id, :seconds)
@@ -73,7 +73,7 @@ module Tasks
       end
 
       def tag_keys(ids)
-        names = time_report_repo.tag_names(ids)
+        names = task_tags.names_by_task(ids)
 
         ->(id, _) { names.fetch(id, NONE).map { [it, it] } }
       end
@@ -91,11 +91,11 @@ module Tasks
       def total(pieces) = pieces.group_by(&:first).sum { |_, found| found.sum(&:last).round }
 
       def worked(from, to)
-        rows = time_report_repo.seconds_by_day(from, to)
-        unspread = time_report_repo.totals_closed_between(from, to)
-        tasks = time_report_repo.titled_tasks((rows.map { it[:task_id] } + unspread.map(&:first)).uniq)
+        rows = work_sessions.seconds_by_day(from, to)
+        unspread = tasks.totals_closed_between(from, to)
+        titled = tasks.titles_and_totals((rows.map { it[:task_id] } + unspread.map(&:first)).uniq)
 
-        [tasks, spread(rows, tasks) + unspread]
+        [titled, spread(rows, titled) + unspread]
       end
     end
   end

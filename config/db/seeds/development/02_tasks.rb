@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Tasks::Slice["queries.sprints_after"].call(Seeds.today - 365).any?
+return if Tasks::Slice["repos.sprint_queries"].after(Seeds.today - 365).any?
 
 capture_task = Tasks::Slice["operations.capture_task"]
 current_sprint = Tasks::Slice["operations.current_sprint"]

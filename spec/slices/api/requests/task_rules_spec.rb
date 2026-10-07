@@ -26,7 +26,7 @@ RSpec.describe "API task rules", type: :request do
     Tasks::Slice["operations.save_task_rule"].call({ pattern:, provider:, tags: }).value!
   end
 
-  def rules = Tasks::Slice["queries.task_rules"].call
+  def rules = Tasks::Slice["repos.task_rule_queries"].all
 
   def sourced(repo, provider: "github", url: "https://github.com/#{repo}/issues/1")
     create(:task, :external).tap { create(:task_source, task: it, provider:, url:) }
@@ -34,7 +34,7 @@ RSpec.describe "API task rules", type: :request do
 
   def status = last_response.status
 
-  def tag_names(task) = Tasks::Slice["repos.task_repo"].by_id(task.id).tags.map(&:name)
+  def tag_names(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).tags.map(&:name)
 
   def update_rule(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
 
@@ -172,7 +172,7 @@ RSpec.describe "API task rules", type: :request do
 
     it "keeps a tag a task already has once" do
       task = sourced("aaronmallen/aaronmallen.me")
-      Tasks::Slice["repos.task_repo"].replace_tags(task.id, %w[ruby])
+      Tasks::Slice["repos.task_mutations"].replace_tags(task.id, %w[ruby])
       create_rule(pattern: "aaronmallen/*", tags: %w[ruby projects])
 
       expect(tag_names(task)).to eq(%w[projects ruby])
@@ -183,7 +183,7 @@ RSpec.describe "API task rules", type: :request do
       create_rule(pattern: "aaronmallen/*", tags: %w[projects])
 
       expect(Tasks::Slice["relations.task_events"].where(task_id: task.id).pluck(:kind)).to eq(%w[tagged])
-      expect(Tasks::Slice["repos.task_repo"].by_id(task.id).source.seen_at).to be_nil
+      expect(Tasks::Slice["repos.task_queries"].by_id(task.id).source.seen_at).to be_nil
     end
 
     it "refuses a bad pattern with a 422 naming the field and saves nothing", :aggregate_failures do

@@ -33,12 +33,12 @@ RSpec.describe "Admin calendar drag", type: :feature do
   def panel = find("[data-calendar-panel]")
 
   def sprint_on(task)
-    Tasks::Slice["repos.sprint_repo"].by_id(stored_task(task).sprint_id).sprint_date
+    Tasks::Slice["repos.sprint_queries"].by_id(stored_task(task).sprint_id).sprint_date
   end
 
   def stored_post(record) = Posts::Slice["repos.post_queries"].by_id(record.id)
 
-  def stored_task(record) = Tasks::Slice["repos.task_repo"].by_id(record.id)
+  def stored_task(record) = Tasks::Slice["repos.task_queries"].by_id(record.id)
 
   def stroke(from, to)
     (1..6).map do |step|

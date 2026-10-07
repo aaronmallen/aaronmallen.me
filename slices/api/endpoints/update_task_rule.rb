@@ -19,11 +19,11 @@ module API
 
       include Deps[
         save_task_rule: "tasks.operations.save_task_rule",
-        task_rules: "tasks.queries.task_rules",
+        task_rule_queries: "tasks.repos.task_rule_queries",
       ]
 
       def handle(id:, **fields)
-        rule = task_rules.call.find { it.id == id }
+        rule = task_rule_queries.all.find { it.id == id }
         return not_found(Wording.missing("task rule", id)) if rule.nil?
 
         saved(id, save_task_rule.call(form(rule, fields), id:))

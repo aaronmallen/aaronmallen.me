@@ -3,7 +3,7 @@
 RSpec.describe "Admin task time", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:started) { Time.at(((Time.now.to_i - 86_400) / 60) * 60) }
   let(:task) { create(:task, worked_seconds: 3600) }
 
@@ -175,7 +175,7 @@ RSpec.describe "Admin task time", type: :request do
       end
 
       it "keeps the total at zero or more" do
-        repo.update(task.id, worked_seconds: 60)
+        Tasks::Slice["repos.task_mutations"].update(task.id, worked_seconds: 60)
         send_to("/admin/tasks/#{task.id}/sessions/#{closed.id}/delete")
 
         expect(total).to eq(0)

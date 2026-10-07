@@ -2,7 +2,9 @@
 
 module Tasks
   module Repos
-    class TaskEventRepo < DB::Repo
+    class TaskEventMutations < DB::Repo
+      root :task_events
+
       def track(task_ids, at, seen: true, &) = task_events.track(task_ids, at, seen:, &)
     end
   end

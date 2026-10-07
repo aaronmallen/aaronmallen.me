@@ -2,8 +2,10 @@
 
 module Tasks
   module Repos
-    class TaskTagRepo < DB::Repo
+    class TaskTagMutations < DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
+
+      root :task_tags
 
       def add(task_id, name) = task_tags.add_missing([task_id], tags.claim([name], scope: TAG_SCOPE).values)
 

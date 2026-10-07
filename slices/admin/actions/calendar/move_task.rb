@@ -5,10 +5,10 @@ module Admin
     module Calendar
       class MoveTask < Action
         include Move
-        include Deps[schedule_task: "tasks.operations.schedule_task", task_by_id: "tasks.queries.task_by_id"]
+        include Deps[schedule_task: "tasks.operations.schedule_task", task_queries: "tasks.repos.task_queries"]
 
         def handle(request, response)
-          task = task_by_id.call(record_id(request))
+          task = task_queries.detailed(record_id(request))
           halt 404 unless task
           return done(request, response, :closed) if task.closed?
 

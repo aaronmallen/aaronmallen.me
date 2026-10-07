@@ -12,7 +12,7 @@ module Admin
         }.freeze
         UNAUTHORIZED = 401
 
-        include Deps[tasks_in_progress: "tasks.queries.tasks_in_progress"]
+        include Deps[task_queries: "tasks.repos.task_queries"]
 
         config.formats.accept :json
 
@@ -22,7 +22,7 @@ module Admin
           route = ROUTES.fetch(Blog::Types::TaskActParam[request.params[:act]])
 
           response.format = :json
-          response.body = JSON.generate(rows: tasks_in_progress.call.map { row(it, route) })
+          response.body = JSON.generate(rows: task_queries.in_progress.map { row(it, route) })
         end
 
         private

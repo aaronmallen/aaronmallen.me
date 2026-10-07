@@ -24,7 +24,7 @@ RSpec.describe "API task comments", type: :request do
 
   def status = last_response.status
 
-  def stored(task) = Tasks::Slice["repos.task_comment_repo"].for_task(task.id)
+  def stored(task) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
 
   let(:task) { create(:task) }
 

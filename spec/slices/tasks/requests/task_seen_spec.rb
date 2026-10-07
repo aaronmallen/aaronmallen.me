@@ -4,7 +4,7 @@ RSpec.describe "Marking a synced task seen", type: :request do
   let(:today) { Blog::TimeZone.today }
   let(:fields) { { title: "Sync my issues", list: "", note: "" } }
 
-  def seen_at(task) = Tasks::Slice["repos.task_repo"].by_id(task.id).source.seen_at
+  def seen_at(task) = Tasks::Slice["repos.task_queries"].by_id(task.id).source.seen_at
 
   def send_at(time, path, **)
     allow(Time).to receive(:now).and_return(time)

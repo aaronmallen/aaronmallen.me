@@ -11,7 +11,7 @@ module API
 
       include Dry::Monads[:result]
       include Deps[
-        counted_sprints_between: "tasks.queries.counted_sprints_between",
+        sprint_queries: "tasks.repos.sprint_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         post_queries: "posts.repos.post_queries",
         social_post_queries: "social.repos.social_post_queries",
@@ -42,7 +42,7 @@ module API
 
       def held(from, to)
         {
-          sprints: counted_sprints_between.call(from:, to:).to_h { [it.sprint_date, it] },
+          sprints: sprint_queries.counted_between(from:, to:).to_h { [it.sprint_date, it] },
           posts: by_day(post_queries.calendar_between(from:, to:), &:published_at),
           social_posts: by_day(social_post_queries.calendar_between(from:, to:), &:posted_at),
           journal: journal_entry_queries.days_between(from, to).to_set,

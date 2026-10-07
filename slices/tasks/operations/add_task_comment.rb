@@ -8,8 +8,8 @@ module Tasks
       include Deps[
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.task_comment_contract",
-        task_comment_repo: "repos.task_comment_repo",
-        task_repo: "repos.task_repo",
+        task_comment_mutations: "repos.task_comment_mutations",
+        task_queries: "repos.task_queries",
       ]
 
       def call(task_id, params)
@@ -17,7 +17,7 @@ module Tasks
         fields = step validate(params)
 
         transaction do
-          comment = task_comment_repo.create(task_id:, body: fields[:body])
+          comment = task_comment_mutations.create(task_id:, body: fields[:body])
           claim_photos.call(PHOTO_OWNER, comment.id, comment.body)
           comment
         end
@@ -25,7 +25,7 @@ module Tasks
 
       private
 
-      def find(id) = found(task_repo.exist?(id) && id)
+      def find(id) = found(task_queries.exist?(id) && id)
 
       def validate(params) = validated(contract.call(body: params[:body]))
     end

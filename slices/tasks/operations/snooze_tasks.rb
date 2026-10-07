@@ -3,7 +3,7 @@
 module Tasks
   module Operations
     class SnoozeTasks < Operation
-      include Deps[task_repo: "repos.task_repo", task_source_repo: "repos.task_source_repo"]
+      include Deps[task_queries: "repos.task_queries", task_source_mutations: "repos.task_source_mutations"]
 
       def call(ids, ends_at)
         each_record(ids) { single(it, ends_at) }
@@ -12,7 +12,7 @@ module Tasks
       private
 
       def single(id, ends_at)
-        found(task_source_repo.snooze(id, ends_at)).fmap { task_repo.by_id(id) }
+        found(task_source_mutations.snooze(id, ends_at)).fmap { task_queries.by_id(id) }
       end
     end
   end

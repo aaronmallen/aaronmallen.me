@@ -14,7 +14,7 @@ RSpec.describe "Admin task rules", type: :request do
     Tasks::Slice["operations.save_task_rule"].call({ pattern:, provider:, tags:, projects: }).value!
   end
 
-  def rules = Tasks::Slice["queries.task_rules"].call
+  def rules = Tasks::Slice["repos.task_rule_queries"].all
 
   def send_to(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 

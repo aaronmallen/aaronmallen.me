@@ -68,14 +68,10 @@ module API
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
       operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
       operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
-      operations.schedule_task operations.set_task_total
-      operations.snooze_tasks
-      operations.start_task operations.unlink_task
-      queries.counted_sprints_between queries.find_tasks queries.list_finished_tasks queries.list_tasks
-      queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
-      queries.task_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
-      queries.unseen_task_count queries.unseen_tasks
-      operations.wake_task queries.snoozed_tasks
+      operations.schedule_task operations.set_task_total operations.snooze_tasks operations.start_task
+      operations.unlink_task operations.wake_task
+      repos.sprint_queries repos.task_comment_queries repos.task_queries repos.task_rule_queries
+      repos.task_source_queries repos.time_report_queries
     ], from: :tasks
 
     export %w[

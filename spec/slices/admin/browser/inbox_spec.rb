@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin inbox", type: :feature do
   context "when editing an issue" do
-    let(:repo) { Tasks::Slice["repos.task_repo"] }
+    let(:repo) { Tasks::Slice["repos.task_queries"] }
     let(:task) { create(:task, :external, title: "Fix the feed") }
 
     def modal = find("dialog#task-create[open]")

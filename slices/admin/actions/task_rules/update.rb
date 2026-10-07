@@ -10,7 +10,7 @@ module Admin
         include Deps[
           index_view: "ui.views.task_rules.index",
           save_task_rule: "tasks.operations.save_task_rule",
-          task_rules: "tasks.queries.task_rules",
+          task_rule_queries: "tasks.repos.task_rule_queries",
         ]
 
         def handle(request, response)
@@ -31,7 +31,8 @@ module Admin
           editing = { errors:, id:, **UI::Views::TaskRules::Index.typed(params) }
 
           response.status = 422
-          response.render(index_view, adding: BLANK, editing:, rules: task_rules.call, projects: task_rules.projects)
+          response.render(index_view, adding: BLANK, editing:, rules: task_rule_queries.all,
+                                      projects: task_rule_queries.project_choices)
         end
       end
     end

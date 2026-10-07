@@ -7,7 +7,7 @@ module API
 
       include Deps[
         message_queries: "contact.repos.message_queries",
-        unseen_tasks: "tasks.queries.unseen_tasks",
+        task_source_queries: "tasks.repos.task_source_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]
 
@@ -23,7 +23,7 @@ module API
         [
           *message_queries.unread.map { row(:message, it.received_at, it) },
           *webmention_queries.unseen.map { row(:webmention, it.received_at, it) },
-          *unseen_tasks.call.map { row(:task, it.created_at, it, it.source) },
+          *task_source_queries.unseen_tasks.map { row(:task, it.created_at, it, it.source) },
         ]
       end
     end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin bulk task actions", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
 
   def acts = find("[data-bulk-acts]", visible: :all)
 

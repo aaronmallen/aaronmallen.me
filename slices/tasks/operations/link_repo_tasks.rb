@@ -3,11 +3,13 @@
 module Tasks
   module Operations
     class LinkRepoTasks < Operation
-      include Deps[task_rule_repo: "repos.task_rule_repo"]
+      include Deps[task_rule_mutations: "repos.task_rule_mutations", task_rule_queries: "repos.task_rule_queries"]
 
       def call(project, was: nil)
         repo = project.repo
-        task_rule_repo.link_projects(task_rule_repo.repo_task_ids(repo), [project.id]) unless repo.nil? || repo == was
+        return project if repo.nil? || repo == was
+
+        task_rule_mutations.link_projects(task_rule_queries.repo_task_ids(repo), [project.id])
 
         project
       end

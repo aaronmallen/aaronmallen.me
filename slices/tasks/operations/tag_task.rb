@@ -4,21 +4,21 @@ module Tasks
   module Operations
     class TagTask < Operation
       include Deps[
-        task_event_repo: "repos.task_event_repo",
-        task_repo: "repos.task_repo",
-        task_tag_repo: "repos.task_tag_repo",
+        task_event_mutations: "repos.task_event_mutations",
+        task_queries: "repos.task_queries",
+        task_tag_mutations: "repos.task_tag_mutations",
       ]
 
       def call(id, name, at: Time.now)
         step find(id)
 
-        task_event_repo.track(id, at) { task_tag_repo.add(id, name) }
-        task_repo.by_id(id)
+        task_event_mutations.track(id, at) { task_tag_mutations.add(id, name) }
+        task_queries.by_id(id)
       end
 
       private
 
-      def find(id) = found(task_repo.exist?(id) && id)
+      def find(id) = found(task_queries.exist?(id) && id)
     end
   end
 end

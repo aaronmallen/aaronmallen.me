@@ -6,7 +6,10 @@ module Tasks
       FIELDS = %i[author body url].freeze
       VISIBLE = /[[:^space:]]/
 
-      include Deps[task_comment_repo: "repos.task_comment_repo"]
+      include Deps[
+        task_comment_mutations: "repos.task_comment_mutations",
+        task_comment_queries: "repos.task_comment_queries",
+      ]
 
       def call(source, task, issue)
         return unless listening?(task, issue)
@@ -20,19 +23,19 @@ module Tasks
 
       private
 
-      def drop(gone) = gone.empty? || task_comment_repo.delete_synced(gone.map(&:id))
+      def drop(gone) = gone.empty? || task_comment_mutations.delete_synced(gone.map(&:id))
 
       def heard(issue) = issue.fetch(:comments).filter_map { said(it) }.to_h { [it[:remote_id], it] }
 
       def held(source, remote_ids)
-        task_comment_repo.synced(source.task_id, source.provider, remote_ids).to_h { [it.remote_id, it] }
+        task_comment_queries.synced(source.task_id, source.provider, remote_ids).to_h { [it.remote_id, it] }
       end
 
       def keep(held, source, comment)
-        return task_comment_repo.create(**comment, task_id: source.task_id, provider: source.provider) unless held
+        return task_comment_mutations.create(**comment, task_id: source.task_id, provider: source.provider) unless held
 
         changes = { **comment.slice(*FIELDS), task_id: source.task_id }
-        task_comment_repo.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
+        task_comment_mutations.update(held.id, **changes) unless changes == held.to_h.slice(*changes.keys)
       end
 
       def listening?(task, issue) = issue.key?(:comments) && !task.closed?

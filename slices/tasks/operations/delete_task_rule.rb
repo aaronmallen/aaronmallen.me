@@ -3,9 +3,9 @@
 module Tasks
   module Operations
     class DeleteTaskRule < Operation
-      include Deps[task_rule_repo: "repos.task_rule_repo"]
+      include Deps[task_rule_mutations: "repos.task_rule_mutations"]
 
-      def call(id) = step found(task_rule_repo.delete(id))
+      def call(id) = step found(task_rule_mutations.delete(id))
     end
   end
 end

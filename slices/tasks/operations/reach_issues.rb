@@ -6,7 +6,7 @@ module Tasks
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
       REACHABLE = %w[open started unassigned].map { Blog::Types::TaskSourceState[it] }.freeze
 
-      include Deps[task_link_repo: "repos.task_link_repo"]
+      include Deps[task_link_queries: "repos.task_link_queries"]
 
       def call(client, assigned, known)
         ids = ends(assigned, known)
@@ -19,7 +19,8 @@ module Tasks
 
       def ends(assigned, known)
         by_task = assigned.to_h { [known.fetch(it[:id]).task_id, it] }
-        named = by_task.values_at(*task_link_repo.open_ids(by_task.keys)).flat_map { it.fetch(:relations, EMPTY_ARRAY) }
+        open_ids = task_link_queries.open_ids(by_task.keys)
+        named = by_task.values_at(*open_ids).flat_map { it.fetch(:relations, EMPTY_ARRAY) }
 
         named.map { it[:remote_id] }.uniq - known.keys
       end

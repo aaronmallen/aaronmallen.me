@@ -11,11 +11,11 @@ module Tasks
       RANKS = Structs::Link::ORDER
       RELATES = Blog::Types::TaskLinkType["relates"]
 
-      include Deps[task_link_repo: "repos.task_link_repo"]
+      include Deps[task_link_mutations: "repos.task_link_mutations", task_link_queries: "repos.task_link_queries"]
 
       def call(known, issues)
         heard = heard(known, issues)
-        rows = task_link_repo.touching_all(heard.keys)
+        rows = task_link_queries.touching_all(heard.keys)
         live = live(known, heard, rows)
 
         transaction { settle(rows, wanted(known, heard.slice(*live), live), live) }
@@ -23,9 +23,9 @@ module Tasks
 
       private
 
-      def add(link) = write { task_link_repo.add_synced(**link) }
+      def add(link) = write { task_link_mutations.add_synced(**link) }
 
-      def change(row, link) = same?(row, link) || write { task_link_repo.update(row.id, **link) }
+      def change(row, link) = same?(row, link) || write { task_link_mutations.update(row.id, **link) }
 
       def ends(link) = link.to_h.values_at(*ENDS)
 
@@ -49,14 +49,14 @@ module Tasks
       def live(known, heard, rows)
         named = heard.values.flatten.filter_map { known[it[:remote_id]]&.task_id }
 
-        task_link_repo.open_ids([*heard.keys, *named, *rows.flat_map { ends(it) }]).to_set
+        task_link_queries.open_ids([*heard.keys, *named, *rows.flat_map { ends(it) }]).to_set
       end
 
       def live?(link, live) = ends(link).all? { live.include?(it) }
 
       def owned?(row, live) = row.synced && live?(row, live)
 
-      def prune(gone) = gone.empty? || task_link_repo.delete(gone.map(&:id))
+      def prune(gone) = gone.empty? || task_link_mutations.delete(gone.map(&:id))
 
       def same?(row, link)
         return row.type == link[:type] if link[:type] == RELATES
@@ -83,7 +83,7 @@ module Tasks
       end
 
       def write(&)
-        task_link_repo.transaction(&)
+        task_link_mutations.transaction(&)
       rescue *FAILURES
         nil
       end

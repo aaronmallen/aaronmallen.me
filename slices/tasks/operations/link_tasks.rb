@@ -13,28 +13,32 @@ module Tasks
       }.freeze
       FIELDS = %i[kind other_id].freeze
 
-      include Deps[contract: "contracts.task_link_contract", task_repo: "repos.task_repo"]
+      include Deps[
+        contract: "contracts.task_link_contract",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+      ]
 
       def call(id, params)
         step find(id)
         fields = step validate(params)
         step persist(id, **fields)
 
-        task_repo.by_id(id)
+        task_queries.by_id(id)
       end
 
       private
 
-      def find(id) = found(task_repo.by_id(id) && id)
+      def find(id) = found(task_queries.by_id(id) && id)
 
       def form(params) = FIELDS.to_h { [it, params[it]] }
 
       def persist(id, kind:, other_id:)
         from, to, type = kind == BLOCKED_BY ? [other_id, id, BLOCKS] : [id, other_id, kind]
 
-        Success(transaction { task_repo.link(from, to, type) })
+        Success(transaction { task_mutations.link(from, to, type) })
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError => e
-        field, code = CONSTRAINTS[task_repo.violated_constraint(e)]
+        field, code = CONSTRAINTS[task_mutations.violated_constraint(e)]
         raise unless field
 
         Failure([:invalid, { field => [code] }])

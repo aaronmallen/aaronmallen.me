@@ -2,14 +2,14 @@
 
 module Tasks
   module Repos
-    class WorkSessionRepo < DB::Repo
+    class WorkSessionMutations < DB::Repo
+      root :work_sessions
+
       stamped_commands :update
 
       def close(task_id, at) = work_sessions.close(task_id, at)
 
       def delete(id) = work_sessions.by_pk(id).delete
-
-      def find(task_id, id) = work_sessions.for_task(task_id).by_pk(id).one
 
       def lock_task(task_id) = tasks.by_pk(task_id).lock.one
 

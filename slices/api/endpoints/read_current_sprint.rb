@@ -6,7 +6,7 @@ module API
       SCHEMA = { additionalProperties: false }.freeze
       REPLY = Schema.widen(Serializers::Sprint::SCHEMA, tasks: Schema.list(Serializers::Task.reference)).freeze
 
-      include Deps[current_sprint: "tasks.operations.current_sprint", tasks_in_sprint: "tasks.queries.tasks_in_sprint"]
+      include Deps[current_sprint: "tasks.operations.current_sprint", task_queries: "tasks.repos.task_queries"]
 
       def handle
         case current_sprint.call
@@ -18,7 +18,7 @@ module API
       private
 
       def tasks(sprint)
-        serialized(Serializers::Task, tasks_in_sprint.call(sprint.id), sprint_on: sprint.sprint_date)
+        serialized(Serializers::Task, task_queries.in_sprint(sprint.id), sprint_on: sprint.sprint_date)
       end
     end
   end

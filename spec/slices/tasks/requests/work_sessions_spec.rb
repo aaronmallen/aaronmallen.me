@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Work sessions", type: :request do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:today) { Blog::TimeZone.today }
   let!(:started) { Time.at(Time.now.to_i - 5400) }
 
@@ -90,7 +90,7 @@ RSpec.describe "Work sessions", type: :request do
 
     it "adds to a total already on the task" do
       task = running
-      repo.update(task.id, worked_seconds: 3600)
+      Tasks::Slice["repos.task_mutations"].update(task.id, worked_seconds: 3600)
       send_at(started + 60, "/admin/tasks/#{task.id}/complete")
 
       expect(repo.by_id(task.id).worked_seconds).to eq(3660)

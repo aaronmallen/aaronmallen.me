@@ -1207,7 +1207,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       def lose_the_roll
         failing = sprint_repo
         allow(failing).to receive(:by_id).and_return(nil)
-        replace_component("repos.sprint_repo", failing)
+        replace_component("repos.sprint_queries", failing)
+        replace_component("tasks.repos.sprint_queries", failing)
       end
 
       def panel = page.find(".sprint-panel")
@@ -1234,11 +1235,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       def sprint = @sprint ||= create(:sprint, sprint_date: today)
 
-      def sprint_repo = Tasks::Slice["repos.sprint_repo"]
+      def sprint_repo = Tasks::Slice["repos.sprint_queries"]
 
       def sprint_stat = page.find(".g-4 .stat", text: "Sprint")
 
-      def task_repo = Tasks::Slice["repos.task_repo"]
+      def task_repo = Tasks::Slice["repos.task_queries"]
 
       it "reads the day as the page title" do
         get "/admin"

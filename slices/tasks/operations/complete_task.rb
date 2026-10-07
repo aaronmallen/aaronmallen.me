@@ -5,26 +5,27 @@ module Tasks
     class CompleteTask < Operation
       include Deps[
         contract: "contracts.worked_contract",
-        task_event_repo: "repos.task_event_repo",
-        task_repo: "repos.task_repo",
-        work_session_repo: "repos.work_session_repo",
+        task_event_mutations: "repos.task_event_mutations",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+        work_session_mutations: "repos.work_session_mutations",
       ]
 
       def call(id, at: Time.now, worked: nil)
         step find(id)
         total = step reported(worked)
 
-        task_event_repo.track(id, at) do
-          work_session_repo.close(id, at)
-          completed = task_repo.complete(id, at:)
-          total ? task_repo.update(id, worked_seconds: total) : completed
+        task_event_mutations.track(id, at) do
+          work_session_mutations.close(id, at)
+          completed = task_mutations.complete(id, at:)
+          total ? task_mutations.update(id, worked_seconds: total) : completed
         end
       end
 
       private
 
       def find(id)
-        found(task_repo.by_id(id)).bind { it.closed? ? Failure(:closed) : Success(it) }
+        found(task_queries.by_id(id)).bind { it.closed? ? Failure(:closed) : Success(it) }
       end
 
       def replaced(seconds, tracked)

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "Tasks", :frozen_clock, type: :request do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
-  let(:sprints) { Tasks::Slice["repos.sprint_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
+  let(:sprints) { Tasks::Slice["repos.sprint_queries"] }
   let(:today) { Blog::TimeZone.today }
 
   def send_to(path, **params)

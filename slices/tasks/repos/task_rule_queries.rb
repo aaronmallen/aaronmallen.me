@@ -2,35 +2,19 @@
 
 module Tasks
   module Repos
-    class TaskRuleRepo < DB::Repo
+    class TaskRuleQueries < DB::Repo
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       LINEAR = Blog::Types::TaskSourceProvider["linear"]
-      TAG_SCOPE = Blog::Types::TagScope["private"]
-
-      stamped_commands :create, :update
-      commands delete: :by_pk
 
       def all = with_targets.order(:pattern, :provider).to_a
 
       def by_id(id) = with_targets.by_pk(id).one
 
-      def link_projects(task_ids, project_ids) = record_links.link_projects(task_ids, project_ids)
-
       def matching_task_ids(rule) = task_ids_from(rule.provider) { rule.matches?(it) }
 
       def project_choices = projects.in_name_order.to_a
 
-      def replace_projects(id, project_ids) = task_rule_projects.replace(id, project_ids)
-
-      def replace_tags(id, names)
-        tag_ids = tags.claim(names, scope: TAG_SCOPE).values_at(*names)
-        task_rule_tags.replace(id, tag_ids)
-        tag_ids
-      end
-
       def repo_task_ids(repo) = task_ids_from(GITHUB) { it == repo }
-
-      def tag_tasks(task_ids, tag_ids) = task_tags.add_missing(task_ids, tag_ids)
 
       def targets(provider, origin)
         found = origin&.downcase

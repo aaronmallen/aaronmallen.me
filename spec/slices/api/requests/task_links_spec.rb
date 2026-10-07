@@ -14,7 +14,7 @@ RSpec.describe "API task links", type: :request do
 
   def status = last_response.status
 
-  def tasks = Tasks::Slice["repos.task_repo"]
+  def tasks = Tasks::Slice["repos.task_queries"]
 
   def unlink(id, other_id) = call_api(:delete, "/#{id}/links/#{other_id}")
 

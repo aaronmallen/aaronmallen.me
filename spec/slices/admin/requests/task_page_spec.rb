@@ -3,7 +3,7 @@
 RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:task) { create(:task, title: "Ship the read page", note: "say **why** it matters") }
   let(:other) { create(:task, title: "Write the migration") }
 
@@ -16,9 +16,10 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   def left_yesterday = create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today - 1).id)
 
   def lose_the_roll
-    failing = Tasks::Slice["repos.sprint_repo"]
+    failing = Tasks::Slice["repos.sprint_queries"]
     allow(failing).to receive(:by_id).and_return(nil)
-    replace_component("repos.sprint_repo", failing)
+    replace_component("repos.sprint_queries", failing)
+    replace_component("tasks.repos.sprint_queries", failing)
   end
 
   def read(record = task, **) = get("/admin/tasks/#{record.id}", **)

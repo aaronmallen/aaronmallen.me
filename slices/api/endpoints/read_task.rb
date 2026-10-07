@@ -19,13 +19,11 @@ module API
         timeline: Schema.list({ oneOf: ENTRIES.map(&:reference) }).merge(description: TIMELINE),
       ).freeze
 
-      include Deps[task_timeline: "tasks.queries.task_timeline"]
-
       def handle(id:)
-        task = task_by_id.call(id)
+        task = task_queries.detailed(id)
         return not_found(Wording.missing("task", id)) if task.nil?
 
-        task_reply(task, timeline: task_timeline.call(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it) })
+        task_reply(task, timeline: task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it) })
       end
     end
   end

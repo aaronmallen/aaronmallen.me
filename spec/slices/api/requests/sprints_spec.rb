@@ -18,9 +18,11 @@ RSpec.describe "API sprints", type: :request do
 
   def plan(fields) = call_api(:post, "", JSON.generate(fields))
 
-  def sprints = Tasks::Slice["repos.sprint_repo"]
+  def sprints = Tasks::Slice["repos.sprint_queries"]
 
   def status = last_response.status
+
+  def stored(task) = Tasks::Slice["repos.task_queries"].detailed(task.id)
 
   def today = Blog::TimeZone.today
 
@@ -130,7 +132,7 @@ RSpec.describe "API sprints", type: :request do
 
       expect(drop(sprint.id)).to eq("id" => sprint.id, "date" => (today + 1).iso8601, "carried_in" => 0,
                                     "dropped" => true)
-      expect(Tasks::Slice["queries.task_by_id"].call(task.id)).to have_attributes(list: "next", sprint: nil)
+      expect(stored(task)).to have_attributes(list: "next", sprint: nil)
     end
 
     context "with a sourced task in progress" do
@@ -145,7 +147,7 @@ RSpec.describe "API sprints", type: :request do
       end
 
       it "sends the task back to external and pauses it" do
-        expect(Tasks::Slice["queries.task_by_id"].call(task.id)).to have_attributes(list: "external", status: "open")
+        expect(stored(task)).to have_attributes(list: "external", status: "open")
       end
 
       it "ends its running session" do

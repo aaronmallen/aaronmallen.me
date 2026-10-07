@@ -3,14 +3,14 @@
 module Tasks
   module Operations
     class WakeTask < Operation
-      include Deps[task_repo: "repos.task_repo", task_source_repo: "repos.task_source_repo"]
+      include Deps[task_queries: "repos.task_queries", task_source_mutations: "repos.task_source_mutations"]
 
       def call(id, now: Time.now)
-        task = step found(task_repo.by_id(id))
+        task = step found(task_queries.by_id(id))
         step snoozed(task.source, now)
-        task_source_repo.snooze(id, now)
+        task_source_mutations.snooze(id, now)
 
-        task_repo.by_id(id)
+        task_queries.by_id(id)
       end
     end
   end

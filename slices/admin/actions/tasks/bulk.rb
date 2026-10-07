@@ -27,7 +27,7 @@ module Admin
           "settings",
           build_tasks_page: "operations.build_tasks_page",
           operation: "tasks.operations.act_on_tasks",
-          task_by_id: "tasks.queries.task_by_id",
+          task_queries: "tasks.repos.task_queries",
         ]
 
         private
@@ -47,7 +47,7 @@ module Admin
           }
         end
 
-        def named(id) = { task: ["#{KEY}#{id}", task_by_id.call(id)&.title].compact.join(" ") }
+        def named(id) = { task: ["#{KEY}#{id}", task_queries.detailed(id)&.title].compact.join(" ") }
 
         def refusal(errors)
           case errors

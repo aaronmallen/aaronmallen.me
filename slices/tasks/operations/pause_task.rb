@@ -4,24 +4,25 @@ module Tasks
   module Operations
     class PauseTask < Operation
       include Deps[
-        task_event_repo: "repos.task_event_repo",
-        task_repo: "repos.task_repo",
-        work_session_repo: "repos.work_session_repo",
+        task_event_mutations: "repos.task_event_mutations",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+        work_session_mutations: "repos.work_session_mutations",
       ]
 
       def call(id, at: Time.now)
         step find(id)
 
-        task_event_repo.track(id, at) do
-          work_session_repo.close(id, at)
-          task_repo.update(id, status: Blog::Types::TaskStatus["open"])
+        task_event_mutations.track(id, at) do
+          work_session_mutations.close(id, at)
+          task_mutations.update(id, status: Blog::Types::TaskStatus["open"])
         end
       end
 
       private
 
       def find(id)
-        found(task_repo.by_id(id)).bind { it.in_progress? ? Success(it) : Failure(:idle) }
+        found(task_queries.by_id(id)).bind { it.in_progress? ? Success(it) : Failure(:idle) }
       end
     end
   end

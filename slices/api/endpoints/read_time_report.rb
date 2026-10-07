@@ -19,7 +19,7 @@ module API
 
       REPLY = Serializers::TimeReport.reference
 
-      include Deps[time_report: "tasks.queries.time_report"]
+      include Deps[time_report_queries: "tasks.repos.time_report_queries"]
 
       def handle(from:, to:, by: Blog::Types::TimeGrouping.values.first)
         case Blog::DayWindow.days(from, to)
@@ -30,7 +30,9 @@ module API
 
       private
 
-      def report(first, last, by) = serialized(Serializers::TimeReport, time_report.call(from: first, to: last, by:))
+      def report(first, last, by)
+        serialized(Serializers::TimeReport, time_report_queries.report(from: first, to: last, by:))
+      end
     end
   end
 end

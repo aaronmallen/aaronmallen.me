@@ -47,7 +47,7 @@ module API
         optional: { next_page: Schema::INTEGER },
       ).freeze
 
-      include Deps["settings", find_tasks: "tasks.queries.find_tasks"]
+      include Deps["settings", task_queries: "tasks.repos.task_queries"]
 
       def handle(from: nil, page: 1, sprint_on: nil, to: nil, **filters)
         day = sprint_on && Blog::TimeZone.parse_day(sprint_on)
@@ -66,7 +66,7 @@ module API
       end
 
       def listed(filters, from, to, number)
-        found = find_tasks.call(**filters, from:, to:, page: page_of(number))
+        found = task_queries.filtered(**filters, from:, to:, page: page_of(number))
         rows = found.paged.rows
 
         {

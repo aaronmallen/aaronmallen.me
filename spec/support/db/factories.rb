@@ -112,7 +112,7 @@ module Spec
         journal_entry: [:record, "repos.journal_entry_mutations", "repos.journal_entry_queries"],
         post: [:posts, "repos.post_mutations", "repos.post_queries"],
         project: [:projects, "repos.project_mutations", "repos.project_queries"],
-        task: [:tasks, "repos.task_repo"],
+        task: [:tasks, "repos.task_mutations", "repos.task_queries"],
       }.freeze
 
       def self.call(name, record, names)

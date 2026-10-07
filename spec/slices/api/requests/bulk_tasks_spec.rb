@@ -18,7 +18,7 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def deleted(task) = { "id" => task.id, "title" => task.title, "deleted" => true }
 
-  def gone_id = create(:task).id.tap { repo.delete(it) }
+  def gone_id = create(:task).id.tap { Tasks::Slice["repos.task_mutations"].delete(it) }
 
   def ids(tasks) = tasks.map(&:id)
 
@@ -28,7 +28,7 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
-  def repo = Tasks::Slice["repos.task_repo"]
+  def repo = Tasks::Slice["repos.task_queries"]
 
   def status = last_response.status
 
@@ -36,7 +36,7 @@ RSpec.describe "API bulk task actions", type: :request do
 
   def tag_names(task) = Tasks::Slice["relations.task_tags"].names_by_task([task.id]).fetch(task.id, [])
 
-  def tagged(*names) = create(:task).tap { repo.replace_tags(it.id, names) }
+  def tagged(*names) = create(:task).tap { Tasks::Slice["repos.task_mutations"].replace_tags(it.id, names) }
 
   def tasks(count) = Array.new(count) { create(:task) }
 

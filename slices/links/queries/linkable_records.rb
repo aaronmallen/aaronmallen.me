@@ -10,6 +10,7 @@ module Links
         "post" => :posts,
         "project" => :projects,
         "social_post" => :social_posts,
+        "task" => :tasks,
         "work_entry" => :work_entries,
       }.freeze
       TITLE_LIMIT = 120
@@ -17,7 +18,6 @@ module Links
 
       include Deps[
         "routes",
-        task: "tasks.queries.linkable_tasks",
         post: "posts.repos.post_queries",
         social_post: "social.repos.social_post_queries",
         journal_entry: "record.repos.journal_entry_queries",
@@ -25,6 +25,7 @@ module Links
         project: "projects.repos.project_queries",
         work_entry: "projects.repos.work_entry_queries",
         decision: "decisions.repos.decision_queries",
+        task: "tasks.repos.task_queries",
       ]
 
       def matching(kind, text, limit:)

@@ -8,7 +8,7 @@ module API
       REPLY = Schema.object({ tasks: Schema.list(Serializers::Task.reference) }).freeze
       UNCHANGED = "could not change task %s"
 
-      include Deps[act_on_tasks: "tasks.operations.act_on_tasks", task_by_id: "tasks.queries.task_by_id"]
+      include Deps[act_on_tasks: "tasks.operations.act_on_tasks", task_queries: "tasks.repos.task_queries"]
 
       private
 
@@ -21,7 +21,7 @@ module API
         end
       end
 
-      def answered(ids, _tasks) = serialized(Serializers::Task, ids.map { task_by_id.call(it) })
+      def answered(ids, _tasks) = serialized(Serializers::Task, ids.map { task_queries.detailed(it) })
 
       def keyed(errors) = flat(errors).transform_keys { FIELDS.fetch(it, it) }
 

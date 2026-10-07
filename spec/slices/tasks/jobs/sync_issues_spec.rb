@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Tasks::Jobs::SyncIssues do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:url) { "https://github.com/aaronmallen/aaronmallen.me/issues/7" }
 
   def api = "https://api.github.com"
-  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
+  def comments(task = imported) = Tasks::Slice["repos.task_comment_queries"].for_task(task.id)
 
   before do
     connect_github_token
@@ -151,7 +151,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     it "keeps a tag I removed off on the next sync" do
       stub_assigned(labeled("Bug Fix"))
       sync
-      repo.replace_tags(imported.id, [])
+      Tasks::Slice["repos.task_mutations"].replace_tags(imported.id, [])
       sync
 
       expect(imported.tags).to be_empty
@@ -218,7 +218,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     it "keeps a tag I removed off on the next sync" do
       stub_assigned(issue)
       sync
-      repo.replace_tags(imported.id, %w[ruby])
+      Tasks::Slice["repos.task_mutations"].replace_tags(imported.id, %w[ruby])
       sync
 
       expect(imported.tags.map(&:name)).to eq(%w[ruby])
@@ -1172,7 +1172,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     let(:connection) { Tasks::Slice["db.rom"].gateways.fetch(:default).connection }
     let(:elsewhere) { Sequel.connect(connection.opts) }
 
-    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Tasks::Repos::TaskSourceRepo::SYNC_LOCK)) }
+    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Tasks::Repos::TaskSourceMutations::SYNC_LOCK)) }
 
     after { elsewhere.disconnect }
 

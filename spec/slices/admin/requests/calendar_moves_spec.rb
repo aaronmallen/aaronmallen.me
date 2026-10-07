@@ -240,9 +240,9 @@ RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
 
     before { sign_in_to_admin }
 
-    def sprint_on(record) = Tasks::Slice["repos.sprint_repo"].by_id(stored_task(record).sprint_id).sprint_date
+    def sprint_on(record) = Tasks::Slice["repos.sprint_queries"].by_id(stored_task(record).sprint_id).sprint_date
 
-    def stored_task(record) = Tasks::Slice["repos.task_repo"].by_id(record.id)
+    def stored_task(record) = Tasks::Slice["repos.task_queries"].by_id(record.id)
 
     it "offers a move form on each open task in the day's sprint and none on a closed one" do
       task

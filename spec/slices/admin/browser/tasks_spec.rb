@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin tasks", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
-  let(:sprint_repo) { Tasks::Slice["repos.sprint_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
+  let(:sprint_repo) { Tasks::Slice["repos.sprint_queries"] }
 
   def active = evaluate_script("document.activeElement.textContent.trim()")
 

@@ -23,7 +23,7 @@ module API
       include Deps[save_task: "tasks.operations.save_task"]
 
       def handle(id:, **fields)
-        task = task_by_id.call(id)
+        task = task_queries.detailed(id)
         return not_found(Wording.missing("task", id)) if task.nil?
 
         case save_task.call(id, form(task, fields))

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Tasks::Repos::TaskSourceRepo do
+RSpec.describe Tasks::Repos::TaskSourceMutations do
   let(:connection) { Tasks::Slice["db.rom"].gateways.fetch(:default).connection }
   let(:elsewhere) { Sequel.connect(connection.opts) }
-  let(:repo) { Tasks::Slice["repos.task_source_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_source_mutations"] }
 
   after { elsewhere.disconnect }
 

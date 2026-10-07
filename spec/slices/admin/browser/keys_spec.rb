@@ -96,7 +96,7 @@ RSpec.describe "Admin keys", type: :feature do
   end
 
   describe "task row keys" do
-    let(:repo) { Tasks::Slice["repos.task_repo"] }
+    let(:repo) { Tasks::Slice["repos.task_queries"] }
 
     def task(title) = repo.all_open.find { it.title == title }
 
@@ -171,7 +171,7 @@ RSpec.describe "Admin keys", type: :feature do
     it "completes the task from there" do
       find("details.task-complete[open]").click_button(done)
 
-      expect(Tasks::Slice["repos.task_repo"].all_open).to be_empty
+      expect(Tasks::Slice["repos.task_queries"].all_open).to be_empty
     end
   end
 

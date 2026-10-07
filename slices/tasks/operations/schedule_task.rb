@@ -7,10 +7,12 @@ module Tasks
 
       include Deps[
         current_sprint: "operations.current_sprint",
-        sprint_repo: "repos.sprint_repo",
-        task_event_repo: "repos.task_event_repo",
-        task_repo: "repos.task_repo",
-        work_session_repo: "repos.work_session_repo",
+        sprint_mutations: "repos.sprint_mutations",
+        sprint_queries: "repos.sprint_queries",
+        task_event_mutations: "repos.task_event_mutations",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+        work_session_mutations: "repos.work_session_mutations",
       ]
 
       def call(id, date, now: Time.now)
@@ -30,21 +32,21 @@ module Tasks
       def ahead(day, now) = day >= Blog::TimeZone.today(now) ? Success(day) : Failure(:past)
 
       def find(id)
-        found(task_repo.by_id(id))
+        found(task_queries.by_id(id))
       end
 
       def held(task)
         return Blog::Constants::EMPTY_STRING unless task.in_sprint?
 
-        sprint_repo.by_id(task.sprint_id).sprint_date.iso8601
+        sprint_queries.by_id(task.sprint_id).sprint_date.iso8601
       end
 
       def join(task, day, now)
         transaction do
           sprint = step current_sprint.call(now:) if day == Blog::TimeZone.today(now)
 
-          task_event_repo.track(task.id, now) do
-            sprint ? task_repo.join_sprint(task.id, sprint.id) : wait(task, day, now)
+          task_event_mutations.track(task.id, now) do
+            sprint ? task_mutations.join_sprint(task.id, sprint.id) : wait(task, day, now)
           end
         end
       end
@@ -66,12 +68,12 @@ module Tasks
       def unschedule(task, now)
         return task unless task.in_sprint?
 
-        task_event_repo.track(task.id, now) { task_repo.return_to_list(task.id, at: now) }
+        task_event_mutations.track(task.id, now) { task_mutations.return_to_list(task.id, at: now) }
       end
 
       def wait(task, day, now)
-        work_session_repo.close(task.id, now)
-        task_repo.update(task.id, list: nil, sprint_id: sprint_repo.claim(day).id, **waiting(task))
+        work_session_mutations.close(task.id, now)
+        task_mutations.update(task.id, list: nil, sprint_id: sprint_mutations.claim(day).id, **waiting(task))
       end
 
       def waiting(task) = task.in_progress? ? { status: OPEN } : Blog::Constants::EMPTY_HASH

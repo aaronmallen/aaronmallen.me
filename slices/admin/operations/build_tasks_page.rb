@@ -16,18 +16,14 @@ module Admin
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
-        finished_task_counts: "tasks.queries.finished_task_counts",
-        list_finished_tasks: "tasks.queries.list_finished_tasks",
-        list_tasks: "tasks.queries.list_tasks",
-        open_task_counts: "tasks.queries.open_task_counts",
-        planned_tasks: "tasks.queries.planned_tasks",
-        sprints_after: "tasks.queries.sprints_after",
+        sprint_queries: "tasks.repos.sprint_queries",
+        task_queries: "tasks.repos.task_queries",
       ]
 
       def call(page:, tab: TODAY, pool: nil, query: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
         today = Blog::TimeZone.today(now)
-        planned = sprints_after.call(today)
+        planned = sprint_queries.after(today)
         filters = { query: Blog::Types::TrimmedText[query] }
         tasks = step listed(tab, sprint, planned, page, Blog::SearchQuery.parse(filters[:query], fields: FIELDS))
 
@@ -40,9 +36,9 @@ module Admin
       private
 
       def counts(sprint, planned, today)
-        finished = finished_task_counts.call(today)
+        finished = task_queries.finished_counts(today)
 
-        open_task_counts.call(sprint:, planned:).merge(
+        task_queries.open_counts(sprint:, planned:).merge(
           COMPLETED => finished.fetch(:total), FINISHED_TODAY => finished.fetch(:on_day), CARRIED => sprint.carried_in,
         )
       end
@@ -52,14 +48,14 @@ module Admin
       def lead(tab, sprint, page, filters)
         return if page.number == 1 || UNORDERED.include?(tab) || !filters[:query].empty?
 
-        list_tasks.call(tab, sprint:, page: Blog::Page.new(number: page.number - 1, size: page.size)).rows.last&.id
+        task_queries.list(tab, sprint:, page: Blog::Page.new(number: page.number - 1, size: page.size)).rows.last&.id
       end
 
       def listed(tab, sprint, planned, page, search)
         tasks = case tab
-                when COMPLETED then list_finished_tasks.call(page:, **search)
-                when UPCOMING then whole(planned_tasks.call(planned, **search))
-                else list_tasks.call(tab, sprint:, page:, **search)
+                when COMPLETED then task_queries.finished(page:, **search)
+                when UPCOMING then whole(task_queries.planned(planned, **search))
+                else task_queries.list(tab, sprint:, page:, **search)
                 end
 
         tasks.past_end? ? Failure(:past_end) : Success(tasks)
@@ -69,12 +65,12 @@ module Admin
         {
           planned: tab == UPCOMING ? scheduled(tasks.rows, planned) : EMPTY_ARRAY,
           pools: tab == TODAY && tasks.rows.empty? ? pools(page) : EMPTY_HASH,
-          waiting: tab == UPCOMING ? list_tasks.call(NEXT, sprint: nil, page: first_page(page)).rows : EMPTY_ARRAY,
+          waiting: tab == UPCOMING ? task_queries.list(NEXT, sprint: nil, page: first_page(page)).rows : EMPTY_ARRAY,
         }
       end
 
       def pools(page)
-        Blog::Types::TaskList.values.to_h { [it, list_tasks.call(it, sprint: nil, page: first_page(page)).rows] }
+        Blog::Types::TaskList.values.to_h { [it, task_queries.list(it, sprint: nil, page: first_page(page)).rows] }
       end
 
       def scheduled(tasks, planned)

@@ -28,7 +28,7 @@ RSpec.describe "API tasks", type: :request do
 
   def status = last_response.status
 
-  def tasks = Tasks::Slice["repos.task_repo"]
+  def tasks = Tasks::Slice["repos.task_queries"]
 
   def titles(answer) = answer.fetch("tasks").map { it.fetch("title") }
 
@@ -316,7 +316,7 @@ RSpec.describe "API tasks", type: :request do
       create(:task, :someday, tags: %w[admin])
       list(lists: "someday", tag: "admin", query: "x")
 
-      expect(Tasks::Slice["repos.sprint_repo"].on(today)).to be_nil
+      expect(Tasks::Slice["repos.sprint_queries"].on(today)).to be_nil
     end
   end
 
@@ -858,7 +858,7 @@ RSpec.describe "API tasks", type: :request do
 
         expect([act(task.id, "schedule", sprint_on: (today + 3).iso8601).fetch("message"), status])
           .to eq(["task #{task.id} is already done or canceled", 422])
-        expect(Tasks::Slice["repos.sprint_repo"].on(today + 3)).to be_nil
+        expect(Tasks::Slice["repos.sprint_queries"].on(today + 3)).to be_nil
         expect(tasks.by_id(task.id)).to have_attributes(status: closed.to_s, sprint_id: nil)
       end
     end

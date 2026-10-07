@@ -6,7 +6,7 @@ module Admin
       MONTH_PATTERN = /\A(\d{4})-(\d{2})\z/
       WEEK = 7
 
-      include Deps[calendar: "api.queries.calendar", tasks_in_sprint: "tasks.queries.tasks_in_sprint"]
+      include Deps[calendar: "api.queries.calendar", task_queries: "tasks.repos.task_queries"]
 
       def call(month: nil, day: nil, today: Blog::TimeZone.today)
         picked = Blog::Types::DateParam[day]
@@ -40,7 +40,7 @@ module Admin
       def tasks(day)
         sprint = day.sprint
 
-        sprint ? tasks_in_sprint.call(sprint.id) : Blog::Constants::EMPTY_ARRAY
+        sprint ? task_queries.in_sprint(sprint.id) : Blog::Constants::EMPTY_ARRAY
       end
     end
   end

@@ -100,7 +100,7 @@ module MCP
       queries.usage
     ], from: :tags
 
-    import keys: %w[operations.link_repo_tasks queries.synced_task_ids], from: :tasks
+    import keys: %w[operations.link_repo_tasks repos.task_source_queries], from: :tasks
 
     export %w[operations.revoke_client queries.connected_clients]
   end

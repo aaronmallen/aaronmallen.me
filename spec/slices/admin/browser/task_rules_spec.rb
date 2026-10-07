@@ -5,7 +5,7 @@ RSpec.describe "Admin task rules", type: :feature do
 
   def editor = find(".rule-editor", visible: :visible)
 
-  def rules = Tasks::Slice["queries.task_rules"].call
+  def rules = Tasks::Slice["repos.task_rule_queries"].all
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 

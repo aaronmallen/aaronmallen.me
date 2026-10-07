@@ -16,7 +16,7 @@ RSpec.describe Tasks::Relations::WorkSessions do
   end
 
   it "refuses a negative total on the task" do
-    expect { Tasks::Slice["repos.task_repo"].update(task.id, worked_seconds: -1) }
+    expect { Tasks::Slice["repos.task_mutations"].update(task.id, worked_seconds: -1) }
       .to raise_error(ROM::SQL::CheckConstraintError, /tasks_worked_seconds_check/)
   end
 end

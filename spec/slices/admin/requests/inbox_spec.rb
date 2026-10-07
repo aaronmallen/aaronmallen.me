@@ -3,7 +3,7 @@
 RSpec.describe "Admin inbox", type: :request do
   let(:messages) { Contact::Slice["repos.message_queries"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:tasks) { Tasks::Slice["repos.task_repo"] }
+  let(:tasks) { Tasks::Slice["repos.task_queries"] }
   let(:webmention_queries) { Social::Slice["repos.webmention_queries"] }
 
   def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })

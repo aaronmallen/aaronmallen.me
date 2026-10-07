@@ -16,7 +16,7 @@ module Admin
         include Deps[
           edit_view: "ui.views.tasks.edit",
           save_task: "tasks.operations.save_task",
-          task_by_id: "tasks.queries.task_by_id",
+          task_queries: "tasks.repos.task_queries",
         ]
 
         def handle(request, response)
@@ -42,7 +42,9 @@ module Admin
         end
 
         def changed_credits(id, credits)
-          return Blog::Constants::EMPTY_HASH if credits.nil? || credits.to_set == task_by_id.call(id)&.credits&.to_set
+          if credits.nil? || credits.to_set == task_queries.detailed(id)&.credits&.to_set
+            return Blog::Constants::EMPTY_HASH
+          end
 
           { contributors: credits }
         end
@@ -64,7 +66,7 @@ module Admin
         end
 
         def invalid(request, response, id, fields, errors)
-          task = task_by_id.call(id) || halt(404)
+          task = task_queries.detailed(id) || halt(404)
           values = FIELDS.to_h { [it, Blog::Types::Text[fields[it]]] }
           credits = credits(fields[:contributors])
           values[:contributors] = credits if credits

@@ -3,14 +3,14 @@
 module Tasks
   module Operations
     class PlanSprint < Operation
-      include Deps[sprint_repo: "repos.sprint_repo"]
+      include Deps[sprint_mutations: "repos.sprint_mutations", sprint_queries: "repos.sprint_queries"]
 
       def call(date, now: Time.now)
         day = step parse(date)
         step ahead(day, now)
         step unplanned(day)
 
-        sprint_repo.claim(day)
+        sprint_mutations.claim(day)
       end
 
       private
@@ -23,7 +23,7 @@ module Tasks
         day ? Success(day) : Failure(:invalid)
       end
 
-      def unplanned(day) = sprint_repo.on(day) ? Failure([:planned, day]) : Success(day)
+      def unplanned(day) = sprint_queries.on(day) ? Failure([:planned, day]) : Success(day)
     end
   end
 end

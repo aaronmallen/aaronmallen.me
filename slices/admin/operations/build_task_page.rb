@@ -10,10 +10,8 @@ module Admin
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
-        link_targets: "tasks.queries.link_targets",
         list_record_links: "operations.list_record_links",
-        task_by_id: "tasks.queries.task_by_id",
-        task_timeline: "tasks.queries.task_timeline",
+        task_queries: "tasks.repos.task_queries",
       ]
 
       def call(id, query: nil, kind: nil, errors: EMPTY_HASH, records: EMPTY_HASH, **forms)
@@ -21,16 +19,16 @@ module Admin
         task = step find(id)
         query = Blog::Types::TrimmedText[query]
 
-        { task:, note_html: note_html(task.note), timeline: task_timeline.call(id),
+        { task:, note_html: note_html(task.note), timeline: task_queries.timeline(id),
           forms: FORMS.merge(forms),
-          linking: { errors:, kind:, query:, targets: link_targets.call(id, query) },
+          linking: { errors:, kind:, query:, targets: task_queries.link_targets(id, query) },
           records: list_record_links.call(KIND, task.id, **records, except: [KIND]) }
       end
 
       private
 
       def find(id)
-        found(task_by_id.call(id))
+        found(task_queries.detailed(id))
       end
 
       def note_html(note)

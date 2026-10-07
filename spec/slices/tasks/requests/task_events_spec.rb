@@ -7,7 +7,7 @@ RSpec.describe "Task events", type: :request do
   def capture(**fields)
     send_to("/admin/tasks", filter: "next", task: { note: "", tags: "", **fields })
     id = Tasks::Slice["relations.tasks"].where(title: fields.fetch(:title)).pluck(:id).first
-    Tasks::Slice["repos.task_repo"].by_id(id)
+    Tasks::Slice["repos.task_queries"].by_id(id)
   end
 
   def events(task, *columns)

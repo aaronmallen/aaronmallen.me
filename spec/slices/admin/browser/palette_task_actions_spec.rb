@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin palette task actions", type: :feature do
-  let(:repo) { Tasks::Slice["repos.task_repo"] }
+  let(:repo) { Tasks::Slice["repos.task_queries"] }
 
   def in_progress(title) = create(:task, :in_progress, :in_sprint, title:)
 

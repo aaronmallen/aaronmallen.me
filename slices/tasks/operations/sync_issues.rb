@@ -21,11 +21,14 @@ module Tasks
         start_task: "operations.start_task",
         sync_comments: "operations.sync_comments",
         sync_links: "operations.sync_links",
-        task_event_repo: "repos.task_event_repo",
-        task_link_repo: "repos.task_link_repo",
-        task_repo: "repos.task_repo",
-        task_source_repo: "repos.task_source_repo",
-        task_rule_repo: "repos.task_rule_repo",
+        task_event_mutations: "repos.task_event_mutations",
+        task_link_queries: "repos.task_link_queries",
+        task_mutations: "repos.task_mutations",
+        task_queries: "repos.task_queries",
+        task_source_mutations: "repos.task_source_mutations",
+        task_source_queries: "repos.task_source_queries",
+        task_rule_mutations: "repos.task_rule_mutations",
+        task_rule_queries: "repos.task_rule_queries",
       ]
 
       def call(provider:, client:, now: Time.now)
@@ -66,7 +69,7 @@ module Tasks
       def finish(task, now) = reopen(task, nil, now).bind { complete_task.call(task.id, at: now) }
 
       def follow(source, issue, now, reached: false)
-        task = task_repo.by_id(source.task_id)
+        task = task_queries.by_id(source.task_id)
         return unless task
 
         state = observed(task, source, issue.fetch(:remote_state), reached)
@@ -81,10 +84,10 @@ module Tasks
 
       def import(provider, issue, now, reached: false)
         transaction do
-          task = task_repo.append(**copy(issue), list: EXTERNAL)
+          task = task_mutations.append(**copy(issue), list: EXTERNAL)
           label(task, provider, issue, now)
           fields = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
-          task_source_repo.create(**fields).tap { follow(it, issue, now, reached:) }
+          task_source_mutations.create(**fields).tap { follow(it, issue, now, reached:) }
         end
       end
 
@@ -93,17 +96,17 @@ module Tasks
       end
 
       def label(task, provider, issue, now)
-        names, project_ids = task_rule_repo.targets(provider, issue[:origin])
+        names, project_ids = task_rule_queries.targets(provider, issue[:origin])
         labeled = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
-        task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, [*labeled, *names].uniq) }
-        task_rule_repo.link_projects([task.id], project_ids)
+        task_event_mutations.track(task.id, now) { task_mutations.add_tags(task.id, [*labeled, *names].uniq) }
+        task_rule_mutations.link_projects([task.id], project_ids)
       end
 
       def observed(task, source, state, reached)
         return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.include?(state)
         return state unless state == UNASSIGNED && !task.closed?
 
-        reached || task_link_repo.synced?(task.id) ? OPEN : state
+        reached || task_link_queries.synced?(task.id) ? OPEN : state
       end
 
       def reach(provider, client, assigned, known)
@@ -128,14 +131,14 @@ module Tasks
         checked_at = now if CLOSED.include?(state)
         return if [source.remote_state, source.url, source.checked_at] == [state, url, checked_at]
 
-        task_source_repo.update(source.id, remote_state: state, url:, checked_at:)
+        task_source_mutations.update(source.id, remote_state: state, url:, checked_at:)
       end
 
       def rewrite(task, issue)
         return unless issue.key?(:title)
 
         fields = copy(issue)
-        task_repo.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
+        task_mutations.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
       end
 
       def settle(task, state, was, now)
@@ -147,7 +150,7 @@ module Tasks
         end.value_or(task)
       end
 
-      def tracked(provider) = task_source_repo.for_provider(provider).to_h { [it.remote_id, it] }
+      def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }
 
       def unseen(known, assigned, now)
         known.except(*assigned.map { it[:id] }).values.select { it.due?(now) }.to_h { [it.remote_id, it.url] }

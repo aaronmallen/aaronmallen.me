@@ -12,7 +12,7 @@ module Tags
 
     import keys: %w[repos.journal_entry_queries], from: :record
 
-    import keys: %w[queries.tasks_by_tag], from: :tasks
+    import keys: %w[repos.task_queries], from: :tasks
 
     export %w[
       operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.matching_count
