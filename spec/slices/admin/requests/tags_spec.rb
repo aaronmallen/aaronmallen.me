@@ -4,7 +4,7 @@ RSpec.describe "Admin tags", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:post_queries) { Posts::Slice["repos.post_queries"] }
-  let(:repo) { Tags::Slice["repos.tag_repo"] }
+  let(:repo) { Tags::Slice["repos.tag_queries"] }
 
   def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
 

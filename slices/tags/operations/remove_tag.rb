@@ -5,7 +5,7 @@ module Tags
     class RemoveTag < Operation
       LAST_TARGET = "task_rules_last_target"
 
-      include Deps[tag_repo: "repos.tag_repo"]
+      include Deps[tag_mutations: "repos.tag_mutations", tag_queries: "repos.tag_queries"]
 
       def call(id, scope:)
         tag = step find(id, scope)
@@ -16,15 +16,15 @@ module Tags
       private
 
       def delete(tag)
-        Success(transaction { tag_repo.delete(tag.id) })
+        Success(transaction { tag_mutations.delete(tag.id) })
       rescue ROM::SQL::CheckConstraintError => e
-        raise unless tag_repo.violated_constraint(e) == LAST_TARGET
+        raise unless tag_mutations.violated_constraint(e) == LAST_TARGET
 
-        Failure([:last_tag_of_rules, tag_repo.last_tag_of_rules(tag.id)])
+        Failure([:last_tag_of_rules, tag_queries.last_tag_of_rules(tag.id)])
       end
 
       def find(id, scope)
-        found(tag_repo.find_in(scope, id))
+        found(tag_queries.find_in(scope, id))
       end
     end
   end

@@ -14,9 +14,6 @@ module Tags
 
     import keys: %w[repos.task_queries], from: :tasks
 
-    export %w[
-      operations.remove_tag operations.save_tag queries.all queries.by_id queries.matching queries.matching_count
-      queries.summary queries.usage
-    ]
+    export %w[operations.remove_tag operations.save_tag repos.tag_queries]
   end
 end

@@ -11,10 +11,10 @@ module API
 
       REPLY = Serializers::TagSummary::SCHEMA
 
-      include Deps[summarize_tag: "tags.queries.summary"]
+      include Deps[tag_queries: "tags.repos.tag_queries"]
 
       def handle(name:)
-        summary = summarize_tag.call(name.strip.downcase)
+        summary = tag_queries.summary(name.strip.downcase)
         return not_found(Wording.missing("tag", name, by: "name")) if summary.nil?
 
         Success(serialized(Serializers::TagSummary, summary))

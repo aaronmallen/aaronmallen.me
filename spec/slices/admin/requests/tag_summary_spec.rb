@@ -12,7 +12,7 @@ RSpec.describe "Admin tag summary", type: :request do
 
   def says(key, **) = Admin::Slice["i18n"].t(["ui.views.tags.show", key].join("."), **)
 
-  def tag_named(name, scope) = Tags::Slice["repos.tag_repo"].all_in(scope).find { it.name == name }
+  def tag_named(name, scope) = Tags::Slice["repos.tag_queries"].all_in(scope).find { it.name == name }
 
   describe "signed out" do
     it "sends the summary to sign in" do

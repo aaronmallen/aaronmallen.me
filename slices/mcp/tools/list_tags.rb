@@ -22,12 +22,13 @@ module MCP
       class << self
         def call(scope:, server_context:, page: 1, query: nil)
           text = Blog::Types::TrimmedText[query].downcase
-          usage = dep(:tag_usage, server_context).call(scope:)
-          tags = dep(:matching_tags, server_context).call(scope:, text:, page: page(page, server_context))
+          tag_queries = dep(:tag_queries, server_context)
+          usage = tag_queries.usage(scope:)
+          tags = tag_queries.page_matching(scope, text, page(page, server_context))
 
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
-            count: dep(:matching_tag_count, server_context).call(scope:, text:),
+            count: tag_queries.count_matching(scope, text),
             **Blog::Paging.fields(tags),
           )
         end

@@ -66,10 +66,7 @@ module Admin
       operations.publish_draft operations.revise_edit_note operations.save_post repos.post_queries
     ], from: :posts
 
-    import keys: %w[
-      operations.remove_tag operations.save_tag queries.matching queries.matching_count queries.summary
-      queries.usage
-    ], from: :tags
+    import keys: %w[operations.remove_tag operations.save_tag repos.tag_queries], from: :tags
 
     import keys: %w[
       operations.change_saved_view operations.create_saved_view operations.delete_saved_view

@@ -95,10 +95,7 @@ module MCP
       operations.replace_social_post_edits repos.suggestion_queries
     ], from: :suggestions
 
-    import keys: %w[
-      operations.remove_tag operations.save_tag queries.by_id queries.matching queries.matching_count
-      queries.usage
-    ], from: :tags
+    import keys: %w[operations.remove_tag operations.save_tag repos.tag_queries], from: :tags
 
     import keys: %w[operations.link_repo_tasks repos.task_source_queries], from: :tasks
 

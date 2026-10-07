@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Blog::DB::Repo do
-  let(:repo) { Tags::Slice["repos.tag_repo"] }
+  let(:repo) { Tags::Slice["repos.tag_mutations"] }
   let(:tags) { Tags::Slice["relations.tags"] }
   let(:long_ago) { Time.utc(2020, 1, 1) }
 

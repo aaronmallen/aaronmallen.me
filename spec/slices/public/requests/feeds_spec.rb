@@ -431,13 +431,13 @@ RSpec.describe "Feeds", type: :request do
     def post_queries = Posts::Slice["repos.post_queries"]
 
     def remove_tag(name)
-      tag_repo = Tags::Slice["repos.tag_repo"]
-      tag_repo.delete(tag_repo.all_in("public").find { it.name == name }.id)
+      tag = Tags::Slice["repos.tag_queries"].all_in("public").find { it.name == name }
+      Tags::Slice["repos.tag_mutations"].delete(tag.id)
     end
 
     def rename_tag(from, to)
-      tag_repo = Tags::Slice["repos.tag_repo"]
-      tag_repo.update(tag_repo.all_in("public").find { it.name == from }.id, name: to)
+      tag = Tags::Slice["repos.tag_queries"].all_in("public").find { it.name == from }
+      Tags::Slice["repos.tag_mutations"].update(tag.id, name: to)
     end
 
     def retag(slug, names) = post_mutations.replace_tags(post_queries.published_by_slug(slug).id, names)

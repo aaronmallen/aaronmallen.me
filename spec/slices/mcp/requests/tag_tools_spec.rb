@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP tag tools", type: :request do
-  let(:tag_repo) { Tags::Slice["repos.tag_repo"] }
+  let(:tag_queries) { Tags::Slice["repos.tag_queries"] }
 
   def access_token
     @access_token ||= mcp_connect(
@@ -134,41 +134,41 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("save_tag", scope: "public", name: "Elixir", color: "mk-blue")
 
       expect(content).to include("name" => "elixir", "color" => "mk-blue")
-      expect(tag_repo.all_in("public").map(&:name)).to eq(%w[elixir])
+      expect(tag_queries.all_in("public").map(&:name)).to eq(%w[elixir])
     end
 
     it "adds a private tag" do
       call_tool("save_tag", scope: "private", name: "chores")
 
-      expect(tag_repo.all_in("private").map(&:name)).to eq(%w[chores])
+      expect(tag_queries.all_in("private").map(&:name)).to eq(%w[chores])
     end
 
     it "takes a name the other scope holds" do
       create(:tag, name: "ruby")
       call_tool("save_tag", scope: "private", name: "ruby")
 
-      expect(tag_repo.all_in("private").map(&:name)).to eq(%w[ruby])
+      expect(tag_queries.all_in("private").map(&:name)).to eq(%w[ruby])
     end
 
     it "recolours a tag and keeps its name" do
       tag = create(:tag, name: "ruby", color: "mk-pink")
       call_tool("save_tag", scope: "public", id: tag.id, color: "mk-green")
 
-      expect(tag_repo.find_in("public", tag.id)).to have_attributes(name: "ruby", color: "mk-green")
+      expect(tag_queries.find_in("public", tag.id)).to have_attributes(name: "ruby", color: "mk-green")
     end
 
     it "renames a tag and keeps its colour" do
       tag = create(:tag, name: "ruby", color: "mk-pink")
       call_tool("save_tag", scope: "public", id: tag.id, name: "crystal")
 
-      expect(tag_repo.find_in("public", tag.id)).to have_attributes(name: "crystal", color: "mk-pink")
+      expect(tag_queries.find_in("public", tag.id)).to have_attributes(name: "crystal", color: "mk-pink")
     end
 
     it "recolours a private tag" do
       tag = create(:tag, :private, name: "chores", color: "mk-pink")
       call_tool("save_tag", scope: "private", id: tag.id, color: "mk-green")
 
-      expect(tag_repo.find_in("private", tag.id)).to have_attributes(name: "chores", color: "mk-green")
+      expect(tag_queries.find_in("private", tag.id)).to have_attributes(name: "chores", color: "mk-green")
     end
 
     it "loads only the tag it changes" do
@@ -184,7 +184,7 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("save_tag", scope: "public", id: tag.id, name: "errands")
 
       expect(message).to eq("no tag has the ID #{tag.id}")
-      expect(tag_repo.find_in("private", tag.id)).to have_attributes(name: "chores")
+      expect(tag_queries.find_in("private", tag.id)).to have_attributes(name: "chores")
     end
 
     it "refuses a name another tag holds, with the reason the admin gives", :aggregate_failures do
@@ -203,7 +203,7 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "names one rule as one" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
-      id = tag_repo.all_in("private").first.id
+      id = tag_queries.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
       expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")
@@ -227,14 +227,14 @@ RSpec.describe "MCP tag tools", type: :request do
       tag = create(:tag)
       call_tool("remove_tag", scope: "public", id: tag.id)
 
-      expect(tag_repo.all_in("public")).to be_empty
+      expect(tag_queries.all_in("public")).to be_empty
     end
 
     it "removes a private tag nothing carries" do
       tag = create(:tag, :private)
       call_tool("remove_tag", scope: "private", id: tag.id)
 
-      expect(tag_repo.all_in("private")).to be_empty
+      expect(tag_queries.all_in("private")).to be_empty
     end
 
     it "refuses a tag from the other scope as not found", :aggregate_failures do
@@ -242,20 +242,20 @@ RSpec.describe "MCP tag tools", type: :request do
       call_tool("remove_tag", scope: "public", id: tag.id)
 
       expect(message).to eq("no tag has the ID #{tag.id}")
-      expect(tag_repo.find_in("private", tag.id)).not_to be_nil
+      expect(tag_queries.find_in("private", tag.id)).not_to be_nil
     end
 
     it "removes a tag records carry" do
       create(:post, tags: %w[ruby rails])
-      call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").find { it.name == "ruby" }.id)
+      call_tool("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
 
-      expect(tag_repo.all_in("public").map(&:name)).to eq(%w[rails])
+      expect(tag_queries.all_in("public").map(&:name)).to eq(%w[rails])
     end
 
     it "takes the tag off every record that carried it", :aggregate_failures do
       post = create(:post, tags: %w[ruby rails])
       project = create(:project, tags: %w[ruby])
-      call_tool("remove_tag", scope: "public", id: tag_repo.all_in("public").find { it.name == "ruby" }.id)
+      call_tool("remove_tag", scope: "public", id: tag_queries.all_in("public").find { it.name == "ruby" }.id)
 
       expect(Posts::Slice["repos.post_queries"].by_id(post.id).tags.map(&:name)).to eq(%w[rails])
       expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
@@ -263,23 +263,23 @@ RSpec.describe "MCP tag tools", type: :request do
 
     it "removes a private tag a task carries" do
       create(:task, tags: %w[chores])
-      call_tool("remove_tag", scope: "private", id: tag_repo.all_in("private").first.id)
+      call_tool("remove_tag", scope: "private", id: tag_queries.all_in("private").first.id)
 
-      expect(tag_repo.all_in("private")).to be_empty
+      expect(tag_queries.all_in("private")).to be_empty
     end
 
     it "refuses the only tag on a task rule, naming the rules", :aggregate_failures do
       %w[rails/* aaronmallen/*].each { Tasks::Slice["operations.save_task_rule"].call({ pattern: it, tags: "ruby" }) }
-      id = tag_repo.all_in("private").first.id
+      id = tag_queries.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
       expect(message).to eq("tag #{id} is the only tag on the task rules aaronmallen/*, rails/*")
-      expect(tag_repo.find_in("private", id)).not_to be_nil
+      expect(tag_queries.find_in("private", id)).not_to be_nil
     end
 
     it "names one rule as one" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
-      id = tag_repo.all_in("private").first.id
+      id = tag_queries.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
       expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")

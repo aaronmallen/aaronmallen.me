@@ -59,7 +59,7 @@ module API
 
     import keys: %w[repos.suggestion_queries], from: :suggestions
 
-    import keys: %w[queries.summary], from: :tags
+    import keys: %w[repos.tag_queries], from: :tags
 
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin tags", type: :feature do
-  let(:repo) { Tags::Slice["repos.tag_repo"] }
+  let(:repo) { Tags::Slice["repos.tag_queries"] }
 
   def editor = find(".tag-editor", visible: :visible)
 
