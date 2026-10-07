@@ -15,7 +15,6 @@ module Public
     SHARED_CACHE_LIFETIME = 300
 
     include Deps[
-      "operations.find_visitor_address",
       record_feed_fetch: "analytics.operations.record_feed_fetch",
       session_reader: "admin.auth.session_reader",
       version_atom_feed: "operations.version_atom_feed",
@@ -39,7 +38,7 @@ module Public
     def count_feed_fetch(request)
       record_feed_fetch.call(
         path: request.path,
-        address: find_visitor_address.call(request),
+        address: Blog::VisitorAddress.call(request),
         user_agent: request.get_header("HTTP_USER_AGENT"),
         signed_in: session_reader.call(request).signed_in?,
       )

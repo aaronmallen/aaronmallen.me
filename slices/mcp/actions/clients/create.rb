@@ -12,7 +12,6 @@ module MCP
         TOO_MANY = "temporarily_unavailable"
 
         include Deps[
-          find_visitor_address: "public.operations.find_visitor_address",
           hash_visitor: "analytics.operations.hash_visitor",
           register_client: "operations.register_client",
         ]
@@ -41,7 +40,7 @@ module MCP
         end
 
         def visitor_hash(request)
-          hash_visitor.call(address: Blog::ThrottleKey.call(find_visitor_address.call(request)))
+          hash_visitor.call(address: Blog::ThrottleKey.call(Blog::VisitorAddress.call(request)))
         end
       end
     end

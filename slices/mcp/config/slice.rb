@@ -78,8 +78,6 @@ module MCP
       operations.restore_project operations.save_project repos.project_queries repos.work_entry_queries
     ], from: :projects
 
-    import keys: %w[operations.find_visitor_address], from: :public
-
     import keys: %w[
       operations.queue_commit_import repos.commit_queries repos.sync_state_queries
     ], from: :record

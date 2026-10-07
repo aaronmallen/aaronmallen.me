@@ -38,7 +38,7 @@ module Public
         def outcome(request, visit)
           record_visit.call(
             visit,
-            address: find_visitor_address.call(request),
+            address: Blog::VisitorAddress.call(request),
             base_url: request.base_url,
             signed_in: signed_in?(request),
             user_agent: request.get_header("HTTP_USER_AGENT"),

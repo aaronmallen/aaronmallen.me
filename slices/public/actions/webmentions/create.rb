@@ -35,7 +35,7 @@ module Public
         end
 
         def visitor_hash(request)
-          hash_visitor.call(address: Blog::ThrottleKey.call(find_visitor_address.call(request)))
+          hash_visitor.call(address: Blog::ThrottleKey.call(Blog::VisitorAddress.call(request)))
         end
       end
     end

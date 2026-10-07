@@ -31,7 +31,7 @@ port.
 
 ## Decision
 
-`Public::Operations::FindVisitorAddress` is the one place that reads the visitor address. `public` exports it and
+`Blog::VisitorAddress` is the one place that reads the visitor address. `public` exports it and
 `mcp` imports it.
 
 - It reads one header, the one `settings.proxy[:address_header]` names. `config/settings/production.yml` names

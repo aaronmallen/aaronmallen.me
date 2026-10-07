@@ -22,6 +22,6 @@ module Public
 
     import keys: %w[operations.receive_webmention repos.social_post_queries repos.webmention_queries], from: :social
 
-    export %w[operations.find_visitor_address]
+    export []
   end
 end
