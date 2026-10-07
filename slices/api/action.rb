@@ -15,7 +15,10 @@ module API
     STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
     UNAUTHORIZED = 401
 
-    include Deps[authenticate: "operations.authenticate"]
+    include Deps[
+      authenticate: "operations.authenticate",
+      record_sighting: "security.operations.record_sighting",
+    ]
 
     config.formats.accept :json
     config.handle_exception BodyParsingError => :refuse_body
@@ -62,7 +65,9 @@ module API
 
     def require_token(request, response)
       case authenticate.call(request.env[AUTHORIZATION])
-        in Success(token) then response[:token] = token
+        in Success(token)
+          record_sighting.call(request, api_token_id: token.id)
+          response[:token] = token
         in Failure(error)
           response.format = :json
           response.headers[CHALLENGE] = bearer(error)

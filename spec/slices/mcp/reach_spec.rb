@@ -89,6 +89,7 @@ RSpec.describe "MCP reach", type: :app do
       "record.operations.record_sync_outcome" => "each sync job records how it went; read_sync_state reads it",
       "record.operations.store_commits" => "the backfill job stores the commits it fetches",
       "saved_views.operations.rename_saved_view" => "the admin renames a view; update_saved_view does it in one step",
+      "security.operations.record_sighting" => "records where an API token or MCP client called from as it calls",
       "security.operations.record_sign_in" => "records an admin sign-in as GitHub calls back",
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",
       "social.operations.move_social_post" => "the admin's calendar moves one a day; send_social_post sets any time",

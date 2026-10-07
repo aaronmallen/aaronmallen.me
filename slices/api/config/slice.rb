@@ -57,6 +57,8 @@ module API
       repos.person_queries repos.social_post_queries repos.webmention_queries
     ], from: :social
 
+    import keys: %w[operations.record_sighting], from: :security
+
     import keys: %w[repos.suggestion_queries], from: :suggestions
 
     import keys: %w[repos.tag_queries], from: :tags

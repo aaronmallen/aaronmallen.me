@@ -88,6 +88,8 @@ module MCP
       repos.webmention_queries
     ], from: :social
 
+    import keys: %w[operations.record_sighting], from: :security
+
     import keys: %w[
       operations.accept_suggestion_edits operations.reject_suggestion_edits operations.replace_post_edits
       operations.replace_social_post_edits repos.suggestion_queries

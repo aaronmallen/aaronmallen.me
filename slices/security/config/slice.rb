@@ -6,6 +6,6 @@ module Security
 
     import keys: %w[operations.find_place], from: :analytics
 
-    export %w[operations.record_sign_in]
+    export %w[operations.record_sighting operations.record_sign_in]
   end
 end

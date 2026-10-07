@@ -13,7 +13,11 @@ module MCP
         UNAUTHORIZED = 401
         UNEXPECTED = { error: INVALID_REQUEST }.freeze
 
-        include Deps[authenticate: "operations.authenticate", handler: "protocol.handler"]
+        include Deps[
+          authenticate: "operations.authenticate",
+          handler: "protocol.handler",
+          record_sighting: "security.operations.record_sighting",
+        ]
 
         def handle(request, response)
           case authenticate.call(request.env[AUTHORIZATION], issuer:)
@@ -26,6 +30,7 @@ module MCP
         private
 
         def answer(request, response, token)
+          record_sighting.call(request, oauth_client_id: token.oauth_client_id)
           payload = request.body.read(MAX_BYTES).to_s
           reply = handler.call(payload, scopes: token.scopes, oauth_client_id: token.oauth_client_id)
           return render_body(response, NO_BODY, status: ACCEPTED) if reply.nil?
