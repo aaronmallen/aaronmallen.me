@@ -15,9 +15,11 @@ module Projects
 
       def live = with_tags.live.in_order.to_a
 
+      def public_archived = with_tags.in_public.archived.by_stars.to_a
+
       def public_by_tag(tag) = with_tags.in_public.live.tagged(tag).in_order.to_a
 
-      def public_grid(limit = nil) = with_tags.in_public.live.in_order.limit(limit).to_a
+      def public_grid(limit = nil) = with_tags.in_public.live.by_stars.limit(limit).to_a
 
       def replace_tags(id, names) = project_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
 

@@ -12,6 +12,8 @@ module Projects
 
       def archived = exclude(archived_on: nil)
 
+      def by_stars = order(self[:stars].desc, self[:id].asc)
+
       def in_order = order(self[:id].asc)
 
       def in_public = where(visibility: Blog::Types::ProjectVisibility["public"])

@@ -477,6 +477,10 @@
   }
 }
 
+@utility past-title {
+  @apply kicker mt-13;
+}
+
 @utility work-title {
   @apply kicker mt-13;
 }

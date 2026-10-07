@@ -53,11 +53,19 @@ RSpec.describe "Home", type: :request do
   end
 
   describe "the projects section" do
-    it "shows three projects in the order they were added" do
-      %w[first second third fourth].each { create(:project, name: it) }
+    it "shows the three projects with the most stars, most first" do
+      { "few" => 2, "most" => 30, "none" => 0, "some" => 9 }.each { |name, stars| create(:project, name:, stars:) }
       get "/"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[first second third])
+      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[most some few])
+    end
+
+    it "leaves out an archived project with more stars" do
+      create(:project, :archived, name: "gone", stars: 100)
+      create(:project, name: "here", stars: 1)
+      get "/"
+
+      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])
     end
 
     it "leaves out archived projects" do

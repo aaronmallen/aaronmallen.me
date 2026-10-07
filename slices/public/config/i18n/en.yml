@@ -190,6 +190,7 @@ en:
           heading: "Libraries I maintain in the open."
           kicker: "Projects"
           lede: "Small, opinionated tools in Rust and Ruby that grew out of problems I hit, most of them about making intent obvious."
+          past: "Past Projects"
           title: "Projects"
       posts:
         index:

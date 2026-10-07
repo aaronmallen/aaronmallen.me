@@ -4,19 +4,26 @@ RSpec.describe "Projects", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
   describe "the card grid" do
-    it "lists the projects in the order they were added" do
-      %w[first second third].each { create(:project, name: it) }
+    it "lists the projects by stars, most first" do
+      { "few" => 2, "most" => 30, "some" => 9 }.each { |name, stars| create(:project, name:, stars:) }
       get "/projects"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[first second third])
+      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[most some few])
     end
 
-    it "leaves out an archived project" do
+    it "keeps the order they were added when the stars tie" do
+      %w[first second].each { create(:project, name: it, stars: 5) }
+      get "/projects"
+
+      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[first second])
+    end
+
+    it "leaves an archived project out of the first grid" do
       create(:project, :archived, name: "gone")
       create(:project, name: "here")
       get "/projects"
 
-      expect(page.all(".proj .n").map(&:text)).to eq(%w[here])
+      expect(page.all(".projs:first-of-type .proj .n").map(&:text)).to eq(%w[here])
     end
 
     it "leaves out a private project" do
@@ -51,6 +58,40 @@ RSpec.describe "Projects", type: :request do
     end
   end
 
+  describe "the past projects" do
+    it "lists archived projects under their own kicker, after the active ones", :aggregate_failures do
+      [[], [:archived]].each { create(:project, *it) }
+      get "/projects"
+
+      expect(page).to have_css(".projects > .projs + h2.past-title + .projs", count: 1)
+      expect(page).to have_css("h2.past-title", exact_text: Public::Slice["i18n"].t("ui.views.pages.projects.past"))
+    end
+
+    it "lists them by stars, most first" do
+      { "few" => 2, "most" => 30, "some" => 9 }.each { |name, stars| create(:project, :archived, name:, stars:) }
+      get "/projects"
+
+      expect(page.all(".past-title + .projs .proj .n").map(&:text)).to eq(%w[most some few])
+    end
+
+    it "leaves out a private archived project" do
+      create(:project, :archived, :private, name: "hidden")
+      create(:project, :archived, name: "shown")
+      get "/projects"
+
+      expect(page.all(".past-title + .projs .proj .n").map(&:text)).to eq(%w[shown])
+    end
+
+    it "renders no section when no public project is archived", :aggregate_failures do
+      create(:project, name: "here")
+      create(:project, :archived, :private, name: "hidden")
+      get "/projects"
+
+      expect(page).to have_no_css(".past-title")
+      expect(page.all(".projs").length).to eq(1)
+    end
+  end
+
   it "leaves the work history to the about page" do
     create(:work_entry)
     get "/projects"
@@ -76,6 +117,10 @@ RSpec.describe "Projects", type: :request do
 
     it "renders no container for the cards" do
       expect(page).to have_no_css(".projs")
+    end
+
+    it "renders no past projects section" do
+      expect(page).to have_no_css(".past-title")
     end
   end
 end
