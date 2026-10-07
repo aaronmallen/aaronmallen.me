@@ -4,7 +4,7 @@ require "base64"
 
 RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
   let(:database) { geo_lite2_database }
-  let(:mirror) { "https://mm-prod-geoip-databases.example.com/GeoLite2-Country.tar.gz" }
+  let(:mirror) { "https://mm-prod-geoip-databases.example.com/GeoLite2-City.tar.gz" }
 
   def credentials = "Basic #{Base64.strict_encode64('123456:license')}"
 
@@ -123,14 +123,14 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
       stub_maxmind_download(status: 401, body: "")
 
       expect { refresh }
-        .to raise_error(described_class::RefreshFailed, "download_failed: MaxMind answered 401 for GeoLite2-Country")
+        .to raise_error(described_class::RefreshFailed, "download_failed: MaxMind answered 401 for GeoLite2-City")
     end
 
     it "leaves a dead key where the operator reads it, message and all" do
       stub_maxmind_download(status: 401, body: "")
       refresh_failing
 
-      expect(failure).to include(message: "MaxMind answered 401 for GeoLite2-Country", reason: "download_failed")
+      expect(failure).to include(message: "MaxMind answered 401 for GeoLite2-City", reason: "download_failed")
     end
 
     it "asks MaxMind once, rather than holding a worker through the retries" do
@@ -144,7 +144,7 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
       stub_request(:get, GeoLite2Database::DOWNLOAD_URL).with(query: hash_including({})).to_timeout
       refresh_failing
 
-      expect(failure).to include(message: a_string_including("GeoLite2-Country download failed"))
+      expect(failure).to include(message: a_string_including("GeoLite2-City download failed"))
     end
 
     it "keeps the copy it had" do
@@ -170,7 +170,7 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
     end
 
     it "fails the run on an archive that holds no database" do
-      stub_maxmind_download(body: geo_lite2_archive(database, name: "GeoLite2-Country_20260928/COPYRIGHT.txt"))
+      stub_maxmind_download(body: geo_lite2_archive(database, name: "GeoLite2-City_20260928/COPYRIGHT.txt"))
       refresh_failing
 
       expect(failure).to include(message: a_string_including("holds no database"), reason: "download_failed")

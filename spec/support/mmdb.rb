@@ -16,7 +16,7 @@ class Mmdb
   V4_PREFIX = 96
   VECTOR = 11
 
-  def initialize(database_type: "GeoLite2-Country")
+  def initialize(database_type: "GeoLite2-City")
     @data = {}
     @database_type = database_type
     @nodes = [[nil, nil]]

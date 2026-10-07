@@ -868,7 +868,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
 
         expect(failure_lines.first).to match(
-          /\ACountry database refresh failed at .+ · The download failed · MaxMind answered 401 for GeoLite2-Country\z/,
+          /\ACountry database refresh failed at .+ · The download failed · MaxMind answered 401 for GeoLite2-City\z/,
         )
       end
 

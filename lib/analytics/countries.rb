@@ -7,6 +7,7 @@ module Analytics
   class Countries
     MISSING = :missing
     PENDING = ".pending"
+    Place = Data.define(:city, :country)
     UNREADABLE = :unreadable
 
     attr_reader :path
@@ -16,12 +17,7 @@ module Analytics
       @path = Pathname(path)
     end
 
-    def code(address)
-      found = reader&.get(address.to_s)&.dig("country", "iso_code").to_s
-      found if Blog::Types::CountryCode.valid?(found)
-    rescue ArgumentError, MaxMind::DB::InvalidDatabaseError, SystemCallError
-      nil
-    end
+    def code(address) = place(address).country
 
     def failure
       return MISSING unless stamp
@@ -29,6 +25,16 @@ module Analytics
       UNREADABLE unless reader
     rescue SystemCallError
       UNREADABLE
+    end
+
+    def place(address)
+      found = record(address)
+      country = found&.dig("country", "iso_code").to_s
+
+      Place.new(
+        city: found&.dig("city", "names", "en"),
+        country: (country if Blog::Types::CountryCode.valid?(country)),
+      )
     end
 
     def replace(database)
@@ -58,6 +64,12 @@ module Analytics
 
       databases.reader(path, at) { open_database(path) }
     rescue Error
+      nil
+    end
+
+    def record(address)
+      reader&.get(address.to_s)
+    rescue ArgumentError, MaxMind::DB::InvalidDatabaseError, SystemCallError
       nil
     end
 

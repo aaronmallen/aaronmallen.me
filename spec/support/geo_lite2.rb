@@ -5,10 +5,11 @@ require "stringio"
 require "zlib"
 
 module GeoLite2Database
+  CITIES = { "81.2.69.0/24" => "London", "198.51.100.0/24" => "Nowhere" }.freeze
   COUNTRIES = { "1.2.3.0/24" => "US", "81.2.69.0/24" => "GB", "2001:db8::/32" => "DE" }.freeze
   CREDENTIALS = { account_id: "123456", license_key: "license" }.freeze
-  DOWNLOAD_URL = "https://download.maxmind.com/geoip/databases/GeoLite2-Country/download"
-  ENTRY = "GeoLite2-Country_20260928/GeoLite2-Country.mmdb"
+  DOWNLOAD_URL = "https://download.maxmind.com/geoip/databases/GeoLite2-City/download"
+  ENTRY = "GeoLite2-City_20260928/GeoLite2-City.mmdb"
   MODE = 0o644
 
   def connect_maxmind(**credentials)
@@ -24,13 +25,16 @@ module GeoLite2Database
     buffer.string
   end
 
-  def geo_lite2_database(countries = COUNTRIES)
-    countries.reduce(Mmdb.new) { |mmdb, (network, code)| mmdb.add(network, country(code)) }.to_s
+  def geo_lite2_database(countries = COUNTRIES, cities: CITIES)
+    networks = countries.keys | cities.keys
+    networks.reduce(Mmdb.new) { |mmdb, network| mmdb.add(network, place(countries[network], cities[network])) }.to_s
   end
 
   private
 
-  def country(code) = { "country" => { "iso_code" => code, "names" => { "en" => code } } }
+  def named(name) = name && { "names" => { "en" => name } }
+
+  def place(code, city) = { "city" => named(city), "country" => named(code)&.merge("iso_code" => code) }.compact
 end
 
 RSpec.configure do |config|

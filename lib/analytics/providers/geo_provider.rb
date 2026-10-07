@@ -30,7 +30,7 @@ module Analytics
       end
 
       CONNECT_TIMEOUT = 10
-      DATABASE_PATH = "tmp/maxmind/GeoLite2-Country.mmdb"
+      DATABASE_PATH = "tmp/maxmind/GeoLite2-City.mmdb"
       DOWNLOAD_TIMEOUT = 120
       DOWNLOAD_URL = "https://download.maxmind.com"
 

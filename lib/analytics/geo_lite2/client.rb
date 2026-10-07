@@ -11,7 +11,7 @@ module Analytics
       class Error < Analytics::Error; end
 
       DATABASE = ".mmdb"
-      EDITION = "GeoLite2-Country"
+      EDITION = "GeoLite2-City"
       SUFFIX = "tar.gz"
 
       def initialize(connection:)
