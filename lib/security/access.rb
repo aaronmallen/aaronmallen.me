@@ -2,6 +2,7 @@
 
 module Security
   module Access
+    DEVICE = %i[browser os city country].freeze
     USER_AGENT = "HTTP_USER_AGENT"
     USER_AGENT_LIMIT = 1024
 

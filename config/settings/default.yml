@@ -5,6 +5,7 @@ attention:
   carried_count: 3
   draft_days: 30
   journal_days: 2
+  new_device_days: 7
   someday_days: 90
 backup_store:
   access_key: <%= ENV["BACKUP_STORE_ACCESS_KEY"].to_json %>

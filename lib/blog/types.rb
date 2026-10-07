@@ -41,7 +41,7 @@ module Blog
     )
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)
-    AttentionKind = Types::String.enum("carried", "draft", "someday", "journal")
+    AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device")
     Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")

@@ -6,6 +6,7 @@ module Activity
       CARRIED = Blog::Types::AttentionKind["carried"]
       DRAFT = Blog::Types::AttentionKind["draft"]
       JOURNAL = Blog::Types::AttentionKind["journal"]
+      NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
       SOMEDAY = Blog::Types::AttentionKind["someday"]
       ROWS = Sequel[:attention]
       SNOOZES = Sequel[:attention_snoozes]
@@ -14,10 +15,11 @@ module Activity
 
       schema :attention, infer: true
 
-      def stalled(on:, now:, carried_count:, draft_days:, journal_days:, someday_days:)
+      def stalled(on:, now:, carried_count:, draft_days:, journal_days:, new_device_days:, someday_days:)
         where(
           Sequel.|(
             carried(carried_count),
+            seen_since(NEW_DEVICE, on - new_device_days),
             untouched(DRAFT, on - draft_days),
             untouched(JOURNAL, on - journal_days),
             untouched(SOMEDAY, on - someday_days),
@@ -28,6 +30,8 @@ module Activity
       private
 
       def carried(count) = Sequel[kind: CARRIED] & (Sequel[:carried_count] >= count)
+
+      def seen_since(kind, since) = Sequel[kind:] & (Sequel[:touched_on] > since)
 
       def snoozed(now) = dataset.db[:attention_snoozes].where(SNOOZED_ROW & (SNOOZES[:ends_at] > now)).exists
 

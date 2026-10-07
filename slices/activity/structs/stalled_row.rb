@@ -7,8 +7,10 @@ module Activity
         Blog::Types::AttentionKind["carried"] => :carried_count,
         Blog::Types::AttentionKind["draft"] => :draft_days,
         Blog::Types::AttentionKind["journal"] => :journal_days,
+        Blog::Types::AttentionKind["new_device"] => :new_device_days,
         Blog::Types::AttentionKind["someday"] => :someday_days,
       }.freeze
+      NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
 
       def self.from(row, on:, limits:)
         new(
@@ -20,7 +22,7 @@ module Activity
         )
       end
 
-      def overdue = (days - limit).fdiv(limit)
+      def overdue = kind == NEW_DEVICE ? Float::INFINITY : (days - limit).fdiv(limit)
 
       def rank = [-overdue, kind, record_id.to_i]
     end

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351", "#353", "#655"]
+amended: ["#351", "#353", "#655", "#706"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -55,7 +55,8 @@ to own them, one that owns none of the three kinds.
 The card, the endpoint and the tool read one exported query, and a new kind joins by adding a branch to the view.
 
 The view reads `tasks.title`, `tasks.status`, `tasks.updated_at`, `tasks.list`, `tasks.carried_count`,
-`posts.title`, `posts.status`, `posts.updated_at` and `journal_entries.entry_date`. Postgres will not change a
+`posts.title`, `posts.status`, `posts.updated_at`, `journal_entries.entry_date`, every column of `known_devices`,
+`api_tokens.name`, `oauth_clients.client_name` and `oauth_clients.client_id`. Postgres will not change a
 column a view reads, so a migration that touches one has to replace `attention` too.
 
 `updated_at` moves on every write through a repo's update command. Dragging a someday task to a new place in its

@@ -5,17 +5,17 @@ module Security
     class RecordSighting < Operation
       include Deps[
         find_place: "analytics.operations.find_place",
+        known_device_mutations: "repos.known_device_mutations",
         sighting_mutations: "repos.sighting_mutations",
       ]
 
       def call(request, api_token_id: nil, oauth_client_id: nil)
         access = Access.read(request, find_place)
+        device = { api_token_id:, oauth_client_id:, **access.slice(*Access::DEVICE) }
 
+        known_device_mutations.know(**device)
         Success(
-          sighting_mutations.sight(
-            api_token_id:, oauth_client_id:, browser: access[:browser], os: access[:os], city: access[:city],
-            country: access[:country], last_address: access[:address], last_user_agent: access[:user_agent],
-          ),
+          sighting_mutations.sight(**device, last_address: access[:address], last_user_agent: access[:user_agent]),
         )
       end
     end

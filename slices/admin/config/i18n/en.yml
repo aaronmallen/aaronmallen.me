@@ -410,6 +410,10 @@ en:
         count:
           one: "%{count} stalled"
           other: "%{count} stalled"
+        first_seen:
+          zero: "New device or place today"
+          one: "New device or place %{count} day ago"
+          other: "New device or place %{count} days ago"
         journal: "Journal"
         journal_gap:
           one: "No entry in %{count} day"

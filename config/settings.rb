@@ -96,6 +96,7 @@ module Blog
       carried_count: AttentionLimit,
       draft_days: AttentionLimit,
       journal_days: AttentionLimit,
+      new_device_days: AttentionLimit,
       someday_days: AttentionLimit,
     )
 

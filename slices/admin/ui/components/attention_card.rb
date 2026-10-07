@@ -7,6 +7,7 @@ module Admin
         CARRIED = Blog::Types::AttentionKind["carried"]
         DRAFT = Blog::Types::AttentionKind["draft"]
         JOURNAL = Blog::Types::AttentionKind["journal"]
+        NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
         SOMEDAY = Blog::Types::AttentionKind["someday"]
@@ -59,12 +60,17 @@ module Admin
           task_form(:admin_move_task, row, t(".move", list:), "fa-solid fa-arrow-right", filter: NEXT)
         end
 
+        def new_device(row)
+          ListItem(title: row.title, href: nil, sub: t(".first_seen", count: row.days)) { snooze(row) }
+        end
+
         def row(row)
           case row.kind
             when CARRIED then task(row, t(".carried", count: row.days))
             when SOMEDAY then task(row, t(".untouched", count: row.days))
             when DRAFT then draft(row)
             when JOURNAL then journal(row)
+            when NEW_DEVICE then new_device(row)
           end
         end
 
