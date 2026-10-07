@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Analytics::Queries::ClicksBetween do
+RSpec.describe Analytics::Repos::AnalyticsPageQueries do
   let(:today) { Blog::TimeZone.today }
 
   def click(on, path: "/writing/hello", **)
@@ -9,7 +9,7 @@ RSpec.describe Analytics::Queries::ClicksBetween do
   end
 
   def clicks(from:, to: today, path: "/writing/hello")
-    Analytics::Slice["queries.clicks_between"].call(path:, from:, to:).map { it.values_at(:link_host, :link_path, :clicks) }
+    Analytics::Slice["repos.analytics_page_queries"].clicks_between(path:, from:, to:).map { it.values_at(:link_host, :link_path, :clicks) }
   end
 
   it "keeps the clicks once the prune takes the day's events" do

@@ -3,7 +3,7 @@
 require "securerandom"
 
 analytics = Analytics::Slice
-return if analytics["queries.rollups_between"].call(from: Seeds.today - 30, to: Seeds.today).any?
+return if analytics["repos.analytics_rollup_queries"].days(from: Seeds.today - 30, to: Seeds.today).any?
 
 pages = {
   "/" => "Aaron Allen",
@@ -28,7 +28,7 @@ countries = ["US", "US", "GB", "DE", "CA", "NL", nil]
 depths = [0, 25, 50, 75, 100]
 
 hash_visitor = analytics["operations.hash_visitor"]
-events = analytics["repos.analytics_event_repo"]
+events = analytics["repos.analytics_event_mutations"]
 random = Random.new(236)
 
 21.downto(0) do |days_ago|

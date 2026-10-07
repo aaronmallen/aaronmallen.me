@@ -19,7 +19,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     rows.map { it.to_h.values_at(:link_host, :link_path, :clicks) }
   end
 
-  def countries(on = day) = rollup_repo.countries(from: on, to: on).map(&:to_h)
+  def countries(on = day) = rollup_repo.analytics_rollup_countries.on(on).top_by_visitors.to_a.map(&:to_h)
 
   def devices_of(path, on = day)
     rows = rollup_repo.analytics_rollup_devices.on(on).for_path(path).order(:device_class).to_a
@@ -29,7 +29,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
 
   def event(*traits, on: day, **) = create(:analytics_event, *traits, occurred_at: noon(on), **)
 
-  def event_repo = Analytics::Slice["repos.analytics_event_repo"]
+  def event_repo = Analytics::Slice["repos.analytics_event_queries"]
 
   def failure = sync_state_queries.failure(analytics_rollup)
 
@@ -45,19 +45,21 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     rows.map { it.to_h.values_at(key, :views, :visitors) }
   end
 
-  def paths(on = day) = rollup_repo.top_paths(from: on, to: on).map(&:to_h)
+  def paths(on = day) = rollup_repo.analytics_rollup_paths.on(on).top_by_views.to_a.map(&:to_h)
+
+  def reach_in(month) = rollup_repo.analytics_rollup_reach.in_month(month).to_a.to_h { [it.path, it.reach] }
 
   def read_throughs(on = day)
     rollup_repo.analytics_rollup_paths.on(on).order(:path).to_a.to_h { [it.path, it.read_throughs] }
   end
 
-  def referrers(on = day) = rollup_repo.referrers(from: on, to: on).map(&:to_h)
+  def referrers(on = day) = rollup_repo.analytics_rollup_referrers.on(on).top_by_visitors.to_a.map(&:to_h)
 
   def roll_up = described_class.new.perform
 
   def rollup(on, **) = create(:analytics_rollup, day: on, **)
 
-  def rollup_repo = Analytics::Slice["repos.analytics_rollup_repo"]
+  def rollup_repo = Analytics::Slice["repos.analytics_rollup_queries"]
 
   def scroll_depths_of(path, on = day)
     rows = rollup_repo.analytics_rollup_scroll_depths.on(on).for_path(path).order(:scroll_depth).to_a
@@ -363,7 +365,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(path: "/writing/other", month_visitor_hash: "b" * 64)
       roll_up
 
-      expect(rollup_repo.reach_in(month)).to eq(nil => 2, "/writing/hello" => 1, "/writing/other" => 2)
+      expect(reach_in(month)).to eq(nil => 2, "/writing/hello" => 1, "/writing/other" => 2)
     end
 
     it "leaves a reader from the month before out of this month" do
@@ -371,14 +373,14 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(month_visitor_hash: "b" * 64)
       roll_up
 
-      expect(rollup_repo.reach_in(month)).to include(nil => 1)
+      expect(reach_in(month)).to include(nil => 1)
     end
 
     it "stores the same reach run twice" do
       event(month_visitor_hash: reader)
       2.times { roll_up }
 
-      expect(rollup_repo.reach_in(month)).to include(nil => 1)
+      expect(reach_in(month)).to include(nil => 1)
     end
 
     it "stores no reach for a month whose start the raw visits no longer hold" do
@@ -386,7 +388,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(on: old)
       roll_up
 
-      expect(rollup_repo.reach_in(month_of(old))).to be_empty
+      expect(reach_in(month_of(old))).to be_empty
     end
   end
 
@@ -472,7 +474,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       feed_reader_hashes.dataset.insert(day:, path: "/writing.atom", reader_hash: Digest::SHA256.hexdigest(day.to_s))
     end
 
-    def feed_reader_hashes = Analytics::Slice["repos.feed_fetch_repo"].feed_reader_hashes
+    def feed_reader_hashes = Analytics::Slice["repos.feed_fetch_queries"].feed_reader_hashes
 
     it "deletes the events older than 90 days once their day is rolled up" do
       event(on: today - 91)
@@ -535,7 +537,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   end
 
   describe "the reader counts" do
-    let(:reader_repo) { Analytics::Slice["repos.post_reader_hash_repo"] }
+    let(:reader_repo) { Analytics::Slice["repos.post_reader_mutations"] }
 
     def hashes(path) = reader_repo.post_reader_hashes.for_paths(path).count
 
@@ -640,7 +642,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
         post("old", 370)
         readers("/writing/old", 3)
         allow(reader_repo).to(receive(:post_reader_hashes).and_wrap_original { break_closed(it.call) })
-        replace_component("repos.post_reader_hash_repo", reader_repo)
+        replace_component("repos.post_reader_mutations", reader_repo)
       end
 
       def break_closed(relation)
@@ -699,9 +701,9 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     end
 
     it "tells the operator the reader counts failed, message and all" do
-      reader_repo = Analytics::Slice["repos.post_reader_hash_repo"]
+      reader_repo = Analytics::Slice["repos.post_reader_mutations"]
       allow(reader_repo).to receive(:save_counts).and_raise(Sequel::DatabaseError, "PG::DiskFull")
-      replace_component("repos.post_reader_hash_repo", reader_repo)
+      replace_component("repos.post_reader_mutations", reader_repo)
       roll_up_failing
 
       expect(failure).to include(reason: "readers_failed", message: "PG::DiskFull")

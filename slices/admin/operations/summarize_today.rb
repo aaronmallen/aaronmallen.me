@@ -14,7 +14,8 @@ module Admin
         attention_queries: "activity.repos.attention_queries",
         client: "record.github.client",
         commit_queries: "record.repos.commit_queries",
-        country_database_failure: "analytics.queries.country_database_failure",
+        country_queries: "analytics.repos.country_queries",
+        event_queries: "analytics.repos.analytics_event_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         pending_webmention_count: "social.queries.pending_webmention_count",
         pending_webmentions: "social.queries.pending_webmentions",
@@ -22,7 +23,6 @@ module Admin
         queued_social_posts: "social.queries.queued_social_posts",
         scheduled_posts: "posts.queries.scheduled",
         sync_state_queries: "record.repos.sync_state_queries",
-        visitors_for_day: "analytics.queries.visitors_for_day",
       ]
 
       def call(now: Time.now, pool: nil)
@@ -36,7 +36,7 @@ module Admin
           entries: journal_entry_queries.today(now:),
           sprint:,
           sync_failures: failures,
-          visitors: visitors_for_day.call(Blog::TimeZone.today(now)),
+          visitors: event_queries.visitors_on(Blog::TimeZone.today(now)),
           webmentions:,
         }
       end
@@ -56,7 +56,7 @@ module Admin
       end
 
       def countries_failure
-        found = country_database_failure.call
+        found = country_queries.database_failure
 
         { reason: found.to_s, repo: nil, sync: COUNTRIES } if found
       end

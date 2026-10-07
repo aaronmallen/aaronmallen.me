@@ -12,7 +12,7 @@ module API
       operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries
     ], from: :activity
 
-    import keys: %w[queries.unique_readers queries.views_by_path queries.views_by_post], from: :analytics
+    import keys: %w[repos.analytics_rollup_queries repos.post_reader_queries], from: :analytics
 
     import keys: %w[
       operations.act_on_messages

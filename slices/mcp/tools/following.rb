@@ -12,7 +12,7 @@ module MCP
                     "top %<top>d posts by webmentions received over the range, each with its post_id, title and " \
                     "received. "
       QUERIES = %i[
-        feed_subscribers_between pending_webmention_count posts_by_ids webmentions_received_between
+        feed_fetch_queries pending_webmention_count posts_by_ids webmentions_received_between
         webmentions_received_by_post
       ].freeze
 
@@ -21,7 +21,7 @@ module MCP
       def call(range, top:, **queries)
         window = { from: range.first, to: range.last }
 
-        { feed: feed(queries.fetch(:feed_subscribers_between).call(**window)),
+        { feed: feed(queries.fetch(:feed_fetch_queries).feed_subscribers_between(**window)),
           webmentions: webmentions(window, top, queries) }
       end
 

@@ -19,10 +19,11 @@ module Analytics
         "geo.countries",
         "settings",
         contract: "contracts.visit_contract",
-        event_repo: "repos.analytics_event_repo",
+        event_mutations: "repos.analytics_event_mutations",
+        event_queries: "repos.analytics_event_queries",
         hash_reader: "operations.hash_reader",
         hash_visitor: "operations.hash_visitor",
-        reader_repo: "repos.post_reader_hash_repo",
+        reader_mutations: "repos.post_reader_mutations",
       ]
 
       def call(payload, address:, user_agent:, base_url:, signed_in: false)
@@ -43,10 +44,10 @@ module Analytics
       end
 
       def click(visit, visitor_hashes)
-        event_id = event_repo.view_id(visitor_hashes:, view_token: visit[:view_token], path: visit[:path])
+        event_id = event_queries.view_id(visitor_hashes:, view_token: visit[:view_token], path: visit[:path])
         return Failure(:unknown_visit) unless event_id
 
-        clicked = event_repo.record_click(event_id:, limit: MAX_CLICKS, **visit.slice(:link_host, :link_path))
+        clicked = event_mutations.record_click(event_id:, limit: MAX_CLICKS, **visit.slice(:link_host, :link_path))
         clicked ? Success(clicked) : Failure(:throttled)
       end
 
@@ -64,7 +65,7 @@ module Analytics
       end
 
       def read(visit, visitor_hashes)
-        matched = event_repo.record_read_seconds(
+        matched = event_mutations.record_read_seconds(
           visitor_hashes:,
           view_token: visit[:view_token],
           read_seconds: [visit[:read_seconds], MAX_READ_SECONDS].min,
@@ -76,7 +77,7 @@ module Analytics
       def read?(visit) = visit[:kind] == Contracts::VisitContract::READ
 
       def record_reader(path, address:, user_agent:)
-        reader_repo.record(path:, reader_hash: hash_reader.call(address:, user_agent:, path:))
+        reader_mutations.record(path:, reader_hash: hash_reader.call(address:, user_agent:, path:))
       end
 
       def referrer(url, base_url)
@@ -96,7 +97,7 @@ module Analytics
       end
 
       def scroll(visit, visitor_hashes)
-        matched = event_repo.record_scroll_depth(
+        matched = event_mutations.record_scroll_depth(
           visitor_hashes:,
           view_token: visit[:view_token],
           scroll_depth: visit[:scroll_depth],
@@ -126,7 +127,7 @@ module Analytics
       end
 
       def view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
-        event = event_repo.claim(
+        event = event_mutations.claim(
           path: visit[:path],
           title: title(visit[:title]),
           **hashes,
@@ -163,7 +164,7 @@ module Analytics
       end
 
       def within_limit(address_hash)
-        stored = event_repo.count_from_address_since(address_hash, window_opened_at)
+        stored = event_queries.count_from_address_since(address_hash, window_opened_at)
 
         stored < settings.analytics[:throttle_limit] ? Success(stored) : Failure(:throttled)
       end

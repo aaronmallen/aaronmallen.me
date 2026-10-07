@@ -85,7 +85,7 @@ RSpec.describe "Post reader counting", type: :request do
     it "still counts the view" do
       view(path: "/writing/old")
 
-      expect(Analytics::Slice["repos.analytics_event_repo"].analytics_events.count).to eq(1)
+      expect(Analytics::Slice["repos.analytics_event_queries"].analytics_events.count).to eq(1)
     end
   end
 

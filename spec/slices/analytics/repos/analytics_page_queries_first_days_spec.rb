@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe Analytics::Queries::FirstDays do
+RSpec.describe Analytics::Repos::AnalyticsPageQueries, "#first_days" do
   let(:today) { Blog::TimeZone.today }
 
-  def first_days(path) = Analytics::Slice["queries.first_days"].call(path)
+  def first_days(path) = Analytics::Slice["repos.analytics_page_queries"].first_days(path)
 
   def publish(slug, on:, status: "published")
     create(:post, slug:, status:, published_at: Blog::TimeZone.day_start(on) + (12 * 3_600))

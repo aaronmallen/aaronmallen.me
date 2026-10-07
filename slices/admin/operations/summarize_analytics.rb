@@ -7,27 +7,26 @@ module Admin
       TOP_ROWS = 10
 
       include Deps[
-        feed_subscribers_between: "analytics.queries.feed_subscribers_between",
+        event_queries: "analytics.repos.analytics_event_queries",
+        feed_queries: "analytics.repos.feed_fetch_queries",
         pending_webmention_count: "social.queries.pending_webmention_count",
         posts_by_ids: "posts.queries.by_ids",
-        summary_between: "analytics.queries.summary_between",
-        view_totals: "analytics.queries.view_totals",
+        rollup_queries: "analytics.repos.analytics_rollup_queries",
         webmentions_received_between: "social.queries.webmentions_received_between",
         webmentions_received_by_post: "social.queries.webmentions_received_by_post",
-        weekday_hours: "analytics.queries.weekday_hours",
       ]
 
       def call(range:)
         to = Blog::TimeZone.today
         from = to - (range - 1)
-        before = view_totals.call(from: from - range, to: from - 1).to_h
+        before = rollup_queries.totals(from: from - range, to: from - 1).to_h
         found = period(from, to)
 
         {
-          feed: feed_subscribers_between.call(from:, to:),
+          feed: feed_queries.feed_subscribers_between(from:, to:),
           range:,
           webmentions: webmentions(from, to),
-          weekday_hours: weekday_hours.call(to:),
+          weekday_hours: event_queries.weekday_hours(to:),
           **found,
           **stats(found.fetch(:totals), before),
         }
@@ -42,7 +41,7 @@ module Admin
       end
 
       def period(from, to)
-        summary = summary_between.call(from:, to:)
+        summary = rollup_queries.summary_between(from:, to:)
 
         {
           **RANKED.to_h { [it, summary.fetch(it).take(TOP_ROWS)] },

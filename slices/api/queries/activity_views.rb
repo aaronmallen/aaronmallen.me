@@ -5,9 +5,9 @@ module API
     class ActivityViews
       POST = Blog::Types::ActivityKind["post"]
 
-      include Deps[views_by_path: "analytics.queries.views_by_path"]
+      include Deps[rollup_queries: "analytics.repos.analytics_rollup_queries"]
 
-      def call(rows) = rows.any? { it.type == POST } ? views_by_path.call : Blog::Constants::EMPTY_HASH
+      def call(rows) = rows.any? { it.type == POST } ? rollup_queries.views_by_path : Blog::Constants::EMPTY_HASH
     end
   end
 end

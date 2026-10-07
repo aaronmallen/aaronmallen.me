@@ -9,10 +9,10 @@ module MCP
 
       module_function
 
-      def call(totals, range, analytics_between)
+      def call(totals, range, rollup_queries)
         to = range.first - 1
         from = to - (range.count - 1)
-        before = analytics_between.call(from:, to:).fetch(:totals).fetch(:views)
+        before = rollup_queries.summary_between(from:, to:).fetch(:totals).fetch(:views)
 
         { from: from.iso8601, to: to.iso8601, views: before, percent: percent(totals.fetch(:views), before) }
       end

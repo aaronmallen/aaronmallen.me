@@ -11,8 +11,8 @@ module MCP
 
       module_function
 
-      def call(weekday_hours, to: Blog::TimeZone.today)
-        found = weekday_hours.call(to:)
+      def call(event_queries, to: Blog::TimeZone.today)
+        found = event_queries.weekday_hours(to:)
         hours = found.fetch(:hours).each_with_index.map { |counts, hour| { hour:, **DAYS.zip(counts).to_h } }
 
         { from: (to - (found.fetch(:days) - 1)).iso8601, to: to.iso8601, time_zone: Blog::TimeZone::NAME, hours: }

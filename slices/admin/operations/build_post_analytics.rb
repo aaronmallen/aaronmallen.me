@@ -6,29 +6,23 @@ module Admin
       TOP_ROWS = 10
 
       include Deps[
-        clicks_between: "analytics.queries.clicks_between",
-        devices_between: "analytics.queries.devices_between",
-        first_days: "analytics.queries.first_days",
-        page_between: "analytics.queries.page_between",
-        reach_between: "analytics.queries.reach_between",
-        read_throughs_between: "analytics.queries.read_throughs_between",
-        scroll_depths_between: "analytics.queries.scroll_depths_between",
-        sources_between: "analytics.queries.sources_between",
-        unique_readers: "analytics.queries.unique_readers",
+        page_queries: "analytics.repos.analytics_page_queries",
+        post_reader_queries: "analytics.repos.post_reader_queries",
+        rollup_queries: "analytics.repos.analytics_rollup_queries",
       ]
 
       def call(post:, range:)
         to = Blog::TimeZone.today
         window = { from: to - (range - 1), to:, path: "#{Blog::Site::WRITING}/#{post.slug}" }
-        page = page_between.call(**window)
+        page = page_queries.page_between(**window)
 
         {
           post:,
           range:,
           **counts(page, window),
           **breakdowns(page, window),
-          first_days: first_days.call(window.fetch(:path)),
-          unique_readers: unique_readers.call([post]).fetch(post.id),
+          first_days: page_queries.first_days(window.fetch(:path)),
+          unique_readers: post_reader_queries.unique_readers([post]).fetch(post.id),
         }
       end
 
@@ -36,12 +30,12 @@ module Admin
 
       def breakdowns(page, window)
         {
-          clicks: clicks_between.call(**window).take(TOP_ROWS),
+          clicks: page_queries.clicks_between(**window).take(TOP_ROWS),
           countries: page.fetch(:countries).take(TOP_ROWS),
-          devices: devices_between.call(**window).take(TOP_ROWS),
+          devices: page_queries.devices_between(**window).take(TOP_ROWS),
           referrers: page.fetch(:referrers).take(TOP_ROWS),
-          scroll: scroll_depths_between.call(**window),
-          sources: sources_between.call(**window).take(TOP_ROWS),
+          scroll: page_queries.scroll_depths_between(**window),
+          sources: page_queries.sources_between(**window).take(TOP_ROWS),
         }
       end
 
@@ -52,8 +46,8 @@ module Admin
         {
           **page.fetch(:totals).slice(:views, :visitors),
           bounces: page.fetch(:bounces),
-          read_throughs: read_throughs_between.call(from: window.fetch(:from), to:).fetch(path, 0),
-          readers: reach_between.call(from: Date.new(to.year, to.month), to:, path:),
+          read_throughs: rollup_queries.read_throughs_between(from: window.fetch(:from), to:).fetch(path, 0),
+          readers: rollup_queries.reach_between(from: Date.new(to.year, to.month), to:, path:),
         }
       end
     end

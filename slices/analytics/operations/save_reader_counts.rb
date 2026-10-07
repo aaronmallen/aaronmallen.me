@@ -3,9 +3,9 @@
 module Analytics
   module Operations
     class SaveReaderCounts < Operation
-      include Deps[reader_repo: "repos.post_reader_hash_repo"]
+      include Deps[reader_mutations: "repos.post_reader_mutations"]
 
-      def call = reader_repo.save_counts(since: Readers.window_opened_at)
+      def call = reader_mutations.save_counts(since: Readers.window_opened_at)
     end
   end
 end

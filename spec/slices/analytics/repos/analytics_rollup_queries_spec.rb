@@ -2,7 +2,7 @@
 
 require "digest"
 
-RSpec.describe Analytics::Queries::ReadThroughsBetween do
+RSpec.describe Analytics::Repos::AnalyticsRollupQueries do
   let(:reader) { Digest::SHA256.hexdigest("reader") }
   let(:today) { Blog::TimeZone.today }
 
@@ -17,7 +17,9 @@ RSpec.describe Analytics::Queries::ReadThroughsBetween do
     )
   end
 
-  def read_throughs(from:, to: today) = Analytics::Slice["queries.read_throughs_between"].call(from:, to:)
+  def read_throughs(from:, to: today)
+    Analytics::Slice["repos.analytics_rollup_queries"].read_throughs_between(from:, to:)
+  end
 
   def roll_up = Analytics::Slice["jobs.roll_up_analytics"].perform
 
@@ -38,7 +40,7 @@ RSpec.describe Analytics::Queries::ReadThroughsBetween do
     read(today - 120)
     roll_up
 
-    expect(Analytics::Slice["repos.analytics_event_repo"].oldest_day).to be_nil
+    expect(Analytics::Slice["repos.analytics_event_queries"].oldest_day).to be_nil
     expect(read_throughs(from: today - 120)).to eq("/writing/hello" => 1)
   end
 

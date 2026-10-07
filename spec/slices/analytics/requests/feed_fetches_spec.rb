@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Feed fetch counting", type: :request do
-  let(:feed_repo) { Analytics::Slice["repos.feed_fetch_repo"] }
+  let(:feed_repo) { Analytics::Slice["repos.feed_fetch_queries"] }
   let(:reader) { "NetNewsWire (RSS Reader; https://netnewswire.com/)" }
   let(:today) { Blog::TimeZone.today }
 

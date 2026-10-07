@@ -5,7 +5,7 @@ require "digest"
 RSpec.describe "Visits", type: :request do
   let(:address) { "203.0.113.7" }
   let(:agent) { "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
-  let(:event_repo) { Analytics::Slice["repos.analytics_event_repo"] }
+  let(:event_repo) { Analytics::Slice["repos.analytics_event_mutations"] }
   let(:loopback) { "127.0.0.1" }
 
   before { create(:post, :published, slug: "hello", title: "Hello", tags: %w[ruby]) }
@@ -293,7 +293,7 @@ RSpec.describe "Visits", type: :request do
       view(agent: "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/130.0")
       roll_up_tomorrow
 
-      expect(Analytics::Slice["repos.analytics_rollup_repo"].by_day(Blog::TimeZone.today - 1))
+      expect(Analytics::Slice["repos.analytics_rollup_queries"].by_day(Blog::TimeZone.today - 1))
         .to have_attributes(visitors: 2)
     end
   end
@@ -538,7 +538,7 @@ RSpec.describe "Visits", type: :request do
           release.pop(timeout: 5)
           original.call(**attrs)
         end
-        replace_component("repos.analytics_event_repo", event_repo)
+        replace_component("repos.analytics_event_mutations", event_repo)
 
         [arrived, release]
       end
@@ -1016,7 +1016,7 @@ RSpec.describe "Visits", type: :request do
         release.pop(timeout: 5)
         original.call(**attrs)
       end
-      replace_component("repos.analytics_event_repo", event_repo)
+      replace_component("repos.analytics_event_mutations", event_repo)
 
       [arrived, release]
     end

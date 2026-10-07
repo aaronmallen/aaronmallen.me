@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
 module Analytics
-  module Queries
-    class FeedSubscribersBetween
-      include Deps[feed_repo: "repos.feed_fetch_repo"]
-
-      def call(from:, to:)
-        subscribers = feed_repo.subscribers_by_day(from:, to:)
-        readers = feed_repo.readers_by_day(from:, to:)
-
+  module Repos
+    class FeedFetchQueries < DB::Repo
+      def feed_subscribers_between(from:, to:)
+        subscribers = subscribers_by_day(from, to)
+        readers = readers_by_day(from, to)
         days = (from..to).to_h { [it, subscribers.fetch(it, 0) + readers.fetch(it, 0)] }
 
         {
-          aggregators: aggregators(feed_repo.latest_subscribers(from:, to:)),
+          aggregators: aggregators(feed_subscribers.between(from, to).latest_per_feed.to_a),
           days: days.map { |day, count| { day:, subscribers: count } },
           latest: days.fetch([to, Blog::TimeZone.today.prev_day].min, 0),
         }
@@ -26,6 +23,12 @@ module Analytics
         found = counts.map { |aggregator, subscribers| { aggregator:, subscribers: } }
 
         found.sort_by { [-it[:subscribers], it[:aggregator]] }
+      end
+
+      def readers_by_day(from, to) = feed_readers.between(from, to).by_day.to_a.to_h { [it.day, it.readers] }
+
+      def subscribers_by_day(from, to)
+        feed_subscribers.between(from, to).by_day.to_a.to_h { [it.day, it.subscribers] }
       end
     end
   end

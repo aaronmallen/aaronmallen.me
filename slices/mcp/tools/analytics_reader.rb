@@ -10,11 +10,11 @@ module MCP
 
       private
 
-      def between(name, **) = dep(name).call(from: range.first, to: range.last, **)
+      def between(repo, name, **) = dep(repo).public_send(name, from: range.first, to: range.last, **)
 
       def breakdowns(page_path)
-        { sources: between(:sources_between, path: page_path).take(top),
-          devices: between(:devices_between, path: page_path) }
+        { sources: between(:analytics_page_queries, :sources_between, path: page_path).take(top),
+          devices: between(:analytics_page_queries, :devices_between, path: page_path) }
       end
 
       def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
@@ -23,12 +23,14 @@ module MCP
 
       def deps(keys) = keys.to_h { [it, dep(it)] }
 
+      def events = dep(:analytics_event_queries)
+
       def heading
         { from: range.first.iso8601, to: range.last.iso8601, time_zone: Blog::TimeZone::NAME }
       end
 
       def page
-        found = between(:page_between, path:)
+        found = between(:analytics_page_queries, :page_between, path:)
         read_throughs = read_throughs_by_path.fetch(path, 0)
 
         found.merge(totals: found.fetch(:totals).merge(read_throughs:, bounces: found.fetch(:bounces)))
@@ -38,8 +40,8 @@ module MCP
         {
           **PAGE_RANKED.to_h { [it, found.fetch(it).take(top)] },
           **breakdowns(path),
-          clicks: between(:clicks_between, path:).take(top),
-          scroll: between(:scroll_depths_between, path:),
+          clicks: between(:analytics_page_queries, :clicks_between, path:).take(top),
+          scroll: between(:analytics_page_queries, :scroll_depths_between, path:),
         }
       end
 
@@ -71,7 +73,7 @@ module MCP
       end
 
       def ranked
-        found = between(:analytics_between)
+        found = between(:analytics_rollup_queries, :summary_between)
         read_throughs = read_throughs_by_path
 
         found.merge(
@@ -86,10 +88,10 @@ module MCP
       end
 
       def raw
-        found = dep(:hourly_between).call(**raw_window)
+        found = events.hourly_between(**raw_window)
         return { refused: ReadAnalytics::RAW_REFUSAL } unless found
 
-        timed(found).merge(dep(:navigation_between).call(**raw_window).transform_values { it.take(top) })
+        timed(found).merge(events.navigation_between(**raw_window).transform_values { it.take(top) })
       end
 
       def raw_window
@@ -97,7 +99,7 @@ module MCP
           to: Blog::TimeZone.day_start(range.last + 1), path: }
       end
 
-      def read_throughs_by_path = between(:read_throughs_between)
+      def read_throughs_by_path = between(:analytics_rollup_queries, :read_throughs_between)
 
       def since_counts(found)
         { at: stamped(at), **found.fetch(:totals), **found.slice(:paths).transform_values { it.take(top) } }
@@ -105,8 +107,8 @@ module MCP
 
       def site_wide(found)
         {
-          weekday_hours: WeekdayGrid.call(dep(:weekday_hours)),
-          change: PriorRange.call(found.fetch(:totals), range, dep(:analytics_between)),
+          weekday_hours: WeekdayGrid.call(events),
+          change: PriorRange.call(found.fetch(:totals), range, dep(:analytics_rollup_queries)),
           **Following.call(range, top:, **deps(Following::QUERIES)),
         }
       end
@@ -128,14 +130,16 @@ module MCP
 
       def timed(found)
         hours = found.fetch(:hours).map { it.merge(hour: stamped(it.fetch(:hour))) }
-        read_spread = dep(:read_spread_between).call(**raw_window)
+        read_spread = events.read_spread_between(**raw_window)
 
         at ? { hours:, read_spread:, since: since_counts(found) } : { hours:, read_spread: }
       end
 
       def top = ReadAnalytics::TOP
 
-      def totals(found, path: nil) = found.fetch(:totals).merge(reach: between(:reach_between, path:))
+      def totals(found, path: nil)
+        found.fetch(:totals).merge(reach: between(:analytics_rollup_queries, :reach_between, path:))
+      end
     end
   end
 end

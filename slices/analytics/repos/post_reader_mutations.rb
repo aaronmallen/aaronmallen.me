@@ -2,8 +2,8 @@
 
 module Analytics
   module Repos
-    class PostReaderHashRepo < DB::Repo
-      def live_counts(paths) = by_path(post_reader_hashes.for_paths(paths).counts_by_path)
+    class PostReaderMutations < DB::Repo
+      root :post_reader_hashes
 
       def record(path:, reader_hash:, since: Readers.window_opened_at)
         post_reader_hashes.record(path:, reader_hash:, since:)
@@ -17,12 +17,6 @@ module Analytics
           post_reader_hashes.orphaned.delete
         end
       end
-
-      def saved_counts(paths) = by_path(post_reader_counts.for_paths(paths))
-
-      private
-
-      def by_path(relation) = relation.to_a.to_h { [it.path, it.readers] }
     end
   end
 end

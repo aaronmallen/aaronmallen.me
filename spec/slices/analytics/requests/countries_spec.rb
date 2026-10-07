@@ -2,7 +2,7 @@
 
 RSpec.describe "Country lookup", type: :request do
   let(:agent) { "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
-  let(:event_repo) { Analytics::Slice["repos.analytics_event_repo"] }
+  let(:event_repo) { Analytics::Slice["repos.analytics_event_queries"] }
 
   before { use_country_database }
 

@@ -41,12 +41,12 @@ module Admin
       include Deps[
         "i18n",
         activity_queries: "activity.repos.activity_queries",
-        views_by_path: "analytics.queries.views_by_path",
+        rollup_queries: "analytics.repos.analytics_rollup_queries",
       ]
 
       def call(from:, day:, size:, **filters)
         found = page(from, day, size, filters)
-        views = found.rows.any? { it.type == POST } ? views_by_path.call : EMPTY_HASH
+        views = found.rows.any? { it.type == POST } ? rollup_queries.views_by_path : EMPTY_HASH
 
         found.with(rows: found.rows.map { event(it, views) })
       end

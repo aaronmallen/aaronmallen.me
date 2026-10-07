@@ -3,7 +3,7 @@
 require "timeout"
 
 RSpec.describe "Analytics beacon", type: :feature do
-  let(:event_repo) { Analytics::Slice["repos.analytics_event_repo"] }
+  let(:event_repo) { Analytics::Slice["repos.analytics_event_queries"] }
 
   def events = event_repo.analytics_events.order(:occurred_at, :id).to_a
 

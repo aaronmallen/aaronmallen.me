@@ -4,8 +4,8 @@ module API
   module Queries
     class PostFigures
       include Deps[
-        unique_readers: "analytics.queries.unique_readers",
-        views_by_post: "analytics.queries.views_by_post",
+        post_reader_queries: "analytics.repos.post_reader_queries",
+        rollup_queries: "analytics.repos.analytics_rollup_queries",
         webmention_counts_by_post: "social.queries.webmention_counts_by_post",
       ]
 
@@ -14,12 +14,12 @@ module API
 
       def call(posts)
         ids = posts.map(&:id)
-        seen = views_by_post.call(ids)
+        seen = rollup_queries.views_by_post(ids)
         figures = ids.to_h { [it, seen.fetch(it, UNSEEN)] }
 
         {
           **COUNTS.transform_values { |key| figures.transform_values { it.fetch(key) } },
-          unique_reader_counts: unique_readers.call(posts),
+          unique_reader_counts: post_reader_queries.unique_readers(posts),
           webmention_counts: webmention_counts_by_post.call(ids),
           word_counts: posts.to_h { [it.id, ::Posts::Markdown.word_count(it.body)] },
         }
