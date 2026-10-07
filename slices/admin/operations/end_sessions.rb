@@ -3,9 +3,9 @@
 module Admin
   module Operations
     class EndSessions < Operation
-      include Deps[session_validity_repo: "repos.session_validity_repo"]
+      include Deps["repos.session_validity_mutations"]
 
-      def call = session_validity_repo.end_sessions
+      def call = session_validity_mutations.end_sessions
     end
   end
 end

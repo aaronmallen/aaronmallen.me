@@ -7,7 +7,7 @@ module MCP
       BEARER = "Bearer"
       REFRESH_LIFETIME = 30 * 24 * 60 * 60
 
-      include Deps[token_repo: "repos.oauth_token_repo"]
+      include Deps["repos.oauth_token_mutations"]
 
       def call(oauth_client_id:, resource:, scopes:)
         held = { oauth_client_id:, resource:, scopes: }
@@ -32,7 +32,7 @@ module MCP
         token = Blog::SecretToken.generate
         expires_at = Time.now + lifetime
 
-        [token, token_repo.issue(token:, type: Blog::Types::OAuthTokenType[type], expires_at:, **held)]
+        [token, oauth_token_mutations.issue(token:, type: Blog::Types::OAuthTokenType[type], expires_at:, **held)]
       end
     end
   end

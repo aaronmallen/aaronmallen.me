@@ -206,9 +206,9 @@ RSpec.describe "Dynamic client registration", type: :request do
       allow(settings).to receive(:client_registration)
         .and_return(settings.client_registration.merge(total_throttle_limit: total))
       total.times { |sent| register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "203.0.113.#{sent + 1}") }
-      client_repo = MCP::Slice["repos.oauth_client_repo"]
+      client_repo = MCP::Slice["repos.oauth_client_queries"]
       allow(client_repo).to receive(:count_since).and_return(total - 1)
-      replace_component("repos.oauth_client_repo", client_repo)
+      replace_component("repos.oauth_client_queries", client_repo)
       register({ redirect_uris: [redirect_uri] }, "REMOTE_ADDR" => "198.51.100.4")
     end
 
@@ -237,9 +237,9 @@ RSpec.describe "Dynamic client registration", type: :request do
   describe "a registration that loses the last place to one landing beside it" do
     before do
       limit.times { register(redirect_uris: [redirect_uri]) }
-      client_repo = MCP::Slice["repos.oauth_client_repo"]
+      client_repo = MCP::Slice["repos.oauth_client_queries"]
       allow(client_repo).to receive(:count_from_visitor_since).and_return(limit - 1)
-      replace_component("repos.oauth_client_repo", client_repo)
+      replace_component("repos.oauth_client_queries", client_repo)
       register(redirect_uris: [redirect_uri])
     end
 

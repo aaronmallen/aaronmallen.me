@@ -15,8 +15,8 @@ module MCP
 
       class << self
         def call(server_context:)
-          clients = dep(:connected_clients, server_context).call
-          scopes = dep(:granted_scopes, server_context).call(clients.map(&:id))
+          clients = dep(:oauth_client_queries, server_context).connected
+          scopes = dep(:oauth_token_queries, server_context).granted_scopes(clients.map(&:id))
           caller_id = dep(:oauth_client_id, server_context)
 
           answer(clients: clients.map { entry(it, scopes.fetch(it.id), caller_id) })

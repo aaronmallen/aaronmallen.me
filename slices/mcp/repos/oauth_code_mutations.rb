@@ -2,12 +2,12 @@
 
 module MCP
   module Repos
-    class OAuthCodeRepo < DB::Repo
+    class OAuthCodeMutations < DB::Repo
+      root :oauth_codes
+
       stamped_commands :create
 
       def burn(id, at: Time.now) = oauth_codes.burn(id, at:)
-
-      def by_code(code) = oauth_codes.with_digest(Blog::SecretToken.digest(code)).one
 
       def delete_expired(at: Time.now) = oauth_codes.expired(at:).delete
 

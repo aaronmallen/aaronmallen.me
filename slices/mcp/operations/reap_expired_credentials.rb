@@ -8,15 +8,15 @@ module MCP
       UNCLAIMED_FOR = DAY
 
       include Deps[
-        client_repo: "repos.oauth_client_repo",
-        code_repo: "repos.oauth_code_repo",
-        token_repo: "repos.oauth_token_repo",
+        "repos.oauth_client_mutations",
+        "repos.oauth_code_mutations",
+        "repos.oauth_token_mutations",
       ]
 
       def call(at: Time.now)
-        expired = code_repo.delete_expired(at:) + token_repo.delete_expired(at:)
-        expired + client_repo.delete_idle(since: at - IDLE_FOR, at:) +
-          client_repo.delete_unclaimed(since: at - UNCLAIMED_FOR)
+        expired = oauth_code_mutations.delete_expired(at:) + oauth_token_mutations.delete_expired(at:)
+        expired + oauth_client_mutations.delete_idle(since: at - IDLE_FOR, at:) +
+          oauth_client_mutations.delete_unclaimed(since: at - UNCLAIMED_FOR)
       end
     end
   end

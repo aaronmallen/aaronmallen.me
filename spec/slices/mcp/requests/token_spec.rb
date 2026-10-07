@@ -408,7 +408,7 @@ RSpec.describe "OAuth token", type: :request do
   end
 
   describe "two requests carrying the same code" do
-    let(:code_repo) { MCP::Slice["repos.oauth_code_repo"] }
+    let(:code_repo) { MCP::Slice["repos.oauth_code_queries"] }
 
     def race
       reads = 0
@@ -416,7 +416,7 @@ RSpec.describe "OAuth token", type: :request do
       allow(code_repo).to(receive(:by_code).and_wrap_original do |read, value|
         read.call(value).tap { second = exchange_response if (reads += 1) == 1 }
       end)
-      replace_component("repos.oauth_code_repo", code_repo)
+      replace_component("repos.oauth_code_queries", code_repo)
       first = exchange_response
 
       [first, second]
@@ -454,7 +454,7 @@ RSpec.describe "OAuth token", type: :request do
       exchange
       document
     end
-    let(:token_repo) { MCP::Slice["repos.oauth_token_repo"] }
+    let(:token_repo) { MCP::Slice["repos.oauth_token_queries"] }
 
     def race
       token = granted.fetch("refresh_token")
@@ -463,7 +463,7 @@ RSpec.describe "OAuth token", type: :request do
       allow(token_repo).to(receive(:by_token).and_wrap_original do |read, *args, **options|
         read.call(*args, **options).tap { second = refresh_response(token) if (reads += 1) == 1 }
       end)
-      replace_component("repos.oauth_token_repo", token_repo)
+      replace_component("repos.oauth_token_queries", token_repo)
       first = refresh_response(token)
 
       [first, second]
@@ -487,8 +487,8 @@ RSpec.describe "OAuth token", type: :request do
   end
 
   describe "a revoke that lands during a grant", :commits do
-    let(:code_repo) { MCP::Slice["repos.oauth_code_repo"] }
-    let(:token_repo) { MCP::Slice["repos.oauth_token_repo"] }
+    let(:code_repo) { MCP::Slice["repos.oauth_code_mutations"] }
+    let(:token_repo) { MCP::Slice["repos.oauth_token_mutations"] }
 
     def database = MCP::Slice["db.rom"].gateways[:default].connection
 
@@ -513,7 +513,7 @@ RSpec.describe "OAuth token", type: :request do
 
     it "leaves no live token behind a code exchange" do
       code
-      revoke_after("repos.oauth_code_repo", code_repo, :burn) { exchange }
+      revoke_after("repos.oauth_code_mutations", code_repo, :burn) { exchange }
 
       expect(tokens.live.count).to eq(0)
     end
@@ -521,7 +521,7 @@ RSpec.describe "OAuth token", type: :request do
     it "leaves no live token behind a refresh" do
       exchange
       token = document.fetch("refresh_token")
-      revoke_after("repos.oauth_token_repo", token_repo, :revoke) { refresh(token) }
+      revoke_after("repos.oauth_token_mutations", token_repo, :revoke) { refresh(token) }
 
       expect(tokens.live.count).to eq(0)
     end
@@ -625,13 +625,13 @@ RSpec.describe "OAuth token", type: :request do
 
   describe "a refresh token it cannot store", :commits do
     before do
-      token_repo = MCP::Slice["repos.oauth_token_repo"]
+      token_repo = MCP::Slice["repos.oauth_token_mutations"]
       allow(token_repo).to receive(:issue).and_wrap_original do |issue, **attributes|
         raise Sequel::DatabaseError if attributes[:type] == Blog::Types::OAuthTokenType["refresh"]
 
         issue.call(**attributes)
       end
-      replace_component("repos.oauth_token_repo", token_repo)
+      replace_component("repos.oauth_token_mutations", token_repo)
     end
 
     it "stores no access token either", :aggregate_failures do
@@ -643,7 +643,7 @@ RSpec.describe "OAuth token", type: :request do
   end
 
   describe "a replay that reaches the burn first", :commits do
-    let(:code_repo) { MCP::Slice["repos.oauth_code_repo"] }
+    let(:code_repo) { MCP::Slice["repos.oauth_code_mutations"] }
 
     def blocked?
       MCP::Slice["db.rom"].gateways[:default].connection.fetch(
@@ -666,7 +666,7 @@ RSpec.describe "OAuth token", type: :request do
         burned = true
         burn.call(id).tap { replay = start_replay(fields) if winner }
       end
-      replace_component("repos.oauth_code_repo", code_repo)
+      replace_component("repos.oauth_code_mutations", code_repo)
 
       [exchange_response, replay.value]
     end

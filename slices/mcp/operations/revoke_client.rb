@@ -4,9 +4,9 @@ module MCP
   module Operations
     class RevokeClient < Operation
       include Deps[
-        client_repo: "repos.oauth_client_repo",
-        code_repo: "repos.oauth_code_repo",
-        token_repo: "repos.oauth_token_repo",
+        "repos.oauth_client_queries",
+        "repos.oauth_code_mutations",
+        "repos.oauth_token_mutations",
       ]
 
       def call(id)
@@ -19,13 +19,13 @@ module MCP
       private
 
       def cut_off(client)
-        code_repo.delete_for_client(client.id)
-        token_repo.delete_for_client(client.id)
+        oauth_code_mutations.delete_for_client(client.id)
+        oauth_token_mutations.delete_for_client(client.id)
         client
       end
 
       def find(id)
-        found(client_repo.connected_by_id_for_update(id))
+        found(oauth_client_queries.connected_by_id_for_update(id))
       end
     end
   end

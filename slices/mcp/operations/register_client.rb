@@ -19,8 +19,9 @@ module MCP
         "https or loopback http URIs, none of them carrying a fragment".freeze
 
       include Deps[
+        "repos.oauth_client_mutations",
+        "repos.oauth_client_queries",
         "settings",
-        client_repo: "repos.oauth_client_repo",
         contract: "contracts.client_registration_contract",
       ]
 
@@ -34,7 +35,7 @@ module MCP
       private
 
       def claim(attributes, visitor_hash:)
-        client = client_repo.claim(
+        client = oauth_client_mutations.claim(
           client_id: SecureRandom.uuid,
           grant_types: OAuth::Metadata::GRANT_TYPES,
           response_types: OAuth::Metadata::RESPONSE_TYPES,
@@ -85,8 +86,8 @@ module MCP
 
       def within_limit(visitor_hash)
         since = window_opened_at
-        under = client_repo.count_from_visitor_since(visitor_hash, since) < limit &&
-                client_repo.count_since(since) < total_limit
+        under = oauth_client_queries.count_from_visitor_since(visitor_hash, since) < limit &&
+                oauth_client_queries.count_since(since) < total_limit
 
         under ? Success(visitor_hash) : Failure(THROTTLED)
       end

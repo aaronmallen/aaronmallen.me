@@ -12,7 +12,7 @@ module Admin
       REQUEST_KEY = "admin.auth.session"
       SIGN_IN_LIMIT = 5
 
-      include Deps["routes", "settings", sessions_valid_after: "queries.sessions_valid_after"]
+      include Deps["routes", "settings", "repos.session_validity_queries"]
 
       def self.for(request) = request.env[REQUEST_KEY] ||= new(request.session)
 
@@ -113,7 +113,7 @@ module Admin
       end
 
       def valid_after
-        @valid_after = sessions_valid_after.call unless defined?(@valid_after)
+        @valid_after = session_validity_queries.valid_after unless defined?(@valid_after)
         @valid_after
       end
     end

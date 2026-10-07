@@ -96,7 +96,7 @@ module Admin
       repos.sprint_queries repos.task_queries repos.task_rule_queries repos.time_report_queries
     ], from: :tasks
 
-    import keys: %w[operations.revoke_client queries.connected_clients], from: :mcp
+    import keys: %w[operations.revoke_client repos.oauth_client_queries], from: :mcp
 
     export %w[auth.session_reader]
   end

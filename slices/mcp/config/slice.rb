@@ -99,6 +99,6 @@ module MCP
 
     import keys: %w[operations.link_repo_tasks repos.task_source_queries], from: :tasks
 
-    export %w[operations.revoke_client queries.connected_clients]
+    export %w[operations.revoke_client repos.oauth_client_queries]
   end
 end

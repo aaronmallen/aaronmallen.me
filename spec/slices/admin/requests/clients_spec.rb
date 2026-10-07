@@ -19,7 +19,7 @@ RSpec.describe "Admin MCP clients", type: :request do
   def row = page.first(".li")
 
   def stock_code(client)
-    MCP::Slice["repos.oauth_code_repo"].issue(
+    MCP::Slice["repos.oauth_code_mutations"].issue(
       code: Blog::SecretToken.generate,
       code_challenge: "a" * 43,
       expires_at: Time.now + 60,
@@ -29,7 +29,7 @@ RSpec.describe "Admin MCP clients", type: :request do
   end
 
   def stock_token(client, type:)
-    MCP::Slice["repos.oauth_token_repo"].issue(
+    MCP::Slice["repos.oauth_token_mutations"].issue(
       token: Blog::SecretToken.generate,
       type:,
       oauth_client_id: client.id,
@@ -238,7 +238,7 @@ RSpec.describe "Admin MCP clients", type: :request do
     it "keeps the client registered so it can sign in again" do
       revoke(client.id)
 
-      expect(MCP::Slice["repos.oauth_client_repo"].connected_by_id(client.id)).not_to be_nil
+      expect(MCP::Slice["repos.oauth_client_queries"].connected_by_id(client.id)).not_to be_nil
     end
 
     it "says so and returns to the page", :aggregate_failures do

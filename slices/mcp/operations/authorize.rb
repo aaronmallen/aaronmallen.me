@@ -35,8 +35,8 @@ module MCP
       }.freeze
 
       include Deps[
-        client_repo: "repos.oauth_client_repo",
-        code_repo: "repos.oauth_code_repo",
+        "repos.oauth_client_queries",
+        "repos.oauth_code_mutations",
         contract: "contracts.authorization_request_contract",
       ]
 
@@ -79,7 +79,7 @@ module MCP
       def confirmation(client, redirect_uri, scopes)
         {
           client_name: client.client_name,
-          new_client: !client_repo.held_token?(client.id),
+          new_client: !oauth_client_queries.held_token?(client.id),
           redirect_uri:,
           registered_at: client.created_at,
           scopes:,
@@ -87,7 +87,7 @@ module MCP
       end
 
       def find_client(client_id)
-        client = client_repo.connected_by_client_id(client_id) if client_id
+        client = oauth_client_queries.connected_by_client_id(client_id) if client_id
         return Success(client) if client
 
         Failure([REJECT, { error: INVALID_CLIENT, error_description: UNKNOWN_CLIENT }])
@@ -102,7 +102,7 @@ module MCP
 
       def issue(client:, issuer:, request:, redirect_uri:, scopes:)
         Blog::SecretToken.generate.tap do |code|
-          code_repo.issue(
+          oauth_code_mutations.issue(
             code:,
             code_challenge: request[:code_challenge],
             expires_at: Time.now + CODE_LIFETIME,

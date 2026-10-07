@@ -13,7 +13,11 @@ module MCP
       UNUSABLE_TOKEN = "the access token is unknown, expired or revoked"
       WRONG_RESOURCE = "the access token was issued for another resource"
 
-      include Deps[client_repo: "repos.oauth_client_repo", token_repo: "repos.oauth_token_repo"]
+      include Deps[
+        "repos.oauth_client_mutations",
+        "repos.oauth_client_queries",
+        "repos.oauth_token_queries",
+      ]
 
       def call(authorization, issuer:)
         value = step read(authorization)
@@ -27,7 +31,7 @@ module MCP
       private
 
       def check_client(token)
-        return Success(token) if client_repo.connected_by_id(token.oauth_client_id)
+        return Success(token) if oauth_client_queries.connected_by_id(token.oauth_client_id)
 
         refuse(UNKNOWN_CLIENT)
       end
@@ -40,7 +44,7 @@ module MCP
       end
 
       def find(value)
-        token = token_repo.by_token(value, type: Blog::Types::OAuthTokenType["access"])
+        token = oauth_token_queries.by_token(value, type: Blog::Types::OAuthTokenType["access"])
         return refuse(UNUSABLE_TOKEN) if token.nil? || token.revoked_at || token.expires_at <= Time.now
 
         Success(token)
@@ -57,7 +61,7 @@ module MCP
 
       def touch(token)
         at = Time.now
-        client_repo.touch_last_used(token.oauth_client_id, at:, unless_since: at - TOUCH_EVERY)
+        oauth_client_mutations.touch_last_used(token.oauth_client_id, at:, unless_since: at - TOUCH_EVERY)
       end
     end
   end

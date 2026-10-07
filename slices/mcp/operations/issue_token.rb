@@ -22,11 +22,13 @@ module MCP
       }.freeze
 
       include Deps[
-        client_repo: "repos.oauth_client_repo",
-        code_repo: "repos.oauth_code_repo",
+        "operations.issue_tokens",
+        "repos.oauth_client_queries",
+        "repos.oauth_code_mutations",
+        "repos.oauth_code_queries",
+        "repos.oauth_token_mutations",
+        "repos.oauth_token_queries",
         contract: "contracts.token_request_contract",
-        issue_tokens: "operations.issue_tokens",
-        token_repo: "repos.oauth_token_repo",
       ]
 
       def call(params)
@@ -42,7 +44,7 @@ module MCP
       private
 
       def check_client(record, client_id)
-        client = client_repo.connected_by_id(record.oauth_client_id)
+        client = oauth_client_queries.connected_by_id(record.oauth_client_id)
         return Success(client) if client && client.client_id == client_id
 
         Failure([REJECT, { error: INVALID_CLIENT, error_description: UNKNOWN_CLIENT }])
@@ -59,11 +61,11 @@ module MCP
         code = step find_code(request[:code])
         client = step check_client(code, client_id)
         step check_grant(code, request)
-        step settle(client, code, UNUSABLE_CODE) { code_repo.burn(code.id) }
+        step settle(client, code, UNUSABLE_CODE) { oauth_code_mutations.burn(code.id) }
       end
 
       def find_code(value)
-        code = code_repo.by_code(value)
+        code = oauth_code_queries.by_code(value)
         return refuse(UNUSABLE_CODE) if code.nil?
         return replay(code.oauth_client_id, UNUSABLE_CODE) if code.used_at
         return refuse(UNUSABLE_CODE) if code.expires_at <= Time.now
@@ -72,7 +74,7 @@ module MCP
       end
 
       def find_token(value)
-        token = token_repo.by_token(value, type: Blog::Types::OAuthTokenType["refresh"])
+        token = oauth_token_queries.by_token(value, type: Blog::Types::OAuthTokenType["refresh"])
         return refuse(UNUSABLE_REFRESH_TOKEN) if token.nil?
         return replay(token.oauth_client_id, UNUSABLE_REFRESH_TOKEN) if token.revoked_at
         return refuse(UNUSABLE_REFRESH_TOKEN) if token.expires_at <= Time.now
@@ -91,18 +93,20 @@ module MCP
       def refuse(description, error: INVALID_GRANT) = Failure([REJECT, { error:, error_description: description }])
 
       def replay(oauth_client_id, description)
-        token_repo.revoke_for_client(oauth_client_id)
+        oauth_token_mutations.revoke_for_client(oauth_client_id)
         refuse(description)
       end
 
       def rotate(request, client_id)
         token = step find_token(request[:refresh_token])
         client = step check_client(token, client_id)
-        step settle(client, token, UNUSABLE_REFRESH_TOKEN) { token_repo.revoke(token.id) }
+        step settle(client, token, UNUSABLE_REFRESH_TOKEN) { oauth_token_mutations.revoke(token.id) }
       end
 
       def settle(client, record, description)
-        granted = transaction { grant(client, record) if client_repo.connected_by_id_for_update(client.id) && yield }
+        granted = transaction do
+          grant(client, record) if oauth_client_queries.connected_by_id_for_update(client.id) && yield
+        end
 
         granted || replay(record.oauth_client_id, description)
       end
