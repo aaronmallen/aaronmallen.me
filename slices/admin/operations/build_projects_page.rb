@@ -38,7 +38,6 @@ module Admin
       def counts(live, archived)
         {
           archived_count: archived.size,
-          featured_count: live.count(&:featured),
           live_count: live.size,
           stars: (live + archived).sum(&:stars),
         }

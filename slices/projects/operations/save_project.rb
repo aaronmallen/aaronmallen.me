@@ -9,7 +9,7 @@ module Projects
         "projects_archived_order_check" => [:started_on, "after_archived"],
         "projects_repo_index" => [:repo, "taken"],
       }.freeze
-      FIELDS = %i[name og_image_url repo started_on status tagline url].freeze
+      FIELDS = %i[name og_image_url repo started_on tagline url visibility].freeze
 
       def call(params, id: nil, now: Time.now)
         attributes = step validate(params, now)
@@ -20,16 +20,10 @@ module Projects
 
       def create_or_update(project, attributes)
         fields = attributes.except(:tags)
-        saved = project ? project_repo.update(project.id, fields) : project_repo.append(**fields)
+        saved = project ? project_repo.update(project.id, fields) : project_repo.create(**fields)
         project_repo.replace_tags(saved.id, attributes.fetch(:tags))
 
         project_repo.by_id(saved.id)
-      end
-
-      def created(attributes)
-        status = attributes[:status] || Blog::Types::ProjectLiveStatus["active"]
-
-        create_or_update(nil, attributes.merge(status:))
       end
 
       def derive(repo, url)
@@ -51,7 +45,7 @@ module Projects
         given = FIELDS.to_h { [it, params[it]] }
         repo, url = derive(*given.values_at(:repo, :url))
 
-        given.merge(repo:, url:, featured: params[:featured], tags: params[:tags])
+        given.merge(repo:, url:, tags: params[:tags])
       end
 
       def github_url(repo)
@@ -71,17 +65,7 @@ module Projects
 
       def repo_from(url) = Blog::Types::Normalized::GithubRepo.call(url) { Blog::Constants::EMPTY_STRING }
 
-      def save(project, attributes)
-        return Success(created(attributes)) unless project
-
-        Success(create_or_update(project, updated(project, attributes)))
-      end
-
-      def updated(project, attributes)
-        keep_status = project.archived? || attributes[:status].nil?
-
-        keep_status ? attributes.except(:status) : attributes
-      end
+      def save(project, attributes) = Success(create_or_update(project, attributes))
 
       def validate(params, now) = validated(contract.call(form(params), today: Blog::TimeZone.today(now)))
     end

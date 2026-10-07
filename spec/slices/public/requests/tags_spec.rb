@@ -166,6 +166,21 @@ RSpec.describe "Tags", type: :request do
     expect(last_response).to be_not_found
   end
 
+  it "returns 404 for a tag only a private project has" do
+    create(:project, :private, tags: %w[secret])
+    get "/writing/tags/secret"
+
+    expect(last_response).to be_not_found
+  end
+
+  it "leaves a private project off a tag page a public one shares" do
+    create(:project, :private, name: "hidden", tags: %w[ruby])
+    create(:project, name: "sai", tags: %w[ruby])
+    get "/writing/tags/ruby"
+
+    expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[sai])
+  end
+
   describe "paging" do
     def titles = page.all(".entry .entry-title").map(&:text)
 

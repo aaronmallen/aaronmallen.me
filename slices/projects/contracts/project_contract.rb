@@ -17,10 +17,9 @@ module Projects
         required(:tagline).maybe(Blog::Types::OptionalText)
         required(:repo).maybe(Blog::Types::Nullable::Repo)
         required(:url).maybe(Blog::Types::Nullable::Url)
-        required(:status).maybe(Blog::Types::Nullable::ProjectLiveStatus)
+        required(:visibility).filled(:string, included_in?: Blog::Types::ProjectVisibility.values)
         required(:started_on).maybe(STARTED_ON)
         required(:tags).value(Blog::Types::TagList)
-        required(:featured).value(Blog::Types::Checkbox)
         required(:og_image_url).maybe(Blog::Types::Nullable::Url)
       end
 

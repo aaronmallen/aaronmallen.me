@@ -99,10 +99,8 @@ module Blog
     PostIntentParam = PostIntent.fallback(PostIntent.values.first)
     ProjectFilter = Types::String.enum("live", "archived", "work")
     ProjectFilterParam = ProjectFilter.fallback(ProjectFilter.values.first)
-    ProjectLiveStatus = Types::String.enum("active", "wip", "paused")
     ProjectMonth = Types::String.constrained(format: /\A\d{4}-(?:0[1-9]|1[0-2])\z/)
-    ProjectMove = Types::String.enum("up", "down")
-    ProjectStatus = Types::String.enum(*ProjectLiveStatus.values, "archived")
+    ProjectVisibility = Types::String.enum("public", "private")
     RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision])
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
@@ -224,7 +222,6 @@ module Blog
     end
 
     module Nullable
-      ProjectLiveStatus = Types::ProjectLiveStatus.optional.constructor { |value| OptionalText[value] }
       Repo = Types::Repo.optional.constructor { |value| OptionalText[value] }
       Slug = Types::Slug.optional.constructor { |value| OptionalText[value] }
       Tag = Types::String.optional.constructor { |value| OptionalText[value]&.then { Normalizers::Tag[it] } }

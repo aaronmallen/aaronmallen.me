@@ -74,7 +74,7 @@ module Admin
 
           def project(project)
             ListItem(title: project.name, href: path(:admin_edit_project, id: project.id)) do
-              Components::Projects::StatusPill(status: project.status)
+              Components::Projects::StatusPill(archived: project.archived?)
             end
           end
 

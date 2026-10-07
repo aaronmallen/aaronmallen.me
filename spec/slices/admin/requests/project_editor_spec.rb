@@ -6,7 +6,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
   let(:repo) { Projects::Slice["repos.project_repo"] }
 
   def fields(**overrides)
-    { name: "sai", tagline: "Terminal colors", repo: "aaronmallen/sai", **overrides }
+    { name: "sai", tagline: "Terminal colors", repo: "aaronmallen/sai", visibility: "public", **overrides }
   end
 
   def save(project = nil, **overrides)
@@ -73,6 +73,16 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       it "posts to the create route" do
         expect(page).to have_css("form[action='/admin/projects'][method='post']")
       end
+
+      it "asks who can see the project, with no choice made", :aggregate_failures do
+        choices = ["Pick one", "Public", "Private"]
+        expect(page).to have_select("project[visibility]", selected: "Pick one", options: choices)
+        expect(page).to have_css("select[name='project[visibility]'][required]")
+      end
+
+      it "offers no featured toggle" do
+        expect(page).to have_no_field("project[featured]", visible: :all)
+      end
     end
 
     describe "the editor for a project" do
@@ -132,6 +142,10 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
       it "joins the tags with a comma" do
         expect(page).to have_css("input[name='project[tags]'][value='cli, ruby']")
+      end
+
+      it "selects the project's visibility" do
+        expect(page).to have_select("project[visibility]", selected: "Public")
       end
 
       it "offers Archive on a live project", :aggregate_failures do
@@ -231,11 +245,18 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("[data-toast]", text: "Project created")
       end
 
-      it "starts the project live at the end of the order", :aggregate_failures do
-        create(:project, position: 7)
-        save
+      it "starts the project active with the visibility it is given" do
+        save(visibility: "private")
 
-        expect(tracking("aaronmallen/sai")).to have_attributes(status: "active", position: 8)
+        expect(tracking("aaronmallen/sai")).to have_attributes(archived?: false, visibility: "private")
+      end
+
+      it "refuses a project with no visibility, and saves nothing", :aggregate_failures do
+        save(visibility: "")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.visibility.blank"))
+        expect(repo.live).to be_empty
       end
 
       it "refuses a blank name", :aggregate_failures do
@@ -457,35 +478,22 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.tags.format"))
       end
 
-      it "takes the status" do
-        save(project, status: "wip")
+      it "takes the visibility" do
+        save(project, visibility: "private")
 
-        expect(repo.by_id(project.id).status).to eq("wip")
+        expect(repo.by_id(project.id).visibility).to eq("private")
       end
 
-      it "refuses a status it doesn't know", :aggregate_failures do
-        save(project, status: "archived")
+      it "refuses a visibility it doesn't know", :aggregate_failures do
+        save(project, visibility: "secret")
 
         expect(last_response.status).to eq(422)
-        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.status.format"))
-      end
-
-      it "takes the featured toggle" do
-        save(project, featured: "1")
-
-        expect(repo.by_id(project.id).featured).to be(true)
-      end
-
-      it "clears the featured toggle" do
-        featured = create(:project, :featured, repo: "aaronmallen/featured")
-        save(featured, repo: "aaronmallen/featured", featured: "0")
-
-        expect(repo.by_id(featured.id).featured).to be(false)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.visibility.format"))
       end
     end
 
     describe "an archived project" do
-      let(:project) { create(:project, :archived, repo: "aaronmallen/gone", status: "archived") }
+      let(:project) { create(:project, :archived, repo: "aaronmallen/gone") }
 
       before do
         project
@@ -507,20 +515,20 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(form).to have_field("filter", with: "live", type: :hidden)
       end
 
-      it "shows the status without a control", :aggregate_failures do
+      it "shows the archived status beside the visibility", :aggregate_failures do
         expect(page).to have_css(".pill", text: "archived")
-        expect(page).to have_no_select("project[status]", visible: :all)
+        expect(page).to have_select("project[visibility]", selected: "Public")
       end
 
-      it "keeps the archived status when the editor saves" do
-        save(project, repo: "aaronmallen/gone", status: "active")
+      it "keeps the archive date when the editor saves" do
+        save(project, repo: "aaronmallen/gone")
 
-        expect(repo.by_id(project.id)).to have_attributes(status: "archived", archived_on: project.archived_on)
+        expect(repo.by_id(project.id).archived_on).to eq(project.archived_on)
       end
     end
 
     describe "archiving from the editor" do
-      let(:project) { create(:project, :featured) }
+      let(:project) { create(:project) }
 
       before do
         project
@@ -531,10 +539,10 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("form[action='/admin/projects/#{project.id}/archive']", visible: :all)
       end
 
-      it "archives and unfeatures the project" do
+      it "archives the project" do
         post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token, filter: "archived"
 
-        expect(repo.by_id(project.id)).to have_attributes(status: "archived", featured: false)
+        expect(repo.by_id(project.id).archived_on).to eq(Blog::TimeZone.today)
       end
 
       it "sends the editor back to the archived list" do

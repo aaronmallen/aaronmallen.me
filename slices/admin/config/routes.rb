@@ -2,7 +2,6 @@
 
 module Admin
   class Routes < Hanami::Routes
-    DIRECTION = Regexp.union(Blog::Types::ProjectMove.values)
     ID = /\d+/
     INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
@@ -121,7 +120,6 @@ module Admin
     get "/projects/:id/edit", to: "projects.edit", as: :edit_project, id: ID
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
     post "/projects/:id/archive", to: "projects.archive", as: :archive_project, id: ID
-    post "/projects/:id/move/:direction", to: "projects.move", as: :move_project, id: ID, direction: DIRECTION
     post "/projects/:id/records", to: "projects.link_record", as: :link_project_record, id: ID
     post(
       "/projects/:id/records/:other_kind/:other_id/delete",

@@ -14,9 +14,9 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
 
     describe "the lists" do
       before do
-        create(:project, name: "live-one", position: 10)
-        create(:project, :featured, name: "live-two", position: 11)
-        create(:project, :archived, name: "gone", position: 12)
+        create(:project, name: "live-one")
+        create(:project, :private, name: "live-two")
+        create(:project, :archived, name: "gone")
       end
 
       it "lists the live projects without a filter" do
@@ -25,11 +25,11 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(names).to eq(%w[live-one live-two])
       end
 
-      it "lists the live projects in position order" do
-        create(:project, name: "first", position: 1)
+      it "lists the live projects in the order they were added" do
+        create(:project, name: "newest")
         get "/admin/projects"
 
-        expect(names).to eq(%w[first live-one live-two])
+        expect(names).to eq(%w[live-one live-two newest])
       end
 
       it "lists the archived projects with the archived filter" do
@@ -45,8 +45,8 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       end
 
       it "sorts the archived projects by the day they were archived, newest first" do
-        create(:project, :archived, name: "older", position: 20, archived_on: Blog::TimeZone.today - 200)
-        create(:project, :archived, name: "newer", position: 21, archived_on: Blog::TimeZone.today - 10)
+        create(:project, :archived, name: "older", archived_on: Blog::TimeZone.today - 200)
+        create(:project, :archived, name: "newer", archived_on: Blog::TimeZone.today - 10)
         get "/admin/projects", filter: "archived"
 
         expect(names).to eq(%w[gone newer older])
@@ -58,7 +58,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".seg input[name='filter'][value='archived'][checked]")
       end
 
-      it "counts the live, featured, archived and starred projects" do
+      it "counts the live, archived and starred projects" do
         get "/admin/projects"
 
         expect(page).to have_css(".page-head-sub", exact_text: expected_sub)
@@ -85,7 +85,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       def expected_sub
         stars = Blog::Figures.count((repo.live + repo.archived).sum(&:stars))
 
-        "2 live · 1 featured on /projects · 1 archived · #{stars} stars total"
+        "2 live · 1 archived · #{stars} stars total"
       end
     end
 
@@ -159,25 +159,32 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         expect(page).to have_css(".proj-meta", text: "archived #{on.strftime('%b %-d, %Y')}")
       end
 
-      it "shows a featured pill on a featured project" do
-        create(:project, :featured)
+      it "shows a private pill on a private project" do
+        create(:project, :private)
         get "/admin/projects"
 
-        expect(page).to have_css(".li-side .pill.orange", text: "featured")
+        expect(page).to have_css(".li-side .pill.sand", text: "private")
       end
 
-      it "draws the featured pill's icon hidden beside its label" do
-        create(:project, :featured)
+      it "draws the private pill's icon hidden beside its label" do
+        create(:project, :private)
         get "/admin/projects"
 
-        expect(page).to have_css(".pill.orange > i.fa-star[aria-hidden='true'] + span", exact_text: "featured")
+        expect(page).to have_css(".pill.sand > i.fa-lock[aria-hidden='true'] + span", exact_text: "private")
       end
 
-      it "leaves the featured pill off an unfeatured project" do
+      it "leaves the private pill off a public project" do
         project
         get "/admin/projects"
 
-        expect(page).to have_no_css(".li-side .pill.orange")
+        expect(page).to have_no_css(".li-side .pill.sand")
+      end
+
+      it "offers no move controls" do
+        project
+        get "/admin/projects"
+
+        expect(page).to have_no_css("form[action*='/move/']")
       end
 
       it "offers Archive on a live project", :aggregate_failures do
@@ -211,145 +218,12 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       end
     end
 
-    describe "the reorder carets" do
-      before do
-        create(:project, name: "first", position: 1)
-        create(:project, name: "middle", position: 2)
-        create(:project, name: "last", position: 3)
-      end
-
-      def states = page.all(".li").map { |row| row.all(".proj-caret", visible: :all).map(&:disabled?) }
-
-      it "stacks a pair on every live row" do
-        get "/admin/projects"
-
-        expect(page).to have_css(".li .proj-move", count: 3)
-      end
-
-      it "posts each caret to the move route" do
-        get "/admin/projects"
-        id = repo.live.first.id
-
-        expect(page.all(".proj-move form").first(2).map { it[:action] })
-          .to eq(["/admin/projects/#{id}/move/up", "/admin/projects/#{id}/move/down"])
-      end
-
-      it "disables only the first up and the last down" do
-        get "/admin/projects"
-
-        expect(states).to eq([[true, false], [false, false], [false, true]])
-      end
-
-      it "disables both carets on a list of one" do
-        repo.live.drop(1).each { repo.update(it.id, status: "archived", archived_on: Blog::TimeZone.today) }
-        get "/admin/projects"
-
-        expect(states).to eq([[true, true]])
-      end
-
-      it "names the project in each caret's label", :aggregate_failures do
-        get "/admin/projects"
-
-        expect(page).to have_css(".proj-caret[aria-label='Move first up']", visible: :all)
-        expect(page).to have_css(".proj-caret[aria-label='Move first down']", visible: :all)
-      end
-
-      it "leaves the carets off the archived tab" do
-        create(:project, :archived, name: "gone", position: 4)
-        get "/admin/projects", filter: "archived"
-
-        expect(page).to have_no_css(".proj-move")
-      end
-    end
-
-    describe "moving" do
-      let!(:one) { create(:project, name: "one", position: 1) }
-      let!(:two) { create(:project, name: "two", position: 2) }
-
-      def move(id, direction) = post("/admin/projects/#{id}/move/#{direction}", _csrf_token: admin_csrf_token)
-
-      def order = repo.live.map(&:name)
-
-      it "swaps a project with the one above it" do
-        move(two.id, "up")
-
-        expect(order).to eq(%w[two one])
-      end
-
-      it "swaps a project with the one below it" do
-        move(one.id, "down")
-
-        expect(order).to eq(%w[two one])
-      end
-
-      it "leaves every position unique" do
-        move(two.id, "up")
-
-        expect(repo.live.map(&:position)).to eq([1, 2])
-      end
-
-      it "redirects back to the list" do
-        move(two.id, "up")
-
-        expect(last_response).to be_redirect
-          .and have_attributes(location: end_with("/admin/projects"))
-      end
-
-      it "leaves the order alone at the top" do
-        move(one.id, "up")
-
-        expect(order).to eq(%w[one two])
-      end
-
-      it "redirects back to the list at the top rather than failing" do
-        move(one.id, "up")
-
-        expect(last_response).to be_redirect
-      end
-
-      it "leaves the order alone at the bottom" do
-        move(two.id, "down")
-
-        expect(order).to eq(%w[one two])
-      end
-
-      it "reorders the public page" do
-        move(two.id, "up")
-        get "/projects"
-
-        expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[two one])
-      end
-
-      it "answers 404 for a project that isn't there" do
-        move(0, "up")
-
-        expect(last_response.status).to eq(404)
-      end
-
-      it "answers 404 for an archived project", :aggregate_failures do
-        gone = create(:project, :archived, name: "gone", position: 3)
-        move(gone.id, "up")
-
-        expect(last_response.status).to eq(404)
-        expect(repo.by_id(gone.id).position).to eq(3)
-      end
-
-      it "answers 404 for a direction it doesn't know", :aggregate_failures do
-        move(two.id, "sideways")
-
-        expect(last_response.status).to eq(404)
-        expect(order).to eq(%w[one two])
-      end
-    end
-
     describe "the status pills" do
-      { "active" => "green", "wip" => "orange", "paused" => "sand" }.each do |status, color|
-        it "colors #{status} #{color}" do
-          create(:project, status:)
-          get "/admin/projects"
+      it "colors active green" do
+        create(:project)
+        get "/admin/projects"
 
-          expect(page).to have_css(".li-side .pill.#{color}", text: status)
-        end
+        expect(page).to have_css(".li-side .pill.green", text: "active")
       end
 
       it "leaves the archived pill without a color" do
@@ -376,11 +250,11 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     end
 
     describe "the card and the note" do
-      it "labels the live card for the public order", :aggregate_failures do
+      it "labels the live card", :aggregate_failures do
         get "/admin/projects"
 
-        expect(page).to have_css(".card-label", text: "Public order")
-        expect(page).to have_css(".card-title", text: "Shown on /projects")
+        expect(page).to have_css(".card-label", text: "Active")
+        expect(page).to have_css(".card-title", text: "Active projects")
       end
 
       it "labels the archived card", :aggregate_failures do
@@ -404,14 +278,12 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     end
 
     describe "archiving" do
-      let(:project) { create(:project, :featured) }
+      let(:project) { create(:project) }
 
-      it "archives the project", :aggregate_failures do
+      it "archives the project as of today" do
         post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token
-        archived = repo.by_id(project.id)
 
-        expect(archived).to have_attributes(status: "archived", featured: false)
-        expect(archived.archived_on).to eq(Blog::TimeZone.today)
+        expect(repo.by_id(project.id)).to have_attributes(archived?: true, archived_on: Blog::TimeZone.today)
       end
 
       it "shows the archived toast" do
@@ -432,7 +304,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         unstarted = create(:project, started_on: Blog::TimeZone.today.next_month)
         post "/admin/projects/#{unstarted.id}/archive", _csrf_token: admin_csrf_token
 
-        expect(repo.by_id(unstarted.id)).to have_attributes(status: "active", archived_on: nil)
+        expect(repo.by_id(unstarted.id).archived_on).to be_nil
         expect(last_response).to be_redirect
           .and have_attributes(location: end_with("/admin/projects/#{unstarted.id}/edit"))
       end
@@ -449,12 +321,10 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     describe "restoring" do
       let(:project) { create(:project, :archived) }
 
-      it "restores the project", :aggregate_failures do
+      it "restores the project" do
         post "/admin/projects/#{project.id}/restore", _csrf_token: admin_csrf_token
-        restored = repo.by_id(project.id)
 
-        expect(restored).to have_attributes(status: "active", featured: false)
-        expect(restored.archived_on).to be_nil
+        expect(repo.by_id(project.id)).to have_attributes(archived?: false, archived_on: nil)
       end
 
       it "shows the restored toast" do
@@ -465,11 +335,11 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       end
 
       it "answers 404 for a project that is not archived", :aggregate_failures do
-        live = create(:project, :wip)
+        live = create(:project)
         post "/admin/projects/#{live.id}/restore", _csrf_token: admin_csrf_token
 
         expect(last_response.status).to eq(404)
-        expect(repo.by_id(live.id).status).to eq("wip")
+        expect(repo.by_id(live.id).archived_on).to be_nil
       end
     end
   end
@@ -484,14 +354,6 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     project = create(:project)
     post "/admin/projects/#{project.id}/archive"
 
-    expect(repo.by_id(project.id).status).to eq("active")
-  end
-
-  it "refuses to move when signed out" do
-    create(:project, name: "one", position: 1)
-    two = create(:project, name: "two", position: 2)
-    post "/admin/projects/#{two.id}/move/up"
-
-    expect(repo.live.map(&:name)).to eq(%w[one two])
+    expect(repo.by_id(project.id).archived_on).to be_nil
   end
 end

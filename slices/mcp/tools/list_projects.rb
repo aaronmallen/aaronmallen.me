@@ -5,9 +5,9 @@ module MCP
     class ListProjects < Base
       SCHEMA = { additionalProperties: false }.freeze
 
-      description "List every project: the live ones in the order /projects shows them, then the archived ones, " \
-                  "newest archived first. Each carries its status, the day it started and the day it was " \
-                  "archived as YYYY-MM-DD, its tags, repository, links, stars and latest release"
+      description "List every project, public and private: the active ones first, then the archived ones, " \
+                  "newest archived first. Each carries its status, its visibility, the day it started and the " \
+                  "day it was archived as YYYY-MM-DD, its tags, repository, links, stars and latest release"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -24,7 +24,7 @@ module MCP
             name: project.name,
             tagline: project.tagline,
             status: project.status,
-            featured: project.featured,
+            visibility: project.visibility,
             started_on: project.started_on&.iso8601,
             archived_on: project.archived_on&.iso8601,
             tags: project.tags.map(&:name),

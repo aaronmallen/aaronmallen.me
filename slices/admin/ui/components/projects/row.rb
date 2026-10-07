@@ -6,15 +6,13 @@ module Admin
       module Projects
         class Row < Component
           ARCHIVE = [:admin_archive_project, ".archive", "fa-solid fa-box-archive", :gh].freeze
-          ARCHIVED_TAB = Blog::Types::ProjectFilter["archived"]
           EDIT_ICON = "fa-regular fa-pen-to-square"
           MONO = { class: "mono" }.freeze
+          PRIVATE = Blog::Types::ProjectVisibility["private"]
           RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
 
           prop :project, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
-          prop :first, Blog::Types::Bool, default: false
-          prop :last, Blog::Types::Bool, default: false
 
           def view_template
             ListItem(title: @project.name, href: path(:admin_edit_project, id: @project.id), link: MONO) do |item|
@@ -30,8 +28,6 @@ module Admin
             span { t(".archived_on", date: l(@project.archived_on, format: :medium)) }
           end
 
-          def archived_tab? = @filter == ARCHIVED_TAB
-
           def change(route, label_key, icon, variant)
             Form(action: path(route, id: @project.id)) do
               input(type: "hidden", name: "filter", value: @filter)
@@ -43,8 +39,8 @@ module Admin
             Button(href: path(:admin_edit_project, id: @project.id), small: true, icon: EDIT_ICON) { t(".edit") }
           end
 
-          def featured
-            Pill(color: :orange, icon: "fa-solid fa-star") { t(".featured") }
+          def hidden
+            Pill(color: :sand, icon: "fa-solid fa-lock") { t(".private") }
           end
 
           def meta
@@ -64,9 +60,8 @@ module Admin
           end
 
           def side
-            Move(project: @project, first: @first, last: @last) unless archived_tab?
-            featured if @project.featured
-            Projects::StatusPill(status: @project.status)
+            hidden if @project.visibility == PRIVATE
+            Projects::StatusPill(archived: @project.archived?)
             change(*(@project.archived? ? RESTORE : ARCHIVE))
             edit
           end

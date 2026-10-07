@@ -20,7 +20,6 @@ module Admin
           }.freeze
 
           prop :archived_count, Blog::Types::Integer
-          prop :featured_count, Blog::Types::Integer
           prop :filter, Blog::Types::ProjectFilter
           prop :live_count, Blog::Types::Integer
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -65,16 +64,12 @@ module Admin
           def rows
             return Empty { t(EMPTY.fetch(@filter)) } if @projects.empty?
 
-            last = @projects.size - 1
-            @projects.each_with_index do |project, index|
-              Row(project:, filter: @filter, first: index.zero?, last: index == last)
-            end
+            @projects.each { Row(project: it, filter: @filter) }
           end
 
           def sub
             dotted(
               t(".live_count", count: @live_count),
-              t(".featured_count", count: @featured_count),
               t(".archived_count", count: @archived_count),
               t(".stars_count", count: @stars, stars: Blog::Figures.count(@stars)),
             )

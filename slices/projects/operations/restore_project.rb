@@ -7,7 +7,7 @@ module Projects
 
       def call(id)
         step find(id)
-        project_repo.update(id, status: Blog::Types::ProjectLiveStatus["active"], archived_on: nil)
+        project_repo.update(id, archived_on: nil)
       end
 
       private

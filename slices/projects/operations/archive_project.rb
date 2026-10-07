@@ -8,7 +8,7 @@ module Projects
       def call(id, on: Blog::TimeZone.today)
         project = step find(id)
         step started(project, on)
-        project_repo.update(id, status: Blog::Types::ProjectStatus["archived"], archived_on: on, featured: false)
+        project_repo.update(id, archived_on: on)
       end
 
       private

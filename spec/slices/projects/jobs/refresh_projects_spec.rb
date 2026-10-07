@@ -2,7 +2,7 @@
 
 RSpec.describe Projects::Jobs::RefreshProjects do
   let(:api) { "https://api.github.com" }
-  let(:project) { create(:project, repo:, stars: 3, release: "v1.0.0", position: 1) }
+  let(:project) { create(:project, repo:, stars: 3, release: "v1.0.0") }
   let(:project_repo) { Projects::Slice["repos.project_repo"] }
   let(:repo) { "aaronmallen/aaronmallen.me" }
   let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
@@ -45,7 +45,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "refreshes every project that names a repository" do
-      other = create(:project, repo: "aaronmallen/other", stars: 0, release: nil, position: 2)
+      other = create(:project, repo: "aaronmallen/other", stars: 0, release: nil)
       stub_other
       refresh
 
@@ -53,7 +53,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "refreshes a project whose url points somewhere other than GitHub" do
-      elsewhere = create(:project, repo: "aaronmallen/other", url: "https://gest.aaronmallen.dev", position: 2)
+      elsewhere = create(:project, repo: "aaronmallen/other", url: "https://gest.aaronmallen.dev")
       stub_other(stars: 9)
       refresh
 
@@ -61,7 +61,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "refreshes an archived project" do
-      archived = create(:project, :archived, repo: "aaronmallen/other", stars: 1, release: nil, position: 2)
+      archived = create(:project, :archived, repo: "aaronmallen/other", stars: 1, release: nil)
       stub_other
       refresh
 
@@ -69,14 +69,14 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "leaves a project with no repository alone" do
-      loose = create(:project, repo: nil, url: nil, stars: 5, position: 2)
+      loose = create(:project, repo: nil, url: nil, stars: 5)
       refresh
 
       expect(stored(loose)).to have_attributes(stars: 5, updated_at: loose.updated_at)
     end
 
     it "writes nothing to a project already up to date" do
-      current = create(:project, repo: "aaronmallen/other", stars: 7, release: "v3.1.0", position: 2)
+      current = create(:project, repo: "aaronmallen/other", stars: 7, release: "v3.1.0")
       stub_other
       refresh
 
@@ -117,7 +117,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "refreshes the other projects" do
-      other = create(:project, repo: "aaronmallen/other", stars: 0, release: nil, position: 2)
+      other = create(:project, repo: "aaronmallen/other", stars: 0, release: nil)
       stub_other
       refresh
 
@@ -193,7 +193,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "keeps the projects it refreshed before the error" do
-      create(:project, repo: "aaronmallen/other", position: 2)
+      create(:project, repo: "aaronmallen/other")
       stub_repo("aaronmallen/other", response: { status: 500 })
       refresh
 

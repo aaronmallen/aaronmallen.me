@@ -19,7 +19,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         create_journal_entry create_post create_saved_view create_social_post drop_decision drop_sprint edit_decision
         edit_decision_comment edit_decision_option edit_task_comment ignore_webmentions import_commits link_records
         link_tasks mark_message mark_messages_read mark_messages_unread mark_task_seen mark_webmentions_spam
-        moderate_webmention move_project move_task move_tasks open_decision pause_task plan_sprint
+        moderate_webmention move_task move_tasks open_decision pause_task plan_sprint
         reject_suggestion_edits reopen_decision reopen_task reorder_task resolve_decision restore_project save_person
         save_project save_review_note save_tag save_task save_task_tag_rule schedule_task set_task_total
         snooze_attention start_task sync_issues tag_decision tag_posts tag_tasks unlink_records unlink_task

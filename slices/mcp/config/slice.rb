@@ -70,7 +70,7 @@ module MCP
     ], from: :posts
 
     import keys: %w[
-      operations.add_work_entry operations.archive_project operations.delete_work_entry operations.move_project
+      operations.add_work_entry operations.archive_project operations.delete_work_entry
       operations.restore_project operations.save_project queries.archived queries.by_id queries.live
       queries.work_entries_between
     ], from: :projects

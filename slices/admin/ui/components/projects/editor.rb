@@ -8,7 +8,6 @@ module Admin
           prop :project, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
-          prop :featured, Blog::Types::Bool
 
           def view_template
             BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
@@ -35,7 +34,7 @@ module Admin
               end
               SideStack do
                 Repository(values: @values, errors: @errors, release:, stars:)
-                Placement(values: @values, errors: @errors, archived: archived?, featured: @featured)
+                Placement(values: @values, errors: @errors, archived: archived?)
               end
             end
           end

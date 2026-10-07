@@ -53,17 +53,24 @@ RSpec.describe "Home", type: :request do
   end
 
   describe "the projects section" do
-    it "shows three projects, featured first and then in position order" do
-      %w[second third fourth].each_with_index { |name, index| create(:project, name:, position: index + 2) }
-      create(:project, :featured, name: "first", position: 9)
+    it "shows three projects in the order they were added" do
+      %w[first second third fourth].each { create(:project, name: it) }
       get "/"
 
       expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[first second third])
     end
 
     it "leaves out archived projects" do
-      create(:project, :archived, :featured, name: "gone", position: 1)
-      create(:project, name: "here", position: 2)
+      create(:project, :archived, name: "gone")
+      create(:project, name: "here")
+      get "/"
+
+      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])
+    end
+
+    it "leaves out private projects" do
+      create(:project, :private, name: "hidden")
+      create(:project, name: "here")
       get "/"
 
       expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])

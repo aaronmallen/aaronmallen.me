@@ -5,7 +5,7 @@ module MCP
     class ArchiveProject < Base
       UNARCHIVED = "could not archive the project"
 
-      description "Archive one project as of today, which takes it off /projects and unfeatures it. " \
+      description "Archive one project as of today, which takes it off /projects. " \
                   "A project whose start month has not come yet stays as it is"
       input_schema(API::Schema.by_id)
       scope OAuth::Scope::WRITE

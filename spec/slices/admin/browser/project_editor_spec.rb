@@ -44,6 +44,7 @@ RSpec.describe "Admin project editor", type: :feature do
     it "creates the project" do
       fill_in "project[name]", with: "sai"
       fill_in "project[repo]", with: "aaronmallen/sai"
+      select "Public", from: "project[visibility]"
       click_button "Create project"
 
       expect(page).to have_css("[data-toast]", text: "Project created")
@@ -52,6 +53,7 @@ RSpec.describe "Admin project editor", type: :feature do
     it "fills the url from the repository on save" do
       fill_in "project[name]", with: "sai"
       fill_in "project[repo]", with: "aaronmallen/sai"
+      select "Public", from: "project[visibility]"
       click_button "Create project"
 
       expect(page).to have_field("project[url]", with: "https://github.com/aaronmallen/sai")
@@ -60,7 +62,7 @@ RSpec.describe "Admin project editor", type: :feature do
 
   describe "an existing project" do
     let!(:project) do
-      create(:project, :featured, name: "sai", repo: "aaronmallen/sai", url: "https://github.com/aaronmallen/sai")
+      create(:project, name: "sai", repo: "aaronmallen/sai", url: "https://github.com/aaronmallen/sai")
     end
 
     before { visit "/admin/projects/#{project.id}/edit" }

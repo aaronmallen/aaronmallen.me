@@ -5,17 +5,13 @@ module Admin
     module Components
       module Projects
         class StatusPill < Component
-          STATUSES = {
-            Blog::Types::ProjectStatus["active"] => [:green, "fa-solid fa-circle-check", ".active"],
-            Blog::Types::ProjectStatus["wip"] => [:orange, "fa-solid fa-hammer", ".wip"],
-            Blog::Types::ProjectStatus["paused"] => [:sand, "fa-regular fa-circle-pause", ".paused"],
-            Blog::Types::ProjectStatus["archived"] => [nil, "fa-solid fa-box-archive", ".archived"],
-          }.freeze
+          ACTIVE = [:green, "fa-solid fa-circle-check", ".active"].freeze
+          ARCHIVED = [nil, "fa-solid fa-box-archive", ".archived"].freeze
 
-          prop :status, Blog::Types::ProjectStatus
+          prop :archived, Blog::Types::Bool
 
           def view_template
-            color, icon, label_key = STATUSES.fetch(@status)
+            color, icon, label_key = @archived ? ARCHIVED : ACTIVE
 
             Pill(color:, icon:) { t(label_key) }
           end

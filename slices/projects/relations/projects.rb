@@ -10,17 +10,15 @@ module Projects
         end
       end
 
-      def archived = with_status(Blog::Types::ProjectStatus["archived"])
+      def archived = exclude(archived_on: nil)
 
-      def featured_first = order(self[:featured].desc, self[:position].asc, self[:id].asc)
+      def in_order = order(self[:id].asc)
 
-      def in_order = order(self[:position].asc, self[:id].asc)
-
-      def last_position = unordered.max(:position).to_i
+      def in_public = where(visibility: Blog::Types::ProjectVisibility["public"])
 
       def linkable = linkables(title: :name, day: self.class.site_day(:created_at))
 
-      def live = exclude(status: Blog::Types::ProjectStatus["archived"])
+      def live = where(archived_on: nil)
 
       def matching(text) = containing(text, :name, :tagline, :repo)
 
@@ -29,8 +27,6 @@ module Projects
       def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
 
       def tracked = exclude(repo: nil)
-
-      def with_status(status) = where(status:)
     end
   end
 end

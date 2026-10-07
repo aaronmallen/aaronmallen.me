@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, posts, projects, public]
 issue: AA-665
-amended: [AA-561, AA-562, AA-809, "#17"]
+amended: [AA-561, AA-562, AA-809, "#17", "#647"]
 tags: [types, constants, enums, dry-types, kernel]
 ---
 
@@ -21,8 +21,8 @@ format regexes, status literals, arrays and normalizing lambdas.
 Most had one reader. `COUNTRY_CODE_FORMAT` stood between a regex and the `constrained(format:)` three lines below
 that read it. The rest wrote down again what an enum already held: `MASTODON` and `BLUESKY` copied the list
 `NetworkName` holds and publishes through `.values`. A caller reaching for `Blog::Types::SOCIAL_POSTED` got a string
-with no check that it belonged to the enum it came from. The file showed accretion rather than a rule:
-`ProjectLiveStatus = Types::String.enum(PROJECT_ACTIVE, "wip", "paused")` took a constant and literals on one line.
+with no check that it belonged to the enum it came from. The file showed accretion rather than a rule: the
+enum of live project statuses, gone since [ADR 0119][0119], took a constant and literals on one line.
 
 The values that were no type went to `Blog::Constants`, and nothing said what may go there. It holds six names today
 in `lib/blog/constants.rb`. Three have one reader: `ACTIVITY_RANGES` and `GITHUB_COMMIT_URL` only in `slices/admin`,
@@ -86,4 +86,5 @@ the module publishes, not every name in it.
 Nothing checks either rule. No spec fails when a regex with two readers lands as a public constant in
 `Blog::Types`, or when a name in `Blog::Constants` drops to one slice reading it.
 
+[0119]: 0119-mark-a-project-archived-by-its-archive-date-and-keep-visibility-in-its-own-enum.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

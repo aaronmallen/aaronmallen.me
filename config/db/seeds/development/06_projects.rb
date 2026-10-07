@@ -4,19 +4,16 @@ projects = Projects::Slice
 
 if projects["queries.live"].call.empty? && projects["queries.archived"].call.empty?
   save_project = projects["operations.save_project"]
-  project = lambda do |name, tagline, repo, status, started_on, tags, featured: false|
-    params = {
-      name:, tagline:, repo:, url: nil, status:, started_on:, tags:, og_image_url: nil,
-      featured: featured ? Blog::Constants::CHECKED : nil,
-    }
+  project = lambda do |name, tagline, repo, visibility, started_on, tags|
+    params = { name:, tagline:, repo:, url: nil, visibility:, started_on:, tags:, og_image_url: nil }
 
     Seeds.unwrap(save_project.call(params))
   end
 
-  project.call("Blog", "This site.", "example/blog", "active", "2025-03", "hanami,ruby", featured: true)
-  project.call("Widgets", "A small widget toolkit.", "example/widgets", "wip", "2025-11", "ruby,tooling")
-  project.call("Domain Kit", "Shared Postgres domains.", "example/domain-kit", "paused", "2024-06", "postgres")
-  retired = project.call("Old Theme", "The theme this site used to wear.", "example/old-theme", nil, "2022-01", "")
+  project.call("Blog", "This site.", "example/blog", "public", "2025-03", "hanami,ruby")
+  project.call("Widgets", "A small widget toolkit.", "example/widgets", "public", "2025-11", "ruby,tooling")
+  project.call("Domain Kit", "Shared Postgres domains.", "example/domain-kit", "private", "2024-06", "postgres")
+  retired = project.call("Old Theme", "The theme this site used to wear.", "example/old-theme", "public", "2022-01", "")
   Seeds.unwrap(projects["operations.archive_project"].call(retired.id, on: Date.new(2025, 2, 1)))
 end
 

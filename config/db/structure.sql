@@ -200,14 +200,12 @@ CREATE TYPE public.post_status AS ENUM (
 
 
 --
--- Name: project_status; Type: TYPE; Schema: public; Owner: -
+-- Name: project_visibility; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE public.project_status AS ENUM (
-    'active',
-    'wip',
-    'paused',
-    'archived'
+CREATE TYPE public.project_visibility AS ENUM (
+    'public',
+    'private'
 );
 
 
@@ -816,18 +814,14 @@ CREATE TABLE public.projects (
     url text,
     stars integer DEFAULT 0 NOT NULL,
     release text,
-    status public.project_status DEFAULT 'active'::public.project_status NOT NULL,
-    featured boolean DEFAULT false NOT NULL,
-    "position" integer NOT NULL,
     started_on date,
     archived_on date,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     og_image_url text,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((name)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(tagline, ''::text) || ' '::text) || COALESCE((repo)::text, ''::text))), 'B'::"char"))) STORED,
-    CONSTRAINT projects_archived_on_check CHECK (((archived_on IS NULL) OR (status = 'archived'::public.project_status))),
+    visibility public.project_visibility NOT NULL,
     CONSTRAINT projects_archived_order_check CHECK ((archived_on >= started_on)),
-    CONSTRAINT projects_position_check CHECK (("position" > 0)),
     CONSTRAINT projects_stars_check CHECK ((stars >= 0))
 );
 
@@ -1136,7 +1130,10 @@ UNION ALL
     NULL::text AS sha,
     NULL::integer AS additions,
     NULL::integer AS deletions,
-    (projects.status)::text AS status,
+        CASE
+            WHEN (projects.archived_on IS NULL) THEN 'active'::text
+            ELSE 'archived'::text
+        END AS status,
     NULL::public.network[] AS targets,
     projects.tagline AS excerpt,
     NULL::integer AS task_id,
@@ -2619,7 +2616,10 @@ UNION ALL
 '::text) || COALESCE(projects.tagline, ''::text)) || '
 '::text) || COALESCE((projects.repo)::text, ''::text)) AS body,
     ((projects.created_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
-    (projects.status)::text AS status,
+        CASE
+            WHEN (projects.archived_on IS NULL) THEN 'active'::text
+            ELSE 'archived'::text
+        END AS status,
     NULL::text AS slug,
     (projects.repo)::text AS repo,
     NULL::text AS sha,
@@ -4275,13 +4275,6 @@ CREATE INDEX projects_created_on_index ON public.projects USING btree ((((create
 
 
 --
--- Name: projects_position_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX projects_position_index ON public.projects USING btree ("position");
-
-
---
 -- Name: projects_repo_index; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -4293,13 +4286,6 @@ CREATE UNIQUE INDEX projects_repo_index ON public.projects USING btree (repo);
 --
 
 CREATE INDEX projects_search_vector_index ON public.projects USING gin (search_vector);
-
-
---
--- Name: projects_status_index; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX projects_status_index ON public.projects USING btree (status);
 
 
 --
@@ -5681,4 +5667,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261006000623_add_contributors_to_activity_views.rb'),
 ('20261006000632_add_parent_to_task_link_type.rb'),
 ('20261006000633_add_synced_and_one_parent_to_task_links.rb'),
-('20261006000639_notify_admin_changes.rb');
+('20261006000639_notify_admin_changes.rb'),
+('20261007000640_replace_project_status_with_visibility.rb');

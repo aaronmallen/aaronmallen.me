@@ -4,18 +4,24 @@ RSpec.describe "Projects", type: :request do
   let(:page) { Capybara.string(last_response.body) }
 
   describe "the card grid" do
-    it "leads with the featured projects, each group in position order" do
-      create(:project, name: "second", position: 2)
-      create(:project, name: "third", position: 3)
-      create(:project, :featured, name: "first", position: 9)
+    it "lists the projects in the order they were added" do
+      %w[first second third].each { create(:project, name: it) }
       get "/projects"
 
       expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[first second third])
     end
 
-    it "leaves out an archived project that is still flagged featured" do
-      create(:project, :archived, :featured, name: "gone", position: 1)
-      create(:project, name: "here", position: 2)
+    it "leaves out an archived project" do
+      create(:project, :archived, name: "gone")
+      create(:project, name: "here")
+      get "/projects"
+
+      expect(page.all(".proj .n").map(&:text)).to eq(%w[here])
+    end
+
+    it "leaves out a private project" do
+      create(:project, :private, name: "hidden")
+      create(:project, name: "here")
       get "/projects"
 
       expect(page.all(".proj .n").map(&:text)).to eq(%w[here])

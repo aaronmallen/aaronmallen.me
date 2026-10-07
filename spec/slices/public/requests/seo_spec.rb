@@ -152,19 +152,19 @@ RSpec.describe "SEO tags", type: :request do
 
   describe "the projects page" do
     it "takes its image from the first card that carries one" do
-      create(:project, position: 1, og_image_url: nil)
-      create(:project, position: 2, og_image_url: "https://example.com/sai.png")
+      create(:project, og_image_url: nil)
+      create(:project, og_image_url: "https://example.com/sai.png")
       get "/projects"
 
       expect(property("og:image")).to eq(["https://example.com/sai.png"])
     end
 
-    it "prefers the featured project, since it leads the grid" do
-      create(:project, position: 1, og_image_url: "https://example.com/first.png")
-      create(:project, :featured, position: 2, og_image_url: "https://example.com/featured.png")
+    it "skips a private project's image" do
+      create(:project, :private, og_image_url: "https://example.com/hidden.png")
+      create(:project, og_image_url: "https://example.com/shown.png")
       get "/projects"
 
-      expect(property("og:image")).to eq(["https://example.com/featured.png"])
+      expect(property("og:image")).to eq(["https://example.com/shown.png"])
     end
 
     it "shows no image when no project carries one" do

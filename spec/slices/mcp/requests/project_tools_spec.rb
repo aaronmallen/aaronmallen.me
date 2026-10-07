@@ -31,13 +31,13 @@ RSpec.describe "MCP project and work entry tools", type: :request do
   def today = Blog::TimeZone.today
 
   describe "list_projects" do
-    def archived(name, position, on) = create(:project, :archived, name:, position:, archived_on: on, started_on: on)
+    def archived(name, on) = create(:project, :archived, name:, archived_on: on, started_on: on)
 
     before do
-      create(:project, name: "second", position: 2, tags: %w[ruby])
-      create(:project, name: "first", position: 1, started_on: Date.new(2024, 6, 1))
-      archived("older", 3, Date.new(2025, 1, 2))
-      archived("newer", 4, Date.new(2025, 3, 4))
+      create(:project, name: "first", started_on: Date.new(2024, 6, 1))
+      create(:project, :private, name: "second", tags: %w[ruby])
+      archived("older", Date.new(2025, 1, 2))
+      archived("newer", Date.new(2025, 3, 4))
       call_tool("list_projects")
     end
 
@@ -45,7 +45,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
     def named(name) = listed.find { it.fetch("name") == name }
 
-    it "lists live projects in order, then archived ones newest first" do
+    it "lists active projects, private ones too, then archived ones newest first" do
       expect(listed.map { it.fetch("name") }).to eq(%w[first second newer older])
     end
 
@@ -55,6 +55,10 @@ RSpec.describe "MCP project and work entry tools", type: :request do
 
     it "gives an archived project the day it was archived" do
       expect(named("newer")).to include("archived_on" => "2025-03-04", "status" => "archived")
+    end
+
+    it "gives each project its visibility" do
+      expect([named("first"), named("second")].map { it.fetch("visibility") }).to eq(%w[public private])
     end
 
     it "gives each project its tags" do
@@ -110,19 +114,39 @@ RSpec.describe "MCP project and work entry tools", type: :request do
   end
 
   describe "save_project" do
-    it "adds a project, active unless told otherwise", :aggregate_failures do
-      call_tool("save_project", name: "fresh", repo: "aaronmallen/fresh", tags: %w[ruby cli])
+    it "adds an active project with the visibility it is given", :aggregate_failures do
+      call_tool("save_project", name: "fresh", repo: "aaronmallen/fresh", visibility: "private", tags: %w[ruby cli])
 
-      expect(content).to include("name" => "fresh", "status" => "active", "url" => "https://github.com/aaronmallen/fresh")
+      expect(content).to include("name" => "fresh", "visibility" => "private", "status" => "active")
       expect(project_repo.by_id(content.fetch("id")).tags.map(&:name)).to contain_exactly("ruby", "cli")
     end
 
+    it "refuses a new project with no visibility, and saves nothing", :aggregate_failures do
+      call_tool("save_project", name: "fresh")
+
+      expect(message).to eq("visibility: pick public or private")
+      expect(project_repo.live).to be_empty
+    end
+
+    it "refuses a visibility it does not know" do
+      call_tool("save_project", name: "fresh", visibility: "secret")
+
+      expect(error?).to be(true)
+    end
+
+    it "makes a public project private" do
+      project = create(:project)
+      call_tool("save_project", id: project.id, visibility: "private")
+
+      expect(project_repo.by_id(project.id).visibility).to eq("private")
+    end
+
     it "keeps every field a change leaves out", :aggregate_failures do
-      project = create(:project, tagline: "kept", featured: true, started_on: Date.new(2024, 6, 1), tags: %w[ruby])
+      project = create(:project, :private, tagline: "kept", started_on: Date.new(2024, 6, 1), tags: %w[ruby])
       call_tool("save_project", id: project.id, name: "renamed")
 
       saved = project_repo.by_id(project.id)
-      expect(saved).to have_attributes(name: "renamed", tagline: "kept", featured: true, started_on: project.started_on)
+      expect(saved).to have_attributes(tagline: "kept", visibility: "private", started_on: project.started_on)
       expect(saved.tags.map(&:name)).to eq(%w[ruby])
     end
 
@@ -137,19 +161,19 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       project = create(:project, :archived)
       call_tool("save_project", id: project.id, name: "still archived")
 
-      expect(project_repo.by_id(project.id).status).to eq("archived")
+      expect(project_repo.by_id(project.id).archived_on).to eq(project.archived_on)
     end
 
     it "refuses a repository another project tracks, with the reason the admin gives", :aggregate_failures do
       create(:project, repo: "aaronmallen/taken")
-      call_tool("save_project", name: "copy", repo: "aaronmallen/taken")
+      call_tool("save_project", name: "copy", repo: "aaronmallen/taken", visibility: "public")
 
       expect(error?).to be(true)
       expect(message).to eq("repo: another project already tracks this repository")
     end
 
     it "refuses a start month still to come" do
-      call_tool("save_project", name: "later", started_on: month(today >> 2))
+      call_tool("save_project", name: "later", visibility: "public", started_on: month(today >> 2))
 
       expect(message).to eq("started_on: pick this month or one before it")
     end
@@ -162,21 +186,21 @@ RSpec.describe "MCP project and work entry tools", type: :request do
     end
 
     it "refuses a project with no name, and saves nothing", :aggregate_failures do
-      call_tool("save_project", repo: "aaronmallen/nameless")
+      call_tool("save_project", repo: "aaronmallen/nameless", visibility: "public")
 
       expect(message).to eq("name: add a name")
       expect(project_repo.live).to be_empty
     end
 
     it "refuses a name made only of Unicode spaces, and saves nothing", :aggregate_failures do
-      call_tool("save_project", name: "\u2003\u3000")
+      call_tool("save_project", name: "\u2003\u3000", visibility: "public")
 
       expect(message).to eq("name: add a name")
       expect(project_repo.live).to be_empty
     end
 
     it "keeps a name with Unicode spaces around real words as typed" do
-      call_tool("save_project", name: "\u2003Pick a queue\u00a0")
+      call_tool("save_project", name: "\u2003Pick a queue\u00a0", visibility: "public")
       call_tool("read_project", id: content.fetch("id"))
 
       expect(content.fetch("name")).to eq("\u2003Pick a queue\u00a0")
@@ -189,42 +213,13 @@ RSpec.describe "MCP project and work entry tools", type: :request do
     end
   end
 
-  describe "move_project" do
-    before do
-      create(:project, name: "one", position: 1)
-      create(:project, name: "two", position: 2)
-    end
-
-    def names = project_repo.live.map(&:name)
-
-    it "moves a project a step up", :aggregate_failures do
-      call_tool("move_project", id: project_repo.live.last.id, direction: "up")
-
-      expect(content).to include("moved" => true)
-      expect(names).to eq(%w[two one])
-    end
-
-    it "moves nothing past the top and says so", :aggregate_failures do
-      call_tool("move_project", id: project_repo.live.first.id, direction: "up")
-
-      expect(content).to include("moved" => false)
-      expect(names).to eq(%w[one two])
-    end
-
-    it "refuses an ID no live project has" do
-      call_tool("move_project", id: 999_999, direction: "down")
-
-      expect(message).to eq("no live project has the ID 999999")
-    end
-  end
-
   describe "archive_project" do
     it "archives a project as of today", :aggregate_failures do
-      project = create(:project, featured: true)
+      project = create(:project)
       call_tool("archive_project", id: project.id)
 
       expect(content).to include("status" => "archived", "archived_on" => today.iso8601)
-      expect(project_repo.by_id(project.id)).to have_attributes(status: "archived", featured: false)
+      expect(project_repo.by_id(project.id).archived_on).to eq(today)
     end
 
     it "refuses a project whose start month has not come, as the admin does", :aggregate_failures do
@@ -232,7 +227,7 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("archive_project", id: project.id)
 
       expect(message).to eq("not archived: its start month has not come yet")
-      expect(project_repo.by_id(project.id).status).to eq("active")
+      expect(project_repo.by_id(project.id).archived_on).to be_nil
     end
 
     it "refuses an ID no project has" do

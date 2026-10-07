@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildProjectEditor
-      FIELDS = %i[name og_image_url repo started_on status tagline url].freeze
+      FIELDS = %i[name og_image_url repo started_on tagline url visibility].freeze
       MONTH_FORMAT = "%Y-%m"
       OPTIONAL = %i[og_image_url repo tagline url].freeze
       TAG_SEPARATOR = ", "
@@ -11,26 +11,12 @@ module Admin
       def call(project: nil, params: nil, errors: Blog::Constants::EMPTY_HASH)
         values = params ? from_params(params) : from_project(project)
 
-        {
-          project:,
-          values:,
-          featured: featured(project, params),
-          errors:,
-        }
+        { project:, values:, errors: }
       end
 
       private
 
-      def blank_values
-        FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] }
-              .merge(status: Blog::Types::ProjectLiveStatus["active"], tags: Blog::Constants::EMPTY_STRING)
-      end
-
-      def featured(project, params)
-        return Blog::Types::Checkbox[params[:featured]] if params
-
-        project ? project.featured : false
-      end
+      def blank_values = (FIELDS + [:tags]).to_h { [it, Blog::Constants::EMPTY_STRING] }
 
       def from_params(params) = (FIELDS + [:tags]).to_h { [it, Blog::Types::Text[params[it]]] }
 
@@ -39,7 +25,7 @@ module Admin
 
         {
           name: project.name,
-          status: project.status,
+          visibility: project.visibility,
           started_on: started_on(project),
           tags: project.tags.map(&:name).join(TAG_SEPARATOR),
           **OPTIONAL.to_h { [it, project.public_send(it).to_s] },

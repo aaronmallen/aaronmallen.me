@@ -985,27 +985,24 @@ en:
             after_archived: "The start month falls after the day this project was archived."
             format: "Use the year and the month, as 2024-06."
             future: "Pick this month or one before it."
-          status:
-            format: "Pick a status from the list."
           tags:
             format: "Use lowercase letters, numbers and single dashes in each tag."
           url:
             format: "Enter a link that starts with http:// or https://."
-        move:
-          down: "Move %{project} down"
-          up: "Move %{project} up"
+          visibility:
+            blank: "Pick who can see it."
+            format: "Pick who can see it from the list."
         placement:
-          archived_note: "Archived projects drop off the public page automatically, whatever this is set to."
-          featured: "Feature on /projects"
           heading: "Placement"
           restore_note: "Restore puts it back on /projects."
           status: "Status"
-          statuses:
-            active: "active"
-            paused: "paused"
-            wip: "wip"
           tags: "Tags"
           tags_placeholder: "ruby, ddd"
+          visibilities:
+            private: "Private"
+            public: "Public"
+            unset: "Pick one"
+          visibility: "Who can see it"
         preview:
           heading: "Preview"
           name_placeholder: "project-name"
@@ -1036,7 +1033,7 @@ en:
           archive: "Archive"
           archived_on: "archived %{date}"
           edit: "Edit"
-          featured: "featured"
+          private: "private"
           restore: "Restore"
           stars:
             one: "%{stars} star"
@@ -1044,8 +1041,6 @@ en:
         status_pill:
           active: "active"
           archived: "archived"
-          paused: "paused"
-          wip: "wip"
       range_presets:
         preset: "%{count}d"
         range: "Range"
@@ -1980,7 +1975,7 @@ en:
           title: "New post"
       projects:
         index:
-          archive_note: "Archiving keeps the repo link and history but removes the project from /projects and from the featured grid."
+          archive_note: "Archiving keeps the repo link and history but removes the project from /projects."
           archived: "archived"
           archived_count: "%{count} archived"
           archived_hint: "hidden from the public page"
@@ -1990,13 +1985,12 @@ en:
             archived: "Nothing archived yet."
             live: "No live projects."
             work: "No roles yet."
-          featured_count: "%{count} featured on /projects"
           filter: "Show"
           heading: "Projects"
           live: "live"
           live_count: "%{count} live"
-          live_label: "Public order"
-          live_title: "Shown on /projects"
+          live_label: "Active"
+          live_title: "Active projects"
           new_project: "New project"
           stars_count:
             one: "%{stars} star total"

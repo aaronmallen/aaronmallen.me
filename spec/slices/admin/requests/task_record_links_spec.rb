@@ -71,6 +71,14 @@ RSpec.describe "Admin task record links", type: :request do
       expect(group("project")).to have_link("aaronmallen.me", href: "/admin/projects/#{project.id}/edit")
     end
 
+    it "links a private project and an archived one" do
+      projects = [create(:project, :private, name: "hidden"), create(:project, :archived, name: "retired")]
+      projects.each { link_records("project", it.id) }
+      get "/admin/tasks/#{task.id}"
+
+      expect(group("project").all("a.record-link-title").map(&:text)).to contain_exactly("hidden", "retired")
+    end
+
     it "lists its decisions, each linking to the decision's page" do
       decisions = [create(:decision, title: "Pick a host"), create(:decision, title: "Pick a rack")]
       decisions.each { link_records("decision", it.id) }

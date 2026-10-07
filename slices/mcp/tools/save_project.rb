@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class SaveProject < Base
-      FIELDS = %i[featured name og_image_url repo started_on status tagline tags url].freeze
+      FIELDS = %i[name og_image_url repo started_on tagline tags url visibility].freeze
       MONTH = "%Y-%m"
       UNSAVED = "could not save the project"
 
@@ -19,31 +19,33 @@ module MCP
           "format" => "use the year and the month, as 2024-06",
           "future" => "pick this month or one before it",
         },
-        status: { "format" => "pick a status from the list" },
         tags: { "format" => "use lowercase letters, numbers and single dashes in each tag" },
         url: { "format" => "enter a link that starts with http:// or https://" },
+        visibility: { "blank" => "pick public or private", "format" => "pick public or private" },
       }.freeze
 
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          featured: { type: "boolean", description: "whether /projects shows it first" },
           id: API::Schema::ID.merge(description: "the project to change; leave it out to add a new one"),
           name: { type: "string" },
           og_image_url: { type: "string", description: "a link to the social card image" },
           repo: { type: "string", description: "the GitHub repository, as owner/repo" },
           started_on: { type: "string", description: "the month it started, as YYYY-MM" },
-          status: { type: "string", enum: Blog::Types::ProjectLiveStatus.values },
           tagline: { type: "string" },
           tags: { type: "array", items: { type: "string" }, description: "every tag it carries, in place of those" },
           url: { type: "string", description: "its home page; a repository alone links to GitHub" },
+          visibility: {
+            type: "string", enum: Blog::Types::ProjectVisibility.values,
+            description: "who can see it; a private project stays off the site",
+          },
         },
       }.freeze
 
       description "Add a project, or change one when you give its id. On a change, a field you leave out keeps " \
                   "what it has and an empty string clears it; tags replaces the whole list. A new project needs " \
-                  "a name and starts active unless you give a status. An archived project keeps its status: " \
-                  "restore it with restore_project"
+                  "a name and a visibility, and starts active. Archive and restore it with archive_project and " \
+                  "restore_project"
       input_schema(SCHEMA)
       scope OAuth::Scope::WRITE
 
@@ -60,22 +62,21 @@ module MCP
         def form(current, fields)
           given = kept(current).merge(fields.slice(*FIELDS))
 
-          given.merge(featured: given[:featured] ? Blog::Constants::CHECKED : nil, tags: Array(given[:tags]).join(","))
+          given.merge(tags: Array(given[:tags]).join(","))
         end
 
         def kept(project)
           return Blog::Constants::EMPTY_HASH unless project
 
           {
-            featured: project.featured,
             name: project.name,
             og_image_url: project.og_image_url,
             repo: project.repo,
             started_on: project.started_on&.strftime(MONTH),
-            status: project.archived? ? nil : project.status,
             tagline: project.tagline,
             tags: project.tags.map(&:name),
             url: project.url,
+            visibility: project.visibility,
           }
         end
 

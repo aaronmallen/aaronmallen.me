@@ -15,8 +15,8 @@ RSpec.describe "An unknown failure reason", type: :request do
     it "answers 500 rather than raising" do
       token = admin_csrf_token
       project = create(:project)
-      refuse("projects.operations.move_project", Projects::Operations::MoveProject)
-      post "/admin/projects/#{project.id}/move/up", _csrf_token: token
+      refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject)
+      post "/admin/projects/#{project.id}/archive", _csrf_token: token
 
       expect(last_response.status).to eq(500)
     end
@@ -24,8 +24,8 @@ RSpec.describe "An unknown failure reason", type: :request do
     it "answers 500 for a reason carrying a payload" do
       token = admin_csrf_token
       project = create(:project)
-      refuse("projects.operations.move_project", Projects::Operations::MoveProject, [:gone_wrong, {}])
-      post "/admin/projects/#{project.id}/move/up", _csrf_token: token
+      refuse("projects.operations.archive_project", Projects::Operations::ArchiveProject, [:gone_wrong, {}])
+      post "/admin/projects/#{project.id}/archive", _csrf_token: token
 
       expect(last_response.status).to eq(500)
     end
