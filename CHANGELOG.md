@@ -5,6 +5,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.4] - 2026-10-07
+
 ### Added
 
 - Admin pages update live. A change made through the API, MCP, the issue sync or another tab redraws the open page
@@ -465,7 +467,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.3...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.4...HEAD
+[26.10.4]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.3...26.10.4
 [26.10.3]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.2...26.10.3
 [26.10.2]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.1...26.10.2
 [26.10.1]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.0...26.10.1
