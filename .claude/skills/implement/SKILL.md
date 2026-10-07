@@ -60,7 +60,14 @@ closes it. Do not close the issue or the spec with `gh`. The commit closes them 
 Swap `in progress` for `needs review` on the issue. Then read the issues it blocks, and take `blocked` off each
 one whose blockers are all closed or in `needs review`.
 
+Then credit yourself on the task synced from the issue. Find it with `list_tasks`, searching for the issue's
+title, and take the one whose source issue is this one. Read it with `read_task`, then call `save_task` with every
+contributor it lists plus yourself as `{kind: "agent", agent:, model:}`, named as [ADR 0115][0115] names them:
+`claude-code` and your model's id, such as `claude-opus-5-5`. `save_task` replaces the whole set, so leave none of
+the old ones out. If no task syncs from the issue, or it already lists you, skip this step.
+
 If a step failed and you could not fix it, leave the issue `in progress` and tell the user what stopped you. Do
 not mark work done that is not.
 
+[0115]: docs/adr/0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
 [issues]: .claude/issues.md

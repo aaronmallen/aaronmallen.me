@@ -40,6 +40,8 @@ The keywords name the issue, as [`.claude/issues.md`][issues] says under "Refere
 for an issue, or its only one, ends with `Closes #<issue>`. Any commit before it ends with `See #<issue>`. When
 the caller names a spec, add `Closes #<spec>` on the next line. With no issue, leave the paragraph out.
 
+Add no `Co-Authored-By` trailer. An agent credits itself on the issue's task instead, as `/implement` says.
+
 ## 3. Commit
 
 Record the change the way [`.claude/vcs.md`][vcs] describes, and pass the message you wrote without rewrapping it.
