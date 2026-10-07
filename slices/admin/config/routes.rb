@@ -68,6 +68,7 @@ module Admin
       to: "inbox.mark_message", as: :inbox_mark_message, id: ID, status: INBOX_MESSAGE_STATUS,
     )
     post "/inbox/tasks/:id/move/:filter", to: "inbox.move_task", as: :inbox_move_task, id: ID, filter: TASK_FILTER
+    post "/inbox/seen", to: "inbox.see_all", as: :inbox_see_all
     post "/inbox/tasks/:id/seen", to: "inbox.see_task", as: :inbox_see_task, id: ID
     post(
       "/inbox/webmentions/:id/moderate/:verdict",

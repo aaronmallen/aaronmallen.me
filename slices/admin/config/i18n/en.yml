@@ -59,6 +59,18 @@ en:
       saved: "Decision saved"
   inbox_page:
     toasts:
+      see_all:
+        done:
+          one: "Marked %{count} row seen"
+          other: "Marked %{count} rows seen"
+        empty: "Nothing changed · the inbox was empty"
+        failed:
+          not_found: "Nothing changed · %{kind} %{id} is gone"
+          other: "Nothing changed · %{kind} %{id} would not change"
+        kinds:
+          messages: "message"
+          tasks: "issue"
+          webmentions: "webmention"
       seen: "Marked seen"
   journal_page:
     toasts:
@@ -617,6 +629,9 @@ en:
           reply: "Reply"
           spam: "Spam"
           subject: "Re: %{subject}"
+        see_all:
+          confirm: "Mark every row here seen? Messages turn read, and webmentions stay pending on Webmentions."
+          label: "Mark All As Seen"
       journal:
         entry:
           body: "Entry text"

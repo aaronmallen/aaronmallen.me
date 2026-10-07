@@ -2244,6 +2244,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "cancel_task" => { id: 1 },
         "cancel_tasks" => { ids: [1] },
         "capture_task" => { title: "Email the accountant" },
+        "clear_inbox" => { messages: [1] },
         "complete_task" => { id: 1 },
         "complete_tasks" => { ids: [1] },
         "compose_announcement" => { id: 1 },

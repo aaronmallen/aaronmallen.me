@@ -11,7 +11,7 @@ module Admin
           prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size))
+            PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size)) { SeeAll(rows: @rows) if @rows.any? }
 
             Card(title: t(".waiting"), data: { key_list: true }) do
               next Empty { t(".empty") } if @rows.empty?

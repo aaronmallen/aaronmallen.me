@@ -25,6 +25,7 @@ module MCP
     import keys: %w[
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
       endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
+      endpoints.clear_inbox
       endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_person
       endpoints.create_saved_view endpoints.create_task_rule endpoints.delete_decision_comment
       endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_person

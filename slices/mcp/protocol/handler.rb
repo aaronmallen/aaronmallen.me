@@ -115,6 +115,7 @@ module MCP
         Tools::CancelTask,
         Tools::CancelTasks,
         Tools::CaptureTask,
+        Tools::ClearInbox,
         Tools::CompleteTask,
         Tools::CompleteTasks,
         Tools::ComposeAnnouncement,

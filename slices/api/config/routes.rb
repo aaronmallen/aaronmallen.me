@@ -75,6 +75,7 @@ module API
     post "/attention/snooze", to: "attention.snooze"
 
     get "/inbox", to: "inbox.index"
+    post "/inbox/seen", to: "inbox.seen"
 
     get "/calendar", to: "calendar.index"
 

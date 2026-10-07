@@ -92,6 +92,8 @@ module Social
 
       def release(id) = held_webmentions.by_pk(id).delete
 
+      def see(id, at) = update(id, seen_at: at)
+
       def settings = stored_settings || created_settings
 
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)

@@ -80,6 +80,7 @@ module API
         ["upload_photo", "post", "/photos", CREATED],
         ["list_attention", "get", "/attention", OK],
         ["list_inbox", "get", "/inbox", OK],
+        ["clear_inbox", "post", "/inbox/seen", OK],
         ["snooze_attention", "post", "/attention/snooze", OK],
         ["list_calendar", "get", "/calendar", OK],
         ["list_links", "get", "/links/{kind}/{id}", OK],

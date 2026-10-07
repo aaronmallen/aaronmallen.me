@@ -13,7 +13,9 @@ module Social
     export %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.expand_for_network
-      operations.lock_editable_social_post operations.measure_parts operations.moderate_webmention
+      operations.lock_editable_social_post
+      operations.mark_webmention_seen
+      operations.measure_parts operations.moderate_webmention
       operations.move_social_post
       operations.receive_webmention
       operations.replace_social_post_parts operations.save_person operations.save_social_post operations.search_accounts

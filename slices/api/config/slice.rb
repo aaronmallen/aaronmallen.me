@@ -14,7 +14,11 @@ module API
 
     import keys: %w[queries.unique_readers queries.views_by_path queries.views_by_post], from: :analytics
 
-    import keys: %w[operations.act_on_messages queries.unread_message_count queries.unread_messages], from: :contact
+    import keys: %w[
+      operations.act_on_messages
+      operations.mark_message
+      queries.unread_message_count queries.unread_messages
+    ], from: :contact
 
     import keys: %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
@@ -47,7 +51,9 @@ module API
     import keys: %w[repos.search_queries], from: :search
 
     import keys: %w[
-      operations.act_on_webmentions operations.delete_person operations.measure_parts operations.save_person
+      operations.act_on_webmentions
+      operations.mark_webmention_seen
+      operations.delete_person operations.measure_parts operations.save_person
       operations.search_accounts queries.calendar_social_posts queries.people queries.person_by_id
       queries.received_webmention_count queries.social_post_by_id queries.unseen_webmention_count
       queries.unseen_webmentions queries.webmention_by_id queries.webmention_counts_by_post
@@ -75,6 +81,7 @@ module API
     export %w[
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
       endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
+      endpoints.clear_inbox
       endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_person
       endpoints.create_saved_view endpoints.create_task_rule endpoints.delete_decision_comment
       endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_person
@@ -98,7 +105,9 @@ module API
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
-      endpoints.update_work_session endpoints.upload_photo operations.mint_token operations.revoke_token
+      endpoints.update_work_session endpoints.upload_photo
+      operations.clear_inbox
+      operations.mint_token operations.revoke_token
       queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
     ]
   end
