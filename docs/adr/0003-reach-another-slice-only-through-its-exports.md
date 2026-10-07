@@ -1,17 +1,18 @@
 ---
 id: "0003"
 title: Reach another slice only through its exports
-status: active
+status: superseded
 created: 2026-09-28
 area: [db, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+superseded-by: "0123"
 issue: AA-605
-amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524", "#620"]
+amended: [AA-559, AA-571, AA-803, AA-809, "#236", "#245", "#524", "#620", "#665"]
 tags: [slices, exports, rom, associations, sidekiq, cycles, providers]
 ---
 
 # ADR 0003: Reach another slice only through its exports
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -133,4 +134,4 @@ method on a repo somebody already imported.
 Every dependency costs two lines, an export and an import. Container keys are strings, and nothing checks them until
 the code runs.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange

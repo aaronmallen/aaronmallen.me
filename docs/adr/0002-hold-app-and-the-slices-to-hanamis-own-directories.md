@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809]
+amended: [AA-809, "#665"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -28,8 +28,8 @@ it grew to 83 files, four of them used by one slice alone (AA-421).
 ## Decision
 
 Every slice root holds only Hanami's directories, `actions`, `config`, `contracts`, `db`, `jobs`, `operations`,
-`queries`, `relations`, `repos`, `structs` and `ui`, plus the base classes beside them. A slice uses the ones it
-needs.
+`relations`, `repos`, `structs` and `ui`, plus the base classes beside them. A slice uses the ones it needs. #665
+dropped `queries`, since ADR 0123 lets a read cross as a read repo.
 
 A slice may also keep the entry surface its own protocol forces, beside its actions. Two qualify:
 
@@ -54,7 +54,8 @@ Code lives with what owns it (AA-421, AA-563).
   `autoloader.push_dir(Hanami.app.root.join("lib/admin"), namespace: Admin)`, which loads the code without
   registering it in the slice's container. A provider moves into the slice that owns its concept, and its key
   crosses by export and import.
-- **An export** carries what another slice reaches on purpose: a query for a read, an operation for a write.
+- **An export** carries what another slice reaches on purpose: a read repo for a read, an operation for a write
+  (#665).
 - **`lib/blog`** keeps only what no slice owns: the base classes every slice inherits, the shared providers,
   helpers such as `Blog::Truncation` that several slices name, and the shared Phlex kit. The record AA-672 files
   says when a component moves into the kit.

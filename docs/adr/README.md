@@ -7,7 +7,7 @@ one.
 | --- | --- | --- | --- |
 | [0001][0001] | Split the app into slices by feature | ![Active][active] | 2026-09-28 |
 | [0002][0002] | Hold app/ and the slices to Hanami's own directories | ![Active][active] | 2026-09-28 |
-| [0003][0003] | Reach another slice only through its exports | ![Active][active] | 2026-09-28 |
+| [0003][0003] | Reach another slice only through its exports | ![Superseded][superseded-0123] | 2026-09-28 |
 | [0004][0004] | Hand every slice the app's routes helper through a prepend | ![Active][active] | 2026-09-28 |
 | [0005][0005] | Run every tool through a mise task and pin tool versions in mise.lock | ![Active][active] | 2026-09-28 |
 | [0006][0006] | Run the site on a Raspberry Pi behind a Cloudflare Tunnel, with its data on the NAS | ![Active][active] | 2026-09-28 |
@@ -127,6 +127,7 @@ one.
 | [0120][0120] | Mark webmentions seen apart from their status, and clear the inbox in one transaction | ![Active][active] | 2026-10-07 |
 | [0121][0121] | Keep inbox snoozes in a snoozed_until column on each record's table | ![Active][active] | 2026-10-07 |
 | [0122][0122] | Widen task tag rules into task rules that assign projects, and match a project's own repo | ![Active][active] | 2026-10-07 |
+| [0123][0123] | Export only read repos and operations, and keep write repos in their slice | ![Active][active] | 2026-10-07 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -250,10 +251,12 @@ one.
 [0120]: 0120-mark-webmentions-seen-apart-from-their-status-and-clear-the-inbox-in-one-transaction.md
 [0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
 [0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
+[0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0102]: https://img.shields.io/badge/0102-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0107]: https://img.shields.io/badge/0107-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0110]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0123]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
