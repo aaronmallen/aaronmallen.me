@@ -26,7 +26,7 @@ laptop and CI test on.
 
 Every tool runs through a mise task, one entry point. Each task is a script under `scripts/`, which
 `.config/mise.toml` pulls in through `[task_config] includes`. The script carries the flags, the config path and any
-database check: `scripts/lint/ruby` runs `rubocop --config .config/.rubocop.yml`, and `scripts/test/_default` runs
+database check: `scripts/lint/ruby` runs `rubocop --config .config/rubocop.yml`, and `scripts/test/_default` runs
 `rspec` through `scripts/util/ensure_postgres`, which starts Postgres when it is down. The script first asks
 Postgres itself with `pg_isready` on `localhost` and `DATABASE_PORT`, and starts the compose service only when
 nothing answers, so a Postgres that compose did not start still counts. Without the Postgres client, it asks

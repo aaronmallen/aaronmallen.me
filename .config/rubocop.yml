@@ -6,7 +6,14 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
 
+inherit_mode:
+  merge:
+    - Include
+
 AllCops:
+  Include:
+    - .config/Guardfile
+    - .config/config.ru
   NewCops: enable
   TargetRubyVersion: 4
 
@@ -23,14 +30,14 @@ Hanami/SliceExports:
     - !ruby/regexp /\Aqueries\.\w+\z/
     - !ruby/regexp /\Arepos\.\w*queries\z/
   Exclude:
-    - ../slices/backups/config/slice.rb
+    - slices/backups/config/slice.rb
 
 I18n/GetText:
   Enabled: false
 
 I18n/RailsI18n/DecorateString:
   Exclude:
-    - ../config/db/seeds/**/*.rb
+    - config/db/seeds/**/*.rb
 
 Metrics/BlockLength:
   CountAsOne:
@@ -52,8 +59,8 @@ Metrics/ClassLength:
     - heredoc
     - method_call
   Exclude:
-    - ../slices/admin/config/routes.rb
-    - ../slices/api/config/routes.rb
+    - slices/admin/config/routes.rb
+    - slices/api/config/routes.rb
 
 Metrics/MethodLength:
   CountAsOne:
@@ -69,7 +76,7 @@ Metrics/ModuleLength:
     - heredoc
     - method_call
   Exclude:
-    - ../lib/blog/types.rb
+    - lib/blog/types.rb
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
@@ -97,7 +104,7 @@ Style/Documentation:
 
 Style/NumericPredicate:
   Exclude:
-    - ../config/db/migrate/**/*.rb
+    - config/db/migrate/**/*.rb
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

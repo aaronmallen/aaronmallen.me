@@ -12,7 +12,7 @@ RSpec.describe "Hanami/SliceExports", type: :script do
       end
     RUBY
     output, status = Open3.capture2e(
-      "bundle", "exec", "rubocop", "--config", ".config/.rubocop.yml", "--only", "Hanami/SliceExports",
+      "bundle", "exec", "rubocop", "--config", ".config/rubocop.yml", "--only", "Hanami/SliceExports",
       "--stdin", "slices/demo/config/slice.rb",
       chdir: Hanami.app.root.to_s, stdin_data: source,
     )
