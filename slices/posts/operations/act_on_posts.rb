@@ -10,7 +10,7 @@ module Posts
       include Deps[
         contract: "contracts.bulk_contract",
         delete_post: "operations.delete_post",
-        post_repo: "repos.post_repo",
+        post_mutations: "repos.post_mutations",
         tag_post: "operations.tag_post",
       ]
 
@@ -23,7 +23,9 @@ module Posts
       private
 
       def delete_draft(id)
-        found(post_repo.by_id_for_update(id)).bind { it.status == DRAFT ? delete_post.call(id) : Failure(:not_draft) }
+        found(post_mutations.by_id_for_update(id)).bind do |post|
+          post.status == DRAFT ? delete_post.call(id) : Failure(:not_draft)
+        end
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }

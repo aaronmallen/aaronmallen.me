@@ -7,7 +7,7 @@ module Admin
         include Deps[
           "settings",
           build_social_page: "operations.build_social_page",
-          editable_social_post: "social.queries.editable_social_post",
+          social_post_queries: "social.repos.social_post_queries",
         ]
 
         def handle(request, response)
@@ -25,7 +25,7 @@ module Admin
           params = request.params
           id = Blog::Types::IdParam[params[:edit]]
 
-          { editing: id && editable_social_post.call(id), records: { query: params[:record_q] } }
+          { editing: id && social_post_queries.editable(id), records: { query: params[:record_q] } }
         end
 
         def writing?(request) = Blog::Types::Checkbox[request.params[:write]]

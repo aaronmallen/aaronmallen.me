@@ -16,14 +16,14 @@ module Admin
         include Deps[
           "settings",
           operation: "social.operations.act_on_webmentions",
-          webmentions_by_status: "social.queries.webmentions_by_status",
+          webmention_queries: "social.repos.webmention_queries",
         ]
 
         private
 
         def back(request)
           status = Blog::Types::WebmentionStatusParam[request.params[:status]]
-          page = landing(request) { webmentions_by_status.call(status, it).past_end? }
+          page = landing(request) { webmention_queries.page_by_status(status, it).past_end? }
 
           routes.path(:admin_webmentions, status:, **Blog::Page.query(page))
         end

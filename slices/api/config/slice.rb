@@ -34,8 +34,7 @@ module API
     import keys: %w[operations.upload_photo], from: :media
 
     import keys: %w[
-      operations.act_on_posts operations.publish_draft operations.revise_edit_note queries.by_filter queries.by_id
-      queries.calendar_posts queries.edits_newest_first
+      operations.act_on_posts operations.publish_draft operations.revise_edit_note repos.post_queries
     ], from: :posts
 
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
@@ -53,16 +52,9 @@ module API
     import keys: %w[repos.search_queries], from: :search
 
     import keys: %w[
-      operations.act_on_webmentions
-      operations.mark_webmention_seen
-      operations.delete_person operations.measure_parts operations.save_person
-      operations.search_accounts
-      operations.snooze_webmentions
-      queries.calendar_social_posts queries.people queries.person_by_id
-      queries.received_webmention_count queries.social_post_by_id queries.unseen_webmention_count
-      queries.unseen_webmentions queries.webmention_by_id queries.webmention_counts_by_post
-      queries.webmention_counts_received_in queries.webmentions_received_in
-      operations.wake_webmention queries.snoozed_webmentions
+      operations.act_on_webmentions operations.delete_person operations.mark_webmention_seen operations.measure_parts
+      operations.save_person operations.search_accounts operations.snooze_webmentions operations.wake_webmention
+      repos.person_queries repos.social_post_queries repos.webmention_queries
     ], from: :social
 
     import keys: %w[queries.for_post queries.for_social_post], from: :suggestions

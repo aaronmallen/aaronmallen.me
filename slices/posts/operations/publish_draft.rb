@@ -7,12 +7,16 @@ module Posts
       PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
-      include Deps[post_repo: "repos.post_repo", save_post: "operations.save_post"]
+      include Deps[
+        post_mutations: "repos.post_mutations",
+        post_queries: "repos.post_queries",
+        save_post: "operations.save_post",
+      ]
 
       def call(id, now: Time.now)
         transaction do
-          step unpublished(post_repo.by_id_for_update(id))
-          step save_post.call(form(post_repo.by_id(id)), id:, intent: PUBLISH, now:)
+          step unpublished(post_mutations.by_id_for_update(id))
+          step save_post.call(form(post_queries.by_id(id)), id:, intent: PUBLISH, now:)
         end
       end
 

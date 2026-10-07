@@ -22,12 +22,12 @@ module API
       include Deps[
         measure_parts: "social.operations.measure_parts",
         record_links: "links.queries.record_links",
-        social_post_by_id: "social.queries.social_post_by_id",
+        social_post_queries: "social.repos.social_post_queries",
         suggestion_for_social_post: "suggestions.queries.for_social_post",
       ]
 
       def handle(id:)
-        social_post = social_post_by_id.call(id)
+        social_post = social_post_queries.by_id(id)
         return not_found(Wording.missing("social post", id)) if social_post.nil?
 
         Success(answered(social_post))

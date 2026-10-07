@@ -3,7 +3,8 @@
 RSpec.describe Social::Jobs::DeliverSocialPost do
   subject(:job) { described_class.new }
 
-  let(:social_post_repo) { Social::Slice["repos.social_post_repo"] }
+  let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
+  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
   before { connect_social_networks }
 
@@ -31,7 +32,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   def key(social_post, network, position) = "social-post-#{social_post.id}-#{network}-#{position}"
 
   def queued(targets: %w[mastodon], parts: %w[one])
-    social_post_repo.create_with_parts(targets:, parts:, status: "scheduled", posted_at: Time.now - 60)
+    social_post_mutations.create_with_parts(targets:, parts:, status: "scheduled", posted_at: Time.now - 60)
   end
 
   def refused(social_post, network)
@@ -40,7 +41,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     nil
   end
 
-  def reloaded(social_post) = social_post_repo.by_id(social_post.id)
+  def reloaded(social_post) = social_post_queries.by_id(social_post.id)
 
   def rkey(social_post, position)
     part = social_post.parts.find { it.position == position }
@@ -684,7 +685,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   end
 
   describe "a post that mentions people" do
-    let(:people) { Social::Slice["repos.person_repo"] }
+    let(:person_mutations) { Social::Slice["repos.person_mutations"] }
 
     let!(:ada) do
       create(:person, key: "ada", name: "Ada Lovelace", mastodon_handle: "@ada@ruby.social",
@@ -758,13 +759,13 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     it "sends a handle changed after the post was queued in its new form" do
       social_post = queued(parts: ["hi @{ada}"])
-      people.update(ada.id, mastodon_handle: "@ada@hachyderm.io")
+      person_mutations.update(ada.id, mastodon_handle: "@ada@hachyderm.io")
 
       expect(sent_status(social_post)).to eq("hi @ada@hachyderm.io")
     end
 
     it "sends the key in place of someone taken out of the directory" do
-      people.delete(ada.id)
+      person_mutations.delete(ada.id)
 
       expect(mastodon_status("hi @{ada}")).to eq("hi ada")
     end
@@ -899,7 +900,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     }.each do |what, attrs|
       it "sends nothing and opens no delivery for #{what}", :aggregate_failures do
         social_post = queued
-        social_post_repo.update(social_post.id, **attrs)
+        social_post_mutations.update(social_post.id, **attrs)
         deliver(social_post, "mastodon")
 
         expect(delivery(social_post, "mastodon")).to be_nil

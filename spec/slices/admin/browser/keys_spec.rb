@@ -231,13 +231,13 @@ RSpec.describe "Admin keys", type: :feature do
   end
 
   describe "p on the posts list" do
-    let(:repo) { Posts::Slice["repos.post_repo"] }
+    let(:post_queries) { Posts::Slice["repos.post_queries"] }
     let!(:draft) { create(:post, :draft, title: "Half done") }
     let!(:published) { create(:post, :published, title: "Out already") }
 
     def row_of(post) = titles.index(post.title) + 1
 
-    def status(post) = repo.by_id(post.id).status
+    def status(post) = post_queries.by_id(post.id).status
 
     before { visit "/admin/posts" }
 
@@ -249,11 +249,11 @@ RSpec.describe "Admin keys", type: :feature do
     end
 
     it "does nothing on a published post", :aggregate_failures do
-      published_at = repo.by_id(published.id).published_at
+      published_at = post_queries.by_id(published.id).published_at
       press(*Array.new(row_of(published), "j"), "p")
 
       expect(page).to have_current_path("/admin/posts")
-      expect(repo.by_id(published.id).published_at).to eq(published_at)
+      expect(post_queries.by_id(published.id).published_at).to eq(published_at)
       expect(status(draft)).to eq("draft")
     end
 

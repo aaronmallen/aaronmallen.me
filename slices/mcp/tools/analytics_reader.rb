@@ -62,7 +62,7 @@ module MCP
 
       def post
         slug = path.delete_prefix("#{Blog::Site::WRITING}/")
-        dep(:published_post_by_slug).call(slug) unless slug == path
+        dep(:post_queries).published_by_slug(slug) unless slug == path
       end
 
       def published(days)

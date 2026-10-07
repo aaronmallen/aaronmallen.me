@@ -3,14 +3,14 @@
 RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
   let(:agent) { Hanami.app["honeybadger.agent"] }
   let(:endpoint) { "https://ada.example/webmention" }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
   let(:target) { "https://ada.example/notes/1" }
 
   def card = { syndication_enabled: "1", syndication_body: "In my own words", syndication_targets: %w[mastodon] }
 
   def cross_posts
     Social::Jobs::SyndicatePost.drain
-    Social::Slice["repos.social_post_repo"].queued
+    Social::Slice["repos.social_post_queries"].queued
   end
 
   def follow_up_jobs = [Social::Jobs::SyndicatePost, Social::Jobs::SendWebmentions]
@@ -59,7 +59,7 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
 
     it "answers as a success", :aggregate_failures do
       expect(last_response.status).to eq(302)
-      expect(post_repo.all.last).to have_attributes(status: "published")
+      expect(post_queries.all.last).to have_attributes(status: "published")
     end
 
     it "tells Honeybadger the queue could not be reached" do
@@ -74,7 +74,7 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
       redis_back
       perform
 
-      expect(cross_posts).to contain_exactly(have_attributes(post_id: post_repo.all.last.id, targets: %w[mastodon]))
+      expect(cross_posts).to contain_exactly(have_attributes(post_id: post_queries.all.last.id, targets: %w[mastodon]))
     end
 
     it "sends the webmentions once Redis is back" do
@@ -115,7 +115,7 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
 
     it "answers as a success", :aggregate_failures do
       expect(last_response.status).to eq(302)
-      expect(post_repo.by_id(published.id).title).to eq("Changed")
+      expect(post_queries.by_id(published.id).title).to eq("Changed")
     end
 
     it "sends the webmentions once Redis is back" do
@@ -135,7 +135,7 @@ RSpec.describe Posts::Jobs::QueueHeldFollowUps, :commits do
     end
 
     it "publishes it" do
-      expect(post_repo.by_id(scheduled.id).status).to eq("published")
+      expect(post_queries.by_id(scheduled.id).status).to eq("published")
     end
 
     it "sends its webmentions once Redis is back" do

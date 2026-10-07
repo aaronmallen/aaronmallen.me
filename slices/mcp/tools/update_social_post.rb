@@ -34,7 +34,7 @@ module MCP
         include SocialPostAnswer
 
         def call(id:, server_context:, **fields)
-          stored = dep(:editable_social_post, server_context).call(id)
+          stored = dep(:social_post_queries, server_context).editable(id)
           params = { parts: stored&.parts&.map(&:body), targets: stored&.targets.to_a }.merge(fields)
 
           result = dep(:compose_social_post, server_context).call(params, intent: DRAFT, id:)

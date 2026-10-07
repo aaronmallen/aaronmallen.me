@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin people", type: :feature do
-  let(:repo) { Social::Slice["repos.person_repo"] }
+  let(:person_queries) { Social::Slice["repos.person_queries"] }
 
   before { sign_in_to_admin }
 
@@ -164,7 +164,7 @@ RSpec.describe "Admin people", type: :feature do
     it "keeps them when I don't confirm" do
       dismiss_confirm { click_button "Remove" }
 
-      expect(repo.all.map(&:name)).to eq(["Ada Lovelace"])
+      expect(person_queries.all.map(&:name)).to eq(["Ada Lovelace"])
     end
 
     it "removes them once I confirm" do

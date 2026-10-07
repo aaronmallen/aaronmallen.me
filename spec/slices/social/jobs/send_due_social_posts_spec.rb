@@ -3,7 +3,8 @@
 RSpec.describe Social::Jobs::SendDueSocialPosts do
   subject(:job) { described_class.new }
 
-  let(:social_post_repo) { Social::Slice["repos.social_post_repo"] }
+  let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
+  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
   def answer_on_both_networks
     connect_social_networks
@@ -21,15 +22,15 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
   end
 
   def moved_after_reading(**attrs)
-    allow(social_post_repo).to receive(:due_scheduled).and_wrap_original do |read, time|
-      read.call(time).tap { |due| due.each { social_post_repo.update(it.id, **attrs) } }
+    allow(social_post_queries).to receive(:due_scheduled).and_wrap_original do |read, time|
+      read.call(time).tap { |due| due.each { social_post_mutations.update(it.id, **attrs) } }
     end
 
-    described_class.new(social_post_repo:).perform
+    described_class.new(social_post_queries:).perform
   end
 
   def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60)
-    social_post_repo.create_with_parts(targets:, posted_at:, status: "scheduled", parts: %w[one])
+    social_post_mutations.create_with_parts(targets:, posted_at:, status: "scheduled", parts: %w[one])
   end
 
   def sent = Social::Jobs::DeliverSocialPost.jobs.map { it["args"] }
@@ -80,7 +81,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
       moved_after_reading(**attrs)
 
       expect(sent).to be_empty
-      expect(social_post_repo.claimed?(social_post.id)).to be(false)
+      expect(social_post_queries.claimed?(social_post.id)).to be(false)
     end
   end
 
@@ -88,7 +89,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     social_post = queued
     job.perform
 
-    expect(social_post_repo.by_id(social_post.id).deliveries.map(&:network)).to eq(%w[bluesky mastodon])
+    expect(social_post_queries.by_id(social_post.id).deliveries.map(&:network)).to eq(%w[bluesky mastodon])
   end
 
   it "never sends the same network twice when run twice" do
@@ -100,7 +101,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "never sends again while a network is still retrying" do
     social_post = queued(targets: %w[mastodon])
-    social_post_repo.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
     job.perform
 
     expect(sent).to be_empty
@@ -117,7 +118,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "sends a network again when its job died partway" do
     social_post = queued(targets: %w[mastodon])
-    social_post_repo.record_delivery(social_post.id, "mastodon", remote_ids: %w[1])
+    social_post_mutations.record_delivery(social_post.id, "mastodon", remote_ids: %w[1])
     later(stalled)
     job.perform
 
@@ -135,7 +136,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "never sends again while a network is still retrying, however long ago it failed" do
     social_post = queued(targets: %w[mastodon])
-    social_post_repo.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
     later(stalled)
     job.perform
 
@@ -144,7 +145,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "sends the network that has no delivery yet" do
     social_post = queued
-    social_post_repo.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
     job.perform
 
     expect(sent).to eq([[social_post.id, "bluesky"]])
@@ -156,6 +157,6 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     job.perform
     Social::Jobs::DeliverSocialPost.drain
 
-    expect(social_post_repo.by_id(social_post.id).status).to eq("posted")
+    expect(social_post_queries.by_id(social_post.id).status).to eq("posted")
   end
 end

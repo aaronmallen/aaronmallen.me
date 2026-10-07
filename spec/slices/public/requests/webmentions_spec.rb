@@ -4,7 +4,7 @@ RSpec.describe "Webmentions", type: :request do
   let(:source) { "https://ada.example/notes/1" }
   let(:elsewhere) { { "HTTP_HOST" => "pi.local" } }
   let(:target) { "https://aaronmallen.me/writing/hello" }
-  let(:webmention_repo) { Social::Slice["repos.webmention_repo"] }
+  let(:webmention_mutations) { Social::Slice["repos.webmention_mutations"] }
 
   def entry
     <<~HTML
@@ -19,7 +19,7 @@ RSpec.describe "Webmentions", type: :request do
   def notify(env = {}, **params) = post("/webmention", { source:, target: }.merge(params), env)
 
   def stored
-    post_id = Posts::Slice["repos.post_repo"].published_by_slug("hello").id
+    post_id = Posts::Slice["repos.post_queries"].published_by_slug("hello").id
 
     webmentions.for_post(post_id).from_source(source).one
   end
@@ -166,7 +166,7 @@ RSpec.describe "Webmentions", type: :request do
     end
 
     it "rejects everything while receiving is off" do
-      webmention_repo.update_settings(receive: false)
+      webmention_mutations.update_settings(receive: false)
       notify
 
       expect(last_response.status).to eq(400)

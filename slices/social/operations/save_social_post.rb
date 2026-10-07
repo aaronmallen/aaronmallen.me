@@ -3,7 +3,7 @@
 module Social
   module Operations
     class SaveSocialPost < Operation
-      include Deps[contract: "contracts.social_post_contract", social_post_repo: "repos.social_post_repo"]
+      include Deps[contract: "contracts.social_post_contract", social_post_mutations: "repos.social_post_mutations"]
 
       def call(id: nil, **attrs)
         attributes = step validate(attrs)
@@ -14,9 +14,9 @@ module Social
       private
 
       def persist(id, attributes)
-        return social_post_repo.create_with_parts(**attributes) unless id
+        return social_post_mutations.create_with_parts(**attributes) unless id
 
-        social_post_repo.update_with_parts(id, **attributes)
+        social_post_mutations.update_with_parts(id, **attributes)
       end
 
       def validate(attrs) = validated(contract.call(attrs))

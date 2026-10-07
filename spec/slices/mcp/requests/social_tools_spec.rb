@@ -25,11 +25,13 @@ RSpec.describe "MCP social tools", type: :request do
 
   def result = JSON.parse(last_response.body).fetch("result")
 
-  def social_post_repo = Social::Slice["repos.social_post_repo"]
+  def social_post_mutations = Social::Slice["repos.social_post_mutations"]
+  def social_post_queries = Social::Slice["repos.social_post_queries"]
 
-  def stored(id) = social_post_repo.by_id(id)
+  def stored(id) = social_post_queries.by_id(id)
 
-  def webmention_repo = Social::Slice["repos.webmention_repo"]
+  def webmention_mutations = Social::Slice["repos.webmention_mutations"]
+  def webmention_queries = Social::Slice["repos.webmention_queries"]
 
   before { connect_social_networks }
 
@@ -77,7 +79,7 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "gives the parts in order" do
-      social_post = social_post_repo.create_with_parts(
+      social_post = social_post_mutations.create_with_parts(
         parts: %w[one two], status: "posted", posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon],
       )
       call_tool("list_social_posts", **range)
@@ -291,12 +293,14 @@ RSpec.describe "MCP social tools", type: :request do
     it "saves nothing when it refuses" do
       call_tool("create_social_post", parts: ["  "], targets: %w[mastodon])
 
-      expect(social_post_repo.drafts).to be_empty
+      expect(social_post_queries.drafts).to be_empty
     end
   end
 
   describe "update_social_post" do
-    def draft = @draft ||= social_post_repo.create_with_parts(parts: %w[old], status: "draft", targets: %w[mastodon])
+    def draft
+      @draft ||= social_post_mutations.create_with_parts(parts: %w[old], status: "draft", targets: %w[mastodon])
+    end
 
     it "replaces the parts" do
       call_tool("update_social_post", id: draft.id, parts: %w[new words])
@@ -350,12 +354,14 @@ RSpec.describe "MCP social tools", type: :request do
   end
 
   describe "send_social_post" do
-    def draft = @draft ||= social_post_repo.create_with_parts(parts: %w[hi], status: "draft", targets: %w[mastodon])
+    def draft
+      @draft ||= social_post_mutations.create_with_parts(parts: %w[hi], status: "draft", targets: %w[mastodon])
+    end
 
     def over(detail) = "parts has a part over the limit for a network you picked: #{detail}"
 
     def send_both(*parts)
-      long = social_post_repo.create_with_parts(parts:, status: "draft", targets: %w[mastodon bluesky])
+      long = social_post_mutations.create_with_parts(parts:, status: "draft", targets: %w[mastodon bluesky])
       call_tool("send_social_post", id: long.id)
     end
 
@@ -378,7 +384,7 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "refuses a part over a network's limit, as the admin does" do
-      long = social_post_repo.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
+      long = social_post_mutations.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
       call_tool("send_social_post", id: long.id)
 
       expect(message).to eq(over("part 1 runs 501 of 500 on mastodon"))
@@ -406,7 +412,7 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "leaves an over limit post a draft" do
-      long = social_post_repo.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
+      long = social_post_mutations.create_with_parts(parts: ["a" * 501], status: "draft", targets: %w[mastodon])
       call_tool("send_social_post", id: long.id)
 
       expect(stored(long.id).status).to eq("draft")
@@ -485,13 +491,13 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("moderate_webmention", id: mention.id, verdict: "spam", reason: "link farm")
 
       expect(content).to eq("id" => mention.id, "status" => "spam")
-      expect(webmention_repo.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+      expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
     end
 
     it "refuses a verdict it does not know" do
       call_tool("moderate_webmention", id: mention.id, verdict: "pending")
 
-      expect(webmention_repo.by_status("pending").map(&:id)).to eq([mention.id])
+      expect(webmention_queries.by_status("pending").map(&:id)).to eq([mention.id])
     end
 
     it "refuses an unknown ID" do
@@ -516,13 +522,13 @@ RSpec.describe "MCP social tools", type: :request do
     it "changes the settings it was given" do
       call_tool("update_webmention_settings", receive: false)
 
-      expect(webmention_repo.settings.receive).to be(false)
+      expect(webmention_queries.settings.receive).to be(false)
     end
 
     it "keeps the settings it was not given" do
       call_tool("update_webmention_settings", receive: false)
 
-      expect(webmention_repo.settings.send_on_publish).to be(true)
+      expect(webmention_queries.settings.send_on_publish).to be(true)
     end
 
     it "answers with every setting" do
@@ -538,7 +544,7 @@ RSpec.describe "MCP social tools", type: :request do
     end
 
     it "says it saved nothing when the hosts match the stored ones" do
-      webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+      webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
       call_tool("update_webmention_settings", single_author_hosts: ["ada.example"])
 
       expect(refused?).to be(true)

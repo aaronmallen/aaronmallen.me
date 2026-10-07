@@ -5,10 +5,14 @@ module Social
     class RefreshSocialEngagement < Operation
       WINDOW = 30 * 24 * 60 * 60
 
-      include Deps[networks: "networks.all", social_post_repo: "repos.social_post_repo"]
+      include Deps[
+        networks: "networks.all",
+        social_post_mutations: "repos.social_post_mutations",
+        social_post_queries: "repos.social_post_queries",
+      ]
 
       def call(now: Time.now)
-        social_post_repo.posted_since(now - WINDOW).sum { refresh(it) }
+        social_post_queries.posted_since(now - WINDOW).sum { refresh(it) }
       end
 
       private
@@ -28,7 +32,7 @@ module Social
         counts = engagement(delivery)
         return false unless counts
 
-        social_post_repo.record_delivery(
+        social_post_mutations.record_delivery(
           social_post_id, delivery.network,
           like_count: counts.like_count, reply_count: counts.reply_count, repost_count: counts.repost_count,
         )

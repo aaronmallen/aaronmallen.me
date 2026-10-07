@@ -3,7 +3,7 @@
 RSpec.describe "Admin people", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Social::Slice["repos.person_repo"] }
+  let(:person_queries) { Social::Slice["repos.person_queries"] }
 
   def add(**fields) = send_to("/admin/people", person: { **blank, **fields })
 
@@ -11,7 +11,7 @@ RSpec.describe "Admin people", type: :request do
 
   def error(field, code) = i18n.t(["ui.components.people.field_error", field, code].join("."))
 
-  def everyone = repo.all
+  def everyone = person_queries.all
 
   def resolves(handle, did)
     stub_request(:get, "#{SocialNetworks::BLUESKY_PUBLIC}/com.atproto.identity.resolveHandle")
@@ -483,35 +483,35 @@ RSpec.describe "Admin people", type: :request do
         save(name: "Ada Lovelace")
         follow_redirect!
 
-        expect(repo.by_id(person.id).name).to eq("Ada Lovelace")
+        expect(person_queries.by_id(person.id).name).to eq("Ada Lovelace")
         expect(page).to have_css("[data-toast]", text: "Person saved")
       end
 
       it "keeps the stored DID without asking Bluesky when the handle stays" do
         save(name: "Ada Lovelace")
 
-        expect(repo.by_id(person.id).bluesky_did).to eq(person.bluesky_did)
+        expect(person_queries.by_id(person.id).bluesky_did).to eq(person.bluesky_did)
       end
 
       it "resolves a new Bluesky handle" do
         resolves("lovelace.example", "did:plc:lovelace")
         save(bluesky_handle: "lovelace.example")
 
-        expect(repo.by_id(person.id))
+        expect(person_queries.by_id(person.id))
           .to have_attributes(bluesky_handle: "lovelace.example", bluesky_did: "did:plc:lovelace")
       end
 
       it "drops the DID with the Bluesky handle" do
         save(mastodon_handle: "@ada@ruby.social", bluesky_handle: "")
 
-        expect(repo.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
+        expect(person_queries.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
       end
 
       it "refuses to take the last handle away", :aggregate_failures do
         save(bluesky_handle: "")
 
         expect(last_response.status).to eq(422)
-        expect(repo.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
+        expect(person_queries.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
       end
 
       it "refuses a new handle that resolves to nobody", :aggregate_failures do
@@ -519,7 +519,7 @@ RSpec.describe "Admin people", type: :request do
         save(bluesky_handle: "nobody.example")
 
         expect(page).to have_css("#person-bluesky_handle-error", text: error(:bluesky_handle, :unresolved))
-        expect(repo.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
+        expect(person_queries.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
       end
 
       it "refuses a key someone else holds" do

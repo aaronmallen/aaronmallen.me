@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API people", type: :request do
-  let(:repo) { Social::Slice["repos.person_repo"] }
+  let(:person_queries) { Social::Slice["repos.person_queries"] }
 
   def add(fields) = call_api(:post, "", JSON.generate(fields))
 
@@ -16,7 +16,7 @@ RSpec.describe "API people", type: :request do
 
   def edit(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
 
-  def everyone = repo.all
+  def everyone = person_queries.all
 
   def json_of(person)
     stamps = person.to_h.slice(:created_at, :updated_at).transform_values { it.utc.iso8601 }
@@ -162,20 +162,20 @@ RSpec.describe "API people", type: :request do
     it "keeps the stored DID without asking Bluesky when the handle stays" do
       edit(person.id, name: "Ada Lovelace", bluesky_handle: "ada.bsky.social")
 
-      expect(repo.by_id(person.id).bluesky_did).to eq("did:plc:ada")
+      expect(person_queries.by_id(person.id).bluesky_did).to eq("did:plc:ada")
     end
 
     it "clears a handle given as null, and its DID with it" do
       edit(person.id, bluesky_handle: nil)
 
-      expect(repo.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
+      expect(person_queries.by_id(person.id)).to have_attributes(bluesky_handle: nil, bluesky_did: nil)
     end
 
     it "refuses to take the last handle away", :aggregate_failures do
       edit(person.id, mastodon_handle: nil, bluesky_handle: nil)
 
       expect(status).to eq(422)
-      expect(repo.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
+      expect(person_queries.by_id(person.id).bluesky_handle).to eq("ada.bsky.social")
     end
 
     it "refuses a key someone else holds" do

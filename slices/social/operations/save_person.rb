@@ -9,7 +9,12 @@ module Social
       UNREACHABLE = "unreachable"
       UNRESOLVED = "unresolved"
 
-      include Deps[contract: "contracts.person_contract", networks: "networks.all", person_repo: "repos.person_repo"]
+      include Deps[
+        contract: "contracts.person_contract",
+        networks: "networks.all",
+        person_mutations: "repos.person_mutations",
+        person_queries: "repos.person_queries",
+      ]
 
       def call(params, id: nil)
         person = step find(id)
@@ -24,7 +29,7 @@ module Social
       def find(id)
         return Success(nil) unless id
 
-        found(person_repo.by_id(id))
+        found(person_queries.by_id(id))
       end
 
       def lookup(handle)
@@ -36,7 +41,9 @@ module Social
       end
 
       def persist(person, fields)
-        Success(transaction { person ? person_repo.update(person.id, **fields) : person_repo.create(**fields) })
+        Success(transaction do
+          person ? person_mutations.update(person.id, **fields) : person_mutations.create(**fields)
+        end)
       rescue ROM::SQL::UniqueConstraintError
         Failure([:invalid, { key: [TAKEN] }])
       end

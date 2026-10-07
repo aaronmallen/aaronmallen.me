@@ -2,7 +2,8 @@
 
 RSpec.describe "Admin bulk post actions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_mutations) { Posts::Slice["repos.post_mutations"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def act(name, posts, **params)
     ids = posts.map { it.is_a?(Integer) ? it : it.id }
@@ -11,13 +12,13 @@ RSpec.describe "Admin bulk post actions", type: :request do
 
   def drafts(count) = Array.new(count) { create(:post, :draft) }
 
-  def gone_id = create(:post).id.tap { repo.delete(it) }
+  def gone_id = create(:post).id.tap { post_mutations.delete(it) }
 
-  def kept?(article) = !repo.by_id(article.id).nil?
+  def kept?(article) = !post_queries.by_id(article.id).nil?
 
-  def tag_names(article) = repo.by_id(article.id).tags.map(&:name).sort
+  def tag_names(article) = post_queries.by_id(article.id).tags.map(&:name).sort
 
-  def tagged(*names, **attributes) = create(:post, **attributes).tap { repo.replace_tags(it.id, names) }
+  def tagged(*names, **attributes) = create(:post, **attributes).tap { post_mutations.replace_tags(it.id, names) }
 
   def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
 
@@ -231,7 +232,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
         article = tagged(status: "published", published_at: Time.now - 120, updated_at: Time.now - 60)
         act("tag", [article], tag: "hanami")
 
-        expect(repo.by_id(article.id).updated_at).to be > article.updated_at
+        expect(post_queries.by_id(article.id).updated_at).to be > article.updated_at
       end
     end
 
@@ -245,7 +246,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       end
 
       it "leaves it as it was" do
-        expect(repo.by_id(article.id).updated_at).to eq(article.updated_at)
+        expect(post_queries.by_id(article.id).updated_at).to eq(article.updated_at)
       end
     end
 
@@ -276,7 +277,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       it "keeps the page while it still has rows" do
         lower_page_size(:admin, to: 1)
         drafts(3)
-        act("delete", [repo.by_status("draft").last], page: 2)
+        act("delete", [post_queries.by_status("draft").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/posts?status=all&page=2")
       end
@@ -284,7 +285,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       it "steps back a page when the batch emptied the last one" do
         lower_page_size(:admin, to: 1)
         drafts(2)
-        act("delete", [repo.by_status("draft").last], page: 2)
+        act("delete", [post_queries.by_status("draft").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/posts?status=all")
       end
@@ -310,7 +311,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Tick 100 posts or fewer")
-        expect(repo.by_status("draft").size).to eq(101)
+        expect(post_queries.by_status("draft").size).to eq(101)
       end
 
       it "asks for a tag before a tag change" do
@@ -342,7 +343,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Nothing changed · pick an action from the bar")
-        expect(repo.by_id(article.id).status).to eq("draft")
+        expect(post_queries.by_id(article.id).status).to eq("draft")
       end
     end
   end
@@ -352,7 +353,7 @@ RSpec.describe "Admin bulk post actions", type: :request do
       article = create(:post)
       post "/admin/posts/bulk", { act: "delete", ids: [article.id] }
 
-      expect(repo.by_id(article.id)).not_to be_nil
+      expect(post_queries.by_id(article.id)).not_to be_nil
     end
   end
 end

@@ -3,13 +3,13 @@
 module Social
   module Operations
     class WakeWebmention < Operation
-      include Deps[webmention_repo: "repos.webmention_repo"]
+      include Deps[webmention_mutations: "repos.webmention_mutations", webmention_queries: "repos.webmention_queries"]
 
       def call(id, now: Time.now)
-        webmention = step found(webmention_repo.by_id(id))
+        webmention = step found(webmention_queries.by_id(id))
         step snoozed(webmention, now)
 
-        webmention_repo.snooze(id, now)
+        webmention_mutations.snooze(id, now)
       end
     end
   end

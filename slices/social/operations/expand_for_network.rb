@@ -3,11 +3,11 @@
 module Social
   module Operations
     class ExpandForNetwork
-      include Deps[mention_directory: "queries.mention_directory", tag_links: "operations.tag_links"]
+      include Deps[person_queries: "repos.person_queries", tag_links: "operations.tag_links"]
 
       def call(bodies, network)
         tagged = Array(bodies).map { tag_links.call(it, network) }
-        directory = mention_directory.call(tagged)
+        directory = person_queries.mention_directory(tagged)
 
         tagged.map { directory.expand(it, network) }
       end

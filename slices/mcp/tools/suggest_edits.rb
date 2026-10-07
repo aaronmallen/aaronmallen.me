@@ -76,7 +76,7 @@ module MCP
         def fault(index, field, token) = "edit #{index + 1}: #{field} #{COMPLAINTS.fetch(token, token)}"
 
         def for_post(id, edits, server_context)
-          return refuse(API::Wording.missing("blog post", id)) if dep(:post_by_id, server_context).call(id).nil?
+          return refuse(API::Wording.missing("blog post", id)) if dep(:post_queries, server_context).by_id(id).nil?
 
           unnumbered = edits.map { it.except(:part) }
 
@@ -87,7 +87,7 @@ module MCP
         end
 
         def for_social_post(id, edits, server_context)
-          social_post = dep(:editable_social_post, server_context).call(id)
+          social_post = dep(:social_post_queries, server_context).editable(id)
           return refuse(API::Wording.missing("unsent social post", id)) if social_post.nil?
 
           numbered = edits.map { it.merge(part: it.fetch(:part, FIRST_PART)) }

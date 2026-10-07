@@ -1,23 +1,28 @@
 # frozen_string_literal: true
 
 RSpec.describe "Accepting suggested edits", type: :request do
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
-  let(:social_post_repo) { Social::Slice["repos.social_post_repo"] }
-  let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
-
   def accept(article) = post("/admin/posts/#{article.id}/suggestions/accept", _csrf_token: admin_csrf_token)
 
   def accept_social(social_post)
     post "/admin/social/#{social_post.id}/suggestions/accept", _csrf_token: admin_csrf_token
   end
 
-  def bodies_of(social_post) = social_post_repo.by_id(social_post.id).parts.map(&:body)
+  def bodies_of(social_post) = social_post_queries.by_id(social_post.id).parts.map(&:body)
 
-  def body_of(article) = post_repo.by_id(article.id).body
+  def body_of(article) = post_queries.by_id(article.id).body
+  let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
 
   def compose(*parts)
-    social_post_repo.create_with_parts(parts:, posted_at: nil, status: "draft", targets: %w[mastodon])
+    social_post_mutations.create_with_parts(parts:, posted_at: nil, status: "draft", targets: %w[mastodon])
   end
+
+  def post_mutations = Posts::Slice["repos.post_mutations"]
+
+  def post_queries = Posts::Slice["repos.post_queries"]
+
+  def social_post_mutations = Social::Slice["repos.social_post_mutations"]
+
+  def social_post_queries = Social::Slice["repos.social_post_queries"]
 
   def statuses(article) = suggestion_repo.for_post(article.id).edits.map(&:status)
 
@@ -183,7 +188,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "answers with a redirect rather than an error when the post is deleted under it" do
       article = create(:post, :draft, body: "teh cat sat")
       suggest(article, typo)
-      ahead_of("posts.operations.lock_post") { |id| Thread.new { post_repo.posts.by_pk(id).delete }.join }
+      ahead_of("posts.operations.lock_post") { |id| Thread.new { post_mutations.posts.by_pk(id).delete }.join }
       accept(article)
 
       expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit")

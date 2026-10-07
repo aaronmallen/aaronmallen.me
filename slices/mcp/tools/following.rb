@@ -11,10 +11,7 @@ module MCP
                     "range; received, the webmentions that came in over the range in any state; and posts, the " \
                     "top %<top>d posts by webmentions received over the range, each with its post_id, title and " \
                     "received. "
-      QUERIES = %i[
-        feed_fetch_queries pending_webmention_count posts_by_ids webmentions_received_between
-        webmentions_received_by_post
-      ].freeze
+      QUERIES = %i[feed_fetch_queries post_queries webmention_queries].freeze
 
       module_function
 
@@ -27,17 +24,18 @@ module MCP
 
       def feed(found) = found.merge(days: found.fetch(:days).map { it.merge(day: it.fetch(:day).iso8601) })
 
-      def posts(counts, posts_by_ids)
-        posts_by_ids.call(counts.keys).map { { post_id: it.id, title: it.title, received: counts.fetch(it.id) } }
+      def posts(counts, post_queries)
+        post_queries.by_ids(counts.keys).map { { post_id: it.id, title: it.title, received: counts.fetch(it.id) } }
       end
 
       def webmentions(window, top, queries)
-        counts = queries.fetch(:webmentions_received_by_post).call(**window)
+        webmention_queries = queries.fetch(:webmention_queries)
+        counts = webmention_queries.received_by_post(**window)
 
         {
-          pending: queries.fetch(:pending_webmention_count).call,
-          received: queries.fetch(:webmentions_received_between).call(**window),
-          posts: posts(counts, queries.fetch(:posts_by_ids)).sort_by { [-it[:received], it[:title]] }.take(top),
+          pending: webmention_queries.pending_count,
+          received: webmention_queries.received_between(**window),
+          posts: posts(counts, queries.fetch(:post_queries)).sort_by { [-it[:received], it[:title]] }.take(top),
         }
       end
     end

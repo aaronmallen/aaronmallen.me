@@ -16,9 +16,9 @@ RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
 
   def panel = page.find("[data-calendar-panel]")
 
-  def stored_post(post) = Posts::Slice["repos.post_repo"].by_id(post.id)
+  def stored_post(post) = Posts::Slice["repos.post_queries"].by_id(post.id)
 
-  def stored_social(social_post) = Social::Slice["repos.social_post_repo"].by_id(social_post.id)
+  def stored_social(social_post) = Social::Slice["repos.social_post_queries"].by_id(social_post.id)
 
   def target = today + 10
 

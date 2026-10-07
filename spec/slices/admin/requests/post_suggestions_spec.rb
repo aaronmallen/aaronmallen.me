@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin post suggestions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
   let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
@@ -23,6 +22,10 @@ RSpec.describe "Admin post suggestions", type: :request do
 
     page.find("form[id='#{button['form']}']", visible: :all)
   end
+
+  def post_mutations = Posts::Slice["repos.post_mutations"]
+
+  def post_queries = Posts::Slice["repos.post_queries"]
 
   def reject(article, **params)
     post "/admin/posts/#{article.id}/suggestions/reject", _csrf_token: admin_csrf_token, **params
@@ -195,7 +198,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       end
 
       it "applies the edit" do
-        expect { sent }.to change { post_repo.by_id(article.id).body }.to("the cat sat")
+        expect { sent }.to change { post_queries.by_id(article.id).body }.to("the cat sat")
       end
     end
 
@@ -219,7 +222,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article, edit_id: first_edit_id(article))
 
         expect(statuses(article)).to eq(%w[stale])
-        expect(post_repo.by_id(article.id).body).to eq("the cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("the cat sat")
       end
     end
 
@@ -270,7 +273,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article)
 
         expect(statuses(article)).to eq(%w[stale])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
 
       it "says nothing was applied on Accept" do
@@ -289,7 +292,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       it "applies it to the saved body" do
         accept(article, edit_id: first_edit_id(article))
 
-        expect(post_repo.by_id(article.id).body).to eq("the cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("the cat sat")
       end
 
       it "marks it accepted and leaves the rest pending" do
@@ -340,7 +343,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         suggest(article, typo, typo("sat", "slept"))
         accept(article)
 
-        expect(post_repo.by_id(article.id).body).to eq("the cat slept")
+        expect(post_queries.by_id(article.id).body).to eq("the cat slept")
       end
 
       it "counts them in the toast" do
@@ -363,7 +366,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         suggest(article, typo, typo("dog", "cat"))
         accept(article)
 
-        expect(post_repo.by_id(article.id).body).to eq("the cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("the cat sat")
         expect(statuses(article)).to eq(%w[accepted stale])
       end
 
@@ -385,7 +388,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         reject(article, edit_id: first_edit_id(article))
 
         expect(statuses(article)).to eq(%w[rejected pending])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
 
       it "shows the rejected toast" do
@@ -427,7 +430,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       it "applies it once", :aggregate_failures do
         accept(article)
 
-        expect(post_repo.by_id(article.id).body).to eq("the black cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("the black cat sat")
         expect(statuses(article)).to eq(%w[accepted])
       end
 
@@ -495,14 +498,14 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article, edit_id: first_edit_id(article))
 
         expect(statuses(article)).to eq(%w[pending])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
 
       it "refuses Accept all", :aggregate_failures do
         accept(article)
 
         expect(statuses(article)).to eq(%w[pending])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
 
       it "says why nothing was applied" do
@@ -525,7 +528,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       before do
         suggest(article, typo)
         inner = Suggestions::Slice["posts.operations.lock_post"]
-        publishing = ->(id) { post_repo.publish(id, at: Time.now).then { inner.call(id) } }
+        publishing = ->(id) { post_mutations.publish(id, at: Time.now).then { inner.call(id) } }
         replace_component("posts.operations.lock_post", publishing)
       end
 
@@ -533,7 +536,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article)
 
         expect(statuses(article)).to eq(%w[pending])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
     end
 
@@ -551,7 +554,7 @@ RSpec.describe "Admin post suggestions", type: :request do
       it "applies an edit" do
         accept(article, edit_id: first_edit_id(article))
 
-        expect(post_repo.by_id(article.id).body).to eq("the cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("the cat sat")
       end
     end
 
@@ -610,7 +613,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article, edit_id: "#{first_edit_id(article)}abc")
 
         expect(statuses(article)).to eq(%w[pending])
-        expect(post_repo.by_id(article.id).body).to eq("teh cat sat")
+        expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
       end
 
       it "rejects no edit for an edit id with text after it" do

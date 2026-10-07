@@ -48,11 +48,11 @@ module MCP
         end
 
         def listed(first, last, status, page, server_context)
-          posts = dep(:dated_posts, server_context).call(from: first, to: last, page:, status:)
-          social_posts = dep(:unsent_social_posts, server_context).call(page)
+          posts = dep(:post_queries, server_context).dated_between(from: first, to: last, page:, status:)
+          social_posts = dep(:social_post_queries, server_context).unsent_page(page)
 
           answer(
-            counts: dep(:dated_post_counts, server_context).call(from: first, to: last),
+            counts: dep(:post_queries, server_context).count_dated_between(from: first, to: last),
             posts: summaries(posts.rows, server_context),
             social_posts: social_posts.rows.map { preview(it) },
             **Blog::Paging.fields(posts, social_posts),

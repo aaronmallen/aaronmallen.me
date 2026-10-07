@@ -26,7 +26,7 @@ RSpec.describe "MCP endpoint", type: :request do
   def clients = MCP::Slice["db.rom"].relations[:oauth_clients]
 
   def compose(status, *parts, posted_at: nil)
-    social_post_repo.create_with_parts(parts:, posted_at:, status:, targets: %w[mastodon])
+    social_post_mutations.create_with_parts(parts:, posted_at:, status:, targets: %w[mastodon])
   end
 
   def connect
@@ -125,7 +125,9 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def scopes = "read suggest write publish delete"
 
-  def social_post_repo = Social::Slice["repos.social_post_repo"]
+  def social_post_mutations = Social::Slice["repos.social_post_mutations"]
+
+  def social_post_queries = Social::Slice["repos.social_post_queries"]
 
   def suggestion_repo = Suggestions::Slice["repos.suggestion_repo"]
 
@@ -413,7 +415,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "runs none of the tools in it" do
       batch(seo_call(1, "First"), seo_call(2, "Second"))
 
-      expect(Posts::Slice["repos.post_repo"].by_id(article.id).og_title).to be_nil
+      expect(Posts::Slice["repos.post_queries"].by_id(article.id).og_title).to be_nil
     end
 
     it "refuses a batch of one" do
@@ -488,7 +490,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "leaves the post as it stands" do
       call_tool("write_post_seo", id: article.id, og_title: "On the card")
 
-      expect(Posts::Slice["repos.post_repo"].by_id(article.id).og_title).to be_nil
+      expect(Posts::Slice["repos.post_queries"].by_id(article.id).og_title).to be_nil
     end
 
     it "reads the activity feed" do
@@ -1359,7 +1361,7 @@ RSpec.describe "MCP endpoint", type: :request do
       rpc("tools/call", { name: "write_post_seo", arguments: { id: article.id, og_title: "On the card" } },
           authorization: "Bearer #{backfilled}")
 
-      expect(Posts::Slice["repos.post_repo"].by_id(article.id).og_title).to be_nil
+      expect(Posts::Slice["repos.post_queries"].by_id(article.id).og_title).to be_nil
     end
   end
 
@@ -1388,7 +1390,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "gives each blog post its tags" do
       post = create(:post, :draft)
-      Posts::Slice["repos.post_repo"].replace_tags(post.id, %w[ruby web])
+      Posts::Slice["repos.post_mutations"].replace_tags(post.id, %w[ruby web])
       call_tool("list_posts")
 
       expect(content.fetch("posts").first.fetch("tags")).to eq(%w[ruby web])
@@ -1580,7 +1582,7 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(Posts::Slice["repos.post_repo"].by_id(post.id).body).to eq("teh cat sat")
+      expect(Posts::Slice["repos.post_queries"].by_id(post.id).body).to eq("teh cat sat")
     end
 
     it "replaces the edits still waiting from an earlier call" do
@@ -1626,7 +1628,7 @@ RSpec.describe "MCP endpoint", type: :request do
       social_post = compose("draft", "teh first")
       call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
 
-      expect(social_post_repo.by_id(social_post.id).parts.map(&:body)).to eq(["teh first"])
+      expect(social_post_queries.by_id(social_post.id).parts.map(&:body)).to eq(["teh first"])
     end
 
     it "calls an unknown blog post an error" do
@@ -2046,7 +2048,7 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "write_post_seo" do
     def article = @article ||= create(:post, :published)
 
-    def seo(id) = Posts::Slice["repos.post_repo"].by_id(id)
+    def seo(id) = Posts::Slice["repos.post_queries"].by_id(id)
 
     it "sets every social card field it takes" do
       call_tool("write_post_seo", id: article.id, og_title: "On the card", og_image_url: "https://e.example/c.png")
@@ -2391,7 +2393,7 @@ RSpec.describe "MCP endpoint", type: :request do
     post = create(:post, :draft)
     call_tool("read_post", id: post.id)
 
-    expect(Posts::Slice["repos.post_repo"].by_id(post.id).to_h).to eq(post.to_h)
+    expect(Posts::Slice["repos.post_queries"].by_id(post.id).to_h).to eq(post.to_h)
   end
 
   it "notes when the client last called" do

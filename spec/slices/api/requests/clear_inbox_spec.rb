@@ -24,7 +24,7 @@ RSpec.describe "API clear inbox", type: :request do
   def task_unseen? = Tasks::Slice["repos.task_repo"].by_id(task.id).source.seen_at.nil?
 
   def webmention_marks
-    Social::Slice["repos.webmention_repo"].by_id(webmention.id).then { [it.seen_at.nil?, it.status] }
+    Social::Slice["repos.webmention_queries"].by_id(webmention.id).then { [it.seen_at.nil?, it.status] }
   end
 
   it "marks issues seen, messages read and webmentions seen but pending", :aggregate_failures do

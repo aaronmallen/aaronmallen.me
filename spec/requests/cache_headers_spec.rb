@@ -142,7 +142,7 @@ RSpec.describe "Cache headers", type: :request do
 
     it "shows an edit to a post on the next request", :aggregate_failures do
       get "/writing/#{article.slug}"
-      Posts::Slice["repos.post_repo"].update(article.id, title: "Edited")
+      Posts::Slice["repos.post_mutations"].update(article.id, title: "Edited")
       get "/writing/#{article.slug}"
 
       expect(page).to have_css("h1", text: "Edited")

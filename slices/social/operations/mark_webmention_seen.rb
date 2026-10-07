@@ -3,9 +3,9 @@
 module Social
   module Operations
     class MarkWebmentionSeen < Operation
-      include Deps[webmention_repo: "repos.webmention_repo"]
+      include Deps[webmention_mutations: "repos.webmention_mutations"]
 
-      def call(id, at: Time.now) = step found(webmention_repo.see(id, at))
+      def call(id, at: Time.now) = step found(webmention_mutations.see(id, at))
     end
   end
 end

@@ -4,18 +4,25 @@ RSpec.describe Social::Jobs::RefreshSocialEngagement do
   subject(:job) { described_class.new }
 
   let(:bluesky_post) { bluesky_uri("3kabc") }
-  let(:social_post_repo) { Social::Slice["repos.social_post_repo"] }
+  let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
+  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
   before { connect_social_networks }
 
   def day = 24 * 60 * 60
 
-  def delivery(social_post, network) = social_post_repo.by_id(social_post.id).deliveries.find { it.network == network }
+  def delivery(social_post, network)
+    social_post_queries.by_id(social_post.id).deliveries.find { it.network == network }
+  end
 
   def posted(at: Time.now - day, status: "posted", remote_ids: { "mastodon" => %w[110] }, likes: {})
-    social_post = social_post_repo.create_with_parts(targets: remote_ids.keys, parts: %w[one], status:, posted_at: at)
+    social_post = social_post_mutations.create_with_parts(
+      targets: remote_ids.keys, parts: %w[one], status:, posted_at: at,
+    )
     remote_ids.each do |network, ids|
-      social_post_repo.record_delivery(social_post.id, network, remote_ids: ids, like_count: likes.fetch(network, 0))
+      social_post_mutations.record_delivery(
+        social_post.id, network, remote_ids: ids, like_count: likes.fetch(network, 0),
+      )
     end
 
     social_post

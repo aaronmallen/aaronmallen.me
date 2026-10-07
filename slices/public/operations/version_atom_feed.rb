@@ -25,17 +25,15 @@ module Public
       end
 
       include Deps[
-        edited_at: "posts.queries.edited_at",
-        last_deleted_at: "posts.queries.last_deleted_at",
-        last_untagged_at: "posts.queries.last_untagged_at",
+        post_queries: "posts.repos.post_queries",
       ]
 
       def call(posts)
         Version.new(
           posts:,
-          edited_at: edited_at.call(posts.rows.map(&:id)),
-          deleted_at: last_deleted_at.call,
-          untagged_at: last_untagged_at.call,
+          edited_at: post_queries.edited_at(posts.rows.map(&:id)),
+          deleted_at: post_queries.last_deleted_at,
+          untagged_at: post_queries.last_untagged_at,
         )
       end
     end

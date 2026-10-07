@@ -12,7 +12,7 @@ module Admin
           edit_view: "ui.views.posts.edit",
           link_records: "links.operations.link_records",
           list_record_links: "operations.list_record_links",
-          post_by_id: "posts.queries.by_id",
+          post_queries: "posts.repos.post_queries",
         ]
 
         def handle(request, response) = link(request, response)
@@ -22,7 +22,7 @@ module Admin
         def record_path(_request, id) = routes.path(:admin_edit_post, id:)
 
         def render_refused(request, response, id, errors)
-          post = post_by_id.call(id)
+          post = post_queries.by_id(id)
           halt 404 unless post
 
           response.render(edit_view, **build_post_editor.call(post:), records: linked_records(request, id, errors))

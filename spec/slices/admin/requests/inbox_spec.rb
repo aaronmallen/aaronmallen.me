@@ -4,7 +4,7 @@ RSpec.describe "Admin inbox", type: :request do
   let(:messages) { Contact::Slice["repos.message_queries"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:tasks) { Tasks::Slice["repos.task_repo"] }
-  let(:webmentions) { Social::Slice["repos.webmention_repo"] }
+  let(:webmention_queries) { Social::Slice["repos.webmention_queries"] }
 
   def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
@@ -227,7 +227,7 @@ RSpec.describe "Admin inbox", type: :request do
           follow_redirect!
 
           expect(page).to have_css("[data-toast]", text: toast)
-          expect(webmentions.by_status(verdict).map(&:id)).to eq([mention.id])
+          expect(webmention_queries.by_status(verdict).map(&:id)).to eq([mention.id])
           expect(inbox).to be_empty
         end
       end
@@ -235,14 +235,14 @@ RSpec.describe "Admin inbox", type: :request do
       it "keeps the reason it was spam" do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "Selling pills")
 
-        expect(webmentions.by_status("spam").map(&:spam_reason)).to eq(["Selling pills"])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["Selling pills"])
       end
 
       it "keeps no reason when it holds only Unicode spaces", :aggregate_failures do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "\u3000\u00a0")
 
         expect(last_response).to be_redirect
-        expect(webmentions.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
       it "refuses to set it back to pending" do
@@ -381,7 +381,7 @@ RSpec.describe "Admin inbox", type: :request do
         records.each_key { snooze(it, Time.now + 3600) }
 
         expect(messages.by_id(records[:message].id).status).to eq("unread")
-        expect(webmentions.by_id(records[:webmention].id)).to have_attributes(status: "pending", seen_at: nil)
+        expect(webmention_queries.by_id(records[:webmention].id)).to have_attributes(status: "pending", seen_at: nil)
         expect(tasks.by_id(records[:task].id).source.seen_at).to be_nil
       end
 

@@ -3,7 +3,7 @@
 RSpec.describe "Admin post edit notes", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:post_edit_repo) { Posts::Slice["repos.post_edit_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
   let(:article) { create(:post, :published, slug: "hello") }
 
   def card = page.find(".card", text: "Edit notes")
@@ -12,7 +12,7 @@ RSpec.describe "Admin post edit notes", type: :request do
 
   def message(key) = i18n.t(key, scope: "ui.components.posts.field_error")
 
-  def notes = post_edit_repo.for_post(article.id).map(&:note)
+  def notes = post_queries.edits_for_post(article.id).map(&:note)
 
   def read = get("/admin/posts/#{article.id}/edit")
 
@@ -127,7 +127,7 @@ RSpec.describe "Admin post edit notes", type: :request do
       it "keeps the note's time" do
         revise(edit, "After")
 
-        expect(post_edit_repo.for_post(article.id).first.created_at).to eq(Time.utc(2026, 9, 1))
+        expect(post_queries.edits_for_post(article.id).first.created_at).to eq(Time.utc(2026, 9, 1))
       end
 
       it "comes back to the editor and says so", :aggregate_failures do
@@ -146,7 +146,7 @@ RSpec.describe "Admin post edit notes", type: :request do
       end
 
       it "leaves the post alone" do
-        expect { revise(edit, "After") }.not_to(change { Posts::Slice["repos.post_repo"].by_id(article.id).to_h })
+        expect { revise(edit, "After") }.not_to(change { Posts::Slice["repos.post_queries"].by_id(article.id).to_h })
       end
     end
 
@@ -198,7 +198,7 @@ RSpec.describe "Admin post edit notes", type: :request do
       revise(edit, "After", post_id: article.id)
 
       expect(last_response.status).to eq(404)
-      expect(post_edit_repo.for_post(other.id).map(&:note)).to eq(["Before"])
+      expect(post_queries.edits_for_post(other.id).map(&:note)).to eq(["Before"])
     end
 
     it "answers 404 for a note that isn't there" do

@@ -3,10 +3,10 @@
 module Posts
   module Operations
     class RevisePostBody
-      include Deps[claim_post_photos: "operations.claim_post_photos", post_repo: "repos.post_repo"]
+      include Deps[claim_post_photos: "operations.claim_post_photos", post_mutations: "repos.post_mutations"]
 
       def call(id, body:)
-        post_repo.update(id, body:).tap { claim_post_photos.call(it) }
+        post_mutations.update(id, body:).tap { claim_post_photos.call(it) }
       end
     end
   end

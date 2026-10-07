@@ -7,35 +7,17 @@ module Social
     config.shared_app_component_keys += %w[honeybadger.agent http]
 
     import keys: %w[
-      operations.compose_announcement operations.record_post_webmentions queries.by_id queries.published_by_slug
+      operations.compose_announcement operations.record_post_webmentions repos.post_queries
     ], from: :posts
 
     export %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
-      operations.delete_social_post operations.expand_for_network
-      operations.lock_editable_social_post
-      operations.mark_webmention_seen
-      operations.measure_parts operations.moderate_webmention
-      operations.move_social_post
-      operations.receive_webmention
-      operations.replace_social_post_parts operations.save_person operations.save_social_post operations.search_accounts
-      operations.snooze_webmentions operations.update_webmention_settings operations.wake_webmention
-      queries.calendar_social_posts
-      queries.counted_webmentions_for_post
-      queries.editable_social_post queries.linkable_social_posts queries.listed_webmentions_for_post
-      queries.mention_directory
-      queries.pending_webmention_count
-      queries.pending_webmentions queries.people queries.person_by_id queries.queued_social_posts
-      queries.received_webmention_count
-      queries.social_post_by_id queries.social_post_counts_by_status queries.social_post_counts_dated_between
-      queries.social_posts_by_filter
-      queries.snoozed_webmentions
-      queries.social_posts_dated_between queries.syndication_urls queries.unseen_webmention_count
-      queries.unseen_webmentions queries.unsent_social_posts
-      queries.webmention_by_id queries.webmention_counts_by_post queries.webmention_counts_by_status
-      queries.webmention_counts_received_in queries.webmention_settings
-      queries.webmentions_by_status queries.webmentions_received_between queries.webmentions_received_by_post
-      queries.webmentions_received_in
+      operations.delete_social_post operations.expand_for_network operations.lock_editable_social_post
+      operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention
+      operations.move_social_post operations.receive_webmention operations.replace_social_post_parts
+      operations.save_person operations.save_social_post operations.search_accounts operations.snooze_webmentions
+      operations.update_webmention_settings operations.wake_webmention repos.person_queries
+      repos.social_post_queries repos.webmention_queries
     ]
   end
 end

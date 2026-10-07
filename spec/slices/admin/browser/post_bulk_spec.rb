@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin bulk post actions", type: :feature do
-  let(:repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def acts = find("[data-bulk-acts]", visible: :all)
 
@@ -16,9 +16,9 @@ RSpec.describe "Admin bulk post actions", type: :feature do
     confirm_dialog.click_button("Yes")
   end
 
-  def tagged(name) = repo.all.select { |post| post.tags.any? { it.name == name } }.map(&:title)
+  def tagged(name) = post_queries.all.select { |post| post.tags.any? { it.name == name } }.map(&:title)
 
-  def titles = repo.all.map(&:title)
+  def titles = post_queries.all.map(&:title)
 
   before do
     create(:post, :draft, title: "first draft", updated_at: Time.now - 30)

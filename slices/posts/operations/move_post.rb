@@ -6,15 +6,15 @@ module Posts
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
       include Blog::DayMove
-      include Deps[post_repo: "repos.post_repo"]
+      include Deps[post_mutations: "repos.post_mutations", post_queries: "repos.post_queries"]
 
       def call(id, date, now: Time.now)
         day = step ahead(date, now)
 
         transaction do
-          post = step scheduled(post_repo.by_id_for_update(id))
-          post_repo.update(post.id, published_at: step(moved(post.published_at, day, now)))
-          post_repo.by_id(post.id)
+          post = step scheduled(post_mutations.by_id_for_update(id))
+          post_mutations.update(post.id, published_at: step(moved(post.published_at, day, now)))
+          post_queries.by_id(post.id)
         end
       end
 

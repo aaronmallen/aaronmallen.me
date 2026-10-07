@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin post editor", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
   let(:i18n) { Admin::Slice["i18n"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
@@ -18,7 +17,7 @@ RSpec.describe "Admin post editor", type: :request do
 
   def note_box = "[data-markdown-editor] textarea[name='post[edit_note]']"
 
-  def post_edit_repo = Posts::Slice["repos.post_edit_repo"]
+  def post_queries = Posts::Slice["repos.post_queries"]
 
   def save(path = "/admin/posts", intent: "draft", **fields)
     post path, _csrf_token: admin_csrf_token, intent:, post: fields
@@ -392,7 +391,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "removes the post" do
         remove
 
-        expect(post_repo.by_id(article.id)).to be_nil
+        expect(post_queries.by_id(article.id)).to be_nil
       end
 
       it "returns to the list with the toast", :aggregate_failures do
@@ -407,23 +406,23 @@ RSpec.describe "Admin post editor", type: :request do
         create(:post_edit, post: article)
         remove
 
-        expect(post_edit_repo.for_post(article.id)).to be_empty
+        expect(post_queries.edits_for_post(article.id)).to be_empty
       end
 
       it "takes the post's webmentions with it" do
         create(:webmention, :approved, post: article)
         remove
 
-        expect(Social::Slice["repos.webmention_repo"].received_count(article.id)).to eq(0)
+        expect(Social::Slice["repos.webmention_queries"].received_count(article.id)).to eq(0)
       end
 
       it "leaves a social post in place, detached", :aggregate_failures do
-        repo = Social::Slice["repos.social_post_repo"]
+        social_post_queries = Social::Slice["repos.social_post_queries"]
         social = create(:social_post, :posted, post_id: article.id)
         remove
 
-        expect(repo.by_id(social.id)).not_to be_nil
-        expect(repo.any_for_post?(article.id)).to be(false)
+        expect(social_post_queries.by_id(social.id)).not_to be_nil
+        expect(social_post_queries.any_for_post?(article.id)).to be(false)
       end
 
       it "drops the post from the public site" do
@@ -437,12 +436,12 @@ RSpec.describe "Admin post editor", type: :request do
         post "/admin/posts/#{article.id}/delete"
 
         expect(last_response.status).to eq(403)
-        expect(post_repo.by_id(article.id)).not_to be_nil
+        expect(post_queries.by_id(article.id)).not_to be_nil
       end
     end
 
     describe "webmentions" do
-      let(:webmention_repo) { Social::Slice["repos.webmention_repo"] }
+      let(:webmention_mutations) { Social::Slice["repos.webmention_mutations"] }
 
       def toggle = page.find_field("Accept webmentions", type: "checkbox")
 
@@ -454,14 +453,14 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "starts a new post on when new posts are enabled by default" do
-        webmention_repo.update_settings(enable_on_new_posts: true)
+        webmention_mutations.update_settings(enable_on_new_posts: true)
         get "/admin/posts/new"
 
         expect(toggle).to be_checked
       end
 
       it "starts a new post off when new posts are disabled by default" do
-        webmention_repo.update_settings(enable_on_new_posts: false)
+        webmention_mutations.update_settings(enable_on_new_posts: false)
         get "/admin/posts/new"
 
         expect(toggle).not_to be_checked
@@ -517,14 +516,14 @@ RSpec.describe "Admin post editor", type: :request do
         post = create(:post, webmentions_enabled: true)
         save("/admin/posts/#{post.id}", title: "Hello", webmentions_enabled: "0")
 
-        expect(post_repo.by_id(post.id)).to have_attributes(webmentions_enabled: false)
+        expect(post_queries.by_id(post.id)).to have_attributes(webmentions_enabled: false)
       end
 
       it "turns the flag on" do
         post = create(:post, webmentions_enabled: false)
         save("/admin/posts/#{post.id}", title: "Hello", webmentions_enabled: "1")
 
-        expect(post_repo.by_id(post.id)).to have_attributes(webmentions_enabled: true)
+        expect(post_queries.by_id(post.id)).to have_attributes(webmentions_enabled: true)
       end
 
       it "turns the flag off on a published post" do
@@ -532,21 +531,21 @@ RSpec.describe "Admin post editor", type: :request do
         save("/admin/posts/#{post.id}", intent: "save", title: "Hello", slug: "hello", body: post.body,
                                         webmentions_enabled: "0")
 
-        expect(post_repo.by_id(post.id)).to have_attributes(status: "published", webmentions_enabled: false)
+        expect(post_queries.by_id(post.id)).to have_attributes(status: "published", webmentions_enabled: false)
       end
 
       it "sets the flag on a new post" do
-        webmention_repo.update_settings(enable_on_new_posts: true)
+        webmention_mutations.update_settings(enable_on_new_posts: true)
         save(title: "Hello", webmentions_enabled: "0")
 
-        expect(post_repo.all.last).to have_attributes(webmentions_enabled: false)
+        expect(post_queries.all.last).to have_attributes(webmentions_enabled: false)
       end
 
       it "leaves the flag to the default when the form doesn't send it" do
-        webmention_repo.update_settings(enable_on_new_posts: false)
+        webmention_mutations.update_settings(enable_on_new_posts: false)
         save(title: "Hello")
 
-        expect(post_repo.all.last).to have_attributes(webmentions_enabled: false)
+        expect(post_queries.all.last).to have_attributes(webmentions_enabled: false)
       end
     end
 
@@ -573,7 +572,7 @@ RSpec.describe "Admin post editor", type: :request do
 
       def queued
         Social::Jobs::SyndicatePost.drain
-        Social::Slice["repos.social_post_repo"].queued
+        Social::Slice["repos.social_post_queries"].queued
       end
 
       def text_field = page.find_field("Cross-post text")
@@ -667,7 +666,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "saves the card with the post" do
         save(title: "Hello", **card)
 
-        expect(post_repo.all.last)
+        expect(post_queries.all.last)
           .to have_attributes(syndication_enabled: true, syndication_body: "In my own words",
                               syndication_targets: %w[mastodon bluesky])
       end
@@ -682,7 +681,7 @@ RSpec.describe "Admin post editor", type: :request do
         post = create(:post, :draft, slug: "hello", syndication_targets: %w[mastodon bluesky])
         save("/admin/posts/#{post.id}", title: "Hello", slug: "hello", **card, syndication_targets: [""])
 
-        expect(post_repo.by_id(post.id)).to have_attributes(syndication_targets: [])
+        expect(post_queries.by_id(post.id)).to have_attributes(syndication_targets: [])
       end
 
       it "queues nothing when every pill is off", :aggregate_failures, :commits do
@@ -690,7 +689,7 @@ RSpec.describe "Admin post editor", type: :request do
         save("/admin/posts/#{post.id}", intent: "publish", title: "Hello", slug: "hello", **card,
                                         syndication_targets: [""])
 
-        expect(post_repo.by_id(post.id)).to have_attributes(status: "published")
+        expect(post_queries.by_id(post.id)).to have_attributes(status: "published")
         expect(queued).to be_empty
       end
 
@@ -698,7 +697,7 @@ RSpec.describe "Admin post editor", type: :request do
         save(intent: "publish", title: "Hello", **card)
 
         expect(queued).to contain_exactly(
-          have_attributes(post_id: post_repo.all.last.id, targets: %w[mastodon bluesky],
+          have_attributes(post_id: post_queries.all.last.id, targets: %w[mastodon bluesky],
                           parts: [have_attributes(body: "In my own words")]),
         )
       end
@@ -723,7 +722,7 @@ RSpec.describe "Admin post editor", type: :request do
 
       it "queues nothing twice when a published post is saved again", :commits do
         save(intent: "publish", title: "Hello", **card)
-        save("/admin/posts/#{post_repo.all.last.id}", intent: "save", title: "Hello", slug: "hello", **card)
+        save("/admin/posts/#{post_queries.all.last.id}", intent: "save", title: "Hello", slug: "hello", **card)
 
         expect(queued.size).to eq(1)
       end
@@ -733,7 +732,7 @@ RSpec.describe "Admin post editor", type: :request do
 
         expect(last_response.status).to eq(422)
         expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
-        expect(post_repo.all).to be_empty
+        expect(post_queries.all).to be_empty
       end
 
       it "refuses an announcement that fits Bluesky only before its link to the site is tagged" do
@@ -753,7 +752,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "publishes a title and link that still fit Bluesky once the link is tagged" do
         save(intent: "publish", title: "a" * 250, slug: "hello", **card, **bluesky_only, syndication_body: "")
 
-        expect(post_repo.all.last.status).to eq("published")
+        expect(post_queries.all.last.status).to eq("published")
       end
 
       it "names the title and link when the blank box is what goes over", :aggregate_failures do
@@ -762,7 +761,7 @@ RSpec.describe "Admin post editor", type: :request do
         expect(last_response.status).to eq(422)
         expect(field_error)
           .to eq(i18n.t("ui.components.posts.field_error.syndication_body.announcement_too_long"))
-        expect(post_repo.all).to be_empty
+        expect(post_queries.all).to be_empty
       end
 
       it "refuses an announcement that fits Bluesky only before its mention expands", :aggregate_failures do
@@ -771,14 +770,14 @@ RSpec.describe "Admin post editor", type: :request do
 
         expect(last_response.status).to eq(422)
         expect(field_error).to eq(i18n.t("ui.components.posts.field_error.syndication_body.too_long"))
-        expect(post_repo.all).to be_empty
+        expect(post_queries.all).to be_empty
       end
 
       it "publishes and delivers an announcement that fits once its mention expands", :aggregate_failures, :commits do
         ada
         save(intent: "publish", title: "Hello", **card, **bluesky_only, syndication_body: "#{'a' * 280} @{ada}")
 
-        expect(post_repo.all.last.status).to eq("published")
+        expect(post_queries.all.last.status).to eq("published")
         expect(delivered).to eq("#{'a' * 280} @ada.bsky.social")
       end
 
@@ -794,7 +793,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "creates a draft" do
         save(title: "Hello", body: "one two", tags: "Ruby, hanami, ruby")
 
-        expect(post_repo.all).to contain_exactly(
+        expect(post_queries.all).to contain_exactly(
           have_attributes(title: "Hello", slug: "hello", status: "draft", body: "one two"),
         )
       end
@@ -803,7 +802,7 @@ RSpec.describe "Admin post editor", type: :request do
         save(title: "Hello")
         follow_redirect!
 
-        expect(last_request.path).to eq("/admin/posts/#{post_repo.all.last.id}/edit")
+        expect(last_request.path).to eq("/admin/posts/#{post_queries.all.last.id}/edit")
         expect(toast).to eq("Draft saved")
       end
 
@@ -811,38 +810,38 @@ RSpec.describe "Admin post editor", type: :request do
         draft = create(:post, :draft, slug: "hello")
         save("/admin/posts/#{draft.id}", title: "Changed", slug: "changed", body: "new")
 
-        expect(post_repo.by_id(draft.id)).to have_attributes(title: "Changed", slug: "changed", body: "new")
+        expect(post_queries.by_id(draft.id)).to have_attributes(title: "Changed", slug: "changed", body: "new")
       end
 
       it "creates a draft for an intent it doesn't know" do
         save(intent: "launch", title: "Hello")
 
-        expect(post_repo.all).to contain_exactly(have_attributes(status: "draft", published_at: nil))
+        expect(post_queries.all).to contain_exactly(have_attributes(status: "draft", published_at: nil))
       end
 
       it "keeps a draft a draft for an intent it doesn't know" do
         draft = create(:post, :draft, slug: "hello")
         save("/admin/posts/#{draft.id}", intent: %w[publish], title: "Hello", slug: "hello")
 
-        expect(post_repo.by_id(draft.id)).to have_attributes(status: "draft", published_at: nil)
+        expect(post_queries.by_id(draft.id)).to have_attributes(status: "draft", published_at: nil)
       end
 
       it "saves the summary, trimmed" do
         save(title: "Hello", summary: "  What it is about  ", body: "one two")
 
-        expect(post_repo.all.last.written_summary).to eq("What it is about")
+        expect(post_queries.all.last.written_summary).to eq("What it is about")
       end
 
       it "saves a blank summary as nothing written" do
         save(title: "Hello", summary: "   ", body: "one two")
 
-        expect(post_repo.all.last.written_summary).to be_nil
+        expect(post_queries.all.last.written_summary).to be_nil
       end
 
       it "saves the social card fields" do
         save(title: "Hello", body: "one two", **card)
 
-        expect(post_repo.all.last).to have_attributes(**card)
+        expect(post_queries.all.last).to have_attributes(**card)
       end
 
       it "refuses a card image that is not a link" do
@@ -854,15 +853,15 @@ RSpec.describe "Admin post editor", type: :request do
       it "keeps the publish time on a draft" do
         save(title: "Hello", publish_at: "2030-09-07T10:30")
 
-        expect(post_repo.all.last).to have_attributes(status: "draft", published_at: Time.utc(2030, 9, 7, 15, 30))
+        expect(post_queries.all.last).to have_attributes(status: "draft", published_at: Time.utc(2030, 9, 7, 15, 30))
       end
 
       it "changes the body of a draft with no note", :aggregate_failures do
         draft = create(:post, :draft, slug: "hello", body: "one")
         save("/admin/posts/#{draft.id}", title: "Hello", slug: "hello", body: "two")
 
-        expect(post_repo.by_id(draft.id).body).to eq("two")
-        expect(post_edit_repo.for_post(draft.id)).to be_empty
+        expect(post_queries.by_id(draft.id).body).to eq("two")
+        expect(post_queries.edits_for_post(draft.id)).to be_empty
       end
 
       it "changes the body of a scheduled post with no note", :aggregate_failures do
@@ -870,8 +869,8 @@ RSpec.describe "Admin post editor", type: :request do
         publish_at = Blog::TimeZone.input_value(scheduled.published_at)
         save("/admin/posts/#{scheduled.id}", intent: "publish", title: "Hello", slug: "hello", body: "two", publish_at:)
 
-        expect(post_repo.by_id(scheduled.id)).to have_attributes(status: "scheduled", body: "two")
-        expect(post_edit_repo.for_post(scheduled.id)).to be_empty
+        expect(post_queries.by_id(scheduled.id)).to have_attributes(status: "scheduled", body: "two")
+        expect(post_queries.edits_for_post(scheduled.id)).to be_empty
       end
 
       it "keeps a scheduled time in the hour the clock repeats when daylight saving ends" do
@@ -880,14 +879,14 @@ RSpec.describe "Admin post editor", type: :request do
         publish_at = Blog::TimeZone.input_value(scheduled.published_at)
         save("/admin/posts/#{scheduled.id}", intent: "publish", title: "Goodbye", slug: "hello", publish_at:)
 
-        expect(post_repo.by_id(scheduled.id)).to have_attributes(title: "Goodbye", published_at: repeated_hour)
+        expect(post_queries.by_id(scheduled.id)).to have_attributes(title: "Goodbye", published_at: repeated_hour)
       end
 
       it "turns a scheduled post back into a draft" do
         scheduled = create(:post, :scheduled, slug: "hello")
         save("/admin/posts/#{scheduled.id}", title: "Hello", slug: "hello")
 
-        expect(post_repo.by_id(scheduled.id)).to have_attributes(status: "draft")
+        expect(post_queries.by_id(scheduled.id)).to have_attributes(status: "draft")
       end
 
       it "returns 404 for invalid input to a post that doesn't exist" do
@@ -901,7 +900,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "publishes now without a publish time" do
         save(intent: "publish", title: "Hello")
 
-        expect(post_repo.all.last).to have_attributes(status: "published", published_at: be_within(5).of(Time.now))
+        expect(post_queries.all.last).to have_attributes(status: "published", published_at: be_within(5).of(Time.now))
       end
 
       it "shows the published toast" do
@@ -914,20 +913,22 @@ RSpec.describe "Admin post editor", type: :request do
       it "publishes now with a past publish time, keeping that time" do
         save(intent: "publish", title: "Hello", publish_at: "2026-09-07T10:30")
 
-        expect(post_repo.all.last).to have_attributes(status: "published", published_at: Time.utc(2026, 9, 7, 15, 30))
+        expect(post_queries.all.last)
+          .to have_attributes(status: "published", published_at: Time.utc(2026, 9, 7, 15, 30))
       end
 
       it "publishes a draft" do
         draft = create(:post, :draft)
         save("/admin/posts/#{draft.id}", intent: "publish", title: "Hello")
 
-        expect(post_repo.by_id(draft.id)).to have_attributes(status: "published")
+        expect(post_queries.by_id(draft.id)).to have_attributes(status: "published")
       end
 
       it "schedules a post with a future publish time" do
         save(intent: "publish", title: "Hello", publish_at: "2030-09-07T10:30")
 
-        expect(post_repo.all.last).to have_attributes(status: "scheduled", published_at: Time.utc(2030, 9, 7, 15, 30))
+        expect(post_queries.all.last)
+          .to have_attributes(status: "scheduled", published_at: Time.utc(2030, 9, 7, 15, 30))
       end
 
       it "shows the scheduled toast with the Chicago time" do
@@ -952,7 +953,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "saves it and keeps it published at its time" do
         save_published(title: "Changed", publish_at: "")
 
-        expect(post_repo.by_id(published.id))
+        expect(post_queries.by_id(published.id))
           .to have_attributes(title: "Changed", status: "published", published_at: Time.utc(2026, 9, 1))
       end
 
@@ -967,15 +968,15 @@ RSpec.describe "Admin post editor", type: :request do
         save_published(title: "Changed", slug: "goodbye")
 
         expect(field_error).to eq(i18n.t("ui.components.posts.field_error.slug.locked"))
-        expect(post_repo.by_id(published.id)).to have_attributes(title: "Hello", slug: "hello")
+        expect(post_queries.by_id(published.id)).to have_attributes(title: "Hello", slug: "hello")
       end
 
       it "refuses a body change with no note and changes nothing", :aggregate_failures do
         save_published(body: "two", edit_note: "  ")
 
         expect([last_response.status, field_error]).to eq([422, note_error("blank")])
-        expect(post_repo.by_id(published.id).body).to eq("one")
-        expect(post_edit_repo.for_post(published.id)).to be_empty
+        expect(post_queries.by_id(published.id).body).to eq("one")
+        expect(post_queries.edits_for_post(published.id)).to be_empty
       end
 
       it "shows the note error under the note box" do
@@ -1002,22 +1003,22 @@ RSpec.describe "Admin post editor", type: :request do
       it "saves a body change with its note", :aggregate_failures do
         save_published(body: "two", edit_note: "fixed the `numbers`")
 
-        expect(post_repo.by_id(published.id)).to have_attributes(body: "two", status: "published")
-        expect(post_edit_repo.for_post(published.id).map(&:note)).to eq(["fixed the `numbers`"])
+        expect(post_queries.by_id(published.id)).to have_attributes(body: "two", status: "published")
+        expect(post_queries.edits_for_post(published.id).map(&:note)).to eq(["fixed the `numbers`"])
       end
 
       it "saves a change to the tags and social card with no note", :aggregate_failures do
         save_published(tags: "ruby", **card)
 
-        expect(post_repo.by_id(published.id)).to have_attributes(**card)
-        expect(post_repo.by_id(published.id).tags.map(&:name)).to eq(%w[ruby])
-        expect(post_edit_repo.for_post(published.id)).to be_empty
+        expect(post_queries.by_id(published.id)).to have_attributes(**card)
+        expect(post_queries.by_id(published.id).tags.map(&:name)).to eq(%w[ruby])
+        expect(post_queries.edits_for_post(published.id)).to be_empty
       end
 
       it "keeps no note when the body stays the same" do
         save_published(title: "Changed", edit_note: "Nothing to say")
 
-        expect(post_edit_repo.for_post(published.id)).to be_empty
+        expect(post_queries.edits_for_post(published.id)).to be_empty
       end
 
       it "reads a body sent back with Windows line endings as the same body" do
@@ -1031,13 +1032,13 @@ RSpec.describe "Admin post editor", type: :request do
         save_published(body: "two", edit_note: "a" * 501)
 
         expect(field_error).to eq(note_error("long"))
-        expect(post_repo.by_id(published.id).body).to eq("one")
+        expect(post_queries.by_id(published.id).body).to eq("one")
       end
 
       it "takes a note of 500 characters" do
         save_published(body: "two", edit_note: "a" * 500)
 
-        expect(post_edit_repo.for_post(published.id).map { it.note.size }).to eq([500])
+        expect(post_queries.edits_for_post(published.id).map { it.note.size }).to eq([500])
       end
 
       it "refuses a note with a control character" do
@@ -1059,7 +1060,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "answers 422 and saves nothing for a blank title" do
         save(title: "  ", body: "kept")
 
-        expect([last_response.status, post_repo.all]).to eq([422, []])
+        expect([last_response.status, post_queries.all]).to eq([422, []])
       end
 
       it "shows the title error next to the title", :aggregate_failures do
@@ -1100,7 +1101,7 @@ RSpec.describe "Admin post editor", type: :request do
         save(title: "Hello")
 
         expect([last_response.status, field_error]).to eq([422, message("slug.taken")])
-        expect(post_repo.all.size).to eq(1)
+        expect(post_queries.all.size).to eq(1)
       end
 
       it "shows an error for a duplicate slug on update and changes nothing", :aggregate_failures do
@@ -1109,7 +1110,7 @@ RSpec.describe "Admin post editor", type: :request do
         save("/admin/posts/#{draft.id}", title: "Changed", slug: "hello")
 
         expect(field_error).to eq(message("slug.taken"))
-        expect(post_repo.by_id(draft.id)).to have_attributes(title: "Draft", slug: "draft")
+        expect(post_queries.by_id(draft.id)).to have_attributes(title: "Draft", slug: "draft")
       end
 
       it "keeps the edit form's action on an update error" do
@@ -1148,7 +1149,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "rejects a Chicago time the clocks skip and saves nothing" do
         save(intent: "publish", title: "Hello", publish_at: "2027-03-14T02:30")
 
-        expect([field_error, post_repo.all]).to eq([message("publish_at.skipped"), []])
+        expect([field_error, post_queries.all]).to eq([message("publish_at.skipped"), []])
       end
 
       it "rejects a publish time it can't read" do
@@ -1160,7 +1161,7 @@ RSpec.describe "Admin post editor", type: :request do
       it "rejects a save without a CSRF token" do
         post "/admin/posts", intent: "draft", post: { title: "Hello" }
 
-        expect([last_response.status, post_repo.all]).to eq([403, []])
+        expect([last_response.status, post_queries.all]).to eq([403, []])
       end
     end
   end
@@ -1179,7 +1180,7 @@ RSpec.describe "Admin post editor", type: :request do
       post "/admin/posts/#{article.id}/delete"
 
       expect(last_response).not_to be_successful
-      expect(post_repo.by_id(article.id)).not_to be_nil
+      expect(post_queries.by_id(article.id)).not_to be_nil
     end
   end
 end

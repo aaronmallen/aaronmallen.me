@@ -36,8 +36,7 @@ module API
 
       include Deps[
         "settings",
-        webmention_counts_received_in: "social.queries.webmention_counts_received_in",
-        webmentions_received_in: "social.queries.webmentions_received_in",
+        webmention_queries: "social.repos.webmention_queries",
       ]
 
       def handle(from: nil, to: nil, status: nil, post_id: nil, page: 1)
@@ -50,13 +49,13 @@ module API
       private
 
       def listed(first, last, status, post_id, page)
-        found = webmentions_received_in.call(from: first, to: last, page:, status:, post_id:)
+        found = webmention_queries.received_in(from: first, to: last, page:, status:, post_id:)
 
         {
           from: first&.iso8601,
           to: last&.iso8601,
           time_zone: Blog::TimeZone::NAME,
-          counts: webmention_counts_received_in.call(from: first, to: last, post_id:),
+          counts: webmention_queries.count_received_in(from: first, to: last, post_id:),
           webmentions: serialized(Serializers::Webmention, found.rows),
           **Blog::Paging.fields(found),
         }

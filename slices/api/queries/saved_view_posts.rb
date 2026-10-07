@@ -6,11 +6,11 @@ module API
   module Queries
     class SavedViewPosts
       include Dry::Monads[:result]
-      include Deps["settings", posts_by_filter: "posts.queries.by_filter"]
+      include Deps["settings", post_queries: "posts.repos.post_queries"]
 
       def call(filters, page: 1, **)
         chosen = Blog::Page.new(number: page, size: settings.page_size[:mcp])
-        found = posts_by_filter.call(Blog::Types::PostFilterParam[filters["status"]], chosen)
+        found = post_queries.by_filter(Blog::Types::PostFilterParam[filters["status"]], chosen)
 
         Success(rows: found.rows, **Blog::Paging.fields(found))
       end

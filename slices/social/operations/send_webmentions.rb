@@ -23,9 +23,9 @@ module Social
       include Deps[
         "routes",
         "webmentions.client",
-        post_by_id: "posts.queries.by_id",
+        post_queries: "posts.repos.post_queries",
         record_post_webmentions: "posts.operations.record_post_webmentions",
-        webmention_repo: "repos.webmention_repo",
+        webmention_queries: "repos.webmention_queries",
       ]
 
       def call(post_id)
@@ -64,9 +64,9 @@ module Social
       end
 
       def eligible(post_id)
-        return Failure(:not_sending) unless webmention_repo.settings.send_on_publish
+        return Failure(:not_sending) unless webmention_queries.settings.send_on_publish
 
-        post = post_by_id.call(post_id)
+        post = post_queries.by_id(post_id)
         return Failure(:not_a_post) unless post&.status == PUBLISHED
 
         Success(post)

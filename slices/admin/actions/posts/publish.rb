@@ -9,8 +9,7 @@ module Admin
 
         include Deps[
           "settings",
-          post_by_id: "posts.queries.by_id",
-          posts_by_filter: "posts.queries.by_filter",
+          post_queries: "posts.repos.post_queries",
           publish_draft: "posts.operations.publish_draft",
         ]
 
@@ -32,13 +31,13 @@ module Admin
 
         def back(request)
           filter = Blog::Types::PostFilterParam[request.params[:status]]
-          page = landing(request) { posts_by_filter.call(filter, it).past_end? }
+          page = landing(request) { post_queries.by_filter(filter, it).past_end? }
 
           routes.path(:admin_posts, status: filter, **Blog::Page.query(page))
         end
 
         def failed(response, id, reason)
-          toast(response, "#{FAILED}.#{reason}", post: post_by_id.call(id)&.title || "#{KEY}#{id}")
+          toast(response, "#{FAILED}.#{reason}", post: post_queries.by_id(id)&.title || "#{KEY}#{id}")
         end
 
         def published(response, outcome, post)

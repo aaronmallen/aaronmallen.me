@@ -6,7 +6,7 @@ module Social
       APPROVED = Blog::Types::WebmentionStatus["approved"]
       IGNORED = Blog::Types::WebmentionStatus["ignored"]
 
-      include Deps[webmention_repo: "repos.webmention_repo"]
+      include Deps[webmention_mutations: "repos.webmention_mutations"]
 
       def call(id, verdict, reason: nil)
         step found(moderated(id, Blog::Types::WebmentionStatus[verdict], visible(reason)))
@@ -16,9 +16,9 @@ module Social
 
       def moderated(id, verdict, reason)
         case verdict
-        when APPROVED then webmention_repo.approve(id)
-        when IGNORED then webmention_repo.ignore(id)
-        else webmention_repo.mark_spam(id, reason)
+        when APPROVED then webmention_mutations.approve(id)
+        when IGNORED then webmention_mutations.ignore(id)
+        else webmention_mutations.mark_spam(id, reason)
         end
       end
 

@@ -47,7 +47,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     nil
   end
 
-  def webmention_repo = Social::Slice["repos.webmention_repo"]
+  def webmention_mutations = Social::Slice["repos.webmention_mutations"]
 
   def webmentions = Social::Slice["relations.webmentions"].with(auto_struct: true, struct_namespace: Social::Structs)
 
@@ -512,21 +512,21 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     end
 
     it "leaves a mention already marked as spam alone" do
-      webmention_repo.mark_spam(stored.id)
+      webmention_mutations.mark_spam(stored.id)
       resend("Second")
 
       expect(stored.status).to eq("spam")
     end
 
     it "leaves a mention already ignored alone when the text changed" do
-      webmention_repo.ignore(stored.id)
+      webmention_mutations.ignore(stored.id)
       resend("Second")
 
       expect(stored).to have_attributes(status: "ignored", excerpt: "Second")
     end
 
     it "leaves a mention already approved alone when it says the same thing" do
-      webmention_repo.approve(stored.id)
+      webmention_mutations.approve(stored.id)
       resend("First")
 
       expect(stored.status).to eq("approved")
@@ -534,21 +534,21 @@ RSpec.describe Social::Jobs::VerifyWebmention do
 
     it "leaves a mention already approved alone when an overlong name comes back the same" do
       verify_page(long_name_entry)
-      webmention_repo.approve(stored.id)
+      webmention_mutations.approve(stored.id)
       verify
 
       expect(stored.status).to eq("approved")
     end
 
     it "sends a mention already approved back to pending when the text changed" do
-      webmention_repo.approve(stored.id)
+      webmention_mutations.approve(stored.id)
       resend("Second")
 
       expect(stored).to have_attributes(status: "pending", excerpt: "Second")
     end
 
     it "sends a mention already approved back to pending when the author changed" do
-      webmention_repo.approve(stored.id)
+      webmention_mutations.approve(stored.id)
       verify_page(entry(body: %(<a href="#{target}">read</a><p class="e-content">First</p>),
                         author: "https://ada.example/about"))
 
@@ -628,7 +628,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       end
 
       it "leaves the mention waiting even on a host marked as one person's site" do
-        webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
         verify_page(entry)
 
         expect(stored.status).to eq("pending")
@@ -649,13 +649,13 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       end
 
       it "approves a mention from any page once the host is marked as one person's site" do
-        webmention_repo.update_settings(single_author_hosts: ["ada.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
 
         expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("approved")
       end
 
       it "leaves a mention waiting once another host is the one marked" do
-        webmention_repo.update_settings(single_author_hosts: ["grace.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["grace.example"])
 
         expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("pending")
       end
@@ -682,7 +682,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
     end
 
     it "leaves a known author waiting once auto-approve is off" do
-      webmention_repo.update_settings(auto_approve_known_authors: false)
+      webmention_mutations.update_settings(auto_approve_known_authors: false)
       verify_page(entry(author: ada))
 
       expect(stored.status).to eq("pending")
@@ -695,7 +695,7 @@ RSpec.describe Social::Jobs::VerifyWebmention do
       "turned webmentions off" => { webmentions_enabled: false },
     }.each do |what, change|
       it "fetches nothing once the post #{what}", :aggregate_failures do
-        Posts::Slice["repos.post_repo"].update(post.id, **change)
+        Posts::Slice["repos.post_mutations"].update(post.id, **change)
         stub_source(entry)
         verify
 
@@ -713,21 +713,21 @@ RSpec.describe Social::Jobs::VerifyWebmention do
 
   describe "the settings" do
     it "fetches nothing once receiving is off" do
-      webmention_repo.update_settings(receive: false)
+      webmention_mutations.update_settings(receive: false)
       verify
 
       expect(a_request(:get, source)).not_to have_been_made
     end
 
     it "fetches nothing from Bridgy once Bridgy is off" do
-      webmention_repo.update_settings(accept_bridgy: false)
+      webmention_mutations.update_settings(accept_bridgy: false)
       verify(source: "https://brid.gy/like/mastodon/1")
 
       expect(a_request(:get, "https://brid.gy/like/mastodon/1")).not_to have_been_made
     end
 
     it "still reads another source once Bridgy is off" do
-      webmention_repo.update_settings(accept_bridgy: false)
+      webmention_mutations.update_settings(accept_bridgy: false)
       verify_page(entry)
 
       expect(stored).not_to be_nil

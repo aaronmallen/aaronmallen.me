@@ -6,11 +6,11 @@ module Admin
       class Edit < Action
         include Deps[
           build_person_editor: "operations.build_person_editor",
-          person_by_id: "social.queries.person_by_id",
+          person_queries: "social.repos.person_queries",
         ]
 
         def handle(request, response)
-          person = person_by_id.call(record_id(request))
+          person = person_queries.by_id(record_id(request))
           not_found(response) unless person
 
           response.render(view, **build_person_editor.call(person:))

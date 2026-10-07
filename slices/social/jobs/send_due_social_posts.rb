@@ -5,21 +5,24 @@ module Social
     class SendDueSocialPosts < Blog::Job
       STALLED_AFTER = 15 * 60
 
-      include Deps[social_post_repo: "repos.social_post_repo"]
+      include Deps[
+        social_post_mutations: "repos.social_post_mutations",
+        social_post_queries: "repos.social_post_queries",
+      ]
 
       sidekiq_options retry: false
 
       def perform
         now = Time.now
 
-        social_post_repo.due_scheduled(now).each { queue(it, due_by: now, stale_before: now - STALLED_AFTER) }
+        social_post_queries.due_scheduled(now).each { queue(it, due_by: now, stale_before: now - STALLED_AFTER) }
       end
 
       private
 
       def queue(social_post, due_by:, stale_before:)
         social_post.targets.each do |network|
-          next unless social_post_repo.claim_delivery(social_post.id, network, due_by:, stale_before:)
+          next unless social_post_mutations.claim_delivery(social_post.id, network, due_by:, stale_before:)
 
           DeliverSocialPost.perform_async(social_post.id, network)
         end

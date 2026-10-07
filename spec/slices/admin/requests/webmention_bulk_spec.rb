@@ -15,11 +15,11 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
 
   def relation = Social::Slice["relations.webmentions"]
 
-  def repo = Social::Slice["repos.webmention_repo"]
-
   def status(mention) = relation.by_pk(mention.id).one&.fetch(:status)
 
   def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
+
+  def webmention_queries = Social::Slice["repos.webmention_queries"]
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -132,20 +132,20 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       it "trusts an author once a batch approves them" do
         act("approved", mentions(1, author_url:))
 
-        expect(repo.known_author?(author_url)).to be(true)
+        expect(webmention_queries.known_author?(author_url)).to be(true)
       end
 
       it "takes trust away once a batch marks them spam" do
         create(:webmention, :approved, post_id: target.id, author_url:)
         act("spam", mentions(1, author_url:))
 
-        expect(repo.known_author?(author_url)).to be(false)
+        expect(webmention_queries.known_author?(author_url)).to be(false)
       end
 
       it "leaves an author unknown when a batch ignores them" do
         act("ignored", mentions(1, author_url:))
 
-        expect(repo.known_author?(author_url)).to be(false)
+        expect(webmention_queries.known_author?(author_url)).to be(false)
       end
     end
 
@@ -237,7 +237,7 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
         follow_redirect!
 
         expect(toast).to eq("Tick 100 webmentions or fewer")
-        expect(repo.pending_count).to eq(101)
+        expect(webmention_queries.pending_count).to eq(101)
       end
 
       it "counts a repeated webmention once" do

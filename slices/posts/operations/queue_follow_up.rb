@@ -6,13 +6,13 @@ module Posts
       SEND_WEBMENTIONS = Blog::Types::PostFollowUp["send_webmentions"]
       SYNDICATE_POST = Blog::Types::PostFollowUp["syndicate_post"]
 
-      include Deps[honeybadger: "honeybadger.agent", post_repo: "repos.post_repo"]
+      include Deps[honeybadger: "honeybadger.agent", post_mutations: "repos.post_mutations"]
 
       def call(post_id, follow_up, at: Time.now)
         queue(post_id, follow_up, at)
       rescue RedisClient::Error => e
         honeybadger.notify(e)
-        post_repo.hold_follow_up(post_id:, follow_up:, requested_at: at)
+        post_mutations.hold_follow_up(post_id:, follow_up:, requested_at: at)
       end
 
       def queue(post_id, follow_up, at)

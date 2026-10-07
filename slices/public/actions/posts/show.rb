@@ -5,24 +5,20 @@ module Public
     module Posts
       class Show < Action
         include Deps[
-          counted_webmentions_for_post: "social.queries.counted_webmentions_for_post",
-          edits_for_post: "posts.queries.edits_for_post",
-          listed_webmentions_for_post: "social.queries.listed_webmentions_for_post",
-          next_published_post: "posts.queries.next_published",
-          previous_published_post: "posts.queries.previous_published",
-          published_post_by_slug: "posts.queries.published_by_slug",
-          syndication_urls: "social.queries.syndication_urls",
+          post_queries: "posts.repos.post_queries",
+          social_post_queries: "social.repos.social_post_queries",
+          webmention_queries: "social.repos.webmention_queries",
         ]
 
         share_with_caches
 
         def handle(request, response)
           slug = Blog::Types::Slug.call(path_param(request, :slug)) { not_found(response) }
-          post = published_post_by_slug.call(slug)
+          post = post_queries.published_by_slug(slug)
           not_found(response) unless post
 
           response[:post] = post
-          response[:syndication_urls] = syndication_urls.call(post.id)
+          response[:syndication_urls] = social_post_queries.syndication_urls(post.id)
           response[:webmentions] = webmentions_for(post)
           expose_body(response, post)
           expose_pager(response, post)
@@ -32,16 +28,16 @@ module Public
 
         def expose_body(response, post)
           response[:body_html] = post.body_html
-          response[:edits] = edits_for_post.call(post.id)
+          response[:edits] = post_queries.edits_for_post(post.id)
         end
 
         def expose_pager(response, post)
-          response[:previous_post] = previous_published_post.call(post)
-          response[:next_post] = next_published_post.call(post)
+          response[:previous_post] = post_queries.previous_published(post)
+          response[:next_post] = post_queries.next_published(post)
         end
 
         def webmentions_for(post)
-          { responses: listed_webmentions_for_post.call(post.id), counts: counted_webmentions_for_post.call(post.id) }
+          { responses: webmention_queries.listed_for(post.id), counts: webmention_queries.counted_for(post.id) }
         end
       end
     end

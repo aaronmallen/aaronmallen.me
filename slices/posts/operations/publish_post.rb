@@ -3,12 +3,16 @@
 module Posts
   module Operations
     class PublishPost < Operation
-      include Deps[post_repo: "repos.post_repo", queue_follow_up: "operations.queue_follow_up"]
+      include Deps[
+        post_mutations: "repos.post_mutations",
+        post_queries: "repos.post_queries",
+        queue_follow_up: "operations.queue_follow_up",
+      ]
 
       def call(id, at: Time.now, only_if_due: false)
         post = step publish(id, at, only_if_due)
-        post_repo.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SYNDICATE_POST, at:) }
-        post_repo.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SEND_WEBMENTIONS) }
+        post_mutations.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SYNDICATE_POST, at:) }
+        post_mutations.after_commit { queue_follow_up.call(post.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         post
       end
@@ -16,9 +20,9 @@ module Posts
       private
 
       def publish(id, at, only_if_due)
-        post = only_if_due ? post_repo.publish_due(id, at:) : post_repo.publish(id, at:)
+        published = only_if_due ? post_mutations.publish_due(id, at:) : post_mutations.publish(id, at:)
 
-        post ? Success(post) : Failure(:not_due)
+        published ? Success(post_queries.by_id(id)) : Failure(:not_due)
       end
     end
   end

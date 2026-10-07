@@ -3,17 +3,17 @@
 module Social
   module Jobs
     class QueueHeldWebmentions < Blog::Job
-      include Deps[webmention_repo: "repos.webmention_repo"]
+      include Deps[webmention_mutations: "repos.webmention_mutations", webmention_queries: "repos.webmention_queries"]
 
       sidekiq_options retry: false
 
-      def perform = webmention_repo.held.each { queue(it) }
+      def perform = webmention_queries.held.each { queue(it) }
 
       private
 
       def queue(held)
         VerifyWebmention.perform_async(held.source_url, held.target_url, held.post_id)
-        webmention_repo.release(held.id)
+        webmention_mutations.release(held.id)
       end
     end
   end

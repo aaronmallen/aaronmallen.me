@@ -5,6 +5,8 @@ RSpec.describe "API publishing a post", type: :request do
 
   def overlong = { syndication_enabled: true, syndication_body: "a" * 301, syndication_targets: %w[bluesky] }
 
+  def post_queries = Posts::Slice["repos.post_queries"]
+
   def publish(id, body = "{}")
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
@@ -12,11 +14,9 @@ RSpec.describe "API publishing a post", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def repo = Posts::Slice["repos.post_repo"]
-
   def status = last_response.status
 
-  def stored(article) = repo.by_id(article.id)
+  def stored(article) = post_queries.by_id(article.id)
 
   describe "POST /api/v1/posts/:id/publish" do
     it "publishes a draft now and answers it", :aggregate_failures do

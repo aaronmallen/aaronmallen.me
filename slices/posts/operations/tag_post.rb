@@ -3,19 +3,19 @@
 module Posts
   module Operations
     class TagPost < Operation
-      include Deps[post_repo: "repos.post_repo"]
+      include Deps[post_mutations: "repos.post_mutations", post_queries: "repos.post_queries"]
 
       def call(id, name)
         transaction do
           step find(id)
-          post_repo.add_tag(id, name)
-          post_repo.by_id(id)
+          post_mutations.add_tag(id, name)
+          post_queries.by_id(id)
         end
       end
 
       private
 
-      def find(id) = found(post_repo.by_id_for_update(id) && id)
+      def find(id) = found(post_mutations.by_id_for_update(id) && id)
     end
   end
 end

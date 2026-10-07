@@ -22,9 +22,9 @@ RSpec.describe "Admin photo claims", type: :request do
   end
 
   describe "a post" do
-    let(:post_repo) { Posts::Slice["repos.post_repo"] }
+    let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
-    def article = post_repo.all.first
+    def article = post_queries.all.first
 
     def save(**fields) = send_to("/admin/posts", intent: "draft", post: { title: "Hello", **fields })
 
@@ -66,9 +66,8 @@ RSpec.describe "Admin photo claims", type: :request do
 
     describe "edit notes" do
       let(:published) { create(:post, :published, slug: "hello", body: "one") }
-      let(:post_edit_repo) { Posts::Slice["repos.post_edit_repo"] }
 
-      def edit = post_edit_repo.for_post(published.id).first
+      def edit = post_queries.edits_for_post(published.id).first
 
       def revise(note) = send_to("/admin/posts/#{published.id}/edits/#{edit.id}", edit: { note: })
 

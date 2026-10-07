@@ -2,13 +2,13 @@
 
 RSpec.describe "Admin publishing a post from the list", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def publish(id, **params) = post("/admin/posts/#{id}/publish", { _csrf_token: admin_csrf_token, **params })
 
   def publish_buttons = page.all("form[action$='/publish'] button[data-key='p']")
 
-  def status(article) = repo.by_id(article.id).status
+  def status(article) = post_queries.by_id(article.id).status
 
   def toast = page.find("[data-toast] .toast", visible: :all).text(:all)
 
@@ -81,7 +81,7 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
 
       Social::Jobs::SyndicatePost.drain
 
-      expect(Social::Slice["repos.social_post_repo"].queued).to contain_exactly(have_attributes(post_id: draft.id))
+      expect(Social::Slice["repos.social_post_queries"].queued).to contain_exactly(have_attributes(post_id: draft.id))
     end
 
     describe "a draft with a publish time still to come" do
@@ -107,7 +107,7 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
 
       it "publishes it now", :aggregate_failures do
         expect(status(scheduled)).to eq("published")
-        expect(repo.by_id(scheduled.id).published_at).to be_within(60).of(Time.now)
+        expect(post_queries.by_id(scheduled.id).published_at).to be_within(60).of(Time.now)
       end
 
       it "says it went out" do
@@ -123,7 +123,7 @@ RSpec.describe "Admin publishing a post from the list", type: :request do
       before { publish(published.id) }
 
       it "leaves it as it was" do
-        expect(repo.by_id(published.id).published_at).to be_within(1).of(published.published_at)
+        expect(post_queries.by_id(published.id).published_at).to be_within(1).of(published.published_at)
       end
 
       it "names the post" do

@@ -6,9 +6,9 @@ module API
       SCHEMA = { additionalProperties: false, properties: {} }.freeze
       REPLY = Schema.object({ people: Schema.list(Serializers::Person.reference) }).freeze
 
-      include Deps[people: "social.queries.people"]
+      include Deps[person_queries: "social.repos.person_queries"]
 
-      def handle = Success(people: serialized(Serializers::Person, people.call))
+      def handle = Success(people: serialized(Serializers::Person, person_queries.all))
     end
   end
 end

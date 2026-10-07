@@ -10,13 +10,15 @@ RSpec.describe "API reading a post", type: :request do
     }
   end
 
+  def post_mutations = Posts::Slice["repos.post_mutations"]
+
+  def post_queries = Posts::Slice["repos.post_queries"]
+
   def read(id)
     headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/posts/#{id}", nil, headers
     JSON.parse(last_response.body)
   end
-
-  def repo = Posts::Slice["repos.post_repo"]
 
   def shown(stored)
     {
@@ -45,9 +47,9 @@ RSpec.describe "API reading a post", type: :request do
   describe "GET /api/v1/posts/:id" do
     it "answers every field the admin editor shows" do
       article = create(:post, :scheduled, **written)
-      repo.replace_tags(article.id, %w[ruby])
+      post_mutations.replace_tags(article.id, %w[ruby])
 
-      expect([read(article.id), status]).to match([include(shown(repo.by_id(article.id))), 200])
+      expect([read(article.id), status]).to match([include(shown(post_queries.by_id(article.id))), 200])
     end
 
     it "gives empty text and null card fields for a post that leaves them blank" do
@@ -115,7 +117,7 @@ RSpec.describe "API reading a post", type: :request do
   describe "the MCP tool" do
     it "answers as GET /api/v1/posts/:id does" do
       article = create(:post, :published, **written)
-      repo.replace_tags(article.id, %w[ruby])
+      post_mutations.replace_tags(article.id, %w[ruby])
       create(:post_edit, post_id: article.id)
 
       expect(mcp_answer("read_post", id: article.id)).to eq(read(article.id))

@@ -12,9 +12,8 @@ module Social
 
       include Deps[
         contract: "contracts.compose_social_post_contract",
-        editable_social_post: "queries.editable_social_post",
         save_social_post: "operations.save_social_post",
-        social_post_by_id: "queries.social_post_by_id",
+        social_post_queries: "repos.social_post_queries",
       ]
 
       def call(params, intent: DRAFT, id: nil, now: Time.now)
@@ -36,10 +35,10 @@ module Social
       def editable(id)
         return Success(nil) unless id
 
-        social_post = editable_social_post.call(id)
+        social_post = social_post_queries.editable(id)
         return Success(social_post) if social_post
 
-        social_post_by_id.call(id) ? Failure(:already_posted) : Failure(:not_found)
+        social_post_queries.by_id(id) ? Failure(:already_posted) : Failure(:not_found)
       end
 
       def form(params) = FIELDS.to_h { [it, params[it]] }

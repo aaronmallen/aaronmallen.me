@@ -54,7 +54,7 @@ RSpec.describe "Admin inbox Mark All As Seen", type: :request do
     see_all(**ids)
 
     expect([toast, inbox]).to eq(["Marked 3 rows seen", []])
-    expect(Social::Slice["repos.webmention_repo"].by_id(ids[:webmentions].first).status).to eq("pending")
+    expect(Social::Slice["repos.webmention_queries"].by_id(ids[:webmentions].first).status).to eq("pending")
   end
 
   it "keeps a row that arrived after the page rendered" do

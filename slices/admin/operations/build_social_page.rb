@@ -18,18 +18,17 @@ module Admin
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
         open_suggestion_counts: "suggestions.queries.open_counts_for_social_posts",
-        people: "social.queries.people",
+        person_queries: "social.repos.person_queries",
         review_social_edits: "operations.review_social_edits",
         settings: "settings",
-        social_post_counts_by_status: "social.queries.social_post_counts_by_status",
-        social_posts_by_filter: "social.queries.social_posts_by_filter",
+        social_post_queries: "social.repos.social_post_queries",
       ]
 
       def call(
         filter: Blog::Types::SocialQueue["queued"], page: nil, params: nil, editing: nil,
         errors: EMPTY_HASH, records: EMPTY_HASH, now: Time.now
       )
-        items = social_posts_by_filter.call(filter, page || first_page)
+        items = social_post_queries.by_filter(filter, page || first_page)
 
         {
           filter:, items:, now:, records: editing && list_record_links.call(KIND, editing.id, **records),
@@ -47,7 +46,7 @@ module Admin
           editing: editing&.id,
           errors:,
           networks: list_networks.call(selected: targets(params, editing)),
-          people: people.call,
+          people: person_queries.all,
           suggestions: review_social_edits.call(editing),
           values:,
         }
@@ -70,7 +69,7 @@ module Admin
       def queue(items)
         {
           accounts: list_social_accounts.call,
-          queued: social_post_counts_by_status.call.fetch(Blog::Types::SocialPostStatus["scheduled"], 0),
+          queued: social_post_queries.count_by_status.fetch(Blog::Types::SocialPostStatus["scheduled"], 0),
           suggestion_counts: open_counts(items),
         }
       end

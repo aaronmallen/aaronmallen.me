@@ -17,12 +17,10 @@ module Admin
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
-        pending_webmention_count: "social.queries.pending_webmention_count",
-        pending_webmentions: "social.queries.pending_webmentions",
-        posts_by_status: "posts.queries.by_status",
-        queued_social_posts: "social.queries.queued_social_posts",
-        scheduled_posts: "posts.queries.scheduled",
+        post_queries: "posts.repos.post_queries",
+        social_post_queries: "social.repos.social_post_queries",
         sync_state_queries: "record.repos.sync_state_queries",
+        webmention_queries: "social.repos.webmention_queries",
       ]
 
       def call(now: Time.now, pool: nil)
@@ -72,13 +70,13 @@ module Admin
       end
 
       def posts(scheduled)
-        drafts = posts_by_status.call(DRAFT)
+        drafts = post_queries.by_status(DRAFT)
 
         { scheduled:, drafts:, draft_counts: draft_counts(drafts) }
       end
 
       def publishing(now)
-        scheduled = scheduled_posts.call
+        scheduled = post_queries.scheduled
         social = social_queue
 
         { posts: posts(scheduled), queue: queue(scheduled, social, now), social: }
@@ -97,7 +95,7 @@ module Admin
       end
 
       def social_queue
-        scheduled = queued_social_posts.call
+        scheduled = social_post_queries.queued
 
         { scheduled:, summaries: scheduled.to_h { [it.id, summary(it)] } }
       end
@@ -109,7 +107,7 @@ module Admin
       end
 
       def webmentions
-        { count: pending_webmention_count.call, mentions: pending_webmentions.call(limit: PENDING_MENTIONS) }
+        { count: webmention_queries.pending_count, mentions: webmention_queries.pending(limit: PENDING_MENTIONS) }
       end
     end
   end

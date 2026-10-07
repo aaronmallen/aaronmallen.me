@@ -3,7 +3,7 @@
 RSpec.describe "Admin tags", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
   let(:repo) { Tags::Slice["repos.tag_repo"] }
 
   def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
@@ -390,7 +390,7 @@ RSpec.describe "Admin tags", type: :request do
         article = create(:post, tags: %w[ruby])
         send_to("/admin/tags/#{named('ruby').id}", tag: { name: "hanami" })
 
-        expect(post_repo.by_id(article.id).tags.map(&:name)).to eq(%w[hanami])
+        expect(post_queries.by_id(article.id).tags.map(&:name)).to eq(%w[hanami])
       end
 
       it "refuses a blank name" do
@@ -542,7 +542,7 @@ RSpec.describe "Admin tags", type: :request do
         project = create(:project, tags: %w[ruby])
         send_to("/admin/tags/#{named('ruby').id}/delete")
 
-        expect(post_repo.by_id(post.id).tags.map(&:name)).to eq(%w[rails])
+        expect(post_queries.by_id(post.id).tags.map(&:name)).to eq(%w[rails])
         expect(Projects::Slice["repos.project_queries"].by_id(project.id).tags).to be_empty
       end
 
@@ -558,7 +558,7 @@ RSpec.describe "Admin tags", type: :request do
         post = create(:post, :published, tags: %w[ruby])
         send_to("/admin/tags/#{named('ruby').id}/delete")
 
-        expect(post_repo.by_id(post.id).updated_at).to eq(post.updated_at)
+        expect(post_queries.by_id(post.id).updated_at).to eq(post.updated_at)
       end
 
       it "takes away a tag while other tags are in use" do

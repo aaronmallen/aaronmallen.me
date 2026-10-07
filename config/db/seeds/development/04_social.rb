@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Social::Slice["queries.people"].call.any?
+return if Social::Slice["repos.person_queries"].all.any?
 
 save_person = Social::Operations::SavePerson.new(networks: Seeds.networks)
 [
@@ -36,7 +36,7 @@ thread = Seeds.unwrap(
   ),
 )
 
-article = Posts::Slice["queries.published_by_slug"].call("moving-the-blog-to-hanami-3")
+article = Posts::Slice["repos.post_queries"].published_by_slug("moving-the-blog-to-hanami-3")
 announcement = Seeds.unwrap(
   save_social_post.call(
     parts: [Posts::Slice["operations.compose_announcement"].call(article)], post_id: article.id, targets: both,
@@ -58,7 +58,7 @@ Seeds.unwrap(
   ),
 )
 
-postgres = Posts::Slice["queries.published_by_slug"].call("domains-in-postgres")
+postgres = Posts::Slice["repos.post_queries"].published_by_slug("domains-in-postgres")
 visitor_hash = Analytics::Slice["operations.hash_visitor"].call(address: "192.0.2.10")
 target = ->(post) { Blog::Site.url("#{Blog::Site::WRITING}/#{post.slug}") }
 page = lambda do |mention|

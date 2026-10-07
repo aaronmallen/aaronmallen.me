@@ -36,7 +36,7 @@ RSpec.describe "Admin post syndication preview", type: :request do
 
     it "saves no post" do
       expect { preview(title: "Hello", slug: "hello") }
-        .not_to(change { Posts::Slice["repos.post_repo"].all.count })
+        .not_to(change { Posts::Slice["repos.post_queries"].all.count })
     end
 
     it "rejects a preview without a CSRF token" do

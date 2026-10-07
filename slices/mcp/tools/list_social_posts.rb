@@ -43,12 +43,12 @@ module MCP
         private
 
         def listed(first, last, queue, page, server_context)
-          found = dep(:social_posts_dated_between, server_context).call(from: first, to: last, page:, queue:)
+          found = dep(:social_post_queries, server_context).dated_between(from: first, to: last, page:, queue:)
 
           answer(
             from: first&.iso8601,
             to: last&.iso8601,
-            counts: dep(:social_post_counts_between, server_context).call(from: first, to: last),
+            counts: dep(:social_post_queries, server_context).count_dated_between(from: first, to: last),
             social_posts: found.rows.map { social_post_entry(it, server_context) },
             **Blog::Paging.fields(found),
           )

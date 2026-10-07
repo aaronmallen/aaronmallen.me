@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Posts::Jobs::PublishDuePosts do
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_mutations) { Posts::Slice["repos.post_mutations"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def due(**) = create(:post, :scheduled, published_at: Time.now.round - 60, **)
 
@@ -10,10 +11,10 @@ RSpec.describe Posts::Jobs::PublishDuePosts do
   def perform = described_class.new.perform
 
   def perform_with_edit_after_select(posts = nil, **edit)
-    allow(post_repo).to(receive(:due_scheduled).and_wrap_original do |select, *args|
-      select.call(*args).tap { |due| (posts || due).each { post_repo.update(it.id, edit) } }
+    allow(post_queries).to(receive(:due_scheduled).and_wrap_original do |select, *args|
+      select.call(*args).tap { |due| (posts || due).each { post_mutations.update(it.id, edit) } }
     end)
-    replace_component("repos.post_repo", post_repo)
+    replace_component("repos.post_queries", post_queries)
     perform
   end
 
@@ -31,7 +32,7 @@ RSpec.describe Posts::Jobs::PublishDuePosts do
 
   def queued = [Social::Jobs::SyndicatePost, Social::Jobs::SendWebmentions].flat_map(&:jobs)
 
-  def reloaded(post) = post_repo.by_id(post.id)
+  def reloaded(post) = post_queries.by_id(post.id)
 
   it "publishes a scheduled post whose publish time has passed" do
     post = due

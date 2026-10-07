@@ -7,10 +7,15 @@ module Social
       OK_STATUSES = (200..299)
       PUBLISHED = Blog::Types::PostStatus["published"]
 
-      include Deps["webmentions.client", post_by_id: "posts.queries.by_id", webmention_repo: "repos.webmention_repo"]
+      include Deps[
+        "webmentions.client",
+        post_queries: "posts.repos.post_queries",
+        webmention_mutations: "repos.webmention_mutations",
+        webmention_queries: "repos.webmention_queries",
+      ]
 
       def call(source:, target:, post_id:)
-        settings = webmention_repo.settings
+        settings = webmention_queries.settings
         step accepting(source, settings)
         post = step open_post(post_id)
         response = step fetch(post, source)
@@ -34,7 +39,7 @@ module Social
         return false unless settings.auto_approve_known_authors && author_url
 
         scope = Webmentions::AuthorScope.new(author_url, single_author_hosts: settings.single_author_hosts)
-        [source, page.url].all? { scope.covers?(it) } && webmention_repo.known_author?(author_url)
+        [source, page.url].all? { scope.covers?(it) } && webmention_queries.known_author?(author_url)
       end
 
       def fetch(post, source)
@@ -50,7 +55,7 @@ module Social
       end
 
       def forget(post, source, reason)
-        webmention_repo.delete_by_source(post.id, source)
+        webmention_mutations.delete_by_source(post.id, source)
         Failure(reason)
       end
 
@@ -59,17 +64,17 @@ module Social
       end
 
       def open_post(post_id)
-        post = post_by_id.call(post_id)
+        post = post_queries.by_id(post_id)
         post&.status == PUBLISHED && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
       end
 
       def status(page, source, settings)
-        approved?(page, source, settings) ? Repos::WebmentionRepo::APPROVED : Repos::WebmentionRepo::PENDING
+        approved?(page, source, settings) ? Repos::WebmentionMutations::APPROVED : Repos::WebmentionQueries::PENDING
       end
 
       def store(page, post, source, settings)
         author = page.author
-        webmention_repo.store(
+        webmention_mutations.store(
           post_id: post.id, source_url: source, author_name: author[:name], author_url: author[:url],
           type: page.type, excerpt: page.excerpt, received_at: Time.now, status: status(page, source, settings),
         )

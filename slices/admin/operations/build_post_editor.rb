@@ -9,13 +9,12 @@ module Admin
         announcement: "posts.operations.compose_announcement",
         build_post_preview: "operations.build_post_preview",
         count_network_lengths: "operations.count_network_lengths",
-        edits_newest_first: "posts.queries.edits_newest_first",
         list_networks: "operations.list_networks",
-        people: "social.queries.people",
+        person_queries: "social.repos.person_queries",
+        post_queries: "posts.repos.post_queries",
         preview_announcement: "operations.preview_announcement",
-        received_webmention_count: "social.queries.received_webmention_count",
         suggestion_for_post: "suggestions.queries.for_post",
-        webmention_settings: "social.queries.webmention_settings",
+        webmention_queries: "social.repos.webmention_queries",
       ]
 
       PUBLISHED = Blog::Types::PostStatus["published"]
@@ -51,7 +50,7 @@ module Admin
       def edits(post)
         return Blog::Constants::EMPTY_ARRAY unless post&.status == PUBLISHED
 
-        edits_newest_first.call(post.id)
+        post_queries.edits_newest_first(post.id)
       end
 
       def suggestions(post)
@@ -73,7 +72,7 @@ module Admin
           counts: count_network_lengths.call([body.strip.empty? ? preview : body]).first,
           enabled: syndication_enabled(post, params),
           networks: list_networks.call(selected: syndication_targets(post, params)),
-          people: people.call,
+          people: person_queries.all,
           preview:,
         }
       end
@@ -109,7 +108,7 @@ module Admin
       def webmentions(post, params)
         {
           enabled: webmentions_enabled(post, params),
-          received: post ? received_webmention_count.call(post.id) : 0,
+          received: post ? webmention_queries.received_count(post.id) : 0,
         }
       end
 
@@ -117,7 +116,7 @@ module Admin
         return Blog::Types::Checkbox[params[:webmentions_enabled]] if params
         return post.webmentions_enabled if post
 
-        webmention_settings.call.enable_on_new_posts
+        webmention_queries.settings.enable_on_new_posts
       end
     end
   end

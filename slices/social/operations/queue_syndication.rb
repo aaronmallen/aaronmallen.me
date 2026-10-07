@@ -9,7 +9,7 @@ module Social
         announcement: "posts.operations.compose_announcement",
         networks: "networks.all",
         save_social_post: "operations.save_social_post",
-        social_post_repo: "repos.social_post_repo",
+        social_post_queries: "repos.social_post_queries",
       ]
 
       def call(post, at: Time.now)
@@ -40,7 +40,7 @@ module Social
       end
 
       def unqueued(post)
-        social_post_repo.any_for_post?(post.id) ? Failure(:already_queued) : Success(post)
+        social_post_queries.any_for_post?(post.id) ? Failure(:already_queued) : Success(post)
       end
 
       def wanted(post) = post.syndication_enabled ? Success(post) : Failure(:not_syndicating)

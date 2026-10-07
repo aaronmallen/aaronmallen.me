@@ -7,14 +7,14 @@ module Public
         include Deps[
           "settings",
           atom_feed: "operations.render_atom_feed",
-          published_page: "posts.queries.published_page",
+          post_queries: "posts.repos.post_queries",
         ]
 
         config.formats.clear.accept :atom
         answer_any_accept :atom
 
         def handle(request, response)
-          posts = published_page.call(requested_page(request, response, settings.page_size[:public]))
+          posts = post_queries.published_page(requested_page(request, response, settings.page_size[:public]))
           halt 404 if posts.past_end?
           version = version_feed_or_halt(request, response, posts)
 

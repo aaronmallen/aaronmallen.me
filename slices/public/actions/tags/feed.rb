@@ -7,7 +7,7 @@ module Public
         include Deps[
           "settings",
           atom_feed: "operations.render_atom_feed",
-          published_page_by_tag: "posts.queries.published_page_by_tag",
+          post_queries: "posts.repos.post_queries",
         ]
 
         config.formats.clear.accept :atom
@@ -17,7 +17,7 @@ module Public
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }
           page = requested_page(request, response, settings.page_size[:public])
           redirect_to_own_path(request, response, :tag_feed, page, tag:)
-          posts = published_page_by_tag.call(tag, page)
+          posts = post_queries.published_page_by_tag(tag, page)
           halt 404 if posts.rows.empty?
           version = version_feed_or_halt(request, response, posts)
 

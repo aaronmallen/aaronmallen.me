@@ -16,23 +16,24 @@ RSpec.describe "API bulk post actions", type: :request do
 
   def drafts(count) = Array.new(count) { create(:post, :draft) }
 
-  def gone_id = create(:post).id.tap { repo.delete(it) }
+  def gone_id = create(:post).id.tap { post_mutations.delete(it) }
 
   def ids(posts) = posts.map(&:id)
 
-  def kept?(article) = !repo.by_id(article.id).nil?
+  def kept?(article) = !post_queries.by_id(article.id).nil?
 
   def missing(id) = "no blog post has the ID #{id}"
 
-  def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
+  def post_mutations = Posts::Slice["repos.post_mutations"]
 
-  def repo = Posts::Slice["repos.post_repo"]
+  def post_queries = Posts::Slice["repos.post_queries"]
+  def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
   def status = last_response.status
 
-  def tag_names(article) = repo.by_id(article.id).tags.map(&:name).sort
+  def tag_names(article) = post_queries.by_id(article.id).tags.map(&:name).sort
 
-  def tagged(*names, **attributes) = create(:post, **attributes).tap { repo.replace_tags(it.id, names) }
+  def tagged(*names, **attributes) = create(:post, **attributes).tap { post_mutations.replace_tags(it.id, names) }
 
   describe "POST /api/v1/posts/bulk/delete" do
     let!(:picked) { [create(:post, :draft, title: "One"), create(:post, :draft, title: "Two")] }

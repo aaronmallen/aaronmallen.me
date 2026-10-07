@@ -8,9 +8,8 @@ module Public
       PAGES = %i[root writing about projects contact].freeze
 
       include Deps[
+        post_queries: "posts.repos.post_queries",
         project_queries: "projects.repos.project_queries",
-        published_page_by_tag: "posts.queries.published_page_by_tag",
-        published_post_by_slug: "posts.queries.published_by_slug",
         routes: "routes",
       ]
 
@@ -25,12 +24,12 @@ module Public
 
       private
 
-      def post?(slug) = Blog::Types::Slug.valid?(slug) && !published_post_by_slug.call(slug).nil?
+      def post?(slug) = Blog::Types::Slug.valid?(slug) && !post_queries.published_by_slug(slug).nil?
 
       def tag?(tag)
         return false unless tag == Blog::Types::Normalized::Tag.call(tag) { nil }
 
-        published_page_by_tag.call(tag, FIRST).rows.any? || project_queries.public_by_tag(tag).any?
+        post_queries.published_page_by_tag(tag, FIRST).rows.any? || project_queries.public_by_tag(tag).any?
       end
 
       def unescape(value) = ::Rack::Utils.unescape_path(value.to_s)

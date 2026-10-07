@@ -6,7 +6,7 @@ module Tags
 
     import keys: %w[repos.decision_queries], from: :decisions
 
-    import keys: %w[queries.by_tag], from: :posts
+    import keys: %w[repos.post_queries], from: :posts
 
     import keys: %w[repos.project_queries], from: :projects
 

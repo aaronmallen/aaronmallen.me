@@ -3,18 +3,18 @@
 module Social
   module Operations
     class DeletePerson < Operation
-      include Deps[person_repo: "repos.person_repo"]
+      include Deps[person_mutations: "repos.person_mutations", person_queries: "repos.person_queries"]
 
       def call(id)
         person = step find(id)
 
-        person_repo.delete(person.id)
+        person_mutations.delete(person.id)
       end
 
       private
 
       def find(id)
-        found(person_repo.by_id(id))
+        found(person_queries.by_id(id))
       end
     end
   end

@@ -7,7 +7,9 @@ module Links
         "commit" => :commits,
         "decision" => :decisions,
         "journal_entry" => :journal_entries,
+        "post" => :posts,
         "project" => :projects,
+        "social_post" => :social_posts,
         "work_entry" => :work_entries,
       }.freeze
       TITLE_LIMIT = 120
@@ -16,8 +18,8 @@ module Links
       include Deps[
         "routes",
         task: "tasks.queries.linkable_tasks",
-        post: "posts.queries.linkable_posts",
-        social_post: "social.queries.linkable_social_posts",
+        post: "posts.repos.post_queries",
+        social_post: "social.repos.social_post_queries",
         journal_entry: "record.repos.journal_entry_queries",
         commit: "record.repos.commit_queries",
         project: "projects.repos.project_queries",

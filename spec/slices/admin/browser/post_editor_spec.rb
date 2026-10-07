@@ -2,7 +2,7 @@
 
 RSpec.describe "Admin post editor", type: :feature do
   let(:body) { find_field("Body") }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def click_tool(label) = find("[role='toolbar'] button[aria-label='#{label}']").click
 
@@ -100,7 +100,7 @@ RSpec.describe "Admin post editor", type: :feature do
         fill_in "Title", with: "A fresh title"
 
         expect(page).to have_field(field, placeholder: /a-fresh-title/)
-        expect(post_repo.all).to be_empty
+        expect(post_queries.all).to be_empty
       end
     end
 
@@ -248,7 +248,7 @@ RSpec.describe "Admin post editor", type: :feature do
       show_view "Preview"
       save_draft
 
-      expect(post_repo.all.last.body).to eq("two words  ")
+      expect(post_queries.all.last.body).to eq("two words  ")
     end
 
     it "switches with the arrow keys" do

@@ -8,14 +8,14 @@ module Public
         PROJECTS = 3
 
         include Deps[
-          latest_published_posts: "posts.queries.latest_published",
+          post_queries: "posts.repos.post_queries",
           project_queries: "projects.repos.project_queries",
         ]
 
         share_with_caches
 
         def handle(_request, response)
-          response[:posts] = latest_published_posts.call(POSTS)
+          response[:posts] = post_queries.published(POSTS)
           response[:projects] = project_queries.public_grid(PROJECTS)
         end
       end

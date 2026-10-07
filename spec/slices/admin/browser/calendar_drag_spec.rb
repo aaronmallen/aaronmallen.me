@@ -36,7 +36,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     Tasks::Slice["repos.sprint_repo"].by_id(stored_task(task).sprint_id).sprint_date
   end
 
-  def stored_post(record) = Posts::Slice["repos.post_repo"].by_id(record.id)
+  def stored_post(record) = Posts::Slice["repos.post_queries"].by_id(record.id)
 
   def stored_task(record) = Tasks::Slice["repos.task_repo"].by_id(record.id)
 
@@ -96,7 +96,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
 
     it "moves to the day it lands on", :aggregate_failures do
       expect(cell(target)).to have_css(".cal-mark.social")
-      expect(Social::Slice["repos.social_post_repo"].by_id(queued.id).posted_at).to eq(at(target, 16))
+      expect(Social::Slice["repos.social_post_queries"].by_id(queued.id).posted_at).to eq(at(target, 16))
     end
   end
 
@@ -168,7 +168,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     before { open_day(day) }
 
     it "says it failed and leaves the post where it was", :aggregate_failures do
-      Posts::Slice["repos.post_repo"].delete(scheduled.id)
+      Posts::Slice["repos.post_mutations"].delete(scheduled.id)
       drag("Hold still", cell(target))
 
       expect(page).to have_css(".toast-failed", text: translate("ui.components.calendar.panel.failed"))
@@ -177,7 +177,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     end
 
     it "shows the refusal when the post went out first", :aggregate_failures do
-      Posts::Slice["repos.post_repo"].update(scheduled.id, status: "published")
+      Posts::Slice["repos.post_mutations"].update(scheduled.id, status: "published")
       drag("Hold still", cell(target))
 
       expect(page).to have_css(".toast-failed", text: translate("calendar_page.toasts.not_scheduled"))

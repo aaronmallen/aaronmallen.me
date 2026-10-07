@@ -68,8 +68,8 @@ module MCP
     ], from: :contact
 
     import keys: %w[
-      operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo queries.by_id
-      queries.by_ids queries.count_dated_between queries.dated_between queries.published_by_slug
+      operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo
+      repos.post_queries
     ], from: :posts
 
     import keys: %w[
@@ -85,10 +85,8 @@ module MCP
 
     import keys: %w[
       operations.compose_social_post operations.delete_social_post operations.measure_parts
-      operations.moderate_webmention operations.update_webmention_settings queries.editable_social_post
-      queries.pending_webmention_count queries.social_post_counts_dated_between queries.social_posts_dated_between
-      queries.unsent_social_posts
-      queries.webmention_settings queries.webmentions_received_between queries.webmentions_received_by_post
+      operations.moderate_webmention operations.update_webmention_settings repos.social_post_queries
+      repos.webmention_queries
     ], from: :social
 
     import keys: %w[

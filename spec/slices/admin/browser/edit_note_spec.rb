@@ -2,18 +2,17 @@
 
 RSpec.describe "Admin edit note dialog", type: :feature do
   let(:article) { create(:post, :published, title: "Hello", slug: "hello", body: "one") }
-  let(:post_edit_repo) { Posts::Slice["repos.post_edit_repo"] }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def dialog = find("dialog[data-edit-note-dialog]")
 
   def focused_value = evaluate_script("document.activeElement.value")
 
-  def notes = post_edit_repo.for_post(article.id).map(&:note)
+  def notes = post_queries.edits_for_post(article.id).map(&:note)
 
   def save = click_button("Save", match: :first)
 
-  def saved_body = post_repo.by_id(article.id).body
+  def saved_body = post_queries.by_id(article.id).body
 
   def visit_editor(post = article) = visit("/admin/posts/#{post.id}/edit")
 
@@ -33,7 +32,7 @@ RSpec.describe "Admin edit note dialog", type: :feature do
 
       expect(page).to have_css(".toast", text: "Saved")
       expect(page).to have_no_css("dialog[open]")
-      expect(post_repo.by_id(article.id).title).to eq("Changed")
+      expect(post_queries.by_id(article.id).title).to eq("Changed")
     end
 
     it "does not ask when only the newline style changes" do

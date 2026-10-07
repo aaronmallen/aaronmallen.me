@@ -2,21 +2,9 @@
 
 module Posts
   module Repos
-    class PostRepo < DB::Repo
+    class PostQueries < DB::Repo
       ALL = Blog::Types::PostFilter["all"]
       SUMMARY = %i[id title slug webmentions_enabled].freeze
-      TAG_SCOPE = Blog::Types::TagScope["public"]
-
-      stamped_commands :create, :update
-      commands delete: :by_pk
-
-      def add_tag(id, name)
-        tag_id = tags.claim([name], scope: TAG_SCOPE).fetch(name)
-        return if tagged?(id, tag_id)
-
-        post_tags.add(id, [tag_id])
-        update(id, {})
-      end
 
       def all = with_tags.newest_first.to_a
 
@@ -27,7 +15,6 @@ module Posts
       end
 
       def by_id(id) = with_tags.by_pk(id).one
-      def by_id_for_update(id) = posts.by_pk(id).lock.one
 
       def by_ids(ids) = with_tags.with_ids(ids).newest_first.to_a
 
@@ -58,23 +45,27 @@ module Posts
 
       def due_scheduled(time) = with_tags.due_at(time).oldest_first.to_a
 
-      def held_follow_ups = held_post_follow_ups.oldest_first.to_a
+      def edit_notes(post_id) = post_edits.for_post(post_id).pluck(:note)
 
-      def hold_follow_up(**) = held_post_follow_ups.hold(**)
+      def edit_on_post?(post_id, id) = post_edits.for_post(post_id).by_pk(id).exist?
+
+      def edited_at(post_ids) = post_edits.edited_at(post_ids).to_a.to_h { [it.post_id, it.edited_at] }
+
+      def edits_for_post(post_id) = post_edits.for_post(post_id).oldest_first.to_a
+
+      def edits_for_posts(post_ids) = post_edits.for_posts(post_ids).oldest_first.to_a.group_by(&:post_id)
+
+      def edits_newest_first(post_id) = edits_for_post(post_id).reverse
+
+      def held_follow_ups = held_post_follow_ups.oldest_first.to_a
 
       def last_deleted_at = post_deletions.last_deleted_at
 
       def last_untagged_at = post_tag_removals.last_removed_at
 
-      def locked_by_id(id) = by_id_for_update(id) && by_id(id)
-
       def next_published(post) = with_tags.published.newer_than(post).oldest_first.limit(1).one
 
       def previous_published(post) = with_tags.published.older_than(post).newest_first.limit(1).one
-
-      def publish(id, at:) = publish_where(posts.by_pk(id).unpublished, id, at)
-
-      def publish_due(id, at:) = publish_where(posts.by_pk(id).due_at(at), id, at)
 
       def published(limit = nil) = with_tags.published.newest_first.limit(limit).to_a
 
@@ -84,10 +75,6 @@ module Posts
 
       def published_page_by_tag(tag, page) = page.fill(with_tags.published.tagged(tag).newest_first.paged(page).to_a)
 
-      def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
-
-      def replace_tags(id, names) = post_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
-
       def scheduled = with_tags.scheduled.oldest_first.to_a
 
       def summaries = posts.newest_first.select(*SUMMARY).to_a
@@ -95,12 +82,6 @@ module Posts
       private
 
       def day_bounds(from, to) = [from && Blog::TimeZone.day_start(from), to && Blog::TimeZone.day_start(to + 1)]
-
-      def publish_where(candidates, id, at)
-        by_id(id) if candidates.publish(at).any?
-      end
-
-      def tagged?(id, tag_id) = post_tags.for_owner(id).where(tag_id:).exist?
 
       def with_tags = posts.combine(:tags)
     end

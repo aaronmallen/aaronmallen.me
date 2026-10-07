@@ -9,8 +9,9 @@ module Social
       include Deps[
         "settings",
         honeybadger: "honeybadger.agent",
-        published_post_by_slug: "posts.queries.published_by_slug",
-        webmention_repo: "repos.webmention_repo",
+        post_queries: "posts.repos.post_queries",
+        webmention_mutations: "repos.webmention_mutations",
+        webmention_queries: "repos.webmention_queries",
       ]
 
       def call(source:, target:, visitor_hash:)
@@ -18,7 +19,7 @@ module Social
         source_url = step url(source)
         target_url = step url(target)
         step distinct(source_url, target_url)
-        step accepted(source_url, webmention_repo.settings)
+        step accepted(source_url, webmention_queries.settings)
         post = step post_for(target_url)
         queue(source_url, target_url, post, visitor_hash)
 
@@ -42,7 +43,7 @@ module Social
         return Failure(:foreign_target) unless settings.owns?(target_url)
 
         slug = slug_in(target_url)
-        post = slug && published_post_by_slug.call(slug)
+        post = slug && post_queries.published_by_slug(slug)
         return Failure(:not_a_post) unless post
         return Failure(:webmentions_off) unless post.webmentions_enabled
 
@@ -51,7 +52,7 @@ module Social
 
       def queue(source_url, target_url, post, visitor_hash)
         limits = settings.webmentions
-        step webmention_repo.claim_receipt(
+        step webmention_mutations.claim_receipt(
           post_id: post.id, source_url: source_url.to_s, visitor_hash:, since: window_opened_at,
           limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit],
         )
@@ -77,7 +78,7 @@ module Social
         Jobs::VerifyWebmention.perform_async(source_url, target_url, post_id)
       rescue RedisClient::Error => e
         honeybadger.notify(e)
-        webmention_repo.hold(post_id:, source_url:, target_url:)
+        webmention_mutations.hold(post_id:, source_url:, target_url:)
       end
 
       def window_opened_at
@@ -87,8 +88,8 @@ module Social
       def within_limits(visitor_hash)
         since = window_opened_at
         limits = settings.webmentions
-        under = webmention_repo.count_receipts_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
-                webmention_repo.count_receipts_since(since) < limits[:total_throttle_limit]
+        under = webmention_queries.count_receipts_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
+                webmention_queries.count_receipts_since(since) < limits[:total_throttle_limit]
 
         under ? Success(visitor_hash) : Failure(:throttled)
       end

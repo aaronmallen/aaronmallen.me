@@ -8,19 +8,12 @@ module Posts
 
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
-    import keys: %w[networks.all operations.expand_for_network queries.mention_directory], from: :social
+    import keys: %w[networks.all operations.expand_for_network repos.person_queries], from: :social
 
     export %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_post
-      operations.move_post operations.publish_draft
-      operations.record_post_webmentions operations.revise_edit_note operations.revise_post_body operations.save_post
-      operations.save_post_seo queries.all
-      queries.by_filter queries.by_id queries.by_ids queries.by_status queries.by_tag queries.calendar_posts
-      queries.count_by_status queries.count_dated_between queries.dated_between
-      queries.edited_at queries.edits_for_post queries.edits_for_posts queries.edits_newest_first
-      queries.last_deleted_at queries.last_untagged_at queries.latest_published queries.linkable_posts
-      queries.next_published queries.previous_published
-      queries.published_by_slug queries.published_page queries.published_page_by_tag queries.scheduled queries.summaries
+      operations.move_post operations.publish_draft operations.record_post_webmentions operations.revise_edit_note
+      operations.revise_post_body operations.save_post operations.save_post_seo repos.post_queries
     ]
   end
 end

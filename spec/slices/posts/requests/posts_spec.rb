@@ -2,7 +2,7 @@
 
 RSpec.describe "Posts", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def publish(slug, published_at: Time.now - 60, **)
     create(:post, :published, slug:, title: slug.capitalize, published_at:, **)
@@ -57,8 +57,9 @@ RSpec.describe "Posts", type: :request do
 
     def save_going_live(post, **fields)
       going_live = Data.define(:id, :status, :published_at).new(post.id, "scheduled", post.published_at)
-      allow(post_repo).to receive(:by_id_for_update).and_return(going_live)
-      replace_component("repos.post_repo", post_repo)
+      post_mutations = Posts::Slice["repos.post_mutations"]
+      allow(post_mutations).to receive(:by_id_for_update).and_return(going_live)
+      replace_component("repos.post_mutations", post_mutations)
       save("/admin/posts/#{post.id}", **fields)
     end
 
@@ -69,7 +70,7 @@ RSpec.describe "Posts", type: :request do
 
       expect(last_response.status).to eq(422)
       expect(field_error).to eq(slug_error("blank"))
-      expect(post_repo.all).to be_empty
+      expect(post_queries.all).to be_empty
     end
 
     it "turns the published slug lock into a slug error when a post goes live mid-edit", :aggregate_failures do
@@ -77,7 +78,7 @@ RSpec.describe "Posts", type: :request do
       save_going_live(published, title: "Hello", slug: "goodbye")
 
       expect(field_error).to eq(slug_error("locked"))
-      expect(post_repo.by_id(published.id)).to have_attributes(slug: "hello", status: "published")
+      expect(post_queries.by_id(published.id)).to have_attributes(slug: "hello", status: "published")
     end
   end
 end

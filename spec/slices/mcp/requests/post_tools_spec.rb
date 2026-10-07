@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "MCP post tools", type: :request do
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def access_token
     @access_token ||= mcp_connect(
@@ -42,20 +42,20 @@ RSpec.describe "MCP post tools", type: :request do
 
   def result = JSON.parse(last_response.body).fetch("result")
 
-  def stored(id) = post_repo.by_id(id)
+  def stored(id) = post_queries.by_id(id)
 
   describe "create_post" do
     it "writes a draft" do
       call_tool("create_post", title: "Hello", body: "one two")
 
-      expect(post_repo.all).to contain_exactly(have_attributes(title: "Hello", body: "one two", status: "draft"))
+      expect(post_queries.all).to contain_exactly(have_attributes(title: "Hello", body: "one two", status: "draft"))
     end
 
     it "answers with the post it wrote" do
       call_tool("create_post", title: "Hello")
 
       expect(content).to eq(
-        "id" => post_repo.all.last.id, "status" => "draft", "title" => "Hello", "slug" => "hello",
+        "id" => post_queries.all.last.id, "status" => "draft", "title" => "Hello", "slug" => "hello",
         "published_at" => nil, "outcome" => "drafted",
       )
     end
@@ -63,13 +63,13 @@ RSpec.describe "MCP post tools", type: :request do
     it "takes the slug from the title when it names none" do
       call_tool("create_post", title: "Hello, World")
 
-      expect(post_repo.all.last.slug).to eq("hello-world")
+      expect(post_queries.all.last.slug).to eq("hello-world")
     end
 
     it "takes the summary, tags and social card" do
       call_tool("create_post", title: "Hello", summary: "In short", tags: %w[Ruby hanami], og_title: "On the card")
 
-      expect(post_repo.all.last)
+      expect(post_queries.all.last)
         .to have_attributes(written_summary: "In short", tags: [have_attributes(name: "hanami"),
                                                                 have_attributes(name: "ruby")], og_title: "On the card")
     end
@@ -77,19 +77,19 @@ RSpec.describe "MCP post tools", type: :request do
     it "takes the announcement" do
       call_tool("create_post", title: "Hello", **announced)
 
-      expect(post_repo.all.last).to have_attributes(**announced)
+      expect(post_queries.all.last).to have_attributes(**announced)
     end
 
     it "leaves the announcement off when it is not asked for" do
       call_tool("create_post", title: "Hello")
 
-      expect(post_repo.all.last.syndication_enabled).to be(false)
+      expect(post_queries.all.last.syndication_enabled).to be(false)
     end
 
     it "keeps a draft with a publish time still to come a draft" do
       call_tool("create_post", title: "Hello", publish_at: future)
 
-      expect(post_repo.all.last.status).to eq("draft")
+      expect(post_queries.all.last.status).to eq("draft")
     end
 
     it "refuses a post with no title" do
@@ -158,7 +158,7 @@ RSpec.describe "MCP post tools", type: :request do
     it "saves nothing when it refuses" do
       call_tool("create_post", title: "Hello", publish_at: "soon")
 
-      expect(post_repo.all).to be_empty
+      expect(post_queries.all).to be_empty
     end
 
     it "refuses a call with no title" do
@@ -270,7 +270,7 @@ RSpec.describe "MCP post tools", type: :request do
       call_tool("update_post", id: published.id, body: "fixed", edit_note: "fixed the numbers")
 
       expect(stored(published.id)).to have_attributes(body: "fixed", status: "published")
-      expect(Posts::Slice["repos.post_edit_repo"].for_post(published.id).map(&:note)).to eq(["fixed the numbers"])
+      expect(Posts::Slice["repos.post_queries"].edits_for_post(published.id).map(&:note)).to eq(["fixed the numbers"])
     end
 
     it "refuses a body change on a published post without an edit note, as the admin does", :aggregate_failures do

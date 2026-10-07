@@ -6,15 +6,14 @@ module Admin
       class Index < Action
         include Deps[
           "settings",
-          post_summaries: "posts.queries.summaries",
-          webmention_counts_by_status: "social.queries.webmention_counts_by_status",
-          webmention_settings: "social.queries.webmention_settings",
-          webmentions_by_status: "social.queries.webmentions_by_status",
+          post_queries: "posts.repos.post_queries",
+          webmention_queries: "social.repos.webmention_queries",
         ]
 
         def handle(request, response)
           filter = Blog::Types::WebmentionStatusParam[request.params[:status]]
-          mentions = webmentions_by_status.call(filter, requested_page(request, response, settings.page_size[:admin]))
+          page = requested_page(request, response, settings.page_size[:admin])
+          mentions = webmention_queries.page_by_status(filter, page)
           not_found(response) if mentions.past_end?
 
           response.render(view, **exposures(filter, mentions))
@@ -23,14 +22,14 @@ module Admin
         private
 
         def exposures(filter, mentions)
-          posts = post_summaries.call
+          posts = post_queries.summaries
 
           {
-            counts: webmention_counts_by_status.call,
+            counts: webmention_queries.count_by_status,
             filter:,
             inbox: { mentions:, slugs: posts.to_h { [it.id, it.slug] } },
             posts:,
-            settings: webmention_settings.call,
+            settings: webmention_queries.settings,
           }
         end
       end

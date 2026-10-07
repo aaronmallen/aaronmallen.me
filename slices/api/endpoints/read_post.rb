@@ -21,15 +21,14 @@ module API
       ).freeze
 
       include Deps[
-        edits_newest_first: "posts.queries.edits_newest_first",
-        post_by_id: "posts.queries.by_id",
-        received_webmention_count: "social.queries.received_webmention_count",
+        post_queries: "posts.repos.post_queries",
         record_links: "links.queries.record_links",
         suggestion_for_post: "suggestions.queries.for_post",
+        webmention_queries: "social.repos.webmention_queries",
       ]
 
       def handle(id:)
-        post = post_by_id.call(id)
+        post = post_queries.by_id(id)
         return not_found(Wording.missing("blog post", id)) if post.nil?
 
         Success(answered(post))
@@ -39,8 +38,8 @@ module API
 
       def answered(post)
         serialized(Serializers::PostDetail, post).merge(
-          webmentions_received: received_webmention_count.call(post.id),
-          edit_notes: serialized(Serializers::PostEdit, edits_newest_first.call(post.id)),
+          webmentions_received: webmention_queries.received_count(post.id),
+          edit_notes: serialized(Serializers::PostEdit, post_queries.edits_newest_first(post.id)),
           **suggested(suggestion_for_post.call(post.id)),
           record_links: linked(KIND, post.id),
         )

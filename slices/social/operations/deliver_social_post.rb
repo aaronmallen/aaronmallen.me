@@ -11,7 +11,8 @@ module Social
       include Deps[
         expand_for_network: "operations.expand_for_network",
         networks: "networks.all",
-        social_post_repo: "repos.social_post_repo",
+        social_post_mutations: "repos.social_post_mutations",
+        social_post_queries: "repos.social_post_queries",
       ]
 
       operate_on :call, :give_up
@@ -22,16 +23,16 @@ module Social
         step available(social_post, network, client)
         bodies = expanded(social_post, network)
         step within_limits(social_post, network, client, bodies)
-        delivery = social_post_repo.record_delivery(social_post.id, network, error: nil, failed: false)
+        delivery = social_post_mutations.record_delivery(social_post.id, network, error: nil, failed: false)
 
         step send_parts(social_post, network, client, delivery, bodies)
       end
 
       def give_up(social_post_id, network)
-        step found(social_post_repo.by_id(social_post_id))
+        step found(social_post_queries.by_id(social_post_id))
 
         transaction do
-          social_post_repo.record_delivery(social_post_id, network, failed: true)
+          social_post_mutations.record_delivery(social_post_id, network, failed: true)
           settle(social_post_id)
         end
       end
@@ -56,7 +57,7 @@ module Social
 
       def refuse(social_post, network, reason, error)
         transaction do
-          social_post_repo.record_delivery(social_post.id, network, error:, failed: true)
+          social_post_mutations.record_delivery(social_post.id, network, error:, failed: true)
           settle(social_post.id)
         end
 
@@ -67,7 +68,7 @@ module Social
         remote = client.post(body.text, mentions: body.mentions, reply_to: delivery.remote_ids.last,
                                         idempotency_key: PartKey.new(network:, part:))
 
-        social_post_repo.record_delivery(
+        social_post_mutations.record_delivery(
           social_post.id, network,
           remote_ids: delivery.remote_ids.to_a + [remote.id],
           remote_url: delivery.remote_url || web_url(remote),
@@ -81,15 +82,15 @@ module Social
 
         Success(settle(social_post.id))
       rescue Social::Error => e
-        social_post_repo.record_delivery(social_post.id, network, error: e.message)
+        social_post_mutations.record_delivery(social_post.id, network, error: e.message)
         Failure(SEND_FAILED)
       end
 
       def settle(social_post_id)
-        social_post = social_post_repo.by_id(social_post_id)
+        social_post = social_post_queries.by_id(social_post_id)
         return social_post unless settled?(social_post)
 
-        social_post_repo.mark_posted(social_post_id) || social_post
+        social_post_mutations.mark_posted(social_post_id) || social_post
       end
 
       def settled?(social_post)
@@ -99,7 +100,7 @@ module Social
       end
 
       def targeted(social_post_id, network)
-        found(social_post_repo.by_id(social_post_id)).bind do |social_post|
+        found(social_post_queries.by_id(social_post_id)).bind do |social_post|
           next Failure(:not_due) unless due?(social_post)
           next Failure(:not_targeted) unless social_post.targets.include?(network)
 

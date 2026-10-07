@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Dropped database connections", :commits, type: :app do
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
 
   def databases
     Hanami.app.with_slices.select { it.key?("db.rom") }.flat_map { it["db.rom"].gateways.values.map(&:connection) }.uniq
@@ -35,6 +35,6 @@ RSpec.describe "Dropped database connections", :commits, type: :app do
     drop_connections
     Posts::Jobs::PublishDuePosts.new.perform
 
-    expect(post_repo.by_id(post.id).status).to eq("published")
+    expect(post_queries.by_id(post.id).status).to eq("published")
   end
 end

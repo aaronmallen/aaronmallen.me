@@ -11,11 +11,11 @@ module API
         post_slug: { type: "string", description: "the slug of the post the webmention names" },
       ).freeze
 
-      include Deps[post_by_id: "posts.queries.by_id", webmention_by_id: "social.queries.webmention_by_id"]
+      include Deps[post_queries: "posts.repos.post_queries", webmention_queries: "social.repos.webmention_queries"]
 
       def handle(id:)
-        mention = webmention_by_id.call(id)
-        post = mention && post_by_id.call(mention.post_id)
+        mention = webmention_queries.by_id(id)
+        post = mention && post_queries.by_id(mention.post_id)
         return not_found(Wording.missing("webmention", id)) if post.nil?
 
         Success(answered(mention, post))

@@ -9,11 +9,9 @@ module Admin
       include Deps[
         event_queries: "analytics.repos.analytics_event_queries",
         feed_queries: "analytics.repos.feed_fetch_queries",
-        pending_webmention_count: "social.queries.pending_webmention_count",
-        posts_by_ids: "posts.queries.by_ids",
+        post_queries: "posts.repos.post_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
-        webmentions_received_between: "social.queries.webmentions_received_between",
-        webmentions_received_by_post: "social.queries.webmentions_received_by_post",
+        webmention_queries: "social.repos.webmention_queries",
       ]
 
       def call(range:)
@@ -35,7 +33,7 @@ module Admin
       private
 
       def mentioned_posts(counts)
-        rows = posts_by_ids.call(counts.keys).map { { count: counts.fetch(it.id), title: it.title } }
+        rows = post_queries.by_ids(counts.keys).map { { count: counts.fetch(it.id), title: it.title } }
 
         rows.sort_by { [-it[:count], it[:title]] }.take(TOP_ROWS)
       end
@@ -63,9 +61,9 @@ module Admin
 
       def webmentions(from, to)
         {
-          pending: pending_webmention_count.call,
-          posts: mentioned_posts(webmentions_received_by_post.call(from:, to:)),
-          received: webmentions_received_between.call(from:, to:),
+          pending: webmention_queries.pending_count,
+          posts: mentioned_posts(webmention_queries.received_by_post(from:, to:)),
+          received: webmention_queries.received_between(from:, to:),
         }
       end
     end

@@ -2,9 +2,10 @@
 
 RSpec.describe "Admin social", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Social::Slice["repos.social_post_repo"] }
+  let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
+  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
-  def bodies = repo.drafts.first.parts.map(&:body)
+  def bodies = social_post_queries.drafts.first.parts.map(&:body)
 
   def compose(intent: "send", **params)
     post "/admin/social", _csrf_token: admin_csrf_token, intent:, social: { targets: %w[mastodon], **params }
@@ -140,7 +141,7 @@ RSpec.describe "Admin social", type: :request do
 
     describe "the preview" do
       def open_draft(*parts, targets: %w[mastodon bluesky])
-        draft = repo.create_with_parts(parts:, targets:, status: "draft")
+        draft = social_post_mutations.create_with_parts(parts:, targets:, status: "draft")
         get "/admin/social", filter: "drafts", edit: draft.id
       end
 
@@ -196,38 +197,38 @@ RSpec.describe "Admin social", type: :request do
       it "queues the post for delivery" do
         compose(parts: ["hello"], mode: "now")
 
-        expect(repo.queued.first).to have_attributes(status: "scheduled", targets: %w[mastodon])
+        expect(social_post_queries.queued.first).to have_attributes(status: "scheduled", targets: %w[mastodon])
       end
 
       it "makes the post due right away" do
         compose(parts: ["hello"], mode: "now")
 
-        expect(repo.due_scheduled(Time.now)).to have(1).item
+        expect(social_post_queries.due_scheduled(Time.now)).to have(1).item
       end
 
       it "takes a mention typed by hand" do
         create(:person, key: "ada-lovelace")
         compose(parts: ["hi @{ada-lovelace}"], mode: "now")
 
-        expect(repo.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
       end
 
       it "keeps the parts in order" do
         compose(parts: %w[one two], mode: "now")
 
-        expect(repo.queued.first.parts.map(&:body)).to eq(%w[one two])
+        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(%w[one two])
       end
 
       it "drops a blank part" do
         compose(parts: ["one", "  "], mode: "now")
 
-        expect(repo.queued.first.parts.map(&:body)).to eq(%w[one])
+        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(%w[one])
       end
 
       it "orders the targets the way the networks are listed" do
         compose(parts: ["hello"], targets: %w[bluesky mastodon])
 
-        expect(repo.queued.first.targets.to_a).to eq(%w[mastodon bluesky])
+        expect(social_post_queries.queued.first.targets.to_a).to eq(%w[mastodon bluesky])
       end
 
       it "says the post is queued for its networks" do
@@ -242,7 +243,7 @@ RSpec.describe "Admin social", type: :request do
       it "saves the post for its Chicago time" do
         compose(parts: ["hello"], mode: "schedule", schedule_at: "2027-03-01T09:30")
 
-        expect(repo.queued.first.posted_at).to eq(Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
+        expect(social_post_queries.queued.first.posted_at).to eq(Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
       end
 
       it "says when the post goes out" do
@@ -273,7 +274,7 @@ RSpec.describe "Admin social", type: :request do
       it "ignores the schedule time while posting now" do
         compose(parts: ["hello"], mode: "now", schedule_at: "soon")
 
-        expect(repo.queued).to have(1).item
+        expect(social_post_queries.queued).to have(1).item
       end
 
       it "rejects a mode it does not know" do
@@ -285,7 +286,7 @@ RSpec.describe "Admin social", type: :request do
       it "queues nothing for a mode it does not know" do
         compose(parts: ["hello"], mode: "later")
 
-        expect(repo.queued).to be_empty
+        expect(social_post_queries.queued).to be_empty
       end
     end
 
@@ -293,7 +294,7 @@ RSpec.describe "Admin social", type: :request do
       it "saves the post as a draft" do
         compose(intent: "draft", parts: ["hello"])
 
-        expect(repo.drafts.first).to have_attributes(status: "draft", posted_at: nil)
+        expect(social_post_queries.drafts.first).to have_attributes(status: "draft", posted_at: nil)
       end
 
       it "keeps the text" do
@@ -312,13 +313,13 @@ RSpec.describe "Admin social", type: :request do
       it "saves a draft that is over a limit" do
         compose(intent: "draft", parts: ["a" * 501])
 
-        expect(repo.drafts).to have(1).item
+        expect(social_post_queries.drafts).to have(1).item
       end
 
       it "saves a draft for an intent it doesn't know" do
         compose(intent: "launch", parts: ["hello"])
 
-        expect(repo.drafts.first).to have_attributes(status: "draft", posted_at: nil)
+        expect(social_post_queries.drafts.first).to have_attributes(status: "draft", posted_at: nil)
       end
     end
 
@@ -362,7 +363,7 @@ RSpec.describe "Admin social", type: :request do
       it "takes a part under every selected limit" do
         compose(parts: ["a" * 301], targets: %w[mastodon])
 
-        expect(repo.queued).to have(1).item
+        expect(social_post_queries.queued).to have(1).item
       end
 
       it "rejects a part over the limit of another selected network" do
@@ -382,7 +383,7 @@ RSpec.describe "Admin social", type: :request do
         create(:person, :bluesky, key: "ada", bluesky_handle: "ada-lovelace.bsky.social")
         compose(parts: ["@{ada} #{'a' * 274}"], targets: %w[bluesky])
 
-        expect(repo.queued).to have(1).item
+        expect(social_post_queries.queued).to have(1).item
       end
 
       it "rejects a part that fits Bluesky only before its link to the site is tagged" do
@@ -394,7 +395,7 @@ RSpec.describe "Admin social", type: :request do
       it "takes a part that still fits Bluesky once its link to the site is tagged" do
         compose(parts: ["#{'a' * 251} https://aaronmallen.me/writing/hello"], targets: %w[bluesky])
 
-        expect(repo.queued).to have(1).item
+        expect(social_post_queries.queued).to have(1).item
       end
 
       it "rejects a mention of nobody in the directory" do
@@ -404,23 +405,23 @@ RSpec.describe "Admin social", type: :request do
       end
 
       it "rejects a mention of someone taken out of the directory" do
-        Social::Slice["repos.person_repo"].delete(create(:person, key: "ada-lovelace").id)
+        Social::Slice["repos.person_mutations"].delete(create(:person, key: "ada-lovelace").id)
         compose(parts: ["hi @{ada-lovelace}"])
 
-        expect(repo.queued).to be_empty
+        expect(social_post_queries.queued).to be_empty
       end
 
       it "takes a mention of someone in the directory" do
         create(:person, key: "ada-lovelace")
         compose(parts: ["hi @{ada-lovelace}"])
 
-        expect(repo.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
+        expect(social_post_queries.queued.first.parts.map(&:body)).to eq(["hi @{ada-lovelace}"])
       end
 
       it "saves nothing when it refuses" do
         compose(parts: ["a" * 501])
 
-        expect(repo.queued).to be_empty
+        expect(social_post_queries.queued).to be_empty
       end
 
       it "keeps the text that was typed" do
@@ -431,18 +432,20 @@ RSpec.describe "Admin social", type: :request do
     end
 
     describe "the queue" do
-      def draft(parts: %w[a draft]) = repo.create_with_parts(parts:, targets: %w[mastodon], status: "draft")
+      def draft(parts: %w[a draft])
+        social_post_mutations.create_with_parts(parts:, targets: %w[mastodon], status: "draft")
+      end
 
       def engage(social_post, network, **counts)
         create(:social_post_delivery, network, social_post_id: social_post.id, **counts)
       end
 
       def posted(parts: %w[posted], at: Time.utc(2026, 9, 13, 2, 30), targets: %w[mastodon])
-        repo.create_with_parts(parts:, targets:, status: "posted", posted_at: at)
+        social_post_mutations.create_with_parts(parts:, targets:, status: "posted", posted_at: at)
       end
 
       def queued(parts: %w[waiting], at: Time.now + (90 * 60))
-        repo.create_with_parts(parts:, targets: %w[mastodon], status: "scheduled", posted_at: at)
+        social_post_mutations.create_with_parts(parts:, targets: %w[mastodon], status: "scheduled", posted_at: at)
       end
 
       def texts = page.all(".sq-part").map(&:text)
@@ -623,7 +626,7 @@ RSpec.describe "Admin social", type: :request do
       end
 
       def make(status, text, at = nil)
-        repo.create_with_parts(parts: [text], targets: %w[mastodon], status:, posted_at: at)
+        social_post_mutations.create_with_parts(parts: [text], targets: %w[mastodon], status:, posted_at: at)
       end
 
       def texts = page.all(".sq-part").map(&:text)
@@ -657,7 +660,7 @@ RSpec.describe "Admin social", type: :request do
 
       it "loads parts and deliveries for the posts on the page only", :aggregate_failures do
         fill_queue
-        on_page = repo.queued.first(2).map(&:id)
+        on_page = social_post_queries.queued.first(2).map(&:id)
 
         expect(loaded_ids("social_post_parts") { get "/admin/social" }).to match_array(on_page)
         expect(loaded_ids("social_post_deliveries") { get "/admin/social" }).to match_array(on_page)
@@ -703,7 +706,7 @@ RSpec.describe "Admin social", type: :request do
 
     describe "removing an item" do
       def item(status, posted_at: nil)
-        repo.create_with_parts(parts: %w[bye], targets: %w[mastodon], status:, posted_at:)
+        social_post_mutations.create_with_parts(parts: %w[bye], targets: %w[mastodon], status:, posted_at:)
       end
 
       def remove(id, filter: "queued")
@@ -714,14 +717,14 @@ RSpec.describe "Admin social", type: :request do
         social_post = item("scheduled", posted_at: Time.now)
         remove(social_post.id)
 
-        expect(repo.by_id(social_post.id)).to be_nil
+        expect(social_post_queries.by_id(social_post.id)).to be_nil
       end
 
       it "removes a draft" do
         social_post = item("draft")
         remove(social_post.id, filter: "drafts")
 
-        expect(repo.by_id(social_post.id)).to be_nil
+        expect(social_post_queries.by_id(social_post.id)).to be_nil
       end
 
       it "goes back to the filter it was removed from" do
@@ -750,7 +753,7 @@ RSpec.describe "Admin social", type: :request do
         social_post = item("posted", posted_at: Time.now)
         remove(social_post.id)
 
-        expect(repo.by_id(social_post.id)).not_to be_nil
+        expect(social_post_queries.by_id(social_post.id)).not_to be_nil
       end
 
       it "sends the removal of an item mid-delivery back to the queue" do
@@ -775,8 +778,8 @@ RSpec.describe "Admin social", type: :request do
         create(:social_post_delivery, :mastodon, social_post_id: social_post.id, error: "rate limited")
         remove(social_post.id)
 
-        expect(repo.by_id(social_post.id)).not_to be_nil
-        expect(repo.by_id(social_post.id).deliveries.map(&:network)).to eq(%w[mastodon])
+        expect(social_post_queries.by_id(social_post.id)).not_to be_nil
+        expect(social_post_queries.by_id(social_post.id).deliveries.map(&:network)).to eq(%w[mastodon])
       end
 
       it "refuses an item that isn't there" do
@@ -788,7 +791,12 @@ RSpec.describe "Admin social", type: :request do
 
     describe "editing an item" do
       let(:social_post) do
-        repo.create_with_parts(parts: %w[first], targets: %w[mastodon], status: "draft")
+        social_post_mutations.create_with_parts(parts: %w[first], targets: %w[mastodon], status: "draft")
+      end
+
+      def queue_at(posted_at)
+        social_post_mutations.create_with_parts(parts: %w[later], targets: %w[mastodon], status: "scheduled",
+                                                posted_at:)
       end
 
       def save_edit(intent: "send", **params)
@@ -797,17 +805,22 @@ RSpec.describe "Admin social", type: :request do
       end
 
       def save_posted
-        posted = repo.create_with_parts(parts: %w[gone], targets: %w[mastodon], status: "posted",
-                                        posted_at: Time.utc(2026, 9, 13, 2, 30))
+        posted = social_post_mutations.create_with_parts(
+          parts: %w[gone], targets: %w[mastodon], status: "posted", posted_at: Time.utc(2026, 9, 13, 2, 30),
+        )
         fields = { parts: %w[new], targets: %w[mastodon], mode: "now" }
         post "/admin/social/#{posted.id}", _csrf_token: admin_csrf_token, intent: "send", social: fields
         posted
       end
 
-      def sends_after_reading
-        inner = Social::Slice["queries.editable_social_post"]
-
-        ->(id) { inner.call(id).tap { repo.mark_posted(id) } }
+      def send_after_reading
+        Social::Slice["repos.social_post_queries"].tap do |queries|
+          allow(queries).to receive(:editable).and_wrap_original do |read, id|
+            read.call(id).tap { social_post_mutations.mark_posted(id) }
+          end
+          replace_component("repos.social_post_queries", queries)
+          replace_component("social.repos.social_post_queries", queries)
+        end
       end
 
       it "opens the item in the composer" do
@@ -829,15 +842,16 @@ RSpec.describe "Admin social", type: :request do
       end
 
       it "prefills the send time of a queued item" do
-        queued = repo.create_with_parts(parts: %w[later], targets: %w[mastodon], status: "scheduled",
-                                        posted_at: Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
+        queued = queue_at(Blog::TimeZone.local_time(2027, 3, 1, 9, 30))
         get "/admin/social", edit: queued.id
 
         expect(page.find_by_id("social-schedule_at", visible: :all).value).to eq("2027-03-01T09:30")
       end
 
       it "opens no item in the composer for a posted one" do
-        posted = repo.create_with_parts(parts: %w[gone], targets: %w[mastodon], status: "posted", posted_at: Time.now)
+        posted = social_post_mutations.create_with_parts(
+          parts: %w[gone], targets: %w[mastodon], status: "posted", posted_at: Time.now,
+        )
         get "/admin/social", edit: posted.id
 
         expect(page.all("[data-social-body]").map(&:value)).to eq([""])
@@ -852,19 +866,19 @@ RSpec.describe "Admin social", type: :request do
       it "saves back to the same item" do
         save_edit(parts: %w[second], mode: "now")
 
-        expect(repo.by_id(social_post.id).parts.map(&:body)).to eq(%w[second])
+        expect(social_post_queries.by_id(social_post.id).parts.map(&:body)).to eq(%w[second])
       end
 
       it "adds no second item" do
         save_edit(parts: %w[second], mode: "now")
 
-        expect(repo.queued + repo.drafts).to have(1).item
+        expect(social_post_queries.queued + social_post_queries.drafts).to have(1).item
       end
 
       it "keeps a draft a draft for an intent it doesn't know" do
         save_edit(intent: %w[send], parts: %w[second], mode: "now")
 
-        expect(repo.by_id(social_post.id)).to have_attributes(status: "draft", posted_at: nil)
+        expect(social_post_queries.by_id(social_post.id)).to have_attributes(status: "draft", posted_at: nil)
       end
 
       it "keeps the item open when it refuses" do
@@ -895,7 +909,7 @@ RSpec.describe "Admin social", type: :request do
       it "keeps a posted item as it was" do
         posted = save_posted
 
-        expect(repo.by_id(posted.id))
+        expect(social_post_queries.by_id(posted.id))
           .to have_attributes(status: "posted", posted_at: posted.posted_at, parts: [have_attributes(body: "gone")])
       end
 
@@ -907,21 +921,23 @@ RSpec.describe "Admin social", type: :request do
       end
 
       it "answers 404 for an item removed before the save" do
-        repo.delete_unposted(social_post.id)
+        social_post_mutations.delete_unposted(social_post.id)
         save_edit(parts: %w[second], mode: "now")
 
         expect(last_response.status).to eq(404)
       end
 
       it "keeps an item marked posted between the read and the save" do
-        replace_component("queries.editable_social_post", sends_after_reading)
+        send_after_reading
         save_edit(parts: %w[second], mode: "now")
 
-        expect(repo.by_id(social_post.id)).to have_attributes(status: "posted", parts: [have_attributes(body: "first")])
+        expect(
+          social_post_queries.by_id(social_post.id),
+        ).to have_attributes(status: "posted", parts: [have_attributes(body: "first")])
       end
 
       it "says the item has already gone out" do
-        replace_component("queries.editable_social_post", sends_after_reading)
+        send_after_reading
         save_edit(parts: %w[second], mode: "now")
         follow_redirect!
 
@@ -931,7 +947,8 @@ RSpec.describe "Admin social", type: :request do
 
     describe "editing an item mid-delivery" do
       let(:social_post) do
-        repo.create_with_parts(parts: %w[first], targets: %w[mastodon], status: "scheduled", posted_at: Time.now)
+        social_post_mutations.create_with_parts(parts: %w[first], targets: %w[mastodon], status: "scheduled",
+                                                posted_at: Time.now)
       end
 
       before do
@@ -957,7 +974,7 @@ RSpec.describe "Admin social", type: :request do
         it "keeps the item as it was on #{change}" do
           save_edit(intent:, **fields)
 
-          expect(repo.by_id(social_post.id))
+          expect(social_post_queries.by_id(social_post.id))
             .to have_attributes(status: "scheduled", posted_at: social_post.posted_at,
                                 parts: [have_attributes(body: "first")])
         end

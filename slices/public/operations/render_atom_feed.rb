@@ -12,7 +12,7 @@ module Public
       NO_EDITS = Blog::Constants::EMPTY_ARRAY
       REF = "feed"
 
-      include Deps["i18n", "routes", "settings", edits_for_posts: "posts.queries.edits_for_posts"]
+      include Deps["i18n", "routes", "settings", post_queries: "posts.repos.post_queries"]
 
       def call(version, title:, html:, feed:, params: {})
         xml = Builder::XmlMarkup.new(indent: 2)
@@ -20,7 +20,7 @@ module Public
         xml.feed(xmlns: NAMESPACE, "xml:lang": LANGUAGE) do
           feed_head(xml, version, title:, html:, params:)
           feed_links(xml, version.posts, html:, feed:, params:)
-          edits = edits_for_posts.call(version.posts.rows.map(&:id))
+          edits = post_queries.edits_for_posts(version.posts.rows.map(&:id))
           version.posts.rows.each { entry(xml, it, version.changed_at(it), edits) }
         end
       end

@@ -42,7 +42,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   end
 
   def schedule_social(*parts, at: Time.now + 60, targets: %w[mastodon])
-    Social::Slice["repos.social_post_repo"].create_with_parts(targets:, status: "scheduled", posted_at: at, parts:)
+    Social::Slice["repos.social_post_mutations"].create_with_parts(targets:, status: "scheduled", posted_at: at, parts:)
   end
 
   def titles(title) = card(title).all(".li-title").map(&:text)

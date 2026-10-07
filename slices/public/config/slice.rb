@@ -18,16 +18,9 @@ module Public
 
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
 
-    import keys: %w[
-      queries.edited_at queries.edits_for_post queries.edits_for_posts queries.last_deleted_at queries.last_untagged_at
-      queries.latest_published queries.next_published queries.previous_published queries.published_by_slug
-      queries.published_page queries.published_page_by_tag
-    ], from: :posts
+    import keys: %w[repos.post_queries], from: :posts
 
-    import keys: %w[
-      operations.receive_webmention queries.counted_webmentions_for_post queries.listed_webmentions_for_post
-      queries.syndication_urls
-    ], from: :social
+    import keys: %w[operations.receive_webmention repos.social_post_queries repos.webmention_queries], from: :social
 
     export %w[operations.find_visitor_address]
   end

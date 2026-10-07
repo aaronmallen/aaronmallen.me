@@ -39,7 +39,7 @@ module MCP
 
       class << self
         def call(id:, server_context:, **given)
-          post = dep(:post_by_id, server_context).call(id)
+          post = dep(:post_queries, server_context).by_id(id)
           return missing(id) unless post
 
           now = Time.now

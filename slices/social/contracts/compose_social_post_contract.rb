@@ -14,8 +14,8 @@ module Social
 
       include Deps[
         expand_for_network: "operations.expand_for_network",
-        mention_directory: "queries.mention_directory",
         networks: "networks.all",
+        person_queries: "repos.person_queries",
       ]
 
       params do
@@ -28,7 +28,7 @@ module Social
       rule(:parts).validate(:without_controls, :visible)
 
       rule(:parts) do
-        key.failure(UNKNOWN_MENTION) if mention_directory.call(value).unknown(value).any?
+        key.failure(UNKNOWN_MENTION) if person_queries.mention_directory(value).unknown(value).any?
       end
 
       rule(:schedule_at, :mode) do

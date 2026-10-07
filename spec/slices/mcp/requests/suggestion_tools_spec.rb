@@ -7,12 +7,12 @@ RSpec.describe "MCP suggestion tools", type: :request do
   end
 
   def compose(status, *parts, posted_at: nil, targets: %w[mastodon])
-    Social::Slice["repos.social_post_repo"].create_with_parts(parts:, posted_at:, status:, targets:)
+    Social::Slice["repos.social_post_mutations"].create_with_parts(parts:, posted_at:, status:, targets:)
   end
 
   def edit(original, replacement, part: nil) = { original:, replacement:, reason: "typo", part: }
 
-  def post_body(id) = Posts::Slice["repos.post_repo"].by_id(id).body
+  def post_body(id) = Posts::Slice["repos.post_queries"].by_id(id).body
 
   def statuses(suggestion) = suggestion_repo.by_id(suggestion.id).edits.map(&:status)
 
@@ -109,7 +109,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       suggestion_id = mcp_answer("read_social_post", id: social_post.id).fetch("suggestion_id")
       mcp_call("accept_suggestion_edits", suggestion_id:)
 
-      expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
+      expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
     end
 
     it "writes into an unsent social post" do
@@ -117,7 +117,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
       mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
 
-      expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
+      expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
     end
 
     describe "an edit that fits Bluesky only before its link to the site is tagged" do
@@ -134,7 +134,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       it "leaves the part alone" do
         mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
 
-        expect(Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)).to eq([part])
+        expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)).to eq([part])
       end
     end
 
@@ -145,7 +145,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
                                                 [edit("teh", "the", part: 1), edit("teh", " ", part: 2)])
       end
 
-      def bodies = Social::Slice["repos.social_post_repo"].by_id(social_post.id).parts.map(&:body)
+      def bodies = Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)
 
       it "is refused" do
         expect(mcp_text("accept_suggestion_edits", suggestion_id: suggestion.id)).to eq(

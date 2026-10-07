@@ -416,17 +416,19 @@ RSpec.describe "Feeds", type: :request do
   end
 
   describe "a reader polling again" do
-    let(:post_repo) { Posts::Slice["repos.post_repo"] }
-    let(:yesterday) { Time.now - (24 * 60 * 60) }
-    let(:note) { create(:post_edit, post: older, note: "fixed a typo", created_at: yesterday, updated_at: yesterday) }
-    let(:older) { post_repo.published_by_slug("older") }
-
     def older_entry(field) = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/older']/#{field}").text
 
     def poll(path, etag: nil, last_modified: nil)
       headers = { "HTTP_IF_NONE_MATCH" => etag, "HTTP_IF_MODIFIED_SINCE" => last_modified }.compact
       get path, {}, headers
     end
+    let(:yesterday) { Time.now - (24 * 60 * 60) }
+    let(:note) { create(:post_edit, post: older, note: "fixed a typo", created_at: yesterday, updated_at: yesterday) }
+    let(:older) { post_queries.published_by_slug("older") }
+
+    def post_mutations = Posts::Slice["repos.post_mutations"]
+
+    def post_queries = Posts::Slice["repos.post_queries"]
 
     def remove_tag(name)
       tag_repo = Tags::Slice["repos.tag_repo"]
@@ -438,9 +440,9 @@ RSpec.describe "Feeds", type: :request do
       tag_repo.update(tag_repo.all_in("public").find { it.name == from }.id, name: to)
     end
 
-    def retag(slug, names) = post_repo.replace_tags(post_repo.published_by_slug(slug).id, names)
+    def retag(slug, names) = post_mutations.replace_tags(post_queries.published_by_slug(slug).id, names)
 
-    def revise_note = Posts::Slice["repos.post_edit_repo"].update(note.id, note: "fixed two typos")
+    def revise_note = Posts::Slice["repos.post_edit_mutations"].update(note.id, note: "fixed two typos")
 
     before do
       create(:post, :published, slug: "older", tags: %w[ruby], published_at: yesterday - 60, updated_at: yesterday - 60)
@@ -505,7 +507,7 @@ RSpec.describe "Feeds", type: :request do
 
         it "answers 200 with the edit once a post changes", :aggregate_failures do
           sent = validators
-          post_repo.update(post_repo.published_by_slug("older").id, title: "Revised")
+          post_mutations.update(post_queries.published_by_slug("older").id, title: "Revised")
           poll(path, **sent)
 
           expect(last_response.status).to eq(200)
@@ -514,7 +516,7 @@ RSpec.describe "Feeds", type: :request do
 
         it "answers 200 without a deleted entry though the newest change stands", :aggregate_failures do
           sent = validators
-          post_repo.delete(post_repo.published_by_slug("older").id)
+          post_mutations.delete(post_queries.published_by_slug("older").id)
           poll(path, **sent)
 
           expect(last_response.status).to eq(200)
@@ -523,7 +525,7 @@ RSpec.describe "Feeds", type: :request do
 
         it "answers 200 without a deleted entry to a reader that sends only the time back", :aggregate_failures do
           sent = validators
-          post_repo.delete(older.id)
+          post_mutations.delete(older.id)
           poll(path, last_modified: sent[:last_modified])
 
           expect(last_response.status).to eq(200)
@@ -577,7 +579,7 @@ RSpec.describe "Feeds", type: :request do
         it "answers 304 to a reader that sends only the time back after a draft loses a tag" do
           sent = validators
           draft = create(:post, :draft, tags: %w[ruby secret])
-          post_repo.replace_tags(draft.id, %w[secret])
+          post_mutations.replace_tags(draft.id, %w[secret])
           poll(path, last_modified: sent[:last_modified])
 
           expect(last_response.status).to eq(304)

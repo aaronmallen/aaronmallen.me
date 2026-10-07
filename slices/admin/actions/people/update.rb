@@ -9,7 +9,7 @@ module Admin
         include Deps[
           build_person_editor: "operations.build_person_editor",
           edit_view: "ui.views.people.edit",
-          person_by_id: "social.queries.person_by_id",
+          person_queries: "social.repos.person_queries",
           save_person: "social.operations.save_person",
         ]
 
@@ -20,7 +20,7 @@ module Admin
           result = save_person.call(params, id:)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, person_by_id.call(id), params, errors)
+          in Failure[:invalid, errors] then invalid(response, person_queries.by_id(id), params, errors)
           else settle(response, result, SAVED, routes.path(:admin_people))
           end
         end

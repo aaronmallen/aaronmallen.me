@@ -9,11 +9,11 @@ module Admin
         include Deps[
           build_post_editor: "operations.build_post_editor",
           list_record_links: "operations.list_record_links",
-          post_by_id: "posts.queries.by_id",
+          post_queries: "posts.repos.post_queries",
         ]
 
         def handle(request, response)
-          post = post_by_id.call(record_id(request))
+          post = post_queries.by_id(record_id(request))
           not_found(response) unless post
 
           records = list_record_links.call(KIND, post.id, query: request.params[:record_q])

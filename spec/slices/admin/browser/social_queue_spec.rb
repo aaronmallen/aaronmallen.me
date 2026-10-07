@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin social queue", type: :feature do
-  let(:repo) { Social::Slice["repos.social_post_repo"] }
+  let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
+  let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
-  def draft = repo.create_with_parts(parts: %w[a-draft], targets: %w[mastodon], status: "draft")
+  def draft = social_post_mutations.create_with_parts(parts: %w[a-draft], targets: %w[mastodon], status: "draft")
 
   def queued
     attributes = { parts: %w[waiting], targets: %w[mastodon], status: "scheduled", posted_at: Time.now + (90 * 60) }
-    repo.create_with_parts(**attributes)
+    social_post_mutations.create_with_parts(**attributes)
   end
 
   before do
@@ -39,7 +40,7 @@ RSpec.describe "Admin social queue", type: :feature do
       click_button "Post now"
 
       expect(page).to have_css("[data-toast]", text: "Queued for Mastodon")
-      expect(repo.queued.map { it.parts.map(&:body) }).to eq([%w[rewritten], %w[waiting]])
+      expect(social_post_queries.queued.map { it.parts.map(&:body) }).to eq([%w[rewritten], %w[waiting]])
     end
   end
 end

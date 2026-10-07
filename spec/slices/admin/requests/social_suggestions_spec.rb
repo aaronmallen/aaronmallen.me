@@ -2,7 +2,6 @@
 
 RSpec.describe "Admin social suggestions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Social::Slice["repos.social_post_repo"] }
   let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
@@ -10,10 +9,10 @@ RSpec.describe "Admin social suggestions", type: :request do
     post "/admin/social/#{social_post.id}/suggestions/accept", _csrf_token: admin_csrf_token, **params
   end
 
-  def bodies(social_post) = repo.by_id(social_post.id).parts.map(&:body)
+  def bodies(social_post) = social_post_queries.by_id(social_post.id).parts.map(&:body)
 
   def compose(*parts, status: "draft", posted_at: nil, targets: %w[mastodon])
-    repo.create_with_parts(parts:, posted_at:, status:, targets:)
+    social_post_mutations.create_with_parts(parts:, posted_at:, status:, targets:)
   end
 
   def edits_of(social_post) = suggestion_repo.for_social_post(social_post.id).edits
@@ -25,6 +24,10 @@ RSpec.describe "Admin social suggestions", type: :request do
   def reject(social_post, **params)
     post "/admin/social/#{social_post.id}/suggestions/reject", _csrf_token: admin_csrf_token, **params
   end
+
+  def social_post_mutations = Social::Slice["repos.social_post_mutations"]
+
+  def social_post_queries = Social::Slice["repos.social_post_queries"]
 
   def statuses(social_post) = edits_of(social_post).map(&:status)
 
@@ -500,15 +503,19 @@ RSpec.describe "Admin social suggestions", type: :request do
     describe "a part rewritten over the limit between the read and the accept" do
       let(:social_post) { compose("the cat sat") }
 
-      def rewrites_after_reading
-        inner = Social::Slice["queries.editable_social_post"]
-
-        ->(id) { inner.call(id).tap { repo.replace_parts(id, ["teh #{'a' * 496}"]) } }
+      def rewrite_after_reading
+        Social::Slice["repos.social_post_queries"].tap do |queries|
+          allow(queries).to receive(:editable).and_wrap_original do |read, id|
+            read.call(id).tap { social_post_mutations.replace_parts(id, ["teh #{'a' * 496}"]) }
+          end
+          replace_component("repos.social_post_queries", queries)
+          replace_component("social.repos.social_post_queries", queries)
+        end
       end
 
       before do
         suggest(social_post, typo("teh", "their"))
-        replace_component("social.queries.editable_social_post", rewrites_after_reading)
+        rewrite_after_reading
         accept(social_post)
       end
 
@@ -588,7 +595,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       def sends_after_reading
         inner = Social::Slice["operations.lock_editable_social_post"]
 
-        ->(id) { inner.call(id).tap { repo.mark_posted(id) } }
+        ->(id) { inner.call(id).tap { social_post_mutations.mark_posted(id) } }
       end
 
       before do
@@ -617,7 +624,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       def sends_before_locking
         inner = Social::Slice["operations.lock_editable_social_post"]
 
-        ->(id) { repo.mark_posted(id).then { inner.call(id) } }
+        ->(id) { social_post_mutations.mark_posted(id).then { inner.call(id) } }
       end
 
       before do

@@ -284,7 +284,7 @@ RSpec.describe "Admin social mentions", type: :feature do
   end
 
   describe "adding someone new" do
-    let(:repo) { Social::Slice["repos.person_repo"] }
+    let(:person_queries) { Social::Slice["repos.person_queries"] }
 
     def add_new(text = "hi @Ada Lovelace") = type(text, :enter)
 
@@ -378,7 +378,7 @@ RSpec.describe "Admin social mentions", type: :feature do
 
       it "closes the dialog and stores the person", :aggregate_failures do
         expect(page).to have_no_css("dialog#person-dialog[open]")
-        expect(repo.all.map(&:key)).to contain_exactly("grace-hopper", "zed-shaw")
+        expect(person_queries.all.map(&:key)).to contain_exactly("grace-hopper", "zed-shaw")
       end
 
       it "puts their token in place of what I typed" do

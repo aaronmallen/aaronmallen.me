@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Posts::Slice["queries.all"].call.any?
+return if Posts::Slice["repos.post_queries"].all.any?
 
 save_post = Posts::Slice["operations.save_post"]
 

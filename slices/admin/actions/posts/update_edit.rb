@@ -10,13 +10,13 @@ module Admin
         include Deps[
           build_post_editor: "operations.build_post_editor",
           list_record_links: "operations.list_record_links",
-          post_by_id: "posts.queries.by_id",
+          post_queries: "posts.repos.post_queries",
           revise_edit_note: "posts.operations.revise_edit_note",
           view: "ui.views.posts.edit",
         ]
 
         def handle(request, response)
-          post = post_by_id.call(record_id(request)) || halt(404)
+          post = post_queries.by_id(record_id(request)) || halt(404)
           id = edit_id(request)
           params = Blog::Types::Fields[request.params[:edit]]
 

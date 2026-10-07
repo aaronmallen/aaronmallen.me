@@ -5,12 +5,12 @@ module Admin
     class CountNetworkLengths
       include Deps[
         expand_for_network: "social.operations.expand_for_network",
-        mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
+        person_queries: "social.repos.person_queries",
       ]
 
       def call(bodies)
-        directory = mention_directory.call(bodies)
+        directory = person_queries.mention_directory(bodies)
         sent = Blog::Types::NetworkName.values.to_h { [it, expand_for_network.call(bodies, it).map(&:text)] }
 
         bodies.each_with_index.map do |body, index|

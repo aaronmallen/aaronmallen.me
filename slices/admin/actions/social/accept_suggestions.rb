@@ -11,15 +11,14 @@ module Admin
 
         include Deps[
           accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
-          editable_social_post: "social.queries.editable_social_post",
           find_over_limit_network: "operations.find_over_limit_network",
-          social_post_by_id: "social.queries.social_post_by_id",
+          social_post_queries: "social.repos.social_post_queries",
           suggestion_for_social_post: "suggestions.queries.for_social_post",
         ]
 
         def handle(request, response)
           id = record_id(request)
-          social_post = editable_social_post.call(id)
+          social_post = social_post_queries.editable(id)
           halt 404 unless social_post || claimed?(id)
 
           social_post ? accept(response, social_post, request.params[:edit_id].to_s) : toast(response, SENT)
@@ -55,7 +54,7 @@ module Admin
 
         def chosen(edit_id) = edit_id.empty? ? nil : Array(Blog::Types::IdParam[edit_id])
 
-        def claimed?(id) = social_post_by_id.call(id)&.deliveries&.any?
+        def claimed?(id) = social_post_queries.by_id(id)&.deliveries&.any?
       end
     end
   end

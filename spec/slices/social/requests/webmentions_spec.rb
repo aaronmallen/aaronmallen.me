@@ -4,7 +4,7 @@ RSpec.describe "Social webmentions", type: :request do
   let(:bridgy) { "https://brid.gy/like/mastodon/1" }
   let(:source) { "https://ada.example/notes/1" }
   let(:target) { "https://aaronmallen.me/writing/hello" }
-  let(:webmention_repo) { Social::Slice["repos.webmention_repo"] }
+  let(:webmention_mutations) { Social::Slice["repos.webmention_mutations"] }
 
   let!(:article) { create(:post, :published, slug: "hello") }
 
@@ -35,14 +35,14 @@ RSpec.describe "Social webmentions", type: :request do
     end
 
     it "is rejected once Bridgy is off" do
-      webmention_repo.update_settings(accept_bridgy: false)
+      webmention_mutations.update_settings(accept_bridgy: false)
       notify(source: bridgy)
 
       expect([last_response.status, queued]).to eq([400, []])
     end
 
     it "leaves other senders accepted once Bridgy is off" do
-      webmention_repo.update_settings(accept_bridgy: false)
+      webmention_mutations.update_settings(accept_bridgy: false)
       notify
 
       expect(last_response.status).to eq(202)
@@ -75,7 +75,7 @@ RSpec.describe "Social webmentions", type: :request do
     end
 
     it "rejects everything while receiving is off" do
-      webmention_repo.update_settings(receive: false)
+      webmention_mutations.update_settings(receive: false)
       notify
 
       expect(last_response.status).to eq(400)

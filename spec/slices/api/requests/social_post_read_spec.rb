@@ -4,7 +4,7 @@ RSpec.describe "API reading a social post", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
   def compose(body)
-    Social::Slice["repos.social_post_repo"]
+    Social::Slice["repos.social_post_mutations"]
       .create_with_parts(parts: [body], posted_at: nil, status: "draft", targets: %w[mastodon])
   end
 
@@ -64,7 +64,7 @@ RSpec.describe "API reading a social post", type: :request do
 
   def status = last_response.status
 
-  def stored(id) = Social::Slice["queries.social_post_by_id"].call(id)
+  def stored(id) = Social::Slice["repos.social_post_queries"].by_id(id)
 
   def suggest(social_post, *edits)
     Suggestions::Slice["repos.suggestion_repo"].replace_for_social_post(social_post.id, edits)

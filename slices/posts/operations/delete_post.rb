@@ -5,11 +5,11 @@ module Posts
     class DeletePost < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
 
-      include Deps[post_repo: "repos.post_repo", release_photos: "media.operations.release_photos"]
+      include Deps[post_mutations: "repos.post_mutations", release_photos: "media.operations.release_photos"]
 
       def call(id)
         transaction do
-          post = step found(post_repo.delete(id))
+          post = step found(post_mutations.delete(id))
           release_photos.call(PHOTO_OWNER, post.id)
           post
         end

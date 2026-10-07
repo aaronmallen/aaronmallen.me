@@ -3,10 +3,12 @@
 RSpec.describe "Admin webmentions", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Social::Slice["repos.webmention_repo"] }
   let(:target) { create(:post, :published, slug: "hello", title: "Hello") }
 
   def authors = page.all(".li-head .li-title").map(&:text)
+  def webmention_mutations = Social::Slice["repos.webmention_mutations"]
+
+  def webmention_queries = Social::Slice["repos.webmention_queries"]
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -197,32 +199,32 @@ RSpec.describe "Admin webmentions", type: :request do
       it "approves a mention" do
         post "/admin/webmentions/#{mention.id}/approve", _csrf_token: admin_csrf_token
 
-        expect(repo.by_status("approved").map(&:id)).to eq([mention.id])
+        expect(webmention_queries.by_status("approved").map(&:id)).to eq([mention.id])
       end
 
       it "marks a mention as spam" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token
 
-        expect(repo.by_status("spam").map(&:id)).to eq([mention.id])
+        expect(webmention_queries.by_status("spam").map(&:id)).to eq([mention.id])
       end
 
       it "stores the note given with spam" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "link farm"
 
-        expect(repo.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
       end
 
       it "marks a mention as spam without a note" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: ""
 
-        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
       it "marks a mention as spam without a note when the note holds only Unicode spaces", :aggregate_failures do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "\u3000\u00a0"
 
         expect(last_response).to be_redirect
-        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
       %w[approve ignore].each do |action|
@@ -238,7 +240,7 @@ RSpec.describe "Admin webmentions", type: :request do
           spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
           post "/admin/webmentions/#{spam.id}/#{action}", _csrf_token: admin_csrf_token
 
-          expect(repo.by_status(status).map(&:spam_reason)).to eq([nil])
+          expect(webmention_queries.by_status(status).map(&:spam_reason)).to eq([nil])
         end
       end
 
@@ -246,7 +248,7 @@ RSpec.describe "Admin webmentions", type: :request do
         spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
         post "/admin/webmentions/#{spam.id}/spam", _csrf_token: admin_csrf_token
 
-        expect(repo.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
       end
 
       it "offers a note field beside Spam" do
@@ -266,7 +268,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "ignores a mention" do
         post "/admin/webmentions/#{mention.id}/ignore", _csrf_token: admin_csrf_token
 
-        expect(repo.by_status("ignored").map(&:id)).to eq([mention.id])
+        expect(webmention_queries.by_status("ignored").map(&:id)).to eq([mention.id])
       end
 
       it "keeps the filter on the way back" do
@@ -320,7 +322,7 @@ RSpec.describe "Admin webmentions", type: :request do
           post "/admin/webmentions/#{mention.id}/#{verdict}", _csrf_token: admin_csrf_token
 
           expect(last_response.status).to eq(404)
-          expect(repo.by_status("pending").map(&:id)).to eq([mention.id])
+          expect(webmention_queries.by_status("pending").map(&:id)).to eq([mention.id])
         end
       end
 
@@ -367,11 +369,11 @@ RSpec.describe "Admin webmentions", type: :request do
         it "saves #{name} turned off" do
           post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: toggles.merge(name => "0")
 
-          expect(repo.settings.public_send(name)).to be(false)
+          expect(webmention_queries.settings.public_send(name)).to be(false)
         end
 
         it "shows #{name} turned off on the next request" do
-          repo.update_settings(name => false)
+          webmention_mutations.update_settings(name => false)
           get "/admin/webmentions"
 
           expect(page).to have_css("input.toggle[name='settings[#{name}]']:not([checked])", visible: :all)
@@ -387,7 +389,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "leaves the toggles it isn't sent alone" do
         post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: { receive: "0" }
 
-        expect(repo.settings).to have_attributes(receive: false, send_on_publish: true)
+        expect(webmention_queries.settings).to have_attributes(receive: false, send_on_publish: true)
       end
 
       it "shows the saved toast" do
@@ -412,25 +414,25 @@ RSpec.describe "Admin webmentions", type: :request do
       it "saves one person's sites from the hosts it is sent, one per line, cleaned up and in order" do
         save_hosts("grace.example\r\nhttps://Ada.Example/about\n\nnot a host/\n")
 
-        expect(repo.settings.single_author_hosts).to eq(%w[ada.example grace.example])
+        expect(webmention_queries.settings.single_author_hosts).to eq(%w[ada.example grace.example])
       end
 
       it "clears the hosts when sent none" do
-        repo.update_settings(single_author_hosts: ["ada.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
         save_hosts("")
 
-        expect(repo.settings.single_author_hosts).to eq([])
+        expect(webmention_queries.settings.single_author_hosts).to eq([])
       end
 
       it "leaves the hosts alone when the form leaves them out" do
-        repo.update_settings(single_author_hosts: ["ada.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
         post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: { receive: "0" }
 
-        expect(repo.settings.single_author_hosts).to eq(["ada.example"])
+        expect(webmention_queries.settings.single_author_hosts).to eq(["ada.example"])
       end
 
       it "says nothing changed when the hosts match the stored ones" do
-        repo.update_settings(single_author_hosts: ["ada.example"])
+        webmention_mutations.update_settings(single_author_hosts: ["ada.example"])
         save_hosts("ada.example")
         follow_redirect!
 
@@ -438,7 +440,7 @@ RSpec.describe "Admin webmentions", type: :request do
       end
 
       it "shows the stored hosts, one per line" do
-        repo.update_settings(single_author_hosts: %w[ada.example grace.example])
+        webmention_mutations.update_settings(single_author_hosts: %w[ada.example grace.example])
         get "/admin/webmentions"
 
         expect(page.find("textarea[name='settings[single_author_hosts]']").value)

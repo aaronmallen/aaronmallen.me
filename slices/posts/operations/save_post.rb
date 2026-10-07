@@ -6,8 +6,9 @@ module Posts
       include Deps[
         claim_post_photos: "operations.claim_post_photos",
         contract: "contracts.post_contract",
-        post_edit_repo: "repos.post_edit_repo",
-        post_repo: "repos.post_repo",
+        post_edit_mutations: "repos.post_edit_mutations",
+        post_mutations: "repos.post_mutations",
+        post_queries: "repos.post_queries",
         publish_post: "operations.publish_post",
         queue_follow_up: "operations.queue_follow_up",
       ]
@@ -28,11 +29,11 @@ module Posts
 
       def create_or_update(post, attributes)
         fields = attributes.except(:tags, NOTE)
-        saved = post ? post_repo.update(post.id, fields) : post_repo.create(fields)
-        post_repo.replace_tags(saved.id, attributes.fetch(:tags))
+        saved = post ? post_mutations.update(post.id, fields) : post_mutations.create(fields)
+        post_mutations.replace_tags(saved.id, attributes.fetch(:tags))
         claim_post_photos.call(saved)
 
-        post_repo.by_id(saved.id)
+        post_queries.by_id(saved.id)
       end
 
       def draft(post, attributes)
@@ -44,7 +45,7 @@ module Posts
       def find(id)
         return Success(nil) unless id
 
-        found(post_repo.by_id_for_update(id))
+        found(post_mutations.by_id_for_update(id))
       end
 
       def form(params)
@@ -71,7 +72,7 @@ module Posts
           save(post, kept(post, attributes), intent, now)
         end
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError => e
-        code = SLUG_CONSTRAINTS[post_repo.violated_constraint(e)]
+        code = SLUG_CONSTRAINTS[post_mutations.violated_constraint(e)]
         raise unless code
 
         invalid(:slug, code)
@@ -101,9 +102,9 @@ module Posts
         note = attributes[NOTE].to_s
         return invalid(NOTE, Blog::Contract::BLANK) if edited && note.empty?
 
-        post_edit_repo.create(post_id: post.id, note:) if edited
+        post_edit_mutations.create(post_id: post.id, note:) if edited
         saved = create_or_update(post, resending(attributes))
-        post_repo.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
+        post_mutations.after_commit { queue_follow_up.call(saved.id, QueueFollowUp::SEND_WEBMENTIONS) }
 
         Success([:saved, saved])
       end

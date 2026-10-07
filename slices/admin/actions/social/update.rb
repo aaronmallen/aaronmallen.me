@@ -10,8 +10,8 @@ module Admin
           build_social_page: "operations.build_social_page",
           compose_social_post: "social.operations.compose_social_post",
           describe_social_post: "operations.describe_social_post",
-          editable_social_post: "social.queries.editable_social_post",
           index_view: "ui.views.social.index",
+          social_post_queries: "social.repos.social_post_queries",
         ]
 
         def handle(request, response)
@@ -34,7 +34,7 @@ module Admin
         def invalid(response, id, params, errors)
           response.status = 422
           response.render(index_view,
-                          **build_social_page.call(params:, errors:, editing: editable_social_post.call(id)))
+                          **build_social_page.call(params:, errors:, editing: social_post_queries.editable(id)))
         end
 
         def saved(response, outcome, social_post)

@@ -122,7 +122,7 @@ RSpec.describe "API saved view records", type: :request do
       create(:post, :published)
 
       expect(records("posts", status: "draft").fetch("records"))
-        .to eq([JSON.parse(API::Serializers::Post.new(Posts::Slice["queries.by_id"].call(draft.id)).serialize)])
+        .to eq([JSON.parse(API::Serializers::Post.new(Posts::Slice["repos.post_queries"].by_id(draft.id)).serialize)])
     end
 
     it "reads every post when no status is saved" do

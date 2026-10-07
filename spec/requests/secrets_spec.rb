@@ -13,6 +13,11 @@ RSpec.describe "Secrets a request carries", type: :request do
 
   def crash = @crash ||= Class.new(StandardError)
 
+  def crashing(method)
+    error = crash
+    Object.new.tap { |stub| stub.define_singleton_method(method) { |*, **| raise error } }
+  end
+
   def logged
     written = +""
     Hanami.app["logger"].backends.each do |backend|
@@ -25,9 +30,9 @@ RSpec.describe "Secrets a request carries", type: :request do
     written
   end
 
-  def reported(key)
+  def reported(key, method = :call)
     notices = []
-    replace_component(key, ->(*, **) { raise crash })
+    replace_component(key, crashing(method))
     allow(agent.config).to receive(:before_notify_hooks).and_return([->(notice) { notices << notice.to_json }])
     begin
       yield
@@ -195,7 +200,7 @@ RSpec.describe "Secrets a request carries", type: :request do
     end
 
     it "reports no visitor address" do
-      expect(reported("posts.queries.latest_published") { visit_home }).not_to include(forwarded, remote)
+      expect(reported("posts.repos.post_queries", :published) { visit_home }).not_to include(forwarded, remote)
     end
   end
 

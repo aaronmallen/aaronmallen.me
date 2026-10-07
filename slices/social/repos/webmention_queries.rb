@@ -2,32 +2,15 @@
 
 module Social
   module Repos
-    class WebmentionRepo < DB::Repo
-      include Dry::Monads[:result]
-
-      APPROVED = Blog::Types::WebmentionStatus["approved"]
-      BARE_HOST = %r{\A(https?://[^/?#]+)\z}
+    class WebmentionQueries < DB::Repo
       COUNTED_TYPES = [Blog::Types::WebmentionType["like"], Blog::Types::WebmentionType["repost"]].freeze
-      IGNORED = Blog::Types::WebmentionStatus["ignored"]
       LISTED_TYPES = [Blog::Types::WebmentionType["reply"], Blog::Types::WebmentionType["mention"]].freeze
       PENDING = Blog::Types::WebmentionStatus["pending"]
-      RESENT_FIELDS = %i[author_name author_url excerpt type].freeze
       SETTINGS_ID = 1
-      SPAM = Blog::Types::WebmentionStatus["spam"]
-
-      stamped_commands :create, :update
-
-      def approve(id) = update(id, status: APPROVED, spam_reason: nil)
 
       def by_id(id) = webmentions.by_pk(id).one
 
       def by_status(status) = webmentions.with_status(status).newest_first.to_a
-
-      def claim_receipt(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
-        receipt = webmention_receipts.claim(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)&.first
-
-        receipt ? Success(receipt) : Failure(:throttled)
-      end
 
       def count_by_post(post_ids) = tallied(webmentions.for_posts(post_ids).counts_by(:post_id), :post_id)
 
@@ -48,23 +31,13 @@ module Social
 
       def counted_for(post_id) = tallied(approved_for(post_id, COUNTED_TYPES).counts_by(:type), :type)
 
-      def delete_by_source(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).delete
-
-      def delete_receipts_before(time) = webmention_receipts.received_before(time).delete
-
       def held = held_webmentions.oldest_first.to_a
 
-      def hold(**) = held_webmentions.hold(**)
-
-      def ignore(id) = update(id, status: IGNORED, spam_reason: nil)
-
-      def known_author?(author_url) = webmentions.by_author_url(normalized_author_url(author_url)).known_author?
+      def known_author?(author_url)
+        webmentions.by_author_url(Webmentions::AuthorUrl.normalize(author_url)).known_author?
+      end
 
       def listed_for(post_id) = approved_for(post_id, LISTED_TYPES).oldest_first.to_a
-
-      def mark_spam(id, reason = nil) = update(id, status: SPAM, spam_reason: reason)
-
-      def normalized_author_url(url) = Blog::Types::Normalized::Url.call(url) { url }.sub(BARE_HOST, '\\1/')
 
       def page_by_status(status, page) = page.fill(webmentions.with_status(status).newest_first.paged(page).to_a)
 
@@ -90,34 +63,13 @@ module Social
         page.fill(days.newest_first.paged(page).to_a)
       end
 
-      def release(id) = held_webmentions.by_pk(id).delete
-
-      def see(id, at) = update(id, seen_at: at)
-
       def settings = stored_settings || created_settings
 
-      def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
-
       def snoozed = webmentions.with_status(PENDING).unseen.asleep.to_a
-
-      def store(**attrs)
-        written = attrs.merge(author_url: normalized_author_url(attrs[:author_url]))
-
-        webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, **written)
-      end
 
       def unseen = unseen_pending.newest_first.to_a
 
       def unseen_count = unseen_pending.count
-
-      def update_settings(**attrs)
-        transaction do
-          settings
-          webmention_settings.by_pk(SETTINGS_ID).stamped(:update).call(**attrs)
-        end
-
-        stored_settings
-      end
 
       private
 

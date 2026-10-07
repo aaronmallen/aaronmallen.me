@@ -6,10 +6,10 @@ module API
       SCHEMA = Schema.by_id
       REPLY = Serializers::Person.reference
 
-      include Deps[person_by_id: "social.queries.person_by_id"]
+      include Deps[person_queries: "social.repos.person_queries"]
 
       def handle(id:)
-        person = person_by_id.call(id)
+        person = person_queries.by_id(id)
 
         person ? Success(serialized(Serializers::Person, person)) : not_found(Wording.missing("person", id))
       end

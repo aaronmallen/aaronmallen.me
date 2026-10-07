@@ -4,7 +4,7 @@ RSpec.describe Social::Jobs::SendWebmentions do
   subject(:job) { described_class.new }
 
   let(:endpoint) { "https://ada.example/webmention" }
-  let(:post_repo) { Posts::Slice["repos.post_repo"] }
+  let(:post_queries) { Posts::Slice["repos.post_queries"] }
   let(:source) { "https://aaronmallen.me/writing/hello" }
   let(:target) { "https://ada.example/notes/1" }
 
@@ -38,9 +38,9 @@ RSpec.describe Social::Jobs::SendWebmentions do
     stub_endpoint(endpoint, status:)
   end
 
-  def targets_of(post) = post_repo.by_id(post.id).webmention_targets.to_a
+  def targets_of(post) = post_queries.by_id(post.id).webmention_targets.to_a
 
-  def update_settings(**) = Social::Slice["repos.webmention_repo"].update_settings(**)
+  def update_settings(**) = Social::Slice["repos.webmention_mutations"].update_settings(**)
 
   before { resolves_publicly("ada.example", "bob.example") }
 

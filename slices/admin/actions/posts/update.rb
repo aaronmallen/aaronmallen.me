@@ -10,7 +10,7 @@ module Admin
         include Deps[
           build_post_editor: "operations.build_post_editor",
           list_record_links: "operations.list_record_links",
-          post_by_id: "posts.queries.by_id",
+          post_queries: "posts.repos.post_queries",
           save_post: "posts.operations.save_post",
         ]
 
@@ -31,7 +31,7 @@ module Admin
         def intent(request) = Blog::Types::PostIntentParam[request.params[:intent]]
 
         def invalid(request, response, params, errors, id:)
-          post = post_by_id.call(id)
+          post = post_queries.by_id(id)
           halt 404 unless post
 
           response.status = 422

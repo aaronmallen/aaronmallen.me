@@ -12,8 +12,8 @@ module Posts
       include Deps[
         announcement: "operations.compose_announcement",
         expand_for_network: "social.operations.expand_for_network",
-        mention_directory: "social.queries.mention_directory",
         networks: "social.networks.all",
+        person_queries: "social.repos.person_queries",
       ]
 
       params do
@@ -48,7 +48,7 @@ module Posts
       end
 
       rule(:syndication_body) do
-        key.failure(UNKNOWN_MENTION) if mention_directory.call(value).unknown(value).any?
+        key.failure(UNKNOWN_MENTION) if person_queries.mention_directory(value).unknown(value).any?
       end
 
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|
