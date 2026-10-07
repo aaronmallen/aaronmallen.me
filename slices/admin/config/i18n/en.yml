@@ -188,11 +188,11 @@ en:
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
-  task_tag_rules_page:
+  task_rules_page:
     toasts:
-      added: "Rule added · the tasks it matches now carry its tags"
-      deleted: "Rule deleted · every task keeps its tags"
-      saved: "Rule saved · new imports take its tags"
+      added: "Rule added · the tasks it matches now carry its tags and projects"
+      deleted: "Rule deleted · every task keeps its tags and projects"
+      saved: "Rule saved · new imports take its tags and projects"
   tasks_page:
     toasts:
       bulk:
@@ -1346,27 +1346,32 @@ en:
             projects:
               one: "%{count} project"
               other: "%{count} projects"
-            task_tag_rules:
+            task_rules:
               one: "%{count} rule"
               other: "%{count} rules"
             tasks:
               one: "%{count} task"
               other: "%{count} tasks"
-      task_tag_rules:
+      task_rules:
         capture:
           add: "Add rule"
-          note: "Adding a rule also tags every task already imported that it matches."
+          note: "Adding a rule also tags and links every task already imported that it matches."
         field_error:
           pattern:
             blank: "Name a repo or team first."
             format: "Name one repo or team as owner/name, or all of an owner's as owner/*."
             taken: "Another rule already holds that pattern."
+          projects:
+            format: "Pick projects from the list."
+            missing: "One of those projects is gone."
           tags:
-            blank: "Name a tag first."
+            blank: "Name a tag or a project first."
             format: "A tag is lowercase words joined by hyphens."
         fields:
           pattern: "Repo or team"
           pattern_placeholder: "aaronmallen/*"
+          no_projects: "No projects yet."
+          projects: "Projects"
           provider: "Provider"
           providers:
             github: "GitHub"
@@ -1375,10 +1380,10 @@ en:
           tags_placeholder: "ruby, projects"
         row:
           cancel: "Cancel"
-          confirm_delete: "Delete the %{provider} rule for %{pattern}? Tasks keep the tags it gave them."
+          confirm_delete: "Delete the %{provider} rule for %{pattern}? Tasks keep the tags and projects it gave them."
           delete: "Delete"
           edit: "Edit"
-          note: "Saving changes only what new imports take. Tasks already imported keep the tags they have."
+          note: "Saving changes only what new imports take. Tasks already imported keep the tags and projects they have."
           save: "Save"
       tasks:
         bulk:
@@ -1478,7 +1483,7 @@ en:
           failed: "Couldn't save the new order"
           label: "Reorder %{task}"
         import_acts:
-          rules: "Tag rules"
+          rules: "Task rules"
         link_editor:
           find: "Find"
           kind: "Link type"
@@ -2095,18 +2100,18 @@ en:
           scopes:
             private: "Private"
             public: "Public"
-      task_tag_rules:
+      task_rules:
         index:
           aside: "Click a rule to edit it or delete it."
           back: "Tasks"
           empty: "No rules yet. Add one above."
-          heading: "Tag rules"
+          heading: "Task rules"
           label: "Tasks"
-          note: "Deleting a rule, or taking a tag out of one, takes no tag off a task."
+          note: "Deleting a rule, or taking a tag or project out of one, takes nothing off a task."
           sub:
-            one: "%{count} rule · each gives the issues it matches private tags on import"
-            other: "%{count} rules · each gives the issues it matches private tags on import"
-          title: "Tags by repo or team"
+            one: "%{count} rule · each gives the issues it matches private tags and projects on import"
+            other: "%{count} rules · each gives the issues it matches private tags and projects on import"
+          title: "Tags and projects by repo or team"
       tasks:
         index:
           archive: "Archive"

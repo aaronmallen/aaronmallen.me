@@ -2992,6 +2992,10 @@
 @utility rule-fields {
   @apply grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-3;
 
+  & > :nth-child(4) {
+    @apply col-span-full;
+  }
+
   @media (width < 43.75rem) {
     @apply grid-cols-1;
   }
@@ -3031,6 +3035,14 @@
 
 @utility rule-tags {
   @apply col-start-1 row-start-2 flex flex-wrap gap-1.5;
+}
+
+@utility rule-project {
+  @apply font-mono text-meta text-ink-muted;
+}
+
+@utility rule-projects {
+  @apply flex flex-wrap gap-x-4 gap-y-2;
 }
 
 @utility rule-acts {

@@ -11,11 +11,11 @@ module Tags
         journal_entries: :journal_entry_tags,
         tasks: :task_tags,
         decisions: :decision_tags,
-        task_tag_rules: :task_tag_rule_tags,
+        task_rules: :task_rule_tags,
       }.freeze
       KINDS = {
         Blog::Types::TagScope["public"] => %i[posts projects],
-        Blog::Types::TagScope["private"] => %i[journal_entries tasks decisions task_tag_rules],
+        Blog::Types::TagScope["private"] => %i[journal_entries tasks decisions task_rules],
       }.freeze
 
       schema :tags, infer: true
@@ -27,7 +27,8 @@ module Tags
       end
 
       def last_tag_of_rules(id)
-        emptied = rules.where(id: rule_tags.where(tag_id: id).select(:task_tag_rule_id)).exclude(others(id).exists)
+        held = rules.where(id: rule_tags.where(tag_id: id).select(:task_rule_id))
+        emptied = held.exclude(others(id).exists).exclude(rule_projects.where(task_rule_id: rule_id).exists)
 
         emptied.order(:pattern).select_map(:pattern)
       end
@@ -41,11 +42,15 @@ module Tags
 
       private
 
-      def others(id) = rule_tags.where(task_tag_rule_id: Sequel[:task_tag_rules][:id]).exclude(tag_id: id)
+      def others(id) = rule_tags.where(task_rule_id: rule_id).exclude(tag_id: id)
 
-      def rule_tags = dataset.db[:task_tag_rule_tags]
+      def rule_id = Sequel[:task_rules][:id]
 
-      def rules = dataset.db[:task_tag_rules]
+      def rule_projects = dataset.db[:task_rule_projects]
+
+      def rule_tags = dataset.db[:task_rule_tags]
+
+      def rules = dataset.db[:task_rules]
     end
   end
 end

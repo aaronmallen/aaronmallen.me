@@ -6,7 +6,7 @@ module Admin
       module Tasks
         class ImportActs < Component
           def view_template
-            Button(href: path(:admin_task_tag_rules), small: true, icon: "fa-solid fa-tag") { t(".rules") }
+            Button(href: path(:admin_task_rules), small: true, icon: "fa-solid fa-tag") { t(".rules") }
             SyncButton()
           end
         end

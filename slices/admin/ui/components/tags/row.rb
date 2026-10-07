@@ -7,7 +7,7 @@ module Admin
         class Row < Component
           LAST_SEPARATOR = " and "
           LIST_SEPARATOR = ", "
-          KINDS = %i[posts projects journal_entries tasks decisions task_tag_rules].freeze
+          KINDS = %i[posts projects journal_entries tasks decisions task_rules].freeze
           USE_KEYS = KINDS.to_h { [it, ".uses.#{it}"] }.freeze
 
           prop :tag, Blog::Types::Instance(ROM::Struct)

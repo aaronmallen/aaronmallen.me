@@ -165,7 +165,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
   end
 
-  describe "a new issue from a repo with tag rules" do
+  describe "a new issue from a repo with task rules" do
     before do
       create(:tag, :private, name: "bug-fix")
       rule("aaronmallen/aaronmallen.me", "ruby, hanami")
@@ -174,7 +174,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     def events = Tasks::Slice["relations.task_events"].for_task(imported.id).to_a
 
-    def rule(pattern, tags, **) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags:, ** })
+    def rule(pattern, tags, **) = Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags:, ** })
 
     it "imports with the tags of every rule it matches beside its label tags" do
       stub_assigned(issue(labels: { nodes: [{ name: "Bug Fix" }] }))
@@ -220,6 +220,47 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       sync
 
       expect(imported.tags.map(&:name)).to eq(%w[ruby])
+    end
+  end
+
+  describe "a new issue from a repo with rules that hold projects" do
+    let(:blog) { create(:project, :private) }
+    let(:site) { create(:project, :archived) }
+
+    before do
+      rule("aaronmallen/aaronmallen.me", projects: [blog.id, site.id])
+      rule("aaronmallen/*", tags: "ruby", projects: [blog.id])
+    end
+
+    def links = Links::Slice["repos.record_link_repo"]
+
+    def project_ids = links.partners("task", imported.id).filter_map { |kind, id| id if kind == "project" }
+
+    def rule(pattern, tags: "", projects: [])
+      Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags:, projects: }).value!
+    end
+
+    it "links to the projects of every rule it matches, private or archived, once each" do
+      stub_assigned(issue)
+      sync
+
+      expect(project_ids).to contain_exactly(blog.id, site.id)
+    end
+
+    it "links to no project when the issue comes from another owner" do
+      stub_assigned(issue(repo: "octocat/aaronmallen.me"))
+      sync
+
+      expect(project_ids).to be_empty
+    end
+
+    it "keeps a project link I removed off on the next sync" do
+      stub_assigned(issue)
+      sync
+      links.unlink(["task", imported.id], ["project", site.id])
+      sync
+
+      expect(project_ids).to eq([blog.id])
     end
   end
 

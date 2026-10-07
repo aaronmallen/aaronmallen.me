@@ -181,7 +181,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
-  describe "a new issue in a team with tag rules" do
+  describe "a new issue in a team with task rules" do
     before do
       create(:tag, :private, name: "bug-fix")
       rule("acme/eng", "ruby, hanami")
@@ -194,7 +194,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
 
     def rule(pattern, tags, provider: "linear")
-      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, provider:, tags: })
+      Tasks::Slice["operations.save_task_rule"].call({ pattern:, provider:, tags: })
     end
 
     it "imports with the tags of every Linear rule it matches beside its label tags" do

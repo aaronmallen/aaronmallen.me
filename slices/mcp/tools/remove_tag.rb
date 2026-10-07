@@ -3,7 +3,7 @@
 module MCP
   module Tools
     class RemoveTag < Base
-      RULES = { true => "the task tag rule", false => "the task tag rules" }.freeze
+      RULES = { true => "the task rule", false => "the task rules" }.freeze
       UNREMOVED = "could not remove the tag"
 
       SCHEMA = {
@@ -13,7 +13,8 @@ module MCP
       }.freeze
 
       description "Remove one tag for good from its scope. #{TAG_KINDS}. Every record that carries the tag loses it. " \
-                  "A tag that is the only tag on a task tag rule stays until the rule takes another tag or goes"
+                  "A tag that is the only tag on a task rule with no projects stays until the rule takes another tag " \
+                  "or a project, or goes"
       input_schema(SCHEMA)
       scope OAuth::Scope::DELETE
 

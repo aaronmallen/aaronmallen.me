@@ -90,7 +90,7 @@ module MCP
       }.freeze
       INSTRUCTIONS = [
         "Read everything %s's site keeps: posts, social posts, announcements, webmentions and their settings,",
-        "the journal, commits and the sync state, API tokens and MCP clients, tasks, sprints, task tag rules, work",
+        "the journal, commits and the sync state, API tokens and MCP clients, tasks, sprints, task rules, work",
         "sessions and the time report, projects, work history, decisions, people, tags, record links, saved views,",
         "messages, photos, the inbox, attention, the calendar, the review, suggestions, analytics and the whole",
         "activity feed. Search every kind by its words, and look up accounts on Mastodon and Bluesky. Suggest edits to",
@@ -102,7 +102,7 @@ module MCP
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
-      SPLIT_ENDPOINTS = %i[create_person create_task_tag_rule update_person update_task_tag_rule].freeze
+      SPLIT_ENDPOINTS = %i[create_person create_task_rule update_person update_task_rule].freeze
       TITLE = "%s's site"
       TOOLS = [
         Tools::AcceptSuggestionEdits,
@@ -133,7 +133,7 @@ module MCP
         Tools::DeleteSocialPost,
         Tools::DeleteTask,
         Tools::DeleteTaskComment,
-        Tools::DeleteTaskTagRule,
+        Tools::DeleteTaskRule,
         Tools::DeleteTasks,
         Tools::DeleteWorkEntry,
         Tools::DeleteWorkSession,
@@ -165,7 +165,7 @@ module MCP
         Tools::ListSprints,
         Tools::ListSuggestions,
         Tools::ListTags,
-        Tools::ListTaskTagRules,
+        Tools::ListTaskRules,
         Tools::ListTasks,
         Tools::ListWebmentions,
         Tools::ListWorkEntries,
@@ -214,7 +214,7 @@ module MCP
         Tools::SaveReviewNote,
         Tools::SaveTag,
         Tools::SaveTask,
-        Tools::SaveTaskTagRule,
+        Tools::SaveTaskRule,
         Tools::ScheduleTask,
         Tools::Search,
         Tools::SearchAccounts,

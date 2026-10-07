@@ -3,7 +3,7 @@
 module Tags
   module Operations
     class RemoveTag < Operation
-      LAST_TAG = "task_tag_rules_last_tag"
+      LAST_TARGET = "task_rules_last_target"
 
       include Deps[tag_repo: "repos.tag_repo"]
 
@@ -18,7 +18,7 @@ module Tags
       def delete(tag)
         Success(transaction { tag_repo.delete(tag.id) })
       rescue ROM::SQL::CheckConstraintError => e
-        raise unless tag_repo.violated_constraint(e) == LAST_TAG
+        raise unless tag_repo.violated_constraint(e) == LAST_TARGET
 
         Failure([:last_tag_of_rules, tag_repo.last_tag_of_rules(tag.id)])
       end

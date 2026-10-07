@@ -54,7 +54,7 @@ RSpec.describe "MCP tag tools", type: :request do
     texts = tools.flat_map { [it.fetch("description"), it.dig("inputSchema", "properties", "scope", "description")] }
 
     expect(tools.map { it.fetch("name") }).to include("list_tags", "save_tag", "remove_tag")
-    expect(texts).to all(include("posts and projects", "journal entries, tasks, decisions and task tag rules"))
+    expect(texts).to all(include("posts and projects", "journal entries, tasks, decisions and task rules"))
   end
 
   describe "list_tags" do
@@ -202,11 +202,11 @@ RSpec.describe "MCP tag tools", type: :request do
     end
 
     it "names one rule as one" do
-      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "rails/*", tags: "ruby" })
+      Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
       id = tag_repo.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task tag rule rails/*")
+      expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")
     end
 
     it "refuses an ID no tag has" do
@@ -268,21 +268,21 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(tag_repo.all_in("private")).to be_empty
     end
 
-    it "refuses the only tag on a task tag rule, naming the rules", :aggregate_failures do
-      %w[rails/* aaronmallen/*].each { Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: it, tags: "ruby" }) }
+    it "refuses the only tag on a task rule, naming the rules", :aggregate_failures do
+      %w[rails/* aaronmallen/*].each { Tasks::Slice["operations.save_task_rule"].call({ pattern: it, tags: "ruby" }) }
       id = tag_repo.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task tag rules aaronmallen/*, rails/*")
+      expect(message).to eq("tag #{id} is the only tag on the task rules aaronmallen/*, rails/*")
       expect(tag_repo.find_in("private", id)).not_to be_nil
     end
 
     it "names one rule as one" do
-      Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: "rails/*", tags: "ruby" })
+      Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
       id = tag_repo.all_in("private").first.id
       call_tool("remove_tag", scope: "private", id:)
 
-      expect(message).to eq("tag #{id} is the only tag on the task tag rule rails/*")
+      expect(message).to eq("tag #{id} is the only tag on the task rule rails/*")
     end
 
     it "refuses an ID no tag has" do

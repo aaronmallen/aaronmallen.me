@@ -606,9 +606,9 @@ RSpec.describe "Admin tags", type: :request do
         expect(confirm_prompt).to eq(confirm(tag: "ruby", count: 1, uses: "1 project"))
       end
 
-      it "counts the task tag rules that hold the tag" do
+      it "counts the task rules that hold the tag" do
         create(:task, tags: %w[ruby])
-        %w[rails/* hanami/*].each { Tasks::Slice["operations.save_task_tag_rule"].call({ pattern: it, tags: "ruby" }) }
+        %w[rails/* hanami/*].each { Tasks::Slice["operations.save_task_rule"].call({ pattern: it, tags: "ruby" }) }
         get "/admin/tags", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("1 task · 2 rules")
@@ -650,12 +650,12 @@ RSpec.describe "Admin tags", type: :request do
       end
     end
 
-    describe "removing the only tag on a task tag rule" do
+    describe "removing the only tag on a task rule" do
       def remove(name) = send_to("/admin/tags/#{named(name).id}/delete", scope: "private")
 
-      def rule(pattern, tags) = Tasks::Slice["operations.save_task_tag_rule"].call({ pattern:, tags: }).value!
+      def rule(pattern, tags) = Tasks::Slice["operations.save_task_rule"].call({ pattern:, tags: }).value!
 
-      def rules = Tasks::Slice["queries.task_tag_rules"].call
+      def rules = Tasks::Slice["queries.task_rules"].call
 
       def tags_of(pattern) = rules.find { it.pattern == pattern }.tags.map(&:name)
 

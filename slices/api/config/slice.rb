@@ -64,14 +64,14 @@ module API
     import keys: %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task
       operations.complete_task operations.current_sprint operations.delete_task operations.delete_task_comment
-      operations.delete_task_tag_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
+      operations.delete_task_rule operations.delete_work_session operations.drop_sprint operations.edit_task_comment
       operations.edit_work_session operations.link_tasks operations.mark_task_seen operations.move_task
       operations.pause_task operations.place_task operations.plan_sprint operations.queue_issue_sync
-      operations.reopen_task operations.reorder_task operations.save_task operations.save_task_tag_rule
+      operations.reopen_task operations.reorder_task operations.save_task operations.save_task_rule
       operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
       queries.counted_sprints_between queries.find_tasks queries.list_finished_tasks queries.list_tasks
       queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
-      queries.task_tag_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
+      queries.task_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
       queries.unseen_task_count queries.unseen_tasks
     ], from: :tasks
 
@@ -79,15 +79,15 @@ module API
       endpoints.add_decision_comment endpoints.add_decision_option endpoints.add_task_comment
       endpoints.approve_webmentions endpoints.cancel_task endpoints.cancel_tasks endpoints.capture_task
       endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_person
-      endpoints.create_saved_view endpoints.create_task_tag_rule endpoints.delete_decision_comment
+      endpoints.create_saved_view endpoints.create_task_rule endpoints.delete_decision_comment
       endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_person
       endpoints.delete_posts endpoints.delete_saved_view endpoints.delete_task endpoints.delete_task_comment
-      endpoints.delete_task_tag_rule endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision
+      endpoints.delete_task_rule endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision
       endpoints.drop_sprint endpoints.edit_decision endpoints.edit_decision_comment endpoints.edit_decision_option
       endpoints.edit_task_comment endpoints.ignore_webmentions endpoints.link_records endpoints.link_tasks
       endpoints.list_attention endpoints.list_calendar endpoints.list_decisions endpoints.list_inbox
       endpoints.list_journal_entries endpoints.list_links endpoints.list_people endpoints.list_saved_views
-      endpoints.list_sprints endpoints.list_task_tag_rules endpoints.list_tasks endpoints.list_webmentions
+      endpoints.list_sprints endpoints.list_task_rules endpoints.list_tasks endpoints.list_webmentions
       endpoints.mark_messages_read endpoints.mark_messages_unread endpoints.mark_task_seen
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
@@ -100,7 +100,7 @@ module API
       endpoints.snooze_attention endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
-      endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_tag_rule
+      endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
       endpoints.update_work_session endpoints.upload_photo operations.mint_token operations.revoke_token
       queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
     ]

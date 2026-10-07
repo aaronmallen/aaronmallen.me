@@ -25,7 +25,7 @@ module Tasks
         task_link_repo: "repos.task_link_repo",
         task_repo: "repos.task_repo",
         task_source_repo: "repos.task_source_repo",
-        task_tag_rule_repo: "repos.task_tag_rule_repo",
+        task_rule_repo: "repos.task_rule_repo",
       ]
 
       def call(provider:, client:, now: Time.now)
@@ -82,7 +82,7 @@ module Tasks
       def import(provider, issue, now, reached: false)
         transaction do
           task = task_repo.append(**copy(issue), list: EXTERNAL)
-          label(task, tags(provider, issue), now)
+          label(task, provider, issue, now)
           fields = { task_id: task.id, provider:, remote_id: issue[:id], url: issue[:url], remote_state: OPEN }
           task_source_repo.create(**fields).tap { follow(it, issue, now, reached:) }
         end
@@ -92,7 +92,12 @@ module Tasks
         issues.each { known[it[:id]] = import(provider, it, now, reached:) }
       end
 
-      def label(task, names, now) = task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, names) }
+      def label(task, provider, issue, now)
+        names, project_ids = task_rule_repo.targets(provider, issue[:origin])
+        labeled = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
+        task_event_repo.track(task.id, now) { task_repo.add_tags(task.id, [*labeled, *names].uniq) }
+        task_rule_repo.link_projects([task.id], project_ids)
+      end
 
       def observed(task, source, state, reached)
         return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.include?(state)
@@ -140,12 +145,6 @@ module Tasks
         when COMPLETED then task.done? ? Success(task) : finish(task, now)
         else close(task, now)
         end.value_or(task)
-      end
-
-      def tags(provider, issue)
-        labeled = issue.fetch(:labels, EMPTY_ARRAY).filter_map { LABEL_TAG.call(it) { nil } }
-
-        [*labeled, *task_tag_rule_repo.tag_names_for(provider, issue[:origin])].uniq
       end
 
       def tracked(provider) = task_source_repo.for_provider(provider).to_h { [it.remote_id, it] }

@@ -6,7 +6,7 @@ require "json"
 module MCP
   module Tools
     class Base < Tool
-      PRIVATE_KINDS = "journal entries, tasks, decisions and task tag rules"
+      PRIVATE_KINDS = "journal entries, tasks, decisions and task rules"
       TAG_KINDS = "Public tags go on posts and projects; private tags go on #{PRIVATE_KINDS}".freeze
       TAG_SCOPE = {
         type: "string",
