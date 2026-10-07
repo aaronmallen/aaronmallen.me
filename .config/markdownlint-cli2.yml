@@ -8,6 +8,8 @@ config:
   single-title:
     front_matter_title: false
 gitignore: true
+ignores:
+  - ".claude/worktrees/**"
 globs:
   - "*.md"
   - "**/*.md"

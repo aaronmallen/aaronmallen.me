@@ -47,11 +47,13 @@ Both halves come out with no description, so describe each one with `jj desc -r 
 
 ## Work in parallel workspaces
 
-Each agent that runs beside others gets a workspace of its own, in a sibling directory outside the repo. Never put
-one under a dot directory: RuboCop's `**/` globs skip it, and lint passes when it should not.
+Each agent that runs beside others gets a workspace of its own, under `.claude/worktrees`. List that folder in
+`.git/info/exclude`, not `.gitignore`: markdownlint reads `.gitignore`, and inside a workspace it would then skip
+every file.
 
 ```sh
-jj workspace add ../aaronmallen.me-ws/<n> --name ws<n> -r <base>
+mkdir -p .claude/worktrees
+jj workspace add .claude/worktrees/<n> --name ws<n> -r <base>
 ```
 
 Copy `.env` into it with `DATABASE_NAME=blog_ws<n>` on the end, so its tests run against their own database, and
