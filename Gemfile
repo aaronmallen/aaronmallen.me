@@ -58,6 +58,7 @@ end
 group :lint do
   gem "rubocop"
   gem "rubocop-capybara"
+  gem "rubocop-hanami"
   gem "rubocop-i18n"
   gem "rubocop-ordered_methods"
   gem "rubocop-performance"

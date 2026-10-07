@@ -1,5 +1,6 @@
 plugins:
   - rubocop-capybara
+  - rubocop-hanami
   - rubocop-i18n
   - rubocop-ordered_methods
   - rubocop-performance
@@ -8,6 +9,21 @@ plugins:
 AllCops:
   NewCops: enable
   TargetRubyVersion: 4
+
+Hanami/SliceExports:
+  AllowedExports:
+    - auth.session_reader
+    - contracts.visit_contract
+    - github.client
+    - linear.client
+    - networks.all
+    - store.client
+    - !ruby/regexp /\Aendpoints\.\w+\z/
+    - !ruby/regexp /\Aoperations\.\w+\z/
+    - !ruby/regexp /\Aqueries\.\w+\z/
+    - !ruby/regexp /\Arepos\.\w*queries\z/
+  Exclude:
+    - ../slices/backups/config/slice.rb
 
 I18n/GetText:
   Enabled: false
