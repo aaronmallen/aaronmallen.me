@@ -205,7 +205,7 @@ RSpec.describe "Admin review note", :frozen_clock, type: :request do
     describe "a note for the week under way" do
       def api_token = API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-      def attention = Activity::Slice["queries.stalled_list"].call.select { it.kind == "journal" }
+      def attention = Activity::Slice["repos.attention_queries"].stalled.select { it.kind == "journal" }
 
       def calendar_marks
         headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }

@@ -40,8 +40,7 @@ module Admin
 
       include Deps[
         "i18n",
-        activity_between: "activity.queries.activity_between",
-        activity_counts_by_day: "activity.queries.activity_counts_by_day",
+        activity_queries: "activity.repos.activity_queries",
         views_by_path: "analytics.queries.views_by_path",
       ]
 
@@ -55,7 +54,7 @@ module Admin
       def newer_day(from:, to:, day:, size:, **filters)
         return if day >= to
 
-        counts = activity_counts_by_day.call(from: day, to:, **filters)
+        counts = activity_queries.counts_by_day(from: day, to:, **filters)
         starts = page_starts(counts, to:, day:, size:)
         return starts.last if shows_rows?(starts.last, counts:, to:, from:, day:, filters:)
 
@@ -106,7 +105,7 @@ module Admin
 
       def page(from, to, size, filters)
         Blog::DayCursor.page(from, to, size:, day: OCCURRED_ON) do |first, last, limit|
-          activity_between.call(from: first, to: last, limit:, **filters)
+          activity_queries.between(from: first, to: last, limit:, **filters)
         end
       end
 
@@ -133,7 +132,7 @@ module Admin
         )
       end
 
-      def rows_before?(from, day, filters) = activity_between.call(from:, to: day.prev_day, limit: 1, **filters).any?
+      def rows_before?(from, day, filters) = activity_queries.between(from:, to: day.prev_day, limit: 1, **filters).any?
 
       def session_line(row) = i18n.t!("activity_page.sub_lines.session", span: Blog::Figures.hours(row.worked_seconds))
 

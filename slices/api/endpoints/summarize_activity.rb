@@ -11,11 +11,7 @@ module API
 
       REPLY = Serializers::ActivitySummary.reference
 
-      include Deps[
-        activity_commit_totals: "activity.queries.activity_commit_totals",
-        activity_counts: "activity.queries.activity_counts",
-        activity_counts_by_month: "activity.queries.activity_counts_by_month",
-      ]
+      include Deps[activity_queries: "activity.repos.activity_queries"]
 
       def handle(from:, to:)
         case Blog::DayWindow.days(from, to)
@@ -31,9 +27,9 @@ module API
         counted = {
           from:,
           to:,
-          kinds: activity_counts.call(from:, to:),
-          months: activity_counts_by_month.call(from:, to:),
-          repos: activity_commit_totals.call(from:, to:),
+          kinds: activity_queries.counts(from:, to:),
+          months: activity_queries.counts_by_month(from:, to:),
+          repos: activity_queries.commit_totals(from:, to:),
         }
 
         serialized(Serializers::ActivitySummary, counted)

@@ -4,15 +4,15 @@ module Admin
   module Operations
     class BuildReviewPage
       include Deps[
-        contributor_choices: "activity.queries.contributor_choices",
-        review: "activity.queries.review",
+        activity_queries: "activity.repos.activity_queries",
+        review_queries: "activity.repos.review_queries",
         review_note: "record.queries.review_note",
       ]
 
       def call(period: nil, day: nil, today: Blog::TimeZone.today, **credit)
         on = Blog::Types::DateParam[day] || today
         credits = Blog::ContributorTerms.call(**credit)
-        found = review.call(period: Blog::Types::ReviewPeriodParam[period], on:, credits:)
+        found = review_queries.review(period: Blog::Types::ReviewPeriodParam[period], on:, credits:)
 
         {
           review: found,
@@ -20,7 +20,7 @@ module Admin
           on:,
           today:,
           credits:,
-          choices: contributor_choices.call,
+          choices: activity_queries.contributor_choices,
         }
       end
     end

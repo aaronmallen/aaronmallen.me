@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class ActivityRepo < DB::Repo
+    class ActivityQueries < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
       TYPES = Blog::Types::ActivityKind.values
 
@@ -18,7 +18,7 @@ module Activity
         totalled.to_a.to_h { [it.repo, it.to_h.except(:repo)] }
       end
 
-      def contributor_names(column) = task_contributors.named(column).pluck(column)
+      def contributor_choices = { agents: contributor_names(:agent), models: contributor_names(:model) }
 
       def counts(from:, to:, types: TYPES, **filters)
         found = narrowed(from:, to:, types:, **filters).counts_by_type.to_a.to_h { [it.type, it.count] }
@@ -41,6 +41,8 @@ module Activity
       private
 
       def blank?(value) = value.to_s.strip.empty?
+
+      def contributor_names(column) = task_contributors.named(column).pluck(column)
 
       def month_counts(tallied, month, types)
         tally(tallied.select { it.month == month }.to_h { [it.type, it.count] }, types)

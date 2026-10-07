@@ -11,6 +11,7 @@ module Admin
 
       include Deps[
         "operations.summarize_sprint",
+        attention_queries: "activity.repos.attention_queries",
         client: "record.github.client",
         commit_totals_today: "record.queries.commit_totals_today",
         commits_last_synced_at: "record.queries.commits_last_synced_at",
@@ -23,7 +24,6 @@ module Admin
         queued_social_posts: "social.queries.queued_social_posts",
         recent_commit_repos: "record.queries.recent_commit_repos",
         scheduled_posts: "posts.queries.scheduled",
-        stalled_list: "activity.queries.stalled_list",
         sync_failures: "record.queries.sync_failures",
         visitors_for_day: "analytics.queries.visitors_for_day",
       ]
@@ -46,7 +46,7 @@ module Admin
 
       private
 
-      def attention(now) = stalled_list.call(now:)
+      def attention(now) = attention_queries.stalled(now:)
 
       def commits(now)
         {

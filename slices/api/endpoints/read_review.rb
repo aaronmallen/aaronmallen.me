@@ -20,13 +20,13 @@ module API
 
       REPLY = Serializers::Review.reference
 
-      include Deps[review: "activity.queries.review", review_note: "record.queries.review_note"]
+      include Deps[review_queries: "activity.repos.review_queries", review_note: "record.queries.review_note"]
 
       def handle(period: Blog::Types::ReviewPeriod.values.first, day: nil, **credited)
         on = day ? Blog::TimeZone.parse_day(day) : Blog::TimeZone.today
         return invalid(day: [BAD_DAY]) unless on
 
-        found = review.call(period:, on:, credits: Blog::ContributorTerms.call(**credited))
+        found = review_queries.review(period:, on:, credits: Blog::ContributorTerms.call(**credited))
 
         Success(serialized(Serializers::Review, found, note: review_note.call(found.period, found.from)))
       end

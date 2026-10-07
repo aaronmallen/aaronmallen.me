@@ -6,9 +6,9 @@ module API
       SCHEMA = { additionalProperties: false }.freeze
       REPLY = Schema.object({ attention: Schema.list(Serializers::Attention.reference) }).freeze
 
-      include Deps[stalled_list: "activity.queries.stalled_list"]
+      include Deps[attention_queries: "activity.repos.attention_queries"]
 
-      def handle = Success(attention: serialized(Serializers::Attention, stalled_list.call))
+      def handle = Success(attention: serialized(Serializers::Attention, attention_queries.stalled))
     end
   end
 end

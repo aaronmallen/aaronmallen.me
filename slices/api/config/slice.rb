@@ -9,8 +9,7 @@ module API
     config.actions.csrf_protection = false
 
     import keys: %w[
-      operations.snooze_attention queries.activity_between queries.activity_commit_totals queries.activity_counts
-      queries.activity_counts_by_month queries.activity_filters queries.review queries.stalled_list
+      operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries
     ], from: :activity
 
     import keys: %w[queries.unique_readers queries.views_by_path queries.views_by_post], from: :analytics

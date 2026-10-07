@@ -7,17 +7,15 @@ module Admin
 
       include Deps[
         "settings",
-        activity_counts: "activity.queries.activity_counts",
-        activity_day_count: "activity.queries.activity_day_count",
-        activity_filters: "activity.queries.activity_filters",
+        activity_queries: "activity.repos.activity_queries",
         list_activity_events: "operations.list_activity_events",
       ]
 
       def call(from: nil, to: nil, types: nil, query: nil, day: nil)
-        window = activity_filters.call(from:, to:, day:, types:)
+        window = ::Activity::Filters.call(from:, to:, day:, types:)
         filters = { **window.except(:day), text: Blog::Types::Text[query] }
         search = filters.merge(**Blog::SearchQuery.parse(filters[:text], fields: FIELDS))
-        counts = activity_counts.call(**search.except(:types))
+        counts = activity_queries.counts(**search.except(:types))
 
         {
           **timeline(search, window[:day]),
@@ -38,7 +36,7 @@ module Admin
       def totals(search, counts)
         {
           events: counts.slice(*search[:types]).values.sum,
-          days: activity_day_count.call(**search),
+          days: activity_queries.day_count(**search),
         }
       end
     end

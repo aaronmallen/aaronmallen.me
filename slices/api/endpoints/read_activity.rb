@@ -41,7 +41,7 @@ module API
         optional: { continue_to: Schema::DAY },
       ).freeze
 
-      include Deps[activity_between: "activity.queries.activity_between", activity_views: "queries.activity_views"]
+      include Deps[activity_queries: "activity.repos.activity_queries", activity_views: "queries.activity_views"]
 
       def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
         filters = { kinds:, repos:, tags:, text:, credits: Blog::ContributorTerms.call(**credited) }
@@ -55,7 +55,7 @@ module API
       private
 
       def found(from, to, filters, limit)
-        activity_between.call(
+        activity_queries.between(
           from:,
           to:,
           types: types(filters[:kinds]),
