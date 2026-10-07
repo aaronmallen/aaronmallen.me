@@ -5,11 +5,86 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+### Added
+
+- Admin pages update live. A change made through the API, MCP, the issue sync or another tab redraws the open page
+  in place, keeping the focused field and its unsent text, and waits while a dialog is open. Each signed-in tab holds
+  one stream open to `/admin/events`, which sends a heartbeat every 30 seconds.
+- Each tag has an admin page at `/admin/tags/<name>` that lists the posts, projects, tasks, journal entries and
+  decisions carrying it, in every status. A tag anywhere in the admin links there, and on the Tags screen only the pen
+  button opens the rename form. `GET /api/v1/tags/:name` and the `read_tag` MCP tool return the same list.
+- A task names who did it: me, an agent with its model, or both. The task editor sets them, the task page lists them,
+  and a task that names no one reads as mine. A commit that closes an issue with a `Co-Authored-By: Claude ...`
+  trailer credits that agent and model on the issue's task. The task list, the activity screen and saved views take
+  `contributor:`, `agent:` and `model:` terms in the search box, and the Review's done card has a Done by switch with
+  agent and model picks. The activity feed and the review name who did each task, and `save_task`, `list_tasks`,
+  `read_activity`, `read_review` and their API routes take and return contributors.
+- The issue sync copies each issue's links from GitHub and Linear onto its task, parents and children included, and
+  imports the open issue at the other end of a link even when it is not assigned. A synced link follows its issue and
+  leaves links made by hand alone. A task page shows these as "parent of" and "child of".
+- A task tag rule names GitHub or Linear, so issues synced from Linear get tags too. A Linear rule matches
+  `workspace/team`. The admin form, the API, `save_task_tag_rule` and `list_task_tag_rules` take and show the
+  provider, and rules made before this release are GitHub rules.
+- Decision rows and the decision page show the decision's #id, which copies on click, as a task's does.
+- The `read_photo` MCP tool returns a photo from a draft, journal entry, task or comment as an image.
+  `list_api_tokens` and `list_clients` list live API tokens and connected MCP clients with their scopes, but never a
+  token.
+- MCP tools and their API routes answer more:
+  - `list_tasks` takes `sprint_on` to read one day's sprint and returns `total` across pages. Tasks carry their
+    `position`, and `reorder_task` takes `after_id` to place a task after another, or first when null.
+  - `list_posts` takes `status` and returns counts by status, with each post's words, views, visitors, readers,
+    read-throughs and webmentions.
+  - `list_social_posts` takes a `queue` of queued, posted or drafts and returns counts by queue. It,
+    `list_webmentions` and `list_messages` no longer need `from` and `to`, and the last two return counts by status.
+  - `list_decisions` takes a `query` and returns counts by status. `list_tags` takes a `query` and returns a count.
+    `list_journal_entries` takes a `tag` and returns the journal's entries, words and streak.
+  - `capture_task` takes a note.
+  - Each social post carries `lengths`, the count and limit of each part on each network, and a send refused as too
+    long names each part and network over the limit.
+  - `list_inbox` rows carry a task's tags and source, a webmention's type and post, and a message's reply-to.
+  - `read_post` and `read_social_post` return the `suggestion_id` that `accept_suggestion_edits` and
+    `reject_suggestion_edits` take.
+- The contact form drops a message sent within 3 seconds of the page loading, more than 24 hours after, or without
+  the page's signed stamp, and answers as if it went. `CONTACT_MINIMUM_SUBMIT_SECONDS` and
+  `CONTACT_STAMP_EXPIRY_HOURS` set the two limits.
+
+### Changed
+
+- Publishing and deleting through MCP need their own scopes. `publish_post` and `send_social_post` need publish, and
+  every `delete_*` tool and `remove_tag` need delete. The consent page lists each scope. A client connected before
+  this release keeps read, suggest and write only, and must connect again to see these tools.
+- The time report groups by tag unless told otherwise, and its Group by control reads Tag, Project, Day. Task links
+  in the report stand at least 24px tall, and 44px on a phone.
+- The palette's Create task, Create decision and Create journal entry actions show their sections' icons.
+- A click outside the edit note dialog closes it, as Cancel does.
+
 ### Removed
 
 - The command palette no longer has a Log work action, and the admin no longer draws its dialog. The action added a
   role to the work history, not time to a task. Roles still go in through the Work tab on the Projects screen and the
   `add_work_entry` MCP tool.
+
+### Fixed
+
+- `upload_photo` failed through MCP for a photo over about 750 KB, because the server read only the first 1 MiB of
+  the request.
+- A retry after a failed webmention send mentioned every linked page again. It now sends only to the pages that
+  failed.
+- The Delete button on a journal entry did nothing with scripts off.
+- A task deleted while an issue sync ran stopped the run, leaving the rest of the issues unsynced and no failure
+  shown.
+- A GitHub answer that left out the signed-in user made the sync read every issue as unassigned. The run now fails
+  instead.
+
+### Security
+
+- A request body past the largest upload limit gets a 413 before the server reads it, so large bodies can no longer
+  fill the server's temp folder.
+- The request log hides every param whose name ends in `_key`, `_secret` or `_token`. Names such as `api_token` and
+  `webhook_secret` used to reach it.
+- MCP marks more text as untrusted: a synced task's title wherever a task shows, such as links, search, activity,
+  attention, the review, the time report and the inbox, a synced comment's author, and the title, excerpt and link of
+  inbox messages and webmentions.
 
 ## [26.10.3] - 2026-10-04
 
