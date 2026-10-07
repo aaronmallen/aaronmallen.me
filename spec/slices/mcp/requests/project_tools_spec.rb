@@ -121,6 +121,26 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(project_repo.by_id(content.fetch("id")).tags.map(&:name)).to contain_exactly("ruby", "cli")
     end
 
+    describe "given a repo with issues already imported" do
+      let(:project) { create(:project, repo: nil) }
+      let!(:task) { create(:task_source, url: "https://github.com/aaronmallen/fresh/issues/1").task_id }
+
+      before { call_tool("save_project", id: project.id, repo: "aaronmallen/fresh") }
+
+      def linked = Tasks::Slice["relations.record_links"].project_ids_by_task([task]).fetch(task, [])
+
+      it "links them to the project" do
+        expect(linked).to eq([project.id])
+      end
+
+      it "leaves a link I removed off when a later change keeps the repo" do
+        Links::Slice["repos.record_link_repo"].unlink(["task", task], ["project", project.id])
+        call_tool("save_project", id: project.id, name: "renamed")
+
+        expect(linked).to be_empty
+      end
+    end
+
     it "refuses a new project with no visibility, and saves nothing", :aggregate_failures do
       call_tool("save_project", name: "fresh")
 

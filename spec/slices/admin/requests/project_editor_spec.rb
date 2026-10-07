@@ -9,6 +9,10 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
     { name: "sai", tagline: "Terminal colors", repo: "aaronmallen/sai", visibility: "public", **overrides }
   end
 
+  def imported(repo) = create(:task_source, url: "https://github.com/#{repo}/issues/1").task_id
+
+  def linked(task_id) = Tasks::Slice["relations.record_links"].project_ids_by_task([task_id]).fetch(task_id, [])
+
   def save(project = nil, **overrides)
     path = project ? "/admin/projects/#{project.id}" : "/admin/projects"
     post path, _csrf_token: admin_csrf_token, project: fields(**overrides)
@@ -212,6 +216,13 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
     end
 
     describe "creating" do
+      it "links the issues already imported from its repo to it" do
+        task_id = imported("AaronMallen/sai")
+        save
+
+        expect(linked(task_id)).to eq([tracking("aaronmallen/sai").id])
+      end
+
       it "saves the project", :aggregate_failures do
         save
 
@@ -403,6 +414,20 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       let(:long_archived) do
         create(:project, :archived, archived_on: Date.new(2024, 6, 1), repo: "aaronmallen/gone",
                                     started_on: Date.new(2023, 1, 1))
+      end
+
+      it "links the issues already imported from a repo it is given" do
+        task_id = imported("aaronmallen/fresh")
+        save(project, repo: "aaronmallen/fresh")
+
+        expect(linked(task_id)).to eq([project.id])
+      end
+
+      it "leaves a link I removed off when the repo stays the same" do
+        task_id = imported("aaronmallen/sai")
+        save(project)
+
+        expect(linked(task_id)).to be_empty
       end
 
       it "saves the changes" do

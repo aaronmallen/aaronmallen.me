@@ -249,6 +249,36 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(project_ids).to contain_exactly(blog.id, site.id)
     end
 
+    it "links once to a project its repo and a rule both name" do
+      Projects::Slice["repos.project_repo"].update(blog.id, repo: "aaronmallen/aaronmallen.me")
+      stub_assigned(issue)
+      sync
+
+      expect(project_ids).to contain_exactly(blog.id, site.id)
+    end
+
+    describe "and a project that owns its repo" do
+      before { create(:project, repo: "aaronmallen/aaronmallen.me") }
+
+      def owner_id = Projects::Slice["relations.projects"].where(repo: "aaronmallen/aaronmallen.me").pluck(:id).first
+
+      it "links to that project beside the rule projects" do
+        stub_assigned(issue(repo: "AaronMallen/AaronMallen.me"))
+        sync
+
+        expect(project_ids).to contain_exactly(blog.id, site.id, owner_id)
+      end
+
+      it "keeps a link to that project I removed off on the next sync" do
+        stub_assigned(issue)
+        sync
+        links.unlink(["task", imported.id], ["project", owner_id])
+        sync
+
+        expect(project_ids).to contain_exactly(blog.id, site.id)
+      end
+    end
+
     it "links to no project when the issue comes from another owner" do
       stub_assigned(issue(repo: "octocat/aaronmallen.me"))
       sync

@@ -54,7 +54,8 @@ module MCP
           current = id && dep(:project_by_id, server_context).call(id)
           return refuse(API::Wording.missing("project", id)) if id && current.nil?
 
-          saved(dep(:save_project, server_context).call(form(current, fields), id:), id)
+          result = dep(:save_project, server_context).call(form(current, fields), id:)
+          saved(result.bind { dep(:link_repo_tasks, server_context).call(it, was: current&.repo) }, id)
         end
 
         private

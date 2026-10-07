@@ -8,13 +8,14 @@ module Admin
 
         include Deps[
           build_project_editor: "operations.build_project_editor",
+          link_repo_tasks: "tasks.operations.link_repo_tasks",
           save_project: "projects.operations.save_project",
         ]
 
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:project]]
 
-          case save_project.call(params)
+          case save(params)
           in Success(project)
             toast(response, CREATED)
             response.redirect_to(routes.path(:admin_edit_project, id: project.id))
@@ -24,6 +25,10 @@ module Admin
           else halt 500
           end
         end
+
+        private
+
+        def save(params) = save_project.call(params).bind { link_repo_tasks.call(it) }
       end
     end
   end

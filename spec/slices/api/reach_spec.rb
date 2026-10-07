@@ -5,6 +5,7 @@ RSpec.describe "API reach", type: :app do
     {
       "saved_views.operations.rename_saved_view" => "the admin renames a view; PATCH changes it in one step",
       "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
+      "tasks.operations.link_repo_tasks" => "the admin and save_project run it when a project's repo changes",
       "tasks.operations.reach_issues" => "the issue sync runs it to import the other end of a relation",
       "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",

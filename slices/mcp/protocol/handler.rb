@@ -36,6 +36,7 @@ module MCP
         first_days: "analytics.queries.first_days",
         granted_scopes: "queries.granted_scopes",
         hourly_between: "analytics.queries.hourly_between",
+        link_repo_tasks: "tasks.operations.link_repo_tasks",
         live_projects: "projects.queries.live",
         live_tokens: "api.queries.live_tokens",
         mark_message: "contact.operations.mark_message",

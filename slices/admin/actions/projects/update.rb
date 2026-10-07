@@ -9,6 +9,7 @@ module Admin
 
         include Deps[
           build_project_editor: "operations.build_project_editor",
+          link_repo_tasks: "tasks.operations.link_repo_tasks",
           list_record_links: "operations.list_record_links",
           project_by_id: "projects.queries.by_id",
           save_project: "projects.operations.save_project",
@@ -18,7 +19,7 @@ module Admin
           id = record_id(request)
           params = Blog::Types::Fields[request.params[:project]]
 
-          result = save_project.call(params, id:)
+          result = save(params, id)
 
           case result
           in Failure[:invalid, errors] then invalid(response, project_by_id.call(id), params, errors)
@@ -34,6 +35,12 @@ module Admin
           response.status = 422
           records = list_record_links.call(KIND, project.id)
           response.render(view, **build_project_editor.call(project:, params:, errors:), records:)
+        end
+
+        def save(params, id)
+          was = project_by_id.call(id)&.repo
+
+          save_project.call(params, id:).bind { link_repo_tasks.call(it, was:) }
         end
       end
     end
