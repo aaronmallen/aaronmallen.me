@@ -58,7 +58,7 @@ RSpec.describe "Admin photo claims", type: :request do
     it "claims a photo an accepted suggestion puts in its body" do
       save(body: "a cat sat here")
       edit = { original: "a cat", replacement: "#{markdown(photo)} a cat", reason: "show it" }
-      Suggestions::Slice["repos.suggestion_repo"].replace_for_post(article.id, [edit])
+      Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(article.id, [edit])
       send_to("/admin/posts/#{article.id}/suggestions/accept")
 
       expect(claims_of("post")).to eq([[article.id, photo.id]])

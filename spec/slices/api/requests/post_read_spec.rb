@@ -31,7 +31,7 @@ RSpec.describe "API reading a post", type: :request do
 
   def status = last_response.status
 
-  def suggest(article, *edits) = Suggestions::Slice["repos.suggestion_repo"].replace_for_post(article.id, edits)
+  def suggest(article, *edits) = Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(article.id, edits)
 
   def typo(original, replacement) = { original:, replacement:, reason: "typo" }
 
@@ -77,7 +77,7 @@ RSpec.describe "API reading a post", type: :request do
     it "gives the suggested edits still open, and leaves out the settled ones" do
       article = create(:post, :draft, body: "a cat and a dog")
       suggestion = suggest(article, typo("cat", "black cat"), typo("dog", "dogs"))
-      Suggestions::Slice["repos.suggestion_repo"].reject([suggestion.edits.last.id])
+      Suggestions::Slice["repos.suggestion_mutations"].reject([suggestion.edits.last.id])
 
       expect(read(suggestion.post_id).fetch("suggestion_edits")).to eq([open_edit(suggestion.edits.first)])
     end
@@ -90,7 +90,7 @@ RSpec.describe "API reading a post", type: :request do
 
     it "gives a null suggestion_id once every edit is settled" do
       suggestion = suggest(create(:post, :draft, body: "a cat"), typo("cat", "dog"))
-      Suggestions::Slice["repos.suggestion_repo"].reject(suggestion.edits.map(&:id))
+      Suggestions::Slice["repos.suggestion_mutations"].reject(suggestion.edits.map(&:id))
 
       expect(read(suggestion.post_id).fetch("suggestion_id")).to be_nil
     end

@@ -10,7 +10,7 @@ RSpec.describe "MCP list tool paging", type: :request do
   def suggest(post)
     edit = { original: "a", replacement: "b", reason: "typo", part: nil }
 
-    Suggestions::Slice["repos.suggestion_repo"].replace_for_post(post.id, [edit])
+    Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, [edit])
   end
 
   def today = Blog::TimeZone.today

@@ -10,7 +10,8 @@ RSpec.describe "Accepting suggested edits", type: :request do
   def bodies_of(social_post) = social_post_queries.by_id(social_post.id).parts.map(&:body)
 
   def body_of(article) = post_queries.by_id(article.id).body
-  let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
+  let(:suggestion_mutations) { Suggestions::Slice["repos.suggestion_mutations"] }
+  let(:suggestion_queries) { Suggestions::Slice["repos.suggestion_queries"] }
 
   def compose(*parts)
     social_post_mutations.create_with_parts(parts:, posted_at: nil, status: "draft", targets: %w[mastodon])
@@ -24,11 +25,11 @@ RSpec.describe "Accepting suggested edits", type: :request do
 
   def social_post_queries = Social::Slice["repos.social_post_queries"]
 
-  def statuses(article) = suggestion_repo.for_post(article.id).edits.map(&:status)
+  def statuses(article) = suggestion_queries.for_post(article.id).edits.map(&:status)
 
-  def suggest(article, *edits) = suggestion_repo.replace_for_post(article.id, edits)
+  def suggest(article, *edits) = suggestion_mutations.replace_for_post(article.id, edits)
 
-  def suggest_social(social_post, *edits) = suggestion_repo.replace_for_social_post(social_post.id, edits)
+  def suggest_social(social_post, *edits) = suggestion_mutations.replace_for_social_post(social_post.id, edits)
 
   def typo(original = "teh", replacement = "the") = { original:, replacement:, reason: "typo" }
 
@@ -63,7 +64,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     end
 
     it "is refused as stale" do
-      expect(suggestion_repo.for_social_post(social_post.id).edits.map(&:status)).to eq(%w[stale])
+      expect(suggestion_queries.for_social_post(social_post.id).edits.map(&:status)).to eq(%w[stale])
     end
 
     it "leaves the part alone" do
@@ -102,11 +103,11 @@ RSpec.describe "Accepting suggested edits", type: :request do
 
     before do
       suggest(article, typo)
-      inner = Suggestions::Slice["queries.for_post"]
-      replace_component(
-        "suggestions.queries.for_post",
-        ->(id) { inner.call(id).tap { suggestion_repo.replace_for_post(id, [typo("sat", "slept")]) } },
-      )
+      allow(suggestion_queries).to receive(:for_post).and_wrap_original do |read, id|
+        read.call(id).tap { suggestion_mutations.replace_for_post(id, [typo("sat", "slept")]) }
+      end
+      replace_component("repos.suggestion_queries", suggestion_queries)
+      replace_component("suggestions.repos.suggestion_queries", suggestion_queries)
       accept(article)
     end
 

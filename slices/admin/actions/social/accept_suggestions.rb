@@ -13,7 +13,7 @@ module Admin
           accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
           find_over_limit_network: "operations.find_over_limit_network",
           social_post_queries: "social.repos.social_post_queries",
-          suggestion_for_social_post: "suggestions.queries.for_social_post",
+          suggestion_queries: "suggestions.repos.suggestion_queries",
         ]
 
         def handle(request, response)
@@ -28,7 +28,7 @@ module Admin
         private
 
         def accept(response, social_post, edit_id)
-          suggestion = suggestion_for_social_post.call(social_post.id) || halt(404)
+          suggestion = suggestion_queries.for_social_post(social_post.id) || halt(404)
 
           case accept_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
           in Success(accepted:, refused:) then applied(response, social_post, accepted, refused)

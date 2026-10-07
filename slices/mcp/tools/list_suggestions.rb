@@ -48,7 +48,7 @@ module MCP
         end
 
         def listed(range, page, server_context)
-          found = dep(:suggestions_between, server_context).call(from: range.first, to: range.last, page:)
+          found = dep(:suggestion_queries, server_context).created_between(from: range.first, to: range.last, page:)
 
           answer(
             from: range.first.iso8601,

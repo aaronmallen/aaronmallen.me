@@ -30,7 +30,7 @@ module MCP
 
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)
-          suggestion = dep(:suggestion_by_id, server_context).call(suggestion_id)
+          suggestion = dep(:suggestion_queries, server_context).by_id(suggestion_id)
           return refuse(API::Wording.missing("suggestion", suggestion_id)) if suggestion.nil?
 
           accepted(suggestion_id, dep(:accept_suggestion_edits, server_context).call(suggestion_id, ids: edit_ids))

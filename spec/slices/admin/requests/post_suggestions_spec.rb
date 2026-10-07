@@ -2,7 +2,8 @@
 
 RSpec.describe "Admin post suggestions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
+  let(:suggestion_mutations) { Suggestions::Slice["repos.suggestion_mutations"] }
+  let(:suggestion_queries) { Suggestions::Slice["repos.suggestion_queries"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
   def accept(article, **params)
@@ -11,7 +12,7 @@ RSpec.describe "Admin post suggestions", type: :request do
 
   def buttons = page.all(".sg-actions button, .card-side button")
 
-  def edits_of(article) = suggestion_repo.for_post(article.id).edits
+  def edits_of(article) = suggestion_queries.for_post(article.id).edits
 
   def first_edit_id(article) = edits_of(article).first.id
 
@@ -40,7 +41,7 @@ RSpec.describe "Admin post suggestions", type: :request do
 
   def statuses(article) = edits_of(article).map(&:status)
 
-  def suggest(article, *edits) = suggestion_repo.replace_for_post(article.id, edits)
+  def suggest(article, *edits) = suggestion_mutations.replace_for_post(article.id, edits)
 
   def typo(original = "teh", replacement = "the", reason: "typo") = { original:, replacement:, reason: }
 
@@ -64,7 +65,7 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       it "shows nothing once every edit is settled" do
         suggestion = suggest(article, typo)
-        suggestion_repo.reject(suggestion.edits.map(&:id))
+        suggestion_mutations.reject(suggestion.edits.map(&:id))
         open_editor(article)
 
         expect(page).to have_no_css(".card-label", text: "Suggestions")
@@ -231,7 +232,7 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before do
         suggestion = suggest(article, typo)
-        suggestion_repo.mark_stale(suggestion.edits.map(&:id))
+        suggestion_mutations.mark_stale(suggestion.edits.map(&:id))
         open_editor(article)
       end
 
@@ -447,8 +448,13 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before do
         rival = rival_accept(article)
-        inner = Suggestions::Slice["queries.for_post"]
-        replace_component("suggestions.queries.for_post", ->(id) { inner.call(id).tap { rival.call } })
+        allow(suggestion_queries).to(receive(:for_post).and_wrap_original do |read, id|
+          read.call(id).tap do
+            rival.call
+          end
+        end)
+        replace_component("repos.suggestion_queries", suggestion_queries)
+        replace_component("suggestions.repos.suggestion_queries", suggestion_queries)
       end
 
       it "leaves it accepted" do

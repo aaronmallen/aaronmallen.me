@@ -14,11 +14,13 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
   def post_body(id) = Posts::Slice["repos.post_queries"].by_id(id).body
 
-  def statuses(suggestion) = suggestion_repo.by_id(suggestion.id).edits.map(&:status)
+  def statuses(suggestion) = suggestion_queries.by_id(suggestion.id).edits.map(&:status)
 
-  def suggest(post, *edits) = suggestion_repo.replace_for_post(post.id, edits)
+  def suggest(post, *edits) = suggestion_mutations.replace_for_post(post.id, edits)
 
-  def suggestion_repo = Suggestions::Slice["repos.suggestion_repo"]
+  def suggestion_mutations = Suggestions::Slice["repos.suggestion_mutations"]
+
+  def suggestion_queries = Suggestions::Slice["repos.suggestion_queries"]
 
   def today = Blog::TimeZone.today
 
@@ -37,7 +39,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
     it "gives every edit with its status" do
       suggestion = suggest(create(:post, :draft, body: "teh cat sat"), edit("teh", "the"))
       edit_id = suggestion.edits.first.id
-      suggestion_repo.reject([edit_id])
+      suggestion_mutations.reject([edit_id])
       said = { "original" => "teh", "replacement" => "the", "reason" => "typo", "status" => "rejected" }
 
       expect(listed.first.fetch("edits")).to eq([{ "id" => edit_id, "part" => nil, **said }])
@@ -45,7 +47,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "names a social post as the target" do
       social_post = compose("draft", "teh one")
-      suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
 
       expect(listed.first).to include("target" => "social_post", "target_id" => social_post.id)
     end
@@ -105,7 +107,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "accepts through the suggestion_id read_social_post gives" do
       social_post = compose("draft", "teh one")
-      suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
       suggestion_id = mcp_answer("read_social_post", id: social_post.id).fetch("suggestion_id")
       mcp_call("accept_suggestion_edits", suggestion_id:)
 
@@ -114,7 +116,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "writes into an unsent social post" do
       social_post = compose("draft", "teh one")
-      suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion = suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
       mcp_call("accept_suggestion_edits", suggestion_id: suggestion.id)
 
       expect(Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)).to eq(["the one"])
@@ -124,7 +126,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
       def part = "teh #{'a' * 247} https://aaronmallen.me/writing/hello"
 
       let(:social_post) { compose("draft", part, targets: %w[bluesky]) }
-      let(:suggestion) { suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "their", part: 1)]) }
+      let(:suggestion) { suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "their", part: 1)]) }
 
       it "is refused" do
         expect(mcp_answer("accept_suggestion_edits", suggestion_id: suggestion.id).fetch("refused"))
@@ -141,8 +143,8 @@ RSpec.describe "MCP suggestion tools", type: :request do
     describe "edits that would leave a social post part empty" do
       let(:social_post) { compose("draft", "teh one", "teh") }
       let(:suggestion) do
-        suggestion_repo.replace_for_social_post(social_post.id,
-                                                [edit("teh", "the", part: 1), edit("teh", " ", part: 2)])
+        edits = [edit("teh", "the", part: 1), edit("teh", " ", part: 2)]
+        suggestion_mutations.replace_for_social_post(social_post.id, edits)
       end
 
       def bodies = Social::Slice["repos.social_post_queries"].by_id(social_post.id).parts.map(&:body)
@@ -163,7 +165,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "refuses a social post already sent" do
       social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
-      suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion = suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
 
       expect(mcp_text("accept_suggestion_edits", suggestion_id: suggestion.id))
         .to eq("the social post under suggestion #{suggestion.id} has been sent")
@@ -197,7 +199,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
     it "refuses when no pending edit is left" do
       post = create(:post, :draft, body: "teh cat sat")
       suggestion = suggest(post, edit("teh", "the"))
-      suggestion_repo.reject(suggestion.edits.map(&:id))
+      suggestion_mutations.reject(suggestion.edits.map(&:id))
 
       expect(mcp_text("accept_suggestion_edits", suggestion_id: suggestion.id))
         .to eq("suggestion #{suggestion.id} has no pending edit with those IDs")
@@ -236,7 +238,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "refuses a social post already sent" do
       social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
-      suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion = suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
 
       expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id))
         .to eq("the social post under suggestion #{suggestion.id} has been sent")
@@ -244,7 +246,7 @@ RSpec.describe "MCP suggestion tools", type: :request do
 
     it "refuses a sent social post before it looks at the edits it names" do
       social_post = compose("posted", "teh one", posted_at: Time.now - 3600)
-      suggestion = suggestion_repo.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
+      suggestion = suggestion_mutations.replace_for_social_post(social_post.id, [edit("teh", "the", part: 1)])
 
       expect(mcp_text("reject_suggestion_edits", suggestion_id: suggestion.id, edit_ids: [999_999]))
         .to eq("the social post under suggestion #{suggestion.id} has been sent")

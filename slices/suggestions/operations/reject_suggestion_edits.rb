@@ -5,7 +5,8 @@ module Suggestions
     class RejectSuggestionEdits < Operation
       include Deps[
         lock_editable_social_post: "social.operations.lock_editable_social_post",
-        suggestion_repo: "repos.suggestion_repo",
+        suggestion_mutations: "repos.suggestion_mutations",
+        suggestion_queries: "repos.suggestion_queries",
       ]
 
       def call(suggestion_id, ids: nil)
@@ -13,7 +14,7 @@ module Suggestions
 
         transaction do
           step unsent(suggestion)
-          suggestion_repo.reject(step(chosen(suggestion, ids)).map(&:id))
+          suggestion_mutations.reject(step(chosen(suggestion, ids)).map(&:id))
         end
       end
 
@@ -26,7 +27,7 @@ module Suggestions
       end
 
       def find(id)
-        found(suggestion_repo.by_id(id))
+        found(suggestion_queries.by_id(id))
       end
 
       def unsent(suggestion)

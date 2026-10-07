@@ -87,7 +87,7 @@ Seeds.unwrap(
   ),
 )
 
-suggestion = Suggestions::Slice["queries.for_post"].call(draft.id)
+suggestion = Suggestions::Slice["repos.suggestion_queries"].for_post(draft.id)
 first, second = suggestion.edits.sort_by(&:position)
 Seeds.unwrap(Suggestions::Slice["operations.accept_suggestion_edits"].call(suggestion.id, ids: [first.id]))
 Seeds.unwrap(Suggestions::Slice["operations.reject_suggestion_edits"].call(suggestion.id, ids: [second.id]))

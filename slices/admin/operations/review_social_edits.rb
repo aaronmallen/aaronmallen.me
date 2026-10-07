@@ -5,7 +5,7 @@ module Admin
     class ReviewSocialEdits
       include Deps[
         find_over_limit_network: "operations.find_over_limit_network",
-        suggestion_for_social_post: "suggestions.queries.for_social_post",
+        suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
       def call(social_post)
@@ -19,7 +19,7 @@ module Admin
       private
 
       def edits(social_post)
-        suggestion = suggestion_for_social_post.call(social_post.id) if social_post
+        suggestion = suggestion_queries.for_social_post(social_post.id) if social_post
         return Blog::Constants::EMPTY_ARRAY unless suggestion
 
         suggestion.open_edits.sort_by { [it.part_number, it.position] }.map { review(social_post, it) }

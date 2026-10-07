@@ -13,7 +13,7 @@ module Admin
         person_queries: "social.repos.person_queries",
         post_queries: "posts.repos.post_queries",
         preview_announcement: "operations.preview_announcement",
-        suggestion_for_post: "suggestions.queries.for_post",
+        suggestion_queries: "suggestions.repos.suggestion_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]
 
@@ -54,7 +54,7 @@ module Admin
       end
 
       def suggestions(post)
-        suggestion = suggestion_for_post.call(post.id) if post && post.status != PUBLISHED
+        suggestion = suggestion_queries.for_post(post.id) if post && post.status != PUBLISHED
 
         {
           post_id: post&.id,

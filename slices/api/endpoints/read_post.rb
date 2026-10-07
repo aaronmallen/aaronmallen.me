@@ -23,7 +23,7 @@ module API
       include Deps[
         post_queries: "posts.repos.post_queries",
         record_links: "links.queries.record_links",
-        suggestion_for_post: "suggestions.queries.for_post",
+        suggestion_queries: "suggestions.repos.suggestion_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]
 
@@ -40,7 +40,7 @@ module API
         serialized(Serializers::PostDetail, post).merge(
           webmentions_received: webmention_queries.received_count(post.id),
           edit_notes: serialized(Serializers::PostEdit, post_queries.edits_newest_first(post.id)),
-          **suggested(suggestion_for_post.call(post.id)),
+          **suggested(suggestion_queries.for_post(post.id)),
           record_links: linked(KIND, post.id),
         )
       end

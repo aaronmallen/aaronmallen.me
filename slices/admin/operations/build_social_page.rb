@@ -17,11 +17,11 @@ module Admin
         list_networks: "operations.list_networks",
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
-        open_suggestion_counts: "suggestions.queries.open_counts_for_social_posts",
         person_queries: "social.repos.person_queries",
         review_social_edits: "operations.review_social_edits",
         settings: "settings",
         social_post_queries: "social.repos.social_post_queries",
+        suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
       def call(
@@ -57,7 +57,7 @@ module Admin
       def open_counts(items)
         unsent = items.reject { it.status == Blog::Types::SocialPostStatus["posted"] }
 
-        open_suggestion_counts.call(unsent.map(&:id))
+        suggestion_queries.open_counts_for_social_posts(unsent.map(&:id))
       end
 
       def parts(bodies)

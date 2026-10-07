@@ -8,7 +8,7 @@ module Suggestions
       include Deps[
         contract: "contracts.edits_contract",
         lock_post: "posts.operations.lock_post",
-        suggestion_repo: "repos.suggestion_repo",
+        suggestion_mutations: "repos.suggestion_mutations",
       ]
 
       def call(post_id, edits:)
@@ -16,7 +16,7 @@ module Suggestions
 
         transaction do
           step unpublished(lock_post.call(post_id))
-          suggestion_repo.replace_for_post(post_id, attributes[:edits])
+          suggestion_mutations.replace_for_post(post_id, attributes[:edits])
         end
       end
 

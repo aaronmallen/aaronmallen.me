@@ -3,11 +3,11 @@
 module Suggestions
   module Operations
     class ReplaceSocialPostEdits < Operation
-      include Deps[contract: "contracts.edits_contract", suggestion_repo: "repos.suggestion_repo"]
+      include Deps[contract: "contracts.edits_contract", suggestion_mutations: "repos.suggestion_mutations"]
 
       def call(social_post_id, edits:)
         attributes = step validated(contract.call(edits:))
-        suggestion_repo.replace_for_social_post(social_post_id, attributes[:edits])
+        suggestion_mutations.replace_for_social_post(social_post_id, attributes[:edits])
       end
     end
   end

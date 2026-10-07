@@ -67,7 +67,7 @@ RSpec.describe "API reading a social post", type: :request do
   def stored(id) = Social::Slice["repos.social_post_queries"].by_id(id)
 
   def suggest(social_post, *edits)
-    Suggestions::Slice["repos.suggestion_repo"].replace_for_social_post(social_post.id, edits)
+    Suggestions::Slice["repos.suggestion_mutations"].replace_for_social_post(social_post.id, edits)
   end
 
   def typo(original, replacement) = { original:, replacement:, reason: "typo", part: 1 }
@@ -121,7 +121,7 @@ RSpec.describe "API reading a social post", type: :request do
     it "gives the suggested edits still open, and leaves out the settled ones" do
       social_post = compose("a cat and a dog")
       suggestion = suggest(social_post, typo("cat", "black cat"), typo("dog", "dogs"))
-      Suggestions::Slice["repos.suggestion_repo"].reject([suggestion.edits.last.id])
+      Suggestions::Slice["repos.suggestion_mutations"].reject([suggestion.edits.last.id])
 
       expect(read(social_post.id).fetch("suggestion_edits")).to eq([open_edit(suggestion.edits.first)])
     end
@@ -136,7 +136,7 @@ RSpec.describe "API reading a social post", type: :request do
     it "gives a null suggestion_id once every edit is settled" do
       social_post = compose("a cat")
       suggestion = suggest(social_post, typo("cat", "dog"))
-      Suggestions::Slice["repos.suggestion_repo"].reject(suggestion.edits.map(&:id))
+      Suggestions::Slice["repos.suggestion_mutations"].reject(suggestion.edits.map(&:id))
 
       expect(read(social_post.id).fetch("suggestion_id")).to be_nil
     end

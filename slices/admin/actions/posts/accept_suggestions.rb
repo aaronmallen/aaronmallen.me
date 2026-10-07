@@ -9,12 +9,12 @@ module Admin
 
         include Deps[
           accept_suggestion_edits: "suggestions.operations.accept_suggestion_edits",
-          suggestion_for_post: "suggestions.queries.for_post",
+          suggestion_queries: "suggestions.repos.suggestion_queries",
         ]
 
         def handle(request, response)
           id = record_id(request)
-          suggestion = suggestion_for_post.call(id)
+          suggestion = suggestion_queries.for_post(id)
           halt 404 unless suggestion
 
           accept(response, suggestion, request.params[:edit_id].to_s)

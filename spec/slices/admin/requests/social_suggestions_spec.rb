@@ -2,7 +2,8 @@
 
 RSpec.describe "Admin social suggestions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:suggestion_repo) { Suggestions::Slice["repos.suggestion_repo"] }
+  let(:suggestion_mutations) { Suggestions::Slice["repos.suggestion_mutations"] }
+  let(:suggestion_queries) { Suggestions::Slice["repos.suggestion_queries"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
   def accept(social_post, **params)
@@ -15,7 +16,7 @@ RSpec.describe "Admin social suggestions", type: :request do
     social_post_mutations.create_with_parts(parts:, posted_at:, status:, targets:)
   end
 
-  def edits_of(social_post) = suggestion_repo.for_social_post(social_post.id).edits
+  def edits_of(social_post) = suggestion_queries.for_social_post(social_post.id).edits
 
   def first_edit_id(social_post) = edits_of(social_post).first.id
 
@@ -31,7 +32,7 @@ RSpec.describe "Admin social suggestions", type: :request do
 
   def statuses(social_post) = edits_of(social_post).map(&:status)
 
-  def suggest(social_post, *edits) = suggestion_repo.replace_for_social_post(social_post.id, edits)
+  def suggest(social_post, *edits) = suggestion_mutations.replace_for_social_post(social_post.id, edits)
 
   def typo(original = "teh", replacement = "the", part: 1, reason: "typo")
     { original:, replacement:, reason:, part: }
@@ -70,7 +71,7 @@ RSpec.describe "Admin social suggestions", type: :request do
 
       it "shows no count when every edit is settled" do
         social_post = compose("teh cat sat")
-        suggestion_repo.reject(suggest(social_post, typo).edits.map(&:id))
+        suggestion_mutations.reject(suggest(social_post, typo).edits.map(&:id))
         get "/admin/social?filter=drafts"
 
         expect(page).to have_no_css(".sq-meta .pill", text: "suggestion")
@@ -233,7 +234,7 @@ RSpec.describe "Admin social suggestions", type: :request do
 
       before do
         suggestion = suggest(social_post, typo)
-        suggestion_repo.mark_stale(suggestion.edits.map(&:id))
+        suggestion_mutations.mark_stale(suggestion.edits.map(&:id))
       end
 
       it "says nothing was applied on Accept all" do
@@ -532,7 +533,7 @@ RSpec.describe "Admin social suggestions", type: :request do
     describe "an item already posted" do
       let(:social_post) { compose("teh cat sat", status: "posted", posted_at: Time.now - 3600) }
 
-      before { suggestion_repo.replace_for_social_post(social_post.id, [typo]) }
+      before { suggestion_mutations.replace_for_social_post(social_post.id, [typo]) }
 
       it "shows no count in the queue" do
         get "/admin/social?filter=posted"
@@ -559,7 +560,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       end
 
       it "answers 404 to a reject once every edit is settled" do
-        suggestion_repo.reject(suggestion_repo.for_social_post(social_post.id).edits.map(&:id))
+        suggestion_mutations.reject(suggestion_queries.for_social_post(social_post.id).edits.map(&:id))
         reject(social_post)
 
         expect(last_response).to be_not_found

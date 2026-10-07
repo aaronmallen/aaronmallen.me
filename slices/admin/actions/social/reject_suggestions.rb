@@ -8,14 +8,14 @@ module Admin
 
         include Deps[
           reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
-          suggestion_for_social_post: "suggestions.queries.for_social_post",
+          suggestion_queries: "suggestions.repos.suggestion_queries",
         ]
 
         include SuggestionRejection
 
         def handle(request, response)
           id = record_id(request)
-          suggestion = suggestion_for_social_post.call(id)
+          suggestion = suggestion_queries.for_social_post(id)
           halt 404 unless suggestion
 
           reject(response, suggestion, request.params[:edit_id].to_s)

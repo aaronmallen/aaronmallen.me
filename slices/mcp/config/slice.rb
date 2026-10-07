@@ -92,7 +92,7 @@ module MCP
 
     import keys: %w[
       operations.accept_suggestion_edits operations.reject_suggestion_edits operations.replace_post_edits
-      operations.replace_social_post_edits queries.by_id queries.created_between
+      operations.replace_social_post_edits repos.suggestion_queries
     ], from: :suggestions
 
     import keys: %w[

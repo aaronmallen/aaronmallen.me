@@ -129,7 +129,9 @@ RSpec.describe "MCP endpoint", type: :request do
 
   def social_post_queries = Social::Slice["repos.social_post_queries"]
 
-  def suggestion_repo = Suggestions::Slice["repos.suggestion_repo"]
+  def suggestion_mutations = Suggestions::Slice["repos.suggestion_mutations"]
+
+  def suggestion_queries = Suggestions::Slice["repos.suggestion_queries"]
 
   def token_params(code)
     {
@@ -508,7 +510,7 @@ RSpec.describe "MCP endpoint", type: :request do
     it "stores no suggestion" do
       call_tool("suggest_edits", target: "post", id: article.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(article.id)).to be_nil
+      expect(suggestion_queries.for_post(article.id)).to be_nil
     end
   end
 
@@ -527,7 +529,7 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(post.id).edits).to have(1).item
+      expect(suggestion_queries.for_post(post.id).edits).to have(1).item
     end
   end
 
@@ -557,7 +559,7 @@ RSpec.describe "MCP endpoint", type: :request do
     def planning(article)
       create(:project)
       create(:sprint, sprint_date: today)
-      suggestion_repo.replace_for_post(article.id, [typo])
+      suggestion_mutations.replace_for_post(article.id, [typo])
     end
 
     def read_activity(from: month_ago, to: today, **arguments)
@@ -572,7 +574,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     def suggest_on(post_id, on: today)
-      suggestion_repo.replace_for_post(post_id, [typo])
+      suggestion_mutations.replace_for_post(post_id, [typo])
       Suggestions::Slice["db.rom"].relations[:suggestions].update(created_at: at(9, on:))
     end
 
@@ -877,7 +879,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
     it "names a suggestion on a social post by its first part" do
       social_post = compose("draft", "teh first part", "the second part")
-      suggestion_repo.replace_for_social_post(social_post.id, [typo])
+      suggestion_mutations.replace_for_social_post(social_post.id, [typo])
       read_activity
 
       expect(entries).to contain_exactly(include("kind" => "suggestion", "name" => "teh first part"))
@@ -1560,14 +1562,14 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(post.id).edits.map(&:status)).to eq(["pending"])
+      expect(suggestion_queries.for_post(post.id).edits.map(&:status)).to eq(["pending"])
     end
 
     it "stores what each edit says" do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(post.id).edits.first)
+      expect(suggestion_queries.for_post(post.id).edits.first)
         .to have_attributes(original: "teh", replacement: "the", reason: "typo")
     end
 
@@ -1591,13 +1593,13 @@ RSpec.describe "MCP endpoint", type: :request do
       later = [{ **typo, original: "sat", replacement: "slept" }]
       call_tool("suggest_edits", target: "post", id: post.id, edits: later)
 
-      expect(suggestion_repo.for_post(post.id).edits.map(&:original)).to eq(["sat"])
+      expect(suggestion_queries.for_post(post.id).edits.map(&:original)).to eq(["sat"])
     end
 
     it "leaves an edit already answered alone" do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
-      answered = suggestion_repo.accept(suggestion_repo.for_post(post.id).edits.map(&:id)).first
+      answered = suggestion_mutations.accept(suggestion_queries.for_post(post.id).edits.map(&:id)).first
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
       expect(Suggestions::Slice["relations.suggestion_edits"].by_pk(answered.id).one[:status]).to eq("accepted")
@@ -1607,21 +1609,21 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, part: 4 }])
 
-      expect(suggestion_repo.for_post(post.id).edits.map(&:part)).to eq([nil])
+      expect(suggestion_queries.for_post(post.id).edits.map(&:part)).to eq([nil])
     end
 
     it "stores edits for an unsent social post" do
       social_post = compose("draft", "teh first", "teh second")
       call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [{ **typo, part: 2 }])
 
-      expect(suggestion_repo.for_social_post(social_post.id).edits.map(&:part)).to eq([2])
+      expect(suggestion_queries.for_social_post(social_post.id).edits.map(&:part)).to eq([2])
     end
 
     it "takes the first part when an edit names none" do
       social_post = compose("draft", "teh first", "teh second")
       call_tool("suggest_edits", target: "social_post", id: social_post.id, edits: [typo])
 
-      expect(suggestion_repo.for_social_post(social_post.id).edits.map(&:part)).to eq([1])
+      expect(suggestion_queries.for_social_post(social_post.id).edits.map(&:part)).to eq([1])
     end
 
     it "leaves the social post parts alone" do
@@ -1655,14 +1657,14 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :published, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(post.id)).to be_nil
+      expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "stores edits for a scheduled blog post" do
       post = create(:post, :scheduled, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
 
-      expect(suggestion_repo.for_post(post.id).edits.map(&:status)).to eq(["pending"])
+      expect(suggestion_queries.for_post(post.id).edits.map(&:status)).to eq(["pending"])
     end
 
     it "calls an unknown social post an error" do
@@ -1710,7 +1712,7 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, note: "by the way" }])
 
-      expect(suggestion_repo.for_post(post.id)).to be_nil
+      expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "refuses an edit with no reason" do
@@ -1773,7 +1775,7 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "   " }])
 
-      expect(suggestion_repo.for_post(post.id)).to be_nil
+      expect(suggestion_queries.for_post(post.id)).to be_nil
     end
 
     it "keeps the edits an earlier call stored when a later one is blank" do
@@ -1781,7 +1783,7 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("suggest_edits", target: "post", id: post.id, edits: [typo])
       call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, original: "  " }])
 
-      expect(suggestion_repo.for_post(post.id).edits.map(&:original)).to eq(["teh"])
+      expect(suggestion_queries.for_post(post.id).edits.map(&:original)).to eq(["teh"])
     end
 
     %i[original reason replacement].each do |field|
@@ -1796,7 +1798,7 @@ RSpec.describe "MCP endpoint", type: :request do
         post = create(:post, :draft, body: "teh cat sat")
         call_tool("suggest_edits", target: "post", id: post.id, edits: [{ **typo, field => "t\u0000he" }])
 
-        expect(suggestion_repo.for_post(post.id)).to be_nil
+        expect(suggestion_queries.for_post(post.id)).to be_nil
       end
     end
 
@@ -1839,7 +1841,7 @@ RSpec.describe "MCP endpoint", type: :request do
       post = create(:post, :draft, body: "teh cat sat")
       call_tool("suggest_edits", target: "post", id: post.id, edits: Array.new(51) { typo })
 
-      expect(suggestion_repo.for_post(post.id)).to be_nil
+      expect(suggestion_queries.for_post(post.id)).to be_nil
     end
   end
 

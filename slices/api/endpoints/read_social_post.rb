@@ -23,7 +23,7 @@ module API
         measure_parts: "social.operations.measure_parts",
         record_links: "links.queries.record_links",
         social_post_queries: "social.repos.social_post_queries",
-        suggestion_for_social_post: "suggestions.queries.for_social_post",
+        suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
       def handle(id:)
@@ -37,7 +37,7 @@ module API
 
       def answered(social_post)
         serialized(Serializers::SocialPost, social_post).merge(
-          **suggested(suggestion_for_social_post.call(social_post.id)),
+          **suggested(suggestion_queries.for_social_post(social_post.id)),
           lengths: lengths(social_post),
           record_links: linked(KIND, social_post.id),
         )

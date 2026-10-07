@@ -86,8 +86,7 @@ module Admin
     ], from: :social
 
     import keys: %w[
-      operations.accept_suggestion_edits operations.reject_suggestion_edits queries.for_post queries.for_social_post
-      queries.open_counts_for_social_posts
+      operations.accept_suggestion_edits operations.reject_suggestion_edits repos.suggestion_queries
     ], from: :suggestions
 
     import keys: %w[

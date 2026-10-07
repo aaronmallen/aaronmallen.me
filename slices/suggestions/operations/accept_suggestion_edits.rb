@@ -12,7 +12,8 @@ module Suggestions
         networks: "social.networks.all",
         replace_social_post_parts: "social.operations.replace_social_post_parts",
         revise_post_body: "posts.operations.revise_post_body",
-        suggestion_repo: "repos.suggestion_repo",
+        suggestion_mutations: "repos.suggestion_mutations",
+        suggestion_queries: "repos.suggestion_queries",
       ]
 
       def call(suggestion_id, ids: nil)
@@ -70,7 +71,7 @@ module Suggestions
       def editable(record) = record ? Success(record) : Failure(:already_posted)
 
       def find(id)
-        found(suggestion_repo.by_id(id))
+        found(suggestion_queries.by_id(id))
       end
 
       def fits?(body, targets)
@@ -79,9 +80,9 @@ module Suggestions
 
       def outcome(sifted)
         {
-          accepted: suggestion_repo.accept(sifted.fetch(:accepted).map(&:id)),
+          accepted: suggestion_mutations.accept(sifted.fetch(:accepted).map(&:id)),
           refused: sifted.fetch(:refused),
-          stale: suggestion_repo.mark_stale(sifted.fetch(:stale).map(&:id)),
+          stale: suggestion_mutations.mark_stale(sifted.fetch(:stale).map(&:id)),
         }
       end
 
@@ -99,7 +100,7 @@ module Suggestions
         [bodies, sifted]
       end
 
-      def still_pending(edits) = suggestion_repo.lock_pending(edits.map(&:id))
+      def still_pending(edits) = suggestion_mutations.lock_pending(edits.map(&:id))
 
       def unpublished(post)
         found(post).bind { it.status == PUBLISHED ? Failure(:published) : Success(it) }
