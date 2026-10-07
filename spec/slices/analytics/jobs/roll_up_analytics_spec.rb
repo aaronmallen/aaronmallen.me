@@ -31,7 +31,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
 
   def event_repo = Analytics::Slice["repos.analytics_event_repo"]
 
-  def failure = sync_state_repo.failure(analytics_rollup)
+  def failure = sync_state_queries.failure(analytics_rollup)
 
   def kept = event_repo.analytics_events.order(:occurred_at, :id).to_a.map(&:id)
 
@@ -75,7 +75,8 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     rollup_repo.public_send(table).on(on).order(key).to_a.to_h { [it[key], it.visitors] }
   end
 
-  def sync_state_repo = Record::Slice["repos.sync_state_repo"]
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   describe "yesterday" do
     it "stores the day's totals" do
@@ -668,7 +669,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
   end
 
   it "clears an earlier failure once a run gets through" do
-    sync_state_repo.record_failure(analytics_rollup, :rollup_failed)
+    sync_state_mutations.record_failure(analytics_rollup, :rollup_failed)
     roll_up
 
     expect(failure).to be_nil

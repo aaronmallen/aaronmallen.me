@@ -3,20 +3,19 @@
 RSpec.describe Record::Jobs::ImportCommits do
   include Spec::DB::FactoryHelper.new(:record)
 
-  let(:commit_repo) { Record::Slice["repos.commit_repo"] }
+  def commit_mutations = Record::Slice["repos.commit_mutations"]
+  def commit_queries = Record::Slice["repos.commit_queries"]
   let(:repo) { "aaronmallen/aaronmallen.me" }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
+
+  def commits_sync = Blog::Types::SyncName["commits"]
+  def day = 24 * 60 * 60
 
   before do
     connect_github_token
     stub_repos(github_repository(repo))
   end
 
-  def commits_sync = Blog::Types::SyncName["commits"]
-
-  def day = 24 * 60 * 60
-
-  def failure = sync_state_repo.failure(commits_sync)
+  def failure = sync_state_queries.failure(commits_sync)
 
   def import = described_class.new.perform
 
@@ -33,6 +32,10 @@ RSpec.describe Record::Jobs::ImportCommits do
   def stub_repos(*repositories, **) = stub_github(GitHubGraphQL::REPOS_QUERY, github_repos_page(*repositories, **))
 
   def stub_repos_answer(*responses) = stub_github(GitHubGraphQL::REPOS_QUERY, *responses)
+
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   describe "an empty commits table" do
     def long_quiet = github_repository("aaronmallen/one", pushed_at: "2015-01-01T00:00:00Z")
@@ -56,7 +59,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     it "starts each walk at the run's own clock", :aggregate_failures do
       import
 
-      expect(commit_repo.backfilled_to(repo)).to be_within(5).of(Time.now)
+      expect(commit_queries.backfilled_to(repo)).to be_within(5).of(Time.now)
       expect(Time.iso8601(Record::Jobs::BackfillRepoCommits.jobs.first["args"].last)).to be_within(5).of(Time.now)
     end
 
@@ -145,14 +148,14 @@ RSpec.describe Record::Jobs::ImportCommits do
 
     it "queues a repository with a recorded failure, pushed or not" do
       stub_repos(github_repository(repo, pushed_at: Time.now - (40 * day)))
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
       import
 
       expect(queued).to eq([repo])
     end
 
     it "queues a repository pushed and failed once" do
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
       import
 
       expect(queued).to eq([repo])
@@ -160,7 +163,7 @@ RSpec.describe Record::Jobs::ImportCommits do
 
     it "queues nothing for a failure that names no repository" do
       stub_repos(github_repository(repo, pushed_at: Time.now - (40 * day)))
-      sync_state_repo.record_failure(commits_sync, :rate_limited)
+      sync_state_mutations.record_failure(commits_sync, :rate_limited)
       import
 
       expect(queued).to be_empty
@@ -168,14 +171,14 @@ RSpec.describe Record::Jobs::ImportCommits do
   end
 
   describe "a repository whose walk is going" do
-    before { commit_repo.record_backfilled_to(repo, at: Time.now - 600) }
+    before { commit_mutations.record_backfilled_to(repo, at: Time.now - 600) }
 
     it "queues no second walk", :aggregate_failures do
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
       import
 
       expect(queued).to be_empty
-      expect(commit_repo.backfilled_to(repo)).to be_within(5).of(Time.now - 600)
+      expect(commit_queries.backfilled_to(repo)).to be_within(5).of(Time.now - 600)
     end
 
     it "starts the walk again once it has stalled, pushed or not", :aggregate_failures do
@@ -184,7 +187,7 @@ RSpec.describe Record::Jobs::ImportCommits do
       import
 
       expect(queued).to eq([repo])
-      expect(commit_repo.backfilled_to(repo)).to be_within(5).of(Time.now)
+      expect(commit_queries.backfilled_to(repo)).to be_within(5).of(Time.now)
     end
   end
 
@@ -225,18 +228,18 @@ RSpec.describe Record::Jobs::ImportCommits do
       run_through
 
       expect(all_stored).to eq(%w[a b c d].map { it * 40 })
-      expect(commit_repo.walks).to be_empty
+      expect(commit_queries.walks).to be_empty
     end
 
     it "leaves every repository a forward edge a day before its walk began" do
       run_through
 
-      expect(commit_repo.synced_through(repo)).to be_within(5).of(Time.now - day)
+      expect(commit_queries.synced_through(repo)).to be_within(5).of(Time.now - day)
     end
 
     it "reads a repository again only down to its forward edge" do
       run_through
-      edge = commit_repo.synced_through(repo).utc.iso8601
+      edge = commit_queries.synced_through(repo).utc.iso8601
       run_through
 
       expect(github_request(GitHubGraphQL::REFS_QUERY, since: edge)).to have_been_made.at_least_once
@@ -269,11 +272,11 @@ RSpec.describe Record::Jobs::ImportCommits do
 
       it "fills a repository whose walk failed, though nobody pushed to it", :aggregate_failures do
         stub_repos(github_repository(repo, pushed_at: Time.now - (40 * day)))
-        sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+        sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
         run_through
 
         expect(%w[a b c].map { stored(it * 40) }).to all(have_attributes(repo:))
-        expect(sync_state_repo.failure(commits_sync, repo:)).to be_nil
+        expect(sync_state_queries.failure(commits_sync, repo:)).to be_nil
       end
     end
   end
@@ -302,13 +305,13 @@ RSpec.describe Record::Jobs::ImportCommits do
       Record::Jobs::BackfillRepoCommits.drain
 
       expect(stored("a" * 40)).to have_attributes(repo:)
-      expect(sync_state_repo.failure(commits_sync, repo:)).to be_nil
+      expect(sync_state_queries.failure(commits_sync, repo:)).to be_nil
     end
   end
 
   describe "reporting the outcome" do
     it "clears the failure once a run finishes" do
-      sync_state_repo.record_failure(commits_sync, :rate_limited)
+      sync_state_mutations.record_failure(commits_sync, :rate_limited)
       import
 
       expect(failure).to be_nil
@@ -343,7 +346,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     end
 
     it "queues nothing when GitHub fails" do
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
       stub_repos_answer(github_rate_limited)
       import
 
@@ -379,7 +382,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     let(:connection) { Record::Slice["db.rom"].gateways.fetch(:default).connection }
     let(:elsewhere) { Sequel.connect(connection.opts) }
 
-    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Record::Repos::CommitRepo::IMPORT_LOCK)) }
+    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Record::Repos::CommitMutations::IMPORT_LOCK)) }
 
     after { elsewhere.disconnect }
 
@@ -390,7 +393,7 @@ RSpec.describe Record::Jobs::ImportCommits do
     end
 
     it "reports nothing about a run it never made" do
-      sync_state_repo.record_failure(commits_sync, :rate_limited)
+      sync_state_mutations.record_failure(commits_sync, :rate_limited)
       import
 
       expect(failure).to include(reason: "rate_limited")

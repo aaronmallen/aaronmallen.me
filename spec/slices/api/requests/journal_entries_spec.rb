@@ -16,7 +16,8 @@ RSpec.describe "API journal entries", type: :request do
 
   def entries = Record::Slice["relations.journal_entries"]
 
-  def entry_repo = Record::Slice["repos.journal_entry_repo"]
+  def journal_entry_mutations = Record::Slice["repos.journal_entry_mutations"]
+  def journal_entry_queries = Record::Slice["repos.journal_entry_queries"]
 
   def link(kind, id, other_kind, other_id)
     Links::Slice["operations.link_records"].call(kind, id, { other_kind:, other_id: }).value!
@@ -42,7 +43,7 @@ RSpec.describe "API journal entries", type: :request do
     it "lists the window's entries, newest first, with their tags" do
       older = entry_on(1, "08:00", "first")
       newer = entry_on(2, "21:15", "second")
-      entry_repo.replace_tags(newer.id, %w[health])
+      journal_entry_mutations.replace_tags(newer.id, %w[health])
 
       expect(rows).to eq([[newer.id, "2026-03-02", "21:15", "second", %w[health]],
                           [older.id, "2026-03-01", "08:00", "first", []]])
@@ -131,7 +132,7 @@ RSpec.describe "API journal entries", type: :request do
   describe "GET /api/v1/journal_entries/:id" do
     it "answers the entry with its tags" do
       entry = create(:journal_entry, entry_date: Date.new(2026, 3, 2), entry_time: "09:30", body: "a day")
-      entry_repo.replace_tags(entry.id, %w[health ruby])
+      journal_entry_mutations.replace_tags(entry.id, %w[health ruby])
 
       expect(read(entry.id).except("id", "created_at", "updated_at")).to eq(
         "date" => "2026-03-02", "time" => "09:30", "body" => "a day", "tags" => %w[health ruby], "record_links" => {},
@@ -245,7 +246,7 @@ RSpec.describe "API journal entries", type: :request do
   describe "PATCH /api/v1/journal_entries/:id" do
     let(:entry) { create(:journal_entry, entry_date: Date.new(2026, 3, 2), body: "before") }
 
-    before { entry_repo.replace_tags(entry.id, %w[health]) }
+    before { journal_entry_mutations.replace_tags(entry.id, %w[health]) }
 
     it "changes the body and keeps the tags and date" do
       expect(update_entry(entry.id, body: "after"))
@@ -264,7 +265,8 @@ RSpec.describe "API journal entries", type: :request do
     it "changes the tags and keeps the body" do
       update_entry(entry.id, tags: %w[ruby])
 
-      expect(entry_repo.by_id(entry.id)).to have_attributes(body: "before", tags: [have_attributes(name: "ruby")])
+      expect(journal_entry_queries.by_id(entry.id))
+        .to have_attributes(body: "before", tags: [have_attributes(name: "ruby")])
     end
 
     it "clears the tags on an empty list" do
@@ -274,7 +276,7 @@ RSpec.describe "API journal entries", type: :request do
     it "refuses a blank body with a 422 and keeps the old one" do
       update_entry(entry.id, body: " ")
 
-      expect([status, entry_repo.by_id(entry.id).body]).to eq([422, "before"])
+      expect([status, journal_entry_queries.by_id(entry.id).body]).to eq([422, "before"])
     end
 
     it "answers an unknown ID with a 404" do

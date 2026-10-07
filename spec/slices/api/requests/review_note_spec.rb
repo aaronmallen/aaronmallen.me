@@ -8,9 +8,7 @@ RSpec.describe "API review note", type: :request do
     token ? found.merge("HTTP_AUTHORIZATION" => "Bearer #{token}") : found
   end
 
-  def note(period = "week", starts_on = Date.new(2026, 9, 14)) = notes_repo.note(period, starts_on)
-
-  def notes_repo = Record::Slice["repos.review_note_repo"]
+  def note(period = "week", starts_on = Date.new(2026, 9, 14)) = review_note_queries.note(period, starts_on)
 
   def read(**query)
     get "/api/v1/review", query, headers(api_token)
@@ -18,6 +16,8 @@ RSpec.describe "API review note", type: :request do
   end
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "body" => [message] } }
+
+  def review_note_queries = Record::Slice["repos.review_note_queries"]
 
   def save(token: api_token, **fields)
     post "/api/v1/review/note", JSON.generate(fields), headers(token)

@@ -7,10 +7,10 @@ module API
       SCHEMA = Schema.by_id
       REPLY = Schema.widen(Serializers::Commit::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
-      include Deps[commit_by_id: "record.queries.commit_by_id", record_links: "links.queries.record_links"]
+      include Deps[commit_queries: "record.repos.commit_queries", record_links: "links.queries.record_links"]
 
       def handle(id:)
-        commit = commit_by_id.call(id)
+        commit = commit_queries.by_id(id)
         return not_found(Wording.missing("commit", id)) if commit.nil?
 
         Success(serialized(Serializers::Commit, commit).merge(record_links: linked(KIND, commit.id)))

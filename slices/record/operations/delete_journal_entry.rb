@@ -5,11 +5,14 @@ module Record
     class DeleteJournalEntry < Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["journal_entry"]
 
-      include Deps[journal_entry_repo: "repos.journal_entry_repo", release_photos: "media.operations.release_photos"]
+      include Deps[
+        journal_entry_mutations: "repos.journal_entry_mutations",
+        release_photos: "media.operations.release_photos",
+      ]
 
       def call(id)
         transaction do
-          step found(journal_entry_repo.delete(id))
+          step found(journal_entry_mutations.delete(id))
           release_photos.call(PHOTO_OWNER, id)
           id
         end

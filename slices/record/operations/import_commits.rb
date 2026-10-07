@@ -8,14 +8,15 @@ module Record
 
       include Deps[
         "github.client",
-        commit_repo: "repos.commit_repo",
-        sync_state_repo: "repos.sync_state_repo",
+        commit_mutations: "repos.commit_mutations",
+        commit_queries: "repos.commit_queries",
+        sync_state_queries: "repos.sync_state_queries",
       ]
 
       def call(now: Time.now)
         pushed = step pushed_since_floor
-        walks = commit_repo.walks
-        started = (pushed | sync_state_repo.failed_repos(SYNC) | walks.keys) - going(walks, now)
+        walks = commit_queries.walks
+        started = (pushed | sync_state_queries.failed_repos(SYNC) | walks.keys) - going(walks, now)
 
         started.each { start(it, now) }
         started.size
@@ -28,7 +29,7 @@ module Record
       def pushed_since_floor
         return Failure(:not_configured) unless client.configured?
 
-        Success(client.repositories(pushed_since: commit_repo.newest_commit_at&.-(CommitEdge::OVERLAP)))
+        Success(client.repositories(pushed_since: commit_queries.newest_commit_at&.-(CommitEdge::OVERLAP)))
       rescue Record::GitHub::Client::RateLimited
         Failure(:rate_limited)
       rescue Record::GitHub::Client::Error => e
@@ -36,7 +37,7 @@ module Record
       end
 
       def start(repo, now)
-        commit_repo.record_backfilled_to(repo, at: now)
+        commit_mutations.record_backfilled_to(repo, at: now)
         Jobs::BackfillRepoCommits.perform_async(repo, now.utc.iso8601)
       end
     end

@@ -33,12 +33,7 @@ module API
         optional: { continue_to: Schema::DAY },
       ).freeze
 
-      include Deps[
-        journal_entries_between: "record.queries.journal_entries_between",
-        journal_entry_count: "record.queries.journal_entry_count",
-        journal_streak: "record.queries.journal_streak",
-        journal_word_count: "record.queries.journal_word_count",
-      ]
+      include Deps[journal_entry_queries: "record.repos.journal_entry_queries"]
 
       def handle(from:, to:, tag: nil)
         case Blog::DayWindow.days(from, to)
@@ -51,7 +46,7 @@ module API
 
       def listed(first, last, tag)
         page = Blog::DayWindow.page(first, last, day: :entry_date.to_proc) do |from, to, limit|
-          journal_entries_between.call(from:, to:, limit:, tag:)
+          journal_entry_queries.between(from:, to:, limit:, tag:)
         end
         rows = page.fetch(:rows)
         window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
@@ -60,7 +55,8 @@ module API
       end
 
       def stats
-        { entries: journal_entry_count.call, words: journal_word_count.call, streak: journal_streak.call }
+        { entries: journal_entry_queries.count, words: journal_entry_queries.word_count,
+          streak: journal_entry_queries.streak }
       end
     end
   end

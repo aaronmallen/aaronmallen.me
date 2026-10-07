@@ -2,12 +2,10 @@
 
 module Record
   module Repos
-    class ReviewNoteRepo < DB::Repo
-      def note(period, starts_on) = review_notes.of(period, starts_on).one
-
+    class ReviewNoteMutations < DB::Repo
       def save_note(period:, starts_on:, body:, now:)
         review_notes.save_note(period:, starts_on:, body:, now:)
-        note(period, starts_on)
+        review_notes.of(period, starts_on).one
       end
     end
   end

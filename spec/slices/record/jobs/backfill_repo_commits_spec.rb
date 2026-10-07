@@ -10,14 +10,15 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
   before do
     connect_github_token
     stub_github_viewer
-    commit_repo.record_backfilled_to(repo, at: edge)
+    commit_mutations.record_backfilled_to(repo, at: edge)
   end
 
   def commit(sha, at: "2026-08-10T14:30:00Z", message: "lib: an older commit", **)
     github_commit(sha, at:, message:, **)
   end
 
-  def commit_repo = Record::Slice["repos.commit_repo"]
+  def commit_mutations = Record::Slice["repos.commit_mutations"]
+  def commit_queries = Record::Slice["repos.commit_queries"]
 
   def commits_sync = Blog::Types::SyncName["commits"]
 
@@ -25,7 +26,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def empty_step = Record::CommitEdge::EMPTY_STEP
 
-  def failure = sync_state_repo.failure(commits_sync, repo:)
+  def failure = sync_state_queries.failure(commits_sync, repo:)
 
   def next_chunk
     described_class.clear
@@ -44,7 +45,8 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def stub_refs_answer(*responses) = stub_github(GitHubGraphQL::REFS_QUERY, *responses)
 
-  def sync_state_repo = Record::Slice["repos.sync_state_repo"]
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   def walk(name = repo) = described_class.new.perform(name, clock.iso8601)
 
@@ -123,7 +125,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "moves the back edge to the oldest commit it read" do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(Time.utc(2026, 8, 10, 14, 30))
+      expect(commit_queries.backfilled_to(repo)).to eq(Time.utc(2026, 8, 10, 14, 30))
     end
 
     it "queues the next chunk for the same repository, with the walk's clock" do
@@ -135,7 +137,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "leaves the forward edge alone until the walk is done" do
       walk
 
-      expect(commit_repo.synced_through(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to be_nil
     end
 
     it "walks back from the edge the last chunk left" do
@@ -146,19 +148,19 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     end
 
     it "clears the failure the repository last recorded, and only that one", :aggregate_failures do
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo: "aaronmallen/other")
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo: "aaronmallen/other")
       walk
 
       expect(failure).to be_nil
-      expect(sync_state_repo.failure(commits_sync, repo: "aaronmallen/other")).to include(reason: "github_failed")
+      expect(sync_state_queries.failure(commits_sync, repo: "aaronmallen/other")).to include(reason: "github_failed")
     end
 
     it "marks the walk as still going" do
       Record::Slice["relations.sync_states"].of_kind("backfill").update(updated_at: Time.now - (3 * day))
       walk
 
-      expect(commit_repo.walks[repo]).to be_within(5).of(Time.now)
+      expect(commit_queries.walks[repo]).to be_within(5).of(Time.now)
     end
   end
 
@@ -175,7 +177,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
   describe "a repository it has read before" do
     let(:floor) { Time.utc(2026, 8, 1, 9) }
 
-    before { commit_repo.record_synced_through(repo, at: floor) }
+    before { commit_mutations.record_synced_through(repo, at: floor) }
 
     it "reads back only to the forward edge" do
       stub_refs(github_branch("main", commit(sha)))
@@ -186,18 +188,18 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
     it "ends the walk once a step would pass the forward edge", :aggregate_failures do
       stub_refs(unanswered_github_branch("main"))
-      commit_repo.record_backfilled_to(repo, at: floor + empty_step)
+      commit_mutations.record_backfilled_to(repo, at: floor + empty_step)
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to be_nil
-      expect(commit_repo.synced_through(repo)).to eq(clock - day)
+      expect(commit_queries.backfilled_to(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to eq(clock - day)
     end
 
     it "keeps stepping while the forward edge is still below" do
       stub_refs(unanswered_github_branch("main"))
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(edge - empty_step)
+      expect(commit_queries.backfilled_to(repo)).to eq(edge - empty_step)
     end
   end
 
@@ -205,7 +207,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     let(:floor) { Time.utc(2026, 8, 12, 9) }
 
     before do
-      commit_repo.record_synced_through(repo, at: floor)
+      commit_mutations.record_synced_through(repo, at: floor)
       create(:commit, sha: old_sha, branch: "main")
     end
 
@@ -234,8 +236,8 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       stub_late_push(under_floor(topic(commit(late_sha), commit(old_sha), more: true)))
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to be_nil
-      expect(commit_repo.synced_through(repo)).to eq(clock - day)
+      expect(commit_queries.backfilled_to(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to eq(clock - day)
       expect(scheduled).to be_empty
     end
 
@@ -243,8 +245,8 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       stub_late_push(under_floor(topic(commit(late_sha, at: "2026-08-05T09:00:00Z"), more: true)))
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(Time.utc(2026, 8, 5, 9))
-      expect(commit_repo.synced_through(repo)).to eq(floor)
+      expect(commit_queries.backfilled_to(repo)).to eq(Time.utc(2026, 8, 5, 9))
+      expect(commit_queries.synced_through(repo)).to eq(floor)
       expect(scheduled).to eq(walking)
     end
 
@@ -280,7 +282,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       walk
 
       expect(github_request(GitHubGraphQL::REFS_QUERY, since: nil)).not_to have_been_made
-      expect(commit_repo.backfilled_to(repo)).to eq(floor)
+      expect(commit_queries.backfilled_to(repo)).to eq(floor)
       expect(scheduled).to contain_exactly([[repo, clock.iso8601], be_within(5).of(Time.now.to_f + 1800)])
     end
   end
@@ -291,13 +293,13 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "moves the forward edge to a day before the walk began" do
       walk
 
-      expect(commit_repo.synced_through(repo)).to eq(clock - day)
+      expect(commit_queries.synced_through(repo)).to eq(clock - day)
     end
 
     it "ends the walk and queues no further chunk", :aggregate_failures do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to be_nil
+      expect(commit_queries.backfilled_to(repo)).to be_nil
       expect(scheduled).to be_empty
     end
 
@@ -310,7 +312,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "leaves every other repository alone" do
       walk
 
-      expect(commit_repo.synced_through("aaronmallen/other")).to be_nil
+      expect(commit_queries.synced_through("aaronmallen/other")).to be_nil
     end
   end
 
@@ -320,7 +322,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "moves the edge down a second anyway" do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(edge - 1)
+      expect(commit_queries.backfilled_to(repo)).to eq(edge - 1)
     end
   end
 
@@ -345,7 +347,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "moves the back edge to the date the commit was committed, which GitHub filters history on" do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(Time.iso8601(committed))
+      expect(commit_queries.backfilled_to(repo)).to eq(Time.iso8601(committed))
     end
 
     it "still reads, in the next chunk, a commit committed between the two dates" do
@@ -368,7 +370,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "moves the back edge down an hour, so the walk doesn't crawl a second at a time" do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(edge - empty_step)
+      expect(commit_queries.backfilled_to(repo)).to eq(edge - empty_step)
     end
   end
 
@@ -378,7 +380,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "keeps walking, rather than writing off history nobody read", :aggregate_failures do
       walk
 
-      expect(commit_repo.synced_through(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to be_nil
       expect(scheduled).to eq(walking)
     end
   end
@@ -396,8 +398,8 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "ends the walk and moves the forward edge", :aggregate_failures do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to be_nil
-      expect(commit_repo.synced_through(repo)).to eq(clock - day)
+      expect(commit_queries.backfilled_to(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to eq(clock - day)
     end
 
     it "records why it stopped, naming the branch it never read" do
@@ -415,7 +417,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     end
 
     it "starts the failure afresh rather than counting an earlier one into it" do
-      sync_state_repo.record_failure(commits_sync, :github_failed, repo:)
+      sync_state_mutations.record_failure(commits_sync, :github_failed, repo:)
       walk
 
       expect(failure).to include(count: 1, reason: "repository_start")
@@ -440,7 +442,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
                 github_branch("topic", commit(old_sha, at: shallow), more: true))
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(Time.iso8601(shallow))
+      expect(commit_queries.backfilled_to(repo)).to eq(Time.iso8601(shallow))
     end
 
     it "stores a commit found on two branches once, under the default branch", :aggregate_failures do
@@ -473,7 +475,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
     it "leaves one row" do
       walk
-      commit_repo.record_backfilled_to(repo, at: edge)
+      commit_mutations.record_backfilled_to(repo, at: edge)
       walk
 
       expect(Record::Slice["relations.commits"].count).to eq(1)
@@ -551,7 +553,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
     it "adds the contributor once when it imports the same commit twice" do
       import("app: credit the agent\n\n#{claude}\n\nCloses #42")
-      commit_repo.record_backfilled_to(repo, at: edge)
+      commit_mutations.record_backfilled_to(repo, at: edge)
       import("app: credit the agent\n\n#{claude}\n\nCloses #42")
 
       expect(contributors.size).to eq(1)
@@ -569,7 +571,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "keeps off a contributor the owner removed when it reads the commit again" do
       import("app: credit the agent\n\n#{claude}\n\nCloses #42")
       Tasks::Slice["relations.task_contributors"].delete
-      commit_repo.record_backfilled_to(repo, at: edge)
+      commit_mutations.record_backfilled_to(repo, at: edge)
       import("app: credit the agent\n\n#{claude}\n\nCloses #42")
 
       expect(contributors).to be_empty
@@ -582,7 +584,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       walk
 
       expect(Record::Slice["relations.commits"].count).to eq(0)
-      expect(commit_repo.backfilled_to(repo)).to be_nil
+      expect(commit_queries.backfilled_to(repo)).to be_nil
     end
 
     %w[NOT_FOUND FORBIDDEN].each do |type|
@@ -618,11 +620,11 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
     it "reads once, then stops while the points are under the reserve", :aggregate_failures do
       walk
-      moved = commit_repo.backfilled_to(repo)
+      moved = commit_queries.backfilled_to(repo)
       next_chunk
 
       expect(github_request(GitHubGraphQL::REFS_QUERY)).to have_been_made.once
-      expect(commit_repo.backfilled_to(repo)).to eq(moved)
+      expect(commit_queries.backfilled_to(repo)).to eq(moved)
     end
 
     it "keeps the last budget it saw when GitHub reports none" do
@@ -692,7 +694,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "leaves the back edge where it was, stores nothing and records nothing", :aggregate_failures do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to eq(edge)
+      expect(commit_queries.backfilled_to(repo)).to eq(edge)
       expect(stored(sha)).to be_nil
       expect(failure).to be_nil
     end
@@ -731,7 +733,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
     it "ends the walk and queues nothing, so the next finder run starts it again", :aggregate_failures do
       walk
 
-      expect(commit_repo.backfilled_to(repo)).to be_nil
+      expect(commit_queries.backfilled_to(repo)).to be_nil
       expect(scheduled).to be_empty
     end
 
@@ -740,7 +742,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       walk
 
       expect(stored(sha)).to be_nil
-      expect(commit_repo.synced_through(repo)).to be_nil
+      expect(commit_queries.synced_through(repo)).to be_nil
     end
   end
 
@@ -761,7 +763,7 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
       walk
 
       expect(failure).to include(reason: "github_failed", message: "GitHub sent no viewer id")
-      expect(commit_repo.backfilled_to(repo)).to be_nil
+      expect(commit_queries.backfilled_to(repo)).to be_nil
     end
   end
 

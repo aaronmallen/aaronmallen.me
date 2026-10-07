@@ -2,7 +2,6 @@
 
 RSpec.describe Backups::Jobs::BackUpDatabase do
   let(:dumps) { (1..9).map { format("database-202609%02dT053000Z.dump", it) } }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
 
   def back_up = described_class.new.perform
 
@@ -12,7 +11,11 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
     nil
   end
 
-  def failure = sync_state_repo.failure(Blog::Types::SyncName["backups"])
+  def failure = sync_state_queries.failure(Blog::Types::SyncName["backups"])
+
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   def upload = a_request(:put, %r{\A#{backup_store_url}/database-\d{8}T\d{6}Z\.dump\z})
 
@@ -61,7 +64,7 @@ RSpec.describe Backups::Jobs::BackUpDatabase do
     end
 
     it "clears a failure an earlier run left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["backups"], :upload_failed)
       back_up
 
       expect(failure).to be_nil

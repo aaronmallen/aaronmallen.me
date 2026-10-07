@@ -5,7 +5,9 @@ RSpec.describe Projects::Jobs::RefreshProjects do
   let(:project) { create(:project, repo:, stars: 3, release: "v1.0.0") }
   let(:project_repo) { Projects::Slice["repos.project_repo"] }
   let(:repo) { "aaronmallen/aaronmallen.me" }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
+
+  def failure = sync_state_queries.failure(Blog::Types::SyncName["projects"])
+  def html = { body: "<html>maintenance</html>", headers: { "Content-Type" => "text/html" } }
 
   before do
     connect_github_token
@@ -13,10 +15,6 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     stub_release(repo, tag: "v2.0.0")
     project
   end
-
-  def failure = sync_state_repo.failure(Blog::Types::SyncName["projects"])
-
-  def html = { body: "<html>maintenance</html>", headers: { "Content-Type" => "text/html" } }
 
   def json(body) = { body: body.to_json, headers: { "Content-Type" => "application/json" } }
 
@@ -36,6 +34,10 @@ RSpec.describe Projects::Jobs::RefreshProjects do
   def stub_repo(repo, stars: 0, response: nil)
     stub_request(:get, "#{api}/repos/#{repo}").to_return(response || json({ full_name: repo, stargazers_count: stars }))
   end
+
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   describe "a refresh GitHub answers" do
     it "stores the star count and the latest release GitHub reports" do
@@ -84,7 +86,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "clears the failure an earlier refresh left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       refresh
 
       expect(failure).to be_nil
@@ -154,7 +156,7 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
 
     it "records the refresh that never ran rather than clearing the failure" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["projects"], :rate_limited)
       refresh
 
       expect(failure).to include(reason: "not_configured")

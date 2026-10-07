@@ -8,7 +8,7 @@ module Record
       include Deps[
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.review_note_contract",
-        review_note_repo: "repos.review_note_repo",
+        review_note_mutations: "repos.review_note_mutations",
       ]
 
       def call(body, period:, on:, now: Time.now)
@@ -21,7 +21,7 @@ module Record
       private
 
       def save(body, period, starts_on, now)
-        note = review_note_repo.save_note(period:, starts_on:, body:, now:)
+        note = review_note_mutations.save_note(period:, starts_on:, body:, now:)
         claim_photos.call(PHOTO_OWNER, note.id, note.body)
         note
       end

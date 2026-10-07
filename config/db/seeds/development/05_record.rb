@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Record::Slice["queries.journal_entry_count"].call.positive?
+return if Record::Slice["repos.journal_entry_queries"].count.nonzero?
 
 save_entry = Record::Slice["operations.save_journal_entry"]
 [

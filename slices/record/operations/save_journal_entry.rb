@@ -9,7 +9,8 @@ module Record
       include Deps[
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.journal_entry_contract",
-        journal_entry_repo: "repos.journal_entry_repo",
+        journal_entry_mutations: "repos.journal_entry_mutations",
+        journal_entry_queries: "repos.journal_entry_queries",
       ]
 
       def call(params, now: Time.now, latest: Blog::TimeZone.today(now))
@@ -25,7 +26,7 @@ module Record
         time = Blog::TimeZone.local(now).strftime(TIME_FORMAT)
         id = transaction { write(attributes, time).id }
 
-        Success(journal_entry_repo.by_id(id))
+        Success(journal_entry_queries.by_id(id))
       end
 
       def validate(params, now, latest)
@@ -34,8 +35,8 @@ module Record
       end
 
       def write(attributes, time)
-        entry = journal_entry_repo.create(**attributes.except(:tags), entry_time: time)
-        journal_entry_repo.replace_tags(entry.id, attributes.fetch(:tags))
+        entry = journal_entry_mutations.create(**attributes.except(:tags), entry_time: time)
+        journal_entry_mutations.replace_tags(entry.id, attributes.fetch(:tags))
         claim_photos.call(PHOTO_OWNER, entry.id, entry.body)
         entry
       end

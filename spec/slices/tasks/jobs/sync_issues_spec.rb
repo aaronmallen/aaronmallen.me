@@ -2,8 +2,10 @@
 
 RSpec.describe Tasks::Jobs::SyncIssues do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
   let(:url) { "https://github.com/aaronmallen/aaronmallen.me/issues/7" }
+
+  def api = "https://api.github.com"
+  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
 
   before do
     connect_github_token
@@ -11,13 +13,9 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     stub_known
   end
 
-  def api = "https://api.github.com"
-
-  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
-
   def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
-  def failure = sync_state_repo.failure(Blog::Types::SyncName["issues"])
+  def failure = sync_state_queries.failure(Blog::Types::SyncName["issues"])
 
   def imported(id = "I_seven") = repo.by_id(sources.at("github", id).pluck(:task_id).first)
 
@@ -42,6 +40,10 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   def sync = described_class.new.perform
+
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   def tracked(*traits, state: "open", checked_at: nil, **)
     task = create(:task, *traits, list: "external", **)
@@ -80,7 +82,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "clears a failure the last run left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil
@@ -990,7 +992,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
 
     it "lets the run clear a failure the last run left" do
       tracked(:canceled, state: "deleted")
-      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       stub_assigned(issue)
       sync
 
@@ -1021,7 +1023,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     end
 
     it "lets the run clear a failure the last run left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil

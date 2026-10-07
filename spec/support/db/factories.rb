@@ -108,27 +108,24 @@ module Spec
 
     module Tagging
       REPOS = {
-        decision: ["repos.decision_repo", :decisions],
-        journal_entry: ["repos.journal_entry_repo", :record],
-        post: ["repos.post_repo", :posts],
-        project: ["repos.project_repo", :projects],
-        task: ["repos.task_repo", :tasks],
+        decision: [:decisions, "repos.decision_repo"],
+        journal_entry: [:record, "repos.journal_entry_mutations", "repos.journal_entry_queries"],
+        post: [:posts, "repos.post_repo"],
+        project: [:projects, "repos.project_repo"],
+        task: [:tasks, "repos.task_repo"],
       }.freeze
 
       def self.call(name, record, names)
         return record unless REPOS.key?(name)
 
-        repo = repo_for(name)
-        repo.replace_tags(record.id, names) if names
+        repo(name, REPOS.fetch(name)[1]).replace_tags(record.id, names) if names
 
-        repo.by_id(record.id)
+        repo_for(name).by_id(record.id)
       end
 
-      def self.repo_for(name)
-        key, slice = REPOS.fetch(name)
+      def self.repo(name, key) = Hanami.app.slices[REPOS.fetch(name).first][key]
 
-        (slice ? Hanami.app.slices[slice] : Hanami.app)[key]
-      end
+      def self.repo_for(name) = repo(name, REPOS.fetch(name).last)
     end
 
     class FactoryHelper < Module

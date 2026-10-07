@@ -7,14 +7,14 @@ module Record
 
       include Deps[
         "github.client",
-        commit_repo: "repos.commit_repo",
-        sync_state_repo: "repos.sync_state_repo",
+        commit_mutations: "repos.commit_mutations",
+        sync_state_mutations: "repos.sync_state_mutations",
       ]
 
       def call
         keep = step repositories
 
-        commit_repo.reap_walks(keep:) + SYNCS.sum { sync_state_repo.reap_failures(it, keep:) }
+        commit_mutations.reap_walks(keep:) + SYNCS.sum { sync_state_mutations.reap_failures(it, keep:) }
       end
 
       private

@@ -9,16 +9,17 @@ module Record
 
       include Deps[
         "github.client",
-        commit_repo: "repos.commit_repo",
+        commit_mutations: "repos.commit_mutations",
+        commit_queries: "repos.commit_queries",
         store_commits: "operations.store_commits",
-        sync_state_repo: "repos.sync_state_repo",
+        sync_state_mutations: "repos.sync_state_mutations",
       ]
 
       def call(repo, clock:)
         step configured
         edge = step walking(repo)
         step affordable
-        floor = commit_repo.synced_through(repo)
+        floor = commit_queries.synced_through(repo)
         return sweep(repo, edge, clock) if floor && edge <= floor
 
         branches = step read(repo, edge, floor)
@@ -30,7 +31,7 @@ module Record
       private
 
       def advance(repo, branches, edge:, floor:, clock:)
-        sync_state_repo.clear_failure(SYNC, repo:)
+        sync_state_mutations.clear_failure(SYNC, repo:)
         return below(repo, floor, clock) if CommitEdge.walked?(branches) || CommitEdge.floored?(branches, edge, floor)
         return ground(repo, clock, CommitEdge.unread(branches)) if CommitEdge.grounded?(branches, edge)
 
@@ -46,7 +47,7 @@ module Record
       def below(repo, floor, clock)
         return finish(repo, clock) unless floor
 
-        commit_repo.record_backfilled_to(repo, at: floor)
+        commit_mutations.record_backfilled_to(repo, at: floor)
         step affordable
         sweep(repo, floor, clock)
       end
@@ -54,19 +55,19 @@ module Record
       def configured = client.configured? ? Success() : Failure(:not_configured)
 
       def finish(repo, clock)
-        commit_repo.finish_walk(repo, synced_through: clock - CommitEdge::OVERLAP)
+        commit_mutations.finish_walk(repo, synced_through: clock - CommitEdge::OVERLAP)
         0
       end
 
       def ground(repo, clock, unread)
-        sync_state_repo.record_failure(SYNC, GROUNDED, message: "#{unread.join(', ')} still unread", repo:)
+        sync_state_mutations.record_failure(SYNC, GROUNDED, message: "#{unread.join(', ')} still unread", repo:)
         finish(repo, clock)
       end
 
-      def known(branches) = commit_repo.known_shas(branches.flat_map { |branch| branch[:commits].map { it[:sha] } })
+      def known(branches) = commit_queries.known_shas(branches.flat_map { |branch| branch[:commits].map { it[:sha] } })
 
       def queue(repo, edge, clock)
-        commit_repo.record_backfilled_to(repo, at: edge)
+        commit_mutations.record_backfilled_to(repo, at: edge)
         Jobs::BackfillRepoCommits.perform_async(repo, clock.utc.iso8601)
         0
       end
@@ -86,8 +87,8 @@ module Record
       end
 
       def stop(repo, reason, message)
-        sync_state_repo.record_failure(SYNC, reason, message:, repo:)
-        commit_repo.end_walk(repo)
+        sync_state_mutations.record_failure(SYNC, reason, message:, repo:)
+        commit_mutations.end_walk(repo)
         Failure(reason)
       end
 
@@ -101,10 +102,10 @@ module Record
       end
 
       def walking(repo)
-        edge = commit_repo.backfilled_to(repo)
+        edge = commit_queries.backfilled_to(repo)
         return Failure(:not_walking) unless edge
 
-        commit_repo.hold_walk(repo)
+        commit_mutations.hold_walk(repo)
         Success(edge)
       end
     end

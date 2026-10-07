@@ -43,10 +43,8 @@ module Admin
 
     import keys: %w[
       github.client operations.delete_journal_entry operations.queue_commit_import operations.save_journal_entry
-      operations.save_review_note operations.update_journal_entry queries.commit_by_id queries.commit_totals_today
-      queries.commits_last_synced_at queries.commits_today queries.journal_days queries.journal_entries_today
-      queries.journal_entry_count queries.journal_streak queries.journal_word_count queries.recent_commit_repos
-      queries.review_note queries.sync_failures
+      operations.save_review_note operations.update_journal_entry repos.commit_queries repos.journal_entry_queries
+      repos.review_note_queries repos.sync_state_queries
     ], from: :record
 
     import keys: %w[

@@ -78,7 +78,7 @@ module MCP
     import keys: %w[operations.find_visitor_address], from: :public
 
     import keys: %w[
-      operations.queue_commit_import queries.commits_between queries.commits_last_synced_at queries.sync_failures
+      operations.queue_commit_import repos.commit_queries repos.sync_state_queries
     ], from: :record
 
     import keys: %w[

@@ -149,10 +149,10 @@ RSpec.describe "MCP record tools", type: :request do
   end
 
   describe "read_sync_state" do
-    def commit_repo = Record::Slice["repos.commit_repo"]
+    def commit_mutations = Record::Slice["repos.commit_mutations"]
 
     def fail_commits(day, message)
-      sync_state_repo.record_failure(
+      sync_state_mutations.record_failure(
         Blog::Types::SyncName["commits"], :github_failed, at: Time.utc(2026, 3, day, 8), message:,
       )
     end
@@ -164,7 +164,7 @@ RSpec.describe "MCP record tools", type: :request do
     end
 
     it "answers when commits last synced" do
-      commit_repo.record_synced_through("aaronmallen/blog", at: Time.utc(2026, 3, 2, 9))
+      commit_mutations.record_synced_through("aaronmallen/blog", at: Time.utc(2026, 3, 2, 9))
       call_tool("read_sync_state")
 
       expect(Time.iso8601(content.fetch("commits_last_synced_at"))).to be_within(60).of(Time.now)
@@ -177,7 +177,7 @@ RSpec.describe "MCP record tools", type: :request do
       }
     end
 
-    def sync_state_repo = Record::Slice["repos.sync_state_repo"]
+    def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
     it "answers each failing sync with when it began failing" do
       fail_commits(1, "502")

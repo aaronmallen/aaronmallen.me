@@ -3,7 +3,7 @@
 RSpec.describe "Admin today", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+  let(:repo) { Record::Slice["repos.journal_entry_queries"] }
   let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
@@ -11,7 +11,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
   def column(position) = page.all(".g-2 > .side-stack")[position]
 
-  def commit_repo = Record::Slice["repos.commit_repo"]
+  def commit_mutations = Record::Slice["repos.commit_mutations"]
+  def commit_queries = Record::Slice["repos.commit_queries"]
 
   def commit_row = commits_card.find(".commits .commit")
 
@@ -655,12 +656,12 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       before { with_token }
 
       def record_sync(at:)
-        commit_repo.record_synced_through("aaronmallen/blog", at: at - Record::CommitEdge::OVERLAP)
+        commit_mutations.record_synced_through("aaronmallen/blog", at: at - Record::CommitEdge::OVERLAP)
         Record::Slice["relations.sync_states"].of_kind("commits").update(updated_at: at)
       end
 
       it "gives the time the newest walk reached its forward edge, not the edge itself" do
-        commit_repo.record_synced_through("aaronmallen/other", at: Time.utc(2026, 1, 9, 15, 30))
+        commit_mutations.record_synced_through("aaronmallen/other", at: Time.utc(2026, 1, 9, 15, 30))
         record_sync(at: Time.utc(2026, 1, 7, 15, 30))
         get "/admin"
 
@@ -676,7 +677,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "gives the Chicago clock time of a sync from today" do
         record_sync(at: Time.now)
-        clock = Blog::TimeZone.local(commit_repo.last_synced_at).strftime("%H:%M")
+        clock = Blog::TimeZone.local(commit_queries.last_synced_at).strftime("%H:%M")
         get "/admin"
 
         expect(commits_card).to have_css(".commits-sub", text: "Last synced today at #{clock}")
@@ -757,7 +758,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       def record_commit_failure(reason, at: failed_at, message: nil, repo: nil)
-        sync_state_repo.record_failure(Blog::Types::SyncName["commits"], reason, at:, message:, repo:)
+        sync_state_mutations.record_failure(Blog::Types::SyncName["commits"], reason, at:, message:, repo:)
       end
 
       def refresh_country_database_answered(response)
@@ -797,7 +798,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         Tasks::Jobs::SyncLinearIssues.new.perform
       end
 
-      def sync_state_repo = Record::Slice["repos.sync_state_repo"]
+      def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
       it "says nothing while both syncs are healthy" do
         get "/admin"
@@ -842,21 +843,21 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       it "reports the nightly analytics rollup" do
-        sync_state_repo.record_failure(Blog::Types::SyncName["analytics_rollup"], :rollup_failed, at: failed_at)
+        sync_state_mutations.record_failure(Blog::Types::SyncName["analytics_rollup"], :rollup_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines).to eq(["Analytics rollup failed at Jan 7, 2026, 09:30 · The days wouldn't roll up"])
       end
 
       it "reports a failed database backup" do
-        sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
+        sync_state_mutations.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines).to eq(["Database backup failed at Jan 7, 2026, 09:30 · The dump wouldn't upload"])
       end
 
       it "puts the failure time in a time tag" do
-        sync_state_repo.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
+        sync_state_mutations.record_failure(Blog::Types::SyncName["backups"], :upload_failed, at: failed_at)
         get "/admin"
 
         expect(page.find(".sync-failure time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
@@ -927,7 +928,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "keeps one repository's failure while another imports cleanly" do
         record_commit_failure(:rate_limited, repo: "aaronmallen/one")
-        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"], repo: "aaronmallen/two")
+        sync_state_mutations.clear_failure(Blog::Types::SyncName["commits"], repo: "aaronmallen/two")
         get "/admin"
 
         expect(failure_lines.size).to eq(1)
@@ -935,7 +936,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "lists both syncs when both failed" do
         record_commit_failure(:rate_limited)
-        sync_state_repo.record_failure(Blog::Types::SyncName["projects"], :github_failed, at: failed_at)
+        sync_state_mutations.record_failure(Blog::Types::SyncName["projects"], :github_failed, at: failed_at)
         get "/admin"
 
         expect(failure_lines.size).to eq(2)
@@ -967,7 +968,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "drops the line once the sync succeeds" do
         record_commit_failure(:rate_limited)
-        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"])
+        sync_state_mutations.clear_failure(Blog::Types::SyncName["commits"])
         get "/admin"
 
         expect(page).to have_no_css(".sync-failures")
@@ -997,7 +998,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       it "drops the streak once the sync recovers and fails again" do
         fail_twice(:github_failed)
-        sync_state_repo.clear_failure(Blog::Types::SyncName["commits"])
+        sync_state_mutations.clear_failure(Blog::Types::SyncName["commits"])
         record_commit_failure(:github_failed)
         get "/admin"
 

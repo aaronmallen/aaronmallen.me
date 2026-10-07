@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
 RSpec.describe Record::Jobs::ReapSyncStates do
-  let(:commit_repo) { Record::Slice["repos.commit_repo"] }
+  def commit_mutations = Record::Slice["repos.commit_mutations"]
+  def commit_queries = Record::Slice["repos.commit_queries"]
   let(:gone) { "aaronmallen/renamed" }
   let(:repo) { "aaronmallen/aaronmallen.me" }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
-
-  before do
-    connect_github_token
-    stub_repos(github_repository(repo))
-  end
 
   def commits_sync = Blog::Types::SyncName["commits"]
 
   def leave_traces(name)
-    commit_repo.record_backfilled_to(name, at: Time.now - 3600)
-    sync_state_repo.record_failure(commits_sync, :github_failed, repo: name)
+    commit_mutations.record_backfilled_to(name, at: Time.now - 3600)
+    sync_state_mutations.record_failure(commits_sync, :github_failed, repo: name)
+  end
+
+  before do
+    connect_github_token
+    stub_repos(github_repository(repo))
   end
 
   def reap = described_class.new.perform
@@ -24,7 +24,11 @@ RSpec.describe Record::Jobs::ReapSyncStates do
 
   def stub_repos_answer(*responses) = stub_github(GitHubGraphQL::REPOS_QUERY, *responses)
 
-  def traces(name) = [commit_repo.backfilled_to(name), sync_state_repo.failure(commits_sync, repo: name)]
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
+
+  def traces(name) = [commit_queries.backfilled_to(name), sync_state_queries.failure(commits_sync, repo: name)]
 
   describe "a repository GitHub no longer lists" do
     before { leave_traces(gone) }
@@ -42,16 +46,16 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     it "keeps everything it left", :aggregate_failures do
       reap
 
-      expect(commit_repo.backfilled_to(repo)).not_to be_nil
-      expect(sync_state_repo.failure(commits_sync, repo:)).to include(reason: "github_failed")
+      expect(commit_queries.backfilled_to(repo)).not_to be_nil
+      expect(sync_state_queries.failure(commits_sync, repo:)).to include(reason: "github_failed")
     end
   end
 
   it "keeps the whole sync's failure, which names no repository" do
-    sync_state_repo.record_failure(commits_sync, :not_configured)
+    sync_state_mutations.record_failure(commits_sync, :not_configured)
     reap
 
-    expect(sync_state_repo.failure(commits_sync)).to include(reason: "not_configured")
+    expect(sync_state_queries.failure(commits_sync)).to include(reason: "not_configured")
   end
 
   it "reads every page of the repository list" do
@@ -60,7 +64,7 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     leave_traces(gone)
     reap
 
-    expect(commit_repo.backfilled_to(gone)).not_to be_nil
+    expect(commit_queries.backfilled_to(gone)).not_to be_nil
   end
 
   it "keeps a repository nobody has pushed to in years" do
@@ -68,13 +72,13 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     leave_traces(gone)
     reap
 
-    expect(commit_repo.backfilled_to(gone)).not_to be_nil
+    expect(commit_queries.backfilled_to(gone)).not_to be_nil
   end
 
   describe "when the list cannot be trusted" do
     before { leave_traces(gone) }
 
-    def kept? = !commit_repo.backfilled_to(gone).nil?
+    def kept? = !commit_queries.backfilled_to(gone).nil?
 
     it "reaps nothing with no token, asking GitHub for nothing", :aggregate_failures do
       disconnect_github

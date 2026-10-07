@@ -164,7 +164,7 @@ RSpec.describe "Admin photo claims", type: :request do
   end
 
   describe "a journal entry" do
-    let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+    let(:repo) { Record::Slice["repos.journal_entry_queries"] }
 
     def entry = repo.between(from: Blog::TimeZone.today - 1, to: Blog::TimeZone.today).first
 

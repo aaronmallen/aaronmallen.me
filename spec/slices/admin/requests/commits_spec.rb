@@ -7,7 +7,7 @@ RSpec.describe "Admin commits import", type: :request do
 
   def api = "https://api.github.com"
 
-  def commit_repo = Record::Slice["repos.commit_repo"]
+  def commit_queries = Record::Slice["repos.commit_queries"]
 
   def enqueued = Record::Jobs::ImportCommits.jobs
 
@@ -51,7 +51,7 @@ RSpec.describe "Admin commits import", type: :request do
     it "imports nothing inside the request", :aggregate_failures do
       import
 
-      expect([commit_repo.today, commit_repo.last_synced_at]).to eq([[], nil])
+      expect([commit_queries.today, commit_queries.last_synced_at]).to eq([[], nil])
     end
 
     it "rejects an import without a CSRF token", :aggregate_failures do

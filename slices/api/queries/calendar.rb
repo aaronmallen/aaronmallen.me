@@ -14,7 +14,7 @@ module API
         calendar_posts: "posts.queries.calendar_posts",
         calendar_social_posts: "social.queries.calendar_social_posts",
         counted_sprints_between: "tasks.queries.counted_sprints_between",
-        journal_days_between: "record.queries.journal_days_between",
+        journal_entry_queries: "record.repos.journal_entry_queries",
       ]
 
       def call(from:, to:)
@@ -45,7 +45,7 @@ module API
           sprints: counted_sprints_between.call(from:, to:).to_h { [it.sprint_date, it] },
           posts: by_day(calendar_posts.call(from:, to:), &:published_at),
           social_posts: by_day(calendar_social_posts.call(from:, to:), &:posted_at),
-          journal: journal_days_between.call(from:, to:).to_set,
+          journal: journal_entry_queries.days_between(from, to).to_set,
         }
       end
     end

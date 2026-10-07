@@ -6,7 +6,7 @@ module Admin
       include Deps[
         activity_queries: "activity.repos.activity_queries",
         review_queries: "activity.repos.review_queries",
-        review_note: "record.queries.review_note",
+        review_note_queries: "record.repos.review_note_queries",
       ]
 
       def call(period: nil, day: nil, today: Blog::TimeZone.today, **credit)
@@ -16,7 +16,7 @@ module Admin
 
         {
           review: found,
-          note: review_note.call(found.period, found.from),
+          note: review_note_queries.note(found.period, found.from),
           on:,
           today:,
           credits:,

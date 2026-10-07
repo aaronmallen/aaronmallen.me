@@ -13,18 +13,15 @@ module Admin
         "operations.summarize_sprint",
         attention_queries: "activity.repos.attention_queries",
         client: "record.github.client",
-        commit_totals_today: "record.queries.commit_totals_today",
-        commits_last_synced_at: "record.queries.commits_last_synced_at",
-        commits_today: "record.queries.commits_today",
+        commit_queries: "record.repos.commit_queries",
         country_database_failure: "analytics.queries.country_database_failure",
-        journal_entries_today: "record.queries.journal_entries_today",
+        journal_entry_queries: "record.repos.journal_entry_queries",
         pending_webmention_count: "social.queries.pending_webmention_count",
         pending_webmentions: "social.queries.pending_webmentions",
         posts_by_status: "posts.queries.by_status",
         queued_social_posts: "social.queries.queued_social_posts",
-        recent_commit_repos: "record.queries.recent_commit_repos",
         scheduled_posts: "posts.queries.scheduled",
-        sync_failures: "record.queries.sync_failures",
+        sync_state_queries: "record.repos.sync_state_queries",
         visitors_for_day: "analytics.queries.visitors_for_day",
       ]
 
@@ -35,8 +32,8 @@ module Admin
           **publishing(now),
           attention: attention(now),
           commits: commits(now),
-          commit_totals: commit_totals_today.call(now:),
-          entries: journal_entries_today.call(now:),
+          commit_totals: commit_queries.today_totals(now:),
+          entries: journal_entry_queries.today(now:),
           sprint:,
           sync_failures: failures,
           visitors: visitors_for_day.call(Blog::TimeZone.today(now)),
@@ -50,9 +47,9 @@ module Admin
 
       def commits(now)
         {
-          entries: commits_today.call(now:, limit: COMMIT_LIMIT),
-          last_synced_at: commits_last_synced_at.call,
-          repos: recent_commit_repos.call(now:).size,
+          entries: commit_queries.today(now:, limit: COMMIT_LIMIT),
+          last_synced_at: commit_queries.last_synced_at,
+          repos: commit_queries.recent_repos(now:).size,
           today: Blog::TimeZone.today(now),
           configured: client.configured?,
         }
@@ -71,7 +68,7 @@ module Admin
       def due(scheduled, social) = scheduled.map(&:published_at) + social[:scheduled].map(&:posted_at)
 
       def failures
-        sync_failures.call + [countries_failure].compact
+        sync_state_queries.failures + [countries_failure].compact
       end
 
       def posts(scheduled)

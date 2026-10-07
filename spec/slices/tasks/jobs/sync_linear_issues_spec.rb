@@ -2,8 +2,10 @@
 
 RSpec.describe Tasks::Jobs::SyncLinearIssues do
   let(:repo) { Tasks::Slice["repos.task_repo"] }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
   let(:url) { "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues" }
+
+  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
+  def discussed(*nodes, **) = issue(comments: { nodes: }, **)
 
   before do
     connect_linear(LinearGraphQL::KEY)
@@ -11,11 +13,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     stub_known
   end
 
-  def comments(task = imported) = Tasks::Slice["queries.task_comments"].call(task.id)
-
-  def discussed(*nodes, **) = issue(comments: { nodes: }, **)
-
-  def failure(name = Blog::Types::SyncName["linear_issues"]) = sync_state_repo.failure(name)
+  def failure(name = Blog::Types::SyncName["linear_issues"]) = sync_state_queries.failure(name)
 
   def imported = repo.by_id(sources.at("linear", "L_one").pluck(:task_id).first)
 
@@ -35,6 +33,10 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
   end
 
   def sync = described_class.new.perform
+
+  def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   def tracked(*traits, state: "open", checked_at: nil, **)
     task = create(:task, *traits, list: "external", title: "Sync my issues", note: "Keep them in step", **)
@@ -67,7 +69,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
 
     it "clears a failure the last run left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil
@@ -772,7 +774,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
 
     it "lets the run clear a failure the last run left" do
-      sync_state_repo.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
+      sync_state_mutations.record_failure(Blog::Types::SyncName["linear_issues"], :rate_limited)
       sync
 
       expect(failure).to be_nil

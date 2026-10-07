@@ -149,7 +149,7 @@ RSpec.describe "Admin journal", type: :feature do
 
   describe "editing an entry" do
     let!(:entry) { create(:journal_entry, entry_date: today - 2, entry_time: "21:05", body: "before") }
-    let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+    let(:repo) { Record::Slice["repos.journal_entry_queries"] }
     let(:item) { find(".journal-entry", text: "21:05") }
 
     before do

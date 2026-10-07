@@ -2,19 +2,19 @@
 
 RSpec.describe "Admin review note", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+  let(:repo) { Record::Slice["repos.journal_entry_queries"] }
   let(:sunday) { Date.new(2026, 9, 20) }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
   def form = notes.find("form#review-note-form[method='post'][action='/admin/review/note']")
 
-  def note(period = "week", starts_on = Date.new(2026, 9, 14)) = notes_repo.note(period, starts_on)&.body
+  def note(period = "week", starts_on = Date.new(2026, 9, 14)) = review_note_queries.note(period, starts_on)&.body
 
   def notes = page.find_by_id("review-notes")
 
-  def notes_repo = Record::Slice["repos.review_note_repo"]
-
   def review_entries = repo.between(from: Date.new(2026, 9, 1), to: Date.new(2026, 10, 31))
+
+  def review_note_queries = Record::Slice["repos.review_note_queries"]
 
   def save_note(body, **params)
     post "/admin/review/note", _csrf_token: admin_csrf_token, day: sunday.iso8601, note: { body: }, **params

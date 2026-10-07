@@ -3,7 +3,7 @@
 RSpec.describe "Admin journal", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Record::Slice["repos.journal_entry_repo"] }
+  let(:repo) { Record::Slice["repos.journal_entry_queries"] }
   let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 

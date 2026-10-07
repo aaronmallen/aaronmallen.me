@@ -3,6 +3,7 @@
 module Links
   module Queries
     class LinkableRecords
+      RELATIONS = { "commit" => :commits, "journal_entry" => :journal_entries }.freeze
       TITLE_LIMIT = 120
       WORK = Blog::Types::ProjectFilter["work"]
 
@@ -11,18 +12,24 @@ module Links
         task: "tasks.queries.linkable_tasks",
         post: "posts.queries.linkable_posts",
         social_post: "social.queries.linkable_social_posts",
-        journal_entry: "record.queries.linkable_journal_entries",
-        commit: "record.queries.linkable_commits",
+        journal_entry: "record.repos.journal_entry_queries",
+        commit: "record.repos.commit_queries",
         project: "projects.queries.linkable_projects",
         work_entry: "projects.queries.linkable_work_entries",
         decision: "decisions.queries.linkable_decisions",
       ]
 
-      def matching(kind, text, limit:) = linked(kind, query(kind).matching(text, limit:))
+      def matching(kind, text, limit:)
+        rows = RELATIONS.key?(kind) ? linkable(kind, text:, limit:) : query(kind).matching(text, limit:)
 
-      def named(kind, ids) = linked(kind, query(kind).named(ids))
+        linked(kind, rows)
+      end
+
+      def named(kind, ids) = linked(kind, RELATIONS.key?(kind) ? linkable(kind, ids:) : query(kind).named(ids))
 
       private
+
+      def linkable(kind, **) = query(kind).linkable(RELATIONS.fetch(kind), **)
 
       def linked(kind, rows)
         rows.map do |row|

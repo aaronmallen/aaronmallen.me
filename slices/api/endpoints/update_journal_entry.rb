@@ -18,12 +18,12 @@ module API
       REPLY = Serializers::JournalEntry.reference
 
       include Deps[
-        journal_entry_by_id: "record.queries.journal_entry_by_id",
+        journal_entry_queries: "record.repos.journal_entry_queries",
         update_journal_entry: "record.operations.update_journal_entry",
       ]
 
       def handle(id:, body: nil, tags: nil)
-        entry = journal_entry_by_id.call(id)
+        entry = journal_entry_queries.by_id(id)
         return not_found(Wording.missing("journal entry", id)) if entry.nil?
 
         params = { body: body || entry.body, tags: Wording.tag_list(tags || entry.tags.map(&:name)) }

@@ -5,7 +5,8 @@ require "base64"
 RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
   let(:database) { geo_lite2_database }
   let(:mirror) { "https://mm-prod-geoip-databases.example.com/GeoLite2-Country.tar.gz" }
-  let(:sync_state_repo) { Record::Slice["repos.sync_state_repo"] }
+
+  def credentials = "Basic #{Base64.strict_encode64('123456:license')}"
 
   before do
     use_country_database
@@ -13,11 +14,9 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
     stub_maxmind_download(body: geo_lite2_archive(database))
   end
 
-  def credentials = "Basic #{Base64.strict_encode64('123456:license')}"
-
   def download = a_request(:get, GeoLite2Database::DOWNLOAD_URL).with(query: hash_including({}))
 
-  def failure = sync_state_repo.failure(Blog::Types::SyncName["country_database"])
+  def failure = sync_state_queries.failure(Blog::Types::SyncName["country_database"])
 
   def lookup(address) = Analytics::Slice["geo.countries"].code(address)
 
@@ -30,6 +29,8 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
   end
 
   def stored = country_database_path.binread
+
+  def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
   describe "a refresh MaxMind answers" do
     it "writes the database inside the archive" do

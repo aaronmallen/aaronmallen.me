@@ -10,7 +10,7 @@ module Tags
 
     import keys: %w[queries.by_tag], from: :projects
 
-    import keys: %w[queries.journal_entries_by_tag], from: :record
+    import keys: %w[repos.journal_entry_queries], from: :record
 
     import keys: %w[queries.tasks_by_tag], from: :tasks
 

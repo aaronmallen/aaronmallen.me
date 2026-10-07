@@ -3,11 +3,11 @@
 module Record
   module Operations
     class RecordSyncOutcome
-      include Deps[sync_state_repo: "repos.sync_state_repo"]
+      include Deps[sync_state_mutations: "repos.sync_state_mutations"]
 
       def call(sync, result, repo: nil)
         result.either(
-          ->(_) { sync_state_repo.clear_failure(sync, repo:) },
+          ->(_) { sync_state_mutations.clear_failure(sync, repo:) },
           ->(failure) { record(sync, failure, repo:) },
         )
       end
@@ -17,7 +17,7 @@ module Record
       def record(sync, failure, repo:)
         reason, message = Array(failure)
 
-        sync_state_repo.record_failure(sync, reason, message:, repo:)
+        sync_state_mutations.record_failure(sync, reason, message:, repo:)
       end
     end
   end

@@ -20,7 +20,10 @@ module API
 
       REPLY = Serializers::Review.reference
 
-      include Deps[review_queries: "activity.repos.review_queries", review_note: "record.queries.review_note"]
+      include Deps[
+        review_note_queries: "record.repos.review_note_queries",
+        review_queries: "activity.repos.review_queries",
+      ]
 
       def handle(period: Blog::Types::ReviewPeriod.values.first, day: nil, **credited)
         on = day ? Blog::TimeZone.parse_day(day) : Blog::TimeZone.today
@@ -28,7 +31,7 @@ module API
 
         found = review_queries.review(period:, on:, credits: Blog::ContributorTerms.call(**credited))
 
-        Success(serialized(Serializers::Review, found, note: review_note.call(found.period, found.from)))
+        Success(serialized(Serializers::Review, found, note: review_note_queries.note(found.period, found.from)))
       end
     end
   end

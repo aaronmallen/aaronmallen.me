@@ -8,23 +8,20 @@ module Admin
 
       include Deps[
         "settings",
-        journal_days: "record.queries.journal_days",
-        journal_entry_count: "record.queries.journal_entry_count",
-        journal_streak: "record.queries.journal_streak",
-        journal_word_count: "record.queries.journal_word_count",
+        journal_entry_queries: "record.repos.journal_entry_queries",
         list_saved_views: "operations.list_saved_views",
       ]
 
       def call(search: Blog::Constants::EMPTY_STRING, to: nil, filters: Blog::Constants::EMPTY_HASH, now: Time.now)
         {
-          days: journal_days.call(
+          days: journal_entry_queries.days(
             size: settings.page_size[:admin], to:, **Blog::SearchQuery.parse(search, fields: FIELDS),
           ),
-          entries: journal_entry_count.call,
+          entries: journal_entry_queries.count,
           saved_views: list_saved_views.call(SCREEN, filters),
-          streak: journal_streak.call(now:),
+          streak: journal_entry_queries.streak(now:),
           today: Blog::TimeZone.today(now),
-          words: journal_word_count.call,
+          words: journal_entry_queries.word_count,
         }
       end
     end
