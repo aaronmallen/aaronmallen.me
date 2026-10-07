@@ -14,6 +14,10 @@ module Tasks
 
       def see(task_id, at) = task_sources.see(task_id, at)
 
+      def snooze(task_id, ends_at)
+        task_sources.where(task_id:).stamped(:update, result: :many).call(snoozed_until: ends_at).first
+      end
+
       def synced_task_ids(ids) = task_sources.where(task_id: ids).pluck(:task_id)
 
       def task_ids_at(provider, urls) = task_sources.where(provider:, url: urls).pluck(:task_id)
@@ -28,7 +32,7 @@ module Tasks
 
       private
 
-      def unseen = tasks.open.where(id: task_sources.unseen.task_ids)
+      def unseen = tasks.open.where(id: task_sources.unseen.awake.task_ids)
     end
   end
 end

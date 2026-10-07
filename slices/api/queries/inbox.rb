@@ -15,11 +15,15 @@ module API
 
       private
 
+      def row(kind, arrived_at, record, snoozable = record)
+        Row.new(kind:, at: [arrived_at, snoozable.snoozed_until].compact.max, record:)
+      end
+
       def rows
         [
-          *unread_messages.call.map { Row.new(kind: :message, at: it.received_at, record: it) },
-          *unseen_webmentions.call.map { Row.new(kind: :webmention, at: it.received_at, record: it) },
-          *unseen_tasks.call.map { Row.new(kind: :task, at: it.created_at, record: it) },
+          *unread_messages.call.map { row(:message, it.received_at, it) },
+          *unseen_webmentions.call.map { row(:webmention, it.received_at, it) },
+          *unseen_tasks.call.map { row(:task, it.created_at, it, it.source) },
         ]
       end
     end

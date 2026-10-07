@@ -21,9 +21,9 @@ module Tasks
       operations.mark_task_seen operations.move_task operations.pause_task
       operations.plan_sprint operations.place_task operations.queue_issue_sync operations.reopen_task
       operations.reorder_task operations.save_task operations.save_task_tag_rule operations.schedule_task
-      operations.set_task_total
+      operations.set_task_total operations.snooze_tasks
       operations.start_task
-      operations.unlink_task
+      operations.unlink_task operations.wake_task
       queries.counted_sprints_between queries.find_tasks queries.finished_task_counts queries.link_targets
       queries.linkable_tasks
       queries.list_finished_tasks queries.list_tasks queries.open_task_counts

@@ -14,7 +14,7 @@ module API
 
     import keys: %w[queries.unique_readers queries.views_by_path queries.views_by_post], from: :analytics
 
-    import keys: %w[operations.act_on_messages queries.count_with_status queries.unread_messages], from: :contact
+    import keys: %w[operations.act_on_messages queries.unread_message_count queries.unread_messages], from: :contact
 
     import keys: %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment

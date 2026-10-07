@@ -970,6 +970,7 @@ CREATE TABLE public.webmentions (
     spam_reason public.non_blank_text,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(author_name, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(excerpt, ''::text) || ' '::text) || COALESCE((source_url)::text, ''::text))), 'B'::"char"))) STORED,
     seen_at timestamp with time zone,
+    snoozed_until timestamp with time zone,
     CONSTRAINT webmentions_source_url_check CHECK ((octet_length((source_url)::text) <= 2048)),
     CONSTRAINT webmentions_spam_reason_check CHECK (((status = 'spam'::public.webmention_status) OR (spam_reason IS NULL)))
 );
@@ -2011,6 +2012,7 @@ CREATE TABLE public.messages (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     marked_spam_at timestamp with time zone,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((subject)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE((body)::text, ''::text) || ' '::text) || COALESCE((reply_to)::text, ''::text))), 'B'::"char"))) STORED,
+    snoozed_until timestamp with time zone,
     CONSTRAINT messages_marked_spam_at_check CHECK (((status = 'spam'::public.message_status) = (marked_spam_at IS NOT NULL)))
 );
 
@@ -2984,7 +2986,8 @@ CREATE TABLE public.task_sources (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL,
     checked_at timestamp with time zone,
-    seen_at timestamp with time zone
+    seen_at timestamp with time zone,
+    snoozed_until timestamp with time zone
 );
 
 
@@ -5670,4 +5673,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261006000633_add_synced_and_one_parent_to_task_links.rb'),
 ('20261006000639_notify_admin_changes.rb'),
 ('20261007000640_replace_project_status_with_visibility.rb'),
-('20261007000641_add_seen_at_to_webmentions.rb');
+('20261007000641_add_seen_at_to_webmentions.rb'),
+('20261007000642_add_snoozed_until_to_inbox_records.rb');

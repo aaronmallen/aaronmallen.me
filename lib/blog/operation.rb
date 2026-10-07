@@ -24,6 +24,8 @@ module Blog
 
     def found(value) = value ? Success(value) : Failure(:not_found)
 
+    def snoozed(record, now) = record&.snoozed_until&.>(now) ? Success(record) : Failure(:not_snoozed)
+
     def validated(result) = result.to_monad.fmap(&:to_h).alt_map { [:invalid, it.errors.to_h] }
   end
 end

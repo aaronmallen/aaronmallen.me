@@ -51,6 +51,12 @@ module Contact
 
       def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD
 
+      def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
+
+      def unread = waiting.newest_first.to_a
+
+      def unread_count = waiting.count
+
       private
 
       def in_days(from, to)
@@ -60,6 +66,8 @@ module Contact
       end
 
       def spam_marked_at(status, at) = (at if status == SPAM)
+
+      def waiting = messages.with_status(UNREAD).awake
     end
   end
 end

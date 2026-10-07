@@ -328,6 +328,74 @@ RSpec.describe "Admin inbox", type: :request do
         end
       end
     end
+
+    describe "a snoozed row" do
+      let(:records) do
+        {
+          message: create(:message, subject: "message", received_at: Time.now - 300),
+          webmention: create(:webmention, author_name: "webmention", received_at: Time.now - 200),
+          task: synced(title: "task", created_at: Time.now - 100),
+        }
+      end
+
+      def slice(kind) = { message: Contact::Slice, webmention: Social::Slice, task: Tasks::Slice }.fetch(kind)
+
+      def snooze(kind, ends_at) = slice(kind)["operations.snooze_#{kind}s"].call([records.fetch(kind).id], ends_at)
+
+      def wake(kind) = slice(kind)["operations.wake_#{kind}"].call(records.fetch(kind).id)
+
+      before { records }
+
+      %i[message webmention task].each do |kind|
+        it "leaves the inbox and its nav count while a #{kind} sleeps", :aggregate_failures do
+          snooze(kind, Time.now + 3600)
+
+          expect(inbox).to match_array((records.keys - [kind]).map(&:to_s))
+          get "/admin"
+          expect(page.all("#command-palette-inbox .pal-r-sub", visible: :all).map(&:text)).to eq(["2 waiting"])
+        end
+
+        it "returns a #{kind} at the top once it wakes" do
+          snooze(kind, Time.now + 3600)
+          wake(kind)
+
+          expect(inbox.first).to eq(kind.to_s)
+        end
+      end
+
+      it "brings back a row whose snooze has passed, sorted by when it ended" do
+        snooze(:message, Time.now - 150)
+
+        expect(inbox).to eq(%w[task message webmention])
+      end
+
+      it "snoozes many rows at once" do
+        more = create(:message, subject: "more")
+
+        Contact::Slice["operations.snooze_messages"].call([records[:message].id, more.id], Time.now + 3600)
+
+        expect(inbox).to eq(%w[task webmention])
+      end
+
+      it "leaves the seen, read and pending marks alone", :aggregate_failures do
+        records.each_key { snooze(it, Time.now + 3600) }
+
+        expect(messages.by_id(records[:message].id).status).to eq("unread")
+        expect(webmentions.by_id(records[:webmention].id)).to have_attributes(status: "pending", seen_at: nil)
+        expect(tasks.by_id(records[:task].id).source.seen_at).to be_nil
+      end
+
+      it "snoozes nothing when one of the ids is missing", :aggregate_failures do
+        result = Contact::Slice["operations.snooze_messages"].call([records[:message].id, 0], Time.now + 3600)
+
+        expect(result.failure).to eq([:record, 0, :not_found])
+        expect(inbox).to include("message")
+      end
+
+      it "refuses to wake a row that is not snoozed" do
+        expect(Social::Slice["operations.wake_webmention"].call(records[:webmention].id).failure).to eq(:not_snoozed)
+      end
+    end
   end
 
   describe "signed out" do

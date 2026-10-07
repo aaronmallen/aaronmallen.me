@@ -94,6 +94,8 @@ module Social
 
       def settings = stored_settings || created_settings
 
+      def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
+
       def store(**attrs)
         written = attrs.merge(author_url: normalized_author_url(attrs[:author_url]))
 
@@ -132,7 +134,7 @@ module Social
 
       def tallied(counts, key) = counts.to_a.to_h { [it[key], it.count] }
 
-      def unseen_pending = webmentions.with_status(PENDING).unseen
+      def unseen_pending = webmentions.with_status(PENDING).unseen.awake
     end
   end
 end
