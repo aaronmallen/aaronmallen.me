@@ -18,17 +18,8 @@ AllCops:
   TargetRubyVersion: 4
 
 Hanami/SliceExports:
-  AllowedExports:
-    - auth.session_reader
-    - contracts.visit_contract
-    - github.client
-    - linear.client
-    - networks.all
-    - store.client
-    - !ruby/regexp /\Aendpoints\.\w+\z/
-    - !ruby/regexp /\Aoperations\.\w+\z/
-    - !ruby/regexp /\Aqueries\.\w+\z/
-    - !ruby/regexp /\Arepos\.\w*queries\z/
+  ForbiddenExports:
+    - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader|contracts\.visit_contract|github\.client|linear\.client|networks\.all|store\.client)\z)/
   Exclude:
     - slices/backups/config/slice.rb
 
