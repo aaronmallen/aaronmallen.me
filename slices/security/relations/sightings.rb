@@ -7,6 +7,8 @@ module Security
 
       schema :sightings, infer: true
 
+      def last_seen_before(time) = where { last_seen_at < time }
+
       def newest_first = order(self[:last_seen_at].desc, self[:id].desc)
 
       def sight(row, at:)

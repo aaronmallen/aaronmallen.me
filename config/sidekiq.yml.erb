@@ -12,6 +12,9 @@ production:
     import_commits:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportCommits
+    prune_access_records:
+      cron: "15 4 * * * <%= Blog::TimeZone::NAME %>"
+      class: Security::Jobs::PruneAccessRecords
     publish_due_posts:
       cron: "* * * * * <%= Blog::TimeZone::NAME %>"
       class: Posts::Jobs::PublishDuePosts
