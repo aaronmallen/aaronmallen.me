@@ -124,6 +124,7 @@ one.
 | [0117][0117] | Sync task relations into task_links, with a parent type and a synced flag | ![Active][active] | 2026-10-06 |
 | [0118][0118] | Keep admin pages live through Postgres notify, a hijacked event stream and a morph | ![Active][active] | 2026-10-06 |
 | [0119][0119] | Mark a project archived by its archive date, and keep visibility in its own enum | ![Active][active] | 2026-10-07 |
+| [0120][0120] | Mark webmentions seen apart from their status, and clear the inbox in one transaction | ![Active][active] | 2026-10-07 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -244,6 +245,7 @@ one.
 [0117]: 0117-sync-task-relations-into-task-links-with-a-parent-type-and-a-synced-flag.md
 [0118]: 0118-keep-admin-pages-live-through-postgres-notify-a-hijacked-event-stream-and-a-morph.md
 [0119]: 0119-mark-a-project-archived-by-its-archive-date-and-keep-visibility-in-its-own-enum.md
+[0120]: 0120-mark-webmentions-seen-apart-from-their-status-and-clear-the-inbox-in-one-transaction.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
