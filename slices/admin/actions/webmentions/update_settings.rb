@@ -20,9 +20,9 @@ module Admin
 
         def save(request)
           case update_webmention_settings.call(**settings(request))
-          in Success(_) then :saved
-          in Failure(:unchanged) then :unchanged
-          else halt 500
+            in Success(_) then :saved
+            in Failure(:unchanged) then :unchanged
+            else halt 500
           end
         end
 

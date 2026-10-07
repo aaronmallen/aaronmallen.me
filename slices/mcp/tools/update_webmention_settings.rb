@@ -24,9 +24,9 @@ module MCP
 
         def call(server_context:, **fields)
           case dep(:update_webmention_settings, server_context).call(**changes(fields))
-          in Success(settings) then answer(settings_entry(settings))
-          in Failure(:unchanged) then refuse("nothing saved, since no setting changed")
-          else refuse("could not save the webmention settings")
+            in Success(settings) then answer(settings_entry(settings))
+            in Failure(:unchanged) then refuse("nothing saved, since no setting changed")
+            else refuse("could not save the webmention settings")
           end
         end
 

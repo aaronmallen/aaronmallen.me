@@ -16,13 +16,13 @@ module Admin
 
         def handle(request, response)
           case schedule_task.call(record_id(request), request.params[:sprint_on])
-          in Success[:unscheduled, task] then done(request, response, UNSCHEDULED, list: task.list)
-          in Success[:pulled_in, *] then done(request, response, PULLED_IN)
-          in Success[:scheduled, _, day] then done(request, response, SCHEDULED, date: i18n.l(day, format: :medium))
-          in Failure(:closed) then done(request, response, CLOSED)
-          in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
-          in Failure(:not_found) then halt 404
-          else halt 500
+            in Success[:unscheduled, task] then done(request, response, UNSCHEDULED, list: task.list)
+            in Success[:pulled_in, *] then done(request, response, PULLED_IN)
+            in Success[:scheduled, _, day] then done(request, response, SCHEDULED, date: i18n.l(day, format: :medium))
+            in Failure(:closed) then done(request, response, CLOSED)
+            in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
+            in Failure(:not_found) then halt 404
+            else halt 500
           end
         end
 

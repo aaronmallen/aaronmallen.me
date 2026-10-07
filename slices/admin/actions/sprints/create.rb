@@ -14,11 +14,11 @@ module Admin
 
         def handle(request, response)
           case plan_sprint.call(request.params[:sprint_on])
-          in Success(sprint) then done(response, PLANNED, sprint.sprint_date)
-          in Failure[:planned, date] then done(response, TAKEN, date)
-          in Failure(:past) then done(response, AHEAD)
-          in Failure(:invalid) then done(response, INVALID)
-          else halt 500
+            in Success(sprint) then done(response, PLANNED, sprint.sprint_date)
+            in Failure[:planned, date] then done(response, TAKEN, date)
+            in Failure(:past) then done(response, AHEAD)
+            in Failure(:invalid) then done(response, INVALID)
+            else halt 500
           end
         end
 

@@ -22,8 +22,8 @@ module Admin
           result = save_tag.call(params, scope:, id:)
 
           case result
-          in Failure[:invalid, errors] then invalid(request, response, scope, editing(id, params, errors))
-          else settle(response, result, saved_key(params), routes.path(:admin_tags, scope:))
+            in Failure[:invalid, errors] then invalid(request, response, scope, editing(id, params, errors))
+            else settle(response, result, saved_key(params), routes.path(:admin_tags, scope:))
           end
         end
 

@@ -15,10 +15,10 @@ module API
 
       def handle(id:, option_id:)
         case delete_decision_option.call(id, option_id)
-        in Success(*) then Success(id:, option_id:, deleted: true)
-        in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
-        in Failure[:invalid, _] then chosen
-        else failed(Wording::UNSAVED)
+          in Success(*) then Success(id:, option_id:, deleted: true)
+          in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
+          in Failure[:invalid, _] then chosen
+          else failed(Wording::UNSAVED)
         end
       end
 

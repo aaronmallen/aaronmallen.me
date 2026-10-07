@@ -37,8 +37,8 @@ module API
 
       def handle(from:, to:, tag: nil)
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] then Success(listed(first, last, tag&.downcase))
-        in Failure(message) then invalid(from: [message], to: [message])
+          in Success[first, last] then Success(listed(first, last, tag&.downcase))
+          in Failure(message) then invalid(from: [message], to: [message])
         end
       end
 

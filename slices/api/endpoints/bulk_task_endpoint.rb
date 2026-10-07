@@ -14,10 +14,10 @@ module API
 
       def acted(ids, **input)
         case act_on_tasks.call({ act: self.class::ACT, ids:, **input })
-        in Success[*tasks] then Success(tasks: answered(ids.uniq, tasks))
-        in Failure[:record, id, reason] then refused(id, reason)
-        in Failure[:invalid, errors] then rejected(keyed(errors), Tasks::COMPLAINTS)
-        else failed(Wording::UNSAVED)
+          in Success[*tasks] then Success(tasks: answered(ids.uniq, tasks))
+          in Failure[:record, id, reason] then refused(id, reason)
+          in Failure[:invalid, errors] then rejected(keyed(errors), Tasks::COMPLAINTS)
+          else failed(Wording::UNSAVED)
         end
       end
 
@@ -27,9 +27,9 @@ module API
 
       def refused(id, reason)
         case reason
-        when :not_found then invalid(ids: [Wording.missing("task", id)])
-        when :closed then invalid(ids: [format(Tasks::CLOSED, id)])
-        else failed(format(UNCHANGED, id))
+          when :not_found then invalid(ids: [Wording.missing("task", id)])
+          when :closed then invalid(ids: [format(Tasks::CLOSED, id)])
+          else failed(format(UNCHANGED, id))
         end
       end
     end

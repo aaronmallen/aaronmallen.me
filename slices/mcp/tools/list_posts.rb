@@ -34,8 +34,8 @@ module MCP
       class << self
         def call(server_context:, page: 1, status: nil, **range)
           case Blog::DayWindow.open_days(range[:from], range[:to])
-          in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
-          in Failure(message) then refuse(message)
+            in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
+            in Failure(message) then refuse(message)
           end
         end
 

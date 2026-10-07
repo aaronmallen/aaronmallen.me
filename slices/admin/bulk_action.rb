@@ -8,10 +8,10 @@ module Admin
 
     def handle(request, response)
       case operation.call(request.params.to_h)
-      in Success[*records] then done(request, response, records.size)
-      in Failure[:record, id, reason] then failed(response, id, reason)
-      in Failure[:invalid, errors] then toast(response, "#{self.class::INVALID}.#{refused(errors)}")
-      else halt 500
+        in Success[*records] then done(request, response, records.size)
+        in Failure[:record, id, reason] then failed(response, id, reason)
+        in Failure[:invalid, errors] then toast(response, "#{self.class::INVALID}.#{refused(errors)}")
+        else halt 500
       end
 
       response.redirect_to(back(request))
@@ -43,10 +43,10 @@ module Admin
 
     def refused(errors)
       case errors
-      in { ids: [LONG, *] } then LONG
-      in { ids: [::String, *] } then Blog::Contract::BLANK
-      in { ids: } then Blog::Contract::FORMAT
-      else refusal(errors)
+        in { ids: [LONG, *] } then LONG
+        in { ids: [::String, *] } then Blog::Contract::BLANK
+        in { ids: } then Blog::Contract::FORMAT
+        else refusal(errors)
       end
     end
   end

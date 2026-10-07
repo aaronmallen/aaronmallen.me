@@ -27,8 +27,8 @@ module API
         return not_found(Wording.missing("task", id)) if task.nil?
 
         case save_task.call(id, form(task, fields))
-        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
-        in result then placed(result, id)
+          in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
+          in result then placed(result, id)
         end
       end
 

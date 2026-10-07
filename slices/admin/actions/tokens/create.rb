@@ -16,11 +16,11 @@ module Admin
           params = Blog::Types::Fields[request.params[:token]]
 
           case mint_token.call(params)
-          in Success({ value: })
-            minted(response, value)
-          in Failure[:invalid, errors]
-            invalid(response, params, errors)
-          else halt 500
+            in Success({ value: })
+              minted(response, value)
+            in Failure[:invalid, errors]
+              invalid(response, params, errors)
+            else halt 500
           end
         end
 

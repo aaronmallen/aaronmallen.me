@@ -20,8 +20,8 @@ module Admin
           result = save_task_rule.call(params, id:)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, id, params, errors)
-          else settle(response, result, SAVED, routes.path(:admin_task_rules))
+            in Failure[:invalid, errors] then invalid(response, id, params, errors)
+            else settle(response, result, SAVED, routes.path(:admin_task_rules))
           end
         end
 

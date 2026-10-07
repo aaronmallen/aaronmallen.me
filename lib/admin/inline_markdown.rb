@@ -28,11 +28,11 @@ module Admin
 
       def collect(node, marks, runs = [])
         case node.type
-        when *DROPPED then nil
-        when :text then runs << Run.new(marks, node.string_content)
-        when *CODE_NODES then runs << Run.new([*marks, CODE], node.string_content)
-        when *BREAKS then runs << Run.new(marks, SPACE)
-        else nest(node, marks, runs)
+          when *DROPPED then nil
+          when :text then runs << Run.new(marks, node.string_content)
+          when *CODE_NODES then runs << Run.new([*marks, CODE], node.string_content)
+          when *BREAKS then runs << Run.new(marks, SPACE)
+          else nest(node, marks, runs)
         end
         runs
       end

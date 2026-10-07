@@ -34,10 +34,10 @@ module API
 
       def saved(id, result)
         case result
-        in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))
-        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
-        in Failure(:not_found) then not_found(Wording.missing("journal entry", id))
-        else failed(UNSAVED)
+          in Success(entry) then Success(serialized(Serializers::JournalEntry, entry))
+          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, JournalEntries::COMPLAINTS, named: true))
+          in Failure(:not_found) then not_found(Wording.missing("journal entry", id))
+          else failed(UNSAVED)
         end
       end
     end

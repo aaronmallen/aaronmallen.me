@@ -13,8 +13,8 @@ module API
 
       def handle(id:, **worked)
         case complete_task.call(id, worked: worked.empty? ? nil : worked)
-        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
-        in result then settled(result, id)
+          in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
+          in result then settled(result, id)
         end
       end
     end

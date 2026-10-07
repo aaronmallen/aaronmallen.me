@@ -10,9 +10,9 @@ module MCP
           response.cache_control(:no_store)
 
           case issue_token.call(request.params.to_h)
-          in Success(tokens) then render_json(response, tokens)
-          in Failure(Operations::IssueToken::REJECT, payload) then render_json(response, payload, status: REJECTED)
-          else reject_json(response)
+            in Success(tokens) then render_json(response, tokens)
+            in Failure(Operations::IssueToken::REJECT, payload) then render_json(response, payload, status: REJECTED)
+            else reject_json(response)
           end
         end
       end

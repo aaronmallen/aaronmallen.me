@@ -21,8 +21,8 @@ module Admin
           result = update_journal_entry.call(id, params)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, id, params, errors)
-          else settle(response, result, UPDATED, routes.path(:admin_journal))
+            in Failure[:invalid, errors] then invalid(response, id, params, errors)
+            else settle(response, result, UPDATED, routes.path(:admin_journal))
           end
         end
 

@@ -15,9 +15,9 @@ module Social
       def self.for(text, mentions: [])
         spans(text, mentions).map do |span|
           case span
-          in Mentions::Mention then facet({ "$type" => MENTION, did: span.did }, span)
-          in Links::Link then facet({ "$type" => LINK, uri: span.url }, span)
-          in Tags::Tag then facet({ "$type" => TAG, tag: span.tag }, span)
+            in Mentions::Mention then facet({ "$type" => MENTION, did: span.did }, span)
+            in Links::Link then facet({ "$type" => LINK, uri: span.url }, span)
+            in Tags::Tag then facet({ "$type" => TAG, tag: span.tag }, span)
           end
         end
       end

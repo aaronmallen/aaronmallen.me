@@ -16,9 +16,9 @@ module Admin
           params = Blog::Types::Fields[request.params[:rule]]
 
           case save_task_rule.call(params)
-          in Success(_) then added(response)
-          in Failure[:invalid, errors] then invalid(response, params, errors)
-          else halt 500
+            in Success(_) then added(response)
+            in Failure[:invalid, errors] then invalid(response, params, errors)
+            else halt 500
           end
         end
 

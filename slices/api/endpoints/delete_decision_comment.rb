@@ -15,9 +15,9 @@ module API
 
       def handle(id:, comment_id:)
         case delete_decision_comment.call(id, comment_id)
-        in Success(*) then Success(id:, comment_id:, deleted: true)
-        in Failure(:not_found) then not_found(Decisions.missing_comment(id, comment_id))
-        else failed(Wording::UNSAVED)
+          in Success(*) then Success(id:, comment_id:, deleted: true)
+          in Failure(:not_found) then not_found(Decisions.missing_comment(id, comment_id))
+          else failed(Wording::UNSAVED)
         end
       end
     end

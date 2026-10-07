@@ -35,8 +35,8 @@ module API
 
       def excerpt(row)
         case row.kind
-        when :message then row.record.body
-        when :webmention then row.record.excerpt
+          when :message then row.record.body
+          when :webmention then row.record.excerpt
         end
       end
 
@@ -65,9 +65,9 @@ module API
 
       def title(row)
         case row.kind
-        when :message then row.record.subject
-        when :webmention then row.record.author_label
-        else row.record.title
+          when :message then row.record.subject
+          when :webmention then row.record.author_label
+          else row.record.title
         end
       end
 
@@ -77,8 +77,8 @@ module API
 
       def url(row)
         case row.kind
-        when :webmention then row.record.source_url
-        when :task then row.record.source.url
+          when :webmention then row.record.source_url
+          when :task then row.record.source.url
         end
       end
     end

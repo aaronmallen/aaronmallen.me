@@ -18,10 +18,10 @@ module Analytics
 
     def self.classify(user_agent)
       case user_agent.to_s
-      when APPS then Blog::Types::DeviceClass["in-app"]
-      when TABLETS then Blog::Types::DeviceClass["tablet"]
-      when PHONES then Blog::Types::DeviceClass["mobile"]
-      else Blog::Types::DeviceClass["desktop"]
+        when APPS then Blog::Types::DeviceClass["in-app"]
+        when TABLETS then Blog::Types::DeviceClass["tablet"]
+        when PHONES then Blog::Types::DeviceClass["mobile"]
+        else Blog::Types::DeviceClass["desktop"]
       end
     end
   end

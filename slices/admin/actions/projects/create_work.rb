@@ -17,13 +17,13 @@ module Admin
           params = Blog::Types::Fields[request.params[:work_entry]]
 
           case add_work_entry.call(params)
-          in Success(_)
-            toast(response, ADDED)
-            response.redirect_to(routes.path(:admin_projects, filter: WORK))
-          in Failure[:invalid, errors]
-            response.status = 422
-            response.render(index_view, **build_projects_page.call(filter: WORK, params:, errors:))
-          else halt 500
+            in Success(_)
+              toast(response, ADDED)
+              response.redirect_to(routes.path(:admin_projects, filter: WORK))
+            in Failure[:invalid, errors]
+              response.status = 422
+              response.render(index_view, **build_projects_page.call(filter: WORK, params:, errors:))
+            else halt 500
           end
         end
       end

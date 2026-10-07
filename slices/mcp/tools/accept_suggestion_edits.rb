@@ -40,14 +40,14 @@ module MCP
 
         def accepted(id, result)
           case result
-          in Success(accepted:, refused:, stale:)
-            answer(suggestion_id: id, accepted: ids(accepted), refused: ids(refused), stale: ids(stale))
-          in Failure(:not_found) then refuse("suggestion #{id} has no pending edit with those IDs")
-          in Failure(:stale) then refuse("the edits you chose on suggestion #{id} have gone stale")
-          in Failure(:already_posted) then refuse(format(SENT, id))
-          in Failure(:empty_part, part) then refuse(format(EMPTY_PART, part, id))
-          in Failure(:published) then refuse(format(PUBLISHED, id))
-          else refuse("could not accept the edits")
+            in Success(accepted:, refused:, stale:)
+              answer(suggestion_id: id, accepted: ids(accepted), refused: ids(refused), stale: ids(stale))
+            in Failure(:not_found) then refuse("suggestion #{id} has no pending edit with those IDs")
+            in Failure(:stale) then refuse("the edits you chose on suggestion #{id} have gone stale")
+            in Failure(:already_posted) then refuse(format(SENT, id))
+            in Failure(:empty_part, part) then refuse(format(EMPTY_PART, part, id))
+            in Failure(:published) then refuse(format(PUBLISHED, id))
+            else refuse("could not accept the edits")
           end
         end
 

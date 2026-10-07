@@ -15,8 +15,8 @@ module API
 
       def handle(id:, reason:)
         case reopen_decision.call(id, { reason: })
-        in Failure(:open) then invalid(id: [format(OPEN, id)])
-        in result then settled(result, id)
+          in Failure(:open) then invalid(id: [format(OPEN, id)])
+          in result then settled(result, id)
         end
       end
     end

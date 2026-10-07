@@ -23,8 +23,8 @@ module API
 
       def handle(from:, to:, by: Blog::Types::TimeGrouping.values.first)
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] then Success(report(first, last, by))
-        in Failure(message) then invalid(from: [message], to: [message])
+          in Success[first, last] then Success(report(first, last, by))
+          in Failure(message) then invalid(from: [message], to: [message])
         end
       end
 

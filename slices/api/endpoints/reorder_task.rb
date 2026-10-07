@@ -32,10 +32,10 @@ module API
 
       def moved(result, id)
         case result
-        in Success(*) then answered(id, moved: true)
-        in Failure(:not_moved | :not_placed) then answered(id, moved: false)
-        in Failure(:not_found) then not_found(Wording.missing("task", id))
-        else failed(Wording::UNSAVED)
+          in Success(*) then answered(id, moved: true)
+          in Failure(:not_moved | :not_placed) then answered(id, moved: false)
+          in Failure(:not_found) then not_found(Wording.missing("task", id))
+          else failed(Wording::UNSAVED)
         end
       end
 
@@ -43,9 +43,9 @@ module API
 
       def place(id, after_id)
         case place_task.call(id, after_id)
-        in Failure(:after_not_found) then not_found(Wording.missing("task", after_id))
-        in Failure(:apart) then invalid(after_id: [format(APART, after_id, id)])
-        in result then moved(result, id)
+          in Failure(:after_not_found) then not_found(Wording.missing("task", after_id))
+          in Failure(:apart) then invalid(after_id: [format(APART, after_id, id)])
+          in result then moved(result, id)
         end
       end
     end

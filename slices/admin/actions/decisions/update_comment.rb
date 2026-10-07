@@ -20,8 +20,8 @@ module Admin
           result = edit_decision_comment.call(record_id(request), id, params)
 
           case result
-          in Failure[:invalid, errors] then refuse_form(request, response, { name: :comment, id:, params:, errors: })
-          else settle(response, result, SAVED, decision_path(request))
+            in Failure[:invalid, errors] then refuse_form(request, response, { name: :comment, id:, params:, errors: })
+            else settle(response, result, SAVED, decision_path(request))
           end
         end
       end

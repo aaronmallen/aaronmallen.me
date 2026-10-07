@@ -50,8 +50,8 @@ module API
         filters = { kinds:, repos:, tags:, text:, credits: Blog::ContributorTerms.call(**credited) }
 
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] then Success(window(first, last, filters))
-        in Failure(message) then invalid(from: [message], to: [message])
+          in Success[first, last] then Success(window(first, last, filters))
+          in Failure(message) then invalid(from: [message], to: [message])
         end
       end
 

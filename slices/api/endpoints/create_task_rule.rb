@@ -20,9 +20,9 @@ module API
 
       def handle(pattern:, provider: nil, tags: [], projects: [])
         case save_task_rule.call({ pattern:, provider:, tags: Wording.tag_list(tags), projects: })
-        in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
-        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskRules::COMPLAINTS))
-        else failed(TaskRules::UNSAVED)
+          in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
+          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskRules::COMPLAINTS))
+          else failed(TaskRules::UNSAVED)
         end
       end
     end

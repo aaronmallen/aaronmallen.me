@@ -13,8 +13,8 @@ module Admin
           result = delete_social_post.call(record_id(request))
 
           case result
-          in Failure(:already_posted) then back(request, response, KEPT)
-          else settle(response, result, REMOVED, queue_path(request))
+            in Failure(:already_posted) then back(request, response, KEPT)
+            else settle(response, result, REMOVED, queue_path(request))
           end
         end
 

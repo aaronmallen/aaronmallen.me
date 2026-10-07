@@ -15,12 +15,12 @@ module Admin
           params = Blog::Types::Fields[request.params[:post]]
 
           case save_post.call(params, intent: intent(request))
-          in Success[outcome, post]
-            saved(response, outcome, post)
-          in Failure[:invalid, errors]
-            response.status = 422
-            response.render(view, **build_post_editor.call(params:, errors:, view: request.params[:view]))
-          else halt 500
+            in Success[outcome, post]
+              saved(response, outcome, post)
+            in Failure[:invalid, errors]
+              response.status = 422
+              response.render(view, **build_post_editor.call(params:, errors:, view: request.params[:view]))
+            else halt 500
           end
         end
 

@@ -24,17 +24,17 @@ module API
 
       def placed(result, id)
         case result
-        in Failure(:past | :invalid) then sprint_past
-        else settled(result, id)
+          in Failure(:past | :invalid) then sprint_past
+          else settled(result, id)
         end
       end
 
       def settled(result, id)
         case result
-        in Success(*) then answered(id)
-        in Failure(:not_found) then not_found(Wording.missing("task", id))
-        in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
-        else failed(Wording::UNSAVED)
+          in Success(*) then answered(id)
+          in Failure(:not_found) then not_found(Wording.missing("task", id))
+          in Failure(:closed) then invalid(id: [format(Tasks::CLOSED, id)])
+          else failed(Wording::UNSAVED)
         end
       end
 

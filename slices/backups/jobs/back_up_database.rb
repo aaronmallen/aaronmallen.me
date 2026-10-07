@@ -16,9 +16,9 @@ module Backups
 
       def perform
         case back_up_database.call
-        in Failure(:not_configured) then logger.warn(NOT_CONFIGURED)
-        in Success(*) => result then record_backup_sync_outcome.call(result)
-        in Failure(*reason) => result then report(result, reason)
+          in Failure(:not_configured) then logger.warn(NOT_CONFIGURED)
+          in Success(*) => result then record_backup_sync_outcome.call(result)
+          in Failure(*reason) => result then report(result, reason)
         end
       end
 

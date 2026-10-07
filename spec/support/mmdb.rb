@@ -63,10 +63,10 @@ class Mmdb
 
   def encode(value)
     case value
-    when Hash then encode_map(value)
-    when Array then encode_array(value)
-    when Integer then control(UINT32, 4) + [value].pack("N")
-    else encode_string(value.to_s)
+      when Hash then encode_map(value)
+      when Array then encode_array(value)
+      when Integer then control(UINT32, 4) + [value].pack("N")
+      else encode_string(value.to_s)
     end
   end
 
@@ -88,9 +88,9 @@ class Mmdb
 
   def record(entry)
     case entry
-    when Leaf then @nodes.size + SEPARATOR.bytesize + entry.offset
-    when Integer then entry
-    else @nodes.size
+      when Leaf then @nodes.size + SEPARATOR.bytesize + entry.offset
+      when Integer then entry
+      else @nodes.size
     end
   end
 

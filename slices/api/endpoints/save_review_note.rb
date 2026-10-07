@@ -33,9 +33,9 @@ module API
         return invalid(day: [ReadReview::BAD_DAY]) unless on
 
         case save_review_note.call(body, period:, on:)
-        in Success(note) then Success(answered(note))
-        in Failure[:invalid, errors] then invalid(reasons(errors))
-        else failed(UNSAVED)
+          in Success(note) then Success(answered(note))
+          in Failure[:invalid, errors] then invalid(reasons(errors))
+          else failed(UNSAVED)
         end
       end
 

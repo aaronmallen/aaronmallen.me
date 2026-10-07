@@ -12,10 +12,10 @@ module Admin
           picked = request.params[:pick] || request.params[:snoozed_until]
 
           case snooze_inbox_row.call(request.params[:kind], record_id(request), picked)
-          in Success(snooze) then done(response, :snoozed, **until_words(snooze.snoozed_until))
-          in Failure(:invalid | :past => refusal) then done(response, refusal)
-          in Failure(:not_found) then halt 404
-          else halt 500
+            in Success(snooze) then done(response, :snoozed, **until_words(snooze.snoozed_until))
+            in Failure(:invalid | :past => refusal) then done(response, refusal)
+            in Failure(:not_found) then halt 404
+            else halt 500
           end
         end
 

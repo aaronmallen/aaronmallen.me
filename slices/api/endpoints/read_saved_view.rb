@@ -52,8 +52,8 @@ module API
         return not_found(Wording.missing("saved view", id)) if view.nil?
 
         case list_saved_view_records.call(view, page:, continue_to: cursor)
-        in Success(found) then Success(answered(view, found))
-        else failed(NO_SPRINT)
+          in Success(found) then Success(answered(view, found))
+          else failed(NO_SPRINT)
         end
       end
 

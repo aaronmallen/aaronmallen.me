@@ -68,9 +68,9 @@ module MCP
 
       def synced_refs(value)
         case value
-        when Hash then [synced_ref(value)&.first, *synced_refs(value.values)].compact
-        when Array then value.flat_map { synced_refs(it) }
-        else Blog::Constants::EMPTY_ARRAY
+          when Hash then [synced_ref(value)&.first, *synced_refs(value.values)].compact
+          when Array then value.flat_map { synced_refs(it) }
+          else Blog::Constants::EMPTY_ARRAY
         end
       end
 
@@ -81,17 +81,17 @@ module MCP
 
       def synced_titles(value, ids)
         case value
-        when Hash then synced_title(value.transform_values { synced_titles(it, ids) }, ids)
-        when Array then value.map { synced_titles(it, ids) }
-        else value
+          when Hash then synced_title(value.transform_values { synced_titles(it, ids) }, ids)
+          when Array then value.map { synced_titles(it, ids) }
+          else value
         end
       end
 
       def task(value)
         case value
-        when Hash then task_shaped(value.transform_values { task(it) })
-        when Array then value.map { task(it) }
-        else value
+          when Hash then task_shaped(value.transform_values { task(it) })
+          when Array then value.map { task(it) }
+          else value
         end
       end
 

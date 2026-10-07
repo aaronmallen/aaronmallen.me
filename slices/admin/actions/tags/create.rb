@@ -17,11 +17,11 @@ module Admin
           scope = Blog::Types::TagScopeParam[request.params[:scope]]
 
           case save_tag.call(params, scope:)
-          in Success(_)
-            added(response, scope)
-          in Failure[:invalid, errors]
-            invalid(response, scope, params, errors)
-          else halt 500
+            in Success(_)
+              added(response, scope)
+            in Failure[:invalid, errors]
+              invalid(response, scope, params, errors)
+            else halt 500
           end
         end
 

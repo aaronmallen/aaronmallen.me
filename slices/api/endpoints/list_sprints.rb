@@ -20,8 +20,8 @@ module API
 
       def handle(from: nil, to: nil, page: 1)
         case Blog::DayWindow.open_days(from || opening(to), to)
-        in Success[first, last] then Success(listed(first, last, page_of(page)))
-        in Failure(message) then invalid(from: [message], to: [message])
+          in Success[first, last] then Success(listed(first, last, page_of(page)))
+          in Failure(message) then invalid(from: [message], to: [message])
         end
       end
 

@@ -32,9 +32,9 @@ module Admin
 
           def row(found)
             case found.kind
-            when :message then MessageItem(message: found.record)
-            when :webmention then MentionItem(mention: found.record, slug: @slugs.fetch(found.record.post_id))
-            else IssueItem(task: found.record)
+              when :message then MessageItem(message: found.record)
+              when :webmention then MentionItem(mention: found.record, slug: @slugs.fetch(found.record.post_id))
+              else IssueItem(task: found.record)
             end
           end
         end

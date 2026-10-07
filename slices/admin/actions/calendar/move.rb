@@ -23,10 +23,10 @@ module Admin
 
         def move(request, response, operation, at:)
           case operation.call(record_id(request), request.params[:to])
-          in Success(record) then done(request, response, :moved, **moved_to(record[at]))
-          in Failure(:not_found) then halt 404
-          in Failure(:invalid | :not_scheduled | :past => refusal) then done(request, response, refusal)
-          else halt 500
+            in Success(record) then done(request, response, :moved, **moved_to(record[at]))
+            in Failure(:not_found) then halt 404
+            in Failure(:invalid | :not_scheduled | :past => refusal) then done(request, response, refusal)
+            else halt 500
           end
         end
 

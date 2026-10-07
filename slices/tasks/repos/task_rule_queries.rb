@@ -29,8 +29,8 @@ module Tasks
 
       def origin(provider, url)
         case provider
-        when GITHUB then url.to_s[Record::GitHub::Issues::URL, :repo]
-        when LINEAR then Record::Linear::Issues::URL.match(url.to_s)&.then { "#{it[:workspace]}/#{it[:team]}" }
+          when GITHUB then url.to_s[Record::GitHub::Issues::URL, :repo]
+          when LINEAR then Record::Linear::Issues::URL.match(url.to_s)&.then { "#{it[:workspace]}/#{it[:team]}" }
         end.to_s.downcase
       end
 

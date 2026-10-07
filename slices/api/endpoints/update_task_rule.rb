@@ -40,10 +40,10 @@ module API
 
       def saved(id, result)
         case result
-        in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
-        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskRules::COMPLAINTS))
-        in Failure(:not_found) then not_found(Wording.missing("task rule", id))
-        else failed(TaskRules::UNSAVED)
+          in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
+          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskRules::COMPLAINTS))
+          in Failure(:not_found) then not_found(Wording.missing("task rule", id))
+          else failed(TaskRules::UNSAVED)
         end
       end
     end

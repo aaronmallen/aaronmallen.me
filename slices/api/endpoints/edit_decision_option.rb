@@ -31,9 +31,9 @@ module API
 
       def saved(result, id, option_id)
         case result
-        in Success(option) then Success(serialized(Serializers::DecisionOption, option))
-        in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
-        else settled(result, id)
+          in Success(option) then Success(serialized(Serializers::DecisionOption, option))
+          in Failure(:not_found) then not_found(Decisions.missing_option(id, option_id))
+          else settled(result, id)
         end
       end
     end

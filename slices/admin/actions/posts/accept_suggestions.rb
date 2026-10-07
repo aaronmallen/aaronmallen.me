@@ -25,11 +25,11 @@ module Admin
 
         def accept(response, suggestion, edit_id)
           case accept_suggestion_edits.call(suggestion.id, ids: chosen(edit_id))
-          in Success(accepted:) then toast(response, APPLIED, count: accepted.length)
-          in Failure(:stale) then toast(response, APPLIED, count: 0)
-          in Failure(:published) then toast(response, LIVE)
-          in Failure(:not_found) then nil
-          else halt 500
+            in Success(accepted:) then toast(response, APPLIED, count: accepted.length)
+            in Failure(:stale) then toast(response, APPLIED, count: 0)
+            in Failure(:published) then toast(response, LIVE)
+            in Failure(:not_found) then nil
+            else halt 500
           end
         end
 

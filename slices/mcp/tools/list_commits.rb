@@ -27,8 +27,8 @@ module MCP
       class << self
         def call(from:, to:, server_context:, repos: nil)
           case Blog::DayWindow.days(from, to)
-          in Success[first, last] then listed(first, last, Array(repos), server_context)
-          in Failure(message) then refuse(message)
+            in Success[first, last] then listed(first, last, Array(repos), server_context)
+            in Failure(message) then refuse(message)
           end
         end
 

@@ -323,9 +323,9 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def marked_texts(value)
       case value
-      when Hash then value["untrusted"] == true ? [value] : value.values.flat_map { marked_texts(it) }
-      when Array then value.flat_map { marked_texts(it) }
-      else []
+        when Hash then value["untrusted"] == true ? [value] : value.values.flat_map { marked_texts(it) }
+        when Array then value.flat_map { marked_texts(it) }
+        else []
       end
     end
 
@@ -333,9 +333,9 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def plain_texts(value)
       case value
-      when Hash then value.flat_map { |key, field| plain?(key, field) ? [field] : plain_texts(field) }
-      when Array then value.flat_map { plain_texts(it) }
-      else []
+        when Hash then value.flat_map { |key, field| plain?(key, field) ? [field] : plain_texts(field) }
+        when Array then value.flat_map { plain_texts(it) }
+        else []
       end
     end
 
@@ -354,9 +354,9 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def synced_titles(value)
       case value
-      when Hash then (synced_task?(value) ? [value["title"]] : []) + synced_titles(value.values)
-      when Array then value.flat_map { synced_titles(it) }
-      else []
+        when Hash then (synced_task?(value) ? [value["title"]] : []) + synced_titles(value.values)
+        when Array then value.flat_map { synced_titles(it) }
+        else []
       end
     end
 
@@ -381,10 +381,10 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def linked_titles(value, id)
       case value
-      when Hash then (value.key?("label") && value["id"] == id ? [value["title"]] : []) + linked_titles(value.values,
-                                                                                                        id)
-      when Array then value.flat_map { linked_titles(it, id) }
-      else []
+        when Hash then (value.key?("label") && value["id"] == id ? [value["title"]] : []) + linked_titles(value.values,
+                                                                                                          id)
+        when Array then value.flat_map { linked_titles(it, id) }
+        else []
       end
     end
 
@@ -429,10 +429,10 @@ RSpec.describe "MCP untrusted text", type: :request do
 
     def input(name)
       case name
-      when "link_records" then { kind: "post", id: draft.id, other_kind: "task", other_id: task.id }
-      when "list_links" then linked("post")
-      when "unlink_records" then unlinked
-      else linked(self.class.reads.fetch(name)).slice(:id)
+        when "link_records" then { kind: "post", id: draft.id, other_kind: "task", other_id: task.id }
+        when "list_links" then linked("post")
+        when "unlink_records" then unlinked
+        else linked(self.class.reads.fetch(name)).slice(:id)
       end
     end
 

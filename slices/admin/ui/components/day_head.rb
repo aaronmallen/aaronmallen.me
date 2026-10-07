@@ -22,9 +22,9 @@ module Admin
 
         def ago
           case days_ago
-          when 0 then t(".today")
-          when 1 then t(".yesterday")
-          else t(".days_ago", count: days_ago) if days_ago.positive?
+            when 0 then t(".today")
+            when 1 then t(".yesterday")
+            else t(".days_ago", count: days_ago) if days_ago.positive?
           end
         end
 

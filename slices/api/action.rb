@@ -26,8 +26,8 @@ module API
 
     def answer(response, result, status: OK)
       case result
-      in Success(payload) then render_json(response, payload, status:)
-      in Failure(Refusal => refusal) then render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
+        in Success(payload) then render_json(response, payload, status:)
+        in Failure(Refusal => refusal) then render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
       end
     end
 
@@ -62,11 +62,11 @@ module API
 
     def require_token(request, response)
       case authenticate.call(request.env[AUTHORIZATION])
-      in Success(token) then response[:token] = token
-      in Failure(error)
-        response.format = :json
-        response.headers[CHALLENGE] = bearer(error)
-        halt UNAUTHORIZED, JSON.generate(error)
+        in Success(token) then response[:token] = token
+        in Failure(error)
+          response.format = :json
+          response.headers[CHALLENGE] = bearer(error)
+          halt UNAUTHORIZED, JSON.generate(error)
       end
     end
 

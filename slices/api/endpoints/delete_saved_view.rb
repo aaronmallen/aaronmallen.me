@@ -10,9 +10,9 @@ module API
 
       def handle(id:)
         case delete_saved_view.call(id)
-        in Success(_) then Success(id:, deleted: true)
-        in Failure(:not_found) then not_found(Wording.missing("saved view", id))
-        else failed("could not delete the saved view")
+          in Success(_) then Success(id:, deleted: true)
+          in Failure(:not_found) then not_found(Wording.missing("saved view", id))
+          else failed("could not delete the saved view")
         end
       end
     end

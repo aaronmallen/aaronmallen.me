@@ -21,9 +21,9 @@ module API
 
       def handle(id:, title:, body: "")
         case add_decision_option.call(id, { title:, body: })
-        in Success(option) then Success(serialized(Serializers::DecisionOption, option))
-        in Failure(:closed) then invalid(id: [format(CLOSED, id)])
-        in result then settled(result, id)
+          in Success(option) then Success(serialized(Serializers::DecisionOption, option))
+          in Failure(:closed) then invalid(id: [format(CLOSED, id)])
+          in result then settled(result, id)
         end
       end
     end

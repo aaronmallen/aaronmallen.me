@@ -14,8 +14,8 @@ module Admin
           result = cancel_task.call(record_id(request))
 
           case result
-          in Failure(:closed) then done(request, response, CLOSED)
-          else settle(response, result, CANCELED, tasks_path(request))
+            in Failure(:closed) then done(request, response, CLOSED)
+            else settle(response, result, CANCELED, tasks_path(request))
           end
         end
 

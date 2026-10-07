@@ -17,9 +17,9 @@ module MCP
 
         def handle(request, response)
           case authenticate.call(request.env[AUTHORIZATION], issuer:)
-          in Success(token) then answer(request, response, token)
-          in Failure(Operations::Authenticate::REJECT, payload) then challenge(response, payload)
-          else challenge(response, UNEXPECTED)
+            in Success(token) then answer(request, response, token)
+            in Failure(Operations::Authenticate::REJECT, payload) then challenge(response, payload)
+            else challenge(response, UNEXPECTED)
           end
         end
 

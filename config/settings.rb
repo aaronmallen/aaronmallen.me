@@ -32,8 +32,8 @@ module Blog
 
     RedisAttempts = (RedisCount | RedisWaits).constructor do |value|
       case value
-      when ::Array, ::Integer, /\A\s*\d+\s*\z/ then value
-      else value.to_s.split(",", -1)
+        when ::Array, ::Integer, /\A\s*\d+\s*\z/ then value
+        else value.to_s.split(",", -1)
       end
     end
 

@@ -16,9 +16,9 @@ module Social
 
       def moderated(id, verdict, reason)
         case verdict
-        when APPROVED then webmention_mutations.approve(id)
-        when IGNORED then webmention_mutations.ignore(id)
-        else webmention_mutations.mark_spam(id, reason)
+          when APPROVED then webmention_mutations.approve(id)
+          when IGNORED then webmention_mutations.ignore(id)
+          else webmention_mutations.mark_spam(id, reason)
         end
       end
 

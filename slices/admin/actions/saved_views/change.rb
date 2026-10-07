@@ -13,8 +13,8 @@ module Admin
           result = change_saved_view.call(record_id(request), filters: request.params[:filters])
 
           case result
-          in Failure[:invalid, _] then answer(request, response, INVALID)
-          else settle(response, result, CHANGED, return_path(request))
+            in Failure[:invalid, _] then answer(request, response, INVALID)
+            else settle(response, result, CHANGED, return_path(request))
           end
         end
       end

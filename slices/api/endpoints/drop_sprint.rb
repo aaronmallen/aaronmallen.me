@@ -10,10 +10,10 @@ module API
 
       def handle(id:)
         case drop_sprint.call(id)
-        in Success(sprint) then Success(serialized(Serializers::Sprint, sprint).merge(dropped: true))
-        in Failure(:started) then invalid(id: ["that sprint has already started"])
-        in Failure(:not_found) then not_found(Wording.missing("sprint", id))
-        else failed(Wording::UNSAVED)
+          in Success(sprint) then Success(serialized(Serializers::Sprint, sprint).merge(dropped: true))
+          in Failure(:started) then invalid(id: ["that sprint has already started"])
+          in Failure(:not_found) then not_found(Wording.missing("sprint", id))
+          else failed(Wording::UNSAVED)
         end
       end
     end

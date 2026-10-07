@@ -10,8 +10,8 @@ module API
 
       def handle(id:)
         case pause_task.call(id)
-        in Failure(:idle) then invalid(id: [format(IDLE, id)])
-        in result then settled(result, id)
+          in Failure(:idle) then invalid(id: [format(IDLE, id)])
+          in result then settled(result, id)
         end
       end
     end

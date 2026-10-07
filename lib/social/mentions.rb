@@ -36,8 +36,8 @@ module Social
 
     def handle(person, network)
       case network
-      when BLUESKY then person.bluesky_handle && ["@#{person.bluesky_handle}", person.bluesky_did]
-      when MASTODON then person.mastodon_handle && [person.mastodon_handle]
+        when BLUESKY then person.bluesky_handle && ["@#{person.bluesky_handle}", person.bluesky_did]
+        when MASTODON then person.mastodon_handle && [person.mastodon_handle]
       end
     end
 

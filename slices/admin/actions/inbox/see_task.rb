@@ -12,8 +12,8 @@ module Admin
           result = mark_task_seen.call(record_id(request))
 
           case result
-          in Failure(:unsourced) then halt 404
-          else settle(response, result, SEEN, routes.path(:admin_inbox))
+            in Failure(:unsourced) then halt 404
+            else settle(response, result, SEEN, routes.path(:admin_inbox))
           end
         end
       end

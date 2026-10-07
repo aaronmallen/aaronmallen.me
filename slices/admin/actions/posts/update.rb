@@ -19,10 +19,10 @@ module Admin
           params = Blog::Types::Fields[request.params[:post]]
 
           case save_post.call(params, id:, intent: intent(request))
-          in Success[outcome, post] then saved(response, outcome, post)
-          in Failure(:not_found) then halt 404
-          in Failure[:invalid, errors] then invalid(request, response, params, errors, id:)
-          else halt 500
+            in Success[outcome, post] then saved(response, outcome, post)
+            in Failure(:not_found) then halt 404
+            in Failure[:invalid, errors] then invalid(request, response, params, errors, id:)
+            else halt 500
           end
         end
 

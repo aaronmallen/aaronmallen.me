@@ -67,9 +67,9 @@ module Links
 
       def listed_url(kind, row)
         case kind
-        when "social_post" then routes.path(:admin_social, edit: row.id)
-        when "journal_entry" then "#{routes.path(:admin_journal, to: row.day)}#day-#{row.day.iso8601}"
-        when "work_entry" then routes.path(:admin_projects, filter: WORK)
+          when "social_post" then routes.path(:admin_social, edit: row.id)
+          when "journal_entry" then "#{routes.path(:admin_journal, to: row.day)}#day-#{row.day.iso8601}"
+          when "work_entry" then routes.path(:admin_projects, filter: WORK)
         end
       end
 
@@ -79,12 +79,12 @@ module Links
         id = row.id
 
         case kind
-        when "task" then routes.path(:admin_task, id:)
-        when "post" then routes.path(:admin_edit_post, id:)
-        when "commit" then routes.path(:admin_commit, id:)
-        when "project" then routes.path(:admin_edit_project, id:)
-        when "decision" then routes.path(:admin_decision, id:)
-        else listed_url(kind, row)
+          when "task" then routes.path(:admin_task, id:)
+          when "post" then routes.path(:admin_edit_post, id:)
+          when "commit" then routes.path(:admin_commit, id:)
+          when "project" then routes.path(:admin_edit_project, id:)
+          when "decision" then routes.path(:admin_decision, id:)
+          else listed_url(kind, row)
         end
       end
     end

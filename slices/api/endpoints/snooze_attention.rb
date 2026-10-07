@@ -22,9 +22,9 @@ module API
 
       def handle(kind:, record_id: nil)
         case snooze_attention.call(kind, record_id)
-        in Success(snooze) then Success(serialized(Serializers::AttentionSnooze, snooze))
-        in Failure(:not_found) then not_found(missing(kind, record_id))
-        else failed("could not snooze the row")
+          in Success(snooze) then Success(serialized(Serializers::AttentionSnooze, snooze))
+          in Failure(:not_found) then not_found(missing(kind, record_id))
+          else failed("could not snooze the row")
         end
       end
 

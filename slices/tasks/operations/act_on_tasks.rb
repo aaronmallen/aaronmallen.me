@@ -35,12 +35,12 @@ module Tasks
 
       def single(act)
         case act
-        when CANCEL then cancel_task
-        when COMPLETE then complete_task
-        when MOVE then move_task
-        when TAG then tag_task
-        when UNTAG then untag_task
-        else delete_task
+          when CANCEL then cancel_task
+          when COMPLETE then complete_task
+          when MOVE then move_task
+          when TAG then tag_task
+          when UNTAG then untag_task
+          else delete_task
         end
       end
 

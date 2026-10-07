@@ -21,9 +21,9 @@ module Admin
           result = edit_task_comment.call(record_id(request), id, params)
 
           case result
-          in Failure[:invalid, errors]
-            refuse(request, response, commenting: { id:, body: Blog::Types::Text[params[:body]], errors: })
-          else settle(response, result, SAVED, tasks_path(request))
+            in Failure[:invalid, errors]
+              refuse(request, response, commenting: { id:, body: Blog::Types::Text[params[:body]], errors: })
+            else settle(response, result, SAVED, tasks_path(request))
           end
         end
       end

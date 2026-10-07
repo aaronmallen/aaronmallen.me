@@ -53,9 +53,9 @@ module Admin
 
       def listed(tab, sprint, planned, page, search)
         tasks = case tab
-                when COMPLETED then task_queries.finished(page:, **search)
-                when UPCOMING then whole(task_queries.planned(planned, **search))
-                else task_queries.list(tab, sprint:, page:, **search)
+                  when COMPLETED then task_queries.finished(page:, **search)
+                  when UPCOMING then whole(task_queries.planned(planned, **search))
+                  else task_queries.list(tab, sprint:, page:, **search)
                 end
 
         tasks.past_end? ? Failure(:past_end) : Success(tasks)

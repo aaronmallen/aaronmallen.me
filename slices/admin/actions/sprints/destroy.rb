@@ -14,8 +14,8 @@ module Admin
           result = drop_sprint.call(record_id(request))
 
           case result
-          in Failure(:started) then done(response, STARTED)
-          else settle(response, result, DROPPED, upcoming_path)
+            in Failure(:started) then done(response, STARTED)
+            else settle(response, result, DROPPED, upcoming_path)
           end
         end
 

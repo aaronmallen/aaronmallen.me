@@ -9,9 +9,9 @@ module API
 
       def handle(kind:, id:, other_kind:, other_id:)
         case unlink_records.call(kind, id, other_kind, other_id)
-        in Success(*) then answered(kind, id)
-        in Failure(:not_found) then not_found(RecordLinks.unlinked(kind, id, other_kind, other_id))
-        else failed(Wording::UNSAVED)
+          in Success(*) then answered(kind, id)
+          in Failure(:not_found) then not_found(RecordLinks.unlinked(kind, id, other_kind, other_id))
+          else failed(Wording::UNSAVED)
         end
       end
     end

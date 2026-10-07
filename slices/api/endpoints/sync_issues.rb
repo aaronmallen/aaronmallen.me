@@ -12,8 +12,8 @@ module API
 
       def handle
         case queue_issue_sync.call
-        in Success[*sources] then Success(queued: sources)
-        in Failure(:not_configured) then failed(UNCONFIGURED)
+          in Success[*sources] then Success(queued: sources)
+          in Failure(:not_configured) then failed(UNCONFIGURED)
         end
       end
     end

@@ -51,9 +51,9 @@ module Admin
 
         def refusal(errors)
           case errors
-          in { to: } then "to_#{Blog::Contract::BLANK}"
-          in { tag: [message, *] } then "tag_#{message}"
-          else Blog::Contract::FORMAT
+            in { to: } then "to_#{Blog::Contract::BLANK}"
+            in { tag: [message, *] } then "tag_#{message}"
+            else Blog::Contract::FORMAT
           end
         end
       end

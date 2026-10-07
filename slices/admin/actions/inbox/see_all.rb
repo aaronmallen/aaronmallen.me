@@ -15,10 +15,10 @@ module Admin
 
         def handle(request, response)
           case clear_inbox.call(request.params.to_h)
-          in Success(cleared) then toast(response, "#{TOASTS}.done", count: cleared.values.sum(&:size))
-          in Failure[:record, kind, id, reason] then failed(response, kind, id, reason)
-          in Failure[:invalid, _] then toast(response, "#{TOASTS}.empty")
-          else halt 500
+            in Success(cleared) then toast(response, "#{TOASTS}.done", count: cleared.values.sum(&:size))
+            in Failure[:record, kind, id, reason] then failed(response, kind, id, reason)
+            in Failure[:invalid, _] then toast(response, "#{TOASTS}.empty")
+            else halt 500
           end
 
           response.redirect_to(routes.path(:admin_inbox))

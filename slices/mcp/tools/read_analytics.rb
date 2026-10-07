@@ -96,8 +96,8 @@ module MCP
           end
 
           case reader
-          in Success(found) then answer(found.call)
-          in Failure(message) then refuse(message)
+            in Success(found) then answer(found.call)
+            in Failure(message) then refuse(message)
           end
         end
 

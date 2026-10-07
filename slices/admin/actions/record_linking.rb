@@ -17,8 +17,8 @@ module Admin
         result = link_records.call(self.class::KIND, id, Blog::Types::Fields[request.params[:record]])
 
         case result
-        in Failure[:invalid, errors] then refuse_link(request, response, id, errors)
-        else settle(response, result, self.class::LINKED, record_path(request, id))
+          in Failure[:invalid, errors] then refuse_link(request, response, id, errors)
+          else settle(response, result, self.class::LINKED, record_path(request, id))
         end
       end
 

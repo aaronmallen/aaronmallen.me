@@ -15,8 +15,8 @@ module Record
         result = commit_mutations.with_import_lock { import_commits.call }
 
         case result
-        in Failure(:lock_busy) then nil
-        else record_sync_outcome.call(Blog::Types::SyncName["commits"], result)
+          in Failure(:lock_busy) then nil
+          else record_sync_outcome.call(Blog::Types::SyncName["commits"], result)
         end
       end
     end

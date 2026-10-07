@@ -19,14 +19,14 @@ module MCP
 
         def handle(request, response)
           case register_client.call(payload(request), visitor_hash: visitor_hash(request))
-          in Success(client)
-            render_json(response, client, status: CREATED)
-          in Failure(Operations::RegisterClient::REJECT, payload)
-            render_json(response, payload, status: REJECTED)
-          in Failure(Operations::RegisterClient::THROTTLED)
-            render_json(response, { error: TOO_MANY }, status: THROTTLED)
-          else
-            reject_json(response)
+            in Success(client)
+              render_json(response, client, status: CREATED)
+            in Failure(Operations::RegisterClient::REJECT, payload)
+              render_json(response, payload, status: REJECTED)
+            in Failure(Operations::RegisterClient::THROTTLED)
+              render_json(response, { error: TOO_MANY }, status: THROTTLED)
+            else
+              reject_json(response)
           end
         end
 

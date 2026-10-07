@@ -13,9 +13,9 @@ module Admin
           params = request.params
 
           case create_saved_view.call(**name_params(request), screen: params[:screen], filters: params[:filters])
-          in Success(_) then answer(request, response, SAVED)
-          in Failure[:invalid, _] then answer(request, response, INVALID)
-          else halt 500
+            in Success(_) then answer(request, response, SAVED)
+            in Failure[:invalid, _] then answer(request, response, INVALID)
+            else halt 500
           end
         end
       end

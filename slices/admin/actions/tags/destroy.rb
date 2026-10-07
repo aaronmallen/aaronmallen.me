@@ -17,10 +17,10 @@ module Admin
           path = routes.path(:admin_tags, scope:)
 
           case result
-          in Failure[:last_tag_of_rules, patterns]
-            toast(response, KEPT, count: patterns.size, rules: patterns.join(SEPARATOR))
-            response.redirect_to(path)
-          else settle(response, result, REMOVED, path)
+            in Failure[:last_tag_of_rules, patterns]
+              toast(response, KEPT, count: patterns.size, rules: patterns.join(SEPARATOR))
+              response.redirect_to(path)
+            else settle(response, result, REMOVED, path)
           end
         end
       end

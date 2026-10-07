@@ -19,11 +19,11 @@ module Admin
           params = Blog::Types::Fields[request.params[:social]]
 
           case compose_social_post.call(params, intent: intent(request), id:)
-          in Success[outcome, social_post] then saved(response, outcome, social_post)
-          in Failure(:already_posted) then sent(response)
-          in Failure(:not_found) then halt 404
-          in Failure[:invalid, errors] then invalid(response, id, params, errors)
-          else halt 500
+            in Success[outcome, social_post] then saved(response, outcome, social_post)
+            in Failure(:already_posted) then sent(response)
+            in Failure(:not_found) then halt 404
+            in Failure[:invalid, errors] then invalid(response, id, params, errors)
+            else halt 500
           end
         end
 

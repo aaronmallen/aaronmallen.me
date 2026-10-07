@@ -24,10 +24,10 @@ module Admin
           fields = Blog::Types::Fields[request.params[:task]]
 
           case save_task.call(id, form(id, fields))
-          in Failure(:closed) then done(request, response, CLOSED)
-          in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
-          in Failure[:invalid, errors] then invalid(request, response, id, fields, errors)
-          in result then settle(response, result, SAVED, tasks_path(request))
+            in Failure(:closed) then done(request, response, CLOSED)
+            in Failure(:past) | Failure(:invalid) then done(request, response, PAST)
+            in Failure[:invalid, errors] then invalid(request, response, id, fields, errors)
+            in result then settle(response, result, SAVED, tasks_path(request))
           end
         end
 

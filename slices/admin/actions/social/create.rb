@@ -17,12 +17,12 @@ module Admin
           params = Blog::Types::Fields[request.params[:social]]
 
           case compose_social_post.call(params, intent: intent(request))
-          in Success[outcome, social_post]
-            saved(response, outcome, social_post)
-          in Failure[:invalid, errors]
-            response.status = 422
-            response.render(index_view, **build_social_page.call(params:, errors:))
-          else halt 500
+            in Success[outcome, social_post]
+              saved(response, outcome, social_post)
+            in Failure[:invalid, errors]
+              response.status = 422
+              response.render(index_view, **build_social_page.call(params:, errors:))
+            else halt 500
           end
         end
 

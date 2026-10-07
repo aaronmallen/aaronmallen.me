@@ -81,8 +81,8 @@ module MCP
           unnumbered = edits.map { it.except(:part) }
 
           case dep(:replace_post_edits, server_context).call(id, edits: unnumbered)
-          in Failure(:published) then refuse(format(PUBLISHED, id))
-          in result then stored(result, POST)
+            in Failure(:published) then refuse(format(PUBLISHED, id))
+            in result then stored(result, POST)
           end
         end
 
@@ -101,10 +101,10 @@ module MCP
 
         def stored(result, target)
           case result
-          in Success(suggestion)
-            answer(suggestion_id: suggestion.id, target:, edits: suggestion.edits.length, status: Blog::Types::SuggestionEditStatus["pending"])
-          in Failure[:invalid, errors] then refuse(complaint(errors))
-          else refuse(UNSTORED)
+            in Success(suggestion)
+              answer(suggestion_id: suggestion.id, target:, edits: suggestion.edits.length, status: Blog::Types::SuggestionEditStatus["pending"])
+            in Failure[:invalid, errors] then refuse(complaint(errors))
+            else refuse(UNSTORED)
           end
         end
       end

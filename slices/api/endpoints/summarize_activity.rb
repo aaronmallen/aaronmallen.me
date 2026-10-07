@@ -15,9 +15,9 @@ module API
 
       def handle(from:, to:)
         case Blog::DayWindow.days(from, to)
-        in Success[first, last] if Blog::DayWindow.too_long?(first, last) then too_long
-        in Success[first, last] then Success(summary(first, last))
-        in Failure(message) then invalid(from: [message], to: [message])
+          in Success[first, last] if Blog::DayWindow.too_long?(first, last) then too_long
+          in Success[first, last] then Success(summary(first, last))
+          in Failure(message) then invalid(from: [message], to: [message])
         end
       end
 

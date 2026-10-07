@@ -20,8 +20,8 @@ module Admin
           result = save_person.call(params, id:)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, person_queries.by_id(id), params, errors)
-          else settle(response, result, SAVED, routes.path(:admin_people))
+            in Failure[:invalid, errors] then invalid(response, person_queries.by_id(id), params, errors)
+            else settle(response, result, SAVED, routes.path(:admin_people))
           end
         end
 

@@ -37,9 +37,9 @@ module Tasks
 
       def keys_for(grouping, ids)
         case grouping
-        when DAY then ->(_, day) { [[day, day.iso8601]] }
-        when PROJECT then project_keys(ids)
-        else tag_keys(ids)
+          when DAY then ->(_, day) { [[day, day.iso8601]] }
+          when PROJECT then project_keys(ids)
+          else tag_keys(ids)
         end
       end
 

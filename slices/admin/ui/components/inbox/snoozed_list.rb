@@ -43,9 +43,9 @@ module Admin
 
           def title(found)
             case found.kind
-            when :message then found.record.subject
-            when :webmention then found.record.author_label
-            else found.record.title
+              when :message then found.record.subject
+              when :webmention then found.record.author_label
+              else found.record.title
             end
           end
         end

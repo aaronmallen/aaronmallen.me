@@ -22,9 +22,9 @@ module MCP
       class << self
         def call(photo:, server_context:)
           case dep(:read_photo, server_context).call(photo)
-          in Success(read) then shown(read.photo, read.stored)
-          in Failure[:missing, key] then refuse("no photo has the key #{key}")
-          in Failure[:unavailable] then refuse(UNAVAILABLE)
+            in Success(read) then shown(read.photo, read.stored)
+            in Failure[:missing, key] then refuse("no photo has the key #{key}")
+            in Failure[:unavailable] then refuse(UNAVAILABLE)
           end
         end
 

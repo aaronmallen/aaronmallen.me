@@ -38,11 +38,11 @@ module Admin
 
         def invalid(request, response, id, params, errors)
           case build_task_page.call(id, kind: Blog::Types::Text[params[:kind]], errors:)
-          in Success(page)
-            response.status = 422
-            response.render(task_view, **page, **return_to(request))
-          in Failure(:not_found) then halt 404
-          else halt 500
+            in Success(page)
+              response.status = 422
+              response.render(task_view, **page, **return_to(request))
+            in Failure(:not_found) then halt 404
+            else halt 500
           end
         end
 
@@ -50,8 +50,8 @@ module Admin
           result = link_tasks.call(id, params)
 
           case result
-          in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
-          else settle(response, result, LINKED, tasks_path(request))
+            in Failure[:invalid, errors] then invalid(request, response, id, params, errors)
+            else settle(response, result, LINKED, tasks_path(request))
           end
         end
       end

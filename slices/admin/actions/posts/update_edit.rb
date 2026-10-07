@@ -23,8 +23,8 @@ module Admin
           result = revise_edit_note.call(post.id, id, params)
 
           case result
-          in Failure[:invalid, errors] then invalid(response, post, id:, note: params[:note], errors:)
-          else settle(response, result, SAVED, post_path(post))
+            in Failure[:invalid, errors] then invalid(response, post, id:, note: params[:note], errors:)
+            else settle(response, result, SAVED, post_path(post))
           end
         end
 

@@ -12,11 +12,11 @@ module API
 
       def handle(ids:)
         case act_on_webmentions.call({ act: self.class::ACT, ids: })
-        in Success[*mentions] then Success(webmentions: serialized(Serializers::Webmention, mentions))
-        in Failure[:record, id, :not_found] then invalid(ids: [Wording.missing("webmention", id)])
-        in Failure[:record, id, _] then failed(format(UNCHANGED, id))
-        in Failure[:invalid, errors] then invalid(flat(errors))
-        else failed(Wording::UNSAVED)
+          in Success[*mentions] then Success(webmentions: serialized(Serializers::Webmention, mentions))
+          in Failure[:record, id, :not_found] then invalid(ids: [Wording.missing("webmention", id)])
+          in Failure[:record, id, _] then failed(format(UNCHANGED, id))
+          in Failure[:invalid, errors] then invalid(flat(errors))
+          else failed(Wording::UNSAVED)
         end
       end
     end

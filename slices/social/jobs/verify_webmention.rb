@@ -13,8 +13,8 @@ module Social
 
       def perform(source, target, post_id)
         case verify_webmention.call(source:, target:, post_id:)
-        in Failure(RETRYABLE) then raise SourceUnreachable
-        else nil
+          in Failure(RETRYABLE) then raise SourceUnreachable
+          else nil
         end
       end
     end

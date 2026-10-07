@@ -16,9 +16,9 @@ module Admin
           fields = Blog::Types::Fields[request.params[:entry]].slice(:body, :tags)
 
           case save_journal_entry.call(fields)
-          in Success(_) then saved(response)
-          in Failure[:invalid, errors] then invalid(response, fields, errors)
-          else halt 500
+            in Success(_) then saved(response)
+            in Failure[:invalid, errors] then invalid(response, fields, errors)
+            else halt 500
           end
         end
 
@@ -28,8 +28,8 @@ module Admin
           response.status = 422
 
           case summarize_today.call
-          in Success(summary) then response.render(show_view, **summary, **values(fields), errors:)
-          else halt 500
+            in Success(summary) then response.render(show_view, **summary, **values(fields), errors:)
+            else halt 500
           end
         end
 

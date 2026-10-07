@@ -30,6 +30,12 @@ I18n/RailsI18n/DecorateString:
   Exclude:
     - config/db/seeds/**/*.rb
 
+Layout/CaseIndentation:
+  IndentOneStep: true
+
+Metrics/AbcSize:
+  CountRepeatedAttributes: false
+
 Metrics/BlockLength:
   CountAsOne:
     - array
@@ -72,6 +78,10 @@ Metrics/ModuleLength:
 Metrics/ParameterLists:
   CountKeywordArgs: false
 
+Naming/ConstantName:
+  Exclude:
+    - lib/**/types.rb
+
 RSpec/DescribeClass:
   IgnoredMetadata:
     type:
@@ -80,6 +90,14 @@ RSpec/DescribeClass:
       - migration
       - request
       - script
+
+RSpec/ExampleLength:
+  CountAsOne:
+    - heredoc
+
+RSpec/NestedGroups:
+  AllowedGroups:
+    - describe
 
 RSpec/SpecFilePathFormat:
   CustomTransform:
@@ -96,6 +114,10 @@ Style/Documentation:
 Style/NumericPredicate:
   Exclude:
     - config/db/migrate/**/*.rb
+
+Style/RescueModifier:
+  Exclude:
+    - spec/**/*.rb
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

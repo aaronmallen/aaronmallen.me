@@ -12,9 +12,9 @@ module Admin
 
         def handle(request, response)
           case build(request, response)
-          in Success(screen) then show_page(request, response, screen)
-          in Failure(:past_end) then not_found(response)
-          else halt 500
+            in Success(screen) then show_page(request, response, screen)
+            in Failure(:past_end) then not_found(response)
+            else halt 500
           end
         end
 

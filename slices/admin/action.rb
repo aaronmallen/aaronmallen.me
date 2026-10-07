@@ -43,11 +43,11 @@ module Admin
 
     def settle(response, result, key, path)
       case result
-      in Success(_)
-        toast(response, key)
-        response.redirect_to(path)
-      in Failure(:not_found) then halt 404
-      else halt 500
+        in Success(_)
+          toast(response, key)
+          response.redirect_to(path)
+        in Failure(:not_found) then halt 404
+        else halt 500
       end
     end
 

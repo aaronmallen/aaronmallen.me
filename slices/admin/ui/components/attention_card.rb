@@ -61,10 +61,10 @@ module Admin
 
         def row(row)
           case row.kind
-          when CARRIED then task(row, t(".carried", count: row.days))
-          when SOMEDAY then task(row, t(".untouched", count: row.days))
-          when DRAFT then draft(row)
-          when JOURNAL then journal(row)
+            when CARRIED then task(row, t(".carried", count: row.days))
+            when SOMEDAY then task(row, t(".untouched", count: row.days))
+            when DRAFT then draft(row)
+            when JOURNAL then journal(row)
           end
         end
 

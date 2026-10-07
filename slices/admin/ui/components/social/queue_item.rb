@@ -91,10 +91,10 @@ module Admin
 
           def relative(seconds)
             case seconds
-            when ...Blog::Figures::MINUTE then t(".in_a_moment")
-            when ...HOUR then t(".in_minutes", count: seconds / Blog::Figures::MINUTE)
-            when ...DAY then t(".in_hours", count: seconds / HOUR)
-            else t(".in_days", count: seconds / DAY)
+              when ...Blog::Figures::MINUTE then t(".in_a_moment")
+              when ...HOUR then t(".in_minutes", count: seconds / Blog::Figures::MINUTE)
+              when ...DAY then t(".in_hours", count: seconds / HOUR)
+              else t(".in_days", count: seconds / DAY)
             end
           end
 

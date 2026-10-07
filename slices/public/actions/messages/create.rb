@@ -27,9 +27,9 @@ module Public
           return confirm(response) if baited?(params) || !check_stamp.call(params[STAMP])
 
           case create_message.call(params, visitor_hash: visitor_hash(request))
-          in Success(_) then confirm(response)
-          in Failure[:throttled] then refuse(response)
-          in Failure[:invalid, errors] then reject(response, params, errors)
+            in Success(_) then confirm(response)
+            in Failure[:throttled] then refuse(response)
+            in Failure[:invalid, errors] then reject(response, params, errors)
           end
         end
 

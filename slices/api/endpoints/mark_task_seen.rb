@@ -10,8 +10,8 @@ module API
 
       def handle(id:)
         case mark_task_seen.call(id)
-        in Failure(:unsourced) then invalid(id: [format(UNSOURCED, id)])
-        in result then settled(result, id)
+          in Failure(:unsourced) then invalid(id: [format(UNSOURCED, id)])
+          in result then settled(result, id)
         end
       end
     end

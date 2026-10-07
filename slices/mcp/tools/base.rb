@@ -41,8 +41,8 @@ module MCP
 
         def hand_over(endpoint, input, server_context, &shape)
           case dep(endpoint, server_context).call(input)
-          in Success(payload) then answer(shape ? yield(payload) : payload)
-          in Failure(refusal) then refuse(refusal.message)
+            in Success(payload) then answer(shape ? yield(payload) : payload)
+            in Failure(refusal) then refuse(refusal.message)
           end
         end
 

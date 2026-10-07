@@ -22,10 +22,10 @@ module Tasks
 
       def moment_failure(value)
         case value
-        when Time then nil
-        when nil then BLANK
-        when Blog::Constants::GAP then SKIPPED
-        else FORMAT
+          when Time then nil
+          when nil then BLANK
+          when Blog::Constants::GAP then SKIPPED
+          else FORMAT
         end
       end
     end

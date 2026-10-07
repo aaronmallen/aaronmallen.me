@@ -8,8 +8,8 @@ module Admin
 
         def handle(request, response)
           case summarize_today.call(pool: request.params[:pool])
-          in Success(summary) then response.render(view, **summary)
-          else halt 500
+            in Success(summary) then response.render(view, **summary)
+            else halt 500
           end
         end
       end

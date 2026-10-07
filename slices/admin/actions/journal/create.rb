@@ -16,13 +16,13 @@ module Admin
           params = Blog::Types::Fields[request.params[:entry]]
 
           case save_journal_entry.call(params)
-          in Success(_)
-            toast(response, SAVED)
-            response.redirect_to(routes.path(:admin_journal))
-          in Failure[:invalid, errors]
-            response.status = 422
-            response.render(index_view, **summarize_journal.call, values: values(params), errors:)
-          else halt 500
+            in Success(_)
+              toast(response, SAVED)
+              response.redirect_to(routes.path(:admin_journal))
+            in Failure[:invalid, errors]
+              response.status = 422
+              response.render(index_view, **summarize_journal.call, values: values(params), errors:)
+            else halt 500
           end
         end
 

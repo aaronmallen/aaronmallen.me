@@ -25,9 +25,9 @@ module API
 
       def clear(kind, id)
         case kind
-        when :tasks then mark_task_seen.call(id)
-        when :messages then mark_message.call(id, READ)
-        else mark_webmention_seen.call(id)
+          when :tasks then mark_task_seen.call(id)
+          when :messages then mark_message.call(id, READ)
+          else mark_webmention_seen.call(id)
         end
       end
 

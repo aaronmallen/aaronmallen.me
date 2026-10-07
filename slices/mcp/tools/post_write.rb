@@ -59,10 +59,10 @@ module MCP
 
         def saved(result, id = nil)
           case result
-          in Success[outcome, post] then answer(written(post).merge(outcome: outcome.to_s))
-          in Failure[:invalid, errors] then refuse(complaint(errors))
-          in Failure(:not_found) then missing(id)
-          else refuse(UNSAVED)
+            in Success[outcome, post] then answer(written(post).merge(outcome: outcome.to_s))
+            in Failure[:invalid, errors] then refuse(complaint(errors))
+            in Failure(:not_found) then missing(id)
+            else refuse(UNSAVED)
           end
         end
 

@@ -12,11 +12,11 @@ module Admin
           network = request.params[:network]
 
           case search_accounts.call(network:, query: request.params[:q])
-          in Success(*accounts) then response.render(view, network:, accounts:)
-          in Failure(:unconfigured) then halt 404
-          in Failure(problem)
-            response.status = STATUSES.fetch(problem)
-            response.render(view, network:, problem:)
+            in Success(*accounts) then response.render(view, network:, accounts:)
+            in Failure(:unconfigured) then halt 404
+            in Failure(problem)
+              response.status = STATUSES.fetch(problem)
+              response.render(view, network:, problem:)
           end
         end
       end

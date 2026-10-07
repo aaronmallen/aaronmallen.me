@@ -20,8 +20,8 @@ module Social
 
       def perform(social_post_id, network)
         case deliver_social_post.call(social_post_id, network)
-        in Failure(RETRYABLE) then raise NetworkUnavailable, "#{network} refused social post #{social_post_id}"
-        else nil
+          in Failure(RETRYABLE) then raise NetworkUnavailable, "#{network} refused social post #{social_post_id}"
+          else nil
         end
       end
     end

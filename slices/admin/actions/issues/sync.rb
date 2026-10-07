@@ -18,8 +18,8 @@ module Admin
 
         def enqueue
           case queue_issue_sync.call
-          in Failure(:not_configured) then :not_configured
-          in Success then :queued
+            in Failure(:not_configured) then :not_configured
+            in Success then :queued
           end
         end
       end

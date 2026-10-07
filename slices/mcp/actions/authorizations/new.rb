@@ -15,11 +15,11 @@ module MCP
           params = authorization_params(request)
 
           case authorize.call(params, issuer:, signed_in: session.signed_in?)
-          in Failure(Operations::Authorize::SIGN_IN) then start_sign_in(request, response, session)
-          in Failure(Operations::Authorize::CONFIRM, asking) then confirm(response, params, asking)
-          in Failure(Operations::Authorize::REFUSE, refusal) then refuse(response, refusal)
-          in Failure(Operations::Authorize::REJECT, payload) then render_json(response, payload, status: REJECTED)
-          else reject_json(response)
+            in Failure(Operations::Authorize::SIGN_IN) then start_sign_in(request, response, session)
+            in Failure(Operations::Authorize::CONFIRM, asking) then confirm(response, params, asking)
+            in Failure(Operations::Authorize::REFUSE, refusal) then refuse(response, refusal)
+            in Failure(Operations::Authorize::REJECT, payload) then render_json(response, payload, status: REJECTED)
+            else reject_json(response)
           end
         end
 

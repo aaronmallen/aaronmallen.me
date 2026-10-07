@@ -77,9 +77,9 @@ module Public
           return uncounted(visit) unless countable?(visit, route)
 
           case outcome(request, visit)
-          in Success(_) then ACCEPTED
-          in Failure(:throttled) then THROTTLED
-          else REJECTED
+            in Success(_) then ACCEPTED
+            in Failure(:throttled) then THROTTLED
+            else REJECTED
           end
         end
 

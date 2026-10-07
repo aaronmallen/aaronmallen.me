@@ -18,9 +18,9 @@ module Social
 
       def by_filter(filter, page)
         case Blog::Types::SocialQueue[filter]
-        when DRAFTS then drafts_page(page)
-        when POSTED_QUEUE then posted_page(page)
-        else queued_page(page)
+          when DRAFTS then drafts_page(page)
+          when POSTED_QUEUE then posted_page(page)
+          else queued_page(page)
         end
       end
 

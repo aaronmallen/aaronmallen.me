@@ -18,8 +18,8 @@ module API
 
       def handle(id:, body:)
         case add_decision_comment.call(id, { body: })
-        in Success(comment) then Success(serialized(Serializers::DecisionComment, comment))
-        in result then settled(result, id)
+          in Success(comment) then Success(serialized(Serializers::DecisionComment, comment))
+          in result then settled(result, id)
         end
       end
     end

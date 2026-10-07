@@ -23,10 +23,10 @@ module API
         name = network.capitalize
 
         case search_accounts.call(network:, query:)
-        in Success(*accounts) then Success(accounts: serialized(Serializers::Account, accounts))
-        in Failure(:unconfigured) then not_found("#{name} has no credentials, so it cannot be searched")
-        in Failure(:rate_limited) then failed("#{name} has had too many searches; wait a minute and try again")
-        else failed("#{name} did not answer; try again")
+          in Success(*accounts) then Success(accounts: serialized(Serializers::Account, accounts))
+          in Failure(:unconfigured) then not_found("#{name} has no credentials, so it cannot be searched")
+          in Failure(:rate_limited) then failed("#{name} has had too many searches; wait a minute and try again")
+          else failed("#{name} did not answer; try again")
         end
       end
     end

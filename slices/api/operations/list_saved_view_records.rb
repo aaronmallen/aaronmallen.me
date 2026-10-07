@@ -27,10 +27,10 @@ module API
         filters = view.filters
 
         case view.screen
-        when ACTIVITY then activity(filters, continue_to)
-        when JOURNAL then journal(filters, continue_to)
-        when POSTS then posts(filters, page_of(page))
-        else tasks(filters, page_of(page), now)
+          when ACTIVITY then activity(filters, continue_to)
+          when JOURNAL then journal(filters, continue_to)
+          when POSTS then posts(filters, page_of(page))
+          else tasks(filters, page_of(page), now)
         end
       end
 
@@ -85,9 +85,9 @@ module API
         search = Blog::SearchQuery.parse(filters["q"], fields: TASK_FIELDS)
 
         case tab
-        when COMPLETED then finished(page, search)
-        when UPCOMING then upcoming(Blog::TimeZone.today(now), search)
-        else open_tasks(tab, step(current_sprint.call(now:)), page, search)
+          when COMPLETED then finished(page, search)
+          when UPCOMING then upcoming(Blog::TimeZone.today(now), search)
+          else open_tasks(tab, step(current_sprint.call(now:)), page, search)
         end
       end
 

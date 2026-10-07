@@ -17,8 +17,8 @@ module Admin
 
         def enqueue
           case queue_commit_import.call
-          in Failure(:not_configured) then :not_configured
-          in Success(_) then :queued
+            in Failure(:not_configured) then :not_configured
+            in Success(_) then :queued
           end
         end
       end

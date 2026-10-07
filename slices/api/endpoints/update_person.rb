@@ -24,10 +24,10 @@ module API
 
       def saved(id, result)
         case result
-        in Success(person) then Success(serialized(Serializers::Person, person))
-        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, People::COMPLAINTS, named: true))
-        in Failure(:not_found) then not_found(Wording.missing("person", id))
-        else failed(People::UNSAVED)
+          in Success(person) then Success(serialized(Serializers::Person, person))
+          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, People::COMPLAINTS, named: true))
+          in Failure(:not_found) then not_found(Wording.missing("person", id))
+          else failed(People::UNSAVED)
         end
       end
     end

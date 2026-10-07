@@ -17,8 +17,8 @@ module Posts
 
       def queue(post_id, follow_up, at)
         case follow_up
-        when SYNDICATE_POST then Social::Jobs::SyndicatePost.once_published(post_id, at)
-        when SEND_WEBMENTIONS then Social::Jobs::SendWebmentions.once_saved(post_id)
+          when SYNDICATE_POST then Social::Jobs::SyndicatePost.once_published(post_id, at)
+          when SEND_WEBMENTIONS then Social::Jobs::SendWebmentions.once_saved(post_id)
         end
       end
     end

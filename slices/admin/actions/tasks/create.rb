@@ -20,11 +20,11 @@ module Admin
           filter = Blog::Types::TaskFilterParam[params[:list] || request.params[:filter]]
 
           case capture_task.call(params, filter:, sprint_on: params[:sprint_on])
-          in Success[:captured, *] then done(request, response, CAPTURED, filter:)
-          in Success[:pulled_in | :scheduled, *] then done(request, response, CAPTURED, filter: UPCOMING)
-          in Failure(:past) | Failure(:invalid) then done(request, response, PAST, filter:)
-          in Failure[:invalid, errors] then invalid(request, response, params, errors)
-          else halt 500
+            in Success[:captured, *] then done(request, response, CAPTURED, filter:)
+            in Success[:pulled_in | :scheduled, *] then done(request, response, CAPTURED, filter: UPCOMING)
+            in Failure(:past) | Failure(:invalid) then done(request, response, PAST, filter:)
+            in Failure[:invalid, errors] then invalid(request, response, params, errors)
+            else halt 500
           end
         end
 

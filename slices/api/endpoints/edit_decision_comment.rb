@@ -19,9 +19,9 @@ module API
 
       def handle(id:, comment_id:, body:)
         case edit_decision_comment.call(id, comment_id, { body: })
-        in Success(comment) then Success(serialized(Serializers::DecisionComment, comment))
-        in Failure(:not_found) then not_found(Decisions.missing_comment(id, comment_id))
-        in result then settled(result, id)
+          in Success(comment) then Success(serialized(Serializers::DecisionComment, comment))
+          in Failure(:not_found) then not_found(Decisions.missing_comment(id, comment_id))
+          in result then settled(result, id)
         end
       end
     end

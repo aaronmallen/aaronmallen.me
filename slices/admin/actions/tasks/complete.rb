@@ -15,9 +15,9 @@ module Admin
           result = complete_task.call(record_id(request), worked: Blog::Types::Fields[request.params[:worked]])
 
           case result
-          in Failure(:closed) then answer(request, response, CLOSED)
-          in Failure[:invalid, _] then answer(request, response, REFUSED)
-          else settle(response, result, COMPLETED, back_path(request))
+            in Failure(:closed) then answer(request, response, CLOSED)
+            in Failure[:invalid, _] then answer(request, response, REFUSED)
+            else settle(response, result, COMPLETED, back_path(request))
           end
         end
 

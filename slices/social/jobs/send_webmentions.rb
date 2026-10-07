@@ -15,8 +15,8 @@ module Social
 
       def perform(post_id)
         case send_webmentions.call(post_id)
-        in Failure(RETRYABLE) then raise EndpointUnreachable
-        else nil
+          in Failure(RETRYABLE) then raise EndpointUnreachable
+          else nil
         end
       end
     end

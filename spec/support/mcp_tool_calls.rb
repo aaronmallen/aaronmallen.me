@@ -15,17 +15,17 @@ module MCPToolCalls
 
   def trusted(value)
     case value
-    when Hash then value["untrusted"] == true ? value["text"] : value.transform_values { trusted(it) }
-    when Array then value.map { trusted(it) }
-    else value
+      when Hash then value["untrusted"] == true ? value["text"] : value.transform_values { trusted(it) }
+      when Array then value.map { trusted(it) }
+      else value
     end
   end
 
   def unstamped(value)
     case value
-    when Hash then value.except("updated_at").transform_values { unstamped(it) }
-    when Array then value.map { unstamped(it) }
-    else value
+      when Hash then value.except("updated_at").transform_values { unstamped(it) }
+      when Array then value.map { unstamped(it) }
+      else value
     end
   end
 

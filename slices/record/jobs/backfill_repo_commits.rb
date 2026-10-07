@@ -11,8 +11,8 @@ module Record
 
       def perform(repo, clock)
         case backfill_repo_commits.call(repo, clock: Time.iso8601(clock))
-        in Failure(:rate_limited) then reschedule(repo, clock)
-        else nil
+          in Failure(:rate_limited) then reschedule(repo, clock)
+          else nil
         end
       end
 

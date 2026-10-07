@@ -21,8 +21,8 @@ module Admin
           result = edit_work_session.call(record_id(request), id, params)
 
           case result
-          in Failure[:invalid, errors] then refuse(request, response, timing: { id:, values: params, errors: })
-          else settle(response, result, SAVED, tasks_path(request))
+            in Failure[:invalid, errors] then refuse(request, response, timing: { id:, values: params, errors: })
+            else settle(response, result, SAVED, tasks_path(request))
           end
         end
       end

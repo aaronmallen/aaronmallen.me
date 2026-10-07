@@ -16,8 +16,8 @@ module Analytics
 
       def perform
         case refresh_country_database.call
-        in Success(*) | Failure(QUIET) then record_country_sync_outcome.call(Success(nil))
-        in Failure(*reason) then report(reason)
+          in Success(*) | Failure(QUIET) then record_country_sync_outcome.call(Success(nil))
+          in Failure(*reason) then report(reason)
         end
       end
 

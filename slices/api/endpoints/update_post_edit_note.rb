@@ -19,10 +19,10 @@ module API
 
       def handle(id:, edit_id:, note:)
         case revise_edit_note.call(id, edit_id, { note: })
-        in Success(edit) then Success(serialized(Serializers::PostEdit, edit))
-        in Failure(:not_found) then not_found(Posts.missing_edit(id, edit_id))
-        in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
-        else failed(Wording::UNSAVED)
+          in Success(edit) then Success(serialized(Serializers::PostEdit, edit))
+          in Failure(:not_found) then not_found(Posts.missing_edit(id, edit_id))
+          in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
+          else failed(Wording::UNSAVED)
         end
       end
     end

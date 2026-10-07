@@ -13,8 +13,8 @@ module Admin
           result = rename_saved_view.call(record_id(request), name_params(request))
 
           case result
-          in Failure[:invalid, _] then answer(request, response, INVALID)
-          else settle(response, result, RENAMED, return_path(request))
+            in Failure[:invalid, _] then answer(request, response, INVALID)
+            else settle(response, result, RENAMED, return_path(request))
           end
         end
       end

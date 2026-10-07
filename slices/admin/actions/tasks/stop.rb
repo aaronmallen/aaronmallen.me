@@ -14,8 +14,8 @@ module Admin
           result = pause_task.call(record_id(request))
 
           case result
-          in Failure(:idle) then answer(request, response, IDLE)
-          else settle(response, result, STOPPED, back_path(request))
+            in Failure(:idle) then answer(request, response, IDLE)
+            else settle(response, result, STOPPED, back_path(request))
           end
         end
 

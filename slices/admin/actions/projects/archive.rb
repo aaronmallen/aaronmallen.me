@@ -15,8 +15,8 @@ module Admin
           result = archive_project.call(id)
 
           case result
-          in Failure(:not_started) then not_started(response, id)
-          else settle(response, result, ARCHIVED, routes.path(:admin_projects, filter: filter(request)))
+            in Failure(:not_started) then not_started(response, id)
+            else settle(response, result, ARCHIVED, routes.path(:admin_projects, filter: filter(request)))
           end
         end
 

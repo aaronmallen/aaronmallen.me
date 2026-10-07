@@ -18,9 +18,9 @@ module API
 
       def handle(id:, session_id:, **times)
         case edit_work_session.call(id, session_id, times)
-        in Failure(:not_found) then not_found(Tasks.missing_session(id, session_id))
-        in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
-        in result then settled(result, id)
+          in Failure(:not_found) then not_found(Tasks.missing_session(id, session_id))
+          in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
+          in result then settled(result, id)
         end
       end
     end

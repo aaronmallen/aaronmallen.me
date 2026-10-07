@@ -10,8 +10,8 @@ module API
 
       def handle
         case current_sprint.call
-        in Success(sprint) then Success(serialized(Serializers::Sprint, sprint).merge(tasks: tasks(sprint)))
-        else failed("could not open today's sprint")
+          in Success(sprint) then Success(serialized(Serializers::Sprint, sprint).merge(tasks: tasks(sprint)))
+          else failed("could not open today's sprint")
         end
       end
 

@@ -20,8 +20,8 @@ module Tasks
         result = task_source_mutations.with_sync_lock(PROVIDER) { sync_issues.call(provider: PROVIDER, client:) }
 
         case result
-        in Failure(:lock_busy) then nil
-        else record_linear_issue_sync_outcome.call(result)
+          in Failure(:lock_busy) then nil
+          else record_linear_issue_sync_outcome.call(result)
         end
       end
     end

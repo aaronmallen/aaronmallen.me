@@ -12,9 +12,9 @@ module MCP
       class << self
         def call(id:, server_context:)
           case dep(:restore_project, server_context).call(id)
-          in Success(project) then answer(id:, status: project.status)
-          in Failure(:not_found) then refuse(API::Wording.missing("archived project", id))
-          else refuse(UNRESTORED)
+            in Success(project) then answer(id:, status: project.status)
+            in Failure(:not_found) then refuse(API::Wording.missing("archived project", id))
+            else refuse(UNRESTORED)
           end
         end
       end

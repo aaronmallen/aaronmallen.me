@@ -20,8 +20,8 @@ module Admin
 
       def filter(value)
         case value
-        when ::Hash then value.to_h { |key, inner| [key.to_s, Blog::Types::Text[inner]] }.reject { _2.empty? }
-        else Blog::Types::Text[value]
+          when ::Hash then value.to_h { |key, inner| [key.to_s, Blog::Types::Text[inner]] }.reject { _2.empty? }
+          else Blog::Types::Text[value]
         end
       end
     end

@@ -56,10 +56,10 @@ module Blog
 
     def utf8?(value)
       case value
-      when ::Hash then value.all? { |key, item| utf8?(key) && utf8?(item) }
-      when ::Array then value.all? { utf8?(it) }
-      when ::String then value.dup.force_encoding(Encoding::UTF_8).valid_encoding?
-      else true
+        when ::Hash then value.all? { |key, item| utf8?(key) && utf8?(item) }
+        when ::Array then value.all? { utf8?(it) }
+        when ::String then value.dup.force_encoding(Encoding::UTF_8).valid_encoding?
+        else true
       end
     end
   end

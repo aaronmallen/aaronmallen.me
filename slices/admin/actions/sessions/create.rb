@@ -19,12 +19,12 @@ module Admin
           return fail_sign_in(request, response, :denied) unless callback_valid?(request, code)
 
           case sign_in.call(code:, redirect_uri: github_callback_url)
-          in Success(github_user_id)
-            path = auth_session(request).sign_in(github_user_id)
-            response.redirect_to(path || routes.path(:admin_root))
-          in Failure(reason)
-            fail_sign_in(request, response, reason)
-          else halt 500
+            in Success(github_user_id)
+              path = auth_session(request).sign_in(github_user_id)
+              response.redirect_to(path || routes.path(:admin_root))
+            in Failure(reason)
+              fail_sign_in(request, response, reason)
+            else halt 500
           end
         end
 

@@ -20,9 +20,9 @@ module Admin
           result = drop_decision.call(record_id(request), params)
 
           case result
-          in Failure(:closed) then to_decision(request, response, CLOSED)
-          in Failure[:invalid, errors] then refuse_form(request, response, { name: :drop, params:, errors: })
-          else settle(response, result, DONE, decision_path(request))
+            in Failure(:closed) then to_decision(request, response, CLOSED)
+            in Failure[:invalid, errors] then refuse_form(request, response, { name: :drop, params:, errors: })
+            else settle(response, result, DONE, decision_path(request))
           end
         end
       end

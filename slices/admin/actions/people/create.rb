@@ -19,11 +19,11 @@ module Admin
           params = Blog::Types::Fields[request.params[:person]]
 
           case save_person.call(params)
-          in Success(person) then added(request, response, person)
-          in Failure[:invalid, errors]
-            response.status = 422
-            response.render(new_view, **build_person_editor.call(params:, errors:))
-          else halt 500
+            in Success(person) then added(request, response, person)
+            in Failure[:invalid, errors]
+              response.status = 422
+              response.render(new_view, **build_person_editor.call(params:, errors:))
+            else halt 500
           end
         end
 

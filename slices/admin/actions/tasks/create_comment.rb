@@ -20,9 +20,9 @@ module Admin
           result = add_task_comment.call(record_id(request), params)
 
           case result
-          in Failure[:invalid, errors]
-            refuse(request, response, commenting: { id: nil, body: Blog::Types::Text[params[:body]], errors: })
-          else settle(response, result, ADDED, tasks_path(request))
+            in Failure[:invalid, errors]
+              refuse(request, response, commenting: { id: nil, body: Blog::Types::Text[params[:body]], errors: })
+            else settle(response, result, ADDED, tasks_path(request))
           end
         end
       end

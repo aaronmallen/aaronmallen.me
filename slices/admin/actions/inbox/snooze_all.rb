@@ -10,11 +10,11 @@ module Admin
           picked = request.params[:pick] || request.params[:snoozed_until]
 
           case snooze_inbox.call({ **request.params.to_h, snoozed_until: picked })
-          in Success(snoozed) then snoozed_all(response, snoozed.values.flatten)
-          in Failure[:record, kind, id, _] then done(response, "see_all.failed.not_found", **named(kind), id:)
-          in Failure[:invalid, _] then done(response, "see_all.empty")
-          in Failure(:invalid | :past => refusal) then done(response, refusal)
-          else halt 500
+            in Success(snoozed) then snoozed_all(response, snoozed.values.flatten)
+            in Failure[:record, kind, id, _] then done(response, "see_all.failed.not_found", **named(kind), id:)
+            in Failure[:invalid, _] then done(response, "see_all.empty")
+            in Failure(:invalid | :past => refusal) then done(response, refusal)
+            else halt 500
           end
         end
 

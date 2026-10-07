@@ -31,10 +31,10 @@ module API
 
       def saved(id, result)
         case result
-        in Success(view) then Success(serialized(Serializers::SavedView, view))
-        in Failure[:invalid, errors] then invalid(Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
-        in Failure(:not_found) then not_found(Wording.missing("saved view", id))
-        else failed(SavedViews::UNSAVED)
+          in Success(view) then Success(serialized(Serializers::SavedView, view))
+          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
+          in Failure(:not_found) then not_found(Wording.missing("saved view", id))
+          else failed(SavedViews::UNSAVED)
         end
       end
     end
