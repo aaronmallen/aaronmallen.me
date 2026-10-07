@@ -42,6 +42,8 @@ module Social
         command(:store).with(update_statement:).call(attrs)
       end
 
+      def unseen = where(seen_at: nil)
+
       def with_status(status) = where(status:)
 
       def with_types(types) = where(type: types)

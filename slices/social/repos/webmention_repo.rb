@@ -100,6 +100,10 @@ module Social
         webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, **written)
       end
 
+      def unseen = unseen_pending.newest_first.to_a
+
+      def unseen_count = unseen_pending.count
+
       def update_settings(**attrs)
         transaction do
           settings
@@ -127,6 +131,8 @@ module Social
       def stored_settings = webmention_settings.by_pk(SETTINGS_ID).one
 
       def tallied(counts, key) = counts.to_a.to_h { [it[key], it.count] }
+
+      def unseen_pending = webmentions.with_status(PENDING).unseen
     end
   end
 end

@@ -172,6 +172,25 @@ RSpec.describe "Admin webmentions", type: :request do
       expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.webmentions.index.empty.ignored"))
     end
 
+    describe "with a seen pending mention" do
+      let!(:seen) do
+        create(:webmention, post: target, author_name: "Seen", seen_at: Time.now)
+      end
+
+      before { get "/admin/webmentions" }
+
+      it "lists and counts it with the pending mentions", :aggregate_failures do
+        expect(authors).to eq(%w[Seen])
+        expect(page).to have_css(".page-head-sub", exact_text: "1 pending · 0 shown on the site")
+      end
+
+      it "keeps its approve, ignore and spam buttons" do
+        actions = page.all("form").map { it[:action] }
+
+        expect(actions).to include(*%w[approve ignore spam].map { "/admin/webmentions/#{seen.id}/#{it}" })
+      end
+    end
+
     describe "moderating" do
       let(:mention) { create(:webmention, post: target) }
 

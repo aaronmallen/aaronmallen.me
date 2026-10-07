@@ -969,6 +969,7 @@ CREATE TABLE public.webmentions (
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     spam_reason public.non_blank_text,
     search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE(author_name, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, ((COALESCE(excerpt, ''::text) || ' '::text) || COALESCE((source_url)::text, ''::text))), 'B'::"char"))) STORED,
+    seen_at timestamp with time zone,
     CONSTRAINT webmentions_source_url_check CHECK ((octet_length((source_url)::text) <= 2048)),
     CONSTRAINT webmentions_spam_reason_check CHECK (((status = 'spam'::public.webmention_status) OR (spam_reason IS NULL)))
 );
@@ -5668,4 +5669,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261006000632_add_parent_to_task_link_type.rb'),
 ('20261006000633_add_synced_and_one_parent_to_task_links.rb'),
 ('20261006000639_notify_admin_changes.rb'),
-('20261007000640_replace_project_status_with_visibility.rb');
+('20261007000640_replace_project_status_with_visibility.rb'),
+('20261007000641_add_seen_at_to_webmentions.rb');

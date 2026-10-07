@@ -52,9 +52,9 @@ module API
 
     import keys: %w[
       operations.act_on_webmentions operations.delete_person operations.measure_parts operations.save_person
-      operations.search_accounts queries.calendar_social_posts queries.pending_webmention_count
-      queries.pending_webmentions queries.people queries.person_by_id queries.received_webmention_count
-      queries.social_post_by_id queries.webmention_by_id queries.webmention_counts_by_post
+      operations.search_accounts queries.calendar_social_posts queries.people queries.person_by_id
+      queries.received_webmention_count queries.social_post_by_id queries.unseen_webmention_count
+      queries.unseen_webmentions queries.webmention_by_id queries.webmention_counts_by_post
       queries.webmention_counts_received_in queries.webmentions_received_in
     ], from: :social
 

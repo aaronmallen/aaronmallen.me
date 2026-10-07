@@ -72,6 +72,12 @@ RSpec.describe "Admin inbox", type: :request do
       expect(inbox).to be_empty
     end
 
+    it "leaves out a pending webmention once it is seen" do
+      create(:webmention, seen_at: Time.now)
+
+      expect(inbox).to be_empty
+    end
+
     it "shows a synced issue's tags" do
       create(:task_source, task: create(:task, :external, tags: %w[feeds bugs]))
       get "/admin/inbox"
@@ -115,6 +121,7 @@ RSpec.describe "Admin inbox", type: :request do
       def no_longer_waiting
         create(:message, :read)
         create(:webmention, :approved)
+        create(:webmention, seen_at: Time.now)
         synced(seen_at: Time.now)
         %i[done canceled].each { synced(it) }
       end

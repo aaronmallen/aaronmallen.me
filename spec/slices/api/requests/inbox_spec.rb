@@ -79,6 +79,12 @@ RSpec.describe "API inbox", type: :request do
     expect(rows).to eq([])
   end
 
+  it "leaves out a pending webmention once it is seen, as the screen does" do
+    create(:webmention, seen_at: Time.now)
+
+    expect(rows).to eq([])
+  end
+
   it "answers the MCP tool with the same JSON once its marks come off" do
     synced
     create(:message)
