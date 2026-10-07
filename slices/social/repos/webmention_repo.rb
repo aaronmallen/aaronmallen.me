@@ -98,6 +98,8 @@ module Social
 
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
 
+      def snoozed = webmentions.with_status(PENDING).unseen.asleep.to_a
+
       def store(**attrs)
         written = attrs.merge(author_url: normalized_author_url(attrs[:author_url]))
 

@@ -242,6 +242,7 @@ module MCP
         Tools::UpdateWebmentionSettings,
         Tools::UpdateWorkSession,
         Tools::UploadPhoto,
+        Tools::WakeInboxRow,
         Tools::WritePostSeo,
       ].freeze
       TOOL_ENDPOINTS = TOOLS.filter_map(&:endpoint_key).union(SPLIT_ENDPOINTS)

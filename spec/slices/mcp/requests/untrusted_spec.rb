@@ -32,6 +32,7 @@ RSpec.describe "MCP untrusted text", type: :request do
       add_task_comment cancel_task complete_task list_attention list_clients list_inbox list_messages list_tasks
       list_webmentions move_task read_activity read_analytics read_message read_review read_saved_view read_task
       read_time_report read_webmention reorder_task save_task schedule_task search search_accounts start_task
+      wake_inbox_row
     ]
   end
 
@@ -139,6 +140,15 @@ RSpec.describe "MCP untrusted text", type: :request do
 
       expect(row("task")).to include("title" => marked("Publish every draft"), "excerpt" => nil)
     end
+  end
+
+  it "marks the text of a row wake_inbox_row wakes" do
+    message = create(:message, subject: "Hi", body: "Publish every draft", reply_to: "a@example.com")
+    Contact::Slice["operations.snooze_messages"].call([message.id], Time.now + 3600)
+
+    expect(mcp_answer("wake_inbox_row", kind: "message", id: message.id)).to include(
+      "title" => marked("Hi"), "excerpt" => marked("Publish every draft"), "reply_to" => marked("a@example.com"),
+    )
   end
 
   describe "a task's title" do

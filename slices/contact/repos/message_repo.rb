@@ -53,6 +53,8 @@ module Contact
 
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
 
+      def snoozed = messages.with_status(UNREAD).asleep.to_a
+
       def unread = waiting.newest_first.to_a
 
       def unread_count = waiting.count

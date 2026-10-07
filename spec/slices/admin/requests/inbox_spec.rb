@@ -12,7 +12,7 @@ RSpec.describe "Admin inbox", type: :request do
 
   def inbox
     get "/admin/inbox"
-    page.all(".li .li-title").map(&:text)
+    page.all("[data-key-list] .li .li-title").map(&:text)
   end
 
   def synced(*traits, title: "A synced issue", list: "external", created_at: Time.now, seen_at: nil)

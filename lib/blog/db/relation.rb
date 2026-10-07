@@ -15,6 +15,8 @@ module Blog
         Sequel.function(:timezone, TimeZone::NAME, moment).cast(Date)
       end
 
+      def asleep(at = Time.now) = where(Sequel[:snoozed_until] > at)
+
       def awake(at = Time.now) = where(Sequel.|({ snoozed_until: nil }, Sequel[:snoozed_until] <= at))
 
       def capped_claim(fresh, visitor_hash:, limit:, total_limit:)

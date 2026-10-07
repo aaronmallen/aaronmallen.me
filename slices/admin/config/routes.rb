@@ -71,6 +71,7 @@ module Admin
     post "/inbox/seen", to: "inbox.see_all", as: :inbox_see_all
     post "/inbox/tasks/:id/seen", to: "inbox.see_task", as: :inbox_see_task, id: ID
     post "/inbox/:kind/:id/snooze", to: "inbox.snooze", as: :inbox_snooze, id: ID
+    post "/inbox/wake/:kind/:id", to: "inbox.wake", as: :inbox_wake, id: ID
     post(
       "/inbox/webmentions/:id/moderate/:verdict",
       to: "inbox.moderate_webmention", as: :inbox_moderate_webmention, id: ID, verdict: INBOX_VERDICT,

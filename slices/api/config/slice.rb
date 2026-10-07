@@ -18,7 +18,8 @@ module API
       operations.act_on_messages
       operations.mark_message
       operations.snooze_messages
-      queries.unread_message_count queries.unread_messages
+      operations.wake_message
+      queries.snoozed_messages queries.unread_message_count queries.unread_messages
     ], from: :contact
 
     import keys: %w[
@@ -61,6 +62,7 @@ module API
       queries.received_webmention_count queries.social_post_by_id queries.unseen_webmention_count
       queries.unseen_webmentions queries.webmention_by_id queries.webmention_counts_by_post
       queries.webmention_counts_received_in queries.webmentions_received_in
+      operations.wake_webmention queries.snoozed_webmentions
     ], from: :social
 
     import keys: %w[queries.for_post queries.for_social_post], from: :suggestions
@@ -81,6 +83,7 @@ module API
       queries.planned_tasks queries.sprints_after queries.sprints_between queries.task_by_id queries.task_comments
       queries.task_rules queries.task_timeline queries.tasks_in_sprint queries.time_report
       queries.unseen_task_count queries.unseen_tasks
+      operations.wake_task queries.snoozed_tasks
     ], from: :tasks
 
     export %w[
@@ -113,10 +116,13 @@ module API
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
       endpoints.update_work_session endpoints.upload_photo
+      endpoints.wake_inbox_row
       operations.clear_inbox
       operations.mint_token operations.revoke_token
       operations.snooze_inbox_row
+      operations.wake_inbox_row
       queries.calendar queries.inbox queries.inbox_count queries.live_tokens queries.post_figures
+      queries.snoozed_inbox
     ]
   end
 end

@@ -82,6 +82,7 @@ module API
         ["list_inbox", "get", "/inbox", OK],
         ["clear_inbox", "post", "/inbox/seen", OK],
         ["snooze_inbox_row", "post", "/inbox/snooze", OK],
+        ["wake_inbox_row", "post", "/inbox/wake", OK],
         ["snooze_attention", "post", "/attention/snooze", OK],
         ["list_calendar", "get", "/calendar", OK],
         ["list_links", "get", "/links/{kind}/{id}", OK],

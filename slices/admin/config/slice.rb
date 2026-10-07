@@ -31,6 +31,7 @@ module Admin
       operations.snooze_inbox_row
       queries.calendar queries.inbox queries.inbox_count
       queries.live_tokens queries.post_figures
+      operations.wake_inbox_row queries.snoozed_inbox
     ], from: :api
 
     import keys: %w[

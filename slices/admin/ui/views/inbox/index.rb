@@ -8,6 +8,7 @@ module Admin
           include Components::Inbox
 
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Queries::Inbox::Row))
+          prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Queries::Inbox::Row))
           prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
 
           def view_template
@@ -18,6 +19,8 @@ module Admin
 
               @rows.each { row(it) }
             end
+
+            SnoozedList(rows: @snoozed) if @snoozed.any?
           end
 
           private

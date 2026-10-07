@@ -51,7 +51,9 @@ module MCP
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_task_rule
-      endpoints.update_work_session endpoints.upload_photo queries.live_tokens queries.post_figures
+      endpoints.update_work_session endpoints.upload_photo
+      endpoints.wake_inbox_row
+      queries.live_tokens queries.post_figures
     ], from: :api
 
     import keys: %w[

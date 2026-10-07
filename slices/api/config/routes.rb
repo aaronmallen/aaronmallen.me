@@ -77,6 +77,7 @@ module API
     get "/inbox", to: "inbox.index"
     post "/inbox/seen", to: "inbox.seen"
     post "/inbox/snooze", to: "inbox.snooze"
+    post "/inbox/wake", to: "inbox.wake"
 
     get "/calendar", to: "calendar.index"
 

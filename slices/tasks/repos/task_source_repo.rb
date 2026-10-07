@@ -18,6 +18,8 @@ module Tasks
         task_sources.where(task_id:).stamped(:update, result: :many).call(snoozed_until: ends_at).first
       end
 
+      def snoozed_tasks = tasks.open.where(id: task_sources.unseen.asleep.task_ids).combine(:source, :tags).to_a
+
       def synced_task_ids(ids) = task_sources.where(task_id: ids).pluck(:task_id)
 
       def task_ids_at(provider, urls) = task_sources.where(provider:, url: urls).pluck(:task_id)
