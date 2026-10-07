@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, contact, mcp, social, tasks]
 issue: "#325"
-amended: ["#650"]
+amended: ["#650", "#655"]
 tags: [inbox, tasks, imports, schema, slices, exports, api, mcp, messages, webmentions]
 ---
 
@@ -47,6 +47,8 @@ as [ADR 0088][0088] says.
 
 Bulk actions on the inbox (#290) stay out of this record. #650 records clearing the whole inbox in one step in
 [ADR 0120][0120].
+Bulk actions on the inbox (#290) stay out of this record. #655 keeps inbox snoozes in a `snoozed_until` column on
+each record's table, as [ADR 0121][0121] says.
 
 ## Alternatives
 
@@ -78,5 +80,6 @@ The `api` slice now imports `contact` and `social`, two more edges it has to kee
 [0066]: 0066-keep-an-imported-tasks-origin-in-a-task-sources-table.md
 [0067]: 0067-park-an-imported-task-on-an-external-list.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
+[0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
 [0120]: 0120-mark-webmentions-seen-apart-from-their-status-and-clear-the-inbox-in-one-transaction.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351", "#353"]
+amended: ["#351", "#353", "#655"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -66,10 +66,14 @@ A snooze points at records in two tables, so no foreign key holds it. A `tasks_d
 triggers do. A migration that drops and rebuilds `tasks` or `posts` loses its trigger. A snooze that has ended stays
 in the table, and the stalled list ignores it.
 
+Inbox snoozes stay out of this table. #655 keeps them in a `snoozed_until` column on each record's table, as
+[ADR 0121][0121] says.
+
 `activity` now writes a table of its own, where before it only read.
 
 [0003]: 0003-reach-another-slice-only-through-its-exports.md
 [0021]: 0021-let-sql-read-another-slices-tables-never-write-them.md
 [0052]: 0052-read-activity-through-one-view-across-every-content-kind.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
+[0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
