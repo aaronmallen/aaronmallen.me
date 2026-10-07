@@ -4,7 +4,7 @@ source "https://gem.coop"
 
 source "https://gem.coop/@aaron" do
   gem "hanami-settings-stores", "~> 0.1"
-  gem "phlex-hanami", "~> 0.2"
+  gem "phlex-hanami", "~> 0.3"
 end
 
 source "https://gem.coop/@dry" do
