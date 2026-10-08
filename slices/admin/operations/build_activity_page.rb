@@ -13,7 +13,7 @@ module Admin
       ]
 
       def call(from: nil, to: nil, types: nil, query: nil, day: nil)
-        window = ::Activity::Filters.call(from:, to:, day:, types:)
+        window = filter_window(from:, to:, day:, types:)
         filters = { **window.except(:day), text: Blog::Types::Text[query] }
         search = filters.merge(**search_query.call(query: filters[:text], fields: FIELDS).to_h)
         counts = activity_queries.counts(**search.except(:types))
@@ -26,6 +26,8 @@ module Admin
       end
 
       private
+
+      def filter_window(**) = ::Activity::Contracts::FiltersContract.new.call(**).to_h
 
       def timeline(search, day)
         paged = search.merge(day:, size: settings.page_size[:admin])

@@ -38,15 +38,15 @@ module API
       private
 
       def activity(filters, continue_to)
-        window = ::Activity::Filters.call(
-          from: filters["from"], to: filters["to"], day: continue_to || filters["day"], types: filters["types"],
-        )
+        window = activity_window(filters.merge("day" => continue_to || filters["day"]))
         search = { types: window[:types], **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
 
         Blog::Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
           activity_queries.between(from:, to:, limit:, **search)
         end
       end
+
+      def activity_window(picked) = ::Activity::Contracts::FiltersContract.new.call(picked).to_h
 
       def finished(page, search)
         found = task_queries.finished(page:, **search)
