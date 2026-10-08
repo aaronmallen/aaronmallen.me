@@ -7,10 +7,10 @@ module Contact
 
       params do
         required(:reply_to).value(
-          Blog::Types::TrimmedText, :filled?, max_size?: MessageLimits::MAX_REPLY_TO, format?: EMAIL,
+          Blog::Types::TrimmedText, :filled?, max_size?: Types::MAX_REPLY_TO, format?: EMAIL,
         )
-        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: MessageLimits::MAX_SUBJECT)
-        required(:body).value(Blog::Types::Normalized::Lines, :filled?, max_size?: MessageLimits::MAX_BODY)
+        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: Types::MAX_SUBJECT)
+        required(:body).value(Blog::Types::Normalized::Lines, :filled?, max_size?: Types::MAX_BODY)
       end
 
       rule(:reply_to).validate(:without_controls)

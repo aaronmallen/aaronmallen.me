@@ -6,7 +6,7 @@ RSpec.describe "Contact messages", type: :request do
   let(:message_queries) { Contact::Slice["repos.message_queries"] }
   let(:sender) { Analytics::Slice["operations.hash_visitor"].call(address: "127.0.0.1") }
 
-  def crlf_lines = Array.new(Contact::MessageLimits::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
+  def crlf_lines = Array.new(Contact::Types::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
 
   def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
@@ -20,13 +20,13 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "is stored with a subject at the cap" do
-      send_message(subject: "a" * Contact::MessageLimits::MAX_SUBJECT)
+      send_message(subject: "a" * Contact::Types::MAX_SUBJECT)
 
       expect(last_response.status).to eq(302)
     end
 
     it "is stored with a body at the cap" do
-      send_message(body: "a" * Contact::MessageLimits::MAX_BODY)
+      send_message(body: "a" * Contact::Types::MAX_BODY)
 
       expect(last_response.status).to eq(302)
     end
@@ -50,13 +50,13 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "is refused with a subject over the cap" do
-      send_message(subject: "a" * (Contact::MessageLimits::MAX_SUBJECT + 1))
+      send_message(subject: "a" * (Contact::Types::MAX_SUBJECT + 1))
 
       expect(last_response.status).to eq(422)
     end
 
     it "is refused with a reply address over the cap" do
-      send_message(reply_to: "#{'a' * Contact::MessageLimits::MAX_REPLY_TO}@example.com")
+      send_message(reply_to: "#{'a' * Contact::Types::MAX_REPLY_TO}@example.com")
 
       expect(last_response.status).to eq(422)
     end

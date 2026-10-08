@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Contact
-  module MessageLimits
+  module Types
     MAX_BODY = 5000
     MAX_REPLY_TO = 254
     MAX_SUBJECT = 200

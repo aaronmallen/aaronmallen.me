@@ -64,7 +64,7 @@ RSpec.describe "Contact form", type: :feature do
   end
 
   describe "the count under the message" do
-    let(:total) { Contact::MessageLimits::MAX_BODY }
+    let(:total) { Contact::Types::MAX_BODY }
 
     before { visit "/contact" }
 
