@@ -38,6 +38,28 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def decision(title, close: nil)
+    run = ->(name, *args) { Decisions::Slice["operations.#{name}"].call(*args).value! }
+    found = run.call(:open_decision, { title:, problem: "Jobs **pile** up", tags: "queues" })
+    option = run.call(:add_decision_option, found.id, { title: "Sidekiq", body: "Runs *today*" })
+    run.call(:add_decision_comment, found.id, { body: "Looked into it" })
+    run.call(:resolve_decision, found.id, { option_id: option.id, reason: "It runs" }) if close
+    found
+  end
+
+  def decisions
+    open_one = decision("Pick a queue")
+    closed = decision("Pick a host", close: true)
+    {
+      "decisions" => "/admin/decisions",
+      "decisions resolved" => "/admin/decisions?status=resolved",
+      "decision" => "/admin/decisions/#{open_one.id}",
+      "decision resolved" => "/admin/decisions/#{closed.id}",
+      "new decision" => "/admin/decisions/new",
+      "decision editor" => "/admin/decisions/#{closed.id}/edit",
+    }
+  end
+
   def dialogs
     {
       "key help" => -> { open_key_help },
@@ -225,7 +247,7 @@ RSpec.describe "Admin screens", type: :feature do
   def screens
     pages.merge(
       calendars, people, person_search, record_search, linked_records, composers, dialogs, journal_editors,
-      saved_view_menus, selections, time_rows,
+      saved_view_menus, selections, time_rows, decisions,
     )
   end
 

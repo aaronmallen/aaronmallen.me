@@ -15,7 +15,7 @@ RSpec.describe "Admin decision keys", type: :feature do
       decision
       visit "/admin/decisions"
       watch_clipboard
-      find(".li", text: "Pick a queue").find(".record-key").click
+      find(".decision-row", text: "Pick a queue").find(".record-key").click
     end
 
     it "copies the key", :aggregate_failures do

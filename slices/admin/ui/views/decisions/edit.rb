@@ -12,7 +12,7 @@ module Admin
           def view_template
             decision = @editor[:decision]
 
-            PageHead(title: decision.title, kicker: t(".kicker")) do
+            PageHead(title: t(".heading"), kicker: decision.title) do
               BackLink(href: path(:admin_decision, id: decision.id)) { t(".back") }
             end
 

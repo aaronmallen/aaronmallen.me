@@ -15,11 +15,13 @@ module Admin
           prop :form, Blog::Types::Hash
 
           def view_template
-            if @decision.open?
-              Card(label: t(".label"), title: t(".resolve_title")) { resolve }
-              Card(label: t(".label"), title: t(".drop_title")) { drop }
-            else
-              Card(label: t(".label"), title: t(".reopen_title")) { reopen }
+            Card(title: t(".label")) do
+              if @decision.open?
+                part(".resolve_title") { resolve }
+                part(".drop_title") { drop }
+              else
+                reopen
+              end
             end
           end
 
@@ -51,6 +53,13 @@ module Admin
           end
 
           def errors_for(name) = @form[:name] == name ? @form[:errors] : Blog::Constants::EMPTY_HASH
+
+          def part(title_key)
+            div(class: "decision-close-part") do
+              h3(class: "decision-close-title") { t(title_key) }
+              yield
+            end
+          end
 
           def reason_field(name)
             scope = scope_for(name)

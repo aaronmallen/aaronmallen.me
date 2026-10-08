@@ -19,11 +19,12 @@ module Admin
           prop :options, Blog::Types::Hash
 
           def view_template
-            return li(class: "timeline-event", **attributes) { line } unless body
-
-            li(class: "comment", **attributes) do
-              div(class: "comment-head") { line }
-              div(class: "markdown-body post-body comment-body") { raw(safe(::Tasks::Markdown.to_html(body).strip)) }
+            li(class: "decision-event", **attributes) do
+              Moment(at: @entry.occurred_at, format: :short, class: "decision-event-time")
+              div(class: "decision-event-text") do
+                line
+                div(class: "markdown-body post-body") { raw(safe(::Tasks::Markdown.to_html(body).strip)) } if body
+              end
             end
           end
 
@@ -36,9 +37,10 @@ module Admin
           def line
             icon, key = EVENTS.fetch(@entry.kind)
 
-            Icon(["timeline-event-icon", icon])
-            span(class: "timeline-event-text") { t(key, option: @options[@entry.option_id]) }
-            Moment(at: @entry.occurred_at, class: "timeline-time")
+            p(class: "decision-event-line") do
+              Icon(icon)
+              plain t(key, option: @options[@entry.option_id])
+            end
           end
         end
       end

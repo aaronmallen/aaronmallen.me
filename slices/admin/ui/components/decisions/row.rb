@@ -8,18 +8,46 @@ module Admin
           prop :decision, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: @decision.title, href: path(:admin_decision, id: @decision.id)) do |item|
-              item.beside { RecordKey(kind: "decision", id: @decision.id) }
-              item.meta { p(class: "li-sub") { sub } }
+            div(class: "decision-row", data: { key_row: true }) do
+              RecordKey(kind: "decision", id: @decision.id)
+              div(class: "decision-row-body") do
+                a(class: "decision-row-title", href: path(:admin_decision, id: @decision.id),
+                  data: { key_open: true }) do
+                  @decision.title
+                end
+                p(class: "decision-meta") { meta }
+              end
+              Status(status: @decision.status)
             end
           end
 
           private
 
-          def sub
-            text = dotted(t(".options", count: @decision.options.size), t(".opened", date: Stamped::MARK))
+          def chosen
+            option = @decision.options.find { it.id == @decision.resolved_option_id }
+            return unless option
 
-            Stamped(text:, at: @decision.created_at)
+            span(class: "decision-chosen") { IconLabel(icon: "fa-solid fa-check") { option.title } }
+          end
+
+          def comments
+            count = @decision.comments.size
+            return if count.zero?
+
+            span do
+              Icon("fa-regular fa-comment")
+              plain count.to_s
+              whitespace
+              span(class: "sr-only") { t(".comments", count:) }
+            end
+          end
+
+          def meta
+            span { Stamped(text: t(".opened", date: Stamped::MARK), at: @decision.created_at, format: :day) }
+            span { t(".options", count: @decision.options.size) }
+            chosen
+            comments
+            @decision.tags.each { Tag(tag: it) }
           end
         end
       end

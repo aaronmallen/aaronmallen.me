@@ -16,7 +16,7 @@ RSpec.describe "Admin decisions", type: :request do
 
   def t(key, **) = i18n.t(key, **)
 
-  def titles = page.all(".li .li-title").map(&:text)
+  def titles = page.all(".decision-row .decision-row-title").map(&:text)
 
   describe "signed out" do
     it "sends the list to sign in" do
@@ -49,12 +49,12 @@ RSpec.describe "Admin decisions", type: :request do
         expect(titles).to eq(["Newer open", "Older open"])
       end
 
-      it "shows each decision's key beside its title" do
+      it "shows each decision's key in its row" do
         get "/admin/decisions"
 
         keys = Decisions::Slice["relations.decisions"].where(title: ["Newer open", "Older open"]).pluck(:id)
 
-        expect(page.all(".li .li-head button.record-key").map { it["data-record-key"] })
+        expect(page.all(".decision-row button.record-key").map { it["data-record-key"] })
           .to match_array(keys.map { "##{it}" })
       end
 
@@ -76,36 +76,77 @@ RSpec.describe "Admin decisions", type: :request do
         expect(titles).to eq(["Newer open", "Older open"])
       end
 
-      it "checks the chosen segment" do
+      it "marks the chosen status tab" do
         get "/admin/decisions", status: "dropped"
 
-        expect(page).to have_css(".seg input[name='status'][value='dropped'][checked]")
+        expect(page).to have_css(".decision-tabs a[aria-current='page'][href='/admin/decisions?status=dropped']")
       end
 
-      it "counts every status" do
-        get "/admin/decisions", status: "dropped"
+      it "counts every status on its tab" do
+        get "/admin/decisions"
 
-        expect(page).to have_css(".page-head-sub", exact_text: "2 open · 0 resolved · 1 dropped")
+        expect(page.all(".decision-tabs a").map(&:text)).to eq(%w[open2 resolved0 dropped1])
+      end
+
+      it "sums up what waits in the lede" do
+        get "/admin/decisions"
+
+        expect(page).to have_css(".page-head-sub", exact_text: "2 decisions wait on a choice. 0 resolved, 1 dropped.")
+      end
+
+      it "says nothing waits when every decision is closed" do
+        Decisions::Slice["relations.decisions"].where(status: "open").delete
+        get "/admin/decisions"
+
+        expect(page).to have_css(".page-head-sub", exact_text: t("ui.views.decisions.index.empty.open"))
       end
 
       it "links each row to its page" do
         get "/admin/decisions"
 
-        expect(page.find(".li-title", text: "Newer open")[:href]).to match(%r{\A/admin/decisions/\d+\z})
+        expect(page.find(".decision-row-title", text: "Newer open")[:href]).to match(%r{\A/admin/decisions/\d+\z})
       end
 
       it "counts each decision's options" do
         option
         get "/admin/decisions"
 
-        expect(page.find(".li", text: "Pick a queue")).to have_css(".li-sub", text: "1 option")
+        expect(page.find(".decision-row", text: "Pick a queue")).to have_css(".decision-meta", text: "1 option")
+      end
+
+      describe "a resolved row" do
+        let(:row) { page.find(".decision-row", text: "Resolved one") }
+
+        before do
+          resolved = create(:decision, title: "Resolved one")
+          Decisions::Slice["repos.decision_mutations"].replace_tags(resolved.id, %w[queues])
+          chosen = create(:decision_option, decision_id: resolved.id, title: "Sidekiq")
+          Decisions::Slice["operations.resolve_decision"].call(resolved.id, { option_id: chosen.id, reason: "Fast" })
+          create(:decision_comment, decision_id: resolved.id)
+          get "/admin/decisions", status: "resolved"
+        end
+
+        it "names the chosen option" do
+          expect(row).to have_css(".decision-chosen", text: "Sidekiq")
+        end
+
+        it "counts its comments" do
+          expect(row).to have_css(".decision-meta", text: "1 comment")
+        end
+
+        it "shows its tags and status", :aggregate_failures do
+          expect(row).to have_css(".tag", text: "#queues")
+          expect(row).to have_css(".pill", text: "resolved")
+        end
       end
 
       it "puts when each decision opened in a time tag" do
         create(:decision, title: "Dated", created_at: Time.utc(2026, 9, 7, 17, 30))
         get "/admin/decisions"
 
-        expect(page.find(".li", text: "Dated").find(".li-sub time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+        time = page.find(".decision-row", text: "Dated").find(".decision-meta time")
+
+        expect(time[:datetime]).to eq("2026-09-07T12:30:00-05:00")
       end
 
       it "says decisions is where you are" do
@@ -200,8 +241,10 @@ RSpec.describe "Admin decisions", type: :request do
         expect(page.find("[data-decision-option='#{option.id}']")).to have_css(".markdown-body em", text: "today")
       end
 
-      it "offers a form to add an option" do
-        expect(page).to have_css("form[action='/admin/decisions/#{decision.id}/options'] input[name='option[title]']")
+      it "offers a form to add an option behind a toggle" do
+        expect(page.find("details.decision-add:not([open])")).to have_css(
+          "form[action='/admin/decisions/#{decision.id}/options'] input[name='option[title]']", visible: :all,
+        )
       end
 
       it "offers an edit form for each option, without a note while open", :aggregate_failures do
@@ -420,6 +463,13 @@ RSpec.describe "Admin decisions", type: :request do
         follow_redirect!
 
         expect(page.find("[data-decision-option='#{option.id}']")).to have_css(".pill", text: "chosen")
+      end
+
+      it "names the choice in the lede" do
+        close(:resolve, option_id: option.id, reason: "It runs")
+        follow_redirect!
+
+        expect(page).to have_css(".page-head-sub", exact_text: t("ui.views.decisions.show.chose", option: "Sidekiq"))
       end
 
       it "refuses another decision's option", :aggregate_failures do

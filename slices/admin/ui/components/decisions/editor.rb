@@ -13,19 +13,26 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Form(action: form_action, class: "form-stack") do
-              fields
-              note if closed?
-              div { Button(variant: :pri, type: "submit") { t(@decision ? ".save" : ".open") } }
+            div(class: "g-main") do
+              Form(action: form_action, class: "form-stack") do
+                fields
+                note if closed?
+                div(class: "decision-editor-acts") do
+                  Button(variant: :pri, type: "submit") { t(@decision ? ".save" : ".open") }
+                  Button(href: cancel_path, variant: :gh) { t(".cancel") }
+                end
+              end
             end
           end
 
           private
 
+          def cancel_path = @decision ? path(:admin_decision, id: @decision.id) : path(:admin_decisions)
+
           def closed? = @decision&.closed? || false
 
           def fields
-            Card(label: t(".label"), title: t(@decision ? ".edit_title" : ".new_title")) do
+            Card do
               div(class: "form-stack") do
                 title_field
                 problem_field

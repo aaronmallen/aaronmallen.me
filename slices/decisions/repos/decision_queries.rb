@@ -33,7 +33,7 @@ module Decisions
       def option_on_decision(decision_id, id) = decision_options.for_decision(decision_id).by_pk(id).one
 
       def page_by_status(status, page)
-        page.fill(decisions.combine(:options).with_status(status).newest_first.paged(page).to_a)
+        page.fill(decisions.combine(:comments, :options, :tags).with_status(status).newest_first.paged(page).to_a)
       end
 
       def timeline(decision_id) = decision_timeline.for_decision(decision_id).oldest_first.to_a

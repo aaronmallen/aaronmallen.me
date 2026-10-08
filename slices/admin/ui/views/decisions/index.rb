@@ -11,44 +11,26 @@ module Admin
           OPEN = Blog::Types::DecisionStatus["open"]
           RESOLVED = Blog::Types::DecisionStatus["resolved"]
 
-          COUNTS = { OPEN => ".counts.open", RESOLVED => ".counts.resolved", DROPPED => ".counts.dropped" }.freeze
           EMPTIES = { OPEN => ".empty.open", RESOLVED => ".empty.resolved", DROPPED => ".empty.dropped" }.freeze
-          FILTERS = {
-            OPEN => "ui.views.decisions.index.open",
-            RESOLVED => "ui.views.decisions.index.resolved",
-            DROPPED => "ui.views.decisions.index.dropped",
-          }.freeze
-          TITLES = { OPEN => ".titles.open", RESOLVED => ".titles.resolved", DROPPED => ".titles.dropped" }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :decisions, Blog::Types::Instance(Blog::Structs::Paged)
           prop :filter, Blog::Types::DecisionStatus
 
           def view_template
+            content_for(:title, t(".title"))
             PageHead(title: t(".heading"), sub:) do
-              filter_form
-              new_link
+              CreateLink(href: path(:admin_new_decision), label: t(".new_decision"))
             end
+            StatusTabs(counts: @counts, filter: @filter)
 
-            Card(title: t(TITLES.fetch(@filter))) { rows }
+            Card { rows }
             Pager(page: @decisions, route: :admin_decisions, params: { status: @filter })
           end
 
           private
 
-          def filter_form
-            FilterSwitch(
-              action: path(:admin_decisions),
-              name: "status",
-              options: FILTERS,
-              selected: @filter,
-              label: t(".filter"),
-            )
-          end
-
-          def new_link
-            CreateLink(href: path(:admin_new_decision), label: t(".new_decision"))
-          end
+          def count(status) = @counts.fetch(status, 0)
 
           def rows
             return Empty { t(EMPTIES.fetch(@filter)) } if @decisions.rows.empty?
@@ -56,7 +38,11 @@ module Admin
             @decisions.rows.each { Row(decision: it) }
           end
 
-          def sub = dotted(*COUNTS.map { |status, key| t(key, count: @counts.fetch(status, 0)) })
+          def sub
+            return t(EMPTIES.fetch(OPEN)) if count(OPEN).zero?
+
+            t(".waiting", count: count(OPEN), resolved: count(RESOLVED), dropped: count(DROPPED))
+          end
         end
       end
     end

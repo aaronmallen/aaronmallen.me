@@ -67,13 +67,23 @@ RSpec.describe "Admin decision timeline", type: :request do
       expect(page).to have_css(".timeline-card .hint", text: t("ui.components.decisions.timeline.empty"))
     end
 
-    it "puts comments and events in time order" do
-      create(:decision_comment, decision_id: decision.id, body: "Noon", created_at: ten + 7200)
-      event("option_added", at: ten + 3600, option_id: option_id("Sidekiq"))
-      create(:decision_comment, decision_id: decision.id, body: "Ten", created_at: ten)
-      read
+    describe "comments and events" do
+      before do
+        create(:decision_comment, decision_id: decision.id, body: "Noon", created_at: ten + 7200)
+        event("option_added", at: ten + 3600, option_id: option_id("Sidekiq"))
+        create(:decision_comment, decision_id: decision.id, body: "Ten", created_at: ten)
+        event("edited", at: ten + 60)
+        read
+      end
 
-      expect(entries.map(&:text)).to match([/Ten/, /#{event_text('option_added', option: 'Sidekiq')}/, /Noon/])
+      it "puts the comments in their card in time order" do
+        expect(page.all(".decision-main .timeline > li").map(&:text)).to match([/Ten/, /Noon/])
+      end
+
+      it "puts the events on the timeline in time order" do
+        expect(page.all(".timeline-card .timeline > li").map(&:text))
+          .to match([/#{event_text('edited')}/, /#{event_text('option_added', option: 'Sidekiq')}/])
+      end
     end
 
     it "leaves out another decision's comments and events" do
@@ -132,9 +142,9 @@ RSpec.describe "Admin decision timeline", type: :request do
         read
       end
 
-      it "shows each one oldest first" do
+      it "shows the comment, then each event oldest first" do
         expect(entries.map { it["data-decision-event"] || "comment" })
-          .to eq(%w[opened option_added comment resolved edited option_edited reopened dropped])
+          .to eq(%w[comment opened option_added resolved edited option_edited reopened dropped])
       end
 
       it "names the option on its events", :aggregate_failures do

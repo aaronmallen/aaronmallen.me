@@ -524,17 +524,16 @@ en:
             resolve: "Why this option wins."
           reason: "Why"
           reopen: "Reopen"
-          reopen_title: "Reopen it"
           resolve: "Resolve"
-          resolve_title: "Pick an option"
+          resolve_title: "Resolve it"
+        comments:
+          title: "Comments"
         edit_note:
           hint: "Needed when you change a closed decision. It goes on the timeline."
           label: "What changed and why"
           placeholder: "Added the cost of running it."
         editor:
-          edit_title: "Problem"
-          label: "Decision"
-          new_title: "What needs a choice"
+          cancel: "Cancel"
           open: "Open decision"
           problem: "Problem"
           problem_placeholder: "What needs a choice, and why it matters."
@@ -568,12 +567,15 @@ en:
           title: "Option"
           title_placeholder: "Use Sidekiq"
         options:
+          add: "+ Add option"
           chosen: "chosen"
           edit: "Edit"
           empty: "No options yet."
-          label: "Choices"
           title: "Options"
         row:
+          comments:
+            one: "comment"
+            other: "comments"
           opened: "opened %{date}"
           options:
             one: "%{count} option"
@@ -583,10 +585,11 @@ en:
           dropped: "dropped"
           open: "open"
           resolved: "resolved"
+        status_tabs:
+          label: "Status"
         timeline:
           empty: "Nothing has happened yet."
-          label: "Timeline"
-          title: "Activity"
+          title: "Timeline"
         timeline_event:
           dropped: "Dropped it"
           edited: "Edited the decision"
@@ -1925,35 +1928,29 @@ en:
       decisions:
         edit:
           back: "Back to the decision"
-          kicker: "Edit decision"
+          heading: "Edit decision"
         index:
-          counts:
-            dropped: "%{count} dropped"
-            open: "%{count} open"
-            resolved: "%{count} resolved"
-          dropped: "dropped"
           empty:
             dropped: "Nothing dropped."
             open: "Nothing waits on a choice."
             resolved: "Nothing resolved yet."
-          filter: "Status"
-          heading: "Decisions"
+          heading: "Journal"
           new_decision: "New decision"
-          open: "open"
-          resolved: "resolved"
-          titles:
-            dropped: "Dropped"
-            open: "Waiting on a choice"
-            resolved: "Resolved"
+          title: "Decisions"
+          waiting:
+            one: "%{count} decision waits on a choice. %{resolved} resolved, %{dropped} dropped."
+            other: "%{count} decisions wait on a choice. %{resolved} resolved, %{dropped} dropped."
         new:
           back: "All decisions"
           heading: "New decision"
         show:
           back: "All decisions"
+          chose: "Chose %{option}."
+          dropped: "Dropped."
           edit: "Edit"
           kicker: "Decision"
-          problem: "Problem"
-          problem_label: "Why"
+          opened: "opened %{date}"
+          problem: "Why it came up"
       forms:
         rejected:
           heading: "Form expired"

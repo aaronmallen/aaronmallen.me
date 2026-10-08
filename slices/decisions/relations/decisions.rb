@@ -5,6 +5,7 @@ module Decisions
     class Decisions < Blog::DB::Relation
       schema :decisions, infer: true do
         associations do
+          has_many :decision_comments, as: :comments
           has_many :decision_options, as: :options, view: :in_order
           has_many :decision_tags
           has_many :tags, through: :decision_tags, view: :in_name_order
