@@ -505,7 +505,7 @@ RSpec.describe "Admin social", type: :request do
         queued
         get "/admin/social"
 
-        expect(page).to have_css(".sq-meta .pill", text: "Mastodon")
+        expect(page).to have_css(".sq-network", text: "Mastodon")
       end
 
       it "counts down to an upcoming item" do
@@ -550,7 +550,7 @@ RSpec.describe "Admin social", type: :request do
         create(:social_post_delivery, :mastodon, social_post_id: social_post.id, failed: true, error: "rate limited")
         get "/admin/social"
 
-        expect(page).to have_css(".pill.pink", text: "Mastodon failed")
+        expect(page).to have_css(".sq-network.bad", text: "Mastodon failed")
       end
 
       it "shows the final error once the retries run out" do

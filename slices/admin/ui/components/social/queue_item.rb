@@ -7,14 +7,14 @@ module Admin
         class QueueItem < Component
           DAY = 86_400
           ENGAGEMENT = [
-            [".likes", "fa-solid fa-heart", :like_count],
+            [".likes", "fa-regular fa-heart", :like_count],
             [".reposts", "fa-solid fa-retweet", :repost_count],
-            [".replies", "fa-solid fa-reply", :reply_count],
+            [".replies", "fa-regular fa-comment", :reply_count],
           ].freeze
           HOUR = 3600
-          NETWORK_COLORS = {
-            Blog::Types::NetworkName["bluesky"] => :blue,
-            Blog::Types::NetworkName["mastodon"] => :violet,
+          NETWORK_ICONS = {
+            Blog::Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
+            Blog::Types::NetworkName["mastodon"] => "fa-brands fa-mastodon",
           }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
 
@@ -25,23 +25,35 @@ module Admin
 
           def view_template
             article(class: "sq-item", data: { social_item: @social_post.id, key_row: true }) do
-              div(class: "sq-text") { @social_post.parts.each { |part| p(class: "sq-part") { part.body } } }
-              failures
-              div(class: "sq-foot") do
-                div(class: "sq-meta") { meta }
-                div(class: "sq-side") { side }
+              div(class: "sq-body") do
+                div(class: "sq-text") { @social_post.parts.each { |part| p(class: "sq-part") { part.body } } }
+                failures
+                p(class: "sq-meta") { meta }
               end
+              actions
             end
           end
 
           private
+
+          def actions
+            return if posted? || claimed?
+
+            div(class: "sq-actions") do
+              edit_link
+              remove_form
+            end
+          end
 
           def claimed? = @social_post.deliveries.any?
 
           def deliveries = @deliveries ||= @social_post.deliveries.to_h { [it.network, it] }
 
           def edit_link
-            Button(href: edit_path, data: { social_edit: "", key_open: true }, small: true) { t(".edit") }
+            Button(
+              href: edit_path, small: true, title: t(".edit"), aria: { label: t(".edit") },
+              icon: "fa-regular fa-pen-to-square", data: { social_edit: "", key_open: true },
+            )
           end
 
           def edit_path = path(:admin_social, filter: @filter, edit: @social_post.id)
@@ -50,7 +62,7 @@ module Admin
             ENGAGEMENT.each do |key, icon, column|
               total = deliveries.each_value.sum { it.public_send(column) }
 
-              span(class: "sq-metric", data: { social_engagement: column }, aria: { label: t(key) }) do
+              span(class: "sq-metric", title: t(key), data: { social_engagement: column }, aria: { label: t(key) }) do
                 IconLabel(icon:) { total.to_s }
               end
             end
@@ -76,15 +88,20 @@ module Admin
           def label(network) = t(Structs::Network::LABELS.fetch(network))
 
           def meta
-            @social_post.targets.each { pill(it) }
-            suggestions_pill
+            @social_post.targets.each { network(it) }
             time_stamp
+            engagement if posted?
+            suggestion_count
           end
 
-          def pill(network)
-            return Pill(color: :pink) { t(".failed", network: label(network)) } if failing?(deliveries[network])
+          def network(name)
+            failing = failing?(deliveries[name])
 
-            Pill(color: NETWORK_COLORS.fetch(network)) { label(network) }
+            span(class: ["sq-network", ("bad" if failing)]) do
+              IconLabel(icon: NETWORK_ICONS.fetch(name)) do
+                failing ? t(".failed", network: label(name)) : label(name)
+              end
+            end
           end
 
           def posted? = @social_post.status == POSTED
@@ -101,22 +118,19 @@ module Admin
           def remove_form
             Form(action: path(:admin_delete_social_post, id: @social_post.id)) do
               input(type: "hidden", name: "filter", value: @filter)
-              Button(type: "submit", variant: :warn, small: true, data: { social_remove_item: "" }) { t(".remove") }
+              Button(
+                type: "submit", variant: :warn, small: true, title: t(".remove"), aria: { label: t(".remove") },
+                icon: "fa-regular fa-trash-can", data: { social_remove_item: "" },
+              )
             end
           end
 
-          def side
-            return engagement if posted?
-            return if claimed?
-
-            edit_link
-            remove_form
-          end
-
-          def suggestions_pill
+          def suggestion_count
             return if posted? || @suggestions.zero?
 
-            Pill(color: :orange) { t(".suggestions", count: @suggestions) }
+            span(class: "sq-suggestions") do
+              IconLabel(icon: "fa-solid fa-robot") { t(".suggestions", count: @suggestions) }
+            end
           end
 
           def time_stamp

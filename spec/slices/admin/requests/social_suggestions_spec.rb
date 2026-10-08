@@ -50,7 +50,7 @@ RSpec.describe "Admin social suggestions", type: :request do
         suggest(social_post, typo, typo("sat", "slept"))
         get "/admin/social?filter=drafts"
 
-        expect(page).to have_css(".sq-meta .pill", text: "2 suggestions")
+        expect(page).to have_css(".sq-suggestions", text: "2 suggestions")
       end
 
       it "names one edit in the singular" do
@@ -58,7 +58,7 @@ RSpec.describe "Admin social suggestions", type: :request do
         suggest(social_post, typo)
         get "/admin/social?filter=drafts"
 
-        expect(page).to have_css(".sq-meta .pill", text: "1 suggestion")
+        expect(page).to have_css(".sq-suggestions", text: "1 suggestion")
       end
 
       it "counts the open edits on a queued item" do
@@ -66,7 +66,7 @@ RSpec.describe "Admin social suggestions", type: :request do
         suggest(social_post, typo)
         get "/admin/social"
 
-        expect(page).to have_css(".sq-meta .pill", text: "1 suggestion")
+        expect(page).to have_css(".sq-suggestions", text: "1 suggestion")
       end
 
       it "shows no count when every edit is settled" do
@@ -74,14 +74,14 @@ RSpec.describe "Admin social suggestions", type: :request do
         suggestion_mutations.reject(suggest(social_post, typo).edits.map(&:id))
         get "/admin/social?filter=drafts"
 
-        expect(page).to have_no_css(".sq-meta .pill", text: "suggestion")
+        expect(page).to have_no_css(".sq-suggestions", text: "suggestion")
       end
 
       it "shows no count on an item without suggestions" do
         compose("teh cat sat")
         get "/admin/social?filter=drafts"
 
-        expect(page).to have_no_css(".sq-meta .pill", text: "suggestion")
+        expect(page).to have_no_css(".sq-suggestions", text: "suggestion")
       end
 
       it "counts only the newest set of edits" do
@@ -90,7 +90,7 @@ RSpec.describe "Admin social suggestions", type: :request do
         suggest(social_post, typo)
         get "/admin/social?filter=drafts"
 
-        expect(page).to have_css(".sq-meta .pill", text: "1 suggestion")
+        expect(page).to have_css(".sq-suggestions", text: "1 suggestion")
       end
     end
 
@@ -538,7 +538,7 @@ RSpec.describe "Admin social suggestions", type: :request do
       it "shows no count in the queue" do
         get "/admin/social?filter=posted"
 
-        expect(page).to have_no_css(".sq-meta .pill", text: "suggestion")
+        expect(page).to have_no_css(".sq-suggestions", text: "suggestion")
       end
 
       it "shows no card" do

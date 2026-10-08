@@ -20,10 +20,11 @@ module Admin
 
           def view_template
             Form(action: action, data: { social_composer: "" }) do
-              Card(label: t(".label"), title: editing? ? t(".editing") : t(".title")) do
+              Card(title: editing? ? t(".editing") : t(".title"), class: "social-compose") do |card|
+                card.side { Targets(errors: @errors, networks: @networks) }
                 parts
-                Targets(errors: @errors, networks: @networks)
-                timing
+                tools
+                schedule_field
                 foot
               end
               part_template
@@ -35,7 +36,7 @@ module Admin
           def action = editing? ? path(:admin_update_social_post, id: @editing) : path(:admin_create_social_post)
 
           def add_button
-            Button(small: true, data: { social_add: "" }, icon: "fa-solid fa-plus") { t(".add") }
+            Button(variant: :gh, small: true, data: { social_add: "" }, icon: "fa-solid fa-plus") { t(".add") }
           end
 
           def blank? = @values[:parts].none? { written?(it) }
@@ -49,14 +50,15 @@ module Admin
           def buttons
             cancel_link if editing?
             Button(
-              type: "submit", name: "intent", value: DRAFT, disabled: draft_disabled?, data: { social_draft: "" },
+              type: "submit", name: "intent", value: DRAFT, small: true, disabled: draft_disabled?,
+              data: { social_draft: "" },
             ) do
               button_label("fa-regular fa-floppy-disk", ".save_draft")
             end
             send_button
           end
 
-          def cancel_link = Button(href: path(:admin_social), small: true) { t(".cancel") }
+          def cancel_link = Button(href: path(:admin_social), variant: :gh, small: true) { t(".cancel") }
 
           def draft_disabled? = blank? || @networks.none?(&:selected)
 
@@ -95,12 +97,11 @@ module Admin
               end
             end
             Mentions(handles: @handles, people: @people)
-            div(class: "compose-add") { add_button }
             FieldError(field: :parts, errors: @errors)
           end
 
           def schedule_field
-            div(data: { social_later: "" }, hidden: !scheduling?) do
+            div(class: "compose-when", data: { social_later: "" }, hidden: !scheduling?) do
               Field(label: t(".schedule_at"), name: :schedule_at, errors: @errors, error: FieldError) do |control|
                 Input(type: "datetime-local", **control, name: "social[schedule_at]", value: @values[:schedule_at])
               end
@@ -121,10 +122,10 @@ module Admin
 
           def send_disabled? = draft_disabled? || over_limit?
 
-          def timing
-            div(class: "compose-when") do
+          def tools
+            div(class: "compose-tools") do
+              add_button
               SegmentedControl(label: t(".when"), name: "social[mode]", options: mode_options, selected: @values[:mode])
-              schedule_field
             end
           end
         end

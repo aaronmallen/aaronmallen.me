@@ -4432,10 +4432,6 @@
   }
 }
 
-@utility compose-part-foot {
-  @apply flex flex-wrap items-center justify-between gap-3;
-}
-
 @utility compose-preview {
   @apply flex flex-col gap-1.5 rounded-card border border-line bg-ground-sunk p-3;
 }
@@ -4480,10 +4476,6 @@
   @apply block h-full rounded-full bg-current transition-[width] duration-150 ease-in-out;
 }
 
-@utility compose-add {
-  @apply mt-3 flex;
-}
-
 @utility compose-targets {
   @apply mt-4 flex flex-wrap items-center gap-2;
 }
@@ -4523,7 +4515,7 @@
 }
 
 @utility compose-when {
-  @apply mt-4 flex flex-col items-start gap-3;
+  @apply mt-3;
 }
 
 @utility compose-foot {
@@ -4535,7 +4527,12 @@
 }
 
 @utility sq-item {
-  @apply flex flex-col gap-2 border-t border-line py-3 first:border-t-0 first:pt-0;
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-t border-line py-4;
+  @apply first:border-t-0 first:pt-0 last:pb-0;
+}
+
+@utility sq-body {
+  @apply flex min-w-0 flex-col gap-2.5;
 }
 
 @utility sq-text {
@@ -4543,31 +4540,118 @@
 }
 
 @utility sq-part {
-  @apply font-serif text-li break-words whitespace-pre-line text-ink;
+  @apply font-serif text-[1.02rem] leading-[1.55] break-words whitespace-pre-line text-ink;
+  text-wrap: pretty;
 }
 
 @utility sq-fail {
   @apply font-mono text-meta text-mk-pink-text;
 }
 
-@utility sq-foot {
-  @apply flex flex-wrap items-center justify-between gap-3;
+@utility sq-meta {
+  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 meta;
 }
 
-@utility sq-meta {
-  @apply flex flex-wrap items-center gap-2;
+@utility sq-network {
+  @apply inline-flex items-center gap-1.5;
+
+  &.bad {
+    @apply text-mk-pink-text;
+  }
+}
+
+@utility sq-suggestions {
+  @apply inline-flex items-center gap-1.5 text-mk-orange-text;
 }
 
 @utility sq-time {
   @apply meta;
 }
 
-@utility sq-side {
-  @apply flex shrink-0 flex-wrap items-center gap-2;
+@utility sq-metric {
+  @apply inline-flex items-center gap-1.5;
 }
 
-@utility sq-metric {
-  @apply inline-flex items-center gap-1.5 meta;
+@utility sq-actions {
+  @apply flex items-center gap-0.5;
+
+  & .btn {
+    @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
+  }
+
+  & .btn.warn:hover {
+    @apply text-mk-pink-text;
+  }
+}
+
+@utility social-side {
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+}
+
+@utility social-compose {
+  & .card-side {
+    @apply flex-col items-end;
+  }
+
+  & .compose-targets {
+    @apply mt-0 gap-1.5;
+  }
+
+  & .compose-target {
+    @apply px-3 py-1.5 text-ink-muted;
+
+    &:is(.mastodon, .bluesky):has(:checked) {
+      @apply border-ink-muted bg-ground text-ink;
+    }
+  }
+
+  & .btn.gh {
+    @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
+  }
+
+  & .compose-part-head .btn.gh {
+    @apply px-0 hover:border-transparent hover:text-mk-pink-text;
+  }
+
+  & .compose-parts {
+    @apply gap-4;
+    counter-reset: social-part;
+  }
+
+  & .compose-part {
+    counter-increment: social-part;
+  }
+
+  & .compose-part-head {
+    @apply flex items-center justify-between gap-3 meta;
+
+    &::before {
+      content: attr(data-label) " " counter(social-part);
+    }
+  }
+
+  & .compose-parts:not(:has(> .compose-part + .compose-part)) .compose-part-head {
+    @apply hidden;
+  }
+
+  & .compose-body {
+    @apply min-h-40 resize-y rounded-sm border-0 bg-transparent px-0 font-serif text-[1.2rem] leading-[1.65];
+    @apply focus:outline-offset-4;
+  }
+
+  & .compose-part + .compose-part .compose-body {
+    @apply min-h-28;
+  }
+
+  & .compose-tools {
+    @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+  }
+
+  & .compose-foot {
+    @apply mt-4;
+  }
 }
 
 @utility connect-actions {

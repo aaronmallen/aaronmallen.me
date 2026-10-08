@@ -13,11 +13,9 @@ module Admin
 
           def view_template
             div(class: "compose-part", data: { social_part: "" }) do
+              div(class: "compose-part-head", data: { label: t(".label") }) { remove_button }
               Textarea(value: @body, **body_attributes)
-              div(class: "compose-part-foot") do
-                Counts(counts: @counts, networks: @networks)
-                remove_button
-              end
+              Counts(counts: @counts, networks: @networks)
               preview
             end
           end
@@ -54,10 +52,7 @@ module Admin
           def previewing? = @body.match?(::Social::Operations::ResolveMentions::TOKEN) && @networks.any?(&:selected)
 
           def remove_button
-            Button(
-              variant: :gh, small: true, hidden: !@removable, icon: "fa-solid fa-xmark", aria: { label: t(".remove") },
-              data: { social_remove: "" },
-            )
+            Button(variant: :gh, small: true, hidden: !@removable, data: { social_remove: "" }) { t(".remove") }
           end
         end
       end

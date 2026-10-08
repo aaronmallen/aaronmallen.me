@@ -23,13 +23,9 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:)
 
-            Grid(columns: 2) do
-              SideStack do
-                suggestions
-                composer
-                linked if @records
-              end
-              SideStack { queue }
+            div(class: "g-main rev") do
+              div(class: "social-side") { SideStack { side } }
+              queue
             end
             render Components::People::PersonDialog.new
           end
@@ -55,6 +51,12 @@ module Admin
 
           def queue
             Queue(filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
+          end
+
+          def side
+            suggestions
+            composer
+            linked if @records
           end
 
           def sub = dotted(cross_posting, t(".queued", count: @queued))
