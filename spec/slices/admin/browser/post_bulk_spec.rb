@@ -9,11 +9,9 @@ RSpec.describe "Admin bulk post actions", type: :feature do
 
   def box(title) = find(".li", text: title).find("input[name='ids[]']")
 
-  def confirm_dialog = find("dialog#confirm-dialog[open]")
-
   def delete_ticked
     within("form#post-bulk") { click_button("Delete") }
-    confirm_dialog.click_button("Yes")
+    confirm_yes
   end
 
   def tagged(name) = post_queries.all.select { |post| post.tags.any? { it.name == name } }.map(&:title)

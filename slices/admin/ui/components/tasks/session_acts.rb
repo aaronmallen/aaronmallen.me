@@ -24,7 +24,7 @@ module Admin
 
           def delete_form
             label = t(".delete")
-            data = { confirm: t(".confirm_delete"), confirm_styled: true }
+            data = { confirm: t(".confirm_delete") }
 
             Form(action: route(:admin_delete_task_session), data:) do
               return_fields

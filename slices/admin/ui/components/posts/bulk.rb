@@ -27,7 +27,7 @@ module Admin
             Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) { label }
           end
 
-          def confirm = { confirm: t(".confirm_delete"), confirm_styled: true }
+          def confirm = { confirm: t(".confirm_delete") }
 
           def fields = { status: @filter, **Blog::Structs::Page.query(@page) }
 

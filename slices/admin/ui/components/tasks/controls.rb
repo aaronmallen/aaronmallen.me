@@ -39,7 +39,7 @@ module Admin
           private
 
           def cancel
-            data = { confirm: t(".confirm_cancel", task: @task.title), confirm_styled: true }
+            data = { confirm: t(".confirm_cancel", task: @task.title) }
 
             change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"), data:)
           end
@@ -85,7 +85,7 @@ module Admin
           end
 
           def move_confirm(list)
-            { confirm: t(".confirm_move", task: @task.title, list:), confirm_styled: true } if running?
+            { confirm: t(".confirm_move", task: @task.title, list:) } if running?
           end
 
           def moves = MOVES.fetch(@task.place).each { |place, side, key| move(place, side, key:) }

@@ -14,20 +14,20 @@ RSpec.describe "Admin MCP clients", type: :feature do
   end
 
   it "asks with the confirmation text" do
-    message = dismiss_confirm { row.click_button "Revoke" }
+    message = confirm_no { row.click_button "Revoke" }
 
     expect(message).to eq(translate("ui.components.client_row.confirm_revoke", client: "Claude"))
   end
 
   it "keeps the client listed when I don't confirm", :aggregate_failures do
-    dismiss_confirm { row.click_button "Revoke" }
+    confirm_no { row.click_button "Revoke" }
 
     expect(page).to have_no_css(".toast")
     expect(page).to have_css(".li-title", text: "Claude")
   end
 
   it "revokes once I confirm" do
-    accept_confirm { row.click_button "Revoke" }
+    confirm_yes { row.click_button "Revoke" }
 
     expect(page).to have_css(".toast", text: "Access revoked")
   end

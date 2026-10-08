@@ -500,7 +500,7 @@ en:
         edit: "Edit"
         edit_label: "Comment"
         save: "Save"
-      confirm_dialog:
+      confirm:
         accept: "Yes"
         decline: "No"
       date_range:

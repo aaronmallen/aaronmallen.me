@@ -27,7 +27,7 @@ module Admin
 
         def cancel(row)
           label = t(".cancel")
-          data = { confirm: t(".confirm_cancel", task: row.title), confirm_styled: true }
+          data = { confirm: t(".confirm_cancel", task: row.title) }
 
           task_form(:admin_cancel_task, row, label, "fa-solid fa-ban", data:)
         end

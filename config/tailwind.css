@@ -1287,7 +1287,7 @@
   }
 
   @media (width < 43.75rem) {
-    @apply min-h-tap;
+    @apply min-h-tap min-w-tap justify-center;
   }
 }
 
@@ -1362,16 +1362,15 @@
 }
 
 @utility saved-view {
-  @apply inline-flex items-center gap-0.5 rounded-btn border border-line bg-ground-sunk;
+  @apply inline-flex items-center gap-0.5;
 }
 
 @utility saved-view-link {
-  @apply rounded-btn px-2.5 py-1 font-mono text-meta text-ink no-underline hover:text-accent;
-  @apply transition-colors duration-150 ease-in-out;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply inline-flex items-center gap-2 rounded-full border border-line px-3 py-[7px] font-mono text-badge;
+  @apply text-ink-muted no-underline hover:text-ink admin-focus;
 
   &.current {
-    @apply bg-wash;
+    @apply border-ink-muted bg-ground-sunk text-ink;
   }
 
   @media (width < 43.75rem) {
@@ -1396,8 +1395,8 @@
 }
 
 @utility saved-view-panel {
-  @apply absolute top-full right-0 z-30 mt-2 flex w-80 flex-col gap-3 p-3 text-left;
-  @apply rounded-card border border-line bg-ground-sunk shadow-lg;
+  @apply absolute top-full right-0 z-55 mt-1.5 flex w-[280px] flex-col gap-3 p-3 text-left;
+  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
 
   :where(.journal-rail, .activity-rail) & {
     @apply right-auto left-0;
@@ -2580,8 +2579,9 @@
 }
 
 @utility record-key {
-  @apply min-w-9 cursor-pointer rounded-code border border-line bg-ground px-1.5 py-0.5;
-  @apply text-center font-mono text-badge whitespace-nowrap text-ink-muted hover:brightness-125;
+  @apply min-w-[42px] cursor-pointer rounded-key border border-line bg-ground px-[7px] py-[3px];
+  @apply text-center font-mono text-badge leading-[1.3] whitespace-nowrap text-ink-muted;
+  @apply hover:border-ink-muted hover:text-ink admin-focus;
 
   @media (width < 43.75rem) {
     @apply min-h-tap min-w-tap;
@@ -2599,7 +2599,7 @@
 }
 
 @utility record-link-kind {
-  @apply font-mono text-badge text-ink-muted;
+  @apply mb-1 flex items-center gap-2 font-mono text-badge tracking-[0.06em] text-ink-muted uppercase;
 }
 
 @utility record-link-list {
@@ -2607,7 +2607,7 @@
 }
 
 @utility record-link-row {
-  @apply flex min-w-0 items-center gap-2 border-t border-line py-1.5 first:border-t-0 first:pt-0;
+  @apply flex min-w-0 items-center gap-2 border-b border-line py-1.5 last:border-b-0;
 
   & > a.record-link-title {
     @apply no-underline hover:text-accent hover:underline focus-ring;
@@ -2619,7 +2619,7 @@
 }
 
 @utility record-link-title {
-  @apply min-w-0 flex-1 truncate text-ink;
+  @apply min-w-0 flex-1 truncate font-display text-li font-medium text-ink;
 }
 
 @utility record-link-day {
@@ -2639,7 +2639,7 @@
 }
 
 @utility record-picker-results {
-  @apply mt-2 flex flex-col gap-2;
+  @apply mt-2 flex flex-col gap-2 rounded-menu border border-line bg-ground-sunk p-1.5 shadow-menu;
 
   & .record-link-list {
     @apply gap-1;
@@ -2647,8 +2647,8 @@
 }
 
 @utility record-picker-target {
-  @apply flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-code border border-line px-2.5 py-2;
-  @apply text-left hover:bg-wash focus-ring;
+  @apply flex w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-icon border-0 bg-transparent px-2.5 py-2;
+  @apply text-left hover:bg-wash admin-focus;
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
@@ -2670,7 +2670,11 @@
 }
 
 @utility comment {
-  @apply flex min-w-0 flex-col gap-1.5 border-t border-line py-3 first:border-t-0 first:pt-0;
+  @apply flex min-w-0 flex-col gap-1 border-b border-line py-2.5 last:border-b-0;
+
+  & > .comment-body {
+    @apply text-base leading-[1.55];
+  }
 }
 
 @utility timeline-event {
@@ -2686,11 +2690,11 @@
 }
 
 @utility comment-head {
-  @apply flex min-w-0 flex-wrap items-center gap-2;
+  @apply flex min-w-0 flex-wrap items-center gap-2.5 font-mono text-badge text-ink-muted;
 }
 
 @utility comment-author {
-  @apply inline-flex items-center gap-1 text-li text-ink;
+  @apply inline-flex items-center gap-1 text-ink-muted;
 }
 
 @utility timeline-time {
@@ -2995,37 +2999,67 @@
 }
 
 @utility dialog {
-  @apply fixed inset-0 m-0 h-full max-h-full w-full max-w-full items-start justify-center overflow-y-auto border-0;
-  @apply bg-transparent px-5 pt-[8vh] pb-5;
+  @apply fixed inset-y-0 right-0 left-auto m-0 h-full max-h-full w-[min(var(--container-drawer),100%)] max-w-full;
+  @apply border-0 border-l border-line bg-ground-sunk p-0 text-ink shadow-drawer;
 
-  &[open] {
-    @apply flex;
+  &.wide {
+    @apply w-[min(var(--container-drawer-wide),100%)];
+  }
+
+  &.modal {
+    @apply inset-0 w-full items-start justify-center overflow-y-auto border-0 bg-transparent px-admin-gutter pt-[12vh];
+    @apply pb-admin-gutter shadow-none;
+
+    &[open] {
+      @apply flex;
+    }
   }
 
   &::backdrop {
-    background: color-mix(in oklab, var(--color-ground) 72%, transparent);
-    backdrop-filter: blur(3px);
-  }
-
-  @media (width < 43.75rem) {
-    @apply px-4 pt-4;
+    background: color-mix(in oklab, var(--color-ground) 65%, transparent);
+    backdrop-filter: blur(6px);
   }
 }
 
 @utility dialog-box {
-  @apply flex w-full max-w-palette flex-col gap-3 rounded-card border border-line bg-ground-sunk p-4 shadow-palette;
+  @apply flex h-full flex-col;
+
+  :where(.dialog.modal) > & {
+    @apply h-auto w-full max-w-palette overflow-hidden rounded-panel border border-line bg-ground-sunk shadow-modal;
+  }
 }
 
 @utility dialog-head {
-  @apply flex items-start justify-between gap-3;
+  @apply flex items-center justify-between gap-2.5 border-b border-line px-[22px] py-4;
+
+  :where(.dialog.modal) & {
+    @apply px-4 py-3;
+  }
 }
 
-@utility confirm-dialog-message {
-  @apply m-0 text-ink;
+@utility dialog-body {
+  @apply flex flex-1 flex-col gap-3 overflow-y-auto p-6;
+
+  :where(.dialog.modal) & {
+    @apply px-5 pt-2 pb-5;
+  }
 }
 
 @utility dialog-foot {
-  @apply flex flex-wrap items-center justify-end gap-2;
+  @apply flex flex-wrap items-center justify-end gap-2 border-t border-line px-[22px] py-3.5;
+
+  :where(.dialog-body) & {
+    @apply border-0 p-0;
+  }
+}
+
+@utility confirm {
+  @apply inline-flex flex-wrap items-center gap-1.5 rounded-xl border border-line bg-ground px-2 py-1.5;
+  @apply font-mono text-badge text-ink;
+}
+
+@utility confirm-message {
+  @apply min-w-0;
 }
 
 @utility snooze-form {
@@ -3033,7 +3067,11 @@
 }
 
 @utility snooze-picks {
-  @apply flex flex-wrap gap-2;
+  @apply flex flex-col gap-1;
+
+  & > button {
+    @apply w-full justify-start border-0 bg-transparent px-2.5 py-2.5 text-tab hover:bg-wash;
+  }
 }
 
 @utility task-panel {
@@ -3665,7 +3703,16 @@
 }
 
 @utility bulk-bar {
-  @apply mb-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-line pb-3;
+  @apply mb-3 flex flex-wrap items-center gap-x-3 gap-y-2;
+
+  &:has([data-bulk-acts]:not([hidden])) {
+    @apply fixed bottom-5 left-1/2 z-60 mb-0 max-w-[calc(100%-2*var(--spacing-admin-gutter))] -translate-x-1/2;
+    @apply rounded-panel border border-line bg-ground-sunk py-2.5 pr-3 pl-[18px] text-input shadow-menu;
+
+    @media (width < 43.75rem) {
+      @apply inset-x-admin-gutter max-w-none translate-x-0;
+    }
+  }
 }
 
 @utility bulk-count {
@@ -3994,20 +4041,18 @@
 }
 
 @utility toast {
-  @apply fixed bottom-toast left-1/2 z-50 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2.5;
-  @apply rounded-toast border border-l-2 border-line border-l-mk-green bg-ground-sunk px-4 py-2.5;
-  @apply font-mono text-meta text-ink shadow-toast;
+  @apply fixed bottom-6 left-1/2 z-90 flex max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-2.5;
+  @apply rounded-full border border-line bg-ground-sunk px-[18px] py-[11px];
+  @apply font-mono text-tab tracking-normal text-ink shadow-menu;
 }
 
 @utility toast-icon {
-  @apply text-mk-green;
+  @apply text-mk-green-text;
 }
 
 @utility toast-failed {
-  @apply border-l-mk-pink;
-
   & .toast-icon {
-    @apply text-mk-pink;
+    @apply text-mk-pink-text;
   }
 }
 

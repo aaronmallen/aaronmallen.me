@@ -156,19 +156,19 @@ RSpec.describe "Admin people", type: :feature do
     before { visit "/admin/people/#{person.id}/edit" }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { click_button "Remove" }
+      message = confirm_no { click_button "Remove" }
 
       expect(message).to eq(translate("ui.components.people.editor.confirm_delete", name: "Ada Lovelace"))
     end
 
     it "keeps them when I don't confirm" do
-      dismiss_confirm { click_button "Remove" }
+      confirm_no { click_button "Remove" }
 
       expect(person_queries.all.map(&:name)).to eq(["Ada Lovelace"])
     end
 
     it "removes them once I confirm" do
-      accept_confirm { click_button "Remove" }
+      confirm_yes { click_button "Remove" }
 
       expect(page).to have_css(".toast", text: "Person removed")
     end

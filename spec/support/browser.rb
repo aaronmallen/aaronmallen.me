@@ -52,6 +52,12 @@ module Spec
 
     def admin_session_cookie = Spec::AdminSession.cookie
 
+    def answer_confirm(button)
+      yield if block_given?
+      ask = confirm_ask
+      ask.find("[data-confirm-message]").text.tap { ask.find(button).click }
+    end
+
     def axe_breaches
       execute_script(Axe::Configuration.instance.jslib)
 
@@ -62,6 +68,12 @@ module Spec
         ));
       JS
     end
+
+    def confirm_ask = find("[data-confirm-ask]")
+
+    def confirm_no(&) = answer_confirm("[data-confirm-decline]", &)
+
+    def confirm_yes(&) = answer_confirm("[data-confirm-accept]", &)
 
     def cookie(name)
       page.driver.cookies[name]&.value

@@ -21,7 +21,7 @@ module Admin
           dialog(**mix(shell_attributes, @attributes)) do
             div(class: "dialog-box") do
               head if @title
-              yield(self) if block_given?
+              div(class: "dialog-body") { yield(self) if block_given? }
               div(class: "dialog-foot", &@foot) if @foot
             end
           end
@@ -39,7 +39,9 @@ module Admin
           end
         end
 
-        def shell_attributes = { id: @id, class: "dialog", hidden: true, aria: { labelledby: @title_id } }
+        def shell_attributes
+          { id: @id, class: "dialog", role: "dialog", hidden: true, aria: { labelledby: @title_id, modal: "true" } }
+        end
       end
     end
   end

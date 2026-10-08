@@ -1,4 +1,5 @@
 import { Idiomorph } from "idiomorph";
+import { ASKING } from "./confirm.js";
 import { setupFetch } from "./fetching.js";
 import { parse } from "./in_place.js";
 
@@ -6,6 +7,7 @@ const LONGEST_WAIT = 30000;
 const MORPHED = "admin:morphed";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
 const WAIT = 1000;
+const HOLD = `dialog:modal, ${ASKING}`;
 
 let started = false;
 
@@ -17,7 +19,7 @@ export function setupLive() {
   let next = null;
 
   const morph = () => {
-    if (!next || document.querySelector("dialog:modal")) return;
+    if (!next || document.querySelector(HOLD)) return;
 
     for (const selector of PARTS) {
       const now = document.querySelector(selector);

@@ -115,15 +115,14 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_no_css("footer.adm-footer a")
     end
 
-    it "renders the confirm dialog before the footer and the palette after it", :aggregate_failures do
-      expect(page).to have_css("main#main ~ dialog#confirm-dialog + footer.adm-footer", visible: :all)
+    it "renders the confirm template before the footer and the palette after it", :aggregate_failures do
+      expect(page).to have_css("main#main ~ template[data-confirm-template] + footer.adm-footer", visible: :all)
       expect(page).to have_css("footer.adm-footer ~ dialog#command-palette", visible: :all)
     end
 
-    it "draws the confirm dialog in the dialog shell with a foot and no head", :aggregate_failures do
-      shell = "dialog#confirm-dialog.dialog[role='alertdialog'][aria-labelledby='confirm-dialog-message'][hidden]"
-      expect(page).to have_css("#{shell} > .dialog-box > .dialog-foot > button[data-dialog-accept]", visible: :all)
-      expect(page).to have_no_css("dialog#confirm-dialog .dialog-head", visible: :all)
+    it "marks the key help a modal dialog with its rows in a body of their own" do
+      shell = "dialog#key-help.dialog.modal[role='dialog'][aria-modal='true']"
+      expect(page).to have_css("#{shell} > .dialog-box > .dialog-head + .dialog-body > dl.keys", visible: :all)
     end
 
     it "draws the key help dialog with a head that holds its title and the close button" do
@@ -216,8 +215,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_css("footer.adm-footer", text: "Version #{Blog::Version::CURRENT}")
     end
 
-    it "renders no confirm dialog" do
-      expect(page).to have_no_css("dialog#confirm-dialog", visible: :all)
+    it "renders no confirm template" do
+      expect(page).to have_no_css("template[data-confirm-template]", visible: :all)
     end
 
     it "offers only the theme options in the settings menu" do

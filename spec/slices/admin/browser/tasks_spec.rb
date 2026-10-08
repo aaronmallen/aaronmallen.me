@@ -8,7 +8,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
   def cancel_task(scope)
     scope.click_button(translate("ui.components.tasks.controls.cancel"))
-    confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+    confirm_yes
   end
 
   def complete_task(scope)
@@ -17,8 +17,6 @@ RSpec.describe "Admin tasks", type: :feature do
     scope.find("summary", text: done).click
     scope.click_button(done)
   end
-
-  def confirm_dialog = find("dialog#confirm-dialog[open]")
 
   def create_task(title, list: "next", **fields)
     click_link("Create Task")
@@ -249,44 +247,43 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "from a row" do
       before { row("Email the accountant").click_button(cancel) }
 
-      it "asks in the styled dialog" do
-        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      it "asks inline" do
+        expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: message)
       end
 
       it "keeps the task open when I say no", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+        confirm_no
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css("[data-confirm-ask]")
         expect(page).to have_no_css(".toast")
         expect(still_open?).to be(true)
       end
 
       it "hands focus back to the cancel button when I say no", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+        confirm_no
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css("[data-confirm-ask]")
         expect(focused_label).to eq(cancel)
       end
 
       it "keeps the task open on Escape and hands focus back", :aggregate_failures do
-        confirm_dialog.send_keys(:escape)
+        confirm_ask.find("[data-confirm-decline]").send_keys(:escape)
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css("[data-confirm-ask]")
         expect(focused_label).to eq(cancel)
         expect(still_open?).to be(true)
       end
 
-      it "keeps the task open on a click outside and hands focus back", :aggregate_failures do
-        confirm_dialog
+      it "keeps asking, with the task open, on a click outside", :aggregate_failures do
+        confirm_ask
         page.driver.browser.mouse.click(x: 5, y: 5)
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
-        expect(focused_label).to eq(cancel)
+        expect(page).to have_css("[data-confirm-ask]")
         expect(still_open?).to be(true)
       end
 
       it "cancels the task when I say yes", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+        confirm_yes
 
         expect(page).to have_css(".toast", text: "Canceled")
         expect(still_open?).to be(false)
@@ -299,12 +296,12 @@ RSpec.describe "Admin tasks", type: :feature do
         find(".read-acts").click_button(cancel)
       end
 
-      it "asks in the styled dialog" do
-        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      it "asks inline" do
+        expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: message)
       end
 
       it "cancels the task when I say yes", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+        confirm_yes
 
         expect(page).to have_css(".toast", text: "Canceled")
         expect(still_open?).to be(false)
@@ -317,26 +314,16 @@ RSpec.describe "Admin tasks", type: :feature do
         panel.click_button(cancel)
       end
 
-      it "asks in the styled dialog over the panel" do
-        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      it "asks inline in the panel" do
+        expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: message)
       end
 
-      it "keeps the panel and the task open on Escape, with focus on the cancel button", :aggregate_failures do
-        confirm_dialog.send_keys(:escape)
+      it "closes the panel on Escape and keeps the task open", :aggregate_failures do
+        confirm_ask.find("[data-confirm-decline]").send_keys(:escape)
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]").and have_css("dialog#task-panel[open]")
-        expect(focused_label).to eq(cancel)
+        expect(page).to have_no_css("dialog#task-panel[open]")
+        expect(page).to have_no_css("[data-confirm-ask]", visible: :all)
         expect(still_open?).to be(true)
-      end
-    end
-
-    describe "on a page without the styled dialog" do
-      before { execute_script("document.getElementById('confirm-dialog').remove()") }
-
-      it "asks with the browser's confirm" do
-        asked = dismiss_confirm { row("Email the accountant").click_button(cancel) }
-
-        expect(asked).to eq(message)
       end
     end
   end
@@ -356,19 +343,19 @@ RSpec.describe "Admin tasks", type: :feature do
         row("Ship the screen").click_button(move_to("next"))
       end
 
-      it "asks in the styled dialog" do
-        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      it "asks inline" do
+        expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: message)
       end
 
       it "keeps the task in today and in progress when I say no", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.decline"))
+        confirm_no
 
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css("[data-confirm-ask]")
         expect(task).to have_attributes(list: nil, sprint_id: sprint.id, status: "in_progress")
       end
 
       it "moves it to next as open when I say yes", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+        confirm_yes
 
         expect(page).to have_current_path("/admin/tasks?filter=next")
         expect(task).to have_attributes(list: "next", sprint_id: nil, status: "open")
@@ -381,12 +368,12 @@ RSpec.describe "Admin tasks", type: :feature do
         row("Ship the screen").click_button(move_to("next"))
       end
 
-      it "asks in the styled dialog" do
-        expect(confirm_dialog).to have_css("#confirm-dialog-message", exact_text: message)
+      it "asks inline" do
+        expect(confirm_ask).to have_css("[data-confirm-message]", exact_text: message)
       end
 
       it "moves it to next as open when I say yes", :aggregate_failures do
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+        confirm_yes
 
         expect(page).to have_no_css(".task-title", exact_text: "Ship the screen")
         expect(task).to have_attributes(list: "next", status: "open")
@@ -402,7 +389,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "moves without asking", :aggregate_failures do
         expect(page).to have_current_path("/admin/tasks?filter=next")
-        expect(page).to have_no_css("dialog#confirm-dialog[open]")
+        expect(page).to have_no_css("[data-confirm-ask]")
       end
     end
   end
@@ -413,8 +400,8 @@ RSpec.describe "Admin tasks", type: :feature do
       visit "/admin/tasks?filter=upcoming"
     end
 
-    it "still asks with the browser's confirm" do
-      asked = dismiss_confirm { click_button(translate("ui.components.tasks.upcoming_sprints.drop")) }
+    it "asks inline" do
+      asked = confirm_no { click_button(translate("ui.components.tasks.upcoming_sprints.drop")) }
 
       expect(asked).to start_with("Drop the sprint for")
     end
@@ -519,7 +506,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "deletes it once asked", :aggregate_failures do
         comment_on(panel).click_button(translate("ui.components.comment_thread.delete"))
-        confirm_dialog.click_button(translate("ui.components.confirm_dialog.accept"))
+        confirm_yes
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.comment_deleted"))
         expect(bodies).to be_empty
@@ -1113,20 +1100,20 @@ RSpec.describe "Admin tasks", type: :feature do
     before { open_editor("Email the accountant") }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { click_button("Delete") }
+      message = confirm_no { click_button("Delete") }
 
       expect(message).to eq(translate("ui.views.tasks.edit.confirm_delete", task: "Email the accountant"))
     end
 
     it "keeps the task when I don't confirm", :aggregate_failures do
-      dismiss_confirm { click_button("Delete") }
+      confirm_no { click_button("Delete") }
 
       expect(page).to have_no_css(".toast")
       expect(page).to have_field("task[title]", with: "Email the accountant")
     end
 
     it "deletes once I confirm" do
-      accept_confirm { click_button("Delete") }
+      confirm_yes { click_button("Delete") }
 
       expect(page).to have_css(".toast", text: "Task deleted")
     end

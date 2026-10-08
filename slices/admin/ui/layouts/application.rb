@@ -40,7 +40,7 @@ module Admin
         end
 
         def render_signed_in_tail(navigation)
-          ConfirmDialog()
+          Confirm()
           Footer()
           render_palette(navigation)
         end

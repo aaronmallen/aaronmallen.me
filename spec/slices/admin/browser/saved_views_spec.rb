@@ -5,8 +5,6 @@ RSpec.describe "Admin saved views", type: :feature do
 
   def bar = find(".saved-views")
 
-  def confirm_dialog = find("dialog#confirm-dialog[open]")
-
   def manage(name)
     find(".saved-view", text: name).find("summary").click
     find(".saved-view", text: name).find(".saved-view-panel")
@@ -66,7 +64,7 @@ RSpec.describe "Admin saved views", type: :feature do
 
       it "deletes the view, and it leaves the list" do
         manage("Weekly").click_on("Delete")
-        confirm_dialog.click_on("Yes")
+        confirm_yes
 
         expect(page).to have_no_css(".saved-view-link")
       end

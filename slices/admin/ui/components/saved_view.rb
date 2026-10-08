@@ -37,7 +37,7 @@ module Admin
         def change = act(:admin_change_saved_view, "fa-solid fa-arrows-rotate", t(".change"), filters: @filters)
 
         def delete
-          confirm = { confirm: t(".confirm_delete", view: @view.name), confirm_styled: true }
+          confirm = { confirm: t(".confirm_delete", view: @view.name) }
 
           act(:admin_delete_saved_view, "fa-regular fa-trash-can", t(".delete"), variant: :warn, data: confirm)
         end

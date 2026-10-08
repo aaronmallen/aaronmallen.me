@@ -46,7 +46,7 @@ RSpec.describe "Admin task rules", type: :feature do
 
   it "asks with the confirmation text before it deletes" do
     row.find(".rule-pattern").click
-    message = dismiss_confirm { editor.click_button "Delete" }
+    message = confirm_no { editor.click_button "Delete" }
 
     expect(message)
       .to eq(translate("ui.components.task_rules.row.confirm_delete", pattern: "aaronmallen/*", provider: "GitHub"))
@@ -54,14 +54,14 @@ RSpec.describe "Admin task rules", type: :feature do
 
   it "keeps the rule when I don't confirm" do
     row.find(".rule-pattern").click
-    dismiss_confirm { editor.click_button "Delete" }
+    confirm_no { editor.click_button "Delete" }
 
     expect(rules.size).to eq(1)
   end
 
   it "deletes once I confirm" do
     row.find(".rule-pattern").click
-    accept_confirm { editor.click_button "Delete" }
+    confirm_yes { editor.click_button "Delete" }
 
     expect(page).to have_css(".empty")
   end

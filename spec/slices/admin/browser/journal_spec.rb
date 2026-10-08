@@ -303,20 +303,20 @@ RSpec.describe "Admin journal", type: :feature do
     let(:item) { find(".journal-entry", text: "drop me") }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { item.click_button "Delete" }
+      message = confirm_no { item.click_button "Delete" }
 
       expect(message).to eq(translate("ui.components.journal.entry.confirm_delete"))
     end
 
     it "keeps the entry when I don't confirm", :aggregate_failures do
-      dismiss_confirm { item.click_button "Delete" }
+      confirm_no { item.click_button "Delete" }
 
       expect(page).to have_no_css(".toast")
       expect(page).to have_css(".journal-entry-body", text: "drop me")
     end
 
     it "removes the entry and updates the counts once I confirm", :aggregate_failures do
-      accept_confirm { item.click_button "Delete" }
+      confirm_yes { item.click_button "Delete" }
       page.assert_selector(".toast", text: "Entry deleted")
 
       expect(page).to have_no_css(".journal-entry-body", text: "drop me")

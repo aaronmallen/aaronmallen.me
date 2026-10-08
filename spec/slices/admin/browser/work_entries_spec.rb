@@ -81,32 +81,32 @@ RSpec.describe "Admin work history", type: :feature do
     before { visit "/admin/projects?filter=work" }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { click_button "Remove" }
+      message = confirm_no { click_button "Remove" }
       confirm = i18n.t("ui.components.work_entries.row.confirm_remove", org: "Rackspace", role: "Software Engineer")
 
       expect(message).to eq(confirm)
     end
 
     it "keeps the role when I don't confirm" do
-      dismiss_confirm { click_button "Remove" }
+      confirm_no { click_button "Remove" }
 
       expect(repo.all.map(&:id)).to eq([entry.id])
     end
 
     it "removes the role once I confirm" do
-      accept_confirm { click_button "Remove" }
+      confirm_yes { click_button "Remove" }
 
       expect(page).to have_css("[data-toast]", text: "Role removed from /projects")
     end
 
     it "takes the role off the list" do
-      accept_confirm { click_button "Remove" }
+      confirm_yes { click_button "Remove" }
 
       expect(page).to have_no_css(".li-title", text: "Software Engineer")
     end
 
     it "takes the role off the public page" do
-      accept_confirm { click_button "Remove" }
+      confirm_yes { click_button "Remove" }
       page.assert_selector("[data-toast]", text: "Role removed from /projects")
       visit "/about"
 

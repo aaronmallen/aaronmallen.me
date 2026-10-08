@@ -60,7 +60,7 @@ module Admin
             div(class: "record-picker-results") do
               @found.each do |kind, rows|
                 div(class: "record-link-group") do
-                  h3(class: "record-link-kind") { t(Section.kind_name_key(kind)) }
+                  KindHeading(kind:)
                   ul(class: "record-link-list") { rows.each { |row| li { pick(kind, row) } } }
                 end
               end

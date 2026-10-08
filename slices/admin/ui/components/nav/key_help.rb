@@ -20,7 +20,9 @@ module Admin
           ].freeze
 
           def view_template
-            Dialog(id: ID, title_id: TITLE_ID, title: t(".title"), data: { dialog: true, key_help: true }) do
+            Dialog(
+              id: ID, title_id: TITLE_ID, title: t(".title"), class: "modal", data: { dialog: true, key_help: true },
+            ) do
               dl(class: "keys", data: { key_help_list: true }) { FIXED.each { fixed(*it) } }
               row_template
             end

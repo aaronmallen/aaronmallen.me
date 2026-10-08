@@ -9,8 +9,6 @@ RSpec.describe "Admin bulk message actions", type: :feature do
 
   def box(subject) = find(".li", text: subject).find("input[name='ids[]']")
 
-  def confirm_dialog = find("dialog#confirm-dialog[open]")
-
   def subjects(status) = repo.by_status(status).map(&:subject)
 
   before do
@@ -54,7 +52,7 @@ RSpec.describe "Admin bulk message actions", type: :feature do
     it "asks before it deletes", :aggregate_failures do
       box("second").check
       within("form#message-bulk") { click_button("Delete") }
-      confirm_dialog.click_button("Yes")
+      confirm_yes
 
       expect(page).to have_css("[data-toast] .toast", text: "Deleted 1 message")
       expect(subjects("unread")).to eq(%w[first third])
@@ -63,7 +61,7 @@ RSpec.describe "Admin bulk message actions", type: :feature do
     it "keeps the messages when the delete is declined" do
       box("second").check
       within("form#message-bulk") { click_button("Delete") }
-      confirm_dialog.click_button("No")
+      confirm_no
 
       expect(subjects("unread").size).to eq(3)
     end

@@ -15,7 +15,7 @@ module Admin
           def view_template
             Dialog(
               id: ID, title_id: TITLE_ID, title: t(".title"), title_data: { task_modal_title: t(".edit_title") },
-              data: { dialog: "static" },
+              class: "modal", data: { dialog: "static" },
             ) do
               div(data: { task_modal_body: true }) do
                 TaskForm(scope: SCOPE, today: @today, returns:) { close }

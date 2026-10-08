@@ -17,8 +17,6 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     end
   end
 
-  def confirm_dialog = find("dialog#confirm-dialog[open]")
-
   def tagged(name)
     names = Tasks::Slice["relations.task_tags"].names_by_task(repo.all_open.map(&:id))
 
@@ -117,7 +115,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     it "asks before it deletes", :aggregate_failures do
       box("second").check
       within("form#task-bulk") { click_button("Delete") }
-      confirm_dialog.click_button("Yes")
+      confirm_yes
 
       expect(page).to have_css("[data-toast] .toast", text: "Deleted 1 task")
       expect(repo.all_open.map(&:title)).to contain_exactly("first", "third", "elsewhere")
@@ -126,7 +124,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     it "keeps the tasks when the delete is declined" do
       box("second").check
       within("form#task-bulk") { click_button("Delete") }
-      confirm_dialog.click_button("No")
+      confirm_no
 
       expect(repo.all_open.size).to eq(4)
     end

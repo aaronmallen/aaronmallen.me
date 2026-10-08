@@ -5,6 +5,16 @@ module Admin
     module Components
       module RecordLinks
         class Section < Component
+          ICONS = {
+            Blog::Types::RecordKind["commit"] => "fa-code-commit",
+            Blog::Types::RecordKind["decision"] => "fa-scale-balanced",
+            Blog::Types::RecordKind["journal_entry"] => "fa-feather",
+            Blog::Types::RecordKind["post"] => "fa-file-lines",
+            Blog::Types::RecordKind["project"] => "fa-cube",
+            Blog::Types::RecordKind["social_post"] => "fa-paper-plane",
+            Blog::Types::RecordKind["task"] => "fa-list-check",
+            Blog::Types::RecordKind["work_entry"] => "fa-briefcase",
+          }.freeze
           KINDS = "ui.components.record_links.kinds"
 
           prop :records, Blog::Types::Hash
@@ -30,7 +40,7 @@ module Admin
 
           def group(kind, rows)
             div(class: "record-link-group") do
-              h3(class: "record-link-kind") { t(self.class.kind_name_key(kind)) }
+              KindHeading(kind:)
               ul(class: "record-link-list") { rows.each { row(it) } }
             end
           end

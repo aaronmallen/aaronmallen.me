@@ -41,8 +41,10 @@ RSpec.describe "Admin screens", type: :feature do
   def dialogs
     {
       "key help" => -> { open_key_help },
+      "inline confirm" => -> { open_confirm },
       "palette" => -> { open_palette },
       "person dialog" => -> { open_person_dialog },
+      "snooze drawer" => -> { open_snooze },
       "task modal" => -> { open_modal },
       "task panel" => -> { open_panel },
     }
@@ -79,6 +81,13 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def open_confirm
+    journal_entry
+    visit "/admin/journal"
+    find(".journal-entry").click_button "Delete"
+    find("[data-confirm-ask]")
+  end
+
   def open_key_help
     draft
     visit "/admin/posts"
@@ -109,6 +118,12 @@ RSpec.describe "Admin screens", type: :feature do
     visit "/admin/social"
     find("[data-social-body]").send_keys("@zed", :enter)
     find("dialog#person-dialog[open] form[data-person-form]")
+  end
+
+  def open_snooze
+    visit "/admin/inbox"
+    click_button "Snooze All"
+    find("dialog#inbox-snooze-all[open]")
   end
 
   def pages

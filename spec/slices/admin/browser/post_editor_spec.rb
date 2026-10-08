@@ -265,7 +265,7 @@ RSpec.describe "Admin post editor", type: :feature do
     before { visit "/admin/posts/#{article.id}/edit" }
 
     it "asks with the confirmation text" do
-      message = dismiss_confirm { click_button "Delete" }
+      message = confirm_no { click_button "Delete" }
 
       expect(message).to eq(translate("ui.components.posts.delete_form.confirm"))
     end
@@ -273,20 +273,20 @@ RSpec.describe "Admin post editor", type: :feature do
     it "names the webmentions it will destroy" do
       create(:webmention, post: article)
       visit "/admin/posts/#{article.id}/edit"
-      message = dismiss_confirm { click_button "Delete" }
+      message = confirm_no { click_button "Delete" }
 
       expect(message).to eq(translate("ui.components.posts.delete_form.confirm_webmentions", count: 1))
     end
 
     it "keeps the post when I don't confirm", :aggregate_failures do
-      dismiss_confirm { click_button "Delete" }
+      confirm_no { click_button "Delete" }
 
       expect(page).to have_no_css(".toast")
       expect(page).to have_field("Title", with: "Drop me")
     end
 
     it "lands on the list with the toast once I confirm", :aggregate_failures do
-      accept_confirm { click_button "Delete" }
+      confirm_yes { click_button "Delete" }
       page.assert_selector(".toast", text: "Post deleted")
 
       expect(page).to have_current_path("/admin/posts")

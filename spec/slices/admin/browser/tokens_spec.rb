@@ -12,20 +12,20 @@ RSpec.describe "Admin API tokens", type: :feature do
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
 
   it "asks with the confirmation text" do
-    message = dismiss_confirm { row.click_button "Revoke" }
+    message = confirm_no { row.click_button "Revoke" }
 
     expect(message).to eq(translate("ui.components.tokens.row.confirm_revoke", token: "Laptop"))
   end
 
   it "keeps the token listed when I don't confirm", :aggregate_failures do
-    dismiss_confirm { row.click_button "Revoke" }
+    confirm_no { row.click_button "Revoke" }
 
     expect(page).to have_no_css(".toast")
     expect(page).to have_css(".li-title", text: "Laptop")
   end
 
   it "revokes once I confirm", :aggregate_failures do
-    accept_confirm { row.click_button "Revoke" }
+    confirm_yes { row.click_button "Revoke" }
 
     expect(page).to have_css(".toast", text: "Token revoked")
     expect(page).to have_no_css(".li-title", text: "Laptop")

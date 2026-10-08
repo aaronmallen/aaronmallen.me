@@ -32,8 +32,8 @@ RSpec.describe "Admin inbox Mark All As Seen", type: :request do
 
     form = page.find(".page-head-actions form[action='/admin/inbox/seen']")
 
-    expect([form["data-confirm-styled"], form["data-confirm"], form.find("button[type=submit]").text])
-      .to eq(["", Admin::Slice["i18n"].t("ui.components.inbox.see_all.confirm"), "Mark All As Seen"])
+    expect([form["data-confirm"], form.find("button[type=submit]").text])
+      .to eq([Admin::Slice["i18n"].t("ui.components.inbox.see_all.confirm"), "Mark All As Seen"])
   end
 
   it "hides the button when nothing waits" do
