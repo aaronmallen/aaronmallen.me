@@ -1972,8 +1972,10 @@
   @apply meta;
 }
 
-@utility review-foot {
-  @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+@utility review-notes {
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
 }
 
 @utility time-bar {

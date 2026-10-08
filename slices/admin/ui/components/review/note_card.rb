@@ -5,7 +5,7 @@ module Admin
     module Components
       module Review
         class NoteCard < Component
-          BODY_HEIGHT = "160px"
+          BODY_HEIGHT = "260px"
           FORM_ID = "review-note-form"
           MONTH = Blog::Types::ReviewPeriod["month"]
           SCOPE = "review-note"
@@ -17,8 +17,8 @@ module Admin
           prop :to, Blog::Types::Date
 
           def view_template
-            Card(label: t(".label"), title: t(".title"), id: "review-notes") do |card|
-              card.side { span(class: "journal-words") { t(@saved ? ".saved" : ".unsaved") } }
+            Card(title: t(".title"), id: "review-notes", class: "jbox review-notes") do |card|
+              card.side { private_note }
               Form(id: FORM_ID, action: path(:admin_save_review_note)) do
                 hidden_fields
                 body_field
@@ -43,11 +43,9 @@ module Admin
           end
 
           def foot
-            div(class: "review-foot") do
-              p(class: "journal-words") do
-                Icon("fa-solid fa-lock today-journal-lock")
-                plain t(".private", day: l(@to, format: :medium))
-              end
+            div(class: "jbox-foot") do
+              span(class: "journal-words") { t(@saved ? ".saved" : ".unsaved") }
+              span(class: "journal-words") { t(".filed", day: l(@to, format: :medium)) }
               save_button
             end
           end
@@ -57,8 +55,17 @@ module Admin
             input(type: "hidden", name: "day", value: @to.iso8601)
           end
 
+          def private_note
+            span(class: "journal-words") do
+              Icon("fa-solid fa-lock")
+              plain " #{t('.private')}"
+            end
+          end
+
           def save_button
-            Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@saved ? ".update" : ".save") }
+            Button(variant: :pri, small: true, type: "submit", icon: "fa-regular fa-floppy-disk") do
+              t(@saved ? ".update" : ".save")
+            end
           end
         end
       end

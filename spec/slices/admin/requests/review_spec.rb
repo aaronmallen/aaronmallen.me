@@ -61,6 +61,16 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: span)
       end
 
+      it "lays the cards out in columns" do
+        expect(page.all(".g-main > .cols > .card").map { it[:id] }).to eq(
+          %w[review-done review-carried review-decisions review-journal review-published review-commits review-worked],
+        )
+      end
+
+      it "keeps the note beside the cards" do
+        expect(page).to have_css(".g-main > #review-notes.review-notes")
+      end
+
       it "draws a row of time worked for each day of the week" do
         expect(card("worked")).to have_css(".meter-row", count: 7)
       end
@@ -92,9 +102,8 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
 
       it "counts the tasks done, the tasks carried, the time worked and the commits" do
-        values = page.all(".stat").map { [it.find(".stat-key").text, it.find(".stat-value").text] }
-
-        expect(values).to eq([%w[Done 1], %w[Carried 1], ["Worked", "1h 00m"], %w[Commits 1]])
+        expect(page.find(".page-head-sub").text)
+          .to eq("Sep 14 → Sep 20, 2026: 1 done, 1 carried, 1h 00m worked, 1 commit")
       end
 
       it "groups each done task under its day and links it to its task, with the time worked on it" do
@@ -196,8 +205,8 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "keeps the done tasks that list me, the default included, and counts only those" do
         visit_review(day: "2026-09-16", contributor: "owner")
 
-        expect([done_titles, page.find(".stat", text: "Done").find(".stat-value").text])
-          .to match([contain_exactly("Mine", "Shared"), "2"])
+        expect([done_titles, page.find(".page-head-sub").text])
+          .to match([contain_exactly("Mine", "Shared"), include(": 2 done,")])
       end
 
       it "keeps the done tasks an agent worked on a model" do

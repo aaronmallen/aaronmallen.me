@@ -34,7 +34,8 @@ RSpec.describe "API review", type: :request do
   def stats
     sign_in_to_admin
     get "/admin/review", day: wednesday.iso8601
-    Capybara.string(last_response.body).all(".stat-value").map(&:text)
+    sub = Capybara.string(last_response.body).find(".page-head-sub").text
+    sub.split(": ", 2).last.split(", ").map { it.sub(/ \S+\z/, "") }
   end
 
   def status = last_response.status

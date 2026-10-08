@@ -26,17 +26,23 @@ module Admin
               )
             end
 
-            Grid(columns: 4) { stats }
-
-            Grid(columns: 2) do
-              SideStack { task_cards }
-              SideStack { record_cards }
+            div(class: "g-main") do
+              div(class: "cols") { cards }
+              NoteCard(**note_card)
             end
-
-            NoteCard(**note_card)
           end
 
           private
+
+          def cards
+            DoneCard(done: @review.done, credits: @credits, choices: @choices, keep: place)
+            CarriedCard(carried: @review.carried)
+            DecisionsCard(decisions: @review.decisions)
+            JournalCard(journal: @review.journal)
+            PublishedCard(posts: @review.posts, social_posts: @review.social_posts)
+            ReposCard(commits: @review.commits)
+            WorkedCard(worked: @review.worked)
+          end
 
           def commit_count = @review.commits.values.sum { it[:commits] }
 
@@ -56,30 +62,18 @@ module Admin
             { period: (@review.period if @review.period == MONTH), day: (@on.iso8601 unless @on == @today) }.compact
           end
 
-          def record_cards
-            PublishedCard(posts: @review.posts, social_posts: @review.social_posts)
-            JournalCard(journal: @review.journal)
-            ReposCard(commits: @review.commits)
-            DecisionsCard(decisions: @review.decisions)
-          end
-
-          def stats
-            Stat(key: t(".done"), value: done_count)
-            Stat(key: t(".carried"), value: @review.carried.size)
-            Stat(key: t(".worked"), value: Blog::Helpers::Figures.hours(@review.worked_seconds))
-            Stat(key: t(".commits"), value: commit_count)
-          end
-
-          def sub
+          def span
             return l(@review.from, format: :month) if @review.period == MONTH
 
             t(".week", from: l(@review.from, format: :short), to: l(@review.to, format: :medium))
           end
 
-          def task_cards
-            DoneCard(done: @review.done, credits: @credits, choices: @choices, keep: place)
-            CarriedCard(carried: @review.carried)
-            WorkedCard(worked: @review.worked)
+          def sub
+            t(
+              ".summary",
+              span:, done: done_count, carried: @review.carried.size, commits: t(".commits", count: commit_count),
+              worked: Blog::Helpers::Figures.hours(@review.worked_seconds),
+            )
           end
         end
       end

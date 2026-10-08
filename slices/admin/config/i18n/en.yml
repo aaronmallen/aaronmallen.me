@@ -1197,9 +1197,9 @@ en:
             other: "%{words} words"
         note_card:
           body: "Review note"
-          label: "Private"
+          filed: "filed under %{day}"
           placeholder: "How did it go?"
-          private: "private · filed under %{day}"
+          private: "private"
           save: "Save note"
           saved: "Saved"
           title: "Notes"
@@ -2108,12 +2108,12 @@ en:
           title: "New project"
       review:
         show:
-          carried: "Carried"
-          commits: "Commits"
-          done: "Done"
+          commits:
+            one: "%{count} commit"
+            other: "%{count} commits"
           heading: "Review"
+          summary: "%{span}: %{done} done, %{carried} carried, %{worked} worked, %{commits}"
           week: "%{from} → %{to}"
-          worked: "Worked"
       search:
         index:
           all: "All kinds"
