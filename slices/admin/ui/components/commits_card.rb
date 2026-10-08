@@ -60,7 +60,7 @@ module Admin
 
         def entry_main(commit)
           div(class: "commit-main") do
-            p(class: "commit-message") { CommitMessage.subject(commit.message) }
+            p(class: "commit-message") { Helpers::CommitMessage.subject(commit.message) }
             p(class: "commit-meta") { "#{commit.repo}#{DOT}#{l(commit.commit_time, format: :clock)}" }
           end
         end

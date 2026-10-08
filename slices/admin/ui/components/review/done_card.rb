@@ -21,7 +21,7 @@ module Admin
 
           private
 
-          def credit_words(contributors) = Credits.words(contributors) { |key, **words| t(key, **words) }
+          def credit_words(contributors) = Helpers::Credits.words(contributors) { |key, **words| t(key, **words) }
 
           def day_group(day, tasks)
             section(class: "review-group") do

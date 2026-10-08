@@ -3,10 +3,9 @@
 module Admin
   module Actions
     module SavedViews
-      class Update < Action
+      class Update < SavedViewAction
         RENAMED = "saved_views_page.toasts.renamed"
 
-        include SavedViewReturn
         include Deps[rename_saved_view: "saved_views.operations.rename_saved_view"]
 
         def handle(request, response)

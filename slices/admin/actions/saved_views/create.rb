@@ -3,10 +3,9 @@
 module Admin
   module Actions
     module SavedViews
-      class Create < Action
+      class Create < SavedViewAction
         SAVED = "saved_views_page.toasts.saved"
 
-        include SavedViewReturn
         include Deps[create_saved_view: "saved_views.operations.create_saved_view"]
 
         def handle(request, response)

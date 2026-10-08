@@ -79,7 +79,7 @@ module Admin
         i18n.t!("activity_page.sub_lines.decision_excerpt", event:, excerpt: shortened(row.excerpt))
       end
 
-      def display_name(row) = row.type == COMMIT ? CommitMessage.subject(row.name) : row.name
+      def display_name(row) = row.type == COMMIT ? Helpers::CommitMessage.subject(row.name) : row.name
 
       def event(row, views)
         Structs::ActivityEvent.new(
@@ -160,7 +160,7 @@ module Admin
       end
 
       def task_line(row)
-        contributors = Credits.words(row.contributors) { |key, **words| i18n.t!(key, **words) }
+        contributors = Helpers::Credits.words(row.contributors) { |key, **words| i18n.t!(key, **words) }
 
         i18n.t!("activity_page.sub_lines.task", contributors:)
       end

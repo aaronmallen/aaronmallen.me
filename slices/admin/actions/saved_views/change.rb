@@ -3,10 +3,9 @@
 module Admin
   module Actions
     module SavedViews
-      class Change < Action
+      class Change < SavedViewAction
         CHANGED = "saved_views_page.toasts.changed"
 
-        include SavedViewReturn
         include Deps[change_saved_view: "saved_views.operations.change_saved_view"]
 
         def handle(request, response)

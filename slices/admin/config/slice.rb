@@ -8,6 +8,8 @@ module Admin
 
     config.shared_app_component_keys += %w[assets]
 
+    config.no_auto_register_paths += %w[helpers]
+
     config.actions.default_headers.merge!("Cache-Control" => "private, no-store", "X-Robots-Tag" => ROBOTS)
 
     config.actions.csrf_protection = true

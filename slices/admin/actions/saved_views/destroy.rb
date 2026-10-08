@@ -3,10 +3,9 @@
 module Admin
   module Actions
     module SavedViews
-      class Destroy < Action
+      class Destroy < SavedViewAction
         DELETED = "saved_views_page.toasts.deleted"
 
-        include SavedViewReturn
         include Deps[delete_saved_view: "saved_views.operations.delete_saved_view"]
 
         def handle(request, response)

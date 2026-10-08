@@ -3,15 +3,13 @@
 module Admin
   module Actions
     module Posts
-      class RejectSuggestions < Action
+      class RejectSuggestions < SuggestionRejectionAction
         REJECTED = "post_form.toasts.rejected"
 
         include Deps[
           reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
           suggestion_queries: "suggestions.repos.suggestion_queries",
         ]
-
-        include SuggestionRejection
 
         def handle(request, response)
           id = record_id(request)

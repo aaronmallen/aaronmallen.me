@@ -62,7 +62,7 @@ module Admin
 
           def sub = t(".sub", repo: @commit.repo, branch: @commit.branch, day:, clock:)
 
-          def subject = CommitMessage.subject(@commit.message)
+          def subject = Helpers::CommitMessage.subject(@commit.message)
         end
       end
     end
