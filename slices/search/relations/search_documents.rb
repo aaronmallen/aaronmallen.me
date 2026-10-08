@@ -10,11 +10,11 @@ module Search
 
       schema :search_documents, infer: true
 
-      def hits(phrase, kinds:, per_kind:, page:)
+      def hits(phrase, kinds:, page:)
         return none if unmatchable?(phrase)
 
         query = tsquery(phrase)
-        found = capped(best(query, kinds), per_kind).order(*RANKED).limit(page.limit).offset(page.offset)
+        found = best(query, kinds).order(*RANKED).limit(page.limit).offset(page.offset)
 
         found.from_self(alias: :found).select(*LINKED, headline(query)).order(*RANKED)
       end
@@ -33,14 +33,6 @@ module Search
         ranked = matched.select(*LINKED, :body, Sequel.function(:ts_rank, :search_vector, query).as(:rank))
 
         ranked.distinct(:kind, :source_id).order(:kind, :source_id, Sequel.desc(:rank)).from_self(alias: :best)
-      end
-
-      def capped(found, per_kind)
-        return found unless per_kind
-
-        placed = found.select_append(Sequel.function(:row_number).over(partition: :kind, order: RANKED).as(:place))
-
-        placed.from_self(alias: :placed).where(Sequel[:place] <= per_kind)
       end
 
       def headline(query) = Sequel.function(:ts_headline, CONFIG, :body, query, HEADLINE).as(:match)

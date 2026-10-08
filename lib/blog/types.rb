@@ -142,7 +142,7 @@ module Blog
     ScrollDepth = Types::Integer.enum(0, 25, 50, 75, 100)
     SecretDigest = Types::String.constructor { |value| Digest::SHA256.hexdigest(value.to_s) }
     SearchKind = Types::String.enum(
-      "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
+      "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention", "decision",
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)

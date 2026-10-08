@@ -152,6 +152,7 @@ RSpec.describe "API search", type: :request do
       create(:person, name: "Zeppelin Fan")
       create(:message, subject: "Zeppelins", body: "Hi there")
       create(:webmention, excerpt: "Nice zeppelin")
+      create(:decision, title: "Buy a zeppelin")
     end
 
     it "finds one of each" do

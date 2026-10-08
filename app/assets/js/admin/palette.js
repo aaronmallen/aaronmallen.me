@@ -12,6 +12,7 @@ const OPTION = "[data-palette-option]";
 const SHOWN = "[data-palette-option]:not([hidden])";
 const OPEN_CODES = ["Slash", "NumpadDivide", "KeyK"];
 const OPEN_KEYS = ["/", "k", "K"];
+const QUERY = "{query}";
 const TASK = "[data-task-read]";
 const TITLE = "{title}";
 
@@ -44,11 +45,10 @@ function setupDialog(dialog) {
   const list = dialog.querySelector("[data-palette-list]");
   const status = dialog.querySelector("[data-palette-status]");
   const groups = [...dialog.querySelectorAll("[data-palette-group]")];
-  const kinds = new Map(
-    [...dialog.querySelectorAll("[data-palette-kind]")].map((group) => [group.dataset.paletteKind, group]),
-  );
+  const records = dialog.querySelector("[data-palette-records]");
   const sources = [...dialog.querySelectorAll("[data-palette-from]")];
   const all = dialog.querySelector("[data-palette-all]");
+  const typed = [...dialog.querySelectorAll("[data-palette-label]")];
   const views = dialog.querySelector("[data-palette-views]");
   const filled = new Set();
   let options = [];
@@ -73,13 +73,22 @@ function setupDialog(dialog) {
     const text = query.value.trim().toLowerCase();
 
     if (all) all.dataset.paletteHref = searchUrl(all.dataset.paletteAll, query.value.trim());
+    for (const option of typed) {
+      option.querySelector(".pal-r-label").textContent = option.dataset.paletteLabel.replace(QUERY, () =>
+        query.value.trim(),
+      );
+    }
 
     for (const option of options) option.hidden = !matches(option, text) || !applies(option, task);
 
     for (const group of groups) group.hidden = !group.querySelector(SHOWN);
 
     const visible = shown();
-    status.textContent = countText(status, "paletteResults", visible.filter((option) => option !== all).length);
+    status.textContent = countText(
+      status,
+      "paletteResults",
+      visible.filter((option) => !typed.includes(option)).length,
+    );
     select(visible[0]);
   };
 
@@ -94,16 +103,23 @@ function setupDialog(dialog) {
 
     if (option.hasAttribute("data-palette-post")) return post(option, dialog.dataset.paletteToken);
 
+    const control = option.dataset.paletteClick;
+    if (control) {
+      dialog.close();
+      return document.querySelector(control)?.click();
+    }
+
     const target = option.dataset.paletteDialog;
     if (!target) return window.location.assign(option.dataset.paletteHref);
 
     dialog.close();
+    fillField(target, option.dataset.paletteFill, query.value.trim());
     if (!openDialog(target)) window.location.assign(option.dataset.paletteHref);
   };
 
-  const show = (found) => {
+  const show = (hits) => {
     for (const row of dialog.querySelectorAll(FOUND)) row.remove();
-    for (const { kind, hits } of found) kinds.get(kind)?.append(...hits.map((hit) => foundRow(kinds.get(kind), hit)));
+    records.append(...hits.map((hit) => foundRow(records, hit)).filter(Boolean));
 
     rebuild();
   };
@@ -135,7 +151,7 @@ function setupDialog(dialog) {
     delay: DELAY,
     request: (text) => ({ url: searchUrl(dialog.dataset.paletteSearch, text), headers: ACCEPT, redirect: "manual" }),
     read: json,
-    done: ({ groups }) => show(groups),
+    done: ({ hits }) => show(hits),
     failed: () => {
       asked = "";
     },
@@ -215,20 +231,27 @@ async function fetchJSON(url) {
   return json(await fetch(url, { headers: ACCEPT, redirect: "manual" }));
 }
 
-function foundRow(group, { id, title, match, date, href }) {
-  const row = group.querySelector("[data-palette-found-row]").content.firstElementChild.cloneNode(true);
+function fillField(dialogId, name, value) {
+  const field = name && document.getElementById(dialogId)?.querySelector(`[name="${name}"]`);
+  if (field) field.value = value;
+}
 
-  row.id = `command-palette-${group.dataset.paletteKind}-${id}`;
+function foundRow(group, { kind, id, title, match, href }) {
+  const template = group.querySelector(`[data-palette-found-row="${kind}"]`);
+  if (!template) return null;
+
+  const row = template.content.firstElementChild.cloneNode(true);
+
+  row.id = `command-palette-${kind}-${id}`;
   row.dataset.paletteHref = href;
   row.querySelector(".pal-r-label").textContent = title;
   row.querySelector(".pal-r-match").textContent = match;
-  row.querySelector(".pal-r-sub").textContent = date;
 
   return row;
 }
 
 function matches(option, text) {
-  if (option.hasAttribute("data-palette-found") || option.hasAttribute("data-palette-all")) return text !== "";
+  if (option.hasAttribute("data-palette-found") || option.hasAttribute("data-palette-label")) return text !== "";
   if (option.hasAttribute("data-palette-typed")) return text !== "" && option.dataset.paletteText.includes(text);
 
   return text === "" || option.dataset.paletteText.includes(text);

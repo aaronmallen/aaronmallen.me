@@ -23,6 +23,9 @@ module Admin
           prop :needs, Blog::Types::String.optional, default: nil
           prop :jump, Blog::Types::String.optional, default: nil
           prop :key, Blog::Types::String.optional, default: nil
+          prop :click, Blog::Types::String.optional, default: nil
+          prop :fill, Blog::Types::String.optional, default: nil
+          prop :query, Blog::Types::Bool, default: false
 
           def view_template
             div(
@@ -30,7 +33,8 @@ module Admin
               data: {
                 palette_option: true, palette_text: @text, palette_href: @href, palette_dialog: @dialog,
                 palette_found: (true if @found), palette_typed: (true if @typed), palette_post: (true if @post),
-                palette_needs: @needs, palette_all: @all, **key_data,
+                palette_needs: @needs, palette_all: @all, palette_click: @click, palette_fill: @fill,
+                palette_label: (@label if @query), **key_data,
               },
             ) do
               Icon(["fa-solid", @icon, "pal-r-icon"])
@@ -57,7 +61,7 @@ module Admin
 
           def trailing
             span(class: ["pal-r-sub", ("warn" if @warn)]) { @sub } if @sub
-            span(class: "kbd pal-r-key", aria: { hidden: "true" }) { @key } if @key
+            span(class: "kbd pal-r-key", aria: { hidden: "true" }) { @key } if @key&.length == 1
           end
         end
       end

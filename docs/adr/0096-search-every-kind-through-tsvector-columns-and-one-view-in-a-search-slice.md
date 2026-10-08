@@ -6,6 +6,7 @@ created: 2026-10-03
 area: [db, admin, api, mcp, assets, posts, projects, record, social, tasks, contact]
 supersedes: ["0091"]
 issue: "#299"
+amended: ["#773"]
 tags: [search, postgres, full-text, tsvector, gin, view, palette, slices]
 ---
 
@@ -40,7 +41,7 @@ query keeps the best part per post. The day follows the `activities` view for ea
 entries take the site day of `created_at`, and messages of `received_at`.
 
 **One query.** The query parses the phrase with `websearch_to_tsquery('english', ...)`, ranks with `ts_rank`,
-newest first on a tie, and narrows by kind, caps per kind or pages by number. It builds the short match with
+newest first on a tie, and narrows by kind and pages by number. It builds the short match with
 `ts_headline` over only the rows it returns, since `ts_headline` reads the whole text.
 
 **A `search` slice.** `slices/search` owns the relation, its repo and the query, and exports the query. The view
@@ -48,19 +49,20 @@ spans six slices' tables, so no one of them owns it, by the reasoning ADR 0052 g
 imports the query for the palette and the search screen, and `api` imports it for the endpoint and the MCP tool
 ([ADR 0088][0088]). The view joins the reads [ADR 0021][0021] lists: it reads the eleven tables and writes none.
 
-**The palette asks search as I type.** A session-only admin route answers the query as JSON, grouped by kind, a few
-per kind. It keeps what ADR 0091 settled for its route: no session answers 401, `return_to` stays alone, the answer
+**The palette asks search as I type.** A session-only admin route answers the query as JSON: the top 8 hits across
+every kind, best first, each with its kind. The palette lists them as one Records group and labels each row with its
+kind. It keeps what ADR 0091 settled for its route: no session answers 401, `return_to` stays alone, the answer
 is `no-store`, and the row markup stays in Ruby through a `template`. The Tasks group comes from search, closed tasks
 among them, so `GET /admin/tasks/palette` and `Admin::Actions::Tasks::Palette` go away in the change that adds the
 route.
 
-A new kind, such as decisions (#272), joins by giving its table a `search_vector` column and its GIN index, adding
-a branch to the view in a new migration, and adding its name to the kinds the query accepts.
+A new kind joins by giving its table a `search_vector` column and its GIN index, adding a branch to the view in a
+new migration, and adding its name to the kinds the query accepts. Decisions (#272) joined this way in #773.
 
 ## Alternatives
 
 **Query each table and merge in Ruby.** It needs no view and no slice. Every caller would run a query per kind, and
-ranking, the cap per kind and paging would run on rows pulled into memory, as ADR 0052 found for activity.
+ranking and paging would run on rows pulled into memory, as ADR 0052 found for activity.
 
 **Add text search to `activities`.** The view already unions most kinds. It has no vector to index and lacks
 people, work entries and messages, and its rows carry what a timeline line needs, not what a search hit needs.

@@ -16,8 +16,8 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "draws one row per entry, in order" do
       names = %w[
-        create-task create-decision create-journal-entry new-post new-social-post start-task
-        complete-task pause-task
+        create-task create-decision create-journal-entry new-post new-social-post plan-tomorrow import-commits
+        sync-issues keyboard-shortcuts toggle-theme start-task complete-task pause-task
       ]
 
       expect(actions.map { it[:id] }).to eq(names.map { "command-palette-#{it}" })
@@ -58,6 +58,35 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "sends New social post to the composer, ready to write" do
       expect(action("new-social-post")["data-palette-href"]).to eq("/admin/social?write=1")
+    end
+
+    it "sends Plan tomorrow to the upcoming tasks" do
+      expect(action("plan-tomorrow")["data-palette-href"]).to eq("/admin/tasks?filter=upcoming")
+    end
+
+    it "posts Import commits to the import route", :aggregate_failures do
+      row = action("import-commits")
+
+      expect(row["data-palette-post"]).not_to be_nil
+      expect(row["data-palette-href"]).to eq("/admin/commits/import")
+    end
+
+    it "posts Sync issues to the sync route", :aggregate_failures do
+      row = action("sync-issues")
+
+      expect(row["data-palette-post"]).not_to be_nil
+      expect(row["data-palette-href"]).to eq("/admin/tasks/issues/sync")
+    end
+
+    it "opens the key help from Keyboard shortcuts, under ?", :aggregate_failures do
+      row = action("keyboard-shortcuts")
+
+      expect(row["data-palette-click"]).to eq("[data-key-help-open]")
+      expect(row).to have_css(".pal-r-key", text: "?", visible: :all)
+    end
+
+    it "flips the theme from Toggle theme" do
+      expect(action("toggle-theme")["data-palette-click"]).to eq("[data-theme-choice][aria-pressed='false']")
     end
 
     it "matches each row on its label and the words for what it does" do

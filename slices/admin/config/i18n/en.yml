@@ -767,6 +767,12 @@ en:
           create_task:
             label: "Create task"
             text: "new task, add task"
+          import_commits:
+            label: "Import commits"
+            text: "sync commits, fetch commits, pull commits"
+          keyboard_shortcuts:
+            label: "Keyboard shortcuts"
+            text: "show the keys, key help, hotkeys"
           new_post:
             label: "New post"
             text: "write a post, draft a post"
@@ -779,9 +785,18 @@ en:
           pause_task_in_progress:
             label: "Pause %{title}"
             text: "stop task, stop work"
+          plan_tomorrow:
+            label: "Plan tomorrow"
+            text: "upcoming tasks, schedule tomorrow"
           start_task:
             label: "Start task"
             text: "begin task, work on task"
+          sync_issues:
+            label: "Sync issues"
+            text: "fetch issues, pull issues, github"
+          toggle_theme:
+            label: "Toggle theme"
+            text: "dark theme, light theme, switch theme"
         avatar_menu:
           keys: "Keyboard shortcuts"
           label: "Account and settings"
@@ -811,17 +826,7 @@ en:
           current: "current"
           escape: "esc"
           go_to: "Go to"
-          kinds:
-            commit: "Commits"
-            journal: "Journal entries"
-            message: "Messages"
-            person: "People"
-            post: "Posts"
-            project: "Projects"
-            social: "Social posts"
-            task: "Tasks"
-            webmention: "Webmentions"
-            work: "Work entries"
+          create_task: "Create task “%{query}”"
           label: "Command palette"
           move: "move"
           open: "open"
@@ -832,12 +837,26 @@ en:
             other: "{count} results"
           results_label: "Sections, actions, saved views and records"
           search: "Search"
-          see_all: "See all results"
+          see_all: "See all results for “%{query}”"
           waiting:
             one: "%{count} waiting"
             other: "%{count} waiting"
         palette_row:
           jump: "Go to %{section}"
+        palette_records:
+          heading: "Records"
+          kinds:
+            commit: "commit"
+            decision: "decision"
+            journal: "journal"
+            message: "message"
+            person: "person"
+            post: "post"
+            project: "project"
+            social: "social"
+            task: "task"
+            webmention: "webmention"
+            work: "work"
         palette_saved_views:
           heading: "Saved views"
         screen_tabs:
@@ -2123,6 +2142,7 @@ en:
           heading: "Search"
           kinds:
             commit: "Commits"
+            decision: "Decisions"
             journal: "Journal entries"
             message: "Messages"
             person: "People"

@@ -3,10 +3,10 @@
 module Admin
   module Operations
     class ListActions
-      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key) do
+      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key, :click) do
         def initialize(
           name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, post: false, needs: nil,
-          from: nil, from_params: Blog::Constants::EMPTY_HASH, key: nil
+          from: nil, from_params: Blog::Constants::EMPTY_HASH, key: nil, click: nil
         )
           super
         end
@@ -26,6 +26,16 @@ module Admin
         Entry.new(
           name: :new_social_post, icon: "fa-paper-plane", route: :admin_social,
           params: { write: Blog::Types::CHECKED },
+        ),
+        Entry.new(
+          name: :plan_tomorrow, icon: "fa-calendar", route: :admin_tasks,
+          params: { filter: Blog::Types::TaskTab["upcoming"] },
+        ),
+        Entry.new(name: :import_commits, icon: "fa-rotate", route: :admin_import_commits, post: true),
+        Entry.new(name: :sync_issues, icon: "fa-code-pull-request", route: :admin_sync_issues, post: true),
+        Entry.new(name: :keyboard_shortcuts, icon: "fa-keyboard", click: "[data-key-help-open]", key: "?"),
+        Entry.new(
+          name: :toggle_theme, icon: "fa-circle-half-stroke", click: "[data-theme-choice][aria-pressed='false']",
         ),
         Entry.new(name: :start_task, icon: "fa-play", post: true, needs: :start),
         Entry.new(name: :complete_task, icon: "fa-check", post: true, needs: :complete),
@@ -47,6 +57,7 @@ module Admin
           Structs::Action.new(
             name: entry.name, icon: entry.icon, path: path(entry.route, entry.params), dialog: entry.dialog,
             post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params), key: entry.key,
+            click: entry.click,
           )
         end
       end

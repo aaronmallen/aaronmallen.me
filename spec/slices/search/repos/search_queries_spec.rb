@@ -6,7 +6,10 @@ RSpec.describe Search::Repos::SearchQueries do
 
   describe "the query plan" do
     let(:tables) do
-      %w[tasks posts social_post_parts journal_entries commits projects work_entries people messages webmentions]
+      %w[
+        tasks posts social_post_parts journal_entries commits projects work_entries people messages webmentions
+        decisions
+      ]
     end
     let(:indexes) { tables.map { "#{it}_search_vector_index" } }
 
@@ -22,7 +25,7 @@ RSpec.describe Search::Repos::SearchQueries do
     def sql
       relation = Search::Slice["relations.search_documents"]
 
-      relation.hits("x", kinds: Blog::Types::SearchKind.values, per_kind: 5, page:).sql
+      relation.hits("x", kinds: Blog::Types::SearchKind.values, page:).sql
     end
 
     it "reads each table's index" do

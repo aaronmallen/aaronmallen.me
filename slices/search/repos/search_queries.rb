@@ -12,11 +12,11 @@ module Search
         search_documents.kind_counts(phrase, kinds:).to_a.to_h { [it[:kind], it[:count]] }
       end
 
-      def search(text:, page:, kinds: Blog::Types::SearchKind.values, per_kind: nil)
+      def search(text:, page:, kinds: Blog::Types::SearchKind.values)
         phrase = text.to_s.strip
         return page.fill(NONE) if phrase.empty?
 
-        page.fill(search_documents.hits(phrase, kinds:, per_kind:, page:).map { Structs::Hit.new(**it) })
+        page.fill(search_documents.hits(phrase, kinds:, page:).map { Structs::Hit.new(**it) })
       end
     end
   end

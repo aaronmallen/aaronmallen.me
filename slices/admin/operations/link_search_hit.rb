@@ -16,6 +16,7 @@ module Admin
           when "commit" then routes.path(:admin_commit, id:)
           when "project" then routes.path(:admin_edit_project, id:)
           when "person" then routes.path(:admin_edit_person, id:)
+          when "decision" then routes.path(:admin_decision, id:)
           else listed(hit)
         end
       end

@@ -16,7 +16,7 @@ module Admin
 
         def handle(request, response)
           response.format = :json
-          response.body = JSON.generate(groups: search_palette.call(request.params[:q]))
+          response.body = JSON.generate(hits: search_palette.call(request.params[:q]))
         end
 
         private

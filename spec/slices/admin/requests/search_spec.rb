@@ -54,6 +54,20 @@ RSpec.describe "Admin search", type: :request do
       end
     end
 
+    describe "a phrase a decision holds" do
+      let!(:decision) { create(:decision, title: "Pick a blimp hangar", problem: "Where the airship sleeps") }
+
+      before { get "/admin/search", q: "airship" }
+
+      it "lists the decision under its kind" do
+        expect(page.find(".card", text: "Decisions")).to have_css(".li-title", text: "Pick a blimp hangar")
+      end
+
+      it "links it to its page" do
+        expect(page).to have_link(href: "/admin/decisions/#{decision.id}")
+      end
+    end
+
     describe "filtering by kind" do
       before do
         create(:task, title: "Track the zeppelin")

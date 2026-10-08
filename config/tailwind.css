@@ -141,7 +141,7 @@
   --container-measure: 44em;
   --container-entry-meta: 170px;
   --container-work-year: 104px;
-  --container-palette: 620px;
+  --container-palette: 640px;
   --container-journal-modal: 880px;
   --spacing-admin-gutter: clamp(20px, 2.2vw, 56px);
   --spacing-top-bar: 4.5rem;
@@ -910,49 +910,45 @@
 }
 
 @utility pal {
-  @apply w-full max-w-palette overflow-hidden rounded-card border border-line bg-ground-sunk shadow-palette;
+  @apply w-full max-w-palette overflow-hidden rounded-panel border border-line bg-ground-sunk shadow-palette;
 }
 
 @utility pal-in {
-  @apply flex items-center gap-3 border-b border-line px-4 py-1.5;
+  @apply flex items-center gap-3 border-b border-line px-5 py-2.5;
 }
 
 @utility pal-in-icon {
-  @apply shrink-0 text-icon-sm text-ink-muted;
+  @apply shrink-0 text-ink-muted;
 }
 
 @utility pal-in-field {
-  @apply min-h-tap min-w-0 flex-1 rounded-input border-0 bg-transparent px-2 py-0 font-mono text-input text-ink;
+  @apply min-h-tap min-w-0 flex-1 rounded-input border-0 bg-transparent px-2 py-0 font-display text-lede text-ink;
   @apply placeholder:text-ink-muted focus:outline-2 focus:-outline-offset-2 focus:outline-mk-blue;
 }
 
 @utility pal-l {
-  @apply overflow-y-auto p-2;
-  max-height: min(52vh, 420px);
+  @apply overflow-y-auto p-1.5;
+  max-height: min(56vh, 520px);
 }
 
 @utility pal-g {
-  @apply px-2.5 pt-2.5 pb-1 font-mono text-label text-mk-orange-text uppercase;
+  @apply m-0 px-3 pt-2.5 pb-1 font-mono text-kicker text-ink-muted uppercase;
 }
 
 @utility pal-r {
-  @apply flex cursor-pointer items-center gap-3 rounded-btn px-2.5 py-2 text-left text-ink;
+  @apply flex cursor-pointer items-center gap-3 rounded-field px-3 py-2.5 text-left font-display text-base text-ink;
 
   &[aria-selected="true"] {
-    @apply bg-wash;
+    @apply bg-ground;
   }
 }
 
 @utility pal-r-icon {
   @apply w-4 shrink-0 text-center text-icon-sm text-ink-muted;
-
-  :where(.pal-r[aria-selected="true"]) > & {
-    @apply text-mk-green;
-  }
 }
 
 @utility pal-r-label {
-  @apply min-w-0 flex-1 truncate font-mono text-input;
+  @apply min-w-0 flex-1 truncate;
 }
 
 @utility pal-r-text {
@@ -960,18 +956,14 @@
 }
 
 @utility pal-r-match {
-  @apply min-w-0 truncate text-badge text-ink-muted;
+  @apply min-w-0 truncate font-mono text-badge text-ink-muted;
 }
 
 @utility pal-r-sub {
-  @apply shrink-0 rounded-full border border-line px-2 py-0.5 font-mono text-badge whitespace-nowrap text-ink-muted;
-
-  :where(.pal-r[aria-selected="true"]) > & {
-    @apply text-ink;
-  }
+  @apply ml-auto shrink-0 font-mono text-badge whitespace-nowrap text-ink-muted;
 
   &.warn {
-    @apply border-mk-pink text-mk-pink-text;
+    @apply text-mk-pink-text;
   }
 }
 

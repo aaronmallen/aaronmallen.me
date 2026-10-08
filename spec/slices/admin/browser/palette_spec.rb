@@ -152,8 +152,51 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(page).to have_css("[data-palette-status]", text: "1 result", visible: :all)
     end
 
-    it "offers no row that writes the query down as a task" do
-      expect(page).to have_no_css(".pal-r", text: "mess”")
+    it "offers a row that writes the query down as a task" do
+      expect(page).to have_css("#command-palette-create-task-typed", text: "Create task “mess”")
+    end
+
+    it "offers a row that sees every result for the query" do
+      expect(page).to have_css("#command-palette-see-all", text: "See all results for “mess”")
+    end
+  end
+
+  describe "running Create task with a query" do
+    before do
+      open_palette
+      query.send_keys(*"Buy stamps".chars)
+      find_by_id("command-palette-create-task-typed").click
+    end
+
+    it "opens the create task dialog with the title filled", :aggregate_failures do
+      expect(page).to have_css("dialog#task-create[open]")
+      expect(page).to have_field("task[title]", with: "Buy stamps")
+    end
+  end
+
+  describe "running Keyboard shortcuts" do
+    before do
+      open_palette
+      query.send_keys(*"keyboard".chars)
+      query.send_keys(:enter)
+    end
+
+    it "opens the key help" do
+      expect(page).to have_css("dialog#key-help[open]")
+    end
+  end
+
+  describe "running Toggle theme" do
+    def theme = evaluate_script("document.documentElement.dataset.siteTheme")
+
+    def toggle
+      open_palette
+      query.send_keys(*"toggle theme".chars, :enter)
+      theme
+    end
+
+    it "flips the theme each time" do
+      expect(toggle).not_to eq(toggle)
     end
   end
 
@@ -215,13 +258,25 @@ RSpec.describe "Admin command palette", type: :feature do
       query.send_keys(*"accountant".chars)
     end
 
-    it "finds the unfinished task", :aggregate_failures do
-      expect(page).to have_css(".pal-g", text: /tasks/i)
+    it "finds the unfinished task under Records", :aggregate_failures do
+      expect(page).to have_css(".pal-g", text: /records/i)
       expect(page).to have_css(".pal-r", text: "Email the accountant")
     end
 
-    it "dates it" do
-      expect(page).to have_css(".pal-r .pal-r-sub", text: today.strftime("%b %-d, %Y"))
+    it "labels it with its kind" do
+      expect(page).to have_css(".pal-r", text: "Email the accountant") { it.has_css?(".pal-r-sub", text: "task") }
+    end
+  end
+
+  describe "searching the decisions" do
+    before do
+      create(:decision, title: "Pick a blimp hangar")
+      open_palette
+      query.send_keys(*"hangar".chars)
+    end
+
+    it "finds the decision, labelled as one" do
+      expect(page).to have_css(".pal-r", text: "Pick a blimp hangar") { it.has_css?(".pal-r-sub", text: "decision") }
     end
   end
 
@@ -233,10 +288,11 @@ RSpec.describe "Admin command palette", type: :feature do
       query.send_keys(*"levee".chars)
     end
 
-    it "lists the entry under its kind", :aggregate_failures do
-      within("[aria-labelledby='command-palette-kind-journal']") do
-        expect(page).to have_css(".pal-g", text: /journal entries/i)
+    it "lists the entry under Records, labelled with its kind", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-records']") do
+        expect(page).to have_css(".pal-g", text: /records/i)
         expect(page).to have_css(".pal-r-label", text: "Walked the levee at dawn")
+        expect(page).to have_css(".pal-r-sub", text: "journal")
       end
     end
 
@@ -317,39 +373,40 @@ RSpec.describe "Admin command palette", type: :feature do
 
     describe "after a query" do
       before do
-        6.times { create(:task, title: "Call the plumber #{it}") }
+        9.times { create(:task, title: "Call the plumber #{it}") }
         query.send_keys(*"plumber".chars)
-        page.assert_selector(".pal-r", text: "Call the plumber", count: 5)
+        page.assert_selector(".pal-r", text: "Call the plumber", count: 8)
       end
 
-      it "sits below the results" do
-        expect(page.all(".pal-r").last[:id]).to eq("command-palette-see-all")
+      it "sits below the results, above Create task" do
+        expect(page.all(".pal-r").last(2).map { it[:id] })
+          .to eq(%w[command-palette-see-all command-palette-create-task-typed])
       end
 
       it "opens the search screen with the same query, every match listed", :aggregate_failures do
         find_by_id("command-palette-see-all").click
 
         expect(page).to have_current_path("/admin/search?q=plumber")
-        expect(page).to have_css(".li-title", text: "Call the plumber", count: 6)
+        expect(page).to have_css(".li-title", text: "Call the plumber", count: 9)
       end
 
       it "opens it from the keyboard" do
-        query.send_keys(:end, :enter)
+        query.send_keys(:end, :up, :enter)
 
         expect(page).to have_current_path("/admin/search?q=plumber")
       end
     end
   end
 
-  describe "searching more tasks than it shows" do
+  describe "searching more records than it shows" do
     before do
-      6.times { create(:task, title: "Call the plumber #{it}") }
+      9.times { create(:task, title: "Call the plumber #{it}") }
       open_palette
       query.send_keys(*"plumber".chars)
     end
 
-    it "shows five" do
-      expect(page).to have_css(".pal-r", text: "Call the plumber", count: 5)
+    it "shows the top eight" do
+      expect(page).to have_css(".pal-r", text: "Call the plumber", count: 8)
     end
   end
 

@@ -778,6 +778,7 @@ CREATE TABLE public.decisions (
     resolved_option_id integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, COALESCE((title)::text, ''::text)), 'A'::"char") || setweight(to_tsvector('english'::regconfig, COALESCE((problem)::text, ''::text)), 'B'::"char"))) STORED,
     CONSTRAINT decisions_choice_check CHECK (((status = 'resolved'::public.decision_status) = (resolved_option_id IS NOT NULL)))
 );
 
@@ -2764,7 +2765,21 @@ UNION ALL
     NULL::text AS sha,
     (webmentions.source_url)::text AS url,
     webmentions.search_vector
-   FROM public.webmentions;
+   FROM public.webmentions
+UNION ALL
+ SELECT 'decision'::text AS kind,
+    decisions.id AS source_id,
+    (decisions.title)::text AS title,
+    ((COALESCE((decisions.title)::text, ''::text) || '
+'::text) || COALESCE((decisions.problem)::text, ''::text)) AS body,
+    ((decisions.created_at AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    (decisions.status)::text AS status,
+    NULL::text AS slug,
+    NULL::text AS repo,
+    NULL::text AS sha,
+    NULL::text AS url,
+    decisions.search_vector
+   FROM public.decisions;
 
 
 --
@@ -4219,6 +4234,13 @@ CREATE INDEX decision_events_decision_id_option_id_index ON public.decision_even
 --
 
 CREATE INDEX decision_tags_tag_id_index ON public.decision_tags USING btree (tag_id);
+
+
+--
+-- Name: decisions_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX decisions_search_vector_index ON public.decisions USING gin (search_vector);
 
 
 --
@@ -5980,4 +6002,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261007000652_create_known_devices.rb'),
 ('20261007000654_add_new_devices_to_attention.rb'),
 ('20261008000200_add_history_cursor_to_task_sources.rb'),
-('20261008000300_add_country_names.rb');
+('20261008000300_add_country_names.rb'),
+('20261008000773_add_decisions_to_search_documents.rb');

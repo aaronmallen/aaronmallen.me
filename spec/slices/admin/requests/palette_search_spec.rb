@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin palette search", type: :request do
-  def groups = JSON.parse(last_response.body).fetch("groups")
+  def found = JSON.parse(last_response.body).fetch("hits")
 
   def hit(kind) = hits(kind).tap { expect(it.length).to eq(1) }.first
 
-  def hits(kind) = groups.find { it.fetch("kind") == kind }&.fetch("hits") || []
+  def hits(kind) = found.select { it.fetch("kind") == kind }
 
   def search(text, headers = {})
     get("/admin/search/palette", { q: text }, { "HTTP_ACCEPT" => "application/json", **headers })
@@ -25,9 +25,9 @@ RSpec.describe "Admin palette search", type: :request do
         expect(last_response.media_type).to eq("application/json")
       end
 
-      it "lists the entry with its title, a short match, its date and where it lives" do
+      it "lists the entry with its kind, title and where it lives" do
         expect(hit("journal")).to include(
-          "id" => entry.id, "title" => "Walked the levee at dawn", "date" => "Oct 1, 2026",
+          "kind" => "journal", "id" => entry.id, "title" => "Walked the levee at dawn",
           "href" => "/admin/journal?to=2026-10-01#day-2026-10-01",
         )
       end
@@ -49,19 +49,20 @@ RSpec.describe "Admin palette search", type: :request do
         search("zeppelin")
       end
 
-      it "groups the hits by kind" do
-        expect(groups.map { it.fetch("kind") }).to contain_exactly("task", "post", "message")
+      it "lists them in one list, each with its kind" do
+        expect(found.map { it.fetch("kind") }).to contain_exactly("task", "post", "message")
       end
     end
 
-    describe "more hits of one kind than it shows" do
+    describe "more hits than it shows" do
       before do
         6.times { create(:task, title: "Call the plumber #{it}") }
+        3.times { create(:message, subject: "Plumber quote #{it}") }
         search("plumber")
       end
 
-      it "lists five" do
-        expect(hits("task").length).to eq(5)
+      it "lists the top eight across every kind" do
+        expect(found.length).to eq(8)
       end
     end
 
@@ -123,6 +124,13 @@ RSpec.describe "Admin palette search", type: :request do
         expect(hit("message").fetch("href")).to eq("/admin/messages?status=read")
       end
 
+      it "sends a decision to its page" do
+        decision = create(:decision, title: "Pick a hangar", problem: "Where the airship sleeps")
+        search("airship")
+
+        expect(hit("decision").fetch("href")).to eq("/admin/decisions/#{decision.id}")
+      end
+
       it "sends a webmention to the list that holds it" do
         create(:webmention, :approved, author_name: "Grace Hopper")
         search("hopper")
@@ -138,7 +146,7 @@ RSpec.describe "Admin palette search", type: :request do
       end
 
       it "finds nothing" do
-        expect(groups).to be_empty
+        expect(found).to be_empty
       end
     end
   end

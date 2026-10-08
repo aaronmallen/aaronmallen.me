@@ -6,25 +6,15 @@ module Admin
       module Nav
         class Palette < Component
           ACTIONS_GROUP = "command-palette-group-actions"
+          CREATE_TASK_ID = "command-palette-create-task-typed"
           DIALOG_ID = "command-palette"
           GO_TO_GROUP = "command-palette-group-go-to"
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘K" }.freeze
-          KINDS = {
-            Blog::Types::SearchKind["task"] => "fa-list-check",
-            Blog::Types::SearchKind["post"] => "fa-file-lines",
-            Blog::Types::SearchKind["social"] => "fa-paper-plane",
-            Blog::Types::SearchKind["journal"] => "fa-feather",
-            Blog::Types::SearchKind["commit"] => "fa-code-commit",
-            Blog::Types::SearchKind["project"] => "fa-cube",
-            Blog::Types::SearchKind["work"] => "fa-briefcase",
-            Blog::Types::SearchKind["person"] => "fa-address-book",
-            Blog::Types::SearchKind["message"] => "fa-envelope",
-            Blog::Types::SearchKind["webmention"] => "fa-at",
-          }.freeze
-          KIND_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           LIST_ID = "command-palette-list"
+          QUERY = "{query}"
           SEE_ALL_GROUP = "command-palette-group-see-all"
           SEE_ALL_ID = "command-palette-see-all"
+          TASK_TITLE = "task[title]"
           TITLE = "{title}"
 
           prop :actions, Blog::Types::Array.of(Blog::Types::Instance(Structs::Action))
@@ -63,7 +53,7 @@ module Admin
 
             PaletteRow(
               id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
-              href: action.path, dialog: action.dialog, post: action.post, needs: action.needs&.to_s, key: action.key,
+              href: action.path, needs: action.needs&.to_s, **action.to_h.slice(:dialog, :post, :key, :click),
             )
           end
 
@@ -96,14 +86,6 @@ module Admin
             end
           end
 
-          def kind_group(kind, icon)
-            row_group("command-palette-kind-#{kind}", t(KIND_KEYS.fetch(kind)), data: { palette_kind: kind }) do
-              template(data: { palette_found_row: true }) do
-                PaletteRow(id: "", icon:, label: "", match: "", sub: "", found: true)
-              end
-            end
-          end
-
           def query_box
             div(class: "pal-in") do
               Icon("fa-solid fa-magnifying-glass pal-in-icon")
@@ -124,13 +106,28 @@ module Admin
               action_group
               PaletteSavedViews()
               go_to_group
-              KINDS.each { |kind, icon| kind_group(kind, icon) }
-              see_all_group
+              PaletteRecords()
+              search_group
             end
           end
 
           def row_group(id, heading, data: Blog::Constants::EMPTY_HASH, &)
             PaletteGroup(id:, heading:, data:, &)
+          end
+
+          def search_group
+            search = path(:admin_search)
+
+            row_group(SEE_ALL_GROUP, t(".search")) do
+              PaletteRow(
+                id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all", query: QUERY), href: search,
+                all: search, query: true,
+              )
+              PaletteRow(
+                id: CREATE_TASK_ID, icon: "fa-plus", label: t(".create_task", query: QUERY),
+                href: path(:admin_new_task), dialog: Tasks::CreateDialog::ID, fill: TASK_TITLE, query: true,
+              )
+            end
           end
 
           def section_row(section)
@@ -147,14 +144,6 @@ module Admin
             return t(".waiting", count: section.count) if section.waiting?
 
             t(".current") if section.current
-          end
-
-          def see_all_group
-            search = path(:admin_search)
-
-            row_group(SEE_ALL_GROUP, t(".search")) do
-              PaletteRow(id: SEE_ALL_ID, icon: "fa-magnifying-glass", label: t(".see_all"), href: search, all: search)
-            end
           end
 
           def status

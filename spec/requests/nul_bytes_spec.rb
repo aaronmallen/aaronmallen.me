@@ -35,11 +35,11 @@ RSpec.describe "Text holding a NUL byte", type: :request do
       expect(page).to have_no_css(".li-title")
     end
 
-    it "answers the admin palette with 200 and no groups" do
+    it "answers the admin palette with 200 and no hits" do
       sign_in_to_admin
       get "/admin/search/palette", { q: nul }, { "HTTP_ACCEPT" => "application/json" }
 
-      expect([status, JSON.parse(last_response.body).fetch("groups")]).to eq([200, []])
+      expect([status, JSON.parse(last_response.body).fetch("hits")]).to eq([200, []])
     end
   end
 
