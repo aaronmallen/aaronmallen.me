@@ -133,6 +133,7 @@ one.
 | [0126][0126] | Keep only base classes and gem wrappers in lib, and give the rest a Hanami shape | ![Active][active] | 2026-10-07 |
 | [0127][0127] | Replay each Linear state change at Linear's time, from a cursor on task sources | ![Active][active] | 2026-10-07 |
 | [0128][0128] | Lay out the admin as a full-width pill-nav shell with right-side drawers | ![Active][active] | 2026-10-07 |
+| [0129][0129] | Store MaxMind's country name beside each country code | ![Active][active] | 2026-10-08 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -262,6 +263,7 @@ one.
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0127]: 0127-replay-each-linear-state-change-at-linears-time-from-a-cursor-on-task-sources.md
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
+[0129]: 0129-store-maxminds-country-name-beside-each-country-code.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
