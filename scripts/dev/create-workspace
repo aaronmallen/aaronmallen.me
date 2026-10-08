@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+#MISE description="Create a jj workspace with its own test database for an agent to work in beside others"
+#USAGE arg "<id>" help="The number that names the workspace and its test database"
+#USAGE arg "[base]" help="The revision to start from"
+
+set -e
+
+case "$1" in
+"" | *[!0-9]*)
+  echo "id must be a number" >&2
+  exit 1
+  ;;
+esac
+
+id="$1"
+dir=".claude/worktrees/ws${id}"
+exclude="$(jj git root)/info/exclude"
+
+if ! grep -qE '^(\*\*/|/)?\.claude/worktrees/?$' "$exclude" 2>/dev/null; then
+  echo '.claude/worktrees' >>"$exclude"
+fi
+
+mkdir -p .claude/worktrees
+jj workspace add "$dir" --name "ws${id}" -r "${2:-@-}"
+grep -v '^WORKSPACE_ID=' .env >"$dir/.env" || true
+echo "WORKSPACE_ID=${id}" >>"$dir/.env"
+mkdir -p "$dir/tmp"
+cp -R tmp/. "$dir/tmp/"
+
+cd "$dir"
+mise trust --quiet .config/mise.toml
+mise run setup:dependencies
+mise run assets:build
+mise run test:prepare

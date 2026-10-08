@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+#MISE description="Drop a workspace's test database, forget the workspace and delete its directory"
+#USAGE arg "<id>" help="The number the workspace was created with"
+
+set -e
+
+case "$1" in
+"" | *[!0-9]*)
+  echo "id must be a number" >&2
+  exit 1
+  ;;
+esac
+
+id="$1"
+
+HANAMI_ENV="test" WORKSPACE_ID="$id" scripts/db/drop
+jj workspace forget "ws${id}"
+rm -rf ".claude/worktrees/ws${id}"

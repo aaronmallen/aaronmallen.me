@@ -11,7 +11,7 @@ bluesky:
   handle: aaronmallen.dev
   profile_url: https://bsky.app/profile/aaronmallen.dev
 database:
-  name: <%= "#{ENV.fetch("DATABASE_NAME", "blog")}_test".to_json %>
+  name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"]].compact.join("_").to_json %>
   host: localhost
   max_connections: <%= ENV.fetch("DATABASE_MAX_CONNECTIONS", 12).to_json %>
   password: <%= ENV["DATABASE_PASSWORD"].to_json %>
