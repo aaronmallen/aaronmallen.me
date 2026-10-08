@@ -17,14 +17,12 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     end
   end
 
+  def select_mode = click_button("Select")
+
   def tagged(name)
     names = Tasks::Slice["relations.task_tags"].names_by_task(repo.all_open.map(&:id))
 
     names.filter_map { |id, tags| repo.by_id(id).title if tags.include?(name) }
-  end
-
-  def ticked
-    page.all(".task").select { it.has_css?("input:checked", wait: false) }.map { it.find(".task-title").text }
   end
 
   before do
@@ -33,8 +31,33 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     sign_in_to_admin
   end
 
+  def ticked
+    page.all(".task").select { it.has_css?("input:checked", wait: false) }.map { it.find(".task-title").text }
+  end
+
   describe "with scripts on" do
-    before { visit "/admin/tasks?filter=next" }
+    before do
+      visit "/admin/tasks?filter=next"
+      select_mode
+    end
+
+    it "hides the boxes until Select turns bulk mode on" do
+      select_mode
+
+      expect(page).to have_no_css(".task input[name='ids[]']")
+    end
+
+    it "clears the ticks when bulk mode goes off" do
+      box("first").check
+      select_mode
+      select_mode
+
+      expect(ticked).to be_empty
+    end
+
+    it "marks the Select button pressed in bulk mode" do
+      expect(page).to have_css("button[data-bulk-toggle][aria-pressed='true']", text: "Select")
+    end
 
     it "hides the actions while nothing is ticked" do
       expect(acts).not_to be_visible
@@ -134,6 +157,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     before do
       lower_page_size(:admin, to: 2)
       visit "/admin/tasks?filter=next"
+      select_mode
     end
 
     it "ticks only the rows on the page", :aggregate_failures do

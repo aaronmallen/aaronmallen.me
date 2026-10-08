@@ -8,7 +8,6 @@ module Admin
           include Components::Tasks
 
           BLURBS = {
-            Blog::Types::TaskFilter["today"] => ".blurbs.today",
             Blog::Types::TaskFilter["next"] => ".blurbs.next",
             Blog::Types::TaskFilter["someday"] => ".blurbs.someday",
             Blog::Types::TaskFilter["external"] => ".blurbs.external",
@@ -22,16 +21,8 @@ module Admin
             Blog::Types::TaskList["external"] => ".empty.external",
           }.freeze
           FINISHED_TODAY = :finished_today
-          LABELS = {
-            Blog::Types::TaskFilter["today"] => ".sprint",
-            Blog::Types::TaskFilter["next"] => ".on_deck",
-            Blog::Types::TaskFilter["someday"] => ".backlog",
-            Blog::Types::TaskFilter["external"] => ".imported",
-          }.freeze
           LIST = { data: { key_list: true } }.freeze
-          LIVE = { class: "card-live" }.freeze
           TITLES = {
-            Blog::Types::TaskFilter["today"] => ".today",
             Blog::Types::TaskFilter["next"] => ".next",
             Blog::Types::TaskFilter["someday"] => ".someday",
             Blog::Types::TaskFilter["external"] => ".external",
@@ -52,10 +43,11 @@ module Admin
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
-              Filters(tab: @tab, **@filters)
+              Filters(tab: @tab, query: @filters[:query])
+              BulkToggle(form: Bulk::ID) if bulk?
               CreateButton()
             end
-            Tabs(counts: @counts, tab: @tab, query: @filters[:query])
+            Tabs(counts: @counts, tab: @tab, query: @filters[:query], saved_views: @filters[:saved_views])
             body
             p(class: "task-note") { t(".footnote") }
           end
@@ -63,7 +55,7 @@ module Admin
           private
 
           def archive
-            Card(label: t(".archive"), title: t(".completed"), **LIST) do |card|
+            Card(**LIST) do |card|
               card.side { span(class: "card-note") { t(".shown", count: @tasks.rows.size) } }
               archived
             end
@@ -72,46 +64,45 @@ module Admin
           def archived
             return Empty { t(filtering? ? ".empty.completed_no_match" : ".empty.completed") } if days.empty?
 
-            days.each { |(date, tasks)| day(date, tasks) }
+            days.each { |(date, tasks)| CompletedDay(date:, tasks:, today: @today) }
             pager
           end
 
           def body
             return upcoming if upcoming?
-            return planner if planning?
+            return sprint if today?
             return archive if completed?
 
             list
           end
 
+          def bulk? = !upcoming? && !completed?
+
           def carried = @counts.fetch(CARRIED)
 
           def completed? = @tab == COMPLETED
 
-          def day(date, tasks)
-            CompletedDay(date:, tasks:, today: @today)
-          end
-
           def days = @days ||= @tasks.rows.group_by { Blog::TimeZone.today(it.completed_at) }.to_a
+
+          def empty_key = today? ? ".empty.today" : EMPTY.fetch(@tab)
 
           def external? = @tab == EXTERNAL
 
           def filtering? = !@filters[:query].empty?
 
-          def label = t(LABELS.fetch(@tab), date: l(@today, format: :short))
-
           def list
-            Card(label:, title: t(TITLES.fetch(@tab)), **list_attributes) do |card|
+            Card(title: list_title, class: ["task-list", ("card-live" if today?)], **LIST) do |card|
               card.side do
-                span(class: "card-note") { open_note }
                 ImportActs() if external?
+                span(class: "card-note") { open_note }
               end
-              p(class: "card-blurb") { t(BLURBS.fetch(@tab)) }
+              p(class: "card-blurb") { t(BLURBS.fetch(@tab)) } if BLURBS.key?(@tab)
               rows
+              QuickAdd(filter: @tab, placeholder: t(".add_to", list: @tab)) unless external?
             end
           end
 
-          def list_attributes = today? ? LIST.merge(LIVE) : LIST
+          def list_title = today? ? t(".sprint", date: l(@today, format: :short)) : t(TITLES.fetch(@tab))
 
           def open_note
             counts = [t(".open", count: filtering? ? @tasks.rows.size : @counts.fetch(@tab))]
@@ -124,18 +115,12 @@ module Admin
 
           def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
 
-          def planner
-            Planner(counts: @counts, date: @today, pool: @pool, pools: @pools)
-          end
-
-          def planning? = today? && @tasks.rows.empty? && !filtering?
-
           def row(task)
             Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID)
           end
 
           def rows
-            return Empty { t(filtering? ? ".empty.no_match" : EMPTY.fetch(@tab)) } if @tasks.rows.empty?
+            return Empty { t(filtering? ? ".empty.no_match" : empty_key) } if @tasks.rows.empty?
 
             Bulk(filter: @tab, page: @tasks.number, query: @filters[:query])
             @tasks.rows.each { row(it) }
@@ -143,6 +128,13 @@ module Admin
           end
 
           def scheduled = (@today if today?)
+
+          def sprint
+            div(class: "g-main") do
+              list
+              PullColumn(counts: @counts, pool: @pool, pools: @pools)
+            end
+          end
 
           def sub
             dotted(

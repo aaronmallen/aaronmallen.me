@@ -434,6 +434,8 @@ en:
       bulk_bar:
         all: "Select all"
         ticked: "%{count} ticked"
+      bulk_toggle:
+        label: "Select"
       calendar:
         cell:
           journal: "journal"
@@ -1640,6 +1642,10 @@ en:
           pull: "Pull in"
           pull_from: "Or pull from"
           pull_task: "Pull %{task} into today"
+        pull_column:
+          title: "Pull in"
+        quick_add:
+          add: "Add"
         row:
           edit: "Edit"
           edit_key: "Edit the highlighted task"
@@ -1722,24 +1728,22 @@ en:
           save: "Save total"
           set: "Set total"
         upcoming_sprints:
+          add_to: "Add to %{date}…"
           confirm_drop: "Drop the sprint for %{date}? Its tasks go back to their lists."
           count:
             one: "%{count} planned"
             other: "%{count} planned"
-          date: "Sprint day"
           drop: "Drop"
           empty: "Nothing scheduled for this day yet."
           in_days: "In %{count} days"
-          label: "Plan ahead"
           none: "No future sprints. Open one above to load tomorrow before tomorrow asks."
-          note: "A future sprint starts automatically on its date, absorbing anything you leave unfinished the day before."
+          note: "A future sprint starts on its date and absorbs anything left unfinished the day before."
+          nothing_waiting: "Nothing in next yet."
           open: "Open sprint"
-          planned:
-            one: "%{count} planned"
-            other: "%{count} planned"
+          open_for: "Open a sprint for"
           pull: "Pull from next"
+          pull_in: "Pull in"
           pull_task: "Schedule %{task} into this sprint"
-          title: "New sprint"
           tomorrow: "Tomorrow"
         worked_fields:
           hours: "Hours"
@@ -2223,17 +2227,14 @@ en:
           title: "Tags and projects by repo or team"
       tasks:
         index:
-          archive: "Archive"
-          backlog: "Backlog"
+          add_to: "Add to %{list}…"
           blurbs:
             external: "open GitHub and Linear issues assigned to you"
             next: "queued up, not today"
             someday: "maybe, eventually, probably not"
-            today: "the current sprint, the only actionable list"
           carried_in:
             one: "%{count} carried in"
             other: "%{count} carried in"
-          completed: "Completed"
           empty:
             completed: "Nothing completed yet."
             completed_no_match: "Nothing completed matches these filters."
@@ -2241,15 +2242,14 @@ en:
             next: "Nothing waiting."
             no_match: "No matches in this list."
             someday: "Nothing parked."
+            today: "Nothing open in today's sprint."
           finished_today:
             one: "%{count} finished today"
             other: "%{count} finished today"
           footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
           external: "External"
           heading: "Tasks"
-          imported: "From GitHub and Linear"
           next: "Next"
-          on_deck: "On deck"
           open:
             one: "%{count} open"
             other: "%{count} open"
@@ -2262,7 +2262,6 @@ en:
           someday: "Someday"
           sprint: "Sprint · %{date}"
           sprint_on: "Sprint %{date}"
-          today: "Today"
           upcoming_count:
             one: "%{count} upcoming"
             other: "%{count} upcoming"

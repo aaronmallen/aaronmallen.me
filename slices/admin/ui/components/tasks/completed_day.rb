@@ -14,7 +14,7 @@ module Admin
           def view_template
             section(class: "task-day") do
               DayHead(date: @date, today: @today, count: @tasks.size, format: :long, sunk: true)
-              @tasks.each { row(it) }
+              div(class: "task-day-rows") { @tasks.each { row(it) } }
             end
           end
 

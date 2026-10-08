@@ -20,11 +20,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
   def move_keys = page.all(".task-acts form[action*='/move/']:has(button[data-key='m'])").map { it["action"] }
 
+  def pooled = page.all(".task-pull .li-title").map(&:text)
+
   def send_to(path, **params)
     post path, { _csrf_token: admin_csrf_token, **params }
   end
 
-  def titles = page.all(".task-title, .li-title").map(&:text)
+  def titles = page.all(".task-title").map(&:text)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -59,7 +61,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         it "marks the #{filter} tab as the one you are on" do
           get "/admin/tasks", filter: filter
 
-          expect(page).to have_css(".subtab.on[aria-current='page']", text: filter)
+          expect(page).to have_css(".task-tabs .screen-tab[aria-current='page']", text: filter)
         end
       end
 
@@ -84,8 +86,8 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "offers a tab for every list and the archive" do
         get "/admin/tasks"
 
-        expect(page.all(".subtab span:first-of-type").map(&:text)).to eq(%w[today upcoming next someday external
-                                                                            completed])
+        expect(page.all(".task-tabs .screen-tab span:first-of-type").map(&:text))
+          .to eq(%w[today upcoming next someday external completed])
       end
 
       it "says nothing arrived in a sprint nothing was carried into" do
@@ -98,7 +100,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :done, title: "Filed already")
         get "/admin/tasks", filter: "someday"
 
-        expect(page.all(".subtab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
+        expect(page.all(".task-tab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
       end
 
       it "keeps the count off the lists a finished task has left" do
@@ -132,7 +134,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :done, completed_at: Blog::TimeZone.day_start(Blog::TimeZone.today) - 60)
         get "/admin/tasks"
 
-        expect(page.all(".subtab-count").map(&:text).last).to eq("1")
+        expect(page.all(".task-tab-count").map(&:text).last).to eq("1")
       end
 
       {
@@ -170,16 +172,20 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".task-note", exact_text: i18n.t("ui.views.tasks.index.footnote"))
       end
 
-      {
-        "today" => ["Sprint · %<date>s", "the current sprint"],
-        "next" => ["On deck", "queued up, not today"],
-        "someday" => ["Backlog", "maybe, eventually, probably not"],
-      }.each do |filter, (label, blurb)|
-        it "labels the #{filter} card with its own label" do
-          get "/admin/tasks", filter: filter
-          date = Blog::TimeZone.today.strftime("%b %-d")
+      it "titles the today card with the sprint date" do
+        get "/admin/tasks", filter: "today"
 
-          expect(page).to have_css(".card-label", exact_text: format(label, date:))
+        expect(page).to have_css(".card-title", exact_text: "Sprint · #{Blog::TimeZone.today.strftime('%b %-d')}")
+      end
+
+      {
+        "next" => ["Next", "queued up, not today"],
+        "someday" => ["Someday", "maybe, eventually, probably not"],
+      }.each do |filter, (title, blurb)|
+        it "titles the #{filter} card with its list" do
+          get "/admin/tasks", filter: filter
+
+          expect(page).to have_css(".card-title", exact_text: title)
         end
 
         it "blurbs the #{filter} card" do
@@ -211,6 +217,37 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page).to have_no_css(".task-capture")
+      end
+
+      %w[today next someday].each do |filter|
+        it "quick adds a task to #{filter} through the create action" do
+          get "/admin/tasks", filter: filter
+          form = page.find(".task-list form.quick-add")
+
+          expect([form["action"], form.find("[name='filter']", visible: :all).value]).to eq(["/admin/tasks", filter])
+        end
+      end
+
+      it "files a quick added task in the list it was added to" do
+        send_to("/admin/tasks", filter: "someday", task: { title: "Learn Rust" })
+
+        expect(repo.in_list("someday").map(&:title)).to include("Learn Rust")
+      end
+
+      it "offers the Select button for bulk mode on a list" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(
+          ".page-head-actions button[data-bulk-toggle='task-bulk'][aria-pressed='false']", visible: :all,
+        )
+      end
+
+      %w[upcoming completed].each do |filter|
+        it "offers no Select button on #{filter}" do
+          get "/admin/tasks", filter: filter
+
+          expect(page).to have_no_css("[data-bulk-toggle]", visible: :all)
+        end
       end
     end
 
@@ -260,20 +297,26 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "marks the external tab as the one you are on" do
         get "/admin/tasks", filter: "external"
 
-        expect(page).to have_css(".subtab.on[aria-current='page']", text: "external")
+        expect(page).to have_css(".task-tabs .screen-tab[aria-current='page']", text: "external")
       end
 
       it "counts the imported tasks on their tab" do
         get "/admin/tasks", filter: "next"
 
-        expect(page.find(".subtab", text: "external").find(".subtab-count").text).to eq("1")
+        expect(page.find(".task-tabs .screen-tab", text: "external").find(".task-tab-count").text).to eq("1")
       end
 
-      it "labels and blurbs the card", :aggregate_failures do
+      it "titles and blurbs the card", :aggregate_failures do
         get "/admin/tasks", filter: "external"
 
-        expect(page).to have_css(".card-label", exact_text: "From GitHub and Linear")
+        expect(page).to have_css(".card-title", exact_text: "External")
         expect(page).to have_css(".card-blurb", text: "open GitHub and Linear issues assigned to you")
+      end
+
+      it "offers no quick add on external" do
+        get "/admin/tasks", filter: "external"
+
+        expect(page).to have_no_css("form.quick-add")
       end
 
       it "says something useful when nothing is imported" do
@@ -402,38 +445,23 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
     end
 
-    describe "an empty sprint" do
-      def planner(key, **) = i18n.t(["ui.components.tasks.planner", key].join("."), **)
-
+    describe "the pull-in column" do
       def pool_note(key, **) = i18n.t(["ui.components.tasks.pools", key].join("."), **)
 
-      def pool_panels(selector) = page.all(".task-planner #{selector}", visible: :all).map { it["data-pool-panel"] }
+      def pool_panels(selector) = page.all(".task-pull #{selector}", visible: :all).map { it["data-pool-panel"] }
 
-      def pools = page.all(".task-planner .seg-option").map(&:text)
+      def pools = page.all(".task-pull .seg-option").map(&:text)
 
-      it "asks what the day is for" do
+      it "heads the column beside the sprint" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css(".task-planner .card-title", exact_text: planner("ask"))
+        expect(page).to have_css(".g-main > aside.task-pull .card-title", exact_text: "Pull in")
       end
 
-      it "heads the planner with the sprint date" do
-        label = planner("label", date: Blog::TimeZone.today.strftime("%b %-d, %Y"))
+      it "says the sprint is empty" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css(".task-planner .card-label", exact_text: label)
-      end
-
-      it "says the sprint is empty beside the question" do
-        get "/admin/tasks", filter: "today"
-
-        expect(page).to have_css(".task-planner .sprint-note", exact_text: planner("empty"))
-      end
-
-      it "leaves writing a task to the Create Task button" do
-        get "/admin/tasks", filter: "today"
-
-        expect(page).to have_no_css(".task-planner .task-capture")
+        expect(page).to have_css(".task-list .empty", exact_text: empty_text("today"))
       end
 
       it "lists what is waiting in next" do
@@ -441,7 +469,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :someday, title: "Learn Elixir")
         get "/admin/tasks", filter: "today"
 
-        expect(titles).to eq(["Email the accountant"])
+        expect(pooled).to eq(["Email the accountant"])
       end
 
       it "counts every pool on the switch" do
@@ -465,13 +493,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :someday, title: "Learn Elixir")
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(titles).to eq(["Learn Elixir"])
+        expect(pooled).to eq(["Learn Elixir"])
       end
 
       it "keeps the tasks screen when switching pools" do
         get "/admin/tasks", filter: "today"
 
-        expect(page.all(".task-planner .seg-option").map { it["href"] })
+        expect(page.all(".task-pull .seg-option").map { it["href"] })
           .to eq(%w[next someday external].map { "/admin/tasks?filter=today&pool=#{it}" })
       end
 
@@ -492,7 +520,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :someday, title: "Learn Elixir")
         get "/admin/tasks", filter: "today"
 
-        expect(page.all(".task-planner form [name='pool']", visible: :all).map(&:value)).to eq(%w[next someday])
+        expect(page.all(".task-pull form [name='pool']", visible: :all).map(&:value)).to eq(%w[next someday])
       end
 
       it "returns to the pool a task was pulled from" do
@@ -506,7 +534,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "today", pool: "someday"
 
         expect(page).to have_css(
-          ".task-planner nav.seg a.seg-option.current[aria-current='page'][data-pool='someday']",
+          ".task-pull nav.seg a.seg-option.current[aria-current='page'][data-pool='someday']",
           exact_text: "someday · 0",
         )
       end
@@ -515,8 +543,8 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, title: "Email the accountant", tags: %w[admin])
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_no_css(".task-planner .task-meta .task-mark")
-        expect(page.all(".task-planner .task-meta .tag").map(&:text)).to eq(%w[#admin])
+        expect(page).to have_no_css(".task-pull .task-meta .task-mark")
+        expect(page.all(".task-pull .task-meta .tag").map(&:text)).to eq(%w[#admin])
       end
 
       it "links a tag on a task it offers to the tag's summary" do
@@ -530,44 +558,45 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task = create(:task)
         get "/admin/tasks", filter: "today"
 
-        expect(page.all(".task-planner .li-side form").map { it["action"] })
+        expect(page.all(".task-pull .li-side form").map { it["action"] })
           .to eq(["/admin/tasks/#{task.id}/move/today"])
       end
 
       it "says which pool is empty" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.next"))
+        expect(page).to have_css(".task-pull .empty", exact_text: pool_note("empty.next"))
       end
 
       it "names the other pool when it is the empty one" do
         get "/admin/tasks", filter: "today", pool: "someday"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.someday"))
+        expect(page).to have_css(".task-pull .empty", exact_text: pool_note("empty.someday"))
       end
 
       it "names external when it is the empty one" do
         get "/admin/tasks", filter: "today", pool: "external"
 
-        expect(page).to have_css(".task-planner .empty", exact_text: pool_note("empty.external"))
+        expect(page).to have_css(".task-pull .empty", exact_text: pool_note("empty.external"))
       end
 
-      it "drops the planner once the sprint holds a task", :aggregate_failures do
+      it "keeps the column once the sprint holds a task", :aggregate_failures do
         create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id, title: "Ship it")
+        create(:task, title: "Email the accountant")
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_no_css(".task-planner")
         expect(titles).to eq(["Ship it"])
+        expect(pooled).to eq(["Email the accountant"])
       end
 
-      it "keeps the planner off the other lists" do
+      it "keeps the column off the other lists" do
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_no_css(".task-planner")
+        expect(page).to have_no_css(".task-pull")
       end
     end
 
-    describe "the external pool of an empty sprint" do
+    describe "the external pool of the pull-in column" do
       let!(:task) do
         create(:task_source, task: create(:task, :external, title: "Fix the feed"), url: issue_url).task
       end
@@ -578,7 +607,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, title: "Email the accountant")
         get "/admin/tasks", filter: "today", pool: "external"
 
-        expect(titles).to eq(["Fix the feed"])
+        expect(pooled).to eq(["Fix the feed"])
       end
 
       it "links each one to its issue" do
@@ -1430,7 +1459,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :canceled, :in_sprint, sprint:)
         get "/admin/tasks", filter: "upcoming"
 
-        expect(page).to have_css(".sprint-note", exact_text: "0 planned")
+        expect(page).to have_css(".cols .card-note", text: "0 planned")
       end
 
       it "names a canceled task's place in the link editor" do
@@ -2069,7 +2098,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "counts the whole pool on its tab and card", :aggregate_failures do
         get "/admin/tasks", filter: "next"
 
-        expect(page.find("a.subtab[href='/admin/tasks?filter=next'] .subtab-count").text).to eq("3")
+        expect(page.find("a.screen-tab[href='/admin/tasks?filter=next'] .task-tab-count").text).to eq("3")
         expect(page).to have_css(".card-note", exact_text: "3 open")
       end
 
@@ -2320,7 +2349,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "keeps the query on a tab it is carried to" do
         search("ship")
 
-        expect(page.all(".subtab").map { it["href"] }).to all(include("q=ship"))
+        expect(page.all(".task-tabs .screen-tab").map { it["href"] }).to all(include("q=ship"))
       end
     end
 
@@ -2451,13 +2480,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "counts every finished task on the tab" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page.all(".subtab-count").last.text).to eq("4")
+        expect(page.all(".task-tab-count").last.text).to eq("4")
       end
 
-      it "files the archive under its own label" do
+      it "sets each day's heading beside its tasks" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_css(".card-label", exact_text: index("archive"))
+        expect(page).to have_css(".task-day > .day-head + .task-day-rows", count: 3)
       end
 
       it "says how many it is showing" do
@@ -2537,7 +2566,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "still counts every finished task on the tab" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page.all(".subtab-count").last.text).to eq("4")
+        expect(page.all(".task-tab-count").last.text).to eq("4")
       end
 
       it "answers 404 for a page past the end" do
@@ -2639,7 +2668,22 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:sprint, sprint_date: tomorrow)
         upcoming
 
-        expect(page).to have_css(".card-title", text: tomorrow.strftime("%A, %B %-d"))
+        expect(page).to have_css(".cols .card-note", text: tomorrow.strftime("%A, %B %-d"))
+      end
+
+      it "titles each planned sprint by how far off it is" do
+        create(:sprint, sprint_date: tomorrow)
+        upcoming
+
+        expect(page).to have_css(".cols .card-title", exact_text: "Tomorrow")
+      end
+
+      it "adds a task straight onto a planned sprint" do
+        create(:sprint, sprint_date: tomorrow)
+        upcoming
+
+        expect(page.all(".cols form.quick-add [name]", visible: :all).to_h { [it["name"], it["value"]] })
+          .to include("filter" => "next", "task[sprint_on]" => tomorrow.iso8601, "task[title]" => nil)
       end
 
       it "counts the tasks waiting on a planned sprint in the head" do
@@ -2766,20 +2810,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to be_empty
       end
 
-      it "drops the trailing space before the mark on a pull chip" do
+      it "offers what waits in next to pull onto a planned sprint", :aggregate_failures do
         create(:sprint, sprint_date: tomorrow)
-        create(:task, title: "#{'a' * 41} bbb")
+        task = create(:task, title: "Email the accountant")
         upcoming
 
-        expect(page).to have_css(".sprint-chips .chip-btn span", exact_text: "#{'a' * 41}…")
-      end
-
-      it "keeps a family emoji whole where it cuts a pull chip" do
-        create(:sprint, sprint_date: tomorrow)
-        create(:task, title: "#{'a' * 41}👩‍👩‍👧‍👦 x")
-        upcoming
-
-        expect(page).to have_css(".sprint-chips .chip-btn span", exact_text: "#{'a' * 41}👩‍👩‍👧‍👦…")
+        expect(page.all("details.sprint-pull .li-title", visible: :all).map(&:text)).to eq(["Email the accountant"])
+        expect(page.find("details.sprint-pull form", visible: :all)["action"]).to eq("/admin/tasks/#{task.id}/schedule")
       end
 
       it "marks the day a waiting task is scheduled for on its row" do

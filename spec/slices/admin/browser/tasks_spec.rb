@@ -94,7 +94,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "stays open with what I typed on a click outside", :aggregate_failures do
-      fill_in("task[title]", with: "Half a thought")
+      modal.fill_in("task[title]", with: "Half a thought")
       page.driver.browser.mouse.click(x: 10, y: 700)
 
       expect(modal).to have_field("task[title]", with: "Half a thought")
@@ -168,21 +168,22 @@ RSpec.describe "Admin tasks", type: :feature do
       expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Ship the screen"])
     end
 
-    it "drops the planner once the sprint holds a task" do
-      create_task("Ship the screen", list: "today")
+    it "quick adds a task to the sprint", :aggregate_failures do
+      find(".quick-add input[name='task[title]']").send_keys("Ship the screen", :enter)
 
-      expect(page).to have_css(".task-title", text: "Ship the screen").and have_no_css(".task-planner")
+      expect(page).to have_css(".task-title", text: "Ship the screen").and have_css(".task-pull")
+      expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Ship the screen"])
     end
 
     describe "switching the pool to someday" do
       before do
         page.driver.resize(1024, 400)
         scroll_down
-        find(".task-planner .seg-option", exact_text: "someday · 1").click
+        find(".task-pull .seg-option", exact_text: "someday · 1").click
       end
 
       it "switches without loading the page", :aggregate_failures do
-        expect(page).to have_css(".task-planner .li-title", text: "Learn Elixir")
+        expect(page).to have_css(".task-pull .li-title", text: "Learn Elixir")
         expect(evaluate_script("window.poolsLoaded")).to be(true)
         expect(evaluate_script("window.scrollY > 0 && window.scrollY === window.poolsScroll")).to be(true)
       end
@@ -194,7 +195,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     before do
       create(:task_source, task: create(:task, :external, title: "Fix the feed"), url: issue_url)
-      find(".subtab", text: "external").click
+      find(".task-tabs .screen-tab", text: "external").click
     end
 
     it "takes a tag from the editor and stays on external", :aggregate_failures do
@@ -211,7 +212,7 @@ RSpec.describe "Admin tasks", type: :feature do
     before do
       cancel_task(find(".task", text: "Email the accountant"))
       find(".toast", text: "Canceled")
-      find(".subtab", text: "completed").click
+      find(".task-tabs .screen-tab", text: "completed").click
     end
 
     it "files it under completed with its canceled mark" do
@@ -222,7 +223,7 @@ RSpec.describe "Admin tasks", type: :feature do
       before do
         find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.reopen"))
         find(".toast", text: "Reopened")
-        find(".subtab", text: "next").click
+        find(".task-tabs .screen-tab", text: "next").click
       end
 
       it "puts it back on its list as open", :aggregate_failures do
@@ -727,7 +728,7 @@ RSpec.describe "Admin tasks", type: :feature do
     it "moves the task through the list field" do
       select("someday", from: "task[list]")
       click_button("Save")
-      find(".subtab", text: "someday").click
+      find(".task-tabs .screen-tab", text: "someday").click
 
       expect(page).to have_css(".task-title", text: "Email the accountant")
     end
@@ -735,8 +736,8 @@ RSpec.describe "Admin tasks", type: :feature do
     def fail_save = save_with(title: " ", tags: "not_a_tag")
 
     def save_with(**fields)
-      fields.each { |name, value| fill_in("task[#{name}]", with: value) }
-      click_button("Save")
+      fields.each { |name, value| modal.fill_in("task[#{name}]", with: value) }
+      modal.click_button("Save")
     end
 
     it "keeps what I typed and says what went wrong in the modal when the save fails", :aggregate_failures do
@@ -756,7 +757,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "closes on Cancel without saving and hands focus back to the row", :aggregate_failures do
-      fill_in("task[title]", with: "Something else")
+      modal.fill_in("task[title]", with: "Something else")
       modal.click_link(translate("ui.views.tasks.edit.cancel"))
 
       expect(page).to have_no_css("dialog#task-create[open]")
@@ -775,7 +776,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "closes on the X without saving and hands focus back to the row", :aggregate_failures do
-      fill_in("task[title]", with: "Something else")
+      modal.fill_in("task[title]", with: "Something else")
       modal.find(modal_x).click
 
       expect(page).to have_no_css("dialog#task-create[open]")
@@ -996,7 +997,7 @@ RSpec.describe "Admin tasks", type: :feature do
         visit "/admin/tasks?filter=someday"
         cancel_task(row("Learn Elixir"))
         find(".toast", text: "Canceled")
-        find(".subtab", text: "next").click
+        find(".task-tabs .screen-tab", text: "next").click
 
         expect(row("Email the accountant")).to have_no_css(".task-meta .task-mark.pink")
       end

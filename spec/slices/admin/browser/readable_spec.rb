@@ -191,6 +191,8 @@ RSpec.describe "Admin screens", type: :feature do
       "tasks archive" => "/admin/tasks?filter=completed",
       "tasks next" => "/admin/tasks?filter=next",
       "tasks someday" => "/admin/tasks?filter=someday",
+      "tasks external" => "/admin/tasks?filter=external",
+      "tasks upcoming" => "/admin/tasks?filter=upcoming",
       "time" => "/admin/time",
       "time by day" => "/admin/time?by=day",
       "today" => "/admin",
@@ -303,6 +305,7 @@ RSpec.describe "Admin screens", type: :feature do
     sprint = create(:sprint, sprint_date: today)
     create(:task, :in_sprint, sprint_id: sprint.id, title: "Plan the week ahead on the calendar screen")
     create(:task, :in_sprint, sprint_id: sprint.id, carried_count: 4, title: "A task that keeps slipping to tomorrow")
+    create(:task, :in_sprint, sprint: create(:sprint, sprint_date: today + 1), title: "Write tomorrow's plan")
     create(:post, :published, title: "A post published today with a title too long to fit its cell",
                               published_at: at(0, 30))
     create(:social_post, :posted, posted_at: at(0, 45))
@@ -365,6 +368,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def tick(path, box)
     visit path
+    find("[data-bulk-toggle]").click if path.start_with?("/admin/tasks")
     find(box).check
     find("[data-bulk-acts]")
   end

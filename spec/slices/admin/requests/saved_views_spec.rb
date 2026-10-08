@@ -46,7 +46,7 @@ RSpec.describe "Admin saved views", type: :request do
         expect(page).to have_css(".saved-view-link.current[aria-current='page']", text: "Mine")
       end
 
-      if %w[journal posts].include?(screen)
+      if %w[journal posts tasks].include?(screen)
         it "puts the saved views beside the screen tabs" do
           get url
 
@@ -143,7 +143,7 @@ RSpec.describe "Admin saved views", type: :request do
       get "/admin/tasks?filter=gone"
 
       expect(last_response.status).to eq(200)
-      expect(page).to have_css(".subtab[aria-current='page']", text: /\Atoday/i)
+      expect(page).to have_css(".task-tabs .screen-tab[aria-current='page']", text: /\Atoday/i)
     end
   end
 

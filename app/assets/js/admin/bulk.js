@@ -4,6 +4,7 @@ const ACTS = "[data-bulk-acts]";
 const ALL = "[data-bulk-all]";
 const COUNT = "[data-bulk-count]";
 const FORM = "form[data-bulk]";
+const TOGGLE = "[data-bulk-toggle]";
 
 const ready = new WeakSet();
 let bound = false;
@@ -12,6 +13,15 @@ export function setupBulk(root = document) {
   for (const form of root.querySelectorAll(FORM)) {
     form.querySelector(ALL).hidden = false;
     show(form);
+  }
+
+  for (const button of fresh(ready, root.querySelectorAll(TOGGLE))) {
+    const form = document.getElementById(button.dataset.bulkToggle);
+    if (!form) continue;
+
+    button.hidden = false;
+    pick(form, button, false);
+    button.addEventListener("click", () => pick(form, button, button.getAttribute("aria-pressed") !== "true"));
   }
 
   for (const form of fresh(ready, root.querySelectorAll(FORM))) {
@@ -37,6 +47,13 @@ export function setupBulk(root = document) {
 
 function all(form) {
   return form.querySelector(ALL).querySelector("input");
+}
+
+function pick(form, button, on) {
+  button.setAttribute("aria-pressed", String(on));
+  form.toggleAttribute("data-bulk-off", !on);
+  if (!on) for (const box of picks(form)) box.checked = false;
+  show(form);
 }
 
 function picks(form) {

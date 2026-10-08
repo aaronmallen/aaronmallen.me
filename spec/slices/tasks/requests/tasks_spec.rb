@@ -110,7 +110,7 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     it "counts it on the completed tab" do
       get "/admin/tasks"
 
-      expect(page.all(".subtab-count").map(&:text).last).to eq("2")
+      expect(page.all(".task-tab-count").map(&:text).last).to eq("2")
     end
 
     it "counts it as closed today in the page sub" do

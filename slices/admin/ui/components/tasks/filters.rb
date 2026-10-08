@@ -9,10 +9,8 @@ module Admin
 
           prop :query, Blog::Types::String
           prop :tab, Blog::Types::String
-          prop :saved_views, Blog::Types::Hash
 
           def view_template
-            SavedViews(**@saved_views)
             AutoForm(action: path(:admin_tasks), role: "search", class: "tasks-filters") do
               input(type: "hidden", name: "filter", value: @tab)
               search_field

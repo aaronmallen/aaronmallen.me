@@ -2890,44 +2890,6 @@
   }
 }
 
-@utility subtabs {
-  @apply mb-4 flex flex-wrap gap-2;
-
-  @media (width < 43.75rem) {
-    @apply flex-nowrap overflow-x-auto pb-1;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      @apply hidden;
-    }
-  }
-}
-
-@utility subtab {
-  @apply inline-flex items-center gap-2 rounded-btn border border-line px-3 py-2;
-  @apply font-mono text-meta whitespace-nowrap text-ink-muted no-underline hover:text-ink;
-  @apply transition-colors duration-200 ease-in-out focus-ring;
-
-  & .subtab-count {
-    @apply border-l border-line pl-2 text-ink-muted;
-  }
-
-  &.on {
-    @apply bg-wash text-ink;
-
-    border-color: color-mix(in oklab, var(--color-mk-green) 45%, var(--color-line));
-  }
-
-  &.on .subtab-count {
-    border-color: color-mix(in oklab, var(--color-mk-green) 40%, var(--color-line));
-    color: var(--color-mk-green-text);
-  }
-
-  @media (width < 43.75rem) {
-    @apply min-h-tap shrink-0;
-  }
-}
-
 @utility search-filters {
   @apply flex flex-wrap items-center gap-2;
 
@@ -2950,10 +2912,6 @@
   & select.inp {
     @apply w-auto;
   }
-}
-
-@utility task-day {
-  @apply flex flex-col;
 }
 
 @utility task-note {
@@ -3633,6 +3591,157 @@
   @apply mr-1.5;
 }
 
+@utility task-tabs {
+  @apply mt-0;
+}
+
+@utility task-tab-count {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility task-list {
+  &:has(form[data-bulk-off]) {
+    & .task-pick,
+    & .bulk-bar {
+      @apply hidden;
+    }
+
+    & .task {
+      @apply grid-cols-[auto_minmax(0,1fr)_auto];
+
+      @media (width < 43.75rem) {
+        @apply grid-cols-[auto_minmax(0,1fr)];
+      }
+    }
+
+    @media (width < 43.75rem) {
+      & .task-acts {
+        @apply col-start-2;
+      }
+    }
+  }
+}
+
+@utility task-pull {
+  @apply bg-transparent;
+
+  & > .card-title {
+    @apply mt-0 mb-4;
+  }
+
+  & > .task-planner-pull {
+    @apply mt-0 border-t-0 pt-0;
+  }
+
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+}
+
+@utility quick-add {
+  @apply mt-1 flex items-center gap-2 border-t border-line pt-3;
+
+  & > i {
+    @apply text-icon-sm text-ink-muted;
+  }
+
+  & > input {
+    @apply min-w-0 flex-1 border-0 bg-transparent py-2 font-display text-[1.02rem] text-ink admin-focus;
+    @apply placeholder:text-ink-muted;
+  }
+
+  &:focus-within {
+    @apply border-ink-muted;
+  }
+
+  &:not(:has(input:valid)) > .btn {
+    @apply hidden;
+  }
+
+  @media (width < 43.75rem) {
+    & > input {
+      @apply min-h-tap;
+    }
+  }
+}
+
+@utility sprint-plan {
+  @apply mb-[clamp(18px,2vw,28px)] flex flex-wrap items-center gap-x-3.5 gap-y-2.5;
+
+  & > input.inp {
+    @apply w-auto;
+  }
+}
+
+@utility sprint-plan-label {
+  @apply meta;
+}
+
+@utility sprint-plan-note {
+  @apply hint;
+}
+
+@utility sprint-pull {
+  @apply mt-1.5 border-t border-line;
+
+  & > summary {
+    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 font-mono text-tab tracking-normal text-ink-muted;
+    @apply select-none hover:text-ink admin-focus;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+
+    & > i {
+      @apply text-icon-sm transition-transform duration-150;
+    }
+  }
+
+  &[open] > summary > i {
+    @apply rotate-90;
+  }
+}
+
+@utility task-day {
+  @apply grid grid-cols-1 gap-x-7 gap-y-1 py-5;
+
+  & + & {
+    @apply border-t border-line;
+  }
+
+  &:first-child {
+    @apply pt-0;
+  }
+
+  & > .day-head {
+    @apply static flex-col-reverse items-start gap-0.5 bg-transparent py-0;
+
+    @media (width >= 53.75rem) {
+      @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+    }
+  }
+
+  & .day-rule {
+    @apply hidden;
+  }
+
+  & .day-note {
+    @apply font-display text-[1.1rem] font-bold text-ink;
+  }
+
+  & .day-date {
+    @apply font-mono text-meta font-normal text-ink-muted;
+  }
+
+  @media (width >= 53.75rem) {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+}
+
+@utility task-day-rows {
+  @apply flex min-w-0 flex-col;
+}
+
 @utility task-stbar {
   @apply flex flex-wrap items-center gap-2 border-b border-line pb-4;
 }
@@ -4114,32 +4223,6 @@
 
 @utility sprint-note {
   @apply meta;
-}
-
-@utility sprint-plan {
-  @apply flex flex-wrap items-center gap-2;
-}
-
-@utility sprint-pull {
-  @apply mt-3 border-t border-line pt-3;
-}
-
-@utility sprint-pull-head {
-  @apply mb-2 font-mono text-label uppercase text-mk-orange-text;
-}
-
-@utility sprint-chips {
-  @apply flex flex-wrap items-center gap-2;
-}
-
-@utility chip-btn {
-  @apply inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-transparent px-2.5 py-1 meta;
-
-  @media (hover: hover) {
-    &:hover {
-      @apply text-ink;
-    }
-  }
 }
 
 @utility msg-body {

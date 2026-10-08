@@ -68,7 +68,7 @@ module Admin
       def plan(tab, tasks, planned, page)
         {
           planned: tab == UPCOMING ? scheduled(tasks.rows, planned) : EMPTY_ARRAY,
-          pools: tab == TODAY && tasks.rows.empty? ? pools(page) : EMPTY_HASH,
+          pools: tab == TODAY ? pools(page) : EMPTY_HASH,
           waiting: tab == UPCOMING ? task_queries.list(NEXT, sprint: nil, page: first_page(page)).rows : EMPTY_ARRAY,
         }
       end

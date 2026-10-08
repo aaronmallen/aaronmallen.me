@@ -213,6 +213,7 @@ RSpec.describe "Admin task order", type: :feature do
       create(:task, :in_sprint, sprint_id: soon.id, title: "soon one", position: 1)
       create(:task, :in_sprint, sprint_id: soon.id, title: "soon two", position: 2)
       create(:task, :in_sprint, sprint_id: later.id, title: "later one", position: 3)
+      page.driver.resize(800, 1000)
       visit "/admin/tasks?filter=upcoming"
     end
 

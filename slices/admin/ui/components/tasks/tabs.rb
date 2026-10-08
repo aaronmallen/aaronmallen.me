@@ -5,11 +5,6 @@ module Admin
     module Components
       module Tasks
         class Tabs < Component
-          ICONS = {
-            Blog::Types::TaskTab["today"] => "fa-solid fa-sun",
-            Blog::Types::TaskTab["upcoming"] => "fa-regular fa-calendar",
-            Blog::Types::TaskTab["completed"] => "fa-solid fa-circle-check",
-          }.freeze
           LABELS = {
             Blog::Types::TaskTab["today"] => ".today",
             Blog::Types::TaskTab["upcoming"] => ".upcoming",
@@ -23,16 +18,18 @@ module Admin
           prop :counts, Blog::Types::Hash
           prop :tab, Blog::Types::String
           prop :query, Blog::Types::String
+          prop :saved_views, Blog::Types::Hash
 
           def view_template
-            nav(class: "subtabs", aria: { label: t(".label") }) do
-              NAMES.each { tab(it) }
+            div(class: "screen-tabs task-tabs") do
+              nav(class: "screen-tabs-list", aria: { label: t(".label") }) { NAMES.each { tab(it) } }
+              div(class: "screen-tabs-side") { SavedViews(**@saved_views) }
             end
           end
 
           private
 
-          def count(name) = span(class: "subtab-count") { @counts.fetch(name).to_s }
+          def count(name) = span(class: "task-tab-count") { @counts.fetch(name).to_s }
 
           def href(name) = path(:admin_tasks, **params(name))
 
@@ -45,8 +42,7 @@ module Admin
           def tab(name)
             current = name == @tab
 
-            a(class: ["subtab", ("on" if current)], href: href(name), aria: { current: ("page" if current) }) do
-              Icon(ICONS[name]) if ICONS.key?(name)
+            a(class: "screen-tab", href: href(name), aria: { current: ("page" if current) }) do
               span { t(LABELS.fetch(name)) }
               count(name)
             end
