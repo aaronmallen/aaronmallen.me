@@ -16,26 +16,61 @@ module Admin
           prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template
-            Form(id: FORM_ID, action: path(:admin_create_journal_entry), data: form_data) do
-              Card(title:) do |card|
-                card.side { words }
-                EntryFields(
-                  body: @values[:body], tags: @values[:tags], errors: @errors, height: BODY_HEIGHT,
-                  label: t(".body"), placeholder: t(".placeholder"), autofocus: @autofocus,
-                )
-                div(class: "journal-new-foot") { save_button }
+            Form(id: FORM_ID, action: path(:admin_create_journal_entry), class: "journal-compose", data: form_data) do
+              Card(title:, class: "jbox") do |card|
+                card.side { private_note }
+                fields(:body, placeholder: t(".placeholder"), autofocus: @autofocus)
+                foot
               end
             end
           end
 
           private
 
+          def date_attributes
+            {
+              type: "date", name: "entry[entry_date]", value: @date.iso8601, max: @today.iso8601, form: FORM_ID,
+              data: { journal_date: "" },
+            }
+          end
+
+          def date_field
+            control = FieldError.control_attributes(:entry_date, @errors, FieldError::SCOPE)
+
+            label(class: "sr-only", for: control[:id]) { t(".entry_date") }
+            Input(**control, **date_attributes)
+            FieldError(field: :entry_date, errors: @errors)
+          end
+
+          def fields(only, **)
+            EntryFields(
+              body: @values[:body], tags: @values[:tags], errors: @errors, height: BODY_HEIGHT, label: t(".body"),
+              only:, **,
+            )
+          end
+
+          def foot
+            div(class: "jbox-foot") do
+              date_field
+              fields(:tags)
+              words
+              save_button
+            end
+          end
+
           def form_data = { journal_entry: "", today: @today.iso8601, today_label: t(".today") }
+
+          def private_note
+            span(class: "journal-words") do
+              Icon("fa-solid fa-lock")
+              plain " #{t('.private')}"
+            end
+          end
 
           def save_button
             blank = EntryFields.blank?(@values[:body])
-            Button(variant: :pri, type: "submit", disabled: blank, data: { journal_save: "" }) do
-              i(class: "fa-regular fa-floppy-disk", aria: { hidden: "true" })
+            Button(variant: :pri, small: true, type: "submit", disabled: blank, data: { journal_save: "" }) do
+              i(class: "fa-solid fa-feather", aria: { hidden: "true" })
               span { t(".save") }
             end
           end

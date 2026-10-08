@@ -46,10 +46,18 @@ RSpec.describe "Admin saved views", type: :request do
         expect(page).to have_css(".saved-view-link.current[aria-current='page']", text: "Mine")
       end
 
-      it "puts the saved views before the filters" do
-        get url
+      if screen == "journal"
+        it "puts the saved views beside the screen tabs" do
+          get url
 
-        expect(page).to have_css(".saved-views + *")
+          expect(page).to have_css(".screen-tabs-side > .saved-views")
+        end
+      else
+        it "puts the saved views before the filters" do
+          get url
+
+          expect(page).to have_css(".saved-views + *")
+        end
       end
 
       it "holds the screen and its filters in the Save view form", :aggregate_failures do

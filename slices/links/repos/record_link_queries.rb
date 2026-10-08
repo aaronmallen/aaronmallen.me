@@ -29,6 +29,12 @@ module Links
         task: "tasks.repos.task_queries",
       ]
 
+      def counts(kind, ids)
+        record_links.touching(kind, ids).to_a.flat_map do |link|
+          [(link.left_id if link.left_kind == kind), (link.right_id if link.right_kind == kind)].compact
+        end.tally
+      end
+
       def find(text, limit: FOUND_LIMIT)
         query = Blog::Types::TrimmedText[text]
         return Blog::Constants::EMPTY_HASH if query.empty?

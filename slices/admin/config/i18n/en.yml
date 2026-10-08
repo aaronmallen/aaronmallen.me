@@ -671,6 +671,7 @@ en:
           confirm_delete: "Delete this entry? You can't undo this."
           delete: "Delete"
           edit: "Edit"
+          linked: "%{count} linked"
           links: "Links"
           save: "Save"
         entry_fields:
@@ -684,15 +685,11 @@ en:
             future: "Pick today or an earlier day."
           tags:
             format: "Use lowercase letters, numbers and single dashes in each tag."
-        filters:
-          entry_date: "Entry date"
-          search: "Search"
-          search_placeholder: "grep entries…"
-          streak: "Streak"
-          streak_days: "Wrote on %{written} of the last %{days} days"
         new_entry:
           body: "Entry"
+          entry_date: "Entry date"
           placeholder: "Unfiltered. Nobody is reading this but you."
+          private: "private"
           save: "Save entry"
           today: "Today"
           words:
@@ -1976,10 +1973,14 @@ en:
           entries:
             one: "%{count} entry"
             other: "%{count} entries"
+          entries_label: "Entries"
           heading: "Journal"
           never_public: "never rendered on the public site"
           no_match: "No entries match."
           private: "Private"
+          search: "Search"
+          search_placeholder: "grep entries…"
+          streak: "wrote on %{written} of the last %{days} days"
           words:
             one: "%{count} word"
             other: "%{count} words"

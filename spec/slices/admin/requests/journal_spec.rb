@@ -43,8 +43,16 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub i.fa-lock:first-child")
       end
 
-      it "lays out the filters beside the content" do
-        expect(page).to have_css(".split > .journal-rail + .journal-main")
+      it "lays out the composer beside the entries" do
+        expect(page).to have_css(".g-main.rev > form#journal-entry.journal-compose + .journal-days")
+      end
+
+      it "puts the search in the page head" do
+        expect(page).to have_css(".page-head-actions form[role='search'] input#journal-search[name='q']")
+      end
+
+      it "puts the saved views beside the screen tabs" do
+        expect(page).to have_css(".screen-tabs-side .saved-views")
       end
 
       it "searches with a get form" do
@@ -97,8 +105,13 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         )
       end
 
-      it "shows the word count in the card head" do
-        expect(page).to have_css("#journal-entry .card-side [data-journal-words]", exact_text: "0 words")
+      it "shows the word count in the composer's foot" do
+        expect(page).to have_css("#journal-entry .jbox-foot [data-journal-words]", exact_text: "0 words")
+      end
+
+      it "puts the entry date and tags in the composer's foot", :aggregate_failures do
+        expect(page).to have_css("#journal-entry .jbox-foot input[type='date'][name='entry[entry_date]']")
+        expect(page).to have_css("#journal-entry .jbox-foot input[name='entry[tags]']")
       end
 
       it "gives the script the word templates" do
@@ -116,7 +129,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       end
 
       it "shows the streak with no days" do
-        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 0 of the last 30 days")
+        expect(page).to have_css(".page-head-sub", text: "wrote on 0 of the last 30 days")
       end
 
       it "leaves the entry field unfocused" do
@@ -144,7 +157,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         create(:journal_entry, body: "four", entry_date: today - 40)
         get "/admin/journal"
 
-        sub = "Private · never rendered on the public site · 2 entries · 4 words"
+        sub = "Private · never rendered on the public site · 2 entries · 4 words · wrote on 1 of the last 30 days"
 
         expect(page).to have_css(".page-head-sub", exact_text: sub)
       end
@@ -185,6 +198,22 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
 
           expect(page).to have_css(".day-head .day-rule + .day-note", exact_text: label)
         end
+      end
+
+      it "counts each entry's linked records in its head" do
+        walked = create(:journal_entry, body: "walked")
+        link = Links::Slice["operations.link_records"]
+        2.times { link.call("journal_entry", walked.id, { other_kind: "post", other_id: create(:post).id }) }
+        get "/admin/journal"
+
+        expect(page).to have_css(".journal-entry-head .journal-linked", exact_text: "2 linked")
+      end
+
+      it "leaves the linked count off an entry without links" do
+        create(:journal_entry, body: "walked")
+        get "/admin/journal"
+
+        expect(page).to have_no_css(".journal-linked")
       end
 
       it "shows each entry's time and body", :aggregate_failures do
@@ -262,7 +291,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         create(:journal_entry, entry_date: today - 30)
         get "/admin/journal"
 
-        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 2 of the last 30 days")
+        expect(page).to have_css(".page-head-sub", text: "wrote on 2 of the last 30 days")
       end
     end
 
@@ -422,7 +451,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       it "counts the streak over every entry" do
         get "/admin/journal"
 
-        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 5 of the last 30 days")
+        expect(page).to have_css(".page-head-sub", text: "wrote on 5 of the last 30 days")
       end
 
       it "reads a day it can't parse as the newest page" do
@@ -753,7 +782,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         follow_redirect!
 
         expect(page).to have_css(".page-head-sub", text: "1 entry · 1 word")
-        expect(page).to have_css(".journal-streak", exact_text: "Wrote on 1 of the last 30 days")
+        expect(page).to have_css(".page-head-sub", text: "wrote on 1 of the last 30 days")
       end
 
       it "answers 404 for an entry that is gone" do

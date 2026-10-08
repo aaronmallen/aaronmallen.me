@@ -321,7 +321,7 @@ RSpec.describe "Admin journal", type: :feature do
 
       expect(page).to have_no_css(".journal-entry-body", text: "drop me")
       expect(page).to have_css(".page-head-sub", text: "1 entry · 2 words")
-      expect(page).to have_css(".journal-streak", exact_text: "Wrote on 1 of the last 30 days")
+      expect(page).to have_css(".page-head-sub", text: "wrote on 1 of the last 30 days")
     end
   end
 
@@ -336,12 +336,12 @@ RSpec.describe "Admin journal", type: :feature do
       expect(evaluate_script("window.scrollY")).to eq(1500)
     end
 
-    it "keeps the filters in view below the top bar" do
-      expect(top(".journal-rail")).to be >= bottom(".top-bar")
+    it "keeps the composer in view below the top bar" do
+      expect(top(".journal-compose")).to be >= bottom(".top-bar")
     end
 
-    it "keeps the filters on screen" do
-      expect(top(".journal-rail")).to be < 200
+    it "keeps the composer on screen" do
+      expect(top(".journal-compose")).to be < 200
     end
 
     it "sticks a day heading directly below the top bar" do
@@ -357,8 +357,8 @@ RSpec.describe "Admin journal", type: :feature do
       visit "/admin/journal"
     end
 
-    it "stacks the filters above the entries" do
-      expect(bottom(".journal-rail")).to be <= top(".journal-main")
+    it "stacks the composer above the entries" do
+      expect(bottom(".journal-compose")).to be <= top(".journal-days")
     end
   end
 end

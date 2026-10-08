@@ -13,12 +13,13 @@ module Admin
           prop :scope, Blog::Types::String, default: FieldError::SCOPE
           prop :placeholder, Blog::Types::String.optional, default: nil
           prop :autofocus, Blog::Types::Bool, default: false
+          prop :only, Blog::Types::Symbol.enum(:body, :tags).optional, default: nil
 
           def self.blank?(body) = !body.match?(/\S/)
 
           def view_template
-            body_field
-            tags_field
+            body_field unless @only == :tags
+            tags_field unless @only == :body
           end
 
           private

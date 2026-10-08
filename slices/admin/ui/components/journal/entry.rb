@@ -11,6 +11,7 @@ module Admin
           prop :entry, Blog::Types::Instance(ROM::Struct)
           prop :date, Blog::Types::Date
           prop :editing, Blog::Types::Hash.optional, default: nil
+          prop :linked, Blog::Types::Integer, default: 0
 
           def view_template
             article(class: "journal-entry", data: { journal_item: "" }) do
@@ -25,7 +26,7 @@ module Admin
 
           def actions
             div(class: "journal-entry-actions", hidden: editing?, data: { journal_actions: "" }) do
-              Button(small: true, data: { journal_edit: "" }) { t(".edit") }
+              Button(**icon(t(".edit"), "fa-regular fa-pen-to-square"), data: { journal_edit: "" })
               links_link
               delete_form
             end
@@ -42,7 +43,7 @@ module Admin
 
           def delete_form
             Form(**delete_attributes) do
-              Button(variant: :warn, small: true, type: "submit") { t(".delete") }
+              Button(**icon(t(".delete"), "fa-regular fa-trash-can"), variant: :warn, type: "submit")
             end
           end
 
@@ -74,8 +75,13 @@ module Admin
               clock = l(@entry.entry_time, format: :clock)
               time(datetime: "#{@date.iso8601}T#{clock}") { clock }
               @entry.tags.each { Tag(tag: it) }
+              linked_count
               actions
             end
+          end
+
+          def icon(label, name)
+            { small: true, title: label, aria: { label: }, icon: name }
           end
 
           def linked
@@ -89,12 +95,18 @@ module Admin
             end
           end
 
-          def links_link
-            Button(
-              href: path(:admin_journal, to: @date.iso8601, edit: @entry.id), small: true, icon: "fa-solid fa-link",
-            ) do
-              t(".links")
+          def linked_count
+            return if @linked.zero?
+
+            span(class: "journal-linked") do
+              Icon("fa-solid fa-link")
+              plain t(".linked", count: @linked)
             end
+          end
+
+          def links_link
+            Button(href: path(:admin_journal, to: @date.iso8601, edit: @entry.id),
+                   **icon(t(".links"), "fa-solid fa-link"))
           end
 
           def records = @editing&.fetch(:records, nil)

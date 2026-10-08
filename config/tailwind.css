@@ -1390,7 +1390,7 @@
   @apply absolute top-full right-0 z-55 mt-1.5 flex w-[280px] flex-col gap-3 p-3 text-left;
   @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
 
-  :where(.journal-rail, .activity-rail) & {
+  :where(.activity-rail) & {
     @apply right-auto left-0;
   }
 
@@ -1523,26 +1523,8 @@
   }
 }
 
-@utility journal-rail {
-  @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
-  }
-}
-
-@utility journal-main {
-  @apply flex min-w-0 flex-col gap-6;
-}
-
-@utility journal-streak {
-  @apply font-mono text-input text-ink;
-}
-
 @utility journal-words {
   @apply meta;
-}
-
-@utility journal-new-foot {
-  @apply mt-3 flex justify-end;
 }
 
 @utility day-head {
@@ -1566,19 +1548,47 @@
 }
 
 @utility journal-day {
-  @apply flex flex-col gap-3 scroll-mt-top-bar;
+  @apply grid scroll-mt-top-bar grid-cols-1 gap-x-7 gap-y-1 pb-2;
+
+  & + & {
+    @apply border-t border-line pt-[22px];
+  }
+
+  & > .day-head {
+    @apply flex-col-reverse items-start gap-0.5;
+
+    @media (width >= 53.75rem) {
+      @apply self-start bg-transparent pt-1;
+    }
+  }
+
+  & .day-rule {
+    @apply hidden;
+  }
+
+  & .day-note {
+    @apply font-display text-card-title font-bold text-ink;
+  }
+
+  & .day-date {
+    @apply font-mono text-meta font-normal text-ink-muted;
+  }
+
+  @media (width >= 53.75rem) {
+    grid-template-columns: 170px minmax(0, 1fr);
+  }
 }
 
 @utility journal-entry {
-  @apply rounded-card border border-line bg-ground-sunk p-5;
+  @apply relative pb-[18px];
 }
 
 @utility journal-entry-head {
-  @apply mb-2 flex flex-wrap items-center gap-2 meta;
+  @apply mb-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 meta;
 }
 
 @utility journal-entry-body {
-  @apply font-serif text-ink;
+  @apply max-w-[72ch] font-serif text-ink;
 
   &.post-body {
     @apply mt-0 min-w-0 wrap-anywhere;
@@ -1608,11 +1618,19 @@
 }
 
 @utility journal-entry-actions {
-  @apply ml-auto flex items-center gap-2;
+  @apply ml-auto flex items-center gap-0.5;
+
+  & .btn {
+    @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
+  }
+
+  & .btn.warn:hover {
+    @apply text-mk-pink-text;
+  }
 }
 
 @utility journal-edit {
-  @apply flex flex-col;
+  @apply flex flex-col gap-2 rounded-card border border-line bg-ground-sunk p-4;
 }
 
 @utility journal-edit-foot {
@@ -1623,6 +1641,62 @@
   & .preview > .post-body {
     @apply journal-entry-body;
   }
+
+  :where(.jbox, .journal-edit) & {
+    & .edit {
+      @apply overflow-visible rounded-none border-0 bg-transparent;
+    }
+
+    & .edit-pane-head {
+      @apply px-0 pt-0;
+    }
+
+    & .preview {
+      @apply px-0;
+    }
+
+    & .edit-body {
+      @apply rounded-sm bg-transparent px-0 font-serif text-[1.2rem] leading-[1.65] focus:outline-offset-4;
+    }
+  }
+}
+
+@utility journal-search {
+  @apply w-[min(320px,100%)];
+}
+
+@utility journal-days {
+  @apply flex min-w-0 flex-col;
+}
+
+@utility journal-compose {
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+}
+
+@utility jbox-foot {
+  @apply mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3.5 meta;
+
+  & .inp {
+    @apply w-auto rounded-none border-0 border-b border-dashed border-line bg-transparent px-0 py-1 text-meta;
+  }
+
+  & .inp[type="date"] {
+    @apply w-36 border-b-0;
+  }
+
+  & > .btn {
+    @apply ml-auto;
+  }
+
+  & > .field-error {
+    @apply order-last basis-full;
+  }
+}
+
+@utility journal-linked {
+  @apply inline-flex items-center gap-1.5;
 }
 
 @utility activity-rail {

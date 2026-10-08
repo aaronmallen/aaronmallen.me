@@ -209,6 +209,11 @@ RSpec.describe "Admin screens", type: :feature do
         find(".saved-view", text: "Next up for the week").find("summary").click
         find(".saved-view-panel", visible: :visible)
       end,
+      "save view beside the tabs" => lambda do
+        visit "/admin/journal"
+        find(".saved-views summary", text: "Save view").click
+        find(".saved-view-panel", visible: :visible)
+      end,
       "save view in the rail" => lambda do
         visit "/admin/activity"
         find(".saved-views summary", text: "Save view").click
