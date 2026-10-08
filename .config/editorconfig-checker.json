@@ -1,5 +1,6 @@
 {
   "Exclude": [
+    "^\\.claude/worktrees/",
     "^\\.idea/",
     "^\\.mise/",
     "^\\.mise-data/",

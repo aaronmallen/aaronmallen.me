@@ -4,4 +4,8 @@
 
 set -e
 
-editorconfig-checker -config .config/editorconfig-checker.json
+if [ -d .git ]; then
+  editorconfig-checker -config .config/editorconfig-checker.json
+else
+  jj file list | tr '\n' '\0' | xargs -0 editorconfig-checker -config .config/editorconfig-checker.json
+fi

@@ -1,5 +1,6 @@
 gitignore_excludes: true
 exclude:
+  - .claude/worktrees
   - .mise
   - .mise-data
   - tmp

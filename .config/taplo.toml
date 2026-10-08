@@ -1,2 +1,8 @@
-exclude = [".git/**", ".jj/**", ".mise/**", ".mise-data/**"]
+exclude = [
+  ".claude/worktrees/**",
+  ".git/**",
+  ".jj/**",
+  ".mise/**",
+  ".mise-data/**",
+]
 include = ["**/*.toml"]
