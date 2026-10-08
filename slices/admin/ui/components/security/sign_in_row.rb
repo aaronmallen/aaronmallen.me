@@ -23,9 +23,11 @@ module Admin
 
           private
 
+          def country = @sign_in.country_name || @sign_in.country
+
           def device = dotted(@sign_in.browser, @sign_in.os).then { it.empty? ? t(".unknown_device") : it }
 
-          def place = dotted(@sign_in.city, @sign_in.country).then { it.empty? ? t(".unknown_place") : it }
+          def place = dotted(@sign_in.city, country).then { it.empty? ? t(".unknown_place") : it }
         end
       end
     end

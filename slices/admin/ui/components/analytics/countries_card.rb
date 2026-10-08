@@ -13,7 +13,9 @@ module Admin
 
           private
 
-          def rows = @rows.map { { count: it[:visitors], label: it[:country_code] || t(".unknown") } }
+          def rows
+            @rows.map { { count: it[:visitors], label: it[:country_name] || it[:country_code] || t(".unknown") } }
+          end
         end
       end
     end

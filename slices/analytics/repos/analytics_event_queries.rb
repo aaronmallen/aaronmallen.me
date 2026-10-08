@@ -56,7 +56,7 @@ module Analytics
           totals: window.totals.one,
           paths: window.paths.to_a,
           referrers: window.counts_by(:referrer_host, as: :host).to_a,
-          countries: window.counts_by(:country_code).to_a,
+          countries: window.countries.to_a,
           sources: by_page(window.known(:source), :source),
           devices: by_page(window.known(:device_class), :device_class),
           **page_only(window),
@@ -104,7 +104,7 @@ module Analytics
       def page_only(window)
         {
           page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
-          page_countries: window.page_counts_by(:country_code).to_a.map(&:to_h),
+          page_countries: window.page_countries.to_a.map(&:to_h),
           scroll_depths: window.known(:scroll_depth).page_counts_by(:scroll_depth).to_a.map(&:to_h),
           read_throughs: window.read_throughs_by_path.to_a.to_h { [it.path, it.read_throughs] },
           **clicks(window),

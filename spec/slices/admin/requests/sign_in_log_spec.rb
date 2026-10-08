@@ -27,7 +27,10 @@ RSpec.describe "Admin sign-in log", type: :request do
   def headers(user_agent) = { "HTTP_USER_AGENT" => user_agent, "HTTP_CF_CONNECTING_IP" => address }
 
   def recorded
-    { outcome: "signed_in", address:, user_agent: agent, browser: "Chrome", os: "macOS", city: "London", country: "GB" }
+    {
+      outcome: "signed_in", address:, user_agent: agent, browser: "Chrome", os: "macOS", city: "London", country: "GB",
+      country_name: "United Kingdom",
+    }
   end
 
   def sign_in(user_agent: agent) = callback(code: "code", state: start_sign_in, user_agent:)

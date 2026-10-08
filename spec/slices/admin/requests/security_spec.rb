@@ -70,6 +70,13 @@ RSpec.describe "Admin security", type: :request do
       expect(card("Sign-ins").find(".li", text: "Firefox")).to have_css(".pill.pink", exact_text: "denied")
     end
 
+    it "shows a sign-in's country by name when it has one" do
+      sign_in_row(country_name: "United Kingdom")
+      get "/admin/security"
+
+      expect(card("Sign-ins").find(".li")).to have_text("London · United Kingdom · 81.2.69.160")
+    end
+
     it "names a device and place it could not read" do
       sign_in_row(browser: nil, os: nil, city: nil, country: nil)
       get "/admin/security"
@@ -84,6 +91,13 @@ RSpec.describe "Admin security", type: :request do
       expect(credential("Terminal").find(".li")).to have_css(".li-title", text: "Firefox · Linux")
         .and have_text("London · GB · 3 calls · 81.2.69.160").and have_text("first seen").and have_text("last seen")
         .and have_css("time", count: 2)
+    end
+
+    it "shows a sighting's country by name when it has one" do
+      sight(api_token_id: token("Terminal").id, country_name: "United Kingdom")
+      get "/admin/security"
+
+      expect(credential("Terminal").find(".li")).to have_text("London · United Kingdom · 3 calls")
     end
 
     it "lists an MCP client's sightings under that client" do

@@ -18,7 +18,7 @@ RSpec.describe Analytics::Jobs::RefreshCountryDatabase do
 
   def failure = sync_state_queries.failure(Blog::Types::SyncName["country_database"])
 
-  def lookup(address) = Analytics::Slice["geo.countries"].code(address)
+  def lookup(address) = Analytics::Slice["geo.countries"].place(address).country
 
   def refresh = described_class.new.perform
 

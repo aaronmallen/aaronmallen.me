@@ -17,8 +17,6 @@ module Analytics
         @path = Pathname(path)
       end
 
-      def code(address) = place(address).country
-
       def failure
         return MISSING unless stamp
 
@@ -29,11 +27,13 @@ module Analytics
 
       def place(address)
         found = record(address)
-        country = found&.dig("country", "iso_code").to_s
+        code = found&.dig("country", "iso_code").to_s
+        known = Blog::Types::CountryCode.valid?(code)
 
         Structs::Place.new(
           city: found&.dig("city", "names", "en"),
-          country: (country if Blog::Types::CountryCode.valid?(country)),
+          country: (code if known),
+          country_name: (found.dig("country", "names", "en") if known),
         )
       end
 

@@ -1345,6 +1345,7 @@ CREATE TABLE public.analytics_events (
     device_class public.device_class,
     scroll_depth public.scroll_depth DEFAULT 0,
     referrer_path public.http_path,
+    country_name text,
     CONSTRAINT analytics_events_read_seconds_check CHECK ((read_seconds >= 0))
 );
 
@@ -1406,6 +1407,7 @@ CREATE TABLE public.analytics_rollup_countries (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     visitors integer,
+    country_name text,
     CONSTRAINT analytics_rollup_countries_views_check CHECK ((views >= 0)),
     CONSTRAINT analytics_rollup_countries_visitors_check CHECK (((visitors >= 0) AND (visitors <= views)))
 );
@@ -1469,6 +1471,7 @@ CREATE TABLE public.analytics_rollup_page_countries (
     visitors integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    country_name text,
     CONSTRAINT analytics_rollup_page_countries_counts_check CHECK (((views >= 0) AND (visitors >= 0) AND (visitors <= views)))
 );
 
@@ -1735,6 +1738,7 @@ CREATE TABLE public.known_devices (
     city text,
     country public.country_code,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    country_name text,
     CONSTRAINT known_devices_credential_check CHECK ((num_nonnulls(api_token_id, oauth_client_id) <= 1))
 );
 
@@ -2793,6 +2797,7 @@ CREATE TABLE public.sightings (
     last_user_agent text NOT NULL,
     first_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     last_seen_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    country_name text,
     CONSTRAINT sightings_credential_check CHECK ((num_nonnulls(api_token_id, oauth_client_id) = 1)),
     CONSTRAINT sightings_last_user_agent_length CHECK ((length(last_user_agent) <= 1024))
 );
@@ -2826,6 +2831,7 @@ CREATE TABLE public.sign_ins (
     city text,
     country public.country_code,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    country_name text,
     CONSTRAINT sign_ins_user_agent_length CHECK ((length(user_agent) <= 1024))
 );
 
@@ -5973,4 +5979,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261007000651_create_sightings.rb'),
 ('20261007000652_create_known_devices.rb'),
 ('20261007000654_add_new_devices_to_attention.rb'),
-('20261008000200_add_history_cursor_to_task_sources.rb');
+('20261008000200_add_history_cursor_to_task_sources.rb'),
+('20261008000300_add_country_names.rb');

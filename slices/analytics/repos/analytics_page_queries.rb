@@ -7,6 +7,7 @@ module Analytics
       COUNTED = [*FIGURES, :bounces].freeze
       FIRST_DAYS = 30
       LINK = %i[link_host link_path].freeze
+      NAMED = { countries: :country_name }.freeze
       RANKED = { countries: :country_code, referrers: :host }.freeze
       ZERO_DAY = COUNTED.to_h { [it, 0] }.freeze
 
@@ -132,7 +133,7 @@ module Analytics
         rolled = page_rows(public_send(:"analytics_rollup_page_#{name}"), window).top_by_visitors.to_a.map(&:to_h)
         rows = rolled + live.flat_map { it.public_send(:"page_#{name}") }.select { it.fetch(:path) == window[:path] }
 
-        rank_rows.call(rows, key:)
+        rank_rows.call(rows, key:, named: NAMED[name])
       end
 
       def page_rows(relation, window) = relation.between(window[:from], window[:to]).for_path(window[:path])

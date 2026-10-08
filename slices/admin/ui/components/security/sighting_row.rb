@@ -18,9 +18,11 @@ module Admin
 
           private
 
+          def country = @sighting.country_name || @sighting.country
+
           def device = dotted(@sighting.browser, @sighting.os).then { it.empty? ? t(".unknown_device") : it }
 
-          def place = dotted(@sighting.city, @sighting.country).then { it.empty? ? t(".unknown_place") : it }
+          def place = dotted(@sighting.city, country).then { it.empty? ? t(".unknown_place") : it }
 
           def seen
             Stamped(text: t(".first_seen", time: Stamped::MARK), at: @sighting.first_seen_at)

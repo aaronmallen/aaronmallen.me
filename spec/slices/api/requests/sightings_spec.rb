@@ -21,7 +21,7 @@ RSpec.describe "API token sightings", type: :request do
   def recorded
     {
       api_token_id: token_id, oauth_client_id: nil, browser: "Chrome", os: "macOS", city: "London", country: "GB",
-      calls: 1,
+      country_name: "United Kingdom", calls: 1,
     }
   end
 

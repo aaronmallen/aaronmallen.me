@@ -59,10 +59,16 @@ module Analytics
       def origin(visit, address:, user_agent:, base_url:)
         {
           **referrer(visit[:referrer], base_url),
-          country_code: countries.code(address),
+          **place(address),
           source: Blog::Types::Normalized::RefSource.call(visit[Contracts::VisitContract::REF]) { nil },
           device_class: classify_device.call(user_agent),
         }
+      end
+
+      def place(address)
+        found = countries.place(address)
+
+        { country_code: found.country, country_name: found.country_name }
       end
 
       def read(visit, visitor_hashes)

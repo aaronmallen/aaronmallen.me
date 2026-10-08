@@ -7,7 +7,7 @@ module Analytics
 
       schema :analytics_rollup_page_countries, infer: true
 
-      ranks_by :country_code
+      ranks_by :country_code, named: :country_name
     end
   end
 end

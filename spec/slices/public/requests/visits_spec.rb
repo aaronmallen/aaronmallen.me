@@ -110,7 +110,8 @@ RSpec.describe "Visits", type: :request do
     end
 
     it "looks the country up from the address the site trusts" do
-      allow(Analytics::Slice["geo.countries"]).to receive(:code).with(loopback).and_return("US")
+      place = Analytics::Structs::Place.new(city: nil, country: "US", country_name: "United States")
+      allow(Analytics::Slice["geo.countries"]).to receive(:place).with(loopback).and_return(place)
       forged("203.0.113.1")
 
       expect(stored.first.country_code).to eq("US")

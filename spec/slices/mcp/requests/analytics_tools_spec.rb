@@ -61,9 +61,10 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     it "gives the countries" do
       day = roll_up(today - 1, views: 10, visitors: 5).day
       create(:analytics_rollup_country, day:, country_code: "DE", views: 3)
-      create(:analytics_rollup_country, day:, country_code: "US", views: 7)
+      create(:analytics_rollup_country, day:, country_code: "US", country_name: "United States", views: 7)
 
-      expect(read.fetch("countries").map { it.values_at("country_code", "views") }).to eq([["US", 7], ["DE", 3]])
+      expect(read.fetch("countries").map { it.values_at("country_code", "country_name", "views") })
+        .to eq([["US", "United States", 7], ["DE", nil, 3]])
     end
 
     it "ranks the referrers by visitors over the range" do
@@ -92,7 +93,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
         create(:analytics_rollup_referrer, day: newer, host: "news.example", views: 2, visitors: 1)
         create(:analytics_rollup_referrer, day: older, host: "old.example", views: 9)
         create(:analytics_rollup_country, day: older, country_code: "US", views: 6)
-        create(:analytics_event, referrer_host: "news.example", country_code: "US")
+        create(:analytics_event, referrer_host: "news.example", country_code: "US", country_name: "United States")
       end
 
       it "sums the visitors of the days that counted them" do
@@ -104,7 +105,8 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       it "adds today's visitors to a country with no counted day" do
-        expect(read.fetch("countries")).to eq([{ "country_code" => "US", "views" => 7, "visitors" => 1 }])
+        expect(read.fetch("countries"))
+          .to eq([{ "country_code" => "US", "country_name" => "United States", "views" => 7, "visitors" => 1 }])
       end
     end
 
@@ -663,6 +665,15 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
         roll_up_origin(:analytics_rollup_page_country, today - 1, country_code: "US", views: 6, visitors: 4)
 
         expect(origins.fetch(:countries)).to eq([["US", 6, 4], ["JP", 2, 1]])
+      end
+
+      it "names the page's countries, rolled up or not" do
+        roll_up_origin(:analytics_rollup_page_country, today - 1, country_code: "JP", country_name: "Japan", views: 2,
+                                                                  visitors: 1)
+        create(:analytics_event, path: "/writing/hello", country_code: "US", country_name: "United States")
+
+        expect(read_page("/writing/hello").fetch("countries").map { it.values_at("country_code", "country_name") })
+          .to eq([%w[JP Japan], ["US", "United States"]])
       end
 
       it "leaves out other pages and the whole site's" do

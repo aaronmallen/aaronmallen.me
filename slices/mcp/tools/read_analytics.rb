@@ -53,6 +53,8 @@ module MCP
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
+                  "Each country gives its country_code and its English country_name, which is null for visits " \
+                  "from before the site kept names. " \
                   "Each top path gives its latest page title, which the visitor's browser sends, marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \

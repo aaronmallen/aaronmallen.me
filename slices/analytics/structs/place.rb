@@ -2,6 +2,6 @@
 
 module Analytics
   module Structs
-    Place = Data.define(:city, :country)
+    Place = Data.define(:city, :country, :country_name)
   end
 end

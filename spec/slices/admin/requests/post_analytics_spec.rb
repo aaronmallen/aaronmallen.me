@@ -32,8 +32,10 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
   def roll_up_breakdowns(day, path: "/writing/hello")
     create(:analytics_rollup_page_referrer, day:, path:, host: "news.example", views: 3, visitors: 2)
     create(:analytics_rollup_page_referrer, :direct, day:, path:, views: 5, visitors: 3)
-    create(:analytics_rollup_page_country, day:, path:, country_code: "US", views: 6, visitors: 4)
+    us = { country_code: "US", country_name: "United States" }
+    create(:analytics_rollup_page_country, day:, path:, **us, views: 6, visitors: 4)
     create(:analytics_rollup_page_country, :unknown, day:, path:, views: 2, visitors: 1)
+    create(:analytics_rollup_page_country, day:, path:, country_code: "JP", views: 1, visitors: 1)
     create(:analytics_rollup_device, day:, path:, device_class: "mobile", views: 5, visitors: 3)
     create(:analytics_rollup_device, day:, path:, device_class: "desktop", views: 3, visitors: 2)
     create(:analytics_rollup_device, day:, path: nil, device_class: "tablet", views: 9, visitors: 9)
@@ -122,9 +124,9 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(counts("Referrers")).to eq(%w[3 2])
       end
 
-      it "ranks the post's countries by visitors, naming one it could not place", :aggregate_failures do
-        expect(names("Geography")).to eq(%w[US unknown])
-        expect(counts("Geography")).to eq(%w[4 1])
+      it "ranks the post's countries by visitors, by name or else code", :aggregate_failures do
+        expect(names("Geography")).to eq(["United States", "unknown", "JP"])
+        expect(counts("Geography")).to eq(%w[4 1 1])
       end
 
       it "ranks the post's devices by visitors, leaving out the site's" do

@@ -192,7 +192,8 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         )
         create(:analytics_rollup_referrer, day: today, host: "news.example", views: 7, visitors: 2)
         create(:analytics_rollup_referrer, :direct, day: today, views: 5, visitors: 5)
-        create(:analytics_rollup_country, day: today, country_code: "US", views: 9, visitors: 3)
+        create(:analytics_rollup_country, day: today, country_code: "US", country_name: "United States", views: 9,
+                                          visitors: 3)
         create(:analytics_rollup_country, :unknown, day: today, views: 3, visitors: 3)
         get "/admin/analytics"
       end
@@ -223,7 +224,14 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "ranks the countries by visitors, then views" do
-        expect(meter_card("Geography").all(".meter-name").map(&:text)).to eq(%w[US unknown])
+        expect(meter_card("Geography").all(".meter-name").map(&:text)).to eq(["United States", "unknown"])
+      end
+
+      it "shows a country's code when it has no name" do
+        create(:analytics_rollup_country, day: today, country_code: "DE", views: 1, visitors: 1)
+        get "/admin/analytics"
+
+        expect(meter_card("Geography")).to have_css(".meter-name", exact_text: "DE")
       end
 
       it "counts each country's visitors" do

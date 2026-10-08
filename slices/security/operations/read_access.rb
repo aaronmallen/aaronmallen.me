@@ -3,7 +3,7 @@
 module Security
   module Operations
     class ReadAccess
-      DEVICE = %i[browser os city country].freeze
+      DEVICE = %i[browser os city country country_name].freeze
       USER_AGENT = "HTTP_USER_AGENT"
       USER_AGENT_LIMIT = 1024
 
@@ -18,7 +18,7 @@ module Security
         user_agent = readable(request.get_header(USER_AGENT))
         place = find_place.call(address)
 
-        { address:, user_agent:, **read_device.call(user_agent), city: place.city, country: place.country }
+        { address:, user_agent:, **read_device.call(user_agent), **place.to_h }
       end
 
       private

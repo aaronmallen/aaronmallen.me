@@ -27,7 +27,7 @@ RSpec.describe "MCP client sightings", type: :request do
   def recorded
     {
       api_token_id: nil, oauth_client_id: client.id, browser: "Chrome", os: "macOS", city: "London", country: "GB",
-      calls: 1,
+      country_name: "United Kingdom", calls: 1,
     }
   end
 

@@ -9,11 +9,15 @@ module Blog
         def self.included(relation) = relation.extend(Ranking)
 
         module Ranking
-          def ranks_by(column, nulls: nil)
+          def ranks_by(column, nulls: nil, named: nil)
             visitors = Sequel.function(:sum, :visitors).desc(nulls:)
             ranking = [visitors, Sequel.function(:sum, :views).desc, Sequel.asc(column)]
 
-            define_method(:top_by_visitors) { unordered.select(column, &FIGURES).group(column).order(*ranking) }
+            define_method(:top_by_visitors) do
+              found = unordered.select(column, &FIGURES).group(column).order(*ranking)
+              name = named && self[named]
+              name ? found.select_append { string.max(name).as(named) } : found
+            end
           end
         end
 

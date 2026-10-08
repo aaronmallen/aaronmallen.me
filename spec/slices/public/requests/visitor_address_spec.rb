@@ -8,9 +8,9 @@ RSpec.describe "Visitor address", type: :request do
   let(:proxy) { "127.0.0.1" }
 
   before do
-    allow(countries).to receive(:code) do |address|
+    allow(countries).to receive(:place) do |address|
       looked_up << address
-      nil
+      Analytics::Structs::Place.new(city: nil, country: nil, country_name: nil)
     end
   end
 

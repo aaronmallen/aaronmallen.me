@@ -6,11 +6,13 @@ RSpec.describe "Country lookup", type: :request do
 
   before { use_country_database }
 
-  def country_of(address)
+  def country_of(address) = stored_event(address)&.country_code
+
+  def stored_event(address)
     visit = { kind: "view", path: "/about", title: "About" }.to_json
     post "/pulse", visit, "CONTENT_TYPE" => "application/json", "HTTP_USER_AGENT" => agent, "REMOTE_ADDR" => address
 
-    event_repo.analytics_events.order(:id).to_a.last&.country_code
+    event_repo.analytics_events.order(:id).to_a.last
   end
 
   describe "a view" do
@@ -18,6 +20,14 @@ RSpec.describe "Country lookup", type: :request do
 
     it "stores the country of an address the database holds" do
       expect(country_of("1.2.3.4")).to eq("US")
+    end
+
+    it "stores the country's name beside its code" do
+      expect(stored_event("1.2.3.4")).to have_attributes(country_code: "US", country_name: "United States")
+    end
+
+    it "stores no name for an address the database doesn't hold" do
+      expect(stored_event("8.8.8.8")).to have_attributes(country_code: nil, country_name: nil)
     end
 
     it "reads the network the address falls in" do

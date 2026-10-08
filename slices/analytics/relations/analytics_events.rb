@@ -8,6 +8,7 @@ module Analytics
       CLICKS = proc do
         [*CLICKED.map { string(it).as(it.column) }, integer.count(CLICK[:id]).as(:clicks)]
       end
+      COUNTRY_NAME = proc { string.max(country_name).as(:country_name) }
       HOUR = Sequel.function(:date_trunc, "hour", :occurred_at, Blog::TimeZone::NAME)
       HOURLY = proc do
         [
@@ -63,6 +64,8 @@ module Analytics
         joined.select(&CLICKS).group(*CLICKED)
       end
 
+      def countries = counts_by(:country_code).select_append(&COUNTRY_NAME)
+
       def counts_by(column, as: column)
         figures = unordered.select(self[column].as(as)) do
           [integer.count(id).as(:views), integer.count(visitor_hash).distinct.as(:visitors)]
@@ -92,6 +95,8 @@ module Analytics
       def oldest_occurred_at = unordered.dataset.min(:occurred_at)
 
       def on_day(day) = between_days(day, day)
+
+      def page_countries = countries.select_append(:path).group_append(:path)
 
       def page_counts_by(column, as: column) = counts_by(column, as:).select_append(:path).group_append(:path)
 
