@@ -3,6 +3,7 @@
 module Tasks
   module Relations
     class TaskEvents < Blog::DB::Relation
+      SEEN = %w[moved tagged untagged].freeze
       SPRINT_ON = Sequel[:sprints][:sprint_date].as(:sprint_on)
       TAG_NAME = Sequel[:tags][:name]
       TASK_ID = Sequel[:tasks][:id]
@@ -17,11 +18,11 @@ module Tasks
 
       def in_order = order(self[:occurred_at].asc, self[:id].asc)
 
-      def track(task_ids, at, seen: false)
+      def track(task_ids, at, diff:, seen: false)
         dataset.db.transaction do
           before = states(task_ids)
           result = yield
-          events = History.changes(before, states(before.keys), at)
+          events = diff.call(before, states(before.keys), at)
           record(events, at, seen:) unless events.empty?
           result
         end
@@ -37,8 +38,10 @@ module Tasks
 
       def record(events, at, seen:)
         command(:create, result: :many).call(events)
-        task_sources.see(History.seen(events), at) if seen
+        task_sources.see(seen_ids(events), at) if seen
       end
+
+      def seen_ids(events) = events.filter_map { it[:task_id] if SEEN.include?(it[:kind]) }.uniq
 
       def states(task_ids)
         tagged = tag_names(task_ids)

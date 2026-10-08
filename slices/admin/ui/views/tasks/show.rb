@@ -124,7 +124,7 @@ module Admin
             end
           end
 
-          def reference = @task.source && ::Tasks::SourceReference.for(@task.source).key
+          def reference = @task.source && ::Tasks::Structs::SourceReference.for(@task.source).key
 
           def sprint_day = @task.sprint ? l(@task.sprint.sprint_date, format: :medium) : t(".unscheduled")
 

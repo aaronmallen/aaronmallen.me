@@ -66,7 +66,7 @@ module API
         return unless row.kind == :task
 
         found = row.record.source
-        { provider: found.provider, reference: ::Tasks::SourceReference.for(found).name }
+        { provider: found.provider, reference: ::Tasks::Structs::SourceReference.for(found).name }
       end
 
       def tags(row)

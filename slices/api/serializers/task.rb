@@ -83,7 +83,7 @@ module API
         {
           provider: found.provider,
           url: found.url,
-          reference: ::Tasks::SourceReference.for(found).name,
+          reference: ::Tasks::Structs::SourceReference.for(found).name,
           remote_state: found.remote_state,
           seen_at: stamp(found.seen_at),
         }

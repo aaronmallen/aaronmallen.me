@@ -11,6 +11,8 @@ module Tasks
 
       root :tasks
 
+      include Deps[order_positions: "operations.order_task_positions"]
+
       stamped_commands :create, :update
       commands delete: :by_pk
 
@@ -41,7 +43,7 @@ module Tasks
       def place(task, after_id)
         transaction do
           tasks.lock_until_commit
-          moves = Placement.moves(tasks.beside(task).in_order.to_a, task.id, after_id)
+          moves = order_positions.call(tasks.beside(task).in_order.to_a, task.id, after_id)
           moves&.each { |id, position| update(id, position:) }
         end
       end
