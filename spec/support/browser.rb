@@ -158,6 +158,9 @@ Capybara.register_driver :cuprite do |app|
     timeout: 10,
     url_allowlist: [%r{\Ahttp://#{Regexp.escape(Capybara.server_host)}:}],
     window_size: [1280, 800],
+    browser_options: {
+      "blink-settings" => "primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4",
+    },
   )
 end
 
