@@ -13,7 +13,7 @@ module Posts
         announcement: "operations.compose_announcement",
         expand_for_network: "social.operations.expand_for_network",
         networks: "social.networks.all",
-        person_queries: "social.repos.person_queries",
+        resolve_mentions: "social.operations.resolve_mentions",
       ]
 
       params do
@@ -48,7 +48,7 @@ module Posts
       end
 
       rule(:syndication_body) do
-        key.failure(UNKNOWN_MENTION) if person_queries.mention_directory(value).unknown(value).any?
+        key.failure(UNKNOWN_MENTION) if resolve_mentions.unknown(value).any?
       end
 
       rule(:syndication_body, :syndication_enabled, :syndication_targets, :slug, :title) do |context:|

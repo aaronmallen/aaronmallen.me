@@ -10,7 +10,7 @@ module Posts
 
     import keys: %w[operations.claim_photos operations.release_photos], from: :media
 
-    import keys: %w[networks.all operations.expand_for_network repos.person_queries], from: :social
+    import keys: %w[networks.all operations.expand_for_network operations.resolve_mentions], from: :social
 
     export %w[
       operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_post

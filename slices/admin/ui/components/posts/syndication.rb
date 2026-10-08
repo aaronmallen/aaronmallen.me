@@ -12,8 +12,8 @@ module Admin
           prop :counts, Blog::Types::Hash
           prop :enabled, Blog::Types::Bool
           prop :errors, Blog::Types::Hash
+          prop :handles, Blog::Types::Hash
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
-          prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :preview, Blog::Types::String
 
           def view_template
@@ -43,7 +43,7 @@ module Admin
             Field(label: t(".text"), name: FIELD, errors: @errors, error: FieldError) do |control|
               Textarea(**control, value: @body, **body_attributes)
               Social::Counts(counts: @counts, networks: @networks)
-              Social::Directory(people: @people)
+              Social::Directory(handles: @handles)
             end
           end
         end

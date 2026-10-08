@@ -14,8 +14,11 @@ module SocialCredentials
   private
 
   def replace_social_clients
-    bluesky = Social::Providers::NetworksProvider.bluesky(Hanami.app["settings"], Hanami.app["http"])
-    mastodon = Social::Providers::NetworksProvider.mastodon(Hanami.app["settings"], Hanami.app["http"])
+    scan_links = Social::Slice["operations.scan_links"]
+    bluesky = Social::Providers::NetworksProvider.bluesky(
+      Hanami.app["settings"], Hanami.app["http"], scan_links:, scan_tags: Social::Slice["operations.scan_tags"],
+    )
+    mastodon = Social::Providers::NetworksProvider.mastodon(Hanami.app["settings"], Hanami.app["http"], scan_links:)
     all = Social::Providers::NetworksProvider.all(bluesky, mastodon)
 
     ALL_KEYS.each { replace_component(it, all) }

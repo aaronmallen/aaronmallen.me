@@ -12,12 +12,12 @@ module Social
       end
       private_class_method :facet
 
-      def self.for(text, mentions: [])
-        spans(text, mentions).map do |span|
+      def self.for(mentions:, links:, tags:)
+        spans(mentions, links, tags).map do |span|
           case span
-            in Mentions::Mention then facet({ "$type" => MENTION, did: span.did }, span)
-            in Links::Link then facet({ "$type" => LINK, uri: span.url }, span)
-            in Tags::Tag then facet({ "$type" => TAG, tag: span.tag }, span)
+            in Structs::Mention then facet({ "$type" => MENTION, did: span.did }, span)
+            in Structs::Link then facet({ "$type" => LINK, uri: span.url }, span)
+            in Structs::Tag then facet({ "$type" => TAG, tag: span.tag }, span)
           end
         end
       end
@@ -25,8 +25,8 @@ module Social
       def self.overlap?(one, other) = one.byte_start < other.byte_end && other.byte_start < one.byte_end
       private_class_method :overlap?
 
-      def self.spans(text, mentions)
-        found = [mentions, Links.new(text).to_a, Tags.new(text).to_a].reduce([]) do |kept, spans|
+      def self.spans(*groups)
+        found = groups.reduce([]) do |kept, spans|
           kept + spans.reject { |span| kept.any? { overlap?(it, span) } }
         end
 

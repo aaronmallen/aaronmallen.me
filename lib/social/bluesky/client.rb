@@ -23,11 +23,13 @@ module Social
       SEARCH_ACTORS = "app.bsky.actor.searchActorsTypeahead"
       XRPC_PATH = "/xrpc"
 
-      def initialize(handle:, password:, pds:, public_api:)
+      def initialize(handle:, password:, pds:, public_api:, scan_links:, scan_tags:)
         @handle = handle
         @password = password
         @pds = pds
         @public_api = public_api
+        @scan_links = scan_links
+        @scan_tags = scan_tags
         @sessions = Sessions.new { sign_in }
       end
 
@@ -42,7 +44,7 @@ module Social
         found = body["posts"].to_a.first
         raise Error, "Bluesky returned no post for #{uri}" unless found
 
-        Engagement.new(
+        Structs::Engagement.new(
           like_count: found["likeCount"].to_i,
           reply_count: found["replyCount"].to_i,
           repost_count: found["repostCount"].to_i,
@@ -59,7 +61,7 @@ module Social
         sessions.use do |session|
           uri = write(record(text, mentions, reply_to, session), session, rkey(idempotency_key))
 
-          RemotePost.new(id: uri, url: web_url(session.handle, uri))
+          Structs::RemotePost.new(id: uri, url: web_url(session.handle, uri))
         end
       end
 
@@ -75,7 +77,7 @@ module Social
 
       private
 
-      attr_reader :handle, :password, :pds, :public_api, :sessions
+      attr_reader :handle, :password, :pds, :public_api, :scan_links, :scan_tags, :sessions
 
       def address(uri)
         match = AT_URI.match(uri.to_s) or raise Error, "#{uri} is not an at:// URI"
@@ -92,7 +94,7 @@ module Social
       end
 
       def record(text, mentions, reply_to, session)
-        facets = Facets.for(text, mentions:)
+        facets = Facets.for(mentions:, links: scan_links.call(text), tags: scan_tags.call(text))
 
         {
           "$type" => COLLECTION,

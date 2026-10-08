@@ -10,7 +10,7 @@ module Admin
           SECURE = "https://"
 
           prop :network, Blog::Types::NetworkName
-          prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(::Social::Account)), default: -> { Blog::Constants::EMPTY_ARRAY }
+          prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(::Social::Structs::Account)), default: -> { Blog::Constants::EMPTY_ARRAY }
           prop :problem, Blog::Types::Symbol.optional, default: nil
 
           def view_template

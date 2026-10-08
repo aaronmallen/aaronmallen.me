@@ -9,11 +9,12 @@ module Admin
 
           layout nil
 
+          prop :handles, Blog::Types::Hash
           prop :person, Blog::Types::Instance(ROM::Struct)
 
           def view_template
             MentionOption(person: @person)
-            Directory(people: [@person])
+            Directory(handles: @handles)
           end
         end
       end

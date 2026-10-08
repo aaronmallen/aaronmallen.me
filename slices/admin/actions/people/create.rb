@@ -12,6 +12,7 @@ module Admin
           build_person_editor: "operations.build_person_editor",
           mention_view: "ui.views.people.mention",
           new_view: "ui.views.people.new",
+          resolve_mentions: "social.operations.resolve_mentions",
           save_person: "social.operations.save_person",
         ]
 
@@ -38,7 +39,7 @@ module Admin
 
         def mention(response, person)
           response.status = CREATED
-          response.render(mention_view, person:)
+          response.render(mention_view, handles: resolve_mentions.handles([person]), person:)
         end
       end
     end

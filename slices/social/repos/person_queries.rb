@@ -7,11 +7,7 @@ module Social
 
       def by_id(id) = people.by_pk(id).one
 
-      def mention_directory(texts)
-        keys = Social::Mentions.keys(texts)
-
-        Social::Mentions.new(keys.empty? ? [] : people.where(key: keys).to_a)
-      end
+      def by_keys(keys) = people.where(key: keys).to_a
     end
   end
 end

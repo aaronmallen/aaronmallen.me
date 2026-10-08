@@ -51,7 +51,7 @@ module Admin
 
           def preview_text(network) = @counts.fetch(network.name, Structs::NetworkCount::NONE).text
 
-          def previewing? = @body.match?(::Social::Mentions::TOKEN) && @networks.any?(&:selected)
+          def previewing? = @body.match?(::Social::Operations::ResolveMentions::TOKEN) && @networks.any?(&:selected)
 
           def remove_button
             Button(

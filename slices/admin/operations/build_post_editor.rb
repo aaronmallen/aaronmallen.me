@@ -13,6 +13,7 @@ module Admin
         person_queries: "social.repos.person_queries",
         post_queries: "posts.repos.post_queries",
         preview_announcement: "operations.preview_announcement",
+        resolve_mentions: "social.operations.resolve_mentions",
         suggestion_queries: "suggestions.repos.suggestion_queries",
         webmention_queries: "social.repos.webmention_queries",
       ]
@@ -71,8 +72,8 @@ module Admin
           body:,
           counts: count_network_lengths.call([body.strip.empty? ? preview : body]).first,
           enabled: syndication_enabled(post, params),
+          handles: resolve_mentions.handles(person_queries.all),
           networks: list_networks.call(selected: syndication_targets(post, params)),
-          people: person_queries.all,
           preview:,
         }
       end

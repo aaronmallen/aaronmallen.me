@@ -2,8 +2,11 @@
 
 Social::Slice.register_provider :networks do
   start do
-    bluesky = Social::Providers::NetworksProvider.bluesky(target["settings"], target["http"])
-    mastodon = Social::Providers::NetworksProvider.mastodon(target["settings"], target["http"])
+    scan_links = target["operations.scan_links"]
+    bluesky = Social::Providers::NetworksProvider.bluesky(
+      target["settings"], target["http"], scan_links:, scan_tags: target["operations.scan_tags"],
+    )
+    mastodon = Social::Providers::NetworksProvider.mastodon(target["settings"], target["http"], scan_links:)
 
     register "networks.all", Social::Providers::NetworksProvider.all(bluesky, mastodon)
   end

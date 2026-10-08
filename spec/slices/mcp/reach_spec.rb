@@ -110,6 +110,7 @@ RSpec.describe "MCP reach", type: :app do
       "social.operations.reap_webmention_receipts" => "a background job reaps old webmention receipts",
       "social.operations.receive_webmention" => "another site sends a webmention to the public endpoint",
       "social.operations.refresh_social_engagement" => "a background job refreshes likes and replies",
+      "social.operations.scan_tags" => "the Bluesky client tags hashtags as it posts what send_social_post queues",
       "social.operations.send_webmentions" => "a background job sends a post's webmentions after it saves",
       "social.operations.verify_webmention" => "a background job checks a received webmention's source",
       "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",

@@ -11,6 +11,7 @@ module Admin
 
           prop :counts, Blog::Types::Array.of(Blog::Types::Hash)
           prop :errors, Blog::Types::Hash
+          prop :handles, Blog::Types::Hash
           prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :values, Blog::Types::Hash
@@ -93,7 +94,7 @@ module Admin
                 part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), autofocus: @autofocus && index.zero?)
               end
             end
-            Mentions(people: @people)
+            Mentions(handles: @handles, people: @people)
             div(class: "compose-add") { add_button }
             FieldError(field: :parts, errors: @errors)
           end

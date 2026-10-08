@@ -30,7 +30,7 @@ module Seeds
     def post(_text, idempotency_key:, **)
       id = "#{@name}-#{idempotency_key.part.id}"
 
-      Social::RemotePost.new(id:, url: "https://#{@name}.example.com/@ada/#{id}")
+      Social::Structs::RemotePost.new(id:, url: "https://#{@name}.example.com/@ada/#{id}")
     end
 
     def resolve(handle) = "did:plc:#{Digest::SHA256.hexdigest(handle)[0, 24]}"

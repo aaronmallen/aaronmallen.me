@@ -5,18 +5,10 @@ module Admin
     module Components
       module Social
         class Directory < Component
-          prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :handles, Blog::Types::Hash
 
           def view_template
-            div(hidden: true, data: { social_people: JSON.generate(handles) })
-          end
-
-          private
-
-          def handles
-            mentions = ::Social::Mentions.new(@people)
-
-            Blog::Types::NetworkName.values.to_h { [it, mentions.handles(it)] }
+            div(hidden: true, data: { social_people: JSON.generate(@handles) })
           end
         end
       end

@@ -20,7 +20,7 @@ module Social
 
         over = !client.within_limit?(text)
 
-        PartLength.new(network: name, part:, count: client.count(text), limit: client.limit, over:)
+        Structs::PartLength.new(network: name, part:, count: client.count(text), limit: client.limit, over:)
       end
     end
   end

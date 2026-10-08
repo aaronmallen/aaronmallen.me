@@ -66,7 +66,7 @@ module Social
 
       def send_part(social_post, network, client, delivery, (part, body))
         remote = client.post(body.text, mentions: body.mentions, reply_to: delivery.remote_ids.last,
-                                        idempotency_key: PartKey.new(network:, part:))
+                                        idempotency_key: Structs::PartKey.new(network:, part:))
 
         social_post_mutations.record_delivery(
           social_post.id, network,

@@ -18,6 +18,7 @@ module Admin
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
         person_queries: "social.repos.person_queries",
+        resolve_mentions: "social.operations.resolve_mentions",
         review_social_edits: "operations.review_social_edits",
         settings: "settings",
         social_post_queries: "social.repos.social_post_queries",
@@ -40,13 +41,15 @@ module Admin
 
       def composer(params, editing, errors)
         values = values(params, editing)
+        people = person_queries.all
 
         {
           counts: count_network_lengths.call(values[:parts]),
           editing: editing&.id,
           errors:,
+          handles: resolve_mentions.handles(people),
           networks: list_networks.call(selected: targets(params, editing)),
-          people: person_queries.all,
+          people:,
           suggestions: review_social_edits.call(editing),
           values:,
         }

@@ -3,10 +3,10 @@
 module Social
   module Operations
     class TagLinks
-      include Deps["settings", tag_ref: "analytics.operations.tag_ref"]
+      include Deps["settings", scan_links: "operations.scan_links", tag_ref: "analytics.operations.tag_ref"]
 
       def call(body, network)
-        Links.new(body).map { settings.owns?(it) ? tag_ref.call(it, network) : it }
+        scan_links.map(body) { settings.owns?(it) ? tag_ref.call(it, network) : it }
       end
     end
   end

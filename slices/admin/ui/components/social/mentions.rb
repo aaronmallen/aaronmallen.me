@@ -12,13 +12,14 @@ module Admin
           }.freeze
           LIST_ID = "social-mentions"
 
+          prop :handles, Blog::Types::Hash
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             list
             status
             noscript { p(class: "hint") { add_link(id: nil) } }
-            Directory(people: @people)
+            Directory(handles: @handles)
           end
 
           private

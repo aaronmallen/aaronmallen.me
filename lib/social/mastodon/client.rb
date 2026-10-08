@@ -17,8 +17,9 @@ module Social
       TOO_MANY_REQUESTS = 429
       VISIBILITY = "public"
 
-      def initialize(connection:)
+      def initialize(connection:, scan_links:)
         @connection = connection
+        @scan_links = scan_links
       end
 
       def configured? = !connection.nil?
@@ -30,7 +31,7 @@ module Social
 
         body = request(:get, "#{STATUSES_PATH}/#{id}")
 
-        Engagement.new(
+        Structs::Engagement.new(
           like_count: body["favourites_count"].to_i,
           reply_count: body["replies_count"].to_i,
           repost_count: body["reblogs_count"].to_i,
@@ -50,7 +51,7 @@ module Social
         )
         id = body["id"] or raise Error, "Mastodon answered #{STATUSES_PATH} without a status ID"
 
-        RemotePost.new(id: id.to_s, url: body["url"].to_s)
+        Structs::RemotePost.new(id: id.to_s, url: body["url"].to_s)
       end
 
       def search(text, limit:)
@@ -63,17 +64,17 @@ module Social
 
       private
 
-      attr_reader :connection
+      attr_reader :connection, :scan_links
 
       def account(found)
         acct = found["acct"].to_s
         handle = acct.include?("@") ? acct : "#{acct}@#{connection.url_prefix.host}"
 
-        Account.new(avatar: found["avatar"], handle: "@#{handle}", name: found["display_name"].to_s.strip)
+        Structs::Account.new(avatar: found["avatar"], handle: "@#{handle}", name: found["display_name"].to_s.strip)
       end
 
       def countable(text)
-        text.to_s.gsub(Links::PATTERN) { shrink(Regexp.last_match(0)) }.gsub(MENTION, "@\\1")
+        scan_links.map(text) { "x" * RESERVED_PER_URL }.gsub(MENTION, "@\\1")
       end
 
       def error_message(route, response)
@@ -98,12 +99,6 @@ module Social
         connection.public_send(verb, path, payload.compact) do |http|
           http.headers[IDEMPOTENCY_HEADER] = key.to_s if key
         end
-      end
-
-      def shrink(match)
-        url = Links.trim(match)
-
-        ("x" * RESERVED_PER_URL) + match[url.length..]
       end
     end
   end
