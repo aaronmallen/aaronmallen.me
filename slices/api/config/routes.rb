@@ -100,7 +100,12 @@ module API
 
     get "/search", to: "search.index"
 
+    get "/social_posts", to: "social_posts.index"
+    post "/social_posts", to: "social_posts.create"
     get "/social_posts/:id", to: "social_posts.show"
+    patch "/social_posts/:id", to: "social_posts.update"
+    delete "/social_posts/:id", to: "social_posts.destroy"
+    post "/social_posts/:id/send", to: "social_posts.send"
 
     get "/sprints", to: "sprints.index"
     post "/sprints", to: "sprints.create"

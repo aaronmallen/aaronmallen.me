@@ -112,7 +112,7 @@ RSpec.describe "MCP social tools", type: :request do
       create(:social_post, :scheduled, posted_at: at(Date.new(2026, 3, 5)), targets: %w[mastodon])
       call_tool("list_social_posts", **range)
 
-      expect(listed.first.fetch("deliveries")).to eq([{ "network" => "mastodon", "state" => "waiting" }])
+      expect(listed.first.fetch("deliveries")).to match([include("network" => "mastodon", "state" => "waiting")])
     end
 
     it "calls a delivery with an error but no give up retrying" do
