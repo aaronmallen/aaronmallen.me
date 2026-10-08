@@ -340,6 +340,69 @@ RSpec.describe "Admin post editor", type: :request do
       end
     end
 
+    describe "the details drawer" do
+      def drawer = page.find("form[data-post-editor] dialog#post-details.wide[role='dialog'][aria-modal='true']")
+
+      def fields = %w[slug tags publish_at og_title og_image_url canonical_url syndication_body webmentions_enabled]
+
+      def opener
+        "button[type='button'][data-dialog-open='post-details'][command='show-modal'][commandfor='post-details']"
+      end
+
+      it "opens from the Details button, with or without scripts" do
+        get "/admin/posts/new"
+
+        expect(page).to have_css(".page-head-actions #{opener}", text: "Details")
+      end
+
+      it "holds the publishing, card, syndication and webmention fields inside the editor form" do
+        get "/admin/posts/new"
+
+        expect(fields.select { drawer.has_field?(name: "post[#{it}]") }).to eq(fields)
+      end
+
+      it "leaves checking to the server, so a bad field in the shut drawer cannot block a save silently" do
+        get "/admin/posts/new"
+
+        expect(page).to have_css("form[data-post-editor][novalidate]")
+      end
+
+      it "stays shut on a fresh editor" do
+        get "/admin/posts/new"
+
+        expect(page).to have_no_css("dialog#post-details[open]")
+      end
+
+      it "opens when one of its fields fails" do
+        create(:post, slug: "hello")
+        save(title: "Hello")
+
+        expect(page).to have_css("dialog#post-details[open]")
+      end
+
+      it "stays shut when only the title fails" do
+        save(title: "")
+
+        expect(page).to have_no_css("dialog#post-details[open]")
+      end
+    end
+
+    describe "the analytics link" do
+      it "shows on a published post" do
+        article = create(:post, :published)
+        get "/admin/posts/#{article.id}/edit"
+
+        expect(page).to have_css(".page-head-actions a[href='/admin/posts/#{article.id}/analytics']", text: "Analytics")
+      end
+
+      it "stays off a draft" do
+        article = create(:post, :draft)
+        get "/admin/posts/#{article.id}/edit"
+
+        expect(page).to have_no_css(".page-head-actions a[href$='/analytics']")
+      end
+    end
+
     describe "deleting a post" do
       let(:article) { create(:post, :published, slug: "hello") }
 
@@ -351,10 +414,12 @@ RSpec.describe "Admin post editor", type: :request do
 
       def remove(id = article.id) = post "/admin/posts/#{id}/delete", _csrf_token: admin_csrf_token
 
-      it "offers Delete beside the editor's other actions" do
+      it "offers Delete post in the foot of the Details drawer" do
         edit
 
-        expect(page).to have_css(".page-head-actions button.warn[form='post-delete']", text: "Delete")
+        expect(page).to have_css(
+          "dialog#post-details .dialog-foot button.warn[form='post-delete']", text: "Delete post",
+        )
       end
 
       it "draws a hidden trash icon before the Delete label" do

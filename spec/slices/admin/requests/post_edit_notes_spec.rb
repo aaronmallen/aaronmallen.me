@@ -55,11 +55,11 @@ RSpec.describe "Admin post edit notes", type: :request do
         expect(card).to have_css(".edit-note-body code", text: "numbers")
       end
 
-      it "stays in the sidebar while the new note box sits below the body", :aggregate_failures do
+      it "sits in the Details drawer while the new note box sits below the body", :aggregate_failures do
         create(:post_edit, post: article)
         read
 
-        expect(page.find(".side-stack").all(".card-label").map(&:text).first).to eq("Edit notes")
+        expect(page.find("dialog#post-details").all(".card-label").map(&:text).last).to eq("Edit notes")
         expect(page.find(".editor-main").all(".card-label").map(&:text)).to eq(["What changed and why"])
       end
 

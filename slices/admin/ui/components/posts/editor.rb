@@ -6,6 +6,7 @@ module Admin
       module Posts
         class Editor < Component
           BODY_HEIGHT = "520px"
+          FORM_DATA = { post_editor: "", time_zone: Blog::TimeZone::NAME }.freeze
           PUBLISHED = Blog::Types::PostStatus["published"]
 
           prop :post, Blog::Types::Instance(ROM::Struct).optional
@@ -22,13 +23,13 @@ module Admin
 
           def view_template
             back_link
-            DeleteForm(post: @post, received: @webmentions[:received]) if @post
-            SuggestionForms(post_id: @suggestions[:post_id]) if suggestions?
-            EditNoteForms(post_id: @post.id, edits: @notes[:edits]) if @post
+            outside_forms
 
-            Form(action: form_action, data: { post_editor: "", time_zone: Blog::TimeZone::NAME }) do
+            Form(action: form_action, class: "post-editor", novalidate: true, data: FORM_DATA) do
               page_head
-              panes_and_sidebar
+              SuggestionsBanner(count: @suggestions[:edits].size) if suggestions?
+              main
+              Details(**details_props)
             end
           end
 
@@ -46,24 +47,39 @@ module Admin
             }
           end
 
+          def details_props
+            {
+              post: @post, values: @values, errors: @errors, notes: @notes, published: published?,
+              scheduling: scheduling?, syndication: @syndication, webmentions: @webmentions,
+            }
+          end
+
           def form_action = @post ? path(:admin_update_post, id: @post.id) : path(:admin_create_post)
+
+          def main
+            div(class: "editor-main") do
+              MarkdownEditor(**body_editor_props) { Preview(**@preview) }
+              EditNote(value: @values[:edit_note], errors: @errors) if published?
+            end
+          end
+
+          def outside_forms
+            if @post
+              DeleteForm(post: @post, received: @webmentions[:received])
+              EditNoteForms(post_id: @post.id, edits: @notes[:edits])
+            end
+            return unless suggestions?
+
+            SuggestionForms(post_id: @suggestions[:post_id])
+            Suggestions(body: @suggestions[:body], edits: @suggestions[:edits])
+          end
 
           def page_head
             EditorHead(label: t(".title"), field: :title, errors: @errors, error: FieldError,
                        **title_attributes) do |head|
               head.sub { sub_line }
               head.below { summary_block }
-              EditorActions(deletable: !@post.nil?, published: published?, scheduling: scheduling?)
-            end
-          end
-
-          def panes_and_sidebar
-            div(class: "editor") do
-              div(class: "editor-main") do
-                MarkdownEditor(**body_editor_props) { Preview(**@preview) }
-                EditNote(value: @values[:edit_note], errors: @errors) if published?
-              end
-              SideStack { sidebar }
+              EditorActions(post: @post, published: published?, scheduling: scheduling?)
             end
           end
 
@@ -76,15 +92,6 @@ module Admin
           end
 
           def scheduling? = @preview[:time] > @now
-
-          def sidebar
-            Suggestions(body: @suggestions[:body], edits: @suggestions[:edits]) if suggestions?
-            EditNotes(**@notes)
-            Publishing(values: @values, errors: @errors, published: published?, scheduling: scheduling?)
-            Seo(values: @values, errors: @errors)
-            Syndication(errors: @errors, **@syndication)
-            Webmentions(**@webmentions)
-          end
 
           def slug = ::Posts::Helpers::PostSlug.derive(slug: @values[:slug], title: @values[:title])
 

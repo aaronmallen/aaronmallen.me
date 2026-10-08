@@ -15,6 +15,8 @@ module Suggestions
 
       def for_post(post_id) = for_target(post_id:)
 
+      def for_posts(post_ids) = where(post_id: post_ids)
+
       def for_social_post(social_post_id) = for_target(social_post_id:)
 
       def for_social_posts(social_post_ids) = where(social_post_id: social_post_ids)
@@ -23,13 +25,15 @@ module Suggestions
 
       def ids = unordered.dataset.select(:id)
 
-      def latest_ids_by_social_post
+      def latest_ids_by(column)
         newest = %i[created_at id].map { Sequel[:suggestions][it].desc }
 
-        found = unordered.dataset.distinct(:social_post_id).order(:social_post_id, *newest)
+        found = unordered.dataset.distinct(column).order(column, *newest)
 
-        found.select_hash(:social_post_id, :id)
+        found.select_hash(column, :id)
       end
+
+      def latest_ids_by_social_post = latest_ids_by(:social_post_id)
 
       def newest_first = order(self[:created_at].desc, self[:id].desc)
 

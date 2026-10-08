@@ -6,6 +6,11 @@ RSpec.describe "Admin post editor", type: :feature do
 
   def click_tool(label) = find("[role='toolbar'] button[aria-label='#{label}']").click
 
+  def details
+    click_button "Details" unless has_css?("dialog#post-details[open]", wait: false)
+    find("dialog#post-details[open]")
+  end
+
   def show_view(name) = find(".edit .seg-option", text: name).click
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
@@ -20,9 +25,9 @@ RSpec.describe "Admin post editor", type: :feature do
     let(:link) { "Read https://aaronmallen.me/writing/hello and tell me" }
     let(:mastodon) { Social::Slice["networks.all"].fetch("mastodon") }
 
-    def counts = all("[data-social-count-text]").map(&:text)
+    def counts = details.all("[data-social-count-text]").map(&:text)
 
-    def write(text) = fill_in("Cross-post text", with: text)
+    def write(text) = details.fill_in("Cross-post text", with: text)
 
     before do
       connect_social_networks
@@ -57,7 +62,7 @@ RSpec.describe "Admin post editor", type: :feature do
     end
 
     it "mutes a network that is off" do
-      find(".compose-target", text: "Bluesky").click
+      details.find(".compose-target", text: "Bluesky").click
 
       expect(page).to have_css(".compose-count.off", text: "Bluesky")
     end
@@ -82,24 +87,24 @@ RSpec.describe "Admin post editor", type: :feature do
       it "previews the title and the URL as you type the title" do
         fill_in "Title", with: "A fresh title"
 
-        expect(page).to have_field(field, placeholder: "A fresh title\n\n#{writing}/a-fresh-title")
+        expect(details).to have_field(field, placeholder: "A fresh title\n\n#{writing}/a-fresh-title")
       end
 
       it "previews the URL the slug field carries" do
         fill_in "Title", with: "A fresh title"
-        fill_in "Slug", with: "chosen"
+        details.fill_in "Slug", with: "chosen"
 
-        expect(page).to have_field(field, placeholder: "A fresh title\n\n#{writing}/chosen")
+        expect(details).to have_field(field, placeholder: "A fresh title\n\n#{writing}/chosen")
       end
 
       it "hints instead while the title is blank" do
-        expect(find_field(field)[:placeholder]).to eq(translate("ui.components.posts.syndication.placeholder"))
+        expect(details.find_field(field)[:placeholder]).to eq(translate("ui.components.posts.syndication.placeholder"))
       end
 
       it "saves no post to preview one", :aggregate_failures do
         fill_in "Title", with: "A fresh title"
 
-        expect(page).to have_field(field, placeholder: /a-fresh-title/)
+        expect(details).to have_field(field, placeholder: /a-fresh-title/)
         expect(post_queries.all).to be_empty
       end
     end
@@ -112,7 +117,7 @@ RSpec.describe "Admin post editor", type: :feature do
       it "counts the title and the URL as each network gets them while the box is blank", :aggregate_failures do
         fill_in "Title", with: "A fresh title"
 
-        expect(page).to have_css(".compose-count", text: "Mastodon #{mastodon.count(announcement)}/500")
+        expect(details).to have_css(".compose-count", text: "Mastodon #{mastodon.count(announcement)}/500")
         expect(page).to have_css(".compose-count", text: "Bluesky #{bluesky.count(tagged)}/300")
       end
 
@@ -122,7 +127,7 @@ RSpec.describe "Admin post editor", type: :feature do
 
       it "counts the text you type over the title and the URL" do
         fill_in "Title", with: "A fresh title"
-        find(".compose-count", text: "Bluesky #{bluesky.count(tagged)}/300")
+        details.find(".compose-count", text: "Bluesky #{bluesky.count(tagged)}/300")
 
         write "hello"
 
@@ -132,7 +137,7 @@ RSpec.describe "Admin post editor", type: :feature do
       it "turns a title over a network's limit pink" do
         fill_in "Title", with: "a" * 301
 
-        expect(page).to have_css(".compose-count.over", text: "Bluesky")
+        expect(details).to have_css(".compose-count.over", text: "Bluesky")
       end
     end
   end
@@ -262,7 +267,10 @@ RSpec.describe "Admin post editor", type: :feature do
   describe "deleting a post" do
     let(:article) { create(:post, :draft, title: "Drop me") }
 
-    before { visit "/admin/posts/#{article.id}/edit" }
+    before do
+      visit "/admin/posts/#{article.id}/edit"
+      details
+    end
 
     it "asks with the confirmation text" do
       message = confirm_no { click_button "Delete" }
@@ -273,6 +281,7 @@ RSpec.describe "Admin post editor", type: :feature do
     it "names the webmentions it will destroy" do
       create(:webmention, post: article)
       visit "/admin/posts/#{article.id}/edit"
+      details
       message = confirm_no { click_button "Delete" }
 
       expect(message).to eq(translate("ui.components.posts.delete_form.confirm_webmentions", count: 1))

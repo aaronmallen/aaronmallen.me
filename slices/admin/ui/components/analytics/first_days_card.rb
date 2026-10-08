@@ -58,10 +58,12 @@ module Admin
           end
 
           def readings
-            table(class: "sr-only") do
-              caption { t(".caption", count: @span) }
-              thead { tr { HEADINGS.each { |key| th(scope: "col") { t(key) } } } }
-              tbody { (1..[@days.size, @median.size].max).each { row(it) } }
+            div(class: "sr-only") do
+              table do
+                caption { t(".caption", count: @span) }
+                thead { tr { HEADINGS.each { |key| th(scope: "col") { t(key) } } } }
+                tbody { (1..[@days.size, @median.size].max).each { row(it) } }
+              end
             end
           end
 

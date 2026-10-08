@@ -43,7 +43,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       it "counts the sub-line from every post, not the page" do
         get "/admin/posts", status: "published"
 
-        expect(page).to have_css(".page-head-sub", exact_text: "3 published · 1 draft · 0 scheduled")
+        expect(page).to have_css(".page-head-sub", exact_text: "1 draft in progress. 3 published, 0 scheduled.")
       end
 
       it "counts the views, visitors and words of a post on a later page" do
@@ -159,13 +159,13 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       end
     end
 
-    it "counts the posts in each status in the sub-line" do
+    it "counts the posts in each status in the lede" do
       2.times { create(:post, :published) }
       create(:post, :draft)
       3.times { create(:post, :scheduled) }
       get "/admin/posts"
 
-      expect(page).to have_css(".page-head-sub", exact_text: "2 published · 1 draft · 3 scheduled")
+      expect(page).to have_css(".page-head-sub", exact_text: "1 draft in progress. 2 published, 3 scheduled.")
     end
 
     it "counts the sub-line from every post while filtered" do
@@ -173,7 +173,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       2.times { create(:post, :draft) }
       get "/admin/posts", status: "published"
 
-      expect(page).to have_css(".page-head-sub", exact_text: "1 published · 2 drafts · 0 scheduled")
+      expect(page).to have_css(".page-head-sub", exact_text: "2 drafts in progress. 1 published, 0 scheduled.")
     end
 
     it "shows the path, publish date, word count, views and visitors under the title" do
@@ -336,15 +336,15 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       end
 
       it "shows each tag in the colour it carries" do
-        expect(page.all(".li-side .tag.sand, .li-side .tag.green").map(&:text)).to eq(%w[#hanami #ruby])
+        expect(page.all(".post-row-meta .tag.sand, .post-row-meta .tag.green").map(&:text)).to eq(%w[#hanami #ruby])
       end
 
       it "links each tag to its summary" do
-        expect(page.all(".li-side a.tag").map { it[:href] }).to eq(%w[/admin/tags/hanami /admin/tags/ruby])
+        expect(page.all(".post-row-meta a.tag").map { it[:href] }).to eq(%w[/admin/tags/hanami /admin/tags/ruby])
       end
 
       it "draws no tag as a pill" do
-        expect(page).to have_no_css(".li-side .pill.green, .li-side .pill.sand")
+        expect(page).to have_no_css(".post-row-meta .pill.green, .post-row-meta .pill.sand")
       end
     end
 
@@ -354,7 +354,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       create(:webmention, :spam, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".li-side .pill.pink span[aria-hidden='true']", exact_text: "@2")
+      expect(page).to have_css(".post-row-meta .pill.pink span[aria-hidden='true']", exact_text: "@2")
     end
 
     it "counts an ignored mention as received" do
@@ -363,7 +363,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       create(:webmention, :ignored, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".li-side .pill.pink span[aria-hidden='true']", exact_text: "@2")
+      expect(page).to have_css(".post-row-meta .pill.pink span[aria-hidden='true']", exact_text: "@2")
     end
 
     it "names the mention count for a screen reader" do
@@ -371,7 +371,28 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       create(:webmention, post: post)
       get "/admin/posts"
 
-      expect(page).to have_css(".li-side .pill.pink .sr-only", exact_text: "1 webmention")
+      expect(page).to have_css(".post-row-meta .pill.pink .sr-only", exact_text: "1 webmention")
+    end
+
+    describe "suggestions" do
+      def suggest(post, count)
+        edits = Array.new(count) { { original: "teh", replacement: "the", reason: "typo" } }
+        Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(post.id, edits)
+      end
+
+      it "counts the open edits on a draft" do
+        suggest(create(:post, :draft, body: "teh teh"), 2)
+        get "/admin/posts"
+
+        expect(page).to have_css(".post-row-meta .pill.blue", exact_text: "2 suggestions")
+      end
+
+      it "counts nothing on a published post, where the editor shows none" do
+        suggest(create(:post, :published, body: "teh"), 1)
+        get "/admin/posts"
+
+        expect(page).to have_no_css(".post-row-meta .pill.blue")
+      end
     end
 
     it "shows no mention pill on a post without mentions" do

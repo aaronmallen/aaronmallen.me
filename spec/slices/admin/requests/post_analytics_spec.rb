@@ -90,8 +90,10 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-title", exact_text: "Hello")
       end
 
-      it "names the range and the path under the title" do
-        expect(page).to have_css(".page-head-sub", exact_text: "Last 7 days · /writing/hello")
+      it "sums up the readers, the range and the path under the title" do
+        lede = "0 readers and 3 read-throughs in the last 7 days. It lives at /writing/hello."
+
+        expect(page).to have_css(".page-head-sub", exact_text: lede)
       end
 
       it "totals the post's views over the range" do

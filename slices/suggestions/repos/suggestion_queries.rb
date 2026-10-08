@@ -18,11 +18,14 @@ module Suggestions
 
       def for_social_post(social_post_id) = latest(with_edits.for_social_post(social_post_id))
 
-      def open_counts_for_social_posts(social_post_ids)
-        latest = latest_ids_for_social_posts(social_post_ids)
-        counts = open_counts(latest.values)
+      def open_counts_for_posts(post_ids)
+        return Blog::Constants::EMPTY_HASH if post_ids.empty?
 
-        latest.filter_map { |social_post_id, id| [social_post_id, counts[id]] if counts[id] }.to_h
+        latest_open_counts(suggestions.for_posts(post_ids).latest_ids_by(:post_id))
+      end
+
+      def open_counts_for_social_posts(social_post_ids)
+        latest_open_counts(latest_ids_for_social_posts(social_post_ids))
       end
 
       private
@@ -33,6 +36,12 @@ module Suggestions
         return Blog::Constants::EMPTY_HASH if social_post_ids.empty?
 
         suggestions.for_social_posts(social_post_ids).latest_ids_by_social_post
+      end
+
+      def latest_open_counts(latest)
+        counts = open_counts(latest.values)
+
+        latest.filter_map { |record_id, id| [record_id, counts[id]] if counts[id] }.to_h
       end
 
       def open_counts(suggestion_ids)

@@ -9,21 +9,29 @@ module Admin
           PUBLISH = Blog::Types::PostIntent["publish"]
           SAVE = Blog::Types::PostIntent["save"]
 
-          prop :deletable, Blog::Types::Bool
+          prop :post, Blog::Types::Instance(ROM::Struct).optional
           prop :published, Blog::Types::Bool
           prop :scheduling, Blog::Types::Bool
 
           def view_template
-            delete_button if @deletable
+            details_button
+            analytics_link if @published
             @published ? save_button : draft_and_publish_buttons
           end
 
           private
 
-          def delete_button
-            Button(variant: :warn, type: "submit", form: DeleteForm::ID, icon: "fa-regular fa-trash-can") do
-              t(".delete")
+          def analytics_link
+            Button(href: path(:admin_post_analytics, id: @post.id), icon: "fa-solid fa-chart-simple") do
+              t(".analytics")
             end
+          end
+
+          def details_button
+            Button(
+              icon: "fa-solid fa-sliders", command: "show-modal", commandfor: Details::ID,
+              data: { dialog_open: Details::ID },
+            ) { t(".details") }
           end
 
           def draft_and_publish_buttons

@@ -26,6 +26,7 @@ module Admin
           prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
           prop :read_through_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :saved_views, Blog::Types::Hash
+          prop :suggestion_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :unique_reader_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
           prop :view_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :visitor_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
@@ -33,8 +34,8 @@ module Admin
           prop :word_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
-            PageHead(title: t(".heading"), sub:) do
-              SavedViews(**@saved_views)
+            content_for(:title, t(".title"))
+            PageHead(title: t(".heading"), sub:, tabs_side:) do
               filter_form
               CreateLink(href: path(:admin_new_post), label: t(".new_post"))
             end
@@ -80,6 +81,14 @@ module Admin
             end
           end
 
+          def meta(post)
+            div(class: "post-row-meta") do
+              mentions(post)
+              suggestions(post)
+              post.tags.each { Tag(tag: it) }
+            end
+          end
+
           def pick(post) = { form: Bulk::ID, value: post.id, label: t(".pick", title: post.title) }
 
           def readership(post)
@@ -94,11 +103,10 @@ module Admin
           def row(post)
             href = path(:admin_edit_post, id: post.id)
 
-            ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do
+            ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do |item|
+              item.meta { meta(post) }
               PublishForm(post:, filter: @filter, page: @posts.number) if post.status == DRAFT
               analytics_link(post)
-              post.tags.each { Tag(tag: it) }
-              mentions(post)
               StatusPill(status: post.status)
             end
           end
@@ -110,19 +118,26 @@ module Admin
           end
 
           def rows
-            Card(data: { key_list: true }) do
+            Card(class: "post-list", data: { key_list: true }) do
               Bulk(filter: @filter, page: @posts.number)
               @posts.rows.each { |post| row(post) }
             end
           end
 
           def sub
-            dotted(
-              t(".published_count", count: count(PUBLISHED)),
-              t(".draft_count", count: count(DRAFT)),
-              t(".scheduled_count", count: count(SCHEDULED)),
-            )
+            drafts = t(".draft_count", count: count(DRAFT))
+
+            t(".lede", drafts:, published: count(PUBLISHED), scheduled: count(SCHEDULED))
           end
+
+          def suggestions(post)
+            count = @suggestion_counts.fetch(post.id, 0)
+            return unless count.positive?
+
+            Pill(color: :blue) { IconLabel(icon: "fa-solid fa-robot") { t(".suggestions", count:) } }
+          end
+
+          def tabs_side = proc { SavedViews(**@saved_views) }
 
           def tallies = { read_throughs: @read_through_counts, views: @view_counts, visitors: @visitor_counts }
 

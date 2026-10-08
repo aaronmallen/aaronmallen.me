@@ -29,23 +29,33 @@ module Admin
           prop :unique_readers, Blog::Types::Hash
 
           def view_template
-            PageHead(title: @post.title, kicker: t(".kicker"), sub:) do
-              range_form
-              Button(href: path(:admin_edit_post, id: @post.id)) { t(".edit") }
-            end
+            PageHead(title: @post.title, kicker: t(".kicker"), sub:) { actions }
 
-            Grid(columns: 4) { stats }
-            FirstDaysCard(**@first_days)
-
-            Grid(columns: 2) do
-              SideStack { left_cards }
-              SideStack { right_cards }
+            div(class: "post-analytics") do
+              Grid(columns: 4) { stats }
+              FirstDaysCard(**@first_days)
+              div(class: "cols") { cards }
             end
           end
 
           private
 
+          def actions
+            BackLink(href: path(:admin_posts)) { t(".back") }
+            range_form
+            Button(href: path(:admin_edit_post, id: @post.id), icon: "fa-regular fa-pen-to-square") { t(".edit") }
+          end
+
           def bounce_rate = Blog::Helpers::Figures.share(stat(:bounces), stat(:visitors))
+
+          def cards
+            MeterCard(color: :blue, empty: t(".no_sources"), rows: sources, title: t(".sources"))
+            MeterCard(color: :pink, empty: t(".no_devices"), rows: devices, title: t(".devices"))
+            ScrollCard(reached: @scroll.fetch(:reached), views: @scroll.fetch(:views))
+            MeterCard(color: :pink, empty: t(".no_clicks"), rows: clicks, title: t(".clicks"))
+            ReferrersCard(rows: @referrers)
+            CountriesCard(rows: @countries)
+          end
 
           def clicks = @clicks.map { { count: it[:clicks], label: it.values_at(:link_host, :link_path).join } }
 
@@ -59,12 +69,6 @@ module Admin
             { views: @views, visitors: @visitors, bounces: @bounces, readers: @readers, read_throughs: @read_throughs }
           end
 
-          def left_cards
-            ScrollCard(reached: @scroll.fetch(:reached), views: @scroll.fetch(:views))
-            MeterCard(color: :pink, empty: t(".no_devices"), rows: devices, title: t(".devices"))
-            MeterCard(color: :blue, empty: t(".no_sources"), rows: sources, title: t(".sources"))
-          end
-
           def month = l(Blog::TimeZone.today, format: :month)
 
           def range_form
@@ -75,12 +79,6 @@ module Admin
               selected: @range.to_s,
               label: t(".range"),
             )
-          end
-
-          def right_cards
-            ReferrersCard(rows: @referrers)
-            CountriesCard(rows: @countries)
-            MeterCard(color: :pink, empty: t(".no_clicks"), rows: clicks, title: t(".clicks"))
           end
 
           def rows(list) = list.map { { count: it[:visitors], label: yield(it) } }
@@ -97,7 +95,15 @@ module Admin
             unique_readers
           end
 
-          def sub = dotted(t(".sub", count: @range), path(:post, slug: @post.slug))
+          def sub
+            t(
+              ".lede",
+              readers: t(".reader_count", count: stat(:readers)),
+              read_throughs: t(".read_through_count", count: stat(:read_throughs)),
+              count: @range,
+              path: path(:post, slug: @post.slug),
+            )
+          end
 
           def unique_readers
             readers, final = @unique_readers.values_at(:readers, :final)

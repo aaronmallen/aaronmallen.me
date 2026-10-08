@@ -940,6 +940,10 @@ en:
           confirm_webmentions:
             one: "Delete this post and the %{count} webmention it received? You can't undo it."
             other: "Delete this post and the %{count} webmentions it received? You can't undo it."
+        details:
+          delete: "Delete post"
+          done: "Done"
+          title: "Post details"
         edit_note:
           hint: "Needed when you change the body. Readers see it on the post."
           label: "What changed and why"
@@ -962,7 +966,8 @@ en:
             one: "%{count} word"
             other: "%{count} words"
         editor_actions:
-          delete: "Delete"
+          analytics: "Analytics"
+          details: "Details"
           publish: "Publish"
           save: "Save"
           save_draft: "Save draft"
@@ -1025,6 +1030,11 @@ en:
           reject: "Reject"
           reject_all: "Reject all"
           stale: "stale"
+        suggestions_banner:
+          count:
+            one: "%{count} suggestion"
+            other: "%{count} suggestions"
+          review: "Review"
         syndication:
           heading: "Syndication"
           hint: "It goes out within a minute of the post going live."
@@ -2008,6 +2018,7 @@ en:
           token: "@{%{key}}"
       posts:
         analytics:
+          back: "All posts"
           bounce: "%{percent}% bounce rate"
           clicks: "Outbound clicks"
           devices: "Devices"
@@ -2015,17 +2026,23 @@ en:
           final: "final count"
           first_year: "in its first 12 months"
           kicker: "Post analytics"
+          lede: "%{readers} and %{read_throughs} in the last %{count} days. It lives at %{path}."
           no_clicks: "No outbound clicks yet."
           no_devices: "No devices yet."
           no_sources: "No sources yet."
           no_unique_readers: "None"
           range: "Range"
           read_note: "read 75% for 30 seconds or more"
+          read_through_count:
+            one: "%{count} read-through"
+            other: "%{count} read-throughs"
           read_throughs: "Read-throughs"
+          reader_count:
+            one: "%{count} reader"
+            other: "%{count} readers"
           readers: "Readers"
           readers_note: "in %{month}"
           sources: "Sources"
-          sub: "Last %{count} days"
           unique_readers: "Unique readers"
           unkept: "no count kept"
           views: "Page views"
@@ -2042,7 +2059,8 @@ en:
           final_unique_readers:
             one: "%{count} unique reader, final"
             other: "%{count} unique readers, final"
-          heading: "Posts"
+          heading: "Publish"
+          lede: "%{drafts} in progress. %{published} published, %{scheduled} scheduled."
           mentions: "@%{count}"
           mentions_label:
             one: "%{count} webmention"
@@ -2051,12 +2069,14 @@ en:
           no_unique_readers: "no unique reader count"
           pick: "Select %{title}"
           published: "published"
-          published_count: "%{count} published"
           read_throughs:
             one: "%{count} read-through"
             other: "%{count} read-throughs"
           scheduled: "scheduled"
-          scheduled_count: "%{count} scheduled"
+          suggestions:
+            one: "%{count} suggestion"
+            other: "%{count} suggestions"
+          title: "Posts"
           unique_readers:
             one: "%{count} unique reader"
             other: "%{count} unique readers"

@@ -222,6 +222,29 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def post_screens
+    {
+      "post analytics" => "/admin/posts/#{published.id}/analytics",
+      "post details" => lambda do
+        visit "/admin/posts/#{published.id}/edit"
+        click_button "Details"
+        find("dialog#post-details[open]")
+      end,
+      "post suggestions" => lambda do
+        Suggestions::Slice["repos.suggestion_mutations"].replace_for_post(
+          draft.id, [{ original: draft.body.split.first, replacement: "Changed", reason: "A better word" }],
+        )
+        visit "/admin/posts/#{draft.id}/edit"
+        click_button "Review"
+        find("dialog#post-suggestions[open]")
+      end,
+    }
+  end
+
+  def published
+    @published ||= create(:post, :published, slug: "hello", title: "A published post with a fairly long title")
+  end
+
   def record_search
     {
       "task record search" => "/admin/tasks/#{task.id}?record_q=published",
@@ -252,7 +275,7 @@ RSpec.describe "Admin screens", type: :feature do
   def screens
     pages.merge(
       calendars, people, person_search, record_search, linked_records, composers, dialogs, journal_editors,
-      saved_view_menus, selections, time_rows, decisions,
+      saved_view_menus, selections, time_rows, decisions, post_screens,
     )
   end
 
@@ -325,11 +348,7 @@ RSpec.describe "Admin screens", type: :feature do
     draft
     project
     create(:tag, name: "ruby", color: "mk-blue")
-    create(
-      :webmention, :reply,
-      author_name: "Ada Lovelace",
-      post: create(:post, :published, slug: "hello", title: "A published post with a fairly long title"),
-    )
+    create(:webmention, :reply, author_name: "Ada Lovelace", post: published)
     social_post
     create(:post, :scheduled, title: "A post scheduled for tomorrow")
     create(:social_post, :scheduled)

@@ -10,7 +10,7 @@ RSpec.describe "Admin post suggestions", type: :request do
     post "/admin/posts/#{article.id}/suggestions/accept", _csrf_token: admin_csrf_token, **params
   end
 
-  def buttons = page.all(".sg-actions button, .card-side button")
+  def buttons = page.all("#post-suggestions .sg-actions button, #post-suggestions .dialog-foot button")
 
   def edits_of(article) = suggestion_queries.for_post(article.id).edits
 
@@ -48,19 +48,19 @@ RSpec.describe "Admin post suggestions", type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    describe "the card" do
+    describe "the drawer" do
       let(:article) { create(:post, :draft, body: "teh cat sat") }
 
       it "shows nothing on a new post" do
         get "/admin/posts/new"
 
-        expect(page).to have_no_css(".card-label", text: "Suggestions")
+        expect(page).to have_no_css("dialog#post-suggestions")
       end
 
       it "shows nothing for a post without suggestions" do
         open_editor(article)
 
-        expect(page).to have_no_css(".card-label", text: "Suggestions")
+        expect(page).to have_no_css("dialog#post-suggestions")
       end
 
       it "shows nothing once every edit is settled" do
@@ -68,21 +68,30 @@ RSpec.describe "Admin post suggestions", type: :request do
         suggestion_mutations.reject(suggestion.edits.map(&:id))
         open_editor(article)
 
-        expect(page).to have_no_css(".card-label", text: "Suggestions")
+        expect(page).to have_no_css("dialog#post-suggestions")
       end
 
-      it "heads the card" do
+      it "heads the drawer" do
         suggest(article, typo)
         open_editor(article)
 
-        expect(page).to have_css(".card-label", text: "Suggestions")
+        expect(page).to have_css("dialog#post-suggestions[role='dialog'] .dialog-head", text: "Suggestions")
       end
 
-      it "sits above the publishing card" do
+      it "counts the edits in a banner" do
+        suggest(article, typo, typo("sat", "slept"))
+        open_editor(article)
+
+        expect(page).to have_css(".post-banner", text: "2 suggestions")
+      end
+
+      it "opens from the banner's Review button" do
         suggest(article, typo)
         open_editor(article)
 
-        expect(page).to have_css(".side-stack > .card:first-child .card-label", text: "Suggestions")
+        review = "button[data-dialog-open='post-suggestions'][commandfor='post-suggestions']"
+
+        expect(page).to have_css(".post-banner #{review}", text: "Review")
       end
 
       it "reads the original out as the before", :aggregate_failures do
@@ -107,11 +116,11 @@ RSpec.describe "Admin post suggestions", type: :request do
         expect(page.all(".sg-actions button").map(&:text)).to eq(%w[Accept Reject Accept Reject])
       end
 
-      it "offers Accept all and Reject all in the head" do
+      it "offers Accept all and Reject all in the foot" do
         suggest(article, typo)
         open_editor(article)
 
-        expect(page.all(".card-side button").map(&:text)).to eq(["Accept all", "Reject all"])
+        expect(page.all("#post-suggestions .dialog-foot button").map(&:text)).to eq(["Accept all", "Reject all"])
       end
 
       it "sends the acceptances to the accept endpoint" do
@@ -163,7 +172,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         suggest(article, typo)
         open_editor(article)
 
-        expect(page.all(".card-side button").map { it["value"] }).to all(be_nil)
+        expect(page.all("#post-suggestions .dialog-foot button").map { it["value"] }).to all(be_nil)
       end
     end
 
@@ -256,11 +265,11 @@ RSpec.describe "Admin post suggestions", type: :request do
         expect(statuses(article)).to eq(%w[rejected])
       end
 
-      it "clears the card on Reject all" do
+      it "clears the drawer on Reject all" do
         reject(article)
         follow_redirect!
 
-        expect(page).to have_no_css(".card-label", text: "Suggestions")
+        expect(page).to have_no_css("dialog#post-suggestions")
       end
 
       it "says nothing was applied on Accept all" do
@@ -476,10 +485,10 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before { suggest(article, typo) }
 
-      it "hides the card" do
+      it "hides the drawer" do
         open_editor(article)
 
-        expect(page).to have_no_css(".card-label", text: "Suggestions")
+        expect(page).to have_no_css("dialog#post-suggestions")
       end
 
       it "offers no decision" do
@@ -551,10 +560,10 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before { suggest(article, typo) }
 
-      it "shows the card" do
+      it "shows the drawer" do
         open_editor(article)
 
-        expect(page).to have_css(".card-label", text: "Suggestions")
+        expect(page).to have_css("dialog#post-suggestions")
       end
 
       it "applies an edit" do

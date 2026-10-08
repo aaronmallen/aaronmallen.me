@@ -9,7 +9,7 @@ RSpec.describe "Admin posts tags", type: :feature do
   end
 
   it "opens the tag's summary from a tag" do
-    find(".li-side .tag", text: "#ruby").click
+    find(".post-row-meta .tag", text: "#ruby").click
 
     expect(page).to have_current_path("/admin/tags/ruby")
   end
