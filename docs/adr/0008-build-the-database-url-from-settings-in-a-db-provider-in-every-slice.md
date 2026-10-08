@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, activity, admin, analytics, contact, mcp, posts, projects, record, social, suggestions, tags, tasks]
 issue: AA-594
-amended: [AA-808]
+amended: [AA-808, "#711"]
 tags: [database, settings, providers, hanami, connection-pool, postgres]
 ---
 
@@ -41,7 +41,8 @@ We build the connection from the `database` settings, never from `DATABASE_URL`.
 - The pool holds a connection per thread plus one for the commit import lock, capped by `database.max_connections`
   (`DBProvider.max_connections`, AA-309). `Blog::Concurrency.threads` reads Sidekiq's concurrency in the worker and
   `HANAMI_MAX_THREADS` in the web process.
-- `config/settings/test.yml` adds `_test` to `DATABASE_NAME` itself.
+- `config/settings/test.yml` adds `_test` to `DATABASE_NAME` itself. #711 adds `_<id>` after it when
+  `WORKSPACE_ID` is set, so each agent workspace tests against a database of its own ([ADR 0125][0125]).
 
 ## Alternatives
 
@@ -64,6 +65,8 @@ slice.
 Hanami's own test database step never runs, so we keep its `_test` rule in `test.yml`. The db tasks skip Hanami's
 test rerun too: `scripts/util/db-command` passes `--skip-test-db`, so each task acts on the one database
 `HANAMI_ENV` names (AA-405), and `scripts/setup/databases` prepares development and test in turn. A set `DATABASE_NAME`
-names both: the name and the name with `_test`.
+names both: the name and the name with `_test`. A workspace sets `WORKSPACE_ID` instead, which moves only the test
+database (#711).
 
+[0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

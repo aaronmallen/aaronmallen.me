@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-654
-amended: [AA-787]
+amended: [AA-787, "#711"]
 tags: [mise, tasks, lockfile, ruby, dotenv, pitchfork, ci, deploy]
 ---
 
@@ -43,7 +43,8 @@ Tool configs live under `.config/` to keep the repository root clean, and each t
 `mise run dev` runs `pitchfork start --local` with `.config/pitchfork.toml`. Pitchfork starts the server only after
 Postgres, Redis and the asset watchers, and the worker only after Postgres and Redis. It runs Postgres and Redis as
 one-shot starts with nothing on exit, so `mise run dev:stop` leaves the shared containers up for any suite still
-using them (AA-417).
+using them (AA-417). The script still ran `compose down`, so #711 made it stop only the pitchfork daemons and moved
+the starts into `db:start` and `redis:start`, which pitchfork wraps ([ADR 0125][0125]).
 
 CI installs the locked tools with `jdx/mise-action` and runs each step as a mise task. Postgres runs there as a
 `postgres:18` service container, which GitHub starts and waits on before the first step, and `ensure_postgres` finds
@@ -86,4 +87,5 @@ not set it. The lock took it from the mise config of the machine that wrote it.
 A task does not always suit the Pi. `mise run db:migrate` starts a local Postgres container first, so the deploy
 calls `hanami db migrate` itself (ADR 0006).
 
+[0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
