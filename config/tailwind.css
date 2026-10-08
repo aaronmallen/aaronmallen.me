@@ -3787,13 +3787,18 @@
     line-height: 1.6;
   }
   pre code { color: var(--color-ink); background-color: transparent; }
-  .syntax-highlighting :is(.keyword, .storage) { color: var(--color-mk-pink-text); }
-  .syntax-highlighting :is(.entity.name.class, .entity.name.type, .entity.other.inherited-class, .support.class) {
+  .syntax-highlighting :is(.hl-keyword, .hl-storage) { color: var(--color-mk-pink-text); }
+  .syntax-highlighting :is(
+    .hl-entity.hl-name.hl-class,
+    .hl-entity.hl-name.hl-type,
+    .hl-entity.hl-other.hl-inherited-class,
+    .hl-support.hl-class
+  ) {
     color: var(--color-mk-green-text);
   }
-  .syntax-highlighting .string { color: var(--color-mk-sand-text); }
-  .syntax-highlighting :is(.entity.name.function, .support.function) { color: var(--color-mk-blue); }
-  .syntax-highlighting :is(.comment, .comment *) { color: var(--color-mk-comment); }
+  .syntax-highlighting .hl-string { color: var(--color-mk-sand-text); }
+  .syntax-highlighting :is(.hl-entity.hl-name.hl-function, .hl-support.hl-function) { color: var(--color-mk-blue); }
+  .syntax-highlighting :is(.hl-comment, .hl-comment *) { color: var(--color-mk-comment); }
 }
 
 @layer components {

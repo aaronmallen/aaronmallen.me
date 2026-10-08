@@ -15,7 +15,7 @@ module Posts
         text unless text.empty?
       end
 
-      def html = @root.to_html(options: OPTIONS, plugins: PLUGINS)
+      def html = Markdown.prefix_highlighter_classes(@root.to_html(options: OPTIONS, plugins: PLUGINS))
 
       def read_time = [1, word_count.fdiv(WORDS_PER_MINUTE).round].max
 
