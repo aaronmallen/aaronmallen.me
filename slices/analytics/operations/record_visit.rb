@@ -18,6 +18,7 @@ module Analytics
       include Deps[
         "geo.countries",
         "settings",
+        classify_device: "operations.classify_device",
         contract: "contracts.visit_contract",
         event_mutations: "repos.analytics_event_mutations",
         event_queries: "repos.analytics_event_queries",
@@ -60,7 +61,7 @@ module Analytics
           **referrer(visit[:referrer], base_url),
           country_code: countries.code(address),
           source: Blog::Types::Normalized::RefSource.call(visit[Contracts::VisitContract::REF]) { nil },
-          device_class: Device.classify(user_agent),
+          device_class: classify_device.call(user_agent),
         }
       end
 

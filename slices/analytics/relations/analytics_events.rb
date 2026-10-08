@@ -22,10 +22,12 @@ module Analytics
       MEDIAN_READ = Sequel.function(:percentile_cont, 0.5).within_group(:read_seconds)
       NEWEST_FIRST = Sequel.desc(:occurred_at)
       REACH = Sequel.function(:count, :month_visitor_hash).distinct
-      READ_THROUGH = Sequel.&(
-        Sequel[:scroll_depth] >= ReadThrough::SCROLL_DEPTH,
-        Sequel[:read_seconds] >= ReadThrough::READ_SECONDS,
-      )
+      READ_THROUGH = Hanami.app.settings.analytics.then do |analytics|
+        Sequel.&(
+          Sequel[:scroll_depth] >= analytics[:read_through_scroll_depth],
+          Sequel[:read_seconds] >= analytics[:read_through_seconds],
+        )
+      end
       READ_THROUGHS = proc { integer.count(visitor_hash).distinct.filter(READ_THROUGH).as(:read_throughs) }
       SINGLE_VIEW = Sequel.expr(Sequel.function(:count).* => 1)
       TITLED = Sequel.~(title: nil)

@@ -6,6 +6,8 @@ module Social
 
     config.shared_app_component_keys += %w[honeybadger.agent http]
 
+    import keys: %w[operations.tag_ref], from: :analytics
+
     import keys: %w[
       operations.compose_announcement operations.record_post_webmentions repos.post_queries
     ], from: :posts

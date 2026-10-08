@@ -5,7 +5,9 @@ module Analytics
     class PostReaderMutations < DB::Repo
       root :post_reader_hashes
 
-      def record(path:, reader_hash:, since: Readers.window_opened_at)
+      include Deps[reader_window_start: "operations.find_reader_window_start"]
+
+      def record(path:, reader_hash:, since: reader_window_start.call)
         post_reader_hashes.record(path:, reader_hash:, since:)
       end
 

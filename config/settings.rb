@@ -90,7 +90,12 @@ module Blog
     end
     private_class_method :unless_set
 
-    setting :analytics, default: {}, constructor: throttle(DEFAULT_ANALYTICS_THROTTLE_LIMIT)
+    setting :analytics, default: {}, constructor: throttle(
+      DEFAULT_ANALYTICS_THROTTLE_LIMIT,
+      read_through_scroll_depth: Types::Coercible::Integer.constrained(gt: 0, lteq: 100),
+      read_through_seconds: Types::Coercible::Integer.constrained(gt: 0),
+      reader_window_months: Types::Coercible::Integer.constrained(gt: 0),
+    )
 
     setting :analytics_salt, constructor: Types::String.constrained(min_size: 64)
 

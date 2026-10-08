@@ -35,7 +35,7 @@ module Analytics
       DOWNLOAD_URL = "https://download.maxmind.com"
 
       class << self
-        def countries(root, databases) = Countries.new(databases:, path: root.join(DATABASE_PATH))
+        def countries(root, databases) = GeoLite2::Countries.new(databases:, path: root.join(DATABASE_PATH))
 
         def geo_lite2(settings, http)
           account_id, license_key = credentials(settings)

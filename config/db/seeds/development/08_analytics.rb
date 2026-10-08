@@ -27,6 +27,7 @@ sources = [nil, nil, nil, "bluesky", "mastodon", "newsletter"]
 countries = ["US", "US", "GB", "DE", "CA", "NL", nil]
 depths = [0, 25, 50, 75, 100]
 
+classify_device = analytics["operations.classify_device"]
 hash_visitor = analytics["operations.hash_visitor"]
 events = analytics["repos.analytics_event_mutations"]
 random = Random.new(236)
@@ -43,7 +44,7 @@ random = Random.new(236)
       month_visitor_hash: hash_visitor.call(address:, user_agent:, at:, period: Analytics::Operations::HashVisitor::MONTH),
       address_hash: hash_visitor.call(address:, at:),
       country_code: countries.sample(random:),
-      device_class: Analytics::Device.classify(user_agent),
+      device_class: classify_device.call(user_agent),
     }
     trail = pages.keys.sample(1 + random.rand(3), random:)
 

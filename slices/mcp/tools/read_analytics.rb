@@ -11,6 +11,9 @@ module MCP
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
       RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for 90 days; " \
                     "start from or since inside them to get these. The daily counts still hold"
+      READ_THROUGH_DEPTH, READ_THROUGH_SECONDS =
+        Hanami.app.settings.analytics.values_at(:read_through_scroll_depth, :read_through_seconds)
+      REF = Analytics::Operations::TagRef::KEY
       SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
       TOP = 25
 
@@ -28,13 +31,13 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
-                  "A read-through is a visitor who scrolled at least #{Analytics::ReadThrough::SCROLL_DEPTH}% " \
-                  "down a page and read it for at least #{Analytics::ReadThrough::READ_SECONDS} seconds, counted " \
+                  "A read-through is a visitor who scrolled at least #{READ_THROUGH_DEPTH}% " \
+                  "down a page and read it for at least #{READ_THROUGH_SECONDS} seconds, counted " \
                   "once per page and day by the daily hash. Totals give read_throughs across the range, and each " \
                   "top path gives its own. Days rolled up before the site counted read-throughs add none. " \
                   "#{WeekdayGrid::DESCRIPTION}" \
                   "sources gives the top #{TOP} ref tags by visitors, each with its views and visitors: a visit " \
-                  "to a link that carries ?#{Analytics::Ref::KEY}=<source> counts under that source, so the " \
+                  "to a link that carries ?#{REF}=<source> counts under that source, so the " \
                   "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
                   "hand-typed tags count too. sources leaves out visits with no tag. " \
                   "devices gives views and visitors by device class, ranked by visitors: one of " \

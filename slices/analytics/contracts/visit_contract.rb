@@ -12,7 +12,7 @@ module Analytics
       MISSING = "missing"
       PATH = %r{\A/\S*\z}
       READ = Blog::Types::VisitKind["read"]
-      REF = Analytics::Ref::KEY.to_sym
+      REF = Operations::TagRef::KEY.to_sym
       SCROLL = Blog::Types::VisitKind["scroll"]
       TOKEN = /\A[0-9a-f]{32}\z/
       VIEW = Blog::Types::VisitKind["view"]

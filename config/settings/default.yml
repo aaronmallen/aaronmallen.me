@@ -1,4 +1,7 @@
 analytics:
+  read_through_scroll_depth: 75
+  read_through_seconds: 30
+  reader_window_months: 12
   throttle_limit: <%= ENV["ANALYTICS_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["ANALYTICS_THROTTLE_WINDOW_MINUTES"].to_json %>
 attention:

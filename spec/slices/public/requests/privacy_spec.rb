@@ -20,8 +20,8 @@ RSpec.describe "Privacy", type: :request do
 
   it "matches the windows the analytics enforce", :aggregate_failures do
     expect(page.text).to include("#{Analytics::Operations::PruneAnalyticsEvents::RETENTION_DAYS} days")
-    expect(page.text).to include("#{Analytics::Readers::MONTHS} months")
-    expect(page.text).to include("#{Analytics::ReadThrough::READ_SECONDS} seconds")
+    expect(page.text).to include("#{Hanami.app.settings.analytics[:reader_window_months]} months")
+    expect(page.text).to include("#{Hanami.app.settings.analytics[:read_through_seconds]} seconds")
     expect(page.text).to include("#{Analytics::Operations::RecordVisit::MAX_READ_SECONDS / 60} minutes")
   end
 

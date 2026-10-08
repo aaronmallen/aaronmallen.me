@@ -10,6 +10,7 @@ module Public
 
     import keys: %w[
       contracts.visit_contract operations.hash_visitor operations.record_feed_fetch operations.record_visit
+      operations.tag_ref
     ], from: :analytics
 
     import keys: %w[operations.create_message], from: :contact

@@ -10,7 +10,11 @@ module Analytics
       RANKED = { countries: :country_code, referrers: :host }.freeze
       ZERO_DAY = COUNTED.to_h { [it, 0] }.freeze
 
-      include Deps[event_queries: "repos.analytics_event_queries", rollup_queries: "repos.analytics_rollup_queries"]
+      include Deps[
+        event_queries: "repos.analytics_event_queries",
+        rank_rows: "operations.rank_rows",
+        rollup_queries: "repos.analytics_rollup_queries",
+      ]
 
       def clicks_between(path:, from:, to:)
         rolled = analytics_rollup_clicks.between(from, to).for_path(path).top_by_clicks.to_a.map(&:to_h)
@@ -22,7 +26,7 @@ module Analytics
       def devices_between(from:, to:, path: nil)
         rolled = analytics_rollup_devices.between(from, to).for_path(path).top_by_visitors.to_a.map(&:to_h)
 
-        RankedRows.call(rolled + live_rows(:devices, path, from:, to:), key: :device_class)
+        rank_rows.call(rolled + live_rows(:devices, path, from:, to:), key: :device_class)
       end
 
       def first_days(path, today: Blog::TimeZone.today)
@@ -57,7 +61,7 @@ module Analytics
       def sources_between(from:, to:, path: nil)
         rolled = analytics_rollup_sources.between(from, to).for_path(path).top_by_visitors.to_a.map(&:to_h)
 
-        RankedRows.call(rolled + live_rows(:sources, path, from:, to:), key: :source)
+        rank_rows.call(rolled + live_rows(:sources, path, from:, to:), key: :source)
       end
 
       private
@@ -126,7 +130,7 @@ module Analytics
         rolled = page_rows(public_send(:"analytics_rollup_page_#{name}"), window).top_by_visitors.to_a.map(&:to_h)
         rows = rolled + live.flat_map { it.public_send(:"page_#{name}") }.select { it.fetch(:path) == window[:path] }
 
-        RankedRows.call(rows, key:)
+        rank_rows.call(rows, key:)
       end
 
       def page_rows(relation, window) = relation.between(window[:from], window[:to]).for_path(window[:path])

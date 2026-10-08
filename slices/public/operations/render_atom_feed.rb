@@ -12,7 +12,9 @@ module Public
       NO_EDITS = Blog::Constants::EMPTY_ARRAY
       REF = "feed"
 
-      include Deps["i18n", "routes", "settings", post_queries: "posts.repos.post_queries"]
+      include Deps[
+        "i18n", "routes", "settings", post_queries: "posts.repos.post_queries", tag_ref: "analytics.operations.tag_ref",
+      ]
 
       def call(version, title:, html:, feed:, params: {})
         xml = Builder::XmlMarkup.new(indent: 2)
@@ -52,7 +54,7 @@ module Public
         xml.entry do
           xml.id(url)
           xml.title(post.title)
-          xml.link(rel: "alternate", type: HTML_TYPE, href: ::Analytics::Ref.tag(url, REF))
+          entry_link(xml, url)
           entry_dates(xml, post, changed_at)
           post.tags.each { xml.category(term: it.name) }
           entry_body(xml, post, edits)
@@ -69,6 +71,8 @@ module Public
         xml.published(timestamp(post.published_at))
         xml.updated(timestamp(changed_at))
       end
+
+      def entry_link(xml, url) = xml.link(rel: "alternate", type: HTML_TYPE, href: tag_ref.call(url, REF))
 
       def feed_head(xml, version, title:, html:, params:)
         xml.id(url(html, params))

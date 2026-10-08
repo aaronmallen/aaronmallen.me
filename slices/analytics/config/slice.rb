@@ -10,7 +10,7 @@ module Analytics
 
     export %w[
       contracts.visit_contract operations.find_place operations.hash_visitor operations.record_feed_fetch
-      operations.record_visit repos.analytics_event_queries repos.analytics_page_queries
+      operations.record_visit operations.tag_ref repos.analytics_event_queries repos.analytics_page_queries
       repos.analytics_rollup_queries repos.country_queries repos.feed_fetch_queries repos.post_reader_queries
     ]
   end

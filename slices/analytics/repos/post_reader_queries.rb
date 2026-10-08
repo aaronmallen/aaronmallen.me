@@ -6,6 +6,8 @@ module Analytics
       NONE = { readers: nil, final: true }.freeze
       UNREAD = { readers: 0, final: false }.freeze
 
+      include Deps[reader_window_start: "operations.find_reader_window_start"]
+
       def readers_by_path(paths)
         live = by_path(post_reader_hashes.for_paths(paths).counts_by_path)
         saved = by_path(post_reader_counts.for_paths(paths))
@@ -15,7 +17,7 @@ module Analytics
         end
       end
 
-      def unique_readers(posts, since: Readers.window_opened_at)
+      def unique_readers(posts, since: reader_window_start.call)
         counts = readers_by_path(posts.map { path(it) })
 
         posts.to_h { |post| [post.id, counts.fetch(path(post)) { counted?(post, since) ? UNREAD : NONE }] }
