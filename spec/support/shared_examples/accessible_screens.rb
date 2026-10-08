@@ -14,7 +14,7 @@ RSpec.shared_examples "accessible screens" do
         const scope = modal ?? document;
         const stops = [...scope.querySelectorAll('a[href], button, input, select, textarea, summary, [tabindex]')]
           .filter((el) => el.tabIndex >= 0 && !el.disabled && el.type !== 'hidden')
-          .filter((el) => el.checkVisibility({ opacityProperty: true, visibilityProperty: true }))
+          .filter((el) => el.checkVisibility({ opacityProperty: !el.closest('.hov'), visibilityProperty: true }))
           .filter((el) => {
             if (el.type !== 'radio' || !el.name) return true;
             const group = [...document.getElementsByName(el.name)].filter((r) => r.type === 'radio' && r.form === el.form);

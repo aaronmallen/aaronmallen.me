@@ -40,8 +40,8 @@ module Admin
         def draft(row)
           sub = t(".untouched", count: row.days)
 
-          ListItem(title: row.title, href: edit_post_path(row), sub:, icon: "fa-regular fa-file-lines") do
-            Button(href: edit_post_path(row), small: true) { t(".open") }
+          ListItem(title: row.title, href: edit_post_path(row), sub:, icon: "fa-regular fa-file-lines", hover: true) do
+            icon_link(edit_post_path(row), t(".open"), "fa-regular fa-pen-to-square")
             snooze(row)
           end
         end
@@ -52,13 +52,17 @@ module Admin
           Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
         end
 
+        def icon_link(href, label, icon)
+          Button(href:, small: true, title: label, aria: { label: }, icon:)
+        end
+
         def journal(row)
           href = "##{TodayJournalCard::FORM_ID}"
 
           sub = t(".journal_gap", count: row.days)
 
-          ListItem(title: t(".journal"), href:, sub:, icon: "fa-solid fa-feather") do
-            Button(href:, small: true) { t(".write") }
+          ListItem(title: t(".journal"), href:, sub:, icon: "fa-solid fa-feather", hover: true) do
+            icon_link(href, t(".write"), "fa-solid fa-feather")
             snooze(row)
           end
         end
@@ -72,7 +76,7 @@ module Admin
         def new_device(row)
           sub = t(".first_seen", count: row.days)
 
-          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved") { snooze(row) }
+          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved", hover: true) { snooze(row) }
         end
 
         def row(row)
@@ -94,7 +98,9 @@ module Admin
         end
 
         def task(row, sub, icon)
-          ListItem(title: row.title, href: path(:admin_task, id: row.record_id, origin: ORIGIN), sub:, icon:) do
+          href = path(:admin_task, id: row.record_id, origin: ORIGIN)
+
+          ListItem(title: row.title, href:, sub:, icon:, hover: true) do
             move(row)
             cancel(row)
             snooze(row)

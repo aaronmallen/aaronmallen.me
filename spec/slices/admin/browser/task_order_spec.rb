@@ -20,7 +20,7 @@ RSpec.describe "Admin task order", type: :feature do
     mouse.up
   end
 
-  def grip(title) = row(title).find("[data-task-grip]")
+  def grip(title) = row(title).tap(&:hover).find("[data-task-grip]")
 
   def grip_box
     evaluate_script(<<~JS)
@@ -77,7 +77,7 @@ RSpec.describe "Admin task order", type: :feature do
 
   describe "a row" do
     it "shows a grip and no carets", :aggregate_failures do
-      expect(page).to have_css(".task [data-task-grip]", count: 3)
+      expect(page).to have_css(".task [data-task-grip]:not([hidden])", count: 3, visible: :all)
       expect(page).to have_no_css(".task-order, .task-caret")
     end
 

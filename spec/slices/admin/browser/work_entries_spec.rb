@@ -78,7 +78,10 @@ RSpec.describe "Admin work history", type: :feature do
   describe "removing a role" do
     let!(:entry) { create(:work_entry, org: "Rackspace", role: "Software Engineer") }
 
-    before { visit "/admin/projects?filter=work" }
+    before do
+      visit "/admin/projects?filter=work"
+      find(".work-row").hover
+    end
 
     it "asks with the confirmation text" do
       message = confirm_no { click_button "Remove" }

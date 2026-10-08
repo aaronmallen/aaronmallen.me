@@ -18,7 +18,7 @@ module Admin
               div(class: "project-card-head") do
                 a(class: "project-card-name", href: edit_path, data: { key_open: true }) { @project.name }
                 pills
-                div(class: "project-card-acts") { acts }
+                div(class: "project-card-acts hov") { acts }
               end
               p(class: "project-card-tagline") { @project.tagline } if written?(@project.tagline)
               p(class: "project-card-meta") { meta }
@@ -29,7 +29,9 @@ module Admin
 
           def acts
             change(*(@project.archived? ? RESTORE : ARCHIVE))
-            Button(href: edit_path, small: true, icon: EDIT_ICON) { t(".edit") }
+            label = t(".edit")
+
+            Button(href: edit_path, small: true, title: label, icon: EDIT_ICON) { span(class: "sr-only") { label } }
           end
 
           def archived_on
@@ -39,7 +41,9 @@ module Admin
           def change(route, label_key, icon, variant)
             Form(action: path(route, id: @project.id)) do
               input(type: "hidden", name: "filter", value: @filter)
-              Button(type: "submit", variant:, small: true, icon:) { t(label_key) }
+              Button(type: "submit", variant:, small: true, title: t(label_key), icon:) do
+                span(class: "sr-only") { t(label_key) }
+              end
             end
           end
 

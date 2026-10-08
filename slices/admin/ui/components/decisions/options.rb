@@ -37,7 +37,10 @@ module Admin
             mine = mine?(option)
 
             details(class: "comment-edit", open: mine) do
-              summary(class: "bt sm") { t(".edit") }
+              summary(class: "bt sm", title: t(".edit")) do
+                Icon("fa-regular fa-pen-to-square")
+                span(class: "sr-only") { t(".edit") }
+              end
               OptionForm(
                 decision: @decision, option:, params: (@form[:params] if mine),
                 errors: mine ? @form[:errors] : Blog::Constants::EMPTY_HASH,
@@ -50,7 +53,7 @@ module Admin
               div(class: "decision-option-head") do
                 span(class: "decision-option-title") { option.title }
                 chosen if chosen?(option)
-                div(class: "comment-acts") { edit(option) }
+                div(class: "comment-acts hov") { edit(option) }
               end
               div(class: "markdown-body post-body decision-option-body") do
                 raw(safe(::Tasks::Markdown.to_html(option.body).strip))

@@ -12,6 +12,7 @@ module Admin
         prop :pick, Blog::Types::Hash.optional, default: nil
         prop :link, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
+        prop :hover, Blog::Types::Bool, default: false
 
         def beside(&block)
           @beside = block
@@ -33,7 +34,7 @@ module Admin
 
           div(id: @id, class: "li", data: { key_row: true, **@data }) do
             @pick ? render_picked : render_body
-            div(class: "li-side") { raw(safe(side)) } unless side.empty?
+            div(class: ["li-side", ("hov" if @hover)]) { raw(safe(side)) } unless side.empty?
           end
         end
 

@@ -13,7 +13,7 @@ module Admin
           def view_template
             div(class: "work-row", data: { key_row: true }) do
               div(class: "work-row-body") { body }
-              div(class: "work-row-acts") do
+              div(class: "work-row-acts hov") do
                 links
                 remove
               end
@@ -33,13 +33,15 @@ module Admin
           def links
             Button(
               href: path(:admin_projects, filter: WORK, edit: @entry.id), small: true, icon: "fa-solid fa-link",
-              aria: { current: @linking && "true" },
-            ) { t(".links") }
+              title: t(".links"), aria: { current: @linking && "true" },
+            ) { span(class: "sr-only") { t(".links") } }
           end
 
           def remove
             Form(action: remove_path, data: { confirm: }) do
-              Button(type: "submit", variant: :warn, small: true, icon: "fa-solid fa-trash-can") { t(".remove") }
+              Button(type: "submit", variant: :warn, small: true, title: t(".remove"), icon: "fa-solid fa-trash-can") do
+                span(class: "sr-only") { t(".remove") }
+              end
             end
           end
 

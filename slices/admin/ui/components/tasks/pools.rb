@@ -70,14 +70,14 @@ module Admin
             Form(action: path(:admin_move_task, id: task.id, filter: TODAY)) do
               input(type: "hidden", name: "origin", value: @origin)
               input(type: "hidden", name: "pool", value: list)
-              Button(variant: :pri, type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
+              Button(type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
                 IconLabel(icon: "fa-solid fa-arrow-turn-up") { t(".pull") }
               end
             end
           end
 
           def row(task, list)
-            ListItem(title: task.title) do |item|
+            ListItem(title: task.title, hover: true) do |item|
               item.meta { meta(task) }
               pull_form(task, list)
             end

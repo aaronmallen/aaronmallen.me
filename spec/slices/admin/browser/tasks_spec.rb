@@ -210,7 +210,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:mark) { translate("ui.components.tasks.closed.canceled") }
 
     before do
-      cancel_task(find(".task", text: "Email the accountant"))
+      cancel_task(find(".task", text: "Email the accountant").tap(&:hover))
       find(".toast", text: "Canceled")
       find(".task-tabs .screen-tab", text: "completed").click
     end
@@ -221,7 +221,8 @@ RSpec.describe "Admin tasks", type: :feature do
 
     describe "reopening it" do
       before do
-        find(".task", text: "Email the accountant").click_button(translate("ui.components.tasks.controls.reopen"))
+        row = find(".task", text: "Email the accountant").tap(&:hover)
+        row.click_button(translate("ui.components.tasks.controls.reopen"))
         find(".toast", text: "Reopened")
         find(".task-tabs .screen-tab", text: "next").click
       end
@@ -241,7 +242,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def focused_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
 
-    def row(title) = find(".task-title", exact_text: title).ancestor(".task")
+    def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
     def still_open? = repo.all_open.map(&:title).include?("Email the accountant")
 
@@ -334,7 +335,7 @@ RSpec.describe "Admin tasks", type: :feature do
     let(:sprint) { sprint_repo.on(today) || create(:sprint, sprint_date: today) }
     let(:task) { repo.all_open.find { it.title == "Ship the screen" } }
 
-    def row(title) = find(".task-title", exact_text: title).ancestor(".task")
+    def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
     before { create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen") }
 
@@ -807,7 +808,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "editing from a row's pen" do
-    def pen = find(".task", text: "Email the accountant").find("a[data-task-open-edit]")
+    def pen = find(".task", text: "Email the accountant").tap(&:hover).find("a[data-task-open-edit]")
 
     def pen_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
 
@@ -895,7 +896,7 @@ RSpec.describe "Admin tasks", type: :feature do
       find(".task-link-target", text: "Learn Elixir")
     end
 
-    def row(title) = find(".task-title", exact_text: title).ancestor(".task")
+    def row(title) = find(".task-title", exact_text: title).ancestor(".task").tap(&:hover)
 
     def stored = Tasks::Slice["relations.task_links"].to_a.map { it.to_h.values_at(:from_task_id, :to_task_id, :type) }
 

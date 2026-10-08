@@ -25,7 +25,7 @@ module Admin
           private
 
           def actions
-            div(class: "journal-entry-actions", hidden: editing?, data: { journal_actions: "" }) do
+            div(class: "journal-entry-actions hov", hidden: editing?, data: { journal_actions: "" }) do
               Button(**icon(t(".edit"), "fa-regular fa-pen-to-square"), data: { journal_edit: "" })
               links_link
               delete_form

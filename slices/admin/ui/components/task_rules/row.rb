@@ -27,7 +27,7 @@ module Admin
           private
 
           def acts
-            div(class: "rule-acts") do
+            div(class: "rule-acts hov") do
               label(class: "bt sm rule-pen", for: toggle_id, title: t(".edit")) do
                 Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }

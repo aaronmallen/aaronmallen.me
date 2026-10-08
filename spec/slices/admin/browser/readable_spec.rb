@@ -81,7 +81,7 @@ RSpec.describe "Admin screens", type: :feature do
     {
       "journal edit" => lambda do
         visit "/admin/journal"
-        find(".journal-entry").click_button "Edit"
+        find(".journal-entry").tap(&:hover).click_button "Edit"
       end,
       "journal preview" => lambda do
         visit "/admin/journal"
@@ -111,7 +111,7 @@ RSpec.describe "Admin screens", type: :feature do
   def open_confirm
     journal_entry
     visit "/admin/journal"
-    find(".journal-entry").click_button "Delete"
+    find(".journal-entry").tap(&:hover).click_button "Delete"
     find("[data-confirm-ask]")
   end
 

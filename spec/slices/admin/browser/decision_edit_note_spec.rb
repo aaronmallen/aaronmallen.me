@@ -55,7 +55,7 @@ RSpec.describe "Admin decision edit notes", type: :feature do
   describe "editing an option" do
     before do
       visit "/admin/decisions/#{decision.id}"
-      within("#decision-option-#{option.id}") do
+      within(find("#decision-option-#{option.id}").tap(&:hover)) do
         find("summary", text: "Edit").click
         fill_in "Option", with: "Sidekiq 8"
         click_button "Save option"

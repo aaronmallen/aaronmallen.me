@@ -1223,6 +1223,40 @@
   }
 }
 
+@utility hov {
+  @apply flex items-center gap-0.5 opacity-0 transition-opacity duration-[120ms];
+
+  :where([data-key-row], .decision-option, .journal-entry):is(:hover, :focus-within) &,
+  &:focus-within,
+  &:has([open], [aria-current="true"]) {
+    @apply opacity-100;
+  }
+
+  @media (hover: none), (width < 43.75rem) {
+    @apply opacity-100;
+  }
+
+  @media (hover: hover) and (width >= 43.75rem) {
+    :where(.task, .li) > & {
+      @apply absolute top-2.5 right-0 z-20 rounded-card border border-line bg-ground-sunk p-0.5;
+      box-shadow: 0 6px 18px rgb(0 0 0 / 18%);
+    }
+
+    :where(.task, .li) > &:not(:has(*)) {
+      @apply hidden;
+    }
+  }
+
+  & .bt {
+    @apply h-8 min-w-8 justify-center gap-[7px] rounded-[8px] border-transparent bg-transparent px-2 py-0 text-badge text-ink-muted;
+    @apply hover:border-line hover:text-ink;
+
+    @media (width < 43.75rem) {
+      @apply size-auto min-h-tap min-w-tap;
+    }
+  }
+}
+
 @utility g-main {
   @apply grid grid-cols-1 items-start gap-stack;
 
@@ -1521,15 +1555,7 @@
 }
 
 @utility journal-entry-actions {
-  @apply ml-auto flex items-center gap-0.5;
-
-  & .bt {
-    @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
-  }
-
-  & .bt.warn:hover {
-    @apply text-mk-pink-text;
-  }
+  @apply ml-auto;
 }
 
 @utility journal-edit {
@@ -2238,7 +2264,7 @@
 }
 
 @utility li {
-  @apply flex flex-wrap items-center justify-between gap-4 border-t border-line py-3 first:border-t-0 first:pt-0;
+  @apply relative flex flex-wrap items-center justify-between gap-4 border-t border-line py-3 first:border-t-0 first:pt-0;
 
   @media (width >= 43.75rem) {
     @apply flex-nowrap;
@@ -2330,8 +2356,12 @@
 }
 
 @utility task {
-  @apply grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2;
+  @apply relative grid grid-cols-[auto_auto_minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2;
   @apply border-t border-line py-4 first:border-t-0 first:pt-0;
+
+  @media (hover: hover) and (width >= 43.75rem) {
+    @apply grid-cols-[auto_auto_minmax(0,1fr)];
+  }
 
   @media (width < 43.75rem) {
     @apply grid-cols-[auto_auto_minmax(0,1fr)] gap-x-3;
@@ -2427,12 +2457,6 @@
 }
 
 @utility task-acts {
-  @apply flex shrink-0 items-center gap-0.5;
-
-  & .bt:not(.pri) {
-    @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
-  }
-
   @media (width < 43.75rem) {
     @apply col-start-3 flex-wrap gap-2;
   }
@@ -3461,6 +3485,10 @@
       @apply grid-cols-[auto_minmax(0,1fr)_auto];
 
       @media (width < 43.75rem) {
+        @apply grid-cols-[auto_minmax(0,1fr)];
+      }
+
+      @media (hover: hover) and (width >= 43.75rem) {
         @apply grid-cols-[auto_minmax(0,1fr)];
       }
     }

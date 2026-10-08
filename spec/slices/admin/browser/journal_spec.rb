@@ -150,7 +150,7 @@ RSpec.describe "Admin journal", type: :feature do
   describe "editing an entry" do
     let!(:entry) { create(:journal_entry, entry_date: today - 2, entry_time: "21:05", body: "before") }
     let(:repo) { Record::Slice["repos.journal_entry_queries"] }
-    let(:item) { find(".journal-entry", text: "21:05") }
+    let(:item) { find(".journal-entry", text: "21:05").tap(&:hover) }
 
     before do
       visit "/admin/journal"
@@ -206,7 +206,7 @@ RSpec.describe "Admin journal", type: :feature do
 
   describe "an entry's links" do
     let(:entry) { create(:journal_entry, body: "Packed the rack") }
-    let(:item) { find(".journal-entry") }
+    let(:item) { find(".journal-entry").tap(&:hover) }
 
     before do
       Links::Slice["operations.link_records"]
@@ -223,7 +223,7 @@ RSpec.describe "Admin journal", type: :feature do
   end
 
   describe "cancelling an edit to a markdown entry" do
-    let(:item) { find(".journal-entry") }
+    let(:item) { find(".journal-entry").tap(&:hover) }
 
     before do
       create(:journal_entry, body: "a **bold** day\n\n- one")
@@ -246,7 +246,7 @@ RSpec.describe "Admin journal", type: :feature do
   end
 
   describe "previewing an edit" do
-    let(:item) { find(".journal-entry") }
+    let(:item) { find(".journal-entry").tap(&:hover) }
 
     before do
       create(:journal_entry, body: "before")
@@ -271,7 +271,7 @@ RSpec.describe "Admin journal", type: :feature do
   end
 
   describe "a rejected edit" do
-    let(:item) { find(".journal-entry") }
+    let(:item) { find(".journal-entry").tap(&:hover) }
 
     before do
       create(:journal_entry, body: "before")
@@ -300,7 +300,7 @@ RSpec.describe "Admin journal", type: :feature do
       visit "/admin/journal"
     end
 
-    let(:item) { find(".journal-entry", text: "drop me") }
+    let(:item) { find(".journal-entry", text: "drop me").tap(&:hover) }
 
     it "asks with the confirmation text" do
       message = confirm_no { item.click_button "Delete" }

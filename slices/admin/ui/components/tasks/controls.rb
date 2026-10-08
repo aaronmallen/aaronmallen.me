@@ -30,6 +30,7 @@ module Admin
           prop :origin, Blog::Types::String, default: ORIGIN
           prop :moves, Blog::Types::Bool, default: true
           prop :keys, Blog::Types::Bool, default: false
+          prop :compact, Blog::Types::Bool, default: false
 
           def view_template
             @task.closed? ? reopen : progress
@@ -55,12 +56,22 @@ module Admin
             Form(action: path(:admin_complete_task, id: @task.id), data: { task_act: "complete" }) do
               origin_fields
               details(class: "task-complete") do
-                summary(class: "bt pri sm", **keyed(COMPLETE)) { done_label }
+                complete_toggle
                 div(class: "task-complete-panel") do
                   worked_fields
                   Button(type: "submit", variant: :pri, small: true) { done_label }
                 end
               end
+            end
+          end
+
+          def complete_toggle
+            return summary(class: "bt pri sm", **keyed(COMPLETE)) { done_label } unless @compact
+
+            label = t(".complete")
+            summary(class: "bt sm", title: label, **keyed(COMPLETE, label:)) do
+              Icon("fa-solid fa-check")
+              span(class: "sr-only") { label }
             end
           end
 

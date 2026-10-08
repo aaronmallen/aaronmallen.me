@@ -32,7 +32,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
 
   def focused_row = evaluate_script("document.activeElement.closest('[data-key-row]')?.textContent")
 
-  def grip(title) = row(title).find("[data-task-grip]")
+  def grip(title) = row(title).tap(&:hover).find("[data-task-grip]")
 
   def place_path = "/admin/tasks/#{repo.all_open.find { it.title == 'first' }.id}/place"
 

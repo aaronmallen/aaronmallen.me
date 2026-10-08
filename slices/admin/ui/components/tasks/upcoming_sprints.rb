@@ -99,7 +99,7 @@ module Admin
           def waiting(sprint)
             return Empty { t(".nothing_waiting") } if @waiting.empty?
 
-            @waiting.each { |task| ListItem(title: task.title) { pull_form(task, sprint) } }
+            @waiting.each { |task| ListItem(title: task.title, hover: true) { pull_form(task, sprint) } }
           end
         end
       end
