@@ -2,7 +2,7 @@
 
 Spec::DB::Factories[:mcp].define(:oauth_token) do |f|
   f.type "access"
-  f.sequence(:token_digest) { |n| Blog::SecretToken.digest("token-#{n}") }
+  f.sequence(:token_digest) { |n| Blog::Types::SecretDigest["token-#{n}"] }
   f.expires_at { Time.now + 3600 }
 
   f.trait :expired do |t|

@@ -104,7 +104,7 @@ RSpec.describe "API journal entries", type: :request do
     end
 
     it "stops at the row cap and says where to go on" do
-      stub_const("Blog::DayWindow::CAP", 1)
+      stub_const("Blog::Helpers::DayWindow::CAP", 1)
       entry_on(1, "08:00", "first")
       entry_on(2, "08:00", "second")
 

@@ -2,7 +2,7 @@
 
 RSpec.describe MCP::Jobs::ReapExpiredCredentials do
   let(:client) { mcp_create(:oauth_client) }
-  let(:verifier) { Blog::SecretToken.generate }
+  let(:verifier) { Blog::Types::NewSecret[] }
 
   def clients = MCP::Slice["db.rom"].relations[:oauth_clients]
 

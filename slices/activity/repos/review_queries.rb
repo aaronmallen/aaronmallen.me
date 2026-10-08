@@ -9,8 +9,10 @@ module Activity
       SOCIAL = Blog::Types::ActivityKind["social"]
       RECORDS = [POST, SOCIAL, JOURNAL].freeze
 
+      include Deps[review_range: "contracts.review_range_contract"]
+
       def review(period:, on: Blog::TimeZone.today, credits: Blog::Constants::EMPTY_HASH)
-        from, to = Blog::ReviewRange.call(Blog::Types::ReviewPeriod[period], on)
+        review_range.call(period:, on:).to_h => { from:, to: }
 
         Structs::Review.new(
           period:, from:, to:, **tasks(from, to, credits), **records(from, to),

@@ -19,7 +19,7 @@ module Admin
       def body_html(commit)
         body = CommitMessage.body(commit.message)
 
-        Blog::RemoteImages.to_links(::Posts::Markdown.to_html(body)) if body
+        ::Tasks::RemoteImages.to_links(::Posts::Markdown.to_html(body)) if body
       end
     end
   end

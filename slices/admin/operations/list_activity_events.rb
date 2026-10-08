@@ -104,7 +104,7 @@ module Admin
       end
 
       def page(from, to, size, filters)
-        Blog::DayCursor.page(from, to, size:, day: OCCURRED_ON) do |first, last, limit|
+        Blog::Structs::DayCursor.page(from, to, size:, day: OCCURRED_ON) do |first, last, limit|
           activity_queries.between(from: first, to: last, limit:, **filters)
         end
       end

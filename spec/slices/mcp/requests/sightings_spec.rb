@@ -4,7 +4,7 @@ RSpec.describe "MCP client sightings", type: :request do
   let(:agent) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/141.0.0.0 Safari/537.36" }
   let(:client) { mcp_create(:oauth_client) }
   let(:sightings) { Security::Slice["db.rom"].gateways[:default].connection[:sightings] }
-  let(:value) { Blog::SecretToken.generate }
+  let(:value) { Blog::Types::NewSecret[] }
 
   before do
     use_country_database
@@ -12,7 +12,7 @@ RSpec.describe "MCP client sightings", type: :request do
     allow(Hanami.app.settings).to receive(:proxy)
       .and_return(address_header: "CF-Connecting-IP", trusted_proxies: [IPAddr.new("127.0.0.0/8")])
     resource = "#{Hanami.app.settings.site_url.chomp('/')}/mcp"
-    mcp_create(:oauth_token, oauth_client: client, token_digest: Blog::SecretToken.digest(value), resource:)
+    mcp_create(:oauth_token, oauth_client: client, token_digest: Blog::Types::SecretDigest[value], resource:)
   end
 
   def call_mcp(address: "81.2.69.160", user_agent: agent, token: value)
@@ -60,7 +60,7 @@ RSpec.describe "MCP client sightings", type: :request do
   end
 
   it "records nothing for a token it refuses" do
-    call_mcp(token: Blog::SecretToken.generate)
+    call_mcp(token: Blog::Types::NewSecret[])
 
     expect(sightings.count).to eq(0)
   end

@@ -10,12 +10,13 @@ module Admin
         "settings",
         journal_entry_queries: "record.repos.journal_entry_queries",
         list_saved_views: "operations.list_saved_views",
+        search_query: "contracts.search_query_contract",
       ]
 
       def call(search: Blog::Constants::EMPTY_STRING, to: nil, filters: Blog::Constants::EMPTY_HASH, now: Time.now)
         {
           days: journal_entry_queries.days(
-            size: settings.page_size[:admin], to:, **Blog::SearchQuery.parse(search, fields: FIELDS),
+            size: settings.page_size[:admin], to:, **search_query.call(query: search, fields: FIELDS).to_h,
           ),
           entries: journal_entry_queries.count,
           saved_views: list_saved_views.call(SCREEN, filters),

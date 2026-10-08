@@ -14,8 +14,8 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::RANGE,
-          page: Blog::Paging::PAGE,
+          **Blog::Helpers::DayWindow::RANGE,
+          page: Blog::Helpers::Paging::PAGE,
           status: STATUS,
         },
       }.freeze
@@ -26,13 +26,13 @@ module MCP
                   "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
-                  "Leave both out to list every message. #{Blog::Paging::USAGE}"
+                  "Leave both out to list every message. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(server_context:, from: nil, to: nil, status: nil, page: 1)
-          case Blog::DayWindow.open_days(from, to)
+          case Blog::Helpers::DayWindow.open_days(from, to)
             in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
             in Failure(message) then refuse(message)
           end
@@ -48,7 +48,7 @@ module MCP
             to: last&.iso8601,
             counts: dep(:message_queries, server_context).count_received_between(from: first, to: last),
             messages: found.rows.map { summary(it) },
-            **Blog::Paging.fields(found),
+            **Blog::Helpers::Paging.fields(found),
           )
         end
 

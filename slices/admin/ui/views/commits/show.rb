@@ -5,6 +5,7 @@ module Admin
     module Views
       module Commits
         class Show < View
+          GITHUB_URL = "https://github.com/%s/commit/%s"
           SHA_LENGTH = 7
 
           prop :commit, Blog::Types::Instance(ROM::Struct)
@@ -35,7 +36,7 @@ module Admin
             end
           end
 
-          def github_url = format(Blog::Constants::GITHUB_COMMIT_URL, @commit.repo, @commit.sha)
+          def github_url = format(GITHUB_URL, @commit.repo, @commit.sha)
 
           def linked
             id = @commit.id

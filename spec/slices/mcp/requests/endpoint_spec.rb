@@ -2,7 +2,7 @@
 
 RSpec.describe "MCP endpoint", type: :request do
   let(:client) { mcp_create(:oauth_client) }
-  let(:verifier) { Blog::SecretToken.generate }
+  let(:verifier) { Blog::Types::NewSecret[] }
 
   def access_token = issued.fetch("access_token")
 
@@ -190,19 +190,19 @@ RSpec.describe "MCP endpoint", type: :request do
 
   describe "a token it refuses" do
     it "refuses a token it never issued" do
-      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "names the token as the problem" do
-      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
       expect(document["error"]).to eq("invalid_token")
     end
 
     it "points at the resource metadata all the same" do
-      rpc("tools/list", authorization: "Bearer #{Blog::SecretToken.generate}")
+      rpc("tools/list", authorization: "Bearer #{Blog::Types::NewSecret[]}")
 
       expect(challenge).to include(%(resource_metadata="#{metadata_url}"))
     end
@@ -1080,7 +1080,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     describe "a window holding more than one answer" do
-      before { stub_const("Blog::DayWindow::CAP", 2) }
+      before { stub_const("Blog::Helpers::DayWindow::CAP", 2) }
 
       def three_days
         3.downto(1) { |days| create(:commit, commit_date: today - days, message: "commit #{days}") }

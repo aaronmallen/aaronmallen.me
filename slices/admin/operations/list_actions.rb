@@ -20,12 +20,12 @@ module Admin
         Entry.new(name: :create_decision, icon: "fa-scale-balanced", route: :admin_new_decision),
         Entry.new(
           name: :create_journal_entry, icon: "fa-feather", route: :admin_journal,
-          params: { write: Blog::Constants::CHECKED },
+          params: { write: Blog::Types::CHECKED },
         ),
         Entry.new(name: :new_post, icon: "fa-file-lines", route: :admin_new_post),
         Entry.new(
           name: :new_social_post, icon: "fa-paper-plane", route: :admin_social,
-          params: { write: Blog::Constants::CHECKED },
+          params: { write: Blog::Types::CHECKED },
         ),
         Entry.new(name: :todays_journal, icon: "fa-feather", route: :admin_journal),
         Entry.new(name: :start_task, icon: "fa-play", post: true, needs: :start),

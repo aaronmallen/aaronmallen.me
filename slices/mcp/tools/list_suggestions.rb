@@ -11,8 +11,8 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::RANGE,
-          page: Blog::Paging::PAGE,
+          **Blog::Helpers::DayWindow::RANGE,
+          page: Blog::Helpers::Paging::PAGE,
         },
         required: %w[from to],
       }.freeze
@@ -22,13 +22,13 @@ module MCP
                   "and its status. A pending edit waits on the author, a stale one no longer matches the text, " \
                   "and accepted and rejected ones are settled. Accept or reject open edits with " \
                   "accept_suggestion_edits and reject_suggestion_edits. " \
-                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Paging::USAGE}"
+                  "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, page: 1)
-          case Blog::DayWindow.days(from, to)
+          case Blog::Helpers::DayWindow.days(from, to)
             in Success[first, last] then listed(first..last, page(page, server_context), server_context)
             in Failure(message) then refuse(message)
           end
@@ -54,7 +54,7 @@ module MCP
             from: range.first.iso8601,
             to: range.last.iso8601,
             suggestions: found.rows.map { summary(it) },
-            **Blog::Paging.fields(found),
+            **Blog::Helpers::Paging.fields(found),
           )
         end
 

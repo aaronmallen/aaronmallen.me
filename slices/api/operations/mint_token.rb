@@ -7,7 +7,7 @@ module API
 
       def call(params)
         fields = step validate(params)
-        value = Blog::SecretToken.generate
+        value = Blog::Types::NewSecret[]
 
         { token: api_token_mutations.mint(token: value, name: fields[:name]), value: }
       end

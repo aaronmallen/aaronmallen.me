@@ -19,7 +19,9 @@ module API
         additionalProperties: false,
         properties: {
           id: SavedViews::ID,
-          page: Blog::Paging::PAGE.merge(description: "the page to read on a tasks or posts view, counting from 1"),
+          page: Blog::Helpers::Paging::PAGE.merge(
+            description: "the page to read on a tasks or posts view, counting from 1",
+          ),
           continue_to: {
             type: "string",
             description: "on a journal or activity view, the continue_to of the last answer, to read the next window",

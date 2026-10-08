@@ -19,7 +19,7 @@ hanami = post.call(
   MARKDOWN
   intent: "publish", now: Seeds.ago(20, hour: 9), tags: "hanami,ruby",
   summary: "Why I left the static generator behind.",
-  syndication_enabled: Blog::Constants::CHECKED, syndication_targets: %w[bluesky mastodon],
+  syndication_enabled: Blog::Types::CHECKED, syndication_targets: %w[bluesky mastodon],
   syndication_body: "New post on moving this blog to Hanami.",
 )
 

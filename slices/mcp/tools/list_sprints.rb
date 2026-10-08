@@ -5,7 +5,7 @@ module MCP
     class ListSprints < Base
       description "List sprints by day, oldest first, each with how many tasks it carried in from the day " \
                   "before. Leave from and to both out for today's sprint and every one planned after it; " \
-                  "leave one out to leave that end open. #{Blog::Paging::USAGE}"
+                  "leave one out to leave that end open. #{Blog::Helpers::Paging::USAGE}"
       endpoint scope: OAuth::Scope::READ
     end
   end

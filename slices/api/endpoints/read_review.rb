@@ -21,6 +21,7 @@ module API
       REPLY = Serializers::Review.reference
 
       include Deps[
+        contributor_terms: "contracts.contributor_terms_contract",
         review_note_queries: "record.repos.review_note_queries",
         review_queries: "activity.repos.review_queries",
       ]
@@ -29,7 +30,7 @@ module API
         on = day ? Blog::TimeZone.parse_day(day) : Blog::TimeZone.today
         return invalid(day: [BAD_DAY]) unless on
 
-        found = review_queries.review(period:, on:, credits: Blog::ContributorTerms.call(**credited))
+        found = review_queries.review(period:, on:, credits: contributor_terms.call(credited).to_h)
 
         Success(serialized(Serializers::Review, found, note: review_note_queries.note(found.period, found.from)))
       end

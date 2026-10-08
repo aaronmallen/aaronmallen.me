@@ -3,7 +3,7 @@
 module MCP
   module Repos
     class OAuthTokenQueries < DB::Repo
-      def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(Blog::SecretToken.digest(token)).one
+      def by_token(token, type:) = oauth_tokens.of_type(type).with_digest(Blog::Types::SecretDigest[token]).one
 
       def granted_scopes(oauth_client_ids, at: Time.now)
         live = oauth_tokens.for_client(oauth_client_ids).live.unexpired(at:)

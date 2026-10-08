@@ -6,8 +6,7 @@ module Security
     USER_AGENT = "HTTP_USER_AGENT"
     USER_AGENT_LIMIT = 1024
 
-    def self.read(request, find_place)
-      address = Blog::VisitorAddress.call(request)
+    def self.read(request, address, find_place)
       user_agent = readable(request.get_header(USER_AGENT))
       place = find_place.call(address)
 

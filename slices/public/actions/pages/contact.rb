@@ -4,7 +4,7 @@ module Public
   module Actions
     module Pages
       class Contact < Action
-        SENT = Blog::Constants::CHECKED
+        SENT = Blog::Types::CHECKED
 
         include Deps[issue_stamp: "operations.issue_contact_stamp"]
 

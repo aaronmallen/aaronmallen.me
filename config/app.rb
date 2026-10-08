@@ -30,6 +30,10 @@ module Blog
     config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS
 
     config.no_auto_register_paths += %w[helpers]
+    config.shared_app_component_keys += %w[
+      contracts.contributor_terms_contract contracts.review_range_contract contracts.search_query_contract
+      operations.read_visitor_address
+    ]
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier
     config.middleware.use ParamsGuard

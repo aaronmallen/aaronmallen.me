@@ -5,7 +5,7 @@ module API
     class SummarizeActivity < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { **Blog::DayWindow::RANGE },
+        properties: { **Blog::Helpers::DayWindow::RANGE },
         required: %w[from to],
       }.freeze
 
@@ -14,8 +14,8 @@ module API
       include Deps[activity_queries: "activity.repos.activity_queries"]
 
       def handle(from:, to:)
-        case Blog::DayWindow.days(from, to)
-          in Success[first, last] if Blog::DayWindow.too_long?(first, last) then too_long
+        case Blog::Helpers::DayWindow.days(from, to)
+          in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then too_long
           in Success[first, last] then Success(summary(first, last))
           in Failure(message) then invalid(from: [message], to: [message])
         end
@@ -35,7 +35,7 @@ module API
         serialized(Serializers::ActivitySummary, counted)
       end
 
-      def too_long = invalid(from: [Blog::DayWindow::TOO_LONG], to: [Blog::DayWindow::TOO_LONG])
+      def too_long = invalid(from: [Blog::Helpers::DayWindow::TOO_LONG], to: [Blog::Helpers::DayWindow::TOO_LONG])
     end
   end
 end

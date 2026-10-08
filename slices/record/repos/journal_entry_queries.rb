@@ -46,9 +46,9 @@ module Record
       def by_day(size:, to: nil, **search)
         entries = searched(with_tags, **search)
         oldest = entries.unordered.min(:entry_date)
-        return Blog::DayCursor::Page.new(rows: EMPTY_ARRAY, continue_to: nil) unless oldest
+        return Blog::Structs::DayCursor.new(rows: EMPTY_ARRAY, continue_to: nil) unless oldest
 
-        Blog::DayCursor.page(oldest, to, size:, day: :entry_date.to_proc) do |low, high, limit|
+        Blog::Structs::DayCursor.page(oldest, to, size:, day: :entry_date.to_proc) do |low, high, limit|
           found = entries.between(low, high).newest_first
           (limit ? found.limit(limit) : found).to_a
         end

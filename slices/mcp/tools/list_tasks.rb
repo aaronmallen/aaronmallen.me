@@ -11,7 +11,7 @@ module MCP
                   "the tasks that list the owner, which every task with no contributors does. sprint_on keeps " \
                   "the tasks planned into that day's sprint. count gives the tasks on this page and total the " \
                   "tasks that match across every page. " \
-                  "#{Blog::Paging::USAGE}. #{Untrusted::TASKS}"
+                  "#{Blog::Helpers::Paging::USAGE}. #{Untrusted::TASKS}"
       endpoint scope: OAuth::Scope::READ
     end
   end

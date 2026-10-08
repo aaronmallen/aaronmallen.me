@@ -3,7 +3,7 @@
 RSpec.describe "OAuth authorization", type: :request do
   let(:client) { mcp_create(:oauth_client, client_name: "Claude") }
   let(:i18n) { MCP::Slice["i18n"] }
-  let(:verifier) { Blog::SecretToken.generate }
+  let(:verifier) { Blog::Types::NewSecret[] }
 
   def approve = approve_authorization(authorize_path)
 
@@ -409,7 +409,7 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "stores the code hashed" do
-      expect(code[:code_digest]).to eq(Blog::SecretToken.digest(callback.fetch("code")))
+      expect(code[:code_digest]).to eq(Blog::Types::SecretDigest[callback.fetch("code")])
     end
 
     it "stores no plain text code" do

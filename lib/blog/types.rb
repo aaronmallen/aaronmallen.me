@@ -1,19 +1,28 @@
 # frozen_string_literal: true
 
+require "digest"
 require "dry/types"
+require "ipaddr"
+require "securerandom"
 require "uri"
 
 module Blog
   Types = Dry.Types(default: :strict)
 
   module Types
+    CHECKED = "1"
+    GAP = :gap
+    INTEGER_MAX = (2**31) - 1
+    IPV6_PREFIX = 64
     REDIRECT_HOSTS = {
       "http" => ->(uri) { %w[127.0.0.1 ::1 localhost].include?(uri.hostname) },
       "https" => ->(uri) { !uri.hostname.to_s.empty? },
     }.freeze
+    SECRET_BYTES = 32
     SLUG_FORMAT = /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/
+    SLUG_RESERVED = %w[tags].freeze
     URL_FORMAT = %r{https?://[^\s/?#]+(?:[/?#]\S*)?}
-    private_constant :REDIRECT_HOSTS, :SLUG_FORMAT, :URL_FORMAT
+    private_constant :IPV6_PREFIX, :REDIRECT_HOSTS, :SECRET_BYTES, :SLUG_FORMAT, :SLUG_RESERVED, :URL_FORMAT
 
     module Normalizers
       Repo = Types::Any.constructor { |value| value.to_s.strip.downcase }
@@ -39,10 +48,11 @@ module Blog
       "commit", "post", "journal", "social", "task", "webmention", "project", "sprint", "suggestion", "comment",
       "decision", "decision_comment", "session",
     )
+    ActivityScreenKind = Types::String.enum(*ActivityKind.values - %w[project sprint suggestion])
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(AnalyticsRange.values.first)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device")
-    Checkbox = Types::Bool.constructor { |value| value == Constants::CHECKED }
+    Checkbox = Types::Bool.constructor { |value| value == CHECKED }
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")
     ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/, max_size: 64)
@@ -66,13 +76,14 @@ module Blog
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)
     IssuedSecret = Types::String.constrained(format: /\A[A-Za-z0-9_-]{43}\z/)
+    NewSecret = IssuedSecret.default { SecureRandom.urlsafe_base64(SECRET_BYTES) }
     LocalTime = Types::Instance(Object).constructor do |value|
       text = TrimmedText[value]
       next nil if text.empty?
 
       TimeZone.parse_input(text) || text
     rescue TZInfo::PeriodNotFound
-      Constants::GAP
+      GAP
     end
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "delete")
@@ -101,6 +112,7 @@ module Blog
     ProjectFilterParam = ProjectFilter.fallback(ProjectFilter.values.first)
     ProjectMonth = Types::String.constrained(format: /\A\d{4}-(?:0[1-9]|1[0-2])\z/)
     ProjectVisibility = Types::String.enum("public", "private")
+    RangePreset = Types::Integer.enum(7, 30, 90)
     RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision])
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
@@ -120,11 +132,12 @@ module Blog
     ReviewPeriodParam = ReviewPeriod.fallback(ReviewPeriod.values.first)
     SavedViewScreen = Types::String.enum("activity", "journal", "posts", "tasks")
     ScrollDepth = Types::Integer.enum(0, 25, 50, 75, 100)
+    SecretDigest = Types::String.constructor { |value| Digest::SHA256.hexdigest(value.to_s) }
     SearchKind = Types::String.enum(
       "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention",
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
-    Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: Constants::SLUG_RESERVED)
+    Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)
     SocialMode = Types::String.enum("now", "schedule")
@@ -169,6 +182,12 @@ module Blog
     end
     TimeGrouping = Types::String.enum("tag", "project", "day")
     TimeGroupingParam = TimeGrouping.fallback(TimeGrouping.values.first)
+    ThrottleKey = Types::String.constructor do |address|
+      ip = IPAddr.new(address).native
+      ip.ipv6? ? ip.mask(IPV6_PREFIX).to_s : ip.to_s
+    rescue IPAddr::Error
+      address
+    end
     TrimmedText = Text.constructor(&:strip)
     UploadParam = Types::Interface(:read, :rewind, :size).optional.constructor do |value|
       value[:tempfile] if value.is_a?(::Hash)

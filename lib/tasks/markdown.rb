@@ -42,11 +42,11 @@ module Tasks
         html = Sanitize.fragment(Commonmarker.to_html(markdown, options: OPTIONS, plugins: PLUGINS), SANITIZE)
         fragment = Nokogiri::HTML5.fragment(html)
         boxes = fragment.css(BOX)
-        images = Blog::RemoteImages.find(fragment)
+        images = RemoteImages.find(fragment)
         return html if boxes.empty? && images.empty?
 
         label(boxes)
-        Blog::RemoteImages.swap(images)
+        RemoteImages.swap(images)
         fragment.to_html
       end
 

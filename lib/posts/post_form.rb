@@ -3,7 +3,7 @@
 module Posts
   module PostForm
     CARD = %i[og_title og_image_url canonical_url].freeze
-    CHECKED = Blog::Constants::CHECKED
+    CHECKED = Blog::Types::CHECKED
     TAG_SEPARATOR = ", "
     UNCHECKED = "0"
 

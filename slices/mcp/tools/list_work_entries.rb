@@ -5,7 +5,7 @@ module MCP
     class ListWorkEntries < Base
       SCHEMA = {
         additionalProperties: false,
-        properties: Blog::DayWindow::RANGE,
+        properties: Blog::Helpers::DayWindow::RANGE,
         required: %w[from to],
       }.freeze
 
@@ -18,7 +18,7 @@ module MCP
 
       class << self
         def call(from:, to:, server_context:)
-          case Blog::DayWindow.days(from, to)
+          case Blog::Helpers::DayWindow.days(from, to)
             in Success[first, last] then listed(first, last, server_context)
             in Failure(message) then refuse(message)
           end

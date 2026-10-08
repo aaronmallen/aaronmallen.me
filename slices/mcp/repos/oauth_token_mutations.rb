@@ -11,7 +11,7 @@ module MCP
 
       def delete_for_client(oauth_client_id) = oauth_tokens.for_client(oauth_client_id).delete
 
-      def issue(token:, **attributes) = create(token_digest: Blog::SecretToken.digest(token), **attributes)
+      def issue(token:, **attributes) = create(token_digest: Blog::Types::SecretDigest[token], **attributes)
 
       def revoke(id, at: Time.now)
         oauth_tokens.burn(id, at:)&.tap do |token|

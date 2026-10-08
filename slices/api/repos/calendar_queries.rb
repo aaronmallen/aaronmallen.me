@@ -18,7 +18,7 @@ module API
       ]
 
       def between(from:, to:)
-        return Failure(Blog::DayWindow::TOO_LONG) if Blog::DayWindow.too_long?(from, to)
+        return Failure(Blog::Helpers::DayWindow::TOO_LONG) if Blog::Helpers::DayWindow.too_long?(from, to)
 
         Success(days(from, to))
       end

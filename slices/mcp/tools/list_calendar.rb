@@ -8,7 +8,7 @@ module MCP
                   "posts, the scheduled and sent social posts, and whether the journal holds an entry. A post " \
                   "or social post falls on the #{Blog::TimeZone::NAME} day it goes out; drafts stay out. " \
                   "Give from and to as YYYY-MM-DD; both days count, and the range runs at most " \
-                  "#{Blog::DayWindow::LONGEST} days. To move something, use schedule_task, update_post or " \
+                  "#{Blog::Helpers::DayWindow::LONGEST} days. To move something, use schedule_task, update_post or " \
                   "send_social_post"
       endpoint scope: OAuth::Scope::READ
     end

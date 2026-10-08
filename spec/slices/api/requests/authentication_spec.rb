@@ -44,19 +44,19 @@ RSpec.describe "API authentication", type: :request do
 
   describe "a token it refuses" do
     it "refuses a token it never minted" do
-      read_token("Bearer #{Blog::SecretToken.generate}")
+      read_token("Bearer #{Blog::Types::NewSecret[]}")
 
       expect(last_response.status).to eq(401)
     end
 
     it "names the token as the problem" do
-      read_token("Bearer #{Blog::SecretToken.generate}")
+      read_token("Bearer #{Blog::Types::NewSecret[]}")
 
       expect(document).to eq("error" => "invalid_token", "error_description" => "the API token is unknown or revoked")
     end
 
     it "names the error in the challenge" do
-      read_token("Bearer #{Blog::SecretToken.generate}")
+      read_token("Bearer #{Blog::Types::NewSecret[]}")
 
       expect(challenge).to eq(%(Bearer error="invalid_token"))
     end
@@ -85,7 +85,7 @@ RSpec.describe "API authentication", type: :request do
 
     it "refuses an MCP access token" do
       access_token = mcp_connect(
-        Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::SecretToken.generate, scope: "read write",
+        Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: "read write",
       ).fetch("access_token")
       read_token("Bearer #{access_token}")
 

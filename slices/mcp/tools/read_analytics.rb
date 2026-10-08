@@ -20,7 +20,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::RANGE,
+          **Blog::Helpers::DayWindow::RANGE,
           path: { type: "string",
                   description: "one page to read alone, such as #{Hanami.app.settings.writing_path}/hello" },
           since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
@@ -56,7 +56,7 @@ module MCP
                   "Each top path gives its latest page title, which the visitor's browser sends, marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range, which runs at most " \
-                  "#{Blog::DayWindow::LONGEST} days. " \
+                  "#{Blog::Helpers::DayWindow::LONGEST} days. " \
                   "Give a path to read one page alone: its totals and its views, visitors and seconds read day by " \
                   "day, its top #{TOP} referrers, countries and sources by visitors, each with its views, its " \
                   "devices, and its top #{TOP} outbound clicks, with no top paths, weekday_hours, change, feed or " \
@@ -115,8 +115,8 @@ module MCP
         end
 
         def range(from, to)
-          Blog::DayWindow.days(from, to).bind do |first, last|
-            too_long?(first, last) ? Failure(Blog::DayWindow::TOO_LONG) : Success(first..last)
+          Blog::Helpers::DayWindow.days(from, to).bind do |first, last|
+            too_long?(first, last) ? Failure(Blog::Helpers::DayWindow::TOO_LONG) : Success(first..last)
           end
         end
       end

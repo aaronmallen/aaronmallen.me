@@ -26,7 +26,10 @@ module API
         to: Schema::DAY,
       ).freeze
 
-      include Deps[save_review_note: "record.operations.save_review_note"]
+      include Deps[
+        review_range: "contracts.review_range_contract",
+        save_review_note: "record.operations.save_review_note",
+      ]
 
       def handle(day:, body:, period: Blog::Types::ReviewPeriod.values.first)
         on = Blog::TimeZone.parse_day(day)
@@ -42,7 +45,7 @@ module API
       private
 
       def answered(note)
-        from, to = Blog::ReviewRange.call(note.period, note.starts_on)
+        review_range.call(period: note.period, on: note.starts_on).to_h => { from:, to: }
 
         { period: note.period, from: from.iso8601, to: to.iso8601, **serialized(Serializers::ReviewNote, note) }
       end

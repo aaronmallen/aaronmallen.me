@@ -6,8 +6,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::RANGE,
-          page: Blog::Paging::PAGE,
+          **Blog::Helpers::DayWindow::RANGE,
+          page: Blog::Helpers::Paging::PAGE,
           status: {
             type: "string",
             enum: Blog::Types::WebmentionStatus.values,
@@ -40,7 +40,7 @@ module API
       ]
 
       def handle(from: nil, to: nil, status: nil, post_id: nil, page: 1)
-        case Blog::DayWindow.open_days(from, to)
+        case Blog::Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(first, last, status, post_id, page_of(page)))
           in Failure(message) then invalid(from: [message], to: [message])
         end
@@ -57,7 +57,7 @@ module API
           time_zone: Blog::TimeZone::NAME,
           counts: webmention_queries.count_received_in(from: first, to: last, post_id:),
           webmentions: serialized(Serializers::Webmention, found.rows),
-          **Blog::Paging.fields(found),
+          **Blog::Helpers::Paging.fields(found),
         }
       end
     end

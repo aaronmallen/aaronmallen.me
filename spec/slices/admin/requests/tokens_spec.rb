@@ -65,7 +65,7 @@ RSpec.describe "Admin API tokens", type: :request do
       mint("Terminal")
       follow_redirect!
 
-      expect(Blog::SecretToken.digest(revealed)).to eq(stored.one[:token_digest])
+      expect(Blog::Types::SecretDigest[revealed]).to eq(stored.one[:token_digest])
     end
 
     it "stores a SHA-256 digest of the value" do

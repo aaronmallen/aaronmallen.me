@@ -3,7 +3,7 @@
 module Admin
   module Operations
     class BuildTimePage
-      DEFAULT_RANGE = Blog::Constants::TIME_RANGES.first
+      DEFAULT_RANGE = Blog::Types::RangePreset.values.first
 
       include Deps[time_report_queries: "tasks.repos.time_report_queries"]
 

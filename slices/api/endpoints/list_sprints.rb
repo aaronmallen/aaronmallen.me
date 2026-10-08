@@ -6,8 +6,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::WINDOW,
-          page: Blog::Paging::PAGE,
+          **Blog::Helpers::DayWindow::WINDOW,
+          page: Blog::Helpers::Paging::PAGE,
         },
       }.freeze
 
@@ -19,7 +19,7 @@ module API
       include Deps["settings", sprint_queries: "tasks.repos.sprint_queries"]
 
       def handle(from: nil, to: nil, page: 1)
-        case Blog::DayWindow.open_days(from || opening(to), to)
+        case Blog::Helpers::DayWindow.open_days(from || opening(to), to)
           in Success[first, last] then Success(listed(first, last, page_of(page)))
           in Failure(message) then invalid(from: [message], to: [message])
         end
@@ -30,7 +30,7 @@ module API
       def listed(first, last, page)
         found = sprint_queries.between(from: first, to: last, page:)
 
-        { sprints: serialized(Serializers::Sprint, found.rows), **Blog::Paging.fields(found) }
+        { sprints: serialized(Serializers::Sprint, found.rows), **Blog::Helpers::Paging.fields(found) }
       end
 
       def opening(to) = to ? nil : Blog::TimeZone.today.iso8601

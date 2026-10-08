@@ -9,11 +9,12 @@ module Record
         claim_photos: "media.operations.claim_photos",
         contract: "contracts.review_note_contract",
         review_note_mutations: "repos.review_note_mutations",
+        review_range: "contracts.review_range_contract",
       ]
 
       def call(body, period:, on:, now: Time.now)
         attributes = step validated(contract.call(body:))
-        starts_on, = Blog::ReviewRange.call(period, on)
+        review_range.call(period:, on:).to_h => { from: starts_on }
 
         transaction { save(attributes.fetch(:body), period, starts_on, now) }
       end

@@ -5,7 +5,7 @@ module API
     class ListCalendar < Endpoint
       SCHEMA = {
         additionalProperties: false,
-        properties: { from: Blog::DayWindow::DAYS, to: Blog::DayWindow::DAYS },
+        properties: { from: Blog::Helpers::DayWindow::DAYS, to: Blog::Helpers::DayWindow::DAYS },
         required: %w[from to],
       }.freeze
 
@@ -16,7 +16,7 @@ module API
       include Deps["repos.calendar_queries"]
 
       def handle(from:, to:)
-        found = Blog::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
+        found = Blog::Helpers::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
 
         found.either(->(days) { Success(listed(days)) }, ->(message) { invalid(from: [message], to: [message]) })
       end

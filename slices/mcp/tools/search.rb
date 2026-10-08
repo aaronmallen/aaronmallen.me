@@ -15,8 +15,8 @@ module MCP
                   "projects, work entries, people, messages and webmentions. Each result gives its kind, id, " \
                   "title, a short match and its day; pass the id to the tool for its kind to read the whole record " \
                   "(#{READERS.map { |kind, tool| "#{kind}: #{tool}" }.join(', ')}). count gives the results on " \
-                  "this page. #{Blog::Paging::USAGE}. The match of a task, the title of a synced task, and the " \
-                  "title and match of a message or webmention, come marked untrusted. #{Untrusted::WARNING}"
+                  "this page. #{Blog::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
+                  "and the title and match of a message or webmention, come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: OAuth::Scope::READ
 
       class << self

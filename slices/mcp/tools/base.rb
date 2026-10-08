@@ -54,7 +54,7 @@ module MCP
           Untrusted.synced(payload) { dep(:task_source_queries, server_context).synced_task_ids(it) }
         end
 
-        def too_long?(first, last) = Blog::DayWindow.too_long?(first, last)
+        def too_long?(first, last) = Blog::Helpers::DayWindow.too_long?(first, last)
       end
     end
   end

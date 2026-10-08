@@ -8,7 +8,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          **Blog::DayWindow::WINDOW,
+          **Blog::Helpers::DayWindow::WINDOW,
           **Schema::CREDITS,
           kinds: {
             type: "array",
@@ -44,12 +44,13 @@ module API
       include Deps[
         activity_queries: "activity.repos.activity_queries",
         activity_view_queries: "repos.activity_view_queries",
+        contributor_terms: "contracts.contributor_terms_contract",
       ]
 
       def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
-        filters = { kinds:, repos:, tags:, text:, credits: Blog::ContributorTerms.call(**credited) }
+        filters = { kinds:, repos:, tags:, text:, credits: contributor_terms.call(credited).to_h }
 
-        case Blog::DayWindow.days(from, to)
+        case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(window(first, last, filters))
           in Failure(message) then invalid(from: [message], to: [message])
         end
@@ -77,7 +78,7 @@ module API
       end
 
       def window(first, last, filters)
-        page = Blog::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
+        page = Blog::Helpers::DayWindow.page(first, last, day: :occurred_on.to_proc) do |from, to, limit|
           found(from, to, filters, limit)
         end
         rows = page.fetch(:rows)

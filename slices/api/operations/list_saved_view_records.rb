@@ -19,6 +19,7 @@ module API
         current_sprint: "tasks.operations.current_sprint",
         journal_entry_queries: "record.repos.journal_entry_queries",
         post_queries: "posts.repos.post_queries",
+        search_query: "contracts.search_query_contract",
         sprint_queries: "tasks.repos.sprint_queries",
         task_queries: "tasks.repos.task_queries",
       ]
@@ -40,9 +41,9 @@ module API
         window = ::Activity::Filters.call(
           from: filters["from"], to: filters["to"], day: continue_to || filters["day"], types: filters["types"],
         )
-        search = { types: window[:types], **Blog::SearchQuery.parse(filters["q"], fields: ACTIVITY_FIELDS) }
+        search = { types: window[:types], **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
 
-        Blog::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
+        Blog::Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
           activity_queries.between(from:, to:, limit:, **search)
         end
       end
@@ -54,14 +55,14 @@ module API
       end
 
       def journal(filters, continue_to)
-        search = Blog::SearchQuery.parse(filters["q"], fields: JOURNAL_FIELDS)
+        search = search_query.call(query: filters["q"], fields: JOURNAL_FIELDS).to_h
         last_day = continue_to || Blog::Types::DateParam[filters["to"]]
-        found = journal_entry_queries.days(size: Blog::DayWindow::CAP, to: last_day, **search)
+        found = journal_entry_queries.days(size: Blog::Helpers::DayWindow::CAP, to: last_day, **search)
 
         { rows: found.rows.flat_map(&:last), **paging(found.older_query) }
       end
 
-      def listed(found, sprint_on) = { rows: found.rows, sprint_on:, **Blog::Paging.fields(found) }
+      def listed(found, sprint_on) = { rows: found.rows, sprint_on:, **Blog::Helpers::Paging.fields(found) }
 
       def open_tasks(tab, sprint, page, search)
         found = task_queries.list(tab, sprint:, page:, **search)
@@ -77,12 +78,12 @@ module API
       def posts(filters, page)
         found = post_queries.by_filter(Blog::Types::PostFilterParam[filters["status"]], page)
 
-        { rows: found.rows, **Blog::Paging.fields(found) }
+        { rows: found.rows, **Blog::Helpers::Paging.fields(found) }
       end
 
       def tasks(filters, page, now)
         tab = Blog::Types::TaskTabParam[filters["filter"]]
-        search = Blog::SearchQuery.parse(filters["q"], fields: TASK_FIELDS)
+        search = search_query.call(query: filters["q"], fields: TASK_FIELDS).to_h
 
         case tab
           when COMPLETED then finished(page, search)

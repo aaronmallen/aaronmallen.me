@@ -2,8 +2,8 @@
 
 module Activity
   module Filters
-    DEFAULT_RANGE = Blog::Constants::ACTIVITY_RANGES.first
-    KINDS = Blog::Constants::ACTIVITY_SCREEN_KINDS.map { Blog::Types::ActivityKind[it] }.freeze
+    DEFAULT_RANGE = Blog::Types::RangePreset.values.first
+    KINDS = Blog::Types::ActivityScreenKind.values
 
     module_function
 

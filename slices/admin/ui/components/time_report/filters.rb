@@ -6,6 +6,7 @@ module Admin
       module TimeReport
         class Filters < Component
           GROUPINGS = Blog::Types::TimeGrouping.values.to_h { [it, ".groupings.#{it}"] }.freeze
+          RANGES = Blog::Types::RangePreset.values
 
           prop :by, Blog::Types::TimeGrouping
           prop :from, Blog::Types::Date
@@ -16,7 +17,7 @@ module Admin
             div(class: "time-rail") do
               Card do
                 div(class: "form-stack") do
-                  RangePresets(ranges: Blog::Constants::TIME_RANGES, today: @today, from: @from, to: @to) do |presets|
+                  RangePresets(ranges: RANGES, today: @today, from: @from, to: @to) do |presets|
                     presets.href { path(:admin_time, from: it.begin.iso8601, to: it.end.iso8601, by: @by) }
                   end
                   filter_form

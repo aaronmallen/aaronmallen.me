@@ -8,25 +8,25 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: Blog::DayWindow::DAYS,
+          from: Blog::Helpers::DayWindow::DAYS,
           repos: {
             type: "array",
             items: { type: "string" },
             description: "repository names, with or without the owner; a commit in any of them comes back",
           },
-          to: Blog::DayWindow::DAYS,
+          to: Blog::Helpers::DayWindow::DAYS,
         },
         required: %w[from to],
       }.freeze
 
       description "List the commits in a date range, each with its sha, repository, branch, whole message, " \
-                  "date, time and lines added and deleted. #{Blog::DayWindow::PAGING_NOTE}"
+                  "date, time and lines added and deleted. #{Blog::Helpers::DayWindow::PAGING_NOTE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(from:, to:, server_context:, repos: nil)
-          case Blog::DayWindow.days(from, to)
+          case Blog::Helpers::DayWindow.days(from, to)
             in Success[first, last] then listed(first, last, Array(repos), server_context)
             in Failure(message) then refuse(message)
           end
@@ -49,7 +49,7 @@ module MCP
         end
 
         def listed(first, last, repos, server_context)
-          page = Blog::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
+          page = Blog::Helpers::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
             dep(:commit_queries, server_context).between(from:, to:, repos:, limit:)
           end
           rows = page.fetch(:rows)

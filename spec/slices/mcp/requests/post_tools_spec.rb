@@ -6,7 +6,7 @@ RSpec.describe "MCP post tools", type: :request do
   def access_token
     @access_token ||= mcp_connect(
       Spec::DB::Factories[:mcp].create(:oauth_client),
-      verifier: Blog::SecretToken.generate,
+      verifier: Blog::Types::NewSecret[],
       scope: "read write publish delete",
     ).fetch("access_token")
   end

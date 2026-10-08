@@ -7,10 +7,10 @@ module Admin
     module Components
       module Activity
         class Filters < Component
-          CHECKED = Blog::Constants::CHECKED
+          CHECKED = Blog::Types::CHECKED
           TYPES = Structs::ActivityEvent::KINDS
           LABELS = TYPES.to_h { [it, ".types.#{it}"] }.freeze
-          RANGES = Blog::Constants::ACTIVITY_RANGES
+          RANGES = Blog::Types::RangePreset.values
           UNCHECKED = "0"
 
           def self.query(from:, to:, types:, text:)

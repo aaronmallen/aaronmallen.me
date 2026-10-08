@@ -5,7 +5,6 @@ module Social
     class MoveSocialPost < Operation
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
-      include Blog::DayMove
       include Deps[
         lock_editable_social_post: "operations.lock_editable_social_post",
         social_post_mutations: "repos.social_post_mutations",
@@ -13,11 +12,11 @@ module Social
       ]
 
       def call(id, date, now: Time.now)
-        day = step ahead(date, now)
+        day = step upcoming_day(date, now)
 
         transaction do
           social_post = step scheduled(id, lock_editable_social_post.call(id))
-          social_post_mutations.update(social_post.id, posted_at: step(moved(social_post.posted_at, day, now)))
+          social_post_mutations.update(social_post.id, posted_at: step(moved_to_day(social_post.posted_at, day, now)))
           social_post_queries.by_id(social_post.id)
         end
       end

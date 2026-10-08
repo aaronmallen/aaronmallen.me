@@ -82,7 +82,7 @@ RSpec.describe "API token sightings", type: :request do
   end
 
   it "records nothing for a token it refuses" do
-    call_api(token: Blog::SecretToken.generate)
+    call_api(token: Blog::Types::NewSecret[])
 
     expect(sightings.count).to eq(0)
   end

@@ -6,7 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          page: Blog::Paging::PAGE,
+          page: Blog::Helpers::Paging::PAGE,
           query: { type: "string", description: "part of a tag's name; only tags whose name holds it come back" },
           scope: TAG_SCOPE,
         },
@@ -15,7 +15,7 @@ module MCP
 
       description "List the tags in one scope by name with their colour, how many records carry each, and that " \
                   "count split by kind. #{TAG_KINDS}. A tag nothing carries counts zero. Give query to keep only " \
-                  "the tags whose name holds it; count holds how many tags match. #{Blog::Paging::USAGE}"
+                  "the tags whose name holds it; count holds how many tags match. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
@@ -29,7 +29,7 @@ module MCP
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },
             count: tag_queries.count_matching(scope, text),
-            **Blog::Paging.fields(tags),
+            **Blog::Helpers::Paging.fields(tags),
           )
         end
 

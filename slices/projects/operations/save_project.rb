@@ -3,6 +3,8 @@
 module Projects
   module Operations
     class SaveProject < Operation
+      REPO_URL = "https://github.com/%s"
+
       include Deps[
         contract: "contracts.project_contract",
         project_mutations: "repos.project_mutations",
@@ -55,7 +57,7 @@ module Projects
       def github_url(repo)
         named = Blog::Types::Normalized::Repo.call(repo) { nil }
 
-        named ? format(Blog::Constants::GITHUB_REPO_URL, named) : Blog::Constants::EMPTY_STRING
+        named ? format(REPO_URL, named) : Blog::Constants::EMPTY_STRING
       end
 
       def persist(id, attributes)

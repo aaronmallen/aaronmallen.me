@@ -10,7 +10,7 @@ module API
         properties: {
           query: { type: "string", description: "the words to find; quote a phrase or put - before a word to skip it" },
           kind: { type: "string", enum: KINDS, description: "find only this kind; every kind when you leave it out" },
-          page: Blog::Paging::PAGE,
+          page: Blog::Helpers::Paging::PAGE,
         },
         required: %w[query],
       }.freeze
@@ -26,7 +26,7 @@ module API
         found = search_queries.search(text: query, page: page_of(page), kinds: kind ? [kind] : KINDS)
         results = serialized(Serializers::SearchHit, found.rows)
 
-        Success(count: results.length, results:, **Blog::Paging.fields(found))
+        Success(count: results.length, results:, **Blog::Helpers::Paging.fields(found))
       end
 
       private

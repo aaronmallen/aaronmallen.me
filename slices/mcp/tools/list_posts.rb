@@ -12,7 +12,7 @@ module MCP
         additionalProperties: false,
         properties: {
           from: { type: "string", description: "the first day a blog post's publish time may fall on, as YYYY-MM-DD" },
-          page: Blog::Paging::PAGE,
+          page: Blog::Helpers::Paging::PAGE,
           status: { type: "string", enum: Blog::Types::PostStatus.values, description: "keep only blog posts in it" },
           to: { type: "string", description: "the last day a blog post's publish time may fall on, as YYYY-MM-DD" },
         },
@@ -27,13 +27,13 @@ module MCP
                   "Give from, to or both as YYYY-MM-DD, in Chicago time, to keep only the blog posts whose " \
                   "publish time falls inside those days; a post with no publish time then drops out. " \
                   "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
-                  "page of each. #{Blog::Paging::USAGE}"
+                  "page of each. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
       scope OAuth::Scope::READ
 
       class << self
         def call(server_context:, page: 1, status: nil, **range)
-          case Blog::DayWindow.open_days(range[:from], range[:to])
+          case Blog::Helpers::DayWindow.open_days(range[:from], range[:to])
             in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
             in Failure(message) then refuse(message)
           end
@@ -55,7 +55,7 @@ module MCP
             counts: dep(:post_queries, server_context).count_dated_between(from: first, to: last),
             posts: summaries(posts.rows, server_context),
             social_posts: social_posts.rows.map { preview(it) },
-            **Blog::Paging.fields(posts, social_posts),
+            **Blog::Helpers::Paging.fields(posts, social_posts),
           )
         end
 

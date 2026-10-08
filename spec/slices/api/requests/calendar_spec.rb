@@ -125,7 +125,7 @@ RSpec.describe "API calendar", type: :request do
     found = read(from: first.iso8601, to: (first + 366).iso8601)
 
     expect([status, found.fetch("errors")]).to eq(
-      [422, { "from" => [Blog::DayWindow::TOO_LONG], "to" => [Blog::DayWindow::TOO_LONG] }],
+      [422, { "from" => [Blog::Helpers::DayWindow::TOO_LONG], "to" => [Blog::Helpers::DayWindow::TOO_LONG] }],
     )
   end
 

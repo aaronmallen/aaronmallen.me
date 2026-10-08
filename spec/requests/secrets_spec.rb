@@ -5,7 +5,7 @@ require "securerandom"
 
 RSpec.describe "Secrets a request carries", type: :request do
   let(:client) { Spec::DB::Factories[:mcp].create(:oauth_client) }
-  let(:verifier) { Blog::SecretToken.generate }
+  let(:verifier) { Blog::Types::NewSecret[] }
 
   before { Hanami.app.start(:honeybadger) }
 

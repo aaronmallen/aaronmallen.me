@@ -9,12 +9,13 @@ module Admin
         "settings",
         activity_queries: "activity.repos.activity_queries",
         list_activity_events: "operations.list_activity_events",
+        search_query: "contracts.search_query_contract",
       ]
 
       def call(from: nil, to: nil, types: nil, query: nil, day: nil)
         window = ::Activity::Filters.call(from:, to:, day:, types:)
         filters = { **window.except(:day), text: Blog::Types::Text[query] }
-        search = filters.merge(**Blog::SearchQuery.parse(filters[:text], fields: FIELDS))
+        search = filters.merge(**search_query.call(query: filters[:text], fields: FIELDS).to_h)
         counts = activity_queries.counts(**search.except(:types))
 
         {

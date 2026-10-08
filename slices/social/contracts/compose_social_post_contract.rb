@@ -35,7 +35,7 @@ module Social
         next unless values[:mode] == Blog::Types::SocialMode["schedule"]
         next if value.is_a?(Time)
 
-        key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
+        key.failure(value == Blog::Types::GAP ? SKIPPED : FORMAT)
       end
 
       rule(:targets) do

@@ -7,7 +7,7 @@ RSpec.describe "Icons", type: :request do
     client = Spec::DB::Factories[:mcp].create(:oauth_client)
     params = {
       client_id: client.client_id,
-      code_challenge: MCP::OAuth::PKCE.challenge(Blog::SecretToken.generate),
+      code_challenge: MCP::OAuth::PKCE.challenge(Blog::Types::NewSecret[]),
       code_challenge_method: "S256",
       redirect_uri: client.redirect_uris.first,
       resource: "https://aaronmallen.me/mcp",

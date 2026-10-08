@@ -16,6 +16,7 @@ module Admin
 
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
+        search_query: "contracts.search_query_contract",
         sprint_queries: "tasks.repos.sprint_queries",
         task_queries: "tasks.repos.task_queries",
       ]
@@ -25,7 +26,7 @@ module Admin
         today = Blog::TimeZone.today(now)
         planned = sprint_queries.after(today)
         filters = { query: Blog::Types::TrimmedText[query] }
-        tasks = step listed(tab, sprint, planned, page, Blog::SearchQuery.parse(filters[:query], fields: FIELDS))
+        tasks = step listed(tab, sprint, planned, page, filters[:query])
 
         {
           counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,
@@ -53,7 +54,8 @@ module Admin
         task_queries.list(tab, sprint:, page: previous).rows.last&.id
       end
 
-      def listed(tab, sprint, planned, page, search)
+      def listed(tab, sprint, planned, page, query)
+        search = search_query.call(query:, fields: FIELDS).to_h
         tasks = case tab
                   when COMPLETED then task_queries.finished(page:, **search)
                   when UPCOMING then whole(task_queries.planned(planned, **search))

@@ -5,6 +5,7 @@ module Tasks
     class CreditAgents
       AGENT = Blog::Types::ContributorKind["agent"]
       GITHUB = Blog::Types::TaskSourceProvider["github"]
+      ISSUE_URL = "https://github.com/%s/issues/%s"
 
       include Deps[
         task_contributor_mutations: "repos.task_contributor_mutations",
@@ -12,7 +13,7 @@ module Tasks
       ]
 
       def call(repo, issues, agents)
-        urls = issues.map { format(Blog::Constants::GITHUB_ISSUE_URL, repo, it) }
+        urls = issues.map { format(ISSUE_URL, repo, it) }
         task_ids = task_source_queries.task_ids_at(GITHUB, urls)
         rows = agents.map { { kind: AGENT, agent: it.fetch("agent"), model: it.fetch("model") } }
 

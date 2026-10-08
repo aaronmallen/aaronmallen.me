@@ -12,7 +12,7 @@ RSpec.describe "MCP connection tools", type: :request do
 
   def calling_client = @calling_client ||= mcp_create(:oauth_client, client_name: "Claude")
 
-  def connect(client, scope:) = mcp_connect(client, verifier: Blog::SecretToken.generate, scope:)
+  def connect(client, scope:) = mcp_connect(client, verifier: Blog::Types::NewSecret[], scope:)
 
   def content = JSON.parse(message)
 
@@ -108,7 +108,7 @@ RSpec.describe "MCP connection tools", type: :request do
     it "never sends a token or its digest" do
       call_tool("list_clients")
 
-      expect(message).not_to include(access_token, Blog::SecretToken.digest(access_token))
+      expect(message).not_to include(access_token, Blog::Types::SecretDigest[access_token])
     end
   end
 end

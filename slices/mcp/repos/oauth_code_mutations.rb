@@ -13,7 +13,7 @@ module MCP
 
       def delete_for_client(oauth_client_id) = oauth_codes.for_client(oauth_client_id).delete
 
-      def issue(code:, **attributes) = create(code_digest: Blog::SecretToken.digest(code), **attributes)
+      def issue(code:, **attributes) = create(code_digest: Blog::Types::SecretDigest[code], **attributes)
     end
   end
 end

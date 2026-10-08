@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          page: Blog::Paging::PAGE,
+          page: Blog::Helpers::Paging::PAGE,
           query: { type: "string", description: "words to find in the title or problem" },
           status: {
             type: "string",
@@ -45,7 +45,7 @@ module API
             count: found.rows.length,
             counts: decision_queries.count_found(**filters),
             decisions: serialized(Serializers::Decision, found.rows),
-            **Blog::Paging.fields(found),
+            **Blog::Helpers::Paging.fields(found),
           },
         )
       end

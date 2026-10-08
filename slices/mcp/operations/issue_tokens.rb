@@ -29,7 +29,7 @@ module MCP
       private
 
       def issue(type, lifetime, **held)
-        token = Blog::SecretToken.generate
+        token = Blog::Types::NewSecret[]
         expires_at = Time.now + lifetime
 
         [token, oauth_token_mutations.issue(token:, type: Blog::Types::OAuthTokenType[type], expires_at:, **held)]

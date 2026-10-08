@@ -6,8 +6,8 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          from: Blog::DayWindow::DAYS,
-          to: Blog::DayWindow::DAYS,
+          from: Blog::Helpers::DayWindow::DAYS,
+          to: Blog::Helpers::DayWindow::DAYS,
           tag: { type: "string", description: "a private tag the entry carries; any tag when you leave it out" },
         },
         required: %w[from to],
@@ -36,7 +36,7 @@ module API
       include Deps[journal_entry_queries: "record.repos.journal_entry_queries"]
 
       def handle(from:, to:, tag: nil)
-        case Blog::DayWindow.days(from, to)
+        case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(listed(first, last, tag&.downcase))
           in Failure(message) then invalid(from: [message], to: [message])
         end
@@ -45,7 +45,7 @@ module API
       private
 
       def listed(first, last, tag)
-        page = Blog::DayWindow.page(first, last, day: :entry_date.to_proc) do |from, to, limit|
+        page = Blog::Helpers::DayWindow.page(first, last, day: :entry_date.to_proc) do |from, to, limit|
           journal_entry_queries.between(from:, to:, limit:, tag:)
         end
         rows = page.fetch(:rows)

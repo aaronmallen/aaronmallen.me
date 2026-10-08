@@ -3,7 +3,7 @@
 require "nokogiri"
 require "uri"
 
-module Blog
+module Tasks
   module RemoteImages
     ALT = "alt"
     ANCHOR = "a"

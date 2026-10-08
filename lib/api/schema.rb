@@ -13,7 +13,7 @@ module API
       model: { type: "string", description: "a model, such as claude-opus-5-5; only the tasks it worked on" },
     }.freeze
     DAY = { type: "string", format: "date" }.freeze
-    ID = { type: "integer", minimum: 1, maximum: Blog::Constants::INTEGER_MAX }.freeze
+    ID = { type: "integer", minimum: 1, maximum: Blog::Types::INTEGER_MAX }.freeze
     INTEGER = { type: "integer" }.freeze
     STAMP = { type: "string", format: "date-time" }.freeze
     STRING = { type: "string" }.freeze
