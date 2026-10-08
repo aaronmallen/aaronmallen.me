@@ -3,7 +3,7 @@
 RSpec.describe "Work sessions", type: :request do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:today) { Blog::TimeZone.today }
-  let!(:started) { Time.at(Time.now.to_i - 5400) }
+  let!(:started) { Time.at([Time.now.to_i - 5400, Blog::TimeZone.day_start(today).to_i].max) }
 
   def open_sessions(task) = sessions(task).select { it[:ended_at].nil? }
 
