@@ -101,7 +101,8 @@ module Admin
       operations.move_task operations.pause_task operations.place_task operations.plan_sprint
       operations.queue_issue_sync operations.reopen_task operations.save_task operations.save_task_rule
       operations.schedule_task operations.set_task_total operations.start_task operations.unlink_task
-      repos.sprint_queries repos.task_queries repos.task_rule_queries repos.time_report_queries
+      repos.sprint_queries repos.task_queries repos.task_rule_queries repos.task_source_queries
+      repos.time_report_queries
     ], from: :tasks
 
     import keys: %w[operations.revoke_client repos.oauth_client_queries], from: :mcp

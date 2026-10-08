@@ -13,7 +13,9 @@ module Admin
             Blog::Types::TaskTab["external"] => ".external",
             Blog::Types::TaskTab["completed"] => ".completed",
           }.freeze
+          EXTERNAL = Blog::Types::TaskTab["external"]
           NAMES = Blog::Types::TaskTab.values.freeze
+          UNSEEN = :unseen
 
           prop :counts, Blog::Types::Hash
           prop :tab, Blog::Types::String
@@ -29,7 +31,7 @@ module Admin
 
           private
 
-          def count(name) = span(class: "task-tab-count") { @counts.fetch(name).to_s }
+          def count(name) = span(class: ["task-tab-count", ("w" if unseen?(name))]) { @counts.fetch(name).to_s }
 
           def href(name) = path(:admin_tasks, **params(name))
 
@@ -47,6 +49,8 @@ module Admin
               count(name)
             end
           end
+
+          def unseen?(name) = name == EXTERNAL && @counts.fetch(UNSEEN).positive?
         end
       end
     end

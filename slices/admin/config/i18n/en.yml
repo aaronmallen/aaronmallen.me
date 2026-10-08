@@ -1642,8 +1642,8 @@ en:
             external: "external · %{count}"
             next: "next · %{count}"
             someday: "someday · %{count}"
-          pull: "Pull in"
-          pull_from: "Or pull from"
+          pull: "pull in"
+          pull_from: "Pull from a list"
           pull_task: "Pull %{task} into today"
         pull_column:
           title: "Pull in"
@@ -1677,6 +1677,7 @@ en:
             one: "%{count} done today"
             other: "%{count} done today"
           progress: "Sprint progress"
+          pull_from: "Pull from a list"
           title: "Today's sprint"
         tabs:
           completed: "completed"

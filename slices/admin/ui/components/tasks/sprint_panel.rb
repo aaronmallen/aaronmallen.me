@@ -23,7 +23,7 @@ module Admin
               progress unless @tasks.empty?
               rows
               finished
-              Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
+              pull
             end
           end
 
@@ -51,6 +51,16 @@ module Admin
 
             div(class: "sprint-progress", role: "progressbar", aria:) do
               span(class: "sprint-progress-fill", style: "width: #{width}%")
+            end
+          end
+
+          def pull
+            details(class: "today-more", open: @tasks.empty?) do
+              summary do
+                Icon("fa-solid fa-chevron-right today-more-chev")
+                plain t(".pull_from")
+              end
+              Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
             end
           end
 

@@ -28,10 +28,7 @@ module Admin
 
           def view_template
             div(class: "task-planner-pull", data: { pools: "" }) do
-              header(class: "card-head") do
-                div { span(class: "card-label") { t(".pull_from") } }
-                div(class: "card-side") { switch }
-              end
+              switch
               LISTS.each_key { pool(it) }
             end
           end
@@ -42,6 +39,7 @@ module Admin
 
           def meta(task)
             p(class: "task-meta") do
+              RecordKey(kind: "task", id: task.id)
               SourceLink(source: task.source)
               task.tags.each { Tag(tag: it) }
             end
@@ -70,7 +68,7 @@ module Admin
             Form(action: path(:admin_move_task, id: task.id, filter: TODAY)) do
               input(type: "hidden", name: "origin", value: @origin)
               input(type: "hidden", name: "pool", value: list)
-              Button(type: "submit", small: true, aria: { label: t(".pull_task", task: task.title) }) do
+              Button(type: "submit", small: true, class: "go", aria: { label: t(".pull_task", task: task.title) }) do
                 IconLabel(icon: "fa-solid fa-arrow-turn-up") { t(".pull") }
               end
             end

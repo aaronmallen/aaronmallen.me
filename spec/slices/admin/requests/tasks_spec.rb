@@ -306,6 +306,19 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page.find(".task-tabs .screen-tab", text: "external").find(".task-tab-count").text).to eq("1")
       end
 
+      it "tints the external count while an unseen issue waits" do
+        get "/admin/tasks", filter: "next"
+
+        expect(page.find(".task-tabs .screen-tab", text: "external")).to have_css(".task-tab-count.w")
+      end
+
+      it "leaves the external count plain once every issue is seen" do
+        Tasks::Slice["relations.task_sources"].see([imported.id], Time.now)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_no_css(".task-tab-count.w")
+      end
+
       it "titles and blurbs the card", :aggregate_failures do
         get "/admin/tasks", filter: "external"
 
@@ -456,6 +469,12 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "today"
 
         expect(page).to have_css(".g-main > aside.task-pull .card-title", exact_text: "Pull in")
+      end
+
+      it "heads the column once" do
+        get "/admin/tasks", filter: "today"
+
+        expect(page.find(".task-pull").all(".card-title, .card-label").map(&:text)).to eq(["Pull in"])
       end
 
       it "says the sprint is empty" do

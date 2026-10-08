@@ -1263,6 +1263,14 @@
     @apply h-8 min-w-8 justify-center gap-[7px] rounded-[8px] border-transparent bg-transparent px-2 py-0 text-badge text-ink-muted;
     @apply hover:border-line hover:text-ink;
 
+    &.go {
+      @apply hover:text-mk-green-text;
+
+      & > i {
+        @apply text-inherit;
+      }
+    }
+
     @media (width < 43.75rem) {
       @apply size-auto min-h-tap min-w-tap;
     }
@@ -2375,11 +2383,27 @@
 }
 
 @utility task-planner-pull {
-  @apply mt-4 border-t border-line pt-4;
+  @apply pb-3.5;
+
+  & > .seg {
+    @apply mb-3;
+  }
 }
 
 @utility task-planner-list {
   @apply flex flex-col;
+
+  & .li-title {
+    @apply text-base font-medium;
+  }
+
+  & .record-key {
+    @apply px-1.5 py-px;
+
+    @media (width >= 43.75rem) {
+      @apply min-w-0;
+    }
+  }
 }
 
 @utility task {
@@ -3508,6 +3532,10 @@
 
 @utility task-tab-count {
   @apply font-mono text-badge text-ink-muted;
+
+  &.w {
+    @apply text-mk-orange-text;
+  }
 }
 
 @utility task-list {
@@ -3542,10 +3570,6 @@
 
   & > .card-title {
     @apply mt-0 mb-4;
-  }
-
-  & > .task-planner-pull {
-    @apply mt-0 border-t-0 pt-0;
   }
 
   @media (width >= 53.75rem) {
@@ -4673,16 +4697,17 @@
 }
 
 @utility seg {
-  @apply inline-flex gap-0.5 rounded-btn border border-line bg-ground p-0.5;
+  @apply inline-flex gap-0.5 rounded-full border border-line bg-ground p-[3px];
 }
 
 @utility seg-option {
-  @apply cursor-pointer rounded-seg px-2.5 py-1 font-mono text-seg whitespace-nowrap text-ink-muted hover:text-ink;
+  @apply cursor-pointer rounded-full px-3 py-1.5 font-mono text-seg whitespace-nowrap text-ink-muted hover:text-ink;
   @apply transition-colors duration-150 ease-in-out;
 
   &:has(:checked),
   &.current {
-    @apply bg-wash text-ink;
+    @apply bg-ground-sunk text-ink;
+    box-shadow: 0 0 0 1px var(--color-line);
   }
 
   &:has(:focus-visible),

@@ -825,11 +825,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         plan("Ship the panel")
         task = create(:task, title: "Email the accountant")
         get "/admin"
-        form = panel.find(".task-planner-pull form")
+        form = pulls.find("form", visible: :all)
         fields = %w[origin pool].to_h { [it, form.find("[name='#{it}']", visible: :all).value] }
         post form[:action], _csrf_token: admin_csrf_token, **fields
         task
       end
+
+      def pulls = panel.find(".task-planner-pull", visible: :all)
 
       def sprint = @sprint ||= create(:sprint, sprint_date: today)
 
@@ -965,7 +967,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       it "folds what is done today away under its count", :aggregate_failures do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"
-        done = panel.find("details.today-more:not([open])")
+        done = panel.find("details.today-more:not([open])", text: "done today")
 
         expect(done.find("summary")).to have_text("1 done today")
         expect(done.all(".task-title", visible: :all).map { it.text(:all) }).to eq(["Ship the panel"])
@@ -1008,7 +1010,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         plan("Ship the panel")
         get "/admin"
 
-        expect(panel).to have_no_css("details.today-more")
+        expect(panel).to have_no_css("details.today-more", text: "done today")
       end
 
       it "leads each open task with its key" do
@@ -1066,14 +1068,16 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create(:task, title: "Email the accountant")
         get "/admin"
 
-        expect(panel.find(".task-planner-pull")).to have_css(".li-title", exact_text: "Email the accountant")
+        expect(pulls).to have_css(".li-title", exact_text: "Email the accountant", visible: :all)
       end
 
       it "keeps Today when switching the pool under the sprint's tasks" do
         plan("Ship the panel")
         get "/admin"
 
-        expect(panel.all(".seg-option").map { it["href"] }).to eq(%w[next someday external].map { "/admin?pool=#{it}" })
+        hrefs = panel.all(".seg-option", visible: :all).map { it["href"] }
+
+        expect(hrefs).to eq(%w[next someday external].map { "/admin?pool=#{it}" })
       end
 
       it "adds a task pulled from the pools under the sprint's tasks to today's sprint" do
@@ -1088,7 +1092,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create(:task_source, task: create(:task, :external), url:)
         get "/admin", pool: "external"
 
-        expect(panel.find(".task-planner-pull")).to have_link("aaronmallen/aaronmallen.me#42", href: url)
+        expect(pulls).to have_link("aaronmallen/aaronmallen.me#42", href: url, visible: :all)
       end
 
       it "links a Linear issue by its workspace in the external pool under the sprint's tasks" do
@@ -1097,7 +1101,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create(:task_source, task: create(:task, :external), provider: "linear", remote_id: "lin-1", url:)
         get "/admin", pool: "external"
 
-        expect(panel.find(".task-planner-pull")).to have_link("acme/ABC-123", href: url)
+        expect(pulls).to have_link("acme/ABC-123", href: url, visible: :all)
       end
 
       it "comes back to Today after pulling from the pools under the sprint's tasks" do
@@ -1111,6 +1115,28 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         post "/admin/tasks/#{task.id}/move/today", _csrf_token: admin_csrf_token, origin: "today", pool: "someday"
 
         expect(last_response.headers["location"]).to eq("/admin?pool=someday")
+      end
+
+      it "folds the pools away under the sprint's tasks", :aggregate_failures do
+        plan("Ship the panel")
+        get "/admin"
+        pull = panel.find("details.today-more", text: "Pull from a list")
+
+        expect(pull[:open]).to be_nil
+        expect(pull).to have_css(".task-planner-pull", visible: :all)
+      end
+
+      it "opens the pools when the sprint is empty" do
+        get "/admin"
+
+        expect(panel).to have_css("details.today-more[open] .task-planner-pull")
+      end
+
+      it "leads each pool row with its key" do
+        task = create(:task, title: "Email the accountant")
+        get "/admin"
+
+        expect(panel.find(".task-planner-list .task-meta")).to have_css(".record-key", exact_text: "##{task.id}")
       end
 
       it "renders every pool and hides all but the chosen one" do

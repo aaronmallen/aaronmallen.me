@@ -186,6 +186,7 @@ RSpec.describe "Admin keys", type: :feature do
         sprint = create(:sprint, sprint_date: today)
         create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")
         visit "/admin"
+        find("details.today-more summary", text: "Pull from a list").click
         press("j", "j")
       end
 
