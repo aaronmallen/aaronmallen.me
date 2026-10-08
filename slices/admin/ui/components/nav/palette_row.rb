@@ -22,6 +22,7 @@ module Admin
           prop :post, Blog::Types::Bool, default: false
           prop :needs, Blog::Types::String.optional, default: nil
           prop :jump, Blog::Types::String.optional, default: nil
+          prop :key, Blog::Types::String.optional, default: nil
 
           def view_template
             div(
@@ -29,21 +30,22 @@ module Admin
               data: {
                 palette_option: true, palette_text: @text, palette_href: @href, palette_dialog: @dialog,
                 palette_found: (true if @found), palette_typed: (true if @typed), palette_post: (true if @post),
-                palette_needs: @needs, palette_all: @all, **jump_key,
+                palette_needs: @needs, palette_all: @all, **key_data,
               },
             ) do
               Icon(["fa-solid", @icon, "pal-r-icon"])
               @match ? text_with_match : span(class: "pal-r-label") { @label }
-              span(class: ["pal-r-sub", ("warn" if @warn)]) { @sub } if @sub
+              trailing
             end
           end
 
           private
 
-          def jump_key
-            return Blog::Constants::EMPTY_HASH unless @jump
+          def key_data
+            return { key: "#{JUMP} #{@jump}", key_label: t(".jump", section: @label) } if @jump
+            return { key: @key, key_label: @label } if @key
 
-            { key: "#{JUMP} #{@jump}", key_label: t(".jump", section: @label) }
+            Blog::Constants::EMPTY_HASH
           end
 
           def text_with_match
@@ -51,6 +53,11 @@ module Admin
               span(class: "pal-r-label") { @label }
               span(class: "pal-r-match") { @match }
             end
+          end
+
+          def trailing
+            span(class: ["pal-r-sub", ("warn" if @warn)]) { @sub } if @sub
+            span(class: "kbd pal-r-key", aria: { hidden: "true" }) { @key } if @key
           end
         end
       end

@@ -803,6 +803,7 @@ en:
           anywhere: "anywhere"
           current: "current"
           escape: "esc"
+          go_to: "Go to"
           kinds:
             commit: "Commits"
             journal: "Journal entries"
@@ -868,6 +869,7 @@ en:
           skip_link: "Skip to content"
           waiting: "something waits"
         key_help:
+          escape: "Close a drawer, dialog or menu"
           next: "Highlight the next row"
           open: "Open the highlighted row"
           palette: "Open the command palette from anywhere"

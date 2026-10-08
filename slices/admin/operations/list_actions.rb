@@ -3,10 +3,10 @@
 module Admin
   module Operations
     class ListActions
-      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params) do
+      Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key) do
         def initialize(
           name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, post: false, needs: nil,
-          from: nil, from_params: Blog::Constants::EMPTY_HASH
+          from: nil, from_params: Blog::Constants::EMPTY_HASH, key: nil
         )
           super
         end
@@ -15,12 +15,12 @@ module Admin
       ALL = [
         Entry.new(
           name: :create_task, icon: "fa-list-check", route: :admin_new_task,
-          dialog: UI::Components::Tasks::CreateDialog::ID,
+          dialog: UI::Components::Tasks::CreateDialog::ID, key: "c",
         ),
         Entry.new(name: :create_decision, icon: "fa-scale-balanced", route: :admin_new_decision),
         Entry.new(
           name: :create_journal_entry, icon: "fa-feather", route: :admin_journal,
-          params: { write: Blog::Types::CHECKED },
+          params: { write: Blog::Types::CHECKED }, key: "w",
         ),
         Entry.new(name: :new_post, icon: "fa-file-lines", route: :admin_new_post),
         Entry.new(
@@ -47,7 +47,7 @@ module Admin
         ALL.map do |entry|
           Structs::Action.new(
             name: entry.name, icon: entry.icon, path: path(entry.route, entry.params), dialog: entry.dialog,
-            post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params),
+            post: entry.post, needs: entry.needs, from: path(entry.from, entry.from_params), key: entry.key,
           )
         end
       end

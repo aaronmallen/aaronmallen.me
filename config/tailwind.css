@@ -1031,16 +1031,20 @@
   @apply font-mono text-badge text-ink-muted;
 }
 
+@utility pal-r-key {
+  @apply ml-auto shrink-0;
+}
+
 @utility kbd {
   @apply rounded-xs border border-line bg-ground px-1.5 py-0.5 font-mono text-badge text-ink-muted;
 }
 
 @utility keys {
-  @apply m-0 grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2.5;
+  @apply m-0 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4;
 }
 
 @utility keys-row {
-  @apply col-span-2 grid grid-cols-subgrid items-baseline;
+  @apply col-span-2 grid grid-cols-subgrid items-center border-b border-line py-3 last:border-b-0;
 
   &[hidden] {
     @apply hidden;
@@ -1048,11 +1052,11 @@
 }
 
 @utility keys-keys {
-  @apply flex flex-wrap gap-1.5;
+  @apply col-start-2 row-start-1 flex flex-wrap justify-end gap-1.5;
 }
 
 @utility keys-label {
-  @apply m-0 meta text-ink;
+  @apply col-start-1 row-start-1 m-0 meta text-ink;
 }
 
 @utility slash {
@@ -4077,9 +4081,8 @@
     &:focus-visible,
     &:has([data-key-open]:focus-visible) {
       outline: none;
-      border-radius: var(--radius-btn);
-      background-color: var(--color-wash);
-      box-shadow: 0 0 0 0.5rem var(--color-wash);
+      background-color: color-mix(in oklab, var(--color-ink) 3%, transparent);
+      box-shadow: -12px 0 0 -9px var(--color-mk-green-text);
     }
   }
 }

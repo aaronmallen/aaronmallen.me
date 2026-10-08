@@ -8,7 +8,7 @@ module Admin
           BRAND_SPLIT = " "
           INBOX = :inbox
           SEARCH_KEY = "/"
-          SHORTCUT = "⌘/"
+          SHORTCUT = "⌘K"
 
           prop :navigation, Blog::Types::Instance(Structs::Navigation).optional
           prop :session, Blog::Types.Interface(:csrf_token, :signed_in?)

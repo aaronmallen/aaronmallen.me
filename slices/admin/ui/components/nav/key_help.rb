@@ -5,15 +5,18 @@ module Admin
     module Components
       module Nav
         class KeyHelp < Component
+          EDIT = "[data-key='e']"
           ID = "key-help"
           ROWS = "[data-key-list] [data-key-row]"
           TITLE_ID = "key-help-title"
           FIXED = [
             [%w[j], ".next", ROWS],
             [%w[k], ".previous", ROWS],
-            [%w[↵], ".open", ROWS],
-            [%w[⌘/ Ctrl+/], ".palette", nil],
+            [%w[↵], ".open", "body:has(#{EDIT}) #{ROWS}"],
+            [%w[↵ e], ".open", "body:not(:has(#{EDIT})) #{ROWS}"],
+            [%w[⌘K ⌘/ Ctrl+K Ctrl+/], ".palette", nil],
             [%w[Alt+↑ Alt+↓], ".reorder", "[data-task-grip]:not([hidden])"],
+            [%w[esc], ".escape", nil],
           ].freeze
 
           def view_template
@@ -27,7 +30,7 @@ module Admin
 
           def fixed(keys, label_key, needs)
             div(class: "keys-row", data: { key_help_needs: needs }) do
-              dt(class: "keys-keys") { keys.each { kbd(class: "kbd") { it } } }
+              dt(class: "keys-keys") { keys.each { |key| kbd(class: "kbd") { key } } }
               dd(class: "keys-label") { t(label_key) }
             end
           end

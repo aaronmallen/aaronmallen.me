@@ -353,7 +353,7 @@ RSpec.describe "Admin keys", type: :feature do
       end
     end
 
-    ["/admin", "/admin/tasks"].each do |screen|
+    ["/admin", "/admin/tasks", "/admin/analytics"].each do |screen|
       it "opens the task dialog on #{screen}" do
         visit screen
         press("c")
@@ -362,27 +362,66 @@ RSpec.describe "Admin keys", type: :feature do
       end
     end
 
-    it "does nothing on a screen with no create button", :aggregate_failures do
+    it "stays on the screen it opens the task dialog over" do
       visit "/admin/analytics"
       press("c")
-      press("?")
+      find(task_dialog)
 
-      expect(page).to have_css("dialog#key-help[open]")
       expect(page).to have_current_path("/admin/analytics")
     end
 
-    it "lists c in the help overlay where it works" do
+    it "lists the screen's own c in the help overlay" do
       visit "/admin/posts"
       press("?")
 
       expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ac\s+New post\z/)
     end
 
-    it "leaves c out of the help overlay where it does nothing" do
+    it "lists c as a new task where the screen has no create button" do
       visit "/admin/analytics"
       press("?")
 
-      expect(find_by_id("key-help")).to have_no_css(".keys-row", text: /\Ac\s/)
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ac\s+Create task\z/)
+    end
+  end
+
+  describe "w" do
+    before { visit "/admin/analytics" }
+
+    it "opens a journal entry" do
+      press("w")
+
+      expect(page).to have_current_path("/admin/journal?write=1")
+    end
+
+    it "lists w in the help overlay" do
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Aw\s+Create journal entry\z/)
+    end
+  end
+
+  describe "e on a row no row key claims" do
+    let!(:post) { create(:post, title: "Only post") }
+
+    before { visit "/admin/posts" }
+
+    it "opens the highlighted row" do
+      press("j", "e")
+
+      expect(page).to have_current_path("/admin/posts/#{post.id}/edit")
+    end
+
+    it "does nothing with no highlight" do
+      press("e")
+
+      expect(page).to have_current_path("/admin/posts")
+    end
+
+    it "lists e beside enter in the help overlay" do
+      press("?")
+
+      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\A↵\s*e\s+Open the highlighted row\z/)
     end
   end
 
@@ -430,6 +469,15 @@ RSpec.describe "Admin keys", type: :feature do
       it "lists the keys the screen's controls carry", :aggregate_failures do
         expect(help).to have_css(".keys-row", text: %r{\A/\s+Open the command palette\z})
         expect(help).to have_css(".keys-row", text: /\A\?\s+Show the keys\z/)
+      end
+
+      it "lists the palette chords and escape", :aggregate_failures do
+        expect(help).to have_css(".keys-row", text: %r{\A⌘K\s*⌘/\s*Ctrl\+K\s*Ctrl\+/\s+Open the command palette})
+        expect(help).to have_css(".keys-row", text: /\Aesc\s+Close a drawer, dialog or menu\z/)
+      end
+
+      it "leaves e off enter where a row key claims it" do
+        expect(help).to have_css(".keys-row", text: /\A↵\s+Open the highlighted row\z/)
       end
 
       it "lists the reorder keys on a task list" do

@@ -52,21 +52,52 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(evaluate_script("document.activeElement.getBoundingClientRect().height")).to be >= 44
     end
 
-    it "lists every section, under its group", :aggregate_failures do
-      expect(page).to have_css(".pal-g", text: /tasks/i)
-      expect(page).to have_css("#command-palette-messages")
+    it "lists every section and settings tab under Go to", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-go-to']") do
+        expect(page).to have_css(".pal-g", text: /go to/i)
+        expect(page).to have_css("#command-palette-messages")
+        expect(page).to have_css("#command-palette-security")
+      end
+    end
+
+    it "orders the groups Actions, Saved views, Go to, Records, Search" do
+      groups = page.all("#command-palette [data-palette-group]", visible: :all).map { it["aria-labelledby"] }
+      names = groups.map { it.sub(/\Acommand-palette-(group-)?/, "").sub(/\Akind-.+/, "records") }
+
+      expect(names.uniq).to eq(%w[actions saved-views go-to records see-all])
+    end
+
+    it "shows the key on the actions that have one", :aggregate_failures do
+      expect(page).to have_css("#command-palette-create-task .pal-r-key", text: "c")
+      expect(page).to have_css("#command-palette-create-journal-entry .pal-r-key", text: "w")
     end
 
     it "selects the first row" do
-      expect(active).to eq("command-palette-today")
+      expect(active).to eq("command-palette-create-task")
     end
 
     it "points the combobox at the selected row" do
-      expect(query["aria-activedescendant"]).to eq("command-palette-today")
+      expect(query["aria-activedescendant"]).to eq("command-palette-create-task")
     end
 
     it "holds the task back until you ask for one" do
       expect(page).to have_no_css("#command-palette-kind-task")
+    end
+  end
+
+  describe "opening it with ⌘K" do
+    before { find("body").send_keys([:meta, "k"]) }
+
+    it "opens the dialog" do
+      expect(page).to have_css("dialog#command-palette[open]")
+    end
+  end
+
+  describe "opening it with Ctrl+K" do
+    before { find("body").send_keys([:control, "k"]) }
+
+    it "opens the dialog" do
+      expect(page).to have_css("dialog#command-palette[open]")
     end
   end
 
@@ -353,19 +384,19 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "steps down the list" do
-      expect(active).to eq("command-palette-tasks")
+      expect(active).to eq("command-palette-create-decision")
     end
 
     it "steps back up" do
       query.send_keys(:up)
 
-      expect(active).to eq("command-palette-today")
+      expect(active).to eq("command-palette-create-task")
     end
 
     it "stops at the top" do
       query.send_keys(:up, :up)
 
-      expect(active).to eq("command-palette-today")
+      expect(active).to eq("command-palette-create-task")
     end
   end
 

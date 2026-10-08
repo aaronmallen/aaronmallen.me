@@ -9,6 +9,7 @@ const FIELD = [
 ].join(", ");
 const MODIFIERS = ["Alt", "AltGraph", "CapsLock", "Control", "Meta", "Shift"];
 const OPEN = "[data-key-open]";
+const OPEN_KEY = "e";
 const ROW = "[data-key-row]";
 const ROWS = "[data-key-list] [data-key-row]";
 const STEPS = { j: 1, k: -1 };
@@ -52,7 +53,8 @@ function press(event) {
     return event.preventDefault();
   }
 
-  const control = find(key, event.target);
+  const control =
+    find(key, event.target) ?? (key === OPEN_KEY ? event.target.closest?.(ROWS)?.querySelector(OPEN) : null);
   if (!control) return;
 
   event.preventDefault();

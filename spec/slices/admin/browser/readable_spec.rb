@@ -40,6 +40,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def dialogs
     {
+      "key help" => -> { open_key_help },
       "palette" => -> { open_palette },
       "person dialog" => -> { open_person_dialog },
       "task modal" => -> { open_modal },
@@ -76,6 +77,13 @@ RSpec.describe "Admin screens", type: :feature do
       "journal links" => "/admin/journal?to=#{journal_entry.entry_date.iso8601}&edit=#{journal_entry.id}",
       "work entry links" => "/admin/projects?filter=work&edit=#{work_entry.id}",
     }
+  end
+
+  def open_key_help
+    draft
+    visit "/admin/posts"
+    find("body").send_keys("?")
+    find("dialog#key-help[open]")
   end
 
   def open_modal

@@ -7,7 +7,8 @@ module Admin
         class Palette < Component
           ACTIONS_GROUP = "command-palette-group-actions"
           DIALOG_ID = "command-palette"
-          HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘/" }.freeze
+          GO_TO_GROUP = "command-palette-group-go-to"
+          HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘K" }.freeze
           KINDS = {
             Blog::Types::SearchKind["task"] => "fa-list-check",
             Blog::Types::SearchKind["post"] => "fa-file-lines",
@@ -62,7 +63,7 @@ module Admin
 
             PaletteRow(
               id: action.id, icon: action.icon, label:, text: "#{label}, #{t(action.text_key)}".downcase,
-              href: action.path, dialog: action.dialog, post: action.post, needs: action.needs&.to_s,
+              href: action.path, dialog: action.dialog, post: action.post, needs: action.needs&.to_s, key: action.key,
             )
           end
 
@@ -86,6 +87,12 @@ module Admin
                   plain(t(key))
                 end
               end
+            end
+          end
+
+          def go_to_group
+            row_group(GO_TO_GROUP, t(".go_to")) do
+              @sections.each { section_row(it) }
             end
           end
 
@@ -114,9 +121,9 @@ module Admin
               id: LIST_ID, class: "pal-l", role: "listbox",
               aria: { label: t(".results_label") }, data: { palette_list: true },
             ) do
-              section_groups
               action_group
               PaletteSavedViews()
+              go_to_group
               KINDS.each { |kind, icon| kind_group(kind, icon) }
               see_all_group
             end
@@ -124,14 +131,6 @@ module Admin
 
           def row_group(id, heading, data: Blog::Constants::EMPTY_HASH, &)
             PaletteGroup(id:, heading:, data:, &)
-          end
-
-          def section_groups
-            @sections.group_by(&:group).each_value do |sections|
-              row_group("command-palette-group-#{sections.first.group}", t(sections.first.group_key)) do
-                sections.each { section_row(it) }
-              end
-            end
           end
 
           def section_row(section)

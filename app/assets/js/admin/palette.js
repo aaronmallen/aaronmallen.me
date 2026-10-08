@@ -10,7 +10,8 @@ const FOUND = "[data-palette-found]";
 const NO_TASK = "no_task";
 const OPTION = "[data-palette-option]";
 const SHOWN = "[data-palette-option]:not([hidden])";
-const SLASH_CODES = ["Slash", "NumpadDivide"];
+const OPEN_CODES = ["Slash", "NumpadDivide", "KeyK"];
+const OPEN_KEYS = ["/", "k", "K"];
 const TASK = "[data-task-read]";
 const TITLE = "{title}";
 
@@ -244,7 +245,7 @@ function hiddenField(name, value) {
 }
 
 function opens(event) {
-  return (event.metaKey || event.ctrlKey) && (event.key === "/" || SLASH_CODES.includes(event.code));
+  return (event.metaKey || event.ctrlKey) && (OPEN_KEYS.includes(event.key) || OPEN_CODES.includes(event.code));
 }
 
 function post(option, token) {
