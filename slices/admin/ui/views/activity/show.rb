@@ -17,13 +17,9 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:)
 
-            Split do
-              Filters(**@filters, saved_views: @saved_views)
-              div(class: "activity-main") do
-                timeline
-                DayPager(older: @older, newer: @newer, **@filters.slice(:from, :to, :types, :text))
-              end
-            end
+            Filters(**@filters, saved_views: @saved_views)
+            Card(class: "activity-main") { timeline }
+            DayPager(older: @older, newer: @newer, **@filters.slice(:from, :to, :types, :text))
           end
 
           private

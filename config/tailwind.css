@@ -1514,15 +1514,6 @@
   @apply flex flex-col gap-4;
 }
 
-@utility split {
-  @apply grid gap-6;
-  grid-template-columns: var(--container-rail) minmax(0, 1fr);
-
-  @media (width < 53.75rem) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 @utility journal-words {
   @apply meta;
 }
@@ -1699,16 +1690,6 @@
   @apply inline-flex items-center gap-1.5;
 }
 
-@utility activity-rail {
-  @media (width >= 53.75rem) {
-    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
-  }
-}
-
-@utility activity-main {
-  @apply flex min-w-0 flex-col gap-6;
-}
-
 @utility activity-icon {
   @apply w-4 shrink-0 text-center text-icon-sm;
 
@@ -1735,22 +1716,6 @@
   &.orange {
     @apply text-mk-orange;
   }
-}
-
-@utility activity-types {
-  @apply flex flex-col gap-2;
-}
-
-@utility activity-type {
-  @apply flex items-center gap-2;
-}
-
-@utility activity-type-count {
-  @apply ml-auto meta;
-}
-
-@utility activity-day {
-  @apply flex flex-col;
 }
 
 @utility activity-event {
@@ -2887,18 +2852,6 @@
 
   & .field {
     @apply w-full;
-  }
-}
-
-@utility search-filters {
-  @apply flex flex-wrap items-center gap-2;
-
-  & input.inp {
-    @apply w-56 max-w-full;
-  }
-
-  & select.inp {
-    @apply w-auto max-w-full;
   }
 }
 
@@ -4412,6 +4365,160 @@
 
 @utility meter-count {
   @apply shrink-0 font-mono text-meta tabular-nums text-ink-muted;
+}
+
+@utility insights {
+  @apply flex flex-col gap-stack;
+
+  & .chart-bars {
+    height: clamp(180px, 22vw, 320px);
+  }
+
+  & .chart.sm .curve {
+    @apply h-24;
+  }
+
+  & .tbl-c:first-child {
+    @apply w-full max-w-0;
+  }
+
+  & .tbl-h:not(:first-child),
+  & .tbl-c.num {
+    @apply pl-3 whitespace-nowrap;
+  }
+
+  & .tbl-title {
+    @apply truncate;
+  }
+}
+
+@utility feed-aggregators {
+  @apply mt-4;
+}
+
+@utility heat-axis {
+  @apply mt-2 flex justify-between pl-10 meta;
+}
+
+@utility activity-bar {
+  @apply mb-4 flex flex-wrap items-end gap-x-3.5 gap-y-2.5;
+
+  & .saved-views {
+    @apply self-end;
+  }
+
+  & input[type="search"] {
+    @apply w-72 max-w-full;
+  }
+}
+
+@utility activity-filter {
+  @apply contents;
+
+  & > noscript {
+    @apply self-end;
+  }
+}
+
+@utility activity-types {
+  @apply order-1 flex basis-full flex-wrap gap-1.5;
+}
+
+@utility activity-type {
+  @apply inline-flex cursor-pointer items-center gap-2 rounded-full border border-line px-3 py-1.5;
+  @apply font-mono text-meta text-ink-muted transition-colors duration-150 ease-in-out;
+
+  &:has(:checked) {
+    @apply border-ink-muted bg-ground-sunk text-ink;
+  }
+
+  &:has(:focus-visible) {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility activity-type-count {
+  @apply border-l border-line pl-2 text-ink-muted;
+}
+
+@utility activity-hint {
+  @apply order-1 -mt-1 basis-full;
+}
+
+@utility activity-day {
+  @apply grid grid-cols-1 gap-x-7 gap-y-1;
+
+  & + & {
+    @apply mt-5 border-t border-line pt-5;
+  }
+
+  & > .day-head {
+    @apply flex-col-reverse items-start gap-0.5;
+  }
+
+  & .day-rule {
+    @apply hidden;
+  }
+
+  & .day-note {
+    @apply font-display text-card-title font-bold text-ink;
+  }
+
+  & .day-date {
+    @apply font-mono text-meta font-normal text-ink-muted;
+  }
+
+  @media (width >= 53.75rem) {
+    grid-template-columns: 200px minmax(0, 1fr);
+
+    & > .day-head {
+      @apply self-start bg-transparent pt-1;
+    }
+  }
+}
+
+@utility activity-events {
+  @apply flex min-w-0 flex-col;
+}
+
+@utility search-box {
+  @apply mb-3.5 flex flex-wrap items-center gap-2;
+
+  & input[type="search"] {
+    @apply min-w-0 flex-1 rounded-card px-5 py-4 font-display text-[1.4rem];
+  }
+}
+
+@utility search-kinds {
+  @apply mb-5 flex flex-wrap gap-1.5;
+}
+
+@utility search-kind {
+  @apply focus-ring;
+  @apply inline-flex items-center gap-2 rounded-full border border-line px-3 py-1.5;
+  @apply font-mono text-meta text-ink-muted no-underline transition-colors duration-150 ease-in-out;
+
+  &:hover,
+  &[aria-current] {
+    @apply text-ink;
+  }
+
+  &[aria-current] {
+    @apply border-ink-muted bg-ground-sunk;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility commit-stats {
+  @apply mt-5 grid gap-stack;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
 }
 
 @utility field {

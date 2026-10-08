@@ -13,16 +13,23 @@ module Admin
           prop :records, Blog::Types::Hash
 
           def view_template
-            PageHead(title: subject, sub:, sub_icon: "fa-solid fa-code-commit") { github_link }
+            PageHead(title: subject, kicker: t(".kicker", sha: short_sha), sub:, sub_icon: "fa-solid fa-code-commit") do
+              BackLink(href: path(:admin_activity)) { t(".back") }
+              github_link
+            end
 
-            Grid(columns: 3) { stats }
-
-            Card(label: t(".label"), title: t(".title")) { message }
-
-            linked
+            div(class: "g-main") do
+              Card(label: t(".label"), title: t(".title")) { body }
+              aside { linked }
+            end
           end
 
           private
+
+          def body
+            message
+            div(class: "commit-stats") { stats }
+          end
 
           def clock = l(@commit.commit_time, format: :clock)
 
@@ -55,9 +62,9 @@ module Admin
           def short_sha = @commit.sha[0, SHA_LENGTH]
 
           def stats
-            Stat(key: t(".sha"), value: short_sha)
             Stat(key: t(".added"), value: "+#{@commit.additions}")
             Stat(key: t(".removed"), value: "−#{@commit.deletions}")
+            Stat(key: t(".sha"), value: short_sha)
           end
 
           def sub = t(".sub", repo: @commit.repo, branch: @commit.branch, day:, clock:)

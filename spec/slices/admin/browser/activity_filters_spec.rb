@@ -10,21 +10,23 @@ RSpec.describe "Admin activity filters", type: :feature do
     visit "/admin/activity"
   end
 
+  def toggle(name) = find(".activity-type", text: name).click
+
   it "puts an unchecked type in the URL" do
-    uncheck "Blog posts"
+    toggle "Blog posts"
 
     expect(page).to have_current_path(%r{/admin/activity\?.*types%5Bpost%5D=0})
   end
 
   describe "going back after unchecking a type" do
     before do
-      uncheck "Blog posts"
+      toggle "Blog posts"
       page.assert_no_selector(".activity-event", text: "A published post")
       page.go_back
     end
 
     it "restores the earlier filters" do
-      expect(page).to have_checked_field("Blog posts")
+      expect(page).to have_checked_field("Blog posts", visible: :all)
     end
 
     it "restores the earlier timeline" do

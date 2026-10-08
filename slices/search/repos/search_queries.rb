@@ -5,6 +5,13 @@ module Search
     class SearchQueries < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
+      def counts(text:, kinds: Blog::Types::SearchKind.values)
+        phrase = text.to_s.strip
+        return Blog::Constants::EMPTY_HASH if phrase.empty?
+
+        search_documents.kind_counts(phrase, kinds:).to_a.to_h { [it[:kind], it[:count]] }
+      end
+
       def search(text:, page:, kinds: Blog::Types::SearchKind.values, per_kind: nil)
         phrase = text.to_s.strip
         return page.fill(NONE) if phrase.empty?

@@ -9,6 +9,7 @@ module Admin
       include Deps[
         event_queries: "analytics.repos.analytics_event_queries",
         feed_queries: "analytics.repos.feed_fetch_queries",
+        page_queries: "analytics.repos.analytics_page_queries",
         post_queries: "posts.repos.post_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
         webmention_queries: "social.repos.webmention_queries",
@@ -40,9 +41,12 @@ module Admin
 
       def period(from, to)
         summary = rollup_queries.summary_between(from:, to:)
+        ranked = RANKED.to_h { [it, summary.fetch(it).take(TOP_ROWS)] }
 
         {
-          **RANKED.to_h { [it, summary.fetch(it).take(TOP_ROWS)] },
+          **ranked,
+          paths: with_posts(ranked.fetch(:paths)),
+          scroll: page_queries.scroll_depths_between(from:, to:),
           series: summary.fetch(:days),
           totals: summary.fetch(:totals),
         }
@@ -65,6 +69,12 @@ module Admin
           posts: mentioned_posts(webmention_queries.received_by_post(from:, to:)),
           received: webmention_queries.received_between(from:, to:),
         }
+      end
+
+      def with_posts(paths)
+        ids = rollup_queries.post_ids_by_path(paths.map { it[:path] })
+
+        paths.map { it.merge(post_id: ids[it[:path]]) }
       end
     end
   end

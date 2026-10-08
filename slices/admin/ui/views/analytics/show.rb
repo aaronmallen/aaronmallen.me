@@ -7,8 +7,6 @@ module Admin
         class Show < View
           include Components::Analytics
 
-          SIGNED = "%+d"
-
           prop :change, Blog::Types::Integer.optional, reader: :private
           prop :countries, Blog::Types::Array.of(Blog::Types::Hash)
           prop :feed, Blog::Types::Hash
@@ -17,45 +15,52 @@ module Admin
           prop :range, Blog::Types::AnalyticsRange
           prop :read_time, Blog::Types::Integer, reader: :private
           prop :referrers, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :scroll, Blog::Types::Hash
           prop :series, Blog::Types::Array.of(Blog::Types::Hash)
           prop :totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :webmentions, Blog::Types::Hash
           prop :weekday_hours, Blog::Types::Hash
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @range)) { range_form }
+            PageHead(title: t(".heading"), sub:) { range_form }
 
-            Grid(columns: 4) { stats }
-            ChartCard(series: @series)
-
-            Grid(columns: 2) do
-              SideStack do
-                PagesCard(paths: @paths)
-                HourGridCard(**@weekday_hours)
-              end
-              SideStack { side_cards }
+            div(class: "insights") do
+              ChartCard(series: @series)
+              div(class: "cols") { cards }
             end
           end
 
           private
 
-          def aggregators
-            @feed.fetch(:aggregators).map { { count: it[:subscribers], label: it[:aggregator] } }
+          def cards
+            PagesCard(paths: @paths)
+            HourGridCard(**@weekday_hours)
+            ReferrersCard(rows: @referrers)
+            CountriesCard(rows: @countries)
+            ScrollCard(reached: @scroll.fetch(:reached), views: @scroll.fetch(:views))
+            FeedCard(**@feed.slice(:aggregators, :days, :latest))
+            mentions_card
           end
 
           def change_text
-            change ? t(".change", count: @range, percent: format(SIGNED, change)) : t(".no_prior")
+            return t(".no_prior") unless change
+
+            t(change.negative? ? ".down" : ".up", count: @range, percent: change.abs)
           end
 
           def count(number) = Blog::Helpers::Figures.count(number)
 
-          def feed_cards
-            FeedCard(**@feed.slice(:days, :latest))
-            MeterCard(color: :blue, empty: t(".no_aggregators"), rows: aggregators, title: t(".aggregators"))
-          end
-
           def mentioned_posts
             @webmentions.fetch(:posts).map { { count: it[:count], label: it[:title] } }
+          end
+
+          def mentions_card
+            received, pending = @webmentions.values_at(:received, :pending)
+
+            MeterCard(
+              color: :pink, empty: t(".no_mentions"), rows: mentioned_posts, title: t(".mentioned_posts"),
+              side: dotted(t(".received", count: received, formatted: count(received)), t(".pending", count: pending)),
+            )
           end
 
           def range_form
@@ -68,42 +73,21 @@ module Admin
             )
           end
 
-          def side_cards
-            ReferrersCard(rows: @referrers)
-            CountriesCard(rows: @countries)
-            MeterCard(
-              color: :pink, empty: t(".no_mentions"), rows: mentioned_posts, title: t(".mentioned_posts"),
+          def sub
+            t(
+              ".lede",
+              views: t(".views", count: views, formatted: count(views)),
+              visitors: t(".visitors", count: visitors, formatted: count(visitors)),
+              count: @range,
+              change: change_text,
+              per_visit:,
+              read: Blog::Helpers::Figures.duration(read_time),
             )
-            feed_cards
-          end
-
-          def stats
-            views_stat
-            Stat(key: t(".visitors"), value: count(visitors), change: t(".per_visit", rate: per_visit))
-            Stat(key: t(".read"), value: Blog::Helpers::Figures.duration(read_time), change: t(".read_note"))
-            webmentions_stat
           end
 
           def views = @totals.fetch(:views)
 
-          def views_stat
-            Stat(
-              key: t(".views"),
-              value: Blog::Helpers::Figures.count(views),
-              change: change_text,
-              down: change.to_i.negative?,
-            )
-          end
-
           def visitors = @totals.fetch(:visitors)
-
-          def webmentions_stat
-            Stat(
-              key: t(".webmentions"),
-              value: Blog::Helpers::Figures.count(@webmentions.fetch(:received)),
-              change: t(".pending", count: @webmentions.fetch(:pending)),
-            )
-          end
         end
       end
     end

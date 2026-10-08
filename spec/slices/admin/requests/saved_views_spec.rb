@@ -53,10 +53,10 @@ RSpec.describe "Admin saved views", type: :request do
           expect(page).to have_css(".screen-tabs-side > .saved-views")
         end
       else
-        it "puts the saved views before the filters" do
+        it "puts the saved views in the filter bar" do
           get url
 
-          expect(page).to have_css(".saved-views + *")
+          expect(page).to have_css(".activity-bar > .saved-views")
         end
       end
 

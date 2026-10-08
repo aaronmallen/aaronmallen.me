@@ -24,6 +24,10 @@ module Analytics
 
       def newest_day = analytics_rollups.newest_day
 
+      def post_ids_by_path(paths)
+        analytics_rollup_paths.posts_at(paths).to_a.to_h { [it.fetch(:path), it.fetch(:post_id)] }
+      end
+
       def reach_between(from:, to:, path: nil)
         complete = event_queries.complete_from
         counts = months(from, to).map { reach(it, path, complete) }

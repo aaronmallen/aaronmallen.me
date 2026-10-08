@@ -10,6 +10,7 @@ module Admin
           MIDDLE = 2
           STEP = 10
 
+          prop :aggregators, Blog::Types::Array.of(Blog::Types::Hash)
           prop :days, Blog::Types::Array.of(Blog::Types::Hash)
           prop :latest, Blog::Types::Integer
 
@@ -17,15 +18,22 @@ module Admin
             Card(title: t(".title")) do |card|
               card.side { span(class: "chart-peak") { t(".latest", count: Blog::Helpers::Figures.count(@latest)) } }
 
-              div(class: "chart") do
-                curve
-                div(class: "curve-dates") { labels.each { |day| span { short(day) } } }
-              end
+              chart
               readings
+              div(class: "feed-aggregators") { Meters(color: :blue, empty: t(".no_aggregators"), rows: aggregators) }
             end
           end
 
           private
+
+          def aggregators = @aggregators.map { { count: it[:subscribers], label: it[:aggregator] } }
+
+          def chart
+            div(class: "chart sm") do
+              curve
+              div(class: "curve-dates") { labels.each { |day| span { short(day) } } }
+            end
+          end
 
           def counts = @days.map { it[:subscribers] }
 

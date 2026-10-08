@@ -7,11 +7,11 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
   def bars = page.all(".chart-bar").map { it[:style] }
 
+  def lede = page.find(".page-head-sub").text
+
   def message(key) = i18n.t(key, scope: "ui")
 
   def meter_card(title) = page.find(".card", text: title)
-
-  def stat(key) = page.find(".stat", text: key)
 
   def tips = page.all(".chart-tip").map(&:text)
 
@@ -27,7 +27,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "heads the page with the range" do
-        expect(page).to have_css(".page-head-sub", text: "Last 7 days · self-hosted rollups, no third-party scripts")
+        expect(lede).to include("in the last 7 days").and end_with("Self-hosted rollups, no third-party scripts.")
       end
 
       it "answers with the page titled Analytics", :aggregate_failures do
@@ -35,24 +35,24 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         expect(page).to have_title("Analytics | Admin | #{Hanami.app.settings.owner_name}")
       end
 
-      it "totals the page views over the range" do
-        expect(stat("Page views")).to have_css(".stat-value", exact_text: "40")
-      end
-
-      it "totals the visitors over the range" do
-        expect(stat("Visitors")).to have_css(".stat-value", exact_text: "25")
+      it "totals the page views and the visitors over the range" do
+        expect(lede).to start_with("40 views from 25 visitors")
       end
 
       it "averages the read time over the page views" do
-        expect(stat("Avg. read")).to have_css(".stat-value", exact_text: "0:22")
+        expect(lede).to include("0:22 average read")
       end
 
       it "divides the views by the visitors for pages per visit" do
-        expect(stat("Visitors")).to have_css(".stat-change", text: "1.6 pages per visit")
+        expect(lede).to include("1.6 pages per visit")
       end
 
       it "compares the views against the previous range of the same length" do
-        expect(stat("Page views")).to have_css(".stat-change.down", text: "-60% vs. previous 7 days")
+        expect(lede).to include("down 60% on the previous 7 days")
+      end
+
+      it "draws no stat strip" do
+        expect(page).to have_no_css(".stat")
       end
 
       it "draws one bar per day in the range" do
@@ -86,7 +86,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       it "totals the days the range covers" do
         get "/admin/analytics", range: "14"
 
-        expect(stat("Page views")).to have_css(".stat-value", exact_text: "110")
+        expect(lede).to start_with("110 views")
       end
 
       it "draws one bar per day" do
@@ -121,11 +121,11 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "says there is no prior period" do
-        expect(stat("Page views")).to have_css(".stat-change", text: "no prior period")
+        expect(lede).to include("with no prior period to compare")
       end
 
-      it "leaves the change unmarked" do
-        expect(stat("Page views")).to have_no_css(".stat-change.down")
+      it "names no rise or fall" do
+        expect(lede).not_to match(/\b(up|down) \d/)
       end
     end
 
@@ -138,7 +138,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts today's raw events in the totals" do
-        expect(stat("Page views")).to have_css(".stat-value", exact_text: "6")
+        expect(lede).to start_with("6 views")
       end
 
       it "counts today's raw events in the chart" do
@@ -162,7 +162,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts every unrolled day's raw events in the totals" do
-        expect(stat("Page views")).to have_css(".stat-value", exact_text: "7")
+        expect(lede).to start_with("7 views")
       end
 
       it "counts each unrolled day's raw events on its own day in the chart" do
@@ -232,7 +232,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "still counts views for the top pages and the total", :aggregate_failures do
         expect(page.first("tbody .tbl-c.num")).to have_text("8")
-        expect(stat("Page views")).to have_css(".stat-value", exact_text: "12")
+        expect(lede).to start_with("12 views")
       end
 
       it "names a country with no code as unknown" do
@@ -302,7 +302,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
-      def cell(hour, weekday) = grid.all("tbody tr")[hour].all(".heat-cell")[weekday]
+      def cell(hour, weekday) = grid.all("tbody tr")[weekday].all(".heat-cell")[hour]
 
       def grid = page.find("table.heat")
 
@@ -313,20 +313,25 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         get "/admin/analytics"
       end
 
-      it "draws a row for every hour of the day" do
-        expect(grid.all("tbody tr").size).to eq(24)
+      it "draws a row for every day of the week" do
+        expect(grid.all("tbody tr").size).to eq(7)
       end
 
-      it "draws a cell for every day of the week in each row" do
-        expect(grid.all("tbody tr").map { it.all(".heat-cell").size }.uniq).to eq([7])
+      it "draws a cell for every hour of the day in each row" do
+        expect(grid.all("tbody tr").map { it.all(".heat-cell").size }.uniq).to eq([24])
       end
 
-      it "heads the columns Monday to Sunday" do
-        expect(grid.all(".heat-day").map(&:text)).to eq(%w[Mon Tue Wed Thu Fri Sat Sun])
+      it "heads the rows Monday to Sunday" do
+        expect(grid.all("tbody .heat-day").map(&:text)).to eq(%w[Mon Tue Wed Thu Fri Sat Sun])
       end
 
-      it "names the window in the card head" do
-        expect(page.find(".card", text: "Readers by hour")).to have_css(".chart-peak", exact_text: "last 90 days")
+      it "heads the columns with the hours" do
+        expect(grid.all("thead .heat-hour").map(&:text)).to eq(Array.new(24) { format("%02d", it) })
+      end
+
+      it "names the window and the time zone in the card head" do
+        expect(page.find(".card", text: "Readers by hour"))
+          .to have_css(".chart-peak", exact_text: "last 90 days · Chicago time")
       end
 
       it "counts a late Sunday event in Sunday's 23 row, whatever its UTC date" do
@@ -353,6 +358,8 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
     end
 
     describe "with feed subscribers" do
+      def aggregators(part) = feed_card.all(".feed-aggregators .meter-#{part}").map(&:text)
+
       def feed_card = page.find(".card", text: "Feed subscribers")
 
       def readings = feed_card.all("tbody tr").map { it.all("th, td").map(&:text) }
@@ -392,17 +399,17 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "names each aggregator, most subscribers first" do
-        expect(meter_card("Feed aggregators").all(".meter-name").map(&:text)).to eq(%w[feedly inoreader])
+        expect(aggregators(:name)).to eq(%w[feedly inoreader])
       end
 
       it "counts each aggregator's latest count across its feeds" do
-        expect(meter_card("Feed aggregators").all(".meter-count").map(&:text)).to eq(%w[42 9])
+        expect(aggregators(:count)).to eq(%w[42 9])
       end
 
       it "takes in a longer range the aggregators it covers" do
         get "/admin/analytics", range: "14"
 
-        expect(meter_card("Feed aggregators").all(".meter-name").map(&:text)).to eq(%w[feedly inoreader newsblur])
+        expect(aggregators(:name)).to eq(%w[feedly inoreader newsblur])
       end
     end
 
@@ -428,12 +435,8 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         get "/admin/analytics"
       end
 
-      it "counts the mentions received over the range" do
-        expect(stat("Webmentions")).to have_css(".stat-value", exact_text: "4")
-      end
-
-      it "counts the mentions still waiting as the change" do
-        expect(stat("Webmentions")).to have_css(".stat-change", text: "3 pending")
+      it "counts the mentions received over the range and those still waiting in the card head" do
+        expect(meter_card("Webmentions per post")).to have_css(".chart-peak", exact_text: "4 received · 3 pending")
       end
 
       it "lists the posts with mentions, most first" do
@@ -462,7 +465,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "counts it as received" do
-        expect(stat("Webmentions")).to have_css(".stat-value", exact_text: "2")
+        expect(meter_card("Webmentions per post")).to have_css(".chart-peak", text: "2 received")
       end
 
       it "counts it against its post" do
@@ -481,12 +484,60 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
     end
 
+    describe "with a top page that is a post" do
+      let!(:post) { create(:post, :published, slug: "hello", title: "Hello") }
+
+      before do
+        create(:analytics_rollup, day: today, views: 12, visitors: 6)
+        { "/writing/hello" => "Hello", "/about" => "About" }.each do |path, title|
+          create(:analytics_rollup_path, day: today, path:, title:, views: 6, visitors: 3, bounces: 0)
+        end
+        get "/admin/analytics"
+      end
+
+      it "links the post to its analytics" do
+        expect(page).to have_link("Hello", href: "/admin/posts/#{post.id}/analytics")
+      end
+
+      it "leaves a page that is no post unlinked" do
+        expect(page).to have_no_link("About")
+      end
+    end
+
+    describe "with scroll depths" do
+      def scroll_card = page.find(".card", text: "Scroll depth")
+
+      before do
+        create(:analytics_rollup, day: today, views: 4, visitors: 4)
+        { "/writing/hello" => [100, 1], "/writing/other" => [25, 3] }.each do |path, (scroll_depth, views)|
+          create(:analytics_rollup_scroll_depth, day: today, path:, scroll_depth:, views:, visitors: views)
+        end
+        get "/admin/analytics"
+      end
+
+      it "shares out how far the views on every page reached" do
+        expect(scroll_card.all(".meter-count").map(&:text)).to eq(%w[100% 25% 25% 25%])
+      end
+    end
+
+    describe "with scroll depths not rolled up yet" do
+      before do
+        create(:analytics_event, path: "/writing/hello", scroll_depth: 75)
+        create(:analytics_event, path: "/writing/other", scroll_depth: 25)
+        get "/admin/analytics"
+      end
+
+      it "counts today's views on every page" do
+        expect(page.find(".card", text: "Scroll depth").all(".meter-count").map(&:text)).to eq(%w[100% 50% 50% 0%])
+      end
+    end
+
     describe "with no data at all" do
       before { get "/admin/analytics" }
 
-      it "answers with the page and zeroed stats", :aggregate_failures do
+      it "answers with the page and zeroed figures", :aggregate_failures do
         expect(last_response).to be_ok
-        expect(page.all(".stat-value").map(&:text)).to eq(["0", "0", "0:00", "0"])
+        expect(lede).to start_with("0 views from 0 visitors").and include("0:00 average read")
       end
 
       it "still draws a bar for every day" do
@@ -502,7 +553,11 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         expect(page).to have_css(".empty", exact_text: message("components.analytics.referrers_card.empty"))
         expect(page).to have_css(".empty", exact_text: message("components.analytics.countries_card.empty"))
         expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_mentions"))
-        expect(page).to have_css(".empty", exact_text: message("views.analytics.show.no_aggregators"))
+        expect(page).to have_css(".empty", exact_text: message("components.analytics.feed_card.no_aggregators"))
+      end
+
+      it "says there is no scroll depth yet" do
+        expect(page).to have_css(".empty", exact_text: message("components.analytics.scroll_card.empty"))
       end
     end
   end

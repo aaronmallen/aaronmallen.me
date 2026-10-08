@@ -55,7 +55,7 @@ RSpec.describe "Admin commit page", :frozen_clock, type: :request do
     it "shows the short sha and the line counts" do
       visit_commit(commit_record(sha: "abc1234#{'0' * 33}", additions: 12, deletions: 3))
 
-      expect(stats).to eq([["Commit", "abc1234"], ["Added", "+12"], ["Removed", "−3"]])
+      expect(stats).to eq([["Added", "+12"], ["Removed", "−3"], ["Commit", "abc1234"]])
     end
 
     it "shows the body, not just the first line" do
@@ -93,6 +93,24 @@ RSpec.describe "Admin commit page", :frozen_clock, type: :request do
       visit_commit(commit_record(message: "admin: add the view"))
 
       expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.commits.show.no_body"))
+    end
+
+    it "names the short sha above the subject" do
+      visit_commit(commit_record(sha: "abc1234#{'0' * 33}"))
+
+      expect(page).to have_css(".page-head-kicker", exact_text: "Commit abc1234")
+    end
+
+    it "links back to the activity" do
+      visit_commit(commit_record)
+
+      expect(page).to have_link("Activity", href: "/admin/activity")
+    end
+
+    it "puts the linked records beside the message" do
+      visit_commit(commit_record)
+
+      expect(page).to have_css(".g-main > .card + aside > .record-links")
     end
 
     it "links the commit on GitHub" do

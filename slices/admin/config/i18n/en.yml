@@ -333,6 +333,7 @@ en:
             other: "Feed subscribers per day, last %{count} days"
           day: "Day"
           latest: "latest %{count}"
+          no_aggregators: "No aggregator counts yet."
           subscribers: "Subscribers"
           title: "Feed subscribers"
         first_days_card:
@@ -378,8 +379,8 @@ en:
             other: "%{formatted} readers"
           title: "Readers by hour"
           window:
-            one: "last %{count} day"
-            other: "last %{count} days"
+            one: "last %{count} day · Chicago time"
+            other: "last %{count} days · Chicago time"
         pages_card:
           bounce: "Bounce"
           empty: "No page views yet."
@@ -1884,22 +1885,24 @@ en:
           span: "%{from} → %{to}"
       analytics:
         show:
-          aggregators: "Feed aggregators"
-          change: "%{percent}% vs. previous %{count} days"
+          down: "down %{percent}% on the previous %{count} days"
           heading: "Analytics"
+          lede: "%{views} from %{visitors} in the last %{count} days, %{change}. %{per_visit} pages per visit, %{read} average read. Self-hosted rollups, no third-party scripts."
           mentioned_posts: "Webmentions per post"
-          no_aggregators: "No aggregator counts yet."
           no_mentions: "No mentions yet."
-          no_prior: "no prior period"
+          no_prior: "with no prior period to compare"
           pending: "%{count} pending"
-          per_visit: "%{rate} pages per visit"
           range: "Range"
-          read: "Avg. read"
-          read_note: "per page view"
-          sub: "Last %{count} days · self-hosted rollups, no third-party scripts"
-          views: "Page views"
-          visitors: "Visitors"
-          webmentions: "Webmentions"
+          received:
+            one: "%{formatted} received"
+            other: "%{formatted} received"
+          up: "up %{percent}% on the previous %{count} days"
+          views:
+            one: "%{formatted} view"
+            other: "%{formatted} views"
+          visitors:
+            one: "%{formatted} visitor"
+            other: "%{formatted} visitors"
       calendar:
         show:
           heading: "Calendar"
@@ -1915,7 +1918,9 @@ en:
       commits:
         show:
           added: "Added"
+          back: "Activity"
           github: "View on GitHub"
+          kicker: "Commit %{sha}"
           label: "Git"
           no_body: "Nothing beyond the subject line."
           removed: "Removed"
@@ -2119,17 +2124,6 @@ en:
           empty: "Type a phrase to search every record."
           filter: "Kind"
           heading: "Search"
-          kind:
-            commit: "Commit"
-            journal: "Journal entry"
-            message: "Message"
-            person: "Person"
-            post: "Post"
-            project: "Project"
-            social: "Social post"
-            task: "Task"
-            webmention: "Webmention"
-            work: "Work entry"
           kinds:
             commit: "Commits"
             journal: "Journal entries"
@@ -2144,8 +2138,9 @@ en:
           no_match: "Nothing matches “%{query}”."
           placeholder: "search every record…"
           query: "Search for"
-          results: "Results"
-          sub: "Matches for “%{query}”"
+          sub:
+            one: "%{formatted} result for “%{query}”."
+            other: "%{formatted} results for “%{query}”."
       security:
         show:
           client: "MCP client"

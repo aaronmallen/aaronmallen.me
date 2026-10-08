@@ -5,20 +5,20 @@ module Admin
     module Views
       module Search
         class Index < View
-          ALL = ""
-          KIND_ID = "search-kind"
-          KIND_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kind.#{it}"] }.freeze
           KINDS_KEYS = Blog::Types::SearchKind.values.to_h { [it, ".kinds.#{it}"] }.freeze
           QUERY_ID = "search-q"
 
+          prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :kind, Blog::Types::SearchKind.optional
           prop :query, Blog::Types::String
           prop :results, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
-            PageHead(title: t(".heading"), sub: (t(".sub", query: @query) unless @query.empty?)) { filter_form }
+            PageHead(title: t(".heading"), sub:)
 
-            Card(title: t(".results"), data: { key_list: true }) { rows }
+            search_form
+            kinds unless @query.empty?
+            groups
             Pager(page: @results, route: :admin_search, params: { q: @query, kind: @kind }.compact)
           end
 
@@ -26,31 +26,62 @@ module Admin
 
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
-          def filter_form
-            AutoForm(action: path(:admin_search), role: "search", class: "search-filters") do
-              label(class: "sr-only", for: QUERY_ID) { t(".query") }
-              Input(type: "search", id: QUERY_ID, name: "q", value: @query, placeholder: t(".placeholder"))
-              label(class: "sr-only", for: KIND_ID) { t(".filter") }
-              Select(id: KIND_ID, name: "kind", options: kind_options, selected: @kind || ALL)
+          def group(kind, results)
+            Card(title: t(KINDS_KEYS.fetch(kind))) do |card|
+              card.side { span(class: "meta") { results.size.to_s } }
+              results.each { row(it) }
             end
           end
 
-          def kind_options = { ALL => t(".all"), **KINDS_KEYS.transform_values { t(it) } }
+          def groups
+            return empty if @results.rows.empty?
+
+            div(class: "cols", data: { key_list: true }) do
+              @results.rows.group_by { it.hit.kind }.each { |kind, results| group(kind, results) }
+            end
+          end
+
+          def kind_link(kind, text, count)
+            a(
+              class: "search-kind", href: path(:admin_search, **{ q: @query, kind: }.compact),
+              aria: { current: ("page" if kind == @kind) },
+            ) do
+              plain text
+              whitespace
+              span(class: "search-kind-count") { count.to_s }
+            end
+          end
+
+          def kinds
+            nav(class: "search-kinds", aria: { label: t(".filter") }) do
+              kind_link(nil, t(".all"), total)
+              KINDS_KEYS.each { |kind, key| kind_link(kind, t(key), @counts[kind]) if @counts[kind] }
+            end
+          end
 
           def row(result)
             hit = result.hit
 
             ListItem(title: hit.title, href: result.href, sub: hit.match) do
-              span { t(KIND_KEYS.fetch(hit.kind)) }
               span { l(hit.day, format: :medium) }
             end
           end
 
-          def rows
-            return empty if @results.rows.empty?
-
-            @results.rows.each { row(it) }
+          def search_form
+            AutoForm(action: path(:admin_search), role: "search", class: "search-box") do
+              label(class: "sr-only", for: QUERY_ID) { t(".query") }
+              Input(type: "search", id: QUERY_ID, name: "q", value: @query, placeholder: t(".placeholder"))
+              input(type: "hidden", name: "kind", value: @kind) if @kind
+            end
           end
+
+          def sub
+            return if @query.empty?
+
+            t(".sub", count: total, formatted: Blog::Helpers::Figures.count(total), query: @query)
+          end
+
+          def total = @counts.values.sum
         end
       end
     end

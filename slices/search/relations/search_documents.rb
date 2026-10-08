@@ -13,10 +13,16 @@ module Search
       def hits(phrase, kinds:, per_kind:, page:)
         return none if unmatchable?(phrase)
 
-        query = Sequel.function(:websearch_to_tsquery, CONFIG, phrase)
+        query = tsquery(phrase)
         found = capped(best(query, kinds), per_kind).order(*RANKED).limit(page.limit).offset(page.offset)
 
         found.from_self(alias: :found).select(*LINKED, headline(query)).order(*RANKED)
+      end
+
+      def kind_counts(phrase, kinds:)
+        return none if unmatchable?(phrase)
+
+        best(tsquery(phrase), kinds).group_and_count(:kind)
       end
 
       private
@@ -38,6 +44,8 @@ module Search
       end
 
       def headline(query) = Sequel.function(:ts_headline, CONFIG, :body, query, HEADLINE).as(:match)
+
+      def tsquery(phrase) = Sequel.function(:websearch_to_tsquery, CONFIG, phrase)
     end
   end
 end

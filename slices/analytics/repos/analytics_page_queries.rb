@@ -50,9 +50,11 @@ module Analytics
         }
       end
 
-      def scroll_depths_between(path:, from:, to:)
-        rolled = analytics_rollup_scroll_depths.between(from, to).for_path(path).by_depth.to_a.map(&:to_h)
-        rows = rolled + live_rows(:scroll_depths, path, from:, to:)
+      def scroll_depths_between(from:, to:, path: nil)
+        rolled = analytics_rollup_scroll_depths.between(from, to)
+        rolled = rolled.for_path(path) if path
+        live = path ? live_rows(:scroll_depths, path, from:, to:) : all_live_rows(:scroll_depths, from:, to:)
+        rows = rolled.by_depth.to_a.map(&:to_h) + live
         views = rows.sum { it.fetch(:views) }
 
         { views:, reached: Blog::Types::ScrollDepth.values.select(&:positive?).map { reached(it, rows, views) } }
@@ -65,6 +67,8 @@ module Analytics
       end
 
       private
+
+      def all_live_rows(name, from:, to:) = rollup_queries.unrolled_summaries(from:, to:).flat_map(&name)
 
       def combined_clicks(rows)
         rows.group_by { it.values_at(*LINK) }.map do |(link_host, link_path), found|
@@ -99,9 +103,7 @@ module Analytics
         row ? figures(row) : ZERO_DAY
       end
 
-      def live_rows(name, path, from:, to:)
-        rollup_queries.unrolled_summaries(from:, to:).flat_map(&name).select { it.fetch(:path) == path }
-      end
+      def live_rows(name, path, from:, to:) = all_live_rows(name, from:, to:).select { it.fetch(:path) == path }
 
       def measured_paths(rows, today)
         first = [analytics_rollups.oldest_day, event_queries.oldest_day].compact.min || today

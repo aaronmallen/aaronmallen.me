@@ -33,9 +33,17 @@ module Admin
 
           def page(entry)
             div(class: "tbl-page") do
-              span(class: "tbl-title") { entry[:title] || entry[:path] }
+              page_title(entry)
               span(class: "tbl-path") { entry[:path] }
             end
+          end
+
+          def page_title(entry)
+            text = entry[:title] || entry[:path]
+            id = entry[:post_id]
+            return span(class: "tbl-title") { text } unless id
+
+            a(class: "tbl-title", href: path(:admin_post_analytics, id:)) { text }
           end
 
           def row(entry)

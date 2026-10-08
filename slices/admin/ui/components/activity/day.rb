@@ -11,8 +11,8 @@ module Admin
 
           def view_template
             section(class: "activity-day") do
-              DayHead(date: @date, today: @today, count: @events.size)
-              @events.each { Event(event: it) }
+              DayHead(date: @date, today: @today, count: @events.size, sunk: true)
+              div(class: "activity-events") { @events.each { Event(event: it) } }
             end
           end
         end

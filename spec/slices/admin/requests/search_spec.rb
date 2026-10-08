@@ -3,6 +3,8 @@
 RSpec.describe "Admin search", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
 
+  def kinds = page.all(".search-kind").map { [it.text, it["aria-current"]] }
+
   def page = Capybara.string(last_response.body)
 
   def says(key, **) = i18n.t(["ui.views.search.index", key].join("."), **)
@@ -30,18 +32,25 @@ RSpec.describe "Admin search", type: :request do
         expect(titles).to contain_exactly("Track the zeppelin", "Zeppelins", "Zeppelin sighting")
       end
 
-      it "names each match's kind", :aggregate_failures do
-        expect(page).to have_css(".li", text: /Track the zeppelin.*Task/m)
-        expect(page).to have_css(".li", text: /Zeppelin sighting.*Message/m)
+      it "groups the matches by kind", :aggregate_failures do
+        expect(page.find(".card", text: "Tasks")).to have_css(".li-title", text: "Track the zeppelin")
+        expect(page.find(".card", text: "Messages")).to have_css(".li-title", text: "Zeppelin sighting")
+      end
+
+      it "counts the matches in the sub-line" do
+        expect(page).to have_css(".page-head-sub", exact_text: "3 results for “zeppelin”.")
       end
 
       it "keeps the query in the box" do
         expect(page).to have_field("q", with: "zeppelin")
       end
 
-      it "offers every kind in the filter, all of them chosen", :aggregate_failures do
-        expect(page).to have_select("kind", selected: "All kinds")
-        expect(page).to have_css("select[name='kind'] option", count: Blog::Types::SearchKind.values.size + 1)
+      it "offers every kind that matched, with its count, all of them chosen" do
+        expect(kinds).to eq([["All kinds 3", "page"], ["Tasks 1", nil], ["Posts 1", nil], ["Messages 1", nil]])
+      end
+
+      it "links each kind with the query kept" do
+        expect(page).to have_link("Messages 1", href: "/admin/search?q=zeppelin&kind=message")
       end
     end
 
@@ -56,8 +65,13 @@ RSpec.describe "Admin search", type: :request do
         expect(titles).to eq(["Zeppelin sighting"])
       end
 
-      it "keeps the kind chosen" do
-        expect(page).to have_select("kind", selected: "Messages")
+      it "keeps the kind chosen", :aggregate_failures do
+        expect(page).to have_css(".search-kind[aria-current='page']", text: "Messages")
+        expect(page).to have_field("kind", type: :hidden, with: "message")
+      end
+
+      it "still counts every kind" do
+        expect(page).to have_link("All kinds 2", href: "/admin/search?q=zeppelin")
       end
     end
 
@@ -86,7 +100,7 @@ RSpec.describe "Admin search", type: :request do
         get "/admin/search", q: "plumber", kind: "task", page: "2"
 
         expect(titles.length).to eq(1)
-        expect(page).to have_select("kind", selected: "Tasks")
+        expect(page).to have_css(".search-kind[aria-current='page']", text: "Tasks")
       end
 
       it "splits every match across the pages" do

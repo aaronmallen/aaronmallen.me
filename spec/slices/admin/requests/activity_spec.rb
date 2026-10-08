@@ -60,8 +60,16 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head h1", text: "Activity")
       end
 
-      it "lays out the filters beside the timeline" do
-        expect(page).to have_css(".split > .activity-rail + .activity-main")
+      it "lays out the filters in a bar above the timeline" do
+        expect(page).to have_css(".activity-bar + .card.activity-main")
+      end
+
+      it "groups the types as chips under one label" do
+        expect(page).to have_css(".activity-types[role='group'][aria-label='Include'] label.activity-type", count: 10)
+      end
+
+      it "ties the search hint to the search box" do
+        expect(page).to have_css("#activity-q[aria-describedby='activity-q-hint']").and have_css("p#activity-q-hint")
       end
 
       it "names the range in the sub-line" do
@@ -86,7 +94,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
 
       it "puts the Apply button after the filters" do
         expect(page).to have_css(
-          "form[action='/admin/activity'] > .form-stack + noscript button", text: "Apply", visible: :all,
+          "form[action='/admin/activity'] > .activity-hint + noscript button", text: "Apply", visible: :all,
         )
       end
     end
@@ -119,8 +127,8 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(page).to have_css(".day-note", text: "Yesterday · 1")
       end
 
-      it "heads each day on the page ground" do
-        expect(page).to have_no_css(".day-head.sunk")
+      it "heads each day on the card ground" do
+        expect(page).to have_css(".activity-main .day-head.sunk", count: 2)
       end
 
       it "shows the time each event happened" do
@@ -856,7 +864,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       it "draws a type as a plain checkbox, not a switch" do
         visit_activity
 
-        expect(page).to have_css("input.check[name='types[post]']:not([role])", visible: :all)
+        expect(page).to have_css("input[type='checkbox'][name='types[post]']:not([role])", visible: :all)
       end
     end
 

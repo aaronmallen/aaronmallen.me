@@ -5,38 +5,18 @@ module Admin
     module Components
       module Analytics
         class MeterCard < Component
-          COLORS = %i[blue pink violet].freeze
-
-          prop :color, Blog::Types::Symbol.enum(*COLORS)
+          prop :color, Blog::Types::Symbol.enum(*Meters::COLORS)
           prop :empty, Blog::Types::String
           prop :rows, Blog::Types::Array.of(Blog::Types::Hash)
           prop :title, Blog::Types::String
+          prop :side, Blog::Types::String.optional
 
           def view_template
-            Card(title: @title) do
-              next Empty { @empty } if @rows.empty?
-
-              @rows.each { row(it) }
+            Card(title: @title) do |card|
+              card.side { span(class: "chart-peak") { @side } } if @side
+              Meters(color: @color, empty: @empty, rows: @rows)
             end
           end
-
-          private
-
-          def bar(entry)
-            span(class: ["meter", @color.to_s]) do
-              span(class: "meter-fill", style: "width: #{Blog::Helpers::Figures.share(entry[:count].to_i, top)}%")
-            end
-          end
-
-          def row(entry)
-            div(class: "meter-row") do
-              span(class: "meter-name") { entry[:label] }
-              bar(entry)
-              span(class: "meter-count") { Blog::Helpers::Figures.count(entry[:count]) if entry[:count] }
-            end
-          end
-
-          def top = @top ||= @rows.filter_map { it[:count] }.max.to_i
         end
       end
     end

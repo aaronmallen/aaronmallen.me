@@ -5,6 +5,7 @@ module Admin
     module Components
       module Analytics
         class HourGridCard < Component
+          AXIS = [0, 12, 23].freeze
           HOUR = "%02d"
           WEEKDAYS = {
             ".days.monday.name" => ".days.monday.short",
@@ -14,7 +15,7 @@ module Admin
             ".days.friday.name" => ".days.friday.short",
             ".days.saturday.name" => ".days.saturday.short",
             ".days.sunday.name" => ".days.sunday.short",
-          }.freeze
+          }.to_a.freeze
 
           prop :days, Blog::Types::Integer
           prop :hours, Blog::Types::Array.of(Blog::Types::Array.of(Blog::Types::Integer))
@@ -23,13 +24,8 @@ module Admin
             Card(title: t(".title")) do |card|
               card.side { span(class: "chart-peak") { t(".window", count: @days) } }
 
-              div(class: "tbl-scroll") do
-                table(class: "heat") do
-                  caption(class: "sr-only") { t(".caption", count: @days) }
-                  head
-                  tbody { @hours.each_with_index { |counts, hour| row(hour, counts) } }
-                end
-              end
+              grid
+              div(class: "heat-axis", aria: { hidden: "true" }) { AXIS.each { |number| span { hour(number) } } }
             end
           end
 
@@ -41,20 +37,38 @@ module Admin
             end
           end
 
-          def head
-            thead do
-              tr do
-                td
-                WEEKDAYS.each { |name, short| th(class: "heat-day", scope: "col", abbr: t(name)) { t(short) } }
+          def grid
+            div(class: "tbl-scroll") do
+              table(class: "heat") do
+                caption(class: "sr-only") { t(".caption", count: @days) }
+                head
+                tbody { @hours.transpose.each_with_index { |counts, day| row(day, counts) } }
               end
             end
           end
 
+          def head
+            thead do
+              tr do
+                td
+                @hours.size.times { |number| hour_heading(number) }
+              end
+            end
+          end
+
+          def hour(number) = format(HOUR, number)
+
+          def hour_heading(number)
+            th(class: "heat-hour", scope: "col") { span(class: "sr-only") { hour(number) } }
+          end
+
           def peak = @peak ||= @hours.flatten.max.to_i
 
-          def row(hour, counts)
+          def row(day, counts)
+            name, short = WEEKDAYS.fetch(day)
+
             tr do
-              th(class: "heat-hour", scope: "row") { format(HOUR, hour) }
+              th(class: "heat-day", scope: "row", abbr: t(name)) { t(short) }
               counts.each { cell(it) }
             end
           end

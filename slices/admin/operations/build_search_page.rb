@@ -9,7 +9,12 @@ module Admin
         text = Blog::Types::TrimmedText[query]
         found = search_queries.search(text:, page:, kinds: kind ? [kind] : Blog::Types::SearchKind.values)
 
-        { kind:, query: text, results: found.with(rows: found.rows.map { result(it) }) }
+        {
+          counts: search_queries.counts(text:),
+          kind:,
+          query: text,
+          results: found.with(rows: found.rows.map { result(it) }),
+        }
       end
 
       private
