@@ -10,9 +10,10 @@ module Admin
           prop :value, Blog::Types::String
 
           def view_template
-            Card(title: t(".title")) do
-              div(class: "token-minted") do
-                label(class: "sr-only", for: ID) { t(".label") }
+            div(class: "token-minted") do
+              Icon(["fa-solid fa-key", "token-minted-icon"])
+              div(class: "token-minted-body") do
+                label(class: "token-minted-title", for: ID) { t(".title") }
                 Input(id: ID, readonly: true, value: @value, autocomplete: "off", spellcheck: "false")
                 Hint { t(".hint") }
               end

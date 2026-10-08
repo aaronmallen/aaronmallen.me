@@ -82,7 +82,7 @@ RSpec.describe "Admin MCP clients", type: :request do
       mcp_create(:oauth_client, client_name: "Stranger")
       get "/admin/clients"
 
-      expect(page).to have_css(".page-head-sub", exact_text: "1 connected client")
+      expect(page).to have_css(".card-side", exact_text: "1 connected client")
     end
 
     it "leaves out a registration that never got a token" do
@@ -143,6 +143,13 @@ RSpec.describe "Admin MCP clients", type: :request do
       get "/admin/clients"
 
       expect(row).to have_text("connected #{Blog::TimeZone.local(connected).strftime('%b %-d, %Y, %H:%M')}")
+    end
+
+    it "links each client to its sightings" do
+      connect(client_name: "Claude")
+      get "/admin/clients"
+
+      expect(row).to have_link("sightings →", href: "/admin/security")
     end
 
     it "shows when the client was last used" do

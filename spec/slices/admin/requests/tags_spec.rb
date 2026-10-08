@@ -68,7 +68,7 @@ RSpec.describe "Admin tags", type: :request do
       it "counts every tag that matches, not the page" do
         get "/admin/tags", q: "r"
 
-        expect(page).to have_css(".page-head-sub", text: "4 tags")
+        expect(page).to have_css(".card-blurb", text: "4 tags")
       end
 
       it "draws no pager when one page holds every tag" do
@@ -102,7 +102,7 @@ RSpec.describe "Admin tags", type: :request do
       it "counts them" do
         get "/admin/tags"
 
-        expect(page).to have_css(".page-head-sub", text: "2 tags")
+        expect(page).to have_css(".card-blurb", text: "2 tags")
       end
 
       it "draws a tag in the colour it carries" do
@@ -232,7 +232,7 @@ RSpec.describe "Admin tags", type: :request do
       it "counts only the tags on the tab" do
         get "/admin/tags", scope: "private"
 
-        expect(page).to have_css(".page-head-sub", text: "1 tag")
+        expect(page).to have_css(".card-blurb", text: "1 tag")
       end
 
       it "holds a name a post and a task carry as one tag on each tab" do

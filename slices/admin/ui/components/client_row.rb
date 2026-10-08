@@ -58,6 +58,8 @@ module Admin
           connected
           plain(DOT)
           last_used
+          plain(DOT)
+          a(class: "settings-link", href: path(:admin_security)) { t(".sightings") }
         end
       end
     end

@@ -178,6 +178,18 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
         .to eq(["tags", "task rules", "webmentions", "API tokens", "MCP clients", "security"])
       expect(page).to have_css("a.screen-tab[aria-current='page']", text: "task rules")
     end
+
+    {
+      "/admin/tags" => "Tags", "/admin/tasks/rules" => "Task rules", "/admin/tokens" => "API tokens",
+      "/admin/clients" => "MCP clients", "/admin/security" => "Security",
+    }.each do |route, title|
+      it "heads #{route} as Settings and titles it #{title}", :aggregate_failures do
+        get route
+
+        expect(page).to have_css(".page-head h1", exact_text: "Settings")
+        expect(page).to have_title("#{title} | Admin | #{Hanami.app.settings.owner_name}")
+      end
+    end
   end
 
   describe "an address nothing lives at" do

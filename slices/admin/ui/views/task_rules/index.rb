@@ -26,19 +26,22 @@ module Admin
           end
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @rules.size)) { back }
-            Card(label: t(".label"), title: t(".title"), data: { key_list: true }) do |card|
-              card.side { Hint(inline: true) { t(".aside") } }
-              Capture(**@adding, choices: @projects)
-              rows
+            SettingsHead(title: t(".heading"))
+            div(class: "g-main") do
+              list
+              Card(title: t(".add"), class: "settings-side") { Capture(**@adding, choices: @projects) }
             end
-            Hint { t(".note") }
           end
 
           private
 
-          def back
-            BackLink(href: path(:admin_tasks, filter: Blog::Types::TaskTab["external"])) { t(".back") }
+          def list
+            Card(title: t(".title"), data: { key_list: true }) do |card|
+              card.side { span(class: "settings-count") { t(".count", count: @rules.size) } }
+              p(class: "card-blurb") { t(".sub") }
+              rows
+              Hint { t(".note") }
+            end
           end
 
           def rows

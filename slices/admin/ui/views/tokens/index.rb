@@ -15,14 +15,20 @@ module Admin
           prop :tokens, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub", count: @tokens.size))
+            SettingsHead(title: t(".heading"))
+            div(class: "g-main") do
+              live
+              Card(title: t(".mint"), class: "settings-side") { Mint(name: @name, errors: @errors) }
+            end
+          end
 
-            Minted(value: @minted) if @minted
-            Card(title: t(".mint")) { Mint(name: @name, errors: @errors) }
-            Card(title: t(".live"), data: { key_list: true }) do
-              next Empty { t(".empty") } if @tokens.empty?
+          private
 
-              @tokens.each { Row(token: it) }
+          def live
+            Card(title: t(".live"), data: { key_list: true }) do |card|
+              card.side { span(class: "settings-count") { t(".count", count: @tokens.size) } }
+              Minted(value: @minted) if @minted
+              @tokens.empty? ? Empty { t(".empty") } : @tokens.each { Row(token: it) }
             end
           end
         end

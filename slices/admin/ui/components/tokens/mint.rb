@@ -10,23 +10,11 @@ module Admin
 
           def view_template
             Form(action: path(:admin_create_token), class: "token-mint") do
-              name_field
-              Button(variant: :pri, type: "submit") { t(".mint") }
+              Field(label: t(".label"), name: :name, errors: @errors, error: FieldError) do |control|
+                Input(**control, autocomplete: "off", name: "token[name]", placeholder: t(".placeholder"), value: @name)
+              end
+              Button(variant: :pri, type: "submit", icon: "fa-solid fa-key") { t(".mint") }
             end
-            FieldError(field: :name, errors: @errors)
-          end
-
-          private
-
-          def name_field
-            label(class: "sr-only", for: FieldError.id_for(:name)) { t(".label") }
-            Input(
-              **FieldError.control_attributes(:name, @errors),
-              autocomplete: "off",
-              name: "token[name]",
-              placeholder: t(".placeholder"),
-              value: @name,
-            )
           end
         end
       end

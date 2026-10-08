@@ -185,6 +185,7 @@ RSpec.describe "Admin screens", type: :feature do
       "tags" => "/admin/tags",
       "tag summary" => "/admin/tags/site",
       "task" => "/admin/tasks/#{task.id}",
+      "task rules" => "/admin/tasks/rules",
       "task link search" => "/admin/tasks/#{task.id}?link_q=finished",
       "task editor" => "/admin/tasks/#{task.id}/edit",
       "tasks" => "/admin/tasks",
@@ -196,6 +197,7 @@ RSpec.describe "Admin screens", type: :feature do
       "time" => "/admin/time",
       "time by day" => "/admin/time?by=day",
       "today" => "/admin",
+      "tokens" => "/admin/tokens",
       "webmentions" => "/admin/webmentions",
     }
   end

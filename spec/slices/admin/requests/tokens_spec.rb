@@ -183,7 +183,7 @@ RSpec.describe "Admin API tokens", type: :request do
       minted("Desktop")
       get "/admin/tokens"
 
-      expect(page).to have_css(".page-head-sub", exact_text: "2 live tokens")
+      expect(page).to have_css(".card-side", exact_text: "2 live tokens")
     end
 
     it "leaves out a revoked token" do

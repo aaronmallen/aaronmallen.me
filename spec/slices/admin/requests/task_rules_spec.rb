@@ -63,7 +63,7 @@ RSpec.describe "Admin task rules", type: :request do
       it "counts them" do
         get "/admin/tasks/rules"
 
-        expect(page).to have_css(".page-head-sub", text: "2 rules")
+        expect(page).to have_css(".card-side", exact_text: "2 rules")
       end
 
       it "fills each editor with the rule it edits", :aggregate_failures do

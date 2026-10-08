@@ -4001,29 +4001,6 @@
   }
 }
 
-@utility token-mint {
-  @apply flex items-center gap-2;
-
-  & .inp {
-    @apply flex-1;
-  }
-
-  @media (width < 43.75rem) {
-    @apply flex-wrap;
-
-    & .inp {
-      @apply basis-full;
-    }
-  }
-}
-
-@utility token-minted {
-  @apply flex flex-col gap-2;
-
-  & .inp {
-    @apply w-full font-mono;
-  }
-}
 
 @utility tags-search {
   @apply w-44;
@@ -4172,6 +4149,84 @@
   & > form:first-child {
     @apply mr-auto;
   }
+}
+
+@utility settings-main {
+  @apply flex min-w-0 flex-col gap-stack;
+}
+
+@utility settings-side {
+  @apply bg-transparent;
+
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+
+  & .rule-fields {
+    @apply grid-cols-1;
+  }
+}
+
+@utility settings-count {
+  @apply font-mono text-label text-ink-muted;
+}
+
+@utility settings-aside {
+  @apply mb-4 max-w-measure font-serif text-li text-ink;
+}
+
+@utility settings-link {
+  @apply text-ink-muted underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
+@utility token-mint {
+  @apply flex flex-col items-start gap-3;
+
+  & .field,
+  & .inp {
+    @apply w-full;
+  }
+}
+
+@utility token-minted {
+  @apply mb-4 flex items-start gap-3 rounded-card border bg-ground px-4 py-3;
+  border-color: color-mix(in oklab, var(--color-mk-blue) 40%, var(--color-line));
+
+  & .inp {
+    @apply w-full font-mono;
+  }
+}
+
+@utility token-minted-icon {
+  @apply mt-1 text-mk-blue-text;
+}
+
+@utility token-minted-body {
+  @apply flex min-w-0 flex-1 flex-col gap-2;
+}
+
+@utility token-minted-title {
+  @apply font-display text-li font-semibold text-ink;
+}
+
+@utility security-cred {
+  @apply border-t border-line pt-4 first:border-t-0 first:pt-0;
+
+  & + & {
+    @apply mt-4;
+  }
+}
+
+@utility security-cred-name {
+  @apply mb-2 font-display text-li font-semibold text-ink;
+}
+
+@utility security-cred-kind {
+  @apply ml-1 meta;
 }
 
 @utility sprint-note {

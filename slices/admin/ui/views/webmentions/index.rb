@@ -35,7 +35,7 @@ module Admin
             PageHead(title: t(".heading"), sub:) { filter_form }
 
             inbox
-            div(class: "cols wm-settings") { side_cards }
+            div(class: "g-main wm-settings") { side_cards }
           end
 
           private

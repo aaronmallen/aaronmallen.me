@@ -8,6 +8,8 @@ RSpec.describe "Admin security", type: :request do
 
   def client(name) = mcp_create(:oauth_client, client_name: name).tap { mcp_create(:oauth_token, oauth_client: it) }
 
+  def credential(name) = page.find(".security-cred", text: name)
+
   def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def sight(**row)
@@ -59,6 +61,15 @@ RSpec.describe "Admin security", type: :request do
         .and have_css("time")
     end
 
+    it "pills a sign-in green when it went through and pink when it did not", :aggregate_failures do
+      sign_in_row(browser: "Safari", created_at: Time.now - 60)
+      sign_in_row(browser: "Firefox", outcome: "denied")
+      get "/admin/security"
+
+      expect(card("Sign-ins").find(".li", text: "Safari")).to have_css(".pill.green", exact_text: "signed in")
+      expect(card("Sign-ins").find(".li", text: "Firefox")).to have_css(".pill.pink", exact_text: "denied")
+    end
+
     it "names a device and place it could not read" do
       sign_in_row(browser: nil, os: nil, city: nil, country: nil)
       get "/admin/security"
@@ -70,7 +81,7 @@ RSpec.describe "Admin security", type: :request do
       sight(api_token_id: token("Terminal").id)
       get "/admin/security"
 
-      expect(card("Terminal").find(".li")).to have_css(".li-title", text: "Firefox · Linux")
+      expect(credential("Terminal").find(".li")).to have_css(".li-title", text: "Firefox · Linux")
         .and have_text("London · GB · 3 calls · 81.2.69.160").and have_text("first seen").and have_text("last seen")
         .and have_css("time", count: 2)
     end
@@ -81,14 +92,14 @@ RSpec.describe "Admin security", type: :request do
       sight(api_token_id: token("Terminal").id)
       get "/admin/security"
 
-      expect(card("Claude").all(".li-title").map(&:text)).to eq(["Chrome · Linux"])
+      expect(credential("Claude").all(".li-title").map(&:text)).to eq(["Chrome · Linux"])
     end
 
     it "shows a credential nothing has used" do
       token("Terminal")
       get "/admin/security"
 
-      expect(card("Terminal")).to have_css(".empty")
+      expect(credential("Terminal")).to have_css(".empty")
     end
 
     it "links to the Honeybadger project when one is set" do

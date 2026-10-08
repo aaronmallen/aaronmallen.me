@@ -450,7 +450,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "names the endpoint" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".hint", text: "Endpoint: POST /webmention")
+        expect(page).to have_css("#webmention-settings .card-side", exact_text: "Endpoint: POST /webmention")
       end
     end
 

@@ -8,7 +8,7 @@ module Admin
           prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            Card(title: t(".title")) do
+            Card(title: t(".title"), class: "settings-side") do
               @posts.empty? ? Empty { t(".empty") } : @posts.each { |post| row(post) }
             end
           end

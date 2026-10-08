@@ -480,6 +480,7 @@ en:
         last_used: "last used %{time}"
         never_used: "never used"
         revoke: "Revoke"
+        sightings: "sightings →"
       commits_card:
         activity: "All of today's commits"
         commits: "Commits"
@@ -1271,6 +1272,9 @@ en:
             wrong_account: "wrong account"
           unknown_device: "Unknown device"
           unknown_place: "Unknown place"
+      settings_head:
+        heading: "Settings"
+        lede: "The rarely-touched stuff, in one place."
       social:
         composer:
           add: "Add to thread"
@@ -1790,7 +1794,6 @@ en:
           placeholder: "Name the client that will use it…"
         minted:
           hint: "Copy it now. The site keeps only a digest, so this page can't show it again."
-          label: "New API token"
           title: "Your new token"
         row:
           confirm_revoke: "Revoke %{token}? Any client using it loses the API at once."
@@ -1909,12 +1912,12 @@ en:
       clients:
         index:
           connected: "Connected clients"
-          empty: "No client has connected yet."
-          heading: "MCP clients"
-          sub:
+          count:
             one: "%{count} connected client"
             other: "%{count} connected clients"
             zero: "Nothing has connected yet"
+          empty: "No client has connected yet."
+          heading: "MCP clients"
       commits:
         show:
           added: "Added"
@@ -2144,12 +2147,14 @@ en:
       security:
         show:
           client: "MCP client"
+          credentials: "Clients and tokens"
           heading: "Security"
           honeybadger: "Errors on Honeybadger"
+          no_credentials: "No live token or client."
           no_sightings: "Nothing has used it yet."
           no_sign_ins: "No sign-ins yet."
           sign_ins: "Sign-ins"
-          sub: "Each device and place that has reached the admin"
+          sub: "Each device and place that has reached the admin."
           token: "API token"
       sessions:
         failed:
@@ -2177,9 +2182,6 @@ en:
               other: "%{count} tags · renaming one changes its /writing/tags link and everything that carries it"
           empty: "No tags yet. Name one above."
           heading: "Tags"
-          label:
-            private: "Private"
-            public: "Public"
           no_match: "Nothing matches %{query}."
           note: "Removing a tag takes it off everything that carries it."
           scope: "Tag scope"
@@ -2210,15 +2212,14 @@ en:
             public: "Public"
       task_rules:
         index:
-          aside: "Click a rule to edit it or delete it."
-          back: "Tasks"
-          empty: "No rules yet. Add one above."
+          add: "Add rule"
+          count:
+            one: "%{count} rule"
+            other: "%{count} rules"
+          empty: "No rules yet."
           heading: "Task rules"
-          label: "Tasks"
           note: "Deleting a rule, or taking a tag or project out of one, takes nothing off a task."
-          sub:
-            one: "%{count} rule · each gives the issues it matches private tags and projects on import"
-            other: "%{count} rules · each gives the issues it matches private tags and projects on import"
+          sub: "Each rule gives the issues it matches private tags and projects on import."
           title: "Tags and projects by repo or team"
       tasks:
         index:
@@ -2359,14 +2360,14 @@ en:
           visitors: "Visitors"
       tokens:
         index:
+          count:
+            one: "%{count} live token"
+            other: "%{count} live tokens"
+            zero: "No live tokens"
           empty: "No live tokens. Mint one for a client that needs the API."
           heading: "API tokens"
           live: "Live tokens"
           mint: "Mint a token"
-          sub:
-            one: "%{count} live token"
-            other: "%{count} live tokens"
-            zero: "No live tokens"
       webmentions:
         index:
           approved: "approved"

@@ -11,7 +11,6 @@ module Admin
           PUBLIC = Blog::Types::TagScope["public"]
 
           COUNTS = { PUBLIC => ".count.public", PRIVATE => ".count.private" }.freeze
-          LABELS = { PUBLIC => ".label.public", PRIVATE => ".label.private" }.freeze
           SCOPES = { PUBLIC => ".scopes.public", PRIVATE => ".scopes.private" }.freeze
           TITLES = { PUBLIC => ".title.public", PRIVATE => ".title.private" }.freeze
           SEARCH_ID = "tags-q"
@@ -26,20 +25,25 @@ module Admin
           prop :usage, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(COUNTS.fetch(@scope), count: @count)) do
-              switch
-              filter_form
+            SettingsHead(title: t(".heading"))
+            div(class: "g-main") do
+              div(class: "settings-main") do
+                card
+                Pager(page: @tags, route: :admin_tags, params: scope_params(@scope))
+              end
+              side_panel
             end
-            card
-            Pager(page: @tags, route: :admin_tags, params: scope_params(@scope))
-            Hint { t(".note") }
           end
 
           private
 
           def card
-            Card(label: t(LABELS.fetch(@scope)), title: t(TITLES.fetch(@scope)), data: { key_list: true }) do |card|
-              card.side { Hint(inline: true) { t(".aside") } }
+            Card(title: t(TITLES.fetch(@scope)), data: { key_list: true }) do |card|
+              card.side do
+                switch
+                filter_form
+              end
+              p(class: "card-blurb") { t(COUNTS.fetch(@scope), count: @count) }
               Capture(name: @name, errors: @errors, tag_scope: @scope)
               rows
             end
@@ -76,6 +80,13 @@ module Admin
           def scope_params(scope) = @query.empty? ? { scope: } : { scope:, q: @query }
 
           def scope_path(scope) = path(:admin_tags, **scope_params(scope))
+
+          def side_panel
+            aside(class: "card settings-side") do
+              p(class: "settings-aside") { t(".aside") }
+              Hint { t(".note") }
+            end
+          end
 
           def switch
             SegmentedLinks(label: t(".scope"), items: SCOPES.keys.map { scope_link(it) })
