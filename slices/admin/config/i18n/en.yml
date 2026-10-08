@@ -482,7 +482,7 @@ en:
         revoke: "Revoke"
         sightings: "sightings →"
       commits_card:
-        activity: "All of today's commits"
+        activity: "All of today's commits →"
         commits: "Commits"
         count:
           one: "%{count} commit"
@@ -490,14 +490,13 @@ en:
         empty: "Nothing pushed yet today."
         import: "Import now"
         importing: "Importing…"
-        latest: "Latest: %{subject}"
-        never_synced: "Never synced"
+        latest:
+          one: "Across %{count} repo. Latest: %{subject}."
+          other: "Across %{count} repos. Latest: %{subject}."
+        never_synced: "never synced"
         no_token: "No GitHub token is set, so the import can't run."
-        repos:
-          one: "%{count} repo in 30 days"
-          other: "%{count} repos in 30 days"
-        synced_on: "Last synced %{at}"
-        synced_today: "Last synced today at %{time}"
+        synced_on: "synced %{at}"
+        synced_today: "synced today at %{time}"
         title: "Shipped today"
       comment_thread:
         add: "Add comment"

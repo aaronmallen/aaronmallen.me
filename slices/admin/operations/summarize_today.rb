@@ -48,7 +48,7 @@ module Admin
         {
           entries: commit_queries.today(now:, limit: COMMIT_LIMIT),
           last_synced_at: commit_queries.last_synced_at,
-          repos: commit_queries.recent_repos(now:).size,
+          repos: commit_queries.today_repos(now:).size,
           today: Blog::TimeZone.today(now),
           configured: client.configured?,
         }

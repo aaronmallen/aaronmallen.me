@@ -7,6 +7,7 @@ module Admin
     module Components
       class CommitsCard < Component
         COMMIT = Blog::Types::ActivityKind["commit"]
+        OWNER_SEPARATOR = "/"
         SHA_LENGTH = 7
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -19,9 +20,8 @@ module Admin
         def view_template
           Card(title: t(".title")) do |card|
             card.side { import_form }
-            stat
-            sub_line
             Hint { t(".no_token") } unless @configured
+            stat
             entry_list
           end
         end
@@ -30,7 +30,7 @@ module Admin
 
         def activity_link
           div(class: "commits-foot") do
-            Button(href: activity_path, variant: :gh, small: true, icon: "fa-solid fa-timeline") { t(".activity") }
+            a(class: "today-link", href: activity_path) { t(".activity") }
           end
         end
 
@@ -42,7 +42,8 @@ module Admin
 
         def button_label(state, icon, text, hidden: false)
           span(class: "bt-label", data: { "commits_#{state}": "" }, hidden:) do
-            IconLabel(icon:) { text }
+            Icon(icon)
+            span(class: "sr-only") { text }
           end
         end
 
@@ -56,48 +57,50 @@ module Admin
         def entry_list
           return Empty { t(".empty") } if @entries.empty?
 
-          p(class: "today-para") { t(".latest", subject: subject(@entries.first)) }
+          p(class: "today-para") { t(".latest", count: @repos, subject: subject(@entries.first)) }
           details(class: "today-more") do
-            summary do
-              Icon("fa-solid fa-chevron-right today-more-chev")
-              plain t(".commits")
-            end
+            entry_summary
             div(class: "commits") { @entries.each { entry_row(it) } }
             activity_link
           end
         end
 
-        def entry_main(commit)
-          div(class: "commit-main") do
-            a(class: "commit-message", href: path(:admin_commit, id: commit.id)) { subject(commit) }
-            p(class: "commit-meta") { "#{commit.repo}#{DOT}#{l(commit.commit_time, format: :clock)}" }
-          end
+        def entry_meta(commit)
+          [commit.sha[0, SHA_LENGTH], repo(commit), l(commit.commit_time, format: :clock)].join(DOT)
         end
 
         def entry_row(commit)
-          article(class: "commit") do
-            span(class: "commit-sha") { commit.sha[0, SHA_LENGTH] }
-            entry_main(commit)
+          a(class: "commit", href: path(:admin_commit, id: commit.id)) do
+            div(class: "commit-main") do
+              p(class: "commit-message") { subject(commit) }
+              p(class: "commit-meta") { entry_meta(commit) }
+            end
             entry_counts(commit)
           end
         end
 
+        def entry_summary
+          summary do
+            Icon("fa-solid fa-chevron-right today-more-chev")
+            plain t(".commits")
+            span(class: "commits-synced") { synced }
+          end
+        end
+
         def import_button
-          Button(variant: :pri, type: "submit", small: true, disabled: !@configured) do
+          Button(type: "submit", title: t(".import"), disabled: !@configured) do
             button_label(:idle, "fa-solid fa-rotate", t(".import"))
             button_label(:busy, "fa-solid fa-rotate commit-spinner", t(".importing"), hidden: true)
           end
         end
 
         def import_form
-          Form(action: path(:admin_import_commits), data: { commits_import: "" }) do
+          Form(action: path(:admin_import_commits), class: "commits-import", data: { commits_import: "" }) do
             import_button
           end
         end
 
-        def repos = "#{DOT}#{t('.repos', count: @repos)}"
-
-        def stamped(text, format) = Stamped(text: "#{text}#{repos}", at: @last_synced_at, format:)
+        def repo(commit) = commit.repo.split(OWNER_SEPARATOR).last
 
         def stat
           return if @totals[:commits].zero?
@@ -112,20 +115,13 @@ module Admin
           end
         end
 
-        def sub_line
-          p(class: "commits-sub") do
-            Icon("fa-brands fa-github commits-sub-icon")
-            synced
-          end
-        end
-
         def subject(commit) = Helpers::CommitMessage.subject(commit.message)
 
         def synced
-          return plain("#{t('.never_synced')}#{repos}") unless @last_synced_at
-          return stamped(t(".synced_on", at: Stamped::MARK), :medium) unless synced_today?
+          return plain(t(".never_synced")) unless @last_synced_at
+          return Stamped(text: t(".synced_on", at: Stamped::MARK), at: @last_synced_at) unless synced_today?
 
-          stamped(t(".synced_today", time: Stamped::MARK), :clock)
+          Stamped(text: t(".synced_today", time: Stamped::MARK), at: @last_synced_at, format: :clock)
         end
 
         def synced_today? = Blog::TimeZone.today(@last_synced_at) == @today

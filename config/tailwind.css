@@ -124,8 +124,6 @@
   --text-compose--line-height: 1.55;
   --text-seg: 0.75rem;
   --text-seg--line-height: 1.4;
-  --text-sha: 0.75rem;
-  --text-sha--line-height: 1.4;
   --text-event-time: 0.75rem;
   --text-event-time--line-height: 1.4;
   --text-proj: 1.3rem;
@@ -2013,29 +2011,31 @@
   @apply font-mono tabular-nums;
 }
 
-@utility commits-sub {
-  @apply meta;
+@utility commits-import {
+  & .bt {
+    @apply h-8 min-w-8 justify-center rounded-[8px] border-transparent px-2 py-0 text-ink-muted;
+    @apply hover:border-line hover:text-ink;
+
+    @media (width < 43.75rem) {
+      @apply size-auto min-h-tap min-w-tap;
+    }
+  }
 }
 
-@utility commits-sub-icon {
-  @apply mr-1.5;
+@utility commits-synced {
+  @apply ml-auto;
 }
 
 @utility commits {
-  @apply mt-4 flex flex-col gap-3 border-t border-line pt-4;
+  @apply flex flex-col;
 }
 
 @utility commits-foot {
-  @apply mt-4 flex;
+  @apply mt-2 mb-3.5 flex;
 }
 
 @utility commit {
-  @apply grid items-baseline gap-3;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-}
-
-@utility commit-sha {
-  @apply font-mono text-sha text-mk-violet;
+  @apply flex items-baseline justify-between gap-3 py-2.5 text-ink no-underline admin-focus;
 }
 
 @utility commit-main {
@@ -2043,10 +2043,10 @@
 }
 
 @utility commit-message {
-  @apply block truncate font-display text-li font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply truncate text-[.96rem] font-medium;
 
-  @media (width < 43.75rem) {
-    @apply min-h-tap py-3;
+  .commit:hover & {
+    @apply text-accent;
   }
 }
 

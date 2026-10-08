@@ -260,12 +260,22 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(commits_card).to have_css("h2.card-title", exact_text: "Shipped today")
       end
 
-      it "names the latest commit under the count" do
-        create_commit(commit_date: today, commit_time: "08:00", message: "earlier")
-        create_commit(commit_date: today, commit_time: "21:05", message: "admin: ship it\n\nwhy")
+      it "names the repos and the latest commit under the count" do
+        create_commit(repo: "aaronmallen/other", commit_date: today, commit_time: "08:00", message: "earlier")
+        create_detailed_commit
         get "/admin"
 
-        expect(commits_card).to have_css(".today-para", exact_text: "Latest: admin: ship it")
+        expect(commits_card.find(".today-para").text)
+          .to eq(i18n.t("ui.components.commits_card.latest", count: 2, subject: "admin: add the commits card"))
+      end
+
+      it "counts one repo in the singular" do
+        create_commit(repo: "aaronmallen/blog", commit_date: today, message: "one")
+        create_commit(repo: "aaronmallen/blog", commit_date: today, message: "two")
+        create_commit(repo: "aaronmallen/other", commit_date: today - 1)
+        get "/admin"
+
+        expect(commits_card.find(".today-para")).to have_text(/\AAcross 1 repo\. /)
       end
 
       it "folds the commit list away" do
@@ -275,20 +285,20 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(commits_card).to have_css("details.today-more:not([open]) .commits")
       end
 
-      it "opens each commit's page" do
+      it "links each whole commit row to the commit's page", :aggregate_failures do
         commit = create_detailed_commit
         get "/admin"
 
-        expect(commit_row).to have_link("admin: add the commits card", href: "/admin/commits/#{commit.id}")
+        expect(commit_row.tag_name).to eq("a")
+        expect(commit_row[:href]).to eq("/admin/commits/#{commit.id}")
       end
 
-      it "gives a commit its short SHA, message, repo and time", :aggregate_failures do
+      it "gives a commit its message, then its short SHA, repo without its owner and time", :aggregate_failures do
         create_detailed_commit
         get "/admin"
 
-        expect(commit_row).to have_css(".commit-sha", exact_text: "9f8e7d6")
         expect(commit_row).to have_css(".commit-message", exact_text: "admin: add the commits card")
-        expect(commit_row).to have_css(".commit-meta", exact_text: "aaronmallen/blog · 14:05")
+        expect(commit_row).to have_css(".commit-meta", exact_text: "9f8e7d6 · blog · 14:05")
       end
 
       it "gives a commit its additions and deletions", :aggregate_failures do
@@ -367,27 +377,33 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
     end
 
-    describe "the commits sub-line" do
-      before { with_token }
+    describe "the commit list's sync time" do
+      around { |example| show_hidden(&example) }
+
+      before do
+        with_token
+        create_detailed_commit
+      end
 
       def record_sync(at:)
         commit_mutations.record_synced_through("aaronmallen/blog", at: at - Record::Operations::PlanCommitWalk::OVERLAP)
         Record::Slice["relations.sync_states"].of_kind("commits").update(updated_at: at)
       end
 
+      def synced = commits_card.find(".today-more > summary .commits-synced")
+
       it "gives the time the newest walk reached its forward edge, not the edge itself" do
         commit_mutations.record_synced_through("aaronmallen/other", at: Time.utc(2026, 1, 9, 15, 30))
         record_sync(at: Time.utc(2026, 1, 7, 15, 30))
         get "/admin"
 
-        expect(commits_card).to have_css(".commits-sub", text: "Last synced Jan 7, 2026, 09:30")
+        expect(synced).to have_text("synced Jan 7, 2026, 09:30", exact: true)
       end
 
-      it "reads Never synced before the first import", :aggregate_failures do
+      it "reads never synced before the first import" do
         get "/admin"
 
-        expect(commits_card).to have_css(".commits-sub i.fa-github")
-        expect(commits_card).to have_css(".commits-sub", exact_text: "Never synced · 0 repos in 30 days")
+        expect(synced).to have_text("never synced", exact: true)
       end
 
       it "gives the Chicago clock time of a sync from today" do
@@ -395,44 +411,20 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         clock = Blog::TimeZone.local(commit_queries.last_synced_at).strftime("%H:%M")
         get "/admin"
 
-        expect(commits_card).to have_css(".commits-sub", text: "Last synced today at #{clock}")
-      end
-
-      it "gives the date of a sync from another day" do
-        record_sync(at: Time.utc(2026, 1, 7, 15, 30))
-        get "/admin"
-
-        expect(commits_card).to have_css(".commits-sub", text: "Last synced Jan 7, 2026, 09:30")
+        expect(synced).to have_text("synced today at #{clock}", exact: true)
       end
 
       it "puts the sync time in a time tag" do
         record_sync(at: Time.utc(2026, 1, 7, 15, 30))
         get "/admin"
 
-        expect(commits_card.find(".commits-sub time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
+        expect(synced.find("time")[:datetime]).to eq("2026-01-07T09:30:00-06:00")
       end
 
-      it "counts the repos pushed to in the last thirty days" do
-        create_commit(repo: "aaronmallen/blog", commit_date: today)
-        create_commit(repo: "aaronmallen/blog", commit_date: today - 29)
-        create_commit(repo: "aaronmallen/other", commit_date: today - 29)
+      it "keeps no standing sync line outside the list" do
         get "/admin"
 
-        expect(commits_card).to have_css(".commits-sub", text: "2 repos in 30 days")
-      end
-
-      it "leaves out repos last pushed to over thirty days ago" do
-        create_commit(repo: "aaronmallen/blog", commit_date: today - 30)
-        get "/admin"
-
-        expect(commits_card).to have_css(".commits-sub", text: "0 repos in 30 days")
-      end
-
-      it "counts one repo in the singular" do
-        create_commit(repo: "aaronmallen/blog", commit_date: today)
-        get "/admin"
-
-        expect(commits_card).to have_css(".commits-sub", text: "1 repo in 30 days")
+        expect(commits_card).to have_no_css(".commits-sub")
       end
     end
 
@@ -730,6 +722,10 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       it "posts to the import route with the CSRF token", :aggregate_failures do
         expect(commits_card).to have_css("form[data-commits-import][method='post'][action='/admin/commits/import']")
         expect(commits_card).to have_css("form[data-commits-import] input[name='_csrf_token']", visible: :hidden)
+      end
+
+      it "puts the import button in the card head" do
+        expect(commits_card).to have_css(".card-head form[data-commits-import] button[title='Import now']")
       end
 
       it "reads Import now with a rotate icon", :aggregate_failures do

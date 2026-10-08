@@ -5,7 +5,6 @@ module Record
     class CommitQueries < DB::Repo
       BACKFILL_KIND = Blog::Types::SyncStateKind["backfill"]
       NONE = Blog::Constants::EMPTY_ARRAY
-      REPO_DAYS = 30
       SYNC_KIND = Blog::Types::SyncStateKind["commits"]
 
       def backfilled_to(repo) = state_at(BACKFILL_KIND, repo)
@@ -26,12 +25,6 @@ module Record
 
       def newest_commit_at = commits.max(:created_at)
 
-      def recent_repos(now: Time.now)
-        today = Blog::TimeZone.today(now)
-
-        commits.between(today - (REPO_DAYS - 1), today).repo_names
-      end
-
       def synced_through(repo) = state_at(SYNC_KIND, repo)
 
       def today(now: Time.now, limit: nil)
@@ -39,6 +32,8 @@ module Record
 
         (limit ? found.limit(limit) : found).to_a
       end
+
+      def today_repos(now: Time.now) = commits.on(Blog::TimeZone.today(now)).repo_names
 
       def today_totals(now: Time.now) = commits.on(Blog::TimeZone.today(now)).day_totals.one.to_h
 
