@@ -50,6 +50,9 @@ File each issue, then make it a sub-issue of the spec so the work hangs off it. 
 Then mark each issue that has to wait as blocked by the issues it waits on, and give it the `blocked` label. Order
 comes from those relations, not from the order you filed them in.
 
+Write only what the spec and the user decided. An edge case a review raised is not a requirement until the user
+says so.
+
 Title an issue after the code that lands, not the outcome for a user. `Render posts from Markdown with Rouge`, not
 `Make posts look nice`.
 

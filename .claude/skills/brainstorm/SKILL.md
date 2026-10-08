@@ -28,7 +28,11 @@ Ask, wait for the answer, then ask the next. Never send a list.
 Start with the open questions the brainstormer raised. The point is to find out what the user has already decided
 and what they have not. A question whose answer changes nothing is a question you can skip.
 
+When the user states the shape outright, take it. Ask no question to check it.
+
 ## 3. Offer two to five approaches
+
+Skip this step when the user stated the shape.
 
 Once the problem is clear, name between two and five ways to build it. For each one say what it costs and what it
 rules out later. Ground every one in a pattern the codebase already has or a record in `docs/adr` it would break.

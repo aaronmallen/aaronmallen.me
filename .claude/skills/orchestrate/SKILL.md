@@ -25,9 +25,9 @@ work, and count it as done when you read what blocks the rest.
 Sort the open sub-issues so nothing runs before the issue that blocks it. If two block each other, stop and say
 so. Nothing else here fixes a cycle.
 
-A wave is the issues whose blockers are all done or in an earlier wave. Keep a wave to between three and seven.
-When more than seven are ready, hold back the ones that touch the same files as one already in the wave, since
-they conflict when you linearize.
+A wave is the issues whose blockers are all done or in an earlier wave. Put every ready issue in a wave, between
+three and seven to a wave. When more than seven are ready, hold back the ones that touch the same files as one
+already in the wave, since they conflict when you linearize.
 
 ## 3. Show the waves and wait
 
@@ -37,11 +37,19 @@ This writes code and commits it, for hours, without checking back. Do not start 
 
 ## 4. Run a wave
 
-Give each issue in the wave a workspace of its own, off the current tip, as [`.claude/vcs.md`][vcs] says under
-"Work in parallel workspaces". Then spawn one agent per issue, all at once, and give each this:
+Before the first wave, start Postgres and Redis, so no agent's test run starts or stops them:
+
+```sh
+mise run db:start
+mise run redis:start
+```
+
+Give each issue in the wave a workspace of its own, off the current tip, with `mise run dev:create-workspace`, as
+[`.claude/vcs.md`][vcs] says under "Work in parallel workspaces". Then spawn one agent per issue, all at once, and
+give each this:
 
 ```text
-Invoke /implement <number>. Follow the skill as written, including the review and the commit.
+Invoke /implement <number> under /orchestrate. Follow the skill as written, including the review and the commit.
 
 Work only in <workspace>. Never touch the main repo directory or another workspace, and never run a jj command
 that rewrites a commit outside your own working copy. Never print .env. Pass -R aaronmallen/aaronmallen.me to
@@ -58,14 +66,15 @@ Wait for every agent in the wave and read each report.
 ## 5. Linearize the wave
 
 Put the wave's commits in one line on the tip, as [`.claude/vcs.md`][vcs] says under "Linearize workspaces".
-Forget each workspace and delete its directory.
+Remove each workspace with `mise run dev:remove-workspace`.
 
 Then read the descriptions on the line. Each issue keeps one `Closes #<n>`, on its last commit, and its earlier
 commits say `See #<n>`. Agents in one wave finish at different times and cannot tell which of them is last, so
 two may close the spec, or none may. When the wave finishes the spec, keep `Closes #<spec>` only on the last
 commit of the line, and add it there if no commit has it. When it does not, no commit closes the spec.
 
-Run `mise run lint` and `mise run test` once from the repo root. Fix what breaks before the next wave.
+Run `mise run lint` and `mise run test` once from the repo root. Fix what breaks before the next wave, each failure
+in the commit that brought it in. Never put a fix commit on top while that commit is unpushed.
 
 ## 6. Stop at the first failure
 

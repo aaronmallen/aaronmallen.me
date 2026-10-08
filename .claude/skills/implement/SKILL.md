@@ -29,6 +29,7 @@ Read `.claude/CLAUDE.md`, the README and the records in `docs/adr` that cover th
 - **Write tests for what you add**, covering the behaviour and the edges.
 - **Follow what is already there.** A new file looks like the files beside it.
 - **Change only what the issue names.** Anything else you spot goes to the user, not into the diff.
+- **Fix a bug in the commit that brought it in** while that commit is unpushed, not in a fix commit on top.
 
 When the issue is the record for a decision, invoke `/write-adr` and stop there. The record lands in its own
 commit, under the code that carries it out. That commit says `See #<issue>`, and the code on top closes it.
@@ -42,6 +43,14 @@ mise run test
 ```
 
 All three pass before you go on. Run the whole lint, not one language.
+
+Under `/orchestrate`, run only the specs your change touches in place of `mise run test`:
+
+```sh
+mise run test:ruby <paths>
+```
+
+The orchestrator runs the whole suite from the root after each wave.
 
 ## 4. Review it
 

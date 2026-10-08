@@ -47,18 +47,15 @@ Both halves come out with no description, so describe each one with `jj desc -r 
 
 ## Work in parallel workspaces
 
-Each agent that runs beside others gets a workspace of its own, under `.claude/worktrees`. List that folder in
-`.git/info/exclude`, not `.gitignore`: markdownlint reads `.gitignore`, and inside a workspace it would then skip
-every file.
+Each agent that runs beside others gets a workspace of its own, `.claude/worktrees/ws<n>`:
 
 ```sh
-mkdir -p .claude/worktrees
-jj workspace add .claude/worktrees/<n> --name ws<n> -r <base>
+mise run dev:create-workspace <n> <base>
 ```
 
-Copy `.env` into it with `DATABASE_NAME=blog_ws<n>` on the end, so its tests run against their own database, and
-run `mise trust -q .config/mise.toml` inside it. A workspace has no `.git`, so `gh` there needs
-`-R aaronmallen/aaronmallen.me`.
+It adds jj workspace `ws<n>` on `<base>`, `@-` when left out, copies `.env` and `tmp` into it, gives it a test
+database of its own and sets it up so both test tasks work there from the first command. A workspace has no `.git`,
+so `gh` there needs `-R aaronmallen/aaronmallen.me`.
 
 ## Linearize workspaces
 
@@ -66,11 +63,11 @@ When every agent in a wave is done, put their commits in one line on the tip, on
 
 ```sh
 jj rebase -b 'ws<n>@-' -d <tip>
-jj workspace forget ws<n>
+mise run dev:remove-workspace <n>
 ```
 
-The last commit you rebased is the next `<tip>`. Delete the workspace's directory once it is forgotten. If its
-empty working-copy commit is still in `jj log`, abandon it.
+The last commit you rebased is the next `<tip>`. `dev:remove-workspace` drops the workspace's test database, forgets
+it and deletes its directory. If its empty working-copy commit is still in `jj log`, abandon it.
 
 Rebasing keeps each message as it was. Before you go on, read the descriptions on the line:
 

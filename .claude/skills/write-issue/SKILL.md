@@ -30,6 +30,8 @@ code it touches. One to three paragraphs.
 Rules for the body:
 
 - The story and the criteria are required. Cut `## Context` only when there is nothing a reader needs.
+- Write only what the spec and the user decided. An edge case a review raised is not a requirement until the user
+  says so.
 - Say what and why. An implementation plan belongs in the code, not the issue.
 - Every criterion has to be checkable by somebody who did not write it.
 - No heading repeats the title.
