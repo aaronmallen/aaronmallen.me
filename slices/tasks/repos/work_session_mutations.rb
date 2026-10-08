@@ -19,6 +19,10 @@ module Tasks
         work_sessions.split([task_id], at) if work_sessions.running.for_task(task_id).exist?
       end
 
+      def rewind(task_id, at)
+        work_sessions.running.for_task(task_id).stamped(:update, result: :many).call(started_at: at)
+      end
+
       def shift_total(task_id, seconds)
         tasks.by_pk(task_id).update(worked_seconds: Sequel.function(:greatest, 0, Sequel[:worked_seconds] + seconds))
       end

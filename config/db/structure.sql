@@ -3175,7 +3175,8 @@ CREATE TABLE public.task_sources (
     remote_state public.task_source_state DEFAULT 'open'::public.task_source_state NOT NULL,
     checked_at timestamp with time zone,
     seen_at timestamp with time zone,
-    snoozed_until timestamp with time zone
+    snoozed_until timestamp with time zone,
+    history_cursor timestamp with time zone
 );
 
 
@@ -5971,4 +5972,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261007000650_create_sign_ins.rb'),
 ('20261007000651_create_sightings.rb'),
 ('20261007000652_create_known_devices.rb'),
-('20261007000654_add_new_devices_to_attention.rb');
+('20261007000654_add_new_devices_to_attention.rb'),
+('20261008000200_add_history_cursor_to_task_sources.rb');

@@ -4,21 +4,17 @@ module Tasks
   module Operations
     class SyncIssues < Operation
       CLOSED = Structs::TaskSource::CLOSED
-      COMPLETED = Blog::Types::TaskSourceState["completed"]
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
+      EMPTY_HASH = Blog::Constants::EMPTY_HASH
       EXTERNAL = Blog::Types::TaskList["external"]
       LABEL_TAG = Blog::Types::Normalized::LabelTag
       OPEN = Blog::Types::TaskSourceState["open"]
-      STARTED = Blog::Types::TaskSourceState["started"]
       UNASSIGNED = Blog::Types::TaskSourceState["unassigned"]
       VISIBLE = SyncComments::VISIBLE
 
       include Deps[
-        cancel_task: "operations.cancel_task",
-        complete_task: "operations.complete_task",
         reach_issues: "operations.reach_issues",
-        reopen_task: "operations.reopen_task",
-        start_task: "operations.start_task",
+        settle_task: "operations.settle_task",
         sync_comments: "operations.sync_comments",
         sync_links: "operations.sync_links",
         task_event_mutations: "repos.task_event_mutations",
@@ -33,18 +29,16 @@ module Tasks
 
       def call(provider:, client:, now: Time.now)
         known = tracked(provider)
-        assigned, checked = step fetch(provider, client, known, now)
+        assigned, checked, history = step fetch(provider, client, known, now)
         held, fresh = assigned.partition { known.key?(it[:id]) }
 
-        [*held, *checked].each { follow(known.fetch(it[:id]), it, now) }
+        follow_all([*held, *checked], known, history, now)
         import_all(provider, fresh, known, now)
 
         fresh.size + step(relate(provider, client, known, now, [assigned, checked])).size
       end
 
       private
-
-      def close(task, now) = task.closed? ? Success(task) : cancel_task.call(task.id, at: now)
 
       def copy(issue)
         title, note = issue.values_at(:title, :body).map { it&.delete("\0") }
@@ -60,26 +54,36 @@ module Tasks
         return Failure(:not_configured) unless client.configured?
 
         assigned = client.assigned_issues
+        checked = client.issues(unseen(known, assigned, now))
 
-        Success([assigned, client.issues(unseen(known, assigned, now))])
+        Success([assigned, checked, history(client, [*assigned, *checked], known)])
       rescue Record::RateLimited, Record::Error => e
         failed(provider, e)
       end
 
-      def finish(task, now) = reopen(task, nil, now).bind { complete_task.call(task.id, at: now) }
-
-      def follow(source, issue, now, reached: false)
+      def follow(source, issue, now, history: EMPTY_HASH, reached: false)
         task = task_queries.by_id(source.task_id)
         return unless task
 
         state = observed(task, source, issue.fetch(:remote_state), reached)
+        changes = history[issue[:id]]
 
         transaction do
-          task = settle(task, state, source.remote_state, now) unless state == source.remote_state
+          task = settle_task.call(task, from: source.remote_state, to: state, at: now, history: changes).value!
           rewrite(task, issue)
-          restamp(source, state, issue[:url], now)
+          restamp(source, state, issue, changes, now)
           sync_comments.call(source, task, issue)
         end
+      end
+
+      def follow_all(issues, known, history, now)
+        issues.each { follow(known.fetch(it[:id]), it, now, history:) }
+      end
+
+      def history(client, issues, known)
+        return EMPTY_HASH unless client.respond_to?(:transitions)
+
+        client.transitions(issues, known.transform_values(&:history_cursor).compact)
       end
 
       def import(provider, issue, now, reached: false)
@@ -121,17 +125,13 @@ module Tasks
         reached
       end
 
-      def reopen(task, was, now)
-        return Success(task) unless task.closed? || (was == STARTED && task.in_progress?)
-
-        reopen_task.call(task.id, at: now)
-      end
-
-      def restamp(source, state, url, now)
+      def restamp(source, state, issue, changes, now)
         checked_at = now if CLOSED.include?(state)
-        return if [source.remote_state, source.url, source.checked_at] == [state, url, checked_at]
+        history_cursor = source.next_cursor(issue[:updated_at], changes, now)
+        fields = { remote_state: state, url: issue[:url], checked_at:, history_cursor: }
+        return if fields.all? { |name, value| source[name] == value }
 
-        task_source_mutations.update(source.id, remote_state: state, url:, checked_at:)
+        task_source_mutations.update(source.id, **fields)
       end
 
       def rewrite(task, issue)
@@ -139,15 +139,6 @@ module Tasks
 
         fields = copy(issue)
         task_mutations.update(task.id, **fields) unless fields == { title: task.title, note: task.note }
-      end
-
-      def settle(task, state, was, now)
-        case state
-          when OPEN then reopen(task, was, now)
-          when STARTED then task.in_progress? ? Success(task) : start_task.call(task.id, at: now, seen: false)
-          when COMPLETED then task.done? ? Success(task) : finish(task, now)
-          else close(task, now)
-        end.value_or(task)
       end
 
       def tracked(provider) = task_source_queries.for_provider(provider).to_h { [it.remote_id, it] }

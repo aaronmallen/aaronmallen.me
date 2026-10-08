@@ -38,9 +38,10 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
   def sync_state_queries = Record::Slice["repos.sync_state_queries"]
 
-  def tracked(*traits, state: "open", checked_at: nil, **)
+  def tracked(*traits, state: "open", checked_at: nil, history_cursor: nil, **)
     task = create(:task, *traits, list: "external", title: "Sync my issues", note: "Keep them in step", **)
-    create(:task_source, provider: "linear", remote_id: "L_one", url:, remote_state: state, checked_at:, task:)
+    fields = { remote_state: state, checked_at:, history_cursor: }
+    create(:task_source, provider: "linear", remote_id: "L_one", url:, task:, **fields)
 
     repo.by_id(task.id)
   end
@@ -626,6 +627,147 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       sync
 
       expect(sessions(task)).to match([include(ended_at: be_within(5).of(Time.now))])
+    end
+  end
+
+  describe "an issue's Linear history" do
+    let(:cursor) { Time.now - 3600 }
+    let(:ten) { Time.now - 840 }
+
+    def at(minutes) = ten + (minutes * 60)
+
+    def changed(issue, *changes)
+      updated = changes.map { Time.iso8601(it[:createdAt]) }.max || cursor
+
+      issue.merge(updatedAt: updated.utc.iso8601(3))
+    end
+
+    def finished(type, *changes)
+      stub_assigned
+      stub_known(changed(issue(state: type), *changes))
+      stub_history(*changes)
+    end
+
+    def history_requests = linear_request(LinearGraphQL::HISTORY_QUERY)
+
+    def session(from, to = nil) = include(started_at: be_within(1).of(from), ended_at: to && be_within(1).of(to))
+
+    def sessions(task) = Tasks::Slice["relations.work_sessions"].for_task(task.id).order(:started_at).to_a
+
+    def start(time = ten) = linear_change("unstarted", "started", at: time)
+
+    def stub_history(*changes)
+      stub_linear(LinearGraphQL::HISTORY_QUERY) do |request|
+        ids = JSON.parse(request.body).dig("variables", "ids")
+        linear_issues(*ids.map { { history: linear_history(*changes.reverse), id: it } })
+      end
+    end
+
+    def stub_started(*changes)
+      stub_assigned(changed(issue(state: "started"), *changes))
+      stub_history(*changes)
+    end
+
+    it "starts the task's session when the issue went In Progress, not when the sync ran" do
+      task = tracked(history_cursor: cursor)
+      stub_started(start)
+      sync
+
+      expect(sessions(task)).to match([session(ten)])
+    end
+
+    it "replays a start, a stop and a start between two runs as two sessions" do
+      task = tracked(history_cursor: cursor)
+      stub_started(start, linear_change("started", "unstarted", at: at(5)), start(at(10)))
+      sync
+
+      expect(sessions(task)).to match([session(ten, at(5)), session(at(10))])
+    end
+
+    { "completed" => "done", "canceled" => "canceled" }.each do |type, status|
+      it "ends the session at Linear's time when the issue is #{type}", :aggregate_failures do
+        task = tracked(:in_progress, state: "started", history_cursor: cursor)
+        create(:work_session, task_id: task.id, started_at: at(-30))
+        finished(type, linear_change("started", type, at: ten))
+        sync
+
+        expect([sessions(task), status(task)]).to match([[session(at(-30), ten)], status])
+      end
+    end
+
+    describe "and a session I started by hand" do
+      let!(:task) { tracked(:in_progress, history_cursor: cursor) }
+
+      before do
+        create(:work_session, task_id: task.id, started_at: at(2))
+        stub_started(start)
+        sync
+      end
+
+      it "moves the session to Linear's start" do
+        expect(sessions(task)).to match([session(ten)])
+      end
+
+      it "counts the total from Linear's start" do
+        finished("completed", start, linear_change("started", "completed", at: at(10)))
+        sync
+
+        expect(repo.by_id(task.id).worked_seconds).to be_within(1).of(600)
+      end
+    end
+
+    it "leaves a status I set by hand when Linear holds no matching change" do
+      task = tracked(:done, history_cursor: cursor)
+      stub_assigned(issue(updatedAt: ten.utc.iso8601(3)))
+      stub_history
+      sync
+
+      expect(status(task)).to eq("done")
+    end
+
+    describe "synced twice" do
+      let!(:task) { tracked(history_cursor: cursor) }
+
+      before do
+        stub_started(start)
+        2.times { sync }
+      end
+
+      it "replays no change twice" do
+        expect(sessions(task)).to match([session(ten)])
+      end
+
+      it "reads the history once, then moves the cursor past it", :aggregate_failures do
+        expect(history_requests).to have_been_made.once
+        expect(repo.by_id(task.id).source.history_cursor).to be_within(1).of(ten)
+      end
+    end
+
+    describe "for an issue with no cursor" do
+      let!(:task) { tracked(:in_progress) }
+
+      before do
+        create(:work_session, task_id: task.id, started_at: at(-60), ended_at: at(-30))
+        stub_started(start)
+        sync
+      end
+
+      it "replays nothing", :aggregate_failures do
+        expect(history_requests).not_to have_been_made
+        expect(sessions(task)).to match([session(at(-60), at(-30))])
+      end
+
+      it "gives the issue a cursor at the time of the run" do
+        expect(repo.by_id(task.id).source.history_cursor).to be_within(5).of(Time.now)
+      end
+    end
+
+    it "sends no history query when no tracked issue changed" do
+      tracked(history_cursor: cursor)
+      stub_assigned(issue(updatedAt: cursor.utc.iso8601(3)))
+      sync
+
+      expect(history_requests).not_to have_been_made
     end
   end
 

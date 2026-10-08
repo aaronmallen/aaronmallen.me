@@ -7,6 +7,7 @@ RSpec.describe "API reach", type: :app do
       "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
       "tasks.operations.link_repo_tasks" => "the admin and save_project run it when a project's repo changes",
       "tasks.operations.reach_issues" => "the issue sync runs it to import the other end of a relation",
+      "tasks.operations.settle_task" => "the issue sync runs it to replay and settle each issue's state",
       "tasks.operations.sync_comments" => "the issue sync runs it for each issue it follows",
       "tasks.operations.sync_issues" => "a background job syncs the GitHub issues assigned to me",
       "tasks.operations.sync_links" => "the issue sync runs it to keep synced task links in step",
