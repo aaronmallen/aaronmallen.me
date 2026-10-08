@@ -28,7 +28,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       before { get "/admin/journal" }
 
       it "says journal is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Daily\s+/\s+journal})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "journal")
       end
 
       it "shows the feather icon in the palette" do

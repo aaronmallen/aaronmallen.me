@@ -111,7 +111,7 @@ RSpec.describe "Admin decisions", type: :request do
       it "says decisions is where you are" do
         get "/admin/decisions"
 
-        expect(page).to have_css(".ctx-where", text: %r{Daily\s+/\s+decisions})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "decisions")
       end
 
       it "answers 404 past the last page" do

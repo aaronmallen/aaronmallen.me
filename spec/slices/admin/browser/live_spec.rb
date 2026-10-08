@@ -32,11 +32,11 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
   it "updates the inbox badge when issues sync from Tasks > External", :aggregate_failures do
     live "/admin/tasks?filter=external"
-    expect(page).to have_no_css(".ctx-dot")
+    expect(page).to have_no_css(".pill-nav-dot")
 
     sync_issues
 
-    expect(page).to have_css(".ctx-bar .ctx-dot")
+    expect(page).to have_css(".top-bar .pill-nav-dot")
     expect(page).to have_css("#command-palette-inbox .pal-r-sub", text: "1 waiting", visible: :all)
   end
 
@@ -87,7 +87,8 @@ RSpec.describe "Admin pages that stay live", type: :feature do
 
     before do
       live "/admin/inbox"
-      find(".ctx-btn[data-key-help-open]").click
+      click_button(class: "avatar")
+      find(".avatar-menu-item[data-key-help-open]").click
       message
     end
 

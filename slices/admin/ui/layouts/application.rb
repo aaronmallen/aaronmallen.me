@@ -6,6 +6,7 @@ module Admin
       class Application < Blog::UI::Layouts::Application
         include Components
         include Components::Nav
+        include Navigated
 
         def view_template(&)
           doctype
@@ -18,14 +19,8 @@ module Admin
 
         private
 
-        def build_navigation = slice["operations.build_navigation"].call(current_path: request.path)
-
         def render_body(&)
-          session = Auth::Session.for(request)
-          navigation = build_navigation if session.signed_in?
-
-          MainNav(session:)
-          ContextBar(current: navigation.current, alert: navigation.alert?) if navigation
+          TopBar(navigation:, session: Auth::Session.for(request))
           main(id: "main", class: "adm-main", data: { live: (path(:admin_events) if navigation) }, &)
           Toast(message: toast_message) if toast_message
           navigation ? render_signed_in_tail(navigation) : Footer()
@@ -41,7 +36,6 @@ module Admin
           Palette(sections: navigation.sections, actions: navigation.actions)
           Components::Tasks::CreateDialog(today: Blog::TimeZone.today, origin: content_for(:task_origin))
           Components::Tasks::Panel()
-          SlashButton()
           KeyHelp()
         end
 

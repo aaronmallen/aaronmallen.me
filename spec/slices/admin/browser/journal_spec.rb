@@ -16,7 +16,7 @@ RSpec.describe "Admin journal", type: :feature do
   def day_heading_stuck_to_bar?
     evaluate_script(<<~JS)
       (() => {
-        const bar = document.querySelector(".ctx-bar").getBoundingClientRect().bottom;
+        const bar = document.querySelector(".top-bar").getBoundingClientRect().bottom;
         return [...document.querySelectorAll(".day-head")]
           .some((head) => Math.abs(head.getBoundingClientRect().top - bar) < 1);
       })()
@@ -32,7 +32,7 @@ RSpec.describe "Admin journal", type: :feature do
   def scroll_into_a_day
     execute_script(<<~JS)
       const day = document.querySelectorAll(".journal-day")[3];
-      const bar = document.querySelector(".ctx-bar").getBoundingClientRect().bottom;
+      const bar = document.querySelector(".top-bar").getBoundingClientRect().bottom;
       window.scrollBy(0, day.getBoundingClientRect().top + (day.offsetHeight / 2) - bar);
     JS
   end
@@ -336,15 +336,15 @@ RSpec.describe "Admin journal", type: :feature do
       expect(evaluate_script("window.scrollY")).to eq(1500)
     end
 
-    it "keeps the filters in view below the context bar" do
-      expect(top(".journal-rail")).to be >= bottom(".ctx-bar")
+    it "keeps the filters in view below the top bar" do
+      expect(top(".journal-rail")).to be >= bottom(".top-bar")
     end
 
     it "keeps the filters on screen" do
       expect(top(".journal-rail")).to be < 200
     end
 
-    it "sticks a day heading directly below the context bar" do
+    it "sticks a day heading directly below the top bar" do
       scroll_into_a_day
 
       expect(day_heading_stuck_to_bar?).to be(true)

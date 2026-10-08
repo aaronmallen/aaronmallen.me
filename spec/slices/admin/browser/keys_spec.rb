@@ -315,7 +315,8 @@ RSpec.describe "Admin keys", type: :feature do
 
     it "does nothing on g alone", :aggregate_failures do
       press("g")
-      find(".ctx-btn[aria-label='Show the keys']").click
+      click_button(class: "avatar")
+      find(".avatar-menu-item[data-key-help-open]").click
 
       expect(page).to have_css("dialog#key-help[open]")
       expect(page).to have_current_path("/admin/analytics")
@@ -455,7 +456,10 @@ RSpec.describe "Admin keys", type: :feature do
     end
 
     describe "opening it from the button" do
-      before { find(".ctx-btn[aria-label='Show the keys']").click }
+      before do
+        click_button(class: "avatar")
+        find(".avatar-menu-item[data-key-help-open]").click
+      end
 
       it "opens the overlay" do
         expect(page).to have_css("dialog#key-help[open]")

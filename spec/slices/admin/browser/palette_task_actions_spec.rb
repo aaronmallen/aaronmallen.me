@@ -248,7 +248,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     before do
       page.driver.resize(375, 800)
       visit "/admin/tasks/#{task.id}"
-      click_button(class: "slash")
+      click_button(class: "top-bar-search")
       find_by_id("command-palette-start-task").click
       page.assert_selector("[data-toast]", text: "Started")
     end
@@ -260,7 +260,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
     describe "then pausing it" do
       before do
-        click_button(class: "slash")
+        click_button(class: "top-bar-search")
         find_by_id("command-palette-pause-task").click
         page.assert_selector("[data-toast]", text: "Stopped")
       end
@@ -272,7 +272,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
     describe "then completing it" do
       before do
-        click_button(class: "slash")
+        click_button(class: "top-bar-search")
         find_by_id("command-palette-complete-task").click
         page.assert_selector("[data-toast]", text: "Done")
       end

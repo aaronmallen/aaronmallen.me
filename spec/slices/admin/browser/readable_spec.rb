@@ -86,7 +86,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def open_palette
     visit "/admin"
-    click_button(class: "slash")
+    click_button(class: "top-bar-search")
     find("dialog#command-palette[open] [data-palette-query]:focus")
   end
 

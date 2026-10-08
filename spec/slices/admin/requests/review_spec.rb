@@ -47,7 +47,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       before { visit_review }
 
       it "says the review is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Insights\s+/\s+review})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "review")
       end
 
       it "lists the review in the palette with its icon" do

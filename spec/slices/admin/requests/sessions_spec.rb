@@ -120,11 +120,11 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response).to be_not_found
     end
 
-    it "renders a missing admin page as the site's not found page" do
+    it "renders a missing admin page as the admin's not found page" do
       sign_in
       get "/admin/nowhere"
 
-      expect(last_response.body).to include("<title>Page not found | Aaron Allen</title>")
+      expect(last_response.body).to include("<title>Page not found | Admin | Aaron Allen</title>")
     end
 
     it "renders the admin" do
@@ -515,7 +515,7 @@ RSpec.describe "Admin sessions", type: :request do
     end
 
     it "renders the page in the admin layout" do
-      expect(page).to have_css("header.site-header + .ctx-bar")
+      expect(page).to have_css("header.top-bar .pill-nav")
     end
 
     it "sends noindex with the error page" do
@@ -575,8 +575,8 @@ RSpec.describe "Admin sessions", type: :request do
       expect(last_response.status).to eq(403)
     end
 
-    it "renders no context bar" do
-      expect(page).to have_no_css(".ctx-bar")
+    it "renders no pills" do
+      expect(page).to have_no_css(".pill-nav")
     end
   end
 

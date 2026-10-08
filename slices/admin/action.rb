@@ -4,7 +4,7 @@
 module Admin
   class Action < Blog::Action
     include CSRFToken
-    include Deps[rejected_view: "ui.views.forms.rejected"]
+    include Deps[not_found_view: "ui.views.not_found", rejected_view: "ui.views.forms.rejected"]
 
     config.formats.accept :html
     config.handle_exception BodyParsingError => 400
@@ -27,6 +27,11 @@ module Admin
 
     def handle_invalid_csrf_token(_request, response)
       halt 403, response.render(rejected_view)
+    end
+
+    def not_found(response)
+      response.format = :html
+      halt 404, response.render(not_found_view)
     end
 
     def record_id(request) = Blog::Types::IdParam[request.params[:id]] || halt(404)

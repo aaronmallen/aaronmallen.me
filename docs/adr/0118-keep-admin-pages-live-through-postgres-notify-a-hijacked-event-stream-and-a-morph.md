@@ -64,7 +64,7 @@ there for logs and for a later record that wants topics.
 
 **`live.js` refetches the page and morphs it with idiomorph.** It opens one `EventSource` per admin tab. On an event
 it calls the page's own URL through `setupFetch`, so events within its wait become one request and a new event
-aborts a stale one. It parses the answer with `parse` and morphs `<main>`, the context bar and the palette in place
+aborts a stale one. It parses the answer with `parse` and morphs `<main>`, the top bar and the palette in place
 with idiomorph, which aube adds and esbuild bundles. idiomorph keeps the focused element, the caret and unsent text,
 and needs no `unsafe-eval`, so the content security policy does not change: `connect-src 'self'` already admits the
 stream. The toast sits outside what the morph touches.

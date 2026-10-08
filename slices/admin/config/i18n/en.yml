@@ -768,6 +768,21 @@ en:
           todays_journal:
             label: "Go to today's journal"
             text: "open the journal, read today"
+        avatar_menu:
+          keys: "Keyboard shortcuts"
+          label: "Account and settings"
+          pages:
+            about: "about"
+            contact: "contact"
+            projects: "projects"
+            writing: "writing"
+          settings: "Settings"
+          show_keys: "Show the keys"
+          sign_out: "Sign out"
+          site: "Site"
+          themes:
+            dark: "Dark theme"
+            light: "Light theme"
         context_bar:
           alert: "something needs you"
           back: "today"
@@ -776,11 +791,13 @@ en:
           separator: "/"
           shortcut: "⌘/"
         groups:
-          daily: "Daily"
           inbox: "Inbox"
           insights: "Insights"
+          journal: "Journal"
           publish: "Publish"
           settings: "Settings"
+          tasks: "Tasks"
+          today: "Today"
         palette:
           actions: "Actions"
           anywhere: "anywhere"
@@ -815,27 +832,41 @@ en:
           jump: "Go to %{section}"
         palette_saved_views:
           heading: "Saved views"
+        screen_tabs:
+          label: "Screens"
+          waiting: "waiting"
         sections:
           activity: "activity"
           analytics: "analytics"
           calendar: "calendar"
-          clients: "clients"
+          clients: "MCP clients"
           decisions: "decisions"
-          inbox: "inbox"
+          inbox: "waiting"
           journal: "journal"
           messages: "messages"
           people: "people"
           posts: "posts"
           projects: "projects"
           review: "review"
+          search: "search"
           security: "security"
           social: "social"
           tags: "tags"
+          task_rules: "task rules"
           tasks: "tasks"
           time: "time"
           today: "today"
           tokens: "API tokens"
+          webmention_settings: "webmentions"
           webmentions: "webmentions"
+        top_bar:
+          brand_label: "%{owner}, home"
+          label: "Admin"
+          palette: "Open the command palette"
+          search: "Find or do anything"
+          search_hint: "Find or do anything…"
+          skip_link: "Skip to content"
+          waiting: "something waits"
         key_help:
           next: "Highlight the next row"
           open: "Open the highlighted row"
@@ -1965,6 +1996,11 @@ en:
             one: "%{count} message"
             other: "%{count} messages"
           unread: "unread"
+      not_found:
+        heading: "Page not found"
+        message: "Nothing lives at this address. The link may be wrong, or the page may have moved."
+        status: "404"
+        today: "Go to today"
       people:
         index:
           bluesky_handle: "@%{handle}"

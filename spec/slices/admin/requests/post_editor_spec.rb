@@ -161,7 +161,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "keeps saying posts is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Publish\s+/\s+posts})
+        expect(page).to have_css(".pill-nav-link[aria-current='page']", text: "Publish")
       end
     end
 

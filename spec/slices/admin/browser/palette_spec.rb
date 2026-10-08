@@ -20,14 +20,15 @@ RSpec.describe "Admin command palette", type: :feature do
     expect(page).to have_no_css("dialog#command-palette[open]")
   end
 
-  it "says where you are on every screen" do
+  it "says where you are on every screen", :aggregate_failures do
     visit "/admin/posts"
 
-    expect(page).to have_css(".ctx-where", text: %r{Publish\s+/\s+posts})
+    expect(page).to have_css(".pill-nav-link[aria-current='page']", text: "Publish")
+    expect(page).to have_css(".screen-tab[aria-current='page']", text: "posts")
   end
 
-  it "flags the unread message on the jump button" do
-    expect(page).to have_css(".ctx-btn.jump .ctx-dot")
+  it "flags the unread message on the inbox pill" do
+    expect(page).to have_css(".pill-nav-link[href='/admin/inbox'] .pill-nav-dot")
   end
 
   describe "opening it with the keyboard" do
@@ -52,7 +53,7 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "lists every section, under its group", :aggregate_failures do
-      expect(page).to have_css(".pal-g", text: /daily/i)
+      expect(page).to have_css(".pal-g", text: /tasks/i)
       expect(page).to have_css("#command-palette-messages")
     end
 
@@ -614,7 +615,7 @@ RSpec.describe "Admin command palette", type: :feature do
       before do
         page.driver.resize(375, 800)
         visit "/admin"
-        click_button(class: "slash")
+        click_button(class: "top-bar-search")
         query.send_keys(*"stale".chars)
       end
 
@@ -682,21 +683,20 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "offers a button to tap" do
-      expect(page).to have_button(class: "slash")
+      expect(page).to have_button(class: "top-bar-search")
     end
 
     it "does not scroll the page sideways" do
       expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
     end
 
-    it "keeps the button off the footer at the foot of the page" do
-      execute_script("window.scrollTo(0, document.documentElement.scrollHeight)")
-
-      expect(edge(".adm-footer-version", :bottom)).to be <= edge(".slash", :top)
+    it "gives the button a 44px square to tap", :aggregate_failures do
+      expect(edge(".top-bar-search", :width)).to be >= 44
+      expect(edge(".top-bar-search", :height)).to be >= 44
     end
 
     describe "tapping it" do
-      before { click_button(class: "slash") }
+      before { click_button(class: "top-bar-search") }
 
       it "opens the palette" do
         expect(page).to have_css("dialog#command-palette[open]")

@@ -52,7 +52,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
 
   def swap
     execute_script(<<~JS)
-      for (const part of document.querySelectorAll("main, .ctx-bar, [data-palette], [data-key-help]")) {
+      for (const part of document.querySelectorAll("main, .top-bar, [data-palette], [data-key-help]")) {
         if (part.isConnected) part.outerHTML = part.outerHTML;
       }
       document.dispatchEvent(new Event("admin:morphed"));
@@ -68,7 +68,10 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
   end
 
   describe "a dialog" do
-    before { find(".ctx-btn[data-key-help-open]").click }
+    before do
+      click_button(class: "avatar")
+      find(".avatar-menu-item[data-key-help-open]").click
+    end
 
     it "opens from its new trigger" do
       expect(page).to have_css("dialog#key-help[open]")
@@ -84,7 +87,7 @@ RSpec.describe "Admin scripts after new markup", type: :feature do
   end
 
   it "opens the palette from its new trigger and moves one row per arrow" do
-    find(".ctx-btn.jump").click
+    find(".top-bar-search").click
     find("[data-palette-query]").send_keys(:down)
 
     expect(active).to eq(evaluate_script("document.querySelectorAll('[data-palette-option]:not([hidden])')[1].id"))

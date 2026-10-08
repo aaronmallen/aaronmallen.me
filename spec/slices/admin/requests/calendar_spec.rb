@@ -45,7 +45,7 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
       before { visit_calendar }
 
       it "says the calendar is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Daily\s+/\s+calendar})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "calendar")
       end
 
       it "lists the calendar in the palette with its icon" do

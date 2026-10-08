@@ -8,6 +8,7 @@ module Admin
         prop :sub, Blog::Types::String.optional
         prop :sub_icon, Blog::Types::String.optional
         prop :kicker, Blog::Types::String.optional
+        prop :tabs_side, Blog::Types::Instance(Proc).optional
 
         def view_template(&actions)
           content_for(:title, @title) unless content_for(:title)
@@ -20,6 +21,7 @@ module Admin
             end
             div(class: "page-head-actions", &actions) if actions
           end
+          Nav::ScreenTabs(&@tabs_side)
         end
 
         private

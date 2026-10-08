@@ -125,7 +125,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "says webmentions is where you are" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".ctx-where", text: %r{Inbox\s+/\s+webmentions})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "webmentions")
       end
     end
 

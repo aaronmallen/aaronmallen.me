@@ -14,7 +14,7 @@ RSpec.shared_examples "readable screens" do |tap: false|
         const named = (el) => el.tagName.toLowerCase() + (el.classList.length ? '.' + [...el.classList].join('.') : '');
         const shown = (el) => el.getClientRects().length > 0;
         const seen = (el) => shown(el) && el.checkVisibility({ opacityProperty: true, visibilityProperty: true });
-        const hidden = (el) => el.closest('.sr-only, .skip-link');
+        const hidden = (el) => el.closest('.sr-only, .skip-link, .top-bar-skip');
 
         const scrolled = (el) => {
           for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {

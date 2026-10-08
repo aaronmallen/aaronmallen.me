@@ -79,7 +79,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       it "says projects is where you are" do
         get "/admin/projects"
 
-        expect(page).to have_css(".ctx-where", text: %r{Publish\s+/\s+projects})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "projects")
       end
 
       def expected_sub

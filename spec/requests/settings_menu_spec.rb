@@ -68,10 +68,6 @@ RSpec.describe "Settings menu", type: :request do
       expect(last_response.headers["set-cookie"]).to be_nil
     end
 
-    it "shows the items in the admin too" do
-      expect(panel).to have_css("a[href='/admin'] + form[action='/admin/sign-out']", visible: :all)
-    end
-
     it "hides the items once the session is older than 30 days" do
       allow(Time).to receive(:now).and_return(Time.now + (30 * 24 * 60 * 60))
       get "/about"
@@ -102,7 +98,7 @@ RSpec.describe "Settings menu", type: :request do
     end
 
     it "sends me home from an admin page rather than back to sign-in" do
-      sign_out_from_menu("/admin")
+      sign_out_from_menu("/about", return_to: "/admin")
 
       expect(last_response.location).to eq("/")
     end

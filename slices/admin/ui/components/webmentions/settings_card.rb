@@ -18,7 +18,7 @@ module Admin
           prop :filter, Blog::Types::String
 
           def view_template
-            Card(title: t(".title")) do
+            Card(title: t(".title"), id: "webmention-settings") do
               Form(action: path(:admin_update_webmention_settings), data: { autosubmit: "" }) do
                 input(type: "hidden", name: "status", value: @filter)
                 div(class: "form-stack") { fields }

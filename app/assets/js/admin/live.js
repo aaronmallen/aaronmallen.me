@@ -4,7 +4,7 @@ import { parse } from "./in_place.js";
 
 const LONGEST_WAIT = 30000;
 const MORPHED = "admin:morphed";
-const PARTS = ["main", ".ctx-bar", "[data-palette]"];
+const PARTS = ["main", ".top-bar", "[data-palette]"];
 const WAIT = 1000;
 
 let started = false;

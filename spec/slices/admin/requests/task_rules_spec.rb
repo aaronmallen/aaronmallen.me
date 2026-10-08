@@ -97,10 +97,10 @@ RSpec.describe "Admin task rules", type: :request do
         expect(ticked(linked.id)).to eq([blog.id.to_s])
       end
 
-      it "sits under the tasks section" do
+      it "sits under the settings tabs" do
         get "/admin/tasks/rules"
 
-        expect(page).to have_css(".ctx-where", text: %r{Daily\s+/\s+tasks})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "task rules")
       end
     end
 

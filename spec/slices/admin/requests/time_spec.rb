@@ -49,7 +49,7 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       before { visit_time }
 
       it "says the time screen is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Insights\s+/\s+time})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "time")
       end
 
       it "lists the time screen in the palette with its icon" do

@@ -49,7 +49,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       before { visit_activity }
 
       it "says activity is where you are" do
-        expect(page).to have_css(".ctx-where", text: %r{Insights\s+/\s+activity})
+        expect(page).to have_css(".screen-tab[aria-current='page']", text: "activity")
       end
 
       it "shows the timeline icon in the palette" do
