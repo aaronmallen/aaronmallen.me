@@ -130,6 +130,7 @@ one.
 | [0123][0123] | Export only read repos and operations, and keep write repos in their slice | ![Active][active] | 2026-10-07 |
 | [0124][0124] | Keep the operator's raw IP and user agent for 90 days in a security slice | ![Active][active] | 2026-10-07 |
 | [0125][0125] | Make agent workspaces with mise tasks, and name each test database from WORKSPACE_ID | ![Active][active] | 2026-10-07 |
+| [0126][0126] | Keep only base classes and gem wrappers in lib, and give the rest a Hanami shape | ![Active][active] | 2026-10-07 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -256,6 +257,7 @@ one.
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0124]: 0124-keep-the-operators-raw-ip-and-user-agent-for-90-days-in-a-security-slice.md
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
+[0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

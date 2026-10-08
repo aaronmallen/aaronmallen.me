@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-661
-amended: [AA-757]
+amended: [AA-757, "#718"]
 tags: [operations, dry-operation, monads, result, callables]
 ---
 
@@ -42,6 +42,9 @@ across when it began to step `CurrentSprint`, and `SummarizeToday` with it, sinc
 
 A plain write that another slice's operation steps may return a row or `nil`, and the caller turns `nil` into its
 `Failure`, the way `Suggestions::Operations::AcceptSuggestionEdits` does with `Posts::Operations::LockPost`.
+
+Since #718, parsers and scanners from `lib` become operations too (ADR 0126). One that cannot refuse is a plain
+callable under this rule.
 
 No name prefix marks the kind. The superclass alone does.
 

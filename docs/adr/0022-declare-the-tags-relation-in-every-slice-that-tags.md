@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76"]
+amended: [AA-809, "#76", "#718"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -33,7 +33,8 @@ then has several definitions. AA-561 item 2 found that `tags` has five, and aske
 Each slice that tags declares its own `Relations::Tags` over the `tags` table: `posts`, `projects`, `record` and
 `tasks`, beside the one in `tags`. Each is `schema :tags, infer: true` and includes `Blog::DB::Tags`
 (`lib/blog/db/tags.rb`), which holds what the relation does: `by_names`, `claim`, `next_color` and the rest. Each
-join relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`.
+join relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both
+mixins into ROM relation plugins that a relation opts into with `use` (ADR 0126).
 
 A tagging repo writes tags itself, as `post_tags.replace(id, tags.claim(names).values_at(*names))` in
 `PostRepo#replace_tags` does, and the same in the project, journal entry and task repos. `claim` inserts each

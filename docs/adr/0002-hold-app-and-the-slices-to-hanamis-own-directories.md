@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809, "#665"]
+amended: [AA-809, "#665", "#718"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -41,7 +41,8 @@ A slice may also keep the entry surface its own protocol forces, beside its acti
 Everything else goes by what it is:
 
 - Anything whose interface is a client becomes a configurable provider.
-- Anything stateless with no configuration becomes plain library code.
+- Anything stateless with no configuration becomes plain library code. #718 narrowed this: ADR 0126 keeps only
+  base classes and code that wraps or extends a gem in `lib`, and gives the rest a Hanami shape.
 - Anything that takes dependencies and does one job becomes an operation.
 - A value with rules becomes a type in `Blog::Types`.
 
@@ -50,15 +51,15 @@ Everything else goes by what it is:
 Code lives with what owns it (AA-421, AA-563).
 
 - **`lib/<slice>/`** holds what one slice owns, under that slice's namespace: `lib/admin/search_query.rb` holds
-  `Admin::SearchQuery`. The slice loads it with one line in its own `config/slice.rb`,
-  `autoloader.push_dir(Hanami.app.root.join("lib/admin"), namespace: Admin)`, which loads the code without
-  registering it in the slice's container. A provider moves into the slice that owns its concept, and its key
-  crosses by export and import.
+  `Admin::SearchQuery`. Since #718 that is only base classes and gem wrappers (ADR 0126). The slice loads it with
+  one line in its own `config/slice.rb`, `autoloader.push_dir(Hanami.app.root.join("lib/admin"), namespace: Admin)`,
+  which loads the code without registering it in the slice's container. A provider moves into the slice that owns
+  its concept, and its key crosses by export and import.
 - **An export** carries what another slice reaches on purpose: a read repo for a read, an operation for a write
   (#665).
-- **`lib/blog`** keeps only what no slice owns: the base classes every slice inherits, the shared providers,
-  helpers such as `Blog::Truncation` that several slices name, and the shared Phlex kit. The record AA-672 files
-  says when a component moves into the kit.
+- **`lib/blog`** keeps only what no slice owns: the base classes every slice inherits, the shared providers and
+  the shared Phlex kit. Since #718, shared helpers such as `Truncation` go in `app/helpers` (ADR 0126). The record
+  AA-672 files says when a component moves into the kit.
 
 Who names a constant decides who owns it. One slice naming it owns it. Two slices, a feature beside a presentation
 slice, give it to the feature. Two of a kind, three slices or more, or a file in `lib/blog` naming it, and no slice
@@ -66,9 +67,10 @@ owns it, so it stays in the kernel.
 
 ### What `app/` keeps
 
-`app/` keeps `assets` and nothing else. One stylesheet and one shared script, `app.js`, load on every page
-(`lib/blog/ui/layouts/application.rb`). Each script belongs to a slice (AA-367): the admin layout adds
-`admin/app.js` and the public layout adds `public/app.js`. The MCP pages load only the shared script.
+`app/` keeps `assets`, and since #718 the shared `structs` and `helpers` ADR 0126 names. One stylesheet and one
+shared script, `app.js`, load on every page (`lib/blog/ui/layouts/application.rb`). Each script belongs to a slice
+(AA-367): the admin layout adds `admin/app.js` and the public layout adds `public/app.js`. The MCP pages load only
+the shared script.
 
 ## Alternatives
 
