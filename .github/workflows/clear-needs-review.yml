@@ -1,0 +1,21 @@
+name: Clear needs review
+
+on:
+  issues:
+    types:
+      - closed
+
+permissions:
+  issues: write
+
+jobs:
+  clear:
+    name: Remove the needs review label
+    if: contains(github.event.issue.labels.*.name, 'needs review')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove the label
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: gh issue edit "$ISSUE" --remove-label 'needs review' -R "$GITHUB_REPOSITORY"
