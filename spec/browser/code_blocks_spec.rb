@@ -66,7 +66,7 @@ RSpec.describe "Code blocks", type: :feature do
 
     {
       "light" => %w[#b3105a #735808 #3a5f0e #0f6f85 #696658],
-      "dark" => %w[#fa4f8d #e6db74 #a6e22e #66d9ef #939081],
+      "dark" => %w[#fb5a94 #e6db74 #a6e22e #66d9ef #939081],
     }.each do |scheme, hexes|
       it "colors keywords, strings, classes, functions and comments in #{scheme} mode" do
         emulate_color_scheme(scheme)
