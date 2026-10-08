@@ -9,16 +9,16 @@ module Admin
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
 
-          def view_template
+          def view_template(&)
             BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
               t(".all_projects")
             end
 
             StatusForm(project: @project) if @project
 
-            Form(action: form_action, data: { project_editor: "" }) do
-              page_head
-              columns
+            div(class: "g-main project-editor") do
+              fields
+              yield if block_given?
             end
           end
 
@@ -27,13 +27,18 @@ module Admin
           def archived? = @project&.archived? || false
 
           def columns
-            div(class: "g-main") do
-              PublicCopy(values: @values, errors: @errors)
-              aside(class: "project-side") do
-                Repository(values: @values, errors: @errors, release:, stars:)
-                Placement(values: @values, errors: @errors, archived: archived?)
-                Preview(values: @values, release:, stars:)
-              end
+            PublicCopy(values: @values, errors: @errors)
+            aside(class: "project-side") do
+              Repository(values: @values, errors: @errors, release:, stars:)
+              Placement(values: @values, errors: @errors, archived: archived?)
+              Preview(values: @values, release:, stars:)
+            end
+          end
+
+          def fields
+            Form(action: form_action, data: { project_editor: "" }) do
+              page_head
+              columns
             end
           end
 

@@ -3300,8 +3300,20 @@
   }
 }
 
-@utility project-linked {
-  @apply mt-stack;
+@utility project-editor {
+  & > form {
+    @apply contents;
+  }
+
+  & > form > .page-head {
+    @apply col-span-full mb-[calc(var(--spacing-head)-var(--spacing-stack))];
+  }
+
+  @media (width >= 53.75rem) {
+    & > form > .project-side {
+      @apply row-span-2;
+    }
+  }
 }
 
 @utility work-row {

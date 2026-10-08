@@ -13,8 +13,7 @@ module Admin
           def view_template
             content_for(:title, @editor[:project].name)
 
-            Editor(**@editor)
-            div(class: "g-main project-linked") { linked }
+            Editor(**@editor) { linked }
           end
 
           private
