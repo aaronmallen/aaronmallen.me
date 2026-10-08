@@ -13,13 +13,13 @@ run = "scripts/util/compose run --rm media-store-bucket"
 auto = ["start"]
 mise = true
 oneshot = true
-run = "scripts/util/compose up --detach --wait postgres"
+run = "mise run db:start"
 
 [daemons.redis]
 auto = ["start"]
 mise = true
 oneshot = true
-run = "scripts/util/compose up --detach --wait redis"
+run = "mise run redis:start"
 
 [daemons.server]
 auto = ["start", "stop"]

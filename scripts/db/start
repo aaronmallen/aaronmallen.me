@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Start the Postgres container"
+
+set -e
+
+scripts/util/compose up --detach --wait postgres
