@@ -96,7 +96,7 @@ module Public
 
         html = Builder::XmlMarkup.new
         html.section(class: "post-edits", "aria-label": i18n.t("ui.components.posts.edits.label")) do
-          ::Posts::EditDays.newest_first(edits).each { |day, day_edits| edit_day(html, day, day_edits) }
+          Helpers::EditDays.newest_first(edits).each { |day, day_edits| edit_day(html, day, day_edits) }
         end
       end
 

@@ -23,7 +23,7 @@ module Posts
       private
 
       def form(post)
-        fields = PostForm.call(post)
+        fields = post.form
 
         post.status == SCHEDULED ? fields.merge(publish_at: Blog::Constants::EMPTY_STRING) : fields
       end

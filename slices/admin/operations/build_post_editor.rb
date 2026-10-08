@@ -102,7 +102,7 @@ module Admin
       def values_from_post(post)
         return FIELDS.to_h { [it, Blog::Constants::EMPTY_STRING] } unless post
 
-        ::Posts::PostForm.call(post).slice(*FIELDS).merge(edit_note: Blog::Constants::EMPTY_STRING)
+        post.form.slice(*FIELDS).merge(edit_note: Blog::Constants::EMPTY_STRING)
       end
 
       def webmentions(post, params)

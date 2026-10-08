@@ -10,7 +10,7 @@ module Public
           def view_template
             return if @edits.empty?
 
-            days = ::Posts::EditDays.newest_first(@edits).map(&:last)
+            days = Helpers::EditDays.newest_first(@edits).map(&:last)
 
             section(class: "post-edits", aria: { label: t(".label") }) do
               days.each { |edits| day(edits, updated: edits.equal?(days.first)) }

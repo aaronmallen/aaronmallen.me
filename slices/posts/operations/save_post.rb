@@ -51,7 +51,7 @@ module Posts
       def form(params)
         given = FIELDS.to_h { [it, params[it]] }.merge(params.slice(*CARD, NOTE))
 
-        given.merge(slug: PostSlug.derive(slug: given[:slug], title: given[:title]))
+        given.merge(slug: Helpers::PostSlug.derive(slug: given[:slug], title: given[:title]))
       end
 
       def invalid(field, code) = Failure([:invalid, { field => [code] }])

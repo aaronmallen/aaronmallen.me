@@ -8,7 +8,7 @@ module Admin
       def call(values)
         title = Blog::Types::Text[values[:title]]
 
-        announcement.default(title:, slug: ::Posts::PostSlug.derive(slug: values[:slug], title:))
+        announcement.default(title:, slug: ::Posts::Helpers::PostSlug.derive(slug: values[:slug], title:))
       end
     end
   end

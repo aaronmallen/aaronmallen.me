@@ -2,6 +2,8 @@
 
 module Public
   class Slice < Hanami::Slice
+    config.no_auto_register_paths += %w[helpers]
+
     config.shared_app_component_keys += %w[assets]
 
     config.actions.default_headers["Vary"] = "Cookie"

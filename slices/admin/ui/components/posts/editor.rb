@@ -86,7 +86,7 @@ module Admin
             Webmentions(**@webmentions)
           end
 
-          def slug = ::Posts::PostSlug.derive(slug: @values[:slug], title: @values[:title])
+          def slug = ::Posts::Helpers::PostSlug.derive(slug: @values[:slug], title: @values[:title])
 
           def sub_line
             writing = "#{path(:writing)}/"
