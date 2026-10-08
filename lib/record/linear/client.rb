@@ -5,6 +5,7 @@ module Record
     class Client
       include Paging
       include Issues
+      include History
 
       Error = Transport::Error
       RateLimited = Transport::RateLimited

@@ -11,9 +11,8 @@ module Record
 
     def more?(page) = page&.dig("pageInfo", "hasNextPage") == true
 
-    def walk
+    def walk(cursor = nil)
       found = []
-      cursor = nil
       page = nil
 
       MAX_PAGES.times do

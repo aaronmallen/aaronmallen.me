@@ -12,7 +12,7 @@ module Record
         RELATED = "pageInfo { hasNextPage } nodes"
 
         FIELDS = <<~GRAPHQL.freeze
-          id identifier url title description trashed state { type } assignee { id }
+          id identifier url title description trashed updatedAt state { type } assignee { id }
           comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt user { displayName } } }
           labels(first: #{MAX_LABELS}) { nodes { name } }
           parent { id }
@@ -106,7 +106,8 @@ module Record
         {
           body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
           id: node.fetch("id"), key:, labels: labels(node), origin: origin(url, key), reference: key,
-          remote_state: remote_state(node, viewer), title: node.fetch("title"), url:, **relations(node),
+          remote_state: remote_state(node, viewer), title: node.fetch("title"), updated_at: updated_at(node), url:,
+          **relations(node),
         }
       end
 
@@ -154,6 +155,8 @@ module Record
 
         UNASSIGNED
       end
+
+      def updated_at(node) = node["updatedAt"] && Time.iso8601(node["updatedAt"])
     end
   end
 end

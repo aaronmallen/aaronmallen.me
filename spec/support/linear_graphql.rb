@@ -4,6 +4,7 @@ module LinearGraphQL
   URL = "https://api.linear.app/graphql"
   ASSIGNED_QUERY = "assignedIssues("
   CLIENT_KEYS = %w[linear.client record.linear.client].freeze
+  HISTORY_QUERY = "history(first:"
   ISSUES_QUERY = "issues(first:"
   KEY = "lin_api_one"
   VIEWER_ID = "0b7f5a52-viewer"
@@ -21,6 +22,10 @@ module LinearGraphQL
     linear_json(data: { viewer: { assignedIssues: page, id: viewer } })
   end
 
+  def linear_change(from, to, at:)
+    { createdAt: at.utc.iso8601(3), fromState: from && { type: from }, toState: to && { type: to } }
+  end
+
   def linear_comment(id, body: "Looks good", author: "aaron", at: Time.now - 600)
     { body:, createdAt: at.utc.iso8601(3), id:, user: author && { displayName: author },
       url: "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues#comment-#{id}" }
@@ -28,6 +33,10 @@ module LinearGraphQL
 
   def linear_errors(code, message = "Linear said no", status: 400)
     linear_json(errors: [{ extensions: { code: }, message: }]).merge(status:)
+  end
+
+  def linear_history(*nodes, more: false)
+    { nodes:, pageInfo: { endCursor: more ? "history-#{nodes.last&.dig(:createdAt)}" : nil, hasNextPage: more } }
   end
 
   def linear_issue(id, key: "ABC-1", state: "unstarted", assignee: VIEWER_ID, **fields)
