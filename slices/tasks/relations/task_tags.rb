@@ -3,7 +3,7 @@
 module Tasks
   module Relations
     class TaskTags < Blog::DB::Relation
-      include Blog::DB::Taggings
+      use :taggings, owner_key: :task_id
 
       schema :task_tags, infer: true do
         associations do
@@ -24,8 +24,6 @@ module Tasks
 
         found.order(name).select(:task_id, name).to_hash_groups(:task_id, :name)
       end
-
-      def owner_key = :task_id
     end
   end
 end

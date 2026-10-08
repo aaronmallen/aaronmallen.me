@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollupClicks < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       LINK = %i[link_host link_path].freeze
 

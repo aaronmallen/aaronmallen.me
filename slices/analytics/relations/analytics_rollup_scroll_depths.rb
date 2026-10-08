@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollupScrollDepths < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       schema :analytics_rollup_scroll_depths, infer: true
 

@@ -3,7 +3,7 @@
 module Record
   module Relations
     class Tags < Blog::DB::Relation
-      include Blog::DB::Tags
+      use :tags
 
       schema :tags, infer: true
     end

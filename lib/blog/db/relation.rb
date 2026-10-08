@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "hanami/db/relation"
+require "blog/db/plugins"
 
 module Blog
   module DB

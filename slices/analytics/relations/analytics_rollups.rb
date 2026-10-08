@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollups < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       TOTALS = proc do
         [

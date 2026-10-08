@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class FeedReaders < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       ONE_MORE = { readers: Sequel[:feed_readers][:readers] + 1, updated_at: Sequel::CURRENT_TIMESTAMP }.freeze
 

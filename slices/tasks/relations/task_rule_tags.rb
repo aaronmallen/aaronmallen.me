@@ -3,7 +3,7 @@
 module Tasks
   module Relations
     class TaskRuleTags < Blog::DB::Relation
-      include Blog::DB::Taggings
+      use :taggings, owner_key: :task_rule_id
 
       schema :task_rule_tags, infer: true do
         associations do
@@ -11,8 +11,6 @@ module Tasks
           belongs_to :task_rule
         end
       end
-
-      def owner_key = :task_rule_id
     end
   end
 end

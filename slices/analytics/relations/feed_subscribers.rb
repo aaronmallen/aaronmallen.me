@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class FeedSubscribers < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       LATEST = { subscribers: Sequel[:excluded][:subscribers], updated_at: Sequel::CURRENT_TIMESTAMP }.freeze
 

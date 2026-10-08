@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollupPageReferrers < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       schema :analytics_rollup_page_referrers, infer: true
 

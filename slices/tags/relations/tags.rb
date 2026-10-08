@@ -3,7 +3,7 @@
 module Tags
   module Relations
     class Tags < Blog::DB::Relation
-      include Blog::DB::Tags
+      use :tags
 
       JOINS = {
         posts: :post_tags,

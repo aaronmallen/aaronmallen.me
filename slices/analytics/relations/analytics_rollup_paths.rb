@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollupPaths < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       FIGURES = proc do
         [

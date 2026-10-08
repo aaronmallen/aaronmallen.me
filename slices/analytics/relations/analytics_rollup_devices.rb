@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class AnalyticsRollupDevices < Blog::DB::Relation
-      include DailyRollup
+      use :daily_rollup
 
       schema :analytics_rollup_devices, infer: true
 

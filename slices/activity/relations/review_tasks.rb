@@ -3,7 +3,7 @@
 module Activity
   module Relations
     class ReviewTasks < Blog::DB::Relation
-      include Crediting
+      use :crediting
 
       DONE = Blog::Types::TaskStatus["done"]
 
