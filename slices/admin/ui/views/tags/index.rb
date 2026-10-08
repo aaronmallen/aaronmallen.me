@@ -49,6 +49,8 @@ module Admin
             end
           end
 
+          def editor(tag) = Editor(tag:, uses: uses(tag), editing: @editing, page: @tags.number)
+
           def empty = Empty { @query.empty? ? t(".empty") : t(".no_match", query: @query) }
 
           def filter_form
@@ -62,15 +64,10 @@ module Admin
             end
           end
 
-          def row(tag)
-            Row(tag:, uses: @usage.fetch(tag.id, Blog::Constants::EMPTY_HASH), editing: @editing,
-                page: @tags.number)
-          end
-
           def rows
             return empty if @tags.rows.empty?
 
-            @tags.rows.each { row(it) }
+            @tags.rows.each { Row(tag: it, uses: uses(it)) }
           end
 
           def scope_link(scope)
@@ -82,15 +79,20 @@ module Admin
           def scope_path(scope) = path(:admin_tags, **scope_params(scope))
 
           def side_panel
-            aside(class: "card settings-side") do
-              p(class: "settings-aside") { t(".aside") }
-              Hint { t(".note") }
+            aside(class: "card settings-side tag-panel", id: Editor::PANEL_ID) do
+              div(class: "tag-panel-intro") do
+                p(class: "settings-aside") { t(".aside") }
+                Hint { t(".note") }
+              end
+              @tags.rows.each { editor(it) }
             end
           end
 
           def switch
             SegmentedLinks(label: t(".scope"), items: SCOPES.keys.map { scope_link(it) })
           end
+
+          def uses(tag) = @usage.fetch(tag.id, Blog::Constants::EMPTY_HASH)
         end
       end
     end

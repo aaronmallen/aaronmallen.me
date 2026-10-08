@@ -7,6 +7,8 @@ RSpec.describe "Admin tags", type: :feature do
 
   def open_editor(name) = find(".tag-row", text: "##{name}").find(".tag-pen").click
 
+  def panel = find("aside.settings-side")
+
   before do
     create(:tag, name: "ruby", color: "mk-blue")
     create(:tag, name: "hanami", color: "mk-green")
@@ -14,8 +16,9 @@ RSpec.describe "Admin tags", type: :feature do
     visit "/admin/tags"
   end
 
-  it "keeps the editor shut until the edit button is clicked" do
+  it "keeps the editor shut until the edit button is clicked", :aggregate_failures do
     expect(page).to have_no_css(".tag-editor", visible: :visible)
+    expect(panel).to have_css(".settings-aside", text: "Click a tag")
   end
 
   it "opens the tag's summary from the tag" do
@@ -30,6 +33,25 @@ RSpec.describe "Admin tags", type: :feature do
     it "opens the one tag that was clicked", :aggregate_failures do
       expect(page.all(".tag-editor", visible: :visible).size).to eq(1)
       expect(editor).to have_field("tag[name]", with: "ruby")
+    end
+
+    it "opens it in the side panel in place of the aside", :aggregate_failures do
+      expect(panel).to have_css(".tag-editor", text: "#ruby", visible: :visible)
+      expect(panel).to have_no_css(".settings-aside", visible: :visible)
+    end
+
+    it "moves to the next tag that was clicked" do
+      open_editor("hanami")
+
+      expect(editor).to have_field("tag[name]", with: "hanami")
+    end
+
+    it "keeps the editor open with the error after a refused rename", :aggregate_failures do
+      editor.fill_in("tag[name]", with: "two words")
+      editor.click_on("Save")
+
+      expect(panel).to have_css(".tag-editor .field-error", visible: :visible)
+      expect(editor).to have_field("tag[name]", with: "two words")
     end
 
     it "renames the tag" do
@@ -47,7 +69,7 @@ RSpec.describe "Admin tags", type: :feature do
     end
 
     it "shuts again on cancel" do
-      editor.find("label", text: "Cancel").click
+      editor.click_on("Cancel")
 
       expect(page).to have_no_css(".tag-editor", visible: :visible)
     end

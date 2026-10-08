@@ -1453,17 +1453,18 @@ en:
             blank: "Give the tag a name first."
             format: "A tag is lowercase words joined by hyphens."
             taken: "Another tag already holds that name."
-        row:
+        editor:
           cancel: "Cancel"
           color: "Colour"
           confirm_remove:
             zero: "Remove %{tag}? You can't undo it."
             one: "Remove %{tag}? %{uses} loses it."
             other: "Remove %{tag}? %{uses} lose it."
-          edit: "Edit"
           remove: "Remove"
           rename: "Rename"
           save: "Save"
+        row:
+          edit: "Edit"
           unused: "unused · the colour is kept"
           uses:
             decisions:

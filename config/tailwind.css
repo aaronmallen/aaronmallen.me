@@ -4011,16 +4011,6 @@
   @apply border-t border-line py-3 first:border-t-0 first:pt-0;
 }
 
-@utility tag-toggle {
-  &:checked ~ .tag-editor {
-    @apply flex;
-  }
-
-  &:focus-visible ~ .tag-acts .tag-pen {
-    @apply outline-2 outline-offset-2 outline-accent;
-  }
-}
-
 @utility tag-name {
   @apply col-start-1 row-start-1 min-w-0 font-mono text-li font-semibold text-ink-muted;
 
@@ -4045,24 +4035,34 @@
   @apply cursor-pointer px-2 py-1;
 }
 
-@utility tag-editor {
-  @apply col-span-2 col-start-1 row-start-3 hidden w-full flex-col gap-3;
-  @apply rounded-card border border-line bg-ground p-3.5;
+@utility tag-panel {
+  @apply scroll-mt-[calc(var(--spacing-top-bar)+1rem)];
 }
 
-@utility tag-editor-row {
-  @apply flex flex-wrap items-start gap-4;
+@utility tag-panel-intro {
+  .tag-panel:not(:target):has(.tag-editor:target, .tag-editor-open) & {
+    @apply hidden;
+  }
+}
 
-  & > form:first-child {
-    @apply min-w-48 flex-1;
+@utility tag-editor {
+  @apply hidden scroll-mt-[calc(var(--spacing-top-bar)+1rem)] flex-col gap-3;
+
+  &:target,
+  &.tag-editor-open {
+    @apply flex;
+  }
+
+  .tag-panel:is(:target, :has(.tag-editor:target)) &.tag-editor-open:not(:target) {
+    @apply hidden;
   }
 }
 
 @utility tag-editor-foot {
   @apply flex flex-wrap items-center gap-2;
 
-  & > form:first-child {
-    @apply mr-auto;
+  & > form {
+    @apply ml-auto;
   }
 }
 

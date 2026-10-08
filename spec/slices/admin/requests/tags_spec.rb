@@ -8,7 +8,7 @@ RSpec.describe "Admin tags", type: :request do
 
   def add(name, **) = post("/admin/tags", _csrf_token: admin_csrf_token, tag: { name: }, **)
 
-  def confirm(**) = i18n.t("ui.components.tags.row.confirm_remove", **)
+  def confirm(**) = i18n.t("ui.components.tags.editor.confirm_remove", **)
 
   def confirm_prompt = page.find("form[action$='/delete']")["data-confirm"]
 
@@ -118,11 +118,24 @@ RSpec.describe "Admin tags", type: :request do
         expect(page.find(".tag-row", text: "#ruby")).to have_link("#ruby", href: "/admin/tags/ruby")
       end
 
-      it "offers an edit button that opens the tag's form" do
+      it "offers an edit button that opens the tag's form in the side panel", :aggregate_failures do
         get "/admin/tags"
-        toggle = page.find(".tag-row", text: "#ruby").find(".tag-toggle", visible: :all)[:id]
+        editor = "tag-#{named('ruby').id}-editor"
 
-        expect(page).to have_css("label.bt.tag-pen[for='#{toggle}']", text: "Edit")
+        expect(page.find(".tag-row", text: "#ruby")).to have_css("a.bt.tag-pen[href='##{editor}']", text: "Edit")
+        expect(page).to have_css("aside.settings-side ##{editor}.tag-editor", visible: :all)
+      end
+
+      it "keeps the forms out of the list" do
+        get "/admin/tags"
+
+        expect(page).to have_no_css(".tag-row form", visible: :all)
+      end
+
+      it "opens no editor until one is asked for" do
+        get "/admin/tags"
+
+        expect(page).to have_no_css(".tag-editor-open", visible: :all)
       end
 
       it "says what carries a tag" do
@@ -405,6 +418,12 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css("#tag-#{tag.id}-name-error")
       end
 
+      it "keeps the refused tag's editor open in the side panel" do
+        send_to("/admin/tags/#{tag.id}", tag: { name: " " })
+
+        expect(page).to have_css("aside.settings-side #tag-#{tag.id}-editor.tag-editor-open #tag-#{tag.id}-name-error")
+      end
+
       it "renames a private tag from the private tab" do
         tag = create(:tag, :private, name: "chores")
         send_to("/admin/tags/#{tag.id}", scope: "private", tag: { name: "errands" })
@@ -462,7 +481,7 @@ RSpec.describe "Admin tags", type: :request do
         expect(stored(tag.id).name).to eq("ruby")
       end
 
-      it "offers a swatch for each colour on the row" do
+      it "offers a swatch for each colour in the editor" do
         tag
 
         get "/admin/tags"
@@ -486,11 +505,11 @@ RSpec.describe "Admin tags", type: :request do
         expect(stored(tag.id).color).to eq("mk-blue")
       end
 
-      it "carries the scope on every form in the row" do
+      it "carries the scope on every form in the editor" do
         create(:tag, :private, name: "chores")
         get "/admin/tags", scope: "private"
 
-        expect(page.all(".tag-row form input[name='scope']", visible: :all).map(&:value).uniq).to eq(%w[private])
+        expect(page.all(".tag-editor form input[name='scope']", visible: :all).map(&:value).uniq).to eq(%w[private])
       end
 
       it "refuses a colour that is not one of the six" do
