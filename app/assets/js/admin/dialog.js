@@ -27,7 +27,7 @@ export function ask(dialog, { opener, focus, accept, refocus = "always" }) {
 }
 
 export function focusField(root) {
-  (root.querySelector(INVALID) ?? root.querySelector(FIELD))?.focus();
+  (root.querySelector(INVALID) ?? root.querySelector("[autofocus]") ?? root.querySelector(FIELD))?.focus();
 }
 
 export function openDialog(id) {

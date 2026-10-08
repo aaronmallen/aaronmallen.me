@@ -5,6 +5,7 @@ module Admin
     module Components
       module Journal
         class WriteDialog < Component
+          BODY_HEIGHT = "300px"
           ID = "journal-write"
           SCOPE = "journal-write"
           TITLE_ID = "journal-write-title"
@@ -29,14 +30,11 @@ module Admin
 
           private
 
-          def body_attributes
-            { class: "journal-modal-body", name: "entry[body]", aria: { label: t(".body") },
-              placeholder: t(".placeholder"), data: { journal_body: "" } }
-          end
-
           def body_field
-            textarea(**mix(control(:body), body_attributes)) { @body }
-            FieldError(field: :body, errors: @errors, scope: SCOPE)
+            EntryFields(
+              body: @body, tags: @tags, errors: @errors, height: BODY_HEIGHT, label: t(".body"), scope: SCOPE,
+              placeholder: t(".placeholder"), autofocus: true, only: :body,
+            )
           end
 
           def control(field) = FieldError.control_attributes(field, @errors, SCOPE)

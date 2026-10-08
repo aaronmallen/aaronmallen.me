@@ -14,6 +14,7 @@ RSpec.describe "Admin journal modal", type: :feature do
 
   it "opens with the cursor in the entry", :aggregate_failures do
     expect(modal).to have_css(".dialog-head", text: "journal · private · #{Blog::TimeZone.today.strftime('%b %-d')}")
+    expect(modal).to have_css("[data-markdown-editor] textarea#journal-write-body[name='entry[body]']")
     expect(page).to have_css("#journal-write-body:focus")
   end
 
@@ -40,8 +41,8 @@ RSpec.describe "Admin journal modal", type: :feature do
     end
   end
 
-  it "saves on Ctrl+Enter", :aggregate_failures do
-    modal.fill_in "journal-write-body", with: "walked"
+  it "saves what was typed in the editor on Ctrl+Enter", :aggregate_failures do
+    press("walked")
     find_by_id("journal-write-body").send_keys(%i[control enter])
 
     expect(page).to have_css(".toast", text: "Journal entry saved · private")

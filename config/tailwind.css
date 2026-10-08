@@ -1588,15 +1588,26 @@
   & .field-error {
     @apply px-6 pb-3;
   }
+
+  & .edit {
+    @apply rounded-none border-0 bg-transparent;
+  }
+
+  & .edit-pane-head {
+    @apply px-6;
+  }
+
+  & .preview {
+    @apply px-6 py-5;
+  }
+
+  & .edit-body {
+    @apply bg-transparent px-6 py-5 font-serif text-[1.15rem] leading-[1.65];
+  }
 }
 
 @utility journal-modal-form {
   @apply flex flex-col;
-}
-
-@utility journal-modal-body {
-  @apply block min-h-75 w-full resize-y border-0 bg-transparent px-6 py-5 font-serif text-[1.15rem] leading-[1.65];
-  @apply text-ink;
 }
 
 @utility journal-modal-foot {
