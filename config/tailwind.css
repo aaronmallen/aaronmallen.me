@@ -87,7 +87,6 @@
   --text-page-title--letter-spacing: -0.03em;
   --text-btn: 0.84375rem;
   --text-btn-sm: 0.75rem;
-  --text-slash: 1.125rem;
   --text-label: 0.75rem;
   --text-label--line-height: 1.4;
   --text-label--letter-spacing: 0.12em;
@@ -133,7 +132,6 @@
   --container-measure: 44em;
   --container-entry-meta: 170px;
   --container-work-year: 104px;
-  --container-admin: 1280px;
   --container-palette: 620px;
   --spacing-admin-gutter: clamp(20px, 2.2vw, 56px);
   --spacing-top-bar: 4.5rem;
@@ -172,7 +170,6 @@
   --container-g-3: 240px;
   --container-g-4: 190px;
   --container-rail: 248px;
-  --spacing-ctx-bar: 2.875rem;
   --container-editor-head: 420px;
   --spacing-preview: 600px;
   --radius-card: 10px;
@@ -181,7 +178,6 @@
   --radius-input: 7px;
   --radius-seg: 5px;
   --radius-toast: 8px;
-  --radius-slash: 14px;
   --spacing-toggle-w: 34px;
   --spacing-toggle-h: 19px;
   --spacing-check: 15px;
@@ -191,7 +187,6 @@
   --spacing-meter-h: 3px;
   --spacing-meter-bar: 6px;
   --spacing-meter-w: 52px;
-  --spacing-toast: 26px;
   --shadow-toast: 0 16px 44px rgb(0 0 0 / 40%);
   --shadow-palette: 0 30px 80px rgb(0 0 0 / 50%);
 }
@@ -890,54 +885,6 @@
   }
 }
 
-@utility ctx-bar {
-  @apply sticky top-0 z-40 border-b border-line bg-ground-sunk;
-}
-
-@utility ctx-bar-content {
-  @apply mx-auto flex max-w-admin items-center gap-2.5 overflow-x-auto px-admin-gutter;
-  min-height: calc(var(--spacing-ctx-bar) - 1px);
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    @apply hidden;
-  }
-}
-
-@utility ctx-where {
-  @apply inline-flex min-w-0 items-center gap-2 meta;
-}
-
-@utility ctx-where-icon {
-  @apply shrink-0 text-icon-sm text-mk-green;
-}
-
-@utility ctx-where-sep {
-  @apply opacity-50;
-}
-
-@utility ctx-where-name {
-  @apply truncate font-medium text-ink;
-}
-
-@utility ctx-btn {
-  @apply focus-ring inline-flex shrink-0 cursor-pointer items-center gap-2 border border-transparent px-2 py-1;
-  @apply rounded-btn font-mono text-meta whitespace-nowrap text-ink-muted no-underline;
-  @apply hover:border-line hover:text-ink transition-colors duration-200 ease-in-out;
-
-  &.jump {
-    @apply ml-auto border-line;
-  }
-
-  @media (width < 43.75rem) {
-    @apply min-h-tap;
-  }
-}
-
-@utility ctx-dot {
-  @apply size-1.5 shrink-0 rounded-full bg-mk-pink;
-}
-
 @utility pal-b {
   @apply fixed inset-0 m-0 h-full max-h-full w-full max-w-full items-start justify-center border-0 bg-transparent;
   @apply px-5 pt-[12vh] pb-5;
@@ -1049,22 +996,6 @@
 
 @utility keys-label {
   @apply col-start-1 row-start-1 m-0 meta text-ink;
-}
-
-@utility slash {
-  @apply focus-ring fixed bottom-5 z-50 grid size-11 cursor-pointer place-items-center border border-line;
-  @apply rounded-slash bg-ground-sunk font-mono text-slash leading-none text-ink-muted shadow-palette;
-  @apply transition duration-150 ease-in-out;
-  left: max(1rem, calc((100vw - var(--container-admin)) / 2 - 60px));
-
-  &:hover,
-  &:focus-visible {
-    @apply -translate-y-0.5 border-mk-green text-mk-green-text;
-  }
-
-  @media (width < 43.75rem) {
-    @apply bottom-3 left-2 rounded-lg text-icon;
-  }
 }
 
 @utility adm-main {
@@ -1495,7 +1426,7 @@
   @apply grid gap-4;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
 
-  @media (width < 56.25rem) {
+  @media (width < 53.75rem) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -2146,7 +2077,7 @@
   @apply grid items-start gap-4;
   grid-template-columns: minmax(0, 1fr) var(--container-rail);
 
-  @media (width < 58.75rem) {
+  @media (width < 53.75rem) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -2389,10 +2320,6 @@
   }
 }
 
-@utility wm-meta {
-  @apply flex flex-wrap items-center gap-2 meta;
-}
-
 @utility wm-reason {
   @apply meta;
 }
@@ -2411,16 +2338,6 @@
       @apply flex-1;
     }
   }
-}
-
-@utility task-planner {
-  & > .card {
-    border-color: color-mix(in oklab, var(--color-mk-green) 38%, var(--color-line));
-  }
-}
-
-@utility task-planner-note {
-  @apply mb-3.5 max-w-measure text-li text-ink-muted;
 }
 
 @utility task-planner-pull {
@@ -3810,7 +3727,11 @@
 }
 
 @utility task-form-pair {
-  @apply grid gap-3 sm:grid-cols-2;
+  @apply grid gap-3;
+
+  @media (width >= 43.75rem) {
+    @apply grid-cols-2;
+  }
 }
 
 @utility task-form-foot {
@@ -3899,10 +3820,6 @@
 
 @utility swatches {
   @apply flex items-center gap-1.5;
-}
-
-@utility swatch-set {
-  @apply flex items-center border-0 p-0;
 }
 
 @utility swatch {

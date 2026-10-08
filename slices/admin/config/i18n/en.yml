@@ -782,13 +782,6 @@ en:
           themes:
             dark: "Dark theme"
             light: "Light theme"
-        context_bar:
-          alert: "something needs you"
-          back: "today"
-          jump: "jump"
-          keys: "Show the keys"
-          separator: "/"
-          shortcut: "⌘/"
         groups:
           inbox: "Inbox"
           insights: "Insights"
@@ -875,8 +868,6 @@ en:
           previous: "Highlight the row above"
           reorder: "Move the focused task up or down"
           title: "Keys"
-        slash_button:
-          label: "Open the command palette"
       people:
         editor:
           all_people: "All people"
@@ -1630,11 +1621,6 @@ en:
           scheduled: "%{date}"
         panel:
           label: "Task"
-        planner:
-          ask: "What do you want to achieve today?"
-          empty: "empty sprint"
-          label: "Sprint · %{date}"
-          note: "One day, one sprint. Put something in it. Anything still open tonight rolls into tomorrow on its own."
         pools:
           empty:
             external: "Nothing in external. Sync issues from the External tab."
