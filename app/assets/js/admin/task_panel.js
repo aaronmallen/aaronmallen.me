@@ -63,7 +63,7 @@ function setupPanel(panel, modal) {
   let created = null;
 
   const read = (task, keep = false) => {
-    const scroll = keep ? panel.scrollTop : 0;
+    const scroll = keep ? panelBody.scrollTop : 0;
     const field = keep ? document.activeElement?.name : null;
 
     panelBody.replaceChildren(task);
@@ -73,7 +73,7 @@ function setupPanel(panel, modal) {
 
     const focus = (field && task.querySelector(`[name="${field}"]`)) || panelBody;
     focus.focus({ preventScroll: true });
-    panel.scrollTop = scroll;
+    panelBody.scrollTop = scroll;
   };
 
   const showEdit = (edit) => {

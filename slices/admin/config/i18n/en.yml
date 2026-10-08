@@ -1614,6 +1614,14 @@ en:
             duplicates: "duplicates"
             parent_of: "parent of"
             relates: "relates to"
+        meta:
+          blocked: "blocked"
+          carried:
+            one: "carried ×%{count}"
+            other: "carried ×%{count}"
+          in_progress: "in progress"
+          in_progress_for: "in progress · %{span}"
+          scheduled: "%{date}"
         panel:
           label: "Task"
         planner:
@@ -1634,15 +1642,9 @@ en:
           pull_from: "Or pull from"
           pull_task: "Pull %{task} into today"
         row:
-          blocked: "blocked"
-          carried:
-            one: "carried ×%{count}"
-            other: "carried ×%{count}"
           edit: "Edit"
           edit_key: "Edit the highlighted task"
-          in_progress: "in progress"
           pick: "Select %{task}"
-          scheduled: "%{date}"
         session_acts:
           confirm_delete: "Delete this session? Its time comes off the total."
           delete: "Delete session"
@@ -2302,10 +2304,16 @@ en:
           created: "Created"
           edit: "Edit"
           links: "Links"
+          lists:
+            external: "external"
+            next: "next"
+            someday: "someday"
+            today: "today"
           note: "Note"
           note_label: "Task"
           owner: "Me"
           related: "Related"
+          running: "running"
           sprint: "Sprint day"
           statuses:
             canceled: "canceled"
@@ -2315,6 +2323,7 @@ en:
           unscheduled: "not set"
           updated: "Updated"
           worked: "Time worked"
+          worked_total: "%{span} worked"
       time_report:
         show:
           heading: "Time"

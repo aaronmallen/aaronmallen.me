@@ -215,7 +215,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "files it under completed with its canceled mark" do
-      expect(find(".task.canceled", text: "Email the accountant")).to have_css(".task-meta .pill", text: mark)
+      expect(find(".task.canceled", text: "Email the accountant")).to have_css(".task-meta", text: mark)
     end
 
     describe "reopening it" do
@@ -227,7 +227,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "puts it back on its list as open", :aggregate_failures do
         expect(page).to have_css(".task-title", text: "Email the accountant")
-        expect(find(".task", text: "Email the accountant")).to have_no_css(".task-meta .pill", text: mark)
+        expect(find(".task", text: "Email the accountant")).to have_no_css(".task-meta", text: mark)
         expect(repo.all_open.map(&:title)).to include("Email the accountant")
       end
     end
@@ -293,7 +293,7 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "from the task page" do
       before do
         visit "/admin/tasks/#{task.id}?filter=next&origin=tasks"
-        find(".read-acts").click_button(cancel)
+        find(".task-stbar").click_button(cancel)
       end
 
       it "asks inline" do
@@ -428,7 +428,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "closes on a click outside and hands focus back to the row", :aggregate_failures do
-      page.driver.browser.mouse.click(x: 1200, y: 400)
+      page.driver.browser.mouse.click(x: 100, y: 400)
 
       expect(page).to have_no_css("dialog#task-panel[open]")
       expect(active).to eq("Email the accountant")
@@ -452,6 +452,14 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_css(".toast", text: "Canceled").and have_no_css("dialog#task-panel[open]")
       expect(page).to have_current_path("/admin/tasks?filter=next")
+    end
+
+    it "opens as the wide drawer against the right edge" do
+      rect = evaluate_script(<<~JS)
+        (r => ({ width: r.width, right: r.right, edge: window.innerWidth }))(document.querySelector('#task-panel').getBoundingClientRect())
+      JS
+
+      expect(rect).to eq("width" => 760, "right" => rect["edge"], "edge" => rect["edge"])
     end
 
     it "spans a phone with no sideways scroll", :aggregate_failures do
@@ -908,7 +916,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "shows the blocked pill while the blocker is open" do
         expect(row("Email the accountant"))
-          .to have_css(".task-meta .pill", text: translate("ui.components.tasks.row.blocked"))
+          .to have_css(".task-meta .task-mark", text: translate("ui.components.tasks.meta.blocked"))
       end
 
       it "saves one blocks link from the other task", :aggregate_failures do
@@ -990,7 +998,7 @@ RSpec.describe "Admin tasks", type: :feature do
         find(".toast", text: "Canceled")
         find(".subtab", text: "next").click
 
-        expect(row("Email the accountant")).to have_no_css(".task-meta .pill.pink")
+        expect(row("Email the accountant")).to have_no_css(".task-meta .task-mark.pink")
       end
     end
 

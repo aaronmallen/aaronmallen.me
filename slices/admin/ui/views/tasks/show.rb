@@ -9,6 +9,7 @@ module Admin
 
           CREDIT_SEPARATOR = ", "
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
+          LISTS = %w[today next someday external].to_h { [Blog::Types::TaskFilter[it], ".lists.#{it}"] }.freeze
           PREFIX = "#"
           STATUSES = {
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle", ".statuses.open"],
@@ -30,7 +31,7 @@ module Admin
             article(class: "read-page", data: { task_read: @task.id }) do
               head
               meta
-              div(class: "read-acts") { Controls(task: @task, filter: @filter, origin: @origin, moves: false) }
+              status_bar
               note
               facts
               links
@@ -109,6 +110,7 @@ module Admin
             p(class: "read-meta") do
               RecordKey(kind: "task", id: @task.id)
               status
+              span(class: "read-meta-list") { t(LISTS.fetch(@task.place)) }
               SourceLink(source: @task.source)
               @task.tags.each { Tag(tag: it) }
             end
@@ -130,6 +132,17 @@ module Admin
             color, icon, label_key = STATUSES.fetch(@task.status)
 
             Pill(color:, icon:) { t(label_key) }
+          end
+
+          def status_bar
+            div(class: "task-stbar") do
+              Controls(task: @task, filter: @filter, origin: @origin, moves: false)
+              p(class: "task-stbar-worked") do
+                Icon("fa-regular fa-clock")
+                plain t(".worked_total", span: Blog::Helpers::Figures.hours(@task.tracked_seconds))
+                span(class: "task-stbar-running") { t(".running") } if @task.running_session
+              end
+            end
           end
 
           def today? = @origin == FROM_TODAY

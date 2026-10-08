@@ -22,7 +22,7 @@ module Admin
           def self.label_key(link) = [LABELS, link.label].join(".")
 
           def view_template
-            div(class: "task-links") { @links.each { chip(it) } }
+            @links.each { chip(it) }
           end
 
           private

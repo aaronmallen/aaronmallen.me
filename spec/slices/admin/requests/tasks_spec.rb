@@ -515,7 +515,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, title: "Email the accountant", tags: %w[admin])
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_no_css(".task-planner .task-meta .pill")
+        expect(page).to have_no_css(".task-planner .task-meta .task-mark")
         expect(page.all(".task-planner .task-meta .tag").map(&:text)).to eq(%w[#admin])
       end
 
@@ -825,7 +825,12 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "the shape of a row" do
-      def keys = page.all(".task .record-key").map(&:text)
+      def busy_task
+        sprint = create(:sprint, sprint_date: Blog::TimeZone.today)
+        task = create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, carried_count: 1, tags: %w[ruby])
+        create(:task_link, from_task_id: create(:task).id, to_task_id: task.id)
+        create(:task_source, task:)
+      end
 
       {
         "today" => [:in_sprint],
@@ -867,7 +872,27 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
         get "/admin/tasks"
 
-        expect(page).to have_css(".task-meta .pill.blue", text: i18n.t("ui.components.tasks.row.in_progress"))
+        expect(page).to have_css(".task-meta .task-mark.blue", text: i18n.t("ui.components.tasks.meta.in_progress"))
+      end
+
+      def keys = page.all(".task .record-key").map(&:text)
+
+      def meta_part(classes) = classes.split.grep_v("task-mark").first
+
+      def meta_parts = page.find(".task.doing .task-meta").all(:xpath, "./*").map { meta_part(it[:class]) }
+
+      it "lays the meta line out in progress, blocked, carried, source, tags, links" do
+        busy_task
+        get "/admin/tasks"
+
+        expect(meta_parts).to eq(%w[blue pink sand task-source tag task-link])
+      end
+
+      it "shows the time worked on a task not in progress" do
+        create(:task, worked_seconds: 5_700)
+        get "/admin/tasks", filter: "next"
+
+        expect(page).to have_css(".task-meta .task-mark:has(.fa-clock)", exact_text: "1h 35m")
       end
 
       it "leaves an open task unmarked", :aggregate_failures do
@@ -984,7 +1009,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task = create(:task)
         get "/admin/tasks/#{task.id}", filter: "next"
 
-        expect(page).to have_no_css(".read-acts .fa-pen-to-square", visible: :all)
+        expect(page).to have_no_css(".task-stbar .fa-pen-to-square", visible: :all)
       end
     end
 
@@ -1328,7 +1353,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :canceled, title: "Dropped")
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_css(".task.canceled .task-meta .pill", text: "canceled")
+        expect(page).to have_css(".task.canceled .task-meta", text: "canceled")
       end
 
       it "says the day and the time it was canceled" do
@@ -1344,6 +1369,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "completed"
 
         expect(page).to have_no_css(".task.canceled")
+      end
+
+      it "reopens it from the box beside the key" do
+        create(:task, :canceled)
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_css(".task > form[action$='/reopen'] button.task-box .fa-xmark")
       end
 
       it "offers reopen and nothing else that moves it", :aggregate_failures do
@@ -1558,7 +1590,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_no_css(".task-meta .pill")
+        expect(page).to have_no_css(".task-meta .task-mark")
       end
 
       it "draws the key in no colour" do
@@ -1792,21 +1824,21 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :in_sprint, sprint_id: yesterday.id, title: "Ship the screen")
         get "/admin/tasks"
 
-        expect(page).to have_css(".task-meta .pill.sand", text: "carried ×1")
+        expect(page).to have_css(".task-meta .task-mark.sand", text: "carried ×1")
       end
 
       it "says nothing on a task that was never carried" do
         create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
         get "/admin/tasks"
 
-        expect(page).to have_no_css(".task-meta .pill", text: "carried")
+        expect(page).to have_no_css(".task-meta .task-mark", text: "carried")
       end
 
       it "says nothing once it is finished" do
         create(:task, :carried, :done, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id)
         get "/admin/tasks"
 
-        expect(page).to have_no_css(".task-meta .pill", text: "carried")
+        expect(page).to have_no_css(".task-meta .task-mark", text: "carried")
       end
 
       it "counts what arrived in the sprint" do
@@ -2754,7 +2786,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         create(:task, :in_sprint, sprint: create(:sprint, sprint_date: tomorrow))
         upcoming
 
-        expect(page).to have_css(".task-meta .pill.orange", text: tomorrow.strftime("%b %-d"))
+        expect(page).to have_css(".task-meta .task-mark.orange", text: tomorrow.strftime("%b %-d"))
       end
 
       it "schedules a task from its editor" do

@@ -135,7 +135,9 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
       create(:task_link, from_task_id: other.id, to_task_id: task.id)
     end
 
-    def pill?(title) = row(title).has_css?(".task-meta .pill.pink", text: i18n.t("ui.components.tasks.row.blocked"))
+    def pill?(title)
+      row(title).has_css?(".task-meta .task-mark.pink", text: i18n.t("ui.components.tasks.meta.blocked"))
+    end
 
     it "shows while an open task blocks it" do
       get "/admin/tasks", filter: "next"
