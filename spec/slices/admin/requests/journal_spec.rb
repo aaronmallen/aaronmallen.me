@@ -634,6 +634,75 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       end
     end
 
+    describe "saving from the modal" do
+      def modal = page.find("dialog#journal-write", visible: :all)
+
+      def write(return_to: "/admin/posts", **fields)
+        post "/admin/journal", _csrf_token: admin_csrf_token, modal: "1", return_to:, entry: fields
+      end
+
+      it "files the entry under today with its tags, whatever date comes with it", :aggregate_failures do
+        write(body: "walked", tags: "health", entry_date: (today - 4).iso8601)
+
+        expect(repo.today.map(&:body)).to eq(["walked"])
+        expect(repo.today.first.tags.map(&:name)).to eq(%w[health])
+      end
+
+      it "returns to the page it was opened on with the toast", :aggregate_failures do
+        write(body: "walked")
+        follow_redirect!
+
+        expect(last_request.path).to eq("/admin/posts")
+        expect(toast).to eq("Journal entry saved · private")
+      end
+
+      it "returns to the journal when the return path leaves the admin" do
+        write(body: "walked", return_to: "https://example.com/admin")
+
+        expect(last_response.headers["Location"]).to end_with("/admin/journal")
+      end
+
+      it "answers 422, saves nothing and reopens the modal", :aggregate_failures do
+        write(body: "  ")
+
+        expect([last_response.status, repo.count]).to eq([422, 0])
+        expect(modal["data-dialog-show"]).not_to be_nil
+      end
+
+      it "shows a body error in the modal" do
+        write(body: "  ")
+        message = i18n.t("ui.components.journal.field_error.body.blank")
+
+        expect(modal).to have_css("#journal-write-body-error.field-error", exact_text: message, visible: :all)
+      end
+
+      it "shows a tags error in the modal and keeps what was typed", :aggregate_failures do
+        write(body: "walked", tags: "a/b")
+
+        expect(modal).to have_css("#journal-write-tags-error.field-error", visible: :all)
+        expect(modal).to have_css("#journal-write-body", exact_text: "walked", visible: :all)
+        expect(modal).to have_css("#journal-write-tags[value='a/b'][aria-invalid='true']", visible: :all)
+        expect(modal).to have_css("input[name='return_to'][value='/admin/posts']", visible: :all)
+      end
+
+      it "leaves the journal page form clean after a modal error" do
+        write(body: "  ")
+
+        expect(page).to have_no_css("#journal-body-error")
+      end
+    end
+
+    describe "the modal on every page" do
+      it "draws it closed, posting to the journal and coming back here", :aggregate_failures do
+        get "/admin/analytics"
+        form = page.find("dialog#journal-write form", visible: :all)
+
+        expect(form["action"]).to eq("/admin/journal")
+        expect(form).to have_css("input[name='return_to'][value='/admin/analytics']", visible: :all)
+        expect(page.find("dialog#journal-write", visible: :all)["data-dialog-show"]).to be_nil
+      end
+    end
+
     describe "each entry" do
       before do
         create(:journal_entry, body: "walked")

@@ -698,6 +698,18 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+        write_dialog:
+          body: "Journal entry"
+          placeholder: "What happened? Only you will ever read this."
+          save: "Save"
+          save_hint: "save"
+          save_key: "⌘↵"
+          tags: "Tags"
+          tags_placeholder: "tags: ruby, health"
+          title: "journal · private · %{date}"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
       markdown_editor:
         preview: "Preview"
         toolbar: "Formatting"
@@ -764,9 +776,6 @@ en:
           start_task:
             label: "Start task"
             text: "begin task, work on task"
-          todays_journal:
-            label: "Go to today's journal"
-            text: "open the journal, read today"
         avatar_menu:
           keys: "Keyboard shortcuts"
           label: "Account and settings"
@@ -1739,17 +1748,6 @@ en:
         worked_fields:
           hours: "Hours"
           minutes: "Minutes"
-      today_journal_card:
-        body: "Entry"
-        label: "Private"
-        placeholder: "What happened? Only you will ever read this."
-        private: "private"
-        save: "Save entry"
-        title: "Journal"
-        today: "%{count} today"
-        words:
-          one: "%{count} word"
-          other: "%{count} words"
       time_report:
         filters:
           by: "Group by"

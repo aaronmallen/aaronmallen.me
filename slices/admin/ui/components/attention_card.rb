@@ -52,17 +52,17 @@ module Admin
           Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
         end
 
-        def icon_link(href, label, icon)
-          Button(href:, small: true, title: label, aria: { label: }, icon:)
+        def icon_link(href, label, icon, **)
+          Button(href:, small: true, title: label, aria: { label: }, icon:, **)
         end
 
         def journal(row)
-          href = "##{TodayJournalCard::FORM_ID}"
-
+          href = path(:admin_journal, write: Blog::Types::CHECKED)
+          link = { data: { dialog_open: Journal::WriteDialog::ID } }
           sub = t(".journal_gap", count: row.days)
 
-          ListItem(title: t(".journal"), href:, sub:, icon: "fa-solid fa-feather", hover: true) do
-            icon_link(href, t(".write"), "fa-solid fa-feather")
+          ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", hover: true) do
+            icon_link(href, t(".write"), "fa-solid fa-feather", **link)
             snooze(row)
           end
         end

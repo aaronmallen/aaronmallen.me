@@ -58,6 +58,7 @@ export function setupDialogs() {
     dialog.addEventListener("click", (event) => {
       if (event.target === dialog && dialog.dataset.dialog !== "static") dialog.close();
     });
+    if ("dialogShow" in dialog.dataset) openDialog(dialog.id);
   }
 
   for (const close of fresh(ready, document.querySelectorAll("[data-dialog] [data-dialog-close]"))) {

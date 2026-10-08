@@ -16,7 +16,6 @@ module Admin
     use(*Admin::Slice.config.actions.sessions.middleware)
 
     get "/", to: "today.show", as: :root
-    post "/", to: "today.create_journal_entry", as: :create_today_journal_entry
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention

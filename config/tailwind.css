@@ -133,6 +133,7 @@
   --container-entry-meta: 170px;
   --container-work-year: 104px;
   --container-palette: 620px;
+  --container-journal-modal: 880px;
   --spacing-admin-gutter: clamp(20px, 2.2vw, 56px);
   --spacing-top-bar: 4.5rem;
   --spacing-avatar: 34px;
@@ -1566,6 +1567,45 @@
   @apply mt-3 flex justify-end gap-2;
 }
 
+@utility journal-modal {
+  & .dialog-box {
+    @apply max-w-journal-modal;
+  }
+
+  & .dialog-head .card-title {
+    @apply font-mono text-badge font-normal text-ink-muted;
+  }
+
+  & .dialog-body {
+    @apply p-0;
+  }
+
+  & .field-error {
+    @apply px-6 pb-3;
+  }
+}
+
+@utility journal-modal-form {
+  @apply flex flex-col;
+}
+
+@utility journal-modal-body {
+  @apply block min-h-75 w-full resize-y border-0 bg-transparent px-6 py-5 font-serif text-[1.15rem] leading-[1.65];
+  @apply text-ink;
+}
+
+@utility journal-modal-foot {
+  @apply flex flex-wrap items-center gap-3 border-t border-line py-2.5 pr-3 pl-5 font-mono text-badge text-ink-muted;
+}
+
+@utility journal-modal-tags {
+  @apply min-w-0 flex-1 border-0 bg-transparent text-ink;
+}
+
+@utility journal-modal-hint {
+  @apply ml-auto;
+}
+
 @utility journal-editor {
   & .preview > .post-body {
     @apply journal-entry-body;
@@ -1956,26 +1996,6 @@
 
 @utility time-task-hours {
   @apply font-mono tabular-nums;
-}
-
-@utility today-journal-foot {
-  @apply mt-3 flex flex-wrap items-center justify-between gap-3;
-}
-
-@utility today-journal-lock {
-  @apply mr-1.5;
-}
-
-@utility today-journal-entries {
-  @apply mt-4 flex flex-col gap-3 border-t border-line pt-4;
-}
-
-@utility today-journal-entry {
-  @apply flex flex-col gap-1;
-}
-
-@utility today-journal-time {
-  @apply meta;
 }
 
 @utility commits-sub {

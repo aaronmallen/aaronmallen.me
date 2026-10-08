@@ -511,12 +511,13 @@ RSpec.describe "Admin command palette", type: :feature do
       query.send_keys(*"journal entry".chars, :enter)
     end
 
-    it "opens the journal page" do
-      expect(page).to have_current_path("/admin/journal?write=1")
+    it "opens the journal modal where you are", :aggregate_failures do
+      expect(page).to have_css("dialog#journal-write[open]")
+      expect(page).to have_current_path("/admin/posts")
     end
 
     it "puts the cursor in the entry field" do
-      expect(page).to have_css("#journal-entry textarea[name='entry[body]']:focus")
+      expect(page).to have_css("#journal-write-body:focus")
     end
   end
 
@@ -558,19 +559,6 @@ RSpec.describe "Admin command palette", type: :feature do
 
     it "puts the cursor in it" do
       expect(page).to have_css("[data-social-part] [data-social-body]:focus")
-    end
-  end
-
-  describe "running the Go to today's journal command" do
-    before do
-      visit "/admin/posts"
-      open_palette
-      query.send_keys(*"today's journal".chars, :enter)
-    end
-
-    it "opens today's journal", :aggregate_failures do
-      expect(page).to have_current_path("/admin/journal")
-      expect(page).to have_css("#journal-entry", text: "Today")
     end
   end
 
@@ -742,7 +730,6 @@ RSpec.describe "Admin command palette", type: :feature do
       {
         "command-palette-new-post" => "/admin/posts/new",
         "command-palette-new-social-post" => "/admin/social?write=1",
-        "command-palette-todays-journal" => "/admin/journal",
       }.each do |id, path|
         it "goes to #{path} from #{id}" do
           find_by_id(id).click

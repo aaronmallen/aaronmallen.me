@@ -101,12 +101,13 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
     expect(row("Old draft").all("a").map { it["href"] }.uniq).to eq(["/admin/posts/#{post.id}/edit"])
   end
 
-  it "takes the journal row to the journal form on today", :aggregate_failures do
+  it "opens the journal modal from the journal row, and the journal page without scripts", :aggregate_failures do
     create(:journal_entry, entry_date: today - 3)
     get "/admin"
 
-    expect(row("Journal").all("a").map { it["href"] }.uniq).to eq(["#today-journal-entry"])
-    expect(page).to have_css("form#today-journal-entry")
+    expect(row("Journal").all("a").map { it["href"] }.uniq).to eq(["/admin/journal?write=1"])
+    expect(row("Journal").all("a").map { it["data-dialog-open"] }.uniq).to eq(["journal-write"])
+    expect(row("Journal")).to have_link(title: "Write")
   end
 
   describe "snoozing" do

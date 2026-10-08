@@ -16,7 +16,7 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "draws one row per entry, in order" do
       names = %w[
-        create-task create-decision create-journal-entry new-post new-social-post todays-journal start-task
+        create-task create-decision create-journal-entry new-post new-social-post start-task
         complete-task pause-task
       ]
 
@@ -40,10 +40,10 @@ RSpec.describe "Admin palette actions", type: :request do
       expect(row).to have_css(".fa-scale-balanced", visible: :all)
     end
 
-    it "sends Create journal entry to the journal, ready to write", :aggregate_failures do
+    it "sends Create journal entry to the journal modal, or the journal page without one", :aggregate_failures do
       row = action("create-journal-entry")
 
-      expect(row["data-palette-dialog"]).to be_nil
+      expect(row["data-palette-dialog"]).to eq("journal-write")
       expect(row["data-palette-href"]).to eq("/admin/journal?write=1")
       expect(row).to have_css(".fa-feather", visible: :all)
     end
@@ -58,10 +58,6 @@ RSpec.describe "Admin palette actions", type: :request do
 
     it "sends New social post to the composer, ready to write" do
       expect(action("new-social-post")["data-palette-href"]).to eq("/admin/social?write=1")
-    end
-
-    it "sends Go to today's journal to the journal" do
-      expect(action("todays-journal")["data-palette-href"]).to eq("/admin/journal")
     end
 
     it "matches each row on its label and the words for what it does" do

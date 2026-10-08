@@ -25,8 +25,10 @@ module Admin
           prop :search, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
           prop :values, Blog::Types::Hash, default: BLANK_ENTRY
           prop :writing, Blog::Types::Bool, default: false
+          prop :written, Blog::Types::Hash.optional, default: nil
 
           def view_template
+            content_for(:journal_write) { capture { WriteDialog(today: @today, **@written) } } if @written
             PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock", tabs_side:) { search_form }
 
             div(class: "g-main rev") do

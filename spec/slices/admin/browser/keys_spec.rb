@@ -395,10 +395,11 @@ RSpec.describe "Admin keys", type: :feature do
   describe "w" do
     before { visit "/admin/analytics" }
 
-    it "opens a journal entry" do
+    it "opens the journal modal on the page you are on", :aggregate_failures do
       press("w")
 
-      expect(page).to have_current_path("/admin/journal?write=1")
+      expect(page).to have_css("dialog#journal-write[open]")
+      expect(page).to have_current_path("/admin/analytics")
     end
 
     it "lists w in the help overlay" do

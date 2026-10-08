@@ -3,7 +3,6 @@
 RSpec.describe "Admin today", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Record::Slice["repos.journal_entry_queries"] }
   let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
@@ -31,17 +30,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
   def create_entry(**attributes) = create(:journal_entry, **attributes)
 
-  def entry_body = card("Journal").find(".today-journal-entry .journal-entry-body")
-
   def line(label) = page.find(".today-line", text: label)
 
   def line_value(label) = line(label).find(".today-line-value").text
 
   def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
-
-  def save(**fields)
-    post "/admin", _csrf_token: admin_csrf_token, entry: fields
-  end
 
   def schedule_social(*parts, at: Time.now + 60, targets: %w[mastodon])
     Social::Slice["repos.social_post_mutations"].create_with_parts(targets:, status: "scheduled", posted_at: at, parts:)
@@ -65,10 +58,10 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "puts the sprint and journal on the left and Shipped today on the right", :aggregate_failures do
+    it "puts the sprint on the left and Shipped today on the right", :aggregate_failures do
       get "/admin"
 
-      expect(column("main")).to eq(["Today's sprint", "Journal"])
+      expect(column("main")).to eq(["Today's sprint"])
       expect(column("side")).to eq(["Shipped today"])
     end
 
@@ -221,141 +214,38 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
     end
 
-    describe "the journal card" do
-      before { get "/admin" }
+    describe "the Journal line" do
+      it "has no journal card" do
+        get "/admin"
 
-      it "labels and titles the card", :aggregate_failures do
-        expect(card("Journal")).to have_css(".card-label", exact_text: "Private")
-        expect(card("Journal")).to have_css("h2.card-title", exact_text: "Journal")
+        expect(page).to have_no_css("section.card h2.card-title", exact_text: "Journal")
       end
 
-      it "posts the entry form to Today with the CSRF token", :aggregate_failures do
-        expect(page).to have_css("form#today-journal-entry[method='post'][action='/admin']")
-        expect(page).to have_css("form#today-journal-entry input[name='_csrf_token']", visible: :hidden)
-      end
-
-      it "renders the entry textarea" do
-        placeholder = i18n.t("ui.components.today_journal_card.placeholder")
-
-        expect(page).to have_field("Entry", type: "textarea", with: "", placeholder:)
-      end
-
-      it "draws the entry in the Markdown editor at its own height" do
-        expect(page).to have_css(
-          "#today-journal-entry [data-markdown-editor][style='--edit-height: 160px'] textarea[name='entry[body]']",
-        )
-      end
-
-      it "renders an empty tags field under the editor" do
-        expect(page).to have_css("#today-journal-entry .journal-editor ~ input[name='entry[tags]'][value='']")
-      end
-
-      it "puts a lock and the word count in the footer", :aggregate_failures do
-        expect(card("Journal")).to have_css(".today-journal-foot i.fa-lock")
-        expect(card("Journal")).to have_css(".today-journal-foot .journal-words", exact_text: "private · 0 words")
-      end
-
-      it "gives the script the word templates" do
-        words = page.find("#today-journal-entry [data-journal-words]")
-
-        expect([words["data-one"], words["data-other"]]).to eq(i18n.t("ui.components.today_journal_card.words").values)
-      end
-
-      it "disables Save entry while the entry is empty" do
-        expect(page).to have_button("Save entry", disabled: true)
-      end
-
-      it "lists no entries without any" do
-        expect(page).to have_no_css(".today-journal-entries")
-      end
-    end
-
-    describe "the counts" do
-      it "counts today's entries in the card head" do
+      it "counts today's entries and leaves out other days" do
         2.times { create_entry(entry_date: today) }
         create_entry(entry_date: today - 1)
         get "/admin"
 
-        expect(card("Journal")).to have_css(".card-side .journal-words", exact_text: "2 today")
+        expect(line_value("Journal")).to eq("2 today w")
       end
 
-      it "counts today's entries on the quiet Journal line", :aggregate_failures do
-        2.times { create_entry(entry_date: today) }
+      it "opens the journal modal, and the journal page without scripts", :aggregate_failures do
         get "/admin"
 
-        expect(line_value("Journal")).to eq("2 today")
-        expect(line("Journal")[:href]).to eq("#today-journal-entry")
+        expect(line("Journal")["data-dialog-open"]).to eq("journal-write")
+        expect(line("Journal")[:href]).to eq("/admin/journal?write=1")
+      end
+
+      it "shows the w key" do
+        get "/admin"
+
+        expect(line("Journal")).to have_css("kbd.kbd", exact_text: "w")
       end
 
       it "reads nothing yet on the quiet Journal line without an entry" do
         get "/admin"
 
-        expect(line_value("Journal")).to eq("nothing yet")
-      end
-
-      it "counts no entries as zero" do
-        create_entry(entry_date: today - 1)
-        get "/admin"
-
-        expect(card("Journal")).to have_css(".card-side .journal-words", exact_text: "0 today")
-      end
-    end
-
-    describe "today's entries" do
-      it "lists them under a rule with their times", :aggregate_failures do
-        create_entry(entry_date: today, entry_time: "21:05", body: "walked")
-        get "/admin"
-
-        entry = card("Journal").find(".today-journal-entries .today-journal-entry")
-
-        expect(entry).to have_css("time.today-journal-time[datetime='#{today.iso8601}T21:05']", exact_text: "21:05")
-        expect(entry).to have_css(".journal-entry-body", exact_text: "walked")
-      end
-
-      it "lists today's entries newest first" do
-        create_entry(entry_date: today, entry_time: "08:00", body: "earlier")
-        create_entry(entry_date: today, entry_time: "21:05", body: "later")
-        get "/admin"
-
-        expect(card("Journal").all(".today-journal-entry .journal-entry-body").map(&:text)).to eq(%w[later earlier])
-      end
-
-      it "leaves out other days" do
-        create_entry(entry_date: today - 1, body: "yesterday")
-        get "/admin"
-
-        expect(page).to have_no_css(".today-journal-entries")
-      end
-
-      it "renders the body as markdown", :aggregate_failures do
-        create_entry(entry_date: today, body: "a **bold** day\n\n- one\n- two\n\n[the lake](https://example.com/lake)")
-        get "/admin"
-
-        expect(entry_body).to have_css("strong", exact_text: "bold")
-        expect(entry_body.all("ul li").map(&:text)).to eq(%w[one two])
-        expect(entry_body).to have_link("the lake", href: "https://example.com/lake")
-      end
-
-      it "joins lines split by one newline into one paragraph" do
-        create_entry(entry_date: today, body: "first\nsecond")
-        get "/admin"
-
-        expect(page.all(".today-journal-entries .journal-entry-body p").map(&:text)).to eq(["first\nsecond"])
-      end
-
-      it "starts a new paragraph after a blank line" do
-        create_entry(entry_date: today, body: "first\n\nsecond")
-        get "/admin"
-
-        expect(page.all(".today-journal-entries .journal-entry-body p").map(&:text)).to eq(%w[first second])
-      end
-
-      it "drops raw HTML from a body", :aggregate_failures do
-        create_entry(entry_date: today, body: "<script>alert(1)</script>\n\nsafe <b onclick=\"alert(1)\">text</b>")
-        get "/admin"
-
-        expect(entry_body).to have_no_css("script, b, [onclick]")
-        expect(entry_body.native.inner_html).not_to include("alert")
+        expect(line_value("Journal")).to eq("nothing yet w")
       end
     end
 
@@ -907,114 +797,6 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       expect(commits_card).to have_no_css(".today-stat")
     end
 
-    describe "saving an entry" do
-      it "files it under today with the time of saving", :aggregate_failures do
-        save(body: "walked")
-        entry = repo.today.first
-
-        expect(entry).to have_attributes(body: "walked", entry_date: today)
-        expect(entry.entry_time.strftime("%H:%M:%S")).to eq(Blog::TimeZone.local(now).strftime("%H:%M:%S"))
-      end
-
-      it "returns to Today with the toast", :aggregate_failures do
-        save(body: "walked")
-        follow_redirect!
-
-        expect(last_request.path).to eq("/admin")
-        expect(toast).to eq("Journal entry saved · private")
-      end
-
-      it "lists the new entry under the card" do
-        save(body: "walked")
-        follow_redirect!
-
-        expect(card("Journal").all(".today-journal-entry .journal-entry-body").map(&:text)).to eq(["walked"])
-      end
-
-      it "files it under today even when a date comes with the form" do
-        save(body: "walked", entry_date: (today - 4).iso8601)
-
-        expect(repo.today.map(&:body)).to eq(["walked"])
-      end
-
-      it "clears the textarea" do
-        save(body: "walked")
-        follow_redirect!
-
-        expect(page).to have_field("Entry", with: "")
-      end
-
-      it "saves the tags, folded to one case" do
-        save(body: "walked", tags: "Ruby, health")
-
-        expect(repo.today.first.tags.map(&:name)).to eq(%w[health ruby])
-      end
-
-      it "saves an entry with no tags" do
-        save(body: "walked")
-
-        expect(repo.today.first.tags).to eq([])
-      end
-
-      it "clears the tags field" do
-        save(body: "walked", tags: "ruby")
-        follow_redirect!
-
-        expect(page).to have_css("#today-journal-entry input[name='entry[tags]'][value='']")
-      end
-    end
-
-    describe "a rejected entry" do
-      it "answers 422 and saves nothing for a blank entry" do
-        save(body: " \n ")
-
-        expect([last_response.status, repo.count]).to eq([422, 0])
-      end
-
-      it "shows the body error next to the textarea", :aggregate_failures do
-        save(body: "  ")
-        message = i18n.t("ui.components.journal.field_error.body.blank")
-
-        expect(page).to have_css("#journal-body-error.field-error", exact_text: message)
-        expect(page).to have_css("#journal-body[aria-invalid='true'][aria-describedby='journal-body-error']")
-      end
-
-      it "keeps the typed tags after a blank entry" do
-        save(body: "  ", tags: "ruby, health")
-
-        expect(page).to have_css("#today-journal-entry input[name='entry[tags]'][value='ruby, health']")
-      end
-
-      it "rejects a tag it can't use and saves nothing" do
-        save(body: "walked", tags: "a/b")
-
-        expect([last_response.status, repo.count]).to eq([422, 0])
-      end
-
-      it "shows the tags error and keeps what was typed", :aggregate_failures do
-        save(body: "walked", tags: "a/b")
-        message = i18n.t("ui.components.journal.field_error.tags.format")
-
-        expect(page).to have_css("#journal-tags-error.field-error", exact_text: message)
-        expect(page).to have_css("#journal-tags[aria-invalid='true'][name='entry[tags]'][value='a/b']")
-        expect(page).to have_field("Entry", with: "walked")
-      end
-
-      it "stays on Today with the side cards", :aggregate_failures do
-        create(:post, :draft)
-        save(body: "  ")
-
-        expect(column("side")).to eq(["Shipped today"])
-        expect(line_value("Drafts")).to eq("1")
-      end
-
-      it "rejects a save without a CSRF token" do
-        post "/admin", entry: { body: "walked" }
-
-        expect([last_response.status, repo.count]).to eq([403, 0])
-      end
-    end
-
     describe "the sprint" do
       def create_from_today(title)
         post "/admin/tasks", _csrf_token: admin_csrf_token, origin: "today", task: { title:, list: "today" }
@@ -1449,14 +1231,6 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(form).to have_field("origin", type: :hidden, with: "today")
         expect(form).to have_select("task[list]", selected: "today")
       end
-    end
-  end
-
-  describe "signed out" do
-    it "saves nothing" do
-      post "/admin", entry: { body: "walked" }
-
-      expect(repo.count).to eq(0)
     end
   end
 end

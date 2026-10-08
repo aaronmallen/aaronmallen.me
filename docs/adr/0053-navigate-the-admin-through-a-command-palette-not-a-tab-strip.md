@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [admin, assets]
 superseded-by: "0128"
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320", "#745"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320", "#745", "#768"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
@@ -56,11 +56,10 @@ matches an action lists it first. #303 made the list, and it now holds these row
 - "Create task" shuts the palette and opens the new task dialog on the page you are on, and goes to
   `/admin/tasks/new` when that page has no dialog.
 - "Create decision" goes to `/admin/decisions/new`.
-- "Create journal entry" goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`, so the
-  cursor lands in it without a script.
+- "Create journal entry" shuts the palette and, since #768, opens the journal modal on the page you are on. Without
+  a script it goes to `/admin/journal?write=1`, which draws the entry field with `autofocus`.
 - "New post" goes to `/admin/posts/new`.
 - "New social post" goes to `/admin/social?write=1`, which puts `autofocus` on the composer's first part.
-- "Go to today's journal" goes to `/admin/journal`.
 - "Start task", "Complete task" and "Pause task" act on the task on screen.
 - "Complete {title}" and "Pause {title}" list each task in progress when no task is on screen.
 

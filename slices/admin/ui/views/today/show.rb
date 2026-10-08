@@ -8,6 +8,7 @@ module Admin
           include Components::Tasks
 
           DRAFT = Blog::Types::PostStatus["draft"]
+          JOURNAL_KEY = "w"
           ORIGIN = Blog::Types::TaskOrigin["today"]
           QUEUED = Blog::Types::SocialQueue["queued"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
@@ -24,9 +25,6 @@ module Admin
           prop :sync_failures, Blog::Types::Array.of(Blog::Types::Hash)
           prop :visitors, Blog::Types::Integer
           prop :webmentions, Blog::Types::Hash
-          prop :body, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
-          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
-          prop :tags, Blog::Types::String, default: Blog::Constants::EMPTY_STRING
 
           def view_template
             content_for(:title, t(".heading"))
@@ -44,10 +42,7 @@ module Admin
 
           def columns
             div(class: "g-main") do
-              div(class: "today-main") do
-                SprintPanel(**@sprint)
-                TodayJournalCard(**journal)
-              end
+              div(class: "today-main") { SprintPanel(**@sprint) }
               aside(class: "today-side") { side_cards }
             end
           end
@@ -64,8 +59,14 @@ module Admin
             t(".headline.left", count: open.size)
           end
 
-          def journal
-            { body: @body, entries: @entries, errors: @errors, tags: @tags, word_count: Blog::Helpers::Figures.words(@body) }
+          def journal_line
+            href = path(:admin_journal, write: Blog::Types::CHECKED)
+
+            line(t(".journal"), href, data: { dialog_open: Components::Journal::WriteDialog::ID }) do
+              plain t(".journal_count", count: @entries.size)
+              whitespace
+              kbd(class: "kbd", aria: { hidden: "true" }) { JOURNAL_KEY }
+            end
           end
 
           def kicker = dotted(l(@sprint[:date], format: :weekday), l(Blog::TimeZone.local(Time.now), format: :clock))
@@ -85,8 +86,8 @@ module Admin
             t(".lede.carried", lead:, count: task.carried_count)
           end
 
-          def line(label, href, &)
-            a(class: "today-line", href:) do
+          def line(label, href, data: nil, &)
+            a(class: "today-line", href:, data:) do
               span { label }
               span(class: "today-line-value", &)
             end
@@ -103,7 +104,7 @@ module Admin
 
           def quiet_lines
             Card(class: "today-quiet") do
-              line(t(".journal"), "##{Components::TodayJournalCard::FORM_ID}") { t(".journal_count", count: @entries.size) }
+              journal_line
               ships_next
               line(t(".drafts"), path(:admin_posts, status: DRAFT)) { t(".draft_count", count: posts[:drafts].size) }
               site_lines

@@ -83,6 +83,9 @@ function setupJournal(form) {
   };
 
   body.addEventListener("input", renderBody);
+  body.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.metaKey || event.ctrlKey) && !save.disabled) form.requestSubmit(save);
+  });
   date?.addEventListener("input", renderTitle);
   renderBody();
 }

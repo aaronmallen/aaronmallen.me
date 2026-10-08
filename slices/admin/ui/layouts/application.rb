@@ -19,6 +19,13 @@ module Admin
 
         private
 
+        def journal_dialog
+          written = content_for(:journal_write)
+          return raw(safe(written)) if written
+
+          Components::Journal::WriteDialog(today: Blog::TimeZone.today, return_to: (request.fullpath if request.get?))
+        end
+
         def render_body(&)
           TopBar(navigation:, session: Auth::Session.for(request))
           main(id: "main", class: "adm-main", data: { live: (path(:admin_events) if navigation) }, &)
@@ -36,6 +43,7 @@ module Admin
           Palette(sections: navigation.sections, actions: navigation.actions)
           Components::Tasks::CreateDialog(today: Blog::TimeZone.today, origin: content_for(:task_origin))
           Components::Tasks::Panel()
+          journal_dialog
           KeyHelp()
         end
 
