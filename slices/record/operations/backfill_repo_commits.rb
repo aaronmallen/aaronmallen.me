@@ -11,6 +11,7 @@ module Record
         "github.client",
         commit_mutations: "repos.commit_mutations",
         commit_queries: "repos.commit_queries",
+        plan_commit_walk: "operations.plan_commit_walk",
         store_commits: "operations.store_commits",
         sync_state_mutations: "repos.sync_state_mutations",
       ]
@@ -32,10 +33,12 @@ module Record
 
       def advance(repo, branches, edge:, floor:, clock:)
         sync_state_mutations.clear_failure(SYNC, repo:)
-        return below(repo, floor, clock) if CommitEdge.walked?(branches) || CommitEdge.floored?(branches, edge, floor)
-        return ground(repo, clock, CommitEdge.unread(branches)) if CommitEdge.grounded?(branches, edge)
 
-        queue(repo, CommitEdge.next_edge(branches, edge), clock)
+        case plan_commit_walk.call(branches, edge, floor:)
+          in [:walked] then below(repo, floor, clock)
+          in [:grounded, unread] then ground(repo, clock, unread)
+          in [:next, next_edge] then queue(repo, next_edge, clock)
+        end
       end
 
       def affordable
@@ -55,7 +58,7 @@ module Record
       def configured = client.configured? ? Success() : Failure(:not_configured)
 
       def finish(repo, clock)
-        commit_mutations.finish_walk(repo, synced_through: clock - CommitEdge::OVERLAP)
+        commit_mutations.finish_walk(repo, synced_through: clock - PlanCommitWalk::OVERLAP)
         0
       end
 
@@ -98,7 +101,7 @@ module Record
         stored = store_commits.call(repo, branches)
         open = branches.reject { settled?(it, seen) }
 
-        stored + (open.empty? ? finish(repo, clock) : queue(repo, CommitEdge.next_edge(open, edge), clock))
+        stored + (open.empty? ? finish(repo, clock) : queue(repo, plan_commit_walk.call(open, edge).last, clock))
       end
 
       def walking(repo)

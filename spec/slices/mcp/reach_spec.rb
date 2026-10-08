@@ -83,6 +83,8 @@ RSpec.describe "MCP reach", type: :app do
       "public.operations.version_atom_feed" => "dates and tags the public Atom feed for a reader polling again",
       "record.operations.backfill_repo_commits" => "a background job walks a repository's history",
       "record.operations.import_commits" => "the import job runs it; import_commits queues that job",
+      "record.operations.parse_commit_credits" => "store_commits reads the agents and issues an imported commit names",
+      "record.operations.plan_commit_walk" => "the backfill job plans the next step of a repository's walk",
       "record.operations.reap_sync_states" => "a background job reaps old sync states",
       "record.operations.record_backup_sync_outcome" => "the backups job records how it went",
       "record.operations.record_country_sync_outcome" => "the country database job records how it went",

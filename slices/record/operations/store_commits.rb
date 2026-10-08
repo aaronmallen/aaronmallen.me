@@ -5,7 +5,11 @@ module Record
     class StoreCommits
       TIME_FORMAT = "%H:%M:%S"
 
-      include Deps[commit_mutations: "repos.commit_mutations", commit_queries: "repos.commit_queries"]
+      include Deps[
+        commit_mutations: "repos.commit_mutations",
+        commit_queries: "repos.commit_queries",
+        parse_commit_credits: "operations.parse_commit_credits",
+      ]
 
       def call(repo, branches)
         commits = first_sightings(branches)
@@ -20,8 +24,7 @@ module Record
       private
 
       def credit(repo, message)
-        issues = CommitCredits.issues(message)
-        agents = CommitCredits.agents(message)
+        parse_commit_credits.call(message) => { agents:, issues: }
         return if issues.empty? || agents.empty?
 
         Tasks::Jobs::CreditAgents.perform_async(repo, issues, agents)

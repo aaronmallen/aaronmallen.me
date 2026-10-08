@@ -656,7 +656,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       before { with_token }
 
       def record_sync(at:)
-        commit_mutations.record_synced_through("aaronmallen/blog", at: at - Record::CommitEdge::OVERLAP)
+        commit_mutations.record_synced_through("aaronmallen/blog", at: at - Record::Operations::PlanCommitWalk::OVERLAP)
         Record::Slice["relations.sync_states"].of_kind("commits").update(updated_at: at)
       end
 

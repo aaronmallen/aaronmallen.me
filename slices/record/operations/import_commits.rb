@@ -29,7 +29,7 @@ module Record
       def pushed_since_floor
         return Failure(:not_configured) unless client.configured?
 
-        Success(client.repositories(pushed_since: commit_queries.newest_commit_at&.-(CommitEdge::OVERLAP)))
+        Success(client.repositories(pushed_since: commit_queries.newest_commit_at&.-(PlanCommitWalk::OVERLAP)))
       rescue Record::GitHub::Client::RateLimited
         Failure(:rate_limited)
       rescue Record::GitHub::Client::Error => e

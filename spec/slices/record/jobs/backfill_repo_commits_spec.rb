@@ -22,9 +22,9 @@ RSpec.describe Record::Jobs::BackfillRepoCommits do
 
   def commits_sync = Blog::Types::SyncName["commits"]
 
-  def day = Record::CommitEdge::OVERLAP
+  def day = Record::Operations::PlanCommitWalk::OVERLAP
 
-  def empty_step = Record::CommitEdge::EMPTY_STEP
+  def empty_step = Record::Operations::PlanCommitWalk::EMPTY_STEP
 
   def failure = sync_state_queries.failure(commits_sync, repo:)
 

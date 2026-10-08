@@ -2,9 +2,6 @@
 
 module Record
   module Paging
-    Listing = Data.define(:items, :cut_short) { def cut_short? = cut_short }
-    private_constant :Listing
-
     MAX_PAGES = 10
 
     private
@@ -22,7 +19,7 @@ module Record
         cursor = page.dig("pageInfo", "endCursor")
       end
 
-      Listing.new(items: found, cut_short: more?(page))
+      Structs::Listing.new(items: found, cut_short: more?(page))
     end
   end
 end
