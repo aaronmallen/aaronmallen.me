@@ -3,7 +3,11 @@
 module SavedViews
   module Operations
     class CreateSavedView < Operation
-      include Deps[contract: "contracts.saved_view_contract", saved_view_mutations: "repos.saved_view_mutations"]
+      include Deps[
+        contract: "contracts.saved_view_contract",
+        filters_contract: "contracts.filters_contract",
+        saved_view_mutations: "repos.saved_view_mutations",
+      ]
 
       def call(params)
         fields = step validate(params)
@@ -16,8 +20,10 @@ module SavedViews
       def form(params)
         screen = params[:screen]
 
-        { name: params[:name], screen:, filters: Filters.keep(screen, params[:filters]) }
+        { name: params[:name], screen:, filters: kept(screen, params[:filters]) }
       end
+
+      def kept(screen, filters) = filters_contract.call(screen:, filters:).to_h[:filters]
 
       def validate(params) = validated(contract.call(form(params)))
     end

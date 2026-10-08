@@ -5,6 +5,7 @@ module SavedViews
     class ChangeSavedView < Operation
       include Deps[
         contract: "contracts.saved_view_contract",
+        filters_contract: "contracts.filters_contract",
         saved_view_mutations: "repos.saved_view_mutations",
         saved_view_queries: "repos.saved_view_queries",
       ]
@@ -25,8 +26,10 @@ module SavedViews
       def form(view, params)
         screen = view.screen
 
-        { name: params.fetch(:name, view.name), screen:, filters: Filters.keep(screen, params[:filters]) }
+        { name: params.fetch(:name, view.name), screen:, filters: kept(screen, params[:filters]) }
       end
+
+      def kept(screen, filters) = filters_contract.call(screen:, filters:).to_h[:filters]
 
       def validate(form) = validated(contract.call(form))
     end
