@@ -37,7 +37,7 @@ module Public
           response.body = Blog::Constants::EMPTY_STRING
         end
 
-        def photo_key?(key) = ::Media::PhotoType::KEY.match?(key)
+        def photo_key?(key) = Blog::Types::PhotoKey.valid?(key)
 
         def published?(key) = photo_key?(key) && !photo_queries.published(key).nil?
 

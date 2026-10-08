@@ -100,6 +100,10 @@ module Blog
     PageNumber = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     PageParam = PageNumber.constructor { |value| value.nil? ? 1 : value }
     PKCEValue = Types::String.constrained(format: /\A[A-Za-z0-9\-._~]{43,128}\z/)
+    PhotoType = Types::String.enum(
+      "gif" => "image/gif", "jpg" => "image/jpeg", "png" => "image/png", "webp" => "image/webp",
+    )
+    PhotoKey = Types::String.constrained(format: /\A[0-9a-f]{32}\.(?:#{PhotoType.values.join('|')})\z/)
     PhotoOwner = Types::String.enum("post", "journal_entry", "task", "task_comment", "decision_comment", "review_note")
     PostBulkAction = Types::String.enum("tag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")

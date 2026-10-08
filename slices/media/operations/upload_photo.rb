@@ -8,6 +8,7 @@ module Media
       KEY_BYTES = 16
 
       include Deps[
+        "operations.detect_photo_type",
         "store.client",
         contract: "contracts.photo_contract",
         photo_mutations: "repos.photo_mutations",
@@ -17,7 +18,7 @@ module Media
       def call(file)
         step available
         photo = step(validate(file)).fetch(:photo)
-        type = PhotoType.detect(photo)
+        type = detect_photo_type.call(photo)
         bytes = photo.read
         step measure(bytes, type)
         processed = step process(bytes, type)
@@ -29,7 +30,7 @@ module Media
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def key_for(type) = "#{SecureRandom.hex(KEY_BYTES)}.#{type.extension}"
+      def key_for(type) = "#{SecureRandom.hex(KEY_BYTES)}.#{type}"
 
       def measure(bytes, type)
         pixels = processor.pixels(bytes, type)
@@ -53,7 +54,7 @@ module Media
       end
 
       def store(key, body, type)
-        client.put(key, body, content_type: type.content_type)
+        client.put(key, body, content_type: Blog::Types::PhotoType.mapping.fetch(type))
         Success(key)
       rescue Store::Client::Error
         Failure([:unavailable])
