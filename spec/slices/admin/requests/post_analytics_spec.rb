@@ -84,7 +84,7 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
     describe "with rolled up days" do
       before do
         roll_up_days
-        get "/admin/posts/#{post.id}/analytics"
+        get "/admin/posts/#{post.id}/analytics", range: "7"
       end
 
       it "answers with the page titled with the post", :aggregate_failures do
@@ -191,7 +191,7 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         end
         create(:analytics_event, path: "/writing/other", month_visitor_hash: hashed("month-three"))
         create(:analytics_click, event_id: events.last.id)
-        get "/admin/posts/#{post.id}/analytics"
+        get "/admin/posts/#{post.id}/analytics", range: "7"
       end
 
       it "counts today's views" do
@@ -242,7 +242,7 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
 
       it "counts the readers of a post in its first 12 months", :aggregate_failures do
         2.times { create(:post_reader_hash, path: "/writing/hello") }
-        get "/admin/posts/#{post.id}/analytics"
+        get "/admin/posts/#{post.id}/analytics", range: "7"
 
         expect(unique_readers).to have_css(".stat-value", exact_text: "2")
         expect(unique_readers).to have_css(".stat-change", exact_text: "in its first 12 months")
@@ -340,7 +340,7 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
 
   describe "signed out" do
     it "redirects to sign-in" do
-      get "/admin/posts/#{post.id}/analytics"
+      get "/admin/posts/#{post.id}/analytics", range: "7"
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
     end

@@ -9,7 +9,7 @@ RSpec.describe "Admin analytics chart", type: :feature do
     create(:analytics_rollup, day: today - 1, views: 30, visitors: 20, read_seconds: 600)
     create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)
     sign_in_to_admin
-    visit "/admin/analytics"
+    visit "/admin/analytics?range=7"
   end
 
   it "hides every tooltip until a bar is hovered" do

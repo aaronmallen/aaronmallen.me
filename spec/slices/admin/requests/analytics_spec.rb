@@ -23,7 +23,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)
         create(:analytics_rollup, day: today - 1, views: 30, visitors: 20, read_seconds: 600)
         create(:analytics_rollup, day: today - 8, views: 100, visitors: 40, read_seconds: 800)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "heads the page with the range" do
@@ -102,22 +102,22 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "offers the 7, 14 and 30 day ranges" do
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
 
         expect(page.all(".seg-option").map(&:text)).to eq(%w[7d 14d 30d])
       end
 
-      it "falls back to 7 days for a range it doesn't know" do
+      it "falls back to 30 days for a range it doesn't know" do
         get "/admin/analytics", range: "90"
 
-        expect(page).to have_css(".seg input[name='range'][value='7'][checked]")
+        expect(page).to have_css(".seg input[name='range'][value='30'][checked]")
       end
     end
 
     describe "without a previous range" do
       before do
         create(:analytics_rollup, day: today, views: 10, visitors: 5, read_seconds: 300)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "says there is no prior period" do
@@ -134,7 +134,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:analytics_rollup, day: today - 1, views: 4, visitors: 2, read_seconds: 40)
         create(:analytics_event, path: "/writing/hello", title: "Hello", read_seconds: 60)
         create(:analytics_event, path: "/writing/hello", title: "Hello", read_seconds: 30)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "counts today's raw events in the totals" do
@@ -158,7 +158,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:analytics_event, path: "/writing/rolled", occurred_at: noon(today - 3))
         create(:analytics_event, path: "/writing/hello", title: "Hello", read_seconds: 60, occurred_at: noon(today - 2))
         2.times { create(:analytics_event, path: "/writing/late", occurred_at: noon(today - 1)) }
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "counts every unrolled day's raw events in the totals" do
@@ -195,7 +195,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:analytics_rollup_country, day: today, country_code: "US", country_name: "United States", views: 9,
                                           visitors: 3)
         create(:analytics_rollup_country, :unknown, day: today, views: 3, visitors: 3)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "shows the page's title and path" do
@@ -229,7 +229,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "shows a country's code when it has no name" do
         create(:analytics_rollup_country, day: today, country_code: "DE", views: 1, visitors: 1)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
 
         expect(meter_card("Geography")).to have_css(".meter-name", exact_text: "DE")
       end
@@ -263,7 +263,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
           create(:analytics_rollup_referrer, day: today, host: "site-#{n}.example", views: 30 - n, visitors: n + 1)
           create(:analytics_rollup_country, day: today, country_code: codes[n], views: 30 - n, visitors: n + 1)
         end
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "lists the top 10 paths by views" do
@@ -288,7 +288,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:analytics_rollup_referrer, day: today - 5, host: "old.example", views: 9)
         create(:analytics_rollup_country, day: today - 5, country_code: "DE", views: 4)
         create(:analytics_event, referrer_host: "news.example", country_code: "US")
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "answers with the page and ranks a referrer with no counted day last", :aggregate_failures do
@@ -318,7 +318,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         2.times { create(:analytics_event, occurred_at: at(sunday, 23, 30)) }
         create(:analytics_event, occurred_at: at(sunday + 1, 9))
         create(:analytics_event, occurred_at: at(today - 95, 9))
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "draws a row for every day of the week" do
@@ -383,7 +383,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         create(:feed_reader, day: today, readers: 3)
         create(:feed_reader, day: today, path: "/writing/tags/ruby.atom", readers: 1)
         create(:feed_reader, day: today - 2, readers: 2)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "lists a day for each day in the range" do
@@ -424,7 +424,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
     describe "with feed subscribers yesterday and no fetch yet today" do
       before do
         create(:feed_subscriber, day: today - 1, aggregator: "feedly", subscribers: 40)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "reads yesterday's count in the card head" do
@@ -440,7 +440,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         3.times { create(:webmention, post: hello, received_at: Blog::TimeZone.day_start(today)) }
         create(:webmention, :approved, post: other, received_at: Blog::TimeZone.day_start(today - 1))
         create(:webmention, :approved, post: older, received_at: Blog::TimeZone.day_start(today - 8))
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "counts the mentions received over the range and those still waiting in the card head" do
@@ -469,7 +469,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         hello = create(:post, :published, title: "Hello")
         create(:webmention, :approved, post: hello, received_at: Blog::TimeZone.day_start(today))
         create(:webmention, :ignored, post: hello, received_at: Blog::TimeZone.day_start(today))
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "counts it as received" do
@@ -484,7 +484,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
     describe "with more mentioned posts than the card holds" do
       before do
         11.times { |n| create(:webmention, post: create(:post, :published, title: "Post #{n}")) }
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "lists only as many posts as the other side cards" do
@@ -500,7 +500,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         { "/writing/hello" => "Hello", "/about" => "About" }.each do |path, title|
           create(:analytics_rollup_path, day: today, path:, title:, views: 6, visitors: 3, bounces: 0)
         end
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "links the post to its analytics" do
@@ -520,7 +520,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         { "/writing/hello" => [100, 1], "/writing/other" => [25, 3] }.each do |path, (scroll_depth, views)|
           create(:analytics_rollup_scroll_depth, day: today, path:, scroll_depth:, views:, visitors: views)
         end
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "shares out how far the views on every page reached" do
@@ -532,7 +532,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       before do
         create(:analytics_event, path: "/writing/hello", scroll_depth: 75)
         create(:analytics_event, path: "/writing/other", scroll_depth: 25)
-        get "/admin/analytics"
+        get "/admin/analytics", range: "7"
       end
 
       it "counts today's views on every page" do
@@ -549,7 +549,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
 
       it "still draws a bar for every day" do
-        expect(bars).to eq(["height: 0%"] * 7)
+        expect(bars).to eq(["height: 0%"] * 30)
       end
 
       it "counts no feed subscribers" do
@@ -572,7 +572,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
   describe "signed out" do
     it "redirects the dashboard to sign-in" do
-      get "/admin/analytics"
+      get "/admin/analytics", range: "7"
 
       expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
     end
