@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+#MISE description="Run the ruby tests without building assets"
+#MISE alias=["t:rb", "test:rb"]
+#USAGE arg "[filter]..." var=#true help="Spec files, directories, file:line pairs or rspec options. Runs the whole suite when empty."
+
+set -e
+
+scripts/test/prepare
+scripts/util/ensure_postgres bundle exec rspec --require spec_helper "$@"
