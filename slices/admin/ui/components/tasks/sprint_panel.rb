@@ -55,7 +55,7 @@ module Admin
           end
 
           def row(task)
-            Row(task:, filter: TODAY, today: @date, origin: ORIGIN, scheduled: @date)
+            Row(task:, filter: TODAY, today: @date, origin: ORIGIN, scheduled: @date, large: !task.closed?)
           end
 
           def rows

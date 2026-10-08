@@ -91,7 +91,7 @@ module Admin
           def filtering? = !@filters[:query].empty?
 
           def list
-            Card(title: list_title, class: ["task-list", ("card-live" if today?)], **LIST) do |card|
+            Card(title: list_title, class: "task-list", **LIST) do |card|
               card.side do
                 ImportActs() if external?
                 span(class: "card-note") { open_note }
@@ -116,7 +116,8 @@ module Admin
           def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
 
           def row(task)
-            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID)
+            Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID,
+                large: today?)
           end
 
           def rows

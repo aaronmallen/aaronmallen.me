@@ -40,7 +40,12 @@ module Tasks
       end
 
       def detailed
-        combine(:contributors, :running_session, :source, :tags, incoming_links: :from_task, outgoing_links: :to_task)
+        comments = dataset.db[:task_comments].where(task_id: Sequel[:tasks][:id]).select { count.function.* }
+
+        counted = select_append(ROM::SQL::Attribute[ROM::Types::Integer].meta(sql_expr: comments).as(:comment_count))
+        links = { incoming_links: :from_task, outgoing_links: :to_task }
+
+        counted.combine(:contributors, :running_session, :source, :tags, **links)
       end
 
       def finished_counts(day)

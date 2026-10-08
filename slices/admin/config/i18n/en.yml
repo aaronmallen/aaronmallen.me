@@ -1625,6 +1625,9 @@ en:
           carried:
             one: "carried ×%{count}"
             other: "carried ×%{count}"
+          comments:
+            one: "%{count} comment"
+            other: "%{count} comments"
           in_progress: "in progress"
           in_progress_for: "in progress · %{span}"
           scheduled: "%{date}"

@@ -201,16 +201,16 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".card-note", exact_text: "1 open")
       end
 
-      it "marks today as the live card" do
+      it "sets today's tasks in the large row" do
         get "/admin/tasks", filter: "today"
 
-        expect(page).to have_css("section.card.card-live")
+        expect(page).to have_css(".task.large")
       end
 
-      it "leaves the other lists unmarked" do
+      it "sets the other lists in the normal row" do
         get "/admin/tasks", filter: "next"
 
-        expect(page).to have_no_css("section.card.card-live")
+        expect(page).to have_css(".task:not(.large)")
       end
 
       it "offers no capture row" do

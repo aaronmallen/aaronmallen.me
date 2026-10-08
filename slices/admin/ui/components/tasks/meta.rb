@@ -15,6 +15,7 @@ module Admin
               SourceLink(source: @task.source)
               @task.tags.each { Tag(tag: it) }
               worked if worked?
+              comments
               Links(links: @task.links)
               Closed(task: @task) if @task.closed?
             end
@@ -23,6 +24,16 @@ module Admin
           private
 
           def carried = mark(:sand, "fa-solid fa-rotate-left") { t(".carried", count: @task.carried_count) }
+
+          def comments
+            count = @task.comment_count
+            return unless count.positive?
+
+            span(class: "task-mark", title: t(".comments", count:)) do
+              Icon("fa-regular fa-comment")
+              plain count.to_s
+            end
+          end
 
           def hours(seconds) = Blog::Helpers::Figures.hours(seconds)
 

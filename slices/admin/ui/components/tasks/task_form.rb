@@ -110,7 +110,14 @@ module Admin
 
           def title_field
             Field(label: t(".title"), **error_props(:title)) do |control|
-              Input(**control, name: "task[title]", value: @values[:title], autocomplete: "off", autofocus: @autofocus)
+              Input(
+                **control,
+                name: "task[title]",
+                value: @values[:title],
+                autocomplete: "off",
+                autofocus: @autofocus,
+                class: "task-title-in",
+              )
             end
           end
         end

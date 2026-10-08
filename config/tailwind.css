@@ -104,6 +104,17 @@
   --text-li: 0.9375rem;
   --text-li--line-height: 1.35;
   --text-li--letter-spacing: -0.01em;
+  --text-task: 1.08rem;
+  --text-task--line-height: 1.3;
+  --text-task--letter-spacing: -0.012em;
+  --text-task-lg: clamp(1.15rem, 1.4vw, 1.6rem);
+  --text-task-lg--line-height: 1.25;
+  --text-task-lg--letter-spacing: -0.018em;
+  --text-task-done: 1rem;
+  --text-task-done--line-height: 1.3;
+  --text-task-title-in: 1.6rem;
+  --text-task-title-in--line-height: 1.2;
+  --text-task-title-in--letter-spacing: -0.02em;
   --text-stat: 2rem;
   --text-stat--line-height: 1.1;
   --text-stat--letter-spacing: -0.03em;
@@ -1388,10 +1399,6 @@
 
 @utility card {
   @apply min-w-0 rounded-panel border border-line bg-ground-sunk p-panel;
-
-  &.card-live {
-    border-color: color-mix(in oklab, var(--color-mk-green) 32%, var(--color-line));
-  }
 }
 
 @utility card-blurb {
@@ -2387,24 +2394,33 @@
     @apply grid-cols-[auto_auto_minmax(0,1fr)] gap-x-3;
   }
 
-  &.doing {
-    @apply -ml-3 border-l-2 pl-2.5;
-
-    border-left-color: var(--color-mk-blue);
-    background: linear-gradient(90deg, color-mix(in oklab, var(--color-mk-blue) 8%, transparent), transparent 60%);
+  &.large {
+    @apply py-5 first:pt-0;
 
     & > .record-key {
-      @apply border-mk-blue text-mk-blue;
+      @apply mt-1 text-[0.78125rem];
+    }
+
+    & .task-title {
+      @apply text-task-lg;
     }
   }
 
+  &.doing > .record-key {
+    @apply border-mk-blue text-mk-blue;
+  }
+
   &.done .task-title {
-    @apply font-medium text-ink-muted line-through;
+    @apply text-task-done font-medium text-ink-muted line-through decoration-ink-muted/50;
+  }
+
+  &:has(> .task-pick :checked) {
+    background: color-mix(in oklab, var(--color-mk-green) 7%, transparent);
   }
 }
 
 @utility task-box {
-  @apply mt-0.5 grid size-6 shrink-0 place-items-center rounded-btn border-[1.5px] border-ink-muted bg-transparent p-0;
+  @apply mt-[3px] grid size-5 shrink-0 place-items-center rounded-btn border-[1.5px] border-ink-muted bg-transparent p-0;
   @apply text-badge text-transparent;
 
   &:is(button) {
@@ -2413,6 +2429,10 @@
     @media (width < 43.75rem) {
       @apply mt-0 size-tap;
     }
+  }
+
+  :where(.task.large) & {
+    @apply mt-1 size-6;
   }
 
   :where(.task.doing) & {
@@ -2433,7 +2453,7 @@
 }
 
 @utility task-title {
-  @apply min-w-0 font-display text-li font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply min-w-0 font-display text-task font-semibold text-pretty text-ink no-underline hover:text-accent focus-ring;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -3395,10 +3415,6 @@
 
 @utility sprint-rows {
   @apply mt-4;
-
-  & .task-title {
-    @apply text-[1.15rem];
-  }
 }
 
 @utility today-more {
@@ -3740,7 +3756,10 @@
 }
 
 @utility task-dragging {
-  @apply relative z-10 bg-ground-sunk opacity-80;
+  @apply relative z-10 bg-ground-sunk;
+
+  background-image: linear-gradient(color-mix(in oklab, var(--color-mk-green) 7%, transparent));
+  box-shadow: inset 0 2px 0 var(--color-mk-green-text);
 
   & .task-grip {
     @apply cursor-grabbing;
@@ -3749,6 +3768,14 @@
 
 @utility task-form {
   @apply flex flex-col gap-3;
+
+  & .field:has(> .task-title-in) > .f {
+    @apply sr-only;
+  }
+
+  & .inp.task-title-in {
+    @apply mb-2 border-0 bg-transparent p-0 font-display text-task-title-in font-bold;
+  }
 }
 
 @utility task-credits {

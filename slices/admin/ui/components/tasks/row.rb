@@ -17,6 +17,7 @@ module Admin
           prop :scheduled, Blog::Types::Date.optional, default: nil
           prop :tab, Blog::Types::String.optional, default: nil
           prop :bulk, Blog::Types::String.optional, default: nil
+          prop :large, Blog::Types::Bool, default: false
 
           def view_template
             div(class: classes, data: { key_row: true, **order }) do
@@ -33,20 +34,25 @@ module Admin
           private
 
           def box
-            return span(class: "task-box", aria: { hidden: true }) unless @task.closed?
+            route, label = @task.closed? ? [:admin_reopen_task, reopen_label] : [:admin_complete_task, complete_label]
 
-            Form(action: path(:admin_reopen_task, id: @task.id)) do
+            Form(action: path(route, id: @task.id)) do
               input(type: "hidden", name: "filter", value: @filter)
               input(type: "hidden", name: "origin", value: @origin)
-              button(type: "submit", class: "task-box", title: reopen_label, aria: { label: reopen_label }) do
+              button(type: "submit", class: "task-box", title: label, aria: { label: }) do
                 Icon(@task.canceled? ? "fa-solid fa-xmark" : "fa-solid fa-check")
               end
             end
           end
 
           def classes
-            ["task", ("done" if @task.closed?), ("canceled" if @task.canceled?), ("doing" if @task.in_progress?)]
+            [
+              "task", ("large" if @large), ("done" if @task.closed?), ("canceled" if @task.canceled?),
+              ("doing" if @task.in_progress?),
+            ]
           end
+
+          def complete_label = t("ui.components.tasks.controls.complete")
 
           def edit
             href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)
