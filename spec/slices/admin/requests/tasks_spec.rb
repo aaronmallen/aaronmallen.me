@@ -238,7 +238,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "next"
 
         expect(page).to have_css(
-          ".page-head-actions button[data-bulk-toggle='task-bulk'][aria-pressed='false']", visible: :all,
+          ".page-head-actions button.bt[data-bulk-toggle='task-bulk'][aria-pressed='false']", visible: :all,
         )
       end
 
@@ -1008,7 +1008,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         task = create(:task)
         get "/admin/tasks", filter: "next"
 
-        expect(pen).to match_css("a.btn[data-task-open-edit]")
+        expect(pen).to match_css("a.bt[data-task-open-edit]")
         expect(pen["href"]).to eq("/admin/tasks/#{task.id}/edit?filter=next&origin=tasks")
       end
 

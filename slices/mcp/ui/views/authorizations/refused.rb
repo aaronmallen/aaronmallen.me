@@ -28,7 +28,7 @@ module MCP
             section(class: "card") do
               p { t(".error", description: @error_description, error: @error) }
               p(class: "hint") { t(".nothing") }
-              a(class: "btn", href: @url) { t(".back", host:) }
+              a(class: "bt", href: @url) { t(".back", host:) }
             end
           end
         end

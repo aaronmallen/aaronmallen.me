@@ -124,7 +124,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def open_modal
     open_panel
-    find("dialog#task-panel .btn", text: "Edit").click
+    find("dialog#task-panel .bt", text: "Edit").click
     find("dialog#task-create[open] [data-task-edit]")
   end
 

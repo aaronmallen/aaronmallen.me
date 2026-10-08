@@ -12,7 +12,7 @@ module Admin
 
           def view_template
             details(class: "task-total-edit", open: @totaling.key?(:errors)) do
-              summary(class: "btn sm") { t(".set") }
+              summary(class: "bt sm") { t(".set") }
               Form(action: path(:admin_update_task_total, id: @task.id)) do
                 input(type: "hidden", name: "filter", value: @tab)
                 input(type: "hidden", name: "origin", value: @origin)

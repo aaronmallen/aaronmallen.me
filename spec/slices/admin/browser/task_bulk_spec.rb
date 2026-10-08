@@ -56,7 +56,13 @@ RSpec.describe "Admin bulk task actions", type: :feature do
     end
 
     it "marks the Select button pressed in bulk mode" do
-      expect(page).to have_css("button[data-bulk-toggle][aria-pressed='true']", text: "Select")
+      expect(page).to have_css("button.bt[data-bulk-toggle][aria-pressed='true']", text: "Select")
+    end
+
+    it "fills the Select button while pressed" do
+      fill = evaluate_script("getComputedStyle(document.querySelector('[data-bulk-toggle]')).backgroundColor")
+
+      expect(fill).not_to eq("rgba(0, 0, 0, 0)")
     end
 
     it "hides the actions while nothing is ticked" do

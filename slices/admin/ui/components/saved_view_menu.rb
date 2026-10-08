@@ -10,7 +10,7 @@ module Admin
 
         def view_template(&)
           details(class: "saved-view-menu") do
-            summary(class: ["btn", "sm", ("gh" if @quiet)], title: (@label if @quiet)) do
+            summary(class: ["bt", "sm", ("gh" if @quiet)], title: (@label if @quiet)) do
               Icon(@icon)
               span(class: ("sr-only" if @quiet)) { @label }
             end

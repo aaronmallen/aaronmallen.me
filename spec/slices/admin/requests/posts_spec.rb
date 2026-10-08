@@ -148,7 +148,7 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       it "links New post to the editor" do
         get "/admin/posts"
 
-        expect(page).to have_css(".page-head-actions a.btn.pri[href='/admin/posts/new']", text: "New post")
+        expect(page).to have_css(".page-head-actions a.bt.pri[href='/admin/posts/new']", text: "New post")
       end
 
       it "links each row to its editor" do

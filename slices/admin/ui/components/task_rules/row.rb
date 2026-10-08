@@ -28,14 +28,14 @@ module Admin
 
           def acts
             div(class: "rule-acts") do
-              label(class: "btn sm rule-pen", for: toggle_id, title: t(".edit")) do
+              label(class: "bt sm rule-pen", for: toggle_id, title: t(".edit")) do
                 Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }
               end
             end
           end
 
-          def cancel = label(class: "btn sm gh", for: toggle_id) { t(".cancel") }
+          def cancel = label(class: "bt sm gh", for: toggle_id) { t(".cancel") }
 
           def delete
             Form(

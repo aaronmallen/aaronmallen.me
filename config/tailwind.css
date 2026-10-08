@@ -1207,6 +1207,15 @@
   &.warn:hover {
     @apply text-mk-pink-text;
     border-color: color-mix(in oklab, var(--color-mk-pink) 40%, var(--color-line));
+
+    & > i {
+      @apply text-mk-pink-text;
+    }
+  }
+
+  &.on,
+  &[aria-pressed="true"] {
+    @apply border-ink-muted bg-ground-sunk;
   }
 
   @media (width < 43.75rem) {
@@ -1340,34 +1349,6 @@
 
 @utility saved-view-acts {
   @apply flex flex-wrap items-center justify-end gap-2 border-t border-line pt-3;
-}
-
-@utility btn {
-  @apply inline-flex cursor-pointer items-center gap-2 rounded-btn border border-line bg-ground-sunk px-3 py-1.5;
-  @apply font-mono text-meta whitespace-nowrap text-ink no-underline hover:bg-mk-selection;
-  @apply transition-colors duration-200 ease-in-out;
-  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
-  @apply disabled:cursor-not-allowed disabled:opacity-45;
-
-  &.pri {
-    @apply border-mk-green bg-mk-green text-ground hover:bg-mk-green;
-  }
-
-  &.warn {
-    @apply text-mk-pink-text;
-  }
-
-  &.gh {
-    @apply bg-transparent hover:bg-mk-selection;
-  }
-
-  &.sm {
-    @apply gap-1.5 px-2 py-1 text-btn-sm;
-  }
-
-  @media (width < 43.75rem) {
-    @apply min-h-tap min-w-tap justify-center;
-  }
 }
 
 @utility card {
@@ -1542,11 +1523,11 @@
 @utility journal-entry-actions {
   @apply ml-auto flex items-center gap-0.5;
 
-  & .btn {
+  & .bt {
     @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
   }
 
-  & .btn.warn:hover {
+  & .bt.warn:hover {
     @apply text-mk-pink-text;
   }
 }
@@ -1608,7 +1589,7 @@
     @apply w-36 border-b-0;
   }
 
-  & > .btn {
+  & > .bt {
     @apply ml-auto;
   }
 
@@ -2218,7 +2199,7 @@
   left: -9999px;
 }
 
-@utility btn-label {
+@utility bt-label {
   @apply inline-flex items-center gap-2;
 }
 
@@ -2448,7 +2429,7 @@
 @utility task-acts {
   @apply flex shrink-0 items-center gap-0.5;
 
-  & .btn:not(.pri) {
+  & .bt:not(.pri) {
     @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
   }
 
@@ -3524,7 +3505,7 @@
     @apply border-ink-muted;
   }
 
-  &:not(:has(input:valid)) > .btn {
+  &:not(:has(input:valid)) > .bt {
     @apply hidden;
   }
 
@@ -4909,11 +4890,11 @@
 @utility sq-actions {
   @apply flex items-center gap-0.5;
 
-  & .btn {
+  & .bt {
     @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
   }
 
-  & .btn.warn:hover {
+  & .bt.warn:hover {
     @apply text-mk-pink-text;
   }
 }
@@ -4941,11 +4922,11 @@
     }
   }
 
-  & .btn.gh {
+  & .bt.gh {
     @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
   }
 
-  & .compose-part-head .btn.gh {
+  & .compose-part-head .bt.gh {
     @apply px-0 hover:border-transparent hover:text-mk-pink-text;
   }
 

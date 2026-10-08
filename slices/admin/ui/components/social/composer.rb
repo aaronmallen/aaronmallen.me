@@ -42,7 +42,7 @@ module Admin
           def blank? = @values[:parts].none? { written?(it) }
 
           def button_label(icon, text_key, **)
-            span(class: "btn-label", **) do
+            span(class: "bt-label", **) do
               IconLabel(icon:) { t(text_key) }
             end
           end

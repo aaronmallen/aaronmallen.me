@@ -46,8 +46,8 @@ module MCP
           def render_form
             Form(action: path(:mcp_oauth_decide), class: "connect-actions") do
               @fields.each { |name, value| input(type: "hidden", name:, value:) }
-              button(type: "submit", name: "decision", value: CANCEL, class: "btn") { t(".cancel") }
-              button(type: "submit", name: "decision", value: APPROVE, class: "btn pri") { t(".approve") }
+              button(type: "submit", name: "decision", value: CANCEL, class: "bt") { t(".cancel") }
+              button(type: "submit", name: "decision", value: APPROVE, class: "bt pri") { t(".approve") }
             end
           end
 

@@ -41,7 +41,7 @@ module Admin
         end
 
         def button_label(state, icon, text, hidden: false)
-          span(class: "btn-label", data: { "commits_#{state}": "" }, hidden:) do
+          span(class: "bt-label", data: { "commits_#{state}": "" }, hidden:) do
             IconLabel(icon:) { text }
           end
         end

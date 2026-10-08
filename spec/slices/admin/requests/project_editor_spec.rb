@@ -69,7 +69,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
       it "draws the back link as a small quiet button with the back arrow" do
         expect(page).to have_css(
-          "a.btn.gh.sm.editor-back[href='/admin/projects'] > i.fa-arrow-left[aria-hidden='true']:first-child",
+          "a.bt.gh.sm.editor-back[href='/admin/projects'] > i.fa-arrow-left[aria-hidden='true']:first-child",
           visible: :all,
         )
       end
@@ -586,7 +586,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
 
       it "offers New project" do
-        expect(page).to have_link("New project", href: "/admin/projects/new", class: %w[btn pri])
+        expect(page).to have_link("New project", href: "/admin/projects/new", class: %w[bt pri])
       end
 
       it "offers Edit on a row" do

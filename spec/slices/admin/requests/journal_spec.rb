@@ -643,7 +643,7 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       it "puts Edit and Delete in the entry's header", :aggregate_failures do
         actions = page.find(".journal-entry-head .journal-entry-actions")
 
-        expect(actions).to have_button("Edit", type: "button", class: "btn", exact: true)
+        expect(actions).to have_button("Edit", type: "button", class: "bt", exact: true)
         expect(actions).to have_button("Delete", type: "submit", class: "warn", exact: true)
       end
 

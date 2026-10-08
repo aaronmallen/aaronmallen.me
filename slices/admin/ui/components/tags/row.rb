@@ -29,14 +29,14 @@ module Admin
 
           def acts
             div(class: "tag-acts") do
-              label(class: "btn sm tag-pen", for: toggle_id, title: t(".edit")) do
+              label(class: "bt sm tag-pen", for: toggle_id, title: t(".edit")) do
                 Icon("fa-regular fa-pen-to-square")
                 span(class: "sr-only") { t(".edit") }
               end
             end
           end
 
-          def cancel = label(class: "btn sm gh", for: toggle_id) { t(".cancel") }
+          def cancel = label(class: "bt sm gh", for: toggle_id) { t(".cancel") }
 
           def color_form
             Form(action: path(:admin_update_tag, id: @tag.id), class: "field") do

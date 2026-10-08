@@ -55,7 +55,7 @@ module Admin
             Form(action: path(:admin_complete_task, id: @task.id), data: { task_act: "complete" }) do
               origin_fields
               details(class: "task-complete") do
-                summary(class: "btn pri sm", **keyed(COMPLETE)) { done_label }
+                summary(class: "bt pri sm", **keyed(COMPLETE)) { done_label }
                 div(class: "task-complete-panel") do
                   worked_fields
                   Button(type: "submit", variant: :pri, small: true) { done_label }

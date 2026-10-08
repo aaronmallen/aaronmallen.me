@@ -181,7 +181,7 @@ RSpec.describe "Admin decisions", type: :request do
 
       it "links back to the list with a hidden arrow before the label", :aggregate_failures do
         get "/admin/decisions/new"
-        back = page.find("a.btn[href='/admin/decisions']", text: "All decisions")
+        back = page.find("a.bt[href='/admin/decisions']", text: "All decisions")
 
         expect(back).to have_css("i.fa-solid.fa-arrow-left[aria-hidden='true']:first-child", visible: :all)
         expect(back[:type]).to be_nil

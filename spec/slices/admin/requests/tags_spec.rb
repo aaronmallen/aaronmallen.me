@@ -122,7 +122,7 @@ RSpec.describe "Admin tags", type: :request do
         get "/admin/tags"
         toggle = page.find(".tag-row", text: "#ruby").find(".tag-toggle", visible: :all)[:id]
 
-        expect(page).to have_css("label.btn.tag-pen[for='#{toggle}']", text: "Edit")
+        expect(page).to have_css("label.bt.tag-pen[for='#{toggle}']", text: "Edit")
       end
 
       it "says what carries a tag" do

@@ -22,7 +22,7 @@ module Admin
 
         def button_attributes = { type: @type, class: classes, disabled: @disabled }
 
-        def classes = ["btn", @variant&.to_s, ("sm" if @small)]
+        def classes = ["bt", @variant&.to_s, ("sm" if @small)]
 
         def inner
           Icon(@icon) if @icon

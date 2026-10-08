@@ -37,7 +37,7 @@ module Admin
             mine = mine?(option)
 
             details(class: "comment-edit", open: mine) do
-              summary(class: "btn sm") { t(".edit") }
+              summary(class: "bt sm") { t(".edit") }
               OptionForm(
                 decision: @decision, option:, params: (@form[:params] if mine),
                 errors: mine ? @form[:errors] : Blog::Constants::EMPTY_HASH,

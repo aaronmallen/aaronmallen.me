@@ -78,7 +78,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "offers Save draft" do
-        expect(page).to have_button("Save draft", class: "btn")
+        expect(page).to have_button("Save draft", class: "bt")
       end
 
       it "offers no delete before the post exists" do
@@ -86,8 +86,8 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "offers Publish, with Schedule hidden", :aggregate_failures do
-        expect(page).to have_css("button.btn.pri[value='publish'] [data-editor-now]:not([hidden])", text: "Publish")
-        expect(page).to have_css("button.btn.pri [data-editor-later][hidden]", text: "Schedule", visible: :all)
+        expect(page).to have_css("button.bt.pri[value='publish'] [data-editor-now]:not([hidden])", text: "Publish")
+        expect(page).to have_css("button.bt.pri [data-editor-later][hidden]", text: "Schedule", visible: :all)
       end
 
       it "switches the pane from a segmented control above it" do
@@ -202,7 +202,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "reads Schedule for a future publish time" do
-        expect(page).to have_css("button.btn.pri [data-editor-later]:not([hidden])", text: "Schedule")
+        expect(page).to have_css("button.bt.pri [data-editor-later]:not([hidden])", text: "Schedule")
       end
 
       it "draws no edit note dialog" do
@@ -238,7 +238,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "offers Save" do
-        expect(page).to have_button("Save", class: %w[btn pri], exact: true)
+        expect(page).to have_button("Save", class: %w[bt pri], exact: true)
       end
 
       it "offers neither Save draft nor Publish" do
@@ -330,7 +330,7 @@ RSpec.describe "Admin post editor", type: :request do
         post = create(:post, :draft, published_at: Time.now - 60)
         get "/admin/posts/#{post.id}/edit"
 
-        expect(page).to have_css("button.btn.pri [data-editor-now]:not([hidden])", text: "Publish")
+        expect(page).to have_css("button.bt.pri [data-editor-now]:not([hidden])", text: "Publish")
       end
 
       it "returns 404 for a post that doesn't exist" do
@@ -426,7 +426,7 @@ RSpec.describe "Admin post editor", type: :request do
         edit
 
         expect(page).to have_css(
-          "button.btn.warn[type='submit'][form='post-delete'] > i.fa-trash-can[aria-hidden='true']:first-child",
+          "button.bt.warn[type='submit'][form='post-delete'] > i.fa-trash-can[aria-hidden='true']:first-child",
           visible: :all,
         )
       end

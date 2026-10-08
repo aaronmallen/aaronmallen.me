@@ -43,10 +43,10 @@ module Admin
 
           def publish_button
             Button(variant: :pri, type: "submit", name: "intent", value: PUBLISH) do
-              span(class: "btn-label", data: { editor_now: "" }, hidden: @scheduling) do
+              span(class: "bt-label", data: { editor_now: "" }, hidden: @scheduling) do
                 IconLabel(icon: "fa-solid fa-arrow-up-right-from-square") { t(".publish") }
               end
-              span(class: "btn-label", data: { editor_later: "" }, hidden: !@scheduling) do
+              span(class: "bt-label", data: { editor_later: "" }, hidden: !@scheduling) do
                 IconLabel(icon: "fa-regular fa-clock") { t(".schedule") }
               end
             end

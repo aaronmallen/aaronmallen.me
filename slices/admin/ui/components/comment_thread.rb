@@ -100,7 +100,7 @@ module Admin
 
         def edit_form(comment)
           details(class: "comment-edit", open: mine?(comment.source_id)) do
-            summary(class: "btn sm") { t(".edit") }
+            summary(class: "bt sm") { t(".edit") }
             Form(action: comment_route(:update, comment)) do
               @fields&.call
               body_field(comment.source_id, t(".edit_label"), comment.body)
