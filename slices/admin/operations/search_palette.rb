@@ -4,7 +4,7 @@ module Admin
   module Operations
     class SearchPalette
       PER_KIND = 5
-      PAGE = Blog::Page.new(number: 1, size: Blog::Types::SearchKind.values.size * PER_KIND)
+      PAGE = Blog::Structs::Page.new(number: 1, size: Blog::Types::SearchKind.values.size * PER_KIND)
 
       include Deps["i18n", "operations.link_search_hit", search_queries: "search.repos.search_queries"]
 

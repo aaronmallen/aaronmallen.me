@@ -41,9 +41,9 @@ module Admin
           def row(entry)
             tr do
               td(class: "tbl-c") { page(entry) }
-              td(class: "tbl-c num") { Blog::Figures.count(entry[:views]) }
-              td(class: "tbl-c num") { Blog::Figures.duration(Blog::Figures.average(entry[:read_seconds], entry[:views])) }
-              td(class: "tbl-c num end") { t(".percent", value: Blog::Figures.share(entry[:bounces], entry[:visitors])) }
+              td(class: "tbl-c num") { Blog::Helpers::Figures.count(entry[:views]) }
+              td(class: "tbl-c num") { Blog::Helpers::Figures.duration(Blog::Helpers::Figures.average(entry[:read_seconds], entry[:views])) }
+              td(class: "tbl-c num end") { t(".percent", value: Blog::Helpers::Figures.share(entry[:bounces], entry[:visitors])) }
             end
           end
         end

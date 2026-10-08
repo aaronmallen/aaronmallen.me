@@ -71,7 +71,7 @@ module Admin
             dotted(
               t(".live_count", count: @live_count),
               t(".archived_count", count: @archived_count),
-              t(".stars_count", count: @stars, stars: Blog::Figures.count(@stars)),
+              t(".stars_count", count: @stars, stars: Blog::Helpers::Figures.count(@stars)),
             )
           end
 

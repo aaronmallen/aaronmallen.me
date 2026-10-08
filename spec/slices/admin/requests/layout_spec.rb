@@ -20,7 +20,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "titles today's page Today, not with the date in its heading" do
-      expect(page).to have_title("Today | Admin | #{Blog::Owner.full_name}")
+      expect(page).to have_title("Today | Admin | #{Hanami.app.settings.owner_name}")
     end
 
     it "renders the page head in the page" do
@@ -115,7 +115,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     end
 
     it "titles the page with its heading" do
-      expect(page).to have_title("Sign-in failed | Admin | #{Blog::Owner.full_name}")
+      expect(page).to have_title("Sign-in failed | Admin | #{Hanami.app.settings.owner_name}")
     end
 
     it "renders no context bar and no palette", :aggregate_failures do

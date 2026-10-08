@@ -38,7 +38,7 @@ module Blog
 
         def brand
           href = path(:root)
-          owner = Blog::Owner.full_name
+          owner = Hanami.app.settings.owner_name
 
           a(class: "main-nav-brand", href:,
             aria: { label: t(".brand_label", owner:), current: aria_current(href) }) do

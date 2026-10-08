@@ -22,7 +22,7 @@ module Admin
 
           def item(decision)
             {
-              title: Blog::Truncation.cut(decision.title, keep: TEXT_LIMIT),
+              title: Blog::Helpers::Truncation.cut(decision.title, keep: TEXT_LIMIT),
               href: path(:admin_decision, id: decision.decision_id),
               sub: sub(decision),
             }
@@ -32,7 +32,7 @@ module Admin
             day = l(decision.closed_on, format: :weekday)
             return t(".dropped", day:) unless decision.outcome == RESOLVED
 
-            t(".resolved", option: Blog::Truncation.cut(decision.chosen, keep: TEXT_LIMIT), day:)
+            t(".resolved", option: Blog::Helpers::Truncation.cut(decision.chosen, keep: TEXT_LIMIT), day:)
           end
         end
       end

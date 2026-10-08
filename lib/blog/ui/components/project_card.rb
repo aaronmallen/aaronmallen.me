@@ -46,8 +46,8 @@ module Blog
         end
 
         def stars
-          span(role: "img", aria: { label: t(".stars_label", count: @stars, stars: Figures.count(@stars)) }) do
-            t(".stars", stars: Figures.count(@stars))
+          span(role: "img", aria: { label: t(".stars_label", count: @stars, stars: Helpers::Figures.count(@stars)) }) do
+            t(".stars", stars: Helpers::Figures.count(@stars))
           end
         end
       end

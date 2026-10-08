@@ -11,7 +11,7 @@ module Admin
 
           prop :accounts, Blog::Types::Array.of(Blog::Types::String)
           prop :filter, Blog::Types::SocialQueue
-          prop :items, Blog::Types::Instance(Blog::Paged)
+          prop :items, Blog::Types::Instance(Blog::Structs::Paged)
           prop :now, Blog::Types::Time
           prop :queued, Blog::Types::Integer
           prop :records, Blog::Types::Hash.optional

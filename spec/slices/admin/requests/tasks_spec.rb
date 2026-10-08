@@ -66,7 +66,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "titles the page Tasks" do
         get "/admin/tasks"
 
-        expect(page).to have_title("Tasks | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("Tasks | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "shows today without a filter" do

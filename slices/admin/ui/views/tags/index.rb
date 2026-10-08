@@ -22,7 +22,7 @@ module Admin
           prop :name, Blog::Types::String
           prop :query, Blog::Types::String
           prop :scope, Blog::Types::TagScope
-          prop :tags, Blog::Types::Instance(Blog::Paged)
+          prop :tags, Blog::Types::Instance(Blog::Structs::Paged)
           prop :usage, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)
 
           def view_template

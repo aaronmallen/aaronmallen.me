@@ -70,7 +70,7 @@ module API
         listed(found, found.rows.to_h { [it.id, day] })
       end
 
-      def page_of(number) = Blog::Page.new(number:, size: settings.page_size[:mcp])
+      def page_of(number) = Blog::Structs::Page.new(number:, size: settings.page_size[:mcp])
 
       def paging(older) = older ? { partial: true, continue_to: older.fetch(:to) } : { partial: false }
 

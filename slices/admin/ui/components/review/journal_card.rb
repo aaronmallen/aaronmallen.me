@@ -22,7 +22,7 @@ module Admin
 
           def entry(record)
             day = record.occurred_on
-            title = Blog::Truncation.cut(record.name, keep: TEXT_LIMIT)
+            title = Blog::Helpers::Truncation.cut(record.name, keep: TEXT_LIMIT)
 
             ListItem(title:, href: href(day), sub: l(day, format: :weekday))
           end
@@ -32,7 +32,7 @@ module Admin
           def totals
             {
               entries: t(".entries", count: @journal.entries.size),
-              words: t(".words", count: @journal.words, words: Blog::Figures.count(@journal.words)),
+              words: t(".words", count: @journal.words, words: Blog::Helpers::Figures.count(@journal.words)),
               streak: t(".streak", count: @journal.streak),
             }
           end

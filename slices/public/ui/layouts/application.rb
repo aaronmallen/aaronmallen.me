@@ -40,12 +40,12 @@ module Public
 
         def page_path = request.path
 
-        def page_social_title = content_for(:social_title) || content_for(:title) || Blog::Owner.full_name
+        def page_social_title = content_for(:social_title) || content_for(:title) || Hanami.app.settings.owner_name
 
-        def page_url = content_for(:canonical) || Blog::Site.url(page_path)
+        def page_url = content_for(:canonical) || Hanami.app.settings.site_url(page_path)
 
         def render_article_tags
-          meta(property: "article:author", content: Blog::Owner.full_name)
+          meta(property: "article:author", content: Hanami.app.settings.owner_name)
           meta(property: "article:published_time", content: content_for(:published_time))
           meta(property: "article:modified_time", content: content_for(:modified_time))
           content_for(:tags).to_a.each { meta(property: "article:tag", content: it) }
@@ -70,7 +70,7 @@ module Public
 
         def render_open_graph
           meta(property: "og:type", content: page_kind)
-          meta(property: "og:site_name", content: Blog::Owner.full_name)
+          meta(property: "og:site_name", content: Hanami.app.settings.owner_name)
           meta(property: "og:title", content: page_social_title)
           meta(property: "og:url", content: page_url)
           meta(property: "og:description", content: page_description) if page_description
@@ -85,7 +85,7 @@ module Public
           meta(name: "twitter:image", content: page_image) if page_image
         end
 
-        def writing_feed_title = t(".writing_feed", owner: Blog::Owner.full_name)
+        def writing_feed_title = t(".writing_feed", owner: Hanami.app.settings.owner_name)
       end
     end
   end

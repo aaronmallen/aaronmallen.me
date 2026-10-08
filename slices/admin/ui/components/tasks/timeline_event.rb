@@ -49,7 +49,7 @@ module Admin
           end
 
           def session
-            return plain(t(".worked", span: Blog::Figures.hours(@entry.seconds))) unless @entry.running?
+            return plain(t(".worked", span: Blog::Helpers::Figures.hours(@entry.seconds))) unless @entry.running?
 
             plain(t(".running"))
             Pill(color: :blue) { t(".running_pill") }

@@ -54,7 +54,7 @@ module Admin
           end
 
           def journal
-            { body: @body, entries: @entries, errors: @errors, tags: @tags, word_count: Blog::Figures.words(@body) }
+            { body: @body, entries: @entries, errors: @errors, tags: @tags, word_count: Blog::Helpers::Figures.words(@body) }
           end
 
           def main_cards

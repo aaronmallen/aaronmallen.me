@@ -23,7 +23,7 @@ module Admin
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :filter, Blog::Types::PostFilter
-          prop :posts, Blog::Types::Instance(Blog::Paged)
+          prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
           prop :read_through_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :saved_views, Blog::Types::Hash
           prop :unique_reader_counts, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Hash)

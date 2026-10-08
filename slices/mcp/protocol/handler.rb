@@ -239,7 +239,7 @@ module MCP
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
 
-      def owner = settings.owner[:name]
+      def owner = settings.owner_name
 
       def report(error, _context)
         honeybadger.notify(error) unless error.is_a?(Server::RequestHandlerError)

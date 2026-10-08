@@ -24,7 +24,7 @@ module Tasks
       def self.seconds(fields)
         return if fields[:hours].nil? && fields[:minutes].nil?
 
-        (fields[:hours].to_i * HOUR) + (fields[:minutes].to_i * Blog::Figures::MINUTE)
+        (fields[:hours].to_i * HOUR) + (fields[:minutes].to_i * Blog::Helpers::Figures::MINUTE)
       end
     end
   end

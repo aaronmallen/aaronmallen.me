@@ -18,7 +18,7 @@ module Admin
 
           private
 
-          def percent(entry) = Blog::Figures.share(entry.fetch(:views), @views)
+          def percent(entry) = Blog::Helpers::Figures.share(entry.fetch(:views), @views)
 
           def row(entry)
             div(class: "meter-row") do

@@ -20,7 +20,7 @@ module Public
 
           response.body = atom_feed.call(
             version,
-            title: t(".title", owner: settings.owner[:name]),
+            title: t(".title", owner: settings.owner_name),
             html: :writing,
             feed: :writing_feed,
           )

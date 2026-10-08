@@ -46,7 +46,7 @@ module MCP
           end
         end
 
-        def page(number, server_context) = Blog::Page.new(number:, size: dep(:page_size, server_context))
+        def page(number, server_context) = Blog::Structs::Page.new(number:, size: dep(:page_size, server_context))
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 

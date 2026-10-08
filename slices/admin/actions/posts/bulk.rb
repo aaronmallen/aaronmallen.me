@@ -24,7 +24,7 @@ module Admin
           filter = Blog::Types::PostFilterParam[request.params[:status]]
           page = landing(request) { post_queries.by_filter(filter, it).past_end? }
 
-          routes.path(:admin_posts, status: filter, **Blog::Page.query(page))
+          routes.path(:admin_posts, status: filter, **Blog::Structs::Page.query(page))
         end
 
         def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }

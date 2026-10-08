@@ -12,7 +12,7 @@ module Admin
 
           def view_template
             Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".peak", views: Blog::Figures.count(peak)) } }
+              card.side { span(class: "chart-peak") { t(".peak", views: Blog::Helpers::Figures.count(peak)) } }
 
               div(class: "chart") do
                 div(class: "chart-bars") { @series.each { bar(it) } }
@@ -24,7 +24,7 @@ module Admin
           private
 
           def bar(point)
-            div(class: "chart-bar", style: "height: #{Blog::Figures.share(point[:views], peak)}%") do
+            div(class: "chart-bar", style: "height: #{Blog::Helpers::Figures.share(point[:views], peak)}%") do
               span(class: "chart-tip") { tip(point) }
             end
           end
@@ -45,8 +45,8 @@ module Admin
             t(
               ".tip",
               date: short(point[:day]),
-              views: t(".views", count: point[:views], formatted: Blog::Figures.count(point[:views])),
-              visitors: t(".visitors", count: point[:visitors], formatted: Blog::Figures.count(point[:visitors])),
+              views: t(".views", count: point[:views], formatted: Blog::Helpers::Figures.count(point[:views])),
+              visitors: t(".visitors", count: point[:visitors], formatted: Blog::Helpers::Figures.count(point[:visitors])),
             )
           end
         end

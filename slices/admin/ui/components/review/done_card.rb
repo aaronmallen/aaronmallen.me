@@ -43,7 +43,7 @@ module Admin
             {
               title: task.title,
               href: path(:admin_task, id: task.task_id),
-              sub: dotted(Blog::Figures.hours(task.worked_seconds), credit_words(task.contributors)),
+              sub: dotted(Blog::Helpers::Figures.hours(task.worked_seconds), credit_words(task.contributors)),
             }
           end
         end

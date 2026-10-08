@@ -60,6 +60,7 @@ page_size:
   admin: 100
   mcp: 100
   public: 25
+web_threads: <%= ENV["HANAMI_MAX_THREADS"].to_json %>
 webmentions:
   throttle_limit: <%= ENV["WEBMENTIONS_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["WEBMENTIONS_THROTTLE_WINDOW_MINUTES"].to_json %>

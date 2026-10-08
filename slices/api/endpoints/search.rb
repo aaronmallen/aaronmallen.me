@@ -31,7 +31,7 @@ module API
 
       private
 
-      def page_of(number) = Blog::Page.new(number:, size: settings.page_size[:admin])
+      def page_of(number) = Blog::Structs::Page.new(number:, size: settings.page_size[:admin])
     end
   end
 end

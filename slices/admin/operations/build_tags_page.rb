@@ -24,7 +24,7 @@ module Admin
 
       private
 
-      def first_page = Blog::Page.new(number: 1, size: settings.page_size[:admin])
+      def first_page = Blog::Structs::Page.new(number: 1, size: settings.page_size[:admin])
 
       def name(params) = Blog::Types::Text[Blog::Types::Fields[params][:name]]
     end

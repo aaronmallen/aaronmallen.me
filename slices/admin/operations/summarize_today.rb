@@ -101,9 +101,9 @@ module Admin
       end
 
       def summary(social_post)
-        body = Blog::Whitespace.squish(social_post.parts.first.body)
+        body = Blog::Helpers::Whitespace.squish(social_post.parts.first.body)
 
-        Blog::Truncation.cut(body, keep: SUMMARY_LIMIT)
+        Blog::Helpers::Truncation.cut(body, keep: SUMMARY_LIMIT)
       end
 
       def webmentions

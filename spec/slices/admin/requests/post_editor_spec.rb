@@ -34,7 +34,7 @@ RSpec.describe "Admin post editor", type: :request do
       before { get "/admin/posts/new" }
 
       it "titles the page New post" do
-        expect(page).to have_title("New post | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("New post | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "shows no edit note box" do
@@ -174,7 +174,7 @@ RSpec.describe "Admin post editor", type: :request do
       before { get "/admin/posts/#{scheduled.id}/edit" }
 
       it "titles the page with the post's title" do
-        expect(page).to have_title("Hello | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("Hello | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "fills the form from the post", :aggregate_failures do

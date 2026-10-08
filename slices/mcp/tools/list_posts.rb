@@ -42,9 +42,9 @@ module MCP
         private
 
         def first_words(social_post)
-          body = Blog::Whitespace.squish(social_post.parts.first&.body)
+          body = Blog::Helpers::Whitespace.squish(social_post.parts.first&.body)
 
-          Blog::Truncation.cut(body, keep: PREVIEW_LENGTH)
+          Blog::Helpers::Truncation.cut(body, keep: PREVIEW_LENGTH)
         end
 
         def listed(first, last, status, page, server_context)

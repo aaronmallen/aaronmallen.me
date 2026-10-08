@@ -61,7 +61,7 @@ RSpec.describe "Admin photo upload", type: :request do
 
       it "answers 201 with the photo's absolute URL", :aggregate_failures do
         expect(last_response.status).to eq(201)
-        expect(json.fetch("url")).to eq(Blog::Site.url("/media/#{stored.keys.first}"))
+        expect(json.fetch("url")).to eq(Hanami.app.settings.site_url("/media/#{stored.keys.first}"))
       end
 
       it "stores it under a random key as a JPEG", :aggregate_failures do

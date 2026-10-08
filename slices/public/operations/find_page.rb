@@ -4,7 +4,7 @@ module Public
   module Operations
     class FindPage
       FEED = ".atom"
-      FIRST = Blog::Page.new(number: 1, size: 1)
+      FIRST = Blog::Structs::Page.new(number: 1, size: 1)
       PAGES = %i[root writing about projects contact].freeze
 
       include Deps[

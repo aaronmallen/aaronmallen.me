@@ -68,11 +68,11 @@ module Admin
 
           def stars
             span(role: "img", aria: { label: stars_label }) do
-              IconLabel(icon: "fa-regular fa-star") { Blog::Figures.count(@project.stars) }
+              IconLabel(icon: "fa-regular fa-star") { Blog::Helpers::Figures.count(@project.stars) }
             end
           end
 
-          def stars_label = t(".stars", count: @project.stars, stars: Blog::Figures.count(@project.stars))
+          def stars_label = t(".stars", count: @project.stars, stars: Blog::Helpers::Figures.count(@project.stars))
         end
       end
     end

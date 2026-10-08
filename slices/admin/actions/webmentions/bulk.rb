@@ -25,7 +25,7 @@ module Admin
           status = Blog::Types::WebmentionStatusParam[request.params[:status]]
           page = landing(request) { webmention_queries.page_by_status(status, it).past_end? }
 
-          routes.path(:admin_webmentions, status:, **Blog::Page.query(page))
+          routes.path(:admin_webmentions, status:, **Blog::Structs::Page.query(page))
         end
 
         def named(id) = { mention: "#{KEY}#{id}" }

@@ -68,7 +68,7 @@ module Admin
           def row(day)
             tr do
               th(scope: "row") { day.to_s }
-              cell(@days[day - 1]&.then { Blog::Figures.count(it) })
+              cell(@days[day - 1]&.then { Blog::Helpers::Figures.count(it) })
               cell(@median[day - 1]&.then { median_text(it) })
             end
           end

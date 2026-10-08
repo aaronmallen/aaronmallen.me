@@ -15,7 +15,7 @@ module Admin
 
           def view_template
             Card(title: t(".title")) do |card|
-              card.side { span(class: "chart-peak") { t(".latest", count: Blog::Figures.count(@latest)) } }
+              card.side { span(class: "chart-peak") { t(".latest", count: Blog::Helpers::Figures.count(@latest)) } }
 
               div(class: "chart") do
                 curve
@@ -61,7 +61,7 @@ module Admin
           def row(point)
             tr do
               th(scope: "row") { short(point[:day]) }
-              td { Blog::Figures.count(point[:subscribers]) }
+              td { Blog::Helpers::Figures.count(point[:subscribers]) }
             end
           end
 

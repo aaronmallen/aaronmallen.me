@@ -21,7 +21,7 @@ module Admin
           TITLES = { OPEN => ".titles.open", RESOLVED => ".titles.resolved", DROPPED => ".titles.dropped" }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
-          prop :decisions, Blog::Types::Instance(Blog::Paged)
+          prop :decisions, Blog::Types::Instance(Blog::Structs::Paged)
           prop :filter, Blog::Types::DecisionStatus
 
           def view_template

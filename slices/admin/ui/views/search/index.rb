@@ -13,7 +13,7 @@ module Admin
 
           prop :kind, Blog::Types::SearchKind.optional
           prop :query, Blog::Types::String
-          prop :results, Blog::Types::Instance(Blog::Paged)
+          prop :results, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
             PageHead(title: t(".heading"), sub: (t(".sub", query: @query) unless @query.empty?)) { filter_form }

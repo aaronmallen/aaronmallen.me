@@ -45,14 +45,16 @@ module Public
             span do
               plain t(".copyright", year: @year)
               whitespace
-              a(class: "site-footer-text-link p-name u-url u-uid", href: path(:root), rel: "me") { Blog::Owner.full_name }
+              a(class: "site-footer-text-link p-name u-url u-uid", href: path(:root), rel: "me") do
+                Hanami.app.settings.owner_name
+              end
             end
             PROFILES.each { |(name, icon, label_key)| profile_link(name:, icon:, label_key:) }
           end
         end
 
         def profile_link(name:, icon:, label_key:)
-          href = Blog::Owner.profile_url(name)
+          href = Hanami.app.settings.public_send(name)[:profile_url]
           return unless Blog::Types::Url.valid?(href)
 
           a(class: "site-footer-link", href:, rel: "me") do

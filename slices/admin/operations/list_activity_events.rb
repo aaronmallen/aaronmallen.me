@@ -134,12 +134,12 @@ module Admin
 
       def rows_before?(from, day, filters) = activity_queries.between(from:, to: day.prev_day, limit: 1, **filters).any?
 
-      def session_line(row) = i18n.t!("activity_page.sub_lines.session", span: Blog::Figures.hours(row.worked_seconds))
+      def session_line(row)
+        i18n.t!("activity_page.sub_lines.session", span: Blog::Helpers::Figures.hours(row.worked_seconds))
+      end
 
       def shortened(name)
-        squished = Blog::Whitespace.squish(Blog::Types::Text[name])
-
-        Blog::Truncation.cut(squished, keep: NAME_LIMIT)
+        Blog::Helpers::Truncation.cut(Blog::Helpers::Whitespace.squish(Blog::Types::Text[name]), keep: NAME_LIMIT)
       end
 
       def shows_rows?(start, counts:, to:, from:, day:, filters:)

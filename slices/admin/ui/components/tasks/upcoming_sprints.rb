@@ -83,7 +83,7 @@ module Admin
             end
           end
 
-          def shorten(title) = Blog::Truncation.cut(title, keep: TITLE_LIMIT)
+          def shorten(title) = Blog::Helpers::Truncation.cut(title, keep: TITLE_LIMIT)
 
           def sprint_card(sprint, tasks)
             open = tasks.reject(&:closed?)

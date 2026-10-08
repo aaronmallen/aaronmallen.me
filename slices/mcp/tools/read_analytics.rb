@@ -18,7 +18,8 @@ module MCP
         additionalProperties: false,
         properties: {
           **Blog::DayWindow::RANGE,
-          path: { type: "string", description: "one page to read alone, such as #{Blog::Site::WRITING}/hello" },
+          path: { type: "string",
+                  description: "one page to read alone, such as #{Hanami.app.settings.writing_path}/hello" },
           since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
         },
         required: %w[from to],

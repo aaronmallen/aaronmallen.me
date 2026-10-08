@@ -17,7 +17,9 @@ RSpec.describe "The error pages in production", type: :request do
     end
 
     it "carries the site name" do
-      expect(page).to have_title(Blog::Owner.full_name).and have_css("header a[href='/']", text: Blog::Owner.full_name)
+      owner = Hanami.app.settings.owner_name
+
+      expect(page).to have_title(owner).and have_css("header a[href='/']", text: owner)
     end
 
     it "keeps it from a shared cache" do

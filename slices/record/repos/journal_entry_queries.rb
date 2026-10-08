@@ -22,10 +22,10 @@ module Record
       def days(size:, to: nil, **search)
         found = by_day(size:, to:, **search)
 
-        Blog::DayPaged.new(
+        Blog::Structs::DayPaged.new(
           rows: found.rows.group_by(&:entry_date).to_a,
           newer_query: to && newer_query(to, size, search),
-          older_query: found.continue_to && Blog::DayPaged.query(found.continue_to),
+          older_query: found.continue_to && Blog::Structs::DayPaged.query(found.continue_to),
         )
       end
 
@@ -69,7 +69,7 @@ module Record
         days = days_after(to, limit: size * 2, **search)
         return if days.empty?
 
-        Blog::DayPaged.query(days.length > size ? newer_day(days, size) : nil)
+        Blog::Structs::DayPaged.query(days.length > size ? newer_day(days, size) : nil)
       end
 
       def searched(entries, tags: EMPTY_ARRAY, text: EMPTY_STRING)

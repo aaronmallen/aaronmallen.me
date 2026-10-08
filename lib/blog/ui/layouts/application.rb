@@ -70,7 +70,7 @@ module Blog
           theme if THEMES.include?(theme)
         end
 
-        def title_suffix = Blog::Owner.full_name
+        def title_suffix = Hanami.app.settings.owner_name
       end
     end
   end

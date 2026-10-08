@@ -23,7 +23,7 @@ module Social
 
       def self.bridgy?(url) = BRIDGY_HOSTS.include?(Blog::Types::Normalized::Host.call(url) { nil })
 
-      def self.truncate(text) = Blog::Truncation.fit(text, limit: EXCERPT_LIMIT)
+      def self.truncate(text) = Blog::Helpers::Truncation.fit(text, limit: EXCERPT_LIMIT)
 
       attr_reader :url
 
@@ -41,7 +41,7 @@ module Social
         return nil if WORDLESS_TYPES.include?(type)
 
         text = CONTENT_SELECTORS.lazy.filter_map { @document.at_css(it) }.first
-        truncate(Blog::Whitespace.squish(text.text)) if text
+        truncate(Blog::Helpers::Whitespace.squish(text.text)) if text
       end
 
       def links_to? = @document.css(LINK_SELECTOR).any? { matches_target?(it["href"]) }
@@ -59,7 +59,7 @@ module Social
 
       def card_href(node) = node.at_css(".u-url")&.[]("href") || node["href"]
 
-      def card_name(node) = truncate(Blog::Whitespace.squish(node.at_css(".p-name")&.text || node.text))
+      def card_name(node) = truncate(Blog::Helpers::Whitespace.squish(node.at_css(".p-name")&.text || node.text))
 
       def claims_target?(property)
         @document.css(".#{property}").any? { matches_target?(it["href"] || it["value"] || it.text) }

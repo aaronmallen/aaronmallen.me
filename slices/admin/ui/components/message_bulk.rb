@@ -32,7 +32,7 @@ module Admin
 
         def confirm = { confirm: t(".confirm_delete"), confirm_styled: true }
 
-        def fields = { status: @filter, **Blog::Page.query(@page) }
+        def fields = { status: @filter, **Blog::Structs::Page.query(@page) }
       end
     end
   end

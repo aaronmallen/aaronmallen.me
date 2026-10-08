@@ -18,7 +18,7 @@ module Admin
 
           prop :filter, Blog::Types::String
           prop :now, Blog::Types::Time
-          prop :page, Blog::Types::Instance(Blog::Paged)
+          prop :page, Blog::Types::Instance(Blog::Structs::Paged)
           prop :suggestion_counts, Blog::Types::Hash
 
           def view_template

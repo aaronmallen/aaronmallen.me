@@ -19,7 +19,7 @@ if MCP::Slice["repos.oauth_client_queries"].connected.empty?
 
   Seeds.unwrap(
     MCP::Slice["operations.issue_tokens"].call(
-      oauth_client_id: registered.id, resource: Blog::Site.url("/mcp"), scopes: %w[read write],
+      oauth_client_id: registered.id, resource: Hanami.app.settings.site_url("/mcp"), scopes: %w[read write],
     ),
   )
 end

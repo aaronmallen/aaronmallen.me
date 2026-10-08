@@ -77,7 +77,7 @@ RSpec.describe "API time report", type: :request do
     end
 
     it "gives the sums the time screen shows" do
-      sums = groups(**range, by: "project").map { Blog::Figures.hours(it.fetch("seconds")) }
+      sums = groups(**range, by: "project").map { Blog::Helpers::Figures.hours(it.fetch("seconds")) }
 
       expect(sums).to eq(screen_rows(**range, by: "project"))
     end
@@ -108,7 +108,7 @@ RSpec.describe "API time report", type: :request do
     end
 
     it "gives the sums the time screen shows" do
-      sums = groups(**range, by: "tag").map { Blog::Figures.hours(it.fetch("seconds")) }
+      sums = groups(**range, by: "tag").map { Blog::Helpers::Figures.hours(it.fetch("seconds")) }
 
       expect(sums).to eq(screen_rows(**range, by: "tag"))
     end
@@ -134,7 +134,7 @@ RSpec.describe "API time report", type: :request do
     end
 
     it "gives the sums the time screen shows" do
-      sums = groups(**range, by: "day").map { Blog::Figures.hours(it.fetch("seconds")) }
+      sums = groups(**range, by: "day").map { Blog::Helpers::Figures.hours(it.fetch("seconds")) }
 
       expect(sums).to eq(screen_rows(**range, by: "day"))
     end

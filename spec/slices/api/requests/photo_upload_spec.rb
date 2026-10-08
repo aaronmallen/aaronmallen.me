@@ -39,7 +39,7 @@ RSpec.describe "API photo upload", type: :request do
     send_photo({ data:, filename: }, token:)
   end
 
-  def url_of(key) = Blog::Site.url("/media/#{key}")
+  def url_of(key) = Hanami.app.settings.site_url("/media/#{key}")
 
   shared_examples "a refusal" do |code, key|
     it "answers #{code} with the admin's reason" do

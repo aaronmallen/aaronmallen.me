@@ -25,7 +25,7 @@ module Admin
           status = Blog::Types::MessageStatusParam[request.params[:status]]
           page = landing(request) { message_queries.page_by_status(status, it).past_end? }
 
-          routes.path(:admin_messages, status:, **Blog::Page.query(page))
+          routes.path(:admin_messages, status:, **Blog::Structs::Page.query(page))
         end
 
         def named(id) = { message: ["#{KEY}#{id}", message_queries.by_id(id)&.subject].compact.join(" ") }

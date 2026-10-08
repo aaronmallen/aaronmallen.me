@@ -18,7 +18,7 @@ module Admin
 
           prop :count, Blog::Types::Integer
           prop :filter, Blog::Types::MessageStatus
-          prop :messages, Blog::Types::Instance(Blog::Paged)
+          prop :messages, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }

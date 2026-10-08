@@ -46,7 +46,7 @@ module Blog
       def linkables(title:, day:)
         columns = [:id, Sequel.as(title, :title), Sequel.as(day, :day)]
 
-        dataset.select(*columns).order(*LINKABLE_ORDER).map { Linkable.new(**it) }
+        dataset.select(*columns).order(*LINKABLE_ORDER).map { Structs::Linkable.new(**it) }
       end
 
       def lock_until_commit(*keys) = dataset.db.get(Sequel.function(:pg_advisory_xact_lock, table_key, *keys))

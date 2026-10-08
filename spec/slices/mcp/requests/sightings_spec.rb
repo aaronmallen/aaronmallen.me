@@ -11,7 +11,7 @@ RSpec.describe "MCP client sightings", type: :request do
     write_country_database
     allow(Hanami.app.settings).to receive(:proxy)
       .and_return(address_header: "CF-Connecting-IP", trusted_proxies: [IPAddr.new("127.0.0.0/8")])
-    resource = "#{Blog::Site.url.chomp('/')}/mcp"
+    resource = "#{Hanami.app.settings.site_url.chomp('/')}/mcp"
     mcp_create(:oauth_token, oauth_client: client, token_digest: Blog::SecretToken.digest(value), resource:)
   end
 

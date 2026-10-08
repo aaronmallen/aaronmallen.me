@@ -198,4 +198,39 @@ RSpec.describe Blog::Settings do
       expect { contact_with("CONTACT_STAMP_EXPIRY_HOURS" => "0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
     end
   end
+
+  describe "#web_threads" do
+    def web_threads(threads)
+      stub_const("ENV", ENV.to_h.merge("HANAMI_MAX_THREADS" => threads))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:web_threads)
+      store = Hanami::Settings::CompositeStore.new({ web_threads: file }, Hanami.app.config.settings_store)
+      described_class.new(store).web_threads
+    end
+
+    it "takes the count from HANAMI_MAX_THREADS" do
+      expect(web_threads("8")).to eq(8)
+    end
+
+    it "runs five threads when HANAMI_MAX_THREADS is unset" do
+      expect(web_threads(nil)).to eq(5)
+    end
+
+    it "refuses a count under one" do
+      expect { web_threads("0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
+    end
+  end
+
+  describe "#site_url" do
+    let(:settings) { Hanami.app["settings"] }
+
+    it "joins a path onto the site", :aggregate_failures do
+      expect(settings.site_url).to eq("https://aaronmallen.me/")
+      expect(settings.site_url("/media/a.png")).to eq("https://aaronmallen.me/media/a.png")
+      expect(settings.site_origin).to eq("https://aaronmallen.me")
+    end
+
+    it "serves posts under /writing" do
+      expect(settings.writing_path).to eq("/writing")
+    end
+  end
 end

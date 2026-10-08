@@ -29,6 +29,8 @@ module Blog
     config.logger.filters |= %w[\w*_key \w*_secret \w*_token code_challenge code_verifier ip]
     config.logger.filters |= Providers::HoneybadgerProvider::FILTER_KEYS
 
+    config.no_auto_register_paths += %w[helpers]
+
     config.middleware.use Honeybadger::Rack::ErrorNotifier
     config.middleware.use ParamsGuard
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]

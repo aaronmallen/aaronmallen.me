@@ -211,7 +211,7 @@ RSpec.describe "MCP untrusted text", type: :request do
     it "comes plain on a local comment" do
       create(:task_comment, task_id: task.id)
 
-      expect(authors(mcp_answer("read_task", id: task.id))).to eq([Blog::Owner.full_name])
+      expect(authors(mcp_answer("read_task", id: task.id))).to eq([Hanami.app.settings.owner_name])
     end
   end
 

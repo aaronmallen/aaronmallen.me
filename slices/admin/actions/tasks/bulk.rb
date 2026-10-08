@@ -37,7 +37,7 @@ module Admin
           tab = task_tab(request)
           page = landing(request) { build_tasks_page.call(page: it, tab:, query:).failure? }
 
-          routes.path(:admin_tasks, filter: tab, **(query.empty? ? {} : { q: query }), **Blog::Page.query(page))
+          routes.path(:admin_tasks, filter: tab, **(query.empty? ? {} : { q: query }), **Blog::Structs::Page.query(page))
         end
 
         def details(request)

@@ -55,7 +55,7 @@ module Admin
 
           def progress
             span(class: "sprint-progress") do
-              span(class: "sprint-progress-fill", style: "width: #{Blog::Figures.share(done, @tasks.size)}%")
+              span(class: "sprint-progress-fill", style: "width: #{Blog::Helpers::Figures.share(done, @tasks.size)}%")
             end
           end
 

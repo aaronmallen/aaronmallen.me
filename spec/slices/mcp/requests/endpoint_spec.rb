@@ -2043,7 +2043,7 @@ RSpec.describe "MCP endpoint", type: :request do
 
       expect(photo.bytesize).to be > 2 * 1024 * 1024
       expect(stored.keys).to contain_exactly(end_with(".jpg"))
-      expect(content).to eq("url" => Blog::Site.url("/media/#{row[:key]}"), "width" => 20, "height" => 40)
+      expect(content).to eq("url" => Hanami.app.settings.site_url("/media/#{row[:key]}"), "width" => 20, "height" => 40)
     end
   end
 

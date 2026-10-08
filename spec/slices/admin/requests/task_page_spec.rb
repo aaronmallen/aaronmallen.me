@@ -102,7 +102,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
     it "titles the tab with the task" do
       read
 
-      expect(page).to have_title("Ship the read page | Admin | #{Blog::Owner.full_name}")
+      expect(page).to have_title("Ship the read page | Admin | #{Hanami.app.settings.owner_name}")
     end
 
     it "draws the key as a badge that copies it" do
@@ -270,10 +270,10 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
 
       it "keeps an image from the site's own /media path", :aggregate_failures do
         key = "#{'a' * 32}.png"
-        read_note("![one](/media/#{key}) ![two](#{Blog::Site.url("/media/#{key}")})")
+        read_note("![one](/media/#{key}) ![two](#{Hanami.app.settings.site_url("/media/#{key}")})")
 
         expect(body).to have_css("img[src='/media/#{key}'][alt='one']")
-        expect(body).to have_css("img[src='#{Blog::Site.url("/media/#{key}")}'][alt='two']")
+        expect(body).to have_css("img[src='#{Hanami.app.settings.site_url("/media/#{key}")}'][alt='two']")
       end
 
       it "keeps the alt text of an image it cannot link", :aggregate_failures do

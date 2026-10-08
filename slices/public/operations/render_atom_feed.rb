@@ -74,7 +74,7 @@ module Public
         xml.id(url(html, params))
         xml.title(title)
         xml.updated(timestamp(version.updated || Time.now))
-        xml.author { xml.name(settings.owner[:name]) }
+        xml.author { xml.name(settings.owner_name) }
       end
 
       def feed_links(xml, posts, html:, feed:, params:)
@@ -98,7 +98,7 @@ module Public
 
       def timestamp(time) = time.utc.iso8601
 
-      def url(route, params, number = 1) = routes.url(route, **params, **Blog::Page.query(number)).to_s
+      def url(route, params, number = 1) = routes.url(route, **params, **Blog::Structs::Page.query(number)).to_s
     end
   end
 end

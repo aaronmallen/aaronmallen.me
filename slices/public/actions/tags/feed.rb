@@ -29,7 +29,7 @@ module Public
         def render_feed(version, tag)
           atom_feed.call(
             version,
-            title: t(".title", tag:, owner: settings.owner[:name]),
+            title: t(".title", tag:, owner: settings.owner_name),
             html: :tag,
             feed: :tag_feed,
             params: { tag: },

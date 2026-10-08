@@ -43,12 +43,14 @@ module Admin
         )
       end
 
-      def first_page(page) = Blog::Page.new(number: 1, size: page.size)
+      def first_page(page) = Blog::Structs::Page.new(number: 1, size: page.size)
 
       def lead(tab, sprint, page, filters)
         return if page.number == 1 || UNORDERED.include?(tab) || !filters[:query].empty?
 
-        task_queries.list(tab, sprint:, page: Blog::Page.new(number: page.number - 1, size: page.size)).rows.last&.id
+        previous = Blog::Structs::Page.new(number: page.number - 1, size: page.size)
+
+        task_queries.list(tab, sprint:, page: previous).rows.last&.id
       end
 
       def listed(tab, sprint, planned, page, search)
@@ -79,7 +81,7 @@ module Admin
         planned.map { { sprint: it, tasks: held.fetch(it.id, EMPTY_ARRAY) } }
       end
 
-      def whole(rows) = Blog::Paged.new(rows:, number: 1, more: false)
+      def whole(rows) = Blog::Structs::Paged.new(rows:, number: 1, more: false)
     end
   end
 end

@@ -28,7 +28,7 @@ module Admin
             Button(type: "submit", variant:, small: true, name: ACT, value:, icon:) { t(label) }
           end
 
-          def fields = { status: @filter, **Blog::Page.query(@page) }
+          def fields = { status: @filter, **Blog::Structs::Page.query(@page) }
         end
       end
     end

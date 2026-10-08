@@ -29,7 +29,9 @@ module Tasks
       end
 
       def replaced(seconds, tracked)
-        seconds unless seconds.nil? || (tracked && seconds / Blog::Figures::MINUTE == tracked / Blog::Figures::MINUTE)
+        unless seconds.nil? || (tracked && seconds / Blog::Helpers::Figures::MINUTE == tracked / Blog::Helpers::Figures::MINUTE)
+          seconds
+        end
       end
 
       def reported(worked)

@@ -4,7 +4,7 @@ require "base64"
 
 RSpec.describe "Admin photo upload in the Markdown editor", type: :feature do
   let(:png) { Hanami.app.root.join("spec/fixtures/photos/small.png") }
-  let(:media) { Regexp.escape(Blog::Site.url("/media/")) }
+  let(:media) { Regexp.escape(Hanami.app.settings.site_url("/media/")) }
   let(:photo_url) { /\A!\[\]\(#{media}[0-9a-f]{32}\.png\)\z/ }
 
   def body = find_field("post-body")

@@ -83,7 +83,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
       end
 
       def expected_sub
-        stars = Blog::Figures.count((repo.live + repo.archived).sum(&:stars))
+        stars = Blog::Helpers::Figures.count((repo.live + repo.archived).sum(&:stars))
 
         "2 live · 1 archived · #{stars} stars total"
       end

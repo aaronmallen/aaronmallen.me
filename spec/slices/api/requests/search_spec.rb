@@ -38,7 +38,7 @@ RSpec.describe "API search", type: :request do
     end
 
     it "gives a result the values search found for it" do
-      page = Blog::Page.new(number: 1, size: 1)
+      page = Blog::Structs::Page.new(number: 1, size: 1)
       hit = Search::Slice["repos.search_queries"].search(text: "track", page:).rows.first
 
       expect(results(query: "track").map { it.values_at("kind", "id", "title", "match", "date") })

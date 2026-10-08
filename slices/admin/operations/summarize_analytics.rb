@@ -53,9 +53,9 @@ module Admin
         prior = before.fetch(:views)
 
         {
-          change: (Blog::Figures.share(views - prior, prior) if prior.positive?),
-          per_visit: Blog::Figures.rate(views, totals.fetch(:visitors)),
-          read_time: Blog::Figures.average(totals.fetch(:read_seconds), views),
+          change: (Blog::Helpers::Figures.share(views - prior, prior) if prior.positive?),
+          per_visit: Blog::Helpers::Figures.rate(views, totals.fetch(:visitors)),
+          read_time: Blog::Helpers::Figures.average(totals.fetch(:read_seconds), views),
         }
       end
 

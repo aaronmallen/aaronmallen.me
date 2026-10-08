@@ -2,7 +2,7 @@
 
 RSpec.describe Search::Repos::SearchQueries do
   let(:db) { Search::Slice["db.rom"].gateways[:default].connection }
-  let(:page) { Blog::Page.new(number: 1, size: 20) }
+  let(:page) { Blog::Structs::Page.new(number: 1, size: 20) }
 
   describe "the query plan" do
     let(:tables) do

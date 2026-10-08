@@ -9,7 +9,7 @@ module Admin
 
           def view_template
             Card(title: t(".title"), id: "review-worked") do |card|
-              card.side { span(class: "review-total") { Blog::Figures.hours(@worked.values.sum) } }
+              card.side { span(class: "review-total") { Blog::Helpers::Figures.hours(@worked.values.sum) } }
 
               @worked.each { |day, seconds| row(day, seconds) }
             end
@@ -21,9 +21,9 @@ module Admin
             div(class: "meter-row") do
               span(class: "meter-name") { t(".day", weekday: l(day, format: :day_name), date: l(day, format: :short)) }
               span(class: "meter blue") do
-                span(class: "meter-fill", style: "width: #{Blog::Figures.share(seconds, top)}%")
+                span(class: "meter-fill", style: "width: #{Blog::Helpers::Figures.share(seconds, top)}%")
               end
-              span(class: "meter-count") { Blog::Figures.hours(seconds) }
+              span(class: "meter-count") { Blog::Helpers::Figures.hours(seconds) }
             end
           end
 

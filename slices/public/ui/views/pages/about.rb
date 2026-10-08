@@ -87,7 +87,7 @@ module Public
           end
 
           def profile(network, icon, key)
-            href = Blog::Owner.profile_url(network)
+            href = Hanami.app.settings.public_send(network)[:profile_url]
             return unless Blog::Types::Url.valid?(href)
 
             li { link(href, "fa-brands #{icon}", t(key)) }

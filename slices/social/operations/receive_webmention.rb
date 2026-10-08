@@ -4,7 +4,7 @@ module Social
   module Operations
     class ReceiveWebmention < Operation
       MAX_URL = 2048
-      TARGET_PATH = %r{\A#{Blog::Site::WRITING}/(?<slug>[^/]+)\z}
+      TARGET_PATH = %r{\A#{Hanami.app.settings.writing_path}/(?<slug>[^/]+)\z}
 
       include Deps[
         "settings",
@@ -82,7 +82,7 @@ module Social
       end
 
       def window_opened_at
-        Time.now - (settings.webmentions[:throttle_window_minutes] * Blog::Figures::MINUTE)
+        Time.now - (settings.webmentions[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
       def within_limits(visitor_hash)

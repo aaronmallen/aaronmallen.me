@@ -22,7 +22,7 @@ module Blog
 
           def author
             a(class: "post-author p-author h-card", href: path(:root)) do
-              span(class: "p-name") { Blog::Owner.full_name }
+              span(class: "p-name") { Hanami.app.settings.owner_name }
             end
           end
         end

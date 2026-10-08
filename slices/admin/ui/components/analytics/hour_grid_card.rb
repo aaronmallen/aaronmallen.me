@@ -36,8 +36,8 @@ module Admin
           private
 
           def cell(count)
-            td(class: "heat-cell", style: "--heat: #{Blog::Figures.share(count, peak)}%") do
-              span(class: "sr-only") { t(".readers", count:, formatted: Blog::Figures.count(count)) }
+            td(class: "heat-cell", style: "--heat: #{Blog::Helpers::Figures.share(count, peak)}%") do
+              span(class: "sr-only") { t(".readers", count:, formatted: Blog::Helpers::Figures.count(count)) }
             end
           end
 

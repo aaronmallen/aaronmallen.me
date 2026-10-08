@@ -23,7 +23,7 @@ module Analytics
           integer.coalesce(integer.sum(read_throughs), 0).as(:read_throughs),
         ]
       end
-      POST_PATH = Sequel.join(["#{Blog::Site::WRITING}/", Sequel[:posts][:slug]])
+      POST_PATH = Sequel.join(["#{Hanami.app.settings.writing_path}/", Sequel[:posts][:slug]])
       PUBLISH_DAY = site_day(Sequel[:posts][:published_at])
       PUBLISHED = Blog::Types::PostStatus["published"]
       RECENT_TITLE = proc { string.array_agg(title).order(NEWEST_FIRST).filter(TITLED).sql_subscript(1).as(:title) }

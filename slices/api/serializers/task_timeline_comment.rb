@@ -20,7 +20,7 @@ module API
       schema_attributes
       stamps :occurred_at
 
-      def author(entry) = entry.synced? ? entry.author : Blog::Owner.full_name
+      def author(entry) = entry.synced? ? entry.author : Hanami.app.settings.owner_name
 
       def id(entry) = entry.source_id
 

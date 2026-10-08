@@ -47,6 +47,8 @@ module Admin
             change ? t(".change", count: @range, percent: format(SIGNED, change)) : t(".no_prior")
           end
 
+          def count(number) = Blog::Helpers::Figures.count(number)
+
           def feed_cards
             FeedCard(**@feed.slice(:days, :latest))
             MeterCard(color: :blue, empty: t(".no_aggregators"), rows: aggregators, title: t(".aggregators"))
@@ -77,8 +79,8 @@ module Admin
 
           def stats
             views_stat
-            Stat(key: t(".visitors"), value: Blog::Figures.count(visitors), change: t(".per_visit", rate: per_visit))
-            Stat(key: t(".read"), value: Blog::Figures.duration(read_time), change: t(".read_note"))
+            Stat(key: t(".visitors"), value: count(visitors), change: t(".per_visit", rate: per_visit))
+            Stat(key: t(".read"), value: Blog::Helpers::Figures.duration(read_time), change: t(".read_note"))
             webmentions_stat
           end
 
@@ -87,7 +89,7 @@ module Admin
           def views_stat
             Stat(
               key: t(".views"),
-              value: Blog::Figures.count(views),
+              value: Blog::Helpers::Figures.count(views),
               change: change_text,
               down: change.to_i.negative?,
             )
@@ -98,7 +100,7 @@ module Admin
           def webmentions_stat
             Stat(
               key: t(".webmentions"),
-              value: Blog::Figures.count(@webmentions.fetch(:received)),
+              value: Blog::Helpers::Figures.count(@webmentions.fetch(:received)),
               change: t(".pending", count: @webmentions.fetch(:pending)),
             )
           end

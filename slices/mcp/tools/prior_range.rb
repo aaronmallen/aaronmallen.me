@@ -17,7 +17,7 @@ module MCP
         { from: from.iso8601, to: to.iso8601, views: before, percent: percent(totals.fetch(:views), before) }
       end
 
-      def percent(views, before) = (Blog::Figures.share(views - before, before) if before.positive?)
+      def percent(views, before) = (Blog::Helpers::Figures.share(views - before, before) if before.positive?)
     end
   end
 end

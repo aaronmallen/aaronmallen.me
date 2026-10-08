@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "blog/concurrency"
 require "cgi"
 require "sequel"
 require "uri"
@@ -41,10 +40,12 @@ module Blog
         end
 
         def max_connections(settings)
-          [Concurrency.threads + SPARE_CONNECTIONS, settings.database[:max_connections]].min
+          [threads(settings) + SPARE_CONNECTIONS, settings.database[:max_connections]].min
         end
 
         private
+
+        def threads(settings) = worker? ? Sidekiq.default_configuration.total_concurrency : settings.web_threads
 
         def userinfo(database)
           password, user = database.values_at(:password, :user)
@@ -55,6 +56,8 @@ module Blog
             [user.to_s, password].map { CGI.escapeURIComponent(it) }.join(":")
           end
         end
+
+        def worker? = defined?(Sidekiq) && Sidekiq.server?
       end
     end
   end

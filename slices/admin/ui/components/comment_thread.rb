@@ -117,7 +117,9 @@ module Admin
 
         def head(comment)
           div(class: "comment-head") do
-            span(class: "comment-author") { comment.synced? ? @author&.call(comment) : plain(Blog::Owner.full_name) }
+            span(class: "comment-author") do
+              comment.synced? ? @author&.call(comment) : plain(Hanami.app.settings.owner_name)
+            end
             Moment(at: comment.occurred_at, class: "timeline-time")
             comment.synced? ? @source&.call(comment) : acts(comment)
           end

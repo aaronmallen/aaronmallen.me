@@ -38,7 +38,7 @@ RSpec.describe "API task comments", type: :request do
     it "answers 201 with the comment, trimmed" do
       answered = comment(task.id, body: "  Blocked on review  ")
       saved = stored(task).first
-      entry = { "id" => saved.id, "body" => "Blocked on review", "author" => Blog::Owner.full_name,
+      entry = { "id" => saved.id, "body" => "Blocked on review", "author" => Hanami.app.settings.owner_name,
                 "source" => "local", "url" => nil, **stamps(saved) }
 
       expect([answered, status]).to eq([entry, 201])
@@ -90,7 +90,7 @@ RSpec.describe "API task comments", type: :request do
     it "answers 200 with the comment, trimmed" do
       answered = edit(task.id, local.id, body: "  Blocked on deploy  ")
       saved = stored(task).first
-      entry = { "id" => local.id, "body" => "Blocked on deploy", "author" => Blog::Owner.full_name,
+      entry = { "id" => local.id, "body" => "Blocked on deploy", "author" => Hanami.app.settings.owner_name,
                 "source" => "local", "url" => nil, **stamps(saved) }
 
       expect([answered, status]).to eq([entry, 200])

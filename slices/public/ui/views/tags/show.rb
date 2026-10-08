@@ -8,7 +8,7 @@ module Public
           include Components::Posts
 
           prop :tag, Blog::Types::String
-          prop :posts, Blog::Types::Instance(Blog::Paged)
+          prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template

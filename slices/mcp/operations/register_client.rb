@@ -81,7 +81,7 @@ module MCP
       end
 
       def window_opened_at
-        Time.now - (settings.client_registration[:throttle_window_minutes] * Blog::Figures::MINUTE)
+        Time.now - (settings.client_registration[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
       def within_limit(visitor_hash)

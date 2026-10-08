@@ -42,7 +42,7 @@ module Public
             paragraph = post.summary
             return unless paragraph
 
-            Blog::Truncation.cut(paragraph, keep: TEASER_LIMIT)
+            Blog::Helpers::Truncation.cut(paragraph, keep: TEASER_LIMIT)
           end
         end
       end

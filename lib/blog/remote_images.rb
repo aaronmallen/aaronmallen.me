@@ -27,10 +27,12 @@ module Blog
       uri = URI(src.to_s)
       return false unless MEDIA.match?(uri.path) && uri.query.nil? && uri.fragment.nil?
 
-      uri.is_a?(URI::HTTP) ? uri.origin == Site.origin : uri.host.nil? && uri.scheme.nil?
+      uri.is_a?(URI::HTTP) ? uri.origin == site_origin : uri.host.nil? && uri.scheme.nil?
     rescue URI::InvalidURIError
       false
     end
+
+    def site_origin = Hanami.app.settings.site_origin
 
     def stand_in(image)
       src = image[SRC].to_s

@@ -12,7 +12,7 @@ module Admin
 
           def view_template
             Card(title: t(TITLES.fetch(@report.by)), id: "time-groups") do |card|
-              card.side { span(class: "time-total") { Blog::Figures.hours(@report.seconds) } }
+              card.side { span(class: "time-total") { Blog::Helpers::Figures.hours(@report.seconds) } }
               rows
             end
           end

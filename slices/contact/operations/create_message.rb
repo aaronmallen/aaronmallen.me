@@ -37,7 +37,7 @@ module Contact
       def validate(params) = validated(contract.call(form(params)))
 
       def window_opened_at
-        Time.now - (settings.contact[:throttle_window_minutes] * Blog::Figures::MINUTE)
+        Time.now - (settings.contact[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
       def within_limits(visitor_hash)

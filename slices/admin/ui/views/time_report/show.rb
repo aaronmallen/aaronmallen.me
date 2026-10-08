@@ -25,7 +25,7 @@ module Admin
             t(
               ".span",
               from: l(@report.from, format: :medium), to: l(@report.to, format: :medium),
-              total: Blog::Figures.hours(@report.seconds),
+              total: Blog::Helpers::Figures.hours(@report.seconds),
             )
           end
         end

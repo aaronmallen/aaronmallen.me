@@ -71,7 +71,7 @@ module Admin
               ".completed" => @task.completed_at,
               ".sprint" => sprint_day,
               ".carried" => t(".carried_count", count: @task.carried_count),
-              ".worked" => Blog::Figures.hours(@task.worked_seconds),
+              ".worked" => Blog::Helpers::Figures.hours(@task.worked_seconds),
               ".contributors" => credits,
             }.compact
           end

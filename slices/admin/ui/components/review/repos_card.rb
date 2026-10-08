@@ -20,8 +20,8 @@ module Admin
           def counts(totals)
             {
               commits: t(".commits", count: totals[:commits]),
-              additions: Blog::Figures.count(totals[:additions]),
-              deletions: Blog::Figures.count(totals[:deletions]),
+              additions: Blog::Helpers::Figures.count(totals[:additions]),
+              deletions: Blog::Helpers::Figures.count(totals[:deletions]),
             }
           end
         end

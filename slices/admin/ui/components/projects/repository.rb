@@ -25,7 +25,7 @@ module Admin
           private
 
           def from_github
-            read_only(t(".stars"), Blog::Figures.count(@stars))
+            read_only(t(".stars"), Blog::Helpers::Figures.count(@stars))
             read_only(t(".release"), @release.to_s.empty? ? t(".none") : @release)
           end
 

@@ -59,7 +59,7 @@ module Links
 
       def linked(kind, rows)
         rows.map do |row|
-          title = Blog::Truncation.fit(row.title, limit: TITLE_LIMIT)
+          title = Blog::Helpers::Truncation.fit(row.title, limit: TITLE_LIMIT)
 
           Structs::Link.new(kind:, id: row.id, title:, day: row.day, url: url(kind, row))
         end

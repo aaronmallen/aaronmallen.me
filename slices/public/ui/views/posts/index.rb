@@ -7,7 +7,7 @@ module Public
         class Index < View
           include Components::Posts
 
-          prop :posts, Blog::Types::Instance(Blog::Paged)
+          prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
             content_for(:title, t(".title"))

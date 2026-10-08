@@ -460,8 +460,10 @@ RSpec.describe "API tasks", type: :request do
       it "names the owner as the author of a local comment" do
         create(:task_comment, task_id: task.id, body: "mine", created_at: at(today, 9))
 
-        expect(comments.first).to include("body" => "mine", "author" => Blog::Owner.full_name, "source" => "local",
-                                          "url" => nil, "created_at" => at(today, 9).utc.iso8601)
+        owner = Hanami.app.settings.owner_name
+
+        expect(comments.first).to include("body" => "mine", "author" => owner, "source" => "local", "url" => nil,
+                                          "created_at" => at(today, 9).utc.iso8601)
       end
 
       it "names the provider, author and link of a synced comment" do
@@ -525,7 +527,7 @@ RSpec.describe "API tasks", type: :request do
       comment = create(:task_comment, task_id: task.id, body: "a note", created_at: at(today, 9))
 
       expect(timeline).to eq([{ "kind" => "comment", "id" => comment.id, "occurred_at" => stamp(today, 9),
-                                "body" => "a note", "author" => Blog::Owner.full_name, "source" => "local",
+                                "body" => "a note", "author" => Hanami.app.settings.owner_name, "source" => "local",
                                 "url" => nil }])
     end
 

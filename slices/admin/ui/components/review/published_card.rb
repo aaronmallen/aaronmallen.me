@@ -38,7 +38,7 @@ module Admin
 
           def item(record)
             {
-              title: Blog::Truncation.cut(record.name, keep: TEXT_LIMIT),
+              title: Blog::Helpers::Truncation.cut(record.name, keep: TEXT_LIMIT),
               href: href(record),
               sub: l(record.occurred_on, format: :weekday),
             }

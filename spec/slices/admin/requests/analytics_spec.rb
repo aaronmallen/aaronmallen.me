@@ -32,7 +32,7 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
 
       it "answers with the page titled Analytics", :aggregate_failures do
         expect(last_response).to be_ok
-        expect(page).to have_title("Analytics | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("Analytics | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "totals the page views over the range" do

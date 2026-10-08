@@ -54,7 +54,7 @@ module Admin
           def confirm = { confirm: t(".confirm_delete"), confirm_styled: true }
 
           def fields
-            { filter: @filter, **(@query.empty? ? {} : { q: @query }), **Blog::Page.query(@page) }
+            { filter: @filter, **(@query.empty? ? {} : { q: @query }), **Blog::Structs::Page.query(@page) }
           end
 
           def move

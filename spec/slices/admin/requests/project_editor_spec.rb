@@ -28,7 +28,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
       it "answers with the page titled New project", :aggregate_failures do
         expect(last_response).to be_ok
-        expect(page).to have_title("New project | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("New project | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "offers an empty name in mono" do
@@ -105,7 +105,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
 
       it "answers with the page titled with the project's name", :aggregate_failures do
         expect(last_response).to be_ok
-        expect(page).to have_title("sai | Admin | #{Blog::Owner.full_name}")
+        expect(page).to have_title("sai | Admin | #{Hanami.app.settings.owner_name}")
       end
 
       it "fills the name" do

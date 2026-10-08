@@ -17,7 +17,7 @@ module Admin
           def view_template
             div(class: "task-worked-fields") do
               part(:hours, @seconds / HOUR)
-              part(:minutes, (@seconds % HOUR) / Blog::Figures::MINUTE)
+              part(:minutes, (@seconds % HOUR) / Blog::Helpers::Figures::MINUTE)
             end
           end
 

@@ -130,7 +130,7 @@ RSpec.describe "API review", type: :request do
 
     it "gives the numbers the admin screen shows for the same week" do
       totals = mcp_answer("read_review", day: wednesday.iso8601).fetch("totals")
-      worked = Blog::Figures.hours(totals.fetch("worked_seconds"))
+      worked = Blog::Helpers::Figures.hours(totals.fetch("worked_seconds"))
       shown = [*totals.values_at("done", "carried"), worked, totals.fetch("commits")]
 
       expect(shown.map(&:to_s)).to eq(stats)

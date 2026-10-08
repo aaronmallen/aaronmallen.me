@@ -62,7 +62,7 @@ module Admin
           def journal_title(entry)
             line = entry.body.each_line.map(&:strip).find { !it.empty? }
 
-            Blog::Truncation.cut(line.to_s, keep: TEXT_LIMIT)
+            Blog::Helpers::Truncation.cut(line.to_s, keep: TEXT_LIMIT)
           end
 
           def post(post)

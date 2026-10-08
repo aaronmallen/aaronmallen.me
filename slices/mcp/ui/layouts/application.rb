@@ -15,7 +15,7 @@ module MCP
 
         private
 
-        def page_title = t(".title", owner: Blog::Owner.full_name)
+        def page_title = t(".title", owner: Hanami.app.settings.owner_name)
 
         def render_head
           super

@@ -51,7 +51,7 @@ module Admin
           render_palette(navigation)
         end
 
-        def title_suffix = t(".title", owner: Blog::Owner.full_name)
+        def title_suffix = t(".title", owner: Hanami.app.settings.owner_name)
 
         def toast_message = flash[Components::Toast::FLASH_KEY]
       end

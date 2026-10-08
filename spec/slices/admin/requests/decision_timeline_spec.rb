@@ -166,7 +166,7 @@ RSpec.describe "Admin decision timeline", type: :request do
       before { read }
 
       it "names the owner and the time", :aggregate_failures do
-        expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: Blog::Owner.full_name)
+        expect(comment_on_page(comment)).to have_css(".comment-author", exact_text: Hanami.app.settings.owner_name)
         expect(comment_on_page(comment).find("time")["datetime"]).to eq(Blog::TimeZone.local(comment.created_at).iso8601)
       end
 

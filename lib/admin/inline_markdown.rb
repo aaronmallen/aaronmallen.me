@@ -21,7 +21,7 @@ module Admin
         runs = squish(collect(Commonmarker.parse(markdown.to_s, options: ::Posts::Markdown::OPTIONS), []))
         return render(runs) if length(runs) <= keep
 
-        "#{render(rstrip(take(runs, keep)))}#{Blog::Truncation::MARK}"
+        "#{render(rstrip(take(runs, keep)))}#{Blog::Helpers::Truncation::MARK}"
       end
 
       private

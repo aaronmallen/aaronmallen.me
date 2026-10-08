@@ -45,13 +45,15 @@ module Admin
 
           private
 
-          def bounce_rate = Blog::Figures.share(stat(:bounces), stat(:visitors))
+          def bounce_rate = Blog::Helpers::Figures.share(stat(:bounces), stat(:visitors))
 
           def clicks = @clicks.map { { count: it[:clicks], label: it.values_at(:link_host, :link_path).join } }
 
           def devices = rows(@devices) { it[:device_class] }
 
-          def figure(key, change: nil) = Stat(key: t(LABELS.fetch(key)), value: Blog::Figures.count(stat(key)), change:)
+          def figure(key, change: nil)
+            Stat(key: t(LABELS.fetch(key)), value: Blog::Helpers::Figures.count(stat(key)), change:)
+          end
 
           def figures
             { views: @views, visitors: @visitors, bounces: @bounces, readers: @readers, read_throughs: @read_throughs }
@@ -101,7 +103,9 @@ module Admin
             readers, final = @unique_readers.values_at(:readers, :final)
             return Stat(key: t(".unique_readers"), value: t(".no_unique_readers"), change: t(".unkept")) unless readers
 
-            Stat(key: t(".unique_readers"), value: Blog::Figures.count(readers), change: t(UNIQUE_NOTES.fetch(final)))
+            change = t(UNIQUE_NOTES.fetch(final))
+
+            Stat(key: t(".unique_readers"), value: Blog::Helpers::Figures.count(readers), change:)
           end
         end
       end

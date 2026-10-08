@@ -26,12 +26,12 @@ module Admin
             span(class: "meter-name") { name }
             shared if @group.shared
             meter
-            span(class: "meter-count") { Blog::Figures.hours(@group.seconds) }
+            span(class: "meter-count") { Blog::Helpers::Figures.hours(@group.seconds) }
           end
 
           def meter
             span(class: "meter blue") do
-              span(class: "meter-fill", style: "width: #{Blog::Figures.share(@group.seconds, @top)}%")
+              span(class: "meter-fill", style: "width: #{Blog::Helpers::Figures.share(@group.seconds, @top)}%")
             end
           end
 
@@ -46,7 +46,7 @@ module Admin
           def task(found)
             ListItem(title: found.title, href: path(:admin_task, id: found.id)) do
               shared if found.shared
-              span(class: "time-task-hours") { Blog::Figures.hours(found.seconds) }
+              span(class: "time-task-hours") { Blog::Helpers::Figures.hours(found.seconds) }
             end
           end
         end

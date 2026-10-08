@@ -27,7 +27,7 @@ module Analytics
 
       def counted?(post, since) = post.published_at.nil? || post.published_at > since
 
-      def path(post) = "#{Blog::Site::WRITING}/#{post.slug}"
+      def path(post) = "#{Hanami.app.settings.writing_path}/#{post.slug}"
     end
   end
 end

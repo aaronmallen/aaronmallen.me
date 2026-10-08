@@ -37,20 +37,21 @@ RSpec.describe "Admin photo claims", type: :request do
     end
 
     it "claims a photo by its absolute URL" do
-      save(body: "![A photo](#{Blog::Site.url("/media/#{photo.key}")})")
+      save(body: "![A photo](#{Hanami.app.settings.site_url("/media/#{photo.key}")})")
 
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end
 
     it "claims the photo in its Open Graph image field" do
-      save(body: "text only", og_image_url: Blog::Site.url("/media/#{photo.key}"))
+      save(body: "text only", og_image_url: Hanami.app.settings.site_url("/media/#{photo.key}"))
 
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end
 
     it "claims the photo a social card write puts in the Open Graph image field" do
       save(body: "text only")
-      Posts::Slice["operations.save_post_seo"].call(article.id, og_image_url: Blog::Site.url("/media/#{photo.key}"))
+      url = Hanami.app.settings.site_url("/media/#{photo.key}")
+      Posts::Slice["operations.save_post_seo"].call(article.id, og_image_url: url)
 
       expect(claims_of("post")).to eq([[article.id, photo.id]])
     end

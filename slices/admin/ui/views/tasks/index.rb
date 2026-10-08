@@ -46,7 +46,7 @@ module Admin
           prop :pool, Blog::Types::String
           prop :pools, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)))
           prop :tab, Blog::Types::TaskTab
-          prop :tasks, Blog::Types::Instance(Blog::Paged)
+          prop :tasks, Blog::Types::Instance(Blog::Structs::Paged)
           prop :today, Blog::Types::Date
           prop :waiting, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 

@@ -66,7 +66,7 @@ module Admin
           def stats
             Stat(key: t(".done"), value: done_count)
             Stat(key: t(".carried"), value: @review.carried.size)
-            Stat(key: t(".worked"), value: Blog::Figures.hours(@review.worked_seconds))
+            Stat(key: t(".worked"), value: Blog::Helpers::Figures.hours(@review.worked_seconds))
             Stat(key: t(".commits"), value: commit_count)
           end
 

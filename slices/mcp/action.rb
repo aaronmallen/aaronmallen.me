@@ -19,7 +19,7 @@ module MCP
 
     def cross_origin? = true
 
-    def issuer = Blog::Site.url.chomp("/")
+    def issuer = Hanami.app.settings.site_url.chomp("/")
 
     def reject_json(response) = render_json(response, { error: INVALID_REQUEST }, status: REJECTED)
 

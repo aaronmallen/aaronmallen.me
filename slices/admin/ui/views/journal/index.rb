@@ -13,7 +13,7 @@ module Admin
             tags: Blog::Constants::EMPTY_STRING,
           }.freeze
 
-          prop :days, Blog::Types::Instance(Blog::DayPaged)
+          prop :days, Blog::Types::Instance(Blog::Structs::DayPaged)
           prop :entries, Blog::Types::Integer
           prop :saved_views, Blog::Types::Hash
           prop :streak, Blog::Types::Hash
@@ -54,7 +54,7 @@ module Admin
           def new_entry
             NewEntry(
               values: { body:, tags: @values[:tags] }, date: entry_date, errors: @errors, today: @today,
-              word_count: Blog::Figures.words(body), autofocus: @writing,
+              word_count: Blog::Helpers::Figures.words(body), autofocus: @writing,
             )
           end
 

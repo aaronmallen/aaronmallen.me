@@ -119,7 +119,7 @@ module Admin
 
           def social_item(social_post)
             {
-              title: Blog::Truncation.cut(social_post.parts.first&.body.to_s, keep: TEXT_LIMIT),
+              title: Blog::Helpers::Truncation.cut(social_post.parts.first&.body.to_s, keep: TEXT_LIMIT),
               href: social_href(social_post),
               at: social_post.posted_at,
             }
