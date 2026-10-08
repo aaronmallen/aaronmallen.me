@@ -436,9 +436,7 @@ en:
       calendar:
         cell:
           journal: "journal"
-          social:
-            one: "%{count} social post"
-            other: "%{count} social posts"
+          more_social: "+%{count} social"
           tasks:
             one: "%{count} task"
             other: "%{count} tasks"
@@ -2327,7 +2325,7 @@ en:
       time_report:
         show:
           heading: "Time"
-          span: "%{from} → %{to} · %{total}"
+          span: "%{from} → %{to} · %{total}. Starting a task opens a work session, and stopping or finishing it closes the session."
       today:
         show:
           clients: "MCP clients"

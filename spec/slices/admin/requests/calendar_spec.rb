@@ -60,6 +60,10 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
         expect(page.all("[aria-current='date']").map { it.find("time")[:datetime] }).to eq([today.iso8601])
       end
 
+      it "marks this month in the pager" do
+        expect(page).to have_css(".seg-option.current", text: "This month")
+      end
+
       it "opens today's panel" do
         expect(panel["data-calendar-panel"]).to eq(today.iso8601)
       end
@@ -80,12 +84,19 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
         visit_calendar(month: "2026-07")
       end
 
-      it "shows its sprint and task count, its posts, its social posts and the journal mark" do
+      it "shows its posts, its social posts with their times, its sprint task count and the journal mark" do
         marks = cell(day).all(".cal-mark").map { [it[:class].split.last, it.text] }
+        social = [["social", /\A08:00 \S/], ["social", /\A10:00 \S/]]
 
-        expect(marks).to eq(
-          [["sprint", "2 tasks"], ["post", "A post on its day"], ["social", "2 social posts"], %w[journal journal]],
-        )
+        expect(marks).to match([["post", "A post on its day"], *social, ["sprint", "2 tasks"], %w[journal journal]])
+      end
+
+      it "shows two social posts and counts the rest" do
+        create(:social_post, :scheduled, posted_at: at(day, 11))
+        visit_calendar(month: "2026-07")
+
+        expect(cell(day).all(".cal-mark.social, .cal-mark.more").map(&:text))
+          .to match([/\A08:00/, /\A10:00/, "+1 social"])
       end
 
       it "leaves an empty day bare" do
@@ -171,6 +182,10 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
 
       it "offer a way back to this month" do
         expect(page).to have_link("This month", href: "/admin/calendar")
+      end
+
+      it "mark this month only when it shows" do
+        expect(page).to have_no_css(".seg-option.current", text: "This month")
       end
     end
 

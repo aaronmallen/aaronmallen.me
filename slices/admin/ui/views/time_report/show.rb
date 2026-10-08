@@ -13,10 +13,8 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:)
 
-            Split do
-              Filters(from: @report.from, to: @report.to, by: @report.by, today: @today)
-              div(class: "time-main") { Groups(report: @report) }
-            end
+            Filters(from: @report.from, to: @report.to, by: @report.by, today: @today)
+            Groups(report: @report)
           end
 
           private

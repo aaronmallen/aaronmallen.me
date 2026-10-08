@@ -14,26 +14,20 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            div(class: "time-rail") do
-              Card do
-                div(class: "form-stack") do
-                  RangePresets(ranges: RANGES, today: @today, from: @from, to: @to) do |presets|
-                    presets.href { path(:admin_time, from: it.begin.iso8601, to: it.end.iso8601, by: @by) }
-                  end
-                  filter_form
-                end
+            div(class: "time-bar") do
+              RangePresets(ranges: RANGES, today: @today, from: @from, to: @to) do |presets|
+                presets.href { path(:admin_time, from: it.begin.iso8601, to: it.end.iso8601, by: @by) }
               end
+              filter_form
             end
           end
 
           private
 
           def filter_form
-            AutoForm(action: path(:admin_time)) do
-              div(class: "form-stack") do
-                grouping
-                DateRange(from: @from, to: @to, id_prefix: "time")
-              end
+            AutoForm(action: path(:admin_time), class: "time-bar-form") do
+              DateRange(from: @from, to: @to, id_prefix: "time")
+              grouping
             end
           end
 

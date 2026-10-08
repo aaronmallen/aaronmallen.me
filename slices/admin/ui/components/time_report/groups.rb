@@ -22,8 +22,8 @@ module Admin
           def rows
             return Empty { t(".empty") } if @report.groups.empty?
 
-            Hint { t(SHARED.fetch(@report.by)) } if @report.groups.any?(&:shared)
             @report.groups.each { Row(group: it, by: @report.by, top:) }
+            Hint { t(SHARED.fetch(@report.by)) } if @report.groups.any?(&:shared)
           end
 
           def top = @top ||= @report.groups.map(&:seconds).max

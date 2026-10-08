@@ -33,9 +33,9 @@ module Admin
             Card(label: t(".label"), title: l(date, format: :full), **attributes) do
               next Empty { t(".empty") } if empty?
 
-              sprint
               posts
               social_posts
+              sprint
               journal
             end
           end
@@ -97,7 +97,7 @@ module Admin
               input(type: "hidden", name: "day", value: date.iso8601)
               label(class: "sr-only", for: field) { t(".move_to", title:) }
               Input(type: "date", id: field, name: "to", min: @today.iso8601, value: date.iso8601)
-              Button(type: "submit", small: true) { t(".move") }
+              button(type: "submit", class: "bt sm") { t(".move") }
             end
           end
 

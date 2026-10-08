@@ -18,8 +18,8 @@ module Admin
               MonthPager(month: @month, today: @today)
             end
 
-            div(class: "cal", data: { calendar: "" }) do
-              Month(month: @month, today: @today, days: @days, picked: @day.date)
+            div(class: "g-main", data: { calendar: "" }) do
+              section(class: "card") { Month(month: @month, today: @today, days: @days, picked: @day.date) }
               Panel(day: @day, tasks: @tasks, today: @today)
             end
           end

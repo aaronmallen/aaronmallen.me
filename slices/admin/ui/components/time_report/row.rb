@@ -22,15 +22,17 @@ module Admin
           private
 
           def head
-            Icon("fa-solid fa-chevron-right time-caret")
-            span(class: "meter-name") { name }
-            shared if @group.shared
+            span(class: "time-label") do
+              Icon("fa-solid fa-chevron-right time-caret")
+              span(class: "meter-name") { name }
+              shared if @group.shared
+            end
             meter
             span(class: "meter-count") { Blog::Helpers::Figures.hours(@group.seconds) }
           end
 
           def meter
-            span(class: "meter blue") do
+            span(class: "time-meter") do
               span(class: "meter-fill", style: "width: #{Blog::Helpers::Figures.share(@group.seconds, @top)}%")
             end
           end
