@@ -5,6 +5,58 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.6] - 2026-10-08
+
+### Added
+
+- The API serves social posts at `/api/v1/social_posts`: list by day range and queue, create, update, send now or at
+  `schedule_at`, and delete one that has not gone out. Each answer carries each part's length and limit on every
+  network the post targets. `list_social_posts`, `create_social_post`, `update_social_post`, `send_social_post` and
+  `delete_social_post` now call these routes, and a `list_social_posts` row carries targets, `updated_at` and the
+  full delivery, as `read_social_post` does.
+- `w` opens a journal modal on every admin screen, with the same Markdown editor as the journal page, a live word
+  count, tags, and Ctrl or Cmd+Enter to save today's entry. The palette's Create journal entry, the Journal row on
+  Today and the attention card's Journal row open it too.
+- Needs attention on Today shows how many inbox rows wait, how many cross-posts failed, and an Open security link on
+  each new device row.
+- The palette gains Plan tomorrow, Import commits, Sync issues, Keyboard shortcuts and Toggle theme. Typing in it
+  offers Create task with the typed title and See all results. ⌘K and Ctrl+K open it, `c` creates a task and `w`
+  writes in the journal.
+- Admin search, the palette, `search` and `GET /api/v1/search` find decisions.
+- Analytics, post analytics and the Security page show each visit's and sign-in's country by name, and
+  `read_analytics` returns `country_name` beside `country_code`. Rows stored before this release show the code.
+- A task row counts its comments, and clicking an open task's box completes it.
+- `mise run dev:create-workspace <id> [base]` sets up a jj workspace with its own test database, and
+  `mise run dev:remove-workspace <id>` drops it. `mise run test:ruby [paths]` runs specs with no asset build, and
+  `mise run db:start` and `mise run redis:start` start Postgres and Redis.
+
+### Changed
+
+- The admin has a new look and fills the window. A top bar holds six pills (Today, Tasks, Journal, Publish, Inbox and
+  Insights), each with tabs under its page head, a search button and an avatar menu with settings, key help, theme
+  and sign out. Screens lay out in cards, in two columns from 860px. The task panel and the post editor's details
+  open in drawers on the right, every button is a pill, and a confirm asks in place of the button that needs it
+  rather than in a browser prompt. A missing admin address shows a 404 inside the admin.
+- Row actions in task, pull in, attention, journal, project, decision option, task rule and work history lists show
+  on hover or focus as icon buttons. On touch screens and phones they always show.
+- The palette lists Actions, Saved views, Go to, Records and Search, and ranks records of every kind in one list of
+  eight, each named by its kind.
+- Today heads with a line built from the sprint and drops its stat strip and journal card. Sprint tasks show in large
+  rows, the pull in list folds under Pull from a list while the sprint has tasks, and Shipped today counts the repos
+  pushed to today, where it used to count the last 30 days.
+- Tags, task rules, API tokens, MCP clients and Security share one Settings head. A tag's editor opens in the panel
+  on the right of the Tags page rather than under the tag.
+- The issue sync replays each change to a Linear issue at the time Linear logged it, so a start or stop no longer
+  lands up to 15 minutes late, and two starts between runs leave two sessions. A task started by hand moves to
+  Linear's start time. Sessions logged before this release stay as they are.
+- `mise run dev:stop` leaves Postgres and Redis running.
+
+### Fixed
+
+- Code blocks in posts no longer split a comment or a block's parameters across lines or draw stray borders.
+- `mise run dev:stop` in a jj workspace no longer stops the main checkout's server and worker.
+- The key help no longer shows blank keys beside its fixed rows.
+
 ## [26.10.5] - 2026-10-07
 
 ### Added
@@ -507,7 +559,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.5...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...HEAD
+[26.10.6]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.5...26.10.6
 [26.10.5]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.4...26.10.5
 [26.10.4]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.3...26.10.4
 [26.10.3]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.2...26.10.3
