@@ -34,10 +34,8 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:) { filter_form }
 
-            Grid(columns: 2) do
-              SideStack { inbox }
-              SideStack { side_cards }
-            end
+            inbox
+            div(class: "cols wm-settings") { side_cards }
           end
 
           private
@@ -55,7 +53,7 @@ module Admin
           end
 
           def inbox
-            Card(title: t(".inbox"), data: { key_list: true }) { rows }
+            rows
             Pager(page: @inbox[:mentions], route: :admin_webmentions, params: { status: @filter })
           end
 
@@ -65,10 +63,10 @@ module Admin
 
           def rows
             mentions = @inbox[:mentions]
-            return Empty { t(EMPTIES.fetch(@filter)) } if mentions.rows.empty?
+            return Card { Empty { t(EMPTIES.fetch(@filter)) } } if mentions.rows.empty?
 
             Bulk(filter: @filter, page: mentions.number)
-            mentions.rows.each { |mention| row(mention) }
+            div(class: "cols", data: { key_list: true }) { mentions.rows.each { |mention| row(mention) } }
           end
 
           def side_cards

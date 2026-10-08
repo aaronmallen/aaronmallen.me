@@ -5,7 +5,7 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
 
   def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 
-  def inbox = page.all("[data-key-list] .li .li-title").map(&:text)
+  def inbox = page.all("[data-key-list] .inbox-row-title").map(&:text)
 
   def show
     get "/admin/inbox"
@@ -25,7 +25,7 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
     slice["operations.snooze_#{kind}s"].call([record.id], ends_at)
   end
 
-  def snoozed = page.all("#inbox-snoozed .li .li-title", visible: :all).map { it.text(:all) }
+  def snoozed = page.all("#inbox-snoozed .inbox-snoozed-title", visible: :all).map { it.text(:all) }
 
   def synced(title) = create(:task, title:, list: "external").tap { create(:task_source, task: it) }
 
@@ -55,11 +55,13 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
     end
 
     it "starts collapsed" do
-      expect(page).to have_css("#inbox-snoozed details:not([open])")
+      expect(page).to have_css("details#inbox-snoozed:not([open])")
     end
 
     it "says what kind each row is and when it wakes", :aggregate_failures do
-      expect(page.all("#inbox-snoozed .pill", visible: :all).map { it.text(:all) }).to eq(%w[message webmention issue])
+      kinds = page.all("#inbox-snoozed .inbox-kind", visible: :all).map { it.text(:all) }
+
+      expect(kinds).to eq(%w[message webmention issue])
       expect(page.all("#inbox-snoozed time", visible: :all).size).to eq(3)
     end
   end

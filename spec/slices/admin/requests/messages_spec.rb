@@ -7,7 +7,7 @@ RSpec.describe "Admin messages", type: :request do
 
   def empty_text(status) = i18n.t(["ui.views.messages.index.empty", status].join("."))
 
-  def subjects = page.all(".li-title").map(&:text)
+  def subjects = page.all(".msg-item-title").map(&:text)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -106,13 +106,21 @@ RSpec.describe "Admin messages", type: :request do
       end
 
       it "shows the subject, the body, the reply address and when it arrived", :aggregate_failures do
-        expect(page).to have_css(".li-title", text: "A question")
+        expect(page).to have_css(".msg-item-title", text: "A question")
         expect(page).to have_css(".msg-body", text: "How?")
-        expect(page).to have_css(".li-sub", text: "ada@example.com · Sep 7, 2026, 12:30")
+        expect(page).to have_css(".msg-item-from", text: "ada@example.com")
+        expect(page).to have_css(".msg-letter time", text: "Sep 7, 2026, 12:30")
+      end
+
+      it "links the row to the message in the reading pane", :aggregate_failures do
+        id = repo.by_status("unread").first.id
+
+        expect(page).to have_css("a.msg-item-open[href='#read-#{id}']")
+        expect(page).to have_css("article#read-#{id} h2", text: "A question")
       end
 
       it "puts when it arrived in a time tag" do
-        expect(page.find(".li-sub time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+        expect(page.find(".msg-item-head time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
       end
     end
 
@@ -177,7 +185,7 @@ RSpec.describe "Admin messages", type: :request do
           create(:message, status: from)
           get "/admin/messages", status: from
 
-          expect(page.all(".li-side button").map(&:text)).to eq(targets.map(&:capitalize))
+          expect(page.all(".msg-item-acts button").map(&:text)).to eq(targets.map(&:capitalize))
         end
       end
 
@@ -238,8 +246,8 @@ RSpec.describe "Admin messages", type: :request do
         create(:message, :read)
         get "/admin/messages", status: "read"
 
-        expect(page).to have_css(".li-side form input[name='_csrf_token']", visible: :all)
-        expect(page).to have_css(".li-side form input[name='filter'][value='read']", visible: :all)
+        expect(page).to have_css(".msg-item-acts form input[name='_csrf_token']", visible: :all)
+        expect(page).to have_css(".msg-item-acts form input[name='filter'][value='read']", visible: :all)
       end
     end
   end

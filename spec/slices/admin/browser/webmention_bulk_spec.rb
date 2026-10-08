@@ -9,7 +9,7 @@ RSpec.describe "Admin bulk webmention actions", type: :feature do
 
   def authors(status) = relation.where(status:).order(:author_name).pluck(:author_name)
 
-  def box(author) = find(".li", text: author).find("input[name='ids[]']")
+  def box(author) = find(".wm-card", text: author).find("input[name='ids[]']")
 
   before do
     target = create(:post, :published)

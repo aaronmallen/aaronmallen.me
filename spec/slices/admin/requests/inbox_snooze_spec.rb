@@ -20,7 +20,7 @@ RSpec.describe "Admin inbox snooze", type: :request do
 
   def inbox
     get "/admin/inbox"
-    page.all(".li .li-title").map(&:text)
+    page.all(".inbox-row-title").map(&:text)
   end
 
   def snooze(kind, **params) = act("/admin/inbox/#{kind}/#{records.fetch(kind).id}/snooze", **params)

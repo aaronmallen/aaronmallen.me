@@ -14,13 +14,12 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size)) { head_actions if @rows.any? }
 
-            Card(title: t(".waiting"), data: { key_list: true }) do
-              next Empty { t(".empty") } if @rows.empty?
-
-              @rows.each { row(it) }
+            Card(class: "inbox-card") do
+              div(data: { key_list: true }) do
+                @rows.empty? ? Empty { t(".empty") } : @rows.each { row(it) }
+              end
+              SnoozedList(rows: @snoozed) if @snoozed.any?
             end
-
-            SnoozedList(rows: @snoozed) if @snoozed.any?
           end
 
           private

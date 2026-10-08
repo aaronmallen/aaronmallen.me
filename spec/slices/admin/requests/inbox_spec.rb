@@ -12,7 +12,7 @@ RSpec.describe "Admin inbox", type: :request do
 
   def inbox
     get "/admin/inbox"
-    page.all("[data-key-list] .li .li-title").map(&:text)
+    page.all("[data-key-list] .inbox-row-title").map(&:text)
   end
 
   def synced(*traits, title: "A synced issue", list: "external", created_at: Time.now, seen_at: nil)
@@ -36,7 +36,7 @@ RSpec.describe "Admin inbox", type: :request do
       create(:webmention)
       get "/admin/inbox"
 
-      expect(page.all(".li .pill").map(&:text)).to contain_exactly("issue", "message", "webmention")
+      expect(page.all(".inbox-kind").map(&:text)).to contain_exactly("issue", "message", "webmention")
     end
 
     it "puts when each row arrived in a time tag" do
@@ -45,14 +45,14 @@ RSpec.describe "Admin inbox", type: :request do
       create(:webmention, received_at: arrived)
       get "/admin/inbox"
 
-      expect(page.all(".wm-meta time").map { it[:datetime] }).to eq(["2026-09-07T12:30:00-05:00"] * 3)
+      expect(page.all(".inbox-meta time").map { it[:datetime] }).to eq(["2026-09-07T12:30:00-05:00"] * 3)
     end
 
-    it "draws the kind pills without an icon" do
+    it "draws the kind labels without an icon" do
       create(:message)
       get "/admin/inbox"
 
-      expect(page).to have_css(".li .pill", exact_text: "message").and have_no_css(".li .pill i")
+      expect(page).to have_css(".inbox-kind", exact_text: "message").and have_no_css(".inbox-kind i")
     end
 
     it "counts the rows" do
@@ -82,14 +82,14 @@ RSpec.describe "Admin inbox", type: :request do
       create(:task_source, task: create(:task, :external, tags: %w[feeds bugs]))
       get "/admin/inbox"
 
-      expect(page.all(".li .tag").map(&:text)).to contain_exactly("#feeds", "#bugs")
+      expect(page.all(".inbox-row .tag").map(&:text)).to contain_exactly("#feeds", "#bugs")
     end
 
     it "links a synced issue's tags to their summaries" do
       create(:task_source, task: create(:task, :external, tags: %w[feeds bugs]))
       get "/admin/inbox"
 
-      expect(page.all(".li a.tag").map { it[:href] }).to contain_exactly("/admin/tags/feeds", "/admin/tags/bugs")
+      expect(page.all(".inbox-row a.tag").map { it[:href] }).to contain_exactly("/admin/tags/feeds", "/admin/tags/bugs")
     end
 
     it "leaves out a task with no source" do
@@ -266,7 +266,7 @@ RSpec.describe "Admin inbox", type: :request do
       it "offers the lists it is not on" do
         get "/admin/inbox"
 
-        expect(page.all(".li-side button").map(&:text)).to eq(%w[Today Next Someday Seen Snooze])
+        expect(page.all(".inbox-row-acts button").map(&:text)).to eq(%w[Today Next Someday Seen Snooze])
       end
 
       it "moves it and drops it", :aggregate_failures do

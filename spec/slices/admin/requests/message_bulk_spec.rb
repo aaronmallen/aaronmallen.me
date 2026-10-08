@@ -45,7 +45,7 @@ RSpec.describe "Admin bulk message actions", type: :request do
       it "gives each row a box that joins the bar" do
         get "/admin/messages"
 
-        expect(page.all(".li input[type='checkbox'][name='ids[]'][form='message-bulk']").size).to eq(2)
+        expect(page.all(".msg-item input[type='checkbox'][name='ids[]'][form='message-bulk']").size).to eq(2)
       end
 
       it "names the message on each box" do

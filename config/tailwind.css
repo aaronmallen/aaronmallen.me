@@ -3115,6 +3115,230 @@
   @apply flex flex-wrap gap-2;
 }
 
+@utility inbox-row {
+  @apply grid grid-cols-1 items-start gap-x-4 gap-y-3 border-b border-line py-4 first:pt-0 last:border-b-0 last:pb-0;
+
+  @media (width >= 43.75rem) {
+    @apply grid-cols-[minmax(0,1fr)_auto] gap-y-1;
+  }
+}
+
+@utility inbox-row-main {
+  @apply flex min-w-0 flex-col gap-1;
+}
+
+@utility inbox-meta {
+  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+
+  & > * {
+    @apply inline-flex items-center gap-1.5;
+  }
+}
+
+@utility inbox-kind {
+  &.violet {
+    @apply text-mk-violet;
+  }
+
+  &.blue {
+    @apply text-mk-blue-text;
+  }
+
+  &.pink {
+    @apply text-mk-pink-text;
+  }
+}
+
+@utility inbox-row-title {
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline;
+
+  &:is(a) {
+    @apply hover:text-accent focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply flex min-h-tap items-center;
+    }
+  }
+}
+
+@utility inbox-row-body {
+  @apply line-clamp-3;
+}
+
+@utility inbox-row-acts {
+  @apply flex flex-wrap items-center gap-2;
+
+  @media (width >= 43.75rem) {
+    @apply justify-end;
+  }
+}
+
+@utility inbox-snoozed {
+  @apply mt-1.5 border-t border-line;
+
+  & > summary {
+    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 font-mono text-badge text-ink-muted select-none;
+    @apply hover:text-ink admin-focus;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
+
+  &[open] .inbox-snoozed-caret {
+    @apply rotate-90;
+  }
+}
+
+@utility inbox-snoozed-caret {
+  @apply text-icon-sm transition-transform;
+}
+
+@utility inbox-snoozed-row {
+  @apply flex flex-wrap items-center justify-between gap-4 border-t border-line py-2.5;
+}
+
+@utility inbox-snoozed-title {
+  @apply font-display text-base font-medium text-ink;
+}
+
+@utility msg-panes {
+  @apply grid grid-cols-1 items-start gap-stack;
+
+  @media (width >= 53.75rem) {
+    grid-template-columns: minmax(340px, 0.8fr) minmax(0, 1.6fr);
+  }
+}
+
+@utility msg-list {
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)];
+  }
+}
+
+@utility msg-item {
+  @apply relative flex flex-wrap items-start gap-x-1.5 gap-y-2 border-b border-line py-3 pl-3 last:border-b-0;
+
+  &.unread::before {
+    @apply absolute top-[21px] left-0 size-1.5 rounded-full bg-mk-pink content-[''];
+  }
+
+  &:has(.msg-item-open:hover) {
+    background: color-mix(in oklab, var(--color-ink) 3%, transparent);
+  }
+}
+
+@utility msg-item-open {
+  @apply block min-w-0 flex-1 pl-1 text-ink no-underline focus-ring;
+}
+
+@utility msg-item-head {
+  @apply flex justify-between gap-2.5 font-display text-base font-medium;
+
+  .unread & {
+    @apply font-semibold;
+  }
+
+  & > time {
+    @apply font-mono text-badge font-normal whitespace-nowrap text-ink-muted;
+  }
+}
+
+@utility msg-item-title {
+  @apply min-w-0;
+}
+
+@utility msg-item-from {
+  @apply mt-1 font-mono text-badge text-ink-muted;
+}
+
+@utility msg-item-preview {
+  @apply mt-1 line-clamp-2 text-[0.92rem] leading-[1.45] text-ink-muted;
+}
+
+@utility msg-item-acts {
+  @apply flex basis-full flex-wrap justify-end gap-2;
+}
+
+@utility msg-pane {
+  @media (width < 53.75rem) {
+    &:not(:has(.msg-letter:target)) {
+      @apply hidden;
+    }
+  }
+}
+
+@utility msg-letter {
+  @apply hidden;
+
+  &:target,
+  .msg-pane:not(:has(:target)) &:first-child {
+    @apply block;
+  }
+
+  & > .inbox-meta {
+    @apply mb-2.5;
+  }
+}
+
+@utility msg-letter-title {
+  @apply font-display text-[clamp(1.6rem,2.2vw,2.4rem)] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink;
+}
+
+@utility msg-letter-body {
+  @apply mt-6 max-w-[68ch] text-[1.15rem] leading-[1.7] text-ink;
+}
+
+@utility wm-card {
+  @apply flex flex-col;
+}
+
+@utility wm-kind {
+  & > i {
+    @apply text-icon-sm;
+  }
+
+  &.pink {
+    @apply text-mk-pink-text;
+  }
+
+  &.sand {
+    @apply text-mk-sand-text;
+  }
+
+  &.green {
+    @apply text-mk-green-text;
+  }
+
+  &.blue {
+    @apply text-mk-blue-text;
+  }
+}
+
+@utility wm-who {
+  @apply mt-2 font-display text-[1.05rem] font-semibold;
+}
+
+@utility wm-author {
+  @apply text-ink no-underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
+@utility wm-acts {
+  @apply mt-4 flex flex-wrap items-center gap-2;
+}
+
+@utility wm-settings {
+  @apply mt-stack;
+}
+
 @utility person-row {
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;

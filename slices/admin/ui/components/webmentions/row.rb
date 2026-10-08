@@ -28,25 +28,27 @@ module Admin
           prop :bulk, Blog::Types::String
 
           def view_template
-            ListItem(
-              id: "webmention-#{@mention.id}", title: @mention.author_label, href: @mention.source_url, icon: type.icon,
-              link: OUTBOUND, pick:,
-            ) do |item|
-              item.body { excerpt }
-              item.meta do
-                meta
-                spam_reason
-              end
-              actions
+            article(id: "webmention-#{@mention.id}", class: "card wm-card", data: { key_row: true }) do
+              p(class: "inbox-meta") { meta }
+              p(class: "wm-who") { author }
+              excerpt
+              spam_reason
+              div(class: "wm-acts") { actions }
             end
           end
 
           private
 
           def actions
-            moderation(APPROVED, ".approve", :pri) unless @mention.status == APPROVED
-            moderation(IGNORED, ".ignore", nil) unless @mention.status == IGNORED
+            moderation(APPROVED, ".approve", nil, icon: "fa-solid fa-check") unless @mention.status == APPROVED
+            moderation(IGNORED, ".ignore", :gh) unless @mention.status == IGNORED
             spam unless @mention.status == SPAM
+          end
+
+          def author
+            a(href: @mention.source_url, class: "wm-author", data: { key_open: true }, **OUTBOUND) do
+              @mention.author_label
+            end
           end
 
           def excerpt
@@ -56,26 +58,29 @@ module Admin
           end
 
           def meta
-            div(class: "wm-meta") do
-              Pill(color: type.color) { t(type.label_key) }
-              span { Stamped(text: dotted(path(:post, slug: @slug), Stamped::MARK), at: @mention.received_at) }
+            BulkCheck(**pick)
+            span(class: ["wm-kind", type.color.to_s]) do
+              Icon(type.icon)
+              plain t(type.label_key)
             end
+            span { path(:post, slug: @slug) }
+            Moment(at: @mention.received_at)
           end
 
-          def moderation(status, label_key, variant, **attributes)
+          def moderation(status, label_key, variant, icon: nil, **attributes)
             verdict = Blog::Types::WebmentionModeration.mapping.fetch(status)
 
             Form(action: path(:admin_moderate_webmention, id: @mention.id, verdict:), **attributes) do
               input(type: "hidden", name: "status", value: @filter)
               yield if block_given?
-              Button(type: "submit", variant:, small: true) { t(label_key) }
+              Button(type: "submit", variant:, small: true, icon:) { t(label_key) }
             end
           end
 
           def pick = { form: @bulk, value: @mention.id, label: t(".pick", author: @mention.author_label) }
 
           def spam
-            moderation(SPAM, ".spam", :warn, class: "wm-spam") do
+            moderation(SPAM, ".spam", :warn, icon: "fa-solid fa-ban", class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
             end
           end

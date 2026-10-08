@@ -7,7 +7,7 @@ RSpec.describe "Admin bulk message actions", type: :feature do
 
   def all_box = find("[data-bulk-all] input")
 
-  def box(subject) = find(".li", text: subject).find("input[name='ids[]']")
+  def box(subject) = find(".msg-item", text: subject).find("input[name='ids[]']")
 
   def subjects(status) = repo.by_status(status).map(&:subject)
 

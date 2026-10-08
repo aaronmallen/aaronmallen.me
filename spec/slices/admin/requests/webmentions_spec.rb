@@ -5,7 +5,7 @@ RSpec.describe "Admin webmentions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:target) { create(:post, :published, slug: "hello", title: "Hello") }
 
-  def authors = page.all(".li-head .li-title").map(&:text)
+  def authors = page.all(".wm-author").map(&:text)
   def webmention_mutations = Social::Slice["repos.webmention_mutations"]
 
   def webmention_queries = Social::Slice["repos.webmention_queries"]
@@ -113,13 +113,13 @@ RSpec.describe "Admin webmentions", type: :request do
       it "links the author to the source in a new tab" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".li-head a[target='_blank'][rel='noopener noreferrer']", text: "Ada")
+        expect(page).to have_css(".wm-author[target='_blank'][rel='noopener noreferrer']", text: "Ada")
       end
 
-      it "marks the kind of mention before the author" do
+      it "marks the kind of mention with an icon" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".li-head i.li-icon[aria-hidden='true'] + a.li-title", text: "Ada")
+        expect(page).to have_css(".wm-kind i[aria-hidden='true']")
       end
 
       it "says webmentions is where you are" do
@@ -129,28 +129,28 @@ RSpec.describe "Admin webmentions", type: :request do
       end
     end
 
-    it "shows the excerpt, the type pill, the target path and the time" do
+    it "shows the excerpt, the type, the target path and the time" do
       create(:webmention, :reply, post: target, excerpt: "Good one", received_at: Time.utc(2026, 9, 7, 17, 30))
       get "/admin/webmentions"
 
       expect(page).to have_css(".wm-excerpt", text: "Good one")
-        .and have_css(".wm-meta .pill.pink", text: "reply")
-        .and have_css(".wm-meta", text: "/writing/hello · Sep 7, 2026, 12:30")
+        .and have_css(".wm-kind.pink", text: "reply")
+        .and have_css(".inbox-meta", text: %r{/writing/hello\s*Sep 7, 2026, 12:30})
     end
 
     it "puts when it arrived in a time tag" do
       create(:webmention, post: target, received_at: Time.utc(2026, 9, 7, 17, 30))
       get "/admin/webmentions"
 
-      expect(page.find(".wm-meta time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+      expect(page.find(".inbox-meta time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
     end
 
     { reply: "pink", like: "sand", repost: "green", mention: "blue" }.each do |type, color|
-      it "colors the #{type} pill #{color}" do
+      it "colors the #{type} label #{color}" do
         create(:webmention, type, post: target)
         get "/admin/webmentions"
 
-        expect(page).to have_css(".wm-meta .pill.#{color}", text: type.to_s)
+        expect(page).to have_css(".wm-kind.#{color}", text: type.to_s)
       end
     end
 

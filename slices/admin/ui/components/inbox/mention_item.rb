@@ -20,11 +20,12 @@ module Admin
           prop :slug, Blog::Types::String
 
           def view_template
-            ListItem(
-              id: "webmention-#{@mention.id}", title: @mention.author_label, href: @mention.source_url, link: OUTBOUND,
-            ) do |item|
-              item.body { excerpt }
-              item.meta { p(class: "wm-meta") { meta } }
+            Row(
+              id: "webmention-#{@mention.id}", kind: :webmention, title: @mention.author_label,
+              href: @mention.source_url, link: OUTBOUND,
+            ) do |row|
+              row.meta { meta }
+              row.body { excerpt }
               actions
             end
           end
@@ -32,8 +33,8 @@ module Admin
           private
 
           def actions
-            moderate(APPROVED, ".approve", :pri)
-            moderate(IGNORED, ".ignore", nil)
+            moderate(APPROVED, ".approve", nil)
+            moderate(IGNORED, ".ignore", :gh)
             moderate(SPAM, ".spam", :warn, class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
             end
@@ -43,12 +44,12 @@ module Admin
           def excerpt
             text = @mention.excerpt.to_s.strip
 
-            p(class: ["wm-excerpt", ("quiet" if text.empty?)]) { text.empty? ? t(".no_content") : text }
+            p(class: ["wm-excerpt inbox-row-body", ("quiet" if text.empty?)]) { text.empty? ? t(".no_content") : text }
           end
 
           def meta
-            Pill(color: :pink) { t(".kind") }
-            span { Stamped(text: summary, at: @mention.received_at) }
+            span { Stamped(text: Stamped::MARK, at: @mention.received_at) }
+            span { summary }
           end
 
           def moderate(verdict, label_key, variant, **attributes)
@@ -58,7 +59,7 @@ module Admin
             end
           end
 
-          def summary = dotted(t(TYPES.fetch(@mention.type)), path(:post, slug: @slug), Stamped::MARK)
+          def summary = t(".summary", type: t(TYPES.fetch(@mention.type)), path: path(:post, slug: @slug))
         end
       end
     end

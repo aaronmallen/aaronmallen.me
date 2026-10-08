@@ -13,9 +13,9 @@ module Admin
           prop :message, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(id: "message-#{@message.id}", title: @message.subject) do |item|
-              item.body { p(class: "msg-body") { @message.body } }
-              item.meta { p(class: "wm-meta") { meta } }
+            Row(id: "message-#{@message.id}", kind: :message, title: @message.subject) do |row|
+              row.meta { meta }
+              row.body { p(class: "msg-body inbox-row-body") { @message.body } }
               actions
             end
           end
@@ -23,8 +23,8 @@ module Admin
           private
 
           def actions
-            Button(href: reply_href, small: true) { t(".reply") }
-            mark(READ, ".read", :pri)
+            Button(href: reply_href, small: true, icon: "fa-solid fa-reply") { t(".reply") }
+            mark(READ, ".read", :gh)
             mark(SPAM, ".spam", :warn)
             Inbox::Snooze(kind: "message", id: @message.id)
           end
@@ -38,8 +38,8 @@ module Admin
           end
 
           def meta
-            Pill(color: :sand) { t(".kind") }
-            span { Stamped(text: dotted(@message.reply_to, Stamped::MARK), at: @message.received_at) }
+            span { Stamped(text: Stamped::MARK, at: @message.received_at) }
+            span { @message.reply_to }
           end
 
           def reply_href = "mailto:#{address}?subject=#{ERB::Util.url_encode(t('.subject', subject: @message.subject))}"

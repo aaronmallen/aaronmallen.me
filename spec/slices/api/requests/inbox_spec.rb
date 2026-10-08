@@ -16,7 +16,7 @@ RSpec.describe "API inbox", type: :request do
   def screen_titles
     sign_in_to_admin
     get "/admin/inbox"
-    Capybara.string(last_response.body).all(".li .li-title").map(&:text)
+    Capybara.string(last_response.body).all(".inbox-row .inbox-row-title").map(&:text)
   end
 
   def source_url = "https://example.com/a"

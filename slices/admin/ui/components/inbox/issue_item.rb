@@ -15,8 +15,9 @@ module Admin
           prop :task, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(id: "issue-#{@task.id}", title: @task.title, href: path(:admin_task, id: @task.id)) do |item|
-              item.meta { p(class: "wm-meta") { meta } }
+            Row(id: "issue-#{@task.id}", kind: :task, title: @task.title,
+                href: path(:admin_task, id: @task.id)) do |row|
+              row.meta { meta }
               actions
             end
           end
@@ -27,7 +28,7 @@ module Admin
             LISTS.each { |filter, label_key| move(filter, label_key) unless filter == @task.place }
             edit
             Form(action: path(:admin_inbox_see_task, id: @task.id)) do
-              Button(type: "submit", small: true) { t(".seen") }
+              Button(type: "submit", variant: :gh, small: true) { t(".seen") }
             end
             Inbox::Snooze(kind: "task", id: @task.id)
           end
@@ -39,10 +40,9 @@ module Admin
           end
 
           def meta
-            Pill(color: :green) { t(".kind") }
+            Moment(at: @task.created_at)
             Tasks::SourceLink(source: @task.source)
             @task.tags.each { Tag(tag: it) }
-            Moment(at: @task.created_at)
           end
 
           def move(filter, label_key)

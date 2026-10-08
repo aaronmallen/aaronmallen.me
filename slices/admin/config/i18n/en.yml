@@ -616,27 +616,30 @@ en:
       inbox:
         issue_item:
           edit: "Edit"
-          kind: "issue"
           lists:
             next: "Next"
             someday: "Someday"
             today: "Today"
           move: "Move to %{list}"
           seen: "Seen"
+        kind_label:
+          kinds:
+            message: "message"
+            task: "issue"
+            webmention: "webmention"
         mention_item:
           approve: "Approve"
           ignore: "Ignore"
-          kind: "webmention"
           no_content: "no content · like only"
           reason: "Why spam? (optional)"
           spam: "Spam"
+          summary: "%{type} on %{path}"
           types:
             like: "like"
             mention: "mention"
             reply: "reply"
             repost: "repost"
         message_item:
-          kind: "message"
           read: "Read"
           reply: "Reply"
           spam: "Spam"
@@ -657,14 +660,9 @@ en:
           tomorrow: "Tomorrow morning"
           until: "Date and time"
         snoozed_list:
-          kinds:
-            message: "message"
-            task: "issue"
-            webmention: "webmention"
           summary:
             one: "%{count} snoozed"
             other: "%{count} snoozed"
-          title: "Snoozed"
           wake: "Wake now"
           wakes: "wakes %{at}"
       journal:
@@ -731,6 +729,7 @@ en:
         read_key: "Mark the highlighted message read"
         spam: "Spam"
         unread: "Unread"
+        unread_mark: "Unread: "
       nav:
         actions:
           complete_task:
@@ -1960,7 +1959,6 @@ en:
             one: "%{count} waiting"
             other: "%{count} waiting"
             zero: "Nothing waiting"
-          waiting: "Waiting on you"
       journal:
         index:
           empty: "Nothing written yet."
@@ -1986,7 +1984,6 @@ en:
             unread: "Nothing waiting."
           filter: "Status"
           heading: "Messages"
-          inbox: "Inbox"
           read: "read"
           spam: "spam"
           sub:
@@ -2370,7 +2367,6 @@ en:
           filter: "Status"
           heading: "Webmentions"
           ignored: "ignored"
-          inbox: "Inbox"
           pending: "pending"
           pending_count: "%{count} pending"
           shown_count: "%{count} shown on the site"

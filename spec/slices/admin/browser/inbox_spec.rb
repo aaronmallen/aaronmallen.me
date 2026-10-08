@@ -8,7 +8,7 @@ RSpec.describe "Admin inbox", type: :feature do
     def modal = find("dialog#task-create[open]")
 
     def save(**fields)
-      within(".li", text: "Fix the feed") { click_link("Edit") }
+      within(".inbox-row", text: "Fix the feed") { click_link("Edit") }
       modal.assert_selector("[data-task-edit]")
       expect(page).to have_current_path("/admin/inbox")
       fields.each { |name, value| modal.fill_in("task[#{name}]", with: value) }
@@ -26,7 +26,7 @@ RSpec.describe "Admin inbox", type: :feature do
 
       expect(page).to have_css("[data-toast]", text: "Task saved")
       expect(page).to have_current_path("/admin/inbox")
-      expect(page).to have_no_css(".li", text: "Fix the feed")
+      expect(page).to have_no_css(".inbox-row", text: "Fix the feed")
       expect(repo.by_id(task.id).tags.map(&:name)).to eq(["feeds"])
     end
 
@@ -34,7 +34,7 @@ RSpec.describe "Admin inbox", type: :feature do
       save(note: "Look at the cache")
 
       expect(page).to have_current_path("/admin/inbox")
-      expect(page).to have_css(".li", text: "Fix the feed")
+      expect(page).to have_css(".inbox-row", text: "Fix the feed")
     end
   end
 
@@ -54,8 +54,8 @@ RSpec.describe "Admin inbox", type: :feature do
     end
 
     it "keeps the buttons to the right of a long title", :aggregate_failures do
-      title_box = box(".li .li-main")
-      side_box = box(".li .li-side")
+      title_box = box(".inbox-row-main")
+      side_box = box(".inbox-row-acts")
 
       expect(side_box["left"]).to be >= title_box["right"]
       expect(side_box["top"]).to be < title_box["bottom"]
@@ -64,7 +64,7 @@ RSpec.describe "Admin inbox", type: :feature do
     it "stacks the buttons below the title on a phone" do
       page.driver.resize(375, 800)
 
-      expect(box(".li .li-side")["top"]).to be >= box(".li .li-main")["bottom"]
+      expect(box(".inbox-row-acts")["top"]).to be >= box(".inbox-row-main")["bottom"]
     end
   end
 end

@@ -5,38 +5,33 @@ module Admin
     module Components
       module Inbox
         class SnoozedList < Component
-          PILLS = {
-            message: [:sand, ".kinds.message"], task: [:green, ".kinds.task"], webmention: [:pink, ".kinds.webmention"],
-          }.freeze
-
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
 
           def view_template
-            Card(title: t(".title"), id: "inbox-snoozed") do
-              details(class: "time-group") do
-                summary(class: "time-row") do
-                  Icon("fa-solid fa-chevron-right time-caret")
-                  span { t(".summary", count: @rows.size) }
-                end
-                @rows.each { row(it) }
+            details(id: "inbox-snoozed", class: "inbox-snoozed") do
+              summary do
+                Icon("fa-solid fa-chevron-right inbox-snoozed-caret")
+                span { t(".summary", count: @rows.size) }
               end
+              @rows.each { row(it) }
             end
           end
 
           private
 
           def meta(found)
-            color, label_key = PILLS.fetch(found.kind)
-
-            Pill(color:) { t(label_key) }
+            KindLabel(kind: found.kind)
             span { Stamped(text: t(".wakes", at: Stamped::MARK), at: found.at) }
           end
 
           def row(found)
-            ListItem(id: "snoozed-#{found.kind}-#{found.record.id}", title: title(found)) do |item|
-              item.meta { p(class: "wm-meta") { meta(found) } }
+            div(id: "snoozed-#{found.kind}-#{found.record.id}", class: "inbox-snoozed-row") do
+              div(class: "inbox-row-main") do
+                p(class: "inbox-snoozed-title") { title(found) }
+                p(class: "inbox-meta") { meta(found) }
+              end
               Form(action: path(:admin_inbox_wake, kind: found.kind, id: found.record.id)) do
-                Button(type: "submit", small: true) { t(".wake") }
+                Button(type: "submit", variant: :gh, small: true) { t(".wake") }
               end
             end
           end

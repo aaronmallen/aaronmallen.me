@@ -50,7 +50,7 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
       it "gives each row a box that joins the bar" do
         get "/admin/webmentions"
 
-        expect(page.all(".li input[type='checkbox'][name='ids[]'][form='webmention-bulk']").size).to eq(2)
+        expect(page.all(".wm-card input[type='checkbox'][name='ids[]'][form='webmention-bulk']").size).to eq(2)
       end
 
       it "names the author on each box" do

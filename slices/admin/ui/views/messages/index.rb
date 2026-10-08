@@ -23,7 +23,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
 
-            Card(title: t(".inbox"), data: { key_list: true }) { rows }
+            @messages.rows.empty? ? Card { Empty { t(EMPTIES.fetch(@filter)) } } : panes
             Pager(page: @messages, route: :admin_messages, params: { status: @filter })
           end
 
@@ -39,11 +39,27 @@ module Admin
             )
           end
 
-          def rows
-            return Empty { t(EMPTIES.fetch(@filter)) } if @messages.rows.empty?
+          def letter(message)
+            article(id: "read-#{message.id}", class: "msg-letter") do
+              p(class: "inbox-meta") do
+                span { message.reply_to }
+                Moment(at: message.received_at)
+              end
+              h2(class: "msg-letter-title") { message.subject }
+              p(class: "msg-body msg-letter-body") { message.body }
+            end
+          end
 
-            MessageBulk(filter: @filter, page: @messages.number)
-            @messages.rows.each { MessageRow(message: it, filter: @filter, bulk: MessageBulk::ID) }
+          def panes
+            div(class: "msg-panes") do
+              Card(class: "msg-list") do
+                MessageBulk(filter: @filter, page: @messages.number)
+                div(data: { key_list: true }) do
+                  @messages.rows.each { MessageRow(message: it, filter: @filter, bulk: MessageBulk::ID) }
+                end
+              end
+              Card(class: "msg-pane") { @messages.rows.each { letter(it) } }
+            end
           end
         end
       end
