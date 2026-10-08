@@ -10,11 +10,12 @@ module Admin
         NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
-        PENDING = Blog::Types::WebmentionStatus["pending"]
         SOMEDAY = Blog::Types::AttentionKind["someday"]
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
         prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
+        prop :failed_social_posts, Blog::Types::Array.of(Blog::Types::SocialPostStatus)
+        prop :inbox, Blog::Types::Integer
         prop :webmentions, Blog::Types::Integer
 
         def view_template
@@ -23,7 +24,7 @@ module Admin
           Card(title: t(".title"), class: "today-need", data: { attention: "", key_list: true }) do |card|
             card.side { span(class: "meta") { total.to_s } }
             SyncFailures(failures: @failures)
-            webmentions
+            AttentionLines(failed_social_posts: @failed_social_posts, inbox: @inbox, webmentions: @webmentions)
             @rows.each { row(it) }
           end
         end
@@ -76,7 +77,10 @@ module Admin
         def new_device(row)
           sub = t(".first_seen", count: row.days)
 
-          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved", hover: true) { snooze(row) }
+          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved", hover: true) do
+            icon_link(path(:admin_security), t(".open_security"), "fa-solid fa-shield-halved")
+            snooze(row)
+          end
         end
 
         def row(row)
@@ -114,16 +118,7 @@ module Admin
           end
         end
 
-        def total = @rows.size + @failures.size + (@webmentions.positive? ? 1 : 0)
-
-        def webmentions
-          return unless @webmentions.positive?
-
-          a(class: "today-line", href: path(:admin_webmentions, status: PENDING)) do
-            span { t(".webmentions") }
-            span(class: "today-line-value warn") { t(".waiting", count: @webmentions) }
-          end
-        end
+        def total = @rows.size + @failures.size + [@inbox, @failed_social_posts.size, @webmentions].count(&:positive?)
       end
     end
   end

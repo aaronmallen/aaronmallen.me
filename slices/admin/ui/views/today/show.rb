@@ -13,7 +13,7 @@ module Admin
           QUEUED = Blog::Types::SocialQueue["queued"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
-          prop :attention, Blog::Types::Array.of(Blog::Types::Instance(::Activity::Structs::StalledRow))
+          prop :attention, Blog::Types::Hash
           prop :clients, Blog::Types::Integer
           prop :commits, Blog::Types::Hash
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
@@ -22,9 +22,7 @@ module Admin
           prop :queue, Blog::Types::Hash, reader: :private
           prop :social, Blog::Types::Hash, reader: :private
           prop :sprint, Blog::Types::Hash
-          prop :sync_failures, Blog::Types::Array.of(Blog::Types::Hash)
           prop :visitors, Blog::Types::Integer
-          prop :webmentions, Blog::Types::Hash
 
           def view_template
             content_for(:title, t(".heading"))
@@ -122,7 +120,7 @@ module Admin
           end
 
           def side_cards
-            AttentionCard(rows: @attention, failures: @sync_failures, webmentions: @webmentions[:count])
+            AttentionCard(**@attention)
             CommitsCard(**@commits, totals: @commit_totals)
             quiet_lines
           end

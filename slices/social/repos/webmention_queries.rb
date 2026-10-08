@@ -41,12 +41,6 @@ module Social
 
       def page_by_status(status, page) = page.fill(webmentions.with_status(status).newest_first.paged(page).to_a)
 
-      def pending(limit: nil)
-        found = webmentions.with_status(PENDING).newest_first
-
-        (limit ? found.limit(limit) : found).to_a
-      end
-
       def pending_count = webmentions.with_status(PENDING).count
 
       def received_between(from:, to:) = in_days(from, to).count

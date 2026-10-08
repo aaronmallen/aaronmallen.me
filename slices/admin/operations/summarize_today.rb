@@ -6,7 +6,6 @@ module Admin
       COMMIT_LIMIT = 10
       COUNTRIES = "countries"
       DRAFT = Blog::Types::PostStatus["draft"]
-      PENDING_MENTIONS = 3
       SUMMARY_LIMIT = 60
 
       include Deps[
@@ -16,6 +15,7 @@ module Admin
         commit_queries: "record.repos.commit_queries",
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
+        inbox_queries: "api.repos.inbox_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         oauth_client_queries: "mcp.repos.oauth_client_queries",
         post_queries: "posts.repos.post_queries",
@@ -35,14 +35,20 @@ module Admin
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
           sprint:,
-          sync_failures: failures,
-          webmentions:,
         }
       end
 
       private
 
-      def attention(now) = attention_queries.stalled(now:)
+      def attention(now)
+        {
+          rows: attention_queries.stalled(now:),
+          failures:,
+          failed_social_posts: social_post_queries.failed_statuses,
+          inbox: inbox_queries.unseen_count,
+          webmentions: webmention_queries.pending_count,
+        }
+      end
 
       def commits(now)
         {
@@ -109,10 +115,6 @@ module Admin
         body = Blog::Helpers::Whitespace.squish(social_post.parts.first.body)
 
         Blog::Helpers::Truncation.cut(body, keep: SUMMARY_LIMIT)
-      end
-
-      def webmentions
-        { count: webmention_queries.pending_count, mentions: webmention_queries.pending(limit: PENDING_MENTIONS) }
       end
     end
   end

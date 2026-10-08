@@ -110,6 +110,60 @@ RSpec.describe "Admin today needs attention", :frozen_clock, type: :request do
     expect(row("Journal")).to have_link(title: "Write")
   end
 
+  describe "the inbox" do
+    it "counts what waits and opens the inbox", :aggregate_failures do
+      2.times { create(:message) }
+      create(:message, :read)
+      get "/admin"
+
+      expect(card.find(".today-line", text: "Inbox")).to have_text("2 waiting →")
+      expect(card).to have_link(href: "/admin/inbox")
+    end
+
+    it "leaves the row out with nothing waiting" do
+      create(:post, :draft, title: "Old draft", updated_at: days_ago(60))
+      get "/admin"
+
+      expect(card).to have_no_css(".today-line", text: "Inbox")
+    end
+  end
+
+  describe "failed cross-posts" do
+    def deliver(social_post, **) = create(:social_post_delivery, :mastodon, social_post_id: social_post.id, **)
+
+    def line = card.find(".today-line", text: "Cross-posts")
+
+    it "counts posts with a delivery that gave up and opens the posted queue", :aggregate_failures do
+      2.times { deliver(create(:social_post, :posted), failed: true, error: "rate limited") }
+      get "/admin"
+
+      expect(line).to have_text("2 failed →")
+      expect(line["href"]).to eq("/admin/social?filter=posted")
+    end
+
+    it "opens the queued list while a failed post still waits on a network" do
+      deliver(create(:social_post, :scheduled), failed: true, error: "rate limited")
+      get "/admin"
+
+      expect(line["href"]).to eq("/admin/social?filter=queued")
+    end
+
+    it "leaves out a delivery that will retry" do
+      deliver(create(:social_post, :posted), error: "rate limited")
+      get "/admin"
+
+      expect(page).to have_no_css("section.card[data-attention]")
+    end
+  end
+
+  it "opens security from a new device row" do
+    database = Security::Slice["db.rom"].gateways[:default].connection
+    %w[Paris London].each { database[:known_devices].insert(browser: "Chrome", os: "macOS", city: it, country: "GB") }
+    get "/admin"
+
+    expect(card.find(".li", text: "Chrome on macOS")).to have_link(href: "/admin/security", title: "Open security")
+  end
+
   describe "snoozing" do
     let(:week) { 7 * 24 * 60 * 60 }
     let!(:draft) { create(:post, :draft, title: "Old draft", updated_at: days_ago(60)) }

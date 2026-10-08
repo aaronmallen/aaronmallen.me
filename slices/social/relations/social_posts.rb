@@ -60,6 +60,8 @@ module Social
 
       def unposted = exclude(status: POSTED)
 
+      def with_failed_delivery = where(id: social_post_deliveries.where(failed: true).dataset.select(:social_post_id))
+
       def with_status(status) = where(status:)
 
       private

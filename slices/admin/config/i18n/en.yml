@@ -420,16 +420,23 @@ en:
           next: "Next"
         move: "Move to %{list}"
         open: "Open"
+        open_security: "Open security"
         snooze: "Snooze for a week"
         title: "Needs attention"
         untouched:
           one: "Untouched for %{count} day"
           other: "Untouched for %{count} days"
+        write: "Write"
+      attention_lines:
+        cross_posts: "Cross-posts"
+        failed:
+          one: "%{count} failed →"
+          other: "%{count} failed →"
+        inbox: "Inbox"
         waiting:
           one: "%{count} waiting →"
           other: "%{count} waiting →"
         webmentions: "Webmentions"
-        write: "Write"
       auto_form:
         apply: "Apply"
       bulk_bar:

@@ -57,6 +57,8 @@ module Social
 
       def editable(id) = with_children.unposted.unclaimed.by_pk(id).one
 
+      def failed_statuses = social_posts.with_failed_delivery.pluck(:status)
+
       def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
 
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a
