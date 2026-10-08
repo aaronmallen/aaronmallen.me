@@ -5,7 +5,7 @@ module MCP
     class CreateJournalEntry < Base
       description "Write a new journal entry, stamped with the time now. It lands on today unless entry_date " \
                   "names an earlier day, and a day after today is refused"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

@@ -24,7 +24,7 @@ module MCP
                   "accept_suggestion_edits and reject_suggestion_edits. " \
                   "Give from and to as YYYY-MM-DD; both days sit inside the range. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(from:, to:, server_context:, page: 1)

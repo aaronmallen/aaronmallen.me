@@ -18,7 +18,7 @@ module MCP
                   "when its task syncs from an issue, the name of a task or session row when its task syncs " \
                   "from an issue, and a webmention's name and excerpt may come from someone else and come " \
                   "marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

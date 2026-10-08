@@ -241,7 +241,7 @@ RSpec.describe "Cache headers", type: :request do
       sign_in_to_admin
       get "/oauth/authorize", {
         client_id: client.client_id,
-        code_challenge: MCP::OAuth::PKCE.challenge(verifier),
+        code_challenge: MCP::Slice["operations.derive_code_challenge"].call(verifier),
         code_challenge_method: "S256",
         redirect_uri: client.redirect_uris.first,
         response_type: "code",

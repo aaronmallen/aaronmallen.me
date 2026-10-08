@@ -7,7 +7,7 @@ module MCP
                   "Give tag to keep only the entries that carry it. stats gives the whole journal's entries and " \
                   "words, and on how many of the last days an entry was written, as the admin's journal shows. " \
                   "#{Blog::Helpers::DayWindow::PAGING_NOTE}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

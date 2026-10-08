@@ -5,7 +5,7 @@ module MCP
     class CancelTasks < Base
       description "Cancel up to 100 open tasks at once. One that is missing or already closed cancels none. " \
                   "#{Untrusted::TASKS}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

@@ -5,6 +5,7 @@ module MCP
     class IssueTokens < Operation
       ACCESS_LIFETIME = 60 * 60
       BEARER = "Bearer"
+      SCOPE_SEPARATOR = " "
       REFRESH_LIFETIME = 30 * 24 * 60 * 60
 
       include Deps["repos.oauth_token_mutations"]
@@ -20,7 +21,7 @@ module MCP
             access_token:,
             expires_in: ACCESS_LIFETIME,
             refresh_token:,
-            scope: scopes.join(OAuth::Scope::SEPARATOR),
+            scope: scopes.join(SCOPE_SEPARATOR),
             token_type: BEARER,
           }
         end

@@ -30,7 +30,7 @@ module MCP
                   "field you leave out keeps what it has, and a rename follows the tag onto every record that " \
                   "carries it"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(scope:, server_context:, id: nil, name: nil, color: nil)

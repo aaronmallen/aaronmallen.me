@@ -16,7 +16,7 @@ module MCP
                   "A tag that is the only tag on a task rule with no projects stays until the rule takes another tag " \
                   "or a project, or goes"
       input_schema(SCHEMA)
-      scope OAuth::Scope::DELETE
+      scope Blog::Types::OAuthScope["delete"]
 
       class << self
         def call(id:, scope:, server_context:)

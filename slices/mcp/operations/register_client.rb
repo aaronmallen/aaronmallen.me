@@ -37,9 +37,9 @@ module MCP
       def claim(attributes, visitor_hash:)
         client = oauth_client_mutations.claim(
           client_id: SecureRandom.uuid,
-          grant_types: OAuth::Metadata::GRANT_TYPES,
-          response_types: OAuth::Metadata::RESPONSE_TYPES,
-          token_endpoint_auth_method: OAuth::Metadata::NO_TOKEN_AUTH,
+          grant_types: Blog::Types::OAuthGrantType.values,
+          response_types: Blog::Types::OAuthResponseType.values,
+          token_endpoint_auth_method: Blog::Types::OAuthTokenAuthMethod["none"],
           **attributes,
           visitor_hash:,
           limit:,

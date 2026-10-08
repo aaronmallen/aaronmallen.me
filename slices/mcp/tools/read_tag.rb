@@ -7,7 +7,7 @@ module MCP
                   "projects with the public tag and the tasks, journal entries and decisions with the private " \
                   "one, grouped by kind, each with its status, drafts, archived projects and closed tasks " \
                   "among them. A name neither scope holds is refused. #{Untrusted::TASKS}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

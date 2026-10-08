@@ -7,7 +7,7 @@ module MCP
                   "does. It goes out to every network it targets, and a sent post cannot be called back. " \
                   "The post is refused if a part runs over a network's limit, naming each such part and network, " \
                   "or if a network has no credentials"
-      endpoint scope: OAuth::Scope::PUBLISH
+      endpoint scope: Blog::Types::OAuthScope["publish"]
     end
   end
 end

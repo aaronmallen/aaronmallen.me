@@ -92,6 +92,10 @@ module Blog
     NetworkName = Types::String.enum("mastodon", "bluesky")
     OAuthDecision = Types::String.enum("cancel", "approve")
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
+    OAuthGrantType = Types::String.enum("authorization_code", "refresh_token")
+    OAuthResponseType = Types::String.enum("code")
+    OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete")
+    OAuthTokenAuthMethod = Types::String.enum("none")
     OAuthTokenType = Types::String.enum("access", "refresh")
     OptionalText = Types::String.optional.constructor do |value|
       text = TrimmedText[value]

@@ -22,7 +22,7 @@ module MCP
                   "A field you leave out keeps what it has, and an empty string clears it. " \
                   "The canonical URL is not yours to set. Nothing else about the post changes"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, server_context:, **fields)

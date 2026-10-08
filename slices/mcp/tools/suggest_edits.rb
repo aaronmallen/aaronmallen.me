@@ -56,7 +56,7 @@ module MCP
                   "post; they wait for the author to accept or reject and change nothing on their own, " \
                   "and a new set replaces the edits still waiting on that post"
       input_schema(SCHEMA)
-      scope OAuth::Scope::SUGGEST
+      scope Blog::Types::OAuthScope["suggest"]
 
       class << self
         def call(target:, id:, edits:, server_context:)

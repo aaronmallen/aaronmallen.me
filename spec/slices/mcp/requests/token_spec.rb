@@ -28,7 +28,7 @@ RSpec.describe "OAuth token", type: :request do
     }
   end
 
-  def challenge = MCP::OAuth::PKCE.challenge(verifier)
+  def challenge = MCP::Slice["operations.derive_code_challenge"].call(verifier)
 
   def codes = MCP::Slice["db.rom"].relations[:oauth_codes]
 

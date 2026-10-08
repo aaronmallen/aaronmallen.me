@@ -14,7 +14,7 @@ module MCP
 
       description "Mark one contact form message as unread, read or spam, as the admin's messages page does"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, status:, server_context:)

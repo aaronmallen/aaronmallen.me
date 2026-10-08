@@ -26,7 +26,7 @@ module MCP
                   "refused; both stay out of the text. Edits that would leave a social post part empty change " \
                   "nothing"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)

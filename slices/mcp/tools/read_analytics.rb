@@ -91,7 +91,7 @@ module MCP
                   "daily counts still come back. With a path, hours, since and read_spread count that page " \
                   "alone. #{DEFINITIONS}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(from:, to:, server_context:, path: nil, since: nil)

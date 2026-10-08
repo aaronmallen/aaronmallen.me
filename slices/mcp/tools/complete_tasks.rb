@@ -6,7 +6,7 @@ module MCP
       description "Mark up to 100 open or started tasks done at once, stamped with the time now. One that is " \
                   "missing or already closed completes none. " \
                   "#{Untrusted::TASKS}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

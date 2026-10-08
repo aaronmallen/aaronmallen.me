@@ -11,7 +11,7 @@ module MCP
                   "with its repository, reason, message, how many times in a row it failed, when it began " \
                   "failing and when it last failed"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:)

@@ -7,7 +7,7 @@ module MCP
                   "that post's title and slug, its type, its status, its source and author, its excerpt, and the " \
                   "reason given for spam. The source, author name, author URL and excerpt, taken from the " \
                   "sender's page, come marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

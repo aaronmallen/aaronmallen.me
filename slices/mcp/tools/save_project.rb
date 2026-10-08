@@ -47,7 +47,7 @@ module MCP
                   "a name and a visibility, and starts active. Archive and restore it with archive_project and " \
                   "restore_project"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(server_context:, id: nil, **fields)

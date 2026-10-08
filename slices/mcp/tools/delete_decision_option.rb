@@ -5,7 +5,7 @@ module MCP
     class DeleteDecisionOption < Base
       description "Delete one option of a decision. The option a decision was resolved with stays until it reopens. " \
                   "This cannot be undone"
-      endpoint scope: OAuth::Scope::DELETE
+      endpoint scope: Blog::Types::OAuthScope["delete"]
     end
   end
 end

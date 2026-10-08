@@ -10,7 +10,7 @@ module MCP
         held = live.pluck(:oauth_client_id, :scopes).group_by(&:first)
 
         oauth_client_ids.to_h do |id|
-          [id, OAuth::Scope::ALL & held.fetch(id, Blog::Constants::EMPTY_ARRAY).flat_map { it.last.to_a }]
+          [id, Blog::Types::OAuthScope.values & held.fetch(id, Blog::Constants::EMPTY_ARRAY).flat_map { it.last.to_a }]
         end
       end
     end

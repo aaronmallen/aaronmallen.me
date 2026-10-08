@@ -3,7 +3,7 @@
 Spec::DB::Factories[:mcp].define(:oauth_code) do |f|
   f.sequence(:code_digest) { |n| Blog::Types::SecretDigest["code-#{n}"] }
   f.redirect_uri "https://claude.ai/api/mcp/auth_callback"
-  f.code_challenge { MCP::OAuth::PKCE.challenge(Blog::Types::NewSecret[]) }
+  f.code_challenge { MCP::Slice["operations.derive_code_challenge"].call(Blog::Types::NewSecret[]) }
   f.expires_at { Time.now + 60 }
 
   f.trait :expired do |t|

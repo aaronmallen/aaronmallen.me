@@ -9,8 +9,10 @@ module MCP
       SCOPE = /\A#{SCOPE_TOKEN}(?: #{SCOPE_TOKEN})*\z/
       STATE = /\A[\x20-\x7E]*\z/
 
+      include Deps["operations.match_resource"]
+
       params do
-        required(:response_type).filled(:string, included_in?: OAuth::Metadata::RESPONSE_TYPES)
+        required(:response_type).filled(:string, included_in?: Blog::Types::OAuthResponseType.values)
         required(:code_challenge).filled(Blog::Types::PKCEValue)
         optional(:code_challenge_method).value(Blog::Types::CodeChallengeMethod.optional)
         optional(:redirect_uri).value(UNCOERCED)
@@ -20,7 +22,7 @@ module MCP
       end
 
       rule(:resource) do |context:|
-        key.failure(FOREIGN) unless OAuth::Resource.ours?(value, context[:issuer])
+        key.failure(FOREIGN) unless match_resource.call(value, context[:issuer])
       end
     end
   end

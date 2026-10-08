@@ -9,7 +9,7 @@ RSpec.describe "MCP endpoint", type: :request do
   def authorization_params
     {
       client_id: client.client_id,
-      code_challenge: MCP::OAuth::PKCE.challenge(verifier),
+      code_challenge: MCP::Slice["operations.derive_code_challenge"].call(verifier),
       code_challenge_method: "S256",
       redirect_uri: client.redirect_uris.first,
       resource:,
@@ -2381,7 +2381,7 @@ RSpec.describe "MCP endpoint", type: :request do
       }.fetch(name)
     end
 
-    def scopes = MCP::OAuth::Scope::ALL.join(MCP::OAuth::Scope::SEPARATOR)
+    def scopes = Blog::Types::OAuthScope.values.join(" ")
 
     MCP::Protocol::Handler::TOOLS.map(&:name_value).each do |name|
       it "refuses #{name} rather than raising on it" do

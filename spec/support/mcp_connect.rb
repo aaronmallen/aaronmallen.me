@@ -4,7 +4,7 @@ module MCPConnect
   def mcp_authorization_code(client, verifier:, scope: nil)
     params = {
       client_id: client.client_id,
-      code_challenge: MCP::OAuth::PKCE.challenge(verifier),
+      code_challenge: MCP::Slice["operations.derive_code_challenge"].call(verifier),
       code_challenge_method: Blog::Types::CodeChallengeMethod["S256"],
       redirect_uri: client.redirect_uris.first,
       response_type: "code",

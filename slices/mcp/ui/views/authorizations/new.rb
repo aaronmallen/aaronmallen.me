@@ -9,7 +9,7 @@ module MCP
 
           APPROVE = Operations::Authorize::APPROVE
           CANCEL = Operations::Authorize::CANCEL
-          PUBLISH = OAuth::Scope::PUBLISH
+          PUBLISH = Blog::Types::OAuthScope["publish"]
 
           prop :client_name, Blog::Types::String.optional
           prop :fields, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)

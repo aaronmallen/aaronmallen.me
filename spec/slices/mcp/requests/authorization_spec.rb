@@ -28,7 +28,7 @@ RSpec.describe "OAuth authorization", type: :request do
 
   def cancel = cancel_authorization(authorize_path)
 
-  def challenge = MCP::OAuth::PKCE.challenge(verifier)
+  def challenge = MCP::Slice["operations.derive_code_challenge"].call(verifier)
 
   def code = codes.one
 

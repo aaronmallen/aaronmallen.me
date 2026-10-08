@@ -13,7 +13,7 @@ module MCP
                   "A new device row's title names an MCP client as the client named itself, so it comes marked " \
                   "untrusted, and so does the title of a carried or someday task that syncs from an issue " \
                   "tracker. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

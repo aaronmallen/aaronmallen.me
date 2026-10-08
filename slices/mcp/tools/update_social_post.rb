@@ -7,7 +7,7 @@ module MCP
                   "leave out keeps what it has. The edit leaves the post a draft, the way saving a draft in " \
                   "the admin does, so a queued post waits until send_social_post queues it again. The answer " \
                   "gives each part's length and limit on each network"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

@@ -11,7 +11,7 @@ module MCP
                   "client making this call. A client names itself when it registers, so the name comes marked " \
                   "untrusted. Revoking a client stays in the admin. #{Untrusted::WARNING}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:)

@@ -9,7 +9,7 @@ module MCP
                   "live, approves known authors on its own, turns them on for new posts, accepts Bridgy, and which " \
                   "hosts are each one person's site"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         include WebmentionSettingsAnswer

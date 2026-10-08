@@ -8,7 +8,7 @@ module MCP
                   "time is cleared. Its announcement and webmentions go with it when the post has them on. " \
                   "A published post cannot be called back, and one already out is refused. " \
                   "The post takes the same checks the admin editor makes, and a refusal names each field at fault"
-      endpoint scope: OAuth::Scope::PUBLISH
+      endpoint scope: Blog::Types::OAuthScope["publish"]
     end
   end
 end

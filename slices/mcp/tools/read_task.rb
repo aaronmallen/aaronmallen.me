@@ -10,7 +10,7 @@ module MCP
                   "times, its comments, oldest first, the other records linked to it, grouped by kind, and its " \
                   "timeline: comments, work sessions with their IDs, moves, tag changes and status changes, " \
                   "oldest first. #{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

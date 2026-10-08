@@ -9,7 +9,7 @@ module MCP
                   "At either end, or when it or the after_id task is done or canceled, it stays put " \
                   "and moved comes back false. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

@@ -12,7 +12,7 @@ module MCP
                   "them. counts gives how many posts in the range sit in each queue, whatever queue asks for. " \
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
                   "Leave both out to list every social post. #{Blog::Helpers::Paging::USAGE}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

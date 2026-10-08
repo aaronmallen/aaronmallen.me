@@ -19,7 +19,7 @@ module MCP
       description "Reject pending or stale edits from one set of suggested edits, as the admin does. " \
                   "The text of the blog post or social post stays as it is"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)

@@ -35,7 +35,7 @@ module MCP
                   "time, and a change to its body needs an edit_note saying what changed and why. " \
                   "The post takes the same checks the admin editor makes, and a refusal names each field at fault"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, server_context:, **given)

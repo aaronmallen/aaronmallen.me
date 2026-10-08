@@ -5,7 +5,7 @@ module MCP
     class DeletePost < Base
       description "Delete one blog post, in any status, for good"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::DELETE
+      scope Blog::Types::OAuthScope["delete"]
 
       class << self
         def call(id:, server_context:)

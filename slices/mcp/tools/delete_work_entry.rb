@@ -7,7 +7,7 @@ module MCP
 
       description "Remove one role from the work list on /projects for good"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::DELETE
+      scope Blog::Types::OAuthScope["delete"]
 
       class << self
         def call(id:, server_context:)

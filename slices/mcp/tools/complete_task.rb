@@ -6,7 +6,7 @@ module MCP
       description "Mark one open or started task done, stamped with the time now. It ends the running work " \
                   "session; hours and minutes, when given, replace the total time worked. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

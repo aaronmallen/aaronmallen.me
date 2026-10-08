@@ -9,7 +9,7 @@ module MCP
                   "newest archived first. Each carries its status, its visibility, the day it started and the " \
                   "day it was archived as YYYY-MM-DD, its tags, repository, links, stars and latest release"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:)

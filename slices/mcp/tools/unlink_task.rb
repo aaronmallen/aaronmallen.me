@@ -5,7 +5,7 @@ module MCP
     class UnlinkTask < Base
       description "Remove the link between two tasks, whichever way it runs. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

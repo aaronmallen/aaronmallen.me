@@ -4,7 +4,7 @@ module MCP
   module Tools
     class DeleteJournalEntry < Base
       description "Delete one journal entry for good. It cannot come back"
-      endpoint scope: OAuth::Scope::DELETE
+      endpoint scope: Blog::Types::OAuthScope["delete"]
     end
   end
 end

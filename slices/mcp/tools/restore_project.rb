@@ -7,7 +7,7 @@ module MCP
 
       description "Restore one archived project to /projects as active"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, server_context:)

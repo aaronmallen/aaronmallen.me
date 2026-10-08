@@ -9,7 +9,7 @@ module MCP
                   "does. It runs in the background, so the commits land a little later; read_sync_state says " \
                   "when the last sync finished and whether one is failing"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(server_context:)

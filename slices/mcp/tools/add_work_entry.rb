@@ -29,7 +29,7 @@ module MCP
 
       description "Add a role to the end of the work list on /projects"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(org:, role:, from_year:, server_context:, blurb: nil, to_year: nil)

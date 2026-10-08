@@ -4,7 +4,7 @@ module MCP
   module Tools
     class DropDecision < Base
       description "Drop an open decision without a choice, with a Markdown reason"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

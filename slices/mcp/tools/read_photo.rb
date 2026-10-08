@@ -17,7 +17,7 @@ module MCP
                   "width, height and size in bytes. Pass the URL from a post, journal entry, task or comment, or " \
                   "the key at its end. Alt text lives in the Markdown that names the photo"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(photo:, server_context:)

@@ -8,7 +8,7 @@ module MCP
                   "picture. A query under two characters finds nothing. A network with no credentials, or one " \
                   "that rate limits, is refused. The name, which the account's owner wrote, comes marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

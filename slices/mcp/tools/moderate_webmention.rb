@@ -28,7 +28,7 @@ module MCP
 
       description "Approve one webmention, so it shows on its blog post, or hide it as ignored or spam"
       input_schema(SCHEMA)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, verdict:, server_context:, reason: nil)

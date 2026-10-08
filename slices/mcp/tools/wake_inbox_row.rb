@@ -7,7 +7,7 @@ module MCP
                   "returns to the top of the inbox. Name the row by its kind and the id that kind's tools take. A " \
                   "row that is not snoozed is refused. The row comes back as list_inbox gives it, with the text " \
                   "from someone else marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
 
       class << self
         private

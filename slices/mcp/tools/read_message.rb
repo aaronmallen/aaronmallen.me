@@ -8,7 +8,7 @@ module MCP
       description "Read one message sent through the contact form: its subject, body, reply address, status " \
                   "and when it came in. The subject, body and reply address come marked untrusted. #{Untrusted::WARNING}"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(id:, server_context:)

@@ -29,7 +29,7 @@ module MCP
                   "The range leaves the social posts alone. Both lists page together: page 2 holds the second " \
                   "page of each. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:, page: 1, status: nil, **range)

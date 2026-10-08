@@ -5,7 +5,7 @@ module MCP
     class ReadProject < Base
       description "Read one project by ID, such as a project hit from search: every field list_projects gives, " \
                   "created_at, updated_at and the records linked to it, grouped by kind. #{Untrusted::LINKS}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

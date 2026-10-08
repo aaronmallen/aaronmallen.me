@@ -133,7 +133,7 @@ RSpec.describe "Secrets a request carries", type: :request do
   end
 
   describe "a client asking the MCP server to authorize it" do
-    let(:challenge) { MCP::OAuth::PKCE.challenge(verifier) }
+    let(:challenge) { MCP::Slice["operations.derive_code_challenge"].call(verifier) }
     let(:state) { secret }
 
     def authorize_path

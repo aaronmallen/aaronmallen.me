@@ -6,7 +6,7 @@ module MCP
       description "Compose the announcement one blog post sends to social networks when it goes out: its own " \
                   "announcement text, or its title and link when it has none. Nothing is sent"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(id:, server_context:)

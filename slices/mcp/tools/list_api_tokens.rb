@@ -9,7 +9,7 @@ module MCP
                   "was last used, null if never. The token itself never comes back. Minting and revoking stay in " \
                   "the admin"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:) = answer(tokens: dep(:api_token_queries, server_context).live.map { entry(it) })

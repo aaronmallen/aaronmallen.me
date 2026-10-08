@@ -5,7 +5,7 @@ module MCP
     class ReadWorkEntry < Base
       description "Read one work entry, a role on /projects, by ID, such as a work hit from search: every field " \
                   "list_work_entries gives and the records linked to it, grouped by kind. #{Untrusted::LINKS}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

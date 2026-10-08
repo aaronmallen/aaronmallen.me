@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "rack/utils"
+
 module MCP
   module Operations
     class IssueToken < Operation
@@ -22,6 +24,7 @@ module MCP
       }.freeze
 
       include Deps[
+        "operations.derive_code_challenge",
         "operations.issue_tokens",
         "repos.oauth_client_queries",
         "repos.oauth_code_mutations",
@@ -52,7 +55,7 @@ module MCP
 
       def check_grant(code, request)
         return refuse(UNUSABLE_REDIRECT_URI) unless redirect_uri_matches?(code, request[:redirect_uri])
-        return refuse(UNUSABLE_VERIFIER) unless OAuth::PKCE.matches?(code.code_challenge, request[:code_verifier])
+        return refuse(UNUSABLE_VERIFIER) unless verifier_matches?(code, request[:code_verifier])
 
         Success(code)
       end
@@ -117,6 +120,10 @@ module MCP
 
         error, description = REFUSALS.find { |field, _| result.error?(field) }.last
         refuse(description, error:)
+      end
+
+      def verifier_matches?(code, verifier)
+        Rack::Utils.secure_compare(code.code_challenge, derive_code_challenge.call(verifier))
       end
     end
   end

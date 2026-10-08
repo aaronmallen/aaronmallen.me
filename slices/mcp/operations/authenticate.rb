@@ -14,6 +14,7 @@ module MCP
       WRONG_RESOURCE = "the access token was issued for another resource"
 
       include Deps[
+        "operations.match_resource",
         "repos.oauth_client_mutations",
         "repos.oauth_client_queries",
         "repos.oauth_token_queries",
@@ -38,7 +39,7 @@ module MCP
 
       def check_resource(token, issuer)
         return refuse(NO_RESOURCE) if token.resource.nil?
-        return Success(token) if OAuth::Resource.ours?(token.resource, issuer)
+        return Success(token) if match_resource.call(token.resource, issuer)
 
         refuse(WRONG_RESOURCE)
       end

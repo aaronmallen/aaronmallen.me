@@ -12,7 +12,7 @@ module MCP
                   "Leave both out to list every webmention. #{Blog::Helpers::Paging::USAGE}. " \
                   "The source, author name, author URL and excerpt, taken from the sender's page, come marked " \
                   "untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

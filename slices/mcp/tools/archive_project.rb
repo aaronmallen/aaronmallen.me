@@ -8,7 +8,7 @@ module MCP
       description "Archive one project as of today, which takes it off /projects. " \
                   "A project whose start month has not come yet stays as it is"
       input_schema(API::Schema.by_id)
-      scope OAuth::Scope::WRITE
+      scope Blog::Types::OAuthScope["write"]
 
       class << self
         def call(id:, server_context:)

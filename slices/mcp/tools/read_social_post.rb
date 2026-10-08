@@ -7,7 +7,7 @@ module MCP
                   "targets, times, parts in order, each part's length and limit on each network it targets, " \
                   "each network's delivery with its link, error and engagement counts, the suggested edits " \
                   "still open and the records linked to it, grouped by kind. #{Untrusted::LINKS}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

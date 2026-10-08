@@ -5,7 +5,7 @@ module MCP
     class DeleteTaskComment < Base
       description "Delete one comment on a task. A comment synced from GitHub or Linear cannot be deleted. " \
                   "This cannot be undone"
-      endpoint scope: OAuth::Scope::DELETE
+      endpoint scope: Blog::Types::OAuthScope["delete"]
     end
   end
 end

@@ -17,7 +17,7 @@ module MCP
                   "count split by kind. #{TAG_KINDS}. A tag nothing carries counts zero. Give query to keep only " \
                   "the tags whose name holds it; count holds how many tags match. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(scope:, server_context:, page: 1, query: nil)

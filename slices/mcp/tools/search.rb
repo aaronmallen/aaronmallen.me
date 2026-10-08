@@ -17,7 +17,7 @@ module MCP
                   "(#{READERS.map { |kind, tool| "#{kind}: #{tool}" }.join(', ')}). count gives the results on " \
                   "this page. #{Blog::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
                   "and the title and match of a message or webmention, come marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

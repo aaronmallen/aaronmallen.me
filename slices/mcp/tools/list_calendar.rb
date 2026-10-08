@@ -10,7 +10,7 @@ module MCP
                   "Give from and to as YYYY-MM-DD; both days count, and the range runs at most " \
                   "#{Blog::Helpers::DayWindow::LONGEST} days. To move something, use schedule_task, update_post or " \
                   "send_social_post"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
     end
   end
 end

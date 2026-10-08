@@ -22,7 +22,7 @@ module MCP
       description "List the commits in a date range, each with its sha, repository, branch, whole message, " \
                   "date, time and lines added and deleted. #{Blog::Helpers::DayWindow::PAGING_NOTE}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(from:, to:, server_context:, repos: nil)

@@ -6,7 +6,7 @@ module MCP
       description "Schedule one task into the sprint for a day, starting that sprint when it has none yet, " \
                   "or unschedule it back to next. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

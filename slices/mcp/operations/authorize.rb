@@ -35,6 +35,7 @@ module MCP
       }.freeze
 
       include Deps[
+        "operations.describe_protected_resource",
         "repos.oauth_client_queries",
         "repos.oauth_code_mutations",
         contract: "contracts.authorization_request_contract",
@@ -45,7 +46,7 @@ module MCP
         redirect_uri = step find_redirect_uri(client, params[:redirect_uri])
         step check_sign_in(signed_in)
         request, callback = step check_request(params, issuer, redirect_uri)
-        scopes = OAuth::Scope.granted(request[:scope])
+        scopes = granted_scopes(request[:scope])
         step check_decision(decision, client, redirect_uri, scopes)
         answer(decision, callback, client:, issuer:, request:, redirect_uri:, scopes:)
       end
@@ -67,7 +68,7 @@ module MCP
       def check_request(params, issuer, redirect_uri)
         result = contract.call(params, issuer:)
         state = result[:state] unless result.error?(:state)
-        callback = OAuth::Callback.new(issuer:, redirect_uri:, state:)
+        callback = Structs::Callback.new(issuer:, redirect_uri:, state:)
         return Success([result.to_h, callback]) if result.success?
 
         error, description = REFUSALS.find { |field, _| result.error?(field) }.last
@@ -100,6 +101,12 @@ module MCP
         Failure([REJECT, { error: INVALID_REQUEST, error_description: UNUSABLE_REDIRECT_URI }])
       end
 
+      def granted_scopes(requested)
+        kept = Blog::Types::OAuthScope.values & requested.to_s.split
+
+        kept.empty? ? [Blog::Types::OAuthScope["read"]] : kept
+      end
+
       def issue(client:, issuer:, request:, redirect_uri:, scopes:)
         Blog::Types::NewSecret[].tap do |code|
           oauth_code_mutations.issue(
@@ -109,7 +116,7 @@ module MCP
             oauth_client_id: client.id,
             redirect_uri:,
             redirect_uri_sent: !request[:redirect_uri].nil?,
-            resource: request[:resource] || OAuth::Metadata.protected_resource(issuer)[:resource],
+            resource: request[:resource] || describe_protected_resource.call(issuer)[:resource],
             scopes:,
           )
         end

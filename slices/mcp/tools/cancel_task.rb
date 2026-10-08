@@ -6,7 +6,7 @@ module MCP
       description "Cancel one open or started task, stamped with the time now. It closes without counting as work " \
                   "done, so the activity feed leaves it out. " \
                   "#{Untrusted::TASK}"
-      endpoint scope: OAuth::Scope::WRITE
+      endpoint scope: Blog::Types::OAuthScope["write"]
     end
   end
 end

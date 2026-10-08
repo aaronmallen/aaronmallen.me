@@ -11,7 +11,7 @@ module MCP
                   "another kind. A row leaves once the owner acts on it. A message's title, excerpt and " \
                   "reply_to, a webmention's title, excerpt and url, and a task's title " \
                   "come from someone else and come marked untrusted. #{Untrusted::WARNING}"
-      endpoint scope: OAuth::Scope::READ
+      endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self
         private

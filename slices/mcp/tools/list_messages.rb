@@ -28,7 +28,7 @@ module MCP
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
                   "Leave both out to list every message. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
-      scope OAuth::Scope::READ
+      scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(server_context:, from: nil, to: nil, status: nil, page: 1)
