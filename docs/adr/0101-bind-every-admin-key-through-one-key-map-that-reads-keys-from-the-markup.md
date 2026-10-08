@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, assets]
 issue: "#297"
+amended: ["#745"]
 tags: [admin, keyboard, shortcuts, palette, help, accessibility, javascript]
 ---
 
@@ -48,10 +49,14 @@ such key. A published post draws no publish button, so `p` does nothing on it.
 - **Help.** The admin layout draws the help overlay as a modal `dialog`, opened by a button in the context bar
   that carries `data-key="?"`. The layout draws the keys no control carries (`j`, `k`, Enter and the chords) into
   the overlay with their labels from the locale files. On opening, the overlay adds every `data-key` on the page by
-  its label, so it lists what the screen has at that moment.
+  its label, so it lists what the screen has at that moment. Since #745 the context bar is gone and the button
+  sits in the avatar menu ([ADR 0128][0128]).
 - **Chords in script.** `keys.js` exports `bind` for a key held with Ctrl, Meta or Alt, which may fire where plain
-  keys may not. `palette.js` binds `⌘/` and `Ctrl+/`, and `task_order.js` binds Alt+Up and Alt+Down. `/` is a
-  plain key, on the slash button alone.
+  keys may not. `palette.js` binds `⌘/` and `Ctrl+/`, and since #745 `⌘K`, and `task_order.js` binds Alt+Up
+  and Alt+Down. `/` is a plain key, on the slash button alone, and since #745 on the search button that replaced it.
+
+**Keys #745 adds.** `w` sits on a control that opens a journal entry, as `c` sits on the create button. `e`
+opens the highlighted row on lists where no row key claims it, and on a task row it keeps editing the task.
 
 **When keys stay quiet.** A plain key does nothing while focus is in a field that takes text (a text input, a
 `textarea`, a `select` or anything `contenteditable`), or while any modal `dialog` is open, the palette and help
@@ -90,4 +95,5 @@ section uses.
 [0055]: 0055-make-every-admin-write-a-plain-form-post-that-scripts-only-add-to.md
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [0098]: 0098-run-each-bulk-action-as-one-operation-per-list-in-one-transaction.md
+[0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

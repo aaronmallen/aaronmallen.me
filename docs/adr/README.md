@@ -57,7 +57,7 @@ one.
 | [0050][0050] | Derive Today from sprint membership | ![Active][active] | 2026-09-28 |
 | [0051][0051] | Store a task link once and derive its reverse on read | ![Active][active] | 2026-09-28 |
 | [0052][0052] | Read activity through one view across every content kind | ![Active][active] | 2026-09-28 |
-| [0053][0053] | Navigate the admin through a command palette, not a tab strip | ![Active][active] | 2026-09-28 |
+| [0053][0053] | Navigate the admin through a command palette, not a tab strip | ![Superseded][superseded-0128] | 2026-09-28 |
 | [0054][0054] | Run every admin screen on a phone | ![Active][active] | 2026-09-28 |
 | [0055][0055] | Make every admin write a plain form POST that scripts only add to | ![Active][active] | 2026-09-28 |
 | [0056][0056] | Serve MCP from our own OAuth 2.1 server and the official Ruby SDK | ![Active][active] | 2026-09-28 |
@@ -132,6 +132,7 @@ one.
 | [0125][0125] | Make agent workspaces with mise tasks, and name each test database from WORKSPACE_ID | ![Active][active] | 2026-10-07 |
 | [0126][0126] | Keep only base classes and gem wrappers in lib, and give the rest a Hanami shape | ![Active][active] | 2026-10-07 |
 | [0127][0127] | Replay each Linear state change at Linear's time, from a cursor on task sources | ![Active][active] | 2026-10-07 |
+| [0128][0128] | Lay out the admin as a full-width pill-nav shell with right-side drawers | ![Active][active] | 2026-10-07 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -260,6 +261,7 @@ one.
 [0125]: 0125-make-agent-workspaces-with-mise-tasks-and-name-each-test-database-from-workspace-id.md
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0127]: 0127-replay-each-linear-state-change-at-linears-time-from-a-cursor-on-task-sources.md
+[0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -267,4 +269,5 @@ one.
 [superseded-0107]: https://img.shields.io/badge/0107-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0110]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0123]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0128]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

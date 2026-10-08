@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
-amended: ["#41", "#90"]
+amended: ["#41", "#90", "#745"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -35,6 +35,9 @@ A script in `app/assets/js/admin` takes the click on those links, fetches the pa
 task's part of the page into a native `dialog`: the read page into the panel, the edit page into the task modal.
 A linked task clicked inside the panel loads into the same panel. With scripts off, or when the fetch fails, the
 link opens the page in full.
+
+Since #745 the panel is a wide drawer that opens from the right, as [ADR 0128][0128] records. It loads the read
+page the same way.
 
 Every form inside the swapped HTML stays a plain POST under ADR 0055. An action redirects with its toast to the
 page the task was opened from, through the `origin` the forms carry. A failed save answers 422 with the edit
@@ -82,4 +85,5 @@ The script cannot read where a redirect points without following it, and followi
 `redirect: "manual"` and loads the page it is on instead. That page and the redirect's target agree for every
 list a row draws on, except that the reload keeps a search or a pool the redirect would drop.
 
+[0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

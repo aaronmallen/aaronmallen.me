@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, admin, public, mcp]
 issue: AA-346
-amended: [AA-539, AA-765, AA-835, "#17"]
+amended: [AA-539, AA-765, AA-835, "#17", "#745"]
 tags: [admin, layout, responsive, accessibility, design]
 ---
 
@@ -60,6 +60,9 @@ the page ends far enough above the palette button that no row sits under it.
 The layouts below 860px are derived, not ported. They come from the tokens and rules the stylesheet already
 carries, and they add no second visual language.
 
+Since #745 the admin folds at 700px and 860px alone, as [ADR 0128][0128] records. Two-column layouts start at
+860px, and the pill nav drops onto its own row below it.
+
 ## Alternatives
 
 **Name the screens a phone is for and let the rest say they are desktop only.** The editors and the tables are the
@@ -85,7 +88,8 @@ rows fit a screen. That is the price of every one of them being tappable.
 controls, and they take the same square as every other control.
 
 **The palette button floats over the column.** The handoff's 46px rail spends an eighth of a 390px screen, so the
-button keeps its corner and the page pads itself to clear it. Anything mid-page scrolls under it.
+button keeps its corner and the page pads itself to clear it. Anything mid-page scrolls under it. #745 replaces the
+button with a search button in the top bar, so the page no longer pads itself to clear one.
 
 **The analytics chart loses its tooltip on a phone.** Laid out all the time, it pushed the page sideways, so it
 draws only while its bar is hovered, and a phone does not hover. The chart keeps its peak and its dates.
@@ -103,4 +107,5 @@ too, so dense tables and cards run a little wider than the handoff drew them.
 public pages as much as the admin, so the spec leaves it out of the tap count, though its text and width still
 count. Public controls answer to axe's 24px rule rather than to the 44px square.
 
+[0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

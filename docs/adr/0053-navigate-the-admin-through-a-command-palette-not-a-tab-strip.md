@@ -1,17 +1,18 @@
 ---
 id: "0053"
 title: Navigate the admin through a command palette, not a tab strip
-status: active
+status: superseded
 created: 2026-09-28
 area: [admin, assets]
+superseded-by: "0128"
 issue: AA-659
-amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320"]
+amended: ["#17", "#87", "#201", "#297", "#303", "#311", "#314", "#282", "#320", "#745"]
 tags: [admin, navigation, palette, keyboard, accessibility, design]
 ---
 
 # ADR 0053: Navigate the admin through a command palette, not a tab strip
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -114,4 +115,4 @@ links and the way back to Today are all the chrome holds. A section is then reac
 
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
