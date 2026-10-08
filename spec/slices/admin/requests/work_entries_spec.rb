@@ -16,9 +16,9 @@ RSpec.describe "Admin work history", type: :request do
       .merge(changes)
   end
 
-  def roles = page.all(".li .li-title").map(&:text)
+  def roles = page.all(".work-row-title").map(&:text)
 
-  def subs = page.all(".li .li-sub").map(&:text)
+  def subs = page.all(".work-row-meta").map(&:text)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -49,10 +49,9 @@ RSpec.describe "Admin work history", type: :request do
         expect(page).to have_no_css("p.hint", text: i18n.t("ui.views.projects.index.archive_note"))
       end
 
-      it "labels the roles card", :aggregate_failures do
+      it "titles the roles card" do
         get "/admin/projects", filter: "work"
 
-        expect(page).to have_css(".card-label", text: "Work history")
         expect(page).to have_css(".card-title", text: "Shown under Work on /projects")
       end
 
@@ -90,14 +89,14 @@ RSpec.describe "Admin work history", type: :request do
         create(:work_entry, blurb: "Built things")
         get "/admin/projects", filter: "work"
 
-        expect(page).to have_css(".proj-tagline", exact_text: "Built things")
+        expect(page).to have_css(".work-row-blurb", exact_text: "Built things")
       end
 
       it "leaves the blurb out when there is none" do
         create(:work_entry, blurb: nil)
         get "/admin/projects", filter: "work"
 
-        expect(page).to have_no_css(".proj-tagline")
+        expect(page).to have_no_css(".work-row-blurb")
       end
 
       it "offers Remove on every row" do

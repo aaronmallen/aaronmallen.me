@@ -27,14 +27,12 @@ module Admin
           def archived? = @project&.archived? || false
 
           def columns
-            div(class: "editor") do
-              SideStack do
-                PublicCopy(values: @values, errors: @errors)
-                Preview(values: @values, release:, stars:)
-              end
-              SideStack do
+            div(class: "g-main") do
+              PublicCopy(values: @values, errors: @errors)
+              aside(class: "project-side") do
                 Repository(values: @values, errors: @errors, release:, stars:)
                 Placement(values: @values, errors: @errors, archived: archived?)
+                Preview(values: @values, release:, stars:)
               end
             end
           end

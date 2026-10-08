@@ -5,7 +5,7 @@ module Admin
     module Components
       module People
         class PersonForm < Component
-          DELETE_FORM = "person-delete"
+          SCOPE = "person"
           EDIT = "edit"
           NEW = "new"
           FIELDS = {
@@ -20,18 +20,15 @@ module Admin
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
           prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
+          prop :scope, Blog::Types::String, default: SCOPE
+
+          def self.delete_form(scope) = "#{scope}-delete"
 
           def view_template
             Form(action: form_action, data: { person_form: @person ? EDIT : NEW }) do
-              div(class: "form-stack") do
-                input_field(:name)
-                input_field(:key) { Hint { t(".key_note") } }
-                input_field(:mastodon_handle)
-                input_field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
-                FieldError(field: :handles, errors: @errors)
-                actions
-              end
+              div(class: "form-stack") { fields }
             end
+            delete_form if @person
           end
 
           private
@@ -44,7 +41,28 @@ module Admin
           end
 
           def delete_button
-            Button(variant: :warn, type: "submit", form: DELETE_FORM, icon: "fa-regular fa-trash-can") { t(".delete") }
+            Button(variant: :warn, type: "submit", form: delete_form_id, icon: "fa-regular fa-trash-can") do
+              t(".delete")
+            end
+          end
+
+          def delete_form
+            Form(
+              id: delete_form_id,
+              action: path(:admin_delete_person, id: @person.id),
+              data: { confirm: t(".confirm_delete", name: @person.name) },
+            )
+          end
+
+          def delete_form_id = self.class.delete_form(@scope)
+
+          def fields
+            input_field(:name)
+            input_field(:key) { Hint { t(".key_note") } }
+            input_field(:mastodon_handle)
+            input_field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
+            FieldError(field: :handles, errors: @errors, scope: @scope)
+            actions
           end
 
           def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
@@ -52,7 +70,7 @@ module Admin
           def input_field(name)
             label_key, placeholder_key = FIELDS.fetch(name)
 
-            Field(label: t(label_key), name:, errors: @errors, error: FieldError) do |control, field|
+            Field(label: t(label_key), name:, errors: @errors, error: FieldError, scope: @scope) do |control, field|
               Input(
                 **control,
                 autocomplete: "off",
@@ -70,7 +88,7 @@ module Admin
 
           def search(name)
             network = SEARCHES[name]
-            Search(network:) if @searchable.include?(network)
+            Search(network:, scope: @scope) if @searchable.include?(network)
           end
         end
       end

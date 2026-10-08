@@ -9,7 +9,7 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Card(label: t(".heading"), title: t(".title")) do
+            Card(title: t(".title")) do
               div(class: "form-stack") do
                 tagline_field
                 og_image_url_field

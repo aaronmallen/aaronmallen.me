@@ -879,7 +879,6 @@ en:
       people:
         editor:
           all_people: "All people"
-          confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
           new_person: "New person"
           sub: "Give them a Mastodon handle, a Bluesky handle, or both."
         field_error:
@@ -904,6 +903,7 @@ en:
           bluesky_handle: "Bluesky handle"
           bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
           bluesky_handle_placeholder: "ada.bsky.social"
+          confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
           delete: "Remove"
           key: "Key"
           key_note: "A post mentions them as @{key}. Lowercase words joined by hyphens."
@@ -1084,9 +1084,7 @@ en:
           heading: "Preview"
           name_placeholder: "project-name"
           tagline_placeholder: "One sentence about the project."
-          title: "Project card"
         public_copy:
-          heading: "Public copy"
           og_image_url: "Card image"
           og_image_url_note: "A link to an image you host. The first card with one gives /projects its social card."
           og_image_url_placeholder: "https://example.com/card.png"
@@ -1837,7 +1835,6 @@ en:
           title: "Settings"
       work_entries:
         entry_form:
-          heading: "Add"
           title: "A new role"
         field_error:
           from_year:
@@ -2083,9 +2080,6 @@ en:
           archive_note: "Archiving keeps the repo link and history but removes the project from /projects."
           archived: "archived"
           archived_count: "%{count} archived"
-          archived_hint: "hidden from the public page"
-          archived_label: "Archive"
-          archived_title: "Archived projects"
           empty:
             archived: "Nothing archived yet."
             live: "No live projects."
@@ -2094,14 +2088,11 @@ en:
           heading: "Projects"
           live: "live"
           live_count: "%{count} live"
-          live_label: "Active"
-          live_title: "Active projects"
           new_project: "New project"
           stars_count:
             one: "%{stars} star total"
             other: "%{stars} stars total"
           work: "work"
-          work_label: "Work history"
           work_linked: "%{role} at %{org}"
           work_title: "Shown under Work on /projects"
         new:

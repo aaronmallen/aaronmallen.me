@@ -7,7 +7,6 @@ module Admin
         class Row < Component
           ARCHIVE = [:admin_archive_project, ".archive", "fa-solid fa-box-archive", :gh].freeze
           EDIT_ICON = "fa-regular fa-pen-to-square"
-          MONO = { class: "mono" }.freeze
           PRIVATE = Blog::Types::ProjectVisibility["private"]
           RESTORE = [:admin_restore_project, ".restore", "fa-solid fa-rotate-left", nil].freeze
 
@@ -15,14 +14,23 @@ module Admin
           prop :filter, Blog::Types::String
 
           def view_template
-            ListItem(title: @project.name, href: path(:admin_edit_project, id: @project.id), link: MONO) do |item|
-              item.body { p(class: "proj-tagline") { @project.tagline } } if written?(@project.tagline)
-              item.meta { meta }
-              side
+            section(class: "card project-card", data: { key_row: true }) do
+              div(class: "project-card-head") do
+                a(class: "project-card-name", href: edit_path, data: { key_open: true }) { @project.name }
+                pills
+                div(class: "project-card-acts") { acts }
+              end
+              p(class: "project-card-tagline") { @project.tagline } if written?(@project.tagline)
+              p(class: "project-card-meta") { meta }
             end
           end
 
           private
+
+          def acts
+            change(*(@project.archived? ? RESTORE : ARCHIVE))
+            Button(href: edit_path, small: true, icon: EDIT_ICON) { t(".edit") }
+          end
 
           def archived_on
             span { t(".archived_on", date: l(@project.archived_on, format: :medium)) }
@@ -35,35 +43,29 @@ module Admin
             end
           end
 
-          def edit
-            Button(href: path(:admin_edit_project, id: @project.id), small: true, icon: EDIT_ICON) { t(".edit") }
-          end
+          def edit_path = path(:admin_edit_project, id: @project.id)
 
           def hidden
             Pill(color: :sand, icon: "fa-solid fa-lock") { t(".private") }
           end
 
           def meta
-            p(class: "proj-meta") do
-              repo if written?(@project.repo)
-              @project.tags.each { Tag(tag: it) }
-              stars
-              span { @project.release } if written?(@project.release)
-              archived_on if @project.archived_on
-            end
+            repo if written?(@project.repo)
+            @project.tags.each { Tag(tag: it) }
+            stars
+            span { @project.release } if written?(@project.release)
+            archived_on if @project.archived_on
+          end
+
+          def pills
+            hidden if @project.visibility == PRIVATE
+            Projects::StatusPill(archived: @project.archived?)
           end
 
           def repo
             span do
               IconLabel(icon: "fa-brands fa-github") { @project.repo }
             end
-          end
-
-          def side
-            hidden if @project.visibility == PRIVATE
-            Projects::StatusPill(archived: @project.archived?)
-            change(*(@project.archived? ? RESTORE : ARCHIVE))
-            edit
           end
 
           def stars

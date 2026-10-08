@@ -14,7 +14,7 @@ module Admin
             content_for(:title, @editor[:project].name)
 
             Editor(**@editor)
-            linked
+            div(class: "g-main project-linked") { linked }
           end
 
           private

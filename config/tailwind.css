@@ -2424,34 +2424,6 @@
   @apply border-t border-dashed border-line py-6 text-center meta;
 }
 
-@utility proj-tagline {
-  @apply text-li text-ink-muted;
-}
-
-@utility proj-move {
-  @apply flex flex-col;
-
-  @media (width < 43.75rem) {
-    @apply flex-row;
-  }
-}
-
-@utility proj-caret {
-  @apply border-transparent bg-transparent px-1.5 py-0 text-icon leading-[0.7] disabled:opacity-30;
-
-  @media (width < 43.75rem) {
-    @apply leading-none;
-  }
-}
-
-@utility proj-meta {
-  @apply flex flex-wrap items-center gap-x-3 gap-y-1.5 meta;
-
-  & > span {
-    @apply inline-flex items-center gap-1;
-  }
-}
-
 @utility wm-excerpt {
   @apply font-serif text-li text-ink-muted;
 
@@ -3141,6 +3113,108 @@
 
 @utility decision-editor-acts {
   @apply flex flex-wrap gap-2;
+}
+
+@utility person-row {
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply first:pt-0 last:border-b-0 last:pb-0;
+}
+
+@utility person-row-body {
+  @apply min-w-0;
+}
+
+@utility person-row-name {
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap items-center;
+  }
+}
+
+@utility person-row-meta {
+  @apply mt-1.5 flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+}
+
+@utility person-row-token {
+  @apply text-ink;
+}
+
+@utility project-card {
+  @apply flex flex-col gap-2.5;
+}
+
+@utility project-card-head {
+  @apply flex flex-wrap items-center gap-2.5;
+}
+
+@utility project-card-name {
+  @apply font-mono text-[1.15rem] font-medium text-ink no-underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap items-center;
+  }
+}
+
+@utility project-card-acts {
+  @apply ml-auto flex flex-wrap items-center gap-1.5;
+}
+
+@utility project-card-tagline {
+  @apply text-[1.02rem] leading-normal text-ink;
+}
+
+@utility project-card-meta {
+  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+
+  & > span {
+    @apply inline-flex items-center gap-1;
+  }
+}
+
+@utility project-side {
+  @apply flex min-w-0 flex-col gap-stack;
+
+  & > .card {
+    @apply bg-transparent;
+  }
+
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+}
+
+@utility project-linked {
+  @apply mt-stack;
+}
+
+@utility work-row {
+  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply first:pt-0 last:border-b-0 last:pb-0;
+
+  @media (width < 43.75rem) {
+    @apply grid-cols-1;
+  }
+}
+
+@utility work-row-body {
+  @apply min-w-0;
+}
+
+@utility work-row-title {
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink;
+}
+
+@utility work-row-meta {
+  @apply mt-1.5 font-mono text-badge text-ink-muted;
+}
+
+@utility work-row-blurb {
+  @apply mt-1.5 leading-normal text-ink-muted;
+}
+
+@utility work-row-acts {
+  @apply flex flex-wrap items-center gap-1.5;
 }
 
 @utility task-stbar {

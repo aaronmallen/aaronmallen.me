@@ -11,14 +11,22 @@ module Admin
           prop :linking, Blog::Types::Bool, default: false
 
           def view_template
-            ListItem(title: @entry.role, sub:) do |item|
-              item.body { p(class: "proj-tagline") { @entry.blurb } } if written?(@entry.blurb)
-              links
-              remove
+            div(class: "work-row", data: { key_row: true }) do
+              div(class: "work-row-body") { body }
+              div(class: "work-row-acts") do
+                links
+                remove
+              end
             end
           end
 
           private
+
+          def body
+            p(class: "work-row-title") { @entry.role }
+            p(class: "work-row-meta") { sub }
+            p(class: "work-row-blurb") { @entry.blurb } if written?(@entry.blurb)
+          end
 
           def confirm = t(".confirm_remove", org: @entry.org, role: @entry.role)
 

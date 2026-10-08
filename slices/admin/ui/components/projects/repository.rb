@@ -11,7 +11,7 @@ module Admin
           prop :stars, Blog::Types::Integer
 
           def view_template
-            Card(label: t(".heading")) do
+            Card(title: t(".heading")) do
               div(class: "form-stack") do
                 repo_field
                 url_field

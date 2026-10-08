@@ -9,7 +9,7 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template
-            Card(label: t(".heading"), title: t(".title")) { Fields(values: @values, errors: @errors) }
+            Card(title: t(".title")) { Fields(values: @values, errors: @errors) }
           end
         end
       end

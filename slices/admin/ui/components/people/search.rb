@@ -6,10 +6,11 @@ module Admin
       module People
         class Search < Component
           prop :network, Blog::Types::NetworkName
+          prop :scope, Blog::Types::String, default: PersonForm::SCOPE
 
-          def self.input_id(network) = "person-#{network}-search"
+          def self.input_id(network, scope = PersonForm::SCOPE) = "#{scope}-#{network}-search"
 
-          def self.list_id(network) = "person-#{network}-results"
+          def self.list_id(network, scope = PersonForm::SCOPE) = "#{scope}-#{network}-results"
 
           def view_template
             div(class: "person-search", hidden: true, data:) do
@@ -47,9 +48,9 @@ module Admin
             }
           end
 
-          def input_id = self.class.input_id(@network)
+          def input_id = self.class.input_id(@network, @scope)
 
-          def list_id = self.class.list_id(@network)
+          def list_id = self.class.list_id(@network, @scope)
 
           def network_label = t(Structs::Network::LABELS.fetch(@network))
         end

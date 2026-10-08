@@ -343,7 +343,7 @@ RSpec.describe "Admin keys", type: :feature do
 
     {
       "/admin/posts" => "/admin/posts/new", "/admin/projects" => "/admin/projects/new",
-      "/admin/decisions" => "/admin/decisions/new", "/admin/people" => "/admin/people/new",
+      "/admin/decisions" => "/admin/decisions/new",
     }.each do |screen, form|
       it "opens #{form} from #{screen}" do
         visit screen
@@ -351,6 +351,13 @@ RSpec.describe "Admin keys", type: :feature do
 
         expect(page).to have_current_path(form)
       end
+    end
+
+    it "opens the new person drawer on /admin/people" do
+      visit "/admin/people"
+      press("c")
+
+      expect(page).to have_css("dialog#person-new-drawer[open] form[data-person-form='new']")
     end
 
     ["/admin", "/admin/tasks", "/admin/analytics"].each do |screen|

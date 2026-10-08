@@ -150,6 +150,33 @@ RSpec.describe "Admin people", type: :feature do
     expect(page).to have_field("Search Mastodon").and have_no_field("Search Bluesky")
   end
 
+  describe "the drawers" do
+    let!(:person) { create(:person, name: "Ada Lovelace", key: "ada") }
+
+    before { visit "/admin/people" }
+
+    it "opens a person's editor from their name" do
+      click_link "Ada Lovelace"
+
+      expect(page).to have_field("person-#{person.id}-key", with: "ada")
+    end
+
+    it "saves from the drawer" do
+      click_link "Ada Lovelace"
+      fill_in "person-#{person.id}-name", with: "Countess Ada"
+      within("#person-#{person.id}-drawer") { click_button "Save" }
+
+      expect(page).to have_css(".person-row-name", text: "Countess Ada")
+    end
+
+    it "fills the key from the name in the new person drawer" do
+      click_link "New person"
+      fill_in "person-new-name", with: "Grace Hopper"
+
+      expect(page).to have_field("person-new-key", with: "grace-hopper")
+    end
+  end
+
   describe "removing a person" do
     let!(:person) { create(:person, name: "Ada Lovelace") }
 
@@ -158,7 +185,7 @@ RSpec.describe "Admin people", type: :feature do
     it "asks with the confirmation text" do
       message = confirm_no { click_button "Remove" }
 
-      expect(message).to eq(translate("ui.components.people.editor.confirm_delete", name: "Ada Lovelace"))
+      expect(message).to eq(translate("ui.components.people.person_form.confirm_delete", name: "Ada Lovelace"))
     end
 
     it "keeps them when I don't confirm" do

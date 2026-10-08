@@ -53,7 +53,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
 
       it "heads the card holding owner/repo and the link Source", :aggregate_failures do
-        card = page.find(".card-label", text: "Source").ancestor(".card")
+        card = page.find(".card-title", text: "Source").ancestor(".card")
 
         expect(card).to have_field("owner/repo")
         expect(card).to have_field("Link")
@@ -590,11 +590,11 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
 
       it "offers Edit on a row" do
-        expect(page).to have_css(".li-side a[href='/admin/projects/#{project.id}/edit']", text: "Edit")
+        expect(page).to have_css(".project-card-acts a[href='/admin/projects/#{project.id}/edit']", text: "Edit")
       end
 
       it "links the name to the editor" do
-        expect(page).to have_css("a.li-title[href='/admin/projects/#{project.id}/edit']", text: project.name)
+        expect(page).to have_css("a.project-card-name[href='/admin/projects/#{project.id}/edit']", text: project.name)
       end
     end
   end

@@ -48,36 +48,54 @@ RSpec.describe "Admin people", type: :request do
         create(:person, name: "Ada Lovelace")
         get "/admin/people"
 
-        expect(page.all(".li-title").map(&:text)).to eq(["Ada Lovelace", "Grace Hopper"])
+        expect(page.all(".person-row-name").map(&:text)).to eq(["Ada Lovelace", "Grace Hopper"])
       end
 
       it "shows the token and each handle a person has" do
         create(:person, :bluesky, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social")
         get "/admin/people"
 
-        expect(page.find(".li-sub").text).to eq("@{ada} · @ada@ruby.social · @ada.bsky.social")
+        expect(page.all(".person-row-meta span").map(&:text))
+          .to eq(["@{ada}", "@ada@ruby.social", "@ada.bsky.social"])
       end
 
       it "links each person to their editor" do
         person = create(:person)
         get "/admin/people"
 
-        expect(page).to have_css("a.li-title[href='/admin/people/#{person.id}/edit']")
+        expect(page).to have_css("a.person-row-name[href='/admin/people/#{person.id}/edit']")
+      end
+
+      it "opens each person's editor in a drawer the page draws" do
+        person = create(:person)
+        get "/admin/people"
+
+        expect(page).to have_css("a.person-row-name[data-dialog-open='person-#{person.id}-drawer']")
+          .and have_css("dialog#person-#{person.id}-drawer form[action='/admin/people/#{person.id}']", visible: :all)
+      end
+
+      it "offers a remove in each person's drawer" do
+        person = create(:person)
+        get "/admin/people"
+
+        expect(page).to have_css(
+          "dialog#person-#{person.id}-drawer form#person-#{person.id}-delete[data-confirm]", visible: :all,
+        )
+      end
+
+      it "opens a new person in a drawer the page draws" do
+        get "/admin/people"
+
+        expect(page).to have_css("a[href='/admin/people/new'][data-dialog-open='person-new-drawer']")
+          .and have_css("dialog#person-new-drawer form[action='/admin/people'][data-person-form='new']", visible: :all)
       end
 
       it "shows a Bluesky and a Mastodon icon beside the name of someone on both" do
         create(:person, :bluesky, name: "Ada Lovelace")
         get "/admin/people"
 
-        expect(page.all(".li-head .person-link i").map { it[:class] })
+        expect(page.all(".person-row .person-link i").map { it[:class] })
           .to eq(["fa-brands fa-bluesky", "fa-brands fa-mastodon"])
-      end
-
-      it "draws no side column on a row with nothing beside it" do
-        create(:person)
-        get "/admin/people"
-
-        expect(page).to have_css(".li").and have_no_css(".li-side")
       end
 
       it "shows only the icon of the one network someone is on" do

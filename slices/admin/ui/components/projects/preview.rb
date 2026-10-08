@@ -10,7 +10,7 @@ module Admin
           prop :stars, Blog::Types::Integer
 
           def view_template
-            Card(label: t(".heading"), title: t(".title")) do
+            Card(title: t(".heading")) do
               div(class: "projs", data: preview_data) { card }
             end
           end

@@ -60,11 +60,11 @@ RSpec.describe "Admin work history", type: :feature do
     end
 
     it "lists the role" do
-      expect(page).to have_css(".li-title", text: "Software Engineer")
+      expect(page).to have_css(".work-row-title", text: "Software Engineer")
     end
 
     it "reads a role with no end year as current" do
-      expect(page).to have_css(".li-sub", text: "Rackspace · 2018–Present")
+      expect(page).to have_css(".work-row-meta", text: "Rackspace · 2018–Present")
     end
 
     it "shows the role on the public page" do
@@ -102,7 +102,7 @@ RSpec.describe "Admin work history", type: :feature do
     it "takes the role off the list" do
       confirm_yes { click_button "Remove" }
 
-      expect(page).to have_no_css(".li-title", text: "Software Engineer")
+      expect(page).to have_no_css(".work-row-title", text: "Software Engineer")
     end
 
     it "takes the role off the public page" do

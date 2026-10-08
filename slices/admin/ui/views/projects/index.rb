@@ -11,7 +11,6 @@ module Admin
           LIVE = Blog::Types::ProjectFilter["live"]
           WORK = Blog::Types::ProjectFilter["work"]
 
-          CARDS = { LIVE => [".live_label", ".live_title"], ARCHIVED => [".archived_label", ".archived_title"] }.freeze
           EMPTY = { LIVE => ".empty.live", ARCHIVED => ".empty.archived", WORK => ".empty.work" }.freeze
           FILTERS = {
             LIVE => "ui.views.projects.index.live",
@@ -34,21 +33,16 @@ module Admin
               filter_form
               CreateLink(href: path(:admin_new_project), label: t(".new_project"))
             end
-            work? ? work : card
+            work? ? work : cards
             Hint { t(".archive_note") } if @filter == LIVE
           end
 
           private
 
-          def archived? = @filter == ARCHIVED
+          def cards
+            return Empty { t(EMPTY.fetch(@filter)) } if @projects.empty?
 
-          def card
-            label_key, title_key = CARDS.fetch(@filter)
-
-            Card(label: t(label_key), title: t(title_key), data: { key_list: true }) do |card|
-              card.side { Hint(inline: true) { t(".archived_hint") } } if archived?
-              rows
-            end
+            div(class: "cols", data: { key_list: true }) { @projects.each { Row(project: it, filter: @filter) } }
           end
 
           def filter_form
@@ -61,12 +55,6 @@ module Admin
             )
           end
 
-          def rows
-            return Empty { t(EMPTY.fetch(@filter)) } if @projects.empty?
-
-            @projects.each { Row(project: it, filter: @filter) }
-          end
-
           def sub
             dotted(
               t(".live_count", count: @live_count),
@@ -76,9 +64,9 @@ module Admin
           end
 
           def work
-            Grid(columns: 2) do
-              Card(label: t(".work_label"), title: t(".work_title"), data: { key_list: true }) { work_rows }
-              SideStack do
+            div(class: "g-main") do
+              Card(title: t(".work_title"), data: { key_list: true }) { work_rows }
+              aside(class: "project-side") do
                 work_linked if @work_links
                 Components::WorkEntries::EntryForm(values: @work_values, errors: @work_errors)
               end

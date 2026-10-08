@@ -5,9 +5,9 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:repo) { Projects::Slice["repos.project_queries"] }
 
-  def meta = page.all(".proj-meta > span").map(&:text)
+  def meta = page.all(".project-card-meta > span").map(&:text)
 
-  def names = page.all(".li .li-title").map(&:text)
+  def names = page.all(".project-card-name").map(&:text)
 
   describe "signed in" do
     before { sign_in_to_admin }
@@ -106,14 +106,14 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         project
         get "/admin/projects"
 
-        expect(page).to have_css(".li-title.mono", exact_text: "aube")
+        expect(page).to have_css(".project-card-name", exact_text: "aube")
       end
 
       it "shows the tagline" do
         project
         get "/admin/projects"
 
-        expect(page).to have_css(".proj-tagline", exact_text: "A node package manager")
+        expect(page).to have_css(".project-card-tagline", exact_text: "A node package manager")
       end
 
       it "shows the repo, the stars and the release" do
@@ -127,21 +127,21 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         project
         get "/admin/projects"
 
-        expect(page.find(".proj-meta")).to have_link("#rust", href: "/admin/tags/rust", class: "tag")
+        expect(page.find(".project-card-meta")).to have_link("#rust", href: "/admin/tags/rust", class: "tag")
       end
 
       it "names the star count once, for a screen reader" do
         project
         get "/admin/projects"
 
-        expect(page).to have_css(".proj-meta span[role='img'][aria-label='21 stars']", visible: :all)
+        expect(page).to have_css(".project-card-meta span[role='img'][aria-label='21 stars']", visible: :all)
       end
 
       it "marks the repo with the GitHub icon" do
         project
         get "/admin/projects"
 
-        expect(page).to have_css(".proj-meta i.fa-brands.fa-github", visible: :all)
+        expect(page).to have_css(".project-card-meta i.fa-brands.fa-github", visible: :all)
       end
 
       it "leaves out a meta field the project has not got" do
@@ -156,14 +156,14 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         create(:project, :archived, name: "gone", archived_on: on)
         get "/admin/projects", filter: "archived"
 
-        expect(page).to have_css(".proj-meta", text: "archived #{on.strftime('%b %-d, %Y')}")
+        expect(page).to have_css(".project-card-meta", text: "archived #{on.strftime('%b %-d, %Y')}")
       end
 
       it "shows a private pill on a private project" do
         create(:project, :private)
         get "/admin/projects"
 
-        expect(page).to have_css(".li-side .pill.sand", text: "private")
+        expect(page).to have_css(".project-card-head .pill.sand", text: "private")
       end
 
       it "draws the private pill's icon hidden beside its label" do
@@ -177,7 +177,7 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         project
         get "/admin/projects"
 
-        expect(page).to have_no_css(".li-side .pill.sand")
+        expect(page).to have_no_css(".project-card-head .pill.sand")
       end
 
       it "offers no move controls" do
@@ -223,15 +223,15 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
         create(:project)
         get "/admin/projects"
 
-        expect(page).to have_css(".li-side .pill.green", text: "active")
+        expect(page).to have_css(".project-card-head .pill.green", text: "active")
       end
 
       it "leaves the archived pill without a color" do
         create(:project, :archived)
         get "/admin/projects", filter: "archived"
 
-        expect(page).to have_css(".li-side .pill", text: "archived")
-          .and have_no_css(".li-side .pill.green")
+        expect(page).to have_css(".project-card-head .pill", text: "archived")
+          .and have_no_css(".project-card-head .pill.green")
       end
     end
 
@@ -250,18 +250,11 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     end
 
     describe "the card and the note" do
-      it "labels the live card", :aggregate_failures do
+      it "draws each project as a card in columns" do
+        create(:project, name: "aube")
         get "/admin/projects"
 
-        expect(page).to have_css(".card-label", text: "Active")
-        expect(page).to have_css(".card-title", text: "Active projects")
-      end
-
-      it "labels the archived card", :aggregate_failures do
-        get "/admin/projects", filter: "archived"
-
-        expect(page).to have_css(".card-label", text: "Archive")
-        expect(page).to have_css(".card-title", text: "Archived projects")
+        expect(page).to have_css(".cols > .card.project-card", count: 1)
       end
 
       it "notes what archiving does under the live list" do

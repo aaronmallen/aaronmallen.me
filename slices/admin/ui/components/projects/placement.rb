@@ -16,7 +16,7 @@ module Admin
           prop :archived, Blog::Types::Bool
 
           def view_template
-            Card(label: t(".heading")) do
+            Card(title: t(".heading")) do
               div(class: "form-stack") do
                 visibility_field
                 archived_status if @archived

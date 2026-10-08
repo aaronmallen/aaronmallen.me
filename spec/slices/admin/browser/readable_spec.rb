@@ -66,6 +66,11 @@ RSpec.describe "Admin screens", type: :feature do
       "inline confirm" => -> { open_confirm },
       "palette" => -> { open_palette },
       "person dialog" => -> { open_person_dialog },
+      "person drawer" => lambda do
+        visit "/admin/people"
+        click_link person.name
+        find("dialog#person-#{person.id}-drawer[open] form[data-person-form]")
+      end,
       "snooze drawer" => -> { open_snooze },
       "task modal" => -> { open_modal },
       "task panel" => -> { open_panel },
