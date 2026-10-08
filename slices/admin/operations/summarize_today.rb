@@ -17,6 +17,7 @@ module Admin
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
+        oauth_client_queries: "mcp.repos.oauth_client_queries",
         post_queries: "posts.repos.post_queries",
         social_post_queries: "social.repos.social_post_queries",
         sync_state_queries: "record.repos.sync_state_queries",
@@ -28,13 +29,13 @@ module Admin
 
         {
           **publishing(now),
+          **counts(now),
           attention: attention(now),
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
           sprint:,
           sync_failures: failures,
-          visitors: event_queries.visitors_on(Blog::TimeZone.today(now)),
           webmentions:,
         }
       end
@@ -57,6 +58,10 @@ module Admin
         found = country_queries.database_failure
 
         { reason: found.to_s, repo: nil, sync: COUNTRIES } if found
+      end
+
+      def counts(now)
+        { clients: oauth_client_queries.connected.size, visitors: event_queries.visitors_on(Blog::TimeZone.today(now)) }
       end
 
       def draft_counts(drafts)

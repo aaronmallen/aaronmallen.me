@@ -10,15 +10,20 @@ module Admin
         NEW_DEVICE = Blog::Types::AttentionKind["new_device"]
         NEXT = Blog::Types::TaskFilter["next"]
         ORIGIN = Blog::Types::TaskOrigin["today"]
+        PENDING = Blog::Types::WebmentionStatus["pending"]
         SOMEDAY = Blog::Types::AttentionKind["someday"]
 
         prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Data))
+        prop :failures, Blog::Types::Array.of(Blog::Types::Hash)
+        prop :webmentions, Blog::Types::Integer
 
         def view_template
-          return if @rows.empty?
+          return if total.zero?
 
-          Card(title: t(".title"), data: { attention: "", key_list: true }) do |card|
-            card.side { span(class: "meta") { t(".count", count: @rows.size) } }
+          Card(title: t(".title"), class: "today-need", data: { attention: "", key_list: true }) do |card|
+            card.side { span(class: "meta") { total.to_s } }
+            SyncFailures(failures: @failures)
+            webmentions
             @rows.each { row(it) }
           end
         end
@@ -33,7 +38,9 @@ module Admin
         end
 
         def draft(row)
-          ListItem(title: row.title, href: edit_post_path(row), sub: t(".untouched", count: row.days)) do
+          sub = t(".untouched", count: row.days)
+
+          ListItem(title: row.title, href: edit_post_path(row), sub:, icon: "fa-regular fa-file-lines") do
             Button(href: edit_post_path(row), small: true) { t(".open") }
             snooze(row)
           end
@@ -48,7 +55,9 @@ module Admin
         def journal(row)
           href = "##{TodayJournalCard::FORM_ID}"
 
-          ListItem(title: t(".journal"), href:, sub: t(".journal_gap", count: row.days)) do
+          sub = t(".journal_gap", count: row.days)
+
+          ListItem(title: t(".journal"), href:, sub:, icon: "fa-solid fa-feather") do
             Button(href:, small: true) { t(".write") }
             snooze(row)
           end
@@ -61,13 +70,15 @@ module Admin
         end
 
         def new_device(row)
-          ListItem(title: row.title, href: nil, sub: t(".first_seen", count: row.days)) { snooze(row) }
+          sub = t(".first_seen", count: row.days)
+
+          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved") { snooze(row) }
         end
 
         def row(row)
           case row.kind
-            when CARRIED then task(row, t(".carried", count: row.days))
-            when SOMEDAY then task(row, t(".untouched", count: row.days))
+            when CARRIED then task(row, t(".carried", count: row.days), "fa-solid fa-rotate-left")
+            when SOMEDAY then task(row, t(".untouched", count: row.days), "fa-regular fa-hourglass")
             when DRAFT then draft(row)
             when JOURNAL then journal(row)
             when NEW_DEVICE then new_device(row)
@@ -82,8 +93,8 @@ module Admin
           end
         end
 
-        def task(row, sub)
-          ListItem(title: row.title, href: path(:admin_task, id: row.record_id, origin: ORIGIN), sub:) do
+        def task(row, sub, icon)
+          ListItem(title: row.title, href: path(:admin_task, id: row.record_id, origin: ORIGIN), sub:, icon:) do
             move(row)
             cancel(row)
             snooze(row)
@@ -94,6 +105,17 @@ module Admin
           Form(action: path(route, id: row.record_id, **params), data:) do
             input(type: "hidden", name: "origin", value: ORIGIN)
             icon_button(label, icon)
+          end
+        end
+
+        def total = @rows.size + @failures.size + (@webmentions.positive? ? 1 : 0)
+
+        def webmentions
+          return unless @webmentions.positive?
+
+          a(class: "today-line", href: path(:admin_webmentions, status: PENDING)) do
+            span { t(".webmentions") }
+            span(class: "today-line-value warn") { t(".waiting", count: @webmentions) }
           end
         end
       end

@@ -71,12 +71,14 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_title("Today | Admin | #{Hanami.app.settings.owner_name}")
     end
 
-    it "renders the page head in the page" do
-      expect(page).to have_css("main#main .page-head h1", text: Blog::TimeZone.today.strftime("%A, %B %-d"))
+    it "renders the page head in the page, with the date in its kicker", :aggregate_failures do
+      expect(page).to have_css("main#main .page-head h1", text: Admin::Slice["i18n"].t("ui.views.today.show.headline.empty"))
+      expect(page).to have_css("main#main .page-head-kicker", text: Blog::TimeZone.today.strftime("%A, %B %-d"))
     end
 
-    it "renders sign out as a submit button in the page head" do
-      expect(page).to have_css(".page-head-actions form button.btn[type='submit']", text: "Sign out")
+    it "renders sign out as a submit button in the avatar menu, not in the page", :aggregate_failures do
+      expect(page).to have_css("#avatar-menu form button[type='submit']", text: "Sign out", visible: :all)
+      expect(page).to have_no_css("main form[action='/admin/sign-out']", visible: :all)
     end
 
     it "renders the palette and no slash button", :aggregate_failures do

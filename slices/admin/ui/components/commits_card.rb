@@ -14,10 +14,12 @@ module Admin
         prop :repos, Blog::Types::Integer
         prop :today, Blog::Types::Date
         prop :configured, Blog::Types::Bool
+        prop :totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
 
         def view_template
-          Card(label: t(".label"), title: t(".title")) do |card|
+          Card(title: t(".title")) do |card|
             card.side { import_form }
+            stat
             sub_line
             Hint { t(".no_token") } unless @configured
             entry_list
@@ -54,13 +56,20 @@ module Admin
         def entry_list
           return Empty { t(".empty") } if @entries.empty?
 
-          div(class: "commits") { @entries.each { entry_row(it) } }
-          activity_link
+          p(class: "today-para") { t(".latest", subject: subject(@entries.first)) }
+          details(class: "today-more") do
+            summary do
+              Icon("fa-solid fa-chevron-right today-more-chev")
+              plain t(".commits")
+            end
+            div(class: "commits") { @entries.each { entry_row(it) } }
+            activity_link
+          end
         end
 
         def entry_main(commit)
           div(class: "commit-main") do
-            p(class: "commit-message") { Helpers::CommitMessage.subject(commit.message) }
+            a(class: "commit-message", href: path(:admin_commit, id: commit.id)) { subject(commit) }
             p(class: "commit-meta") { "#{commit.repo}#{DOT}#{l(commit.commit_time, format: :clock)}" }
           end
         end
@@ -90,12 +99,27 @@ module Admin
 
         def stamped(text, format) = Stamped(text: "#{text}#{repos}", at: @last_synced_at, format:)
 
+        def stat
+          return if @totals[:commits].zero?
+
+          p(class: "today-stat") do
+            plain t(".count", count: @totals[:commits])
+            small do
+              span(class: "commit-added") { "+#{@totals[:additions]}" }
+              whitespace
+              span(class: "commit-removed") { "−#{@totals[:deletions]}" }
+            end
+          end
+        end
+
         def sub_line
           p(class: "commits-sub") do
             Icon("fa-brands fa-github commits-sub-icon")
             synced
           end
         end
+
+        def subject(commit) = Helpers::CommitMessage.subject(commit.message)
 
         def synced
           return plain("#{t('.never_synced')}#{repos}") unless @last_synced_at

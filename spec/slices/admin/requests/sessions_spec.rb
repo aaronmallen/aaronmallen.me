@@ -146,7 +146,7 @@ RSpec.describe "Admin sessions", type: :request do
       sign_in
       follow_redirect!
 
-      token = page.find("main form[action='/admin/sign-out'] input[name='_csrf_token']", visible: :all)
+      token = page.find("#avatar-menu form[action='/admin/sign-out'] input[name='_csrf_token']", visible: :all)
 
       expect(token.value).to match(/\A\h{64}\z/)
     end

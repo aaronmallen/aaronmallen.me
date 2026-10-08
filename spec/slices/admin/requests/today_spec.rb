@@ -7,18 +7,18 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   let(:today) { Blog::TimeZone.today }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
-  def card(title) = page.find(".g-2 > .side-stack > section.card", text: title)
+  def card(title) = page.all("section.card").find { it.has_css?("h2.card-title", exact_text: title) }
 
-  def column(position) = page.all(".g-2 > .side-stack")[position]
+  def column(name) = page.all(".today-#{name} > section.card h2.card-title").map(&:text)
 
   def commit_mutations = Record::Slice["repos.commit_mutations"]
   def commit_queries = Record::Slice["repos.commit_queries"]
 
   def commit_row = commits_card.find(".commits .commit")
 
-  def commits_card = card("Commits imported today")
+  def commits_card = card("Shipped today")
 
-  def commits_stat = page.find(".g-4 .stat", text: "Commits")
+  def commits_stat = commits_card.find(".today-stat")
 
   def create_commit(**attributes) = create(:commit, **attributes)
 
@@ -33,9 +33,11 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
   def entry_body = card("Journal").find(".today-journal-entry .journal-entry-body")
 
-  def pending_card = card("Webmentions pending")
+  def line(label) = page.find(".today-line", text: label)
 
-  def queue_stat = page.find(".g-4 .stat", text: "In the queue")
+  def line_value(label) = line(label).find(".today-line-value").text
+
+  def mcp_create(name, *traits, **) = Spec::DB::Factories[:mcp].create(name, *traits, **)
 
   def save(**fields)
     post "/admin", _csrf_token: admin_csrf_token, entry: fields
@@ -45,15 +47,16 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
     Social::Slice["repos.social_post_mutations"].create_with_parts(targets:, status: "scheduled", posted_at: at, parts:)
   end
 
-  def titles(title) = card(title).all(".li-title").map(&:text)
+  def show_hidden
+    Capybara.ignore_hidden_elements = false
+    yield
+  ensure
+    Capybara.ignore_hidden_elements = true
+  end
 
   def visit_site(visitor, at: Time.now)
     create(:analytics_event, visitor_hash: Digest::SHA256.hexdigest(visitor), occurred_at: at)
   end
-
-  def visitors_stat = page.find(".g-4 .stat", text: "Unique visitors")
-
-  def webmentions_stat = page.find(".g-4 .stat", text: "Webmentions")
 
   def with_token
     connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
@@ -62,322 +65,106 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   describe "signed in" do
     before { sign_in_to_admin }
 
-    it "puts the journal and commit cards on the left and the post cards on the right", :aggregate_failures do
+    it "puts the sprint and journal on the left and Shipped today on the right", :aggregate_failures do
       get "/admin"
 
-      expect(column(0).all("h2.card-title").map(&:text))
-        .to eq(["Journal", "Commits imported today"])
-      expect(column(1).all("h2.card-title").map(&:text)).to eq(["What ships next", "Drafts"])
+      expect(column("main")).to eq(["Today's sprint", "Journal"])
+      expect(column("side")).to eq(["Shipped today"])
+    end
+
+    it "lists the quiet lines under Shipped today" do
+      get "/admin"
+
+      expect(page.all(".today-side > .today-quiet .today-line > span:first-child").map(&:text))
+        .to eq(["Journal", "What ships next", "Drafts", "Visitors", "MCP clients"])
+    end
+
+    it "shows no stat strip" do
+      get "/admin"
+
+      expect(page).to have_no_css(".stat")
     end
 
     describe "What ships next" do
-      it "lists scheduled posts, soonest first" do
-        create(:post, :scheduled, title: "Later", published_at: Time.now + 120)
-        create(:post, :scheduled, title: "Sooner", published_at: Time.now + 60)
+      it "links the soonest scheduled post to its editor" do
+        create(:post, :scheduled, published_at: Time.now + 120)
+        post = create(:post, :scheduled, published_at: Time.now + 60)
         get "/admin"
 
-        expect(titles("What ships next")).to eq(%w[Sooner Later])
+        expect(line("What ships next")[:href]).to eq("/admin/posts/#{post.id}/edit")
       end
 
-      it "leaves out drafts and published posts" do
-        create(:post, :draft, title: "Draft")
-        create(:post, :published, title: "Published")
-        get "/admin"
-
-        expect(titles("What ships next")).to be_empty
-      end
-
-      it "links each row to its editor" do
-        post = create(:post, :scheduled, title: "Linked")
-        get "/admin"
-
-        expect(card("What ships next")).to have_link("Linked", href: "/admin/posts/#{post.id}/edit", class: "li-title")
-      end
-
-      it "shows the Chicago publish time under the title" do
-        create(:post, :scheduled, published_at: Time.utc(2030, 1, 7, 15, 30))
-        get "/admin"
-
-        expect(card("What ships next")).to have_css(".li-sub", exact_text: "Jan 7, 2030, 09:30")
-      end
-
-      it "puts the publish time in a time tag" do
-        create(:post, :scheduled, published_at: Time.utc(2030, 1, 7, 15, 30))
-        get "/admin"
-
-        expect(card("What ships next").find(".li-sub time")[:datetime]).to eq("2030-01-07T09:30:00-06:00")
-      end
-
-      it "shows an empty state without scheduled posts" do
-        get "/admin"
-
-        expect(card("What ships next")).to have_css(".empty", exact_text: i18n.t("ui.components.ships_next_card.empty"))
-      end
-
-      it "lists scheduled social posts after the blog posts" do
-        create(:post, :scheduled, title: "Blog", published_at: Time.now + 600)
-        schedule_social("Social")
-        get "/admin"
-
-        expect(titles("What ships next")).to eq(%w[Blog Social])
-      end
-
-      it "lists scheduled social posts soonest first" do
-        schedule_social("Later", at: Time.now + 120)
-        schedule_social("Sooner", at: Time.now + 60)
-        get "/admin"
-
-        expect(titles("What ships next")).to eq(%w[Sooner Later])
-      end
-
-      it "leaves out drafted and posted social posts" do
-        create(:social_post, :draft)
-        create(:social_post, :posted)
-        get "/admin"
-
-        expect(card("What ships next")).to have_css(".empty")
-      end
-
-      it "opens the queue on the queued filter from a social row" do
-        schedule_social("Social")
-        get "/admin"
-
-        expect(card("What ships next"))
-          .to have_link("Social", href: "/admin/social?filter=queued", class: "li-title")
-      end
-
-      it "puts the Chicago time and the networks under a social post" do
-        schedule_social("Social", at: Time.utc(2030, 1, 7, 15, 30), targets: %w[mastodon bluesky])
-        get "/admin"
-
-        expect(card("What ships next"))
-          .to have_css(".li-sub", exact_text: "Jan 7, 2030, 09:30 · Mastodon + Bluesky")
-      end
-
-      it "puts a social post's time in a time tag" do
-        schedule_social("Social", at: Time.utc(2030, 1, 7, 15, 30))
-        get "/admin"
-
-        expect(card("What ships next").find(".li-sub time")[:datetime]).to eq("2030-01-07T09:30:00-06:00")
-      end
-
-      it "shortens a long social post to one line" do
-        schedule_social("#{'word ' * 20}end")
-        get "/admin"
-
-        expect(titles("What ships next")).to eq(["#{('word ' * 12).strip}…"])
-      end
-
-      it "reads a threaded social post by its first part" do
-        schedule_social("First", "Second")
-        get "/admin"
-
-        expect(titles("What ships next")).to eq(%w[First])
-      end
-
-      it "keeps a social post with line breaks on one line" do
-        schedule_social("First\n\nSecond")
-        get "/admin"
-
-        expect(titles("What ships next")).to eq(["First Second"])
-      end
-    end
-
-    describe "the In the queue stat" do
-      it "counts scheduled blog posts and scheduled social posts together", :aggregate_failures do
+      it "opens the queue on the queued filter when a social post goes first" do
         create(:post, :scheduled, published_at: Time.now + 600)
         schedule_social("Social")
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-key", exact_text: "In the queue")
-        expect(queue_stat).to have_css(".stat-value", exact_text: "2")
+        expect(line("What ships next")[:href]).to eq("/admin/social?filter=queued")
       end
 
-      it "leaves out drafts and published posts" do
-        create(:post, :draft)
-        create(:post, :published)
+      it "puts the Chicago time of the next item in a time tag", :aggregate_failures do
+        create(:post, :scheduled, published_at: Time.utc(2030, 1, 7, 15, 30))
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-value", exact_text: "0")
+        expect(line("What ships next").find("time")[:datetime]).to eq("2030-01-07T09:30:00-06:00")
+        expect(line_value("What ships next")).to eq("Jan 7, 2030, 09:30 · 1 queued")
       end
 
-      it "leaves out drafted and posted social posts" do
-        create(:social_post, :draft)
-        create(:social_post, :posted)
-        get "/admin"
-
-        expect(queue_stat).to have_css(".stat-value", exact_text: "0")
-      end
-
-      it "counts each kind of queued item", :aggregate_failures do
+      it "counts scheduled blog posts and scheduled social posts together" do
         2.times { |index| create(:post, :scheduled, published_at: Time.now + (60 * (index + 1))) }
         schedule_social("Social")
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-value", exact_text: "3")
-        expect(queue_stat).to have_css(".stat-change", exact_text: "2 posts · 1 social post")
+        expect(line_value("What ships next")).to end_with("· 3 queued")
       end
 
-      it "leaves posts out with only social posts queued" do
-        schedule_social("First", at: Time.now + 60)
-        schedule_social("Second", at: Time.now + 120)
+      it "reads nothing scheduled without a queue" do
+        create(:post, :draft)
+        create(:post, :published)
+        create(:social_post, :posted)
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-change", exact_text: "2 social posts")
+        expect(line_value("What ships next")).to eq("nothing scheduled")
       end
 
-      it "counts one post in the singular" do
-        create(:post, :scheduled, published_at: Time.now + 60)
+      it "opens the calendar without a queue" do
         get "/admin"
 
-        expect(queue_stat).to have_css(".stat-change", exact_text: "1 post")
-      end
-
-      it "leaves every queued title out of the tile", :aggregate_failures do
-        create(:post, :scheduled, title: "Launch notes", published_at: Time.now + 60)
-        schedule_social("Thread opener", at: Time.now + 120)
-        get "/admin"
-
-        expect(queue_stat).to have_no_text("Launch notes")
-        expect(queue_stat).to have_no_text("Thread opener")
-      end
-
-      it "reads nothing scheduled with an empty queue" do
-        get "/admin"
-
-        expect(queue_stat).to have_css(".stat-change", exact_text: "nothing scheduled")
+        expect(line("What ships next")[:href]).to eq("/admin/calendar")
       end
     end
 
     describe "Drafts" do
-      it "lists only drafts" do
-        create(:post, :draft, title: "Draft")
-        create(:post, :scheduled, title: "Scheduled")
-        create(:post, :published, title: "Published")
+      it "counts only drafts" do
+        create(:post, :draft)
+        create(:post, :scheduled)
+        create(:post, :published)
         get "/admin"
 
-        expect(titles("Drafts")).to eq(["Draft"])
+        expect(line_value("Drafts")).to eq("1")
       end
 
-      it "links each row to its editor" do
-        post = create(:post, :draft, title: "Linked")
+      it "opens the drafts list" do
         get "/admin"
 
-        expect(card("Drafts")).to have_link("Linked", href: "/admin/posts/#{post.id}/edit", class: "li-title")
+        expect(line("Drafts")[:href]).to eq("/admin/posts?status=draft")
       end
 
-      it "shows the word count and read time under the title" do
-        create(:post, :draft, body: (["word"] * 660).join(" "))
-        get "/admin"
-
-        expect(card("Drafts")).to have_css(".li-sub", exact_text: "660 words · ~3 min read")
-      end
-
-      it "counts one word in the singular" do
-        create(:post, :draft, body: "one")
-        get "/admin"
-
-        expect(card("Drafts")).to have_css(".li-sub", exact_text: "1 word · ~1 min read")
-      end
-
-      it "reads No drafts. Suspicious. without drafts" do
+      it "reads none without drafts" do
         create(:post, :scheduled)
         get "/admin"
 
-        expect(card("Drafts")).to have_css(".empty", exact_text: i18n.t("ui.components.drafts_card.empty"))
+        expect(line_value("Drafts")).to eq("none")
       end
     end
 
-    describe "Webmentions pending" do
-      it "leaves the card out without a pending mention" do
-        create(:webmention, :approved)
-        create(:webmention, :spam)
-        get "/admin"
-
-        expect(page).to have_no_css(".card-title", text: "Webmentions pending")
-      end
-
-      it "shows the three newest pending mentions" do
-        4.times { |index| create(:webmention, author_name: "A#{index}", received_at: Time.now - index) }
-        get "/admin"
-
-        expect(titles("Webmentions pending")).to eq(%w[A0 A1 A2])
-      end
-
-      it "leaves out approved and spam mentions" do
-        create(:webmention, author_name: "Ada")
-        create(:webmention, :approved, author_name: "Grace")
-        create(:webmention, :spam, author_name: "Alan")
-        get "/admin"
-
-        expect(titles("Webmentions pending")).to eq(%w[Ada])
-      end
-
-      it "links the author to the source" do
-        create(:webmention, author_name: "Ada", source_url: "https://ada.example/note")
-        get "/admin"
-
-        expect(pending_card).to have_link("Ada", href: "https://ada.example/note", class: "li-title")
-      end
-
-      it "names the author's domain without a name" do
-        create(:webmention, author_name: nil, author_url: "https://ada.example/about")
-        get "/admin"
-
-        expect(titles("Webmentions pending")).to eq(%w[ada.example])
-      end
-
-      it "names the source without a name or an author page" do
-        create(:webmention, author_name: nil, author_url: nil, source_url: "https://ada.example/note")
-        get "/admin"
-
-        expect(titles("Webmentions pending")).to eq(%w[https://ada.example/note])
-      end
-
-      it "puts the type and the excerpt under the author" do
-        create(:webmention, :reply, excerpt: "Good one")
-        get "/admin"
-
-        expect(pending_card).to have_css(".li-sub", exact_text: "reply · Good one")
-      end
-
-      it "reads only the type for a mention with no excerpt" do
-        create(:webmention, :like)
-        get "/admin"
-
-        expect(pending_card).to have_css(".li-sub", exact_text: "like")
-      end
-
-      it "opens the webmentions page on the pending filter" do
-        create(:webmention)
-        get "/admin"
-
-        expect(pending_card).to have_link("Review", href: "/admin/webmentions?status=pending")
-      end
-
-      it "sits above the post cards in the right column" do
-        create(:webmention)
-        get "/admin"
-
-        expect(column(1).all("h2.card-title").map(&:text))
-          .to eq(["Webmentions pending", "What ships next", "Drafts"])
-      end
-    end
-
-    describe "the Unique visitors stat" do
-      it "sits right after In the queue in the one stat grid" do
-        get "/admin"
-
-        expect(page.all(".g-4 > .stat > .stat-key").map(&:text).last(2)).to eq(["In the queue", "Unique visitors"])
-      end
-
-      it "counts each visitor once", :aggregate_failures do
+    describe "Visitors" do
+      it "counts each visitor once" do
         2.times { visit_site("first") }
         visit_site("second")
         get "/admin"
 
-        expect(visitors_stat).to have_css(".stat-key", exact_text: "Unique visitors")
-        expect(visitors_stat).to have_css(".stat-value", exact_text: "2")
+        expect(line_value("Visitors")).to eq("2 visitors today")
       end
 
       it "leaves out visits from before today" do
@@ -385,44 +172,52 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         visit_site("yesterday", at: Blog::TimeZone.day_start(today) - 1)
         get "/admin"
 
-        expect(visitors_stat).to have_css(".stat-value", exact_text: "1")
+        expect(line_value("Visitors")).to eq("1 visitor today")
       end
 
-      it "reads zero without a visit today" do
+      it "opens analytics" do
         get "/admin"
 
-        expect(visitors_stat).to have_css(".stat-value", exact_text: "0")
-      end
-
-      it "links nowhere" do
-        get "/admin"
-
-        expect(visitors_stat).to have_no_css("a")
+        expect(line("Visitors")[:href]).to eq("/admin/analytics")
       end
     end
 
-    describe "the Webmentions stat" do
-      it "counts the pending mentions the same as the card and the palette's Inbox", :aggregate_failures do
+    describe "MCP clients" do
+      it "counts the connected clients and opens them", :aggregate_failures do
+        mcp_create(:oauth_client).tap { mcp_create(:oauth_token, oauth_client: it) }
+        mcp_create(:oauth_client)
+        get "/admin"
+
+        expect(line_value("MCP clients")).to eq("1 connected")
+        expect(line("MCP clients")[:href]).to eq("/admin/clients")
+      end
+    end
+
+    describe "pending webmentions" do
+      def attention = page.find("section.card[data-attention]")
+
+      it "leaves Needs attention out without a pending mention" do
+        create(:webmention, :approved)
+        create(:webmention, :spam)
+        get "/admin"
+
+        expect(page).to have_no_css("section.card[data-attention]")
+      end
+
+      it "counts them in Needs attention the same as the palette's Inbox", :aggregate_failures do
         4.times { create(:webmention) }
-        get "/admin"
-
-        expect(webmentions_stat).to have_css(".stat-value", exact_text: "4")
-        expect(pending_card).to have_css(".wm-count", exact_text: "4 pending")
-        expect(page).to have_css("#command-palette-inbox .pal-r-sub", exact_text: "4 waiting", visible: :all)
-      end
-
-      it "names the stat and notes what the count waits for", :aggregate_failures do
-        get "/admin"
-
-        expect(webmentions_stat).to have_css(".stat-key", exact_text: "Webmentions")
-        expect(webmentions_stat).to have_css(".stat-change", exact_text: "awaiting review")
-      end
-
-      it "reads zero without a pending mention" do
         create(:webmention, :approved)
         get "/admin"
 
-        expect(webmentions_stat).to have_css(".stat-value", exact_text: "0")
+        expect(attention.find(".today-line", text: "Webmentions")).to have_text("4 waiting →")
+        expect(page).to have_css("#command-palette-inbox .pal-r-sub", exact_text: "4 waiting", visible: :all)
+      end
+
+      it "opens the webmentions page on the pending filter" do
+        create(:webmention)
+        get "/admin"
+
+        expect(attention).to have_link(href: "/admin/webmentions?status=pending")
       end
     end
 
@@ -484,20 +279,26 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(card("Journal")).to have_css(".card-side .journal-words", exact_text: "2 today")
       end
 
+      it "counts today's entries on the quiet Journal line", :aggregate_failures do
+        2.times { create_entry(entry_date: today) }
+        get "/admin"
+
+        expect(line_value("Journal")).to eq("2 today")
+        expect(line("Journal")[:href]).to eq("#today-journal-entry")
+      end
+
+      it "reads nothing yet on the quiet Journal line without an entry" do
+        get "/admin"
+
+        expect(line_value("Journal")).to eq("nothing yet")
+      end
+
       it "counts no entries as zero" do
         create_entry(entry_date: today - 1)
         get "/admin"
 
         expect(card("Journal")).to have_css(".card-side .journal-words", exact_text: "0 today")
       end
-    end
-
-    it "shows no Journaled tile" do
-      create_entry(entry_date: today, body: "one two three")
-      get "/admin"
-
-      expect(page.all(".g-4 .stat-key").map(&:text))
-        .to eq(["Sprint", "Commits", "Webmentions", "In the queue", "Unique visitors"])
     end
 
     describe "today's entries" do
@@ -559,13 +360,36 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
     end
 
     describe "the commits card" do
+      around { |example| show_hidden(&example) }
+
       before { with_token }
 
-      it "labels and titles the card", :aggregate_failures do
+      it "titles the card Shipped today" do
         get "/admin"
 
-        expect(commits_card).to have_css(".card-label", exact_text: "Git")
-        expect(commits_card).to have_css("h2.card-title", exact_text: "Commits imported today")
+        expect(commits_card).to have_css("h2.card-title", exact_text: "Shipped today")
+      end
+
+      it "names the latest commit under the count" do
+        create_commit(commit_date: today, commit_time: "08:00", message: "earlier")
+        create_commit(commit_date: today, commit_time: "21:05", message: "admin: ship it\n\nwhy")
+        get "/admin"
+
+        expect(commits_card).to have_css(".today-para", exact_text: "Latest: admin: ship it")
+      end
+
+      it "folds the commit list away" do
+        create_detailed_commit
+        get "/admin"
+
+        expect(commits_card).to have_css("details.today-more:not([open]) .commits")
+      end
+
+      it "opens each commit's page" do
+        commit = create_detailed_commit
+        get "/admin"
+
+        expect(commit_row).to have_link("admin: add the commits card", href: "/admin/commits/#{commit.id}")
       end
 
       it "gives a commit its short SHA, message, repo and time", :aggregate_failures do
@@ -604,7 +428,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create_commit(commit_date: today - 1, message: "yesterday")
         get "/admin"
 
-        expect(commits_card).to have_no_css(".commits")
+        expect(commits_card).to have_no_css(".commits", visible: :all)
       end
 
       it "shows an empty state without commits today" do
@@ -616,11 +440,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       it "leaves out the activity link without commits today" do
         get "/admin"
 
-        expect(commits_card).to have_no_link(i18n.t("ui.components.commits_card.activity"))
+        expect(commits_card).to have_no_link(i18n.t("ui.components.commits_card.activity"), visible: :all)
       end
     end
 
     describe "the commits card on a busy day" do
+      around { |example| show_hidden(&example) }
+
       before do
         12.times do |hour|
           create_commit(commit_date: today, commit_time: format("%02d:00", hour + 8), message: "at #{hour + 8}")
@@ -646,9 +472,8 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(last_response.body).to include("at 8", "at 19")
       end
 
-      it "still counts every commit from today", :aggregate_failures do
-        expect(commits_stat).to have_css(".stat-value", exact_text: "12")
-        expect(page).to have_text("12 commits")
+      it "still counts every commit from today" do
+        expect(commits_stat).to have_text("12 commits")
       end
     end
 
@@ -1058,7 +883,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
     end
 
-    describe "the Commits stat" do
+    describe "the commit count" do
       before do
         create_commit(commit_date: today, additions: 120, deletions: 8)
         create_commit(commit_date: today, additions: 5, deletions: 2)
@@ -1066,26 +891,20 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
       end
 
-      it "counts today's commits", :aggregate_failures do
-        expect(commits_stat).to have_css(".stat-key", exact_text: "Commits")
-        expect(commits_stat).to have_css(".stat-value", exact_text: "2")
-      end
-
-      it "sums today's additions and deletions" do
-        expect(commits_stat).to have_css(".stat-change", exact_text: "+125 / −10")
+      it "counts today's commits with their additions and deletions" do
+        expect(commits_stat).to have_text("2 commits+125 −10", exact: true)
       end
 
       it "matches the rows on the card" do
-        expect(commits_stat.find(".stat-value").text).to eq(commits_card.all(".commit").size.to_s)
+        expect(commits_stat.text).to start_with("#{commits_card.all('.commit', visible: :all).size} commits")
       end
     end
 
-    it "reads zero commits with none today", :aggregate_failures do
+    it "shows no commit count with none today" do
       create_commit(commit_date: today - 1)
       get "/admin"
 
-      expect(commits_stat).to have_css(".stat-value", exact_text: "0")
-      expect(commits_stat).to have_css(".stat-change", exact_text: "+0 / −0")
+      expect(commits_card).to have_no_css(".today-stat")
     end
 
     describe "saving an entry" do
@@ -1181,13 +1000,12 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(page).to have_field("Entry", with: "walked")
       end
 
-      it "stays on Today with the post cards", :aggregate_failures do
-        create(:post, :draft, title: "Draft")
+      it "stays on Today with the side cards", :aggregate_failures do
+        create(:post, :draft)
         save(body: "  ")
 
-        expect(column(0).all("h2.card-title").map(&:text))
-          .to eq(["Journal", "Commits imported today"])
-        expect(titles("Drafts")).to eq(["Draft"])
+        expect(column("side")).to eq(["Shipped today"])
+        expect(line_value("Drafts")).to eq("1")
       end
 
       it "rejects a save without a CSRF token" do
@@ -1219,8 +1037,6 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         end
       end
 
-      def planner(key, **) = i18n.t(["ui.components.tasks.planner", key].join("."), **)
-
       def pool_note(key, **) = i18n.t(["ui.components.tasks.pools", key].join("."), **)
 
       def pull_under_sprint
@@ -1237,42 +1053,95 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
       def sprint_repo = Tasks::Slice["repos.sprint_queries"]
 
-      def sprint_stat = page.find(".g-4 .stat", text: "Sprint")
+      def start(title) = task_repo.in_sprint(sprint.id).find { it.title == title }.then { start_task(it) }
+
+      def start_task(task) = Tasks::Slice["repos.task_mutations"].update(task.id, status: "in_progress")
 
       def task_repo = Tasks::Slice["repos.task_queries"]
 
-      it "reads the day as the page title" do
-        get "/admin"
+      def words(key, **) = i18n.t(["ui.views.today.show", key].join("."), **)
 
-        expect(page).to have_css(".page-head-title", text: today.strftime("%A, %B %-d"))
+      it "puts the day and time over the headline" do
+        get "/admin"
+        clock = Blog::TimeZone.local(Time.now).strftime("%H:%M")
+
+        expect(page).to have_css(".page-head-kicker", exact_text: "#{today.strftime('%A, %B %-d')} · #{clock}")
       end
 
-      it "opens the sub-line with the sprint" do
+      it "says nothing is planned for an empty sprint", :aggregate_failures do
+        get "/admin"
+
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.empty"))
+        expect(page).to have_css(".page-head-sub", exact_text: words("lede.empty"))
+      end
+
+      it "counts one thing left" do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"
 
-        expect(page).to have_css(".page-head-sub", text: "1/2 tasks done")
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.left", count: 1))
       end
 
-      it "counts the commits, entries and what is due today in the sub-line" do
+      it "counts the things left" do
+        plan("Ship the panel", "Read the design", "Email the accountant")
         get "/admin"
 
-        expect(page).to have_css(".page-head-sub", text: "0 commits · 0 journal entries · 0 scheduled today")
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.left", count: 3))
       end
 
-      it "puts the sprint stat first in the row" do
+      it "calls the sprint clear when everything is done", :aggregate_failures do
+        plan("Ship the panel", "Read the design", done: 2)
         get "/admin"
 
-        expect(page.all(".g-4 .stat .stat-key").map(&:text).first).to eq("Sprint")
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.clear"))
+        expect(page).to have_css(".page-head-sub", exact_text: words("lede.clear", count: 2))
       end
 
-      it "leaves a canceled task out of what is still open", :aggregate_failures do
+      it "names what is up next" do
+        plan("Ship the panel", "Read the design", done: 1)
+        get "/admin"
+
+        expect(page).to have_css(".page-head-sub", text: "Up next: Read the design")
+      end
+
+      it "says how much is done" do
+        plan("Ship the panel", "Read the design", done: 1)
+        get "/admin"
+
+        expect(page.find(".page-head-sub").text).to end_with("1 of 2 done.")
+      end
+
+      it "names the task in progress before the rest" do
+        plan("Ship the panel", "Read the design")
+        start("Read the design")
+        get "/admin"
+
+        expect(page).to have_css(".page-head-sub", text: "You're in the middle of Read the design")
+      end
+
+      it "says how long the lead task has carried over" do
+        create(:task, :in_sprint, sprint_id: sprint.id, title: "Ship the panel", carried_count: 2)
+        get "/admin"
+
+        expect(page).to have_css(".page-head-sub", text: "Up next: Ship the panel, carried over 2 days")
+      end
+
+      it "leaves a canceled task out of the open rows" do
         plan("Ship the panel", "Read the design")
         create(:task, :canceled, :in_sprint, sprint_id: sprint.id, title: "Dropped")
         get "/admin"
 
-        expect(panel.all(".task-title").map(&:text)).to contain_exactly("Ship the panel", "Read the design")
-        expect(sprint_stat).to have_css(".stat-change", text: "2 still open")
+        titles = panel.all(".sprint-rows .task-title").map(&:text)
+
+        expect(titles).to contain_exactly("Ship the panel", "Read the design")
+      end
+
+      it "leaves a canceled task out of what is left" do
+        plan("Ship the panel", "Read the design")
+        create(:task, :canceled, :in_sprint, sprint_id: sprint.id, title: "Dropped")
+        get "/admin"
+
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.left", count: 2))
       end
 
       it "calls the sprint clear when what is left was canceled" do
@@ -1280,40 +1149,19 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create(:task, :canceled, :in_sprint, sprint_id: sprint.id)
         get "/admin"
 
-        expect(panel).to have_css(".card-title", text: "Sprint clear")
+        expect(page).to have_css(".page-head-title", exact_text: words("headline.clear"))
       end
 
-      it "reads the stat as done over total" do
-        plan("Ship the panel", "Read the design", done: 1)
+      it "puts the panel first in the main column" do
         get "/admin"
 
-        expect(sprint_stat).to have_css(".stat-value", text: "1/2")
+        expect(page).to have_css(".g-main > .today-main > .sprint-panel:first-child")
       end
 
-      it "counts what is still open under the stat" do
-        plan("Ship the panel", "Read the design", done: 1)
+      it "titles the panel Today's sprint" do
         get "/admin"
 
-        expect(sprint_stat).to have_css(".stat-change", text: "1 still open")
-      end
-
-      it "says nothing is planned for an empty sprint" do
-        get "/admin"
-
-        expect(sprint_stat).to have_css(".stat-change.down", text: "nothing planned")
-      end
-
-      it "puts the panel between the stats and the two columns" do
-        get "/admin"
-
-        expect(page).to have_css(".g-4 + .sprint-panel + .g-2")
-      end
-
-      it "labels the panel with the day's sprint" do
-        plan("Ship the panel")
-        get "/admin"
-
-        expect(panel).to have_css(".card-label", text: "Sprint · #{Blog::TimeZone.today.strftime('%b %-d')}")
+        expect(panel).to have_css("h2.card-title", exact_text: "Today's sprint")
       end
 
       it "ends each task's buttons with a pen that edits it and comes back to Today", :aggregate_failures do
@@ -1329,7 +1177,23 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"
 
-        expect(panel.all(".task-title").map(&:text)).to eq(["Read the design"])
+        expect(panel.all(".sprint-rows .task-title").map(&:text)).to eq(["Read the design"])
+      end
+
+      it "folds what is done today away under its count", :aggregate_failures do
+        plan("Ship the panel", "Read the design", done: 1)
+        get "/admin"
+        done = panel.find("details.today-more:not([open])")
+
+        expect(done.find("summary")).to have_text("1 done today")
+        expect(done.all(".task-title", visible: :all).map { it.text(:all) }).to eq(["Ship the panel"])
+      end
+
+      it "folds nothing away when nothing is done" do
+        plan("Ship the panel")
+        get "/admin"
+
+        expect(panel).to have_no_css("details.today-more")
       end
 
       it "leads each open task with its key" do
@@ -1346,18 +1210,26 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         expect(panel.find(".sprint-progress-fill", visible: :all)[:style]).to eq("width: 50%")
       end
 
+      it "names the progress bar and its values" do
+        plan("Ship the panel", "Read the design", done: 1)
+        get "/admin"
+        bar = panel.find("[role='progressbar']")
+
+        expect(%w[aria-label aria-valuemin aria-valuemax aria-valuenow].map { bar[it] })
+          .to eq(["Sprint progress", "0", "2", "1"])
+      end
+
+      it "draws no progress bar for an empty sprint" do
+        get "/admin"
+
+        expect(panel).to have_no_css("[role='progressbar']")
+      end
+
       it "notes the count done beside the title" do
         plan("Ship the panel", "Read the design", done: 1)
         get "/admin"
 
-        expect(panel).to have_css(".sprint-note", text: "1/2 done")
-      end
-
-      it "says the sprint is clear when everything is done" do
-        plan("Ship the panel", done: 1)
-        get "/admin"
-
-        expect(panel).to have_css(".card-title", text: "Sprint clear")
+        expect(panel).to have_css(".sprint-note", exact_text: "1 of 2 done")
       end
 
       it "counts what was finished when everything is done" do
@@ -1433,26 +1305,19 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
           .to eq(%w[external])
       end
 
-      it "offers the planner when the sprint holds nothing" do
+      it "says the sprint holds nothing" do
         get "/admin"
 
-        expect(panel).to have_css(".task-planner .card-title", text: planner("ask"))
+        expect(panel).to have_css(".empty", exact_text: i18n.t("ui.components.tasks.sprint_panel.empty"))
       end
 
-      it "heads the planner with the sprint date" do
-        label = planner("label", date: today.strftime("%b %-d, %Y"))
-        get "/admin"
-
-        expect(panel).to have_css(".task-planner .card-label", exact_text: label)
-      end
-
-      it "offers no capture row with the planner" do
+      it "offers no capture row with an empty sprint" do
         get "/admin"
 
         expect(panel).to have_no_field("task[title]")
       end
 
-      it "counts every pool the planner can pull from" do
+      it "counts every pool an empty sprint can pull from" do
         create(:task, title: "Email the accountant")
         create(:task, :someday, title: "Learn Elixir")
         get "/admin"
@@ -1488,17 +1353,15 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
 
       it "links through to the tasks screen" do
-        plan("Ship the panel")
         get "/admin"
 
-        expect(panel).to have_css(".sprint-foot a[href='/admin/tasks']", text: "All tasks")
+        expect(panel).to have_css(".card-side a[href='/admin/tasks']", exact_text: "all tasks →")
       end
 
-      it "offers to pull from next when the sprint is clear" do
-        plan("Ship the panel", done: 1)
+      it "offers Plan tomorrow on the upcoming tab" do
         get "/admin"
 
-        expect(panel).to have_css(".sprint-foot a[href='/admin/tasks']", text: "Pull from next")
+        expect(page).to have_link("Plan tomorrow", href: "/admin/tasks?filter=upcoming")
       end
 
       it "claims today's sprint as it loads" do
@@ -1520,7 +1383,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         create(:task, :in_sprint, sprint_id: yesterday.id, title: "Read the design")
         get "/admin"
 
-        expect(panel.all(".task-title").map(&:text)).to eq(["Read the design"])
+        expect(panel.all(".sprint-rows .task-title").map(&:text)).to eq(["Read the design"])
       end
 
       it "answers with a server error when the day's sprint cannot be rolled" do

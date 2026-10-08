@@ -7,10 +7,13 @@ module Admin
         class Show < View
           include Components::Tasks
 
+          DRAFT = Blog::Types::PostStatus["draft"]
           ORIGIN = Blog::Types::TaskOrigin["today"]
-          QUEUE_KINDS = { posts: ".queue_posts", social_posts: ".queue_social_posts" }.freeze
+          QUEUED = Blog::Types::SocialQueue["queued"]
+          UPCOMING = Blog::Types::TaskTab["upcoming"]
 
           prop :attention, Blog::Types::Array.of(Blog::Types::Instance(::Activity::Structs::StalledRow))
+          prop :clients, Blog::Types::Integer
           prop :commits, Blog::Types::Hash
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -29,94 +32,106 @@ module Admin
             content_for(:title, t(".heading"))
             content_for(:task_origin, ORIGIN)
 
-            PageHead(title: l(@sprint[:date], format: :weekday), sub:) { head_actions }
-
-            SyncFailures(failures: @sync_failures)
-
-            Grid(columns: 4) { stats }
-
-            SprintPanel(**@sprint)
-
-            Grid(columns: 2) do
-              SideStack { main_cards }
-              SideStack { side_cards }
+            div(class: "today") do
+              PageHead(title: headline, kicker:, sub: lede) { head_actions }
+              columns
             end
           end
 
           private
 
-          def commits_note = t(".commits_note", **@commit_totals)
+          def closed = sprint_tasks.count(&:closed?)
+
+          def columns
+            div(class: "g-main") do
+              div(class: "today-main") do
+                SprintPanel(**@sprint)
+                TodayJournalCard(**journal)
+              end
+              aside(class: "today-side") { side_cards }
+            end
+          end
 
           def head_actions
+            Button(href: path(:admin_tasks, filter: UPCOMING), icon: "fa-regular fa-calendar") { t(".plan") }
             CreateButton(origin: ORIGIN)
-            Button(href: path(:admin_clients)) { t(".clients") }
-            sign_out_form
+          end
+
+          def headline
+            return t(".headline.empty") if sprint_tasks.empty?
+            return t(".headline.clear") if open.empty?
+
+            t(".headline.left", count: open.size)
           end
 
           def journal
             { body: @body, entries: @entries, errors: @errors, tags: @tags, word_count: Blog::Helpers::Figures.words(@body) }
           end
 
-          def main_cards
-            TodayJournalCard(**journal)
-            CommitsCard(**@commits)
+          def kicker = dotted(l(@sprint[:date], format: :weekday), l(Blog::TimeZone.local(Time.now), format: :clock))
+
+          def lede
+            return t(".lede.empty") if sprint_tasks.empty?
+            return t(".lede.clear", count: closed) if open.empty?
+
+            t(".lede.open", lead: lede_lead, done: closed, total: sprint_tasks.size)
           end
 
-          def queue_kinds
-            waiting = QUEUE_KINDS.select { |kind, _key| queue[kind].positive? }
+          def lede_lead
+            task = open.find(&:in_progress?) || open.first
+            lead = t(task.in_progress? ? ".lede.doing" : ".lede.next", task: task.title)
+            return lead if task.carried_count.zero?
 
-            dotted(*waiting.map { |kind, key| t(key, count: queue[kind]) })
+            t(".lede.carried", lead:, count: task.carried_count)
           end
 
-          def queue_stat
-            note = queue[:count].zero? ? t(".queue_note_empty") : queue_kinds
-
-            Stat(key: t(".queue"), value: queue[:count], change: note)
-          end
-
-          def side_cards
-            AttentionCard(rows: @attention)
-            Components::Webmentions::PendingCard(**@webmentions) if @webmentions[:count].positive?
-            ShipsNextCard(posts: posts[:scheduled], social_posts: social[:scheduled], summaries: social[:summaries])
-            DraftsCard(posts: posts[:drafts], counts: posts[:draft_counts])
-          end
-
-          def sign_out_form
-            Form(action: path(:admin_sign_out)) do
-              Button(type: "submit") { t(".sign_out") }
+          def line(label, href, &)
+            a(class: "today-line", href:) do
+              span { label }
+              span(class: "today-line-value", &)
             end
           end
 
-          def sprint_done = sprint_tasks.count(&:closed?)
+          def next_up
+            [
+              *posts[:scheduled].first(1).map { [it.published_at, path(:admin_edit_post, id: it.id)] },
+              *social[:scheduled].first(1).map { [it.posted_at, path(:admin_social, filter: QUEUED)] },
+            ].min_by(&:first)
+          end
 
-          def sprint_open = sprint_tasks.size - sprint_done
+          def open = @open ||= sprint_tasks.reject(&:closed?)
 
-          def sprint_stat
-            note = sprint_tasks.empty? ? t(".sprint_empty") : t(".sprint_open", count: sprint_open)
+          def quiet_lines
+            Card(class: "today-quiet") do
+              line(t(".journal"), "##{Components::TodayJournalCard::FORM_ID}") { t(".journal_count", count: @entries.size) }
+              ships_next
+              line(t(".drafts"), path(:admin_posts, status: DRAFT)) { t(".draft_count", count: posts[:drafts].size) }
+              site_lines
+            end
+          end
 
-            Stat(key: t(".sprint"), value: sprint_value, change: note, down: sprint_tasks.empty?)
+          def ships_next
+            at, href = next_up
+            return line(t(".ships_next"), path(:admin_calendar)) { t(".nothing_scheduled") } unless at
+
+            line(t(".ships_next"), href) do
+              Moment(at:)
+              plain "#{DOT}#{t('.queued', count: queue[:count])}"
+            end
+          end
+
+          def side_cards
+            AttentionCard(rows: @attention, failures: @sync_failures, webmentions: @webmentions[:count])
+            CommitsCard(**@commits, totals: @commit_totals)
+            quiet_lines
+          end
+
+          def site_lines
+            line(t(".visitors"), path(:admin_analytics)) { t(".visitor_count", count: @visitors) }
+            line(t(".clients"), path(:admin_clients)) { t(".client_count", count: @clients) }
           end
 
           def sprint_tasks = @sprint[:tasks]
-
-          def sprint_value = t(".sprint_value", done: sprint_done, total: sprint_tasks.size)
-
-          def stats
-            sprint_stat
-            Stat(key: t(".commits"), value: @commit_totals[:commits], change: commits_note)
-            Stat(key: t(".webmentions"), value: @webmentions[:count], change: t(".webmentions_note"))
-            queue_stat
-            Stat(key: t(".visitors"), value: @visitors)
-          end
-
-          def sub
-            dotted(
-              t(".sub_tasks", done: sprint_done, total: sprint_tasks.size),
-              t(".sub_commits", count: @commit_totals[:commits]),
-              t(".sub_entries", count: @entries.size),
-              t(".sub_scheduled", count: queue[:today]),
-            )
-          end
         end
       end
     end

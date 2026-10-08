@@ -407,9 +407,6 @@ en:
           one: "Carried over %{count} day"
           other: "Carried over %{count} days"
         confirm_cancel: "Cancel %{task}? It moves to completed."
-        count:
-          one: "%{count} stalled"
-          other: "%{count} stalled"
         first_seen:
           zero: "New device or place today"
           one: "New device or place %{count} day ago"
@@ -427,6 +424,10 @@ en:
         untouched:
           one: "Untouched for %{count} day"
           other: "Untouched for %{count} days"
+        waiting:
+          one: "%{count} waiting →"
+          other: "%{count} waiting →"
+        webmentions: "Webmentions"
         write: "Write"
       auto_form:
         apply: "Apply"
@@ -478,10 +479,14 @@ en:
         revoke: "Revoke"
       commits_card:
         activity: "All of today's commits"
+        commits: "Commits"
+        count:
+          one: "%{count} commit"
+          other: "%{count} commits"
         empty: "Nothing pushed yet today."
         import: "Import now"
         importing: "Importing…"
-        label: "Git"
+        latest: "Latest: %{subject}"
         never_synced: "Never synced"
         no_token: "No GitHub token is set, so the import can't run."
         repos:
@@ -489,7 +494,7 @@ en:
           other: "%{count} repos in 30 days"
         synced_on: "Last synced %{at}"
         synced_today: "Last synced today at %{time}"
-        title: "Commits imported today"
+        title: "Shipped today"
       comment_thread:
         add: "Add comment"
         add_label: "New comment"
@@ -600,13 +605,6 @@ en:
           resolved: "Resolved it with %{option}"
       dialog:
         close: "Close"
-      drafts_card:
-        empty: "No drafts. Suspicious."
-        read_time: "~%{count} min read"
-        title: "Drafts"
-        words:
-          one: "%{count} word"
-          other: "%{count} words"
       edit_note_dialog:
         cancel: "Cancel"
         save: "Save"
@@ -1270,9 +1268,6 @@ en:
             wrong_account: "wrong account"
           unknown_device: "Unknown device"
           unknown_place: "Unknown place"
-      ships_next_card:
-        empty: "Nothing scheduled."
-        title: "What ships next"
       social:
         composer:
           add: "Add to thread"
@@ -1663,14 +1658,16 @@ en:
           unscheduled: "Unscheduled · lives in a list only."
           waiting: "Waits until that sprint starts."
         sprint_panel:
-          all_tasks: "All tasks"
-          clear: "Sprint clear"
-          done: "%{done}/%{total} done"
+          all_tasks: "all tasks →"
+          clear:
+            one: "Everything in today's sprint is done · %{count} finished. Pull one from next below."
+            other: "Everything in today's sprint is done · %{count} finished. Pull one from next below."
+          done: "%{done} of %{total} done"
+          empty: "Nothing in today's sprint yet. Pull a task in from a list below."
           finished:
-            one: "Everything in today's sprint is done · %{count} finished. Add another or pull one from next."
-            other: "Everything in today's sprint is done · %{count} finished. Add another or pull one from next."
-          label: "Sprint · %{date}"
-          pull: "Pull from next"
+            one: "%{count} done today"
+            other: "%{count} done today"
+          progress: "Sprint progress"
           title: "Today's sprint"
         tabs:
           completed: "completed"
@@ -1802,15 +1799,6 @@ en:
           ignore: "Ignore"
           label: "Ticked webmentions"
           spam: "Spam"
-        pending_card:
-          pending: "%{count} pending"
-          review: "Review"
-          title: "Webmentions pending"
-          types:
-            like: "like"
-            mention: "mention"
-            reply: "reply"
-            repost: "repost"
         posts_card:
           disabled: "off"
           empty: "No posts yet."
@@ -2333,38 +2321,48 @@ en:
           span: "%{from} → %{to} · %{total}. Starting a task opens a work session, and stopping or finishing it closes the session."
       today:
         show:
+          client_count:
+            one: "%{count} connected"
+            other: "%{count} connected"
           clients: "MCP clients"
-          commits: "Commits"
-          commits_note: "+%{additions} / −%{deletions}"
+          draft_count:
+            one: "%{count}"
+            other: "%{count}"
+            zero: "none"
+          drafts: "Drafts"
           heading: "Today"
-          queue: "In the queue"
-          queue_note_empty: "nothing scheduled"
-          queue_posts:
-            one: "%{count} post"
-            other: "%{count} posts"
-          queue_social_posts:
-            one: "%{count} social post"
-            other: "%{count} social posts"
-          sign_out: "Sign out"
-          sprint: "Sprint"
-          sprint_empty: "nothing planned"
-          sprint_open:
-            one: "%{count} still open"
-            other: "%{count} still open"
-          sprint_value: "%{done}/%{total}"
-          sub_commits:
-            one: "%{count} commit"
-            other: "%{count} commits"
-          sub_entries:
-            one: "%{count} journal entry"
-            other: "%{count} journal entries"
-          sub_scheduled:
-            one: "%{count} scheduled today"
-            other: "%{count} scheduled today"
-          sub_tasks: "%{done}/%{total} tasks done"
-          visitors: "Unique visitors"
-          webmentions: "Webmentions"
-          webmentions_note: "awaiting review"
+          headline:
+            clear: "Sprint clear."
+            empty: "Nothing planned yet."
+            left:
+              one: "One thing left."
+              other: "%{count} things left."
+          journal: "Journal"
+          journal_count:
+            one: "%{count} today"
+            other: "%{count} today"
+            zero: "nothing yet"
+          lede:
+            carried:
+              one: "%{lead}, carried over %{count} day"
+              other: "%{lead}, carried over %{count} days"
+            clear:
+              one: "All %{count} done. Pull something from next, or call it a day."
+              other: "All %{count} done. Pull something from next, or call it a day."
+            doing: "You're in the middle of %{task}"
+            empty: "What do you want to get done today? Anything still open tonight rolls into tomorrow."
+            next: "Up next: %{task}"
+            open: "%{lead}. %{done} of %{total} done."
+          nothing_scheduled: "nothing scheduled"
+          plan: "Plan tomorrow"
+          queued:
+            one: "%{count} queued"
+            other: "%{count} queued"
+          ships_next: "What ships next"
+          visitor_count:
+            one: "%{count} visitor today"
+            other: "%{count} visitors today"
+          visitors: "Visitors"
       tokens:
         index:
           empty: "No live tokens. Mint one for a client that needs the API."

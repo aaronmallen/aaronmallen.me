@@ -2075,18 +2075,6 @@
   @apply meta;
 }
 
-@utility sync-failures {
-  @apply mb-6 flex flex-col gap-1;
-}
-
-@utility sync-failure {
-  @apply font-mono text-meta text-mk-pink-text;
-}
-
-@utility sync-failure-icon {
-  @apply mr-1.5;
-}
-
 @utility commits-sub {
   @apply meta;
 }
@@ -2117,7 +2105,11 @@
 }
 
 @utility commit-message {
-  @apply truncate font-display text-li font-semibold text-ink;
+  @apply block truncate font-display text-li font-semibold text-ink no-underline hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap py-3;
+  }
 }
 
 @utility commit-meta {
@@ -3514,6 +3506,133 @@
   @apply flex flex-col gap-stack;
 }
 
+@utility today {
+  & .page-head-title {
+    @apply text-head-big;
+  }
+}
+
+@utility today-main {
+  @apply flex min-w-0 flex-col gap-stack;
+}
+
+@utility today-side {
+  @apply flex min-w-0 flex-col gap-stack;
+
+  @media (width >= 53.75rem) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] self-start;
+  }
+}
+
+@utility today-link {
+  @apply font-mono text-badge text-mk-green-text no-underline hover:underline admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+}
+
+@utility sprint-progress {
+  @apply mb-1.5 block h-1 overflow-hidden rounded-full bg-line;
+}
+
+@utility sprint-progress-fill {
+  @apply block h-full rounded-full bg-mk-green transition-[width];
+}
+
+@utility sprint-rows {
+  @apply mt-4;
+
+  & .task-title {
+    @apply text-[1.15rem];
+  }
+}
+
+@utility today-more {
+  @apply mt-1.5 border-t border-line;
+
+  & + .today-more {
+    @apply mt-0;
+  }
+
+  & > summary {
+    @apply flex cursor-pointer list-none items-center gap-2.5 py-3.5 font-mono text-badge text-ink-muted select-none;
+    @apply hover:text-ink admin-focus;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
+
+  &[open] > summary .today-more-chev {
+    @apply rotate-90;
+  }
+}
+
+@utility today-more-chev {
+  @apply text-icon-sm transition-transform;
+}
+
+@utility today-stat {
+  @apply flex flex-wrap items-baseline gap-3 font-display text-[clamp(2rem,2.6vw,3rem)] leading-none font-bold;
+  @apply tracking-[-0.03em] text-ink;
+
+  & > small {
+    @apply flex gap-2 font-mono text-meta font-normal tracking-normal;
+  }
+}
+
+@utility today-para {
+  @apply mt-2.5 text-ink-muted;
+  text-wrap: pretty;
+}
+
+@utility today-line {
+  @apply flex w-full items-baseline justify-between gap-3 border-b border-line py-3 last:border-b-0;
+  @apply font-display font-medium text-ink no-underline hover:text-accent admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap items-center;
+  }
+}
+
+@utility today-line-value {
+  @apply flex items-center gap-2 font-mono text-badge font-normal text-ink-muted;
+
+  &.warn {
+    @apply text-mk-orange-text;
+  }
+}
+
+@utility today-need {
+  border-color: color-mix(in oklab, var(--color-mk-orange) 40%, var(--color-line));
+
+  & .today-line {
+    @apply border-t border-b-0 first:border-t-0;
+  }
+
+  & .li-icon {
+    @apply text-mk-sand-text;
+  }
+}
+
+@utility sync-failures {
+  @apply mb-3 flex flex-col gap-2;
+}
+
+@utility sync-failure {
+  @apply rounded-[10px] border bg-ground px-3 py-2 font-mono text-meta text-mk-pink-text;
+  border-color: color-mix(in oklab, var(--color-mk-pink) 40%, var(--color-line));
+}
+
+@utility sync-failure-icon {
+  @apply mr-1.5;
+}
+
 @utility task-stbar {
   @apply flex flex-wrap items-center gap-2 border-b border-line pb-4;
 }
@@ -3993,24 +4112,8 @@
   }
 }
 
-@utility sprint-panel {
-  @apply my-4 block;
-}
-
 @utility sprint-note {
   @apply meta;
-}
-
-@utility sprint-progress {
-  @apply mb-3.5 block h-1 overflow-hidden rounded-full bg-line;
-}
-
-@utility sprint-progress-fill {
-  @apply block h-full rounded-full bg-mk-green;
-}
-
-@utility sprint-foot {
-  @apply flex flex-wrap items-end gap-3;
 }
 
 @utility sprint-plan {
@@ -4041,10 +4144,6 @@
 
 @utility msg-body {
   @apply font-serif text-li break-words whitespace-pre-line text-ink-muted;
-}
-
-@utility wm-count {
-  @apply meta;
 }
 
 @utility chart {

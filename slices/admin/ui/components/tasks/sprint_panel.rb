@@ -18,44 +18,39 @@ module Admin
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            div(class: "sprint-panel") { @tasks.empty? ? planner : panel }
+            Card(title: t(".title"), class: "sprint-panel", data: { key_list: true }) do |card|
+              card.side { side }
+              progress unless @tasks.empty?
+              rows
+              finished
+              Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
+            end
           end
 
           private
 
-          def done = @tasks.count(&:closed?)
+          def closed = @closed ||= @tasks.select(&:closed?)
 
-          def foot
-            div(class: "sprint-foot") do
-              Button(href: path(:admin_tasks), variant: :gh, icon: "fa-solid fa-list-check") do
-                t(open.empty? ? ".pull" : ".all_tasks")
+          def finished
+            return if closed.empty?
+
+            details(class: "today-more") do
+              summary do
+                Icon("fa-solid fa-chevron-right today-more-chev")
+                plain t(".finished", count: closed.size)
               end
+              closed.each { row(it) }
             end
           end
-
-          def label = t(".label", date: l(@date, format: :short))
 
           def open = @open ||= @tasks.reject(&:closed?)
 
-          def panel
-            Card(label:, title: t(open.empty? ? ".clear" : ".title"), data: { key_list: true }) do |card|
-              card.side { span(class: "sprint-note") { t(".done", done:, total: @tasks.size) } }
-              progress
-              rows
-              pools
-              foot
-            end
-          end
-
-          def planner
-            Planner(counts: @counts, date: @date, origin: ORIGIN, pool: @pool, pools: @pools)
-          end
-
-          def pools = Pools(counts: @counts, origin: ORIGIN, pool: @pool, pools: @pools)
-
           def progress
-            span(class: "sprint-progress") do
-              span(class: "sprint-progress-fill", style: "width: #{Blog::Helpers::Figures.share(done, @tasks.size)}%")
+            aria = { label: t(".progress"), valuemin: 0, valuemax: @tasks.size, valuenow: closed.size }
+            width = Blog::Helpers::Figures.share(closed.size, @tasks.size)
+
+            div(class: "sprint-progress", role: "progressbar", aria:) do
+              span(class: "sprint-progress-fill", style: "width: #{width}%")
             end
           end
 
@@ -64,9 +59,14 @@ module Admin
           end
 
           def rows
-            return Empty { t(".finished", count: done) } if open.empty?
+            return Empty { t(@tasks.empty? ? ".empty" : ".clear", count: closed.size) } if open.empty?
 
-            open.each { row(it) }
+            div(class: "sprint-rows") { open.each { row(it) } }
+          end
+
+          def side
+            span(class: "sprint-note") { t(".done", done: closed.size, total: @tasks.size) } unless @tasks.empty?
+            a(class: "today-link", href: path(:admin_tasks)) { t(".all_tasks") }
           end
         end
       end

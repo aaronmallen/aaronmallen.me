@@ -45,9 +45,9 @@ RSpec.describe "CSRF protection", type: :request do
       end
     end
 
-    it "signs out through the form the today page draws" do
+    it "signs out through the form the avatar menu draws" do
       get "/admin"
-      form = page.find("main form[action='/admin/sign-out']", visible: :all)
+      form = page.find("#avatar-menu form[action='/admin/sign-out']", visible: :all)
       post("/admin/sign-out", form.all("input[type='hidden']", visible: :all).to_h { [it[:name], it.value] })
 
       expect(last_response.location).to eq("/")
