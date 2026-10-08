@@ -3,10 +3,10 @@
 module API
   module Serializers
     class SavedView < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          name: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          name: Helpers::Schema::STRING,
           screen: { type: "string", enum: Blog::Types::SavedViewScreen.values },
           filters: Endpoints::SavedViews::FILTERS.except(:description),
         },

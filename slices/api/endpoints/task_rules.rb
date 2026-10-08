@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module TaskRules
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
       UNSAVED = "could not save the rule"
 
       COMPLAINTS = {

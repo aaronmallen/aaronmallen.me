@@ -4,7 +4,9 @@ module API
   module Endpoints
     class ListSocialPosts < SocialPostEndpoint
       COUNTED = "how many posts in the range sit in each queue, whatever queue asks for"
-      COUNTS = Schema.object(Blog::Types::SocialQueue.values.to_h { [it.to_sym, Schema::INTEGER] }).merge(
+      COUNTS = Helpers::Schema.object(
+        Blog::Types::SocialQueue.values.to_h { [it.to_sym, Helpers::Schema::INTEGER] },
+      ).merge(
         description: COUNTED,
       ).freeze
 
@@ -21,15 +23,15 @@ module API
         },
       }.freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
-          from: Schema.nullable(Schema::DAY),
-          to: Schema.nullable(Schema::DAY),
+          from: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          to: Helpers::Schema.nullable(Helpers::Schema::DAY),
           counts: COUNTS,
-          social_posts: Schema.list(SocialPostEndpoint::REPLY),
-          partial: Schema::BOOLEAN,
+          social_posts: Helpers::Schema.list(SocialPostEndpoint::REPLY),
+          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Schema::INTEGER },
+        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps["settings"]

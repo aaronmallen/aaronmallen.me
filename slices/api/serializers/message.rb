@@ -3,14 +3,14 @@
 module API
   module Serializers
     class Message < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          subject: Schema::STRING,
-          body: Schema::STRING,
-          reply_to: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          subject: Helpers::Schema::STRING,
+          body: Helpers::Schema::STRING,
+          reply_to: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
-          received_at: Schema::STAMP,
+          received_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

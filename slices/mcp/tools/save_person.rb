@@ -6,7 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID.merge(description: "the person to edit; leave it out to add a new one"),
+          id: API::Helpers::Schema::ID.merge(description: "the person to edit; leave it out to add a new one"),
           **API::Endpoints::People::PROPERTIES,
         },
       }.freeze

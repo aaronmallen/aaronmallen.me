@@ -9,7 +9,9 @@ module API
         required: %w[id comment_id],
       }.freeze
 
-      REPLY = Schema.object({ id: Schema::INTEGER, comment_id: Schema::INTEGER, deleted: Schema::BOOLEAN }).freeze
+      REPLY = Helpers::Schema.object(
+        { id: Helpers::Schema::INTEGER, comment_id: Helpers::Schema::INTEGER, deleted: Helpers::Schema::BOOLEAN },
+      ).freeze
 
       include Deps[delete_task_comment: "tasks.operations.delete_task_comment"]
 
@@ -17,7 +19,7 @@ module API
         case delete_task_comment.call(id, comment_id)
           in Success(*) then Success(id:, comment_id:, deleted: true)
           in Failure(:not_found) then not_found(Tasks.missing_comment(id, comment_id))
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

@@ -4,19 +4,19 @@ module API
   module Endpoints
     class ReadPost < Endpoint
       KIND = Blog::Types::RecordKind["post"]
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       EDIT_NOTES = "the notes left on each change to the published post, newest first"
       RECEIVED = "the webmentions the post has received"
       SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
       SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         Serializers::PostDetail::SCHEMA,
         webmentions_received: { type: "integer", description: RECEIVED },
-        edit_notes: Schema.list(Serializers::PostEdit.reference).merge(description: EDIT_NOTES),
-        suggestion_id: Schema.nullable(Schema::ID).merge(description: SUGGESTION),
-        suggestion_edits: Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
+        edit_notes: Helpers::Schema.list(Serializers::PostEdit.reference).merge(description: EDIT_NOTES),
+        suggestion_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(description: SUGGESTION),
+        suggestion_edits: Helpers::Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
         record_links: Serializers::Link::GROUPS,
       ).freeze
 
@@ -29,7 +29,7 @@ module API
 
       def handle(id:)
         post = post_queries.by_id(id)
-        return not_found(Wording.missing("blog post", id)) if post.nil?
+        return not_found(Helpers::Wording.missing("blog post", id)) if post.nil?
 
         Success(answered(post))
       end

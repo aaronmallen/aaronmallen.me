@@ -5,8 +5,8 @@ module API
     class TagSummary < Serializer
       KINDS = { posts: Post, projects: Project, tasks: Task, journal_entries: JournalEntry, decisions: Decision }.freeze
 
-      SCHEMA = Schema.object(
-        { name: Schema::STRING, **KINDS.transform_values { Schema.list(it.reference) } },
+      SCHEMA = Helpers::Schema.object(
+        { name: Helpers::Schema::STRING, **KINDS.transform_values { Helpers::Schema.list(it.reference) } },
       ).freeze
 
       schema_attributes

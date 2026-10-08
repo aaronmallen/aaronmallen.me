@@ -132,16 +132,16 @@ module API
 
       SOURCES = { "read_document" => Actions::Documents::Show, "read_token" => Actions::Tokens::Show }.freeze
 
-      REFUSAL = Schema.object(
+      REFUSAL = Helpers::Schema.object(
         {
           error: { type: "string", enum: [*Action::STATUSES.keys.map(&:to_s), Action::NOT_AN_OBJECT.fetch(:error)] },
-          message: Schema::STRING,
+          message: Helpers::Schema::STRING,
         },
-        optional: { errors: { type: "object", additionalProperties: Schema.list(Schema::STRING) } },
+        optional: { errors: { type: "object", additionalProperties: Helpers::Schema.list(Helpers::Schema::STRING) } },
       ).freeze
 
-      UNAUTHORIZED = Schema.object(
-        { error_description: Schema::STRING },
+      UNAUTHORIZED = Helpers::Schema.object(
+        { error_description: Helpers::Schema::STRING },
         optional: { error: { type: "string", enum: [Authenticate::INVALID_TOKEN] } },
       ).freeze
 

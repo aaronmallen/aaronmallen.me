@@ -5,13 +5,13 @@ module API
     class SuggestionEdit < Serializer
       OPEN = %w[pending stale].freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          part: Schema.nullable({ type: "integer", description: "the part of a social post it targets" }),
+          id: Helpers::Schema::INTEGER,
+          part: Helpers::Schema.nullable({ type: "integer", description: "the part of a social post it targets" }),
           original: { type: "string", description: "the text it would replace" },
-          replacement: Schema::STRING,
-          reason: Schema::STRING,
+          replacement: Helpers::Schema::STRING,
+          reason: Helpers::Schema::STRING,
           status: { type: "string", enum: OPEN, description: "a stale edit no longer matches the text" },
         },
       ).freeze

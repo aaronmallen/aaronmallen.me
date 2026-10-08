@@ -4,8 +4,10 @@ module API
   module Endpoints
     class DeletePosts < BulkPostEndpoint
       ACT = Blog::Types::PostBulkAction["delete"]
-      DELETED = Schema.object({ id: Schema::INTEGER, title: Schema::STRING, deleted: Schema::BOOLEAN }).freeze
-      REPLY = Schema.object({ posts: Schema.list(DELETED) }).freeze
+      DELETED = Helpers::Schema.object(
+        { id: Helpers::Schema::INTEGER, title: Helpers::Schema::STRING, deleted: Helpers::Schema::BOOLEAN },
+      ).freeze
+      REPLY = Helpers::Schema.object({ posts: Helpers::Schema.list(DELETED) }).freeze
       SCHEMA = Posts::BULK
 
       def handle(ids:) = acted(ids)

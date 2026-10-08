@@ -30,7 +30,8 @@ module API
     def answer(response, result, status: OK)
       case result
         in Success(payload) then render_json(response, payload, status:)
-        in Failure(Refusal => refusal) then render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
+        in Failure(Structs::Refusal => refusal)
+          render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
       end
     end
 

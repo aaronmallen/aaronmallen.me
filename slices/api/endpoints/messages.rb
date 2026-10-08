@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module Messages
-      BULK = Schema.bulk("messages")
+      BULK = Helpers::Schema.bulk("messages")
       UNCHANGED = "could not change message %s"
     end
   end

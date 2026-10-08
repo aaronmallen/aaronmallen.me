@@ -8,7 +8,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Schema::ID.merge(description: "the open decision to add it to"),
+          id: Helpers::Schema::ID.merge(description: "the open decision to add it to"),
           title: { type: "string" },
           body: { type: "string", description: "the option, in Markdown, pros and cons included" },
         },

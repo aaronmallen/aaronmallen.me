@@ -46,7 +46,7 @@ module MCP
         additionalProperties: false,
         properties: {
           edits: { type: "array", items: EDIT, maxItems: ::Suggestions::Types::MAX_EDITS },
-          id: API::Schema::ID,
+          id: API::Helpers::Schema::ID,
           target: { type: "string", enum: [POST, SOCIAL_POST] },
         },
         required: %w[target id edits],
@@ -76,7 +76,9 @@ module MCP
         def fault(index, field, token) = "edit #{index + 1}: #{field} #{COMPLAINTS.fetch(token, token)}"
 
         def for_post(id, edits, server_context)
-          return refuse(API::Wording.missing("blog post", id)) if dep(:post_queries, server_context).by_id(id).nil?
+          if dep(:post_queries, server_context).by_id(id).nil?
+            return refuse(API::Helpers::Wording.missing("blog post", id))
+          end
 
           unnumbered = edits.map { it.except(:part) }
 
@@ -88,7 +90,7 @@ module MCP
 
         def for_social_post(id, edits, server_context)
           social_post = dep(:social_post_queries, server_context).editable(id)
-          return refuse(API::Wording.missing("unsent social post", id)) if social_post.nil?
+          return refuse(API::Helpers::Wording.missing("unsent social post", id)) if social_post.nil?
 
           numbered = edits.map { it.merge(part: it.fetch(:part, FIRST_PART)) }
           missing = missing_part(numbered, social_post.parts.length)

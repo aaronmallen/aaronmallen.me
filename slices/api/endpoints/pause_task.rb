@@ -4,7 +4,7 @@ module API
   module Endpoints
     class PauseTask < TaskEndpoint
       IDLE = "task %s is not in progress"
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       include Deps[pause_task: "tasks.operations.pause_task"]
 

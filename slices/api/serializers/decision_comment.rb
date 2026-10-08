@@ -3,12 +3,12 @@
 module API
   module Serializers
     class DecisionComment < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
           body: { type: "string", description: "the comment, in Markdown" },
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

@@ -5,68 +5,83 @@ module API
     class Review < Serializer
       OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
       NOTE = "the note kept on the period, or null when it has none"
-      CARRIED_TASK = Schema.object(
-        { id: Schema::INTEGER, title: Schema::STRING, carried_count: Schema::INTEGER, sprint_on: Schema::DAY },
-      ).freeze
-      CREDITS = "who did the work; the owner when none is set"
-      DONE_TASK = Schema.object(
+      CARRIED_TASK = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          worked_seconds: Schema::INTEGER,
-          contributors: Schema.list(Task::CONTRIBUTOR).merge(description: CREDITS),
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          carried_count: Helpers::Schema::INTEGER,
+          sprint_on: Helpers::Schema::DAY,
         },
       ).freeze
-      RECORD = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, name: Schema::STRING }).freeze
+      CREDITS = "who did the work; the owner when none is set"
+      DONE_TASK = Helpers::Schema.object(
+        {
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          worked_seconds: Helpers::Schema::INTEGER,
+          contributors: Helpers::Schema.list(Task::CONTRIBUTOR).merge(description: CREDITS),
+        },
+      ).freeze
+      RECORD = Helpers::Schema.object(
+        { id: Helpers::Schema::INTEGER, date: Helpers::Schema::DAY, name: Helpers::Schema::STRING },
+      ).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           period: { type: "string", enum: Blog::Types::ReviewPeriod.values },
-          from: Schema::DAY,
-          to: Schema::DAY,
-          totals: Schema.object(
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
+          totals: Helpers::Schema.object(
             {
-              done: Schema::INTEGER,
-              carried: Schema::INTEGER,
-              worked_seconds: Schema::INTEGER,
-              commits: Schema::INTEGER,
+              done: Helpers::Schema::INTEGER,
+              carried: Helpers::Schema::INTEGER,
+              worked_seconds: Helpers::Schema::INTEGER,
+              commits: Helpers::Schema::INTEGER,
             },
           ),
-          done: Schema.list(
-            Schema.object(
+          done: Helpers::Schema.list(
+            Helpers::Schema.object(
               {
-                date: Schema::DAY,
-                tasks: Schema.list(DONE_TASK),
+                date: Helpers::Schema::DAY,
+                tasks: Helpers::Schema.list(DONE_TASK),
               },
             ),
           ),
-          carried: Schema.list(CARRIED_TASK),
-          posts: Schema.list(RECORD),
-          social_posts: Schema.list(RECORD),
-          journal: Schema.object({ entries: Schema.list(RECORD), words: Schema::INTEGER, streak: Schema::INTEGER }),
-          commits: Schema.list(
-            Schema.object(
+          carried: Helpers::Schema.list(CARRIED_TASK),
+          posts: Helpers::Schema.list(RECORD),
+          social_posts: Helpers::Schema.list(RECORD),
+          journal: Helpers::Schema.object(
+            {
+              entries: Helpers::Schema.list(RECORD),
+              words: Helpers::Schema::INTEGER,
+              streak: Helpers::Schema::INTEGER,
+            },
+          ),
+          commits: Helpers::Schema.list(
+            Helpers::Schema.object(
               {
-                repo: Schema::STRING,
-                commits: Schema::INTEGER,
-                additions: Schema::INTEGER,
-                deletions: Schema::INTEGER,
+                repo: Helpers::Schema::STRING,
+                commits: Helpers::Schema::INTEGER,
+                additions: Helpers::Schema::INTEGER,
+                deletions: Helpers::Schema::INTEGER,
               },
             ),
           ),
-          decisions: Schema.list(
-            Schema.object(
+          decisions: Helpers::Schema.list(
+            Helpers::Schema.object(
               {
-                id: Schema::INTEGER,
-                title: Schema::STRING,
+                id: Helpers::Schema::INTEGER,
+                title: Helpers::Schema::STRING,
                 outcome: { type: "string", enum: OUTCOMES },
-                chosen: Schema.nullable(Schema::STRING),
-                reason: Schema::STRING,
-                date: Schema::DAY,
+                chosen: Helpers::Schema.nullable(Helpers::Schema::STRING),
+                reason: Helpers::Schema::STRING,
+                date: Helpers::Schema::DAY,
               },
             ),
           ),
-          worked: Schema.list(Schema.object({ date: Schema::DAY, seconds: Schema::INTEGER })),
+          worked: Helpers::Schema.list(
+            Helpers::Schema.object({ date: Helpers::Schema::DAY, seconds: Helpers::Schema::INTEGER }),
+          ),
           note: { oneOf: [ReviewNote.reference, { type: "null" }], description: NOTE },
         },
       ).freeze

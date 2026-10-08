@@ -5,15 +5,15 @@ module API
     class TaskComment < Serializer
       LOCAL = "local"
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
           body: { type: "string", description: "the comment, in Markdown" },
-          author: Schema.nullable(Schema::STRING),
+          author: Helpers::Schema.nullable(Helpers::Schema::STRING),
           source: { type: "string", enum: [LOCAL, *Blog::Types::TaskSourceProvider.values] },
-          url: Schema.nullable(Schema::STRING),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          url: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

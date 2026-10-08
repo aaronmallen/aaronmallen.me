@@ -3,15 +3,15 @@
 module API
   module Serializers
     class JournalEntry < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          date: Schema::DAY,
+          id: Helpers::Schema::INTEGER,
+          date: Helpers::Schema::DAY,
           time: { type: "string", description: "the time of day, as HH:MM" },
           body: { type: "string", description: "the entry, in Markdown" },
-          tags: Schema::TAGS,
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          tags: Helpers::Schema::TAGS,
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

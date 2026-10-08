@@ -5,7 +5,9 @@ module API
     module Tokens
       class Show < Action
         SCHEMA = { additionalProperties: false }.freeze
-        REPLY = Schema.object({ name: Schema::STRING, created_at: Schema::STAMP, last_used_at: Schema::STAMP }).freeze
+        REPLY = Helpers::Schema.object(
+          { name: Helpers::Schema::STRING, created_at: Helpers::Schema::STAMP, last_used_at: Helpers::Schema::STAMP },
+        ).freeze
 
         def handle(_request, response) = render_json(response, described(response[:token]))
 

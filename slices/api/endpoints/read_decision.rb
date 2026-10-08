@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadDecision < Endpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       KIND = Blog::Types::RecordKind["decision"]
       RESOLVED = Blog::Types::DecisionEventKind["resolved"]
@@ -18,12 +18,12 @@ module API
         description: "the option the decision was resolved with and why; null unless it is resolved",
       }.freeze
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         Serializers::Decision::SCHEMA,
         choice: CHOICE,
-        comments: Schema.list(Serializers::DecisionComment.reference),
+        comments: Helpers::Schema.list(Serializers::DecisionComment.reference),
         record_links: Serializers::Link::GROUPS,
-        timeline: Schema.list({ oneOf: ENTRIES.map(&:reference) }).merge(description: TIMELINE),
+        timeline: Helpers::Schema.list({ oneOf: ENTRIES.map(&:reference) }).merge(description: TIMELINE),
       ).freeze
 
       include Deps[
@@ -33,7 +33,7 @@ module API
 
       def handle(id:)
         decision = decision_queries.by_id(id)
-        return not_found(Wording.missing("decision", id)) if decision.nil?
+        return not_found(Helpers::Wording.missing("decision", id)) if decision.nil?
 
         Success(answered(decision, decision_queries.timeline(decision.id)))
       end

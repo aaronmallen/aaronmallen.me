@@ -11,7 +11,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID,
+          id: API::Helpers::Schema::ID,
           og_image_url: { type: "string", description: "a link to the social card image, hosted anywhere" },
           og_title: { type: "string", description: "a title for the social card, when the post title reads badly" },
         },
@@ -29,7 +29,7 @@ module MCP
           case dep(:save_post_seo, server_context).call(id, fields.slice(*FIELDS))
             in Success(post) then answer(seo(post))
             in Failure[:invalid, errors] then refuse(complaint(errors))
-            in Failure(:not_found) then refuse(API::Wording.missing("blog post", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("blog post", id))
             else refuse(UNSAVED)
           end
         end

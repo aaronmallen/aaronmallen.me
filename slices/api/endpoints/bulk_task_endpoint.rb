@@ -5,7 +5,7 @@ module API
   module Endpoints
     class BulkTaskEndpoint < Endpoint
       FIELDS = { to: :list }.freeze
-      REPLY = Schema.object({ tasks: Schema.list(Serializers::Task.reference) }).freeze
+      REPLY = Helpers::Schema.object({ tasks: Helpers::Schema.list(Serializers::Task.reference) }).freeze
       UNCHANGED = "could not change task %s"
 
       include Deps[act_on_tasks: "tasks.operations.act_on_tasks", task_queries: "tasks.repos.task_queries"]
@@ -17,7 +17,7 @@ module API
           in Success[*tasks] then Success(tasks: answered(ids.uniq, tasks))
           in Failure[:record, id, reason] then refused(id, reason)
           in Failure[:invalid, errors] then rejected(keyed(errors), Tasks::COMPLAINTS)
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
 
@@ -27,7 +27,7 @@ module API
 
       def refused(id, reason)
         case reason
-          when :not_found then invalid(ids: [Wording.missing("task", id)])
+          when :not_found then invalid(ids: [Helpers::Wording.missing("task", id)])
           when :closed then invalid(ids: [format(Tasks::CLOSED, id)])
           else failed(format(UNCHANGED, id))
         end

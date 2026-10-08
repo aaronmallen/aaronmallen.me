@@ -5,8 +5,8 @@ module API
     class TaskTimelineTag < Serializer
       KINDS = %w[tagged untagged].map { Blog::Types::TaskTimelineKind[it] }.freeze
 
-      SCHEMA = Schema.object(
-        { kind: { type: "string", enum: KINDS }, occurred_at: Schema::STAMP, tag: Schema::STRING },
+      SCHEMA = Helpers::Schema.object(
+        { kind: { type: "string", enum: KINDS }, occurred_at: Helpers::Schema::STAMP, tag: Helpers::Schema::STRING },
       ).freeze
 
       schema_attributes

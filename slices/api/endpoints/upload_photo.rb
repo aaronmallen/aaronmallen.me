@@ -37,7 +37,7 @@ module API
         case upload_photo.call(Blog::Types::UploadParam[upload(bytes, filename)])
           in Success(photo) then Success(serialized(Serializers::Photo, photo))
           in Failure[:invalid, { photo: [code, *] }] then refuse(code)
-          in Failure[:unavailable] then Failure(Refusal.unavailable(message(:unavailable)))
+          in Failure[:unavailable] then Failure(Structs::Refusal.unavailable(message(:unavailable)))
           in Failure[reason] then refuse(reason)
         end
       end

@@ -3,23 +3,27 @@
 module API
   module Serializers
     class SocialPost < Serializer
-      LENGTH = Schema.object({ count: Schema::INTEGER, limit: Schema::INTEGER })
+      LENGTH = Helpers::Schema.object({ count: Helpers::Schema::INTEGER, limit: Helpers::Schema::INTEGER })
       LENGTHS = "for each part in order, its length on each network it targets, counted the way send counts"
       NETWORKS = Blog::Types::NetworkName.values.to_h { [it.to_sym, LENGTH] }
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
           status: { type: "string", enum: Blog::Types::SocialPostStatus.values },
-          post_id: Schema.nullable(Schema::INTEGER),
-          targets: Schema.list({ type: "string", enum: Blog::Types::NetworkName.values }),
-          posted_at: Schema.nullable(Schema::STAMP),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
-          parts: { type: "array", items: Schema::STRING, description: "the text of each part, in order" },
-          deliveries: Schema.list(SocialDelivery.reference).merge(description: "one for each target, in order"),
+          post_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          targets: Helpers::Schema.list({ type: "string", enum: Blog::Types::NetworkName.values }),
+          posted_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
+          parts: { type: "array", items: Helpers::Schema::STRING, description: "the text of each part, in order" },
+          deliveries: Helpers::Schema.list(SocialDelivery.reference).merge(
+            description: "one for each target, in order",
+          ),
         },
-        optional: { lengths: Schema.list(Schema.object({}, optional: NETWORKS)).merge(description: LENGTHS) },
+        optional: {
+          lengths: Helpers::Schema.list(Helpers::Schema.object({}, optional: NETWORKS)).merge(description: LENGTHS),
+        },
       ).freeze
 
       schema_attributes

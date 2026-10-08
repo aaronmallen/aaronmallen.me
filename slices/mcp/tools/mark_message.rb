@@ -6,7 +6,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID,
+          id: API::Helpers::Schema::ID,
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
         },
         required: %w[id status],
@@ -20,7 +20,7 @@ module MCP
         def call(id:, status:, server_context:)
           case dep(:mark_message, server_context).call(id, status)
             in Success(message) then answer(id: message.id, status: message.status)
-            in Failure(:not_found) then refuse(API::Wording.missing("message", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("message", id))
             else refuse("could not mark the message")
           end
         end

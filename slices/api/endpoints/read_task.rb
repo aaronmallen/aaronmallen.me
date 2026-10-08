@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadTask < TaskEndpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       TIMELINE = "the task's comments, work sessions, moves, tag changes and status changes, oldest first"
 
@@ -14,14 +14,14 @@ module API
 
       SERIALIZERS = ENTRIES.flat_map { |serializer| serializer::KINDS.map { [it, serializer] } }.to_h.freeze
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         TaskEndpoint::REPLY,
-        timeline: Schema.list({ oneOf: ENTRIES.map(&:reference) }).merge(description: TIMELINE),
+        timeline: Helpers::Schema.list({ oneOf: ENTRIES.map(&:reference) }).merge(description: TIMELINE),
       ).freeze
 
       def handle(id:)
         task = task_queries.detailed(id)
-        return not_found(Wording.missing("task", id)) if task.nil?
+        return not_found(Helpers::Wording.missing("task", id)) if task.nil?
 
         task_reply(task, timeline: task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it) })
       end

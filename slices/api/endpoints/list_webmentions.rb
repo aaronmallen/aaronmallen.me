@@ -18,20 +18,22 @@ module API
         },
       }.freeze
 
-      COUNTS = Schema.object(Blog::Types::WebmentionStatus.values.to_h { [it.to_sym, Schema::INTEGER] }).merge(
+      COUNTS = Helpers::Schema.object(
+        Blog::Types::WebmentionStatus.values.to_h { [it.to_sym, Helpers::Schema::INTEGER] },
+      ).merge(
         description: "how many webmentions in the range, and for the post when given, sit in each status",
       ).freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
-          from: Schema.nullable(Schema::DAY),
-          to: Schema.nullable(Schema::DAY),
-          time_zone: Schema::STRING,
+          from: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          to: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          time_zone: Helpers::Schema::STRING,
           counts: COUNTS,
-          webmentions: Schema.list(Serializers::Webmention.reference),
-          partial: Schema::BOOLEAN,
+          webmentions: Helpers::Schema.list(Serializers::Webmention.reference),
+          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Schema::INTEGER },
+        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps[

@@ -3,13 +3,13 @@
 module API
   module Serializers
     class DecisionOption < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
           body: { type: "string", description: "the option, in Markdown" },
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

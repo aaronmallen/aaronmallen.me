@@ -37,14 +37,14 @@ module API
         },
       }.freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
-          count: Schema::INTEGER,
-          total: Schema::INTEGER,
-          tasks: Schema.list(Serializers::Task.reference),
-          partial: Schema::BOOLEAN,
+          count: Helpers::Schema::INTEGER,
+          total: Helpers::Schema::INTEGER,
+          tasks: Helpers::Schema.list(Serializers::Task.reference),
+          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Schema::INTEGER },
+        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps["settings", task_queries: "tasks.repos.task_queries"]

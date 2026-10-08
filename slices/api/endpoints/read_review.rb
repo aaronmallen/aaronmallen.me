@@ -14,7 +14,7 @@ module API
             description: "week, from Monday to Sunday, or the calendar month; week when left out",
           },
           day: { type: "string", description: "a day inside the period, as YYYY-MM-DD; today when left out" },
-          **Schema::CREDITS,
+          **Helpers::Schema::CREDITS,
         },
       }.freeze
 

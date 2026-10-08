@@ -4,8 +4,8 @@
 module API
   module Endpoints
     module Posts
-      BULK = Schema.bulk("blog posts")
-      ID = Schema::ID
+      BULK = Helpers::Schema.bulk("blog posts")
+      ID = Helpers::Schema::ID
       INVALID = "is not valid"
       TAG = { type: "string", description: "one public tag, lowercase words" }.freeze
       URL = "needs a URL starting with http:// or https://"

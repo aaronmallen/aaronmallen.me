@@ -7,7 +7,7 @@ module API
         additionalProperties: false,
         properties: {
           id: Decisions::ID,
-          option_id: Schema::ID.merge(description: "the option picked, one of this decision's own"),
+          option_id: Helpers::Schema::ID.merge(description: "the option picked, one of this decision's own"),
           reason: Decisions::REASON,
         },
         required: %w[id option_id reason],

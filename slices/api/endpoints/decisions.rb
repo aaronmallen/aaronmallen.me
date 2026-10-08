@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module Decisions
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
       NOTE = { type: "string", description: "why it changed; a resolved or dropped decision needs one" }.freeze
       REASON = { type: "string", description: "why, in Markdown" }.freeze
 

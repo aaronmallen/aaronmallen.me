@@ -3,16 +3,18 @@
 module API
   module Serializers
     class ActivitySummary < Serializer
-      KINDS = Schema.object(Blog::Types::ActivityKind.values.to_h { [it.to_sym, Schema::INTEGER] }).freeze
+      KINDS = Helpers::Schema.object(
+        Blog::Types::ActivityKind.values.to_h { [it.to_sym, Helpers::Schema::INTEGER] },
+      ).freeze
       MONTH = "^[0-9]{4}-[0-9]{2}$"
-      TOTALS = Schema.object(
-        { commits: Schema::INTEGER, additions: Schema::INTEGER, deletions: Schema::INTEGER },
+      TOTALS = Helpers::Schema.object(
+        { commits: Helpers::Schema::INTEGER, additions: Helpers::Schema::INTEGER, deletions: Helpers::Schema::INTEGER },
       ).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          from: Schema::DAY,
-          to: Schema::DAY,
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
           kinds: KINDS,
           months: {
             type: "object",

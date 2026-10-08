@@ -5,28 +5,38 @@ module API
     class InboxRow < Serializer
       KINDS = %w[message webmention task].freeze
 
-      SOURCE = Schema.object(
+      SOURCE = Helpers::Schema.object(
         {
           provider: { type: "string", enum: Blog::Types::TaskSourceProvider.values },
-          reference: Schema.nullable({ type: "string", description: "the issue's short name, such as owner/repo#12" }),
+          reference: Helpers::Schema.nullable(
+            { type: "string", description: "the issue's short name, such as owner/repo#12" },
+          ),
         },
       ).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
-          id: Schema::INTEGER,
-          at: Schema::STAMP,
-          title: Schema::STRING,
-          excerpt: Schema.nullable(Schema::STRING),
-          url: Schema.nullable(Schema::STRING),
-          tags: Schema.nullable(Schema::TAGS).merge(description: "a task's tags, or null for another kind"),
-          source: Schema.nullable(SOURCE).merge(description: "the issue a task syncs from, or null for another kind"),
-          type: Schema.nullable({ type: "string", enum: Blog::Types::WebmentionType.values })
-                      .merge(description: "a webmention's type, or null for another kind"),
-          post_id: Schema.nullable(Schema::INTEGER).merge(description: "a webmention's post, or null for another kind"),
-          reply_to: Schema.nullable(Schema::STRING)
-                          .merge(description: "a message's reply address, or null for another kind"),
+          id: Helpers::Schema::INTEGER,
+          at: Helpers::Schema::STAMP,
+          title: Helpers::Schema::STRING,
+          excerpt: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          url: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          tags: Helpers::Schema.nullable(Helpers::Schema::TAGS).merge(
+            description: "a task's tags, or null for another kind",
+          ),
+          source: Helpers::Schema.nullable(SOURCE).merge(
+            description: "the issue a task syncs from, or null for another kind",
+          ),
+          type: Helpers::Schema.nullable({ type: "string", enum: Blog::Types::WebmentionType.values }).merge(
+            description: "a webmention's type, or null for another kind",
+          ),
+          post_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER).merge(
+            description: "a webmention's post, or null for another kind",
+          ),
+          reply_to: Helpers::Schema.nullable(Helpers::Schema::STRING).merge(
+            description: "a message's reply address, or null for another kind",
+          ),
         },
       ).freeze
 

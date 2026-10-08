@@ -7,27 +7,27 @@ module API
       CREDITS = "who did a task's work, the owner when it lists none, or null for any other kind"
       VIEWS = "a post's views over the last 90 days, or null for any other kind"
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: Blog::Types::ActivityKind.values },
-          source_id: Schema::INTEGER,
-          date: Schema::DAY,
+          source_id: Helpers::Schema::INTEGER,
+          date: Helpers::Schema::DAY,
           time: { type: "string", description: "the time of day, as HH:MM" },
-          name: Schema::STRING,
-          link: Schema.nullable(Schema::STRING),
-          repo: Schema.nullable(Schema::STRING),
-          sha: Schema.nullable(Schema::STRING),
-          additions: Schema.nullable(Schema::INTEGER),
-          deletions: Schema.nullable(Schema::INTEGER),
-          status: Schema.nullable(Schema::STRING),
-          targets: Schema.nullable(Schema::TAGS),
-          excerpt: Schema.nullable(Schema::STRING),
-          task_id: Schema.nullable(Schema::INTEGER),
-          decision_id: Schema.nullable(Schema::INTEGER),
-          worked_seconds: Schema.nullable(Schema::INTEGER),
-          views: Schema.nullable(Schema::INTEGER).merge(description: VIEWS),
-          tags: Schema::TAGS,
-          contributors: Schema.nullable(Schema.list(Task::CONTRIBUTOR)).merge(description: CREDITS),
+          name: Helpers::Schema::STRING,
+          link: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          repo: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          sha: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          additions: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          deletions: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          status: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          targets: Helpers::Schema.nullable(Helpers::Schema::TAGS),
+          excerpt: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          task_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          decision_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          worked_seconds: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          views: Helpers::Schema.nullable(Helpers::Schema::INTEGER).merge(description: VIEWS),
+          tags: Helpers::Schema::TAGS,
+          contributors: Helpers::Schema.nullable(Helpers::Schema.list(Task::CONTRIBUTOR)).merge(description: CREDITS),
         },
       ).freeze
 

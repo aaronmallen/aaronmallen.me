@@ -12,15 +12,15 @@ module API
       WAITING = "waiting"
       STATES = [WAITING, SENDING, RETRYING, SENT, FAILED].freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           network: { type: "string", enum: Blog::Types::NetworkName.values },
           state: { type: "string", enum: STATES, description: "waiting until the network has been tried" },
-          url: Schema.nullable({ type: "string", description: "the first part on the network, once sent" }),
-          error: Schema.nullable({ type: "string", description: "the last error the network gave" }),
-          likes: Schema::INTEGER,
-          reposts: Schema::INTEGER,
-          replies: Schema::INTEGER,
+          url: Helpers::Schema.nullable({ type: "string", description: "the first part on the network, once sent" }),
+          error: Helpers::Schema.nullable({ type: "string", description: "the last error the network gave" }),
+          likes: Helpers::Schema::INTEGER,
+          reposts: Helpers::Schema::INTEGER,
+          replies: Helpers::Schema::INTEGER,
         },
       ).freeze
 

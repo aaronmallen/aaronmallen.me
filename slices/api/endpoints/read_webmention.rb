@@ -3,9 +3,9 @@
 module API
   module Endpoints
     class ReadWebmention < Endpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         Serializers::Webmention::SCHEMA,
         post_title: { type: "string", description: "the title of the post the webmention names" },
         post_slug: { type: "string", description: "the slug of the post the webmention names" },
@@ -16,7 +16,7 @@ module API
       def handle(id:)
         mention = webmention_queries.by_id(id)
         post = mention && post_queries.by_id(mention.post_id)
-        return not_found(Wording.missing("webmention", id)) if post.nil?
+        return not_found(Helpers::Wording.missing("webmention", id)) if post.nil?
 
         Success(answered(mention, post))
       end

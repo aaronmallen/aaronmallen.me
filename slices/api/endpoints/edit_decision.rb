@@ -18,7 +18,7 @@ module API
 
       def handle(id:, **fields)
         decision = decision_queries.by_id(id)
-        return not_found(Wording.missing("decision", id)) if decision.nil?
+        return not_found(Helpers::Wording.missing("decision", id)) if decision.nil?
 
         params = { title: decision.title, problem: decision.problem }.merge(fields)
         settled(edit_decision.call(id, params), id)

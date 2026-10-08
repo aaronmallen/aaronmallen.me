@@ -6,7 +6,7 @@ module API
       LABELS = %w[blocks blocked_by child_of duplicates duplicated_by parent_of relates].freeze
       SLUG = { type: "string", pattern: "^[a-z0-9]+([.-][a-z0-9]+)*$", maxLength: 64 }.freeze
 
-      CONTRIBUTOR = Schema.object(
+      CONTRIBUTOR = Helpers::Schema.object(
         { kind: { type: "string", enum: Blog::Types::ContributorKind.values } },
         optional: {
           agent: SLUG.merge(description: "the agent, such as claude-code; only with kind agent"),
@@ -14,46 +14,52 @@ module API
         },
       ).freeze
 
-      LINK = Schema.object(
+      LINK = Helpers::Schema.object(
         {
           label: { type: "string", enum: LABELS },
-          id: Schema::INTEGER,
-          title: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
         },
       ).freeze
 
-      SOURCE = Schema.object(
+      SOURCE = Helpers::Schema.object(
         {
           provider: { type: "string", enum: Blog::Types::TaskSourceProvider.values },
-          url: Schema::STRING,
-          reference: Schema.nullable({ type: "string", description: "the issue's short name, such as owner/repo#12" }),
+          url: Helpers::Schema::STRING,
+          reference: Helpers::Schema.nullable(
+            { type: "string", description: "the issue's short name, such as owner/repo#12" },
+          ),
           remote_state: { type: "string", enum: Blog::Types::TaskSourceState.values },
-          seen_at: Schema.nullable(Schema::STAMP),
+          seen_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
         },
       ).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          note: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          note: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::TaskStatus.values },
-          list: Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
-          sprint_on: Schema.nullable(Schema::DAY),
-          position: Schema::INTEGER.merge(
+          list: Helpers::Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }),
+          sprint_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          position: Helpers::Schema::INTEGER.merge(
             description: "the task's place in the order the owner set; lower comes first, ties go to the lower id",
           ),
-          tags: Schema::TAGS,
-          contributors: Schema.list(CONTRIBUTOR).merge(description: "who did the work; the owner when none is set"),
-          links: Schema.list(LINK),
-          blocked: Schema::BOOLEAN,
-          carried_count: Schema::INTEGER,
-          worked_seconds: Schema::INTEGER,
-          source: Schema.nullable(SOURCE).merge(description: "the issue the task syncs from, or null for a local task"),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
-          completed_at: Schema.nullable(Schema::STAMP),
+          tags: Helpers::Schema::TAGS,
+          contributors: Helpers::Schema.list(CONTRIBUTOR).merge(
+            description: "who did the work; the owner when none is set",
+          ),
+          links: Helpers::Schema.list(LINK),
+          blocked: Helpers::Schema::BOOLEAN,
+          carried_count: Helpers::Schema::INTEGER,
+          worked_seconds: Helpers::Schema::INTEGER,
+          source: Helpers::Schema.nullable(SOURCE).merge(
+            description: "the issue the task syncs from, or null for a local task",
+          ),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
+          completed_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
         },
       ).freeze
 

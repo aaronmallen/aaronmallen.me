@@ -9,7 +9,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          after_id: Schema.nullable(Schema::ID).merge(
+          after_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(
             description: "the task to follow, from the same list or sprint; null puts the task first",
           ),
           direction: { type: "string", enum: Tasks::DIRECTIONS, description: "move one place up or down" },
@@ -18,7 +18,7 @@ module API
         required: %w[id],
       }.freeze
 
-      REPLY = Schema.widen(TaskEndpoint::REPLY, moved: Schema::BOOLEAN).freeze
+      REPLY = Helpers::Schema.widen(TaskEndpoint::REPLY, moved: Helpers::Schema::BOOLEAN).freeze
 
       include Deps[place_task: "tasks.operations.place_task", reorder_task: "tasks.operations.reorder_task"]
 
@@ -34,8 +34,8 @@ module API
         case result
           in Success(*) then answered(id, moved: true)
           in Failure(:not_moved | :not_placed) then answered(id, moved: false)
-          in Failure(:not_found) then not_found(Wording.missing("task", id))
-          else failed(Wording::UNSAVED)
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("task", id))
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
 
@@ -43,7 +43,7 @@ module API
 
       def place(id, after_id)
         case place_task.call(id, after_id)
-          in Failure(:after_not_found) then not_found(Wording.missing("task", after_id))
+          in Failure(:after_not_found) then not_found(Helpers::Wording.missing("task", after_id))
           in Failure(:apart) then invalid(after_id: [format(APART, after_id, id)])
           in result then moved(result, id)
         end

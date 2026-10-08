@@ -3,15 +3,15 @@
 module API
   module Serializers
     class TaskRule < Serializer
-      PROJECT = Schema.object({ id: Schema::INTEGER, name: Schema::STRING }).freeze
+      PROJECT = Helpers::Schema.object({ id: Helpers::Schema::INTEGER, name: Helpers::Schema::STRING }).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          pattern: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          pattern: Helpers::Schema::STRING,
           provider: Endpoints::TaskRules::PROVIDER.except(:description),
-          tags: Schema::TAGS,
-          projects: Schema.list(PROJECT),
+          tags: Helpers::Schema::TAGS,
+          projects: Helpers::Schema.list(PROJECT),
         },
       ).freeze
 

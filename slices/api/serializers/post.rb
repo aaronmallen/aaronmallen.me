@@ -3,15 +3,15 @@
 module API
   module Serializers
     class Post < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          slug: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          slug: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::PostStatus.values },
-          published_at: Schema.nullable(Schema::STAMP),
-          tags: Schema::TAGS,
-          updated_at: Schema::STAMP,
+          published_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
+          tags: Helpers::Schema::TAGS,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

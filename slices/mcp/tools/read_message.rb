@@ -7,13 +7,13 @@ module MCP
     class ReadMessage < Base
       description "Read one message sent through the contact form: its subject, body, reply address, status " \
                   "and when it came in. The subject, body and reply address come marked untrusted. #{Untrusted::WARNING}"
-      input_schema(API::Schema.by_id)
+      input_schema(API::Helpers::Schema.by_id)
       scope Blog::Types::OAuthScope["read"]
 
       class << self
         def call(id:, server_context:)
           message = dep(:message_queries, server_context).by_id(id)
-          message ? answered(message) : refuse(API::Wording.missing("message", id))
+          message ? answered(message) : refuse(API::Helpers::Wording.missing("message", id))
         end
 
         private

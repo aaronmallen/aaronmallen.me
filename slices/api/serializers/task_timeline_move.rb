@@ -5,16 +5,16 @@ module API
     class TaskTimelineMove < Serializer
       KINDS = [Blog::Types::TaskTimelineKind["moved"]].freeze
 
-      LIST = Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }).freeze
+      LIST = Helpers::Schema.nullable({ type: "string", enum: Blog::Types::TaskList.values }).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
-          occurred_at: Schema::STAMP,
+          occurred_at: Helpers::Schema::STAMP,
           from_list: LIST,
-          from_sprint_on: Schema.nullable(Schema::DAY),
+          from_sprint_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
           to_list: LIST,
-          to_sprint_on: Schema.nullable(Schema::DAY),
+          to_sprint_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
         },
       ).freeze
 

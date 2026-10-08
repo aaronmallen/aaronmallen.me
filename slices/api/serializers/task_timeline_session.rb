@@ -7,15 +7,15 @@ module API
 
       ID = "the session's ID, which update_work_session and delete_work_session take"
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
           id: { type: "integer", description: ID },
-          occurred_at: Schema::STAMP,
-          started_at: Schema::STAMP,
-          ended_at: Schema.nullable(Schema::STAMP),
+          occurred_at: Helpers::Schema::STAMP,
+          started_at: Helpers::Schema::STAMP,
+          ended_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
           seconds: { type: "integer", description: "how long the session ran, up to now while it runs" },
-          running: Schema::BOOLEAN,
+          running: Helpers::Schema::BOOLEAN,
         },
       ).freeze
 

@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Schema::ID.merge(description: "the task to comment on"),
+          id: Helpers::Schema::ID.merge(description: "the task to comment on"),
           body: { type: "string", description: "the comment, in Markdown" },
         },
         required: %w[id body],
@@ -19,9 +19,9 @@ module API
       def handle(id:, body:)
         case add_task_comment.call(id, { body: })
           in Success(comment) then Success(serialized(Serializers::TaskComment, comment))
-          in Failure(:not_found) then not_found(Wording.missing("task", id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("task", id))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

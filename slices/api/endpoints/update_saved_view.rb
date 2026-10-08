@@ -22,7 +22,7 @@ module API
 
       def handle(id:, name: nil, filters: nil)
         view = saved_view_queries.by_id(id)
-        return not_found(Wording.missing("saved view", id)) if view.nil?
+        return not_found(Helpers::Wording.missing("saved view", id)) if view.nil?
 
         saved(id, change_saved_view.call(id, name: name || view.name, filters: filters || view.filters))
       end
@@ -32,8 +32,9 @@ module API
       def saved(id, result)
         case result
           in Success(view) then Success(serialized(Serializers::SavedView, view))
-          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
-          in Failure(:not_found) then not_found(Wording.missing("saved view", id))
+          in Failure[:invalid, errors]
+            invalid(Helpers::Wording.complaints(errors, SavedViews::COMPLAINTS, named: true))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("saved view", id))
           else failed(SavedViews::UNSAVED)
         end
       end

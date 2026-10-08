@@ -5,13 +5,13 @@ module API
     class Attention < Serializer
       CARRIED = Blog::Types::AttentionKind["carried"]
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: Blog::Types::AttentionKind.values },
-          record_id: Schema.nullable(Schema::INTEGER),
-          title: Schema.nullable(Schema::STRING),
-          carried_count: Schema.nullable(Schema::INTEGER),
-          days: Schema.nullable(Schema::INTEGER),
+          record_id: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          title: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          carried_count: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
+          days: Helpers::Schema.nullable(Helpers::Schema::INTEGER),
         },
       ).freeze
 

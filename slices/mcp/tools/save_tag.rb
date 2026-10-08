@@ -18,7 +18,9 @@ module MCP
         additionalProperties: false,
         properties: {
           color: { type: "string", enum: Blog::Types::TagColor.values },
-          id: API::Schema::ID.merge(description: "the tag to rename or recolour; leave it out to add a new one"),
+          id: API::Helpers::Schema::ID.merge(
+            description: "the tag to rename or recolour; leave it out to add a new one",
+          ),
           name: { type: "string", description: "lowercase words joined by hyphens" },
           scope: TAG_SCOPE,
         },
@@ -42,7 +44,7 @@ module MCP
 
         private
 
-        def missing(id) = API::Wording.missing("tag", id)
+        def missing(id) = API::Helpers::Wording.missing("tag", id)
 
         def saved(result, id)
           case result

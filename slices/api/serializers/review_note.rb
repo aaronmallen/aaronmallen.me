@@ -3,11 +3,11 @@
 module API
   module Serializers
     class ReviewNote < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           body: { type: "string", description: "the note, in Markdown" },
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

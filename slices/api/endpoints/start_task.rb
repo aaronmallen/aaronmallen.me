@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class StartTask < TaskEndpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       include Deps[start_task: "tasks.operations.start_task"]
 

@@ -10,7 +10,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Schema::ID,
+          id: Helpers::Schema::ID,
           schedule_at: {
             type: "string",
             description: "when to send it, as YYYY-MM-DDTHH:MM in #{Blog::TimeZone::NAME}; leave it out for now",

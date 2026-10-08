@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReadPerson < Endpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
       REPLY = Serializers::Person.reference
 
       include Deps[person_queries: "social.repos.person_queries"]
@@ -11,7 +11,7 @@ module API
       def handle(id:)
         person = person_queries.by_id(id)
 
-        person ? Success(serialized(Serializers::Person, person)) : not_found(Wording.missing("person", id))
+        person ? Success(serialized(Serializers::Person, person)) : not_found(Helpers::Wording.missing("person", id))
       end
     end
   end

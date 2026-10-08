@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module SavedViews
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
       UNSAVED = "could not save the saved view"
 
       COMPLAINTS = {
@@ -14,8 +14,8 @@ module API
 
       FILTERS = {
         type: "object",
-        properties: { types: { type: "object", additionalProperties: Schema::STRING } },
-        additionalProperties: Schema::STRING,
+        properties: { types: { type: "object", additionalProperties: Helpers::Schema::STRING } },
+        additionalProperties: Helpers::Schema::STRING,
         description: [
           "the screen's filters as its URL params take them, such as {\"q\": \"deploy\"}; activity's types",
           "takes an object, such as {\"post\": \"1\"}, and a filter the screen does not read is dropped",

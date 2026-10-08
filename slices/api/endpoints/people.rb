@@ -5,7 +5,7 @@ module API
   module Endpoints
     module People
       FIELDS = %i[name key mastodon_handle bluesky_handle].freeze
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
       UNSAVED = "could not save the person"
 
       COMPLAINTS = {
@@ -35,10 +35,10 @@ module API
           type: "string",
           description: "the token a post mentions them by, as @{key}: lowercase words joined by hyphens",
         },
-        mastodon_handle: Schema.nullable(
+        mastodon_handle: Helpers::Schema.nullable(
           { type: "string", description: "their Mastodon handle, such as @ada@ruby.social; null clears it" },
         ),
-        bluesky_handle: Schema.nullable({ type: "string", description: BLUESKY_HANDLE }),
+        bluesky_handle: Helpers::Schema.nullable({ type: "string", description: BLUESKY_HANDLE }),
       }.freeze
     end
   end

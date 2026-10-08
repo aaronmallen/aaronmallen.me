@@ -3,7 +3,9 @@
 module API
   module Serializers
     class Sprint < Serializer
-      SCHEMA = Schema.object({ id: Schema::INTEGER, date: Schema::DAY, carried_in: Schema::INTEGER }).freeze
+      SCHEMA = Helpers::Schema.object(
+        { id: Helpers::Schema::INTEGER, date: Helpers::Schema::DAY, carried_in: Helpers::Schema::INTEGER },
+      ).freeze
 
       schema_attributes
 

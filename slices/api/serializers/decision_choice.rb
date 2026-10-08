@@ -3,11 +3,11 @@
 module API
   module Serializers
     class DecisionChoice < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           option: DecisionOption.reference,
           reason: { type: "string", description: "why that option won, in Markdown" },
-          resolved_at: Schema::STAMP,
+          resolved_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

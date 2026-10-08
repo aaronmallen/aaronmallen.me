@@ -4,7 +4,7 @@
 module API
   module Endpoints
     module JournalEntries
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
 
       COMPLAINTS = {
         body: { Blog::Contract::BLANK => "body needs a character that is not a space" },

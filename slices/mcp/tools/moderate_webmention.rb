@@ -10,7 +10,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID,
+          id: API::Helpers::Schema::ID,
           reason: {
             type: "string",
             description: "why it is spam, kept with a spam verdict; approved and ignored clear it",
@@ -34,7 +34,7 @@ module MCP
         def call(id:, verdict:, server_context:, reason: nil)
           case dep(:moderate_webmention, server_context).call(id, verdict, reason:)
             in Success(mention) then answer(id: mention.id, status: mention.status)
-            in Failure(:not_found) then refuse(API::Wording.missing("webmention", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("webmention", id))
             else refuse("could not moderate the webmention")
           end
         end

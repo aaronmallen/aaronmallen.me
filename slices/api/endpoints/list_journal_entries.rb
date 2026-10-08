@@ -13,24 +13,24 @@ module API
         required: %w[from to],
       }.freeze
 
-      STATS = Schema.object(
+      STATS = Helpers::Schema.object(
         {
-          entries: Schema::INTEGER,
-          words: Schema::INTEGER,
-          streak: Schema.object({ days: Schema::INTEGER, written: Schema::INTEGER }),
+          entries: Helpers::Schema::INTEGER,
+          words: Helpers::Schema::INTEGER,
+          streak: Helpers::Schema.object({ days: Helpers::Schema::INTEGER, written: Helpers::Schema::INTEGER }),
         },
       ).merge(description: "the whole journal's entries and words, and the days written of the last few").freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
-          from: Schema::DAY,
-          to: Schema::DAY,
-          count: Schema::INTEGER,
-          partial: Schema::BOOLEAN,
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
+          count: Helpers::Schema::INTEGER,
+          partial: Helpers::Schema::BOOLEAN,
           stats: STATS,
-          entries: Schema.list(Serializers::JournalEntry.reference),
+          entries: Helpers::Schema.list(Serializers::JournalEntry.reference),
         },
-        optional: { continue_to: Schema::DAY },
+        optional: { continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[journal_entry_queries: "record.repos.journal_entry_queries"]

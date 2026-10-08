@@ -3,23 +3,23 @@
 module API
   module Serializers
     class Project < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          name: Schema::STRING,
-          tagline: Schema.nullable(Schema::STRING),
+          id: Helpers::Schema::INTEGER,
+          name: Helpers::Schema::STRING,
+          tagline: Helpers::Schema.nullable(Helpers::Schema::STRING),
           status: { type: "string", enum: %w[active archived], description: "archived once it has an archive date" },
           visibility: { type: "string", enum: Blog::Types::ProjectVisibility.values },
-          started_on: Schema.nullable(Schema::DAY),
-          archived_on: Schema.nullable(Schema::DAY),
-          tags: Schema::TAGS,
-          repo: Schema.nullable({ type: "string", description: "the repository, as owner/name" }),
-          url: Schema.nullable(Schema::STRING),
-          og_image_url: Schema.nullable(Schema::STRING),
-          stars: Schema::INTEGER,
-          release: Schema.nullable({ type: "string", description: "the latest release" }),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          started_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          archived_on: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          tags: Helpers::Schema::TAGS,
+          repo: Helpers::Schema.nullable({ type: "string", description: "the repository, as owner/name" }),
+          url: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          og_image_url: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          stars: Helpers::Schema::INTEGER,
+          release: Helpers::Schema.nullable({ type: "string", description: "the latest release" }),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

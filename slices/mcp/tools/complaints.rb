@@ -3,7 +3,7 @@
 module MCP
   module Tools
     module Complaints
-      CONTROL = API::Wording::CONTROL
+      CONTROL = API::Helpers::Wording::CONTROL
       INVALID = "check this field"
 
       module_function

@@ -18,10 +18,10 @@ module API
       def settled(result, id)
         case result
           in Success(*) then answered(id)
-          in Failure(:not_found) then not_found(Wording.missing("decision", id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("decision", id))
           in Failure(:closed) then closed(id)
           in Failure[:invalid, errors] then rejected(errors, Decisions::COMPLAINTS)
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

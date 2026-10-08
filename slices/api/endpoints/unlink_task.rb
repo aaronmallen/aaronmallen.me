@@ -15,7 +15,7 @@ module API
         case unlink_task.call(id, other_id)
           in Success(*) then answered(id)
           in Failure(:not_found) then not_found("task #{id} has no link to task #{other_id}")
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

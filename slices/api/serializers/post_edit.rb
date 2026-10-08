@@ -3,12 +3,12 @@
 module API
   module Serializers
     class PostEdit < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
           note: { type: "string", description: "what changed in the published post, and why" },
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

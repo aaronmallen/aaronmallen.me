@@ -3,15 +3,15 @@
 module API
   module Endpoints
     class DeleteSavedView < Endpoint
-      SCHEMA = Schema.by_id
-      REPLY = Schema.object({ id: Schema::INTEGER, deleted: Schema::BOOLEAN }).freeze
+      SCHEMA = Helpers::Schema.by_id
+      REPLY = Helpers::Schema.object({ id: Helpers::Schema::INTEGER, deleted: Helpers::Schema::BOOLEAN }).freeze
 
       include Deps[delete_saved_view: "saved_views.operations.delete_saved_view"]
 
       def handle(id:)
         case delete_saved_view.call(id)
           in Success(_) then Success(id:, deleted: true)
-          in Failure(:not_found) then not_found(Wording.missing("saved view", id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("saved view", id))
           else failed("could not delete the saved view")
         end
       end

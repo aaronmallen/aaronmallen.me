@@ -8,7 +8,7 @@ module MCP
 
       SCHEMA = {
         additionalProperties: false,
-        properties: { id: API::Schema::ID, scope: TAG_SCOPE },
+        properties: { id: API::Helpers::Schema::ID, scope: TAG_SCOPE },
         required: %w[id scope],
       }.freeze
 
@@ -24,7 +24,7 @@ module MCP
             in Success(_) then answer(id:, removed: true)
             in Failure[:last_tag_of_rules, patterns]
               refuse("tag #{id} is the only tag on #{RULES.fetch(patterns.one?)} #{patterns.join(', ')}")
-            in Failure(:not_found) then refuse(API::Wording.missing("tag", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("tag", id))
             else refuse(UNREMOVED)
           end
         end

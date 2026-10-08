@@ -3,19 +3,19 @@
 module API
   module Serializers
     class CalendarDay < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          date: Schema::DAY,
-          sprint: Schema.nullable(
-            Schema.object(
+          date: Helpers::Schema::DAY,
+          sprint: Helpers::Schema.nullable(
+            Helpers::Schema.object(
               {
-                id: Schema::INTEGER,
+                id: Helpers::Schema::INTEGER,
                 task_count: { type: "integer", description: "the tasks planned into the sprint" },
               },
             ),
           ),
-          posts: Schema.list(Post.reference),
-          social_posts: Schema.list(SocialPost.reference),
+          posts: Helpers::Schema.list(Post.reference),
+          social_posts: Helpers::Schema.list(SocialPost.reference),
           journal: { type: "boolean", description: "whether the journal holds an entry for the day" },
         },
       ).freeze

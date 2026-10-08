@@ -7,26 +7,28 @@ module API
       SUMMARY = "the summary the author wrote; empty when the post falls back to its first paragraph"
       SYNDICATION = "the announcement the post sends when it goes out; empty sends its title and link"
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          slug: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          slug: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::PostStatus.values },
           summary: { type: "string", description: SUMMARY },
-          tags: Schema::TAGS,
+          tags: Helpers::Schema::TAGS,
           body: { type: "string", description: "the post, in Markdown" },
-          published_at: Schema.nullable(Schema::STAMP),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
-          og_title: Schema.nullable({ type: "string", description: "the title #{CARD}" }),
-          og_image_url: Schema.nullable({ type: "string", description: "the image #{CARD}" }),
-          canonical_url: Schema.nullable({ type: "string", description: "the post's first home, when it has one" }),
-          syndication_enabled: Schema::BOOLEAN,
+          published_at: Helpers::Schema.nullable(Helpers::Schema::STAMP),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
+          og_title: Helpers::Schema.nullable({ type: "string", description: "the title #{CARD}" }),
+          og_image_url: Helpers::Schema.nullable({ type: "string", description: "the image #{CARD}" }),
+          canonical_url: Helpers::Schema.nullable(
+            { type: "string", description: "the post's first home, when it has one" },
+          ),
+          syndication_enabled: Helpers::Schema::BOOLEAN,
           syndication_body: { type: "string", description: SYNDICATION },
-          syndication_targets: Schema.list({ type: "string", enum: Blog::Types::NetworkName.values }),
-          webmentions_enabled: Schema::BOOLEAN,
-          word_count: Schema::INTEGER,
+          syndication_targets: Helpers::Schema.list({ type: "string", enum: Blog::Types::NetworkName.values }),
+          webmentions_enabled: Helpers::Schema::BOOLEAN,
+          word_count: Helpers::Schema::INTEGER,
           read_time: { type: "integer", description: "minutes to read the body" },
         },
       ).freeze

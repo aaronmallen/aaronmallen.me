@@ -24,7 +24,7 @@ module API
 
       def handle(id:, **fields)
         rule = task_rule_queries.all.find { it.id == id }
-        return not_found(Wording.missing("task rule", id)) if rule.nil?
+        return not_found(Helpers::Wording.missing("task rule", id)) if rule.nil?
 
         saved(id, save_task_rule.call(form(rule, fields), id:))
       end
@@ -32,7 +32,7 @@ module API
       private
 
       def form(rule, fields)
-        tags = Wording.tag_list(fields.fetch(:tags) { rule.tags.map(&:name) })
+        tags = Helpers::Wording.tag_list(fields.fetch(:tags) { rule.tags.map(&:name) })
         projects = fields.fetch(:projects) { rule.projects.map(&:id) }
 
         { pattern: fields.fetch(:pattern, rule.pattern), provider: fields[:provider], tags:, projects: }
@@ -41,8 +41,8 @@ module API
       def saved(id, result)
         case result
           in Success(rule) then Success(serialized(Serializers::TaskRule, rule))
-          in Failure[:invalid, errors] then invalid(Wording.complaints(errors, TaskRules::COMPLAINTS))
-          in Failure(:not_found) then not_found(Wording.missing("task rule", id))
+          in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, TaskRules::COMPLAINTS))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("task rule", id))
           else failed(TaskRules::UNSAVED)
         end
       end

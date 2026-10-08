@@ -8,10 +8,10 @@ module MCP
         properties: {
           edit_ids: {
             type: "array",
-            items: API::Schema::ID,
+            items: API::Helpers::Schema::ID,
             description: "the edits to reject; every pending and stale edit in the set when you leave it out",
           },
-          suggestion_id: API::Schema::ID,
+          suggestion_id: API::Helpers::Schema::ID,
         },
         required: ["suggestion_id"],
       }.freeze
@@ -31,7 +31,7 @@ module MCP
         def rejected(id, result)
           case result
             in Success(*rejected) then answer(suggestion_id: id, rejected: rejected.map(&:id))
-            in Failure(:not_found) then refuse(API::Wording.missing("suggestion", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("suggestion", id))
             in Failure(:nothing_open) then refuse("suggestion #{id} has no open edit with those IDs")
             in Failure(:already_posted) then refuse(format(AcceptSuggestionEdits::SENT, id))
             else refuse("could not reject the edits")

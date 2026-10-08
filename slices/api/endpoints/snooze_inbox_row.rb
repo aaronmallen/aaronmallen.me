@@ -9,7 +9,7 @@ module API
         additionalProperties: false,
         properties: {
           kind: { type: "string", enum: Serializers::InboxRow::KINDS, description: "the row's kind" },
-          id: Schema::ID.merge(description: "the row's id from list_inbox"),
+          id: Helpers::Schema::ID.merge(description: "the row's id from list_inbox"),
           snoozed_until: {
             type: "string",
             description: "a future time, as YYYY-MM-DDTHH:MM in the site's time zone or as ISO 8601",

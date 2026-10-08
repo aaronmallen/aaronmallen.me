@@ -4,7 +4,7 @@ module API
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/api"), namespace: API)
 
-    config.no_auto_register_paths += %w[serializers]
+    config.no_auto_register_paths += %w[helpers serializers]
 
     config.actions.csrf_protection = false
 

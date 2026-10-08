@@ -15,7 +15,9 @@ module API
         required: %w[kind id other_kind other_id],
       }.freeze
 
-      REPLY = Schema.object({ kind: RecordLinks::KIND, id: Schema::INTEGER, links: Serializers::Link::GROUPS }).freeze
+      REPLY = Helpers::Schema.object(
+        { kind: RecordLinks::KIND, id: Helpers::Schema::INTEGER, links: Serializers::Link::GROUPS },
+      ).freeze
 
       include Deps[record_link_queries: "links.repos.record_link_queries"]
 

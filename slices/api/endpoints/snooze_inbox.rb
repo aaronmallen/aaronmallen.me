@@ -18,10 +18,10 @@ module API
         required: %w[snoozed_until],
       }.freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
           **NOUNS.transform_values { IDS },
-          snoozed_until: { **Schema::STAMP, description: "when the rows come back to the top of the inbox" },
+          snoozed_until: { **Helpers::Schema::STAMP, description: "when the rows come back to the top of the inbox" },
         },
       ).freeze
 
@@ -30,7 +30,7 @@ module API
       def handle(snoozed_until:, **ids)
         case snooze_inbox.call({ **ids, snoozed_until: })
           in Success(snoozed) then Success(reply(snoozed))
-          in Failure[:record, kind, id, _] then invalid(kind => [Wording.missing(NOUNS.fetch(kind), id)])
+          in Failure[:record, kind, id, _] then invalid(kind => [Helpers::Wording.missing(NOUNS.fetch(kind), id)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
           in Failure(:invalid) then invalid(snoozed_until: ["snoozed_until is not a time"])
           in Failure(:past) then invalid(snoozed_until: ["snoozed_until must be in the future"])

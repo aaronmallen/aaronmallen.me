@@ -10,9 +10,9 @@ module API
       def handle(kind:, id:, other_kind:, other_id:)
         case link_records.call(kind, id, { other_kind:, other_id: })
           in Success(*) then answered(kind, id)
-          in Failure(:not_found) then not_found(Wording.missing(RecordLinks.name(kind), id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing(RecordLinks.name(kind), id))
           in Failure[:invalid, errors] then rejected(errors, RecordLinks::COMPLAINTS)
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

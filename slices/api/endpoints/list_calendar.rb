@@ -9,8 +9,12 @@ module API
         required: %w[from to],
       }.freeze
 
-      REPLY = Schema.object(
-        { from: Schema::DAY, to: Schema::DAY, days: Schema.list(Serializers::CalendarDay.reference) },
+      REPLY = Helpers::Schema.object(
+        {
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
+          days: Helpers::Schema.list(Serializers::CalendarDay.reference),
+        },
       ).freeze
 
       include Deps["repos.calendar_queries"]

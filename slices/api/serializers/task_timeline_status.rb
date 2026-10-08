@@ -7,8 +7,13 @@ module API
 
       STATUS = { type: "string", enum: Blog::Types::TaskStatus.values }.freeze
 
-      SCHEMA = Schema.object(
-        { kind: { type: "string", enum: KINDS }, occurred_at: Schema::STAMP, from_status: STATUS, to_status: STATUS },
+      SCHEMA = Helpers::Schema.object(
+        {
+          kind: { type: "string", enum: KINDS },
+          occurred_at: Helpers::Schema::STAMP,
+          from_status: STATUS,
+          to_status: STATUS,
+        },
       ).freeze
 
       schema_attributes

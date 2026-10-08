@@ -3,13 +3,13 @@
 module API
   module Serializers
     class TimeReport < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          from: Schema::DAY,
-          to: Schema::DAY,
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
           by: { type: "string", enum: Blog::Types::TimeGrouping.values },
           seconds: { type: "integer", description: "the time worked in the range, each task counted once" },
-          groups: Schema.list(TimeGroup.reference),
+          groups: Helpers::Schema.list(TimeGroup.reference),
         },
       ).freeze
 

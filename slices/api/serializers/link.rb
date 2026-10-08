@@ -3,19 +3,19 @@
 module API
   module Serializers
     class Link < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: Blog::Types::RecordKind.values },
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          day: Schema.nullable(Schema::DAY),
-          url: Schema.nullable({ type: "string", description: "the record's page in the admin" }),
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          day: Helpers::Schema.nullable(Helpers::Schema::DAY),
+          url: Helpers::Schema.nullable({ type: "string", description: "the record's page in the admin" }),
         },
       ).freeze
 
-      GROUPS = Schema.object(
+      GROUPS = Helpers::Schema.object(
         {},
-        optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Schema.list(reference)] },
+        optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Helpers::Schema.list(reference)] },
       ).freeze
 
       schema_attributes

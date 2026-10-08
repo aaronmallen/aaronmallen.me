@@ -8,7 +8,7 @@ module API
         properties: { screen: SavedViews::SCREEN.merge(description: "list only the views on this screen") },
       }.freeze
 
-      REPLY = Schema.object({ saved_views: Schema.list(Serializers::SavedView.reference) }).freeze
+      REPLY = Helpers::Schema.object({ saved_views: Helpers::Schema.list(Serializers::SavedView.reference) }).freeze
 
       include Deps[saved_view_queries: "saved_views.repos.saved_view_queries"]
 

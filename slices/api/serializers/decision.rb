@@ -3,17 +3,19 @@
 module API
   module Serializers
     class Decision < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
           problem: { type: "string", description: "the problem, in Markdown" },
           status: { type: "string", enum: Blog::Types::DecisionStatus.values },
-          resolved_option_id: Schema.nullable({ type: "integer", description: "the option it was resolved with" }),
-          tags: Schema::TAGS,
-          options: Schema.list(DecisionOption.reference),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          resolved_option_id: Helpers::Schema.nullable(
+            { type: "integer", description: "the option it was resolved with" },
+          ),
+          tags: Helpers::Schema::TAGS,
+          options: Helpers::Schema.list(DecisionOption.reference),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

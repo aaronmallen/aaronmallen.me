@@ -24,7 +24,7 @@ module API
 
       def handle(id:, **fields)
         task = task_queries.detailed(id)
-        return not_found(Wording.missing("task", id)) if task.nil?
+        return not_found(Helpers::Wording.missing("task", id)) if task.nil?
 
         case save_task.call(id, form(task, fields))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
@@ -39,7 +39,7 @@ module API
           list: fields[:list],
           note: fields.fetch(:note, task.note),
           sprint_on: fields[:sprint_on],
-          tags: Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
+          tags: Helpers::Wording.tag_list(fields.fetch(:tags, task.tags.map(&:name))),
           title: fields.fetch(:title, task.title),
           **fields.slice(:contributors),
         }

@@ -6,7 +6,7 @@ module API
     class SocialPostEndpoint < Endpoint
       COMPLAINTS = {
         "blank" => "is empty",
-        Blog::Contract::CONTROL => Wording::CONTROL,
+        Blog::Contract::CONTROL => Helpers::Wording::CONTROL,
         Blog::Contract::FORMAT => "needs a date and time, as 2026-10-01T09:30",
         Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
         "too_long" => "has a part over the limit for a network you picked",
@@ -39,7 +39,7 @@ module API
           in Success[_, social_post] then Success(answered(social_post))
           in Failure[:invalid, errors] then invalid(refusals(errors, params))
           in Failure(:already_posted) then gone(id, "saved")
-          in Failure(:not_found) then not_found(Wording.missing("social post", id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing("social post", id))
           else failed(UNSAVED)
         end
       end

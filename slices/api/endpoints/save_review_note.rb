@@ -19,11 +19,11 @@ module API
         required: %w[day body],
       }.freeze
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         Serializers::ReviewNote::SCHEMA,
         period: { type: "string", enum: Blog::Types::ReviewPeriod.values },
-        from: Schema::DAY,
-        to: Schema::DAY,
+        from: Helpers::Schema::DAY,
+        to: Helpers::Schema::DAY,
       ).freeze
 
       include Deps[

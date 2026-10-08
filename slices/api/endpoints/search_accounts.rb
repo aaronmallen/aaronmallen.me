@@ -15,7 +15,7 @@ module API
         required: %w[network query],
       }.freeze
 
-      REPLY = Schema.object({ accounts: Schema.list(Serializers::Account.reference) }).freeze
+      REPLY = Helpers::Schema.object({ accounts: Helpers::Schema.list(Serializers::Account.reference) }).freeze
 
       include Deps[search_accounts: "social.operations.search_accounts"]
 

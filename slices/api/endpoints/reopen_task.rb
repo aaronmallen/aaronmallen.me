@@ -3,7 +3,7 @@
 module API
   module Endpoints
     class ReopenTask < TaskEndpoint
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
 
       include Deps[reopen_task: "tasks.operations.reopen_task"]
 

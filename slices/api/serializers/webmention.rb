@@ -3,18 +3,18 @@
 module API
   module Serializers
     class Webmention < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          post_id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
+          post_id: Helpers::Schema::INTEGER,
           type: { type: "string", enum: Blog::Types::WebmentionType.values },
           status: { type: "string", enum: Blog::Types::WebmentionStatus.values },
-          source_url: Schema::STRING,
-          author_name: Schema.nullable(Schema::STRING),
-          author_url: Schema.nullable(Schema::STRING),
-          excerpt: Schema.nullable(Schema::STRING),
-          spam_reason: Schema.nullable(Schema::STRING),
-          received_at: Schema::STAMP,
+          source_url: Helpers::Schema::STRING,
+          author_name: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          author_url: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          excerpt: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          spam_reason: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          received_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

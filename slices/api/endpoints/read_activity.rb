@@ -9,7 +9,7 @@ module API
         additionalProperties: false,
         properties: {
           **Blog::Helpers::DayWindow::WINDOW,
-          **Schema::CREDITS,
+          **Helpers::Schema::CREDITS,
           kinds: {
             type: "array",
             items: { type: "string", enum: KINDS },
@@ -30,15 +30,15 @@ module API
         required: %w[from to],
       }.freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
-          from: Schema::DAY,
-          to: Schema::DAY,
-          count: Schema::INTEGER,
-          partial: Schema::BOOLEAN,
-          activity: Schema.list(Serializers::Activity.reference),
+          from: Helpers::Schema::DAY,
+          to: Helpers::Schema::DAY,
+          count: Helpers::Schema::INTEGER,
+          partial: Helpers::Schema::BOOLEAN,
+          activity: Helpers::Schema.list(Serializers::Activity.reference),
         },
-        optional: { continue_to: Schema::DAY },
+        optional: { continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[

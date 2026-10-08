@@ -17,7 +17,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID,
+          id: API::Helpers::Schema::ID,
           **FIELDS,
           edit_note: {
             type: "string",

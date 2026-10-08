@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ClearInbox < Endpoint
       EMPTY = "name at least one row to clear"
-      IDS = Schema.list(Schema::ID).freeze
+      IDS = Helpers::Schema.list(Helpers::Schema::ID).freeze
       NOUNS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze
       UNCHANGED = "could not clear %s %s"
 
@@ -17,7 +17,7 @@ module API
         },
       }.freeze
 
-      REPLY = Schema.object(NOUNS.transform_values { IDS }).freeze
+      REPLY = Helpers::Schema.object(NOUNS.transform_values { IDS }).freeze
 
       include Deps[clear_inbox: "operations.clear_inbox"]
 
@@ -26,13 +26,15 @@ module API
           in Success(cleared) then Success(cleared.transform_values { it.map(&:id) })
           in Failure[:record, kind, id, reason] then invalid(kind => [refused(NOUNS.fetch(kind), id, reason)])
           in Failure[:invalid, _] then invalid(input: [EMPTY])
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
 
       private
 
-      def refused(noun, id, reason) = reason == :not_found ? Wording.missing(noun, id) : format(UNCHANGED, noun, id)
+      def refused(noun, id, reason)
+        reason == :not_found ? Helpers::Wording.missing(noun, id) : format(UNCHANGED, noun, id)
+      end
     end
   end
 end

@@ -22,7 +22,7 @@ module API
           in Success(edit) then Success(serialized(Serializers::PostEdit, edit))
           in Failure(:not_found) then not_found(Posts.missing_edit(id, edit_id))
           in Failure[:invalid, errors] then invalid(Posts.form_complaints(errors))
-          else failed(Wording::UNSAVED)
+          else failed(Helpers::Wording::UNSAVED)
         end
       end
     end

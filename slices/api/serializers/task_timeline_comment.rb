@@ -5,15 +5,15 @@ module API
     class TaskTimelineComment < Serializer
       KINDS = [Blog::Types::TaskTimelineKind["comment"]].freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
           id: { type: "integer", description: "the comment's ID" },
-          occurred_at: Schema::STAMP,
+          occurred_at: Helpers::Schema::STAMP,
           body: { type: "string", description: "the comment, in Markdown" },
-          author: Schema.nullable(Schema::STRING),
+          author: Helpers::Schema.nullable(Helpers::Schema::STRING),
           source: TaskComment::SCHEMA.dig(:properties, :source),
-          url: Schema.nullable(Schema::STRING),
+          url: Helpers::Schema.nullable(Helpers::Schema::STRING),
         },
       ).freeze
 

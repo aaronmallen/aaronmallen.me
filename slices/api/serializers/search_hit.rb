@@ -3,13 +3,13 @@
 module API
   module Serializers
     class SearchHit < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: Blog::Types::SearchKind.values },
           id: { type: "integer", description: "the record's ID, as the kind's read tool takes it" },
-          title: Schema::STRING,
+          title: Helpers::Schema::STRING,
           match: { type: "string", description: "the stretch of text around the words that matched" },
-          date: Schema::DAY,
+          date: Helpers::Schema::DAY,
         },
       ).freeze
 

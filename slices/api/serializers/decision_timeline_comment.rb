@@ -5,11 +5,11 @@ module API
     class DecisionTimelineComment < Serializer
       KINDS = [Blog::Types::DecisionTimelineKind["comment"]].freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
           id: { type: "integer", description: "the comment's ID" },
-          occurred_at: Schema::STAMP,
+          occurred_at: Helpers::Schema::STAMP,
           body: { type: "string", description: "the comment, in Markdown" },
         },
       ).freeze

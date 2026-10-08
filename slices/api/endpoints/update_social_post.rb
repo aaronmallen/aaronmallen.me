@@ -8,7 +8,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Schema::ID,
+          id: Helpers::Schema::ID,
           parts: {
             type: "array",
             items: { type: "string" },

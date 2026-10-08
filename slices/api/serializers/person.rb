@@ -3,15 +3,15 @@
 module API
   module Serializers
     class Person < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
           key: { type: "string", description: "the token a post mentions them by, as @{key}" },
-          name: Schema::STRING,
-          mastodon_handle: Schema.nullable(Schema::STRING),
-          bluesky_handle: Schema.nullable(Schema::STRING),
-          created_at: Schema::STAMP,
-          updated_at: Schema::STAMP,
+          name: Helpers::Schema::STRING,
+          mastodon_handle: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          bluesky_handle: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          created_at: Helpers::Schema::STAMP,
+          updated_at: Helpers::Schema::STAMP,
         },
       ).freeze
 

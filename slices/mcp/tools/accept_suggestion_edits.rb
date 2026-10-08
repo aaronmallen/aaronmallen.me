@@ -12,10 +12,10 @@ module MCP
         properties: {
           edit_ids: {
             type: "array",
-            items: API::Schema::ID,
+            items: API::Helpers::Schema::ID,
             description: "the edits to accept; every pending edit in the set when you leave it out",
           },
-          suggestion_id: API::Schema::ID,
+          suggestion_id: API::Helpers::Schema::ID,
         },
         required: ["suggestion_id"],
       }.freeze
@@ -31,7 +31,7 @@ module MCP
       class << self
         def call(suggestion_id:, server_context:, edit_ids: nil)
           suggestion = dep(:suggestion_queries, server_context).by_id(suggestion_id)
-          return refuse(API::Wording.missing("suggestion", suggestion_id)) if suggestion.nil?
+          return refuse(API::Helpers::Wording.missing("suggestion", suggestion_id)) if suggestion.nil?
 
           accepted(suggestion_id, dep(:accept_suggestion_edits, server_context).call(suggestion_id, ids: edit_ids))
         end

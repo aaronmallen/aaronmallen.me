@@ -15,7 +15,7 @@ module API
 
       def handle(name:)
         summary = tag_queries.summary(name.strip.downcase)
-        return not_found(Wording.missing("tag", name, by: "name")) if summary.nil?
+        return not_found(Helpers::Wording.missing("tag", name, by: "name")) if summary.nil?
 
         Success(serialized(Serializers::TagSummary, summary))
       end

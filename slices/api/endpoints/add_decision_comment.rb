@@ -6,7 +6,7 @@ module API
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: Schema::ID.merge(description: "the decision to comment on"),
+          id: Helpers::Schema::ID.merge(description: "the decision to comment on"),
           body: { type: "string", description: "the comment, in Markdown" },
         },
         required: %w[id body],

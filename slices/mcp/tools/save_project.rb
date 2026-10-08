@@ -27,7 +27,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          id: API::Schema::ID.merge(description: "the project to change; leave it out to add a new one"),
+          id: API::Helpers::Schema::ID.merge(description: "the project to change; leave it out to add a new one"),
           name: { type: "string" },
           og_image_url: { type: "string", description: "a link to the social card image" },
           repo: { type: "string", description: "the GitHub repository, as owner/repo" },
@@ -52,7 +52,7 @@ module MCP
       class << self
         def call(server_context:, id: nil, **fields)
           current = id && dep(:project_queries, server_context).by_id(id)
-          return refuse(API::Wording.missing("project", id)) if id && current.nil?
+          return refuse(API::Helpers::Wording.missing("project", id)) if id && current.nil?
 
           result = dep(:save_project, server_context).call(form(current, fields), id:)
           saved(result.bind { dep(:link_repo_tasks, server_context).call(it, was: current&.repo) }, id)
@@ -85,7 +85,7 @@ module MCP
           case result
             in Success(project) then answer(ListProjects.summary(project))
             in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
-            in Failure(:not_found) then refuse(API::Wording.missing("project", id))
+            in Failure(:not_found) then refuse(API::Helpers::Wording.missing("project", id))
             else refuse(UNSAVED)
           end
         end

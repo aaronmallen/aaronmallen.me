@@ -4,14 +4,14 @@ module API
   module Endpoints
     class ReadSocialPost < SocialPostEndpoint
       KIND = Blog::Types::RecordKind["social_post"]
-      SCHEMA = Schema.by_id
+      SCHEMA = Helpers::Schema.by_id
       SUGGESTION = "the suggestion that holds the open edits, to accept or reject them; null when none is open"
       SUGGESTIONS = "the suggested edits still waiting on the author, in the order they apply"
 
-      REPLY = Schema.widen(
+      REPLY = Helpers::Schema.widen(
         SocialPostEndpoint::REPLY,
-        suggestion_id: Schema.nullable(Schema::ID).merge(description: SUGGESTION),
-        suggestion_edits: Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
+        suggestion_id: Helpers::Schema.nullable(Helpers::Schema::ID).merge(description: SUGGESTION),
+        suggestion_edits: Helpers::Schema.list(Serializers::SuggestionEdit.reference).merge(description: SUGGESTIONS),
         record_links: Serializers::Link::GROUPS,
       ).freeze
 
@@ -22,7 +22,7 @@ module API
 
       def handle(id:)
         social_post = social_post_queries.by_id(id)
-        return not_found(Wording.missing("social post", id)) if social_post.nil?
+        return not_found(Helpers::Wording.missing("social post", id)) if social_post.nil?
 
         Success(read(social_post))
       end

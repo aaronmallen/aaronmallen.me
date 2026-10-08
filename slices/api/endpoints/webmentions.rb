@@ -4,8 +4,8 @@
 module API
   module Endpoints
     module Webmentions
-      BULK = Schema.bulk("webmentions")
-      ID = Schema::ID
+      BULK = Helpers::Schema.bulk("webmentions")
+      ID = Helpers::Schema::ID
     end
   end
 end

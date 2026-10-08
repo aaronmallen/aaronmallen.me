@@ -4,8 +4,10 @@ module API
   module Endpoints
     class DeleteMessages < BulkMessageEndpoint
       ACT = Blog::Types::MessageBulkAction["delete"]
-      DELETED = Schema.object({ id: Schema::INTEGER, subject: Schema::STRING, deleted: Schema::BOOLEAN }).freeze
-      REPLY = Schema.object({ messages: Schema.list(DELETED) }).freeze
+      DELETED = Helpers::Schema.object(
+        { id: Helpers::Schema::INTEGER, subject: Helpers::Schema::STRING, deleted: Helpers::Schema::BOOLEAN },
+      ).freeze
+      REPLY = Helpers::Schema.object({ messages: Helpers::Schema.list(DELETED) }).freeze
 
       private
 

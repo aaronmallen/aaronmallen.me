@@ -9,7 +9,7 @@ module API
       private
 
       def retag(decision, tags)
-        params = { title: decision.title, problem: decision.problem, tags: Wording.tag_list(tags) }
+        params = { title: decision.title, problem: decision.problem, tags: Helpers::Wording.tag_list(tags) }
 
         settled(edit_decision.call(decision.id, params), decision.id)
       end

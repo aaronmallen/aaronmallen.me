@@ -4,7 +4,7 @@ module API
   module Endpoints
     class ListInbox < Endpoint
       SCHEMA = { additionalProperties: false }.freeze
-      REPLY = Schema.object({ inbox: Schema.list(Serializers::InboxRow.reference) }).freeze
+      REPLY = Helpers::Schema.object({ inbox: Helpers::Schema.list(Serializers::InboxRow.reference) }).freeze
 
       include Deps["repos.inbox_queries"]
 

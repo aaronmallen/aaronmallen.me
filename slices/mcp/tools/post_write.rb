@@ -53,7 +53,7 @@ module MCP
           end
         end
 
-        def missing(id) = refuse(API::Wording.missing("blog post", id))
+        def missing(id) = refuse(API::Helpers::Wording.missing("blog post", id))
 
         def reason(field, token) = API::Endpoints::Posts.field_reason(field, token)
 

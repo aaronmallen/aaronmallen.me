@@ -5,7 +5,7 @@ module API
     class SyncIssues < Endpoint
       SCHEMA = { additionalProperties: false }.freeze
       SOURCES = %w[github linear].freeze
-      REPLY = Schema.object({ queued: Schema.list({ type: "string", enum: SOURCES }) }).freeze
+      REPLY = Helpers::Schema.object({ queued: Helpers::Schema.list({ type: "string", enum: SOURCES }) }).freeze
       UNCONFIGURED = "no GitHub token or Linear key is set, so no issue sync can run"
 
       include Deps[queue_issue_sync: "tasks.operations.queue_issue_sync"]

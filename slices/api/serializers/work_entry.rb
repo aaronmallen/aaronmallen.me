@@ -3,14 +3,16 @@
 module API
   module Serializers
     class WorkEntry < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          org: Schema::STRING,
-          role: Schema::STRING,
-          blurb: Schema.nullable(Schema::STRING),
-          from_year: Schema::INTEGER,
-          to_year: Schema.nullable({ type: "integer", description: "the last year held; null while still held" }),
+          id: Helpers::Schema::INTEGER,
+          org: Helpers::Schema::STRING,
+          role: Helpers::Schema::STRING,
+          blurb: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          from_year: Helpers::Schema::INTEGER,
+          to_year: Helpers::Schema.nullable(
+            { type: "integer", description: "the last year held; null while still held" },
+          ),
           current: { type: "boolean", description: "true while the role is still held" },
         },
       ).freeze

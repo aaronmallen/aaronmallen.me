@@ -30,14 +30,14 @@ module API
         required: ["id"],
       }.freeze
 
-      REPLY = Schema.object(
+      REPLY = Helpers::Schema.object(
         {
           saved_view: Serializers::SavedView.reference,
-          count: Schema::INTEGER,
-          partial: Schema::BOOLEAN,
-          records: Schema.list({ anyOf: SERIALIZERS.values.map(&:reference) }),
+          count: Helpers::Schema::INTEGER,
+          partial: Helpers::Schema::BOOLEAN,
+          records: Helpers::Schema.list({ anyOf: SERIALIZERS.values.map(&:reference) }),
         },
-        optional: { next_page: Schema::INTEGER, continue_to: Schema::DAY },
+        optional: { next_page: Helpers::Schema::INTEGER, continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[
@@ -51,7 +51,7 @@ module API
         return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
 
         view = saved_view_queries.by_id(id)
-        return not_found(Wording.missing("saved view", id)) if view.nil?
+        return not_found(Helpers::Wording.missing("saved view", id)) if view.nil?
 
         case list_saved_view_records.call(view, page:, continue_to: cursor)
           in Success(found) then Success(answered(view, found))

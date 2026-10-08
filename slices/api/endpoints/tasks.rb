@@ -4,13 +4,13 @@
 module API
   module Endpoints
     module Tasks
-      BULK = Schema.bulk("tasks")
+      BULK = Helpers::Schema.bulk("tasks")
       CLOSED = "task %s is already done or canceled"
       CREDITS = "the whole set of who did the work: the owner, or an agent with the model it ran on; " \
                 "an empty list clears it, which lists the owner again"
-      CONTRIBUTORS = Schema.list(Serializers::Task::CONTRIBUTOR).merge(description: CREDITS).freeze
+      CONTRIBUTORS = Helpers::Schema.list(Serializers::Task::CONTRIBUTOR).merge(description: CREDITS).freeze
       DIRECTIONS = Blog::Types::TaskMove.values.freeze
-      ID = Schema::ID
+      ID = Helpers::Schema::ID
       LISTS = Blog::Types::TaskFilter.values.freeze
       SPRINT_PAST = "a sprint opens on today or a day after it"
       TAG = { type: "string", description: "one private tag, lowercase words" }.freeze

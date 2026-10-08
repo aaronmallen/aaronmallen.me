@@ -10,7 +10,7 @@ module API
         additionalProperties: false,
         properties: {
           kind: { type: "string", enum: Serializers::InboxRow::KINDS, description: "the row's kind" },
-          id: Schema::ID.merge(description: "the id of the message, webmention or task"),
+          id: Helpers::Schema::ID.merge(description: "the id of the message, webmention or task"),
         },
         required: %w[kind id],
       }.freeze
@@ -22,7 +22,7 @@ module API
       def handle(kind:, id:)
         case wake_inbox_row.call(kind, id)
           in Success(row) then Success(serialized(Serializers::InboxRow, row))
-          in Failure(:not_found) then not_found(Wording.missing(kind, id))
+          in Failure(:not_found) then not_found(Helpers::Wording.missing(kind, id))
           in Failure(:not_snoozed) then invalid(id: [format(NOT_SNOOZED, kind, id)])
         end
       end

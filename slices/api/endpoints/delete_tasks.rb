@@ -5,7 +5,7 @@ module API
     class DeleteTasks < BulkTaskEndpoint
       ACT = Blog::Types::TaskBulkAction["delete"]
       SCHEMA = Tasks::BULK
-      REPLY = Schema.object({ tasks: Schema.list(DeleteTask::REPLY) }).freeze
+      REPLY = Helpers::Schema.object({ tasks: Helpers::Schema.list(DeleteTask::REPLY) }).freeze
 
       def handle(ids:) = acted(ids)
 

@@ -5,14 +5,14 @@ module API
     class DecisionTimelineEvent < Serializer
       KINDS = Blog::Types::DecisionEventKind.values.freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: KINDS },
           id: { type: "integer", description: "the event's ID" },
-          occurred_at: Schema::STAMP,
-          option_id: Schema.nullable({ type: "integer", description: "the option added, edited or chosen" }),
-          reason: Schema.nullable({ type: "string", description: "why it was resolved, dropped or reopened" }),
-          note: Schema.nullable({ type: "string", description: "why the decision or option changed" }),
+          occurred_at: Helpers::Schema::STAMP,
+          option_id: Helpers::Schema.nullable({ type: "integer", description: "the option added, edited or chosen" }),
+          reason: Helpers::Schema.nullable({ type: "string", description: "why it was resolved, dropped or reopened" }),
+          note: Helpers::Schema.nullable({ type: "string", description: "why the decision or option changed" }),
         },
       ).freeze
 

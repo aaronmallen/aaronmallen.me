@@ -3,25 +3,25 @@
 module API
   module Serializers
     class TimeGroup < Serializer
-      TASK = Schema.object(
+      TASK = Helpers::Schema.object(
         {
-          id: Schema::INTEGER,
-          title: Schema::STRING,
-          seconds: Schema::INTEGER,
+          id: Helpers::Schema::INTEGER,
+          title: Helpers::Schema::STRING,
+          seconds: Helpers::Schema::INTEGER,
           shared: { type: "boolean", description: "whether this task's time also counts in another group" },
         },
       ).freeze
 
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           key: {
             type: %w[integer string null],
             description: "the project's ID, the tag or the day as YYYY-MM-DD; null for tasks with no project or tag",
           },
-          name: Schema.nullable(Schema::STRING),
-          seconds: Schema::INTEGER,
+          name: Helpers::Schema.nullable(Helpers::Schema::STRING),
+          seconds: Helpers::Schema::INTEGER,
           shared: { type: "boolean", description: "whether some of this time also counts in another group" },
-          tasks: Schema.list(TASK),
+          tasks: Helpers::Schema.list(TASK),
         },
       ).freeze
 

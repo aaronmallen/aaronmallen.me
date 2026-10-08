@@ -3,11 +3,11 @@
 module API
   module Serializers
     class Photo < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           url: { type: "string", description: "where the photo lives; a record whose text names it claims it" },
-          width: Schema::INTEGER,
-          height: Schema::INTEGER,
+          width: Helpers::Schema::INTEGER,
+          height: Helpers::Schema::INTEGER,
         },
       ).freeze
 

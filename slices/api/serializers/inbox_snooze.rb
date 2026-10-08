@@ -3,11 +3,11 @@
 module API
   module Serializers
     class InboxSnooze < Serializer
-      SCHEMA = Schema.object(
+      SCHEMA = Helpers::Schema.object(
         {
           kind: { type: "string", enum: InboxRow::KINDS },
-          id: Schema::INTEGER,
-          snoozed_until: { **Schema::STAMP, description: "when the row comes back to the top of the inbox" },
+          id: Helpers::Schema::INTEGER,
+          snoozed_until: { **Helpers::Schema::STAMP, description: "when the row comes back to the top of the inbox" },
         },
       ).freeze
 

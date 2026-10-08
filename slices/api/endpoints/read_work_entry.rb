@@ -4,8 +4,8 @@ module API
   module Endpoints
     class ReadWorkEntry < Endpoint
       KIND = Blog::Types::RecordKind["work_entry"]
-      SCHEMA = Schema.by_id
-      REPLY = Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
+      SCHEMA = Helpers::Schema.by_id
+      REPLY = Helpers::Schema.widen(Serializers::WorkEntry::SCHEMA, record_links: Serializers::Link::GROUPS).freeze
 
       include Deps[
         record_link_queries: "links.repos.record_link_queries",
@@ -14,7 +14,7 @@ module API
 
       def handle(id:)
         entry = work_entry_queries.by_id(id)
-        return not_found(Wording.missing("work entry", id)) if entry.nil?
+        return not_found(Helpers::Wording.missing("work entry", id)) if entry.nil?
 
         Success(serialized(Serializers::WorkEntry, entry).merge(record_links: linked(KIND, entry.id)))
       end
