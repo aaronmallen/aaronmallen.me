@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, tasks]
 issue: "#33"
-amended: ["#43"]
+amended: ["#43", "#735"]
 tags: [tasks, imports, github, linear, sync, schema, enums]
 ---
 
@@ -38,6 +38,10 @@ A row at `moved` or `deleted` has nothing left on GitHub to follow, so the sync 
 Issue #43 added this note: ADR 0070 holds this rule for every provider, not GitHub alone. Each provider's client
 works out `remote_state`, Linear's mapping lives in that record, and `task_source_state` gains `started` for it.
 
+Issue #735 added this note: a Linear run no longer sees one change. It replays every state change in the issue's
+history past a cursor on `task_sources`, in order and at Linear's time, so the rule above holds for each change in
+turn ([ADR 0127][0127]).
+
 ## Alternatives
 
 **Match the issue on every run.** No stored state: an open issue means an open task. It lost because it reopens a
@@ -61,3 +65,4 @@ A new state GitHub, or any provider ADR 0070 adds, can report needs a value in `
 migration of its own.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[0127]: 0127-replay-each-linear-state-change-at-linears-time-from-a-cursor-on-task-sources.md
