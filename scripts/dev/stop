@@ -3,4 +3,6 @@
 
 set -e
 
-pitchfork stop --local
+pitchfork list --project --status running --status waiting --hide-header |
+  awk '{ print $1 }' |
+  xargs -r pitchfork stop
