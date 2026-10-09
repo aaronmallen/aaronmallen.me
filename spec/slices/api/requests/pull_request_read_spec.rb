@@ -52,7 +52,7 @@ RSpec.describe "API reading a pull request", type: :request do
       opened = create(:pull_request)
       link(opened.id, "post", create(:post).id)
 
-      expect(read(opened.id)).to eq(mcp_answer("read_pull_request", id: opened.id))
+      expect(read(opened.id)).to eq(trusted(mcp_answer("read_pull_request", id: opened.id)))
     end
 
     it "answers an unknown ID with a 404" do

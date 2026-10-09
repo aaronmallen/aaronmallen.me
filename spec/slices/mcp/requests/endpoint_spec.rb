@@ -787,7 +787,8 @@ RSpec.describe "MCP endpoint", type: :request do
       end
 
       def row(pull, kind, time)
-        include("kind" => "pull_request_#{kind}", "time" => time, "source_id" => pull.id, "name" => "Add feeds",
+        include("kind" => "pull_request_#{kind}", "time" => time, "source_id" => pull.id,
+                "name" => { "untrusted" => true, "text" => "Add feeds" },
                 "repo" => "aaronmallen/blog", "link" => pull.url)
       end
 

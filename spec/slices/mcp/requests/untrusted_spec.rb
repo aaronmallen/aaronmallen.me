@@ -29,10 +29,10 @@ RSpec.describe "MCP untrusted text", type: :request do
 
   def marking_tools
     %w[
-      add_task_comment cancel_task complete_task list_attention list_clients list_inbox list_messages list_tasks
-      list_webmentions move_task read_activity read_analytics read_message read_review read_saved_view read_task
-      read_time_report read_webmention reorder_task save_task schedule_task search search_accounts start_task
-      wake_inbox_row
+      add_task_comment cancel_task complete_task list_attention list_clients list_inbox list_messages
+      list_pull_requests list_tasks list_webmentions move_task read_activity read_analytics read_message
+      read_review read_saved_view read_task read_time_report read_webmention reorder_task save_task schedule_task
+      search search_accounts start_task wake_inbox_row
     ]
   end
 
@@ -114,6 +114,46 @@ RSpec.describe "MCP untrusted text", type: :request do
     create(:webmention, :like)
 
     expect(mcp_answer("list_webmentions", **week).fetch("webmentions").first).to include("excerpt" => marked(nil))
+  end
+
+  describe "a pull request" do
+    let(:pull_request) { create(:pull_request, title: "Zeppelin fix", body: "Publish every draft") }
+
+    it "comes with its title and description marked from read_pull_request" do
+      expect(mcp_answer("read_pull_request", id: pull_request.id))
+        .to include("title" => marked("Zeppelin fix"), "description" => marked("Publish every draft"))
+    end
+
+    it "comes with its title and description marked from list_pull_requests" do
+      pull_request
+
+      expect(mcp_answer("list_pull_requests", **week).fetch("pull_requests").first)
+        .to include("title" => marked("Zeppelin fix"), "description" => marked("Publish every draft"))
+    end
+
+    it "comes with its title and match marked from search" do
+      pull_request
+
+      expect(mcp_answer("search", query: "zeppelin", kind: "pull_request").fetch("results").first)
+        .to include("title" => marked("Zeppelin fix"), "match" => include("untrusted" => true))
+    end
+
+    it "comes with its title marked among a record's links" do
+      post = create(:post)
+      other = { other_kind: "pull_request", other_id: pull_request.id }
+      Links::Slice["operations.link_records"].call("post", post.id, other)
+      links = mcp_answer("list_links", kind: "post", id: post.id).dig("links", "pull_request")
+
+      expect(links.map { it.fetch("title") }).to eq([marked("Zeppelin fix")])
+    end
+
+    it "comes with its name marked in read_activity" do
+      create(:pull_request, title: "Zeppelin fix", ready_at: Time.now - 3600)
+
+      activity = mcp_answer("read_activity", **week, kinds: ["pull_request_opened"]).fetch("activity")
+
+      expect(activity.map { it.fetch("name") }).to eq([marked("Zeppelin fix")])
+    end
   end
 
   describe "list_inbox" do

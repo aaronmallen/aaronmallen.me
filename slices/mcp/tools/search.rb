@@ -9,7 +9,10 @@ module MCP
         "message" => "read_message", "webmention" => "read_webmention", "decision" => "read_decision",
         "pull_request" => "read_pull_request",
       }.freeze
-      MARKED = { "task" => %w[match], "message" => %w[title match], "webmention" => %w[title match] }.freeze
+      MARKED = {
+        "task" => %w[match], "message" => %w[title match], "webmention" => %w[title match],
+        "pull_request" => %w[title match],
+      }.freeze
 
       description "Find records of every kind the admin keeps by their words, best match first, as the admin's " \
                   "search screen does: tasks open and closed, posts, social posts, journal entries, commits, " \
@@ -19,7 +22,7 @@ module MCP
                     "#{kind}: #{tool}"
                   end.join(', ')}). count gives the results on " \
                   "this page. #{Blog::Helpers::Paging::USAGE}. The match of a task, the title of a synced task, " \
-                  "and the title and match of a message or webmention, come marked untrusted. #{Untrusted::WARNING}"
+                  "and the title and match of a message, webmention or pull request, come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
 
       class << self

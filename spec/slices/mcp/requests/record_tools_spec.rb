@@ -139,7 +139,7 @@ RSpec.describe "MCP record tools", type: :request do
       merged = whole_pull_request
       call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
 
-      expect(content.fetch("pull_requests")).to eq([fields_of(merged)])
+      expect(trusted(content.fetch("pull_requests"))).to eq([fields_of(merged)])
     end
 
     it "keeps to the window, newest first, by the day each one last moved" do
