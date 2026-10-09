@@ -11,13 +11,13 @@ RSpec.describe "About", type: :request do
   def settings = Hanami.app.settings
 
   it "points the Rust paragraph at the projects page for the full list" do
-    paragraph = page.find(".about .post-body p", text: copy("prose.open_source.rust"))
+    paragraph = page.find(".g > .prose p", text: copy("prose.open_source.rust"))
 
     expect(paragraph).to have_link(copy("prose.open_source.projects_link"), href: "/projects", exact: true)
   end
 
   it "points the Ruby paragraph at the Hanakai team" do
-    paragraph = page.find(".about .post-body p", text: copy("prose.open_source.ruby"))
+    paragraph = page.find(".g > .prose p", text: copy("prose.open_source.ruby"))
 
     expect(paragraph).to have_link(copy("prose.open_source.hanakai_link"), href: "https://hanakai.org", exact: true)
   end
@@ -28,8 +28,14 @@ RSpec.describe "About", type: :request do
     expect(page.text).not_to match(retired)
   end
 
-  it "leaves out the career heading while there is no history" do
-    expect(page).to have_no_css(".about .rows")
+  it "heads the page with the kicker, the heading and the lede", :aggregate_failures do
+    expect(page).to have_css("header.hd .kicker", exact_text: copy("kicker"))
+    expect(page).to have_css("header.hd h1", exact_text: "Hi, I’m Aaron")
+    expect(page).to have_css("header.hd .ld", exact_text: copy("lede"))
+  end
+
+  it "leaves out the career card while there is no history" do
+    expect(page).to have_no_css(".card")
   end
 
   describe "the career history" do
@@ -39,14 +45,14 @@ RSpec.describe "About", type: :request do
       get "/about"
     end
 
-    it "renders the rows in position order under the career heading", :aggregate_failures do
-      expect(page).to have_css(".about h2.work-title", exact_text: copy("career"))
-      expect(page.all(".about .rows .row h3").map(&:text)).to eq(%w[First Second])
+    it "renders the rows in position order in the career card", :aggregate_failures do
+      expect(page).to have_css(".card > h2.kicker", exact_text: copy("career"))
+      expect(page.all(".card .crs .cr h3").map(&:text)).to eq(%w[First Second])
     end
 
-    it "puts the rows after the prose and before the call to action" do
-      expect(page.all(".about > .post-body, .about > .rows, .about > .cta").map { it[:class] })
-        .to eq(%w[post-body rows cta])
+    it "sets the career and call to action cards in the sidebar after the prose" do
+      expect(page.all(".g > .prose, .g > aside.stack.stick > *").map { it[:class] })
+        .to eq(%w[prose card cta])
     end
   end
 
@@ -54,7 +60,7 @@ RSpec.describe "About", type: :request do
     def row(*traits, **attrs)
       create(:work_entry, *traits, **attrs)
       get "/about"
-      page.find(".about .rows .row")
+      page.find(".crs .cr")
     end
 
     it "shows the years, the role, the organization and the blurb" do
@@ -77,7 +83,7 @@ RSpec.describe "About", type: :request do
   it "closes with the contact form and the profiles the settings hold" do
     profiles = %i[github mastodon bluesky].map { settings.public_send(it)[:profile_url] }
 
-    expect(page.all(".about .cta .links a").map { it[:href] }).to eq(["/contact", *profiles])
+    expect(page.all(".cta .links a").map { it[:href] }).to eq(["/contact", *profiles])
   end
 
   it "publishes no address to write to" do

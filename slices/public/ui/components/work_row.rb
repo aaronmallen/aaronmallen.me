@@ -7,13 +7,11 @@ module Public
         prop :entry, Blog::Types::Instance(ROM::Struct)
 
         def view_template
-          div(class: "row") do
-            div(class: "yr") { years }
-            div do
-              h3 { @entry.role }
-              div(class: "at") { @entry.org }
-              p { @entry.blurb } if written?(@entry.blurb)
-            end
+          div(class: "cr") do
+            span(class: "yr") { years }
+            h3 { @entry.role }
+            span(class: "at") { @entry.org }
+            p { @entry.blurb } if written?(@entry.blurb)
           end
         end
 

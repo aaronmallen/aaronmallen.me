@@ -169,14 +169,14 @@ RSpec.describe "Admin work history", type: :request do
         add(**fields)
         get "/about"
 
-        expect(page.all(".rows .row h3").map(&:text)).to eq(["Software Engineer"])
+        expect(page.all(".crs .cr h3").map(&:text)).to eq(["Software Engineer"])
       end
 
       it "keeps a role with no end year current on the public page" do
         add(**fields(to_year: ""))
         get "/about"
 
-        expect(page).to have_css(".rows .row .yr", exact_text: "2018–Present")
+        expect(page).to have_css(".crs .cr .yr", exact_text: "2018–Present")
       end
 
       it "adds each role to the end of the order" do
@@ -281,7 +281,7 @@ RSpec.describe "Admin work history", type: :request do
         remove(entry.id)
         get "/about"
 
-        expect(page).to have_no_css(".rows .row")
+        expect(page).to have_no_css(".crs .cr")
       end
 
       it "leaves the other roles alone" do

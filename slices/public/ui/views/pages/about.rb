@@ -22,13 +22,10 @@ module Public
           def view_template
             content_for(:title, t(".title"))
 
-            section(class: "about") do
-              span(class: "kicker") { t(".kicker") }
-              h1(class: "page-title") { t(".heading") }
-              p(class: "lede") { t(".lede") }
+            page_head
+            div(class: "g") do
               prose
-              career
-              cta
+              sidebar
             end
           end
 
@@ -50,12 +47,14 @@ module Public
           def career
             return if @work_entries.empty?
 
-            h2(class: "work-title") { t(".career") }
-            div(class: "rows") { @work_entries.each { WorkRow(entry: it) } }
+            section(class: "card") do
+              h2(class: "kicker") { t(".career") }
+              div(class: "crs") { @work_entries.each { WorkRow(entry: it) } }
+            end
           end
 
           def cta
-            div(class: "cta") do
+            section(class: "cta") do
               h2 { t(".cta.heading") }
               p { t(".cta.body") }
               ul(class: "links") do
@@ -77,6 +76,14 @@ module Public
             paragraph_with_link(".prose.open_source.ruby", HANAKAI_URL, ".prose.open_source.hanakai_link")
           end
 
+          def page_head
+            header(class: "hd") do
+              span(class: "kicker") { t(".kicker") }
+              h1 { t(".heading") }
+              p(class: "ld") { t(".lede") }
+            end
+          end
+
           def paragraph_with_link(lead, href, label)
             p do
               plain(t(lead))
@@ -94,12 +101,19 @@ module Public
           end
 
           def prose
-            div(class: "post-body") do
+            div(class: "prose") do
               p { t(".prose.work") }
               p { t(".prose.structure") }
               open_source
               blockquote { p { t(".prose.quote") } }
               away
+            end
+          end
+
+          def sidebar
+            aside(class: "stack stick") do
+              career
+              cta
             end
           end
         end

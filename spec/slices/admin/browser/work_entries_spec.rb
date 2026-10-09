@@ -71,7 +71,7 @@ RSpec.describe "Admin work history", type: :feature do
       page.assert_selector("[data-toast]", text: "Role added to /projects")
       visit "/about"
 
-      expect(page).to have_css(".rows .row h3", text: "Software Engineer")
+      expect(page).to have_css(".crs .cr h3", text: "Software Engineer")
     end
   end
 
@@ -113,7 +113,7 @@ RSpec.describe "Admin work history", type: :feature do
       page.assert_selector("[data-toast]", text: "Role removed from /projects")
       visit "/about"
 
-      expect(page).to have_css("h1.page-title").and have_no_css(".rows .row")
+      expect(page).to have_css(".hd h1").and have_no_css(".crs .cr")
     end
   end
 end

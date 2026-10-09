@@ -70,7 +70,7 @@ en:
               contact: "contact form"
               github: "github"
               mastodon: "mastodon"
-          heading: "Hi, I'm Aaron"
+          heading: "Hi, I’m Aaron"
           hobbies:
             dnd:
               body: "long campaigns, with the odd turn behind the DM screen."
@@ -79,7 +79,7 @@ en:
               body: "a lifelong player who still wants to make one."
               name: "Video games"
             magic:
-              body: "almost always Commander, with more half-built decks than I'd like to admit."
+              body: "almost always Commander, with more half-built decks than I’d like to admit."
               name: "Magic: The Gathering"
             separator: ": "
           kicker: "About"
@@ -93,7 +93,7 @@ en:
               projects_link: "projects page"
               ruby: "In Ruby I focus on Hanami, Dry and ROM as part of the"
               rust: "Most of my own time goes into Rust: command line tools and the libraries behind them. The full list is on the"
-            quote: "Systems with clear rules pull me in, whether that's a deck, a tabletop game or a codebase."
+            quote: "Systems with clear rules pull me in, whether that’s a deck, a tabletop game or a codebase."
             structure: "What keeps me interested is structure: how do you keep a large app easy to read as it grows? For me it starts with clear domain boundaries, so each part of the app owns one piece of the business."
             work: "My work centers on domain-driven design: code that models the business in the words the business uses."
           title: "About"
