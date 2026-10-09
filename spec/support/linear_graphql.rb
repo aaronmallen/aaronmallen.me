@@ -3,17 +3,18 @@
 module LinearGraphQL
   URL = "https://api.linear.app/graphql"
   ASSIGNED_QUERY = "assignedIssues("
-  CLIENT_KEYS = %w[linear.client record.linear.client].freeze
   HISTORY_QUERY = "history(first:"
   ISSUES_QUERY = "issues(first:"
   KEY = "lin_api_one"
   VIEWER_ID = "0b7f5a52-viewer"
+  WORKSPACE_QUERY = "organization {"
 
   def connect_linear(*api_keys)
-    Record::Slice.start(:linear)
-    allow(Hanami.app.settings).to receive(:linear).and_return({ api_keys: })
-    client = Record::Providers::LinearProvider.client(Hanami.app["settings"], Hanami.app["http"])
-    CLIENT_KEYS.each { replace_component(it, client) }
+    Services::Slice["relations.service_connections"].where(provider: "linear").delete
+    api_keys.each do |api_key|
+      Services::Slice["repos.connection_mutations"]
+        .add(provider: "linear", account_id: api_key, label: api_key, credentials: { api_key: })
+    end
   end
 
   def linear_assigned(*nodes, more: false, viewer: VIEWER_ID)
@@ -59,6 +60,8 @@ module LinearGraphQL
         variables.all? { |name, value| body.dig("variables", name.to_s) == value }
     end
   end
+
+  def linear_workspace(id = "ws-root", name = "ROOT") = linear_json(data: { organization: { id:, name: } })
 
   def stub_linear(query, *responses, key: nil, &block)
     stub = stub_request(:post, URL).with do |request|

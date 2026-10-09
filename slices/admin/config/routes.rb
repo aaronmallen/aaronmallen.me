@@ -9,6 +9,7 @@ module Admin
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
+    SERVICE = /[a-z_]+/
     TAG = %r{[^/]+}
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
     WEBMENTION_VERDICT = Regexp.union(Blog::Types::WebmentionModeration.mapping.values)
@@ -151,6 +152,9 @@ module Admin
     get "/search/palette", to: "search.palette", as: :palette_search
     get "/security", to: "security.show", as: :security
     get "/services", to: "services.index", as: :services
+    post "/services/:provider", to: "services.create", as: :connect_service, provider: SERVICE
+    post "/services/:id/delete", to: "services.destroy", as: :disconnect_service, id: ID
+    post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID

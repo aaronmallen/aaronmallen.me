@@ -56,10 +56,6 @@ module Blog
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
     SECRETS = %i[reader_salt analytics_salt app_secret data_key].freeze
 
-    ApiKeys = Types::Array.constructor do |value|
-      (value.is_a?(::Array) ? value : value.to_s.split(",")).map { it.to_s.strip }.reject(&:empty?)
-    end
-
     AttentionLimit = Types::Coercible::Integer.constrained(gt: 0)
     MinimumSubmitSeconds = Types::Coercible::Integer.constrained(gteq: 0)
     OwnerName = Types::String.constrained(format: /\S/)
@@ -179,8 +175,6 @@ module Blog
       project_url?: Value,
       report_data?: Types::Params::Bool.optional,
     )
-
-    setting :linear, default: {}, constructor: Schema.schema(api_keys?: ApiKeys.default([].freeze))
 
     setting :mastodon, default: {}, constructor: Schema.schema(access_token?: Value, profile_url?: Value, url?: Value)
 

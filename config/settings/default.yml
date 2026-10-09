@@ -41,8 +41,6 @@ honeybadger:
   api_key: <%= ENV["HONEYBADGER_API_KEY"].to_json %>
   project_url: <%= ENV["HONEYBADGER_PROJECT_URL"].to_json %>
   report_data: <%= ENV["HONEYBADGER_REPORT_DATA"].to_json %>
-linear:
-  api_keys: <%= ENV["LINEAR_API_KEYS"].to_json %>
 mastodon:
   access_token: <%= ENV["MASTODON_ACCESS_TOKEN"].to_json %>
   profile_url: https://ruby.social/@aaronmallen

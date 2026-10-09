@@ -2,6 +2,7 @@
 
 Record::Slice.register_provider :linear do
   start do
-    register "linear.client", Record::Providers::LinearProvider.client(target["settings"], target["http"])
+    connections = target["services.repos.connection_queries"]
+    register "linear.client", Record::Providers::LinearProvider.client(connections, target["http"])
   end
 end

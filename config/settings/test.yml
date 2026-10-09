@@ -25,8 +25,6 @@ github:
   profile_url: https://github.com/aaronmallen
 honeybadger:
   api_key: null
-linear:
-  api_keys: []
 mastodon:
   access_token: null
   profile_url: https://ruby.social/@aaronmallen

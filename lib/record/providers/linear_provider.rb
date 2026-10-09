@@ -6,10 +6,8 @@ module Record
       API_URL = "https://api.linear.app"
 
       class << self
-        def client(settings, http)
-          transports = settings.linear[:api_keys].map { Linear::Transport.new(connection: graphql(http, it)) }
-
-          Linear::Client.new(transports:)
+        def client(connections, http)
+          Linear::Client.new(connections:, transport: ->(key) { Linear::Transport.new(connection: graphql(http, key)) })
         end
 
         private

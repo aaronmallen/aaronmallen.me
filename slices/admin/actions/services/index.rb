@@ -4,13 +4,26 @@ module Admin
   module Actions
     module Services
       class Index < Action
-        include Deps[list_services: "operations.list_services"]
+        include Deps[
+          check_service: "operations.check_service",
+          definition_queries: "services.repos.definition_queries",
+          list_services: "operations.list_services",
+        ]
 
         def handle(request, response)
-          listing = list_services.call
-          selected = request.params[:selected].to_s
+          response.render(view, **listing(request.params[:connect], selected: request.params[:selected]))
+        end
 
-          response.render(view, **listing, selected: listing[:rows].find { it.key == selected })
+        private
+
+        def listing(connect, selected: nil, **)
+          listing = list_services.call
+          connectable = definition_queries.all.select { check_service.checks?(it.id) }
+
+          listing.merge(
+            connect: connectable.find { it.id == connect.to_s }, connectable: connectable.map(&:id),
+            selected: listing[:rows].find { it.key == selected.to_s }, **,
+          )
         end
       end
     end

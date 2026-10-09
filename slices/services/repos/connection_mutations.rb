@@ -10,6 +10,8 @@ module Services
       def add(credentials:, **columns)
         create(credentials: Blog::Encryptor.new.seal(JSON.generate(credentials)), **columns)
       end
+
+      def remove(id) = service_connections.by_pk(id).delete
     end
   end
 end

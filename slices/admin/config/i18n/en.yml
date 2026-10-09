@@ -186,6 +186,16 @@ en:
       invalid: "Nothing saved · give the view a name of 100 characters or fewer"
       renamed: "View renamed"
       saved: "View saved"
+  services_page:
+    refusals:
+      duplicate: "That account is already connected. Nothing was saved."
+      refused: "Nothing was saved · %{reason}"
+      single: "The site holds one account for this service. Disconnect it first."
+    toasts:
+      answered: "%{name} answered"
+      connected: "%{name} connected as %{account}"
+      disconnected: "Account disconnected"
+      refused: "%{name} isn't answering · %{reason}"
   social:
     networks:
       bluesky: "Bluesky"
@@ -1331,6 +1341,21 @@ en:
           unknown_device: "Unknown device"
           unknown_place: "Unknown place"
       services:
+        actions:
+          another: "Add another account"
+          confirm_disconnect: "Disconnect %{name} (%{account})? Its jobs stop reading it."
+          disconnect: "Disconnect"
+          open: "Open %{name}"
+          test: "Test connection"
+        available:
+          connect: "Connect"
+        connect:
+          close: "Close"
+          connect: "Connect %{name}"
+          fields:
+            api_key: "API key"
+          heading: "Connect %{name}"
+          hint: "The site checks the key with %{name} before it saves it, and keeps it encrypted."
         detail:
           access: "Access"
           app_credentials: "App credentials"
@@ -1344,9 +1369,10 @@ en:
           missing: "missing"
           no_credentials: "No credentials. It follows the Bridgy toggle in"
           not_granted: "not granted"
-          open: "Open %{name}"
           powers: "Powers"
           set: "set"
+        field_error:
+          blank: "Paste a key first."
         row:
           used: "used %{time}"
       settings_head:

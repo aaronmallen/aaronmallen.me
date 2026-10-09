@@ -11,6 +11,8 @@ module Services
       end
 
       attr_reader :all
+
+      def find(id) = all.find { it.id == id.to_s }
     end
   end
 end

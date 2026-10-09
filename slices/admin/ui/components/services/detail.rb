@@ -6,9 +6,9 @@ module Admin
       module Services
         class Detail < Component
           CLOSE_ICON = "fa-solid fa-xmark"
-          OPEN_ICON = "fa-solid fa-arrow-up-right-from-square"
 
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
+          prop :connectable, Blog::Types::Bool
 
           def view_template
             head
@@ -20,7 +20,7 @@ module Admin
             access if definition.oauth? && @row.connection
             credentials
             jobs
-            dashboard
+            Actions(row: @row, connectable: @connectable)
           end
 
           private
@@ -41,19 +41,7 @@ module Admin
             Hint { t(".environment") }
           end
 
-          def dashboard
-            return unless definition.dashboard
-
-            div(class: "svc-actions") do
-              Button(small: true, variant: :gh, icon: OPEN_ICON, **external(definition.dashboard)) do
-                t(".open", name: definition.name)
-              end
-            end
-          end
-
           def definition = @row.definition
-
-          def external(href) = { href:, target: "_blank", rel: "noopener" }
 
           def head
             div(class: "svc-head") do

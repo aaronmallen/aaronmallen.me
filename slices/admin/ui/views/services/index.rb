@@ -8,6 +8,10 @@ module Admin
           include Components::Services
 
           prop :available, Blog::Types::Array
+          prop :connect, Blog::Types::Instance(::Services::Definition).optional
+          prop :connectable, Blog::Types::Array.of(Blog::Types::String)
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :refusal, Blog::Types::String.optional, default: nil
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Structs::ServiceRow))
           prop :selected, Blog::Types::Instance(Structs::ServiceRow).optional
 
@@ -15,7 +19,7 @@ module Admin
             SettingsHead(title: t(".heading"))
             div(class: "g-main") do
               list
-              Card(class: "settings-side") { @selected ? Detail(row: @selected) : glance }
+              Card(class: "settings-side") { side }
             end
           end
 
@@ -26,9 +30,11 @@ module Admin
 
             div(class: "svc-group") do
               p(class: "svc-group-label") { t(".available") }
-              @available.each { Available(definition: it) }
+              @available.each { Available(definition: it, connectable: connectable?(it)) }
             end
           end
+
+          def connectable?(definition) = @connectable.include?(definition.id)
 
           def failing = @rows.select { it.status == :failing }
 
@@ -56,6 +62,13 @@ module Admin
               @rows.group_by { it.definition.group }.each { |name, rows| group(name, rows) }
               available
             end
+          end
+
+          def side
+            return Connect(definition: @connect, errors: @errors, refusal: @refusal) if @connect
+            return Detail(row: @selected, connectable: connectable?(@selected.definition)) if @selected
+
+            glance
           end
 
           def summary

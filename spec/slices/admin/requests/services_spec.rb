@@ -7,6 +7,12 @@ RSpec.describe "Admin connected services", type: :request do
 
   def available = group("Available").all(".li-title").map(&:text)
 
+  def connect(provider = "linear", **connection)
+    post("/admin/services/#{provider}", connection:, _csrf_token: admin_csrf_token)
+  end
+
+  def connections = Services::Slice["repos.connection_queries"].for(:linear)
+
   def fail_sync(name)
     Record::Slice["repos.sync_state_mutations"].record_failure(Blog::Types::SyncName[name], :unreachable)
   end
@@ -18,6 +24,8 @@ RSpec.describe "Admin connected services", type: :request do
   def page = Capybara.string(last_response.body)
 
   def row(name) = page.find(".li", text: name)
+
+  def toast = page.find("[data-toast]").text
 
   describe "signed out" do
     it "sends me to sign-in" do
@@ -178,6 +186,144 @@ RSpec.describe "Admin connected services", type: :request do
 
         expect(page).to have_link("webmentions →", href: "/admin/webmentions#webmention-settings")
       end
+    end
+  end
+
+  describe "connecting Linear" do
+    before { sign_in_to_admin }
+
+    it "offers a key form from available", :aggregate_failures do
+      get "/admin/services"
+      expect(group("Available")).to have_link("Connect", href: "/admin/services?connect=linear")
+
+      get "/admin/services?connect=linear"
+      expect(page).to have_css(".settings-side form[action='/admin/services/linear'] input[type='password']")
+    end
+
+    it "offers no form for a service with no check yet" do
+      get "/admin/services?connect=bluesky"
+
+      expect(page).to have_no_css("form[action='/admin/services/bluesky']")
+    end
+
+    describe "with a key Linear accepts" do
+      before do
+        stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")
+        connect(api_key: " lin_api_root ")
+      end
+
+      it "saves the workspace under its name with the key sealed", :aggregate_failures do
+        expect(connections.map { [it.account_id, it.label, it.credentials] })
+          .to eq([["ws-root", "ROOT", { api_key: "lin_api_root" }]])
+      end
+
+      it "opens the new row with a toast", :aggregate_failures do
+        expect(last_response.location).to end_with("/admin/services?selected=#{connections.first.id}")
+        follow_redirect!
+        expect(toast).to include("Linear connected as ROOT")
+        expect(page).to have_css(".settings-side .svc-account", text: "ROOT")
+      end
+    end
+
+    it "saves nothing for a key Linear refuses and says why", :aggregate_failures do
+      stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_errors("AUTHENTICATION_ERROR", "Authentication required"))
+      connect(api_key: "lin_api_bad")
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".settings-side .field-error", text: "Authentication required")
+      expect(connections).to be_empty
+    end
+
+    it "saves nothing for a blank key", :aggregate_failures do
+      connect(api_key: "  ")
+
+      expect(page).to have_css(".field-error", text: "Paste a key first")
+      expect(a_request(:post, LinearGraphQL::URL)).not_to have_been_made
+      expect(connections).to be_empty
+    end
+
+    it "saves nothing for a workspace the site already holds", :aggregate_failures do
+      stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"))
+      connect(api_key: "lin_api_root")
+      connect(api_key: "lin_api_root_again")
+
+      expect(page).to have_css(".field-error", text: "That account is already connected")
+      expect(connections.size).to eq(1)
+    end
+
+    it "refuses a service it cannot check" do
+      connect("bluesky", handle: "aaron.bsky.social", app_password: "abcd")
+
+      expect(last_response.status).to eq(404)
+    end
+
+    describe "a second workspace" do
+      let(:sources) { Tasks::Slice["relations.task_sources"].where(provider: "linear") }
+
+      before do
+        stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")
+        stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-hana", "Hanakai"), key: "lin_api_hana")
+        stub_linear(LinearGraphQL::ASSIGNED_QUERY, linear_assigned(linear_issue("L_one")), key: "lin_api_root")
+        stub_linear(LinearGraphQL::ASSIGNED_QUERY, linear_assigned(linear_issue("L_two", key: "XYZ-2")),
+                    key: "lin_api_hana")
+        stub_linear(LinearGraphQL::ISSUES_QUERY, linear_issues)
+      end
+
+      def connect_and_sync(api_key)
+        connect(api_key:)
+        Tasks::Jobs::SyncLinearIssues.new.perform
+      end
+
+      it "joins the issue sync with no restart", :aggregate_failures do
+        connect_and_sync("lin_api_root")
+        connect_and_sync("lin_api_hana")
+
+        expect(connections.map(&:label)).to contain_exactly("ROOT", "Hanakai")
+        expect(sources.pluck(:remote_id)).to contain_exactly("L_one", "L_two")
+      end
+    end
+  end
+
+  describe "a connected Linear workspace" do
+    let(:connection) { add_connection("linear", "ws-root", "ROOT", credentials: { api_key: "lin_api_root" }) }
+
+    before { sign_in_to_admin }
+
+    it "offers a test, another account and a disconnect", :aggregate_failures do
+      get "/admin/services?selected=#{connection.id}"
+
+      expect(page).to have_css("form[action='/admin/services/#{connection.id}/test']")
+      expect(page).to have_link("Add another account", href: "/admin/services?connect=linear")
+      expect(page).to have_css("form[action='/admin/services/#{connection.id}/delete'][data-confirm]")
+    end
+
+    it "reports that Linear answers a test" do
+      stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")
+      post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token
+      follow_redirect!
+
+      expect(toast).to include("Linear answered")
+    end
+
+    it "reports that Linear refuses a test" do
+      stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_errors("AUTHENTICATION_ERROR", "Authentication required"))
+      post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token
+      follow_redirect!
+
+      expect(toast).to include("Linear isn't answering", "Authentication required")
+    end
+
+    it "deletes the row on disconnect", :aggregate_failures do
+      post "/admin/services/#{connection.id}/delete", _csrf_token: admin_csrf_token
+
+      expect(last_response.location).to end_with("/admin/services")
+      expect(connections).to be_empty
+    end
+
+    it "answers not found for a disconnect of a row that is gone" do
+      post "/admin/services/31337/delete", _csrf_token: admin_csrf_token
+
+      expect(last_response.status).to eq(404)
     end
   end
 

@@ -47,9 +47,9 @@ module Admin
     ], from: :contact
 
     import keys: %w[
-      github.client operations.delete_journal_entry operations.queue_commit_import operations.save_journal_entry
-      operations.save_review_note operations.update_journal_entry repos.commit_queries repos.journal_entry_queries
-      repos.review_note_queries repos.sync_state_queries
+      github.client linear.client operations.delete_journal_entry operations.queue_commit_import
+      operations.save_journal_entry operations.save_review_note operations.update_journal_entry repos.commit_queries
+      repos.journal_entry_queries repos.review_note_queries repos.sync_state_queries
     ], from: :record
 
     import keys: %w[
@@ -83,7 +83,9 @@ module Admin
       repos.sign_in_queries
     ], from: :security
 
-    import keys: %w[repos.connection_queries repos.definition_queries], from: :services
+    import keys: %w[
+      operations.add_connection operations.remove_connection repos.connection_queries repos.definition_queries
+    ], from: :services
 
     import keys: %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
