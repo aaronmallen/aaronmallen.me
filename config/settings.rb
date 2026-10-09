@@ -54,7 +54,7 @@ module Blog
     DEFAULT_WEB_THREADS = 5
     DEFAULT_WRITING_PATH = "/writing"
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
-    SECRETS = %i[reader_salt analytics_salt app_secret].freeze
+    SECRETS = %i[reader_salt analytics_salt app_secret data_key].freeze
 
     ApiKeys = Types::Array.constructor do |value|
       (value.is_a?(::Array) ? value : value.to_s.split(",")).map { it.to_s.strip }.reject(&:empty?)
@@ -76,6 +76,7 @@ module Blog
 
     RedisTimeout = Types::Coercible::Float.constrained(gt: 0)
     Schema = Types::Hash.schema({}).with_key_transform(&:to_sym)
+    Secret = Types::String.constrained(min_size: 64)
     SiteUrl = Types::String.constrained(format: %r{\Ahttps?://[^\s/?#@]+/?\z})
     StampExpiryHours = Types::Coercible::Integer.constrained(gteq: 1)
     Threads = Types::Coercible::Integer.constrained(gt: 0)
@@ -131,9 +132,7 @@ module Blog
       reader_window_months: Types::Coercible::Integer.constrained(gt: 0),
     )
 
-    setting :analytics_salt, constructor: Types::String.constrained(min_size: 64)
-
-    setting :app_secret, constructor: Types::String.constrained(min_size: 64)
+    SECRETS.each { setting it, constructor: Secret }
 
     setting :attention, constructor: Schema.schema(
       carried_count: AttentionLimit,
@@ -200,8 +199,6 @@ module Blog
       address_header?: Value,
       trusted_proxies?: TrustedProxies.default([].freeze),
     )
-
-    setting :reader_salt, constructor: Types::String.constrained(min_size: 64)
 
     setting :redis, default: {}, constructor: Schema.schema(
       connect_timeout?: unless_blank(RedisTimeout),

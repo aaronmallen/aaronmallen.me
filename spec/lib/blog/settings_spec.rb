@@ -34,6 +34,41 @@ RSpec.describe Blog::Settings do
     end
   end
 
+  describe "#data_key" do
+    let(:app) { Hanami.app["settings"] }
+
+    def settings_with(**values)
+      described_class.new(Hanami::Settings::CompositeStore.new(values, Hanami.app.config.settings_store))
+    end
+
+    it "takes a key of 64 characters or more that repeats no other secret" do
+      expect(settings_with(data_key: "d" * 64).data_key).to eq("d" * 64)
+    end
+
+    it "reads the key from DATA_KEY" do
+      stub_const("ENV", ENV.to_h.merge("DATA_KEY" => "d" * 64))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:data_key)
+
+      expect(settings_with(data_key: file).data_key).to eq("d" * 64)
+    end
+
+    it "refuses to load when DATA_KEY is unset" do
+      stub_const("ENV", ENV.to_h.except("DATA_KEY"))
+      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:data_key)
+
+      expect { settings_with(data_key: file) }.to raise_error(Hanami::Settings::InvalidSettingsError, /data_key/)
+    end
+
+    it "refuses a key under 64 characters" do
+      expect { settings_with(data_key: "d" * 63) }.to raise_error(Hanami::Settings::InvalidSettingsError, /data_key/)
+    end
+
+    it "refuses a key that repeats app_secret" do
+      expect { settings_with(data_key: app.app_secret) }
+        .to raise_error(Hanami::Settings::InvalidSettingsError, /must not repeat data_key/)
+    end
+  end
+
   describe "the committed secrets" do
     let(:committed) do
       %w[development test].to_h do |environment|
@@ -42,7 +77,7 @@ RSpec.describe Blog::Settings do
       end
     end
 
-    let(:fresh) { { analytics_salt: "a" * 64, app_secret: "s" * 64, reader_salt: "r" * 64 } }
+    let(:fresh) { { analytics_salt: "a" * 64, app_secret: "s" * 64, data_key: "d" * 64, reader_salt: "r" * 64 } }
 
     def settings_in(environment, **values)
       stub_const("ENV", ENV.to_h.merge("HANAMI_ENV" => environment))

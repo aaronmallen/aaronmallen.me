@@ -41,6 +41,7 @@ ensure_secret() {
 ensure_secret "ANALYTICS_SALT" 64
 ensure_secret "APP_SECRET" 64
 ensure_var "COMPOSE_FILE" "./.config/compose.yml"
+ensure_secret "DATA_KEY" 64
 ensure_secret "DATABASE_PASSWORD"
 ensure_var "DATABASE_USER" "postgres"
 ensure_var "MEDIA_STORE_ACCESS_KEY" "blog"

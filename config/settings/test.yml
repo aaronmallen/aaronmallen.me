@@ -1,5 +1,6 @@
 analytics_salt: test-analytics-salt-not-a-real-secret-do-not-use-this-one-in-production
 app_secret: test-app-secret-not-a-real-secret-do-not-use-this-one-in-production
+data_key: test-data-key-not-a-real-secret-do-not-use-this-one-in-production
 reader_salt: test-reader-salt-not-a-real-secret-do-not-use-this-one-in-production-either
 backup_store:
   access_key: null
