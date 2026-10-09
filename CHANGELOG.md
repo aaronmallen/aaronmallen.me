@@ -5,6 +5,15 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.8] - 2026-10-09
+
+### Fixed
+
+- Connect on the Connected services tab opens GitHub's or the Mastodon server's sign-in page. A plain click did nothing,
+  because the admin's content security policy blocked the redirect.
+- Connecting GitHub no longer fails on GitHub with "The redirect_uri is not associated with this application". It now
+  comes back through the same address as sign-in.
+
 ## [26.10.7] - 2026-10-09
 
 ### Added
@@ -612,7 +621,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...HEAD
+[26.10.8]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...26.10.8
 [26.10.7]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...26.10.7
 [26.10.6]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.5...26.10.6
 [26.10.5]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.4...26.10.5
