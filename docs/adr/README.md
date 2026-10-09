@@ -136,6 +136,7 @@ one.
 | [0129][0129] | Store MaxMind's country name beside each country code | ![Active][active] | 2026-10-08 |
 | [0130][0130] | Keep service credentials encrypted in a services slice and define each service in code | ![Active][active] | 2026-10-08 |
 | [0131][0131] | Keep owner identities in the database and add the first by hand | ![Active][active] | 2026-10-08 |
+| [0132][0132] | Send a social post to each connected account the owner ticks | ![Active][active] | 2026-10-08 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -268,6 +269,7 @@ one.
 [0129]: 0129-store-maxminds-country-name-beside-each-country-code.md
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [0131]: 0131-keep-owner-identities-in-the-database-and-add-the-first-by-hand.md
+[0132]: 0132-send-a-social-post-to-each-connected-account-the-owner-ticks.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange

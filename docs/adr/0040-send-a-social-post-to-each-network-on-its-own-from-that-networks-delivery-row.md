@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, social, admin]
 issue: AA-577
-amended: [AA-814]
+amended: [AA-814, "#793"]
 tags: [social, sidekiq, jobs, retry, mastodon, bluesky, idempotency]
 ---
 
@@ -41,6 +41,10 @@ writes the time it settled into `posted_at`, over the time it was due.
 A network is a client in `networks.all` (`Social::Providers::NetworksProvider`) and a value of the `network` enum.
 Its client answers `post`, `within_limit?`, `engagement` and `configured?`.
 
+Since #793 a network can hold several accounts, so a post targets the connected accounts the owner ticks and each
+account gets its own delivery row, keyed on the connection in place of the network. [ADR 0132][0132] records it.
+What this record says of a network's row holds for an account's row.
+
 ## Alternatives
 
 **One job that sends every network.** It lost because a failure on one network would retry the whole job, and so
@@ -67,4 +71,5 @@ before a retry goes out.
 A new network needs a client that answers the four methods, an entry in `networks.all`, and a value added to the
 `network` enum and to `Blog::Types::NetworkName`.
 
+[0132]: 0132-send-a-social-post-to-each-connected-account-the-owner-ticks.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
