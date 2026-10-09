@@ -38,7 +38,7 @@ one.
 | [0031][0031] | Give each element one class named for what it is, defined as a Tailwind utility | ![Active][active] | 2026-09-28 |
 | [0032][0032] | Keep the theme in a site_theme cookie the browser sets, and draw it with light-dark() | ![Active][active] | 2026-09-28 |
 | [0033][0033] | Draw every icon as a Font Awesome Free class | ![Active][active] | 2026-09-28 |
-| [0034][0034] | Hold every page to a 1040px column and prose to its own measure | ![Active][active] | 2026-09-28 |
+| [0034][0034] | Hold every page to a 1040px column and prose to its own measure | ![Superseded][superseded-0136] | 2026-09-28 |
 | [0035][0035] | Test the app only through requests, the browser, jobs and MCP | ![Active][active] | 2026-09-28 |
 | [0036][0036] | Check every route with axe-core in the browser suite | ![Active][active] | 2026-09-28 |
 | [0037][0037] | Give every public page an h1, hidden where the design draws none | ![Active][active] | 2026-09-28 |
@@ -140,6 +140,7 @@ one.
 | [0133][0133] | Count overlapping work sessions once in rollups by merging them in SQL at read time | ![Active][active] | 2026-10-08 |
 | [0134][0134] | Store each pull request once and read it twice in the activity view | ![Active][active] | 2026-10-09 |
 | [0135][0135] | Find pull requests by searching GitHub for ones I authored | ![Active][active] | 2026-10-09 |
+| [0136][0136] | Run every public page full width with fluid sizes | ![Active][active] | 2026-10-09 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -276,6 +277,7 @@ one.
 [0133]: 0133-count-overlapping-work-sessions-once-in-rollups-by-merging-them-in-sql-at-read-time.md
 [0134]: 0134-store-each-pull-request-once-and-read-it-twice-in-the-activity-view.md
 [0135]: 0135-find-pull-requests-by-searching-github-for-ones-i-authored.md
+[0136]: 0136-run-every-public-page-full-width-with-fluid-sizes.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -285,4 +287,5 @@ one.
 [superseded-0123]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0128]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0131]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0136]: https://img.shields.io/badge/0136-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

@@ -1,17 +1,18 @@
 ---
 id: "0034"
 title: Hold every page to a 1040px column and prose to its own measure
-status: active
+status: superseded
 created: 2026-09-28
 area: [assets, public, admin]
+superseded-by: "0136"
 issue: AA-538
-amended: [AA-539]
+amended: [AA-539, "#842"]
 tags: [layout, design, css, tailwind, public]
 ---
 
 # ADR 0034: Hold every page to a 1040px column and prose to its own measure
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -91,4 +92,4 @@ rather than 880px. Below that the column shrinks as it always did.
 `p`. We cannot, because one stylesheet serves the admin too and most of its paragraphs sit in cards, not reading
 lines. A new block of prose that forgets the cap takes the full 1040px.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0136-black?style=for-the-badge&label=Superseded&labelColor=orange
