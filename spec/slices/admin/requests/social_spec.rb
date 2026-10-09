@@ -562,12 +562,18 @@ RSpec.describe "Admin social", type: :request do
         create(:social_post_delivery, network, social_post_id: social_post.id, **counts)
       end
 
+      def links = page.all("a.sq-network").to_h { [it.text, it[:href]] }
+
       def posted(parts: %w[posted], at: Time.utc(2026, 9, 13, 2, 30), targets: %w[mastodon])
         social_post_mutations.create_with_parts(parts:, targets:, status: "posted", posted_at: at)
       end
 
       def queued(parts: %w[waiting], at: Time.now + (90 * 60))
         social_post_mutations.create_with_parts(parts:, targets: %w[mastodon], status: "scheduled", posted_at: at)
+      end
+
+      def sent(social_post, connection_id: nil, url: nil)
+        create(:social_post_delivery, :mastodon, social_post_id: social_post.id, connection_id:, remote_url: url)
       end
 
       def texts = page.all(".sq-part").map(&:text)
@@ -628,6 +634,37 @@ RSpec.describe "Admin social", type: :request do
         get "/admin/social"
 
         expect(page).to have_css(".sq-network", text: "Mastodon")
+      end
+
+      it "colors each network label by its network" do
+        posted(targets: %w[mastodon bluesky])
+        get "/admin/social", filter: "posted"
+
+        expect(page.all(".sq-network").map { it[:class] }).to eq(["sq-network mastodon", "sq-network bluesky"])
+      end
+
+      it "links a posted network to its sent post in a new tab" do
+        sent(posted, url: "https://ruby.social/@a/1")
+        get "/admin/social", filter: "posted"
+
+        expect(page).to have_css("a.sq-network.mastodon[href='https://ruby.social/@a/1'][target='_blank']")
+      end
+
+      it "names each sent post by its account when a network went to more than one" do
+        social_post = posted
+        sent(social_post, connection_id: social_account("mastodon").id, url: "https://e.test/1")
+        sent(social_post, connection_id: connect_another_mastodon.id, url: "https://e.test/2")
+        get "/admin/social", filter: "posted"
+
+        expect(links).to eq("@aaronmallen@ruby.social" => "https://e.test/1", "@ada@hachyderm.io" => "https://e.test/2")
+      end
+
+      it "shows a posted network with no post address without a link", :aggregate_failures do
+        sent(posted)
+        get "/admin/social", filter: "posted"
+
+        expect(page).to have_css("span.sq-network", text: "Mastodon")
+        expect(page).to have_no_css("a.sq-network")
       end
 
       it "counts down to an upcoming item" do

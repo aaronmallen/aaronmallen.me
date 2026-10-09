@@ -50,7 +50,9 @@ module Admin
           end
 
           def queue
-            Queue(filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
+            accounts = @accounts.to_h { [it.id, it.label] }
+
+            Queue(accounts:, filter: @filter, page: @items, now: @now, suggestion_counts: @suggestion_counts)
           end
 
           def side

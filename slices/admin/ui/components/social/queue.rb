@@ -16,6 +16,7 @@ module Admin
             DRAFTS => "ui.components.social.queue.drafts",
           }.freeze
 
+          prop :accounts, Blog::Types::Hash
           prop :filter, Blog::Types::String
           prop :now, Blog::Types::Time
           prop :page, Blog::Types::Instance(Blog::Structs::Paged)
@@ -26,7 +27,7 @@ module Admin
               card.side { filter_form }
               next Empty { t(EMPTIES.fetch(@filter)) } if @page.rows.empty?
 
-              @page.rows.each { QueueItem(social_post: it, filter: @filter, now: @now, suggestions: count(it)) }
+              @page.rows.each { item(it) }
               Pager(page: @page, route: :admin_social, params: { filter: @filter })
             end
           end
@@ -43,6 +44,10 @@ module Admin
               selected: @filter,
               label: t(".filter"),
             )
+          end
+
+          def item(social_post)
+            QueueItem(social_post:, accounts: @accounts, filter: @filter, now: @now, suggestions: count(social_post))
           end
         end
       end

@@ -1458,6 +1458,8 @@ en:
           results:
             one: "{count} person"
             other: "{count} people"
+        network_label:
+          failed: "%{network} failed"
         part:
           body: "Post text"
           label: "part"
@@ -1476,7 +1478,6 @@ en:
           title: "What's waiting"
         queue_item:
           edit: "Edit"
-          failed: "%{network} failed"
           failure: "%{network}: %{detail}"
           in_a_moment: "in a moment"
           in_days:

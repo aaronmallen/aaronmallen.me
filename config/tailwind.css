@@ -5365,7 +5365,23 @@
 }
 
 @utility sq-network {
-  @apply inline-flex items-center gap-1.5;
+  @apply inline-flex items-center gap-1.5 rounded-sm text-(--net);
+
+  &.mastodon {
+    --net: var(--color-mk-violet);
+  }
+
+  &.bluesky {
+    --net: var(--color-mk-blue-text);
+  }
+
+  &:is(a) {
+    @apply no-underline hover:underline focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
 
   &.bad {
     @apply text-mk-pink-text;

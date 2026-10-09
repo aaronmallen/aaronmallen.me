@@ -19,6 +19,7 @@ module Admin
           POSTED = Blog::Types::SocialPostStatus["posted"]
 
           prop :social_post, Blog::Types::Instance(ROM::Struct)
+          prop :accounts, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :filter, Blog::Types::String
           prop :now, Blog::Types::Time
           prop :suggestions, Blog::Types::Integer, default: 0
@@ -35,6 +36,8 @@ module Admin
           end
 
           private
+
+          def account(delivery) = @accounts.fetch(delivery.connection_id) { label(delivery.network) }
 
           def actions
             return if posted? || claimed?
@@ -93,12 +96,13 @@ module Admin
           end
 
           def network(name)
-            failing = @social_post.deliveries.any? { it.network == name && failing?(it) }
+            delivered = @social_post.deliveries.select { it.network == name }
+            failing = delivered.any? { failing?(it) }
+            return NetworkLabel(network: name, text: label(name), failing:) unless posted? && delivered.any?
 
-            span(class: ["sq-network", ("bad" if failing)]) do
-              IconLabel(icon: NETWORK_ICONS.fetch(name)) do
-                failing ? t(".failed", network: label(name)) : label(name)
-              end
+            delivered.each do |delivery|
+              text = delivered.one? ? label(name) : account(delivery)
+              NetworkLabel(network: name, text:, failing: failing?(delivery), url: delivery.remote_url)
             end
           end
 
