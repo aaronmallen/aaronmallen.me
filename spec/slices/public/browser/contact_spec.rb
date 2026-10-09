@@ -99,6 +99,41 @@ RSpec.describe "Contact form", type: :feature do
     end
   end
 
+  describe "the clock" do
+    def clock(time) = i18n.t("ui.components.contact_info.where.clock", time:)
+
+    def wind_clock_to(time)
+      page.driver.browser.page.command("Page.addScriptToEvaluateOnNewDocument", source: <<~JS)
+        const shift = #{(time.to_f * 1000).round} - Date.now();
+        const now = Date.now;
+        Date.now = () => now() + shift;
+      JS
+    end
+
+    it "shows the time in the site's zone" do
+      wind_clock_to(Time.utc(2026, 10, 9, 20, 7, 30))
+      visit "/contact"
+
+      expect(page).to have_css("[data-clock]", exact_text: clock("3:07 pm"))
+    end
+
+    it "turns over with the minute" do
+      wind_clock_to(Time.utc(2026, 1, 9, 23, 59, 59))
+      visit "/contact"
+
+      expect(page).to have_css("[data-clock]", exact_text: clock("6:00 pm"))
+    end
+
+    it "shows the zone with the script off" do
+      page.driver.browser.page.disable_javascript
+      visit "/contact"
+
+      expect(page).to have_css("[data-clock]", exact_text: i18n.t("ui.components.contact_info.where.zone"))
+    ensure
+      page.driver.browser.page.command("Emulation.setScriptExecutionDisabled", value: false)
+    end
+  end
+
   it "keeps the honeypot off the screen" do
     visit "/contact"
 
