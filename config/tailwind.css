@@ -4984,60 +4984,65 @@
   }
 }
 
-@utility person-search {
-  @apply mt-2 flex flex-col gap-1;
+@utility person-finder {
+  & .seg-option.mastodon:has(:checked) {
+    @apply text-mk-violet;
+  }
 
-  &[hidden] {
+  & .seg-option.bluesky:has(:checked) {
+    @apply text-mk-blue-text;
+  }
+
+  & .seg-option i {
+    @apply mr-1.5;
+  }
+}
+
+@utility person-finder-form {
+  @apply flex gap-2;
+
+  & > .inp {
+    @apply min-w-0 flex-1;
+  }
+}
+
+@utility person-finder-results {
+  @apply mt-2 flex flex-col;
+
+  &:empty {
     @apply hidden;
   }
 }
 
-@utility person-search-box {
-  @apply relative flex items-center;
-
-  & > i {
-    @apply pointer-events-none absolute left-2.5 text-badge text-ink-muted;
-  }
-
-  & > .inp {
-    @apply pl-8;
-  }
+@utility person-result {
+  @apply flex items-center gap-x-3 border-b border-line py-2.5 last:border-b-0;
 }
 
-@utility person-search-results {
-  @apply overflow-y-auto rounded-card border border-line bg-ground-sunk p-1;
-  max-height: min(40vh, 280px);
-}
-
-@utility person-search-result {
-  @apply flex cursor-pointer items-center gap-x-3 rounded-btn px-2.5 py-2 text-ink;
-
-  &[aria-selected="true"] {
-    @apply bg-wash;
-  }
-
-  @media (width < 43.75rem) {
-    @apply min-h-tap;
-  }
-}
-
-@utility person-search-note {
-  @apply cursor-default font-mono text-badge text-ink-muted;
-}
-
-@utility person-search-avatar {
+@utility person-result-avatar {
   @apply size-8 shrink-0 rounded-full bg-wash object-cover;
 }
 
-@utility person-search-name {
-  @apply min-w-0 truncate font-mono text-input;
+@utility person-result-body {
+  @apply min-w-0 flex-1;
 }
 
-@utility person-search-handle {
-  @apply ml-auto min-w-0 truncate font-mono text-badge text-ink-muted;
+@utility person-result-name {
+  @apply truncate font-mono text-input text-ink;
+}
 
-  :where(.person-search-result[aria-selected="true"]) > & {
-    @apply text-ink;
+@utility person-result-handle {
+  @apply meta truncate;
+
+  &.mastodon {
+    @apply text-mk-violet;
+  }
+
+  &.bluesky {
+    @apply text-mk-blue-text;
+  }
+
+  & i {
+    @apply mr-1;
   }
 }
 

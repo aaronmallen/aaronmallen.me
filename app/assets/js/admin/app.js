@@ -11,6 +11,7 @@ import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupMessageLabels } from "./message_label.js";
 import { setupPalette } from "./palette.js";
+import { setupPersonFinder } from "./person_finder.js";
 import { setupPersonForms } from "./person_form.js";
 import { setupPools } from "./pools.js";
 import { setupPostEditors } from "./post_editor.js";
@@ -37,6 +38,7 @@ function setup() {
   setupMessageLabels();
   setupMarkdownEditors();
   setupPalette();
+  setupPersonFinder();
   setupPersonForms();
   setupPools();
   setupPostEditors();

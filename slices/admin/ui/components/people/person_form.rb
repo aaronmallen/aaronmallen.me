@@ -14,12 +14,10 @@ module Admin
             mastodon_handle: %w[.mastodon_handle .mastodon_handle_placeholder],
             bluesky_handle: %w[.bluesky_handle .bluesky_handle_placeholder],
           }.freeze
-          SEARCHES = { mastodon_handle: "mastodon", bluesky_handle: "bluesky" }.freeze
 
           prop :person, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
           prop :errors, Blog::Types::Hash
-          prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
           prop :scope, Blog::Types::String, default: SCOPE
 
           def self.delete_form(scope) = "#{scope}-delete"
@@ -67,7 +65,7 @@ module Admin
 
           def form_action = @person ? path(:admin_update_person, id: @person.id) : path(:admin_create_person)
 
-          def input_field(name)
+          def input_field(name, &)
             label_key, placeholder_key = FIELDS.fetch(name)
 
             Field(label: t(label_key), name:, errors: @errors, error: FieldError, scope: @scope) do |control, field|
@@ -79,16 +77,8 @@ module Admin
                 value: @values[name],
                 data: { person_field: name },
               )
-              field.after do
-                search(name)
-                yield if block_given?
-              end
+              field.after(&) if block_given?
             end
-          end
-
-          def search(name)
-            network = SEARCHES[name]
-            Search(network:, scope: @scope) if @searchable.include?(network)
           end
         end
       end

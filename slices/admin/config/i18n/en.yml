@@ -973,6 +973,13 @@ en:
             format: "A Mastodon handle looks like @ada@ruby.social."
           name:
             blank: "Give them a name first."
+        finder:
+          failed: "That search did not go through. Try again."
+          label: "Search %{network}"
+          network: "Network"
+          placeholder: "Search %{network} by name or handle"
+          search: "Search"
+          title: "Find an account"
         person_dialog:
           title: "New person"
         person_form:
@@ -994,15 +1001,13 @@ en:
           bluesky: "%{name} on Bluesky"
           bluesky_handle: "@%{handle}"
           mastodon: "%{name} on Mastodon"
-        search:
-          label: "Search %{network}"
-          placeholder: "Search %{network} by name or handle"
-          results:
-            one: "{count} account found"
-            other: "{count} accounts found"
-          results_label: "%{network} accounts"
         search_results:
+          add: "Add"
+          add_label: "Add %{name}"
           failed: "%{network} did not answer. Try again, or type the handle."
+          found:
+            one: "%{count} account found"
+            other: "%{count} accounts found"
           none: "No accounts match."
           rate_limited: "%{network} has had too many searches. Wait a minute, or type the handle."
       posts:

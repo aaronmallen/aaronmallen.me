@@ -221,9 +221,11 @@ RSpec.describe "Admin screens", type: :feature do
         stub_bluesky_search("ada",
                             { avatar: "https://cdn.bsky.app/a.jpg", displayName: "Ada Lovelace",
                               handle: "ada.bsky.social" })
-        visit "/admin/people/new"
-        find_by_id("person-bluesky-search").send_keys("ada")
-        find("#person-bluesky-results [role='option']", text: "Ada Lovelace")
+        visit "/admin/people"
+        find("#person-finder .seg-option.bluesky").click
+        fill_in("person-finder-q", with: "ada")
+        click_button("Search")
+        find("[data-person-result]", text: "Ada Lovelace")
       end,
     }
   end

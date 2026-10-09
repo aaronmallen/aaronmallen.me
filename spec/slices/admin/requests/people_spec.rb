@@ -352,7 +352,7 @@ RSpec.describe "Admin people", type: :request do
         { acct: "grace@hachyderm.io", avatar: "https://files.example/grace.png", display_name: "Grace Hopper" }
       end
 
-      def results = page.all("[data-person-pick]").map { [it["data-person-pick"], it["data-person-pick-name"]] }
+      def results = page.all("[data-person-add]").map { [it["data-person-add"], it["data-person-add-name"]] }
 
       def search(network, query) = get("/admin/people/search/#{network}", q: query)
 
@@ -363,8 +363,8 @@ RSpec.describe "Admin people", type: :request do
         search("bluesky", "ada")
 
         expect(results).to eq([["ada.bsky.social", "Ada Lovelace"]])
-        expect(page).to have_css("[role='option'] img[src='https://cdn.bsky.app/ada.jpg'][alt='']")
-        expect(page).to have_css("[role='option'] .person-search-handle", text: "ada.bsky.social")
+        expect(page).to have_css("[data-person-result] img[src='https://cdn.bsky.app/ada.jpg'][alt='']")
+        expect(page).to have_css("[data-person-result] .person-result-handle.bluesky", text: "@ada.bsky.social")
       end
 
       it "answers with rows and no layout" do
@@ -392,7 +392,7 @@ RSpec.describe "Admin people", type: :request do
         stub_bluesky_search("ada", ada.merge(displayName: ""))
         search("bluesky", "ada")
 
-        expect(page.find(".person-search-name").text).to eq("ada.bsky.social")
+        expect(page.find(".person-result-name").text).to eq("ada.bsky.social")
       end
 
       it "draws no avatar from an address that is not HTTPS" do
@@ -406,7 +406,7 @@ RSpec.describe "Admin people", type: :request do
         stub_bluesky_search("nobody")
         search("bluesky", "nobody")
 
-        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "No accounts match")
+        expect(page).to have_css(".empty", text: "No accounts match")
         expect(results).to be_empty
       end
 
@@ -422,14 +422,14 @@ RSpec.describe "Admin people", type: :request do
         search("bluesky", "ada")
 
         expect(last_response.status).to eq(502)
-        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "Bluesky did not answer")
+        expect(page).to have_css("[data-person-finder-note='failed']", text: "Bluesky did not answer")
       end
 
       it "shows an error row when the network times out" do
         stub_request(:get, SocialNetworks::MASTODON_SEARCH).with(query: hash_including({})).to_timeout
         search("mastodon", "grace")
 
-        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "Mastodon did not answer")
+        expect(page).to have_css("[data-person-finder-note='failed']", text: "Mastodon did not answer")
       end
 
       it "shows an error row when the network rate limits", :aggregate_failures do
@@ -437,7 +437,7 @@ RSpec.describe "Admin people", type: :request do
         search("mastodon", "grace")
 
         expect(last_response.status).to eq(429)
-        expect(page).to have_css("[role='option'][aria-disabled='true']", text: "too many searches")
+        expect(page).to have_css("[data-person-finder-note='rate_limited']", text: "too many searches")
       end
 
       it "answers 404 for a network with no credentials" do
@@ -453,30 +453,41 @@ RSpec.describe "Admin people", type: :request do
         expect(last_response).to be_not_found
       end
 
-      it "gives each handle field a search box" do
-        get "/admin/people/new"
+      it "counts the accounts it found" do
+        stub_bluesky_search("ada", ada, ada.merge(handle: "ada2.bsky.social"))
+        search("bluesky", "ada")
 
-        expect(page.all("[data-person-search]", visible: :all).map { it["data-person-search"] })
+        expect(page).to have_css("[data-person-finder-count]", text: "2 accounts found")
+      end
+
+      it "offers one search panel beside the people list", :aggregate_failures do
+        get "/admin/people"
+
+        expect(page).to have_css(".g-main > aside[data-person-finder][hidden]", visible: :all)
+        expect(page.all("[data-person-finder] input[name='network']", visible: :all).map(&:value))
           .to eq(%w[mastodon bluesky])
       end
 
-      it "gives the editor the same search boxes" do
-        get "/admin/people/#{create(:person).id}/edit"
-
-        expect(page).to have_css("[data-person-search]", visible: :all, count: 2)
-      end
-
-      it "shows no search box for a network with no credentials" do
+      it "offers only the networks with credentials" do
         connect_social_networks(mastodon: {})
-        get "/admin/people/new"
+        get "/admin/people"
 
-        expect(page.all("[data-person-search]", visible: :all).map { it["data-person-search"] }).to eq(%w[bluesky])
+        expect(page.all("[data-person-finder] input[name='network']", visible: :all).map(&:value)).to eq(%w[bluesky])
       end
 
-      it "hides the search boxes until scripts show them" do
-        get "/admin/people/new"
+      it "leaves the panel out when no network has credentials" do
+        connect_social_networks(bluesky: {}, mastodon: {})
+        get "/admin/people"
 
-        expect(page).to have_css("[data-person-search][hidden]", visible: :all, count: 2)
+        expect(page).to have_no_css("[data-person-finder]", visible: :all).and have_no_css(".g-main")
+      end
+
+      it "gives the person form no search boxes", :aggregate_failures do
+        get "/admin/people/new"
+        expect(page).to have_no_field(type: "search", visible: :all)
+
+        get "/admin/people/#{create(:person).id}/edit"
+        expect(page).to have_no_field(type: "search", visible: :all)
       end
     end
 

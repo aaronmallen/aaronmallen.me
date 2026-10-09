@@ -6,6 +6,7 @@ module Admin
       module People
         class SearchResults < Component
           AVATAR_SIZE = 32
+          BLUESKY = Blog::Types::NetworkName["bluesky"]
           PROBLEMS = { failed: ".failed", rate_limited: ".rate_limited" }.freeze
           SECURE = "https://"
 
@@ -14,40 +15,52 @@ module Admin
           prop :problem, Blog::Types::Symbol.optional, default: nil
 
           def view_template
-            return note(t(PROBLEMS.fetch(@problem), network: network_label), @problem) if @problem
-            return note(t(".none"), :none) if @accounts.empty?
+            return Hint(class: "bad", data: { person_finder_note: @problem.name }) { problem } if @problem
+            return Empty { t(".none") } if @accounts.empty?
 
-            @accounts.each_with_index { |account, index| result(account, index) }
+            Hint(data: { person_finder_count: "" }) { t(".found", count: @accounts.size) }
+            @accounts.each { result(it) }
           end
 
           private
 
+          def add_button(account)
+            Button(
+              small: true, aria: { label: t(".add_label", name: name(account)) },
+              data: { person_add: account.handle, person_add_name: account.name, person_add_network: @network },
+            ) { t(".add") }
+          end
+
           def avatar(account)
-            return span(class: "person-search-avatar", aria: { hidden: "true" }) unless secure?(account.avatar)
+            return span(class: "person-result-avatar", aria: { hidden: "true" }) unless secure?(account.avatar)
 
             img(
-              class: "person-search-avatar", src: account.avatar, alt: "", width: AVATAR_SIZE, height: AVATAR_SIZE,
+              class: "person-result-avatar", src: account.avatar, alt: "", width: AVATAR_SIZE, height: AVATAR_SIZE,
               loading: "lazy", referrerpolicy: "no-referrer",
             )
           end
 
-          def network_label = t(Structs::Network::LABELS.fetch(@network))
-
-          def note(text, kind)
-            div(
-              id: "#{Search.list_id(@network)}-#{kind}", class: "person-search-result person-search-note",
-              role: "option", aria: { disabled: "true", selected: "false" }, data: { person_search_note: kind },
-            ) { text }
+          def body(account)
+            div(class: "person-result-body") do
+              p(class: "person-result-name") { name(account) }
+              p(class: "person-result-handle #{@network}") do
+                Icon(Finder::ICONS.fetch(@network))
+                plain handle(account)
+              end
+            end
           end
 
-          def result(account, index)
-            div(
-              id: "#{Search.list_id(@network)}-#{index}", class: "person-search-result", role: "option",
-              aria: { selected: "false" }, data: { person_pick: account.handle, person_pick_name: account.name },
-            ) do
+          def handle(account) = @network == BLUESKY ? "@#{account.handle}" : account.handle
+
+          def name(account) = account.name.empty? ? account.handle : account.name
+
+          def problem = t(PROBLEMS.fetch(@problem), network: t(Structs::Network::LABELS.fetch(@network)))
+
+          def result(account)
+            div(class: "person-result", data: { person_result: "" }) do
               avatar(account)
-              span(class: "person-search-name") { account.name.empty? ? account.handle : account.name }
-              span(class: "person-search-handle") { account.handle }
+              body(account)
+              add_button(account)
             end
           end
 

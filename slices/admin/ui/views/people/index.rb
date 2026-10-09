@@ -9,11 +9,14 @@ module Admin
 
           prop :people, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :editors, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :searchable, Blog::Types::Array.of(Blog::Types::NetworkName)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @people.size)) { new_person }
-            @people.empty? ? Empty { t(".empty") } : Card(data: { key_list: true }) { @people.each { row(it) } }
-            Hint { t(".note") }
+            div(class: ("g-main" if @searchable.any?)) do
+              div(class: "settings-main") { list }
+              Finder(networks: @searchable) if @searchable.any?
+            end
             @editors.each { Drawer(**it) }
           end
 
@@ -22,6 +25,11 @@ module Admin
           def bluesky(person) = person.bluesky_handle && t(".bluesky_handle", handle: person.bluesky_handle)
 
           def drawer(person) = "#{Drawer.id_for(person)}-drawer"
+
+          def list
+            @people.empty? ? Empty { t(".empty") } : Card(data: { key_list: true }) { @people.each { row(it) } }
+            Hint { t(".note") }
+          end
 
           def meta(person)
             span(class: "person-row-token") { t(".token", key: person.key) }
