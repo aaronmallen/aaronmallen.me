@@ -64,7 +64,7 @@ RSpec.describe "Admin post preview", :frozen_clock, type: :request do
       let(:article_body) do
         create(:post, :published, slug: "hello", body:)
         get "/writing/hello"
-        page.find(".post .post-body").native.inner_html
+        Capybara.string(last_response.body).find(".post .e-content").native.inner_html
       end
 
       it "renders the body as the public article does" do

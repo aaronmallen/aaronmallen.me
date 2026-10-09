@@ -214,6 +214,12 @@
   --text-prose-h2: clamp(1.4rem, 1.7vw, 1.95rem);
   --text-prose-h2--line-height: 1.15;
   --text-prose-h2--letter-spacing: -0.022em;
+  --text-prose-h3: clamp(1.15rem, 1.25vw, 1.4rem);
+  --text-prose-h3--line-height: 1.25;
+  --text-prose-h3--letter-spacing: -0.012em;
+  --text-post-head: clamp(2.4rem, 4.8vw, 5.2rem);
+  --text-post-head--line-height: 0.98;
+  --text-post-head--letter-spacing: -0.04em;
   --text-cta-head: clamp(1.3rem, 1.5vw, 1.75rem);
   --text-cta-head--line-height: 1.15;
   --text-cta-head--letter-spacing: -0.02em;
@@ -313,12 +319,28 @@
       @apply mt-[1.05em];
     }
 
+    &.lead > p:first-child {
+      @apply text-[1.12em];
+    }
+
+    & [id] {
+      @apply scroll-mt-24;
+    }
+
     & h2 {
       @apply mt-[1.9em] font-display text-prose-h2 font-bold text-ink;
     }
 
+    & h3 {
+      @apply mt-[1.6em] font-display text-prose-h3 font-semibold text-ink;
+    }
+
     & ul {
       @apply list-disc pl-[1.2em];
+    }
+
+    & ol {
+      @apply list-decimal pl-[1.2em];
     }
 
     & li {
@@ -328,6 +350,30 @@
     & blockquote {
       @apply my-[1.5em] border-l-2 border-mk-pink pl-5.5 text-[1.06em] text-ink-muted italic;
     }
+
+    & pre {
+      @apply my-[1.5em] rounded-[12px] text-[clamp(13px,0.8vw,14.5px)];
+    }
+
+    & .cf pre {
+      @apply m-0;
+    }
+
+    & hr {
+      @apply my-[2em] border-line;
+    }
+
+    & :not(pre) > code {
+      @apply rounded-[3px] px-[5px] py-[2px] text-[0.85em];
+    }
+  }
+}
+
+@utility endmark {
+  @apply mt-[1.8em] flex text-[clamp(1rem,1vw,1.2rem)] text-ink-muted;
+
+  & > .glasses {
+    @apply h-[0.95em] w-[2.4em];
   }
 }
 
@@ -852,11 +898,24 @@
 }
 
 @utility post-back {
-  @apply inline-flex items-center gap-2 meta no-underline hover:text-accent focus-ring;
+  @apply mb-[clamp(18px,2vw,30px)] inline-flex items-center gap-2 meta no-underline hover:text-accent focus-ring;
+
+  & i {
+    @apply text-[10.5px];
+  }
+}
+
+@utility post-h {
+  @apply mb-[clamp(28px,3vw,48px)];
+
+  & .post-meta {
+    @apply mt-0 items-baseline gap-x-3.5 gap-y-1 leading-[1.4];
+  }
 }
 
 @utility post-title {
-  @apply mt-6 font-display text-post-title font-extrabold text-ink;
+  @apply m-0 mb-4.5 max-w-[20ch] font-display text-post-head font-extrabold text-ink;
+  text-wrap: balance;
 }
 
 @utility post-meta {
@@ -917,13 +976,13 @@
   & :not(pre) > code {
     @apply rounded-code px-1 text-[0.875em];
   }
+}
 
-  & .cf-n {
-    @apply mb-2 flex items-center gap-2 font-mono text-meta text-ink-muted;
+@utility cf-n {
+  @apply mb-2 flex items-center gap-2 font-mono text-meta text-ink-muted;
 
-    & i {
-      @apply text-[0.6875rem];
-    }
+  & i {
+    @apply text-[0.6875rem];
   }
 }
 

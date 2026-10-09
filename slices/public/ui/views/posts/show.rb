@@ -27,7 +27,7 @@ module Public
 
             article(class: "post h-entry") do
               head_row
-              div(class: "post-body e-content") { raw(safe(@body_html)) }
+              post_body
               Edits(edits: @edits)
               feedback_note
               Syndication(urls: @syndication_urls)
@@ -76,7 +76,7 @@ module Public
 
           def head_row
             back_link
-            header do
+            header(class: "post-h") do
               h1(class: "post-title p-name") { @post.title }
               data(class: "u-url", value: path(:post, slug: @post.slug))
               Meta(time: @post.published_at, tags: @post.tags, read_time: @post.read_time)
@@ -99,6 +99,11 @@ module Public
               end
               span(class: "post-pager-title") { post.title }
             end
+          end
+
+          def post_body
+            div(class: "prose lead e-content") { raw(safe(@body_html)) }
+            span(class: "endmark", aria: { hidden: "true" }) { span(class: "glasses") }
           end
 
           def social_card

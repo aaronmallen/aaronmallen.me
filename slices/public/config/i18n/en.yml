@@ -65,6 +65,8 @@ en:
           label: "Edits"
         list:
           read_time: "%{count} min"
+        meta:
+          read_time: "%{count} min"
         responses:
           heading: "Responses"
           likes:

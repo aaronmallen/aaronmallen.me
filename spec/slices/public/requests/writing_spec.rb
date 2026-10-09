@@ -213,21 +213,28 @@ RSpec.describe "Writing", type: :request do
 
       expect(last_response).to be_ok
       expect(page).to have_css("article.post a.post-back[href='/writing'] + header h1.post-title", text: "Hello")
-      expect(page).to have_css(".post-body > p:first-child", text: "the start").and have_css(".post-body h2")
+      expect(page).to have_css(".prose > p:first-child", text: "the start").and have_css(".prose h2")
     end
 
     it "gives every heading an id from its text, numbering repeats" do
       publish("hello", 1, body: "## Setup\n\n### The `config` file\n\n## Setup")
       get "/writing/hello"
 
-      expect(page.all(".post-body h2, .post-body h3").map { it[:id] }).to eq(%w[setup the-config-file setup-1])
+      expect(page.all(".prose h2, .prose h3").map { it[:id] }).to eq(%w[setup the-config-file setup-1])
     end
 
     it "keeps a remote image in the body" do
       publish("hello", 1, body: "the start\n\n![shot](https://example.com/shot.png)")
       get "/writing/hello"
 
-      expect(page).to have_css(".post-body img[src='https://example.com/shot.png'][alt='shot']")
+      expect(page).to have_css(".prose img[src='https://example.com/shot.png'][alt='shot']")
+    end
+
+    it "marks the end of the body" do
+      publish("hello", 1)
+      get "/writing/hello"
+
+      expect(page).to have_css(".e-content + .endmark[aria-hidden='true'] > .glasses", visible: :all)
     end
 
     it "closes the article with an eyebrow linking to contact", :aggregate_failures do
@@ -243,7 +250,8 @@ RSpec.describe "Writing", type: :request do
       get "/writing/hello"
 
       expect(page.find("header .post-meta"))
-        .to have_css("time", text: "Sep 7, 2026").and have_css(".post-tag", count: 2).and have_text("1 min read")
+        .to have_css("time", text: "Sep 7, 2026").and have_css(".post-tag", count: 2)
+        .and have_css("span", exact_text: "1 min")
     end
 
     it "links each tag to its tag page" do
