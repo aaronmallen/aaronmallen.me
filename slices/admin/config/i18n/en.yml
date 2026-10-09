@@ -1403,9 +1403,18 @@ en:
         lede: "The rarely-touched stuff, in one place."
       social:
         account_picker:
+          all: "all %{count}"
+          clear: "Clear"
+          empty: "Pick at least one account"
+          everywhere: "Everywhere"
+          find: "Find an account"
           manage: "Manage accounts"
           menu: "Post as"
+          more: "+%{count} more"
+          no_match: "No account matches “%{query}”."
+          none: "none"
           picked: "%{picked} of %{total}"
+          remove: "Remove %{account}"
           to: "To"
         composer:
           add: "Add to thread"

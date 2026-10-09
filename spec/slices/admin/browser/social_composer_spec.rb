@@ -10,13 +10,19 @@ RSpec.describe "Admin social composer", type: :feature do
 
   def bodies = all("[data-social-body]")
 
+  def chips = all(".compose-chip").map { it.text.strip }
+
   def counts = all("[data-social-count-text]").map(&:text)
 
   def draft_button = find("[data-social-draft]")
 
+  def height(selector) = evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().height")
+
   def meter(network) = find(".compose-count", text: network)
 
   def open_accounts = find(".compose-accounts summary").click
+
+  def remove_chip(account) = find("button[aria-label='Remove #{account}']").click
 
   def send_button = find("[data-social-send]")
 
@@ -44,7 +50,131 @@ RSpec.describe "Admin social composer", type: :feature do
       page.driver.resize(375, 800)
       open_accounts
 
-      expect(evaluate_script("document.querySelector('.compose-account').getBoundingClientRect().height")).to be >= 44
+      expect(height(".compose-account")).to be >= 44
+    end
+
+    it "shows a chip for each picked account" do
+      expect(chips).to eq(["@aaronmallen", "@ada.example"])
+    end
+
+    it "unticks an account from its chip" do
+      remove_chip "@ada.example"
+
+      expect(chips).to eq(["@aaronmallen"])
+    end
+
+    it "tints a chip by its network" do
+      expect(page).to have_css(".compose-chip.bluesky", text: "@ada.example")
+    end
+
+    it "asks for an account when none is picked" do
+      write "hello"
+      remove_chip "@aaronmallen@ruby.social"
+      remove_chip "@ada.example"
+
+      expect(page).to have_css(".compose-to", text: "Pick at least one account")
+    end
+
+    it "shows the hosts of two picked accounts with the same handle" do
+      connect_another_mastodon(host: "hachyderm.io")
+      connect_another_mastodon(host: "mastodon.social")
+      visit "/admin/social"
+
+      expect(all(".compose-chip-host").map(&:text)).to eq(%w[hachyderm.io mastodon.social])
+    end
+
+    context "with four accounts" do
+      before do
+        connect_another_bluesky
+        connect_another_mastodon
+        visit "/admin/social"
+      end
+
+      it "folds the chips past three into a button" do
+        expect(chips).to eq(["@aaronmallen", "@ada", "@ada.example"])
+      end
+
+      it "opens the menu from the button" do
+        click_button "+1 more"
+
+        expect(page).to have_css(".compose-accounts[open]")
+      end
+
+      it "ticks every account in a group" do
+        open_accounts
+        within(".compose-account-group.bluesky") { click_button "none" }
+        within(".compose-account-group.bluesky") { click_button "all 2" }
+
+        expect(page).to have_css(".compose-accounts summary", text: "4 of 4")
+      end
+    end
+
+    it "leaves the group link off a group of one" do
+      open_accounts
+
+      expect(page).to have_no_css(".compose-account-group.bluesky [data-social-group]", visible: :visible)
+    end
+
+    it "picks every account then clears them" do
+      toggle "Bluesky"
+      click_button "Everywhere"
+      click_button "Clear"
+
+      expect(page).to have_css(".compose-to", text: "Pick at least one account")
+    end
+
+    it "closes the menu on Esc" do
+      open_accounts
+      find(".compose-accounts summary").send_keys(:escape)
+
+      expect(page).to have_no_css(".compose-accounts[open]")
+    end
+
+    it "closes the menu on a click outside it" do
+      open_accounts
+      find("main").click(x: 5, y: 5)
+
+      expect(page).to have_no_css(".compose-accounts[open]")
+    end
+
+    it "leaves the search off with five accounts or fewer" do
+      open_accounts
+
+      expect(page).to have_no_field("Find an account")
+    end
+
+    it "grows the chip buttons to touch size on a narrow screen" do
+      page.driver.resize(375, 800)
+
+      expect(height(".compose-chip-remove")).to be >= 44
+    end
+
+    context "with more than five accounts" do
+      before do
+        %w[a.example b.example c.example].each { connect_another_mastodon(host: it) }
+        connect_another_bluesky
+        visit "/admin/social"
+        open_accounts
+      end
+
+      it "filters the rows by handle, ignoring case and a leading @" do
+        fill_in "Find an account", with: "@GRACE"
+
+        expect(page).to have_css(".compose-account", count: 1, text: "@grace.example")
+      end
+
+      it "says when no account matches" do
+        fill_in "Find an account", with: "zed"
+
+        expect(page).to have_css(".compose-accounts-menu", text: /No account matches .zed./)
+      end
+
+      it "acts on the rows left with the group link" do
+        fill_in "Find an account", with: "ada"
+        within(".compose-account-group.mastodon") { click_button "none" }
+
+        expect(page).to have_css(".compose-accounts summary", text: "3 of 6")
+      end
     end
   end
 

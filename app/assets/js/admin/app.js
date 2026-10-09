@@ -19,6 +19,7 @@ import { setupPostSyndication } from "./post_syndication.js";
 import { setupProjectEditors } from "./project_editor.js";
 import { setupProjectPicks } from "./project_pick.js";
 import { setupRecordKeys } from "./record_key.js";
+import { setupAccountPickers } from "./social_account_picker.js";
 import { setupSocialComposers } from "./social_composer.js";
 import { setupTaskOrder } from "./task_order.js";
 import { setupTaskPanel } from "./task_panel.js";
@@ -26,6 +27,7 @@ import { setupToasts } from "./toast.js";
 import { setupWorkForms } from "./work_form.js";
 
 function setup() {
+  setupAccountPickers();
   setupAutosubmit();
   setupBulk();
   setupCalendars();

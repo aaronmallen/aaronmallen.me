@@ -5153,6 +5153,71 @@
   @apply meta tracking-[.1em] uppercase;
 }
 
+@utility compose-chips {
+  @apply flex min-w-0 flex-1 flex-wrap items-center gap-1.5;
+}
+
+@utility compose-chips-empty {
+  @apply font-mono text-meta text-mk-pink-text;
+}
+
+@utility compose-chip {
+  @apply inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border py-1 pr-1 pl-3 font-mono text-meta text-ink;
+  border-color: color-mix(in oklab, var(--net) 55%, var(--color-line));
+  background-color: color-mix(in oklab, var(--net) 14%, transparent);
+
+  &.mastodon {
+    --net: var(--color-mk-violet);
+  }
+
+  &.bluesky {
+    --net: var(--color-mk-blue-text);
+  }
+
+  & > i {
+    @apply flex-none text-(--net);
+  }
+}
+
+@utility compose-chip-handle {
+  @apply min-w-0 truncate;
+}
+
+@utility compose-chip-host {
+  @apply flex-none whitespace-nowrap text-ink-muted;
+}
+
+@utility compose-chip-remove {
+  @apply inline-flex size-5.5 flex-none cursor-pointer items-center justify-center rounded-full text-ink-muted;
+  @apply hover:text-ink admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap min-w-tap;
+  }
+}
+
+@utility compose-chips-more {
+  @apply cursor-pointer rounded-full border border-dashed border-line px-3 py-1 font-mono text-meta text-ink-muted;
+  @apply hover:border-ink-muted hover:text-ink admin-focus;
+}
+
+@utility compose-accounts-find {
+  @apply mb-1.5;
+}
+
+@utility compose-accounts-link {
+  @apply cursor-pointer font-mono text-meta tracking-normal normal-case text-ink-muted;
+  @apply hover:text-ink admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap min-w-tap items-center justify-center;
+  }
+}
+
+@utility compose-accounts-none {
+  @apply mx-2.5 my-1.5 meta;
+}
+
 @utility compose-accounts {
   @apply relative ml-auto;
 
@@ -5193,7 +5258,7 @@
 }
 
 @utility compose-account-group-head {
-  @apply flex items-center gap-1.5 px-2.5 pt-2 pb-1 meta tracking-[.1em] text-(--net) uppercase;
+  @apply flex items-center justify-between gap-1.5 px-2.5 pt-2 pb-1 meta tracking-[.1em] text-(--net) uppercase;
 }
 
 @utility compose-account {
@@ -5222,7 +5287,7 @@
 }
 
 @utility compose-accounts-foot {
-  @apply mt-1.5 flex items-center border-t border-line px-2.5 pt-2.5 pb-1 meta;
+  @apply mt-1.5 flex items-center justify-between border-t border-line px-2.5 pt-2.5 pb-1 meta;
 
   & a {
     @apply hover:text-ink;
