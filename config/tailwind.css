@@ -789,6 +789,14 @@
   & :not(pre) > code {
     @apply rounded-code px-1 text-[0.875em];
   }
+
+  & .cf-n {
+    @apply mb-2 flex items-center gap-2 font-mono text-meta text-ink-muted;
+
+    & i {
+      @apply text-[0.6875rem];
+    }
+  }
 }
 
 @utility post-edits {

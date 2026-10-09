@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "cgi"
+
 module Posts
   module Markdown
     class Document
@@ -15,7 +17,14 @@ module Posts
         text unless text.empty?
       end
 
-      def html = Markdown.prefix_highlighter_classes(@root.to_html(options: OPTIONS, plugins: PLUGINS))
+      def html
+        names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
+        @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(HIGHLIGHTED_BLOCK) do |block|
+          block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
+          name = names.shift
+          name ? format(CAPTION, CGI.escapeHTML(name), block) : block
+        end
+      end
 
       def read_time = [1, word_count.fdiv(WORDS_PER_MINUTE).round].max
 

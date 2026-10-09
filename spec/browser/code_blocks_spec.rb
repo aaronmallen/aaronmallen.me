@@ -13,6 +13,19 @@ RSpec.describe "Code blocks", type: :feature do
       ```
     MARKDOWN
   end
+  let(:captioned) do
+    <<~MARKDOWN
+      ```ruby config/providers/redis.rb
+      Hanami.app.register_provider(:redis) do
+      end
+      ```
+
+      ```ruby
+      NAME = "create"
+      ```
+    MARKDOWN
+  end
+  let(:body) { markdown }
 
   def bordered
     evaluate_script(<<~JS)
@@ -76,24 +89,54 @@ RSpec.describe "Code blocks", type: :feature do
     end
   end
 
+  shared_examples "file caption" do
+    it "captions the fence that names its file" do
+      expect(page).to have_css(".cf > .cf-n", exact_text: "config/providers/redis.rb")
+    end
+
+    it "marks the caption with a file icon" do
+      expect(page).to have_css(".cf-n > i.fa-regular.fa-file-code[aria-hidden='true']")
+    end
+
+    it "keeps the highlighted code under the caption" do
+      expect(page).to have_css(".cf > .cf-n + pre.syntax-highlighting .hl-keyword", text: "do")
+    end
+
+    it "leaves the fence without a file bare" do
+      expect(page).to have_css("pre.syntax-highlighting:not(.cf pre)", count: 1)
+    end
+  end
+
   describe "on the public post page" do
     before do
-      create(:post, :published, slug: "hello", body: markdown)
+      create(:post, :published, slug: "hello", body:)
       visit "/writing/hello"
     end
 
     it_behaves_like "rendered code"
+
+    context "with a file name" do
+      let(:body) { captioned }
+
+      it_behaves_like "file caption"
+    end
   end
 
   describe "in the admin preview" do
     before do
       sign_in_to_admin
       visit "/admin/posts/new"
-      fill_in "Body", with: markdown
+      fill_in "Body", with: body
       find(".edit .seg-option", text: "Preview").click
       page.assert_selector(".preview pre.syntax-highlighting")
     end
 
     it_behaves_like "rendered code"
+
+    context "with a file name" do
+      let(:body) { captioned }
+
+      it_behaves_like "file caption"
+    end
   end
 end
