@@ -17,14 +17,11 @@ module Posts
         text unless text.empty?
       end
 
-      def html
-        names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
-        @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(HIGHLIGHTED_BLOCK) do |block|
-          block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
-          name = names.shift
-          name ? format(CAPTION, CGI.escapeHTML(name), block) : block
-        end
+      def headings
+        html.scan(H2).filter_map { |id, text| { id:, text: CGI.unescapeHTML(text).strip } unless id.empty? }
       end
+
+      def html = @html ||= render
 
       def read_time = [1, word_count.fdiv(WORDS_PER_MINUTE).round].max
 
@@ -45,6 +42,15 @@ module Posts
           text << node.string_content if TEXT_NODES.include?(node.type)
         end
         text
+      end
+
+      def render
+        names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
+        @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(HIGHLIGHTED_BLOCK) do |block|
+          block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
+          name = names.shift
+          name ? format(CAPTION, CGI.escapeHTML(name), block) : block
+        end
       end
     end
   end

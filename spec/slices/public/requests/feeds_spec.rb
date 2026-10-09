@@ -127,6 +127,15 @@ RSpec.describe "Feeds", type: :request do
     it "has the rendered body as HTML content" do
       expect(Capybara.string(entry.at_xpath("content[@type='html']").text)).to have_css("p em", text: "start")
     end
+
+    it "gives the body's headings the ids the article does" do
+      create(:post, :published, slug: "headed", body: "## The Setup")
+      get "/writing.atom"
+
+      content = feed.at_xpath("/feed/entry[id='https://aaronmallen.me/writing/headed']/content").text
+
+      expect(Capybara.string(content)).to have_css("h2#the-setup")
+    end
   end
 
   describe "an entry for a post with notes" do

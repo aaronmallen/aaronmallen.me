@@ -216,6 +216,13 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_css(".post-body > p:first-child", text: "the start").and have_css(".post-body h2")
     end
 
+    it "gives every heading an id from its text, numbering repeats" do
+      publish("hello", 1, body: "## Setup\n\n### The `config` file\n\n## Setup")
+      get "/writing/hello"
+
+      expect(page.all(".post-body h2, .post-body h3").map { it[:id] }).to eq(%w[setup the-config-file setup-1])
+    end
+
     it "keeps a remote image in the body" do
       publish("hello", 1, body: "the start\n\n![shot](https://example.com/shot.png)")
       get "/writing/hello"

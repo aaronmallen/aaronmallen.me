@@ -813,6 +813,10 @@
     @apply mt-10 text-ink;
   }
 
+  & [id] {
+    @apply scroll-mt-24;
+  }
+
   & h2 {
     @apply text-entry font-bold;
   }
