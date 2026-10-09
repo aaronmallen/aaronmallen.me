@@ -18,6 +18,7 @@ module Public
     get "/media/:key", to: "media.show", as: :media
     get "/site.webmanifest", to: "manifests.show", as: :manifest
     get "/sitemap.xml", to: "sitemaps.show", as: :sitemap
+    get "/robots.txt", to: "robots.show", as: :robots
     post "/contact", to: "messages.create", as: :message
     post "/pulse", to: "visits.create", as: :visit
     post "/webmention", to: "webmentions.create", as: :webmention
