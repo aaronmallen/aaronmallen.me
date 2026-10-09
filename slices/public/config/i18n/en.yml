@@ -231,6 +231,7 @@ en:
           title: "Writing"
         show:
           all_writing: "All writing"
+          all_writing_note: "Everything, newest first"
           back: "Writing"
           feedback:
             after: "."

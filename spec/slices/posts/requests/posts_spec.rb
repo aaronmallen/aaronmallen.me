@@ -32,15 +32,15 @@ RSpec.describe "Posts", type: :request do
     it "links the older id as previous", :aggregate_failures do
       get "/writing/second"
 
-      expect(page).to have_css(".post-pager a[rel='prev'][href='/writing/first']")
-      expect(page).to have_no_css(".post-pager a[rel='next']")
+      expect(page).to have_css("nav.pgr a[rel='prev'][href='/writing/first']")
+      expect(page).to have_no_css("nav.pgr a[rel='next']")
     end
 
     it "links the newer id as next", :aggregate_failures do
       get "/writing/first"
 
-      expect(page).to have_css(".post-pager a[rel='next'][href='/writing/second']")
-      expect(page).to have_no_css(".post-pager a[rel='prev']")
+      expect(page).to have_css("nav.pgr a[rel='next'][href='/writing/second']")
+      expect(page).to have_no_css("nav.pgr a[rel='prev']")
     end
   end
 

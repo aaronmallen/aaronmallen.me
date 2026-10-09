@@ -1133,39 +1133,37 @@
   text-wrap: pretty;
 }
 
-@utility post-footer {
-  @apply mt-14 flex flex-wrap items-start justify-between gap-x-8 gap-y-4 border-t border-line pt-6;
-}
+@utility pgr {
+  @apply mt-[clamp(28px,3vw,44px)] grid max-w-[min(100%,1100px)] gap-pgrid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
 
-@utility post-footer-link {
-  @apply meta no-underline hover:text-accent focus-ring;
-}
-
-@utility post-pager {
-  @apply flex flex-wrap gap-x-8 gap-y-4;
-}
-
-@utility post-pager-link {
-  @apply flex max-w-60 flex-col gap-1 no-underline focus-ring;
-
-  &.next {
-    @apply items-end text-right;
+  & a {
+    @apply flex flex-col gap-1.5 text-ink no-underline transition-colors duration-150 hover:border-ink-muted;
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
   }
-}
 
-@utility post-pager-label {
-  @apply inline-flex items-center gap-1.5 meta;
+  & .l {
+    @apply flex items-center gap-2 font-mono text-[12px] text-ink-muted;
 
-  :where(.next) > & {
-    @apply flex-row-reverse;
+    & i {
+      @apply text-[10.5px];
+    }
   }
-}
 
-@utility post-pager-title {
-  @apply font-display text-li font-semibold text-ink;
+  & .t {
+    @apply font-display text-[clamp(1.15rem,1.4vw,1.5rem)] leading-[1.2] font-bold tracking-[-0.02em];
+  }
 
-  :where(.post-pager-link:hover) > & {
+  & a:hover .t {
     @apply text-accent;
+  }
+
+  & .all {
+    @apply justify-center;
+  }
+
+  & .nx {
+    @apply items-end text-right;
   }
 }
 

@@ -331,19 +331,22 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_title("Hello | Aaron Allen")
     end
 
-    it "links back to writing from the footer" do
+    it "links back to writing from the more posts cards", :aggregate_failures do
       publish("hello", 1)
       get "/writing/hello"
 
-      expect(page).to have_css("article footer.post-footer a.post-footer-link[href='/writing']", text: "All writing")
+      expect(page).to have_css("nav.pgr[aria-label='More posts'] a.card.all[href='/writing']", text: "All writing")
+      expect(page).to have_css("nav.pgr a.all .t", text: "Everything, newest first")
+      expect(page).to have_no_css("footer.post-footer")
     end
 
     it "links the previous and next posts in publish order", :aggregate_failures do
       %w[first second third].each_with_index { |slug, index| publish(slug, 3 - index) }
       get "/writing/second"
 
-      expect(page).to have_css(".post-pager a[rel='prev'][href='/writing/first']", text: "First")
-      expect(page).to have_css(".post-pager a[rel='next'][href='/writing/third']", text: "Third")
+      expect(page.all("nav.pgr a.card").map { it[:href] }).to eq(%w[/writing/first /writing /writing/third])
+      expect(page).to have_css("nav.pgr a.card[rel='prev'] .t", text: "First")
+      expect(page).to have_css("nav.pgr a.card.nx[rel='next'] .t", text: "Third")
     end
 
     it "leaves out previous on the oldest post", :aggregate_failures do
@@ -367,7 +370,7 @@ RSpec.describe "Writing", type: :request do
       %i[draft scheduled].each { create(:post, it) }
       get "/writing/only"
 
-      expect(page).to have_no_css(".post-pager a")
+      expect(page.all("nav.pgr a.card").map { it[:href] }).to eq(%w[/writing])
     end
 
     %i[draft scheduled].each do |status|

@@ -30,18 +30,11 @@ module Public
               head_row
               post_body
               extras
-              footer_row
+              more_posts
             end
           end
 
           private
-
-          def article_meta
-            content_for(:kind, Layouts::Application::ARTICLE)
-            content_for(:modified_time, stamp(@post.updated_at))
-            content_for(:published_time, stamp(@post.published_at))
-            content_for(:tags, @post.tags.map(&:name))
-          end
 
           def back_link
             a(class: "post-back", href: path(:writing)) do
@@ -71,16 +64,6 @@ module Public
             end
           end
 
-          def footer_row
-            footer(class: "post-footer") do
-              a(class: "post-footer-link", href: path(:writing)) { t(".all_writing") }
-              nav(class: "post-pager", aria: { label: t(".pager_label") }) do
-                pager_link(@previous_post, rel: "prev", label_key: ".previous", icon: "fa-arrow-left")
-                pager_link(@next_post, rel: "next", label_key: ".next", icon: "fa-arrow-right")
-              end
-            end
-          end
-
           def head_row
             back_link
             header(class: "post-h") do
@@ -90,21 +73,37 @@ module Public
             end
           end
 
+          def more_posts
+            nav(class: "pgr", aria: { label: t(".pager_label") }) do
+              pager_card(@previous_post, rel: "prev", label_key: ".previous")
+              a(class: "card all", href: path(:writing)) do
+                span(class: "l") { IconLabel(icon: "fa-solid fa-list") { t(".all_writing") } }
+                span(class: "t") { t(".all_writing_note") }
+              end
+              pager_card(@next_post, rel: "next", label_key: ".next")
+            end
+          end
+
           def page_meta
             content_for(:title, @post.title)
             content_for(:webmention, path(:webmention)) if @post.webmentions_enabled
             social_card
-            article_meta
+            content_for(:kind, Layouts::Application::ARTICLE)
+            content_for(:modified_time, stamp(@post.updated_at))
+            content_for(:published_time, stamp(@post.published_at))
+            content_for(:tags, @post.tags.map(&:name))
           end
 
-          def pager_link(post, rel:, label_key:, icon:)
+          def pager_card(post, rel:, label_key:)
             return unless post
 
-            a(class: ["post-pager-link", rel], href: path(:post, slug: post.slug), rel:) do
-              span(class: "post-pager-label") do
-                IconLabel(icon: ["fa-solid", icon]) { t(label_key) }
+            a(class: ["card", ("nx" if rel == "next")], href: path(:post, slug: post.slug), rel:) do
+              span(class: "l") do
+                Icon("fa-solid fa-arrow-left") if rel == "prev"
+                plain t(label_key)
+                Icon("fa-solid fa-arrow-right") if rel == "next"
               end
-              span(class: "post-pager-title") { post.title }
+              span(class: "t") { post.title }
             end
           end
 

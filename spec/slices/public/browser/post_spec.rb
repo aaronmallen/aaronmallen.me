@@ -30,6 +30,10 @@ RSpec.describe "Post layout", type: :feature do
     expect(evaluate_script("document.querySelector('.endmark .glasses').getBoundingClientRect().width")).to be_positive
   end
 
+  it "sets the more posts links as cards" do
+    expect(style("nav.pgr a.card.all", "borderTopStyle")).to eq("solid")
+  end
+
   describe "the table of contents" do
     before do
       sections = %w[One Two Three Four].map { "## #{it}\n\n#{Array.new(80) { 'Words fill the page. ' }.join}" }
