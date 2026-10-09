@@ -998,9 +998,7 @@ en:
           name_placeholder: "Ada Lovelace"
           save: "Save"
         profile_links:
-          bluesky: "%{name} on Bluesky"
           bluesky_handle: "@%{handle}"
-          mastodon: "%{name} on Mastodon"
         search_results:
           add: "Add"
           add_label: "Add %{name}"
@@ -2152,15 +2150,13 @@ en:
         today: "Go to today"
       people:
         index:
-          bluesky_handle: "@%{handle}"
+          edit: "Edit %{name}"
           empty: "Nobody yet. Add the people you mention."
           heading: "People"
           new_person: "New person"
-          note: "A social post mentions someone by their key. Each network gets their handle there, or their name where they have none."
           sub:
-            one: "%{count} person you can mention"
-            other: "%{count} people you can mention"
-            zero: "Nobody to mention yet"
+            one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
+            other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
           token: "@{%{key}}"
       posts:
         analytics:

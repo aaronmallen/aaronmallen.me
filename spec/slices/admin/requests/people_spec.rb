@@ -37,10 +37,24 @@ RSpec.describe "Admin people", type: :request do
     end
 
     describe "the list" do
-      it "says something useful when there is nobody yet" do
+      it "says who to add when there is nobody yet" do
         get "/admin/people"
 
-        expect(page).to have_css(".empty", text: "Nobody yet")
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.people.index.empty"))
+      end
+
+      it "counts the people and says how a post names them" do
+        2.times { create(:person) }
+        get "/admin/people"
+
+        expect(page).to have_css(".page-head-sub", exact_text: i18n.t("ui.views.people.index.sub", count: 2))
+      end
+
+      it "leaves no hint under the list" do
+        create(:person)
+        get "/admin/people"
+
+        expect(page).to have_no_css("[data-key-list] ~ .hint")
       end
 
       it "lists everyone in name order" do
@@ -51,11 +65,11 @@ RSpec.describe "Admin people", type: :request do
         expect(page.all(".person-row-name").map(&:text)).to eq(["Ada Lovelace", "Grace Hopper"])
       end
 
-      it "shows the token and each handle a person has" do
+      it "shows the token, then each handle as a link" do
         create(:person, :bluesky, key: "ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social")
         get "/admin/people"
 
-        expect(page.all(".person-row-meta span").map(&:text))
+        expect(page.all(".person-row-meta > *").map { it.text.strip })
           .to eq(["@{ada}", "@ada@ruby.social", "@ada.bsky.social"])
       end
 
@@ -74,6 +88,16 @@ RSpec.describe "Admin people", type: :request do
           .and have_css("dialog#person-#{person.id}-drawer form[action='/admin/people/#{person.id}']", visible: :all)
       end
 
+      it "offers a pencil on each row that opens the person's drawer" do
+        person = create(:person, name: "Ada")
+        get "/admin/people"
+
+        pencil = page.find(".person-row .hov a:has(i.fa-pen-to-square)")
+
+        expect([pencil[:href], pencil["data-dialog-open"], pencil[:title]])
+          .to eq(["/admin/people/#{person.id}/edit", "person-#{person.id}-drawer", "Edit Ada"])
+      end
+
       it "offers a remove in each person's drawer" do
         person = create(:person)
         get "/admin/people"
@@ -90,36 +114,36 @@ RSpec.describe "Admin people", type: :request do
           .and have_css("dialog#person-new-drawer form[action='/admin/people'][data-person-form='new']", visible: :all)
       end
 
-      it "shows a Bluesky and a Mastodon icon beside the name of someone on both" do
+      it "marks each handle with its network's icon and color" do
         create(:person, :bluesky, name: "Ada Lovelace")
         get "/admin/people"
 
-        expect(page.all(".person-row .person-link i").map { it[:class] })
-          .to eq(["fa-brands fa-bluesky", "fa-brands fa-mastodon"])
+        expect(page.all(".person-row .person-link").map { [it[:class], it.find("i")[:class]] })
+          .to eq([["person-link mastodon", "fa-brands fa-mastodon"], ["person-link bluesky", "fa-brands fa-bluesky"]])
       end
 
-      it "shows only the icon of the one network someone is on" do
+      it "shows only the handle of the one network someone is on" do
         create(:person, mastodon_handle: "@ada@ruby.social")
         get "/admin/people"
 
-        expect(page.all(".person-link i").map { it[:class] }).to eq(["fa-brands fa-mastodon"])
+        expect(page.all(".person-link").map { it.text.strip }).to eq(["@ada@ruby.social"])
       end
 
-      it "shows only the Bluesky icon for someone with no Mastodon handle" do
-        create(:person, :bluesky, mastodon_handle: nil)
+      it "shows only the Bluesky handle for someone with no Mastodon handle" do
+        create(:person, :bluesky, mastodon_handle: nil, bluesky_handle: "ada.bsky.social")
         get "/admin/people"
 
-        expect(page.all(".person-link i").map { it[:class] }).to eq(["fa-brands fa-bluesky"])
+        expect(page.all(".person-link").map { it.text.strip }).to eq(["@ada.bsky.social"])
       end
 
-      it "links the Bluesky icon to the profile by DID" do
+      it "links the Bluesky handle to the profile by DID" do
         create(:person, :bluesky, bluesky_did: "did:plc:ada")
         get "/admin/people"
 
         expect(page).to have_link(class: "person-link", href: "https://bsky.app/profile/did:plc:ada")
       end
 
-      it "links the Mastodon icon to the profile on the person's instance" do
+      it "links the Mastodon handle to the profile on the person's instance" do
         create(:person, mastodon_handle: "@ada@ruby.social")
         get "/admin/people"
 
@@ -132,14 +156,6 @@ RSpec.describe "Admin people", type: :request do
 
         expect(page.all("a.person-link").map { [it[:target], it[:rel]] })
           .to eq([["_blank", "noopener noreferrer"]] * 2)
-      end
-
-      it "shows each handle on hover and names the person and the network" do
-        create(:person, :bluesky, name: "Ada", mastodon_handle: "@ada@ruby.social", bluesky_handle: "ada.bsky.social")
-        get "/admin/people"
-
-        expect(page.all("a.person-link").map { [it[:title], it["aria-label"]] })
-          .to eq([["@ada.bsky.social", "Ada on Bluesky"], ["@ada@ruby.social", "Ada on Mastodon"]])
       end
 
       it "links to the form for a new person" do

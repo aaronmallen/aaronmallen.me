@@ -3261,7 +3261,7 @@
 }
 
 @utility person-row {
-  @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;
 }
 
@@ -3271,6 +3271,7 @@
 
 @utility person-row-name {
   @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply after:absolute after:inset-0;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -3283,6 +3284,10 @@
 
 @utility person-row-token {
   @apply text-ink;
+}
+
+@utility person-row-acts {
+  @apply relative;
 }
 
 @utility project-card {
@@ -4972,12 +4977,24 @@
   }
 }
 
-@utility person-links {
-  @apply inline-flex items-center gap-1;
-}
-
 @utility person-link {
-  @apply inline-flex items-center justify-center text-ink-muted no-underline hover:text-accent focus-ring;
+  @apply relative inline-flex items-center gap-1.5 rounded-sm text-ink-muted no-underline focus-ring;
+
+  &.mastodon {
+    @apply hover:text-mk-violet;
+
+    & i {
+      @apply text-mk-violet;
+    }
+  }
+
+  &.bluesky {
+    @apply hover:text-mk-blue-text;
+
+    & i {
+      @apply text-mk-blue-text;
+    }
+  }
 
   @media (width < 43.75rem) {
     @apply min-h-tap min-w-tap;

@@ -22,18 +22,24 @@ module Admin
 
           private
 
-          def bluesky(person) = person.bluesky_handle && t(".bluesky_handle", handle: person.bluesky_handle)
-
           def drawer(person) = "#{Drawer.id_for(person)}-drawer"
+
+          def edit(person)
+            label = t(".edit", name: person.name)
+
+            Button(
+              href: path(:admin_edit_person, id: person.id), small: true, title: label,
+              icon: "fa-regular fa-pen-to-square", data: { dialog_open: drawer(person) },
+            ) { span(class: "sr-only") { label } }
+          end
 
           def list
             @people.empty? ? Empty { t(".empty") } : Card(data: { key_list: true }) { @people.each { row(it) } }
-            Hint { t(".note") }
           end
 
           def meta(person)
             span(class: "person-row-token") { t(".token", key: person.key) }
-            [person.mastodon_handle, bluesky(person)].compact.each { |handle| span { handle } }
+            ProfileLinks(person:)
           end
 
           def new_person
@@ -49,7 +55,7 @@ module Admin
                 ) { person.name }
                 p(class: "person-row-meta") { meta(person) }
               end
-              ProfileLinks(person:)
+              div(class: "person-row-acts hov") { edit(person) }
             end
           end
         end
