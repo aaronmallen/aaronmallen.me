@@ -2,6 +2,6 @@
 
 module Tasks
   module Structs
-    TimeGroup = Data.define(:key, :name, :seconds, :shared, :tasks)
+    TimeGroup = Data.define(:key, :name, :seconds, :shared, :overlapped, :tasks)
   end
 end

@@ -165,17 +165,109 @@ RSpec.describe "API time report", type: :request do
     expect(read(from: (today - 1).iso8601, to: today.iso8601).fetch("seconds")).to be_within(5).of(600)
   end
 
-  describe "a hand-set total" do
-    it "spreads across the task's sessions by their length" do
-      spent("Set by hand", [at(2, 9), at(2, 10)], [at(3, 9), at(3, 12)], total: 2 * 3600)
+  describe "tasks that ran at the same time" do
+    def hour(title, tags: []) = worked(title, at(2, 9), at(2, 10), tags:)
 
-      expect(sums(**range)).to eq([["2026-03-02", 1800], ["2026-03-03", 5400]])
+    it "counts the hour once in the total while each task keeps its hour" do
+      ids = %w[one two three].map { hour(it).id }
+
+      rows = groups(**range, by: "day").first.fetch("tasks").map { it.values_at("id", "seconds") }
+
+      expect([read(**range).fetch("seconds"), rows]).to match([3600, match_array(ids.map { [it, 3600] })])
     end
 
-    it "spreads over sessions outside the range too" do
-      spent("Set by hand", [at(2, 9), at(2, 10)], [at(10, 9), at(10, 10)], total: 4 * 3600)
+    it "gives a project they share one hour and says they overlapped" do
+      2.times { link(hour("Side by side #{it}"), site) }
 
-      expect(sums(**range)).to eq([["2026-03-02", 7200]])
+      expect(groups(**range, by: "project").map { it.values_at("name", "seconds", "overlapped") })
+        .to eq([["site", 3600, true]])
+    end
+
+    it "gives each of two projects an hour and the total an hour" do
+      link(hour("For the site"), site)
+      link(hour("For the gem"), gem)
+
+      found = groups(**range, by: "project").map { it.values_at("name", "seconds", "overlapped") }
+
+      expect([read(**range).fetch("seconds"), found]).to eq([3600, [["gem", 3600, false], ["site", 3600, false]]])
+    end
+
+    it "counts a task in two projects once in the total" do
+      link(hour("Shared"), site, gem)
+      hour("Loose")
+
+      expect(read(**range, by: "project").fetch("seconds")).to eq(3600)
+    end
+
+    it "merges within a tag" do
+      hour("Ruby one", tags: %w[ruby])
+      hour("Ruby two", tags: %w[ruby])
+
+      found = groups(**range, by: "tag").map { it.values_at("name", "seconds", "overlapped") }
+
+      expect(found).to eq([["ruby", 3600, true]])
+    end
+
+    it "merges short spans inside a long one" do
+      worked("Long", at(2, 9), at(2, 12))
+      worked("Inside early", at(2, 9, 30), at(2, 10))
+      worked("Inside late", at(2, 11), at(2, 11, 30))
+
+      expect(sums(**range)).to eq([["2026-03-02", 3 * 3600]])
+    end
+
+    it "flags no overlap for tasks that ran apart" do
+      worked("Morning", at(2, 9), at(2, 10))
+      worked("Noon", at(2, 12), at(2, 13))
+
+      expect(groups(**range, by: "day").map { it.values_at("seconds", "overlapped") }).to eq([[7200, false]])
+    end
+
+    it "lands overlap that crosses midnight on each site day" do
+      spent("Late", [at(2, 22), at(3, 2)])
+      spent("Later", [at(2, 23), at(3, 1)])
+
+      expect(sums(**range)).to eq([["2026-03-02", 7200], ["2026-03-03", 7200]])
+    end
+
+    it "counts a running task beside a closed one once up to now" do
+      today = Blog::TimeZone.today
+      running = create(:task, :in_progress)
+      create(:work_session, task_id: running.id, started_at: Time.now - 1200)
+      spent("Closed beside it", [Time.now - 600, Time.now - 300], completed_at: Time.now)
+
+      expect(read(from: (today - 1).iso8601, to: today.iso8601).fetch("seconds")).to be_within(5).of(1200)
+    end
+  end
+
+  describe "a hand-set total" do
+    def beside(title) = worked(title, at(2, 9), at(2, 10))
+
+    it "adds to the merged total as it stands" do
+      beside("Ran alongside")
+      spent("Set by hand", [at(2, 9), at(2, 10)], total: 3 * 3600, completed_at: at(2, 10))
+
+      expect([read(**range).fetch("seconds"), sums(**range)]).to eq([3 * 3600, [["2026-03-02", 3 * 3600]]])
+    end
+
+    it "takes from the merged total as it stands" do
+      beside("Ran alongside")
+      spent("Set by hand", [at(2, 9), at(2, 10)], total: 1800, completed_at: at(2, 10))
+
+      expect(read(**range).fetch("seconds")).to eq(1800)
+    end
+
+    it "lands on the day the task closed, not across its sessions" do
+      spent("Set by hand", [at(2, 9), at(2, 10)], [at(3, 9), at(3, 12)], total: 5 * 3600, completed_at: at(5, 15))
+
+      expect(sums(**range)).to eq([["2026-03-02", 3600], ["2026-03-03", 3 * 3600], ["2026-03-05", 3600]])
+    end
+
+    it "lands on the task's last session day while the task is open" do
+      task = create(:task, :in_progress, worked_seconds: 2 * 3600)
+      create(:work_session, task_id: task.id, started_at: at(3, 9), ended_at: at(3, 10))
+
+      expect(sums(**range)).to eq([["2026-03-03", 2 * 3600]])
     end
 
     it "lands on the day the task closed when it has no sessions" do

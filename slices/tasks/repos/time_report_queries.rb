@@ -11,27 +11,32 @@ module Tasks
 
       def report(from:, to:, by:)
         grouping = Blog::Types::TimeGrouping[by]
-        tasks, pieces = worked(from, to)
+        sessions, manual = worked(from, to)
+        keys = keys_for(grouping, (sessions + manual).map(&:first).uniq)
+        merged = merged(from, to, grouping, sums(keys, sessions))
 
         Structs::TimeReport.new(
-          from:, to:, by: grouping, seconds: total(pieces), groups: groups(grouping, pieces, tasks),
+          from:, to:, by: grouping, seconds: merged[:total] + manual.sum(&:last),
+          groups: groups(grouping, sums(keys, sessions + manual), sums(keys, manual), merged),
         )
       end
 
       private
 
-      def group(key, name, seconds_by_task, tasks, shared)
-        found = task_times(seconds_by_task, tasks, shared)
-        return if found.empty?
+      def group((key, name), seconds_by_task, added, merged, tasks)
+        return if tasks.empty?
 
-        Structs::TimeGroup.new(key:, name:, seconds: found.sum(&:seconds), shared: found.any?(&:shared), tasks: found)
+        overlapped = merged < seconds_by_task.values.sum - added
+
+        Structs::TimeGroup.new(key:, name:, seconds: merged + added, shared: tasks.any?(&:shared), overlapped:, tasks:)
       end
 
-      def groups(grouping, pieces, tasks)
-        sums = sums(keys_for(grouping, pieces.map(&:first).uniq), pieces)
-        shared = grouping == DAY ? Set.new : shared_ids(sums)
+      def groups(grouping, sums, manual, merged)
+        times = task_times_by_group(grouping, sums)
 
-        found = sums.filter_map { |(key, name), seconds_by_task| group(key, name, seconds_by_task, tasks, shared) }
+        found = sums.filter_map do |key, seconds_by_task|
+          group(key, seconds_by_task, manual.fetch(key, {}).values.sum, merged[key], times[key])
+        end
         found.sort_by { [it.key.nil? ? 1 : 0, it.name.to_s] }
       end
 
@@ -43,6 +48,20 @@ module Tasks
         end
       end
 
+      def merged(from, to, grouping, sessions)
+        keyed = grouping == DAY ? {} : sessions.transform_values(&:keys)
+        found = work_sessions.merged_seconds_by_day(from, to, keyed.merge(total: sessions.values.flat_map(&:keys).uniq))
+        daily = found.fetch(:total, {})
+
+        Hash.new(0).merge(merged_groups(grouping, found, daily), total: daily.values.sum)
+      end
+
+      def merged_groups(grouping, found, daily)
+        return daily.to_h { |day, seconds| [[day, day.iso8601], seconds] } if grouping == DAY
+
+        found.transform_values { it.values.sum }
+      end
+
       def project_keys(ids)
         project_ids = record_links.project_ids_by_task(ids)
         names = project_queries.linkable(:projects, ids: project_ids.values.flatten.uniq).to_h { [it.id, it.title] }
@@ -52,18 +71,6 @@ module Tasks
 
       def shared_ids(sums)
         sums.values.flat_map(&:keys).tally.filter_map { |id, count| id if count > 1 }.to_set
-      end
-
-      def spread(rows, tasks)
-        closed = work_sessions.closed_seconds_by_task(rows.map { it[:task_id] }.uniq)
-
-        rows.map do |row|
-          id, seconds = row.values_at(:task_id, :seconds)
-          sessions = closed.fetch(id, 0)
-          scaled = row[:running] || sessions.zero? ? seconds : Rational(seconds * tasks.fetch(id).last, sessions)
-
-          [id, row[:worked_on], scaled]
-        end
       end
 
       def sums(keys, pieces)
@@ -78,25 +85,24 @@ module Tasks
         ->(id, _) { names.fetch(id, NONE).map { [it, it] } }
       end
 
-      def task_times(seconds_by_task, tasks, shared)
+      def task_times(seconds_by_task, titles, shared)
         found = seconds_by_task.filter_map do |id, seconds|
-          next unless seconds.round.positive?
+          next unless seconds.positive?
 
-          Structs::TaskTime.new(id:, title: tasks.fetch(id).first, seconds: seconds.round, shared: shared.include?(id))
+          Structs::TaskTime.new(id:, title: titles.fetch(id), seconds:, shared: shared.include?(id))
         end
 
         found.sort_by { [-it.seconds, it.title, it.id] }
       end
 
-      def total(pieces) = pieces.group_by(&:first).sum { |_, found| found.sum(&:last).round }
+      def task_times_by_group(grouping, sums)
+        shared = grouping == DAY ? Set.new : shared_ids(sums)
+        titles = tasks.titles(sums.values.flat_map(&:keys).uniq)
 
-      def worked(from, to)
-        rows = work_sessions.seconds_by_day(from, to)
-        unspread = tasks.totals_closed_between(from, to)
-        titled = tasks.titles_and_totals((rows.map { it[:task_id] } + unspread.map(&:first)).uniq)
-
-        [titled, spread(rows, titled) + unspread]
+        sums.transform_values { task_times(it, titles, shared) }
       end
+
+      def worked(from, to) = [work_sessions.seconds_by_day(from, to), tasks.manual_between(from, to)]
     end
   end
 end

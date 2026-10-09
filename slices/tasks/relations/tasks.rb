@@ -9,6 +9,8 @@ module Tasks
       CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze
+      MANUAL = (Sequel[:worked_seconds] - Sequel.function(:coalesce, Sequel[:sessions][:seconds], 0)).cast(Integer)
+      MANUAL_DAY = Sequel.function(:coalesce, COMPLETED_ON, site_day(Sequel[:sessions][:last_at]))
       OPEN = Blog::Types::TaskStatus["open"]
 
       schema :tasks, infer: true do
@@ -75,6 +77,13 @@ module Tasks
 
       def list_counts = select_append { LISTS.map { integer.count(id).filter(list: it).as(it.to_sym) } }
 
+      def manual_between(first, last)
+        found = dataset.unordered.left_join(work_sessions.totals_by_task.as(:sessions), task_id: :id)
+
+        found.where(MANUAL_DAY => first..last).exclude(MANUAL => 0).select_map([:id, MANUAL_DAY.as(:worked_on),
+                                                                                MANUAL.as(:seconds)])
+      end
+
       def matching(text) = containing(text, :title, :note)
 
       def narrowed(statuses:, from:, to:, lists: [], sprint_on: nil, **search)
@@ -129,14 +138,7 @@ module Tasks
 
       def titled(text) = containing(text, :title)
 
-      def titles_and_totals(ids) = dataset.unordered.where(id: ids).select_hash(:id, %i[title worked_seconds])
-
-      def totals_closed_between(first, last)
-        found = exclude(worked_seconds: 0).exclude(id: work_sessions.select(:task_id).dataset)
-        closed = found.where(COMPLETED_ON => first..last).dataset.unordered
-
-        closed.select_map([:id, COMPLETED_ON.as(:closed_on), :worked_seconds])
-      end
+      def titles(ids) = dataset.unordered.where(id: ids).select_hash(:id, :title)
 
       def touched_between(first, last)
         days = Range.new(first, last)

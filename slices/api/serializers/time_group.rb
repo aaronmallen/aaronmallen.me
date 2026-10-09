@@ -21,6 +21,9 @@ module API
           name: Helpers::Schema.nullable(Helpers::Schema::STRING),
           seconds: Helpers::Schema::INTEGER,
           shared: { type: "boolean", description: "whether some of this time also counts in another group" },
+          overlapped: {
+            type: "boolean", description: "whether tasks in this group ran at the same time, counted once in seconds",
+          },
           tasks: Helpers::Schema.list(TASK),
         },
       ).freeze

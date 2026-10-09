@@ -8,7 +8,7 @@ module API
           from: Helpers::Schema::DAY,
           to: Helpers::Schema::DAY,
           by: { type: "string", enum: Blog::Types::TimeGrouping.values },
-          seconds: { type: "integer", description: "the time worked in the range, each task counted once" },
+          seconds: { type: "integer", description: "the time worked in the range, overlapping time counted once" },
           groups: Helpers::Schema.list(TimeGroup.reference),
         },
       ).freeze

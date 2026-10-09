@@ -24,6 +24,7 @@ module Admin
 
             @report.groups.each { Row(group: it, by: @report.by, top:) }
             Hint { t(SHARED.fetch(@report.by)) } if @report.groups.any?(&:shared)
+            Hint { t(".overlapped") } if @report.groups.any?(&:overlapped)
           end
 
           def top = @top ||= @report.groups.map(&:seconds).max

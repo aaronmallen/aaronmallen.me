@@ -188,6 +188,25 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
       end
     end
 
+    describe "tasks that ran at the same time" do
+      before do
+        2.times { link(worked("Side by side #{it}", at(2, 9), at(2, 10)), site) }
+        visit_time(from: "2026-03-02", to: "2026-03-08", by: "project")
+      end
+
+      it "counts the hour once in the project" do
+        expect(rows).to eq([["site", "1h 00m"]])
+      end
+
+      it "counts the hour once in the total" do
+        expect(page).to have_css(".page-head-sub", text: "Mar 2, 2026 → Mar 8, 2026 · 1h 00m")
+      end
+
+      it "explains why the rows add up to more than the total" do
+        expect(page).to have_css(".hint", text: "ran at the same time count once")
+      end
+    end
+
     it "starts a range that runs backward on the day it ends" do
       visit_time(from: "2026-03-08", to: "2026-03-02")
 
