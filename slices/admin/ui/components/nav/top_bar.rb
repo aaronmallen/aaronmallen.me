@@ -5,7 +5,6 @@ module Admin
     module Components
       module Nav
         class TopBar < Component
-          BRAND_SPLIT = " "
           INBOX = :inbox
           SEARCH_KEY = "/"
           SHORTCUT = "⌘K"
@@ -16,7 +15,7 @@ module Admin
           def view_template
             header(class: "top-bar") do
               a(class: "top-bar-skip", href: "#main") { t(".skip_link") }
-              wordmark
+              Wordmark(placement: "top-bar-wordmark")
               @navigation ? signed_in : SettingsMenu(session: @session)
             end
           end
@@ -60,19 +59,6 @@ module Admin
           def waiting_dot
             span(class: "pill-nav-dot", aria: { hidden: "true" })
             span(class: "sr-only") { t(".waiting") }
-          end
-
-          def wordmark
-            owner = Hanami.app.settings.owner_name
-            first, rest = owner.split(BRAND_SPLIT, 2)
-
-            a(class: "wordmark", href: path(:root), aria: { label: t(".brand_label", owner:) }) do
-              plain first
-              next unless rest
-
-              span(class: "wordmark-slash", aria: { hidden: "true" }) { "/" }
-              plain rest
-            end
           end
         end
       end

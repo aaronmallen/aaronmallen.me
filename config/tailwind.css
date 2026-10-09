@@ -49,6 +49,30 @@
   --color-mk-selection: light-dark(#dcdacb, #49483e);
   --color-wash: light-dark(#e4e2d6, #3e3d32);
 
+  --animate-mk-cycle: mk-cycle 7.2s linear infinite;
+
+  @keyframes mk-cycle {
+    0%,
+    100% {
+      color: var(--cy0);
+    }
+    16.667% {
+      color: var(--cy1);
+    }
+    33.333% {
+      color: var(--cy2);
+    }
+    50% {
+      color: var(--cy3);
+    }
+    66.667% {
+      color: var(--cy4);
+    }
+    83.333% {
+      color: var(--cy5);
+    }
+  }
+
   --font-display: "Bricolage Grotesque", "Helvetica Neue", Helvetica, sans-serif;
   --font-serif: "Newsreader", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -262,16 +286,13 @@
 }
 
 @utility main-nav-brand {
-  @apply col-start-1 row-start-1 justify-self-start font-display font-extrabold text-brand uppercase whitespace-nowrap text-ink no-underline;
-  @apply hover:cursor-pointer focus-ring;
-}
-
-@utility main-nav-brand-accent {
-  @apply mx-px text-accent transition-colors duration-200 ease-in-out;
-
-  :where(.main-nav-brand:hover, .main-nav-brand:focus-visible) & {
-    color: var(--color-mk-green-text);
-  }
+  @apply col-start-1 row-start-1 justify-self-start text-brand hover:cursor-pointer focus-ring;
+  --cy0: var(--color-mk-pink);
+  --cy1: var(--color-mk-orange);
+  --cy2: var(--color-mk-sand);
+  --cy3: var(--color-mk-green);
+  --cy4: var(--color-mk-blue);
+  --cy5: var(--color-mk-violet);
 }
 
 @utility main-nav-toggle {
@@ -1036,20 +1057,31 @@
   @apply focus:bg-ink focus:px-3.5 focus:py-2.5 focus:text-ground;
 }
 
-@utility wordmark {
-  @apply mr-3 inline-flex items-center font-display text-wordmark font-extrabold uppercase whitespace-nowrap;
-  @apply text-ink no-underline hover:text-ink admin-focus;
+@utility top-bar-wordmark {
+  @apply mr-3 text-wordmark admin-focus;
+  --cy0: var(--color-mk-green-text);
+  --cy1: var(--color-mk-blue-text);
+  --cy2: var(--color-mk-violet);
+  --cy3: var(--color-mk-pink-text);
+  --cy4: var(--color-mk-orange-text);
+  --cy5: var(--color-mk-sand-text);
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
   }
 }
 
+@utility wordmark {
+  @apply inline-flex items-center font-display font-extrabold uppercase whitespace-nowrap;
+  @apply text-ink no-underline hover:text-ink;
+}
+
 @utility wordmark-slash {
-  @apply mx-px text-mk-green-text transition-colors duration-150 ease-in-out;
+  @apply mx-px;
+  color: var(--cy0);
 
   :where(.wordmark:hover, .wordmark:focus-visible) > & {
-    @apply text-mk-blue-text;
+    @apply animate-mk-cycle;
   }
 }
 

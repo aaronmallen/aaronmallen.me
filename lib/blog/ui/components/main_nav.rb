@@ -11,8 +11,6 @@ module Blog
           %i[contact .pages.contact].freeze,
         ].freeze
 
-        BRAND_ACCENT = "/"
-        BRAND_SPLIT = " "
         LINKS_ID = "main-nav-links"
 
         prop :session, Blog::Types.Interface(:csrf_token, :signed_in?)
@@ -22,7 +20,7 @@ module Blog
             a(class: "skip-link", href: "#main") { t(".skip_link") }
 
             nav(class: "main-nav", aria: { label: t(".label") }) do
-              brand
+              Wordmark(placement: "main-nav-brand")
               menu_toggle
               links
               settings
@@ -34,25 +32,6 @@ module Blog
 
         def aria_current(href)
           "page" if current_page?(href)
-        end
-
-        def brand
-          href = path(:root)
-          owner = Hanami.app.settings.owner_name
-
-          a(class: "main-nav-brand", href:,
-            aria: { label: t(".brand_label", owner:), current: aria_current(href) }) do
-            brand_name(owner)
-          end
-        end
-
-        def brand_name(owner)
-          first, rest = owner.split(BRAND_SPLIT, 2)
-          span { first }
-          return unless rest
-
-          span(class: "main-nav-brand-accent", aria: { hidden: "true" }) { BRAND_ACCENT }
-          span { rest }
         end
 
         def current_page?(href) = request.path == href

@@ -26,7 +26,7 @@ RSpec.describe "The owner", type: :request do
     get "/"
 
     expect(last_response.body).to include("<span>Ada</span>")
-    expect(last_response.body).not_to include("main-nav-brand-accent")
+    expect(last_response.body).not_to include("wordmark-slash")
   end
 
   it "signs the feed with the name the settings give" do

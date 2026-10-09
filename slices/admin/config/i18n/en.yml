@@ -945,7 +945,6 @@ en:
           webmention_settings: "webmentions"
           webmentions: "webmentions"
         top_bar:
-          brand_label: "%{owner}, home"
           label: "Admin"
           palette: "Open the command palette"
           search: "Find or do anything"
