@@ -103,7 +103,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
       it "counts the tasks done, the tasks carried, the time worked and the commits" do
         expect(page.find(".page-head-sub").text)
-          .to eq("Sep 14 → Sep 20, 2026: 1 done, 1 carried, 1h 00m worked, 1 commit")
+          .to eq("Sep 14 → Sep 20, 2026: 1 done, 1 carried, 1h 30m worked, 1 commit")
       end
 
       it "groups each done task under its day and links it to its task, with the time worked on it" do
@@ -156,7 +156,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "gives the time worked on each day and in all" do
         row = card("worked").find(".meter-row", text: "Wed Sep 16")
 
-        expect([row.find(".meter-count").text, card("worked").find(".review-total").text]).to eq(["1h 00m", "1h 00m"])
+        expect([row.find(".meter-count").text, card("worked").find(".review-total").text]).to eq(["1h 30m", "1h 30m"])
       end
     end
 

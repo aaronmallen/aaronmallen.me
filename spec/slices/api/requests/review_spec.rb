@@ -42,7 +42,10 @@ RSpec.describe "API review", type: :request do
 
   def today = Blog::TimeZone.today
 
-  def work(from, to) = create(:work_session, task_id: create(:task).id, started_at: from, ended_at: to)
+  def work(from, to, task: create(:task, worked_seconds: (to - from).to_i))
+    create(:work_session, task_id: task.id, started_at: from, ended_at: to)
+    task
+  end
 
   describe "a week with records" do
     let!(:filled) { fill(wednesday) }
@@ -67,7 +70,7 @@ RSpec.describe "API review", type: :request do
     end
 
     it "totals the tasks done, the tasks carried, the time worked and the commits" do
-      expect(review.fetch("totals")).to eq("done" => 1, "carried" => 1, "worked_seconds" => 3600, "commits" => 1)
+      expect(review.fetch("totals")).to eq("done" => 1, "carried" => 1, "worked_seconds" => 5400, "commits" => 1)
     end
 
     it "groups the tasks done by day" do
@@ -126,7 +129,7 @@ RSpec.describe "API review", type: :request do
 
     it "gives the time worked on every day of the week" do
       expect(review.fetch("worked").map { it.values_at("date", "seconds") })
-        .to eq((Date.new(2026, 9, 14)..Date.new(2026, 9, 20)).map { [it.iso8601, it == wednesday ? 3600 : 0] })
+        .to eq((Date.new(2026, 9, 14)..Date.new(2026, 9, 20)).map { [it.iso8601, it == wednesday ? 5400 : 0] })
     end
 
     it "gives the numbers the admin screen shows for the same week" do
@@ -267,6 +270,52 @@ RSpec.describe "API review", type: :request do
       expect(seconds_on("2026-09-15", "2026-09-16")).to eq([3600, 5400])
     end
 
+    describe "tasks that ran at once" do
+      def ran(from, to, **)
+        work(from, to, task: create(:task, :done, completed_at: to, worked_seconds: (to - from).to_i, **))
+      end
+
+      it "counts an hour three tasks shared once on the day and in all" do
+        3.times { ran(at(wednesday, 9), at(wednesday, 10)) }
+
+        expect([seconds_on("2026-09-16"), review.dig("totals", "worked_seconds")]).to eq([[3600], 3600])
+      end
+
+      it "still gives each done task the full time it ran" do
+        3.times { ran(at(wednesday, 9), at(wednesday, 10)) }
+
+        expect(review.fetch("done").flat_map { it.fetch("tasks") }.map { it.fetch("worked_seconds") })
+          .to eq([3600, 3600, 3600])
+      end
+
+      it "puts overlap that crosses midnight on the site day it fell on" do
+        ran(at(Date.new(2026, 9, 15), 23), at(wednesday, 1))
+        ran(at(Date.new(2026, 9, 15), 23, 30), at(wednesday, 0, 30))
+
+        expect(seconds_on("2026-09-15", "2026-09-16")).to eq([3600, 3600])
+      end
+
+      it "counts a running task that overlaps a closed one once up to now" do
+        ran(at(wednesday, 8), at(wednesday, 11))
+        create(:work_session, task_id: create(:task, :in_progress).id, started_at: at(wednesday, 9))
+
+        expect(seconds_on("2026-09-16", "2026-09-17")).to eq([16 * 3600, 24 * 3600])
+      end
+
+      it "adds time set by hand on top, on the day the task closed" do
+        task = ran(at(wednesday, 9), at(wednesday, 10), completed_at: at(Date.new(2026, 9, 17)), worked_seconds: 5400)
+        ran(at(wednesday, 9), at(wednesday, 10))
+
+        expect([seconds_on("2026-09-16", "2026-09-17"), task.worked_seconds]).to eq([[3600, 1800], 5400])
+      end
+
+      it "takes time set by hand off the day an open task last ran" do
+        work(at(wednesday, 9), at(wednesday, 10), task: create(:task, worked_seconds: 2400))
+
+        expect(seconds_on("2026-09-16")).to eq([2400])
+      end
+    end
+
     it "counts only the part of a session inside the week" do
       work(at(Date.new(2026, 9, 13), 23), at(Date.new(2026, 9, 14), 1))
 
@@ -381,7 +430,7 @@ RSpec.describe "API review", type: :request do
     it "counts only the done tasks it keeps and leaves the time worked and the carried tasks whole" do
       totals = read(day: wednesday.iso8601, model: "claude-sonnet-5").fetch("totals")
 
-      expect(totals).to include("done" => 1, "carried" => 1, "worked_seconds" => 3600)
+      expect(totals).to include("done" => 1, "carried" => 1, "worked_seconds" => 5400)
     end
 
     it "reads through read_review as the endpoint does" do
