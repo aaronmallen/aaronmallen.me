@@ -84,6 +84,10 @@ RSpec.describe "SEO tags", type: :request do
       expect(named("twitter:description")).to eq(["The opening paragraph"])
     end
 
+    it "describes it for search engines too" do
+      expect(named("description")).to eq(["The opening paragraph"])
+    end
+
     it "points at its own page on this site" do
       expect(canonical).to eq("https://aaronmallen.me/writing/hello")
     end
@@ -109,6 +113,49 @@ RSpec.describe "SEO tags", type: :request do
     end
   end
 
+  describe "an article with a long first paragraph and no summary" do
+    before do
+      publish(summary: "", body: "#{'word ' * 60}\n\nthe second")
+      get "/writing/hello"
+    end
+
+    it "cuts the description to a length search results show", :aggregate_failures do
+      description = named("description").first
+      expect(description.length).to eq(160)
+      expect(description).to start_with("word word").and end_with("…")
+    end
+
+    it "cuts the card descriptions the same way" do
+      expect(property("og:description")).to eq(named("description"))
+    end
+  end
+
+  describe "an article with no summary and no paragraph" do
+    before do
+      publish(summary: "  ", body: "## Only a heading")
+      get "/writing/hello"
+    end
+
+    it "emits no empty description", :aggregate_failures do
+      expect(named("description")).to be_empty
+      expect(property("og:description")).to be_empty
+      expect(named("twitter:description")).to be_empty
+    end
+  end
+
+  describe "an article with a long summary of its own" do
+    let(:summary) { "word " * 60 }
+
+    before do
+      publish(summary:)
+      get "/writing/hello"
+    end
+
+    it "keeps the whole summary" do
+      expect(named("description")).to eq([summary.strip])
+    end
+  end
+
   describe "an article carrying its own social card" do
     before do
       publish(summary: "What it is about", og_title: "On the card",
@@ -127,6 +174,10 @@ RSpec.describe "SEO tags", type: :request do
 
     it "describes it with the summary the post carries" do
       expect(property("og:description")).to eq(["What it is about"])
+    end
+
+    it "gives search engines the same summary" do
+      expect(named("description")).to eq(["What it is about"])
     end
 
     it "shows the image" do

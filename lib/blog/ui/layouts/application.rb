@@ -15,7 +15,10 @@ module Blog
 
         private
 
-        def page_description = content_for(:description)
+        def page_description
+          description = content_for(:description).to_s.strip
+          description unless description.empty?
+        end
 
         def page_feed = content_for(:feed)
 

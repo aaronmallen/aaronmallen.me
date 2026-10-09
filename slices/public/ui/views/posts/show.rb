@@ -9,6 +9,8 @@ module Public
         class Show < View
           include Components::Posts
 
+          DESCRIPTION_LIMIT = 160
+
           prop :post, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String
           prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -47,6 +49,10 @@ module Public
             a(class: "post-back", href: path(:writing)) do
               IconLabel(icon: "fa-solid fa-arrow-left") { t(".back") }
             end
+          end
+
+          def description
+            @post.written_summary || Blog::Helpers::Truncation.fit(@post.summary, limit: DESCRIPTION_LIMIT)
           end
 
           def feedback_note
@@ -97,7 +103,7 @@ module Public
 
           def social_card
             content_for(:canonical, @post.canonical_url)
-            content_for(:description, @post.summary)
+            content_for(:description, description)
             content_for(:image, @post.og_image_url)
             content_for(:social_title, @post.og_title)
           end
