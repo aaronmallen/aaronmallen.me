@@ -8,7 +8,12 @@ RSpec.describe "Privacy", type: :request do
 
   def copy(key) = i18n.t(key, scope: "ui.views.pages.privacy")
 
-  def list_after(heading) = page.find(".privacy h2", exact_text: heading).find(:xpath, "following-sibling::ul[1]")
+  def list_after(heading) = page.find(".prose h2", exact_text: heading).find(:xpath, "following-sibling::ul[1]")
+
+  it "opens with the page head", :aggregate_failures do
+    expect(page).to have_css("header.hd h1", exact_text: copy("heading"))
+    expect(page).to have_css("header.hd .ld", exact_text: copy("lede"))
+  end
 
   it "says how long each thing stays", :aggregate_failures do
     retention = list_after(copy("retention.heading"))
@@ -26,7 +31,7 @@ RSpec.describe "Privacy", type: :request do
   end
 
   it "points requests to the contact form" do
-    paragraph = page.find(".privacy .post-body p", text: copy("requests.body"))
+    paragraph = page.find(".prose p", text: copy("requests.body"))
 
     expect(paragraph).to have_link(copy("requests.link"), href: "/contact", exact: true)
   end

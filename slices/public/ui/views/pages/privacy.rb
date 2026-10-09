@@ -37,14 +37,14 @@ module Public
           def view_template
             content_for(:title, t(".title"))
 
-            section(class: "privacy") do
+            header(class: "hd") do
               span(class: "kicker") { t(".kicker") }
-              h1(class: "page-title") { t(".heading") }
-              p(class: "lede") { t(".lede") }
-              div(class: "post-body") do
-                SECTIONS.each_value { topic(**it) }
-                requests
-              end
+              h1 { t(".heading") }
+              p(class: "ld") { t(".lede") }
+            end
+            div(class: "prose") do
+              SECTIONS.each_value { topic(**it) }
+              requests
             end
           end
 

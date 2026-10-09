@@ -304,6 +304,36 @@
   text-wrap: pretty;
 }
 
+@utility prose {
+  .pub & {
+    @apply max-w-prose font-serif text-prose;
+
+    & > * {
+      @apply m-0;
+    }
+
+    & > * + * {
+      @apply mt-[1.05em];
+    }
+
+    & h2 {
+      @apply mt-[1.9em] font-display text-prose-h2 font-bold text-ink;
+    }
+
+    & ul {
+      @apply list-disc pl-[1.2em];
+    }
+
+    & li {
+      @apply mb-[0.45em];
+    }
+
+    & blockquote {
+      @apply my-[1.5em] border-l-2 border-mk-pink pl-5.5 text-[1.06em] text-ink-muted italic;
+    }
+  }
+}
+
 @utility g {
   @apply grid grid-cols-1 items-start gap-grid;
 
@@ -667,34 +697,6 @@
 
   & li:nth-child(3n + 3) {
     border-color: color-mix(in oklab, var(--color-mk-blue) 40%, var(--color-line));
-  }
-}
-
-@utility prose {
-  @apply max-w-prose font-serif text-prose;
-
-  & > * + * {
-    margin-top: 1.05em;
-  }
-
-  & h2 {
-    @apply font-display text-prose-h2 font-bold text-ink;
-    margin-top: 1.9em;
-  }
-
-  & ul {
-    @apply list-disc;
-    padding-left: 1.2em;
-  }
-
-  & li {
-    margin-bottom: 0.45em;
-  }
-
-  & blockquote {
-    @apply border-l-2 border-mk-pink pl-5.5 text-ink-muted italic;
-    margin-block: 1.5em;
-    font-size: 1.06em;
   }
 }
 
