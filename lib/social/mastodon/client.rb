@@ -39,6 +39,12 @@ module Social
         )
       end
 
+      def for(connection)
+        account = [connection.host, connection.credentials.fetch(:access_token)]
+
+        self.class.new(account: -> { account }, connect: @connect, scan_links:)
+      end
+
       def inspect = "#<#{self.class.name} configured=#{configured?}>"
 
       def limit = LIMIT

@@ -3,23 +3,23 @@
 module Admin
   module Operations
     class ListSocialAccounts
-      MASTODON = "mastodon"
+      include Deps["i18n", connection_queries: "services.repos.connection_queries"]
 
-      include Deps[
-        "settings", connection_queries: "services.repos.connection_queries", list_networks: "operations.list_networks",
-      ]
-
-      def call
-        list_networks.call.select(&:configured).flat_map { accounts(it.name) }
+      def call(selected: nil)
+        Blog::Types::NetworkName.values.flat_map do |network|
+          connection_queries.for(network).map { account(it, network, selected) }
+        end
       end
 
       private
 
-      def accounts(name) = name == Blog::Types::NetworkName["bluesky"] ? bluesky_accounts : [mastodon_account]
-
-      def bluesky_accounts = connection_queries.for(Blog::Types::NetworkName["bluesky"]).map(&:label)
-
-      def mastodon_account = connection_queries.for(MASTODON).first&.host.to_s
+      def account(connection, network, selected)
+        Structs::SocialAccount.new(
+          configured: true, id: connection.id, label: connection.label, network:,
+          network_label: i18n.t(Structs::Network::LABELS.fetch(network)),
+          selected: selected.nil? || selected.include?(connection.id),
+        )
+      end
     end
   end
 end

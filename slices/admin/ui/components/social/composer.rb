@@ -5,10 +5,12 @@ module Admin
     module Components
       module Social
         class Composer < Component
+          ACCOUNTS = "social[accounts][]"
           DRAFT = Blog::Types::SocialIntent["draft"]
           MODES = Blog::Types::SocialMode.values.to_h { [it, ".#{it}"] }.freeze
           SEND = Blog::Types::SocialIntent["send"]
 
+          prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(Structs::SocialAccount))
           prop :counts, Blog::Types::Array.of(Blog::Types::Hash)
           prop :errors, Blog::Types::Hash
           prop :handles, Blog::Types::Hash
@@ -21,7 +23,7 @@ module Admin
           def view_template
             Form(action: action, data: { social_composer: "" }) do
               Card(title: editing? ? t(".editing") : t(".title"), class: "social-compose") do |card|
-                card.side { Targets(errors: @errors, networks: @networks) }
+                card.side { targets }
                 parts
                 tools
                 schedule_field
@@ -121,6 +123,11 @@ module Admin
           end
 
           def send_disabled? = draft_disabled? || over_limit?
+
+          def targets
+            Targets(errors: @errors, networks: @accounts, name: ACCOUNTS)
+            input(type: "hidden", name: ACCOUNTS, value: "")
+          end
 
           def tools
             div(class: "compose-tools") do

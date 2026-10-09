@@ -11,20 +11,20 @@ module Social
         end
       end
 
-      def claim(social_post_id:, network:, stale_before:)
+      def claim(social_post_id:, connection_id:, network:, stale_before:)
         reclaim = command(:record).with(update_statement: excluded(%i[updated_at]), update_where: stalled(stale_before))
 
-        reclaim.call(social_post_id:, network:)
+        reclaim.call(social_post_id:, connection_id:, network:)
       end
 
       def for_social_post(social_post_id) = where(social_post_id:)
 
       def in_network_order = order(self[:network].asc)
 
-      def record(social_post_id:, network:, **attrs)
+      def record(social_post_id:, connection_id:, network:, **attrs)
         update_statement = excluded([*attrs.keys, :updated_at])
 
-        command(:record).with(update_statement:).call(social_post_id:, network:, **attrs)
+        command(:record).with(update_statement:).call(social_post_id:, connection_id:, network:, **attrs)
       end
 
       def syndicated_for_post(post_id)

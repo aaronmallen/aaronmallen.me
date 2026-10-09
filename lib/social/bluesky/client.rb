@@ -55,6 +55,8 @@ module Social
         )
       end
 
+      def for(connection) = dup.tap { it.credentials = connection.credentials }
+
       def inspect = "#<#{self.class.name}>"
 
       def limit = LIMIT
@@ -62,7 +64,7 @@ module Social
       def max_bytes = MAX_BYTES
 
       def post(text, idempotency_key:, mentions: [], reply_to: nil)
-        sessions = accounts.sessions(reply_to && address(reply_to)[:repo])
+        sessions = accounts.sessions(reply_to && address(reply_to)[:repo], @credentials)
 
         sessions.use do |session|
           accounts.wrote(session.did, sessions)
@@ -81,6 +83,10 @@ module Social
       def search(text, limit:) = Actors.accounts(query(public_api, SEARCH_ACTORS, q: text, limit:))
 
       def within_limit?(text) = count(text) <= LIMIT && text.to_s.bytesize <= MAX_BYTES
+
+      protected
+
+      attr_writer :credentials
 
       private
 

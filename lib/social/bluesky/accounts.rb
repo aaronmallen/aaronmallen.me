@@ -13,13 +13,13 @@ module Social
         @sign_in = sign_in
       end
 
-      def any? = !credentials.nil?
+      def any? = !first_credentials.nil?
 
-      def sessions(author = nil)
+      def sessions(author = nil, credentials = nil)
         known = author && @lock.synchronize { @authors[author] }
         return known if known
 
-        found = credentials or raise Client::Error, "Bluesky has no connected account"
+        found = credentials || first_credentials or raise Client::Error, "Bluesky has no connected account"
         @lock.synchronize { @sessions[found] ||= Sessions.new { @sign_in.call(found) } }
       end
 
@@ -27,7 +27,7 @@ module Social
 
       private
 
-      def credentials = @connections.for(PROVIDER).first&.credentials
+      def first_credentials = @connections.for(PROVIDER).first&.credentials
     end
   end
 end

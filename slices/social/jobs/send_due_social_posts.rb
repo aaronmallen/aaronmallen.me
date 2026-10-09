@@ -6,6 +6,7 @@ module Social
       STALLED_AFTER = 15 * 60
 
       include Deps[
+        list_target_accounts: "operations.list_target_accounts",
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",
       ]
@@ -21,10 +22,10 @@ module Social
       private
 
       def queue(social_post, due_by:, stale_before:)
-        social_post.targets.each do |network|
-          next unless social_post_mutations.claim_delivery(social_post.id, network, due_by:, stale_before:)
+        list_target_accounts.call(social_post).each do |account|
+          next unless social_post_mutations.claim_delivery(social_post.id, account, due_by:, stale_before:)
 
-          DeliverSocialPost.perform_async(social_post.id, network)
+          DeliverSocialPost.perform_async(social_post.id, account.id)
         end
       end
     end

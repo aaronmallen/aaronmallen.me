@@ -44,10 +44,20 @@ announcement = Seeds.unwrap(
   ),
 )
 
+add_connection = Services::Slice["repos.connection_mutations"]
+bluesky = add_connection.add(
+  provider: "bluesky", account_id: "did:plc:ada", label: "@ada.example.com",
+  credentials: { app_password: "seed", handle: "ada.example.com" },
+)
+mastodon = add_connection.add(
+  provider: "mastodon", host: "social.example.com", account_id: "1", label: "@ada@social.example.com",
+  credentials: { access_token: "seed" }, scopes: %w[write:statuses read:accounts read:search read:statuses],
+)
+
 deliver = Social::Operations::DeliverSocialPost.new(networks: Seeds.networks)
-both.each { Seeds.unwrap(deliver.call(thread.id, it)) }
-Seeds.unwrap(deliver.call(announcement.id, "mastodon"))
-Seeds.unwrap(deliver.give_up(announcement.id, "bluesky"))
+[bluesky, mastodon].each { Seeds.unwrap(deliver.call(thread.id, it.id)) }
+Seeds.unwrap(deliver.call(announcement.id, mastodon.id))
+Seeds.unwrap(deliver.give_up(announcement.id, bluesky.id))
 social_posts = Social::Slice["relations.social_posts"]
 social_posts.by_pk(thread.id).command(:update).call(posted_at: Seeds.ago(5, hour: 11))
 social_posts.by_pk(announcement.id).command(:update).call(posted_at: article.published_at)

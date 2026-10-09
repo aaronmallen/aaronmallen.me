@@ -6,8 +6,9 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
   let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
   let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
+  before { connect_social_networks }
+
   def answer_on_both_networks
-    connect_social_networks
     stub_bluesky
     stub_mastodon("110")
   end
@@ -21,6 +22,8 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     allow(Social::Jobs::DeliverSocialPost).to receive(:perform_async).and_call_original
   end
 
+  def mastodon = social_account("mastodon")
+
   def moved_after_reading(**attrs)
     allow(social_post_queries).to receive(:due_scheduled).and_wrap_original do |read, time|
       read.call(time).tap { |due| due.each { social_post_mutations.update(it.id, **attrs) } }
@@ -29,26 +32,51 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     described_class.new(social_post_queries:).perform
   end
 
-  def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60)
-    social_post_mutations.create_with_parts(targets:, posted_at:, status: "scheduled", parts: %w[one])
+  def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60, connection_ids: [])
+    social_post_mutations.create_with_parts(targets:, posted_at:, connection_ids:, status: "scheduled", parts: %w[one])
   end
 
   def sent = Social::Jobs::DeliverSocialPost.jobs.map { it["args"] }
 
   def stalled = described_class::STALLED_AFTER + 60
 
-  it "sends a due social post to every network it targets" do
+  it "sends a due social post to every account on the networks it targets" do
     social_post = queued
     job.perform
 
-    expect(sent.sort).to eq([[social_post.id, "bluesky"], [social_post.id, "mastodon"]].sort)
+    expect(sent.sort).to eq([[social_post.id, social_account("bluesky").id], [social_post.id, mastodon.id]].sort)
   end
 
   it "sends a due social post to the one network it targets" do
     social_post = queued(targets: %w[mastodon])
     job.perform
 
-    expect(sent).to eq([[social_post.id, "mastodon"]])
+    expect(sent).to eq([[social_post.id, mastodon.id]])
+  end
+
+  it "sends a due social post to each account on a network with two" do
+    other = connect_another_mastodon
+    social_post = queued(targets: %w[mastodon])
+    job.perform
+
+    expect(sent.sort).to eq([[social_post.id, mastodon.id], [social_post.id, other.id]].sort)
+  end
+
+  it "sends a due social post only to the accounts it picked" do
+    other = connect_another_mastodon
+    social_post = queued(targets: %w[mastodon], connection_ids: [other.id])
+    job.perform
+
+    expect(sent).to eq([[social_post.id, other.id]])
+  end
+
+  it "waits while no account is connected on the networks it targets", :aggregate_failures do
+    social_post = queued(targets: %w[mastodon])
+    connect_social_networks(mastodon: {})
+    job.perform
+
+    expect(sent).to be_empty
+    expect(social_post_queries.by_id(social_post.id).status).to eq("scheduled")
   end
 
   it "leaves a social post scheduled for later alone" do
@@ -85,11 +113,13 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     end
   end
 
-  it "opens a delivery for each network it sends to" do
+  it "opens a delivery for each account it sends to" do
+    other = connect_another_mastodon
     social_post = queued
     job.perform
 
-    expect(social_post_queries.by_id(social_post.id).deliveries.map(&:network)).to eq(%w[bluesky mastodon])
+    expect(social_post_queries.by_id(social_post.id).deliveries.map(&:connection_id))
+      .to contain_exactly(social_account("bluesky").id, mastodon.id, other.id)
   end
 
   it "never sends the same network twice when run twice" do
@@ -101,7 +131,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "never sends again while a network is still retrying" do
     social_post = queued(targets: %w[mastodon])
-    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, mastodon, error: "down")
     job.perform
 
     expect(sent).to be_empty
@@ -113,16 +143,16 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     later(stalled)
     job.perform
 
-    expect(sent).to eq([[social_post.id, "mastodon"]])
+    expect(sent).to eq([[social_post.id, mastodon.id]])
   end
 
   it "sends a network again when its job died partway" do
     social_post = queued(targets: %w[mastodon])
-    social_post_mutations.record_delivery(social_post.id, "mastodon", remote_ids: %w[1])
+    social_post_mutations.record_delivery(social_post.id, mastodon, remote_ids: %w[1])
     later(stalled)
     job.perform
 
-    expect(sent).to eq([[social_post.id, "mastodon"]])
+    expect(sent).to eq([[social_post.id, mastodon.id]])
   end
 
   it "waits for a job that has not had time to start" do
@@ -136,7 +166,7 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "never sends again while a network is still retrying, however long ago it failed" do
     social_post = queued(targets: %w[mastodon])
-    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, mastodon, error: "down")
     later(stalled)
     job.perform
 
@@ -145,10 +175,10 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
 
   it "sends the network that has no delivery yet" do
     social_post = queued
-    social_post_mutations.record_delivery(social_post.id, "mastodon", error: "down")
+    social_post_mutations.record_delivery(social_post.id, mastodon, error: "down")
     job.perform
 
-    expect(sent).to eq([[social_post.id, "bluesky"]])
+    expect(sent).to eq([[social_post.id, social_account("bluesky").id]])
   end
 
   it "posts a due social post to every network it targets once the jobs it queued run" do

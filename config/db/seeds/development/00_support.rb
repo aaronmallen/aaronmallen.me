@@ -27,6 +27,8 @@ module Seeds
 
     def configured? = true
 
+    def for(_connection) = self
+
     def post(_text, idempotency_key:, **)
       id = "#{@name}-#{idempotency_key.part.id}"
 

@@ -21,6 +21,7 @@ module Social
       params do
         required(:parts).value(Blog::Types::TextList, :filled?)
         required(:targets).value(Blog::Types::Normalized::Networks, :filled?)
+        optional(:connection_ids).value(Blog::Types::IdList)
         required(:mode).value(MODE)
         required(:schedule_at).value(Blog::Types::LocalTime)
       end

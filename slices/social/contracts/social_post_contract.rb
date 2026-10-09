@@ -6,6 +6,7 @@ module Social
       params do
         required(:parts).value(Blog::Types::TextList, :filled?)
         required(:targets).value(Blog::Types::Normalized::Networks, :filled?)
+        optional(:connection_ids).value(Blog::Types::IdList)
         required(:status).value(Blog::Types::SocialPostStatus)
         optional(:post_id).maybe(:integer)
         optional(:posted_at).maybe(:time)

@@ -47,8 +47,6 @@ module Admin
 
           def claimed? = @social_post.deliveries.any?
 
-          def deliveries = @deliveries ||= @social_post.deliveries.to_h { [it.network, it] }
-
           def edit_link
             Button(
               href: edit_path, small: true, title: t(".edit"), aria: { label: t(".edit") },
@@ -60,7 +58,7 @@ module Admin
 
           def engagement
             ENGAGEMENT.each do |key, icon, column|
-              total = deliveries.each_value.sum { it.public_send(column) }
+              total = @social_post.deliveries.sum { it.public_send(column) }
 
               span(class: "sq-metric", title: t(key), data: { social_engagement: column }, aria: { label: t(key) }) do
                 IconLabel(icon:) { total.to_s }
@@ -68,7 +66,7 @@ module Admin
             end
           end
 
-          def failing?(delivery) = !delivery.nil? && (delivery.failed || written?(delivery.error))
+          def failing?(delivery) = delivery.failed || written?(delivery.error)
 
           def failure_text(delivery)
             error = delivery.error.to_s.strip
@@ -95,7 +93,7 @@ module Admin
           end
 
           def network(name)
-            failing = failing?(deliveries[name])
+            failing = @social_post.deliveries.any? { it.network == name && failing?(it) }
 
             span(class: ["sq-network", ("bad" if failing)]) do
               IconLabel(icon: NETWORK_ICONS.fetch(name)) do

@@ -10,7 +10,7 @@ module Social
         use :timestamps
         timestamps :created_at, :updated_at
 
-        conflict_target %i[social_post_id network]
+        conflict_target %i[social_post_id connection_id]
       end
     end
   end

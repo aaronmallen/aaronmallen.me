@@ -630,7 +630,7 @@ RSpec.describe "Admin post editor", type: :request do
       def delivered
         stub_bluesky
         Social::Jobs::SyndicatePost.drain
-        Social::Jobs::DeliverSocialPost.new.perform(queued.first.id, "bluesky")
+        Social::Jobs::DeliverSocialPost.new.perform(queued.first.id, social_account("bluesky").id)
 
         bluesky_writes.first.dig("record", "text")
       end

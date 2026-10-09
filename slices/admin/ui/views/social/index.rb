@@ -9,7 +9,7 @@ module Admin
 
           ACCOUNTS_SEPARATOR = " and "
 
-          prop :accounts, Blog::Types::Array.of(Blog::Types::String)
+          prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(Structs::SocialAccount))
           prop :filter, Blog::Types::SocialQueue
           prop :items, Blog::Types::Instance(Blog::Structs::Paged)
           prop :now, Blog::Types::Time
@@ -32,12 +32,12 @@ module Admin
 
           private
 
-          def composer = Composer(**@composer, autofocus: @writing)
+          def composer = Composer(**@composer, accounts: @accounts, autofocus: @writing)
 
           def cross_posting
             return t(".no_accounts") if @accounts.empty?
 
-            t(".cross_posting", accounts: @accounts.join(ACCOUNTS_SEPARATOR))
+            t(".cross_posting", accounts: @accounts.map(&:label).join(ACCOUNTS_SEPARATOR))
           end
 
           def linked

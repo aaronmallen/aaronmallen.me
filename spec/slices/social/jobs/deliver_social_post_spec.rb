@@ -8,12 +8,14 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
   before { connect_social_networks }
 
-  def deliver(social_post, network) = job.perform(social_post.id, network)
+  def deliver(social_post, network) = job.perform(social_post.id, social_account(network).id)
 
   def delivery(social_post, network) = reloaded(social_post).deliveries.find { it.network == network }
 
   def exhaust(social_post, network)
-    described_class.sidekiq_retries_exhausted_block.call({ "args" => [social_post.id, network] }, nil)
+    job = { "args" => [social_post.id, social_account(network).id] }
+
+    described_class.sidekiq_retries_exhausted_block.call(job, nil)
   end
 
   def facet(url, start, finish)
@@ -29,7 +31,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     bluesky_writes.first.dig("record", "facets")
   end
 
-  def key(social_post, network, position) = "social-post-#{social_post.id}-#{network}-#{position}"
+  def key(social_post, network, position) = "social-post-#{social_post.id}-#{social_account(network).id}-#{position}"
 
   def queued(targets: %w[mastodon], parts: %w[one])
     social_post_mutations.create_with_parts(targets:, parts:, status: "scheduled", posted_at: Time.now - 60)
@@ -154,8 +156,9 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       it "raises so Sidekiq tries again when Mastodon #{what}" do
         stub_request(:post, statuses).to_return(**response)
 
-        expect { deliver(social_post, "mastodon") }
-          .to raise_error(described_class::NetworkUnavailable, "mastodon refused social post #{social_post.id}")
+        message = "account #{social_account('mastodon').id} refused social post #{social_post.id}"
+
+        expect { deliver(social_post, "mastodon") }.to raise_error(described_class::NetworkUnavailable, message)
       end
 
       it "keeps what went wrong when Mastodon #{what}" do
@@ -512,7 +515,10 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     it "raises so Sidekiq tries again" do
       stub_request(:post, session_url).to_return(status: 500)
 
-      expect { deliver(social_post, "bluesky") }.to raise_error(described_class::NetworkUnavailable, /bluesky/)
+      expect do
+        deliver(social_post,
+                "bluesky")
+      end.to raise_error(described_class::NetworkUnavailable, /account #{social_account('bluesky').id}/)
     end
   end
 
@@ -868,20 +874,104 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
-  describe "a network with no credentials" do
-    it "marks the delivery failed for good with no Mastodon connection" do
-      connect_social_networks(mastodon: {})
-      social_post = queued
-      deliver(social_post, "mastodon")
+  describe "two accounts on one network" do
+    let(:other) { connect_another_mastodon }
+    let(:other_statuses) { "https://hachyderm.io/api/v1/statuses" }
+    let(:social_post) { queued }
 
-      expect(delivery(social_post, "mastodon")).to have_attributes(failed: true, error: "mastodon has no credentials")
+    before do
+      other
+      stub_mastodon("110")
+      stub_request(:post, other_statuses).to_return(**json_response(id: "220", url: "https://hachyderm.io/@ada/220"))
     end
 
-    it "asks nothing of Bluesky" do
-      connect_social_networks(bluesky: {})
-      deliver(queued(targets: %w[bluesky]), "bluesky")
+    def deliver_other = job.perform(social_post.id, other.id)
 
-      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))).not_to have_been_made
+    it "posts as the account its job names", :aggregate_failures do
+      deliver_other
+
+      expect(a_request(:post, other_statuses).with(headers: { "Authorization" => "Bearer other" })).to have_been_made
+      expect(a_request(:post, statuses)).not_to have_been_made
+    end
+
+    it "keeps a delivery for each account" do
+      deliver(social_post, "mastodon")
+      deliver_other
+
+      expect(reloaded(social_post).deliveries.to_h { [it.connection_id, it.remote_ids] })
+        .to eq(social_account("mastodon").id => %w[110], other.id => %w[220])
+    end
+
+    it "sends each account a key of its own" do
+      deliver_other
+
+      key = "social-post-#{social_post.id}-#{other.id}-1"
+
+      expect(a_request(:post, other_statuses).with(headers: { "Idempotency-Key" => key })).to have_been_made
+    end
+
+    it "keeps the social post scheduled until every account has sent it" do
+      deliver(social_post, "mastodon")
+
+      expect(reloaded(social_post).status).to eq("scheduled")
+    end
+
+    it "counts the social post posted once every account has sent it" do
+      deliver(social_post, "mastodon")
+      deliver_other
+
+      expect(reloaded(social_post).status).to eq("posted")
+    end
+
+    it "counts the social post posted once the one account it picked has sent it" do
+      social_post_mutations.update(social_post.id, connection_ids: [other.id])
+      deliver_other
+
+      expect(reloaded(social_post).status).to eq("posted")
+    end
+
+    it "sends nothing to an account the social post did not pick", :aggregate_failures do
+      social_post_mutations.update(social_post.id, connection_ids: [other.id])
+      deliver(social_post, "mastodon")
+
+      expect(a_request(:post, statuses)).not_to have_been_made
+      expect(reloaded(social_post).deliveries).to be_empty
+    end
+  end
+
+  describe "two Bluesky accounts" do
+    let(:other) { connect_another_bluesky }
+    let(:social_post) { queued(targets: %w[bluesky]) }
+
+    before do
+      other
+      stub_bluesky
+    end
+
+    it "signs in as the account its job names" do
+      job.perform(social_post.id, other.id)
+
+      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))
+        .with(body: { identifier: "grace.example", password: "other" })).to have_been_made
+    end
+  end
+
+  describe "an account disconnected before its job runs" do
+    let(:social_post) { queued }
+    let!(:gone) { social_account("mastodon") }
+
+    before { Services::Slice["repos.connection_mutations"].delete(gone.id) }
+
+    it "sends nothing and opens no delivery", :aggregate_failures do
+      job.perform(social_post.id, gone.id)
+
+      expect(a_request(:any, /ruby\.social/)).not_to have_been_made
+      expect(reloaded(social_post).deliveries).to be_empty
+    end
+
+    it "gives up quietly" do
+      expect { described_class.sidekiq_retries_exhausted_block.call({ "args" => [social_post.id, gone.id] }, nil) }
+        .not_to raise_error
     end
   end
 

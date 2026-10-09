@@ -5,6 +5,19 @@ module SocialCredentials
   BLUESKY = { app_password: "secret", handle: "ada.example" }.freeze
   MASTODON = { access_token: "token", host: "ruby.social" }.freeze
 
+  def connect_another_bluesky(handle: "grace.example", account_id: "did:plc:grace")
+    Services::Slice["repos.connection_mutations"].add(
+      provider: "bluesky", account_id:, label: "@#{handle}", credentials: { app_password: "other", handle: },
+    )
+  end
+
+  def connect_another_mastodon(host: "hachyderm.io", access_token: "other")
+    Services::Slice["repos.connection_mutations"].add(
+      provider: "mastodon", host:, account_id: "2", label: "@ada@#{host}", credentials: { access_token: },
+      scopes: %w[write:statuses read:accounts read:search read:statuses],
+    )
+  end
+
   def connect_bluesky(credentials = BLUESKY, account_id: "did:plc:ada")
     disconnect_bluesky
     Services::Slice["repos.connection_mutations"]
@@ -17,6 +30,8 @@ module SocialCredentials
     connect_mastodon(**mastodon)
     replace_social_clients
   end
+
+  def social_account(network) = Services::Slice["repos.connection_queries"].for(network).first
 
   private
 

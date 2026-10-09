@@ -109,7 +109,10 @@ RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
     end
 
     describe "a move to today" do
-      before { clock(12) }
+      before do
+        clock(12)
+        connect_social_networks
+      end
 
       it "moves a post to a time still ahead" do
         later = create(:post, :scheduled, published_at: at(day, 15))

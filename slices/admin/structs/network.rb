@@ -8,6 +8,8 @@ module Admin
         Blog::Types::NetworkName["mastodon"] => "social.networks.mastodon",
       }.freeze
       SEPARATOR = " + "
+
+      def value = name
     end
   end
 end

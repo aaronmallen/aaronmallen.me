@@ -5,10 +5,12 @@ RSpec.describe "Admin social", type: :request do
   let(:social_post_mutations) { Social::Slice["repos.social_post_mutations"] }
   let(:social_post_queries) { Social::Slice["repos.social_post_queries"] }
 
+  def accounts(networks) = ["", *networks.filter_map { social_account(it)&.id&.to_s }]
+
   def bodies = social_post_queries.drafts.first.parts.map(&:body)
 
-  def compose(intent: "send", **params)
-    post "/admin/social", _csrf_token: admin_csrf_token, intent:, social: { targets: %w[mastodon], **params }
+  def compose(intent: "send", targets: %w[mastodon], **params)
+    post "/admin/social", _csrf_token: admin_csrf_token, intent:, social: { accounts: accounts(targets), **params }
   end
 
   def counts = page.all("[data-social-count-text]").map(&:text)
@@ -55,7 +57,9 @@ RSpec.describe "Admin social", type: :request do
         create(:social_post, :scheduled)
         get "/admin/social"
 
-        expect(page).to have_css(".page-head-sub", text: "Cross-posting to ruby.social and @ada.example · 1 queued")
+        sub = "Cross-posting to @aaronmallen@ruby.social and @ada.example · 1 queued"
+
+        expect(page).to have_css(".page-head-sub", text: sub)
       end
 
       it "counts a link the way Mastodon does" do
@@ -236,6 +240,44 @@ RSpec.describe "Admin social", type: :request do
         follow_redirect!
 
         expect(page).to have_css("[data-toast]", text: "Queued for Mastodon + Bluesky")
+      end
+
+      it "sends only to the accounts left ticked" do
+        other = connect_another_mastodon
+        post "/admin/social", _csrf_token: admin_csrf_token, intent: "send",
+                              social: { accounts: ["", other.id.to_s], parts: ["hello"], mode: "now" }
+
+        expect(social_post_queries.queued.first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
+      end
+    end
+
+    describe "a second account on a network" do
+      let!(:other) { connect_another_mastodon }
+
+      def targets = page.all("[data-social-target]")
+
+      it "lists every connected account, all ticked", :aggregate_failures do
+        get "/admin/social"
+
+        expect(targets.map(&:value)).to eq([social_account("mastodon").id, other.id,
+                                            social_account("bluesky").id].map(&:to_s))
+        expect(targets.map { it[:checked] }).to all(be_truthy)
+      end
+
+      it "names each account by its handle" do
+        get "/admin/social"
+
+        expect(page.all(".compose-target").map { it.text.strip })
+          .to eq(["Mastodon @aaronmallen@ruby.social", "Mastodon @ada@hachyderm.io", "Bluesky @ada.example"])
+      end
+
+      it "ticks only the accounts a draft picked when it opens" do
+        draft = social_post_mutations.create_with_parts(
+          parts: %w[hi], targets: %w[mastodon], connection_ids: [other.id], status: "draft",
+        )
+        get "/admin/social", edit: draft.id
+
+        expect(targets.select { it[:checked] }.map(&:value)).to eq([other.id.to_s])
       end
     end
 
@@ -799,16 +841,16 @@ RSpec.describe "Admin social", type: :request do
                                                 posted_at:)
       end
 
-      def save_edit(intent: "send", **params)
+      def save_edit(intent: "send", targets: %w[mastodon], **params)
         post "/admin/social/#{social_post.id}", _csrf_token: admin_csrf_token, intent:,
-                                                social: { targets: %w[mastodon], **params }
+                                                social: { accounts: accounts(targets), **params }
       end
 
       def save_posted
         posted = social_post_mutations.create_with_parts(
           parts: %w[gone], targets: %w[mastodon], status: "posted", posted_at: Time.utc(2026, 9, 13, 2, 30),
         )
-        fields = { parts: %w[new], targets: %w[mastodon], mode: "now" }
+        fields = { parts: %w[new], accounts: accounts(%w[mastodon]), mode: "now" }
         post "/admin/social/#{posted.id}", _csrf_token: admin_csrf_token, intent: "send", social: fields
         posted
       end
@@ -957,7 +999,8 @@ RSpec.describe "Admin social", type: :request do
 
       def save_edit(intent:, **params)
         post "/admin/social/#{social_post.id}", _csrf_token: admin_csrf_token, intent:,
-                                                social: { targets: %w[mastodon], parts: %w[second], **params }
+                                                social: { accounts: accounts(%w[mastodon]), parts: %w[second],
+                                                          **params }
       end
 
       it "opens no item in the composer" do
@@ -1019,8 +1062,9 @@ RSpec.describe "Admin social", type: :request do
       expect(page.all("[data-social-composer] button[type='submit']").map { it[:disabled] }).to all(be_truthy)
     end
 
-    it "refuses a network with no credentials" do
-      compose(parts: ["hello"])
+    it "refuses an account disconnected since the form opened" do
+      post "/admin/social", _csrf_token: admin_csrf_token, intent: "send",
+                            social: { accounts: ["", "0"], parts: ["hi"] }
 
       expect(page).to have_css(".field-error", text: "That network has no credentials")
     end

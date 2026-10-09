@@ -8,11 +8,11 @@ module Social
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def claim_delivery(social_post_id, network, due_by:, stale_before:)
+      def claim_delivery(social_post_id, connection, due_by:, stale_before:)
         transaction do
           next unless lock_due(social_post_id, due_by)
 
-          social_post_deliveries.claim(social_post_id:, network:, stale_before:)
+          social_post_deliveries.claim(social_post_id:, **account(connection), stale_before:)
         end
       end
 
@@ -34,9 +34,11 @@ module Social
 
       def mark_posted(id, at: Time.now) = social_posts.mark_posted(id, at:)
 
-      def record_delivery(social_post_id, network, **attrs)
-        social_post_deliveries.record(social_post_id:, network:, **attrs)
+      def record_delivery(social_post_id, connection, **attrs)
+        social_post_deliveries.record(social_post_id:, **account(connection), **attrs)
       end
+
+      def record_engagement(id, **counts) = social_post_deliveries.by_pk(id).stamped(:update).call(**counts)
 
       def replace_parts(id, parts)
         transaction do
@@ -60,6 +62,8 @@ module Social
       end
 
       private
+
+      def account(connection) = { connection_id: connection.id, network: connection.provider }
 
       def by_id(id) = social_posts.combine(:parts, :deliveries).by_pk(id).one
 

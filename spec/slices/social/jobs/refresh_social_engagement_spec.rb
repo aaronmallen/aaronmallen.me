@@ -17,11 +17,13 @@ RSpec.describe Social::Jobs::RefreshSocialEngagement do
 
   def posted(at: Time.now - day, status: "posted", remote_ids: { "mastodon" => %w[110] }, likes: {})
     social_post = social_post_mutations.create_with_parts(
-      targets: remote_ids.keys, parts: %w[one], status:, posted_at: at,
+      targets: remote_ids.keys.empty? ? %w[mastodon] : remote_ids.keys, parts: %w[one], status:, posted_at: at,
     )
     remote_ids.each do |network, ids|
-      social_post_mutations.record_delivery(
-        social_post.id, network, remote_ids: ids, like_count: likes.fetch(network, 0),
+      create(
+        :social_post_delivery,
+        social_post_id: social_post.id, network:, connection_id: social_account(network).id, remote_ids: ids,
+        like_count: likes.fetch(network, 0),
       )
     end
 
@@ -152,6 +154,22 @@ RSpec.describe Social::Jobs::RefreshSocialEngagement do
           expect(delivery(social_post, "bluesky").like_count).to eq(6)
         end
       end
+    end
+  end
+
+  describe "a post sent from a second Mastodon account" do
+    let(:social_post) { posted(remote_ids: {}) }
+
+    before do
+      stub_request(:get, "https://hachyderm.io/api/v1/statuses/220").to_return(**json_response(favourites_count: 6))
+      create(:social_post_delivery, social_post_id: social_post.id, connection_id: connect_another_mastodon.id,
+                                    remote_ids: %w[220])
+    end
+
+    it "asks the Mastodon server of the account that sent it" do
+      job.perform
+
+      expect(delivery(social_post, "mastodon").like_count).to eq(6)
     end
   end
 

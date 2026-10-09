@@ -16,13 +16,12 @@ module Social
         new.give_up(*job["args"])
       end
 
-      def give_up(social_post_id, network) = deliver_social_post.give_up(social_post_id, network)
+      def give_up(social_post_id, connection_id) = deliver_social_post.give_up(social_post_id, connection_id)
 
-      def perform(social_post_id, network)
-        case deliver_social_post.call(social_post_id, network)
-          in Failure(RETRYABLE) then raise NetworkUnavailable, "#{network} refused social post #{social_post_id}"
-          else nil
-        end
+      def perform(social_post_id, connection_id)
+        return unless deliver_social_post.call(social_post_id, connection_id) in Failure(RETRYABLE)
+
+        raise NetworkUnavailable, "account #{connection_id} refused social post #{social_post_id}"
       end
     end
   end

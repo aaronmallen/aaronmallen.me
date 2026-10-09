@@ -878,6 +878,7 @@ CREATE TABLE public.social_posts (
     posted_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    connection_ids integer[] DEFAULT '{}'::integer[] NOT NULL,
     CONSTRAINT social_posts_posted_at_check CHECK (((status = 'draft'::public.social_post_status) OR (posted_at IS NOT NULL))),
     CONSTRAINT social_posts_targets_check CHECK ((cardinality(targets) > 0))
 );
@@ -2982,6 +2983,7 @@ CREATE TABLE public.social_post_deliveries (
     reply_count integer DEFAULT 0 NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    connection_id integer,
     CONSTRAINT social_post_deliveries_counts_check CHECK (((like_count >= 0) AND (repost_count >= 0) AND (reply_count >= 0)))
 );
 
@@ -4761,10 +4763,10 @@ CREATE INDEX sign_ins_created_at_index ON public.sign_ins USING btree (created_a
 
 
 --
--- Name: social_post_deliveries_social_post_id_network_index; Type: INDEX; Schema: public; Owner: -
+-- Name: social_post_deliveries_social_post_id_connection_id_index; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX social_post_deliveries_social_post_id_network_index ON public.social_post_deliveries USING btree (social_post_id, network);
+CREATE UNIQUE INDEX social_post_deliveries_social_post_id_connection_id_index ON public.social_post_deliveries USING btree (social_post_id, connection_id);
 
 
 --
@@ -5917,6 +5919,14 @@ ALTER TABLE ONLY public.sightings
 
 
 --
+-- Name: social_post_deliveries social_post_deliveries_connection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.social_post_deliveries
+    ADD CONSTRAINT social_post_deliveries_connection_id_fkey FOREIGN KEY (connection_id) REFERENCES public.service_connections(id) ON DELETE SET NULL;
+
+
+--
 -- Name: social_post_deliveries social_post_deliveries_social_post_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6226,4 +6236,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261008000781_create_message_tags.rb'),
 ('20261008000795_create_service_connections.rb'),
 ('20261008000801_create_owner_identities.rb'),
-('20261009000799_create_service_apps.rb');
+('20261009000799_create_service_apps.rb'),
+('20261009000800_deliver_social_posts_to_each_account.rb');

@@ -17,6 +17,7 @@ module Admin
         list_networks: "operations.list_networks",
         list_record_links: "operations.list_record_links",
         list_social_accounts: "operations.list_social_accounts",
+        list_target_accounts: "social.operations.list_target_accounts",
         person_queries: "social.repos.person_queries",
         resolve_mentions: "social.operations.resolve_mentions",
         review_social_edits: "operations.review_social_edits",
@@ -30,16 +31,17 @@ module Admin
         errors: EMPTY_HASH, records: EMPTY_HASH, now: Time.now
       )
         items = social_post_queries.by_filter(filter, page || first_page)
+        accounts = list_social_accounts.call(selected: picked(params, editing))
 
         {
-          filter:, items:, now:, records: editing && list_record_links.call(KIND, editing.id, **records),
-          **queue(items.rows), **composer(params, editing, errors),
+          accounts:, filter:, items:, now:, records: editing && list_record_links.call(KIND, editing.id, **records),
+          **queue(items.rows), **composer(params, editing, errors, accounts),
         }
       end
 
       private
 
-      def composer(params, editing, errors)
+      def composer(params, editing, errors, accounts)
         values = values(params, editing)
         people = person_queries.all
 
@@ -48,7 +50,7 @@ module Admin
           editing: editing&.id,
           errors:,
           handles: resolve_mentions.handles(people),
-          networks: list_networks.call(selected: targets(params, editing)),
+          networks: list_networks.call(selected: accounts.select(&:selected).map(&:network)),
           people:,
           suggestions: review_social_edits.call(editing),
           values:,
@@ -69,9 +71,14 @@ module Admin
         found.empty? ? [EMPTY_STRING] : found
       end
 
+      def picked(params, editing)
+        return Array(params[:accounts]).map(&:to_i) if params
+
+        editing && list_target_accounts.call(editing).map(&:id)
+      end
+
       def queue(items)
         {
-          accounts: list_social_accounts.call,
           queued: social_post_queries.count_by_status.fetch(Blog::Types::SocialPostStatus["scheduled"], 0),
           suggestion_counts: open_counts(items),
         }
@@ -85,12 +92,6 @@ module Admin
           parts: parts(social_post.parts.map(&:body)),
           schedule_at: scheduled ? Blog::TimeZone.input_value(social_post.posted_at) : EMPTY_STRING,
         }
-      end
-
-      def targets(params, editing)
-        return Array(params[:targets]).map(&:to_s) if params
-
-        editing&.targets&.to_a
       end
 
       def values(params, editing)

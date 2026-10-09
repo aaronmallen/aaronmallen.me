@@ -23,7 +23,7 @@ export function renderCounts(root, text, selected) {
 export function selectedTargets(root) {
   const boxes = [...root.querySelectorAll("[data-social-target]")];
 
-  return new Set(boxes.filter((box) => box.checked).map((box) => box.value));
+  return new Set(boxes.filter((box) => box.checked).map((box) => box.dataset.socialTarget));
 }
 
 function graphemes(text) {

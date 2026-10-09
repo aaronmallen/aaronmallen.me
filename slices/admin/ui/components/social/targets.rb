@@ -5,7 +5,9 @@ module Admin
     module Components
       module Social
         class Targets < Component
-          prop :networks, Blog::Types::Array.of(Blog::Types::Instance(Structs::Network))
+          prop :networks, Blog::Types::Array.of(
+            Blog::Types::Instance(Structs::Network) | Blog::Types::Instance(Structs::SocialAccount),
+          )
           prop :errors, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :name, Blog::Types::String, default: "social[targets][]"
 
@@ -23,7 +25,7 @@ module Admin
               class: "sr-only",
               type: "checkbox",
               name: @name,
-              value: network.name,
+              value: network.value,
               checked: network.selected,
               disabled: !network.configured,
               data: { social_target: network.name },
@@ -33,8 +35,15 @@ module Admin
           def target(network)
             label(class: ["compose-target", network.name]) do
               input(**checkbox(network))
-              IconLabel(icon: "fa-solid fa-check compose-target-check") { network.label }
+              IconLabel(icon: "fa-solid fa-check compose-target-check") { target_label(network) }
             end
+          end
+
+          def target_label(network)
+            return network.label unless network.is_a?(Structs::SocialAccount)
+
+            span(class: "sr-only") { "#{network.network_label} " }
+            plain network.label
           end
         end
       end

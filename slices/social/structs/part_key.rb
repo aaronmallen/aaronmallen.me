@@ -2,8 +2,8 @@
 
 module Social
   module Structs
-    PartKey = Data.define(:network, :part) do
-      def to_s = "social-post-#{part.social_post_id}-#{network}-#{part.position}"
+    PartKey = Data.define(:connection_id, :part) do
+      def to_s = "social-post-#{part.social_post_id}-#{connection_id}-#{part.position}"
     end
   end
 end
