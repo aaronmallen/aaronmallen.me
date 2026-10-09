@@ -54,6 +54,7 @@ module API
         ["read_activity", "get", "/activity", OK],
         ["summarize_activity", "get", "/activity/summary", OK],
         ["read_commit", "get", "/commits/{id}", OK],
+        ["read_pull_request", "get", "/pull_requests/{id}", OK],
         ["list_decisions", "get", "/decisions", OK],
         ["open_decision", "post", "/decisions", CREATED],
         ["read_decision", "get", "/decisions/{id}", OK],

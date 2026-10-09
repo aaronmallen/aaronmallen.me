@@ -43,7 +43,8 @@ module MCP
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
-      endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
+      endpoints.read_post endpoints.read_project endpoints.read_pull_request endpoints.read_review
+      endpoints.read_saved_view
       endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
       endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
@@ -86,7 +87,7 @@ module MCP
     ], from: :projects
 
     import keys: %w[
-      operations.queue_commit_import repos.commit_queries repos.sync_state_queries
+      operations.queue_commit_import repos.commit_queries repos.pull_request_queries repos.sync_state_queries
     ], from: :record
 
     import keys: %w[

@@ -43,6 +43,8 @@ module API
 
     get "/commits/:id", to: "commits.show"
 
+    get "/pull_requests/:id", to: "pull_requests.show"
+
     get "/decisions", to: "decisions.index"
     post "/decisions", to: "decisions.create"
     get "/decisions/:id", to: "decisions.show"

@@ -115,6 +115,93 @@ RSpec.describe "MCP record tools", type: :request do
     end
   end
 
+  describe "list_pull_requests" do
+    def fields_of(pull_request)
+      {
+        "id" => pull_request.id, "repo" => "someone/else", "number" => 7, "title" => "Import them",
+        "description" => "Every one", "url" => "https://github.com/someone/else/pull/7", "state" => "merged",
+        "ready_at" => on(2).utc.iso8601, "merged_at" => on(3).utc.iso8601, "closed_at" => nil,
+      }
+    end
+
+    def numbers = content.fetch("pull_requests").map { it.fetch("number") }
+
+    def on(day) = Blog::TimeZone.local_time(2026, 3, day, 12)
+
+    def whole_pull_request
+      create(
+        :pull_request,
+        repo: "someone/else", number: 7, title: "Import them", body: "Every one", ready_at: on(2), merged_at: on(3),
+      )
+    end
+
+    it "answers each pull request whole" do
+      merged = whole_pull_request
+      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+
+      expect(content.fetch("pull_requests")).to eq([fields_of(merged)])
+    end
+
+    it "keeps to the window, newest first, by the day each one last moved" do
+      create(:pull_request, number: 1, ready_at: on(1))
+      create(:pull_request, number: 2, ready_at: Blog::TimeZone.local_time(2026, 2, 20), closed_at: on(31))
+      create(:pull_request, number: 3, ready_at: on(5), merged_at: Blog::TimeZone.local_time(2026, 4, 1))
+      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+
+      expect(numbers).to eq([2, 1])
+    end
+
+    it "answers a draft as a draft" do
+      create(:pull_request, ready_at: nil)
+      call_tool("list_pull_requests", from: today.iso8601, to: today.iso8601)
+
+      expect(content.fetch("pull_requests").map { it.fetch("state") }).to eq(%w[draft])
+    end
+
+    it "stops at the row cap and says where to go on" do
+      stub_const("Blog::Helpers::DayWindow::CAP", 2)
+      [1, 2, 2, 3].each { create(:pull_request, ready_at: on(it)) }
+      call_tool("list_pull_requests", from: "2026-03-01", to: "2026-03-31")
+
+      expect(content).to include("count" => 3, "partial" => true, "continue_to" => "2026-03-01")
+    end
+
+    it "refuses a window that runs backwards" do
+      call_tool("list_pull_requests", from: "2026-03-31", to: "2026-03-01")
+
+      expect(message).to eq("from comes after to")
+    end
+  end
+
+  describe "read_pull_request" do
+    def opened_fields
+      {
+        "repo" => "aaronmallen/blog", "number" => 12, "url" => "https://github.com/aaronmallen/blog/pull/12",
+        "state" => "open", "ready_at" => "2026-03-02T14:05:00Z", "merged_at" => nil, "closed_at" => nil,
+      }
+    end
+
+    it "answers an open pull request with its times" do
+      opened = create(:pull_request, repo: "aaronmallen/blog", number: 12, ready_at: Time.utc(2026, 3, 2, 14, 5))
+      call_tool("read_pull_request", id: opened.id)
+
+      expect(content).to include(opened_fields)
+    end
+
+    it "answers a pull request closed unmerged as closed" do
+      closed = create(:pull_request, closed_at: Time.now)
+      call_tool("read_pull_request", id: closed.id)
+
+      expect(content.fetch("state")).to eq("closed")
+    end
+
+    it "refuses an unknown ID" do
+      call_tool("read_pull_request", id: 999_999)
+
+      expect([error?, message]).to eq([true, "no pull request has the ID 999999"])
+    end
+  end
+
   describe "create_journal_entry" do
     it "shows the entry in the admin" do
       call_tool("create_journal_entry", body: "Wrote about abc")

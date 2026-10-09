@@ -121,6 +121,7 @@ module Blog
     ProjectFilterParam = ProjectFilter.fallback(ProjectFilter.values.first)
     ProjectMonth = Types::String.constrained(format: /\A\d{4}-(?:0[1-9]|1[0-2])\z/)
     ProjectVisibility = Types::String.enum("public", "private")
+    PullRequestState = Types::String.enum("draft", "open", "merged", "closed")
     RangePreset = Types::Integer.enum(7, 30, 90)
     RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision])
     RedirectUri = Types::String.constructor do |value|

@@ -41,7 +41,8 @@ module API
 
     import keys: %w[
       operations.delete_journal_entry operations.save_journal_entry operations.save_review_note
-      operations.update_journal_entry repos.commit_queries repos.journal_entry_queries repos.review_note_queries
+      operations.update_journal_entry repos.commit_queries repos.journal_entry_queries repos.pull_request_queries
+      repos.review_note_queries
     ], from: :record
 
     import keys: %w[
@@ -99,7 +100,8 @@ module API
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
-      endpoints.read_post endpoints.read_project endpoints.read_review endpoints.read_saved_view
+      endpoints.read_post endpoints.read_project endpoints.read_pull_request endpoints.read_review
+      endpoints.read_saved_view
       endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
       endpoints.read_webmention endpoints.read_work_entry endpoints.reopen_decision endpoints.reopen_task
       endpoints.reorder_task endpoints.resolve_decision endpoints.save_review_note endpoints.save_task
