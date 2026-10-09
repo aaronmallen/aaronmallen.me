@@ -903,7 +903,8 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "adding one" do
       before do
         find_task("elixir")
-        find("#task-#{task.id}-link-kind").select(translate("ui.components.tasks.link_editor.kinds.blocked_by"))
+        find(".task-link-target", text: "Learn Elixir")
+        kind_select.select(kind(:blocked_by))
         pick("Learn Elixir")
       end
 
