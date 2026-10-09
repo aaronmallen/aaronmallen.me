@@ -106,9 +106,6 @@
   --text-icon: 1rem;
   --text-badge: 0.75rem;
   --text-badge--line-height: 1.6;
-  --text-page-title: clamp(1.8rem, 4vw, 2.5rem);
-  --text-page-title--line-height: 1.05;
-  --text-page-title--letter-spacing: -0.03em;
   --text-btn: 0.84375rem;
   --text-btn-sm: 0.75rem;
   --text-label: 0.75rem;
@@ -505,10 +502,6 @@
   }
 }
 
-@utility page-title {
-  @apply font-display text-page-title font-extrabold text-ink;
-}
-
 @utility home {
   & > .sec + .sec {
     @apply mt-14;
@@ -529,16 +522,6 @@
 
 @utility writing-empty {
   @apply empty;
-}
-
-@utility tagged {
-  & > .page-title {
-    @apply mb-8;
-  }
-}
-
-@utility tagged-title {
-  @apply kicker mt-13;
 }
 
 @utility entries {

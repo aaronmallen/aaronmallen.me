@@ -16,8 +16,8 @@ module Public
             content_for(:canonical, url(:tag, tag: @tag, **@posts.query))
             content_for(:feed, path(:tag_feed, tag: @tag)) unless @posts.rows.empty?
 
-            section(class: "tagged") do
-              h1(class: "page-title") { t(".heading", tag: @tag) }
+            section do
+              header(class: "hd") { h1 { t(".heading", tag: @tag) } }
               writing
               projects
             end
@@ -28,14 +28,14 @@ module Public
           def projects
             return if @projects.empty?
 
-            h2(class: "tagged-title") { t(".projects") }
+            h2(class: "kicker kt") { t(".projects") }
             ProjectGrid(projects: @projects)
           end
 
           def writing
             return if @posts.rows.empty?
 
-            h2(class: "tagged-title") { t(".writing") }
+            h2(class: "kicker") { t(".writing") }
             List(posts: @posts.rows)
             Pager(page: @posts, route: :tag, params: { tag: @tag })
           end

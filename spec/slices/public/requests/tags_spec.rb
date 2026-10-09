@@ -48,8 +48,16 @@ RSpec.describe "Tags", type: :request do
     publish("hello", 1, tags: %w[ruby])
     get "/writing/tags/ruby"
 
-    expect(page).to have_css("h1.page-title", text: "Tagged ruby")
+    expect(page).to have_css(".hd h1", text: "Tagged ruby")
     expect(page).to have_title("Tagged ruby | Aaron Allen")
+  end
+
+  it "has one h1" do
+    publish("hello", 1, tags: %w[ruby])
+    create(:project, name: "sai", tags: %w[ruby])
+    get "/writing/tags/ruby"
+
+    expect(page).to have_css("h1", count: 1)
   end
 
   it "links its own feed, then the writing feed, in the head" do
@@ -208,7 +216,7 @@ RSpec.describe "Tags", type: :request do
     it "keeps the heading on a later page" do
       get "/writing/tags/ruby?page=2"
 
-      expect(page).to have_css("h1.page-title", text: "Tagged ruby")
+      expect(page).to have_css(".hd h1", text: "Tagged ruby")
     end
 
     it "names the page in the canonical link" do
@@ -265,7 +273,7 @@ RSpec.describe "Tags", type: :request do
       end
 
       it "heads the writing and the projects separately" do
-        expect(page.all("h2.tagged-title").map(&:text)).to eq(%w[Writing Projects])
+        expect(page.all("h2.kicker").map(&:text)).to eq(%w[Writing Projects])
       end
 
       it "lists the post and the project under their headings", :aggregate_failures do
@@ -278,7 +286,7 @@ RSpec.describe "Tags", type: :request do
       publish("hello", 1, tags: %w[ruby])
       get "/writing/tags/ruby"
 
-      expect(page.all("h2.tagged-title").map(&:text)).to eq(%w[Writing])
+      expect(page.all("h2.kicker").map(&:text)).to eq(%w[Writing])
       expect(page).to have_no_css(".pgrid")
     end
 
@@ -286,7 +294,7 @@ RSpec.describe "Tags", type: :request do
       create(:project, name: "sai", tags: %w[ruby])
       get "/writing/tags/ruby"
 
-      expect(page.all("h2.tagged-title").map(&:text)).to eq(%w[Projects])
+      expect(page.all("h2.kicker").map(&:text)).to eq(%w[Projects])
       expect(page).to have_no_css(".entries")
     end
 
