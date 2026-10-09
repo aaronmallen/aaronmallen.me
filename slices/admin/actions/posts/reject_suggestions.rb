@@ -16,9 +16,14 @@ module Admin
           suggestion = suggestion_queries.for_post(id)
           halt 404 unless suggestion
 
-          reject(response, suggestion, request.params[:edit_id].to_s)
-          response.redirect_to(routes.path(:admin_edit_post, id:))
+          edit_id = request.params[:edit_id].to_s
+          reject(response, suggestion, edit_id)
+          response.redirect_to(routes.path(:admin_edit_post, id:, **reviewing(edit_id)))
         end
+
+        private
+
+        def reviewing(edit_id) = edit_id.empty? ? Blog::Constants::EMPTY_HASH : { review: Blog::Types::CHECKED }
       end
     end
   end

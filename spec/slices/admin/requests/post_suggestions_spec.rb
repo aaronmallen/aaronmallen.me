@@ -85,6 +85,28 @@ RSpec.describe "Admin post suggestions", type: :request do
         expect(page).to have_css(".post-banner", text: "2 suggestions")
       end
 
+      it "opens on load when asked to" do
+        suggest(article, typo)
+        get "/admin/posts/#{article.id}/edit", review: "1"
+
+        expect(page).to have_css("dialog#post-suggestions[data-dialog-show]", visible: :all)
+      end
+
+      it "stays shut without the ask" do
+        suggest(article, typo)
+        open_editor(article)
+
+        expect(page).to have_no_css("dialog#post-suggestions[data-dialog-show]", visible: :all)
+      end
+
+      it "shows nothing when asked to open with every edit settled" do
+        suggestion = suggest(article, typo)
+        suggestion_mutations.reject(suggestion.edits.map(&:id))
+        get "/admin/posts/#{article.id}/edit", review: "1"
+
+        expect(page).to have_no_css("dialog#post-suggestions", visible: :all)
+      end
+
       it "opens from the banner's Review button" do
         suggest(article, typo)
         open_editor(article)
@@ -311,10 +333,10 @@ RSpec.describe "Admin post suggestions", type: :request do
         expect(statuses(article)).to eq(%w[accepted pending])
       end
 
-      it "returns to the editor" do
+      it "returns to the editor with the drawer open" do
         accept(article, edit_id: first_edit_id(article))
 
-        expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit")
+        expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit?review=1")
       end
 
       it "shows the applied toast" do
@@ -348,6 +370,13 @@ RSpec.describe "Admin post suggestions", type: :request do
 
     describe "accepting every edit" do
       let(:article) { create(:post, :draft, body: "teh cat sat") }
+
+      it "returns to the editor with the drawer closed" do
+        suggest(article, typo, typo("sat", "slept"))
+        accept(article)
+
+        expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit")
+      end
 
       it "applies them all" do
         suggest(article, typo, typo("sat", "slept"))
@@ -399,6 +428,12 @@ RSpec.describe "Admin post suggestions", type: :request do
 
         expect(statuses(article)).to eq(%w[rejected pending])
         expect(post_queries.by_id(article.id).body).to eq("teh cat sat")
+      end
+
+      it "returns to the editor with the drawer open after one" do
+        reject(article, edit_id: first_edit_id(article))
+
+        expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit?review=1")
       end
 
       it "shows the rejected toast" do

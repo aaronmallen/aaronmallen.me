@@ -22,7 +22,7 @@ module Admin
 
       def call(
         post: nil, params: nil, errors: Blog::Constants::EMPTY_HASH, noting: Blog::Constants::EMPTY_HASH, view: nil,
-        now: Time.now
+        now: Time.now, review: false
       )
         values = params ? values_from_params(params) : values_from_post(post)
         preview = build_post_preview.call(values:, now:)
@@ -35,7 +35,7 @@ module Admin
           notes: { edits: edits(post), noting: },
           now:,
           preview:,
-          suggestions: suggestions(post),
+          suggestions: suggestions(post, review),
           syndication: syndication(values, post, params),
           view:,
           webmentions: webmentions(post, params),
@@ -54,13 +54,14 @@ module Admin
         post_queries.edits_newest_first(post.id)
       end
 
-      def suggestions(post)
+      def suggestions(post, review)
         suggestion = suggestion_queries.for_post(post.id) if post && post.status != PUBLISHED
 
         {
           post_id: post&.id,
           body: post ? post.body : Blog::Constants::EMPTY_STRING,
           edits: suggestion ? suggestion.open_edits : Blog::Constants::EMPTY_ARRAY,
+          review:,
         }
       end
 

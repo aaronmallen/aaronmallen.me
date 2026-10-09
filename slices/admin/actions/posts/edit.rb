@@ -17,7 +17,8 @@ module Admin
           not_found(response) unless post
 
           records = list_record_links.call(KIND, post.id, query: request.params[:record_q])
-          response.render(view, **build_post_editor.call(post:), records:)
+          review = Blog::Types::Checkbox[request.params[:review]]
+          response.render(view, **build_post_editor.call(post:, review:), records:)
         end
       end
     end

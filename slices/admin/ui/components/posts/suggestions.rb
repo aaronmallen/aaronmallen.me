@@ -6,13 +6,14 @@ module Admin
       module Posts
         class Suggestions < Component
           ID = "post-suggestions"
-          DIALOG = { id: ID, title_id: "#{ID}-title", hidden: false, data: { dialog: true } }.freeze
+          DIALOG = { id: ID, title_id: "#{ID}-title", hidden: false }.freeze
 
           prop :body, Blog::Types::String
           prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :review, Blog::Types::Bool
 
           def view_template
-            Dialog(**DIALOG, title: t(".heading")) do |dialog|
+            Dialog(**DIALOG, title: t(".heading"), data: { dialog: true, dialog_show: (true if @review) }) do |dialog|
               dialog.foot { bulk_actions }
               div(class: "sg-edits") { @edits.each { suggestion(it) } }
             end

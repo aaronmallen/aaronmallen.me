@@ -71,7 +71,7 @@ module Admin
             return unless suggestions?
 
             SuggestionForms(post_id: @suggestions[:post_id])
-            Suggestions(body: @suggestions[:body], edits: @suggestions[:edits])
+            Suggestions(body: @suggestions[:body], edits: @suggestions[:edits], review: @suggestions[:review])
           end
 
           def page_head

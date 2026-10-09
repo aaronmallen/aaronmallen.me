@@ -32,6 +32,7 @@ export function showToast(message, { failed = false } = {}) {
 function play(region) {
   const toast = region.firstElementChild;
 
+  document.querySelector("dialog:modal")?.append(region);
   requestAnimationFrame(() => {
     toast.hidden = false;
     setTimeout(() => region.remove(), DURATION);
