@@ -22,8 +22,8 @@ module Admin
 
           def view_template
             Form(action: action, data: { social_composer: "" }) do
-              Card(title: editing? ? t(".editing") : t(".title"), class: "social-compose") do |card|
-                card.side { targets }
+              Card(title: editing? ? t(".editing") : t(".title"), class: "social-compose") do
+                accounts
                 parts
                 tools
                 schedule_field
@@ -34,6 +34,11 @@ module Admin
           end
 
           private
+
+          def accounts
+            input(type: "hidden", name: ACCOUNTS, value: "")
+            AccountPicker(accounts: @accounts, errors: @errors, name: ACCOUNTS)
+          end
 
           def action = editing? ? path(:admin_update_social_post, id: @editing) : path(:admin_create_social_post)
 
@@ -123,11 +128,6 @@ module Admin
           end
 
           def send_disabled? = draft_disabled? || over_limit?
-
-          def targets
-            Targets(errors: @errors, networks: @accounts, name: ACCOUNTS)
-            input(type: "hidden", name: ACCOUNTS, value: "")
-          end
 
           def tools
             div(class: "compose-tools") do

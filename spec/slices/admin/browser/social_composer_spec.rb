@@ -16,9 +16,14 @@ RSpec.describe "Admin social composer", type: :feature do
 
   def meter(network) = find(".compose-count", text: network)
 
+  def open_accounts = find(".compose-accounts summary").click
+
   def send_button = find("[data-social-send]")
 
-  def toggle(network) = find(".compose-target", text: network).click
+  def toggle(network)
+    open_accounts if has_no_css?(".compose-accounts[open]", wait: false)
+    find(".compose-account-group.#{network.downcase} .compose-account").click
+  end
 
   def write(text, index: 0) = bodies[index].set(text)
 
@@ -26,6 +31,21 @@ RSpec.describe "Admin social composer", type: :feature do
     connect_social_networks
     sign_in_to_admin
     visit "/admin/social"
+  end
+
+  describe "the account picker" do
+    it "counts the accounts left ticked" do
+      toggle "Bluesky"
+
+      expect(page).to have_css(".compose-accounts summary", text: "1 of 2")
+    end
+
+    it "grows the rows to touch size on a narrow screen" do
+      page.driver.resize(375, 800)
+      open_accounts
+
+      expect(evaluate_script("document.querySelector('.compose-account').getBoundingClientRect().height")).to be >= 44
+    end
   end
 
   describe "the thread" do

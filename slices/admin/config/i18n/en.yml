@@ -1399,6 +1399,11 @@ en:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
       social:
+        account_picker:
+          manage: "Manage accounts"
+          menu: "Post as"
+          picked: "%{picked} of %{total}"
+          to: "To"
         composer:
           add: "Add to thread"
           cancel: "Cancel"

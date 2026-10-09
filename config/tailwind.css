@@ -5123,6 +5123,94 @@
   }
 }
 
+@utility compose-to {
+  @apply -mt-1 mb-3 flex items-center gap-2.5 border-b border-line pt-1 pb-3;
+}
+
+@utility compose-to-label {
+  @apply meta tracking-[.1em] uppercase;
+}
+
+@utility compose-accounts {
+  @apply relative ml-auto;
+
+  &:not([open]) > .compose-accounts-menu {
+    @apply hidden;
+  }
+
+  & > summary {
+    @apply list-none font-mono;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &[open] > summary .fa-chevron-down {
+    rotate: 180deg;
+  }
+}
+
+@utility compose-accounts-menu {
+  @apply absolute top-full right-0 z-55 mt-1.5 max-h-105 w-[400px] max-w-[calc(100vw-2rem)] overflow-auto p-2;
+  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+}
+
+@utility compose-account-group {
+  & + & {
+    @apply mt-1.5 border-t border-line pt-1;
+  }
+
+  &.mastodon {
+    --net: var(--color-mk-violet);
+  }
+
+  &.bluesky {
+    --net: var(--color-mk-blue-text);
+  }
+}
+
+@utility compose-account-group-head {
+  @apply flex items-center gap-1.5 px-2.5 pt-2 pb-1 meta tracking-[.1em] text-(--net) uppercase;
+}
+
+@utility compose-account {
+  @apply flex cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 font-mono text-meta text-ink;
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--net) 12%, transparent);
+  }
+
+  & input {
+    @apply m-0 size-4 flex-none;
+    accent-color: var(--net);
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility compose-account-handle {
+  @apply min-w-0 truncate;
+}
+
+@utility compose-account-host {
+  @apply ml-auto meta whitespace-nowrap;
+}
+
+@utility compose-accounts-foot {
+  @apply mt-1.5 flex items-center border-t border-line px-2.5 pt-2.5 pb-1 meta;
+
+  & a {
+    @apply hover:text-ink;
+
+    @media (width < 43.75rem) {
+      @apply inline-flex min-h-tap items-center;
+    }
+  }
+}
+
 @utility compose-when {
   @apply mt-3;
 }
@@ -5200,22 +5288,6 @@
 }
 
 @utility social-compose {
-  & .card-side {
-    @apply flex-col items-end;
-  }
-
-  & .compose-targets {
-    @apply mt-0 gap-1.5;
-  }
-
-  & .compose-target {
-    @apply px-3 py-1.5 text-ink-muted;
-
-    &:is(.mastodon, .bluesky):has(:checked) {
-      @apply border-ink-muted bg-ground text-ink;
-    }
-  }
-
   & .bt.gh {
     @apply border-transparent bg-transparent text-ink-muted hover:border-line hover:bg-transparent hover:text-ink;
   }

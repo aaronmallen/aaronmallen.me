@@ -254,7 +254,29 @@ RSpec.describe "Admin social", type: :request do
     describe "a second account on a network" do
       let!(:other) { connect_another_mastodon }
 
-      def targets = page.all("[data-social-target]")
+      def account_rows
+        page.all(".compose-account", visible: :all).map { |row| row.all("span", visible: :all).map { it.text(:all) } }
+      end
+
+      def send_with_scripts_off(untick:)
+        draft = social_post_mutations.create_with_parts(parts: %w[hello], targets: Blog::Types::NetworkName.values,
+                                                        status: "draft")
+        browser = signed_in_browser
+        browser.visit("/admin/social?edit=#{draft.id}")
+        browser.find(".compose-accounts summary").click
+        untick.each { |account| browser.find(".compose-accounts input[value='#{account.id}']").set(false) }
+        browser.click_button("Post now")
+      end
+
+      def session_cookie = "#{Blog::SessionCookie::KEY}=#{Spec::AdminSession.cookie(csrf_token: admin_csrf_token)}"
+
+      def signed_in_browser
+        Capybara::Session.new(:rack_test, Hanami.app).tap do |browser|
+          browser.driver.browser.set_cookie(session_cookie, URI(Capybara.default_host))
+        end
+      end
+
+      def targets = page.all("[data-social-target]", visible: :all)
 
       it "lists every connected account, all ticked", :aggregate_failures do
         get "/admin/social"
@@ -264,11 +286,47 @@ RSpec.describe "Admin social", type: :request do
         expect(targets.map { it[:checked] }).to all(be_truthy)
       end
 
-      it "names each account by its handle" do
+      it "names each account by its handle and host" do
         get "/admin/social"
 
-        expect(page.all(".compose-target").map { it.text.strip })
-          .to eq(["Mastodon @aaronmallen@ruby.social", "Mastodon @ada@hachyderm.io", "Bluesky @ada.example"])
+        expect(account_rows)
+          .to eq([%w[@aaronmallen ruby.social], %w[@ada hachyderm.io], %w[@ada.example]])
+      end
+
+      it "groups the accounts by network in a Post as menu" do
+        get "/admin/social"
+
+        expect(page.all("details.compose-accounts [role=group][aria-label]", visible: :all).map { it["aria-label"] })
+          .to eq(["Post as", "Mastodon", "Bluesky"])
+      end
+
+      it "counts the picked accounts on the toggle" do
+        get "/admin/social"
+
+        expect(page.find(".compose-to summary").text.strip).to eq("3 of 3")
+      end
+
+      it "counts only the accounts a draft picked" do
+        draft = social_post_mutations.create_with_parts(
+          parts: %w[hi], targets: %w[mastodon], connection_ids: [other.id], status: "draft",
+        )
+        get "/admin/social", edit: draft.id
+
+        expect(page.find(".compose-to summary").text.strip).to eq("1 of 3")
+      end
+
+      it "links the menu to the connected services" do
+        get "/admin/social"
+
+        link = page.find(".compose-accounts-foot a", text: "Manage accounts", visible: :all)
+
+        expect(link[:href]).to eq("/admin/services")
+      end
+
+      it "sends to the accounts ticked in the menu with scripts off" do
+        send_with_scripts_off(untick: [social_account("mastodon"), social_account("bluesky")])
+
+        expect(social_post_queries.queued.first).to have_attributes(targets: %w[mastodon], connection_ids: [other.id])
       end
 
       it "ticks only the accounts a draft picked when it opens" do

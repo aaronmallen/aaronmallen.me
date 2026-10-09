@@ -18,6 +18,7 @@ function setupComposer(form) {
   const partTemplate = form.querySelector("[data-social-part-template]");
   const draft = form.querySelector("[data-social-draft]");
   const send = form.querySelector("[data-social-send]");
+  const picked = form.querySelector("[data-social-picked]");
 
   const render = () => {
     const selected = selectedTargets(form);
@@ -25,6 +26,8 @@ function setupComposer(form) {
     const over = bodies.map((part) => renderPart(part, selected, bodies.length > 1)).some(Boolean);
     const blank = bodies.every((part) => part.querySelector("[data-social-body]").value.trim() === "");
 
+    const count = form.querySelectorAll("[data-social-target]:checked").length;
+    picked.textContent = picked.dataset.template.replace("%{picked}", count);
     draft.disabled = blank || selected.size === 0;
     send.disabled = draft.disabled || over;
   };

@@ -2,10 +2,10 @@
 
 module Admin
   module Structs
-    SocialAccount = Data.define(:configured, :id, :label, :network, :network_label, :selected) do
-      def name = network
+    SocialAccount = Data.define(:id, :label, :network, :network_label, :selected) do
+      def handle = host ? label.delete_suffix("@#{host}") : label
 
-      def value = id
+      def host = label[/\A@[^@]+@(.+)\z/, 1]
     end
   end
 end

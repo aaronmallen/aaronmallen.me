@@ -30,10 +30,11 @@ RSpec.describe "Admin screens", type: :feature do
         find("[data-social-body]").send_keys("@ada")
         find("[data-social-mentions]")
       end,
-      "social targets" => lambda do
+      "social accounts" => lambda do
         connect_social_networks
         visit "/admin/social"
-        find(".compose-target.bluesky:has(:checked)")
+        find(".compose-accounts summary").click
+        find(".compose-account-group.bluesky .compose-account:has(:checked)")
       end,
     }
   end

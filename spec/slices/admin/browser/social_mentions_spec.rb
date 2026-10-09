@@ -230,7 +230,8 @@ RSpec.describe "Admin social mentions", type: :feature do
 
       it "drops the line of a network turned off" do
         type "hi @kay", :enter
-        find(".compose-target", text: "Bluesky").click
+        find(".compose-accounts summary").click
+        find(".compose-account-group.bluesky .compose-account").click
 
         expect(page).to have_no_css("[data-social-preview-line='bluesky']", visible: :visible)
       end

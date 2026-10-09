@@ -15,7 +15,7 @@ module Admin
 
       def account(connection, network, selected)
         Structs::SocialAccount.new(
-          configured: true, id: connection.id, label: connection.label, network:,
+          id: connection.id, label: connection.label, network:,
           network_label: i18n.t(Structs::Network::LABELS.fetch(network)),
           selected: selected.nil? || selected.include?(connection.id),
         )
