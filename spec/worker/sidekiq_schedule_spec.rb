@@ -27,6 +27,16 @@ RSpec.describe "The worker's schedule", type: :app do
     expect(queues).to all(satisfy { |_job, queue| config[:queues].include?(queue) })
   end
 
+  describe "the pull request import" do
+    let(:cron) { Fugit::Cron.parse(schedule.fetch("import_pull_requests").fetch("cron")) }
+
+    it "runs every 15 minutes" do
+      run = cron.next_time(Time.utc(2026, 9, 17, 12))
+
+      expect(cron.next_time(run).to_t - run.to_t).to eq(15 * 60)
+    end
+  end
+
   describe "the sprint roll-over" do
     let(:entry) { schedule.fetch("roll_over_sprint") }
     let(:cron) { Fugit::Cron.parse(entry.fetch("cron")) }

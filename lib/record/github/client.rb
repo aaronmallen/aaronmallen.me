@@ -7,6 +7,7 @@ module Record
     class Client
       include Paging
       include Issues
+      include PullRequests
 
       Error = Transport::Error
       RateLimited = Transport::RateLimited

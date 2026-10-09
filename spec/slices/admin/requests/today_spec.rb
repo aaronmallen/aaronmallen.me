@@ -464,6 +464,12 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         Record::Jobs::ImportCommits.new.perform
       end
 
+      def import_pull_requests_answered(response)
+        connect_github_token
+        stub_github(GitHubGraphQL::PULL_REQUESTS_QUERY, response)
+        Record::Jobs::ImportPullRequests.new.perform
+      end
+
       def record_commit_failure(reason, at: failed_at, message: nil, repo: nil)
         sync_state_mutations.record_failure(Blog::Types::SyncName["commits"], reason, at:, message:, repo:)
       end
@@ -525,6 +531,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         get "/admin"
 
         expect(failure_lines).to match([bad_gateway_line("Commit import", "GraphQL")])
+      end
+
+      it "reads what GitHub answered off a failed pull request import" do
+        import_pull_requests_answered(bad_gateway)
+        get "/admin"
+
+        expect(failure_lines).to match([bad_gateway_line("Pull request import", "GraphQL")])
       end
 
       it "reads what GitHub answered off a failed project refresh" do

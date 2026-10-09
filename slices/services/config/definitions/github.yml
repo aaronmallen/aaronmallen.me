@@ -15,4 +15,5 @@ scopes:
 jobs:
   - {name: GitHub issue sync, every: every 15 minutes, sync: issues}
   - {name: Commit import, every: every 15 minutes, sync: commits}
+  - {name: Pull request import, every: every 15 minutes, sync: pull_requests}
   - {name: Project refresh, every: nightly, sync: projects}

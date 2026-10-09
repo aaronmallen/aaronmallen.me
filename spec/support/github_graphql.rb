@@ -4,6 +4,7 @@ module GitHubGraphQL
   URL = "https://api.github.com/graphql"
   ASSIGNED_QUERY = "search(query:"
   ISSUES_QUERY = "nodes(ids:"
+  PULL_REQUESTS_QUERY = "viewerDidAuthor"
   REFS_QUERY = "refs(refPrefix:"
   REPOS_QUERY = "repositories("
   VIEWER_QUERY = "viewer { id }"
@@ -58,6 +59,21 @@ module GitHubGraphQL
   end
 
   def github_page_info(more, cursor) = { endCursor: more ? cursor : nil, hasNextPage: more }
+
+  def github_pull_request(number, repo: "aaronmallen/aaronmallen.me", created_at: Time.now - 3600, ready_at: nil,
+                          **fields)
+    { body: "Adds the import", closedAt: nil, createdAt: github_time(created_at), isDraft: false, mergedAt: nil,
+      number:, repository: { nameWithOwner: repo }, state: "OPEN",
+      timelineItems: { nodes: ready_at ? [{ createdAt: github_time(ready_at) }] : [] },
+      title: "Import pull requests", url: "https://github.com/#{repo}/pull/#{number}", viewerDidAuthor: true }
+      .merge(fields)
+  end
+
+  def github_pull_request_search(*nodes, count: nodes.size, more: false, remaining: 4999)
+    search = { issueCount: count, nodes:, pageInfo: github_page_info(more, "pulls-page-2") }
+
+    github_json(data: { rateLimit: github_rate_limit(remaining:), search: })
+  end
 
   def github_rate_limit(remaining: 4999, reset: Time.now + 1800)
     { limit: 5000, remaining:, resetAt: github_time(reset) }

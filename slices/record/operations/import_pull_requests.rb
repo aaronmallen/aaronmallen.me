@@ -1,0 +1,35 @@
+# frozen_string_literal: true
+
+module Record
+  module Operations
+    class ImportPullRequests < Operation
+      OVERLAP = 24 * 60 * 60
+
+      include Deps[
+        "github.client",
+        pull_request_mutations: "repos.pull_request_mutations",
+        pull_request_queries: "repos.pull_request_queries",
+      ]
+
+      def call(now: Time.now)
+        found = step authored(now)
+
+        pull_request_mutations.import(found)
+        found.size
+      end
+
+      private
+
+      def authored(now)
+        return Failure(:not_configured) unless client.configured?
+
+        updated_since = pull_request_queries.newest_import_at&.-(OVERLAP)
+        Success(client.authored_pull_requests(updated_since:, now:))
+      rescue Record::GitHub::Client::RateLimited
+        Failure(:rate_limited)
+      rescue Record::GitHub::Client::Error => e
+        Failure([:github_failed, e.message])
+      end
+    end
+  end
+end

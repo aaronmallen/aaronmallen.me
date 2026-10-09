@@ -1564,6 +1564,7 @@ en:
           issues: "GitHub issue sync"
           linear_issues: "Linear issue sync"
           projects: "Project refresh"
+          pull_requests: "Pull request import"
       tags:
         capture:
           add: "Add tag"
