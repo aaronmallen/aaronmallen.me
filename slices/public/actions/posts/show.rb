@@ -5,6 +5,7 @@ module Public
     module Posts
       class Show < Action
         include Deps[
+          photo_queries: "media.repos.photo_queries",
           post_queries: "posts.repos.post_queries",
           social_post_queries: "social.repos.social_post_queries",
           webmention_queries: "social.repos.webmention_queries",
@@ -27,7 +28,7 @@ module Public
         private
 
         def expose_body(response, post)
-          response[:body_html] = post.body_html
+          response[:body_html] = ::Posts::Markdown.size_images(post.body_html) { photo_queries.sizes(it) }
           response[:headings] = post.headings
           response[:edits] = post_queries.edits_for_post(post.id)
         end

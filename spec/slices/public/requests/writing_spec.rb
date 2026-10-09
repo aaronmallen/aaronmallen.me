@@ -260,6 +260,37 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_css(".prose img[src='https://example.com/shot.png'][alt='shot']")
     end
 
+    it "lazy loads every image after the first", :aggregate_failures do
+      publish("hello", 1, body: <<~MARKDOWN)
+        ![one](https://example.com/1.png)
+
+        ![two](https://example.com/2.png)
+
+        ![three](https://example.com/3.png "Caption")
+      MARKDOWN
+      get "/writing/hello"
+
+      expect(page).to have_css(".prose img[src$='1.png']:not([loading]):not([decoding])")
+      expect(page).to have_css(".prose p img[src$='2.png'][loading='lazy'][decoding='async']")
+      expect(page).to have_css(".prose figure.fig img[src$='3.png'][loading='lazy'][decoding='async']")
+    end
+
+    it "gives an image from the site's media its size" do
+      photo = create(:photo, width: 1200, height: 800)
+      publish("hello", 1, body: "![shot](/media/#{photo.key})")
+      get "/writing/hello"
+
+      expect(page).to have_css(".prose img[src='/media/#{photo.key}'][width='1200'][height='800']")
+    end
+
+    it "renders a site media image with no known size", :aggregate_failures do
+      publish("hello", 1, body: "![shot](/media/#{'f' * 32}.png)")
+      get "/writing/hello"
+
+      expect(page).to have_css(".prose img[src='/media/#{'f' * 32}.png']")
+      expect(page).to have_no_css(".prose img[width], .prose img[height]")
+    end
+
     it "marks the end of the body" do
       publish("hello", 1)
       get "/writing/hello"

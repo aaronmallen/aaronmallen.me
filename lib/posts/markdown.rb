@@ -12,18 +12,30 @@ module Posts
     H2 = %r{<h2 id="([^"]*)">(.*?)</h2>}m
     HIGHLIGHTED_BLOCK = %r{<pre class="syntax-highlighting">.*?</pre>}m
     HIGHLIGHTER_CLASSES = /(?<=<span class=")[^"]+/
+    IMAGE = "<img "
     INLINE_NODES = %i[
       code emph escaped_tag image link spoiler_text strikethrough strong subscript superscript text underline
     ].freeze
+    LAZY_IMAGE = '<img loading="lazy" decoding="async" '
     LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
+    MEDIA_IMAGE = %r{<img (?=[^>]*src="[^"]*/media/([0-9a-f]{32}\.(?:gif|jpg|png|webp))")}
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/
+    SIZED_IMAGE = '<img width="%d" height="%d" '
     TEXT_NODES = %i[code code_block text].freeze
     WORDS_PER_MINUTE = 220
 
     class << self
       def read_time(markdown) = Document.new(markdown).read_time
+
+      def size_images(html)
+        keys = html.scan(MEDIA_IMAGE).flatten.uniq
+        return html if keys.empty?
+
+        sizes = yield keys
+        html.gsub(MEDIA_IMAGE) { (size = sizes[Regexp.last_match(1)]) ? format(SIZED_IMAGE, *size) : it }
+      end
 
       def to_html(markdown) = Document.new(markdown).html
 

@@ -31,10 +31,24 @@ module Posts
 
       private
 
+      def caption_code(html)
+        names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
+        html.gsub(HIGHLIGHTED_BLOCK) do |block|
+          block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
+          name = names.shift
+          name ? format(CAPTION, CGI.escapeHTML(name), block) : block
+        end
+      end
+
       def inline_text(node)
         return " " if BREAK_NODES.include?(node.type)
 
         TEXT_NODES.include?(node.type) ? node.string_content : Blog::Constants::EMPTY_STRING
+      end
+
+      def lazy_load(html)
+        count = 0
+        html.gsub(IMAGE) { (count += 1) > 1 ? LAZY_IMAGE : IMAGE }
       end
 
       def plain_text
@@ -47,13 +61,9 @@ module Posts
       end
 
       def render
-        names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
         html = @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(ANCHOR, Blog::Constants::EMPTY_STRING)
-        html.gsub(HIGHLIGHTED_BLOCK) do |block|
-          block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
-          name = names.shift
-          name ? format(CAPTION, CGI.escapeHTML(name), block) : block
-        end.gsub(LONE_TITLED_IMAGE, FIGURE)
+        html = caption_code(html)
+        lazy_load(html.gsub(LONE_TITLED_IMAGE, FIGURE))
       end
     end
   end
