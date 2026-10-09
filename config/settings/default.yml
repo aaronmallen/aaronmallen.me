@@ -58,7 +58,6 @@ media_store:
   region: <%= ENV["MEDIA_STORE_REGION"].to_json %>
   secret_key: <%= ENV["MEDIA_STORE_SECRET_KEY"].to_json %>
 owner:
-  github_id: <%= ENV.fetch("OWNER_GITHUB_ID", 931094) %>
   name: Aaron Allen
 page_size:
   admin: 100

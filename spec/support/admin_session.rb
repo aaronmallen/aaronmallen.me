@@ -7,6 +7,7 @@ require "securerandom"
 module Spec
   module AdminSession
     CSRF_TOKEN = Hanami::Action::CSRFProtection::CSRF_TOKEN.to_s
+    GITHUB_USER_ID = 931_094
 
     module_function
 
@@ -29,10 +30,14 @@ module Spec
     def session(csrf_token)
       {
         CSRF_TOKEN => csrf_token,
-        "github_user_id" => Hanami.app.settings.owner[:github_id],
+        "github_user_id" => GITHUB_USER_ID,
         "session_id" => SecureRandom.hex(16),
         "signed_in_at" => Time.now.to_i,
       }
     end
   end
+end
+
+RSpec.configure do |config|
+  config.before { Admin::Slice["repos.owner_identity_mutations"].add_github(Spec::AdminSession::GITHUB_USER_ID) }
 end

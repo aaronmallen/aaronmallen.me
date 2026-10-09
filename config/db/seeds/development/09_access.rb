@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+Admin::Slice["repos.owner_identity_mutations"].add_github(931_094)
+
 api = API::Slice
 
 if api["repos.api_token_queries"].live.empty?

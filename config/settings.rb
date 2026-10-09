@@ -188,10 +188,7 @@ module Blog
 
     setting :media_store, default: {}, constructor: object_store
 
-    setting :owner, default: {}, constructor: Schema.schema(
-      github_id: Types::Coercible::Integer.constrained(gt: 0),
-      name: OwnerName,
-    )
+    setting :owner, default: {}, constructor: Schema.schema(name: OwnerName)
 
     setting :page_size, constructor: Schema.schema(admin: PageSize, mcp: PageSize, public: PageSize)
 
@@ -232,8 +229,6 @@ module Blog
     end
 
     def inspect_values = inspect
-
-    def operator?(github_id) = Types::Coercible::Integer.call(github_id) { nil } == owner[:github_id]
 
     def owner_name = owner[:name]
 

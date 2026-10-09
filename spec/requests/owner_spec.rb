@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "The owner", type: :request do
-  before { allow(Hanami.app.settings).to receive(:owner).and_return({ github_id: 1, name: "Ada Lovelace" }) }
+  before { allow(Hanami.app.settings).to receive(:owner).and_return({ name: "Ada Lovelace" }) }
 
   it "titles the page with the name the settings give" do
     get "/"
@@ -22,7 +22,7 @@ RSpec.describe "The owner", type: :request do
   end
 
   it "leaves a one word name whole", :aggregate_failures do
-    allow(Hanami.app.settings).to receive(:owner).and_return({ github_id: 1, name: "Ada" })
+    allow(Hanami.app.settings).to receive(:owner).and_return({ name: "Ada" })
     get "/"
 
     expect(last_response.body).to include("<span>Ada</span>")

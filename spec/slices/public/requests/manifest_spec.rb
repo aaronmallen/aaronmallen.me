@@ -38,7 +38,7 @@ RSpec.describe "Web manifest", type: :request do
   end
 
   it "names the site after the owner the settings give" do
-    allow(Hanami.app.settings).to receive(:owner).and_return({ github_id: 1, name: "Ada Lovelace" })
+    allow(Hanami.app.settings).to receive(:owner).and_return({ name: "Ada Lovelace" })
     get "/site.webmanifest"
 
     expect(manifest).to include("name" => "Ada Lovelace", "short_name" => "Ada Lovelace")

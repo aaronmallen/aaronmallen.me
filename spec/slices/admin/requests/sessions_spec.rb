@@ -179,6 +179,37 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "signing in as a second owner" do
+    let(:github_user_id) { 42 }
+
+    before do
+      Admin::Slice["repos.owner_identity_mutations"].add_github(github_user_id)
+      sign_in
+    end
+
+    it "opens the admin" do
+      expect(last_response.location).to end_with("/admin")
+    end
+  end
+
+  describe "with no owners" do
+    let(:owners) { Admin::Slice["db.rom"].gateways[:default].connection[:owner_identities] }
+
+    it "turns the account away" do
+      owners.delete
+      sign_in
+
+      expect(last_response.status).to eq(403)
+    end
+
+    it "ends a session that was signed in" do
+      sign_in
+      owners.delete
+
+      expect(signed_out?).to be(true)
+    end
+  end
+
   describe "a denied callback" do
     before { callback(error: "access_denied", state: start_sign_in) }
 

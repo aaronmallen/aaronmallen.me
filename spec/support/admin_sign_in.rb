@@ -26,7 +26,9 @@ module AdminSignIn
     stub_request(:post, "https://github.com/login/oauth/access_token")
       .to_return(headers: { "Content-Type" => "application/json" }, body: { access_token: "gho_token" }.to_json)
     stub_request(:get, "https://api.github.com/user")
-      .to_return(headers: { "Content-Type" => "application/json" }, body: { id: 931_094 }.to_json)
+      .to_return(
+        headers: { "Content-Type" => "application/json" }, body: { id: Spec::AdminSession::GITHUB_USER_ID }.to_json,
+      )
   end
 
   private

@@ -12,7 +12,7 @@ module Admin
       REQUEST_KEY = "admin.auth.session"
       SIGN_IN_LIMIT = 5
 
-      include Deps["routes", "settings", "repos.session_validity_queries"]
+      include Deps["routes", "repos.owner_identity_queries", "repos.session_validity_queries"]
 
       def self.for(request) = request.env[REQUEST_KEY] ||= new(request.session)
 
@@ -56,7 +56,7 @@ module Admin
       end
 
       def signed_in?
-        settings.operator?(@session["github_user_id"]) && !expired? && !ended?
+        !expired? && !ended? && owner_identity_queries.github?(@session["github_user_id"])
       end
 
       def start_sign_in
