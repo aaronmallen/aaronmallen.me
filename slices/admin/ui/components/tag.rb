@@ -7,8 +7,11 @@ module Admin
         PREFIX = "#"
 
         prop :tag, Blog::Types::Instance(ROM::Struct)
+        prop :link, Blog::Types::Bool, default: true
 
         def view_template
+          return span(class: classes) { PREFIX + @tag.name } unless @link
+
           a(class: classes, href: path(:admin_tag, name: @tag.name)) { PREFIX + @tag.name }
         end
 

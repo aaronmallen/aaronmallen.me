@@ -4,7 +4,13 @@ module Admin
   module Actions
     module Messages
       class Index < Action
-        include Deps["settings", message_queries: "contact.repos.message_queries"]
+        PRIVATE = Blog::Types::TagScope["private"]
+
+        include Deps[
+          "settings",
+          message_queries: "contact.repos.message_queries",
+          tag_queries: "tags.repos.tag_queries",
+        ]
 
         def handle(request, response)
           filter = Blog::Types::MessageStatusParam[request.params[:status]]
@@ -14,7 +20,7 @@ module Admin
           response[:count] = message_queries.count_with_status(filter)
           response[:filter] = filter
           response[:messages] = messages
-          response[:open] = opened(request)
+          show_open(request, response)
         end
 
         private
@@ -25,6 +31,13 @@ module Admin
         end
 
         def page(request, response) = requested_page(request, response, settings.page_size[:admin])
+
+        def show_open(request, response)
+          message = opened(request)
+
+          response[:open] = message
+          response[:tags] = message ? tag_queries.all_in(PRIVATE) : []
+        end
       end
     end
   end

@@ -24,7 +24,9 @@ module Contact
 
       def exist?(id) = messages.by_pk(id).exist?
 
-      def page_by_status(status, page) = page.fill(messages.with_status(status).newest_first.paged(page).to_a)
+      def page_by_status(status, page)
+        page.fill(messages.combine(:tags).with_status(status).newest_first.paged(page).to_a)
+      end
 
       def received_between(from:, to:, page:, status: nil)
         found = in_days(from, to)

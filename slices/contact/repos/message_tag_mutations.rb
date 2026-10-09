@@ -16,6 +16,10 @@ module Contact
       def remove(message_id, name)
         message_tags.for_owner(message_id).where(tag_id: tags.in_scope(TAG_SCOPE).by_names([name]).pluck(:id)).delete
       end
+
+      def replace(message_id, names)
+        message_tags.replace(message_id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
+      end
     end
   end
 end

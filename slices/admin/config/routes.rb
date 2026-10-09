@@ -89,6 +89,7 @@ module Admin
     get "/messages", to: "messages.index", as: :messages
     post "/messages/bulk", to: "messages.bulk", as: :bulk_messages
     post "/messages/:id/delete", to: "messages.destroy", as: :delete_message, id: ID
+    post "/messages/:id/label", to: "messages.label", as: :label_message, id: ID
     post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
     post "/messages/:id/open", to: "messages.open", as: :open_message, id: ID
     post "/messages/:id/snooze", to: "messages.snooze", as: :snooze_message, id: ID

@@ -111,6 +111,37 @@ RSpec.describe "Admin bulk message actions", type: :request do
       end
     end
 
+    describe "tag and untag on the ticked messages" do
+      let!(:ticked) { messages(2) }
+
+      def tags(message) = repo.by_id(message.id).tags.map(&:name)
+
+      it "tags them and says so", :aggregate_failures do
+        act("tag", ticked, tag: "Billing")
+        follow_redirect!
+
+        expect(ticked.map { tags(it) }).to eq([%w[billing], %w[billing]])
+        expect(toast).to eq("Tagged 2 messages billing")
+      end
+
+      it "untags them and says so", :aggregate_failures do
+        act("tag", ticked, tag: "billing")
+        act("untag", ticked, tag: "billing")
+        follow_redirect!
+
+        expect(ticked.map { tags(it) }).to eq([[], []])
+        expect(toast).to eq("Untagged 2 messages billing")
+      end
+
+      it "refuses a bad tag", :aggregate_failures do
+        act("tag", ticked, tag: "two words")
+        follow_redirect!
+
+        expect(ticked.map { tags(it) }).to eq([[], []])
+        expect(toast).to eq("Nothing changed · a tag takes lowercase letters, numbers and dashes")
+      end
+    end
+
     describe "read on spam" do
       it "clears the sender's spam flag as a single mark does" do
         message = create(:message, :spam)

@@ -65,6 +65,7 @@ RSpec.describe "MCP reach", type: :app do
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
       "backups.operations.back_up_database" => "a background job dumps the database each night",
       "contact.operations.create_message" => "a reader sends a message through the public form",
+      "contact.operations.label_message" => "sets a message's tags from the admin; tag_messages covers it",
       "contact.operations.reap_spam_messages" => "a background job reaps old spam messages",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",

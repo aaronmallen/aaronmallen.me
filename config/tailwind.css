@@ -3152,6 +3152,10 @@
   @apply font-mono text-badge font-normal text-ink-muted;
 }
 
+@utility msg-item-tags {
+  @apply flex basis-full flex-wrap gap-x-2 pl-1;
+}
+
 @utility msg-item-title {
   @apply min-w-0;
 }
@@ -3184,6 +3188,10 @@
 
 @utility msg-letter-far {
   @apply ml-auto flex flex-wrap gap-2;
+}
+
+@utility msg-letter-tags {
+  @apply mt-2 flex flex-wrap gap-x-2;
 }
 
 @utility msg-letter-title {
@@ -3912,6 +3920,22 @@
 
 @utility snooze-form {
   @apply flex flex-col gap-3;
+}
+
+@utility label-form {
+  @apply flex flex-col gap-3;
+}
+
+@utility label-list {
+  @apply grid max-h-65 justify-items-start gap-0.5 overflow-auto;
+}
+
+@utility label-choice {
+  @apply py-1.5;
+}
+
+@utility label-count {
+  @apply mr-auto hint;
 }
 
 @utility snooze-picks {

@@ -9,6 +9,7 @@ import { setupJournals } from "./journal.js";
 import { setupKeys } from "./keys.js";
 import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
+import { setupMessageLabels } from "./message_label.js";
 import { setupPalette } from "./palette.js";
 import { setupPersonForms } from "./person_form.js";
 import { setupPools } from "./pools.js";
@@ -33,6 +34,7 @@ function setup() {
   setupEditNotes();
   setupJournals();
   setupKeys();
+  setupMessageLabels();
   setupMarkdownEditors();
   setupPalette();
   setupPersonForms();

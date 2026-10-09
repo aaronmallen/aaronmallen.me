@@ -11,6 +11,7 @@ module Admin
         prop :message, Blog::Types::Instance(ROM::Struct)
         prop :filter, Blog::Types::String
         prop :page, Blog::Types::Integer
+        prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
         def view_template
           article(id: "read-#{@message.id}", class: "msg-letter") do
@@ -19,7 +20,7 @@ module Admin
               Moment(at: @message.received_at)
               StatusPill(status: :spam) if spam?
             end
-            h2(class: "msg-letter-title") { @message.subject }
+            subject
             div(class: "msg-letter-acts") { spam? ? spam_acts : acts }
             p(class: "msg-body msg-letter-body") { @message.body }
           end
@@ -30,6 +31,7 @@ module Admin
         def acts
           @message.status == UNREAD ? mark(READ, ".mark_read") : mark(UNREAD, ".mark_unread")
           snoozed? ? wake : snooze
+          MessageLabel(message: @message, filter: @filter, tags: @tags)
           div(class: "msg-letter-far") do
             mark(SPAM, ".spam", variant: :warn)
             delete(".delete", ".confirm_delete")
@@ -67,6 +69,11 @@ module Admin
             mark(READ, ".not_spam")
             delete(".delete_forever", ".confirm_delete_forever")
           end
+        end
+
+        def subject
+          h2(class: "msg-letter-title") { @message.subject }
+          div(class: "msg-letter-tags") { @message.tags.each { Tag(tag: it) } } if @message.tags.any?
         end
 
         def wake

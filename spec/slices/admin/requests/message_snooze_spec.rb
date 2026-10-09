@@ -26,14 +26,14 @@ RSpec.describe "Admin message snooze", type: :request do
       message = create(:message, :read, snoozed_until: later)
       get "/admin/messages", status: "read", open: message.id
 
-      expect(acts).to eq(["Mark unread", "Wake", "Spam", "Delete"])
+      expect(acts).to eq(["Mark unread", "Wake", "Label", "Spam", "Delete"])
     end
 
     it "offers Snooze again once the snooze has ended" do
       message = create(:message, snoozed_until: now - 60)
       get "/admin/messages", open: message.id
 
-      expect(acts).to eq(["Mark read", "Snooze", "Spam", "Delete"])
+      expect(acts).to eq(["Mark read", "Snooze", "Label", "Spam", "Delete"])
     end
 
     it "offers neither on a spam message" do

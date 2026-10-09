@@ -185,8 +185,8 @@ RSpec.describe "Admin messages", type: :request do
       end
 
       {
-        "unread" => ["Mark read", "Snooze", "Spam", "Delete"],
-        "read" => ["Mark unread", "Snooze", "Spam", "Delete"],
+        "unread" => ["Mark read", "Snooze", "Label", "Spam", "Delete"],
+        "read" => ["Mark unread", "Snooze", "Label", "Spam", "Delete"],
         "spam" => ["Not spam", "Delete forever"],
       }.each do |status, labels|
         it "offers #{labels.join(', ')} on a #{status} message" do

@@ -21,10 +21,15 @@ module Admin
               input(type: "hidden", name: "page", value: @page)
               button(type: "submit", class: "msg-item-open", **keyed) { summary }
             end
+            chips
           end
         end
 
         private
+
+        def chips
+          div(class: "msg-item-tags") { @message.tags.each { Tag(tag: it) } } if @message.tags.any?
+        end
 
         def keyed
           return { data: { key_open: true } } unless unread?

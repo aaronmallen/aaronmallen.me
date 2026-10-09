@@ -7,7 +7,9 @@ module Admin
         DONE = {
           Blog::Types::MessageBulkAction["delete"] => "messages_page.toasts.bulk.deleted",
           Blog::Types::MessageBulkAction["read"] => "messages_page.toasts.bulk.read",
+          Blog::Types::MessageBulkAction["tag"] => "messages_page.toasts.bulk.tagged",
           Blog::Types::MessageBulkAction["unread"] => "messages_page.toasts.bulk.unread",
+          Blog::Types::MessageBulkAction["untag"] => "messages_page.toasts.bulk.untagged",
         }.freeze
         FAILED = "messages_page.toasts.bulk.failed"
         INVALID = "messages_page.toasts.bulk.invalid"
@@ -28,7 +30,16 @@ module Admin
           routes.path(:admin_messages, status:, **Blog::Structs::Page.query(page))
         end
 
+        def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
+
         def named(id) = { message: ["#{KEY}#{id}", message_queries.by_id(id)&.subject].compact.join(" ") }
+
+        def refusal(errors)
+          case errors
+            in { tag: [message, *] } then "tag_#{message}"
+            else Blog::Contract::FORMAT
+          end
+        end
       end
     end
   end

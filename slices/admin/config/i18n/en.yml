@@ -97,13 +97,24 @@ en:
           blank: "Tick a message first"
           format: "Nothing changed · pick an action from the bar"
           long: "Tick 100 messages or fewer"
+          tag_blank: "Type a tag first"
+          tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         read:
           one: "Marked %{count} message read"
           other: "Marked %{count} messages read"
+        tagged:
+          one: "Tagged %{count} message %{tag}"
+          other: "Tagged %{count} messages %{tag}"
         unread:
           one: "Moved %{count} message back to unread"
           other: "Moved %{count} messages back to unread"
+        untagged:
+          one: "Untagged %{count} message %{tag}"
+          other: "Untagged %{count} messages %{tag}"
       deleted: "Message deleted"
+      labels_cleared: "Labels cleared"
+      labels_invalid: "Use lowercase letters, numbers and single dashes."
+      labels_saved: "Labels saved"
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
@@ -745,6 +756,17 @@ en:
         label: "Ticked messages"
         read: "Read"
         unread: "Unread"
+      message_label:
+        bad: "Use lowercase letters, numbers and single dashes."
+        cancel: "Cancel"
+        count: "%{count} selected"
+        create: "Create “#%{name}”"
+        empty: "No labels yet. Type one above to create it."
+        find: "find or create a label…"
+        find_label: "Find or create a label"
+        open: "Label"
+        save: "Save"
+        title: "Label · %{subject}"
       message_letter:
         confirm_delete: "Delete this message? This cannot be undone."
         confirm_delete_forever: "Delete forever?"

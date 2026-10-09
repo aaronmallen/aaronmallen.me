@@ -20,6 +20,7 @@ module Admin
           prop :filter, Blog::Types::MessageStatus
           prop :messages, Blog::Types::Instance(Blog::Structs::Paged)
           prop :open, Blog::Types::Instance(ROM::Struct).optional
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
@@ -45,7 +46,7 @@ module Admin
           def letter
             return Empty { t(".pick") } unless @open
 
-            MessageLetter(message: @open, filter: @filter, page: @messages.number)
+            MessageLetter(message: @open, filter: @filter, page: @messages.number, tags: @tags)
           end
 
           def panes
