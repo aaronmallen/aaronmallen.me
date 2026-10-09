@@ -141,6 +141,7 @@ one.
 | [0134][0134] | Store each pull request once and read it twice in the activity view | ![Active][active] | 2026-10-09 |
 | [0135][0135] | Find pull requests by searching GitHub for ones I authored | ![Active][active] | 2026-10-09 |
 | [0136][0136] | Run every public page full width with fluid sizes | ![Active][active] | 2026-10-09 |
+| [0137][0137] | Slug heading ids from their text with commonmarker's header ids | ![Active][active] | 2026-10-09 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -278,6 +279,7 @@ one.
 [0134]: 0134-store-each-pull-request-once-and-read-it-twice-in-the-activity-view.md
 [0135]: 0135-find-pull-requests-by-searching-github-for-ones-i-authored.md
 [0136]: 0136-run-every-public-page-full-width-with-fluid-sizes.md
+[0137]: 0137-slug-heading-ids-from-their-text-with-commonmarkers-header-ids.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
