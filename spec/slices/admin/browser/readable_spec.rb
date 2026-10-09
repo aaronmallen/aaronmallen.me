@@ -347,6 +347,7 @@ RSpec.describe "Admin screens", type: :feature do
   end
 
   def seed_tasks
+    create(:tag, :private, name: "site", color: "mk-blue")
     task
     create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
     running = create(:task, :in_progress, title: "Ship the phone layout")
