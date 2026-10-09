@@ -8,7 +8,7 @@ RSpec.describe Search::Repos::SearchQueries do
     let(:tables) do
       %w[
         tasks posts social_post_parts journal_entries commits projects work_entries people messages webmentions
-        decisions
+        decisions pull_requests
       ]
     end
     let(:indexes) { tables.map { "#{it}_search_vector_index" } }

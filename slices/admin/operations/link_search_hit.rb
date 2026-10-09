@@ -3,22 +3,19 @@
 module Admin
   module Operations
     class LinkSearchHit
+      PAGES = {
+        "commit" => :admin_commit, "decision" => :admin_decision, "person" => :admin_edit_person,
+        "post" => :admin_edit_post, "project" => :admin_edit_project, "pull_request" => :admin_pull_request,
+        "task" => :admin_task,
+      }.freeze
       WORK = Blog::Types::ProjectFilter["work"]
 
       include Deps["routes"]
 
       def call(hit)
-        id = hit.source_id
+        page = PAGES[hit.kind]
 
-        case hit.kind
-          when "task" then routes.path(:admin_task, id:)
-          when "post" then routes.path(:admin_edit_post, id:)
-          when "commit" then routes.path(:admin_commit, id:)
-          when "project" then routes.path(:admin_edit_project, id:)
-          when "person" then routes.path(:admin_edit_person, id:)
-          when "decision" then routes.path(:admin_decision, id:)
-          else listed(hit)
-        end
+        page ? routes.path(page, id: hit.source_id) : listed(hit)
       end
 
       private

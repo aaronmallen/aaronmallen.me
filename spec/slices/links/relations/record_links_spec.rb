@@ -24,6 +24,7 @@ RSpec.describe Links::Relations::RecordLinks do
       {
         "task" => :tasks, "post" => :posts, "social_post" => :social_posts, "journal_entry" => :journal_entries,
         "commit" => :commits, "project" => :projects, "work_entry" => :work_entries, "decision" => :decisions,
+        "pull_request" => :pull_requests,
       }
     end
 

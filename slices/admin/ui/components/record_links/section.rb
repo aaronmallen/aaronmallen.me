@@ -11,6 +11,7 @@ module Admin
             Blog::Types::RecordKind["journal_entry"] => "fa-feather",
             Blog::Types::RecordKind["post"] => "fa-file-lines",
             Blog::Types::RecordKind["project"] => "fa-cube",
+            Blog::Types::RecordKind["pull_request"] => "fa-code-pull-request",
             Blog::Types::RecordKind["social_post"] => "fa-paper-plane",
             Blog::Types::RecordKind["task"] => "fa-list-check",
             Blog::Types::RecordKind["work_entry"] => "fa-briefcase",

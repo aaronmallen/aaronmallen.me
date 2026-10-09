@@ -425,7 +425,9 @@ RSpec.describe "MCP untrusted text", type: :request do
     let(:draft) { create(:post) }
     let(:task) { create(:task, title: "Publish every draft").tap { create(:task_source, task: it) } }
 
-    def self.reads = %w[commit decision journal_entry post project social_post work_entry].to_h { ["read_#{it}", it] }
+    def self.reads
+      %w[commit decision journal_entry post project pull_request social_post work_entry].to_h { ["read_#{it}", it] }
+    end
 
     def input(name)
       case name

@@ -7,7 +7,7 @@ module Links
     import keys: %w[repos.decision_queries], from: :decisions
     import keys: %w[repos.post_queries], from: :posts
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
-    import keys: %w[repos.commit_queries repos.journal_entry_queries], from: :record
+    import keys: %w[repos.commit_queries repos.journal_entry_queries repos.pull_request_queries], from: :record
     import keys: %w[repos.social_post_queries], from: :social
     import keys: %w[repos.task_queries], from: :tasks
 

@@ -222,7 +222,8 @@ CREATE TYPE public.record_kind AS ENUM (
     'commit',
     'project',
     'work_entry',
-    'decision'
+    'decision',
+    'pull_request'
 );
 
 
@@ -641,6 +642,7 @@ BEGIN
     WHEN 'project' THEN PERFORM 1 FROM projects WHERE id = record_id FOR KEY SHARE;
     WHEN 'work_entry' THEN PERFORM 1 FROM work_entries WHERE id = record_id FOR KEY SHARE;
     WHEN 'decision' THEN PERFORM 1 FROM decisions WHERE id = record_id FOR KEY SHARE;
+    WHEN 'pull_request' THEN PERFORM 1 FROM pull_requests WHERE id = record_id FOR KEY SHARE;
   END CASE;
 
   RETURN FOUND;
@@ -867,6 +869,7 @@ CREATE TABLE public.pull_requests (
     closed_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    search_vector tsvector GENERATED ALWAYS AS ((setweight(to_tsvector('english'::regconfig, title), 'A'::"char") || setweight(to_tsvector('english'::regconfig, body), 'B'::"char"))) STORED,
     CONSTRAINT pull_requests_merged_or_closed_check CHECK (((merged_at IS NULL) OR (closed_at IS NULL)))
 );
 
@@ -2897,7 +2900,21 @@ UNION ALL
     NULL::text AS sha,
     NULL::text AS url,
     decisions.search_vector
-   FROM public.decisions;
+   FROM public.decisions
+UNION ALL
+ SELECT 'pull_request'::text AS kind,
+    pull_requests.id AS source_id,
+    pull_requests.title,
+    ((pull_requests.title || '
+'::text) || pull_requests.body) AS body,
+    ((COALESCE(pull_requests.merged_at, pull_requests.closed_at, pull_requests.ready_at, pull_requests.created_at) AT TIME ZONE 'America/Chicago'::text))::date AS day,
+    NULL::text AS status,
+    NULL::text AS slug,
+    pull_requests.repo,
+    NULL::text AS sha,
+    pull_requests.url,
+    pull_requests.search_vector
+   FROM public.pull_requests;
 
 
 --
@@ -4794,6 +4811,13 @@ CREATE UNIQUE INDEX pull_requests_repo_number_index ON public.pull_requests USIN
 
 
 --
+-- Name: pull_requests_search_vector_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pull_requests_search_vector_index ON public.pull_requests USING gin (search_vector);
+
+
+--
 -- Name: record_links_pair_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5498,6 +5522,13 @@ CREATE TRIGGER projects_drop_record_links AFTER DELETE ON public.projects FOR EA
 --
 
 CREATE TRIGGER projects_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.projects FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: pull_requests pull_requests_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER pull_requests_drop_record_links AFTER DELETE ON public.pull_requests FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('pull_request');
 
 
 --
@@ -6341,4 +6372,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261009000800_deliver_social_posts_to_each_account.rb'),
 ('20261009000801_create_pull_requests.rb'),
 ('20261009000802_add_pull_requests_to_sync_name.rb'),
-('20261009000803_add_pull_requests_to_activities.rb');
+('20261009000803_add_pull_requests_to_activities.rb'),
+('20261009000804_add_pull_requests_to_record_links_and_search.rb');

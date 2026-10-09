@@ -214,6 +214,7 @@ RSpec.describe "Admin record links", type: :request do
       create(:project, tagline: "Tracks a zeppelin")
       create(:work_entry, blurb: "Flew a zeppelin")
       create(:decision, problem: "Which zeppelin to buy")
+      create(:pull_request, body: "Lands the zeppelin")
     end
 
     def fields = {}
@@ -297,6 +298,17 @@ RSpec.describe "Admin record links", type: :request do
     def page_path = "/admin/commits/#{record.id}"
     def record = @record ||= create(:commit, message: "app: move the server")
     def records_path = "/admin/commits/#{record.id}/records"
+
+    it_behaves_like "a page with a Linked section"
+  end
+
+  describe "on a pull request" do
+    def back_path = page_path
+    def fields = {}
+    def kind = "pull_request"
+    def page_path = "/admin/pull-requests/#{record.id}"
+    def record = @record ||= create(:pull_request, title: "Move the server")
+    def records_path = "/admin/pull-requests/#{record.id}/records"
 
     it_behaves_like "a page with a Linked section"
   end

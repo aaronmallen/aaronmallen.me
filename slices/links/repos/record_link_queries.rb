@@ -10,6 +10,7 @@ module Links
         "journal_entry" => :journal_entries,
         "post" => :posts,
         "project" => :projects,
+        "pull_request" => :pull_requests,
         "social_post" => :social_posts,
         "task" => :tasks,
         "work_entry" => :work_entries,
@@ -26,6 +27,7 @@ module Links
         project: "projects.repos.project_queries",
         work_entry: "projects.repos.work_entry_queries",
         decision: "decisions.repos.decision_queries",
+        pull_request: "record.repos.pull_request_queries",
         task: "tasks.repos.task_queries",
       ]
 
@@ -90,6 +92,7 @@ module Links
           when "commit" then routes.path(:admin_commit, id:)
           when "project" then routes.path(:admin_edit_project, id:)
           when "decision" then routes.path(:admin_decision, id:)
+          when "pull_request" then routes.path(:admin_pull_request, id:)
           else listed_url(kind, row)
         end
       end

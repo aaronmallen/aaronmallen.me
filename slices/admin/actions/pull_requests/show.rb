@@ -7,7 +7,7 @@ module Admin
         include Deps[build_pull_request_page: "operations.build_pull_request_page"]
 
         def handle(request, response)
-          page = build_pull_request_page.call(record_id(request))
+          page = build_pull_request_page.call(record_id(request), records: { query: request.params[:record_q] })
           not_found(response) unless page
 
           response.render(view, **page)

@@ -3,6 +3,10 @@
 RSpec.describe "API reading a pull request", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
+  def link(id, other_kind, other_id)
+    Links::Slice["operations.link_records"].call("pull_request", id, { other_kind:, other_id: }).value!
+  end
+
   def read(id)
     headers = { "HTTP_ACCEPT" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{api_token}" }
     get "/api/v1/pull_requests/#{id}", nil, headers
@@ -14,6 +18,7 @@ RSpec.describe "API reading a pull request", type: :request do
       "id" => pull_request.id, "repo" => "aaronmallen/blog", "number" => 4, "title" => "Fix the feed",
       "description" => "It broke", "url" => "https://github.com/aaronmallen/blog/pull/4", "state" => "merged",
       "ready_at" => "2026-03-02T14:05:00Z", "merged_at" => "2026-03-03T09:00:00Z", "closed_at" => nil,
+      "record_links" => {},
     }
   end
 
@@ -34,8 +39,18 @@ RSpec.describe "API reading a pull request", type: :request do
       expect([read(merged.id), status]).to eq([shown(merged), 200])
     end
 
+    it "answers the records linked to the pull request, grouped by kind" do
+      opened = create(:pull_request)
+      task = create(:task, title: "Move the server")
+      link(opened.id, "task", task.id)
+
+      expect(read(opened.id).fetch("record_links"))
+        .to match("task" => [include("kind" => "task", "id" => task.id, "title" => "Move the server")])
+    end
+
     it "answers the same JSON as read_pull_request" do
       opened = create(:pull_request)
+      link(opened.id, "post", create(:post).id)
 
       expect(read(opened.id)).to eq(mcp_answer("read_pull_request", id: opened.id))
     end

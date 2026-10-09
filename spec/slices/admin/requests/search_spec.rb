@@ -68,6 +68,20 @@ RSpec.describe "Admin search", type: :request do
       end
     end
 
+    describe "a phrase a pull request holds" do
+      let!(:pull_request) { create(:pull_request, title: "Fix the hangar door", body: "The airship got stuck") }
+
+      before { get "/admin/search", q: "airship" }
+
+      it "lists the pull request under its kind" do
+        expect(page.find(".card", text: "Pull requests")).to have_css(".li-title", text: "Fix the hangar door")
+      end
+
+      it "links it to its page" do
+        expect(page).to have_link(href: "/admin/pull-requests/#{pull_request.id}")
+      end
+    end
+
     describe "filtering by kind" do
       before do
         create(:task, title: "Track the zeppelin")

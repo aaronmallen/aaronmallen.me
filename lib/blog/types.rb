@@ -123,7 +123,8 @@ module Blog
     ProjectVisibility = Types::String.enum("public", "private")
     PullRequestState = Types::String.enum("draft", "open", "merged", "closed")
     RangePreset = Types::Integer.enum(7, 30, 90)
-    RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision])
+    RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision
+                                        pull_request])
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
 
@@ -145,6 +146,7 @@ module Blog
     SecretDigest = Types::String.constructor { |value| Digest::SHA256.hexdigest(value.to_s) }
     SearchKind = Types::String.enum(
       "task", "post", "social", "journal", "commit", "project", "work", "person", "message", "webmention", "decision",
+      "pull_request",
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)

@@ -6,7 +6,7 @@ created: 2026-10-03
 area: [db, admin, api, mcp, assets, posts, projects, record, social, tasks, contact]
 supersedes: ["0091"]
 issue: "#299"
-amended: ["#773"]
+amended: ["#773", "#818"]
 tags: [search, postgres, full-text, tsvector, gin, view, palette, slices]
 ---
 
@@ -57,7 +57,8 @@ among them, so `GET /admin/tasks/palette` and `Admin::Actions::Tasks::Palette` g
 route.
 
 A new kind joins by giving its table a `search_vector` column and its GIN index, adding a branch to the view in a
-new migration, and adding its name to the kinds the query accepts. Decisions (#272) joined this way in #773.
+new migration, and adding its name to the kinds the query accepts. Decisions (#272) joined this way in #773, and pull
+requests in #818.
 
 ## Alternatives
 

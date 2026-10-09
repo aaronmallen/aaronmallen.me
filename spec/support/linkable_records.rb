@@ -10,6 +10,7 @@ module Spec
       "project" => %i[project name],
       "work_entry" => %i[work_entry role],
       "decision" => %i[decision title],
+      "pull_request" => %i[pull_request title],
     }.freeze
 
     def linkable_record(kind, text = Faker::Lorem.sentence)

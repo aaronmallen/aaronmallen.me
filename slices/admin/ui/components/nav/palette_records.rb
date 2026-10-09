@@ -18,6 +18,7 @@ module Admin
             Blog::Types::SearchKind["message"] => "fa-envelope",
             Blog::Types::SearchKind["webmention"] => "fa-at",
             Blog::Types::SearchKind["decision"] => "fa-scale-balanced",
+            Blog::Types::SearchKind["pull_request"] => "fa-code-pull-request",
           }.freeze
           KIND_KEYS = KINDS.keys.to_h { [it, ".kinds.#{it}"] }.freeze
 

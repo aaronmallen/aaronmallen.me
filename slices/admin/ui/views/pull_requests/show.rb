@@ -7,6 +7,7 @@ module Admin
         class Show < View
           prop :pull_request, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String.optional
+          prop :records, Blog::Types::Hash
 
           def view_template
             PageHead(
@@ -17,7 +18,10 @@ module Admin
               github_link
             end
 
-            Card(label: t(".label"), title: t(".title")) { body }
+            div(class: "g-main") do
+              Card(label: t(".label"), title: t(".title")) { body }
+              aside { linked }
+            end
           end
 
           private
@@ -48,6 +52,14 @@ module Admin
             ) do
               t(".github")
             end
+          end
+
+          def linked
+            id = @pull_request.id
+
+            RecordLinks::Section(
+              records: @records, kind: "pull_request", id:, find_path: path(:admin_pull_request, id:),
+            )
           end
 
           def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)
