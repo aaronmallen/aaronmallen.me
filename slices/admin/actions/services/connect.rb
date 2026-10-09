@@ -34,7 +34,7 @@ module Admin
           return Failure(:not_configured) unless github.configured?
 
           started = Auth::ConnectState.new(request.session).start(definition.id)
-          Success(github.connect_url(redirect_uri: github_service_callback_url, scope:, **started))
+          Success(github.connect_url(redirect_uri: github_callback_url, scope:, **started))
         end
 
         def mastodon_url(request, scope)

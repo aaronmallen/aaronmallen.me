@@ -18,7 +18,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
 
   def authorize_query = Rack::Utils.parse_query(URI(last_response.location).query)
 
-  def callback(**) = get("/admin/auth/github/callback/services", **)
+  def callback(**) = get("/admin/auth/github/callback", **)
 
   def connections = Services::Slice["repos.connection_queries"].for(:github)
 
@@ -37,10 +37,10 @@ RSpec.describe "Admin GitHub connection", type: :request do
       expect(authorize_query).to include("client_id" => "client-id", "scope" => "repo read:org")
     end
 
-    it "sends a PKCE challenge and comes back to the services callback", :aggregate_failures do
+    it "sends a PKCE challenge and comes back to the sign-in callback", :aggregate_failures do
       expect(authorize_query).to include("code_challenge_method" => "S256")
       expect(authorize_query.fetch("code_challenge")).to match(/\A[\w-]{43}\z/)
-      expect(authorize_query.fetch("redirect_uri")).to end_with("/admin/auth/github/callback/services")
+      expect(authorize_query.fetch("redirect_uri")).to end_with("/admin/auth/github/callback")
     end
   end
 
@@ -62,6 +62,13 @@ RSpec.describe "Admin GitHub connection", type: :request do
       verified = a_request(:post, "https://github.com/login/oauth/access_token").with(body: /code_verifier=[\w-]{64}/)
 
       expect(verified).to have_been_made
+    end
+
+    it "sends the sign-in callback with the code" do
+      callback = /redirect_uri=[^&]*%2Fadmin%2Fauth%2Fgithub%2Fcallback(&|\z)/
+      sent = a_request(:post, "https://github.com/login/oauth/access_token").with(body: callback)
+
+      expect(sent).to have_been_made
     end
 
     it "opens the connection with its account and scopes granted", :aggregate_failures do
@@ -98,10 +105,27 @@ RSpec.describe "Admin GitHub connection", type: :request do
     it "refuses a state it never sent", :aggregate_failures do
       start_connect
       callback(code: "code", state: "forged")
-      follow_redirect!
 
       expect(connections).to be_empty
-      expect(page).to have_css("[data-toast]", text: "didn't start here")
+      expect(last_response.status).to eq(401)
+    end
+
+    it "refuses a state that has expired", :aggregate_failures do
+      state = start_connect
+      allow(Time).to receive(:now).and_return(Time.now + (11 * 60))
+      callback(code: "code", state:)
+
+      expect(connections).to be_empty
+      expect(last_response.location).to end_with("/admin/services")
+    end
+
+    it "refuses a connect state once I have signed out", :aggregate_failures do
+      state = start_connect
+      post "/admin/sign-out", _csrf_token: admin_csrf_token
+      callback(code: "code", state:)
+
+      expect(connections).to be_empty
+      expect(last_response.status).to eq(401)
     end
 
     it "refuses a state used once already", :aggregate_failures do

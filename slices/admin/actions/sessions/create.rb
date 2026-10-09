@@ -13,12 +13,15 @@ module Admin
         UNEXPECTED = 500
 
         include Deps[
+          connect_callback: "actions.services.github_callback",
           failed_view: "ui.views.sessions.failed",
           record_sign_in: "security.operations.record_sign_in",
           sign_in: "operations.sign_in",
         ]
 
         def handle(request, response)
+          return connect_callback.handle(request, response) if connecting?(request)
+
           code = Blog::Types::Text[request.params[:code]]
           return fail_sign_in(request, response, :denied) unless callback_valid?(request, code)
 
@@ -33,6 +36,11 @@ module Admin
 
         def callback_valid?(request, code)
           auth_session(request).state?(request.params[:state]) && request.params[:error].nil? && !code.empty?
+        end
+
+        def connecting?(request)
+          auth_session(request).signed_in? &&
+            Auth::ConnectState.new(request.session).held?(Services::GitHubCallback::PROVIDER, request.params[:state])
         end
 
         def fail_sign_in(request, response, reason)

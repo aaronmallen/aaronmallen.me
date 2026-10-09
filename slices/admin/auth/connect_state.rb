@@ -18,6 +18,8 @@ module Admin
         @session = session
       end
 
+      def held?(provider, state) = !find(started, provider, state).nil?
+
       def start(provider, host: nil)
         state = SecureRandom.urlsafe_base64(32)
         verifier = SecureRandom.urlsafe_base64(48)
@@ -28,10 +30,8 @@ module Admin
       end
 
       def take(provider, state)
-        return unless state.is_a?(String)
-
         held = started
-        matched = held.find { it.is_a?(Hash) && it["provider"] == provider && same?(it["state"], state) }
+        matched = find(held, provider, state)
         return if matched.nil?
 
         @session[KEY] = held - [matched]
@@ -39,6 +39,12 @@ module Admin
       end
 
       private
+
+      def find(held, provider, state)
+        return unless state.is_a?(String)
+
+        held.find { it.is_a?(Hash) && it["provider"] == provider && same?(it["state"], state) }
+      end
 
       def same?(held, given) = held.is_a?(String) && Rack::Utils.secure_compare(held, given)
 

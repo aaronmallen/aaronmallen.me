@@ -26,7 +26,7 @@ module Admin
         private
 
         def connect(code, code_verifier)
-          connect_github.call(code:, code_verifier:, redirect_uri: github_service_callback_url)
+          connect_github.call(code:, code_verifier:, redirect_uri: github_callback_url)
         end
 
         def connected(response, connection)

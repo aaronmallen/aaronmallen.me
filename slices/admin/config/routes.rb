@@ -241,7 +241,6 @@ module Admin
     )
     get "/sign-in", to: "sessions.new", as: :sign_in
     get "/auth/github/callback", to: "sessions.create", as: :github_callback
-    get "/auth/github/callback/services", to: "services.github_callback", as: :github_service_callback
     get "/auth/mastodon/callback", to: "services.mastodon_callback", as: :mastodon_service_callback
     post "/sign-out", to: "sessions.destroy", as: :sign_out
     get "/*path", to: "not_found"
