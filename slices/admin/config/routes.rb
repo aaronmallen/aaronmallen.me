@@ -8,7 +8,7 @@ module Admin
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
-    OAUTH_SERVICE = /github/
+    OAUTH_SERVICE = /github|mastodon/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
     TAG = %r{[^/]+}
@@ -236,6 +236,7 @@ module Admin
     get "/sign-in", to: "sessions.new", as: :sign_in
     get "/auth/github/callback", to: "sessions.create", as: :github_callback
     get "/auth/github/callback/services", to: "services.github_callback", as: :github_service_callback
+    get "/auth/mastodon/callback", to: "services.mastodon_callback", as: :mastodon_service_callback
     post "/sign-out", to: "sessions.destroy", as: :sign_out
     get "/*path", to: "not_found"
   end

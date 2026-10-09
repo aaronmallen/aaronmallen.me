@@ -31,6 +31,8 @@ module Admin
       halt 403, response.render(rejected_view)
     end
 
+    def mastodon_service_callback_url = routes.url(:admin_mastodon_service_callback).to_s
+
     def not_found(response)
       response.format = :html
       halt 404, response.render(not_found_view)

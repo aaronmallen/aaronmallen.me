@@ -18,10 +18,10 @@ module Admin
         @session = session
       end
 
-      def start(provider)
+      def start(provider, host: nil)
         state = SecureRandom.urlsafe_base64(32)
         verifier = SecureRandom.urlsafe_base64(48)
-        entry = { "at" => @now, "provider" => provider, "state" => state, "verifier" => verifier }
+        entry = { "at" => @now, "host" => host, "provider" => provider, "state" => state, "verifier" => verifier }
         @session[KEY] = started.push(entry).last(LIMIT)
 
         { code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false), state: }
@@ -35,7 +35,7 @@ module Admin
         return if matched.nil?
 
         @session[KEY] = held - [matched]
-        matched["verifier"] if @now - matched["at"].to_i < LIFETIME
+        matched.slice("host", "verifier") if @now - matched["at"].to_i < LIFETIME
       end
 
       private

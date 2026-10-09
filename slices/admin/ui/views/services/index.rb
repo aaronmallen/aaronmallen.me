@@ -7,7 +7,6 @@ module Admin
         class Index < View
           include Components::Services
 
-          prop :available, Blog::Types::Array
           prop :connect, Blog::Types::Instance(::Services::Definition).optional
           prop :connectable, Blog::Types::Array.of(Blog::Types::String)
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
@@ -26,15 +25,6 @@ module Admin
           end
 
           private
-
-          def available
-            return if @available.empty?
-
-            div(class: "svc-group") do
-              p(class: "svc-group-label") { t(".available") }
-              @available.each { Available(definition: it, connectable: connectable?(it)) }
-            end
-          end
 
           def connect_button
             Button(small: true, icon: "fa-solid fa-plus", data: { dialog_open: Picker::ID }) { t(".connect") }
@@ -69,7 +59,6 @@ module Admin
               end
               Hint { t(".hint") }
               @rows.group_by { it.definition.group }.each { |name, rows| group(name, rows) }
-              available
             end
           end
 

@@ -17,12 +17,13 @@ module Social
       TOO_MANY_REQUESTS = 429
       VISIBILITY = "public"
 
-      def initialize(connection:, scan_links:)
-        @connection = connection
+      def initialize(account:, connect:, scan_links:)
+        @account = account
+        @connect = connect
         @scan_links = scan_links
       end
 
-      def configured? = !connection.nil?
+      def configured? = !(@current = @account.call).nil?
 
       def count(text) = countable(text).grapheme_clusters.size
 
@@ -64,13 +65,19 @@ module Social
 
       private
 
-      attr_reader :connection, :scan_links
+      attr_reader :scan_links
 
       def account(found)
         acct = found["acct"].to_s
         handle = acct.include?("@") ? acct : "#{acct}@#{connection.url_prefix.host}"
 
         Structs::Account.new(avatar: found["avatar"], handle: "@#{handle}", name: found["display_name"].to_s.strip)
+      end
+
+      def connection
+        current = @current || @account.call || raise(Error, "Mastodon is not connected")
+        @connection = { account: current, http: @connect.call(*current) } unless @connection&.fetch(:account) == current
+        @connection.fetch(:http)
       end
 
       def countable(text)

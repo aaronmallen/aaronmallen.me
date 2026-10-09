@@ -3,7 +3,7 @@
 module SocialCredentials
   ALL_KEYS = %w[networks.all social.networks.all].freeze
   BLUESKY = { app_password: "secret", handle: "ada.example" }.freeze
-  MASTODON = { access_token: "token", url: "https://ruby.social" }.freeze
+  MASTODON = { access_token: "token", host: "ruby.social" }.freeze
 
   def connect_bluesky(credentials = BLUESKY, account_id: "did:plc:ada")
     disconnect_bluesky
@@ -14,11 +14,21 @@ module SocialCredentials
   def connect_social_networks(bluesky: BLUESKY, mastodon: MASTODON)
     Social::Slice.start(:networks)
     bluesky.empty? ? disconnect_bluesky : connect_bluesky(bluesky)
-    allow(Hanami.app.settings).to receive_messages(mastodon:)
+    connect_mastodon(**mastodon)
     replace_social_clients
   end
 
   private
+
+  def connect_mastodon(access_token: nil, host: nil)
+    Services::Slice["relations.service_connections"].where(provider: "mastodon").delete
+    return unless access_token
+
+    Services::Slice["repos.connection_mutations"].add(
+      provider: "mastodon", host:, account_id: "1", label: "@aaronmallen@#{host}", credentials: { access_token: },
+      scopes: %w[write:statuses read:accounts read:search read:statuses],
+    )
+  end
 
   def disconnect_bluesky = Services::Slice["relations.service_connections"].where(provider: "bluesky").delete
 
@@ -28,7 +38,9 @@ module SocialCredentials
       Services::Slice["repos.connection_queries"], Hanami.app["http"],
       scan_links:, scan_tags: Social::Slice["operations.scan_tags"],
     )
-    mastodon = Social::Providers::NetworksProvider.mastodon(Hanami.app["settings"], Hanami.app["http"], scan_links:)
+    mastodon = Social::Providers::NetworksProvider.mastodon(
+      Social::Slice["services.repos.connection_queries"], Hanami.app["http"], scan_links:,
+    )
     all = Social::Providers::NetworksProvider.all(bluesky, mastodon)
 
     ALL_KEYS.each { replace_component(it, all) }

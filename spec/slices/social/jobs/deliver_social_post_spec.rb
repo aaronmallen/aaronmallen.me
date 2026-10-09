@@ -869,17 +869,12 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   end
 
   describe "a network with no credentials" do
-    {
-      "nothing set" => {},
-      "an instance URL that won't parse" => { access_token: "token", url: "https://ruby social" },
-    }.each do |what, mastodon|
-      it "marks the delivery failed for good with #{what}" do
-        connect_social_networks(mastodon:)
-        social_post = queued
-        deliver(social_post, "mastodon")
+    it "marks the delivery failed for good with no Mastodon connection" do
+      connect_social_networks(mastodon: {})
+      social_post = queued
+      deliver(social_post, "mastodon")
 
-        expect(delivery(social_post, "mastodon")).to have_attributes(failed: true, error: "mastodon has no credentials")
-      end
+      expect(delivery(social_post, "mastodon")).to have_attributes(failed: true, error: "mastodon has no credentials")
     end
 
     it "asks nothing of Bluesky" do

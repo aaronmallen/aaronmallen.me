@@ -175,7 +175,7 @@ module Blog
       report_data?: Types::Params::Bool.optional,
     )
 
-    setting :mastodon, default: {}, constructor: Schema.schema(access_token?: Value, profile_url?: Value, url?: Value)
+    setting :mastodon, default: {}, constructor: Schema.schema(profile_url?: Value)
 
     setting :maxmind, default: {}, constructor: Schema.schema(account_id?: Value, license_key?: Value)
 

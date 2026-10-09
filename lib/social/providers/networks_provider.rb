@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require "faraday"
-require "uri"
 
 module Social
   module Providers
     module NetworksProvider
       HEADERS = { "Accept" => "application/json" }.freeze
+      MASTODON = "mastodon"
       PDS_URL = "https://bsky.social"
       PUBLIC_URL = "https://public.api.bsky.app"
 
@@ -23,12 +23,14 @@ module Social
           )
         end
 
-        def mastodon(settings, http, scan_links:)
-          url, token = credentials(settings.mastodon, :url, :access_token)
+        def mastodon(connection_queries, http, scan_links:)
+          account = lambda do
+            found = connection_queries.for(MASTODON).first
+            found && [found.host, found.credentials.fetch(:access_token)]
+          end
+          connect = ->(host, token) { json(http, url: "https://#{host}", headers: bearer(token)) }
 
-          Mastodon::Client.new(connection: url && json(http, url:, headers: bearer(token)), scan_links:)
-        rescue URI::Error
-          Mastodon::Client.new(connection: nil, scan_links:)
+          Mastodon::Client.new(account:, connect:, scan_links:)
         end
 
         private

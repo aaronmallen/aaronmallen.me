@@ -4,11 +4,13 @@ module Admin
   module Operations
     class DisconnectService < Operation
       GITHUB = "github"
+      MASTODON = "mastodon"
 
       include Deps[
         connection_queries: "services.repos.connection_queries",
         github: "github.auth",
         honeybadger: "honeybadger.agent",
+        mastodon: "mastodon.auth",
         remove_connection: "services.operations.remove_connection",
       ]
 
@@ -22,11 +24,17 @@ module Admin
       private
 
       def revoke(connection)
-        return unless connection.provider == GITHUB && github.configured?
-
-        github.revoke(connection.credentials.fetch(:access_token))
+        case connection.provider
+          when GITHUB then github.revoke(connection.credentials.fetch(:access_token)) if github.configured?
+          when MASTODON then revoke_mastodon(connection)
+        end
       rescue OAuth2::Error, Faraday::Error => e
         honeybadger.notify(e)
+      end
+
+      def revoke_mastodon(connection)
+        credentials = connection.credentials
+        mastodon.revoke(connection.host, credentials, credentials.fetch(:access_token))
       end
     end
   end

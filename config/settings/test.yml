@@ -23,9 +23,7 @@ github:
 honeybadger:
   api_key: null
 mastodon:
-  access_token: null
   profile_url: https://ruby.social/@aaronmallen
-  url: https://ruby.social
 maxmind:
   account_id: null
   license_key: null

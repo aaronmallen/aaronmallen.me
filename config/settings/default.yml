@@ -39,9 +39,7 @@ honeybadger:
   project_url: <%= ENV["HONEYBADGER_PROJECT_URL"].to_json %>
   report_data: <%= ENV["HONEYBADGER_REPORT_DATA"].to_json %>
 mastodon:
-  access_token: <%= ENV["MASTODON_ACCESS_TOKEN"].to_json %>
   profile_url: https://ruby.social/@aaronmallen
-  url: https://ruby.social
 maxmind:
   account_id: <%= ENV["MAXMIND_ACCOUNT_ID"].to_json %>
   license_key: <%= ENV["MAXMIND_LICENSE_KEY"].to_json %>

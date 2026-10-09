@@ -84,7 +84,8 @@ module Admin
     ], from: :security
 
     import keys: %w[
-      operations.add_connection operations.remove_connection repos.connection_queries repos.definition_queries
+      operations.add_connection operations.remove_connection operations.save_app repos.app_queries
+      repos.connection_queries repos.definition_queries
     ], from: :services
 
     import keys: %w[

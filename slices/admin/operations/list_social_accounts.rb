@@ -3,10 +3,10 @@
 module Admin
   module Operations
     class ListSocialAccounts
+      MASTODON = "mastodon"
+
       include Deps[
-        "settings",
-        connection_queries: "services.repos.connection_queries",
-        list_networks: "operations.list_networks",
+        "settings", connection_queries: "services.repos.connection_queries", list_networks: "operations.list_networks",
       ]
 
       def call
@@ -19,10 +19,7 @@ module Admin
 
       def bluesky_accounts = connection_queries.for(Blog::Types::NetworkName["bluesky"]).map(&:label)
 
-      def mastodon_account
-        url = settings.mastodon[:url]
-        Blog::Types::Normalized::Host.call(url) { url.to_s }
-      end
+      def mastodon_account = connection_queries.for(MASTODON).first&.host.to_s
     end
   end
 end

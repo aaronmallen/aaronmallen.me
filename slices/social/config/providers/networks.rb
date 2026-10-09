@@ -7,7 +7,9 @@ Social::Slice.register_provider :networks do
       target["services.repos.connection_queries"], target["http"],
       scan_links:, scan_tags: target["operations.scan_tags"],
     )
-    mastodon = Social::Providers::NetworksProvider.mastodon(target["settings"], target["http"], scan_links:)
+    mastodon = Social::Providers::NetworksProvider.mastodon(
+      target["services.repos.connection_queries"], target["http"], scan_links:,
+    )
 
     register "networks.all", Social::Providers::NetworksProvider.all(bluesky, mastodon)
   end

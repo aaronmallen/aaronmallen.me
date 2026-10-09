@@ -5,8 +5,6 @@ RSpec.describe "Admin connected services", type: :request do
     Services::Slice["repos.connection_mutations"].add(provider:, account_id:, label:, credentials:, **)
   end
 
-  def available = group("Available").all(".li-title").map(&:text)
-
   def connect(provider = "linear", **connection)
     post("/admin/services/#{provider}", connection:, _csrf_token: admin_csrf_token)
   end
@@ -22,6 +20,8 @@ RSpec.describe "Admin connected services", type: :request do
   def names(label) = group(label).all(".li-title").map(&:text)
 
   def page = Capybara.string(last_response.body)
+
+  def pickable = page.all("#connect-service .svc-pick .svc-line-name", visible: :all).map(&:text)
 
   def row(name) = page.find(".li", text: name)
 
@@ -52,10 +52,11 @@ RSpec.describe "Admin connected services", type: :request do
       expect(names("Infrastructure")).to eq(["Backup store", "Honeybadger", "MaxMind", "Media store"])
     end
 
-    it "lists every service with no connected account under available" do
+    it "puts every service I can connect in the picker and none in the list", :aggregate_failures do
       get "/admin/services"
 
-      expect(available).to eq(%w[GitHub Linear Bluesky Mastodon])
+      expect(pickable).to eq(%w[GitHub Linear Bluesky Mastodon])
+      expect(page).to have_no_css(".svc-group", text: "Available")
     end
 
     describe "with two Linear workspaces" do
@@ -70,8 +71,8 @@ RSpec.describe "Admin connected services", type: :request do
         expect(page.all(".svc-account").map(&:text)).to include("ROOT workspace", "Hanakai workspace")
       end
 
-      it "takes Linear out of available" do
-        expect(available).not_to include("Linear")
+      it "keeps Linear in the picker for a third" do
+        expect(pickable).to include("Linear")
       end
     end
 
@@ -92,10 +93,10 @@ RSpec.describe "Admin connected services", type: :request do
         replace_component("services.repos.definition_queries", queries.new([*queries.new.all, fake]))
       end
 
-      it "shows under available while nothing is connected" do
+      it "leaves it out of the picker while the site has no check for it" do
         get "/admin/services"
 
-        expect(available).to include("Fakebook")
+        expect(pickable).not_to include("Fakebook")
       end
 
       it "offers no form while the site has no check for it" do
@@ -204,9 +205,9 @@ RSpec.describe "Admin connected services", type: :request do
   describe "connecting Linear" do
     before { sign_in_to_admin }
 
-    it "offers a key form from available", :aggregate_failures do
+    it "offers a key form from the picker", :aggregate_failures do
       get "/admin/services"
-      expect(group("Available")).to have_link("Connect", href: "/admin/services?connect=linear")
+      expect(page).to have_css("#connect-service a.svc-pick[href='/admin/services?connect=linear']", visible: :all)
 
       get "/admin/services?connect=linear"
       expect(page).to have_css(".settings-side form[action='/admin/services/linear'] input[type='password']")

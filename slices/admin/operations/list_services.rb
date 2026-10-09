@@ -4,10 +4,10 @@ module Admin
   module Operations
     class ListServices
       BRIDGY = "bridgy"
-      OAUTH_FLOWS = %w[github].freeze
 
       include Deps[
         "settings",
+        check_service: "operations.check_service",
         connection_queries: "services.repos.connection_queries",
         definition_queries: "services.repos.definition_queries",
         sync_state_queries: "record.repos.sync_state_queries",
@@ -16,9 +16,9 @@ module Admin
 
       def call
         connections = connection_queries.all.group_by(&:provider)
-        connected, available = definition_queries.all.partition { !it.connectable? || connections.key?(it.id) }
+        connected = definition_queries.all.select { !it.connectable? || connections.key?(it.id) }
 
-        { available:, pickable: pickable(connections), rows: rows(connected, connections) }
+        { pickable: pickable(connections), rows: rows(connected, connections) }
       end
 
       private
@@ -32,7 +32,8 @@ module Admin
 
       def pickable(connections)
         definition_queries.all.select do |definition|
-          OAUTH_FLOWS.include?(definition.id) && (definition.multiple || !connections.key?(definition.id))
+          (definition.oauth? || check_service.checks?(definition.id)) &&
+            (definition.multiple || !connections.key?(definition.id))
         end
       end
 

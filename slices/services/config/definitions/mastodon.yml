@@ -8,4 +8,6 @@ powers:
   - Handle lookup on People
 scopes:
   - {id: "write:statuses", label: Post on your behalf, why: Social queue}
-  - {id: "read:accounts", label: Look up accounts, why: Handle lookup on People}
+  - {id: "read:accounts", label: Read your account, why: Naming the account you connect}
+  - {id: "read:search", label: Look up accounts, why: Handle lookup on People}
+  - {id: "read:statuses", label: Read posts, why: Likes and replies on the social queue}

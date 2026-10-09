@@ -72,7 +72,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "hides GitHub from the picker" do
-      expect(page).to have_no_css("#connect-service", visible: :all)
+      expect(page).to have_no_css("#connect-service .svc-pick", text: "GitHub", visible: :all)
     end
 
     it "lets the record client read it with no restart" do

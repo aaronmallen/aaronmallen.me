@@ -8,6 +8,11 @@ module Admin
           ID = "connect-service"
           CHEVRON = "fa-solid fa-chevron-right"
           GO = "fa-solid fa-arrow-up-right-from-square"
+          MASTODON = "mastodon"
+          SERVER_FIELD = {
+            autocapitalize: "none", autocomplete: "off", name: "server", placeholder: "mastodon.social", required: true,
+            spellcheck: "false",
+          }.freeze
 
           prop :definitions, Blog::Types::Array.of(Blog::Types::Instance(::Services::Definition))
 
@@ -16,7 +21,7 @@ module Admin
               @definitions.each { pick(it) }
               Hint { t(".hint") }
             end
-            @definitions.each { connect(it) }
+            @definitions.select(&:oauth?).each { connect(it) }
           end
 
           private
@@ -35,18 +40,27 @@ module Admin
 
           def continue(definition)
             Form(action: path(:admin_connect_service, provider: definition.id)) do
+              server if definition.id == MASTODON
               Button(variant: :pri, type: "submit", icon: GO) { t(".continue", name: definition.name) }
             end
           end
 
+          def line(definition)
+            Icon(definition.icon)
+            span do
+              span(class: "svc-line-name") { definition.name }
+              span(class: "svc-line-note") { definition.powers.join(DOT) }
+            end
+            Icon(CHEVRON)
+          end
+
           def pick(definition)
-            button(type: "button", class: "svc-pick", data: { dialog_open: "#{ID}-#{definition.id}" }) do
-              Icon(definition.icon)
-              span do
-                span(class: "svc-line-name") { definition.name }
-                span(class: "svc-line-note") { definition.powers.join(DOT) }
+            if definition.oauth?
+              button(type: "button", class: "svc-pick", data: { dialog_open: "#{ID}-#{definition.id}" }) do
+                line(definition)
               end
-              Icon(CHEVRON)
+            else
+              a(href: path(:admin_services, connect: definition.id), class: "svc-pick") { line(definition) }
             end
           end
 
@@ -57,6 +71,12 @@ module Admin
                 span(class: "svc-line-name") { scope[:label] }
                 span(class: "svc-line-note") { t(".required", why: scope[:why]) }
               end
+            end
+          end
+
+          def server
+            Field(label: t(".server"), id: "#{ID}-server") do |control|
+              Input(**control, **SERVER_FIELD)
             end
           end
         end

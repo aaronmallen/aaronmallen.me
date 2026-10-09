@@ -193,10 +193,12 @@ en:
       taken: "That account is already connected. Nothing was saved."
     toasts:
       answered: "%{name} answered"
+      bad_server: "That isn't a server name · nothing was saved"
       connected: "%{name} connected as %{account}"
-      declined: "GitHub didn't grant access · nothing was saved"
+      declined: "%{name} didn't grant access · nothing was saved"
       disconnected: "%{name} disconnected"
       github_failed: "GitHub didn't answer · nothing was saved"
+      mastodon_failed: "That server didn't answer as Mastodon · nothing was saved"
       not_configured: "GitHub sign-in isn't set up, so GitHub can't connect"
       refused: "That sign-in didn't start here or has expired · nothing was saved"
       single: "GitHub takes one account · disconnect it first"
@@ -1353,8 +1355,6 @@ en:
           disconnect: "Disconnect"
           open: "Open %{name}"
           test: "Test connection"
-        available:
-          connect: "Connect"
         connect:
           close: "Close"
           connect: "Connect %{name}"
@@ -1388,8 +1388,9 @@ en:
           away: "You'll approve access on %{name}, then come straight back here."
           connect: "Connect %{name}"
           continue: "Continue to %{name}"
-          hint: "Services that use keys instead of a sign-in, like storage and MaxMind, are set in the server environment."
+          hint: "Storage, MaxMind and Honeybadger read their keys from the server environment, so they aren't listed here."
           required: "Required · %{why}"
+          server: "Your server"
           revoke: "Read-only unless it says otherwise. You can disconnect any time; the site revokes its token on %{name} too."
           title: "Connect a service"
         row:
@@ -2295,7 +2296,6 @@ en:
       services:
         index:
           all_answered: "Everything answered on its last run."
-          available: "Available"
           connect: "Connect a service"
           connected: "Connected services"
           count:

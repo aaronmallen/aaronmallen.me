@@ -3,21 +3,21 @@
 module Admin
   module Actions
     module Services
-      class GitHubCallback < Action
-        NAME = "GitHub"
-        PROVIDER = "github"
+      class MastodonCallback < Action
+        NAME = "Mastodon"
+        PROVIDER = "mastodon"
         TOASTS = "services_page.toasts"
 
-        include Deps[connect_github: "operations.connect_github"]
+        include Deps[connect_mastodon: "operations.connect_mastodon"]
 
         def handle(request, response)
-          verifier = verifier(request)
-          return refuse(response, :refused) if verifier.nil?
+          started = Auth::ConnectState.new(request.session).take(PROVIDER, request.params[:state])
+          return refuse(response, :refused) if started.nil?
 
           code = Blog::Types::Text[request.params[:code]]
           return refuse(response, :declined) if request.params[:error] || code.empty?
 
-          case connect(code, verifier)
+          case connect(started, code)
             in Success(connection) then connected(response, connection)
             in Failure(reason) then refuse(response, reason)
           end
@@ -25,8 +25,11 @@ module Admin
 
         private
 
-        def connect(code, code_verifier)
-          connect_github.call(code:, code_verifier:, redirect_uri: github_service_callback_url)
+        def connect(started, code)
+          connect_mastodon.call(
+            host: started.fetch("host"), code:, code_verifier: started.fetch("verifier"),
+            redirect_uri: mastodon_service_callback_url,
+          )
         end
 
         def connected(response, connection)
@@ -37,10 +40,6 @@ module Admin
         def refuse(response, reason)
           toast(response, "#{TOASTS}.#{reason}", name: NAME)
           response.redirect_to(routes.path(:admin_services))
-        end
-
-        def verifier(request)
-          Auth::ConnectState.new(request.session).take(PROVIDER, request.params[:state])&.fetch("verifier")
         end
       end
     end
