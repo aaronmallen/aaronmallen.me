@@ -11,6 +11,7 @@ module Public
         IMAGE_CARD = "summary_large_image"
         SHARE_IMAGE = "share.png"
         SHARE_IMAGE_SIZE = { width: 1200, height: 630 }.freeze
+        STRUCTURED_DATA_TYPE = "application/ld+json"
         WEBSITE = "website"
 
         def view_template(&)
@@ -68,6 +69,7 @@ module Public
         def render_head
           super
           link(rel: "canonical", href: page_url)
+          render_structured_data
           script(src: asset_url("public/app.js"), type: "module")
         end
 
@@ -91,6 +93,11 @@ module Public
           meta(property: "og:image", content: page_image)
           meta(property: "og:image:alt", content: page_image_alt)
           SHARE_IMAGE_SIZE.each { |side, size| meta(property: "og:image:#{side}", content: size) } unless own_image
+        end
+
+        def render_structured_data
+          data = content_for(:structured_data)
+          script(type: STRUCTURED_DATA_TYPE) { raw(safe(JSON.generate(data, script_safe: true))) } if data
         end
 
         def render_twitter_card

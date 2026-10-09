@@ -13,6 +13,7 @@ module Public
           def view_template
             head_wording
             content_for(:social_title, Hanami.app.settings.owner_name)
+            content_for(:structured_data, StructuredData.site)
 
             h1(class: "sr-only") { t(".heading") }
             div(class: "g") do
