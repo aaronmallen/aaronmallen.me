@@ -1,0 +1,8 @@
+name: Bridgy
+icon: fa-solid fa-bridge
+group: social
+auth: none
+account: brid.gy
+dashboard: https://brid.gy
+powers:
+  - Mastodon and Bluesky replies arrive as webmentions

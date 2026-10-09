@@ -83,6 +83,8 @@ module Admin
       repos.sign_in_queries
     ], from: :security
 
+    import keys: %w[repos.connection_queries repos.definition_queries], from: :services
+
     import keys: %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.expand_for_network operations.moderate_webmention

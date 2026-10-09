@@ -1,0 +1,9 @@
+name: Honeybadger
+icon: fa-solid fa-bug
+group: infrastructure
+auth: env
+dashboard: https://app.honeybadger.io
+env:
+  honeybadger: [api_key, project_url]
+powers:
+  - Error reporting from web and jobs

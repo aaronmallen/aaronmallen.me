@@ -149,6 +149,7 @@ module Admin
     get "/search", to: "search.index", as: :search
     get "/search/palette", to: "search.palette", as: :palette_search
     get "/security", to: "security.show", as: :security
+    get "/services", to: "services.index", as: :services
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID

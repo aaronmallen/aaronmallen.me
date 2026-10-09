@@ -1,0 +1,11 @@
+name: Backup store
+icon: fa-solid fa-box-archive
+group: infrastructure
+auth: env
+account: S3-compatible bucket
+env:
+  backup_store: [access_key, secret_key, bucket, endpoint, region]
+powers:
+  - Nightly database backups
+jobs:
+  - {name: Database backup, every: nightly, sync: backups}

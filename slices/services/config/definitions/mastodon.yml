@@ -1,0 +1,11 @@
+name: Mastodon
+icon: fa-brands fa-mastodon
+group: social
+auth: oauth
+multiple: true
+powers:
+  - Posting from the social queue
+  - Handle lookup on People
+scopes:
+  - {id: "write:statuses", label: Post on your behalf, why: Social queue}
+  - {id: "read:accounts", label: Look up accounts, why: Handle lookup on People}

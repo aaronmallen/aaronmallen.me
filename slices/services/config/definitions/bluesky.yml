@@ -1,0 +1,10 @@
+name: Bluesky
+icon: fa-brands fa-bluesky
+group: social
+auth: credentials
+multiple: true
+dashboard: https://bsky.app/settings
+fields: [handle, app_password]
+powers:
+  - Posting from the social queue
+  - Handle resolution on People

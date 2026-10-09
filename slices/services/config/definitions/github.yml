@@ -1,0 +1,17 @@
+name: GitHub
+icon: fa-brands fa-github
+group: code
+auth: oauth
+dashboard: https://github.com/settings/applications
+env:
+  github: [client_id, client_secret]
+powers:
+  - Issue import into external tasks
+  - Commit record on Activity
+  - Project stars and releases
+scopes:
+  - {id: repo, label: Read repositories and issues, why: "Issues, commits, project stats"}
+jobs:
+  - {name: GitHub issue sync, every: every 15 minutes, sync: issues}
+  - {name: Commit import, every: every 15 minutes, sync: commits}
+  - {name: Project refresh, every: nightly, sync: projects}

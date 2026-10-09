@@ -1,0 +1,10 @@
+name: Media store
+icon: fa-solid fa-images
+group: infrastructure
+auth: env
+account: S3-compatible bucket
+env:
+  media_store: [access_key, secret_key, bucket, endpoint, region]
+powers:
+  - Post images and uploads
+  - Open Graph images

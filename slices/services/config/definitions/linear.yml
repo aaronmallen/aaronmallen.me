@@ -1,0 +1,11 @@
+name: Linear
+icon: fa-solid fa-circle-nodes
+group: code
+auth: credentials
+multiple: true
+dashboard: https://linear.app/settings/account/security
+fields: [api_key]
+powers:
+  - Issue import into external tasks
+jobs:
+  - {name: Linear issue sync, every: every 15 minutes, sync: linear_issues}

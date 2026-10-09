@@ -1,0 +1,13 @@
+name: MaxMind
+icon: fa-solid fa-location-dot
+group: infrastructure
+auth: env
+account: GeoLite2 City
+dashboard: https://www.maxmind.com/en/account/login
+env:
+  maxmind: [account_id, license_key]
+powers:
+  - Places on sign-ins and sightings
+  - Countries in Analytics
+jobs:
+  - {name: GeoIP database download, every: weekly, sync: country_database}

@@ -25,6 +25,7 @@ module Admin
         %i[task_rules settings fa-wand-magic-sparkles admin_task_rules].freeze,
         %i[webmention_settings settings fa-at admin_webmentions webmention-settings].freeze,
         %i[tokens settings fa-key admin_tokens].freeze,
+        %i[services settings fa-link admin_services].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
         %i[security settings fa-shield-halved admin_security].freeze,
       ].freeze

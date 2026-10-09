@@ -35,6 +35,7 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.list_record_links" => "fills the admin's Linked section; list_links reads the same links",
       "admin.operations.list_saved_views" => "lists a screen's saved views in the admin; list_saved_views reads them",
       "admin.operations.list_sections" => "lists the admin menu's sections",
+      "admin.operations.list_services" => "builds the admin's connected services tab; no tool reads credentials",
       "admin.operations.list_social_accounts" => "lists the admin's accounts for its social screen",
       "admin.operations.open_journal_entry" => "opens an entry on the admin's journal; read_journal_entry reads it",
       "admin.operations.preview_announcement" => "previews the admin's announcement; compose_announcement writes one",

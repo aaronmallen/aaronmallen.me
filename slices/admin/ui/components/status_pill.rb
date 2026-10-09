@@ -12,6 +12,10 @@ module Admin
           pending: [:orange, "fa-regular fa-clock", ".pending"],
           scheduled: [:blue, "fa-regular fa-clock", ".scheduled"],
           spam: [:pink, "fa-solid fa-ban", ".spam"],
+          connected: [:green, "fa-solid fa-circle-check", ".connected"],
+          failing: [:pink, "fa-solid fa-triangle-exclamation", ".failing"],
+          paused: [nil, "fa-solid fa-pause", ".paused"],
+          not_set_up: [:orange, "fa-solid fa-circle-exclamation", ".not_set_up"],
         }.freeze
 
         prop :status, Blog::Types::Symbol.enum(*STATUSES.keys), &:to_sym

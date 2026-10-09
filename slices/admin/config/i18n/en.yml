@@ -887,6 +887,7 @@ en:
           review: "review"
           search: "search"
           security: "security"
+          services: "connected services"
           social: "social"
           tags: "tags"
           task_rules: "task rules"
@@ -1307,6 +1308,25 @@ en:
             wrong_account: "wrong account"
           unknown_device: "Unknown device"
           unknown_place: "Unknown place"
+      services:
+        detail:
+          access: "Access"
+          app_credentials: "App credentials"
+          bridgy: "webmentions →"
+          close: "Close"
+          connected: "Connected %{time}"
+          credentials: "Credentials"
+          environment: "Set in the server environment. Change them there, then redeploy."
+          granted: "granted"
+          jobs: "Jobs"
+          missing: "missing"
+          no_credentials: "No credentials. It follows the Bridgy toggle in"
+          not_granted: "not granted"
+          open: "Open %{name}"
+          powers: "Powers"
+          set: "set"
+        row:
+          used: "used %{time}"
       settings_head:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
@@ -1402,7 +1422,11 @@ en:
           label: "Networks"
       status_pill:
         approved: "approved"
+        connected: "connected"
         draft: "draft"
+        failing: "failing"
+        not_set_up: "not set up"
+        paused: "paused"
         pending: "pending"
         posted: "posted"
         published: "published"
@@ -2194,6 +2218,25 @@ en:
           sign_ins: "Sign-ins"
           sub: "Each device and place that has reached the admin."
           token: "API token"
+      services:
+        index:
+          all_answered: "Everything answered on its last run."
+          available: "Available"
+          connected: "Connected services"
+          count:
+            one: "%{count} connected"
+            other: "%{count} connected"
+          failing:
+            one: "%{count} failing"
+            other: "%{count} failing"
+          glance: "At a glance"
+          groups:
+            code: "Code and sign-in"
+            infrastructure: "Infrastructure"
+            social: "Social"
+          heading: "Connected services"
+          hint: "Every outside service the site talks to. Services you sign in to keep an encrypted token in the database; the rest read keys from the server environment."
+          pick_hint: "Click a service to see what it powers, what it can access, and when its jobs last ran."
       sessions:
         failed:
           denied: "GitHub sign-in did not finish. Try again."
