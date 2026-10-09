@@ -51,6 +51,7 @@ function setupDialog(dialog) {
   const typed = [...dialog.querySelectorAll("[data-palette-label]")];
   const views = dialog.querySelector("[data-palette-views]");
   const filled = new Set();
+  let loading = 0;
   let options = [];
   let task = null;
   let asked = "";
@@ -128,12 +129,18 @@ function setupDialog(dialog) {
     if (filled.has(holder)) return;
 
     filled.add(holder);
+    loading += 1;
+    list.setAttribute("aria-busy", "true");
     fetchJSON(url)
       .then(({ rows }) => {
         place(rows);
         rebuild();
       })
-      .catch(() => filled.delete(holder));
+      .catch(() => filled.delete(holder))
+      .finally(() => {
+        loading -= 1;
+        if (loading === 0) list.removeAttribute("aria-busy");
+      });
   };
 
   const fill = () => {

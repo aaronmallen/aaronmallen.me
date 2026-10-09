@@ -426,6 +426,7 @@ RSpec.describe "Admin command palette", type: :feature do
   describe "hovering a row" do
     before do
       open_palette
+      page.assert_no_selector("[data-palette-list][aria-busy]")
       find_by_id("command-palette-messages").hover
     end
 
