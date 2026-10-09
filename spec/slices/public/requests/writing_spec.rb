@@ -23,7 +23,7 @@ RSpec.describe "Writing", type: :request do
       get "/writing"
 
       expect(last_response).to be_ok
-      expect(page).to have_css(".writing .kicker", text: "Writing").and have_css(".writing-empty")
+      expect(page).to have_css("main > section .kicker", text: "Writing").and have_css(".writing-empty")
     end
 
     it "lists only published posts, newest first" do
@@ -116,15 +116,15 @@ RSpec.describe "Writing", type: :request do
     it "heads the page with a heading it never draws, over the kicker", :aggregate_failures do
       get "/writing"
 
-      expect(page).to have_css(".writing > h1.sr-only:first-child", exact_text: index_copy("heading"))
-      expect(page).to have_css(".writing > .kicker", exact_text: index_copy("kicker"))
+      expect(page).to have_css("main > section > h1.sr-only:first-child", exact_text: index_copy("heading"))
+      expect(page).to have_css("main > section > .kicker", exact_text: index_copy("kicker"))
       expect(page.all("h1").length).to eq(1)
     end
 
     it "points at no archive" do
       get "/writing"
 
-      expect(page).to have_no_css(".writing p.eyebrow")
+      expect(page).to have_no_css("main > section p.eyebrow")
     end
 
     it "links the feed in the head once" do
@@ -176,7 +176,7 @@ RSpec.describe "Writing", type: :request do
     it "keeps the heading on a later page" do
       get "/writing?page=2"
 
-      expect(page).to have_css(".writing > h1.sr-only", exact_text: index_copy("heading"))
+      expect(page).to have_css("main > section > h1.sr-only", exact_text: index_copy("heading"))
     end
 
     it "names the page in the canonical link" do

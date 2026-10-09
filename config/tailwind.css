@@ -161,7 +161,7 @@
 
   --spacing-gutter: 5rem;
   --container-measure: 44em;
-  --container-entry-meta: 170px;
+  --container-entry-meta: clamp(150px, 18cqi, 230px);
   --container-work-year: 104px;
   --container-palette: 640px;
   --container-journal-modal: 880px;
@@ -203,6 +203,15 @@
   --container-pc: 320px;
   --spacing-pc: clamp(20px, 1.7vw, 30px);
   --spacing-pgrid: clamp(14px, 1.4vw, 24px);
+  --leading-em: 1.4;
+  --text-et: clamp(1.35rem, 1.7vw, 2rem);
+  --text-et--line-height: 1.12;
+  --text-et--letter-spacing: -0.022em;
+  --text-eb: clamp(1rem, 0.5vw + 0.8rem, 1.15rem);
+  --text-eb--line-height: 1.55;
+  --spacing-ent: clamp(20px, 1.8vw, 30px);
+  --spacing-ent-x: clamp(24px, 3cqi, 48px);
+  --container-eb: 68ch;
   --radius-panel: 18px;
   --radius-menu: 14px;
   --radius-field: 10px;
@@ -253,6 +262,10 @@
 
 @utility pub {
   @apply text-public;
+
+  & .pager {
+    @apply mt-0 border-t-0 pt-ent;
+  }
 }
 
 @utility site-main {
@@ -481,7 +494,7 @@
 }
 
 @utility entries {
-  @apply flex flex-col;
+  @apply @container border-t border-line;
 }
 
 @utility pager {
@@ -497,44 +510,41 @@
 }
 
 @utility entry {
-  @apply relative grid gap-x-6 gap-y-2 border-t border-line py-6 first:border-t-0 first:pt-0;
-  grid-template-columns: var(--container-entry-meta) minmax(0, 1fr);
+  @apply grid grid-cols-1 gap-x-ent-x gap-y-2 border-b border-line py-ent;
 
-  @media (width < 47.5rem) {
-    grid-template-columns: minmax(0, 1fr);
+  @container (width >= 720px) {
+    grid-template-columns: var(--container-entry-meta) minmax(0, 1fr);
   }
 }
 
 @utility entry-meta {
-  @apply flex flex-col items-start gap-2 pt-1.5 meta;
+  @apply flex flex-wrap items-baseline gap-x-3.5 gap-y-1 meta leading-em;
+
+  @container (width >= 720px) {
+    @apply flex-col items-start gap-1.25 pt-1.75;
+  }
 }
 
 @utility entry-title {
-  @apply font-display text-entry font-bold text-ink transition-colors duration-200 ease-in-out;
-
-  :where(.entry:hover) & {
-    @apply text-accent;
-  }
+  @apply mb-2 font-display text-et font-bold text-ink;
+  text-wrap: balance;
 }
 
 @utility entry-link {
-  @apply text-inherit no-underline focus-ring;
-
-  &::after {
-    @apply absolute inset-0 content-[''];
-  }
+  @apply text-inherit no-underline hover:text-accent focus-ring;
 }
 
 @utility entry-blurb {
-  @apply mt-2 max-w-measure text-ink-muted;
+  @apply max-w-eb text-eb text-ink-muted;
+  text-wrap: pretty;
 }
 
 @utility post-tags {
-  @apply flex flex-wrap gap-x-3 gap-y-1;
+  @apply flex flex-wrap gap-x-2.5 gap-y-0.5;
 }
 
 @utility post-tag {
-  @apply relative z-10 text-accent no-underline hover:underline focus-ring;
+  @apply text-mk-pink-text no-underline hover:underline focus-ring;
 
   &::before {
     @apply content-['#'];
@@ -549,7 +559,7 @@
   }
 
   &.blue {
-    @apply text-mk-blue;
+    @apply text-mk-blue-text;
   }
 
   &.violet {

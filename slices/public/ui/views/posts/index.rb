@@ -13,7 +13,7 @@ module Public
             content_for(:title, t(".title"))
             content_for(:canonical, url(:writing, **@posts.query))
 
-            section(class: "writing") do
+            section do
               h1(class: "sr-only") { t(".heading") }
               span(class: "kicker") { t(".kicker") }
               @posts.rows.empty? ? p(class: "writing-empty") { t(".empty") } : entries
