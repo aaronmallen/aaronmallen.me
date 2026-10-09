@@ -16,6 +16,7 @@ RSpec.describe "MCP reach", type: :app do
       "admin.operations.build_posts_page" => "builds the admin's posts screen; list_posts reads the same posts",
       "admin.operations.build_project_editor" => "builds the admin's project editor; save_project covers a project",
       "admin.operations.build_projects_page" => "builds the admin's projects screen; list_projects reads the same",
+      "admin.operations.build_pull_request_page" => "builds the admin's pull request page; read_pull_request reads it",
       "admin.operations.build_review_page" => "builds the admin's review screen; read_review reads the same review",
       "admin.operations.build_search_page" => "builds the admin's search screen; the search tool runs the same search",
       "admin.operations.build_social_page" => "builds the admin's social screen; list_social_posts reads the same",

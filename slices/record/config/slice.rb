@@ -16,7 +16,8 @@ module Record
       operations.record_linear_issue_sync_outcome operations.record_projects_sync_outcome
       operations.record_rollup_sync_outcome operations.save_journal_entry operations.save_review_note
       operations.update_journal_entry
-      repos.commit_queries repos.journal_entry_queries repos.review_note_queries repos.sync_state_queries
+      repos.commit_queries repos.journal_entry_queries repos.pull_request_queries repos.review_note_queries
+      repos.sync_state_queries
     ]
   end
 end

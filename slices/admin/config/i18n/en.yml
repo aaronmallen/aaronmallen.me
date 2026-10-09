@@ -2269,6 +2269,23 @@ en:
           work_title: "Shown under Work on /projects"
         new:
           title: "New project"
+      pull_requests:
+        show:
+          back: "Activity"
+          closed: "Closed"
+          github: "View on GitHub"
+          kicker: "Pull request #%{number}"
+          label: "GitHub"
+          merged: "Merged"
+          no_body: "No description."
+          opened: "Opened"
+          state: "State"
+          states:
+            closed: "Closed"
+            draft: "Draft"
+            merged: "Merged"
+            open: "Open"
+          title: "Description"
       review:
         show:
           commits:

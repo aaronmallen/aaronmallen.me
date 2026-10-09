@@ -142,6 +142,7 @@ module Admin
       "/projects/work/:id/records/:other_kind/:other_id/delete",
       to: "projects.unlink_work_record", as: :unlink_work_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
+    get "/pull-requests/:id", to: "pull_requests.show", as: :pull_request, id: ID
     get "/review", to: "review.show", as: :review
     post "/review/note", to: "review.save_note", as: :save_review_note
     post "/saved-views", to: "saved_views.create", as: :create_saved_view
