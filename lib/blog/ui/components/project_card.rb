@@ -4,6 +4,7 @@ module Blog
   module UI
     module Components
       class ProjectCard < Component
+        SCHEME = %r{\A[a-z][a-z0-9+.-]*://}i
         STARS = :stars
 
         prop :name, Blog::Types::String
@@ -12,25 +13,37 @@ module Blog
         prop :stars, Blog::Types::Integer, default: 0
         prop :release, Blog::Types::String.optional
         prop :url, Blog::Types::String.optional
+        prop :past, Blog::Types::Bool, default: false
 
         def view_template
           card do
-            span(class: "n") { @name }
+            span(class: "pn") { @name }
             meta
             p { @tagline } if written?(@tagline)
+            foot
           end
         end
 
         private
 
         def card(&)
-          written?(@url) ? a(class: "proj", href: @url, &) : div(class: "proj", &)
+          classes = ["pc", ("past" if @past)]
+          written?(@url) ? a(class: classes, href: @url, &) : div(class: classes, &)
+        end
+
+        def foot
+          return unless written?(@url)
+
+          span(class: "pu") do
+            plain @url.sub(SCHEME, "")
+            Icon("fa-solid fa-arrow-up-right-from-square")
+          end
         end
 
         def meta
           parts = meta_parts
 
-          span(class: "s") { parts.each_with_index { |part, index| meta_part(part, index) } } unless parts.empty?
+          span(class: "ps") { parts.each_with_index { |part, index| meta_part(part, index) } } unless parts.empty?
         end
 
         def meta_part(part, index)

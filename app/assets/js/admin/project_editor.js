@@ -19,11 +19,11 @@ function setupProjectEditor(form) {
   const render = () => {
     save.disabled = name.value.trim() === "";
     fill(subRepo, repo.value, subRepo.dataset.editorRepo);
-    fill(preview.querySelector(".n"), name.value, preview.dataset.name);
+    fill(preview.querySelector(".pn"), name.value, preview.dataset.name);
     fill(preview.querySelector("p"), tagline.value, preview.dataset.tagline);
   };
 
-  settle(preview.querySelector("a.proj"));
+  settle(preview.querySelector("a.pc"));
   form.addEventListener("input", render);
   render();
 }

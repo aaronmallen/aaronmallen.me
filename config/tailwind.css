@@ -150,9 +150,9 @@
   --text-seg--line-height: 1.4;
   --text-event-time: 0.75rem;
   --text-event-time--line-height: 1.4;
-  --text-proj: 1.3rem;
-  --text-proj--line-height: 1.2;
-  --text-proj--letter-spacing: -0.02em;
+  --text-pn: clamp(1.1rem, 1.2vw, 1.3rem);
+  --text-ps: 0.75rem;
+  --text-pu-icon: 0.65625rem;
   --text-work: 1.08rem;
   --text-work--line-height: 1.25;
   --text-work--letter-spacing: -0.01em;
@@ -200,6 +200,9 @@
   --spacing-kt: clamp(56px, 5.5vw, 96px);
   --spacing-stick: 92px;
   --container-ld: 56ch;
+  --container-pc: 320px;
+  --spacing-pc: clamp(20px, 1.7vw, 30px);
+  --spacing-pgrid: clamp(14px, 1.4vw, 24px);
   --radius-panel: 18px;
   --radius-menu: 14px;
   --radius-field: 10px;
@@ -562,41 +565,52 @@
   }
 }
 
-@utility projects {
-  & > .page-title {
-    @apply mb-3.5;
-  }
-}
-
-@utility past-title {
-  @apply kicker mt-13;
-}
-
 @utility work-title {
   @apply kicker mt-13;
 }
 
-@utility projs {
-  @apply flex flex-col border-t border-line;
+@utility pgrid {
+  @apply grid gap-pgrid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--container-pc)), 1fr));
 }
 
-@utility proj {
-  @apply block border-b border-line py-6 text-inherit no-underline hover:no-underline focus-ring;
+@utility pc {
+  @apply flex flex-col gap-2 rounded-panel border border-line bg-ground-sunk p-pc text-ink no-underline;
+  @apply transition-colors duration-150 hover:no-underline;
+  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
 
-  & .n {
-    @apply font-display text-proj font-bold text-ink;
+  &:is(a):hover {
+    @apply border-ink-muted;
   }
 
-  &:is(a):hover .n {
+  &.past {
+    @apply bg-transparent;
+  }
+
+  & .pn {
+    @apply font-mono text-pn font-medium text-ink;
+  }
+
+  &:is(a):hover .pn {
     @apply text-accent;
   }
 
-  & .s {
-    @apply ml-2.5 font-mono text-meta text-mk-sand-text;
+  & .ps {
+    @apply font-mono text-ps text-mk-sand-text;
   }
 
   & p {
-    @apply mt-1.5 max-w-measure text-post text-ink-muted;
+    @apply m-0 max-w-none text-base/normal text-ink-muted;
+    text-wrap: pretty;
+  }
+
+  & .pu {
+    @apply mt-auto flex items-center gap-2 pt-2 font-mono text-ps text-ink-muted;
+    overflow-wrap: anywhere;
+
+    & i {
+      @apply text-pu-icon;
+    }
   }
 }
 

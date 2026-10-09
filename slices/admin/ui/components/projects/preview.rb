@@ -11,7 +11,7 @@ module Admin
 
           def view_template
             Card(title: t(".heading")) do
-              div(class: "projs", data: preview_data) { card }
+              div(class: "pgrid", data: preview_data) { card }
             end
           end
 

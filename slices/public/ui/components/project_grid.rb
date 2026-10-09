@@ -5,9 +5,10 @@ module Public
     module Components
       class ProjectGrid < Component
         prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+        prop :past, Blog::Types::Bool, default: false
 
         def view_template
-          div(class: "projs") do
+          div(class: "pgrid") do
             @projects.each { |project| card(project) }
           end
         end
@@ -22,6 +23,7 @@ module Public
             stars: project.stars,
             release: project.release,
             url: project.url,
+            past: @past,
           )
         end
       end

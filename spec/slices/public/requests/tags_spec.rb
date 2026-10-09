@@ -178,7 +178,7 @@ RSpec.describe "Tags", type: :request do
     create(:project, name: "sai", tags: %w[ruby])
     get "/writing/tags/ruby"
 
-    expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[sai])
+    expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[sai])
   end
 
   describe "paging" do
@@ -228,10 +228,10 @@ RSpec.describe "Tags", type: :request do
     it "lists the projects on the first page only", :aggregate_failures do
       create(:project, name: "sai", tags: %w[ruby])
       get "/writing/tags/ruby"
-      expect(page).to have_css(".projs .proj .n", exact_text: "sai")
+      expect(page).to have_css(".pgrid .pc .pn", exact_text: "sai")
 
       get "/writing/tags/ruby?page=2"
-      expect(Capybara.string(last_response.body)).to have_no_css(".projs")
+      expect(Capybara.string(last_response.body)).to have_no_css(".pgrid")
     end
 
     it "returns 404 for a page past the end" do
@@ -270,7 +270,7 @@ RSpec.describe "Tags", type: :request do
 
       it "lists the post and the project under their headings", :aggregate_failures do
         expect(page).to have_css(".entries .entry-title", text: "Hello")
-        expect(page).to have_css(".projs .proj .n", exact_text: "sai")
+        expect(page).to have_css(".pgrid .pc .pn", exact_text: "sai")
       end
     end
 
@@ -279,7 +279,7 @@ RSpec.describe "Tags", type: :request do
       get "/writing/tags/ruby"
 
       expect(page.all("h2.tagged-title").map(&:text)).to eq(%w[Writing])
-      expect(page).to have_no_css(".projs")
+      expect(page).to have_no_css(".pgrid")
     end
 
     it "leaves the writing heading out when only a project carries the tag", :aggregate_failures do
@@ -301,7 +301,7 @@ RSpec.describe "Tags", type: :request do
       create(:project, name: "sai", tags: %w[ruby], stars: 21, release: "v1.0", tagline: "Terminal colors")
       get "/writing/tags/ruby"
 
-      expect(page).to have_css(".proj .s", exact_text: "ruby · ★ 21 · v1.0")
+      expect(page).to have_css(".pc .ps", exact_text: "ruby · ★ 21 · v1.0")
     end
   end
 end

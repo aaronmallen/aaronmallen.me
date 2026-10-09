@@ -26,13 +26,13 @@ RSpec.describe "Admin project editor", type: :feature do
     it "shows the name in the preview card as it is typed" do
       fill_in "project[name]", with: "sai"
 
-      expect(page).to have_css(".proj .n", text: "sai")
+      expect(page).to have_css(".pc .pn", text: "sai")
     end
 
     it "shows the tagline in the preview card as it is typed" do
       fill_in "project[tagline]", with: "Terminal colors"
 
-      expect(page).to have_css(".proj p", text: "Terminal colors")
+      expect(page).to have_css(".pc p", text: "Terminal colors")
     end
 
     it "shows the repository under the name as it is typed" do
@@ -68,7 +68,7 @@ RSpec.describe "Admin project editor", type: :feature do
     before { visit "/admin/projects/#{project.id}/edit" }
 
     it "keeps the preview card out of the tab order" do
-      expect(page).to have_css("a.proj[tabindex='-1']")
+      expect(page).to have_css("a.pc[tabindex='-1']")
     end
   end
 end

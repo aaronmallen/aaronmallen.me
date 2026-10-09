@@ -202,16 +202,16 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         create(:project, **values)
         get "/admin/projects/#{repo.live.first.id}/edit"
 
-        expect(page).to have_css(".projs .proj .n", text: "sai")
-        expect(page).to have_css(".projs .proj .s", text: "ruby · ★ 21 · v1.0.0")
-        expect(page).to have_css(".projs .proj p", text: "Terminal colors")
+        expect(page).to have_css(".pgrid .pc .pn", text: "sai")
+        expect(page).to have_css(".pgrid .pc .ps", text: "ruby · ★ 21 · v1.0.0")
+        expect(page).to have_css(".pgrid .pc p", text: "Terminal colors")
       end
 
       it "stands in for an empty name and tagline", :aggregate_failures do
         get "/admin/projects/new"
 
-        expect(page).to have_css(".proj .n", text: i18n.t("ui.components.projects.preview.name_placeholder"))
-        expect(page).to have_css(".proj p", text: i18n.t("ui.components.projects.preview.tagline_placeholder"))
+        expect(page).to have_css(".pc .pn", text: i18n.t("ui.components.projects.preview.name_placeholder"))
+        expect(page).to have_css(".pc p", text: i18n.t("ui.components.projects.preview.tagline_placeholder"))
       end
     end
 

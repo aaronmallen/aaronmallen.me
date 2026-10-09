@@ -57,7 +57,7 @@ RSpec.describe "Home", type: :request do
       { "few" => 2, "most" => 30, "none" => 0, "some" => 9 }.each { |name, stars| create(:project, name:, stars:) }
       get "/"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[most some few])
+      expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[most some few])
     end
 
     it "leaves out an archived project with more stars" do
@@ -65,7 +65,7 @@ RSpec.describe "Home", type: :request do
       create(:project, name: "here", stars: 1)
       get "/"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])
+      expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[here])
     end
 
     it "leaves out archived projects" do
@@ -73,7 +73,7 @@ RSpec.describe "Home", type: :request do
       create(:project, name: "here")
       get "/"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])
+      expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[here])
     end
 
     it "leaves out private projects" do
@@ -81,14 +81,14 @@ RSpec.describe "Home", type: :request do
       create(:project, name: "here")
       get "/"
 
-      expect(page.all(".projs .proj .n").map(&:text)).to eq(%w[here])
+      expect(page.all(".pgrid .pc .pn").map(&:text)).to eq(%w[here])
     end
 
     it "renders each card the way the projects page does" do
       create(:project, name: "sai", tags: %w[ruby], stars: 21, release: "v1.0", tagline: "Terminal colors")
       get "/"
 
-      expect(page).to have_css(".proj .s", exact_text: "ruby · ★ 21 · v1.0")
+      expect(page).to have_css(".pc .ps", exact_text: "ruby · ★ 21 · v1.0")
     end
 
     it "names the section with a kicker and links to the projects page", :aggregate_failures do
@@ -103,7 +103,7 @@ RSpec.describe "Home", type: :request do
       get "/"
 
       expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.pages.index.no_projects"))
-      expect(page).to have_no_css(".projs")
+      expect(page).to have_no_css(".pgrid")
     end
   end
 
