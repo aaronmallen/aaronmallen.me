@@ -7,6 +7,7 @@ module Admin
         class Connect < Component
           CLOSE_ICON = "fa-solid fa-xmark"
           LINK_ICON = "fa-solid fa-link"
+          PLAIN = %w[handle].freeze
 
           prop :definition, Blog::Types::Instance(::Services::Definition)
           prop :errors, Blog::Types::Hash
@@ -29,7 +30,7 @@ module Admin
           def field(name)
             Field(label: t(".fields").fetch(name.to_sym), name: name.to_sym, errors: @errors,
                   error: FieldError) do |control|
-              Input(**control, type: "password", autocomplete: "off", name: "connection[#{name}]")
+              Input(**control, type: input_type(name), autocomplete: "off", name: "connection[#{name}]")
             end
           end
 
@@ -39,6 +40,8 @@ module Admin
               Button(small: true, variant: :gh, icon: CLOSE_ICON, **close)
             end
           end
+
+          def input_type(name) = PLAIN.include?(name) ? "text" : "password"
         end
       end
     end

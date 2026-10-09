@@ -12,6 +12,8 @@ module Social
       operations.compose_announcement operations.record_post_webmentions repos.post_queries
     ], from: :posts
 
+    import keys: %w[repos.connection_queries], from: :services
+
     export %w[
       networks.all operations.act_on_webmentions operations.compose_social_post operations.delete_person
       operations.delete_social_post operations.expand_for_network operations.lock_editable_social_post

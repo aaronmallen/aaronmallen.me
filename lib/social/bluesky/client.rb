@@ -23,17 +23,21 @@ module Social
       SEARCH_ACTORS = "app.bsky.actor.searchActorsTypeahead"
       XRPC_PATH = "/xrpc"
 
-      def initialize(handle:, password:, pds:, public_api:, scan_links:, scan_tags:)
-        @handle = handle
-        @password = password
+      def initialize(connections:, pds:, public_api:, scan_links:, scan_tags:)
+        @accounts = Accounts.new(connections) { sign_in(**it) }
         @pds = pds
         @public_api = public_api
         @scan_links = scan_links
         @scan_tags = scan_tags
-        @sessions = Sessions.new { sign_in }
       end
 
-      def configured? = !handle.nil? && !password.nil?
+      def account(handle:, app_password:)
+        session = sign_in(handle:, app_password:)
+
+        { account_id: session.did, label: "@#{session.handle}" }
+      end
+
+      def configured? = accounts.any?
 
       def count(text) = text.to_s.grapheme_clusters.size
 
@@ -51,14 +55,17 @@ module Social
         )
       end
 
-      def inspect = "#<#{self.class.name} configured=#{configured?}>"
+      def inspect = "#<#{self.class.name}>"
 
       def limit = LIMIT
 
       def max_bytes = MAX_BYTES
 
       def post(text, idempotency_key:, mentions: [], reply_to: nil)
+        sessions = accounts.sessions(reply_to && address(reply_to)[:repo])
+
         sessions.use do |session|
+          accounts.wrote(session.did, sessions)
           uri = write(record(text, mentions, reply_to, session), session, rkey(idempotency_key))
 
           Structs::RemotePost.new(id: uri, url: web_url(session.handle, uri))
@@ -77,7 +84,7 @@ module Social
 
       private
 
-      attr_reader :handle, :password, :pds, :public_api, :scan_links, :scan_tags, :sessions
+      attr_reader :accounts, :pds, :public_api, :scan_links, :scan_tags
 
       def address(uri)
         match = AT_URI.match(uri.to_s) or raise Error, "#{uri} is not an at:// URI"
@@ -128,8 +135,8 @@ module Social
 
       def rkey(key) = Tid.for(key.part.id, key.part.created_at)
 
-      def sign_in
-        body = procedure(pds, "com.atproto.server.createSession", identifier: handle, password:)
+      def sign_in(handle:, app_password:)
+        body = procedure(pds, "com.atproto.server.createSession", identifier: handle, password: app_password)
         did, author, token = body.values_at("did", "handle", "accessJwt")
         raise Error, "Bluesky returned an incomplete session for #{handle}" unless did && author && token
 

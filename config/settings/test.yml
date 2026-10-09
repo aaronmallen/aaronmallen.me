@@ -8,8 +8,6 @@ backup_store:
   endpoint: null
   secret_key: null
 bluesky:
-  app_password: null
-  handle: aaronmallen.dev
   profile_url: https://bsky.app/profile/aaronmallen.dev
 database:
   name: <%= [ENV.fetch("DATABASE_NAME", "blog"), "test", ENV["WORKSPACE_ID"]].compact.join("_").to_json %>

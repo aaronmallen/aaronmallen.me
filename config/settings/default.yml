@@ -18,8 +18,6 @@ backup_store:
   region: <%= ENV["BACKUP_STORE_REGION"].to_json %>
   secret_key: <%= ENV["BACKUP_STORE_SECRET_KEY"].to_json %>
 bluesky:
-  app_password: <%= ENV["BLUESKY_APP_PASSWORD"].to_json %>
-  handle: aaronmallen.dev
   profile_url: https://bsky.app/profile/aaronmallen.dev
 client_registration:
   throttle_limit: <%= ENV["CLIENT_REGISTRATION_THROTTLE_LIMIT"].to_json %>

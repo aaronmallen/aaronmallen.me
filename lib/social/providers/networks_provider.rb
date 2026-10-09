@@ -15,11 +15,9 @@ module Social
           { Blog::Types::NetworkName["bluesky"] => bluesky, Blog::Types::NetworkName["mastodon"] => mastodon }.freeze
         end
 
-        def bluesky(settings, http, scan_links:, scan_tags:)
-          handle, password = credentials(settings.bluesky, :handle, :app_password)
-
+        def bluesky(connections, http, scan_links:, scan_tags:)
           Bluesky::Client.new(
-            handle:, password:, scan_links:, scan_tags:,
+            connections:, scan_links:, scan_tags:,
             pds: json(http, url: PDS_URL, params_encoder: Faraday::FlatParamsEncoder),
             public_api: json(http, url: PUBLIC_URL, params_encoder: Faraday::FlatParamsEncoder),
           )

@@ -3,17 +3,21 @@
 module Admin
   module Operations
     class ListSocialAccounts
-      include Deps["settings", list_networks: "operations.list_networks"]
+      include Deps[
+        "settings",
+        connection_queries: "services.repos.connection_queries",
+        list_networks: "operations.list_networks",
+      ]
 
       def call
-        list_networks.call.select(&:configured).map { account(it.name) }
+        list_networks.call.select(&:configured).flat_map { accounts(it.name) }
       end
 
       private
 
-      def account(name) = name == Blog::Types::NetworkName["bluesky"] ? bluesky_account : mastodon_account
+      def accounts(name) = name == Blog::Types::NetworkName["bluesky"] ? bluesky_accounts : [mastodon_account]
 
-      def bluesky_account = "@#{settings.bluesky[:handle]}"
+      def bluesky_accounts = connection_queries.for(Blog::Types::NetworkName["bluesky"]).map(&:label)
 
       def mastodon_account
         url = settings.mastodon[:url]

@@ -98,6 +98,18 @@ RSpec.describe "Admin connected services", type: :request do
         expect(available).to include("Fakebook")
       end
 
+      it "offers no form while the site has no check for it" do
+        get "/admin/services?connect=fake"
+
+        expect(page).to have_no_css("form[action='/admin/services/fake']")
+      end
+
+      it "refuses a connect while the site has no check for it" do
+        connect("fake", token: "abcd")
+
+        expect(last_response.status).to eq(404)
+      end
+
       it "shows in its group once an account connects" do
         add_connection("fake", "1", "ghost")
         get "/admin/services"
@@ -200,12 +212,6 @@ RSpec.describe "Admin connected services", type: :request do
       expect(page).to have_css(".settings-side form[action='/admin/services/linear'] input[type='password']")
     end
 
-    it "offers no form for a service with no check yet" do
-      get "/admin/services?connect=bluesky"
-
-      expect(page).to have_no_css("form[action='/admin/services/bluesky']")
-    end
-
     describe "with a key Linear accepts" do
       before do
         stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")
@@ -249,12 +255,6 @@ RSpec.describe "Admin connected services", type: :request do
 
       expect(page).to have_css(".field-error", text: "That account is already connected")
       expect(connections.size).to eq(1)
-    end
-
-    it "refuses a service it cannot check" do
-      connect("bluesky", handle: "aaron.bsky.social", app_password: "abcd")
-
-      expect(last_response.status).to eq(404)
     end
 
     describe "a second workspace" do

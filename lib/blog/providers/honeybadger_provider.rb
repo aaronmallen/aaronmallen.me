@@ -12,6 +12,7 @@ module Blog
       ATTEMPT_THRESHOLD = Sidekiq::JobRetry::DEFAULT_MAX_RETRY_ATTEMPTS
       FILTER_KEYS = %w[
         api_key
+        app_password
         authorization
         bluesky_did
         bluesky_handle

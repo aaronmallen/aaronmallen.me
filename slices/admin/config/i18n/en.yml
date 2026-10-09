@@ -1360,8 +1360,10 @@ en:
           connect: "Connect %{name}"
           fields:
             api_key: "API key"
+            app_password: "App password"
+            handle: "Handle"
           heading: "Connect %{name}"
-          hint: "The site checks the key with %{name} before it saves it, and keeps it encrypted."
+          hint: "The site checks these with %{name} before it saves them, and keeps them encrypted."
         detail:
           access: "Access"
           app_credentials: "App credentials"
@@ -1378,7 +1380,9 @@ en:
           powers: "Powers"
           set: "set"
         field_error:
+          app_password_blank: "Paste an app password first."
           blank: "Paste a key first."
+          handle_blank: "Type a handle first."
         picker:
           asks: "The site will ask for"
           away: "You'll approve access on %{name}, then come straight back here."

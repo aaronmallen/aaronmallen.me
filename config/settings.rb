@@ -140,7 +140,7 @@ module Blog
 
     setting :backup_store, default: {}, constructor: object_store
 
-    setting :bluesky, default: {}, constructor: Schema.schema(app_password?: Value, handle?: Value, profile_url?: Value)
+    setting :bluesky, default: {}, constructor: Schema.schema(profile_url?: Value)
 
     setting :client_registration, default: {}, constructor: throttle(
       DEFAULT_CLIENT_REGISTRATION_THROTTLE_LIMIT,

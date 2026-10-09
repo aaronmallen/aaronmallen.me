@@ -239,6 +239,15 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
         .with(body: { identifier: "ada.example", password: "secret" })).to have_been_made
     end
 
+    it "signs in as an account connected since the last post with no restart" do
+      deliver(social_post, "bluesky")
+      connect_bluesky({ app_password: "pw-two", handle: "two.example" })
+      deliver(queued(targets: %w[bluesky], parts: ["again"]), "bluesky")
+
+      expect(a_request(:post, bluesky_url("com.atproto.server.createSession"))
+        .with(body: { identifier: "two.example", password: "pw-two" })).to have_been_made
+    end
+
     it "writes the record to the author's feed" do
       deliver(social_post, "bluesky")
 
