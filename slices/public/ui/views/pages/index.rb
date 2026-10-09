@@ -11,6 +11,9 @@ module Public
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
+            head_wording
+            content_for(:social_title, Hanami.app.settings.owner_name)
+
             h1(class: "sr-only") { t(".heading") }
             div(class: "g") do
               writing

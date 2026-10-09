@@ -10,7 +10,7 @@ module Public
           prop :posts, Blog::Types::Instance(Blog::Structs::Paged)
 
           def view_template
-            content_for(:title, t(".title"))
+            head_wording
             content_for(:canonical, url(:writing, **@posts.query))
 
             section do

@@ -6,7 +6,7 @@ RSpec.describe "The owner", type: :request do
   it "titles the page with the name the settings give" do
     get "/"
 
-    expect(last_response.body).to include("<title>Ada Lovelace</title>")
+    expect(last_response.body).to include("<title>Writing and projects | Ada Lovelace</title>")
   end
 
   it "names the site in the navigation" do

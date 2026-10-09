@@ -20,7 +20,7 @@ module Public
           prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:title, t(".title"))
+            head_wording
 
             page_head
             div(class: "g") do

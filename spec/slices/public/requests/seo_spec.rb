@@ -12,7 +12,7 @@ RSpec.describe "SEO tags", type: :request do
   def publish(**attributes) = create(:post, :published, slug: "hello", title: "Hello", **attributes)
 
   describe "a page with nothing of its own" do
-    before { get "/about" }
+    before { get "/privacy" }
 
     it "calls it a website" do
       expect(property("og:type")).to eq(%w[website])
@@ -23,11 +23,11 @@ RSpec.describe "SEO tags", type: :request do
     end
 
     it "titles the card with the page, not the whole document title" do
-      expect(property("og:title")).to eq(%w[About])
+      expect(property("og:title")).to eq(%w[Privacy])
     end
 
     it "builds the canonical link from the site setting, not the host that asked" do
-      expect(canonical).to eq("https://aaronmallen.me/about")
+      expect(canonical).to eq("https://aaronmallen.me/privacy")
     end
 
     it "points the card at the canonical link" do
@@ -62,12 +62,44 @@ RSpec.describe "SEO tags", type: :request do
   describe "the home page" do
     before { get "/" }
 
-    it "falls back to the owner for a page with no title" do
+    it "titles the card with the owner" do
       expect(property("og:title")).to eq(["Aaron Allen"])
+    end
+
+    it "says what the site is beside the owner in the document title" do
+      expect(page.find("title", visible: :all).text).to eq("Writing and projects | Aaron Allen")
     end
 
     it "roots the canonical link" do
       expect(canonical).to eq("https://aaronmallen.me/")
+    end
+  end
+
+  describe "the descriptions of the pages" do
+    def description_of(path)
+      get path
+      head = Capybara.string(last_response.body)
+      ["[name='description']", "[property='og:description']", "[name='twitter:description']"]
+        .map { |tag| head.all("meta#{tag}", visible: :all).map { it[:content] } }
+    end
+
+    before { publish(tags: %w[ruby]) }
+
+    let(:descriptions) { %w[/ /about /projects /contact /writing /writing/tags/ruby].to_h { [it, description_of(it)] } }
+
+    it "gives each page one description in the meta, Open Graph and Twitter tags", :aggregate_failures do
+      descriptions.each_value do |tags|
+        expect(tags).to all(contain_exactly(a_string_matching(/\S/)))
+        expect(tags.uniq.size).to eq(1)
+      end
+    end
+
+    it "gives each page a description of its own" do
+      expect(descriptions.values.uniq.size).to eq(descriptions.size)
+    end
+
+    it "names the tag on a tag page" do
+      expect(descriptions["/writing/tags/ruby"].flatten).to all(include("ruby"))
     end
   end
 

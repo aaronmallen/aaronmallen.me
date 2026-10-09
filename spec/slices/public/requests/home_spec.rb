@@ -124,10 +124,10 @@ RSpec.describe "Home", type: :request do
     expect(page.all(".g > section > .sh > h2").map(&:text)).to eq(%w[Writing Projects])
   end
 
-  it "titles the page with the site name" do
+  it "titles the page with what the site is and the owner's name" do
     get "/"
 
-    expect(page).to have_title("Aaron Allen")
+    expect(page).to have_title("Writing and projects | Aaron Allen", exact: true)
   end
 
   it "links the writing feed in the head" do

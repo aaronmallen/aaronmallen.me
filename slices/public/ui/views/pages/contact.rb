@@ -18,7 +18,7 @@ module Public
           prop :values, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
           def view_template
-            content_for(:title, t(".title"))
+            head_wording
 
             div(class: "g even") do
               div(class: "stick") do

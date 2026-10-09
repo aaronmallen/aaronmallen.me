@@ -101,6 +101,7 @@ en:
               contact: "contact form"
               github: "github"
               mastodon: "mastodon"
+          description: "Who I am, how I work and what I do away from the keyboard."
           heading: "Hi, I’m Aaron"
           hobbies:
             dnd:
@@ -130,6 +131,7 @@ en:
           title: "About"
         contact:
           count_separator: " / "
+          description: "Send me a message about a post, a project or anything else."
           fields:
             body: "Message"
             reference: "Website"
@@ -154,10 +156,12 @@ en:
         index:
           all_projects: "All projects"
           all_writing: "All writing"
+          description: "Software engineer in San Antonio, Texas, writing about Ruby, Rust and domain-driven design."
           heading: "Writing and projects"
           no_projects: "Nothing built yet."
           no_writing: "Nothing written yet."
           projects: "Projects"
+          title: "Writing and projects"
           writing: "Writing"
         privacy:
           address:
@@ -218,6 +222,7 @@ en:
             read_through: "A view that scrolls three quarters of the way down and stays 30 seconds counts as a read-through."
             script: "With JavaScript off, the script never runs and the analytics record nothing."
         projects:
+          description: "The Rust and Ruby libraries and tools I maintain in the open."
           heading: "Libraries I maintain in the open."
           kicker: "Projects"
           lede: "Small, opinionated tools in Rust and Ruby that grew out of problems I hit, most of them about making intent obvious."
@@ -225,6 +230,7 @@ en:
           title: "Projects"
       posts:
         index:
+          description: "Every post I have written on Ruby, Rust and building software, newest first."
           empty: "Nothing here yet."
           heading: "Writing"
           kicker: "Writing · newest first"
@@ -242,6 +248,7 @@ en:
           previous: "Previous"
       tags:
         show:
+          description: "Posts and projects tagged %{tag}."
           heading: "Tagged %{tag}"
           projects: "Projects"
           title: "Tagged %{tag}"

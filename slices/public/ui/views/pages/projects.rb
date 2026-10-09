@@ -9,7 +9,7 @@ module Public
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:title, t(".title"))
+            head_wording
             content_for(:image, card_image)
 
             section(class: "projects") do

@@ -12,7 +12,7 @@ module Public
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            content_for(:title, t(".title", tag: @tag))
+            head_wording(tag: @tag)
             content_for(:canonical, url(:tag, tag: @tag, **@posts.query))
             content_for(:feed, path(:tag_feed, tag: @tag)) unless @posts.rows.empty?
 
