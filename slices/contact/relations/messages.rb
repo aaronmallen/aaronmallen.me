@@ -3,7 +3,12 @@
 module Contact
   module Relations
     class Messages < Blog::DB::Relation
-      schema :messages, infer: true
+      schema :messages, infer: true do
+        associations do
+          has_many :message_tags
+          has_many :tags, through: :message_tags, view: :in_name_order
+        end
+      end
 
       def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
         capped_claim(received_since(since), visitor_hash:, limit:, total_limit:) do

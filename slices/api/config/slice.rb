@@ -109,6 +109,8 @@ module API
       endpoints.snooze_inbox_row
       endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
+      endpoints.tag_messages
+      endpoints.untag_messages
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_social_post
       endpoints.update_task_rule

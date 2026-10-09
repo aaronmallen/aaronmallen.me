@@ -10,12 +10,14 @@ module API
           body: Helpers::Schema::STRING,
           reply_to: Helpers::Schema::STRING,
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
+          tags: Helpers::Schema::TAGS,
           received_at: Helpers::Schema::STAMP,
         },
       ).freeze
 
       schema_attributes
       stamps :received_at
+      tag_names
     end
   end
 end

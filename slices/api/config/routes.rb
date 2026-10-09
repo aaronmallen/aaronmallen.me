@@ -61,7 +61,9 @@ module API
 
     post "/messages/bulk/delete", to: "bulk_messages.delete"
     post "/messages/bulk/read", to: "bulk_messages.read"
+    post "/messages/bulk/tag", to: "bulk_messages.tag"
     post "/messages/bulk/unread", to: "bulk_messages.unread"
+    post "/messages/bulk/untag", to: "bulk_messages.untag"
 
     post "/posts/bulk/delete", to: "bulk_posts.delete"
     post "/posts/bulk/tag", to: "bulk_posts.tag"

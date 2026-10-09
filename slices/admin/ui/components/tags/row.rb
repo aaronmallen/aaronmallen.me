@@ -5,7 +5,7 @@ module Admin
     module Components
       module Tags
         class Row < Component
-          KINDS = %i[posts projects journal_entries tasks decisions task_rules].freeze
+          KINDS = %i[posts projects journal_entries tasks decisions task_rules messages].freeze
           USE_KEYS = KINDS.to_h { [it, "ui.components.tags.row.uses.#{it}"] }.freeze
 
           prop :tag, Blog::Types::Instance(ROM::Struct)

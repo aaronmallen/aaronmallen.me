@@ -12,10 +12,11 @@ module Tags
         tasks: :task_tags,
         decisions: :decision_tags,
         task_rules: :task_rule_tags,
+        messages: :message_tags,
       }.freeze
       KINDS = {
         Blog::Types::TagScope["public"] => %i[posts projects],
-        Blog::Types::TagScope["private"] => %i[journal_entries tasks decisions task_rules],
+        Blog::Types::TagScope["private"] => %i[journal_entries tasks decisions task_rules messages],
       }.freeze
 
       schema :tags, infer: true

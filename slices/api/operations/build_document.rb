@@ -72,6 +72,8 @@ module API
         ["delete_messages", "post", "/messages/bulk/delete", OK],
         ["mark_messages_read", "post", "/messages/bulk/read", OK],
         ["mark_messages_unread", "post", "/messages/bulk/unread", OK],
+        ["tag_messages", "post", "/messages/bulk/tag", OK],
+        ["untag_messages", "post", "/messages/bulk/untag", OK],
         ["delete_posts", "post", "/posts/bulk/delete", OK],
         ["tag_posts", "post", "/posts/bulk/tag", OK],
         ["read_post", "get", "/posts/{id}", OK],

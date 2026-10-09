@@ -1480,6 +1480,9 @@ en:
             journal_entries:
               one: "%{count} journal entry"
               other: "%{count} journal entries"
+            messages:
+              one: "%{count} message"
+              other: "%{count} messages"
             posts:
               one: "%{count} post"
               other: "%{count} posts"

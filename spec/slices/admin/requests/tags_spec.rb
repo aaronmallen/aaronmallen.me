@@ -161,6 +161,13 @@ RSpec.describe "Admin tags", type: :request do
         expect(page.find(".tag-uses").text).to eq("1 journal entry · 1 task · 1 decision")
       end
 
+      it "counts the messages a private tag is on" do
+        2.times { Contact::Slice["repos.message_tag_mutations"].add(create(:message).id, "ruby") }
+        get "/admin/tags", scope: "private"
+
+        expect(page.find(".tag-uses").text).to eq("2 messages")
+      end
+
       it "says a tag nothing carries is unused" do
         create(:tag, name: "elixir")
         get "/admin/tags"
@@ -571,6 +578,14 @@ RSpec.describe "Admin tags", type: :request do
         send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
 
         records.each { |kind, record| expect(Spec::DB::Tagging.repo_for(kind).by_id(record.id).tags).to be_empty }
+      end
+
+      it "takes it off every message that carried it" do
+        message = create(:message)
+        Contact::Slice["repos.message_tag_mutations"].add(message.id, "chores")
+        send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
+
+        expect(Contact::Slice["repos.message_queries"].by_id(message.id).tags).to be_empty
       end
 
       it "leaves a published post that loses the tag as it was updated" do

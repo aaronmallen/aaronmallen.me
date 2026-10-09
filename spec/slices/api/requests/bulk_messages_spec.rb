@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "API bulk message actions", type: :request do
-  def act(name, ids) = call_api(name, JSON.generate(ids:))
+  def act(name, ids, **fields) = call_api(name, JSON.generate(ids:, **fields))
 
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
@@ -24,12 +24,19 @@ RSpec.describe "API bulk message actions", type: :request do
 
   def status_of(message) = repo.by_id(message.id)&.status
 
+  def tag_names(message) = repo.by_id(message.id).tags.map(&:name)
+
+  def tagged(*names) = create(:message).tap { |message| names.each { tagging.add(message.id, it) } }
+
+  def tagging = Contact::Slice["repos.message_tag_mutations"]
+
   def whole(message)
     {
       "id" => message.id,
       "subject" => message.subject,
       "body" => message.body,
       "reply_to" => message.reply_to,
+      "tags" => [],
       "received_at" => message.received_at.utc.iso8601,
     }
   end
@@ -95,6 +102,58 @@ RSpec.describe "API bulk message actions", type: :request do
     end
   end
 
+  describe "POST /api/v1/messages/bulk/tag" do
+    let!(:picked) { [tagged("billing"), tagged] }
+
+    it "adds the tag to each message and keeps the ones it had" do
+      answer = act("tag", ids(picked), tag: "Urgent")
+
+      expect([answer.fetch("messages").map { it.fetch("tags") }, status]).to eq([[%w[billing urgent], %w[urgent]], 200])
+    end
+
+    it "tags a message once when it already carries the tag" do
+      act("tag", ids(picked), tag: "billing")
+
+      expect(picked.map { tag_names(it) }).to eq([%w[billing], %w[billing]])
+    end
+
+    it "tags none when one ID is gone and names it" do
+      gone = gone_id
+
+      expect([act("tag", [*ids(picked), gone], tag: "urgent"), status, picked.map { tag_names(it) }])
+        .to eq([refusal("no message has the ID #{gone}"), 422, [%w[billing], []]])
+    end
+
+    it "refuses a tag that is not lowercase words" do
+      expect([act("tag", ids(picked), tag: "two words").fetch("errors"), status])
+        .to eq([{ "tag" => ["a tag is lowercase words"] }, 422])
+    end
+
+    it "refuses a blank tag" do
+      expect(act("tag", ids(picked), tag: " ").fetch("message")).to eq("tag: name the tag first")
+    end
+
+    it "refuses a request with no tag" do
+      expect(call_api("tag", JSON.generate(ids: ids(picked))).fetch("errors")).to eq("tag" => ["tag is missing"])
+    end
+  end
+
+  describe "POST /api/v1/messages/bulk/untag" do
+    let!(:picked) { [tagged("billing", "urgent"), tagged("billing")] }
+
+    it "takes the tag off each message" do
+      answer = act("untag", ids(picked), tag: "billing")
+
+      expect([answer.fetch("messages").map { it.fetch("tags") }, status]).to eq([[%w[urgent], []], 200])
+    end
+
+    it "untags none when one ID is gone" do
+      act("untag", [*ids(picked), gone_id], tag: "billing")
+
+      expect([status, picked.map { tag_names(it) }]).to eq([422, [%w[billing urgent], %w[billing]]])
+    end
+  end
+
   describe "the list of IDs" do
     it "acts on a repeated ID once" do
       message = create(:message)
@@ -143,6 +202,21 @@ RSpec.describe "API bulk message actions", type: :request do
 
       expect(mcp_answer("delete_messages", ids: [last.id]))
         .to eq("messages" => deleted.fetch("messages").map { it.merge("id" => last.id) })
+    end
+
+    it "tag as tag_messages does" do
+      message = create(:message)
+      tagged_answer = act("tag", [message.id], tag: "billing")
+
+      expect(mcp_answer("tag_messages", ids: [message.id], tag: "billing")).to eq(tagged_answer)
+    end
+
+    it "untag as untag_messages does" do
+      message = tagged("billing", "urgent")
+      untagged = act("untag", [message.id], tag: "billing")
+      tagging.add(message.id, "billing")
+
+      expect(mcp_answer("untag_messages", ids: [message.id], tag: "billing")).to eq(untagged)
     end
 
     it "refuse a gone ID with the message the endpoint gives" do
