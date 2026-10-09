@@ -12,11 +12,12 @@ module API
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
           tags: Helpers::Schema::TAGS,
           received_at: Helpers::Schema::STAMP,
+          snoozed_until: Helpers::Schema.nullable(Helpers::Schema::STAMP),
         },
       ).freeze
 
       schema_attributes
-      stamps :received_at
+      stamps :received_at, :snoozed_until
       tag_names
     end
   end

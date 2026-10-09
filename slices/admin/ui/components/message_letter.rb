@@ -29,6 +29,7 @@ module Admin
 
         def acts
           @message.status == UNREAD ? mark(READ, ".mark_read") : mark(UNREAD, ".mark_unread")
+          snoozed? ? wake : snooze
           div(class: "msg-letter-far") do
             mark(SPAM, ".spam", variant: :warn)
             delete(".delete", ".confirm_delete")
@@ -51,12 +52,27 @@ module Admin
           end
         end
 
+        def snooze
+          Inbox::Snooze(kind: "message", id: @message.id, action: path(:admin_snooze_message, id: @message.id)) do
+            input(type: "hidden", name: "filter", value: @filter)
+          end
+        end
+
+        def snoozed? = @message.snoozed_until&.>(Time.now)
+
         def spam? = @message.status == SPAM
 
         def spam_acts
           div(class: "msg-letter-far") do
             mark(READ, ".not_spam")
             delete(".delete_forever", ".confirm_delete_forever")
+          end
+        end
+
+        def wake
+          Form(action: path(:admin_wake_message, id: @message.id)) do
+            input(type: "hidden", name: "filter", value: @filter)
+            Button(type: "submit", small: true) { t(".wake") }
           end
         end
       end

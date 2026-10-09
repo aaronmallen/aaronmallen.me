@@ -91,6 +91,8 @@ module Admin
     post "/messages/:id/delete", to: "messages.destroy", as: :delete_message, id: ID
     post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
     post "/messages/:id/open", to: "messages.open", as: :open_message, id: ID
+    post "/messages/:id/snooze", to: "messages.snooze", as: :snooze_message, id: ID
+    post "/messages/:id/wake", to: "messages.wake", as: :wake_message, id: ID
     get "/people", to: "people.index", as: :people
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person

@@ -3119,6 +3119,10 @@
     @apply absolute top-[21px] left-0 size-1.5 rounded-full bg-mk-pink content-[''];
   }
 
+  &.snoozed {
+    @apply opacity-60;
+  }
+
   &:has(.msg-item-open:hover) {
     background: color-mix(in oklab, var(--color-ink) 3%, transparent);
   }
@@ -3142,6 +3146,10 @@
   & > time {
     @apply font-mono text-badge font-normal whitespace-nowrap text-ink-muted;
   }
+}
+
+@utility msg-item-snoozed {
+  @apply font-mono text-badge font-normal text-ink-muted;
 }
 
 @utility msg-item-title {

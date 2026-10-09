@@ -38,6 +38,7 @@ RSpec.describe "API bulk message actions", type: :request do
       "reply_to" => message.reply_to,
       "tags" => [],
       "received_at" => message.received_at.utc.iso8601,
+      "snoozed_until" => nil,
     }
   end
 
@@ -60,6 +61,12 @@ RSpec.describe "API bulk message actions", type: :request do
         message = picked.first
 
         expect(act(name, [message.id]).fetch("messages").first.except("status")).to eq(whole(message))
+      end
+
+      it "says when a snooze ends" do
+        message = create(:message, status: before, snoozed_until: Time.utc(2099, 1, 2, 3))
+
+        expect(act(name, [message.id]).fetch("messages").first.fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
       end
 
       it "leaves the rest alone" do

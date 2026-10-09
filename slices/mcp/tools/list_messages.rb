@@ -21,7 +21,7 @@ module MCP
       }.freeze
 
       description "List the messages people sent through the contact form, newest first: " \
-                  "the ID, subject, reply address, status, tags and when it came in. " \
+                  "the ID, subject, reply address, status, tags, when it came in and when a snooze ends. " \
                   "counts gives how many messages in the range sit in each status. " \
                   "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
                   "#{Untrusted::WARNING}. " \
@@ -60,6 +60,7 @@ module MCP
             status: message.status,
             tags: message.tags.map(&:name),
             received_at: message.received_at.utc.iso8601,
+            snoozed_until: message.snoozed_until&.utc&.iso8601,
           }
         end
       end

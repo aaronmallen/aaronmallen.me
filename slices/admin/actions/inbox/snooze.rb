@@ -11,9 +11,9 @@ module Admin
         def handle(request, response)
           picked = request.params[:pick] || request.params[:snoozed_until]
 
-          case snooze_inbox_row.call(request.params[:kind], record_id(request), picked)
-            in Success(snooze) then done(response, :snoozed, **until_words(snooze.snoozed_until))
-            in Failure(:invalid | :past => refusal) then done(response, refusal)
+          case snooze_inbox_row.call(kind(request), record_id(request), picked)
+            in Success(snooze) then done(request, response, :snoozed, **until_words(snooze.snoozed_until))
+            in Failure(:invalid | :past => refusal) then done(request, response, refusal)
             in Failure(:not_found) then halt 404
             else halt 500
           end
@@ -21,10 +21,14 @@ module Admin
 
         private
 
-        def done(response, key, **)
+        def back(_request) = routes.path(:admin_inbox)
+
+        def done(request, response, key, **)
           toast(response, "#{TOASTS}.#{key}", **)
-          response.redirect_to(routes.path(:admin_inbox))
+          response.redirect_to(back(request))
         end
+
+        def kind(request) = request.params[:kind]
 
         def until_words(time)
           {

@@ -35,8 +35,9 @@ RSpec.describe "MCP contact message tools", type: :request do
       message = create(:message, :read, subject: "Hello", reply_to: "someone@example.com", received_at: at(today, 0, 5))
       shown = { "subject" => untrusted("Hello"), "reply_to" => untrusted("someone@example.com"), "status" => "read" }
 
-      expect(listed.first)
-        .to eq("id" => message.id, **shown, "tags" => [], "received_at" => at(today, 0, 5).utc.iso8601)
+      expect(listed.first).to eq(
+        "id" => message.id, **shown, "tags" => [], "received_at" => at(today, 0, 5).utc.iso8601, "snoozed_until" => nil,
+      )
     end
 
     it "lists each message's tags in name order" do
@@ -44,6 +45,12 @@ RSpec.describe "MCP contact message tools", type: :request do
       %w[urgent billing].each { Contact::Slice["repos.message_tag_mutations"].add(message.id, it) }
 
       expect(listed.first.fetch("tags")).to eq(%w[billing urgent])
+    end
+
+    it "says when a snooze ends" do
+      create(:message, received_at: at(today, 0), snoozed_until: Time.utc(2099, 1, 2, 3))
+
+      expect(listed.first.fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
     end
 
     it "narrows to one status" do
@@ -118,7 +125,7 @@ RSpec.describe "MCP contact message tools", type: :request do
       message = create(:message)
 
       expect(mcp_answer("read_message", id: message.id).keys)
-        .to contain_exactly("id", "subject", "body", "reply_to", "status", "tags", "received_at")
+        .to contain_exactly("id", "subject", "body", "reply_to", "status", "tags", "received_at", "snoozed_until")
     end
 
     it "says which tags it carries" do
@@ -126,6 +133,12 @@ RSpec.describe "MCP contact message tools", type: :request do
       Contact::Slice["repos.message_tag_mutations"].add(message.id, "billing")
 
       expect(mcp_answer("read_message", id: message.id).fetch("tags")).to eq(%w[billing])
+    end
+
+    it "says when a snooze ends" do
+      message = create(:message, snoozed_until: Time.utc(2099, 1, 2, 3))
+
+      expect(mcp_answer("read_message", id: message.id).fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
     end
 
     it "calls an unknown ID an error" do

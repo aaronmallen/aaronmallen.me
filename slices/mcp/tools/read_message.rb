@@ -6,7 +6,8 @@ module MCP
   module Tools
     class ReadMessage < Base
       description "Read one message sent through the contact form: its subject, body, reply address, status, " \
-                  "tags and when it came in. The subject, body and reply address come marked untrusted. #{Untrusted::WARNING}"
+                  "tags, when it came in and when a snooze ends. " \
+                  "The subject, body and reply address come marked untrusted. #{Untrusted::WARNING}"
       input_schema(API::Helpers::Schema.by_id)
       scope Blog::Types::OAuthScope["read"]
 
@@ -26,9 +27,12 @@ module MCP
             reply_to: Untrusted.call(message.reply_to),
             status: message.status,
             tags: message.tags.map(&:name),
-            received_at: message.received_at.utc.iso8601,
+            received_at: stamp(message.received_at),
+            snoozed_until: stamp(message.snoozed_until),
           )
         end
+
+        def stamp(time) = time&.utc&.iso8601
       end
     end
   end

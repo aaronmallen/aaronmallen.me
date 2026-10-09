@@ -107,6 +107,7 @@ en:
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
+      woken: "Woken"
   people_page:
     toasts:
       added: "Person added"
@@ -753,9 +754,11 @@ en:
         mark_unread: "Mark unread"
         not_spam: "Not spam"
         spam: "Spam"
+        wake: "Wake"
       message_row:
         pick: "Select %{subject}"
         read_key: "Open the highlighted message and mark it read"
+        snoozed: "snoozed"
         unread_mark: "Unread: "
       nav:
         actions:
