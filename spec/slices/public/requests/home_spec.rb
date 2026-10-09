@@ -40,8 +40,8 @@ RSpec.describe "Home", type: :request do
       publish("hello", 1)
       get "/"
 
-      expect(page).to have_css(".sec > .sec-h > .kicker:first-child", text: "Writing")
-      expect(page).to have_css(".sec-h .sec-l[href='/writing']", text: "All writing")
+      expect(page).to have_css(".g > section > .sh > h2.kicker:first-child", text: "Writing")
+      expect(page).to have_css(".sh .sec-l[href='/writing']", text: "All writing")
     end
 
     it "says so when nothing is published", :aggregate_failures do
@@ -95,8 +95,8 @@ RSpec.describe "Home", type: :request do
       create(:project)
       get "/"
 
-      expect(page).to have_css(".sec > .sec-h > .kicker:first-child", text: "Projects")
-      expect(page).to have_css(".sec-h .sec-l[href='/projects']", text: "All projects")
+      expect(page).to have_css(".g > section > .sh > h2.kicker:first-child", text: "Projects")
+      expect(page).to have_css(".sh .sec-l[href='/projects']", text: "All projects")
     end
 
     it "says so when nothing is built", :aggregate_failures do
@@ -116,12 +116,12 @@ RSpec.describe "Home", type: :request do
     expect(page.all("h1").length).to eq(1)
   end
 
-  it "names its sections with a kicker rather than a heading" do
+  it "heads its sections with h2 kickers, writing first" do
     publish("hello", 1)
     create(:project)
     get "/"
 
-    expect(page).to have_no_css(".sec > h2, .sec-h h2")
+    expect(page.all(".g > section > .sh > h2").map(&:text)).to eq(%w[Writing Projects])
   end
 
   it "titles the page with the site name" do

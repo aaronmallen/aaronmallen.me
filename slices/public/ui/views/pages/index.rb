@@ -11,8 +11,8 @@ module Public
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            section(class: "home") do
-              h1(class: "sr-only") { t(".heading") }
+            h1(class: "sr-only") { t(".heading") }
+            div(class: "g") do
               writing
               projects
             end
@@ -28,21 +28,21 @@ module Public
           end
 
           def projects
-            section(class: "sec") do
+            section do
               section_head(".projects", :projects, ".all_projects")
               @projects.empty? ? Empty { t(".no_projects") } : ProjectGrid(projects: @projects)
             end
           end
 
           def section_head(kicker, route, key)
-            div(class: "sec-h") do
-              span(class: "kicker") { t(kicker) }
+            div(class: "sh") do
+              h2(class: "kicker") { t(kicker) }
               list_link(route, key)
             end
           end
 
           def writing
-            section(class: "sec") do
+            section do
               section_head(".writing", :writing, ".all_writing")
               @posts.empty? ? Empty { t(".no_writing") } : List(posts: @posts)
             end

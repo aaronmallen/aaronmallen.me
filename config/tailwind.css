@@ -502,14 +502,8 @@
   }
 }
 
-@utility home {
-  & > .sec + .sec {
-    @apply mt-14;
-  }
-}
-
-@utility sec-h {
-  @apply mb-4 flex items-baseline justify-between gap-4;
+@utility sh {
+  @apply mb-3.5 flex flex-wrap items-baseline justify-between gap-3;
 
   & > .kicker {
     @apply mb-0;
