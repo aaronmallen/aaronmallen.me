@@ -5,6 +5,7 @@ status: active
 created: 2026-10-08
 area: [social, admin, db]
 issue: "#793"
+amended: ["#805"]
 tags: [social, mastodon, bluesky, connections, delivery, composer]
 ---
 
@@ -24,7 +25,9 @@ A network no longer names one account, so it can no longer say where a post goes
 ## Decision
 
 A social post targets connected accounts, not networks. The composer lists each connected Mastodon and Bluesky
-account, all ticked, and the post goes to each one the owner leaves ticked.
+account, and the post goes to each one the owner leaves ticked. Since #805, a new post starts with the accounts the
+browser remembers from the last post sent or scheduled, or with the first account when none of those is still
+connected. A post being edited, or one shown again after an error, keeps its own picks.
 
 Each picked account gets one delivery row, unique on the post and the connection. Everything [ADR 0040][0040] says of
 a network's row now holds for an account's row: the claim, one job per row, the five retries, the resume from the
@@ -44,8 +47,8 @@ other account would mean changing the default first.
 
 ## Consequences
 
-A new account shows in the composer, ticked, the moment it connects, so a post goes to it unless the owner unticks
-it.
+A new account shows in the composer the moment it connects. Since #805 it starts unticked once the browser
+remembers other accounts, so a post goes to it only after the owner ticks it.
 
 Delivery history has to outlive the account. Disconnecting deletes the connection, so it cannot take the account's
 delivery rows with it.

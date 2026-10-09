@@ -29,7 +29,7 @@ RSpec.describe "Admin social mentions", type: :feature do
                       bluesky_did: "did:plc:alan")
       connect_social_networks
       sign_in_to_admin
-      visit "/admin/social"
+      remember_social_accounts
     end
 
     describe "the list" do
@@ -293,7 +293,7 @@ RSpec.describe "Admin social mentions", type: :feature do
       create(:person, name: "Grace Hopper", key: "grace-hopper")
       connect_social_networks
       sign_in_to_admin
-      visit "/admin/social"
+      remember_social_accounts
     end
 
     it "opens the dialog on Enter and inserts no token", :aggregate_failures do

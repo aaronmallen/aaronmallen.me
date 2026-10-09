@@ -22,6 +22,13 @@ RSpec.describe "Admin social composer", type: :feature do
 
   def open_accounts = find(".compose-accounts summary").click
 
+  def picked = all("[data-social-target]:checked", visible: :all).map(&:value)
+
+  def remember(*accounts)
+    execute_script("localStorage.setItem('social:accounts', arguments[0])", JSON.generate(accounts.map(&:to_s)))
+    visit "/admin/social"
+  end
+
   def remove_chip(account) = find("button[aria-label='Remove #{account}']").click
 
   def send_button = find("[data-social-send]")
@@ -37,6 +44,7 @@ RSpec.describe "Admin social composer", type: :feature do
     connect_social_networks
     sign_in_to_admin
     visit "/admin/social"
+    remember(social_account("mastodon").id, social_account("bluesky").id)
   end
 
   describe "the account picker" do
@@ -78,7 +86,7 @@ RSpec.describe "Admin social composer", type: :feature do
     it "shows the hosts of two picked accounts with the same handle" do
       connect_another_mastodon(host: "hachyderm.io")
       connect_another_mastodon(host: "mastodon.social")
-      visit "/admin/social"
+      remember_social_accounts
 
       expect(all(".compose-chip-host").map(&:text)).to eq(%w[hachyderm.io mastodon.social])
     end
@@ -87,7 +95,7 @@ RSpec.describe "Admin social composer", type: :feature do
       before do
         connect_another_bluesky
         connect_another_mastodon
-        visit "/admin/social"
+        remember_social_accounts
       end
 
       it "folds the chips past three into a button" do
@@ -153,7 +161,7 @@ RSpec.describe "Admin social composer", type: :feature do
       before do
         %w[a.example b.example c.example].each { connect_another_mastodon(host: it) }
         connect_another_bluesky
-        visit "/admin/social"
+        remember_social_accounts
         open_accounts
       end
 
@@ -175,6 +183,80 @@ RSpec.describe "Admin social composer", type: :feature do
 
         expect(page).to have_css(".compose-accounts summary", text: "3 of 6")
       end
+    end
+  end
+
+  describe "the remembered accounts" do
+    def bluesky_id = social_account("bluesky").id.to_s
+
+    def mastodon_id = social_account("mastodon").id.to_s
+
+    def pick_bluesky_and_write
+      toggle "Mastodon"
+      write "hello"
+    end
+
+    def reopen
+      find("[data-toast]")
+      visit "/admin/social"
+    end
+
+    def schedule_for(time)
+      find(".seg-option", text: "schedule").click
+      fill_in "Send time (Chicago)", with: time
+      send_button.click
+    end
+
+    it "starts a new post with the accounts last sent to" do
+      remember(bluesky_id)
+
+      expect(picked).to eq([bluesky_id])
+    end
+
+    it "remembers the accounts a sent post went to" do
+      pick_bluesky_and_write
+      send_button.click
+      reopen
+
+      expect(picked).to eq([bluesky_id])
+    end
+
+    it "remembers the accounts of a scheduled post" do
+      pick_bluesky_and_write
+      schedule_for "2099-03-01T09:30"
+      reopen
+
+      expect(picked).to eq([bluesky_id])
+    end
+
+    it "remembers nothing when a draft is saved" do
+      pick_bluesky_and_write
+      draft_button.click
+      reopen
+
+      expect(picked).to eq([mastodon_id, bluesky_id])
+    end
+
+    it "ticks the first account when none it remembers is still connected" do
+      remember(0)
+
+      expect(picked).to eq([mastodon_id])
+    end
+
+    it "ticks the first account with nothing remembered" do
+      execute_script("localStorage.clear()")
+      visit "/admin/social"
+
+      expect(picked).to eq([mastodon_id])
+    end
+
+    it "keeps a draft's own accounts when it opens" do
+      draft = Social::Slice["repos.social_post_mutations"].create_with_parts(
+        parts: %w[hi], targets: %w[bluesky], connection_ids: [bluesky_id.to_i], status: "draft",
+      )
+      visit "/admin/social?edit=#{draft.id}"
+
+      expect(picked).to eq([bluesky_id])
     end
   end
 

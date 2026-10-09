@@ -47,10 +47,16 @@ RSpec.describe "Admin social", type: :request do
         expect(page).to have_no_css("template [data-social-body][autofocus]", visible: :all)
       end
 
-      it "selects every connected network" do
+      it "ticks the first account on a new post" do
         get "/admin/social"
 
-        expect(page.all("[data-social-target]").map { it[:checked] }).to all(be_truthy)
+        expect(page.all("[data-social-target]", visible: :all).map { it[:checked] }).to eq([true, false])
+      end
+
+      it "lets the browser restore the last used accounts on a new post" do
+        get "/admin/social"
+
+        expect(page).to have_css("form[data-social-composer][data-social-restore]")
       end
 
       it "names both accounts and the queue in the sub-line" do
@@ -278,12 +284,12 @@ RSpec.describe "Admin social", type: :request do
 
       def targets = page.all("[data-social-target]", visible: :all)
 
-      it "lists every connected account, all ticked", :aggregate_failures do
+      it "lists every connected account, the first one ticked", :aggregate_failures do
         get "/admin/social"
 
         expect(targets.map(&:value)).to eq([social_account("mastodon").id, other.id,
                                             social_account("bluesky").id].map(&:to_s))
-        expect(targets.map { it[:checked] }).to all(be_truthy)
+        expect(targets.map { it[:checked] }).to eq([true, false, false])
       end
 
       it "names each account by its handle and host" do
@@ -303,7 +309,7 @@ RSpec.describe "Admin social", type: :request do
       it "counts the picked accounts on the toggle" do
         get "/admin/social"
 
-        expect(page.find(".compose-to summary").text.strip).to eq("3 of 3")
+        expect(page.find(".compose-to summary").text.strip).to eq("1 of 3")
       end
 
       it "counts only the accounts a draft picked" do
@@ -336,6 +342,15 @@ RSpec.describe "Admin social", type: :request do
         get "/admin/social", edit: draft.id
 
         expect(targets.select { it[:checked] }.map(&:value)).to eq([other.id.to_s])
+      end
+
+      it "leaves a draft's accounts for the browser to keep" do
+        draft = social_post_mutations.create_with_parts(
+          parts: %w[hi], targets: %w[mastodon], connection_ids: [other.id], status: "draft",
+        )
+        get "/admin/social", edit: draft.id
+
+        expect(page).to have_no_css("[data-social-restore]")
       end
     end
 
@@ -434,6 +449,13 @@ RSpec.describe "Admin social", type: :request do
         compose(parts: ["   "])
 
         expect(page).to have_css(".field-error", text: "Write something first")
+      end
+
+      it "keeps the accounts it was sent with", :aggregate_failures do
+        compose(parts: ["   "], targets: %w[bluesky])
+
+        expect(page.all("[data-social-target]", visible: :all).map { it[:checked] }).to eq([false, true])
+        expect(page).to have_no_css("[data-social-restore]")
       end
 
       it "keeps one empty part for a post sent with no parts" do

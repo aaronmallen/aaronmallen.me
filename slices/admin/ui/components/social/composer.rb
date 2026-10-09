@@ -21,7 +21,7 @@ module Admin
           prop :autofocus, Blog::Types::Bool, default: false
 
           def view_template
-            Form(action: action, data: { social_composer: "" }) do
+            Form(action: action, data: { social_composer: "", social_restore: @values[:restore_accounts] }) do
               Card(title: editing? ? t(".editing") : t(".title"), class: "social-compose") do
                 accounts
                 parts

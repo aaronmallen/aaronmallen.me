@@ -31,6 +31,13 @@ module SocialCredentials
     replace_social_clients
   end
 
+  def remember_social_accounts
+    ids = Services::Slice["relations.service_connections"].pluck(:id).map(&:to_s)
+    visit "/admin/social"
+    execute_script("localStorage.setItem('social:accounts', arguments[0])", JSON.generate(ids))
+    visit "/admin/social"
+  end
+
   def social_account(network) = Services::Slice["repos.connection_queries"].for(network).first
 
   private

@@ -34,7 +34,7 @@ RSpec.describe "Admin screens", type: :feature do
         connect_social_networks
         visit "/admin/social"
         find(".compose-accounts summary").click
-        find(".compose-account-group.bluesky .compose-account:has(:checked)")
+        find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
     }
   end

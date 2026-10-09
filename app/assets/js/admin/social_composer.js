@@ -2,6 +2,7 @@ import { fresh } from "./fresh.js";
 import { renderCounts, selectedTargets } from "./social_counts.js";
 import { expand, mentions } from "./social_expand.js";
 import { setupMentions } from "./social_mentions.js";
+import { setupPicks } from "./social_picks.js";
 
 const SCHEDULE = "schedule";
 
@@ -59,6 +60,7 @@ function setupComposer(form) {
     render();
   });
   setupMentions(form);
+  setupPicks(form);
   render();
 }
 

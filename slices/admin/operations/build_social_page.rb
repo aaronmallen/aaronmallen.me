@@ -8,6 +8,7 @@ module Admin
       DEFAULT_VALUES = {
         mode: Blog::Types::SocialMode["now"],
         parts: [EMPTY_STRING].freeze,
+        restore_accounts: true,
         schedule_at: EMPTY_STRING,
       }.freeze
       KIND = Blog::Types::RecordKind["social_post"]
