@@ -5,24 +5,24 @@ module Services
     class AddConnection < Operation
       include Deps["repos.connection_mutations", "repos.connection_queries", "repos.definition_queries"]
 
-      def call(provider:, account_id:, **)
-        definition = step found(definition_queries.find(provider))
-        step room(definition)
-        step fresh(definition, account_id, **)
+      def call(provider:, account_id:, host: nil, **columns)
+        definition = step known(provider)
+        step open_to(definition, host, account_id)
 
-        connection_mutations.add(provider: definition.id, account_id:, **)
+        connection_mutations.add(provider: definition.id, account_id:, host:, **columns)
+      rescue ROM::SQL::UniqueConstraintError
+        Failure(:taken)
       end
 
       private
 
-      def fresh(definition, account_id, host: nil, **)
-        connection_queries.held?(definition.id, account_id, host) ? Failure(:duplicate) : Success(definition)
-      end
+      def known(provider) = found(definition_queries.all.find { it.id == provider.to_s && it.connectable? })
 
-      def room(definition)
-        return Success(definition) if definition.multiple || connection_queries.for(definition.id).empty?
+      def open_to(definition, host, account_id)
+        return Failure(:taken) if connection_queries.account?(definition.id, host, account_id)
+        return Failure(:single) unless definition.multiple || connection_queries.for(definition.id).empty?
 
-        Failure(:single)
+        Success(definition)
       end
     end
   end

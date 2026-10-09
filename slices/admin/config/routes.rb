@@ -8,6 +8,7 @@ module Admin
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
+    OAUTH_SERVICE = /github/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
     TAG = %r{[^/]+}
@@ -152,8 +153,9 @@ module Admin
     get "/search/palette", to: "search.palette", as: :palette_search
     get "/security", to: "security.show", as: :security
     get "/services", to: "services.index", as: :services
-    post "/services/:provider", to: "services.create", as: :connect_service, provider: SERVICE
-    post "/services/:id/delete", to: "services.destroy", as: :disconnect_service, id: ID
+    post "/services/:provider", to: "services.create", as: :create_service, provider: SERVICE
+    post "/services/:provider/connect", to: "services.connect", as: :connect_service, provider: OAUTH_SERVICE
+    post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
@@ -233,6 +235,7 @@ module Admin
     )
     get "/sign-in", to: "sessions.new", as: :sign_in
     get "/auth/github/callback", to: "sessions.create", as: :github_callback
+    get "/auth/github/callback/services", to: "services.github_callback", as: :github_service_callback
     post "/sign-out", to: "sessions.destroy", as: :sign_out
     get "/*path", to: "not_found"
   end

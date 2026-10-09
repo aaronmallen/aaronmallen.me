@@ -14,7 +14,7 @@ RSpec.describe "Admin commits import", type: :request do
   def import = post("/admin/commits/import", _csrf_token: admin_csrf_token)
 
   def with_token
-    connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
+    connect_github_token
   end
 
   describe "signed in with a token" do

@@ -11,6 +11,7 @@ module Admin
           prop :connect, Blog::Types::Instance(::Services::Definition).optional
           prop :connectable, Blog::Types::Array.of(Blog::Types::String)
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+          prop :pickable, Blog::Types::Array
           prop :refusal, Blog::Types::String.optional, default: nil
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(Structs::ServiceRow))
           prop :selected, Blog::Types::Instance(Structs::ServiceRow).optional
@@ -21,6 +22,7 @@ module Admin
               list
               Card(class: "settings-side") { side }
             end
+            Picker(definitions: @pickable) unless @pickable.empty?
           end
 
           private
@@ -32,6 +34,10 @@ module Admin
               p(class: "svc-group-label") { t(".available") }
               @available.each { Available(definition: it, connectable: connectable?(it)) }
             end
+          end
+
+          def connect_button
+            Button(small: true, icon: "fa-solid fa-plus", data: { dialog_open: Picker::ID }) { t(".connect") }
           end
 
           def connectable?(definition) = @connectable.include?(definition.id)
@@ -57,7 +63,10 @@ module Admin
 
           def list
             Card(title: t(".connected"), data: { key_list: true }) do |card|
-              card.side { span(class: "settings-count") { summary } }
+              card.side do
+                span(class: "settings-count") { summary }
+                connect_button unless @pickable.empty?
+              end
               Hint { t(".hint") }
               @rows.group_by { it.definition.group }.each { |name, rows| group(name, rows) }
               available

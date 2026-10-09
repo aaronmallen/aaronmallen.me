@@ -146,8 +146,8 @@ RSpec.describe Projects::Jobs::RefreshProjects do
     end
   end
 
-  describe "with no GitHub token" do
-    before { connect_github(**GitHubCredentials::OAUTH_APP) }
+  describe "with GitHub not connected" do
+    before { disconnect_github }
 
     it "asks GitHub for nothing" do
       refresh

@@ -294,7 +294,7 @@ RSpec.describe "Admin connected services", type: :request do
 
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/test']")
       expect(page).to have_link("Add another account", href: "/admin/services?connect=linear")
-      expect(page).to have_css("form[action='/admin/services/#{connection.id}/delete'][data-confirm]")
+      expect(page).to have_css("form[action='/admin/services/#{connection.id}/disconnect'][data-confirm]")
     end
 
     it "reports that Linear answers a test" do
@@ -314,14 +314,14 @@ RSpec.describe "Admin connected services", type: :request do
     end
 
     it "deletes the row on disconnect", :aggregate_failures do
-      post "/admin/services/#{connection.id}/delete", _csrf_token: admin_csrf_token
+      post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token
 
       expect(last_response.location).to end_with("/admin/services")
       expect(connections).to be_empty
     end
 
     it "answers not found for a disconnect of a row that is gone" do
-      post "/admin/services/31337/delete", _csrf_token: admin_csrf_token
+      post "/admin/services/31337/disconnect", _csrf_token: admin_csrf_token
 
       expect(last_response.status).to eq(404)
     end

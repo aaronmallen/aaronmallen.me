@@ -14,15 +14,24 @@ module GitHubCredentials
     replace_github_components
   end
 
+  def connect_github_account(access_token: "ghp_token", account_id: "931094", label: "@aaronmallen", scopes: ["repo"])
+    Services::Slice["repos.connection_mutations"]
+      .add(provider: "github", account_id:, label:, credentials: { access_token: }, scopes:)
+  end
+
   def connect_oauth_app = connect_github(**@github_credentials.to_h, **OAUTH_APP)
 
-  def disconnect_github = connect_github(**OAUTH_APP)
+  def disconnect_github
+    Services::Slice["relations.service_connections"].where(provider: "github").delete
+    connect_github(**OAUTH_APP)
+  end
 
   private
 
   def replace_github_components
     settings = Hanami.app["settings"]
-    client = Record::Providers::GitHubProvider.client(settings, Hanami.app["http"])
+    client = Record::Providers::GitHubProvider.client(Record::Slice["services.repos.connection_queries"],
+                                                      Hanami.app["http"])
 
     replace_component("github.auth", Admin::Providers::GitHubAuthProvider.auth(settings))
     CLIENT_KEYS.each { replace_component(it, client) }

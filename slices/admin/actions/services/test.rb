@@ -5,7 +5,7 @@ module Admin
     module Services
       class Test < Action
         ANSWERED = "services_page.toasts.answered"
-        REFUSED = "services_page.toasts.refused"
+        UNANSWERED = "services_page.toasts.unanswered"
 
         include Deps[
           check_service: "operations.check_service",
@@ -27,7 +27,7 @@ module Admin
 
           case check_service.call(connection.provider, connection.credentials)
             in Success(_) then toast(response, ANSWERED, name:)
-            in Failure[:refused, reason] then toast(response, REFUSED, name:, reason:)
+            in Failure[:refused, reason] then toast(response, UNANSWERED, name:, reason:)
             in Failure(:not_found) then halt 404
           end
         end

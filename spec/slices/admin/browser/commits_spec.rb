@@ -16,7 +16,7 @@ RSpec.describe "Admin commits card", type: :feature do
   end
 
   def stub_token
-    connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
+    connect_github_token
   end
 
   def visit_today
@@ -77,7 +77,7 @@ RSpec.describe "Admin commits card", type: :feature do
 
     it "disables Import now with a hint", :aggregate_failures do
       expect(page).to have_button("Import now", disabled: true)
-      expect(page).to have_css(".card .hint", text: "No GitHub token is set")
+      expect(page).to have_css(".card .hint", text: "GitHub isn't connected")
     end
 
     it "animates nothing" do

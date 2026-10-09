@@ -33,7 +33,6 @@ contact:
   total_throttle_limit: <%= ENV["CONTACT_TOTAL_THROTTLE_LIMIT"].to_json %>
 data_key: <%= ENV["DATA_KEY"].to_json %>
 github:
-  api_token: <%= ENV["GITHUB_API_TOKEN"].to_json %>
   client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["GITHUB_CLIENT_SECRET"].to_json %>
   profile_url: https://github.com/aaronmallen

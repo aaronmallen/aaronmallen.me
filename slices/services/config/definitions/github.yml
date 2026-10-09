@@ -11,6 +11,7 @@ powers:
   - Project stars and releases
 scopes:
   - {id: repo, label: Read repositories and issues, why: "Issues, commits, project stats"}
+  - {id: "read:org", label: Read organization membership, why: "Repos and issues you reach through an org"}
 jobs:
   - {name: GitHub issue sync, every: every 15 minutes, sync: issues}
   - {name: Commit import, every: every 15 minutes, sync: commits}

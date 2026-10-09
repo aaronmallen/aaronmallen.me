@@ -6,8 +6,8 @@ module Admin
       class Create < Index
         CONNECTED = "services_page.toasts.connected"
         REFUSALS = {
-          duplicate: "services_page.refusals.duplicate", refused: "services_page.refusals.refused",
-          single: "services_page.refusals.single",
+          refused: "services_page.refusals.refused", single: "services_page.refusals.single",
+          taken: "services_page.refusals.taken",
         }.freeze
 
         include Deps[connect_service: "operations.connect_service", index_view: "ui.views.services.index"]
@@ -20,7 +20,7 @@ module Admin
             in Failure(:not_found) then halt 404
             in Failure[:invalid, errors] then rejected(response, provider, errors:)
             in Failure[:refused, reason] then rejected(response, provider, refusal: refusal(:refused, reason:))
-            in Failure(:duplicate | :single => code) then rejected(response, provider, refusal: refusal(code))
+            in Failure(:single | :taken => code) then rejected(response, provider, refusal: refusal(code))
           end
         end
 

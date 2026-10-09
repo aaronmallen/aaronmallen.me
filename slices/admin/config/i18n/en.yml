@@ -188,14 +188,20 @@ en:
       saved: "View saved"
   services_page:
     refusals:
-      duplicate: "That account is already connected. Nothing was saved."
       refused: "Nothing was saved · %{reason}"
       single: "The site holds one account for this service. Disconnect it first."
+      taken: "That account is already connected. Nothing was saved."
     toasts:
       answered: "%{name} answered"
       connected: "%{name} connected as %{account}"
-      disconnected: "Account disconnected"
-      refused: "%{name} isn't answering · %{reason}"
+      declined: "GitHub didn't grant access · nothing was saved"
+      disconnected: "%{name} disconnected"
+      github_failed: "GitHub didn't answer · nothing was saved"
+      not_configured: "GitHub sign-in isn't set up, so GitHub can't connect"
+      refused: "That sign-in didn't start here or has expired · nothing was saved"
+      single: "GitHub takes one account · disconnect it first"
+      taken: "That account is already connected · nothing was saved"
+      unanswered: "%{name} isn't answering · %{reason}"
   social:
     networks:
       bluesky: "Bluesky"
@@ -309,7 +315,7 @@ en:
       unscheduled: "Unscheduled · back in %{list}"
   today_page:
     toasts:
-      not_configured: "No GitHub token is set."
+      not_configured: "Connect GitHub first."
       queued: "Import queued · new commits show on the card shortly"
       snoozed: "Snoozed for a week"
   tokens_page:
@@ -524,7 +530,7 @@ en:
           one: "Across %{count} repo. Latest: %{subject}."
           other: "Across %{count} repos. Latest: %{subject}."
         never_synced: "never synced"
-        no_token: "No GitHub token is set, so the import can't run."
+        no_token: "GitHub isn't connected, so the import can't run."
         synced_on: "synced %{at}"
         synced_today: "synced today at %{time}"
         title: "Shipped today"
@@ -1343,7 +1349,7 @@ en:
       services:
         actions:
           another: "Add another account"
-          confirm_disconnect: "Disconnect %{name} (%{account})? Its jobs stop reading it."
+          confirm_disconnect: "Disconnect %{name} (%{account})? Its jobs stop until you connect it again."
           disconnect: "Disconnect"
           open: "Open %{name}"
           test: "Test connection"
@@ -1373,6 +1379,15 @@ en:
           set: "set"
         field_error:
           blank: "Paste a key first."
+        picker:
+          asks: "The site will ask for"
+          away: "You'll approve access on %{name}, then come straight back here."
+          connect: "Connect %{name}"
+          continue: "Continue to %{name}"
+          hint: "Services that use keys instead of a sign-in, like storage and MaxMind, are set in the server environment."
+          required: "Required · %{why}"
+          revoke: "Read-only unless it says otherwise. You can disconnect any time; the site revokes its token on %{name} too."
+          title: "Connect a service"
         row:
           used: "used %{time}"
       settings_head:
@@ -1499,7 +1514,7 @@ en:
           invalid_database: "The file it sent won't open"
           linear_failed: "Linear didn't answer"
           missing: "No database on disk"
-          not_configured: "No GitHub token is set"
+          not_configured: "GitHub isn't connected"
           page_limit: "It stopped at the page limit"
           prune_backups_failed: "The old dumps wouldn't delete"
           prune_failed: "The old events wouldn't delete"
@@ -2277,6 +2292,7 @@ en:
         index:
           all_answered: "Everything answered on its last run."
           available: "Available"
+          connect: "Connect a service"
           connected: "Connected services"
           count:
             one: "%{count} connected"

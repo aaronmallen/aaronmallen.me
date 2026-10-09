@@ -4,6 +4,7 @@ module Admin
   module Operations
     class ListServices
       BRIDGY = "bridgy"
+      OAUTH_FLOWS = %w[github].freeze
 
       include Deps[
         "settings",
@@ -17,7 +18,7 @@ module Admin
         connections = connection_queries.all.group_by(&:provider)
         connected, available = definition_queries.all.partition { !it.connectable? || connections.key?(it.id) }
 
-        { available:, rows: rows(connected, connections) }
+        { available:, pickable: pickable(connections), rows: rows(connected, connections) }
       end
 
       private
@@ -27,6 +28,12 @@ module Admin
           values = settings.public_send(setting)
           keys.map { ["#{setting}_#{it}".upcase, !values[it.to_sym].to_s.empty?] }
         end.to_h
+      end
+
+      def pickable(connections)
+        definition_queries.all.select do |definition|
+          OAUTH_FLOWS.include?(definition.id) && (definition.multiple || !connections.key?(definition.id))
+        end
       end
 
       def row(definition, connection, failures, bridgy)

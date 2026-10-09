@@ -164,7 +164,6 @@ module Blog
     )
 
     setting :github, default: {}, constructor: Schema.schema(
-      api_token?: Value,
       client_id?: Value,
       client_secret?: Value,
       profile_url?: Value,

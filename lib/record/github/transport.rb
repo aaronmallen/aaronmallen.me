@@ -17,17 +17,17 @@ module Record
 
       attr_reader :rate_limit_remaining, :rate_limit_reset_at
 
-      def initialize(connection:, graphql: nil)
-        @connection = connection
-        @graphql = graphql
+      def initialize(token:, connect:)
+        @token = token
+        @connect = connect
         @rate_limit_remaining = nil
         @rate_limit_reset_at = nil
       end
 
-      def configured? = !connection.nil?
+      def configured? = !token.nil?
 
       def get(path, **params)
-        response = connection.get(path, params)
+        response = connections.fetch(:api).get(path, params)
 
         return readable(response.body) if response.success?
         raise RateLimited, "GitHub rate limited #{path}" if rate_limited?(response)
@@ -47,9 +47,15 @@ module Record
         raise Error, "GitHub GraphQL request failed: #{e.message}"
       end
 
+      def token = @token.call
+
       private
 
-      attr_reader :connection, :graphql
+      def connections
+        current = token || raise(Error, "GitHub is not connected")
+        @connections = { token: current, **@connect.call(current) } unless @connections&.fetch(:token) == current
+        @connections
+      end
 
       def data(body)
         errors = body["errors"].to_a
@@ -60,7 +66,7 @@ module Record
       end
 
       def post(document, variables)
-        response = graphql.post(GRAPHQL_PATH) { it.body = { query: document, variables: } }
+        response = connections.fetch(:graphql).post(GRAPHQL_PATH) { it.body = { query: document, variables: } }
         raise RateLimited, "GitHub rate limited GraphQL" if rate_limited?(response)
         raise Error, "GitHub answered #{response.status} for GraphQL" unless response.success?
 

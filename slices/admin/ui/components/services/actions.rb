@@ -5,6 +5,7 @@ module Admin
     module Components
       module Services
         class Actions < Component
+          DISCONNECT_ICON = "fa-solid fa-link-slash"
           OPEN_ICON = "fa-solid fa-arrow-up-right-from-square"
           TEST_ICON = "fa-solid fa-plug-circle-check"
 
@@ -38,13 +39,13 @@ module Admin
 
           def disconnect
             Form(**disconnect_attributes) do
-              Button(small: true, variant: :warn, type: "submit") { t(".disconnect") }
+              Button(small: true, variant: :warn, type: "submit", icon: DISCONNECT_ICON) { t(".disconnect") }
             end
           end
 
           def disconnect_attributes
             {
-              action: path(:admin_disconnect_service, id: connection.id), class: "svc-actions",
+              action: path(:admin_disconnect_service, id: connection.id), class: "svc-disconnect",
               data: { confirm: t(".confirm_disconnect", name: definition.name, account: @row.account) },
             }
           end

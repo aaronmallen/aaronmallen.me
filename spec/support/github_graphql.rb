@@ -9,7 +9,10 @@ module GitHubGraphQL
   VIEWER_QUERY = "viewer { id }"
   VIEWER_ID = "MDQ6VXNlcjkzMTA5NA=="
 
-  def connect_github_token = connect_github(**GitHubCredentials::OAUTH_APP, api_token: "ghp_token")
+  def connect_github_token
+    connect_github(**GitHubCredentials::OAUTH_APP)
+    connect_github_account
+  end
 
   def github_branch(name, *commits, more: false)
     { name:, target: { history: { pageInfo: github_page_info(more, "#{name}-page-2"), nodes: commits } } }

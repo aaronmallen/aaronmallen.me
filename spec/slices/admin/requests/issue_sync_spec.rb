@@ -12,7 +12,7 @@ RSpec.describe "Admin issue sync", type: :request do
   describe "signed in with a token" do
     before do
       sign_in_to_admin
-      connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
+      connect_github_token
     end
 
     it "offers the button on the External tab" do

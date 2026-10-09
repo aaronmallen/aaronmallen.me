@@ -52,7 +52,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
   end
 
   def with_token
-    connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
+    connect_github_token
   end
 
   describe "signed in" do

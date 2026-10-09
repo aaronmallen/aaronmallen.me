@@ -77,7 +77,7 @@ module Record
 
       def initialize(transport:)
         @transport = transport
-        @viewer_id = nil
+        @viewer = nil
       end
 
       def commits(repo, since: nil, before: nil)
@@ -175,8 +175,9 @@ module Record
       def stamp(time) = time&.utc&.iso8601
 
       def viewer_id
-        @viewer_id ||= transport.query(Queries::VIEWER)&.dig("viewer", "id")
-        @viewer_id || raise(Error, "GitHub sent no viewer id")
+        token = transport.token
+        @viewer = { token => transport.query(Queries::VIEWER)&.dig("viewer", "id") } unless @viewer&.[](token)
+        @viewer[token] || raise(Error, "GitHub sent no viewer id")
       end
     end
   end

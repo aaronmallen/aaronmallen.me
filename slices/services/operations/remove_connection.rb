@@ -3,9 +3,13 @@
 module Services
   module Operations
     class RemoveConnection < Operation
-      include Deps["repos.connection_mutations"]
+      include Deps["repos.connection_mutations", "repos.connection_queries"]
 
-      def call(id) = step affected(connection_mutations.remove(id))
+      def call(id)
+        connection = step found(connection_queries.by_id(id))
+        connection_mutations.delete(id)
+        connection
+      end
     end
   end
 end

@@ -8,14 +8,14 @@ module Record
         "Accept" => "application/vnd.github+json",
         "X-GitHub-Api-Version" => "2022-11-28",
       }.freeze
+      PROVIDER = "github"
 
       class << self
-        def client(settings, http)
-          token = settings.github[:api_token]
-          transport = GitHub::Transport.new(connection: token && api(http, token),
-                                            graphql: token && graphql(http, token))
+        def client(connection_queries, http)
+          token = -> { connection_queries.for(PROVIDER).first&.credentials&.fetch(:access_token, nil) }
+          connect = ->(current) { { api: api(http, current), graphql: graphql(http, current) } }
 
-          GitHub::Client.new(transport:)
+          GitHub::Client.new(transport: GitHub::Transport.new(token:, connect:))
         end
 
         private

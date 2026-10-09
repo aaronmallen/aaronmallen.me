@@ -6,7 +6,7 @@ module Admin
 
     ROBOTS = "noindex, nofollow"
 
-    config.shared_app_component_keys += %w[assets]
+    config.shared_app_component_keys += %w[assets honeybadger.agent]
 
     config.no_auto_register_paths += %w[helpers]
 

@@ -4322,6 +4322,10 @@
   @apply flex items-center justify-between gap-3;
 }
 
+@utility svc-scope {
+  @apply flex min-w-0 flex-col gap-0.5;
+}
+
 @utility svc-status {
   @apply mb-2 mt-2 flex flex-wrap items-center gap-2 font-mono text-meta;
 }
@@ -4352,6 +4356,22 @@
 
 @utility svc-connect {
   @apply mt-4 flex flex-col items-start gap-3;
+}
+
+@utility svc-disconnect {
+  @apply mt-5 border-t border-line pt-4;
+}
+
+@utility svc-pick {
+  @apply flex w-full items-center gap-3 border-b border-line py-3 text-left focus-ring;
+
+  & > span {
+    @apply flex min-w-0 flex-1 flex-col gap-0.5;
+  }
+
+  &:hover .svc-line-name {
+    @apply text-accent;
+  }
 }
 
 @utility token-mint {

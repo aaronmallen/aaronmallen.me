@@ -14,7 +14,7 @@ module Admin
 
           def view_template
             head
-            Form(action: path(:admin_connect_service, provider: @definition.id), class: "svc-connect") do
+            Form(action: path(:admin_create_service, provider: @definition.id), class: "svc-connect") do
               p(class: "field-error", role: "alert") { @refusal } if @refusal
               @definition.fields.each { field(it) }
               Hint { t(".hint", name: @definition.name) }

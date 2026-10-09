@@ -19,7 +19,6 @@ database:
   port: <%= ENV.fetch("DATABASE_PORT", 5432).to_json %>
   user: <%= ENV["DATABASE_USER"].to_json %>
 github:
-  api_token: null
   client_id: null
   client_secret: null
   profile_url: https://github.com/aaronmallen

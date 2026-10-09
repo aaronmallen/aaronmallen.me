@@ -192,17 +192,17 @@ RSpec.describe "MCP record tools", type: :request do
     def enqueued = Record::Jobs::ImportCommits.jobs
 
     it "queues the import the admin queues", :aggregate_failures do
-      connect_github(client_id: "client-id", client_secret: "client-secret", api_token: "ghp_token")
+      connect_github_token
       call_tool("import_commits")
 
       expect([content, enqueued.size]).to eq([{ "status" => "queued" }, 1])
     end
 
-    it "refuses when no GitHub token is set", :aggregate_failures do
+    it "refuses when GitHub isn't connected", :aggregate_failures do
       disconnect_github
       call_tool("import_commits")
 
-      expect([message, enqueued]).to eq(["no GitHub token is set, so no import can run", []])
+      expect([message, enqueued]).to eq(["GitHub isn't connected, so no import can run", []])
     end
   end
 end

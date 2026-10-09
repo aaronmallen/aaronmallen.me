@@ -15,7 +15,7 @@ module MCP
         def call(server_context:)
           case dep(:queue_commit_import, server_context).call
             in Success(_) then answer(status: "queued")
-            in Failure(:not_configured) then refuse("no GitHub token is set, so no import can run")
+            in Failure(:not_configured) then refuse("GitHub isn't connected, so no import can run")
           end
         end
       end
