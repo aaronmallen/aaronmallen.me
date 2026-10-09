@@ -1508,10 +1508,18 @@ en:
             blank: "Name a tag or a project first."
             format: "A tag is lowercase words joined by hyphens."
         fields:
+          archived: "archived"
+          chosen: "Chosen projects"
+          no_match: "No projects match."
           pattern: "Repo or team"
           pattern_placeholder: "aaronmallen/*"
           no_projects: "No projects yet."
           projects: "Projects"
+          remove: "Remove %{name}"
+          results:
+            one: "{count} project"
+            other: "{count} projects"
+          search_placeholder: "Search projects"
           provider: "Provider"
           providers:
             github: "GitHub"

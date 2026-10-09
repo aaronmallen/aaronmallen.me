@@ -257,6 +257,18 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def rule_project_search
+    {
+      "task rule project search" => lambda do
+        create(:project, :archived, name: "Atlas")
+        create(:project, name: "Bloom")
+        visit "/admin/tasks/rules"
+        find(".rule-capture [role='combobox']").send_keys("atlas", :down, :enter, "b")
+        find(".rule-capture [role='listbox']", visible: :visible)
+      end,
+    }
+  end
+
   def saved_view_menus
     {
       "saved view menu" => lambda do
@@ -280,7 +292,7 @@ RSpec.describe "Admin screens", type: :feature do
   def screens
     pages.merge(
       calendars, people, person_search, record_search, linked_records, composers, dialogs, journal_editors,
-      saved_view_menus, selections, time_rows, decisions, post_screens,
+      saved_view_menus, selections, time_rows, decisions, post_screens, rule_project_search,
     )
   end
 

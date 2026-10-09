@@ -15,6 +15,7 @@ import { setupPools } from "./pools.js";
 import { setupPostEditors } from "./post_editor.js";
 import { setupPostSyndication } from "./post_syndication.js";
 import { setupProjectEditors } from "./project_editor.js";
+import { setupProjectPicks } from "./project_pick.js";
 import { setupRecordKeys } from "./record_key.js";
 import { setupSocialComposers } from "./social_composer.js";
 import { setupTaskOrder } from "./task_order.js";
@@ -39,6 +40,7 @@ function setup() {
   setupPostEditors();
   setupPostSyndication();
   setupProjectEditors();
+  setupProjectPicks();
   setupRecordKeys();
   setupSocialComposers();
   setupTaskOrder();

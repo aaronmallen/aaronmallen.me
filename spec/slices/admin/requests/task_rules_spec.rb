@@ -138,7 +138,7 @@ RSpec.describe "Admin task rules", type: :request do
         create(:project, :archived, name: "Atlas")
         get "/admin/tasks/rules"
 
-        expect(page.find(".rule-capture").all(".rule-projects .choice").map(&:text)).to eq(%w[Atlas Blog])
+        expect(page.find(".rule-capture").all(".rule-projects .choice").map(&:text)).to eq(["Atlas archived", "Blog"])
       end
 
       it "stores the projects it is given, with no tags" do

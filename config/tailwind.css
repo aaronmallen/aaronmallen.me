@@ -4143,6 +4143,72 @@
   @apply flex flex-wrap gap-x-4 gap-y-2;
 }
 
+@utility rule-project-archived {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility project-pick {
+  @apply flex flex-col gap-2;
+}
+
+@utility project-pick-chips {
+  @apply m-0 flex list-none flex-wrap gap-1.5 p-0;
+
+  &:empty {
+    @apply hidden;
+  }
+}
+
+@utility project-pick-chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-line py-0.5 pr-1 pl-3 font-mono text-input text-ink;
+}
+
+@utility project-pick-archived {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility project-pick-remove {
+  @apply inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-ink-muted;
+  @apply hover:text-accent focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap min-w-tap;
+  }
+}
+
+@utility project-pick-box {
+  @apply relative flex items-center;
+
+  & > i {
+    @apply pointer-events-none absolute left-2.5 text-badge text-ink-muted;
+  }
+
+  & > .inp {
+    @apply pl-8;
+  }
+}
+
+@utility project-pick-results {
+  @apply overflow-y-auto rounded-card border border-line bg-ground-sunk p-1;
+  max-height: min(40vh, 280px);
+}
+
+@utility project-pick-result {
+  @apply flex cursor-pointer items-center gap-x-2 rounded-btn px-2.5 py-2 font-mono text-input text-ink;
+
+  &[aria-selected="true"] {
+    @apply bg-wash;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility project-pick-note {
+  @apply cursor-default text-badge text-ink-muted;
+}
+
 @utility rule-acts {
   @apply col-start-2 row-start-1 row-span-2 flex shrink-0 items-center gap-1;
 }
