@@ -5,6 +5,59 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.7] - 2026-10-09
+
+### Added
+
+- Settings has a Connected services tab. Connect GitHub and Mastodon through OAuth, Bluesky with a handle and an app
+  password, and Linear workspaces with an API key, then test or disconnect each one. Mastodon works on any server, and
+  Mastodon and Bluesky take more than one account. The site encrypts the keys it keeps, and posting, commit import,
+  issue sync and the MCP tools follow a new connection with no restart.
+- A social post goes to each account ticked in the composer. Its To row opens a Post as menu grouped by network, with
+  chips for the picked accounts, all and none links for each network, Everywhere, and a search once there are more than
+  five accounts. A new post starts with the accounts you last sent or scheduled to, kept in the browser, or with the
+  first account when there are none.
+- Pull requests you author, in any repo and from forks too, import from GitHub every 15 minutes and show in Today's sync
+  health. Each one has an admin page, shows opened, merged and closed rows in Activity and `read_activity`, links to
+  other records and turns up in search. `list_pull_requests`, `read_pull_request` and `GET /api/v1/pull_requests/:id`
+  read them.
+- Messages open in the reading pane, where you can mark one read or unread, snooze or wake it, label it with tags and
+  delete it. The Messages screen searches the subject, sender, body and tags, and filters by status and tag, with a new
+  Inbox filter for everything but spam. `tag_messages` and `untag_messages` tag messages, `list_messages`,
+  `read_message` and the API return their tags and `snoozed_until`, and the Tags screen counts them.
+- The people page has a Find an account panel beside the list. Add on a result opens the new person drawer with the
+  name, key and handle filled in.
+- The projects field on a task rule has a search with chips, and marks archived projects.
+
+### Changed
+
+- Sign-in lets in only a GitHub account listed in the owner identities table. `OWNER_GITHUB_ID` goes, and an empty table
+  lets nobody in, so the live site needs its first row added by hand.
+- The site needs a `DATA_KEY` secret, apart from `APP_SECRET`, to encrypt service keys. `mise run setup:environment`
+  writes one.
+- The time report total, its project and tag groups, and the review's worked figures count overlapping task time once,
+  so three tasks run in the same hour count one hour. Task rows still show each task's full time, a group with overlap
+  shows a hint, and the API and MCP report an `overlapped` flag. Past reports change to match.
+- The API and MCP list one delivery for each account a social post goes to, with its `account`, which is null for sends
+  from before this release. Adding a network to a post that picked accounts adds every account on that network.
+- The social queue shows networks in their colors, and on a posted item each network links to the post it made, named by
+  account when it went to more than one.
+- People rows show handles as colored links with a hover pencil, the person drawer shows network colors with Remove on
+  the left, and the handle fields in the person form, including the one in the mention dialog, lose their search boxes.
+- Accepting or rejecting one suggestion keeps the suggestions dialog open.
+- Analytics and post analytics open on 30 days.
+- The palette tells screen readers when its rows are still loading.
+
+### Removed
+
+- `GITHUB_API_TOKEN`, `LINEAR_API_KEYS`, `BLUESKY_APP_PASSWORD` and `MASTODON_ACCESS_TOKEN`, and the settings behind
+  them, with no fallback. Connect each service from the Connected services tab instead.
+
+### Fixed
+
+- Blue and pink tags on a ticked task row no longer fall below 4.5:1 contrast. Code keywords take the lighter pink too.
+- Linked records on the project editor no longer start below the side column and leave a gap under the tagline card.
+
 ## [26.10.6] - 2026-10-08
 
 ### Added
@@ -559,7 +612,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...HEAD
+[26.10.7]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...26.10.7
 [26.10.6]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.5...26.10.6
 [26.10.5]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.4...26.10.5
 [26.10.4]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.3...26.10.4
