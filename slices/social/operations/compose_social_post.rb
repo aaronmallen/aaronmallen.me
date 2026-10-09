@@ -20,7 +20,7 @@ module Social
 
       def call(params, intent: DRAFT, id: nil, now: Time.now)
         social_post = step editable(id)
-        attributes = step validate(params, intent)
+        attributes = step validate(params, intent, social_post)
 
         save(attributes, intent, now, social_post)
       end
@@ -45,9 +45,9 @@ module Social
         social_post_queries.by_id(id) ? Failure(:already_posted) : Failure(:not_found)
       end
 
-      def form(params)
+      def form(params, social_post)
         found = FIELDS.to_h { [it, params[it]] }
-        return found unless params.key?(:accounts)
+        return widened(found, social_post) unless params.key?(:accounts)
 
         picked = picked(Array(params[:accounts]).map(&:to_s).reject(&:empty?).uniq)
         picked && found.merge(picked)
@@ -67,10 +67,18 @@ module Social
         [outcome, step(save_social_post.call(id: social_post&.id, status:, posted_at:, **fields))]
       end
 
-      def validate(params, intent)
-        fields = form(params)
+      def validate(params, intent, social_post)
+        fields = form(params, social_post)
 
         fields ? validated(contract.call(fields, intent:)) : Failure([:invalid, UNAVAILABLE])
+      end
+
+      def widened(found, social_post)
+        picked = social_post&.connection_ids.to_a
+        return found if picked.empty?
+
+        added = Blog::Types::Normalized::Networks[found[:targets]] - social_post.targets.to_a
+        found.merge(connection_ids: picked | added.flat_map { connection_queries.for(it) }.map(&:id))
       end
     end
   end

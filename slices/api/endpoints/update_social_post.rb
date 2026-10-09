@@ -3,6 +3,7 @@
 module API
   module Endpoints
     class UpdateSocialPost < SocialPostEndpoint
+      ADDED = "the networks it goes out to; a network it adds goes to each account on it"
       DRAFT = Blog::Types::SocialIntent["draft"]
 
       SCHEMA = {
@@ -14,7 +15,7 @@ module API
             items: { type: "string" },
             description: "the text of each part in order; this list replaces every part the post has",
           },
-          targets: TARGETS,
+          targets: TARGETS.merge(description: ADDED),
         },
         required: ["id"],
       }.freeze

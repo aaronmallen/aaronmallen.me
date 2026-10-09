@@ -30,6 +30,8 @@ RSpec.describe "MCP social tools", type: :request do
 
   def stored(id) = social_post_queries.by_id(id)
 
+  def targeted(id) = Social::Slice["operations.list_target_accounts"].call(stored(id)).map(&:id)
+
   def webmention_mutations = Social::Slice["repos.webmention_mutations"]
   def webmention_queries = Social::Slice["repos.webmention_queries"]
 
@@ -318,6 +320,14 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
 
       expect(stored(draft.id)).to have_attributes(targets: %w[mastodon bluesky], parts: [have_attributes(body: "old")])
+    end
+
+    it "sends to every account on a network it adds to a post that picked accounts" do
+      other = connect_another_mastodon
+      social_post_mutations.update(draft.id, connection_ids: [other.id])
+      call_tool("update_social_post", id: draft.id, targets: %w[mastodon bluesky])
+
+      expect(targeted(draft.id)).to eq([other.id, social_account("bluesky").id])
     end
 
     it "gives the lengths of the parts it saved" do

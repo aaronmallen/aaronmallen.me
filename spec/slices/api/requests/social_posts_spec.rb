@@ -12,8 +12,8 @@ RSpec.describe "API social posts", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def compose(*parts, status: "draft", targets: %w[mastodon])
-    Social::Slice["repos.social_post_mutations"].create_with_parts(parts:, status:, targets:)
+  def compose(*parts, status: "draft", targets: %w[mastodon], **)
+    Social::Slice["repos.social_post_mutations"].create_with_parts(parts:, status:, targets:, **)
   end
 
   def create_social_post(fields) = call_api(:post, "", JSON.generate(fields))
@@ -38,6 +38,8 @@ RSpec.describe "API social posts", type: :request do
       create(:social_post_delivery, :mastodon, social_post_id: social_post.id)
     end
   end
+
+  def targeted(id) = Social::Slice["operations.list_target_accounts"].call(stored(id)).map(&:id)
 
   def update_social_post(id, fields) = call_api(:patch, "/#{id}", JSON.generate(fields))
 
@@ -123,6 +125,15 @@ RSpec.describe "API social posts", type: :request do
       answer = update_social_post(draft.id, targets: %w[mastodon bluesky])
 
       expect([answer.fetch("targets"), answer.fetch("parts")]).to eq([%w[mastodon bluesky], %w[old]])
+    end
+
+    it "sends to every account on a network it adds to a post that picked accounts" do
+      other = connect_another_mastodon
+      bluesky = connect_another_bluesky
+      draft = compose("old", connection_ids: [other.id])
+      update_social_post(draft.id, targets: %w[mastodon bluesky])
+
+      expect(targeted(draft.id)).to eq([other.id, social_account("bluesky").id, bluesky.id])
     end
 
     it "refuses a post that has gone out with a 422" do
