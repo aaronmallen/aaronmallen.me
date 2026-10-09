@@ -7,12 +7,14 @@ module Posts
     BREAK_NODES = %i[linebreak softbreak].freeze
     CAPTION = '<div class="cf"><span class="cf-n"><i class="fa-regular fa-file-code" aria-hidden="true"></i>' \
               "%s</span>%s</div>"
+    FIGURE = '<figure class="fig">\\1 /><figcaption>\\2</figcaption></figure>'
     H2 = /<h2 id="([^"]*)">.*?data-heading-content="([^"]*)"/m
     HIGHLIGHTED_BLOCK = %r{<pre class="syntax-highlighting">.*?</pre>}m
     HIGHLIGHTER_CLASSES = /(?<=<span class=")[^"]+/
     INLINE_NODES = %i[
       code emph escaped_tag image link spoiler_text strikethrough strong subscript superscript text underline
     ].freeze
+    LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TEXT_NODES = %i[code code_block text].freeze

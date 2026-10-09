@@ -50,7 +50,7 @@ module Posts
           block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
           name = names.shift
           name ? format(CAPTION, CGI.escapeHTML(name), block) : block
-        end
+        end.gsub(LONE_TITLED_IMAGE, FIGURE)
       end
     end
   end

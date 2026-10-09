@@ -237,6 +237,29 @@ RSpec.describe "Writing", type: :request do
       expect(page).to have_css(".e-content + .endmark[aria-hidden='true'] > .glasses", visible: :all)
     end
 
+    it "draws a titled image alone in its paragraph as a captioned figure", :aggregate_failures do
+      publish("hello", 1, body: %(the start\n\n![shot](https://example.com/shot.png "Fish & <chips>")))
+      get "/writing/hello"
+
+      expect(page).to have_css(".prose > figure.fig > img[src='https://example.com/shot.png'][alt='shot']")
+      expect(page).to have_css("figure.fig > img + figcaption", exact_text: "Fish & <chips>")
+      expect(page).to have_no_css("figure.fig img[title]")
+    end
+
+    {
+      "an untitled image" => "![shot](https://example.com/shot.png)",
+      "a titled image sharing its paragraph" => %(see ![shot](https://example.com/shot.png "Caption")),
+      "a linked titled image" => %([![shot](https://example.com/shot.png "Caption")](https://example.com)),
+    }.each do |name, image|
+      it "leaves #{name} in its paragraph", :aggregate_failures do
+        publish("hello", 1, body: "the start\n\n#{image}")
+        get "/writing/hello"
+
+        expect(page).to have_css(".prose > p img[src='https://example.com/shot.png']")
+        expect(page).to have_no_css("figure")
+      end
+    end
+
     it "closes the article with an eyebrow linking to contact", :aggregate_failures do
       publish("hello", 1)
       get "/writing/hello"

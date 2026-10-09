@@ -366,6 +366,18 @@
     & :not(pre) > code {
       @apply rounded-[3px] px-[5px] py-[2px] text-[0.85em];
     }
+
+    & .fig {
+      @apply my-[1.6em];
+
+      & img {
+        @apply block h-auto max-w-full rounded-xl border border-line;
+      }
+
+      & figcaption {
+        @apply mt-2.5 font-mono text-[12.5px] leading-normal text-ink-muted;
+      }
+    }
   }
 }
 
@@ -975,6 +987,18 @@
 
   & :not(pre) > code {
     @apply rounded-code px-1 text-[0.875em];
+  }
+
+  & .fig {
+    @apply my-[1.6em];
+
+    & img {
+      @apply block h-auto max-w-full rounded-xl border border-line;
+    }
+
+    & figcaption {
+      @apply mt-2.5 font-mono text-[12.5px] leading-normal text-ink-muted;
+    }
   }
 }
 
