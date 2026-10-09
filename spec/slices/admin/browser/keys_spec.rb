@@ -279,9 +279,9 @@ RSpec.describe "Admin keys", type: :feature do
 
     before { visit "/admin/messages" }
 
-    it "marks the highlighted message read", :aggregate_failures do
+    it "opens the highlighted message and marks it read", :aggregate_failures do
       press("j", "r")
-      find(".toast", text: "Marked read")
+      find(".msg-letter h2", text: "First")
 
       expect(repo.by_id(first.id).status).to eq("read")
       expect(repo.by_id(second.id).status).to eq("unread")
@@ -296,7 +296,8 @@ RSpec.describe "Admin keys", type: :feature do
     it "lists r in the help overlay" do
       press("?")
 
-      expect(find_by_id("key-help")).to have_css(".keys-row", text: /\Ar\s+Mark the highlighted message read\z/)
+      expect(find_by_id("key-help"))
+        .to have_css(".keys-row", text: /\Ar\s+Open the highlighted message and mark it read\z/)
     end
   end
 
@@ -436,8 +437,8 @@ RSpec.describe "Admin keys", type: :feature do
 
   describe "a row with no link" do
     before do
-      create(:message, subject: "Hello there")
-      visit "/admin/messages"
+      create(:work_entry, role: "Hello there")
+      visit "/admin/projects?filter=work"
       press("j")
     end
 
@@ -445,7 +446,7 @@ RSpec.describe "Admin keys", type: :feature do
       expect(evaluate_script("document.activeElement.matches('[data-key-row]')")).to be(true)
     end
 
-    it "holds the message" do
+    it "holds the entry" do
       expect(focused_row).to include("Hello there")
     end
   end

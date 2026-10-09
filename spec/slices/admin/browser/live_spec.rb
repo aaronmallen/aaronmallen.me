@@ -47,6 +47,15 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("#message-#{message.id}", text: "Hello there")
   end
 
+  it "shows a new message on the messages page and keeps the open one", :aggregate_failures do
+    opened = create(:message, :read, subject: "Answered")
+    live "/admin/messages?open=#{opened.id}"
+    message = create(:message, subject: "Hello there")
+
+    expect(page).to have_css("#message-#{message.id}", text: "Hello there")
+    expect(page).to have_css(".msg-letter h2", text: "Answered")
+  end
+
   it "shows a new webmention in the open inbox" do
     live "/admin/inbox"
     mention = create(:webmention, author_name: "A neighbour")

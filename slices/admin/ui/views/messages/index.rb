@@ -19,15 +19,18 @@ module Admin
           prop :count, Blog::Types::Integer
           prop :filter, Blog::Types::MessageStatus
           prop :messages, Blog::Types::Instance(Blog::Structs::Paged)
+          prop :open, Blog::Types::Instance(ROM::Struct).optional
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @count)) { filter_form }
 
-            @messages.rows.empty? ? Card { Empty { t(EMPTIES.fetch(@filter)) } } : panes
+            @messages.rows.empty? && !@open ? Card { empty } : panes
             Pager(page: @messages, route: :admin_messages, params: { status: @filter })
           end
 
           private
+
+          def empty = Empty { t(EMPTIES.fetch(@filter)) }
 
           def filter_form
             FilterSwitch(
@@ -39,26 +42,27 @@ module Admin
             )
           end
 
-          def letter(message)
-            article(id: "read-#{message.id}", class: "msg-letter") do
-              p(class: "inbox-meta") do
-                span { message.reply_to }
-                Moment(at: message.received_at)
-              end
-              h2(class: "msg-letter-title") { message.subject }
-              p(class: "msg-body msg-letter-body") { message.body }
-            end
+          def letter
+            return Empty { t(".pick") } unless @open
+
+            MessageLetter(message: @open, filter: @filter, page: @messages.number)
           end
 
           def panes
             div(class: "msg-panes") do
               Card(class: "msg-list") do
                 MessageBulk(filter: @filter, page: @messages.number)
-                div(data: { key_list: true }) do
-                  @messages.rows.each { MessageRow(message: it, filter: @filter, bulk: MessageBulk::ID) }
-                end
+                @messages.rows.empty? ? empty : rows
               end
-              Card(class: "msg-pane") { @messages.rows.each { letter(it) } }
+              Card(class: "msg-pane") { letter }
+            end
+          end
+
+          def rows
+            div(data: { key_list: true }) do
+              @messages.rows.each do |message|
+                MessageRow(message:, filter: @filter, page: @messages.number, bulk: MessageBulk::ID)
+              end
             end
           end
         end

@@ -16,10 +16,17 @@ module Admin
           status = request.params[:status]
 
           result = mark_message.call(record_id(request), status)
-          settle(response, result, TOASTS.fetch(status), routes.path(:admin_messages, status: filter(request)))
+          settle(response, result, TOASTS.fetch(status), back(request))
         end
 
         private
+
+        def back(request)
+          id = Blog::Types::IdParam[request.params[:open]]
+          path = routes.path(:admin_messages, status: filter(request), **({ open: id } if id))
+
+          id ? "#{path}#read-#{id}" : path
+        end
 
         def filter(request) = Blog::Types::MessageStatusParam[request.params[:filter]]
       end

@@ -3124,8 +3124,12 @@
   }
 }
 
+@utility msg-item-form {
+  @apply min-w-0 flex-1;
+}
+
 @utility msg-item-open {
-  @apply block min-w-0 flex-1 pl-1 text-ink no-underline focus-ring;
+  @apply block w-full cursor-pointer pl-1 text-left text-ink focus-ring;
 }
 
 @utility msg-item-head {
@@ -3145,36 +3149,33 @@
 }
 
 @utility msg-item-from {
-  @apply mt-1 font-mono text-badge text-ink-muted;
+  @apply mt-1 block font-mono text-badge text-ink-muted;
 }
 
 @utility msg-item-preview {
   @apply mt-1 line-clamp-2 text-[0.92rem] leading-[1.45] text-ink-muted;
 }
 
-@utility msg-item-acts {
-  @apply flex basis-full flex-wrap justify-end gap-2;
-}
-
 @utility msg-pane {
   @media (width < 53.75rem) {
-    &:not(:has(.msg-letter:target)) {
+    &:not(:has(.msg-letter)) {
       @apply hidden;
     }
   }
 }
 
 @utility msg-letter {
-  @apply hidden;
-
-  &:target,
-  .msg-pane:not(:has(:target)) &:first-child {
-    @apply block;
-  }
-
   & > .inbox-meta {
     @apply mb-2.5;
   }
+}
+
+@utility msg-letter-acts {
+  @apply mt-4 flex flex-wrap items-center gap-2;
+}
+
+@utility msg-letter-far {
+  @apply ml-auto flex flex-wrap gap-2;
 }
 
 @utility msg-letter-title {

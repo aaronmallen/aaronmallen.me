@@ -14,9 +14,15 @@ module Admin
           response[:count] = message_queries.count_with_status(filter)
           response[:filter] = filter
           response[:messages] = messages
+          response[:open] = opened(request)
         end
 
         private
+
+        def opened(request)
+          id = Blog::Types::IdParam[request.params[:open]]
+          message_queries.by_id(id) if id
+        end
 
         def page(request, response) = requested_page(request, response, settings.page_size[:admin])
       end

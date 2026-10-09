@@ -166,6 +166,7 @@ RSpec.describe "Admin screens", type: :feature do
       "inbox" => "/admin/inbox",
       "journal" => "/admin/journal",
       "messages" => "/admin/messages",
+      "message open" => "/admin/messages?open=#{Contact::Slice['repos.message_queries'].by_status('unread').first.id}",
       "new post" => "/admin/posts/new",
       "new project" => "/admin/projects/new",
       "not found" => "/admin/nothing-here",

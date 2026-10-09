@@ -7,6 +7,8 @@ RSpec.describe "Admin messages", type: :request do
 
   def empty_text(status) = i18n.t(["ui.views.messages.index.empty", status].join("."))
 
+  def pick_text = i18n.t("ui.views.messages.index.pick")
+
   def subjects = page.all(".msg-item-title").map(&:text)
 
   describe "signed in" do
@@ -99,28 +101,213 @@ RSpec.describe "Admin messages", type: :request do
 
     describe "a row" do
       let(:arrived) { Time.utc(2026, 9, 7, 17, 30) }
+      let(:id) { repo.by_status("unread").first.id }
 
       before do
         create(:message, reply_to: "ada@example.com", subject: "A question", body: "How?", received_at: arrived)
         get "/admin/messages"
       end
 
-      it "shows the subject, the body, the reply address and when it arrived", :aggregate_failures do
+      it "shows the subject, the body and the reply address", :aggregate_failures do
         expect(page).to have_css(".msg-item-title", text: "A question")
-        expect(page).to have_css(".msg-body", text: "How?")
+        expect(page).to have_css(".msg-item-preview", text: "How?")
         expect(page).to have_css(".msg-item-from", text: "ada@example.com")
-        expect(page).to have_css(".msg-letter time", text: "Sep 7, 2026, 12:30")
       end
 
-      it "links the row to the message in the reading pane", :aggregate_failures do
-        id = repo.by_status("unread").first.id
+      it "posts to open the message, keeping the list" do
+        expect(page).to have_css(
+          "form[action='/admin/messages/#{id}/open'] input[name='status'][value='unread']", visible: :all,
+        )
+      end
 
-        expect(page).to have_css("a.msg-item-open[href='#read-#{id}']")
-        expect(page).to have_css("article#read-#{id} h2", text: "A question")
+      it "holds no action button" do
+        expect(page).to have_no_css(".msg-item button:not(.msg-item-open)")
       end
 
       it "puts when it arrived in a time tag" do
         expect(page.find(".msg-item-head time")[:datetime]).to eq("2026-09-07T12:30:00-05:00")
+      end
+    end
+
+    describe "the reading pane" do
+      let(:arrived) { Time.utc(2026, 9, 7, 17, 30) }
+
+      def acts = page.all(".msg-letter-acts button").map(&:text)
+
+      it "asks for a pick with nothing open" do
+        create(:message)
+        get "/admin/messages"
+
+        expect(page).to have_css(".msg-pane .empty", exact_text: pick_text)
+      end
+
+      describe "an open message" do
+        let(:message) do
+          create(:message, reply_to: "ada@example.com", subject: "A question", body: "How?", received_at: arrived)
+        end
+
+        before { get "/admin/messages", open: message.id }
+
+        it "shows the sender and the full date and time", :aggregate_failures do
+          expect(page).to have_css(".msg-letter .inbox-meta", text: "ada@example.com")
+          expect(page).to have_css(".msg-letter time", text: "Sep 7, 2026, 12:30")
+        end
+
+        it "shows the subject and the body", :aggregate_failures do
+          expect(page).to have_css("article#read-#{message.id} h2", text: "A question")
+          expect(page).to have_css(".msg-letter-body", text: "How?")
+        end
+
+        it "draws no spam badge" do
+          expect(page).to have_no_css(".msg-letter .pill")
+        end
+      end
+
+      it "badges spam" do
+        message = create(:message, :spam)
+        get "/admin/messages", status: "spam", open: message.id
+
+        expect(page).to have_css(".msg-letter .inbox-meta", text: "spam")
+      end
+
+      it "shows a message the list no longer holds" do
+        message = create(:message, :read, subject: "Answered")
+        get "/admin/messages", status: "unread", open: message.id
+
+        expect(page).to have_css(".msg-letter h2", text: "Answered")
+      end
+
+      it "asks for a pick when the open message is gone" do
+        create(:message)
+        get "/admin/messages", open: "0"
+
+        expect(page).to have_css(".msg-pane .empty", exact_text: pick_text)
+      end
+
+      {
+        "unread" => ["Mark read", "Spam", "Delete"],
+        "read" => ["Mark unread", "Spam", "Delete"],
+        "spam" => ["Not spam", "Delete forever"],
+      }.each do |status, labels|
+        it "offers #{labels.join(', ')} on a #{status} message" do
+          message = create(:message, status:)
+          get "/admin/messages", status:, open: message.id
+
+          expect(acts).to eq(labels)
+        end
+      end
+
+      it "puts Spam and Delete on the far side" do
+        message = create(:message)
+        get "/admin/messages", open: message.id
+
+        expect(page.all(".msg-letter-far button").map(&:text)).to eq(%w[Spam Delete])
+      end
+
+      it "marks a spam message read with Not spam" do
+        message = create(:message, :spam)
+        get "/admin/messages", status: "spam", open: message.id
+
+        expect(page).to have_css("form[action='/admin/messages/#{message.id}/mark/read'] button", text: "Not spam")
+      end
+
+      { "read" => "confirm_delete", "spam" => "confirm_delete_forever" }.each do |status, key|
+        it "asks before it deletes a #{status} message" do
+          message = create(:message, status:)
+          ask = i18n.t(key, scope: "ui.components.message_letter")
+          get "/admin/messages", status:, open: message.id
+
+          expect(page).to have_css("form[action='/admin/messages/#{message.id}/delete'] button[data-confirm='#{ask}']")
+        end
+      end
+
+      it "keeps the message open after a move" do
+        message = create(:message)
+        get "/admin/messages", open: message.id
+
+        expect(page).to have_css(".msg-letter-acts input[name='open'][value='#{message.id}']", visible: :all)
+      end
+    end
+
+    describe "opening a message" do
+      def open_message(id, **params) = post("/admin/messages/#{id}/open", { _csrf_token: admin_csrf_token, **params })
+
+      it "marks an unread message read" do
+        message = create(:message)
+        open_message(message.id)
+
+        expect(repo.by_id(message.id).status).to eq("read")
+      end
+
+      it "leaves a spam message spam" do
+        message = create(:message, :spam)
+        open_message(message.id, status: "spam")
+
+        expect(repo.by_id(message.id).status).to eq("spam")
+      end
+
+      it "returns to the list with the message open" do
+        message = create(:message, :read)
+        open_message(message.id, status: "read")
+
+        expect(last_response).to be_redirect.and have_attributes(
+          location: end_with("/admin/messages?status=read&open=#{message.id}#read-#{message.id}"),
+        )
+      end
+
+      it "steps back a page the open emptied" do
+        lower_page_size(:admin, to: 1)
+        message = [2, 1].map { create(:message, received_at: Time.utc(2026, 9, it)) }.last
+        open_message(message.id, status: "unread", page: "2")
+
+        expect(last_response.location)
+          .to end_with("/admin/messages?status=unread&open=#{message.id}#read-#{message.id}")
+      end
+
+      it "answers 404 for a message that isn't there" do
+        open_message(0)
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "refuses a post with a forged CSRF token" do
+        message = create(:message)
+        post "/admin/messages/#{message.id}/open", _csrf_token: "forged"
+
+        expect(repo.by_id(message.id).status).to eq("unread")
+      end
+    end
+
+    describe "deleting a message" do
+      def delete(id, **params) = post("/admin/messages/#{id}/delete", { _csrf_token: admin_csrf_token, **params })
+
+      it "removes it for good" do
+        message = create(:message)
+        delete(message.id)
+
+        expect(repo.by_id(message.id)).to be_nil
+      end
+
+      it "returns to the list that was open with a toast", :aggregate_failures do
+        message = create(:message, :spam)
+        delete(message.id, status: "spam")
+
+        expect(last_response.location).to end_with("/admin/messages?status=spam")
+        follow_redirect!
+        expect(page).to have_css("[data-toast]", text: "Message deleted")
+      end
+
+      it "answers 404 for a message that isn't there" do
+        delete(0)
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "refuses a post with a forged CSRF token" do
+        message = create(:message)
+        post "/admin/messages/#{message.id}/delete", _csrf_token: "forged"
+
+        expect(repo.by_id(message.id)).not_to be_nil
       end
     end
 
@@ -143,8 +330,8 @@ RSpec.describe "Admin messages", type: :request do
       let(:markup) { "<script>alert('x')</script> and <b>bold</b>" }
 
       before do
-        create(:message, body: markup)
-        get "/admin/messages"
+        message = create(:message, body: markup)
+        get "/admin/messages", open: message.id
       end
 
       it "reads it back as the text it is" do
@@ -171,7 +358,7 @@ RSpec.describe "Admin messages", type: :request do
         post("/admin/messages/#{id}/mark/#{status}", { _csrf_token: admin_csrf_token, **params })
       end
 
-      { "unread" => %w[read spam], "read" => %w[unread spam], "spam" => %w[unread] }.each do |from, targets|
+      { "unread" => %w[read spam], "read" => %w[unread spam], "spam" => %w[unread read] }.each do |from, targets|
         targets.each do |to|
           it "marks a #{from} message #{to}" do
             message = create(:message, status: from)
@@ -179,13 +366,6 @@ RSpec.describe "Admin messages", type: :request do
 
             expect(repo.by_id(message.id).status).to eq(to)
           end
-        end
-
-        it "offers only #{targets.join(' and ')} on a #{from} message" do
-          create(:message, status: from)
-          get "/admin/messages", status: from
-
-          expect(page.all(".msg-item-acts button").map(&:text)).to eq(targets.map(&:capitalize))
         end
       end
 
@@ -242,12 +422,20 @@ RSpec.describe "Admin messages", type: :request do
         expect(repo.by_id(message.id).status).to eq("unread")
       end
 
-      it "carries the token and the open list in the form", :aggregate_failures do
-        create(:message, :read)
-        get "/admin/messages", status: "read"
+      it "returns with the message open when the pane sends it" do
+        message = create(:message)
+        mark(message.id, "unread", filter: "read", open: message.id)
 
-        expect(page).to have_css(".msg-item-acts form input[name='_csrf_token']", visible: :all)
-        expect(page).to have_css(".msg-item-acts form input[name='filter'][value='read']", visible: :all)
+        expect(last_response.location)
+          .to end_with("/admin/messages?status=read&open=#{message.id}#read-#{message.id}")
+      end
+
+      it "carries the token and the open list in the pane form", :aggregate_failures do
+        message = create(:message, :read)
+        get "/admin/messages", status: "read", open: message.id
+
+        expect(page).to have_css(".msg-letter-acts form input[name='_csrf_token']", visible: :all)
+        expect(page).to have_css(".msg-letter-acts form input[name='filter'][value='read']", visible: :all)
       end
     end
   end

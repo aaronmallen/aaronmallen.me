@@ -103,6 +103,7 @@ en:
         unread:
           one: "Moved %{count} message back to unread"
           other: "Moved %{count} messages back to unread"
+      deleted: "Message deleted"
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
@@ -743,12 +744,18 @@ en:
         label: "Ticked messages"
         read: "Read"
         unread: "Unread"
+      message_letter:
+        confirm_delete: "Delete this message? This cannot be undone."
+        confirm_delete_forever: "Delete forever?"
+        delete: "Delete"
+        delete_forever: "Delete forever"
+        mark_read: "Mark read"
+        mark_unread: "Mark unread"
+        not_spam: "Not spam"
+        spam: "Spam"
       message_row:
         pick: "Select %{subject}"
-        read: "Read"
-        read_key: "Mark the highlighted message read"
-        spam: "Spam"
-        unread: "Unread"
+        read_key: "Open the highlighted message and mark it read"
         unread_mark: "Unread: "
       nav:
         actions:
@@ -2007,6 +2014,7 @@ en:
             unread: "Nothing waiting."
           filter: "Status"
           heading: "Messages"
+          pick: "Pick a message to read it."
           read: "read"
           spam: "spam"
           sub:

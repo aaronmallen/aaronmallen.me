@@ -2,6 +2,8 @@
 
 RSpec.describe "Admin messages", type: :feature do
   let(:pane) { find(".msg-pane") }
+  let(:i18n) { Admin::Slice["i18n"] }
+  let(:repo) { Contact::Slice["repos.message_queries"] }
 
   before do
     create(:message, subject: "Newer", body: "The newer body", received_at: Time.now)
@@ -10,15 +12,32 @@ RSpec.describe "Admin messages", type: :feature do
     visit "/admin/messages"
   end
 
-  it "reads the newest message in the pane at first", :aggregate_failures do
-    expect(pane).to have_css("h2", text: "Newer")
-    expect(pane).to have_no_css("h2", text: "Older")
+  it "asks for a pick at first" do
+    expect(pane).to have_text(i18n.t("ui.views.messages.index.pick"))
   end
 
-  it "reads a message picked from the list", :aggregate_failures do
+  it "reads a message picked from the list and marks it read", :aggregate_failures do
     find(".msg-item-open", text: "Older").click
 
     expect(pane).to have_css("h2", text: "Older")
     expect(pane).to have_no_css("h2", text: "Newer")
+    expect(page).to have_no_css(".msg-item-title", text: "Older")
+    expect(repo.by_status("read").map(&:subject)).to eq(%w[Older])
+  end
+
+  it "moves the open message back to unread from the pane" do
+    find(".msg-item-open", text: "Older").click
+    click_button "Mark unread"
+
+    expect(page).to have_css(".msg-item-title", text: "Older")
+  end
+
+  it "asks before it deletes from the pane", :aggregate_failures do
+    find(".msg-item-open", text: "Older").click
+    message = confirm_yes { pane.click_button "Delete" }
+
+    expect(message).to eq(i18n.t("ui.components.message_letter.confirm_delete"))
+    expect(page).to have_css(".toast", text: "Message deleted")
+    expect(repo.by_status("read")).to be_empty
   end
 end
