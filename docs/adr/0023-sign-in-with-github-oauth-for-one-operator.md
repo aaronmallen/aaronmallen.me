@@ -1,16 +1,18 @@
 ---
 id: "0023"
 title: Sign in with GitHub OAuth for one operator
-status: active
+status: superseded
 created: 2026-09-28
 area: [admin, lib, db]
+superseded-by: "0131"
 issue: AA-628
+amended: ["#792"]
 tags: [auth, oauth, github, sessions, cookies, sign-out]
 ---
 
 # ADR 0023: Sign in with GitHub OAuth for one operator
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -80,4 +82,4 @@ Rotating `app_secret` signs every session out, since no cookie decrypts under th
 
 The MCP server (ADR 0056) builds its consent screen on this sign-in, so it inherits every cost above.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange

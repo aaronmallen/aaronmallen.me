@@ -27,7 +27,7 @@ one.
 | [0020][0020] | Keep locks, throttles and claims in Postgres, not Redis | ![Active][active] | 2026-09-28 |
 | [0021][0021] | Let SQL read another slice's tables, never write them | ![Active][active] | 2026-09-28 |
 | [0022][0022] | Declare the tags relation in every slice that tags | ![Active][active] | 2026-09-28 |
-| [0023][0023] | Sign in with GitHub OAuth for one operator | ![Active][active] | 2026-09-28 |
+| [0023][0023] | Sign in with GitHub OAuth for one operator | ![Superseded][superseded-0131] | 2026-09-28 |
 | [0024][0024] | Mount the session cookie in admin and mcp alone, and let public read it by hand | ![Active][active] | 2026-09-28 |
 | [0025][0025] | Inherit Blog::Operation only in a class that can refuse or steps a Result | ![Active][active] | 2026-09-28 |
 | [0026][0026] | Coerce a param in the action, validate it in a contract | ![Active][active] | 2026-09-28 |
@@ -135,6 +135,7 @@ one.
 | [0128][0128] | Lay out the admin as a full-width pill-nav shell with right-side drawers | ![Active][active] | 2026-10-07 |
 | [0129][0129] | Store MaxMind's country name beside each country code | ![Active][active] | 2026-10-08 |
 | [0130][0130] | Keep service credentials encrypted in a services slice and define each service in code | ![Active][active] | 2026-10-08 |
+| [0131][0131] | Keep owner identities in the database and add the first by hand | ![Active][active] | 2026-10-08 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -266,6 +267,7 @@ one.
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
 [0129]: 0129-store-maxminds-country-name-beside-each-country-code.md
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
+[0131]: 0131-keep-owner-identities-in-the-database-and-add-the-first-by-hand.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -274,4 +276,5 @@ one.
 [superseded-0110]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0123]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0128]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0131]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
