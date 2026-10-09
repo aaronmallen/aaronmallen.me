@@ -41,6 +41,70 @@ post.call(
   summary: "Seeds that go through the front door.",
 )
 
+post.call(
+  "Providers, all the way down",
+  <<~MARKDOWN,
+    Every Hanami app has to talk to things it does not own: a database, a queue, an API. Providers are where that starts.
+
+    ## What a provider is
+
+    A provider starts a resource once and puts it in the container, so the rest of the app asks for it by name.
+
+    ### Notes
+
+    A provider can also stop what it started, which matters for workers.
+
+    ## Registering one
+
+    This one hands the app a Redis client.
+
+    ```ruby config/providers/redis.rb
+    Hanami.app.register_provider(:redis) do
+      prepare { require "redis" }
+
+      start { register "redis", Redis.new(url: target["settings"].redis_url) }
+
+      stop { target["redis"].close }
+    end
+    ```
+
+    ### Notes
+
+    The key you register is the name every class asks for.
+
+    ## Asking for it
+
+    A class names what it needs with `Deps`, and the container fills it in.
+
+    ```ruby
+    class CountVisit
+      include Deps["redis"]
+
+      def call(path) = redis.incr("visits:\#{path}")
+    end
+    ```
+
+    > If you cannot tell what a class needs from its first ten lines, the line between parts sits in the wrong place.
+
+    ## Slices
+
+    - **Each slice gets its own container.** A provider in `slices/admin` stays in admin unless you export it.
+    - **Start order comes for free.** A provider that uses another asks for it, and Hanami starts that one first.
+
+    ![The site's favicon](/favicon.ico "Any image with a title, alone on its line, renders as a figure.")
+
+    ## Slices
+
+    This heading repeats on purpose, so its id ends in a number.
+
+    ## What I would change
+
+    Keep a provider in the one slice that uses it. That rule shaped this codebase more than any refactor.
+  MARKDOWN
+  intent: "publish", now: Seeds.ago(3, hour: 10), tags: "hanami,ruby",
+  summary: "A post that uses every part of the markdown renderer.",
+)
+
 draft = post.call(
   "Notes on tooling",
   <<~MARKDOWN,

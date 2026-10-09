@@ -28,6 +28,8 @@ module Posts
         }
       end
 
+      def headings = document.headings
+
       def og_image_url = written(:og_image_url)
 
       def og_title = written(:og_title)

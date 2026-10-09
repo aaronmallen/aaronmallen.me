@@ -381,6 +381,32 @@
   }
 }
 
+@utility post-g {
+  @apply grid grid-cols-1 items-start gap-[clamp(36px,4vw,88px)];
+  @apply min-[1100px]:grid-cols-[minmax(0,48rem)_clamp(200px,16vw,260px)];
+}
+
+@utility toc {
+  @apply sticky top-stick hidden min-[1100px]:block;
+
+  & .kicker {
+    @apply mb-3;
+  }
+
+  & ol {
+    @apply m-0 list-none border-l border-line p-0;
+  }
+
+  & a {
+    @apply -ml-px block border-l-2 border-transparent py-[7px] pl-3.5 font-display text-[0.95rem] leading-[1.3];
+    @apply font-medium text-ink-muted no-underline hover:text-ink focus-ring;
+
+    &[aria-current] {
+      @apply border-accent text-ink;
+    }
+  }
+}
+
 @utility endmark {
   @apply mt-[1.8em] flex text-[clamp(1rem,1vw,1.2rem)] text-ink-muted;
 

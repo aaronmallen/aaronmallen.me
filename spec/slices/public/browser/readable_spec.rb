@@ -30,6 +30,14 @@ RSpec.describe "Public screens", type: :feature do
       body: <<~MARKDOWN,
         prose and `code`
 
+        ## First
+
+        ### Under the first
+
+        ## Second
+
+        ## Third
+
         ```ruby
         # greets the reader
         class Greeter < Base

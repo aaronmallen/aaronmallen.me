@@ -80,6 +80,8 @@ en:
           networks:
             bluesky: "Bluesky"
             mastodon: "Mastodon"
+        toc:
+          label: "On this page"
       work_row:
         current: "Present"
         years: "%{from}–%{to}"

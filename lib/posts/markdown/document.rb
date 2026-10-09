@@ -18,7 +18,9 @@ module Posts
       end
 
       def headings
-        html.scan(H2).filter_map { |id, text| { id:, text: CGI.unescapeHTML(text).strip } unless id.empty? }
+        html.scan(H2).filter_map do |id, text|
+          { id:, text: CGI.unescapeHTML(text.gsub(TAG, Blog::Constants::EMPTY_STRING)).strip } unless id.empty?
+        end
       end
 
       def html = @html ||= render
@@ -46,7 +48,8 @@ module Posts
 
       def render
         names = @root.walk.select { it.type == :code_block }.map { it.fence_info.split(" ", 2)[1] }
-        @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(HIGHLIGHTED_BLOCK) do |block|
+        html = @root.to_html(options: OPTIONS, plugins: PLUGINS).gsub(ANCHOR, Blog::Constants::EMPTY_STRING)
+        html.gsub(HIGHLIGHTED_BLOCK) do |block|
           block = block.gsub(HIGHLIGHTER_CLASSES) { it.gsub(/\S+/, 'hl-\\0') }
           name = names.shift
           name ? format(CAPTION, CGI.escapeHTML(name), block) : block

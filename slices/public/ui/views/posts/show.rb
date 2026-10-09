@@ -13,6 +13,7 @@ module Public
 
           prop :post, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String
+          prop :headings, Toc::HEADINGS
           prop :edits, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :previous_post, Blog::Types::Instance(ROM::Struct).optional
           prop :next_post, Blog::Types::Instance(ROM::Struct).optional
@@ -102,8 +103,13 @@ module Public
           end
 
           def post_body
-            div(class: "prose lead e-content") { raw(safe(@body_html)) }
-            span(class: "endmark", aria: { hidden: "true" }) { span(class: "glasses") }
+            div(class: "post-g") do
+              div do
+                div(class: "prose lead e-content") { raw(safe(@body_html)) }
+                span(class: "endmark", aria: { hidden: "true" }) { span(class: "glasses") }
+              end
+              Toc(headings: @headings)
+            end
           end
 
           def social_card

@@ -28,6 +28,7 @@ module Public
 
         def expose_body(response, post)
           response[:body_html] = post.body_html
+          response[:headings] = post.headings
           response[:edits] = post_queries.edits_for_post(post.id)
         end
 

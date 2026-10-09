@@ -223,6 +223,36 @@ RSpec.describe "Writing", type: :request do
       expect(page.all(".prose h2, .prose h3").map { it[:id] }).to eq(%w[setup the-config-file setup-1])
     end
 
+    it "leaves no empty link inside a heading" do
+      publish("hello", 1, body: "## Setup\n\n### Deeper")
+      get "/writing/hello"
+
+      expect(page).to have_no_css(".prose h2 a, .prose h3 a")
+    end
+
+    it "lists three or more h2s beside the body as links to each one", :aggregate_failures do
+      publish("hello", 1, body: "## One\n\n### Under\n\n## Two *more*\n\n## One")
+      get "/writing/hello"
+
+      expect(page).to have_css(".post-g > aside.toc[aria-label='On this page'] > h2", text: "On this page")
+      expect(page.all(".toc li a").map { [it[:href], it.text] })
+        .to eq([["#one", "One"], ["#two-more", "Two more"], ["#one-1", "One"]])
+    end
+
+    it "points each listed link at an h2 in the body" do
+      publish("hello", 1, body: "## One\n\n## Two\n\n## One")
+      get "/writing/hello"
+
+      expect(page.all(".prose h2").map { "##{it[:id]}" }).to eq(page.all(".toc a").map { it[:href] })
+    end
+
+    it "lists nothing beside a body with fewer than three h2s" do
+      publish("hello", 1, body: "## One\n\n### Under\n\n#### Deep\n\n## Two")
+      get "/writing/hello"
+
+      expect(page).to have_no_css(".toc")
+    end
+
     it "keeps a remote image in the body" do
       publish("hello", 1, body: "the start\n\n![shot](https://example.com/shot.png)")
       get "/writing/hello"
