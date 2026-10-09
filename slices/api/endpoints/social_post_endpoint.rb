@@ -26,13 +26,16 @@ module API
       UNSAVED = "could not save the social post"
 
       include Deps[
+        list_target_accounts: "social.operations.list_target_accounts",
         measure_parts: "social.operations.measure_parts",
         social_post_queries: "social.repos.social_post_queries",
       ]
 
       private
 
-      def answered(social_post) = serialized(Serializers::SocialPost, social_post, measure_parts:)
+      def answered(social_post)
+        serialized(Serializers::SocialPost, social_post, measure_parts:, target_accounts: list_target_accounts)
+      end
 
       def composed(result, id, params)
         case result

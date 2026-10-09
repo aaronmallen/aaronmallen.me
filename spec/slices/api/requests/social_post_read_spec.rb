@@ -8,9 +8,19 @@ RSpec.describe "API reading a social post", type: :request do
       .create_with_parts(parts: [body], posted_at: nil, status: "draft", targets: %w[mastodon])
   end
 
+  def connect_two_mastodons
+    connect_social_networks
+    connect_another_mastodon
+    Services::Slice["repos.connection_queries"].for("mastodon")
+  end
+
   def deliver(social_post, network, **)
     create(:social_post_delivery, social_post_id: social_post.id, network:, **)
   end
+
+  def delivered(id) = read(id).fetch("deliveries").map { [it.values_at("network", "account"), it.fetch("state")] }
+
+  def hachyderm = %w[mastodon @ada@hachyderm.io]
 
   def lengths(social_post)
     social_post.parts.map do |part|
@@ -38,6 +48,8 @@ RSpec.describe "API reading a social post", type: :request do
     JSON.parse(last_response.body)
   end
 
+  def ruby_social = %w[mastodon @aaronmallen@ruby.social]
+
   def sent_counts
     {
       remote_ids: Sequel.pg_array(%w[1]), remote_url: "https://ruby.social/@me/1", like_count: 4, repost_count: 2,
@@ -47,8 +59,8 @@ RSpec.describe "API reading a social post", type: :request do
 
   def sent_delivery
     {
-      "network" => "mastodon", "state" => "sent", "url" => "https://ruby.social/@me/1", "error" => nil,
-      "likes" => 4, "reposts" => 2, "replies" => 1,
+      "network" => "mastodon", "account" => nil, "state" => "sent", "url" => "https://ruby.social/@me/1",
+      "error" => nil, "likes" => 4, "reposts" => 2, "replies" => 1,
     }
   end
 
@@ -74,8 +86,8 @@ RSpec.describe "API reading a social post", type: :request do
 
   def waiting_delivery
     {
-      "network" => "bluesky", "state" => "waiting", "url" => nil, "error" => nil, "likes" => 0, "reposts" => 0,
-      "replies" => 0,
+      "network" => "bluesky", "account" => nil, "state" => "waiting", "url" => nil, "error" => nil, "likes" => 0,
+      "reposts" => 0, "replies" => 0,
     }
   end
 
@@ -116,6 +128,31 @@ RSpec.describe "API reading a social post", type: :request do
 
       expect(read(social_post.id).fetch("deliveries").map { it.values_at("network", "state") })
         .to include(%w[mastodon sending])
+    end
+
+    it "names each account a post went to on one network" do
+      social_post = create(:social_post, :posted, targets: %w[mastodon])
+      first, second = connect_two_mastodons
+      deliver(social_post, "mastodon", connection_id: first.id, **sent_counts)
+      deliver(social_post, "mastodon", connection_id: second.id, error: "refused", failed: true)
+
+      expect(delivered(social_post.id)).to eq([[ruby_social, "sent"], [hachyderm, "failed"]])
+    end
+
+    it "lists each picked account as waiting before the post goes out" do
+      social_post = create(:social_post, :scheduled, targets: %w[mastodon bluesky])
+      connect_two_mastodons
+
+      expect(delivered(social_post.id))
+        .to eq([[ruby_social, "waiting"], [hachyderm, "waiting"], [%w[bluesky @ada.example], "waiting"]])
+    end
+
+    it "keeps the network of a delivery sent before accounts" do
+      connect_social_networks
+      social_post = create(:social_post, :posted, targets: %w[mastodon])
+      deliver(social_post, "mastodon", **sent_counts)
+
+      expect(read(social_post.id).fetch("deliveries")).to eq([sent_delivery])
     end
 
     it "gives the suggested edits still open, and leaves out the settled ones" do
@@ -165,6 +202,13 @@ RSpec.describe "API reading a social post", type: :request do
       social_post = compose("teh cat sat")
       deliver(social_post, "mastodon", error: "slow")
       suggest(social_post, typo("teh", "the"))
+
+      expect(mcp_answer("read_social_post", id: social_post.id)).to eq(read(social_post.id))
+    end
+
+    it "names each account as GET /api/v1/social_posts/:id does" do
+      social_post = create(:social_post, :posted, targets: %w[mastodon])
+      connect_two_mastodons.each { deliver(social_post, "mastodon", connection_id: it.id, **sent_counts) }
 
       expect(mcp_answer("read_social_post", id: social_post.id)).to eq(read(social_post.id))
     end

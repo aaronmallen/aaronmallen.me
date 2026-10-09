@@ -116,7 +116,6 @@ RSpec.describe "MCP reach", type: :app do
       "services.operations.remove_connection" => "deletes a connection the admin disconnects; no tool does",
       "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
       "social.operations.deliver_social_post" => "a background job delivers what send_social_post queues",
-      "social.operations.list_target_accounts" => "a background job picks the accounts send_social_post goes to",
       "social.operations.move_social_post" => "the admin's calendar moves one a day; send_social_post sets any time",
       "social.operations.queue_syndication" => "the syndication job runs it after publish_post publishes a post",
       "social.operations.reap_webmention_receipts" => "a background job reaps old webmention receipts",

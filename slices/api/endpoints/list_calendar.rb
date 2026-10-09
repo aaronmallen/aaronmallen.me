@@ -17,7 +17,7 @@ module API
         },
       ).freeze
 
-      include Deps["repos.calendar_queries"]
+      include Deps["repos.calendar_queries", target_accounts: "social.operations.list_target_accounts"]
 
       def handle(from:, to:)
         found = Blog::Helpers::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
@@ -28,7 +28,9 @@ module API
       private
 
       def listed(days)
-        { from: days.first.date.iso8601, to: days.last.date.iso8601, days: serialized(Serializers::CalendarDay, days) }
+        listed = serialized(Serializers::CalendarDay, days, target_accounts:)
+
+        { from: days.first.date.iso8601, to: days.last.date.iso8601, days: listed }
       end
     end
   end

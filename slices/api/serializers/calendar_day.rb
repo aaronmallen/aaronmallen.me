@@ -26,7 +26,7 @@ module API
 
       def posts(found) = Post.new(found.posts).serializable_hash
 
-      def social_posts(found) = SocialPost.new(found.social_posts).serializable_hash
+      def social_posts(found) = SocialPost.new(found.social_posts, params:).serializable_hash
 
       def sprint(found) = found.sprint&.then { { id: it.id, task_count: it.task_count } }
     end

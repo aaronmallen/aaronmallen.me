@@ -3,8 +3,9 @@
 module API
   module Serializers
     class SocialDelivery < Serializer
-      Entry = Data.define(:network, :delivery, :part_count)
+      Entry = Data.define(:network, :account, :delivery, :part_count)
 
+      ACCOUNT = "the account it goes to; null when the network has none connected or the send predates accounts"
       FAILED = "failed"
       RETRYING = "retrying"
       SENDING = "sending"
@@ -15,6 +16,7 @@ module API
       SCHEMA = Helpers::Schema.object(
         {
           network: { type: "string", enum: Blog::Types::NetworkName.values },
+          account: Helpers::Schema.nullable({ type: "string", description: ACCOUNT }),
           state: { type: "string", enum: STATES, description: "waiting until the network has been tried" },
           url: Helpers::Schema.nullable({ type: "string", description: "the first part on the network, once sent" }),
           error: Helpers::Schema.nullable({ type: "string", description: "the last error the network gave" }),

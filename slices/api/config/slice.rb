@@ -53,7 +53,8 @@ module API
 
     import keys: %w[
       operations.act_on_webmentions operations.compose_social_post operations.delete_person
-      operations.delete_social_post operations.mark_webmention_seen operations.measure_parts operations.save_person
+      operations.delete_social_post operations.list_target_accounts operations.mark_webmention_seen
+      operations.measure_parts operations.save_person
       operations.search_accounts operations.snooze_webmentions operations.wake_webmention repos.person_queries
       repos.social_post_queries repos.webmention_queries
     ], from: :social
