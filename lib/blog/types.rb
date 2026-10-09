@@ -46,7 +46,7 @@ module Blog
 
     ActivityKind = Types::String.enum(
       "commit", "post", "journal", "social", "task", "webmention", "project", "sprint", "suggestion", "comment",
-      "decision", "decision_comment", "session",
+      "decision", "decision_comment", "session", "pull_request_opened", "pull_request_merged", "pull_request_closed",
     )
     ActivityScreenKind = Types::String.enum(*ActivityKind.values - %w[project sprint suggestion])
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)

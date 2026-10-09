@@ -564,6 +564,11 @@ RSpec.describe "MCP endpoint", type: :request do
       suggestion_mutations.replace_for_post(article.id, [typo])
     end
 
+    def pulling
+      create(:pull_request, ready_at: at(9), merged_at: at(10))
+      create(:pull_request, ready_at: at(9, on: month_ago - 1), closed_at: at(11))
+    end
+
     def read_activity(from: month_ago, to: today, **arguments)
       call_tool("read_activity", from: from.to_s, to: to.to_s, **arguments)
     end
@@ -593,6 +598,7 @@ RSpec.describe "MCP endpoint", type: :request do
       work_on_tasks
       deciding
       planning(article)
+      pulling
     end
 
     def work_on_tasks
@@ -772,6 +778,31 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity
 
         expect(entries).to be_empty
+      end
+    end
+
+    describe "a pull request" do
+      def pull_request(**times)
+        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(9), **times)
+      end
+
+      def row(pull, kind, time)
+        include("kind" => "pull_request_#{kind}", "time" => time, "source_id" => pull.id, "name" => "Add feeds",
+                "repo" => "aaronmallen/blog", "link" => pull.url)
+      end
+
+      it "sends an opened row and a merged row for a merged one" do
+        pull = pull_request(merged_at: at(10))
+        read_activity
+
+        expect(entries).to contain_exactly(row(pull, "opened", "09:00"), row(pull, "merged", "10:00"))
+      end
+
+      it "sends a closed row for one closed without a merge" do
+        pull_request(closed_at: at(10))
+        read_activity
+
+        expect(entries.map { it.fetch("kind") }).to contain_exactly("pull_request_opened", "pull_request_closed")
       end
     end
 

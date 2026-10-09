@@ -21,6 +21,7 @@ module Activity
       MONTH_FORMAT = "YYYY-MM"
       OWNER_SEPARATOR = "/"
       POST = Blog::Types::ActivityKind["post"]
+      REPO_KINDS = %w[commit pull_request_closed pull_request_merged pull_request_opened].freeze
       SEARCHED = %i[excerpt link name repo sha status].freeze
       SESSION = Blog::Types::ActivityKind["session"]
       TASK = Blog::Types::ActivityKind["task"]
@@ -63,7 +64,7 @@ module Activity
       def in_repo(names)
         named = names.reject { unmatchable?(it) }.map { named_repo(it) }
 
-        where(Sequel.|(Sequel.~(Sequel[type: COMMIT]), *named))
+        where(Sequel.|(Sequel.~(type: REPO_KINDS), *named))
       end
 
       def matching(text) = containing(text, *SEARCHED, Sequel.function(:array_to_string, :targets, TARGET_SEPARATOR))

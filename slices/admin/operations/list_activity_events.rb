@@ -15,6 +15,7 @@ module Admin
       LINES = {
         COMMENT => "activity_page.sub_lines.comment",
         JOURNAL => "activity_page.sub_lines.journal",
+        **Blog::Types::ActivityKind.values.grep(/\Apull_request_/).to_h { [it, "activity_page.sub_lines.#{it}"] },
       }.freeze
       MARKDOWN = [JOURNAL, COMMENT, DECISION_COMMENT].freeze
       NAME_LIMIT = 120
@@ -156,7 +157,7 @@ module Admin
         return post_line(row, views) if row.type == POST
 
         builder = LINE_BUILDERS[row.type]
-        builder ? send(builder, row) : i18n.t!(LINES.fetch(row.type), task: row.excerpt)
+        builder ? send(builder, row) : i18n.t!(LINES.fetch(row.type), task: row.excerpt, repo: row.repo)
       end
 
       def task_line(row)

@@ -13,12 +13,24 @@ module Admin
           DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
           JOURNAL = Blog::Types::ActivityKind["journal"]
           POST = Blog::Types::ActivityKind["post"]
+          PULL_REQUEST_CLOSED = Blog::Types::ActivityKind["pull_request_closed"]
+          PULL_REQUEST_MERGED = Blog::Types::ActivityKind["pull_request_merged"]
+          PULL_REQUEST_OPENED = Blog::Types::ActivityKind["pull_request_opened"]
           SESSION = Blog::Types::ActivityKind["session"]
           SOCIAL = Blog::Types::ActivityKind["social"]
           TASK = Blog::Types::ActivityKind["task"]
           WEBMENTION = Blog::Types::ActivityKind["webmention"]
+          PAGES = {
+            COMMIT => :admin_commit,
+            PULL_REQUEST_OPENED => :admin_pull_request,
+            PULL_REQUEST_MERGED => :admin_pull_request,
+            PULL_REQUEST_CLOSED => :admin_pull_request,
+          }.freeze
           TYPES = {
             COMMIT => Type.new(icon: "fa-code-commit", color: :violet, prose: false),
+            PULL_REQUEST_OPENED => Type.new(icon: "fa-code-pull-request", color: :violet, prose: false),
+            PULL_REQUEST_MERGED => Type.new(icon: "fa-code-merge", color: :violet, prose: false),
+            PULL_REQUEST_CLOSED => Type.new(icon: "fa-circle-xmark", color: :violet, prose: false),
             POST => Type.new(icon: "fa-file-lines", color: :green, prose: false),
             JOURNAL => Type.new(icon: "fa-feather", color: :sand, prose: true),
             SOCIAL => Type.new(icon: "fa-paper-plane", color: :blue, prose: true),
@@ -50,7 +62,7 @@ module Admin
 
           def href_for
             case @event.type
-              when COMMIT then path(:admin_commit, id: @event.source_id)
+              when *PAGES.keys then path(PAGES.fetch(@event.type), id: @event.source_id)
               when POST then path(:admin_edit_post, id: @event.source_id)
               when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
               when SOCIAL then path(:admin_social, filter: POSTED)

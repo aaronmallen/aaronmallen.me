@@ -29,6 +29,8 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       "comment" => "comment", "commit" => "code-commit", "decision" => "scale-balanced",
       "decision_comment" => "comments", "journal" => "feather", "post" => "file-lines", "session" => "clock",
       "social" => "paper-plane", "task" => "circle-check", "webmention" => "at",
+      "pull_request_opened" => "code-pull-request", "pull_request_merged" => "code-merge",
+      "pull_request_closed" => "circle-xmark",
     }.fetch(type)
   end
 
@@ -65,7 +67,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "groups the types as chips under one label" do
-        expect(page).to have_css(".activity-types[role='group'][aria-label='Include'] label.activity-type", count: 10)
+        expect(page).to have_css(".activity-types[role='group'][aria-label='Include'] label.activity-type", count: 13)
       end
 
       it "ties the search hint to the search box" do
@@ -85,7 +87,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "checks every type" do
-        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 10, visible: :all)
+        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 13, visible: :all)
       end
 
       it "submits the filters as a get" do
@@ -509,6 +511,63 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
     end
 
+    describe "pull requests" do
+      def hrefs = page.all("a.activity-event").map { it[:href] }
+
+      def pull_request(**times)
+        create(:pull_request, repo: "aaronmallen/blog", title: "Add feeds", ready_at: at(9), **times)
+      end
+
+      it "opens each row on the pull request's page" do
+        pull = pull_request(merged_at: at(10))
+        visit_activity
+
+        expect(hrefs).to eq(["/admin/pull-requests/#{pull.id}"] * 2)
+      end
+
+      it "shows an opened row and a merged row for a merged one" do
+        pull_request(merged_at: at(10))
+        visit_activity
+
+        expect(event_subs).to eq(["merged into aaronmallen/blog", "opened in aaronmallen/blog"])
+      end
+
+      it "shows an opened row and a closed row for one closed without a merge" do
+        pull_request(closed_at: at(10))
+        visit_activity
+
+        expect(event_subs).to eq(["closed in aaronmallen/blog", "opened in aaronmallen/blog"])
+      end
+
+      it "shows only the opened row for an open one" do
+        pull_request
+        visit_activity
+
+        expect(event_subs).to eq(["opened in aaronmallen/blog"])
+      end
+
+      it "shows nothing for one that was never ready" do
+        pull_request(ready_at: nil, closed_at: at(10))
+        visit_activity
+
+        expect(event_names).to be_empty
+      end
+
+      it "counts each kind apart" do
+        [{ merged_at: at(10) }, { closed_at: at(11) }].each { pull_request(**it) }
+        visit_activity
+
+        expect(%w[opened merged closed].map { count_for("pull_request_#{it}") }).to eq(%w[2 1 1])
+      end
+
+      it "drops a kind when its type is unchecked" do
+        pull_request(merged_at: at(10))
+        visit_activity(types: { pull_request_opened: "0", pull_request_merged: "1" })
+
+        expect(event_subs).to eq(["merged into aaronmallen/blog"])
+      end
+    end
+
     describe "a day older than yesterday" do
       before do
         create(:commit, commit_date: today - 3, message: "add the view")
@@ -891,6 +950,14 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity(q: "repo:aaronmallen/one repo:aaronmallen/two")
 
         expect(event_names).to include("in one", "in two")
+      end
+
+      it "drops the pull requests of every other repo" do
+        create(:pull_request, repo: "aaronmallen/one", title: "pr in one", ready_at: Time.now)
+        create(:pull_request, repo: "aaronmallen/two", title: "pr in two", ready_at: Time.now)
+        visit_activity(q: "repo:aaronmallen/one")
+
+        expect(event_names & ["pr in one", "pr in two"]).to eq(["pr in one"])
       end
 
       it "leaves the other types alone when it names two repos" do
