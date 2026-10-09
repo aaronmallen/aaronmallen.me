@@ -22,6 +22,13 @@ RSpec.describe "Footer", type: :request do
     expect(page.find("footer .h-card").text).to start_with("© #{Blog::TimeZone.today.year} Aaron Allen")
   end
 
+  it "puts the glasses before the copyright, hidden from assistive tech", :aggregate_failures do
+    mark = page.find("footer .h-card .site-footer-mark")
+
+    expect(mark.first("span", visible: :all)[:class]).to eq("site-footer-glasses")
+    expect(mark.find(".site-footer-glasses", visible: :all)["aria-hidden"]).to eq("true")
+  end
+
   it "marks the site owner's link rel=me and keeps it in this tab", :aggregate_failures do
     link = page.find("footer .h-card a.p-name")
 

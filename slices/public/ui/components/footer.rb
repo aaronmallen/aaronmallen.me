@@ -40,8 +40,9 @@ module Public
           a(class: "site-footer-text-link", href:, target: "_blank", rel: "noopener") { name }
         end
 
-        def identity
-          span(class: "site-footer-group h-card") do
+        def copyright
+          span(class: "site-footer-mark") do
+            span(class: "site-footer-glasses", aria: { hidden: "true" })
             span do
               plain t(".copyright", year: @year)
               whitespace
@@ -49,6 +50,12 @@ module Public
                 Hanami.app.settings.owner_name
               end
             end
+          end
+        end
+
+        def identity
+          span(class: "site-footer-group h-card") do
+            copyright
             PROFILES.each { |(name, icon, label_key)| profile_link(name:, icon:, label_key:) }
           end
         end
