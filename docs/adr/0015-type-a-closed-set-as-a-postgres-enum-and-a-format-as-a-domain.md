@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib]
 issue: AA-609
-amended: [AA-758, AA-801, AA-819, "#17"]
+amended: [AA-758, AA-801, AA-819, "#17", "#791"]
 tags: [postgres, schema, enums, domains, constraints, types]
 ---
 
@@ -42,6 +42,9 @@ token rather than a hex value, because the theme resolves each token through `li
 reads in both themes. AA-801 took the task type icon out of the schema, and #17 retired task types with their
 icons (ADR 0065).
 
+One set grows by design and stays text. #791 checks `service_connections.provider` against the service definitions
+in code, so a new service takes no migration ([ADR 0130][0130]).
+
 `Blog::Types` keeps a Ruby enum for 11 of the 16 sets, and relations and operations take their values from it
 (`slices/posts/relations/posts.rb`).
 
@@ -72,4 +75,5 @@ write, which a request spec that sends it would catch as a 500. The order drifts
 `slices/mcp/repos/oauth_token_repo.rb` and `slices/suggestions/repos/suggestion_repo.rb`. No spec compares a
 domain's pattern with its Ruby type either.
 
+[0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

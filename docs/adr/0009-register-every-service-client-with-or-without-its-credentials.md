@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, analytics, config, lib, projects, record, social]
 issue: AA-674
-amended: [AA-822]
+amended: [AA-822, "#791"]
 tags: [providers, clients, settings, credentials, github, maxmind, bluesky, mastodon]
 ---
 
@@ -44,6 +44,10 @@ A caller asks `configured?` before it calls out. An operation answers `Failure(:
 `Record::Operations::ImportCommits` and `Analytics::Operations::RefreshCountryDatabase` do. An action or a view
 shows the state, as `Admin::Actions::Sessions::New` does.
 
+Since #791 the GitHub, Linear, Mastodon and Bluesky credentials live in the database, not in settings, and a client
+looks them up on each call rather than at boot ([ADR 0130][0130]). Their providers still register a client either
+way.
+
 ## Alternatives
 
 **Required settings.** A setting whose constructor has no default, as `analytics_salt` has, stops the app at boot
@@ -69,4 +73,5 @@ A provider reads its settings once, at boot, so stubbing the settings in a spec 
 changes credentials has to start the provider, stub the settings and replace the registered component, as
 `spec/support/github_credentials.rb` does for GitHub and `spec/support/social_credentials.rb` for the networks.
 
+[0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
