@@ -3,6 +3,8 @@
 module Contact
   module Repos
     class MessageQueries < DB::Repo
+      INBOX = Blog::Types::MessageFilter["inbox"]
+      NAME = Blog::DB::Plugins::Taggings::NAME
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
@@ -11,6 +13,8 @@ module Contact
       def by_status(status) = messages.with_status(status).newest_first.to_a
 
       def count_from_visitor_since(visitor_hash, time) = messages.for_visitor(visitor_hash).received_since(time).count
+
+      def count_listed(**) = listed(**).count
 
       def count_received_between(from:, to:)
         counted = in_days(from, to).counts_by(:status).to_a
@@ -24,9 +28,7 @@ module Contact
 
       def exist?(id) = messages.by_pk(id).exist?
 
-      def page_by_status(status, page)
-        page.fill(messages.combine(:tags).with_status(status).newest_first.paged(page).to_a)
-      end
+      def page_listed(page, **) = page.fill(listed(**).combine(:tags).newest_first.paged(page).to_a)
 
       def received_between(from:, to:, page:, status: nil)
         found = in_days(from, to)
@@ -39,6 +41,8 @@ module Contact
 
       def snoozed = messages.with_status(UNREAD).asleep.to_a
 
+      def tag_names = message_tags.join(:tag).dataset.unordered.distinct.order(NAME).select_map(NAME)
+
       def unread = waiting.newest_first.to_a
 
       def unread_count = waiting.count
@@ -49,6 +53,12 @@ module Contact
         found = messages
         found = found.received_since(Blog::TimeZone.day_start(from)) if from
         to ? found.received_before(Blog::TimeZone.day_start(to + 1)) : found
+      end
+
+      def listed(status:, search: nil, tag: nil)
+        found = status == INBOX ? messages.exclude(status: SPAM) : messages.with_status(status)
+        found = found.matching(search) if search
+        tag ? found.tagged(tag) : found
       end
 
       def waiting = messages.with_status(UNREAD).awake

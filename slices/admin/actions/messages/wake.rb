@@ -19,8 +19,7 @@ module Admin
         private
 
         def back(request, id)
-          status = Blog::Types::MessageStatusParam[request.params[:filter]]
-          "#{routes.path(:admin_messages, status:, open: id)}#read-#{id}"
+          "#{routes.path(:admin_messages, **Helpers::MessageList.from(request.params, :filter), open: id)}#read-#{id}"
         end
       end
     end

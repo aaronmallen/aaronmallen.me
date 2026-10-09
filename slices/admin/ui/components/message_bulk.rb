@@ -16,6 +16,7 @@ module Admin
 
         prop :filter, Blog::Types::String
         prop :page, Blog::Types::Integer
+        prop :narrowed, Blog::Types::Hash
 
         def view_template
           BulkBar(id: ID, action: path(:admin_bulk_messages), label: t(".label"), fields:) do
@@ -32,7 +33,7 @@ module Admin
 
         def confirm = { confirm: t(".confirm_delete") }
 
-        def fields = { status: @filter, **Blog::Structs::Page.query(@page) }
+        def fields = { status: @filter, **@narrowed, **Blog::Structs::Page.query(@page) }
       end
     end
   end

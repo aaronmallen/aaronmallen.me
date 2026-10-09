@@ -24,10 +24,10 @@ module Admin
         private
 
         def back(request, id)
-          status = Blog::Types::MessageStatusParam[request.params[:status]]
-          page = landing(request) { message_queries.page_by_status(status, it).past_end? }
+          list = Helpers::MessageList.from(request.params)
+          page = landing(request) { message_queries.page_listed(it, **list).past_end? }
 
-          "#{routes.path(:admin_messages, status:, **Blog::Structs::Page.query(page), open: id)}#read-#{id}"
+          "#{routes.path(:admin_messages, **list, **Blog::Structs::Page.query(page), open: id)}#read-#{id}"
         end
       end
     end

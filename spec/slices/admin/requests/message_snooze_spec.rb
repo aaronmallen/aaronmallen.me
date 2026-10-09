@@ -83,6 +83,13 @@ RSpec.describe "Admin message snooze", type: :request do
         .to end_with("/admin/messages?status=unread&open=#{message.id}#read-#{message.id}")
     end
 
+    it "keeps the search and the tag on the way back" do
+      snooze(pick: "2026-10-08T08:00", filter: "inbox", search: "later", tag: "billing")
+
+      expect(last_response.location)
+        .to end_with("/admin/messages?status=inbox&search=later&tag=billing&open=#{message.id}#read-#{message.id}")
+    end
+
     it "snoozes until the time in the field" do
       snooze(snoozed_until: "2026-10-09T17:30")
 
@@ -133,6 +140,14 @@ RSpec.describe "Admin message snooze", type: :request do
 
       expect(repo.by_id(message.id).snoozed_until).to be <= now
       expect(last_response.location).to end_with("/admin/messages?status=read&open=#{message.id}#read-#{message.id}")
+    end
+
+    it "keeps the search on the way back" do
+      message = create(:message, snoozed_until: later)
+      wake(message.id, filter: "inbox", search: "later")
+
+      expect(last_response.location)
+        .to end_with("/admin/messages?status=inbox&search=later&open=#{message.id}#read-#{message.id}")
     end
 
     it "puts the message back in the inbox" do

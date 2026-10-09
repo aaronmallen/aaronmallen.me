@@ -11,6 +11,7 @@ module Admin
         prop :message, Blog::Types::Instance(ROM::Struct)
         prop :filter, Blog::Types::String
         prop :page, Blog::Types::Integer
+        prop :narrowed, Blog::Types::Hash
         prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
         def view_template
@@ -31,7 +32,7 @@ module Admin
         def acts
           @message.status == UNREAD ? mark(READ, ".mark_read") : mark(UNREAD, ".mark_unread")
           snoozed? ? wake : snooze
-          MessageLabel(message: @message, filter: @filter, tags: @tags)
+          MessageLabel(message: @message, filter: @filter, narrowed: @narrowed, tags: @tags)
           div(class: "msg-letter-far") do
             mark(SPAM, ".spam", variant: :warn)
             delete(".delete", ".confirm_delete")
@@ -42,6 +43,7 @@ module Admin
           Form(action: path(:admin_delete_message, id: @message.id)) do
             input(type: "hidden", name: "status", value: @filter)
             input(type: "hidden", name: "page", value: @page)
+            narrowing
             Button(type: "submit", variant: :warn, small: true, data: { confirm: t(confirm_key) }) { t(label_key) }
           end
         end
@@ -50,13 +52,17 @@ module Admin
           Form(action: path(:admin_mark_message, id: @message.id, status:)) do
             input(type: "hidden", name: "filter", value: @filter)
             input(type: "hidden", name: "open", value: @message.id)
+            narrowing
             Button(type: "submit", variant:, small: true) { t(label_key) }
           end
         end
 
+        def narrowing = @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
+
         def snooze
           Inbox::Snooze(kind: "message", id: @message.id, action: path(:admin_snooze_message, id: @message.id)) do
             input(type: "hidden", name: "filter", value: @filter)
+            narrowing
           end
         end
 
@@ -79,6 +85,7 @@ module Admin
         def wake
           Form(action: path(:admin_wake_message, id: @message.id)) do
             input(type: "hidden", name: "filter", value: @filter)
+            narrowing
             Button(type: "submit", small: true) { t(".wake") }
           end
         end

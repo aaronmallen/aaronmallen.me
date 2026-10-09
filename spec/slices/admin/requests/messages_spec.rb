@@ -89,6 +89,137 @@ RSpec.describe "Admin messages", type: :request do
 
         expect(subjects).to eq(%w[Waiting])
       end
+
+      it "shows every message but spam with the inbox filter" do
+        get "/admin/messages", status: "inbox"
+
+        expect(subjects).to contain_exactly("Waiting", "Answered")
+      end
+
+      it "offers inbox, unread, read and spam in that order" do
+        get "/admin/messages"
+
+        expect(page.all(".seg input[name='status']", visible: :all).map(&:value)).to eq(%w[inbox unread read spam])
+      end
+    end
+
+    describe "searching" do
+      def tagging = Contact::Slice["repos.message_tag_mutations"]
+
+      before do
+        create(:message, subject: "Invoice overdue", reply_to: "ada@example.com", body: "please pay")
+        create(:message, subject: "Hello", reply_to: "grace@example.com", body: "a lighthouse question")
+        tagging.add(create(:message, subject: "Tagged", body: "nothing here").id, "billing")
+        create(:message, :spam, subject: "Invoice scam")
+      end
+
+      {
+        "subject" => ["invoice", ["Invoice overdue"]],
+        "sender" => ["grace@", %w[Hello]],
+        "body" => ["lighthouse", %w[Hello]],
+        "tag" => ["billing", %w[Tagged]],
+      }.each do |field, (query, listed)|
+        it "finds a message by its #{field}" do
+          get "/admin/messages", status: "inbox", search: query
+
+          expect(subjects).to eq(listed)
+        end
+      end
+
+      it "searches within the filter" do
+        get "/admin/messages", status: "spam", search: "invoice"
+
+        expect(subjects).to eq(["Invoice scam"])
+      end
+
+      it "counts only what matches" do
+        get "/admin/messages", search: "invoice"
+
+        expect(page).to have_css(".page-head-sub", exact_text: "1 message")
+      end
+
+      it "says nothing matches when nothing does" do
+        get "/admin/messages", search: "zebra"
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.messages.index.no_match"))
+      end
+
+      it "keeps the search in the box" do
+        get "/admin/messages", search: "invoice"
+
+        expect(page).to have_field("messages-search", with: "invoice")
+      end
+
+      it "treats a wildcard as plain text" do
+        get "/admin/messages", status: "inbox", search: "%"
+
+        expect(subjects).to be_empty
+      end
+
+      it "keeps the search on the pager" do
+        lower_page_size(:admin, to: 1)
+        create(:message, subject: "Invoice again")
+        get "/admin/messages", search: "invoice"
+
+        expect(page).to have_css("nav.pager a[rel='next'][href='/admin/messages?status=unread&search=invoice&page=2']")
+      end
+
+      it "keeps the search in a row's open form" do
+        get "/admin/messages", search: "invoice"
+
+        expect(page).to have_css(".msg-item-form input[name='search'][value='invoice']", visible: :all)
+      end
+
+      it "keeps the search in the bulk bar" do
+        get "/admin/messages", search: "invoice"
+
+        expect(page).to have_css("#message-bulk input[name='search'][value='invoice']", visible: :all)
+      end
+    end
+
+    describe "the tag select" do
+      def tagging = Contact::Slice["repos.message_tag_mutations"]
+
+      it "hides when no message has tags" do
+        create(:message)
+        get "/admin/messages"
+
+        expect(page).to have_no_select("tag")
+      end
+
+      describe "with tagged messages" do
+        before do
+          tagging.add(create(:message, subject: "Bill").id, "billing")
+          tagging.add(create(:message, subject: "Urgent bill").id, "billing")
+          tagging.add(create(:message, subject: "Hurry").id, "urgent")
+          create(:message, subject: "Plain")
+          create(:tag, name: "unused")
+        end
+
+        it "offers the tags messages carry" do
+          get "/admin/messages"
+
+          expect(page.all("select[name='tag'] option").map(&:value)).to eq(["", "billing", "urgent"])
+        end
+
+        it "lists only messages with that tag" do
+          get "/admin/messages", tag: "billing"
+
+          expect(subjects).to contain_exactly("Bill", "Urgent bill")
+        end
+
+        it "selects the chosen tag" do
+          get "/admin/messages", tag: "urgent"
+
+          expect(page).to have_select("messages-tag", selected: "urgent")
+        end
+
+        it "lists everything with no tag chosen" do
+          get "/admin/messages", tag: ""
+
+          expect(subjects).to contain_exactly("Bill", "Urgent bill", "Hurry", "Plain")
+        end
+      end
     end
 
     it "lists the newest message first" do
@@ -255,6 +386,14 @@ RSpec.describe "Admin messages", type: :request do
         )
       end
 
+      it "keeps the search and the tag on the way back" do
+        message = create(:message)
+        open_message(message.id, status: "inbox", search: "invoice", tag: "billing")
+
+        expect(last_response.location)
+          .to end_with("/admin/messages?status=inbox&search=invoice&tag=billing&open=#{message.id}#read-#{message.id}")
+      end
+
       it "steps back a page the open emptied" do
         lower_page_size(:admin, to: 1)
         message = [2, 1].map { create(:message, received_at: Time.utc(2026, 9, it)) }.last
@@ -318,7 +457,7 @@ RSpec.describe "Admin messages", type: :request do
       expect(page).to have_css(".page-head-sub", exact_text: "2 messages")
     end
 
-    %w[unread read spam].each do |status|
+    %w[inbox unread read spam].each do |status|
       it "says something useful when #{status} holds nothing" do
         get "/admin/messages", status: status
 
@@ -374,6 +513,13 @@ RSpec.describe "Admin messages", type: :request do
         mark(message.id, "spam", filter: "read")
 
         expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/messages?status=read"))
+      end
+
+      it "keeps the search on the way back" do
+        message = create(:message)
+        mark(message.id, "read", filter: "inbox", search: "invoice")
+
+        expect(last_response.location).to end_with("/admin/messages?status=inbox&search=invoice")
       end
 
       it "falls back to unread for a filter it doesn't know" do

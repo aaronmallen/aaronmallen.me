@@ -13,13 +13,14 @@ module Admin
         ]
 
         def handle(request, response)
-          filter = Blog::Types::MessageStatusParam[request.params[:status]]
-          messages = message_queries.page_by_status(filter, page(request, response))
+          list = Helpers::MessageList.from(request.params)
+          messages = message_queries.page_listed(page(request, response), **list)
           not_found(response) if messages.past_end?
 
-          response[:count] = message_queries.count_with_status(filter)
-          response[:filter] = filter
+          response[:count] = message_queries.count_listed(**list)
+          response[:list] = list
           response[:messages] = messages
+          response[:tag_names] = message_queries.tag_names
           show_open(request, response)
         end
 

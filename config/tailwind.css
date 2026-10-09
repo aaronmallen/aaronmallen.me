@@ -2844,6 +2844,18 @@
   }
 }
 
+@utility msg-filters {
+  @apply flex flex-wrap items-center gap-2;
+
+  & input.inp {
+    @apply w-56;
+  }
+
+  & select.inp {
+    @apply w-auto;
+  }
+}
+
 @utility tasks-filters {
   @apply flex flex-wrap items-center gap-2;
 

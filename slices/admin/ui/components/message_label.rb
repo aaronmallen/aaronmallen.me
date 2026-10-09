@@ -10,6 +10,7 @@ module Admin
 
         prop :message, Blog::Types::Instance(ROM::Struct)
         prop :filter, Blog::Types::String
+        prop :narrowed, Blog::Types::Hash
         prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
         def view_template
@@ -20,6 +21,7 @@ module Admin
           ) do
             Form(action: path(:admin_label_message, id: @message.id), class: "label-form", data: DATA) do
               input(type: "hidden", name: "filter", value: @filter)
+              @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
               find
               list
               foot

@@ -10,6 +10,7 @@ module Admin
         prop :message, Blog::Types::Instance(ROM::Struct)
         prop :filter, Blog::Types::String
         prop :page, Blog::Types::Integer
+        prop :narrowed, Blog::Types::Hash
         prop :bulk, Blog::Types::String
 
         def view_template
@@ -19,6 +20,7 @@ module Admin
             Form(action: path(:admin_open_message, id: @message.id), class: "msg-item-form") do
               input(type: "hidden", name: "status", value: @filter)
               input(type: "hidden", name: "page", value: @page)
+              narrowing
               button(type: "submit", class: "msg-item-open", **keyed) { summary }
             end
             chips
@@ -36,6 +38,8 @@ module Admin
 
           { aria: { keyshortcuts: READ_KEY }, data: { key_open: true, key: READ_KEY, key_label: t(".read_key") } }
         end
+
+        def narrowing = @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
 
         def pick = { form: @bulk, value: @message.id, label: t(".pick", subject: @message.subject) }
 

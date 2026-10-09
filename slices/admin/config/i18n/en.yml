@@ -2069,18 +2069,25 @@ en:
             other: "%{count} words"
       messages:
         index:
+          all_tags: "All tags"
           empty:
+            inbox: "No messages."
             read: "Nothing read yet."
             spam: "No spam."
             unread: "Nothing waiting."
           filter: "Status"
           heading: "Messages"
+          inbox: "inbox"
+          no_match: "No messages match."
           pick: "Pick a message to read it."
+          placeholder: "Search messages"
           read: "read"
+          search: "Search messages"
           spam: "spam"
           sub:
             one: "%{count} message"
             other: "%{count} messages"
+          tag: "Tag"
           unread: "unread"
       not_found:
         heading: "Page not found"

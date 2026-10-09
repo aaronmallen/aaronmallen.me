@@ -8,10 +8,8 @@ module Admin
 
         def back(request)
           id = record_id(request)
-          "#{routes.path(:admin_messages, status: filter(request), open: id)}#read-#{id}"
+          "#{routes.path(:admin_messages, **Helpers::MessageList.from(request.params, :filter), open: id)}#read-#{id}"
         end
-
-        def filter(request) = Blog::Types::MessageStatusParam[request.params[:filter]]
 
         def kind(_request) = "message"
       end

@@ -87,8 +87,9 @@ module Blog
     end
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
+    MessageFilter = Types::String.enum("unread", "read", "spam", "inbox")
+    MessageFilterParam = MessageFilter.fallback(MessageFilter.values.first)
     MessageStatus = Types::String.enum("unread", "read", "spam")
-    MessageStatusParam = MessageStatus.fallback(MessageStatus.values.first)
     NetworkName = Types::String.enum("mastodon", "bluesky")
     OAuthDecision = Types::String.enum("cancel", "approve")
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
