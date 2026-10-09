@@ -954,6 +954,9 @@ en:
           reorder: "Move the focused task up or down"
           title: "Keys"
       people:
+        drawer:
+          edit: "edit person"
+          new: "new person"
         editor:
           all_people: "All people"
           new_person: "New person"
@@ -985,12 +988,12 @@ en:
         person_form:
           add: "Add person"
           bluesky_handle: "Bluesky handle"
-          bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account's DID."
+          bluesky_handle_note: "Saving looks the handle up on Bluesky and keeps the account’s DID."
           bluesky_handle_placeholder: "ada.bsky.social"
           confirm_delete: "Remove %{name}? Posts that mention them keep the token. You can't undo it."
           delete: "Remove"
           key: "Key"
-          key_note: "A post mentions them as @{key}. Lowercase words joined by hyphens."
+          key_note: "A post mentions them as @{%{key}}. Lowercase words joined by hyphens."
           key_placeholder: "ada"
           mastodon_handle: "Mastodon handle"
           mastodon_handle_placeholder: "@ada@ruby.social"

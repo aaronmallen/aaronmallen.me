@@ -14,6 +14,7 @@ module Admin
             mastodon_handle: %w[.mastodon_handle .mastodon_handle_placeholder],
             bluesky_handle: %w[.bluesky_handle .bluesky_handle_placeholder],
           }.freeze
+          NETWORKS = { mastodon_handle: "mastodon", bluesky_handle: "bluesky" }.freeze
 
           prop :person, Blog::Types::Instance(ROM::Struct).optional
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)
@@ -32,9 +33,9 @@ module Admin
           private
 
           def actions
-            div(class: "sg-actions") do
-              Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@person ? ".save" : ".add") }
+            div(class: "sg-actions person-form-actions") do
               delete_button if @person
+              Button(variant: :pri, type: "submit", icon: "fa-regular fa-floppy-disk") { t(@person ? ".save" : ".add") }
             end
           end
 
@@ -56,7 +57,7 @@ module Admin
 
           def fields
             input_field(:name)
-            input_field(:key) { Hint { t(".key_note") } }
+            input_field(:key) { Hint { t(".key_note", key: key_token) } }
             input_field(:mastodon_handle)
             input_field(:bluesky_handle) { Hint { t(".bluesky_handle_note") } }
             FieldError(field: :handles, errors: @errors, scope: @scope)
@@ -68,7 +69,8 @@ module Admin
           def input_field(name, &)
             label_key, placeholder_key = FIELDS.fetch(name)
 
-            Field(label: t(label_key), name:, errors: @errors, error: FieldError, scope: @scope) do |control, field|
+            Field(label: t(label_key), **network(name), name:, errors: @errors, error: FieldError,
+                  scope: @scope) do |control, field|
               Input(
                 **control,
                 autocomplete: "off",
@@ -79,6 +81,13 @@ module Admin
               )
               field.after(&) if block_given?
             end
+          end
+
+          def key_token = @values[:key].to_s.empty? ? "key" : @values[:key]
+
+          def network(name)
+            net = NETWORKS[name]
+            net ? { class: "field-net #{net}", icon: "fa-brands fa-#{net}" } : Blog::Constants::EMPTY_HASH
           end
         end
       end

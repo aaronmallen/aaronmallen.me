@@ -129,6 +129,38 @@ RSpec.describe "Admin people", type: :feature do
       expect(page).to have_css(".person-row-name", text: "Countess Ada")
     end
 
+    it "titles the drawers new person and edit person", :aggregate_failures do
+      click_link "New person"
+      expect(page).to have_css("#person-new-title", text: "new person")
+
+      find_by_id("person-new-drawer").find("[data-dialog-close]").click
+      click_link "Ada Lovelace"
+      expect(page).to have_css("#person-#{person.id}-title", text: "edit person")
+    end
+
+    it "shows the person's key in the key hint" do
+      click_link "Ada Lovelace"
+
+      hint = translate("ui.components.people.person_form.key_note", key: "ada")
+
+      expect(page).to have_css("#person-#{person.id}-drawer .hint", text: hint)
+    end
+
+    it "marks the handle fields with their network", :aggregate_failures do
+      click_link "Ada Lovelace"
+
+      within("#person-#{person.id}-drawer") do
+        expect(page).to have_css(".field-net.mastodon .fa-mastodon")
+        expect(page).to have_css(".field-net.bluesky .fa-bluesky")
+      end
+    end
+
+    it "puts Remove before Save" do
+      click_link "Ada Lovelace"
+
+      expect(find("#person-#{person.id}-drawer .person-form-actions")).to have_text(/Remove.*Save/m)
+    end
+
     it "fills the key from the name in the new person drawer" do
       click_link "New person"
       fill_in "person-new-name", with: "Grace Hopper"

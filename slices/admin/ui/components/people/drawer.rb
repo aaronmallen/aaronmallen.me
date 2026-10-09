@@ -22,7 +22,7 @@ module Admin
 
           def scope = self.class.id_for(@person)
 
-          def title = @person ? @person.name : t("ui.components.people.editor.new_person")
+          def title = t(@person ? ".edit" : ".new")
         end
       end
     end

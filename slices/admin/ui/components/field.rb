@@ -12,6 +12,8 @@ module Admin
         prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
         prop :error, ERROR.optional, default: nil
         prop :scope, Blog::Types::String.optional, default: nil
+        prop :icon, Blog::Types::String.optional, default: nil
+        prop :attributes, Blog::Types::Hash, :**
 
         def after(&block)
           @after = block
@@ -19,7 +21,7 @@ module Admin
         end
 
         def view_template(&)
-          div(class: "field") do
+          div(**mix({ class: "field" }, @attributes)) do
             render_label
             yield control, self
             render @error.new(field: @name, errors: @errors, scope:) if @name
@@ -38,11 +40,16 @@ module Admin
 
         def control_id = @name ? @error.id_for(@name, scope) : @id
 
+        def label_text
+          i(class: "#{@icon} f-icon", aria: { hidden: "true" }) if @icon
+          plain @label
+        end
+
         def render_label
           id = control_id
-          return span(class: "f") { @label } unless id
+          return span(class: "f") { label_text } unless id
 
-          label(class: "f", for: id) { @label }
+          label(class: "f", for: id) { label_text }
         end
 
         def scope = @scope || @error::SCOPE

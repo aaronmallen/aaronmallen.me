@@ -5001,6 +5001,34 @@
   }
 }
 
+@utility person-form-actions {
+  & > :last-child {
+    @apply ml-auto;
+  }
+
+  :where(.dialog-body) & {
+    @apply border-t border-line pt-3.5;
+  }
+}
+
+@utility field-net {
+  &.mastodon {
+    --net: var(--color-mk-violet);
+  }
+
+  &.bluesky {
+    --net: var(--color-mk-blue-text);
+  }
+
+  & .f-icon {
+    @apply mr-1 text-(--net);
+  }
+
+  & .inp:focus {
+    @apply border-(--net) outline-2 outline-offset-1 outline-(--net)/45;
+  }
+}
+
 @utility person-finder {
   & .seg-option.mastodon:has(:checked) {
     @apply text-mk-violet;
