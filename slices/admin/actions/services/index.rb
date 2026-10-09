@@ -10,11 +10,19 @@ module Admin
           list_services: "operations.list_services",
         ]
 
+        before :allow_oauth_redirects
+
         def handle(request, response)
           response.render(view, **listing(request.params[:connect], selected: request.params[:selected]))
         end
 
         private
+
+        def allow_oauth_redirects(_request, response)
+          policy = Slice.config.actions.content_security_policy.dup
+          policy[:form_action] = "'self' https:"
+          response.headers["Content-Security-Policy"] = policy.to_s
+        end
 
         def listing(connect, selected: nil, **)
           listing = list_services.call

@@ -15,6 +15,8 @@ RSpec.describe "Admin connected services", type: :request do
     Record::Slice["repos.sync_state_mutations"].record_failure(Blog::Types::SyncName[name], :unreachable)
   end
 
+  def form_action = last_response.headers["Content-Security-Policy"][/form-action [^;]*/]
+
   def group(label) = page.find(".svc-group", text: label)
 
   def names(label) = group(label).all(".li-title").map(&:text)
@@ -37,6 +39,25 @@ RSpec.describe "Admin connected services", type: :request do
 
   describe "signed in" do
     before { sign_in_to_admin }
+
+    it "lets the connect form follow its redirect to an authorize page on any https origin" do
+      get "/admin/services"
+
+      expect(form_action).to eq("form-action 'self' https:")
+    end
+
+    it "keeps the wider form-action when it shows the form again after a refusal", :aggregate_failures do
+      connect(connection: { api_key: "" })
+
+      expect(last_response.status).to eq(422)
+      expect(form_action).to eq("form-action 'self' https:")
+    end
+
+    it "keeps form-action to my own origin on the other admin screens" do
+      get "/admin/tasks"
+
+      expect(form_action).to eq("form-action 'self'")
+    end
 
     it "heads the tab as Settings and titles it Connected services", :aggregate_failures do
       get "/admin/services"
