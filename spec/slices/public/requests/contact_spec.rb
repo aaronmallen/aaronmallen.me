@@ -12,6 +12,8 @@ RSpec.describe "Contact", type: :request do
 
   def error(key) = i18n.t(key, scope: "ui.components.contact_field_error")
 
+  def info(key) = i18n.t(key, scope: "ui.components.contact_info")
+
   def send_from(headers) = post("/contact", { message: stamped(fields) }, headers)
 
   def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
@@ -28,12 +30,49 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "heads the page with a kicker over the heading", :aggregate_failures do
-      expect(page).to have_css(".contact .kicker", exact_text: copy("kicker"))
-      expect(page).to have_css(".contact h1.page-title", exact_text: copy("heading"))
+      expect(page).to have_css(".hd .kicker", exact_text: copy("kicker"))
+      expect(page).to have_css(".hd h1", exact_text: copy("heading"))
     end
 
     it "opens with a lede" do
-      expect(page).to have_css(".contact p.lede", exact_text: copy("lede"))
+      expect(page).to have_css(".hd p.ld", exact_text: copy("lede"))
+    end
+
+    it "sets the head and info list beside the form, in the even grid", :aggregate_failures do
+      expect(page).to have_css(".g.even > .stick > .hd + dl.ci")
+      expect(page).to have_css(".g.even > .stick + div > form.form.card")
+    end
+
+    it "lists where Aaron is, what he works on, what the site keeps and where else he is" do
+      headings = page.all("dl.ci dt.kicker").map(&:text)
+
+      expect(headings).to eq(%w[where work keep elsewhere].map { info("#{it}.heading") })
+    end
+
+    it "says where Aaron is, with the zone in the clock's slot", :aggregate_failures do
+      expect(page).to have_css(".ci-v", exact_text: info("where.value"))
+      expect(page).to have_css(
+        ".ci-s [data-clock='#{Blog::TimeZone::NAME}'][data-clock-label='#{info('where.clock')}']",
+        exact_text: info("where.zone"),
+      )
+    end
+
+    it "links what Aaron works on through the site's own pages", :aggregate_failures do
+      expect(page).to have_link(info("work.employer"), href: "/about")
+      expect(page).to have_link(info("work.hanakai"), href: "https://hanakai.org")
+      expect(page).to have_link(info("work.projects"), href: "/projects")
+    end
+
+    it "says what the site keeps, linked to the privacy page", :aggregate_failures do
+      expect(page).to have_css(".ci-v", exact_text: info("keep.value"))
+      expect(page).to have_css(".ci-s", text: info("keep.detail").strip)
+      expect(page).to have_link(info("keep.privacy"), href: "/privacy")
+    end
+
+    it "lists the profiles the settings hold as pills" do
+      profiles = %i[github mastodon bluesky].map { Hanami.app.settings.public_send(it)[:profile_url] }
+
+      expect(page.all(".ci ul.links a").map { it[:href] }).to eq(profiles)
     end
 
     it "posts the form back to /contact", :aggregate_failures do
@@ -178,13 +217,13 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "confirms the message", :aggregate_failures do
-      expect(page).to have_css(".contact .f-ok strong", exact_text: copy("sent.heading"))
-      expect(page).to have_css(".contact .f-ok p", exact_text: copy("sent.body"))
+      expect(page).to have_css(".f-ok strong", exact_text: copy("sent.heading"))
+      expect(page).to have_css(".f-ok p", exact_text: copy("sent.body"))
     end
 
     it "reads as a send that went through", :aggregate_failures do
-      expect(page).to have_css(".contact .f-ok > i.fa-circle-check[aria-hidden='true']")
-      expect(page).to have_no_css(".contact .f-ok.f-wait")
+      expect(page).to have_css(".f-ok > i.fa-circle-check[aria-hidden='true']")
+      expect(page).to have_no_css(".f-ok.f-wait")
     end
 
     it "offers no form to send again" do
@@ -196,7 +235,12 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "ends at the answer, with no other way to write" do
-      expect(page).to have_no_css(".contact .post-body")
+      expect(page).to have_no_css(".post-body")
+    end
+
+    it "keeps the head and the info list", :aggregate_failures do
+      expect(page).to have_css(".stick .hd h1", exact_text: copy("heading"))
+      expect(page).to have_css(".stick dl.ci .ci-r", count: 4)
     end
   end
 
@@ -204,14 +248,14 @@ RSpec.describe "Contact", type: :request do
     it "shows the form rather than the refusal a throttled send gets", :aggregate_failures do
       get "/contact?throttled=1"
 
-      expect(page).to have_css(".contact form")
-      expect(page).to have_no_css(".contact .f-ok")
+      expect(page).to have_css("form")
+      expect(page).to have_no_css(".f-ok")
     end
 
     it "shows no error the server never found", :aggregate_failures do
       get "/contact?errors[body][]=blank"
 
-      expect(page).to have_css(".contact form")
+      expect(page).to have_css("form")
       expect(page).to have_no_css(".f-e")
       expect(page).to have_no_css("[aria-invalid]")
     end
@@ -261,7 +305,7 @@ RSpec.describe "Contact", type: :request do
     it "confirms it on the page that follows" do
       follow_redirect!
 
-      expect(page).to have_css(".contact .f-ok strong", exact_text: copy("sent.heading"))
+      expect(page).to have_css(".f-ok strong", exact_text: copy("sent.heading"))
     end
 
     it "does not read the message back" do
@@ -468,20 +512,20 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "comes back with the contact page" do
-      expect(page).to have_css(".contact h1.page-title", exact_text: copy("heading"))
+      expect(page).to have_css(".hd h1", exact_text: copy("heading"))
     end
 
     it "says the sender has sent enough for now", :aggregate_failures do
-      expect(page).to have_css(".contact .f-ok.f-wait strong", exact_text: copy("throttled.heading"))
-      expect(page).to have_css(".contact .f-ok.f-wait p", exact_text: copy("throttled.body"))
+      expect(page).to have_css(".f-ok.f-wait strong", exact_text: copy("throttled.heading"))
+      expect(page).to have_css(".f-ok.f-wait p", exact_text: copy("throttled.body"))
     end
 
     it "reads as a wait rather than a send that went through" do
-      expect(page).to have_css(".contact .f-ok > i.fa-hourglass-half[aria-hidden='true']")
+      expect(page).to have_css(".f-ok > i.fa-hourglass-half[aria-hidden='true']")
     end
 
     it "never says what the limit or the window is" do
-      expect(page.find(".contact .f-ok").text).not_to match(/\d/)
+      expect(page.find(".f-ok").text).not_to match(/\d/)
     end
 
     it "offers no form to send again" do
@@ -493,7 +537,12 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "ends at the answer, with no other way to write" do
-      expect(page).to have_no_css(".contact .post-body")
+      expect(page).to have_no_css(".post-body")
+    end
+
+    it "keeps the head and the info list", :aggregate_failures do
+      expect(page).to have_css(".stick .hd h1", exact_text: copy("heading"))
+      expect(page).to have_css(".stick dl.ci .ci-r", count: 4)
     end
   end
 
@@ -647,7 +696,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "comes back with the page" do
-      expect(page).to have_css(".contact form")
+      expect(page).to have_css("form")
     end
 
     it "names the failing field" do

@@ -20,10 +20,12 @@ module Public
           def view_template
             content_for(:title, t(".title"))
 
-            section(class: "contact") do
-              span(class: "kicker") { t(".kicker") }
-              h1(class: "page-title") { t(".heading") }
-              outcome
+            div(class: "g even") do
+              div(class: "stick") do
+                head
+                ContactInfo()
+              end
+              div { outcome }
             end
           end
 
@@ -76,6 +78,14 @@ module Public
             input(type: "hidden", name: field_name(STAMP), value: @values[STAMP])
           end
 
+          def head
+            header(class: "hd") do
+              span(class: "kicker") { t(".kicker") }
+              h1 { t(".heading") }
+              p(class: "ld") { t(".lede") }
+            end
+          end
+
           def honeypot
             div(class: "f-hp", aria: { hidden: "true" }) do
               label(for: honeypot_id) { t(".fields.reference") }
@@ -107,8 +117,7 @@ module Public
           end
 
           def message_form
-            p(class: "lede") { t(".lede") }
-            form(action: path(:message), class: "form", id: FORM_ID, method: "post") do
+            form(action: path(:message), class: "form card", id: FORM_ID, method: "post") do
               fields
               actions
             end

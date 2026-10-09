@@ -33,14 +33,14 @@ RSpec.describe "Contact form", type: :feature do
     send_message
 
     expect(page).to have_current_path("/contact?sent=1")
-    expect(page).to have_css(".contact .f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
+    expect(page).to have_css(".f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
   end
 
   it "stores one message however often the page that follows is refreshed", :aggregate_failures do
     send_message
     2.times { page.refresh }
 
-    expect(page).to have_css(".contact .f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
+    expect(page).to have_css(".f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
     expect(message_queries.messages.count).to eq(1)
   end
 

@@ -21,6 +21,32 @@ en:
           blank: "Say what this is about."
           control: "The subject holds a hidden character."
           long: "Shorten the subject."
+      contact_info:
+        elsewhere:
+          bluesky: "bluesky"
+          github: "github"
+          heading: "Elsewhere"
+          mastodon: "mastodon"
+        keep:
+          detail: "No mailing list, no third party. Spam is gone after 30 days. "
+          heading: "What I keep"
+          privacy: "Privacy"
+          value: "Your address, subject and message, until I delete them."
+        where:
+          clock: "Central time · %{time} here right now"
+          heading: "Where I am"
+          value: "San Antonio, Texas"
+          zone: "Central time"
+        work:
+          ask: "Questions about "
+          employer: "Credit Ninja"
+          hanakai: "Hanakai"
+          hanami: ", Hanami with "
+          heading: "What I’m on"
+          projects: "any of the projects"
+          ruby: "Ruby at "
+          rust: ", Rust in the open"
+          welcome: " are always welcome."
       footer:
         and: "and"
         built_with: "Built with"
@@ -107,7 +133,7 @@ en:
           heading: "Send me something."
           kicker: "Contact"
           lede: "Real messages from real people get an answer, usually within a few days."
-          note: "Goes straight to my inbox. No mailing list, no third party."
+          note: "Goes straight to my inbox."
           placeholders:
             body: "Bugs, better patterns, arguments about service objects. All welcome."
             reply_to: "you@somewhere.dev"
