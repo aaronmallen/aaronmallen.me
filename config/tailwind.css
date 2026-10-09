@@ -99,7 +99,7 @@
   --text-display: clamp(2.3rem, 7vw, 3.5rem);
   --text-display--line-height: 0.98;
   --text-display--letter-spacing: -0.03em;
-  --text-brand: 1.25rem;
+  --text-brand: 1.125rem;
   --text-brand--letter-spacing: -0.01em;
   --text-nav: 0.8125rem;
   --text-icon-sm: 0.75rem;
@@ -160,7 +160,6 @@
   --tracking-eyebrow: 0.02em;
 
   --spacing-gutter: 5rem;
-  --spacing-nav: 2rem;
   --container-measure: 44em;
   --container-entry-meta: 170px;
   --container-work-year: 104px;
@@ -233,11 +232,6 @@
   --spacing-meter-w: 52px;
   --shadow-toast: 0 16px 44px rgb(0 0 0 / 40%);
   --shadow-palette: 0 30px 80px rgb(0 0 0 / 50%);
-}
-
-@utility icon-button {
-  @apply inline-flex size-10 cursor-pointer items-center justify-center text-ink-muted hover:text-ink focus-ring;
-  @apply transition-colors duration-200 ease-in-out;
 }
 
 @utility focus-ring {
@@ -337,57 +331,58 @@
   @apply text-icon-sm text-mk-pink;
 }
 
-@utility site-header {
-  @apply bg-ground-sunk;
+@utility pub-focus {
+  @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
 }
 
-@utility main-nav {
-  @apply grid items-center gap-x-2 px-gutter py-3;
-  grid-template-columns: 1fr auto auto;
+@utility site-header {
+  @apply sticky top-0 z-40 flex items-center gap-x-4 gap-y-3 px-admin-gutter py-3.5;
+  background-color: color-mix(in oklab, var(--color-ground) 88%, transparent);
+  backdrop-filter: blur(10px);
 
-  @variant md {
-    grid-template-columns: 1fr auto 1fr;
+  @media (width < 43.75rem) {
+    @apply flex-wrap;
   }
 }
 
 @utility main-nav-brand {
-  @apply col-start-1 row-start-1 justify-self-start text-brand hover:cursor-pointer focus-ring;
+  @apply mr-[clamp(4px,1vw,16px)] text-brand pub-focus;
   --cy0: var(--color-mk-pink);
   --cy1: var(--color-mk-orange);
   --cy2: var(--color-mk-sand);
   --cy3: var(--color-mk-green);
   --cy4: var(--color-mk-blue);
   --cy5: var(--color-mk-violet);
-}
 
-@utility main-nav-toggle {
-  @apply col-start-2 row-start-1 icon-button md:hidden;
-}
-
-@utility main-nav-toggle-closed-icon {
-  :where([aria-expanded="true"]) > & {
-    --fa-display: none;
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
   }
 }
 
-@utility main-nav-toggle-opened-icon {
-  :where([aria-expanded="false"]) > & {
-    --fa-display: none;
+@utility main-nav {
+  @apply flex gap-0.5 overflow-x-auto rounded-full border border-line bg-ground-sunk p-1;
+  scrollbar-width: none;
+
+  @media (width < 43.75rem) {
+    @apply order-3 w-full;
   }
 }
 
-@utility main-nav-links {
-  @apply col-span-full row-start-2 hidden flex-col items-start gap-y-2 pt-3;
-  @apply md:col-span-1 md:col-start-2 md:row-start-1 md:flex md:flex-row md:flex-wrap md:items-center;
-  @apply md:justify-center md:gap-x-nav md:gap-y-1.5 md:pt-0;
+@utility main-nav-link {
+  @apply rounded-full px-[clamp(12px,1vw,18px)] py-2 font-display text-pill leading-[1.2] font-semibold whitespace-nowrap;
+  @apply text-ink-muted no-underline hover:text-ink pub-focus;
 
-  :where(.main-nav:has(.main-nav-toggle[aria-expanded="true"])) & {
-    display: flex;
+  &[aria-current="page"] {
+    @apply bg-ink text-ground;
+  }
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap flex-1 items-center justify-center;
   }
 }
 
 @utility main-nav-settings {
-  @apply col-start-3 row-start-1 justify-self-end;
+  @apply ml-auto;
 }
 
 @utility settings-menu {
@@ -395,12 +390,22 @@
 }
 
 @utility settings-menu-toggle {
-  @apply icon-button text-icon;
+  @apply flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-full px-2.5 text-nav text-ink-muted;
+  @apply hover:text-ink pub-focus;
+  box-shadow: 0 0 0 1px var(--color-line);
+
+  &:hover {
+    box-shadow: 0 0 0 1px var(--color-ink-muted);
+  }
+
+  @media (width < 43.75rem) {
+    @apply h-tap min-w-tap;
+  }
 }
 
 @utility settings-menu-panel {
-  @apply absolute top-full right-0 z-50 mt-2 hidden w-56 flex-col p-2;
-  @apply rounded-card border border-line bg-ground-sunk shadow-lg;
+  @apply absolute top-[calc(100%+10px)] right-0 z-50 hidden w-menu flex-col p-1.5;
+  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
 
   :where(.settings-menu:has(.settings-menu-toggle[aria-expanded="true"])) & {
     display: flex;
@@ -408,19 +413,23 @@
 }
 
 @utility settings-menu-heading {
-  @apply block px-3 pt-2 pb-1.5 font-mono text-kicker uppercase text-mk-orange-text;
+  @apply block px-2.5 pt-[9px] pb-1 font-mono text-kicker uppercase text-mk-orange-text;
 }
 
 @utility settings-menu-separator {
-  @apply my-2 border-line;
+  @apply mx-1 my-1.5 border-line;
 }
 
 @utility settings-menu-option {
-  @apply flex w-full cursor-pointer items-center gap-3 rounded-sm px-3 py-2 font-mono text-nav text-ink-muted;
-  @apply transition-colors duration-200 ease-in-out hover:text-ink focus-ring;
+  @apply flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-mono text-tab tracking-normal;
+  @apply text-ink-muted hover:bg-wash hover:text-ink pub-focus;
 
   &[aria-pressed="true"] {
     @apply text-ink;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
   }
 }
 
@@ -429,24 +438,6 @@
 
   :where([aria-pressed="false"]) > & {
     --fa-display: none;
-  }
-}
-
-@utility main-nav-link {
-  @apply font-mono text-nav px-0.5 py-1 no-underline text-ink-muted focus-ring;
-  @apply transition-colors duration-200 ease-in-out;
-  text-decoration-skip-ink: none;
-
-  &:hover {
-    @apply text-ink underline decoration-wavy decoration-mk-pink decoration-1 underline-offset-4;
-  }
-}
-
-@utility main-nav-link-current {
-  @apply text-ink underline decoration-solid decoration-mk-green decoration-2 underline-offset-4;
-
-  &:hover {
-    @apply decoration-solid decoration-mk-green decoration-2;
   }
 }
 

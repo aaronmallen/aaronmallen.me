@@ -26,7 +26,6 @@ en:
     components:
       main_nav:
         label: "Main"
-        menu_label: "Menu"
         pages:
           about: "about"
           contact: "contact"

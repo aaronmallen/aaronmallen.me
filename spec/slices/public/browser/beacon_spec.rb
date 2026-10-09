@@ -164,6 +164,7 @@ RSpec.describe "Analytics beacon", type: :feature do
 
     it "starts a page that fits on screen at the full depth" do
       create(:post, :published, slug: "short", body: "Short")
+      page.current_window.resize_to(1280, 1000)
       visit "/writing/short"
 
       expect(recorded("/writing/short").scroll_depth).to eq(100)
