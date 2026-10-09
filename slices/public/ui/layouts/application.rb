@@ -17,7 +17,7 @@ module Public
 
           html(lang: "en", data: { site_theme: saved_theme }) do
             head { render_head }
-            body(data: { beacon: path(:visit), beacon_ref: BEACON_REF, beacon_clicks: article? }) do
+            body(class: "pub", data: { beacon: path(:visit), beacon_ref: BEACON_REF, beacon_clicks: article? }) do
               MainNav(session: admin_session)
               main(id: "main", class: "site-main", &)
               Footer(year: Blog::TimeZone.today.year)

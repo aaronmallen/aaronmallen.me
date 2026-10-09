@@ -24,6 +24,16 @@ RSpec.describe "Home sections", type: :feature do
     expect(kicker["top"]).to be < link["bottom"]
   end
 
+  it "runs the main the full width of the window" do
+    expect(evaluate_script("document.querySelector('main').getBoundingClientRect().width"))
+      .to be_within(1).of(evaluate_script("document.documentElement.clientWidth"))
+  end
+
+  it "sets the body type at 17px on 1.55" do
+    expect(evaluate_script("(({ fontSize, lineHeight }) => [fontSize, lineHeight])(getComputedStyle(document.body))"))
+      .to eq(["17px", "26.35px"])
+  end
+
   it "pushes the link to the far edge of the section" do
     expect(box(".sec-h .sec-l")["right"]).to be_within(1).of(box(".sec-h")["right"])
   end
