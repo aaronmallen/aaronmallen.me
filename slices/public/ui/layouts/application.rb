@@ -9,7 +9,8 @@ module Public
         ARTICLE = "article"
         BEACON_REF = ::Analytics::Operations::TagRef::KEY
         IMAGE_CARD = "summary_large_image"
-        PLAIN_CARD = "summary"
+        SHARE_IMAGE = "share.png"
+        SHARE_IMAGE_SIZE = { width: 1200, height: 630 }.freeze
         WEBSITE = "website"
 
         def view_template(&)
@@ -33,9 +34,16 @@ module Public
 
         def article? = page_kind == ARTICLE
 
-        def page_card = page_image ? IMAGE_CARD : PLAIN_CARD
+        def own_image
+          image = content_for(:image).to_s
+          image unless image.empty?
+        end
 
-        def page_image = content_for(:image)
+        def page_image = own_image || Hanami.app.settings.site_url(asset_url(SHARE_IMAGE))
+
+        def page_image_alt
+          own_image ? page_social_title : t(".share_image_alt", owner: Hanami.app.settings.owner_name)
+        end
 
         def page_kind = content_for(:kind) || WEBSITE
 
@@ -75,15 +83,22 @@ module Public
           meta(property: "og:title", content: page_social_title)
           meta(property: "og:url", content: page_url)
           meta(property: "og:description", content: page_description) if page_description
-          meta(property: "og:image", content: page_image) if page_image
+          render_open_graph_image
           render_article_tags if article?
         end
 
+        def render_open_graph_image
+          meta(property: "og:image", content: page_image)
+          meta(property: "og:image:alt", content: page_image_alt)
+          SHARE_IMAGE_SIZE.each { |side, size| meta(property: "og:image:#{side}", content: size) } unless own_image
+        end
+
         def render_twitter_card
-          meta(name: "twitter:card", content: page_card)
+          meta(name: "twitter:card", content: IMAGE_CARD)
           meta(name: "twitter:title", content: page_social_title)
           meta(name: "twitter:description", content: page_description) if page_description
-          meta(name: "twitter:image", content: page_image) if page_image
+          meta(name: "twitter:image", content: page_image)
+          meta(name: "twitter:image:alt", content: page_image_alt)
         end
 
         def writing_feed_title = t(".writing_feed", owner: Hanami.app.settings.owner_name)

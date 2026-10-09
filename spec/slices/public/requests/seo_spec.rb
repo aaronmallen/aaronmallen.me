@@ -34,13 +34,23 @@ RSpec.describe "SEO tags", type: :request do
       expect(property("og:url")).to eq([canonical])
     end
 
-    it "asks for the small card while it has no image" do
-      expect(named("twitter:card")).to eq(%w[summary])
+    it "asks for the large card" do
+      expect(named("twitter:card")).to eq(%w[summary_large_image])
     end
 
-    it "emits no image it does not have", :aggregate_failures do
-      expect(property("og:image")).to be_empty
-      expect(named("twitter:image")).to be_empty
+    it "shares the site image", :aggregate_failures do
+      expect(property("og:image")).to match([a_string_matching(%r{\Ahttps://aaronmallen\.me/assets/share.*\.png\z})])
+      expect(named("twitter:image")).to eq(property("og:image"))
+    end
+
+    it "describes the site image", :aggregate_failures do
+      expect(property("og:image:alt")).to eq(["Aaron Allen's logo: black glasses in a white circle"])
+      expect(named("twitter:image:alt")).to eq(property("og:image:alt"))
+    end
+
+    it "sizes the site image", :aggregate_failures do
+      expect(property("og:image:width")).to eq(%w[1200])
+      expect(property("og:image:height")).to eq(%w[630])
     end
 
     it "emits no description it does not have", :aggregate_failures do
@@ -108,8 +118,9 @@ RSpec.describe "SEO tags", type: :request do
       expect(property("article:tag")).to contain_exactly("hanami", "ruby")
     end
 
-    it "asks for the small card while it has no image" do
-      expect(named("twitter:card")).to eq(%w[summary])
+    it "shares the site image on the large card", :aggregate_failures do
+      expect(property("og:image")).to match([a_string_including("/assets/share")])
+      expect(named("twitter:card")).to eq(%w[summary_large_image])
     end
   end
 
@@ -188,6 +199,16 @@ RSpec.describe "SEO tags", type: :request do
       expect(named("twitter:image")).to eq(["https://example.com/card.png"])
     end
 
+    it "describes the image with the card title", :aggregate_failures do
+      expect(property("og:image:alt")).to eq(["On the card"])
+      expect(named("twitter:image:alt")).to eq(["On the card"])
+    end
+
+    it "claims no size it does not know", :aggregate_failures do
+      expect(property("og:image:width")).to be_empty
+      expect(property("og:image:height")).to be_empty
+    end
+
     it "asks for the large card once it has an image" do
       expect(named("twitter:card")).to eq(%w[summary_large_image])
     end
@@ -218,18 +239,18 @@ RSpec.describe "SEO tags", type: :request do
       expect(property("og:image")).to eq(["https://example.com/shown.png"])
     end
 
-    it "shows no image when no project carries one" do
+    it "falls back to the site image when no project carries one" do
       create(:project, og_image_url: nil)
       get "/projects"
 
-      expect(property("og:image")).to be_empty
+      expect(property("og:image")).to match([a_string_including("/assets/share")])
     end
 
     it "passes over a card whose image is blank" do
       create(:project, og_image_url: "")
       get "/projects"
 
-      expect(property("og:image")).to be_empty
+      expect(property("og:image")).to match([a_string_including("/assets/share")])
     end
   end
 end

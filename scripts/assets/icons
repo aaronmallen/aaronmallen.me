@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#MISE description="Render the PNG and ICO icons from the favicon SVG"
+#MISE description="Render the PNG and ICO icons and the share image from the favicon SVG"
 
 set -e
 
@@ -18,3 +18,6 @@ done
 
 magick "$tmp/16.png" "$tmp/32.png" "$tmp/48.png" -strip "$images/favicon.ico"
 cp "$images/favicon.ico" public/favicon.ico
+
+rsvg-convert -w 420 -h 420 "$svg" -o "$tmp/share.png"
+magick -size 1200x630 xc:'#272822' "$tmp/share.png" -gravity center -composite -strip "PNG8:$images/share.png"
