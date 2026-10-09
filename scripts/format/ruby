@@ -4,4 +4,4 @@
 
 set -e
 
-rubocop -A --config .config/rubocop.yml
+bundle exec rubocop -A --config .config/rubocop.yml
