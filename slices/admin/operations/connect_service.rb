@@ -4,6 +4,7 @@ module Admin
   module Operations
     class ConnectService < Operation
       BLANK = "blank"
+      CREDENTIALS = ::Services::Structs::ServiceConnection::CREDENTIALS
 
       include Deps[
         add_connection: "services.operations.add_connection",
@@ -16,7 +17,7 @@ module Admin
         credentials = step filled(definition, fields)
         account = step check_service.call(definition.id, credentials)
 
-        step add_connection.call(provider: definition.id, credentials:, **account)
+        step add_connection.call(provider: definition.id, credentials: marked(definition, credentials), **account)
       end
 
       private
@@ -27,6 +28,8 @@ module Admin
 
         blank.empty? ? Success(credentials) : Failure[:invalid, blank]
       end
+
+      def marked(definition, credentials) = definition.oauth? ? { **credentials, auth: CREDENTIALS } : credentials
     end
   end
 end

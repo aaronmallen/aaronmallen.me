@@ -24,6 +24,8 @@ module Admin
       private
 
       def revoke(connection)
+        return if connection.by_credentials?
+
         case connection.provider
           when GITHUB then github.revoke(connection.credentials.fetch(:access_token)) if github.configured?
           when MASTODON then revoke_mastodon(connection)

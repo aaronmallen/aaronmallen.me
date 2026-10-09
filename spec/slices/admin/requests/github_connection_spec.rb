@@ -78,6 +78,10 @@ RSpec.describe "Admin GitHub connection", type: :request do
       expect(page.find(".svc-line", text: "Read repositories and issues")).to have_css(".pill", text: "granted")
     end
 
+    it "says it signed in with OAuth" do
+      expect(page.find(".svc-line", text: "Signed in with")).to have_css(".pill", text: "OAuth")
+    end
+
     it "hides GitHub from the picker" do
       expect(page).to have_no_css("#connect-service .svc-pick", text: "GitHub", visible: :all)
     end
@@ -151,6 +155,127 @@ RSpec.describe "Admin GitHub connection", type: :request do
       callback(code: "code", state: start_connect)
 
       expect(connections).to be_empty
+    end
+  end
+
+  describe "connecting with a personal access token" do
+    let(:user_url) { "https://api.github.com/user" }
+
+    def connect_token(token)
+      post("/admin/services/github", connection: { access_token: token }, _csrf_token: admin_csrf_token)
+    end
+
+    def stub_user(token, status: 200, body: { id: 931_094, login: "aaronmallen" }, scopes: "repo, read:org")
+      headers = { "Content-Type" => "application/json", "X-OAuth-Scopes" => scopes }
+      stub_request(:get, user_url).with(headers: { "Authorization" => "Bearer #{token}" })
+                                  .to_return(status:, headers:, body: body.to_json)
+    end
+
+    it "offers a token field beside Sign in with GitHub", :aggregate_failures do
+      get "/admin/services"
+      dialog = page.find_by_id("connect-service-github", visible: :all)
+      token = "form[action='/admin/services/github'] input[type='password'][name='connection[access_token]']"
+
+      expect(dialog).to have_css("form[action='/admin/services/github/connect']", visible: :all)
+      expect(dialog).to have_css(token, visible: :all)
+    end
+
+    describe "with a token GitHub accepts" do
+      before do
+        stub_user("ghp_new")
+        connect_token(" ghp_new ")
+        follow_redirect!
+      end
+
+      it "saves the account with its scopes and the token sealed", :aggregate_failures do
+        connection, = connections
+
+        expect([connection.account_id, connection.label,
+                connection.scopes]).to eq(["931094", "@aaronmallen", %w[repo read:org]])
+        expect(connection.credentials).to eq(access_token: "ghp_new", auth: "credentials")
+      end
+
+      it "opens the connection and says it signed in with a token", :aggregate_failures do
+        expect(page).to have_css("[data-toast]", text: "GitHub connected as @aaronmallen")
+        expect(page.find(".svc-line", text: "Signed in with")).to have_css(".pill", text: "personal access token")
+      end
+
+      it "lets the record client call GitHub with the token with no restart" do
+        stub_request(:get, "https://api.github.com/repos/aaronmallen/blog")
+          .with(headers: { "Authorization" => "Bearer ghp_new" })
+          .to_return(headers: { "Content-Type" => "application/json" }, body: { stargazers_count: 3 }.to_json)
+
+        expect(Record::Slice["github.client"].stars("aaronmallen/blog")).to eq(3)
+      end
+    end
+
+    it "lists no scopes for a fine-grained token" do
+      stub_user("github_pat_new", scopes: "")
+      connect_token("github_pat_new")
+      follow_redirect!
+
+      expect(page).to have_no_css(".svc-line", text: "Read repositories and issues")
+    end
+
+    it "saves nothing for a token GitHub refuses and shows why", :aggregate_failures do
+      stub_user("ghp_bad", status: 401, body: { message: "Bad credentials" })
+      connect_token("ghp_bad")
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".settings-side .field-error", text: "Bad credentials")
+      expect(connections).to be_empty
+    end
+
+    it "saves nothing for a blank token", :aggregate_failures do
+      connect_token("  ")
+
+      expect(page).to have_css(".field-error", text: "Paste a token first")
+      expect(a_request(:get, user_url)).not_to have_been_made
+    end
+
+    it "refuses a token while GitHub is already connected", :aggregate_failures do
+      connect_github_account(account_id: "1", label: "@someone")
+      stub_user("ghp_new")
+      connect_token("ghp_new")
+
+      expect(page).to have_css(".field-error", text: "The site holds one account")
+      expect(connections.map(&:label)).to eq(["@someone"])
+    end
+
+    describe "once connected" do
+      let(:connection) do
+        Services::Slice["repos.connection_mutations"].add(
+          provider: "github", account_id: "931094", label: "@aaronmallen",
+          credentials: { access_token: "ghp_new", auth: "credentials" }, scopes: [],
+        )
+      end
+
+      def toast = page.find("[data-toast]").text
+
+      it "reports that GitHub answers a test" do
+        stub_user("ghp_new")
+        post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token
+        follow_redirect!
+
+        expect(toast).to include("GitHub answered")
+      end
+
+      it "reports that GitHub refuses a test" do
+        stub_user("ghp_new", status: 401, body: { message: "Bad credentials" })
+        post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token
+        follow_redirect!
+
+        expect(toast).to include("GitHub isn't answering", "Bad credentials")
+      end
+
+      it "deletes the row and asks me to revoke the token on GitHub", :aggregate_failures do
+        post "/admin/services/#{connection.id}/disconnect", _csrf_token: admin_csrf_token
+        follow_redirect!
+
+        expect(connections).to be_empty
+        expect(a_request(:delete, revoke_url)).not_to have_been_made
+        expect(toast).to include("revoke its token on GitHub")
+      end
     end
   end
 

@@ -15,8 +15,12 @@ module Services
       super
     end
 
-    def connectable? = %w[credentials oauth].include?(auth)
+    def connectable? = credentials? || oauth?
 
-    def oauth? = auth == "oauth"
+    def credentials? = ways.include?("credentials")
+
+    def oauth? = ways.include?("oauth")
+
+    def ways = Array(auth)
   end
 end

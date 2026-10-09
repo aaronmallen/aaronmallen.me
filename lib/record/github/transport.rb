@@ -38,6 +38,15 @@ module Record
         raise Error, "GitHub request to #{path} failed: #{e.message}"
       end
 
+      def get_as(token, path)
+        response = @connect.call(token).fetch(:api).get(path)
+        return response if response.success?
+
+        raise Error, refusal(response)
+      rescue Faraday::Error => e
+        raise Error, "GitHub request to #{path} failed: #{e.message}"
+      end
+
       def query(document, **variables)
         body = post(document, variables)
         read_rate_limit(body.dig("data", "rateLimit"))
@@ -87,6 +96,11 @@ module Record
       end
 
       def readable(body) = body.is_a?(Hash) ? body : nil
+
+      def refusal(response)
+        message = readable(response.body)&.fetch("message", nil)
+        message.to_s.empty? ? "GitHub answered #{response.status}" : message
+      end
     end
   end
 end

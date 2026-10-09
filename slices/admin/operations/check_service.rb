@@ -3,7 +3,9 @@
 module Admin
   module Operations
     class CheckService < Operation
-      include Deps[linear: "record.linear.client", networks: "social.networks.all"]
+      include Deps[
+        github: "record.github.client", linear: "record.linear.client", networks: "social.networks.all",
+      ]
 
       def call(provider, credentials)
         client = step found(clients[provider])
@@ -21,7 +23,9 @@ module Admin
         Failure[:refused, e.message]
       end
 
-      def clients = { "bluesky" => networks.fetch(Blog::Types::NetworkName["bluesky"]), "linear" => linear }
+      def clients
+        { "bluesky" => networks.fetch(Blog::Types::NetworkName["bluesky"]), "github" => github, "linear" => linear }
+      end
     end
   end
 end

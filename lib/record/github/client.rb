@@ -75,10 +75,21 @@ module Record
       private_constant :Queries
 
       PUSH_PERMISSIONS = %w[ADMIN MAINTAIN WRITE].freeze
+      SCOPES_HEADER = "x-oauth-scopes"
+      USER_PATH = "/user"
 
       def initialize(transport:)
         @transport = transport
         @viewer = nil
+      end
+
+      def account(access_token:, **)
+        response = transport.get_as(access_token, USER_PATH)
+        user = response.body
+        raise Error, "GitHub sent no user" unless user.is_a?(Hash) && user["id"] && user["login"]
+
+        { account_id: user.fetch("id").to_s, label: "@#{user.fetch('login')}",
+          scopes: response.headers[SCOPES_HEADER].to_s.split(",").map(&:strip).reject(&:empty?) }
       end
 
       def commits(repo, since: nil, before: nil)

@@ -27,9 +27,12 @@ module Admin
 
           def access
             label(t(".access"))
-            definition.scopes.each { scope(it) }
+            way if definition.credentials?
+            definition.scopes.each { scope(it) } unless by_token? && @row.connection.scopes.empty?
             Hint { Stamped(text: t(".connected", time: Stamped::MARK), at: @row.connection.created_at) }
           end
+
+          def by_token? = @row.connection.by_credentials?
 
           def close = { href: path(:admin_services), aria: { label: t(".close") } }
 
@@ -93,6 +96,8 @@ module Admin
             granted = @row.connection.scopes.include?(scope[:id])
             line(scope[:label], scope[:why]) { held(granted, :green, ".granted", ".not_granted") }
           end
+
+          def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }
         end
       end
     end

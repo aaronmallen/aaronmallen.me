@@ -19,6 +19,7 @@ module Admin
               p(class: "field-error", role: "alert") { @refusal } if @refusal
               @definition.fields.each { field(it) }
               Hint { t(".hint", name: @definition.name) }
+              Hint { t(".token_hint") } if @definition.oauth?
               Button(variant: :pri, type: "submit", icon: LINK_ICON) { t(".connect", name: @definition.name) }
             end
           end

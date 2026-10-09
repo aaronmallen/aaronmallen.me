@@ -1,10 +1,11 @@
 name: GitHub
 icon: fa-brands fa-github
 group: code
-auth: oauth
+auth: [oauth, credentials]
 dashboard: https://github.com/settings/applications
 env:
   github: [client_id, client_secret]
+fields: [access_token]
 powers:
   - Issue import into external tasks
   - Commit record on Activity

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-08
 area: [admin, config, db, lib, record, social, tasks]
 issue: "#791"
+amended: ["#831"]
 tags: [services, credentials, encryption, settings, providers, clients, oauth, github, linear, mastodon, bluesky]
 ---
 
@@ -30,7 +31,8 @@ A new `services` slice owns a `service_connections` table, one row per connected
 
 Each service is one definition in code: its name, icon and group, how it signs in (`oauth`, `credentials`, `env` or
 `none`), its form fields or OAuth scopes, whether it takes more than one account, and what it powers. The provider
-column is text, and the slice checks it against those definitions.
+column is text, and the slice checks it against those definitions. #831 lets a service sign in more than one way:
+GitHub takes OAuth or a personal access token, and a row made from the form marks that in its credentials.
 
 Each row keeps its credentials in one encrypted column. An encryptor in `lib/blog` holds the key, which comes from
 a new `data_key` setting. `Blog::SecretCheck` guards `data_key` with the other secrets, so it cannot repeat
