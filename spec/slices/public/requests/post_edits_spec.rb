@@ -7,27 +7,28 @@ RSpec.describe "Post edits", type: :request do
 
   def edit(note, at:) = create(:post_edit, post: post_record, note:, created_at: at, updated_at: at)
 
-  it "shows a note as Edited, its date and the note" do
+  it "heads the notes Edits and shows each one's date and note", :aggregate_failures do
     edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
     get "/writing/hello"
 
-    expect(page.find(".post-edit").text(normalize_ws: true)).to eq("Edited Sep 7, 2026 fixed the numbers")
+    expect(page).to have_css(".post-edits > h2.kicker", exact_text: "Edits")
+    expect(page.find(".post-edit").text(normalize_ws: true)).to eq("Sep 7, 2026 fixed the numbers")
   end
 
   it "shows the notes above the feedback line" do
     edit("fixed the numbers", at: Time.utc(2026, 9, 7, 12))
     get "/writing/hello"
 
-    classes = page.all("article > *").map { it[:class] }
+    classes = page.all("article .post-extras > *").map { it[:class] }
 
-    expect(classes[classes.index("eyebrow") - 1]).to eq("post-edits")
+    expect(classes).to eq(%w[post-edits post-feedback])
   end
 
   it "dates a note by the site's day, not UTC's" do
     edit("late night fix", at: Time.utc(2026, 9, 8, 3))
     get "/writing/hello"
 
-    expect(page.find(".post-edit-date")).to have_text("Edited Sep 7, 2026")
+    expect(page.find(".post-edit-date")).to have_text("Sep 7, 2026")
   end
 
   describe "two notes from one day" do
@@ -38,7 +39,7 @@ RSpec.describe "Post edits", type: :request do
     end
 
     it "shows the date once" do
-      expect(page.all(".post-edit-date").map(&:text)).to eq(["Edited Sep 7, 2026"])
+      expect(page.all(".post-edit-date").map(&:text)).to eq(["Sep 7, 2026"])
     end
 
     it "lists the notes under it, oldest first" do
@@ -54,7 +55,7 @@ RSpec.describe "Post edits", type: :request do
     get "/writing/hello"
 
     expect(page.all(".post-edit").map { it.text(normalize_ws: true) })
-      .to eq(["Edited Sep 9, 2026 fixed a link", "Edited Sep 7, 2026 fixed the numbers"])
+      .to eq(["Sep 9, 2026 fixed a link", "Sep 7, 2026 fixed the numbers"])
   end
 
   it "puts dt-updated on the newest day's date" do

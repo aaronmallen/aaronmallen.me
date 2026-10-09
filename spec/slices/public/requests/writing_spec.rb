@@ -290,12 +290,14 @@ RSpec.describe "Writing", type: :request do
       end
     end
 
-    it "closes the article with an eyebrow linking to contact", :aggregate_failures do
+    it "closes the article with a feedback line linking to contact", :aggregate_failures do
       publish("hello", 1)
       get "/writing/hello"
 
-      expect(page).to have_css("article.post > p.eyebrow", exact_text: feedback_line)
-      expect(page).to have_css("article.post > p.eyebrow a[href='/contact']", exact_text: show_copy("feedback.link"))
+      line = page.find("article.post .post-extras > p.post-feedback")
+
+      expect(line).to have_text(feedback_line, exact: true)
+      expect(line).to have_link(show_copy("feedback.link"), href: "/contact", exact_text: true)
     end
 
     it "shows the date, tags and read time in the meta row" do

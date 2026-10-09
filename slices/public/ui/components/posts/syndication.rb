@@ -15,9 +15,9 @@ module Public
           def view_template
             return if @urls.empty?
 
-            div(class: "post-syndication") do
-              span { t(".heading") }
-              @urls.each { |network, url| link(network, url) }
+            section(class: "post-syndication") do
+              h2(class: "kicker") { t(".heading") }
+              ul(class: "links") { @urls.each { |network, url| li { link(network, url) } } }
             end
           end
 
@@ -26,7 +26,7 @@ module Public
           def link(network, url)
             icon, label_key = NETWORKS[network]
 
-            a(class: "post-syndication-link u-syndication", href: url) do
+            a(class: "u-syndication", href: url) do
               IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
             end
           end

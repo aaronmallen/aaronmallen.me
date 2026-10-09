@@ -22,6 +22,10 @@ RSpec.describe "Post layout", type: :feature do
     expect(style("h1.p-name", "fontSize").to_f).to be > narrow
   end
 
+  it "draws a rule above the feedback line" do
+    expect(style(".post-extras > .post-feedback", "borderTopWidth")).to eq("1px")
+  end
+
   it "draws the glasses after the body" do
     expect(evaluate_script("document.querySelector('.endmark .glasses').getBoundingClientRect().width")).to be_positive
   end

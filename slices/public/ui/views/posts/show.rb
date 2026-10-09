@@ -29,10 +29,7 @@ module Public
             article(class: "post h-entry") do
               head_row
               post_body
-              Edits(edits: @edits)
-              feedback_note
-              Syndication(urls: @syndication_urls)
-              Responses(**@webmentions)
+              extras
               footer_row
             end
           end
@@ -56,8 +53,17 @@ module Public
             @post.written_summary || Blog::Helpers::Truncation.fit(@post.summary, limit: DESCRIPTION_LIMIT)
           end
 
+          def extras
+            div(class: "post-extras") do
+              Edits(edits: @edits)
+              feedback_note
+              Syndication(urls: @syndication_urls)
+              Responses(**@webmentions)
+            end
+          end
+
           def feedback_note
-            p(class: "eyebrow") do
+            p(class: "post-feedback") do
               plain t(".feedback.before")
               whitespace
               a(href: path(:contact)) { t(".feedback.link") }

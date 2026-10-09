@@ -5,9 +5,9 @@ module Public
     module Components
       module Posts
         class Responses < Component
-          COUNT_KEYS = {
-            Blog::Types::WebmentionType["like"] => ".likes",
-            Blog::Types::WebmentionType["repost"] => ".reposts",
+          COUNTS = {
+            Blog::Types::WebmentionType["like"] => %w[.likes fa-heart],
+            Blog::Types::WebmentionType["repost"] => %w[.reposts fa-retweet],
           }.freeze
           REL = "nofollow ugc noopener"
 
@@ -18,7 +18,7 @@ module Public
             return if @responses.empty? && @counts.empty?
 
             section(class: "post-responses") do
-              h2(class: "post-responses-title") { t(".heading") }
+              h2(class: "kicker") { t(".heading") }
               count_row
               response_list
             end
@@ -27,10 +27,14 @@ module Public
           private
 
           def count_row
-            labels = COUNT_KEYS.filter_map { |type, key| t(key, count: @counts[type]) if @counts[type] }
-            return if labels.empty?
+            counts = COUNTS.select { |type, _| @counts[type] }
+            return if counts.empty?
 
-            p(class: "post-response-counts") { dotted(*labels) }
+            p(class: "post-response-counts") do
+              counts.each do |type, (key, icon)|
+                span { IconLabel(icon: ["fa-solid", icon]) { t(key, count: @counts[type]) } }
+              end
+            end
           end
 
           def excerpt(mention)
@@ -38,14 +42,25 @@ module Public
             p(class: "post-response-text p-content") { text } unless text.empty?
           end
 
+          def handle(mention)
+            domain = mention.author_domain
+            span(class: "post-response-handle") { domain } if domain && domain != mention.author_label
+          end
+
+          def head(mention)
+            div(class: "post-response-head") do
+              a(class: "post-response-author u-url", href: mention.source_url, rel: REL) do
+                span(class: "p-author h-card") { span(class: "p-name") { mention.author_label } }
+              end
+              handle(mention)
+              Date(time: mention.received_at)
+            end
+          end
+
           def response(mention)
             li(class: "post-response h-cite u-comment") do
-              p(class: "post-response-head") do
-                a(class: "post-response-author u-url", href: mention.source_url, rel: REL) do
-                  span(class: "p-author h-card") { span(class: "p-name") { mention.author_label } }
-                end
-                Date(time: mention.received_at)
-              end
+              span(class: "post-response-avatar", aria: { hidden: "true" }) { mention.author_label[0].upcase }
+              head(mention)
               excerpt(mention)
             end
           end

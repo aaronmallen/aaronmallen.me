@@ -12,23 +12,22 @@ module Public
 
             days = Helpers::EditDays.newest_first(@edits).map(&:last)
 
-            section(class: "post-edits", aria: { label: t(".label") }) do
-              days.each { |edits| day(edits, updated: edits.equal?(days.first)) }
+            section(class: "post-edits") do
+              h2(class: "kicker") { t(".label") }
+              ul(class: "post-edit-days") do
+                days.each { |edits| day(edits, updated: edits.equal?(days.first)) }
+              end
             end
           end
 
           private
 
           def date(time, updated:)
-            p(class: "post-edit-date") do
-              plain t(".edited")
-              whitespace
-              Moment(at: time, format: :day, class: ("dt-updated" if updated))
-            end
+            p(class: "post-edit-date") { Moment(at: time, format: :day, class: ("dt-updated" if updated)) }
           end
 
           def day(edits, updated:)
-            div(class: "post-edit") do
+            li(class: "post-edit") do
               date(edits.last.created_at, updated:)
               whitespace
               edits.one? ? note(edits.first) : notes(edits)

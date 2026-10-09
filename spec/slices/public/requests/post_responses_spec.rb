@@ -17,7 +17,11 @@ RSpec.describe "Post responses", type: :request do
       end
 
       it "heads the section" do
-        expect(page.find(".post-responses")).to have_text("Responses")
+        expect(page).to have_css(".post-responses > h2.kicker", exact_text: "Responses")
+      end
+
+      it "shows the author's initial in an avatar hidden from screen readers" do
+        expect(page).to have_css(".post-response-avatar[aria-hidden='true']", exact_text: "A")
       end
 
       it "shows the author, the date and the excerpt", :aggregate_failures do
@@ -45,11 +49,19 @@ RSpec.describe "Post responses", type: :request do
       expect(link[:rel].to_s.split).to contain_exactly("nofollow", "noopener", "ugc")
     end
 
-    it "falls back to the author's domain when the mention has no name" do
+    it "falls back to the author's domain when the mention has no name", :aggregate_failures do
       mention(:approved, :reply, author_name: nil, author_url: "https://ada.example/about")
       get "/writing/hello"
 
       expect(page).to have_css(".post-response .p-name", text: "ada.example")
+      expect(page).to have_no_css(".post-response-handle")
+    end
+
+    it "shows the author's domain as the handle" do
+      mention(:approved, :reply, author_name: "Ada", author_url: "https://Ada.example/about")
+      get "/writing/hello"
+
+      expect(page).to have_css(".post-response-head .post-response-handle", exact_text: "ada.example")
     end
 
     it "leaves out the excerpt when the mention has none" do
@@ -101,7 +113,15 @@ RSpec.describe "Post responses", type: :request do
       mention(:approved, :repost)
       get "/writing/hello"
 
-      expect(page).to have_css(".post-response-counts", text: "2 likes · 1 repost")
+      expect(page.all(".post-response-counts > span").map(&:text)).to eq(["2 likes", "1 repost"])
+    end
+
+    it "marks each count with its icon" do
+      mention(:approved, :like)
+      mention(:approved, :repost)
+      get "/writing/hello"
+
+      expect(page.all(".post-response-counts i").map { it[:class] }).to eq(["fa-solid fa-heart", "fa-solid fa-retweet"])
     end
 
     it "leaves out a type nobody sent" do
