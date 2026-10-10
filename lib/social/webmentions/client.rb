@@ -9,6 +9,7 @@ module Social
     class Client
       class Error < StandardError; end
       class Refused < Error; end
+      class Unreachable < Error; end
 
       Response = Data.define(:body, :headers, :status, :url)
       Target = Data.define(:address, :uri)
@@ -27,6 +28,7 @@ module Social
       PORTS = [80, 443].freeze
       REDIRECT_STATUSES = [301, 302, 303, 307, 308].freeze
       SPECIAL = %i[link_local? loopback? private?].freeze
+      UNREACHABLE = [Faraday::ConnectionFailed, Faraday::SSLError, Faraday::TimeoutError].freeze
 
       def initialize(connection:)
         @connection = connection
@@ -57,13 +59,15 @@ module Social
         raise Refused, "#{url} names port #{uri.port}, which is not a web port" unless PORTS.include?(uri.port)
 
         found = addresses(host, deadline)
-        raise Error, "#{url} names a host we could not resolve" if found.empty?
+        raise Unreachable, "#{url} names a host we could not resolve" if found.empty?
         raise Refused, "#{url} resolves to an address we do not reach" unless found.all? { allowed?(it) }
 
         found.first
       end
 
       def declared_over?(env) = env.response_headers["content-length"].to_i > MAX_BODY
+
+      def failure(error, deadline) = deadline.passed? || UNREACHABLE.any? { error.is_a?(it) } ? Unreachable : Error
 
       def follow(url, deadline)
         at = url
@@ -132,12 +136,12 @@ module Social
       def refused = BLOCKED_RANGES + Socket.getifaddrs.select { it.addr&.ip? }.map { network(it) }
 
       def request(verb, url, deadline, *body)
-        raise Error, overdue(url) if deadline.passed?
+        raise Unreachable, overdue(url) if deadline.passed?
 
         target = reachable(url, deadline)
         read(url) { |on_data| connection.public_send(verb, target.uri, *body) { pin(it, target, deadline, on_data) } }
       rescue Faraday::Error => e
-        raise Error, deadline.passed? ? overdue(url) : "#{verb.upcase} #{url} failed: #{e.message}"
+        raise failure(e, deadline), deadline.passed? ? overdue(url) : "#{verb.upcase} #{url} failed: #{e.message}"
       end
     end
   end

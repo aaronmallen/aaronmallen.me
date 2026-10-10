@@ -9,6 +9,9 @@ production:
     back_up_database:
       cron: "30 0 * * * <%= Blog::TimeZone::NAME %>"
       class: Backups::Jobs::BackUpDatabase
+    check_post_links:
+      cron: "0 6 * * 1 <%= Blog::TimeZone::NAME %>"
+      class: Posts::Jobs::CheckPostLinks
     import_commits:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Record::Jobs::ImportCommits

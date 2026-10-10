@@ -55,7 +55,7 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | Scheduled job | On failure |
 | --- | --- |
 | `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
-| `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions` | Raise |
+| `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks` | Raise |
 | `ImportCommits`, `RefreshProjects` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos` | Drop it |
 
