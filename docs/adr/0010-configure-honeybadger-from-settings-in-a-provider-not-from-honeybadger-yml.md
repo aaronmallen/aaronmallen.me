@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, mcp]
 issue: AA-660
-amended: [AA-819, "#237", "#467"]
+amended: [AA-819, "#237", "#467", "#1012"]
 tags: [honeybadger, errors, providers, settings, sidekiq, privacy]
 ---
 
@@ -63,7 +63,8 @@ off. A hand-written handler would copy that code.
 
 ## Consequences
 
-Settings are the one source, and a spec can build the options from settings it stubs.
+Settings are the one source, and a spec can stub them and read the config the agent holds. #1012 dropped the
+options hash the provider built first, so the agent sets each value straight onto the gem's config.
 
 `config/sidekiq.rb` must boot, not prepare. The Hanami guides point a worker at `hanami/prepare`. Under it the
 provider never starts, the plugin never registers, and every job error goes unreported. No spec would notice:

@@ -48,44 +48,26 @@ module Blog
 
       class << self
         def agent(settings, env)
-          chosen = options(settings, env)
-
-          Honeybadger.configure { apply(it, chosen) }
+          configure(settings.honeybadger, env.to_s)
           Honeybadger.load_plugins!
           Honeybadger.install_at_exit_callback
 
           Honeybadger::Agent.instance
         end
 
-        def options(settings, env)
-          found = settings.honeybadger
-
-          {
-            api_key: found[:api_key],
-            attempt_threshold: ATTEMPT_THRESHOLD,
-            env: env.to_s,
-            filter_keys: FILTER_KEYS,
-            ignore: IGNORE,
-            report_data: report_data?(found, env),
-            revision: Blog::Version::CURRENT,
-          }
-        end
-
         private
 
-        def apply(config, chosen)
-          config.api_key = chosen[:api_key]
-          config.env = chosen[:env]
-          config.report_data = chosen[:report_data]
-          config.revision = chosen[:revision]
-          config.before_notify { quiet_scheduler(it) }
-          apply_sections(config, chosen)
-        end
-
-        def apply_sections(config, chosen)
-          config.exceptions.ignore = chosen[:ignore]
-          config.request.filter_keys = chosen[:filter_keys]
-          config.sidekiq.attempt_threshold = chosen[:attempt_threshold]
+        def configure(found, env)
+          Honeybadger.configure do |config|
+            config.api_key = found[:api_key]
+            config.env = env
+            config.report_data = report_data?(found, env)
+            config.revision = Blog::Version::CURRENT
+            config.before_notify { quiet_scheduler(it) }
+            config.exceptions.ignore = IGNORE
+            config.request.filter_keys = FILTER_KEYS
+            config.sidekiq.attempt_threshold = ATTEMPT_THRESHOLD
+          end
         end
 
         def quiet_scheduler(notice)
@@ -97,7 +79,7 @@ module Blog
         def report_data?(honeybadger, env)
           found = honeybadger[:report_data]
 
-          found.nil? ? env.to_s == PRODUCTION : found
+          found.nil? ? env == PRODUCTION : found
         end
       end
     end
