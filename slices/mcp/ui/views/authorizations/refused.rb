@@ -10,12 +10,7 @@ module MCP
           prop :url, Blog::Types::String
 
           def view_template
-            header(class: "page-head") do
-              div do
-                h1(class: "page-head-title") { t(".heading") }
-                p(class: "page-head-sub") { t(".message", host:) }
-              end
-            end
+            PageHead(title: t(".heading"), sub: t(".message", host:))
 
             render_error
           end

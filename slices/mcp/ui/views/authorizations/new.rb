@@ -19,12 +19,7 @@ module MCP
           prop :scopes, Blog::Types::Array.of(Blog::Types::String)
 
           def view_template
-            header(class: "page-head") do
-              div do
-                h1(class: "page-head-title") { heading }
-                p(class: "page-head-sub") { calls_itself }
-              end
-            end
+            PageHead(title: heading, sub: calls_itself)
 
             render_new_client if @new_client
             render_grants

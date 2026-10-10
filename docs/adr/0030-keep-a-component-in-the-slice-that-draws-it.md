@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, public, mcp]
 issue: AA-672
-amended: [AA-783, AA-809, "#17"]
+amended: [AA-783, AA-809, "#17", "#1041"]
 tags: [phlex, components, kit, ui, slices, kernel]
 ---
 
@@ -74,6 +74,9 @@ Copy splits across two locale trees. A kernel component's strings live in `confi
 `ui.components`, and a slice component's in that slice's locale file, so a move carries its copy with it.
 
 The MCP consent page, `slices/mcp/ui/views/authorizations/new.rb`, draws the kernel `Form` but not admin's
-`PageHead` or `Card`, which only admin draws. It writes their markup by hand.
+`Card`, which only admin draws. It writes that markup by hand. #1041 moved the tab-free part of `PageHead` to the
+kernel, since the MCP authorization pages draw it too. Admin's `PageHead` subclasses it and adds the screen tabs.
+Both kits then define a `PageHead` method, and the kernel one wins until admin's class loads, so
+`slices/admin/ui/components.rb` loads it up front.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
