@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351", "#353", "#655", "#706"]
+amended: ["#351", "#353", "#655", "#706", "#869"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -67,6 +67,9 @@ A snooze points at records in two tables, so no foreign key holds it. A `tasks_d
 triggers do. A migration that drops and rebuilds `tasks` or `posts` loses its trigger. A snooze that has ended stays
 in the table, and the stalled list ignores it.
 
+Dead jobs stay out of the view. #869 reads them from Sidekiq's dead set in a second `activity` query, as
+[ADR 0138][0138] says.
+
 Inbox snoozes stay out of this table. #655 keeps them in a `snoozed_until` column on each record's table, as
 [ADR 0121][0121] says.
 
@@ -77,4 +80,5 @@ Inbox snoozes stay out of this table. #655 keeps them in a `snoozed_until` colum
 [0052]: 0052-read-activity-through-one-view-across-every-content-kind.md
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0121]: 0121-keep-inbox-snoozes-in-a-snoozed-until-column-on-each-records-table.md
+[0138]: 0138-read-dead-jobs-from-the-sidekiq-dead-set-in-an-activity-query.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
