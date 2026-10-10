@@ -1,17 +1,18 @@
 ---
 id: "0027"
 title: Fail a contract with a code and let the view word it
-status: active
+status: superseded
 created: 2026-09-28
 area: [lib, admin, api, public, mcp]
+superseded-by: "0140"
 issue: AA-662
-amended: ["#17", "#255", "#606", "#960"]
+amended: ["#17", "#255", "#606", "#960", "#1002"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
 # ADR 0027: Fail a contract with a code and let the view word it
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -82,4 +83,4 @@ A field shows only its first code. A field failing two checks names one, and fix
 Codes are bare strings, written again in each `MESSAGES` table and `COMPLAINTS` table. Nothing checks that a code
 a contract can return has a row anywhere.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0140-black?style=for-the-badge&label=Superseded&labelColor=orange
