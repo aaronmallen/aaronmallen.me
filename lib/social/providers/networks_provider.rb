@@ -37,12 +37,6 @@ module Social
 
         def bearer(token) = { "Authorization" => "Bearer #{token}" }
 
-        def credentials(settings, *keys)
-          found = settings.values_at(*keys)
-
-          found.all? ? found : Array.new(found.size)
-        end
-
         def json(http, headers: Blog::Constants::EMPTY_HASH, **)
           http.call(headers: HEADERS.merge(headers), **) do |faraday|
             faraday.request :json
