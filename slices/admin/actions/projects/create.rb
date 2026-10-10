@@ -28,7 +28,7 @@ module Admin
 
         private
 
-        def save(params) = save_project.call(params).bind { link_repo_tasks.call(it) }
+        def save(params) = save_project.call(params).fmap { link_repo_tasks.call(it) }
       end
     end
   end

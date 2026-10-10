@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class ReapExpiredCredentials < Operation
+    class ReapExpiredCredentials
       DAY = 24 * 60 * 60
       IDLE_FOR = 90 * DAY
       UNCLAIMED_FOR = DAY

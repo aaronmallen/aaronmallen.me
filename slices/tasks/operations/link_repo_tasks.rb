@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class LinkRepoTasks < Operation
+    class LinkRepoTasks
       include Deps[task_rule_mutations: "repos.task_rule_mutations", task_rule_queries: "repos.task_rule_queries"]
 
       def call(project, was: nil)

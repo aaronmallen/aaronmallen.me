@@ -2,7 +2,7 @@
 
 module Security
   module Operations
-    class RecordSighting < Operation
+    class RecordSighting
       include Deps[
         "operations.read_access",
         known_device_mutations: "repos.known_device_mutations",
@@ -14,9 +14,7 @@ module Security
         device = { api_token_id:, oauth_client_id:, **access.slice(*ReadAccess::DEVICE) }
 
         known_device_mutations.know(**device)
-        Success(
-          sighting_mutations.sight(**device, last_address: access[:address], last_user_agent: access[:user_agent]),
-        )
+        sighting_mutations.sight(**device, last_address: access[:address], last_user_agent: access[:user_agent])
       end
     end
   end

@@ -2,7 +2,7 @@
 
 module Security
   module Operations
-    class PruneAccessRecords < Operation
+    class PruneAccessRecords
       KEEP_FOR = 90 * 24 * 60 * 60
 
       include Deps[

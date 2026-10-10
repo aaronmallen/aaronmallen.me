@@ -2,7 +2,7 @@
 
 module Security
   module Operations
-    class RecordSignIn < Operation
+    class RecordSignIn
       SIGNED_IN = :signed_in
 
       include Deps[
@@ -15,7 +15,7 @@ module Security
         access = read_access.call(request)
 
         known_device_mutations.know(**access.slice(*ReadAccess::DEVICE)) if outcome == SIGNED_IN
-        Success(sign_in_mutations.create(outcome: outcome.to_s, **access))
+        sign_in_mutations.create(outcome: outcome.to_s, **access)
       end
     end
   end

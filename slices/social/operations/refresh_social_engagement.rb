@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class RefreshSocialEngagement < Operation
+    class RefreshSocialEngagement
       WINDOW = 30 * 24 * 60 * 60
 
       include Deps[

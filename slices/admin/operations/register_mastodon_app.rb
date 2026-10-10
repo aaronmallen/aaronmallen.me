@@ -20,7 +20,7 @@ module Admin
         return { host:, app: held.credentials } if held && fits?(held, redirect_uri, scope)
 
         app = step register(host, redirect_uri:, scope:)
-        step save_app.call(provider: PROVIDER, host:, redirect_uri:, scopes: scope.split, credentials: app)
+        save_app.call(provider: PROVIDER, host:, redirect_uri:, scopes: scope.split, credentials: app)
         { host:, app: }
       end
 

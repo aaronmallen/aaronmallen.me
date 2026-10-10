@@ -40,7 +40,7 @@ module Admin
         def save(params, id)
           was = project_queries.by_id(id)&.repo
 
-          save_project.call(params, id:).bind { link_repo_tasks.call(it, was:) }
+          save_project.call(params, id:).fmap { link_repo_tasks.call(it, was:) }
         end
       end
     end

@@ -2,7 +2,7 @@
 
 module Services
   module Operations
-    class SaveApp < Operation
+    class SaveApp
       include Deps["repos.app_mutations"]
 
       def call(**) = app_mutations.replace(**)

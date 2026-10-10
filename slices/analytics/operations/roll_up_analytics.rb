@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class RollUpAnalytics < Operation
+    class RollUpAnalytics
       include Deps[
         event_queries: "repos.analytics_event_queries",
         rollup_mutations: "repos.analytics_rollup_mutations",

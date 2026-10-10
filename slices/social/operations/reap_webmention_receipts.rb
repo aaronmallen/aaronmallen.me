@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class ReapWebmentionReceipts < Operation
+    class ReapWebmentionReceipts
       include Deps["settings", webmention_mutations: "repos.webmention_mutations"]
 
       def call(at: Time.now)

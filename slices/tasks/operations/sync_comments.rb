@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncComments < Operation
+    class SyncComments
       FIELDS = %i[author body url].freeze
       VISIBLE = /[[:^space:]]/
 

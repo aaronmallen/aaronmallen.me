@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class SaveReaderCounts < Operation
+    class SaveReaderCounts
       include Deps[
         reader_mutations: "repos.post_reader_mutations",
         reader_window_start: "operations.find_reader_window_start",

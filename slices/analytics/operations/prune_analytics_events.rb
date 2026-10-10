@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class PruneAnalyticsEvents < Operation
+    class PruneAnalyticsEvents
       RETENTION_DAYS = 90
 
       include Deps[
