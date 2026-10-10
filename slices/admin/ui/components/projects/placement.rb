@@ -29,7 +29,7 @@ module Admin
 
           def archived_status
             Field(label: t(".status")) do
-              div { Projects::StatusPill(archived: true) }
+              div { StatusPill(status: :archived) }
               Hint { t(".restore_note") }
             end
           end

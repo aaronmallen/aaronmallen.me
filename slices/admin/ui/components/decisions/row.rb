@@ -17,7 +17,7 @@ module Admin
                 end
                 p(class: "decision-meta") { meta }
               end
-              Status(status: @decision.status)
+              StatusPill(status: @decision.status)
             end
           end
 

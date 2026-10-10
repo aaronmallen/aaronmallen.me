@@ -36,7 +36,7 @@ module Admin
 
           def decision(decision)
             ListItem(title: decision.title, href: path(:admin_decision, id: decision.id)) do
-              Components::Decisions::Status(status: decision.status)
+              StatusPill(status: decision.status)
             end
           end
 
@@ -74,7 +74,7 @@ module Admin
 
           def project(project)
             ListItem(title: project.name, href: path(:admin_edit_project, id: project.id)) do
-              Components::Projects::StatusPill(archived: project.archived?)
+              StatusPill(status: project.archived? ? :archived : :active)
             end
           end
 

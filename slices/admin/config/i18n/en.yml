@@ -641,10 +641,6 @@ en:
             one: "%{count} option"
             other: "%{count} options"
             zero: "no options"
-        status:
-          dropped: "dropped"
-          open: "open"
-          resolved: "resolved"
         status_tabs:
           label: "Status"
         timeline:
@@ -1219,9 +1215,6 @@ en:
           stars:
             one: "%{stars} star"
             other: "%{stars} stars"
-        status_pill:
-          active: "active"
-          archived: "archived"
       range_presets:
         preset: "%{count}d"
         range: "Range"
@@ -1572,15 +1565,20 @@ en:
         targets:
           label: "Networks"
       status_pill:
+        active: "active"
         approved: "approved"
+        archived: "archived"
         connected: "connected"
         draft: "draft"
+        dropped: "dropped"
         failing: "failing"
         not_set_up: "not set up"
+        open: "open"
         paused: "paused"
         pending: "pending"
         posted: "posted"
         published: "published"
+        resolved: "resolved"
         scheduled: "scheduled"
         spam: "spam"
       swatches:

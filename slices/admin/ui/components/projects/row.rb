@@ -63,7 +63,7 @@ module Admin
 
           def pills
             hidden if @project.visibility == PRIVATE
-            Projects::StatusPill(archived: @project.archived?)
+            StatusPill(status: @project.archived? ? :archived : :active)
           end
 
           def repo

@@ -16,6 +16,11 @@ module Admin
           failing: [:pink, "fa-solid fa-triangle-exclamation", ".failing"],
           paused: [nil, "fa-solid fa-pause", ".paused"],
           not_set_up: [:orange, "fa-solid fa-circle-exclamation", ".not_set_up"],
+          open: [:orange, "fa-regular fa-circle", ".open"],
+          resolved: [:green, "fa-solid fa-circle-check", ".resolved"],
+          dropped: [nil, "fa-solid fa-ban", ".dropped"],
+          active: [:green, "fa-solid fa-circle-check", ".active"],
+          archived: [nil, "fa-solid fa-box-archive", ".archived"],
         }.freeze
 
         prop :status, Blog::Types::Symbol.enum(*STATUSES.keys), &:to_sym
