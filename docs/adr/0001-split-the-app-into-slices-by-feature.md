@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, config, lib, activity, admin, analytics, api, contact, decisions, links, mcp, media, posts, projects,
   public, record, saved_views, search, social, suggestions, tags, tasks]
 issue: AA-587
-amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319"]
+amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -61,7 +61,8 @@ that calls another's client imports its key, as `projects` and `admin` import `g
 connection builder under the GitHub, network, webmention and GeoLite2 clients, for `analytics`, `record` and
 `social` (AA-747); and `honeybadger.agent` for `mcp`.
 
-`app/` keeps the asset sources and no Ruby. Which `lib` a file goes in is ADR 0002's.
+What `app/` keeps and which `lib` a file goes in are ADR 0002's, since #950. This record first gave `app/` the
+asset sources and no Ruby.
 
 ## Alternatives
 
@@ -93,7 +94,7 @@ imports from `posts`.
 Nineteen slices mean nineteen containers to boot and eighteen `db` providers, one for each slice that owns rows. A new
 feature costs a directory tree and a `slice.rb` before it holds a line of code.
 
-`app/` is a shell around `app/assets`. A reader who opens it finds CSS and JavaScript, and has to know that the code
-is in `lib` and `slices/`.
+`app/` holds the asset sources and the few pieces no slice owns, as ADR 0002 lists them (#950). A reader who opens
+it finds little of the code, and has to know that the rest is in `lib` and `slices/`.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

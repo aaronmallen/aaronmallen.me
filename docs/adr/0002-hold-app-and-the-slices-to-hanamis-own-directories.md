@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809, "#665", "#718", "#952"]
+amended: [AA-809, "#665", "#718", "#952", "#950"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -72,10 +72,12 @@ owns it, so it stays in the kernel.
 
 ### What `app/` keeps
 
-`app/` keeps `assets`, and since #718 the shared `structs` and `helpers` ADR 0126 names. One stylesheet and one
-shared script, `app.js`, load on every page (`lib/blog/ui/layouts/application.rb`). Each script belongs to a slice
-(AA-367): the admin layout adds `admin/app.js` and the public layout adds `public/app.js`. The MCP pages load only
-the shared script.
+`app/` keeps `assets`, and since #718 the shared `structs` and `helpers` ADR 0126 names. #950 adds `contracts` and
+`operations`, which hold the contracts and the operation `config/app.rb` shares with every slice.
+
+One stylesheet and one shared script, `app.js`, load on every page (`lib/blog/ui/layouts/application.rb`). Each
+script belongs to a slice (AA-367): the admin layout adds `admin/app.js` and the public layout adds `public/app.js`.
+The MCP pages load only the shared script.
 
 ## Alternatives
 
