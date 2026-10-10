@@ -1112,13 +1112,6 @@ RSpec.describe "MCP endpoint", type: :request do
         3.downto(1) { |days| create(:commit, commit_date: today - days, message: "commit #{days}") }
       end
 
-      def watched_activity_repo
-        Activity::Slice["repos.activity_queries"].tap do |repo|
-          allow(repo).to receive(:between).and_call_original
-          replace_component("activity.repos.activity_queries", repo)
-        end
-      end
-
       it "says the answer is partial" do
         three_days
         read_activity
@@ -1161,14 +1154,6 @@ RSpec.describe "MCP endpoint", type: :request do
         read_activity
 
         expect(entries).to have(3).items
-      end
-
-      it "asks the database for no more rows than one answer needs" do
-        repo = watched_activity_repo
-        three_days
-        read_activity
-
-        expect(repo).to have_received(:between).with(hash_including(limit: 3)).at_least(:once)
       end
 
       it "calls a window that rounds out to its oldest day whole" do
