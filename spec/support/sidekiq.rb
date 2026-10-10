@@ -9,6 +9,32 @@ Hanami.app.start(:sidekiq)
 Sidekiq.default_configuration.logger.level = Logger::WARN
 
 module Spec
+  class FakeJobSet
+    include Enumerable
+
+    attr_reader :name
+
+    def initialize(name)
+      @entries = []
+      @name = name
+    end
+
+    def add(at, item) = @entries << Sidekiq::SortedEntry.new(self, at.to_f, Sidekiq.dump_json(item))
+
+    def delete_by_value(_name, value) = @entries.delete_if { it.value == value }
+
+    def each(&) = @entries.each(&)
+
+    def find_job(jid) = find { it.jid == jid }
+
+    def remove_job(entry)
+      delete_by_value(name, entry.value)
+      yield entry.value
+    end
+
+    def size = @entries.size
+  end
+
   module SidekiqConfig
     def sidekiq_config(environment = :development)
       path = Hanami.app.root.join("config/sidekiq.yml.erb")

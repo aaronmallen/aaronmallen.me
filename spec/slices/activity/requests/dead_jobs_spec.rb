@@ -4,18 +4,12 @@ require "securerandom"
 require "sidekiq/api"
 
 RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request do
-  let(:dead_set) { Sidekiq::JobSet.new("dead-spec-#{SecureRandom.hex(8)}") }
-  let(:retry_set) { Sidekiq::JobSet.new("retry") }
-  let(:retrying_jid) { SecureRandom.hex(12) }
+  let(:dead_set) { Spec::FakeJobSet.new("dead") }
+  let(:retry_set) { Spec::FakeJobSet.new("retry") }
 
   before do
-    Hanami.app.start(:sidekiq)
-    replace_component("sidekiq.dead_set", -> { dead_set })
-  end
-
-  after do
-    dead_set.clear
-    retry_set.find_job(retrying_jid)&.delete
+    allow(Sidekiq::DeadSet).to receive(:new).and_return(dead_set)
+    allow(Sidekiq::RetrySet).to receive(:new).and_return(retry_set)
   end
 
   def api_read
@@ -31,15 +25,13 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
   end
 
   def job(name, args: [], error: "boom", jid: SecureRandom.hex(12))
-    Sidekiq.dump_json(
+    {
       "class" => name, "args" => args, "jid" => jid, "queue" => "default", "retry" => 3,
       "error_class" => "RuntimeError", "error_message" => error,
-    )
+    }
   end
 
-  def kill(name, at:, **)
-    Sidekiq.redis { it.zadd(dead_set.name, at.to_f.to_s, job(name, **)) }
-  end
+  def kill(name, at:, **) = dead_set.add(at, job(name, **))
 
   def page_has_card?
     sign_in_to_admin
@@ -118,7 +110,7 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
   end
 
   it "leaves a job that is still retrying off the card" do
-    Sidekiq.redis { it.zadd(retry_set.name, (Time.now + 60).to_f.to_s, job("Posts::Jobs::Retrying", jid: retrying_jid)) }
+    retry_set.add(Time.now + 60, job("Posts::Jobs::Retrying"))
 
     expect(page_has_card?).to be(false)
   end
@@ -145,7 +137,7 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
   end
 
   it "lists no dead jobs while Redis is down" do
-    replace_component("sidekiq.dead_set", -> { raise RedisClient::CannotConnectError })
+    allow(Sidekiq::DeadSet).to receive(:new).and_raise(RedisClient::CannotConnectError)
 
     expect(api_read.fetch("dead_jobs")).to eq([])
   end
