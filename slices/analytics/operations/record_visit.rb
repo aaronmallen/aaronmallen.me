@@ -18,8 +18,8 @@ module Analytics
       include Deps[
         "geo.countries",
         "settings",
+        check_visit: "operations.check_visit",
         classify_device: "operations.classify_device",
-        contract: "contracts.visit_contract",
         event_mutations: "repos.analytics_event_mutations",
         event_queries: "repos.analytics_event_queries",
         hash_reader: "operations.hash_reader",
@@ -28,7 +28,7 @@ module Analytics
       ]
 
       def call(payload, address:, user_agent:, base_url:, signed_in: false)
-        visit = step validate(payload)
+        visit = step check_visit.call(payload)
         return nil if signed_in || bot?(user_agent)
 
         address_hashes = hash_visitor.throttle_hashes(address)
@@ -126,11 +126,6 @@ module Analytics
       def title(value)
         found = value.to_s.strip
         found unless found.empty?
-      end
-
-      def validate(payload)
-        result = contract.call(payload)
-        result.success? ? Success(result.to_h) : Failure(:malformed)
       end
 
       def view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)

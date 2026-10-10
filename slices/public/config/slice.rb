@@ -11,7 +11,7 @@ module Public
     import keys: %w[auth.session_reader], from: :admin
 
     import keys: %w[
-      contracts.visit_contract operations.hash_visitor operations.record_feed_fetch operations.record_visit
+      operations.check_visit operations.hash_visitor operations.record_feed_fetch operations.record_visit
       operations.tag_ref
     ], from: :analytics
 

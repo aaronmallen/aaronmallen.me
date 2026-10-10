@@ -16,8 +16,8 @@ module Public
 
         include Deps[
           "operations.find_page",
+          check_visit: "analytics.operations.check_visit",
           record_visit: "analytics.operations.record_visit",
-          visit_contract: "analytics.contracts.visit_contract",
         ]
 
         config.formats.clear.accept :json
@@ -83,7 +83,7 @@ module Public
           end
         end
 
-        def uncounted(visit) = visit_contract.call(visit).success? ? ACCEPTED : REJECTED
+        def uncounted(visit) = check_visit.call(visit).success? ? ACCEPTED : REJECTED
       end
     end
   end
