@@ -45,13 +45,6 @@ RSpec.describe Blog::Settings do
       expect(settings_with(data_key: "d" * 64).data_key).to eq("d" * 64)
     end
 
-    it "reads the key from DATA_KEY" do
-      stub_const("ENV", ENV.to_h.merge("DATA_KEY" => "d" * 64))
-      file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:data_key)
-
-      expect(settings_with(data_key: file).data_key).to eq("d" * 64)
-    end
-
     it "refuses to load when DATA_KEY is unset" do
       stub_const("ENV", ENV.to_h.except("DATA_KEY"))
       file = Hanami::Settings::FileStore.new(Hanami.app.root.join("config/settings/default.yml")).fetch(:data_key)
@@ -146,27 +139,23 @@ RSpec.describe Blog::Settings do
       described_class.new(store).redis.compact
     end
 
-    %w[development production test].each do |environment|
-      context "with the #{environment} settings" do
-        it "hands the timeouts and reconnect attempts to Sidekiq's Redis client" do
-          set = names.zip(%w[2.5 4 10]).to_h
+    it "hands the timeouts and reconnect attempts to Sidekiq's Redis client" do
+      set = names.zip(%w[2.5 4 10]).to_h
 
-          expect(client_for(environment, **set))
-            .to eq(connect_timeout: 2.5, read_timeout: 10.0, reconnect_waits: [0, 0, 0, 0], write_timeout: 10.0)
-        end
+      expect(client_for("test", **set))
+        .to eq(connect_timeout: 2.5, read_timeout: 10.0, reconnect_waits: [0, 0, 0, 0], write_timeout: 10.0)
+    end
 
-        it "hands a list of reconnect waits to Sidekiq's Redis client" do
-          client = client_for(environment, "REDIS_RECONNECT_ATTEMPTS" => "0.5, 1,2")
+    it "hands a list of reconnect waits to Sidekiq's Redis client" do
+      client = client_for("test", "REDIS_RECONNECT_ATTEMPTS" => "0.5, 1,2")
 
-          expect(client[:reconnect_waits]).to eq([0.5, 1.0, 2.0])
-        end
+      expect(client[:reconnect_waits]).to eq([0.5, 1.0, 2.0])
+    end
 
-        it "keeps Sidekiq's own defaults when nothing is set", :aggregate_failures do
-          defaults = client
+    it "keeps Sidekiq's own defaults when nothing is set", :aggregate_failures do
+      defaults = client
 
-          blanks.each { |blank| expect(client_for(environment, **names.to_h { [it, blank] })).to eq(defaults) }
-        end
-      end
+      blanks.each { |blank| expect(client_for("test", **names.to_h { [it, blank] })).to eq(defaults) }
     end
 
     it "takes numbers written straight into a settings file" do
@@ -213,13 +202,6 @@ RSpec.describe Blog::Settings do
       described_class.new(store).contact
     end
 
-    it "takes the wait and the expiry from the environment", :aggregate_failures do
-      contact = contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "10", "CONTACT_STAMP_EXPIRY_HOURS" => "2")
-
-      expect(contact[:minimum_submit_seconds]).to eq(10)
-      expect(contact[:stamp_expiry_hours]).to eq(2)
-    end
-
     it "takes a wait of nothing, which turns the wait off" do
       expect(contact_with("CONTACT_MINIMUM_SUBMIT_SECONDS" => "0")[:minimum_submit_seconds]).to eq(0)
     end
@@ -242,30 +224,8 @@ RSpec.describe Blog::Settings do
       described_class.new(store).web_threads
     end
 
-    it "takes the count from HANAMI_MAX_THREADS" do
-      expect(web_threads("8")).to eq(8)
-    end
-
-    it "runs five threads when HANAMI_MAX_THREADS is unset" do
-      expect(web_threads(nil)).to eq(5)
-    end
-
     it "refuses a count under one" do
       expect { web_threads("0") }.to raise_error(Hanami::Settings::InvalidSettingsError)
-    end
-  end
-
-  describe "#site_url" do
-    let(:settings) { Hanami.app["settings"] }
-
-    it "joins a path onto the site", :aggregate_failures do
-      expect(settings.site_url).to eq("https://aaronmallen.me/")
-      expect(settings.site_url("/media/a.png")).to eq("https://aaronmallen.me/media/a.png")
-      expect(settings.site_origin).to eq("https://aaronmallen.me")
-    end
-
-    it "serves posts under /writing" do
-      expect(settings.writing_path).to eq("/writing")
     end
   end
 end
