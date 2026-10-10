@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76", "#718"]
+amended: [AA-809, "#76", "#718", "#954"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -41,8 +41,8 @@ A tagging repo writes tags itself, as `post_tags.replace(id, tags.claim(names).v
 missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope
 (ADR 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones.
 
-`tags` is the one table several slices write, and the one exception to reaching another slice only through its
-exports.
+Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
+table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.
 
 ## Alternatives
 

@@ -3,9 +3,9 @@ id: "0021"
 title: Let SQL read another slice's tables, never write them
 status: active
 created: 2026-09-28
-area: [activity, analytics, db, lib, links, posts, search, social, tags]
+area: [activity, analytics, db, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -25,9 +25,9 @@ allowed.
 
 ## Decision
 
-A slice's SQL may read a table another slice owns. It never writes one. We take the SQL path when the export path
-would cost one import per owning slice, or would close a cycle the record on exports refuses. These reads
-cross today:
+A slice's SQL may read a table another slice owns. It never writes one, save the one write named below. We take
+the SQL path when the export path would cost one import per owning slice, or would close a cycle the record on
+exports refuses. These reads cross today:
 
 - **The `activities` view**, built in `config/db/migrate/20260928000035_create_activities_view.rb` and read by
   `slices/activity/relations/activities.rb`, unions `commits`, `journal_entries`, `posts`, `social_posts`,
@@ -79,8 +79,13 @@ cross today:
   `posts` own, and deletes a deleted row's snoozes from `attention_snoozes`, a table `activity` owns. The record on
   the stalled list (ADR 0095) holds why snoozes live there.
 
-The one table several slices write is `tags`, and the record on declaring the tags relation in every slice that
-tags holds that choice.
+One write crosses a slice line in SQL, and #954 names it. `Tasks::Relations::RecordLinks#link_projects` inserts
+into `record_links`, which `links` owns, when a task rule or a repo match links tasks to projects (ADR 0122).
+Calling an operation in `links` would close a cycle, since `links` imports from `tasks`, and the record on exports
+(ADR 0123) allows only its three named cycles.
+
+Two tables take writes from more than one slice: `tags`, which the record on declaring the tags relation in every
+slice that tags holds, and `record_links`, for the write above.
 
 A new read across a slice line in SQL joins the list above, in the change that adds it.
 
