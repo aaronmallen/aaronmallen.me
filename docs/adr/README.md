@@ -39,7 +39,7 @@ one.
 | [0032][0032] | Keep the theme in a site_theme cookie the browser sets, and draw it with light-dark() | ![Active][active] | 2026-09-28 |
 | [0033][0033] | Draw every icon as a Font Awesome Free class | ![Active][active] | 2026-09-28 |
 | [0034][0034] | Hold every page to a 1040px column and prose to its own measure | ![Superseded][superseded-0136] | 2026-09-28 |
-| [0035][0035] | Test the app only through requests, the browser, jobs and MCP | ![Active][active] | 2026-09-28 |
+| [0035][0035] | Test the app only through requests, the browser, jobs and MCP | ![Superseded][superseded-0139] | 2026-09-28 |
 | [0036][0036] | Check every route with axe-core in the browser suite | ![Active][active] | 2026-09-28 |
 | [0037][0037] | Give every public page an h1, hidden where the design draws none | ![Active][active] | 2026-09-28 |
 | [0038][0038] | Keep the schedule and the live time in one published_at, and never unpublish | ![Active][active] | 2026-09-28 |
@@ -143,6 +143,7 @@ one.
 | [0136][0136] | Run every public page full width with fluid sizes | ![Active][active] | 2026-10-09 |
 | [0137][0137] | Slug heading ids from their text with commonmarker's header ids | ![Active][active] | 2026-10-09 |
 | [0138][0138] | Read dead jobs from the Sidekiq dead set in an activity query | ![Active][active] | 2026-10-09 |
+| [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Active][active] | 2026-10-10 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -282,6 +283,7 @@ one.
 [0136]: 0136-run-every-public-page-full-width-with-fluid-sizes.md
 [0137]: 0137-slug-heading-ids-from-their-text-with-commonmarkers-header-ids.md
 [0138]: 0138-read-dead-jobs-from-the-sidekiq-dead-set-in-an-activity-query.md
+[0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -292,4 +294,5 @@ one.
 [superseded-0128]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0131]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0136]: https://img.shields.io/badge/0136-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0139]: https://img.shields.io/badge/0139-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

@@ -1,16 +1,18 @@
 ---
 id: "0035"
 title: Test the app only through requests, the browser, jobs and MCP
-status: active
+status: superseded
 created: 2026-09-28
 area: [app, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
+superseded-by: "0139"
 issue: AA-807
+amended: ["#916"]
 tags: [testing, rspec, coverage, capybara, sidekiq, mcp]
 ---
 
 # ADR 0035: Test the app only through requests, the browser, jobs and MCP
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -73,4 +75,4 @@ A failing spec names a page, a job or a tool call, not the class that broke, so 
 
 A class can change shape without touching a spec. Dead code shows up as branches no spec can reach.
 
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0139-black?style=for-the-badge&label=Superseded&labelColor=orange
