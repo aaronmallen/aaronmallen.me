@@ -53,6 +53,12 @@ RSpec.describe "SEO tags", type: :request do
       expect(property("og:image:height")).to eq(%w[630])
     end
 
+    it "colors the browser bar with the page ground in each theme" do
+      ground = Hanami.app.root.join("config/tailwind.css").read.match(/--color-ground: light-dark\((#\h+), (#\h+)\)/)
+
+      expect(named("theme-color")).to eq(ground.captures)
+    end
+
     it "emits no description it does not have", :aggregate_failures do
       expect(property("og:description")).to be_empty
       expect(named("description")).to be_empty

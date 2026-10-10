@@ -34,6 +34,12 @@ RSpec.describe "Settings menu", type: :request do
       expect(panel).to have_no_css(".settings-menu-separator", visible: :all)
     end
 
+    it "tells the theme picker which cookie to set" do
+      get "/"
+
+      expect(page).to have_css("html[data-theme-cookie='site_theme']", visible: :all)
+    end
+
     it "shows only the theme options with a forged session cookie", :aggregate_failures do
       set_cookie "#{Blog::SessionCookie::KEY}=forged"
       get "/"

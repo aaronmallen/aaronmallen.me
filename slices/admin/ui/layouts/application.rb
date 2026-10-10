@@ -9,10 +9,7 @@ module Admin
         include Navigated
 
         def view_template(&)
-          doctype
-
-          html(lang: "en", data: { site_theme: saved_theme }) do
-            head { render_head }
+          document do
             body(class: "adm") { render_body(&) }
           end
         end

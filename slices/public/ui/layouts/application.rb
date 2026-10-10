@@ -15,10 +15,7 @@ module Public
         WEBSITE = "website"
 
         def view_template(&)
-          doctype
-
-          html(lang: "en", data: { site_theme: saved_theme }) do
-            head { render_head }
+          document do
             body(class: "pub", data: { beacon: path(:visit), beacon_ref: BEACON_REF, beacon_clicks: article? }) do
               MainNav(session: admin_session)
               main(id: "main", class: "site-main", &)

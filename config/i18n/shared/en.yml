@@ -41,9 +41,10 @@ en:
       settings_menu:
         admin: "Admin"
         appearance: "Appearance"
-        dark: "Dark"
-        light: "Light"
         sign_out: "Sign out"
+        themes:
+          dark: "Dark"
+          light: "Light"
         toggle_label: "Settings"
       wordmark:
         label: "%{owner}, home"

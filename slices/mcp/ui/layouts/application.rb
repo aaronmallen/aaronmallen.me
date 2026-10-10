@@ -5,12 +5,7 @@ module MCP
     module Layouts
       class Application < Blog::UI::Layouts::Application
         def view_template(&)
-          doctype
-
-          html(lang: "en", data: { site_theme: saved_theme }) do
-            head { render_head }
-            body { main(id: "main", class: "adm-main", &) }
-          end
+          document { body { main(id: "main", class: "adm-main", &) } }
         end
 
         private

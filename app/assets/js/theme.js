@@ -1,4 +1,3 @@
-const COOKIE = "site_theme";
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
 
 export function setupThemePicker() {
@@ -21,7 +20,7 @@ export function setupThemePicker() {
       render();
       globalThis.cookieStore?.set({
         expires: Date.now() + ONE_YEAR,
-        name: COOKIE,
+        name: root.dataset.themeCookie,
         path: "/",
         sameSite: "lax",
         value: button.dataset.themeChoice,

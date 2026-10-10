@@ -7,11 +7,6 @@ module Blog
         APPEARANCE_ID = "settings-menu-appearance"
         PANEL_ID = "settings-menu"
 
-        THEMES = [
-          %w[light fa-sun .light].freeze,
-          %w[dark fa-moon .dark].freeze,
-        ].freeze
-
         prop :session, Blog::Types.Interface(:csrf_token, :signed_in?)
 
         def view_template
@@ -39,7 +34,7 @@ module Blog
           div(id: PANEL_ID, class: "settings-menu-panel") do
             div(role: "group", aria: { labelledby: APPEARANCE_ID }) do
               span(id: APPEARANCE_ID, class: "settings-menu-heading") { t(".appearance") }
-              THEMES.each { |(theme, icon, label_key)| theme_option(theme:, icon:, label_key:) }
+              Layouts::Application::THEMES.each { |theme, attributes| theme_option(theme, **attributes) }
             end
             signed_in = admin_session
             admin_items(signed_in) if signed_in
@@ -55,7 +50,7 @@ module Blog
           end
         end
 
-        def theme_option(theme:, icon:, label_key:)
+        def theme_option(theme, icon:, label_key:, **)
           button(
             type: "button",
             class: "settings-menu-option",

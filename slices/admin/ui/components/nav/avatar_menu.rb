@@ -13,10 +13,6 @@ module Admin
             %i[projects fa-cube .pages.projects].freeze,
             %i[contact fa-envelope .pages.contact].freeze,
           ].freeze
-          THEMES = [
-            %w[light fa-sun .themes.light].freeze,
-            %w[dark fa-moon .themes.dark].freeze,
-          ].freeze
 
           prop :settings, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
 
@@ -86,9 +82,9 @@ module Admin
           end
 
           def themes
-            THEMES.each do |(theme, icon, label_key)|
-              item(icon, aria: { pressed: "false" }, data: { theme_choice: theme }) do
-                plain t(label_key)
+            Blog::UI::Layouts::Application::THEMES.each do |theme, attributes|
+              item(attributes[:icon], aria: { pressed: "false" }, data: { theme_choice: theme }) do
+                plain t(attributes[:label_key])
                 Icon("fa-solid fa-check avatar-menu-check")
               end
             end
