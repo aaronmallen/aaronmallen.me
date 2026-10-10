@@ -35,6 +35,11 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
         expect(page).to have_title("Analytics | Admin | #{Hanami.app.settings.owner_name}")
       end
 
+      it "switches the range on the analytics screen", :aggregate_failures do
+        expect(page).to have_css("form[action='/admin/analytics'] [role=radiogroup][aria-label=Range]")
+        expect(page).to have_checked_field("range", with: "7")
+      end
+
       it "totals the page views and the visitors over the range" do
         expect(lede).to start_with("40 views from 25 visitors")
       end

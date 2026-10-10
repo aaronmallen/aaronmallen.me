@@ -63,15 +63,7 @@ module Admin
             )
           end
 
-          def range_form
-            FilterSwitch(
-              action: path(:admin_analytics),
-              name: "range",
-              options: RANGES,
-              selected: @range.to_s,
-              label: t(".range"),
-            )
-          end
+          def range_form = RangeSwitch(action: path(:admin_analytics), range: @range)
 
           def sub
             t(

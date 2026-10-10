@@ -92,6 +92,11 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-title", exact_text: "Hello")
       end
 
+      it "switches the range on the post's analytics screen", :aggregate_failures do
+        expect(page).to have_css("form[action='/admin/posts/#{post.id}/analytics'] [role=radiogroup][aria-label=Range]")
+        expect(page).to have_checked_field("range", with: "7")
+      end
+
       it "sums up the readers, the range and the path under the title" do
         lede = "0 readers and 3 read-throughs in the last 7 days. It lives at /writing/hello."
 

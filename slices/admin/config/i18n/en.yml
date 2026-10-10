@@ -435,6 +435,8 @@ en:
           time: "Avg. time"
           title: "Top pages"
           views: "Views"
+        range_switch:
+          label: "Range"
         ranges:
           "7": "7d"
           "14": "14d"
@@ -2130,7 +2132,6 @@ en:
           no_mentions: "No mentions yet."
           no_prior: "with no prior period to compare"
           pending: "%{count} pending"
-          range: "Range"
           received:
             one: "%{formatted} received"
             other: "%{formatted} received"
@@ -2272,7 +2273,6 @@ en:
           no_devices: "No devices yet."
           no_sources: "No sources yet."
           no_unique_readers: "None"
-          range: "Range"
           read_note: "read 75% for 30 seconds or more"
           read_through_count:
             one: "%{count} read-through"

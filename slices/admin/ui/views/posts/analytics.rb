@@ -71,15 +71,7 @@ module Admin
 
           def month = l(Blog::TimeZone.today, format: :month)
 
-          def range_form
-            FilterSwitch(
-              action: path(:admin_post_analytics, id: @post.id),
-              name: "range",
-              options: RANGES,
-              selected: @range.to_s,
-              label: t(".range"),
-            )
-          end
+          def range_form = RangeSwitch(action: path(:admin_post_analytics, id: @post.id), range: @range)
 
           def rows(list) = list.map { { count: it[:visitors], label: yield(it) } }
 
