@@ -212,9 +212,13 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       get "/admin/sign-in"
     end
 
-    it "renders the top bar and page head", :aggregate_failures do
-      expect(page).to have_css("header.top-bar a.wordmark")
-      expect(page).to have_css(".page-head h1", text: "Sign-in failed")
+    it "renders the site header and page head", :aggregate_failures do
+      expect(page).to have_css("header.site-header + main#main .page-head h1", text: "Sign-in failed")
+      expect(page).to have_no_css("header.top-bar")
+    end
+
+    it "links the site pages from the header" do
+      expect(page.all("nav.main-nav a.main-nav-link").map { it["href"] }).to eq(%w[/writing /about /projects /contact])
     end
 
     it "titles the page with its heading" do
@@ -234,8 +238,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
       expect(page).to have_no_css("template[data-confirm-template]", visible: :all)
     end
 
-    it "offers only the theme options in the settings menu" do
-      expect(page).to have_no_css("#settings-menu .settings-menu-separator", visible: :all)
+    it "offers the theme toggle in place of the settings menu", :aggregate_failures do
+      expect(page).to have_css(".main-nav-settings button[data-theme-toggle]")
+      expect(page).to have_no_css("#settings-menu", visible: :all)
     end
   end
 end

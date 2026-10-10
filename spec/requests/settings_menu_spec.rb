@@ -30,7 +30,7 @@ RSpec.describe "Settings menu", type: :request do
     it "shows a theme toggle instead of the menu", :aggregate_failures do
       get "/"
 
-      expect(page).to have_button("Toggle dark mode", visible: :all)
+      expect(page).to have_css("button[aria-label='Toggle dark mode']", visible: :all)
       expect(page).to have_no_css("#settings-menu", visible: :all)
     end
 

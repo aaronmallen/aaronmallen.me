@@ -24,7 +24,8 @@ module Admin
         end
 
         def render_body(&)
-          TopBar(navigation:, session: Auth::Session.for(request))
+          session = Auth::Session.for(request)
+          navigation ? TopBar(navigation:, session:) : MainNav(session:)
           main(id: "main", class: "adm-main", data: { live: (path(:admin_events) if navigation) }, &)
           Toast(message: toast_message) if toast_message
           navigation ? render_signed_in_tail(navigation) : Footer()

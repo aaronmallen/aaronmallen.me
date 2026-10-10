@@ -59,15 +59,6 @@ en:
           bluesky: "bluesky"
           github: "github"
           mastodon: "mastodon"
-      main_nav:
-        label: "Main"
-        pages:
-          about: "about"
-          contact: "contact"
-          projects: "projects"
-          writing: "writing"
-        skip_link: "Skip to content"
-        theme_toggle_label: "Toggle dark mode"
       posts:
         edits:
           edited: "Edited"
