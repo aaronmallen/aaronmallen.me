@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncLinks < Blog::Operation
+    class SyncLinks
       ENDS = %i[from_task_id to_task_id].freeze
       FAILURES = [ROM::SQL::UniqueConstraintError, ROM::SQL::ForeignKeyConstraintError].freeze
       KINDS = Structs::Link::LABELS.each_with_object({}) do |(type, sides), kinds|
@@ -18,7 +18,7 @@ module Tasks
         rows = task_link_queries.touching_all(heard.keys)
         live = live(known, heard, rows)
 
-        transaction { settle(rows, wanted(known, heard.slice(*live), live), live) }
+        task_link_mutations.transaction { settle(rows, wanted(known, heard.slice(*live), live), live) }
       end
 
       private

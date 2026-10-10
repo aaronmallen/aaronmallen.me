@@ -86,7 +86,7 @@ module MCP
       end
 
       def grant(client, record)
-        issue_tokens.call(oauth_client_id: client.id, resource: record.resource, scopes: record.scopes)
+        Success(issue_tokens.call(oauth_client_id: client.id, resource: record.resource, scopes: record.scopes))
       end
 
       def redirect_uri_matches?(code, redirect_uri)

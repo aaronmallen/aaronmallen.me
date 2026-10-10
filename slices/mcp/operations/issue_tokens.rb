@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class IssueTokens < Blog::Operation
+    class IssueTokens
       ACCESS_LIFETIME = 60 * 60
       BEARER = "Bearer"
       SCOPE_SEPARATOR = " "
@@ -13,7 +13,7 @@ module MCP
       def call(oauth_client_id:, resource:, scopes:)
         held = { oauth_client_id:, resource:, scopes: }
 
-        transaction do
+        oauth_token_mutations.transaction do
           access_token, access = issue("access", ACCESS_LIFETIME, **held)
           refresh_token, = issue("refresh", REFRESH_LIFETIME, access_token_id: access.id, **held)
 

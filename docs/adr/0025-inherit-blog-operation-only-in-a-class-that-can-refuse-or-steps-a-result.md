@@ -5,8 +5,8 @@ status: active
 created: 2026-09-28
 area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-661
-amended: [AA-757, "#718"]
-tags: [operations, dry-operation, monads, result, callables]
+amended: [AA-757, "#718", "#955"]
+tags: [operations, dry-operation, monads, result, callables, transactions]
 ---
 
 # ADR 0025: Inherit `Blog::Operation` only in a class that can refuse or steps a `Result`
@@ -39,6 +39,11 @@ fallback branch, a branch that never runs. The page builders such as `Admin::Ope
 return a hash the action splats, stay plain, as do `Analytics::Operations::HashVisitor`, which returns a String,
 and the `List*` reads. So do the `Summarize*` reads but two: AA-757 moved `Admin::Operations::SummarizeSprint`
 across when it began to step `CurrentSprint`, and `SummarizeToday` with it, since it steps `SummarizeSprint`.
+
+Since #955, a plain callable that needs a transaction opens it through its write repo, the way
+`Tasks::Operations::SyncLinks` calls `task_link_mutations.transaction`. ADR 0019 makes that seam a savepoint just as
+it does the operation's, so no class inherits `Blog::Operation` only to borrow `transaction`. `SyncLinks` and
+`MCP::Operations::IssueTokens` did until #955.
 
 A plain write that another slice's operation steps may return a row or `nil`, and the caller turns `nil` into its
 `Failure`, the way `Suggestions::Operations::AcceptSuggestionEdits` does with `Posts::Operations::LockPost`.
