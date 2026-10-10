@@ -258,6 +258,11 @@ en:
       added: "Rule added · the tasks it matches now carry its tags and projects"
       deleted: "Rule deleted · every task keeps its tags and projects"
       saved: "Rule saved · new imports take its tags and projects"
+  task_statuses:
+    canceled: "canceled"
+    done: "done"
+    in_progress: "in progress"
+    open: "open"
   tasks_page:
     toasts:
       bulk:
@@ -517,10 +522,6 @@ en:
           social_posts: "Social posts"
           sprint: "Sprint · %{tasks}"
           statuses:
-            canceled: "canceled"
-            done: "done"
-            in_progress: "in progress"
-            open: "open"
             posted: "posted"
             published: "published"
             scheduled: "scheduled"
@@ -1951,11 +1952,6 @@ en:
           running_pill: "running"
           sprint: "the %{day} sprint"
           status_changed: "Changed the status from %{from} to %{to}"
-          statuses:
-            canceled: "canceled"
-            done: "done"
-            in_progress: "in progress"
-            open: "open"
           tagged: "Added the tag %{tag}"
           untagged: "Removed the tag %{tag}"
           worked: "Worked %{span}"
@@ -2544,11 +2540,6 @@ en:
           related: "Related"
           running: "running"
           sprint: "Sprint day"
-          statuses:
-            canceled: "canceled"
-            done: "done"
-            in_progress: "in progress"
-            open: "open"
           unscheduled: "not set"
           updated: "Updated"
           worked: "Time worked"

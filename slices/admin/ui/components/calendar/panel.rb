@@ -15,13 +15,10 @@ module Admin
           QUEUED = Blog::Types::SocialQueue["queued"]
           SCHEDULED = "scheduled"
           STATUSES = {
-            "canceled" => ".statuses.canceled",
-            "done" => ".statuses.done",
-            "in_progress" => ".statuses.in_progress",
-            "open" => ".statuses.open",
-            "posted" => ".statuses.posted",
-            "published" => ".statuses.published",
-            "scheduled" => ".statuses.scheduled",
+            Blog::Types::PostStatus["published"] => ".statuses.published",
+            Blog::Types::PostStatus["scheduled"] => ".statuses.scheduled",
+            Blog::Types::SocialPostStatus["posted"] => ".statuses.posted",
+            **Helpers::TaskStatuses::NAMES,
           }.freeze
           TEXT_LIMIT = 80
 

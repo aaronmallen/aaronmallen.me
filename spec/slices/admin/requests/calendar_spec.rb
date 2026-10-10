@@ -24,7 +24,7 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
 
   def plan_sprint
     sprint = create(:sprint, sprint_date: day)
-    create(:task, :in_sprint, sprint_id: sprint.id)
+    create(:task, :in_sprint, :in_progress, sprint_id: sprint.id)
     create(:task, :in_sprint, sprint_id: sprint.id, title: "Write the calendar")
   end
 
@@ -119,6 +119,12 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
 
       it "links each sprint task" do
         expect(panel).to have_link("Write the calendar", href: "/admin/tasks/#{filled[:task].id}")
+      end
+
+      it "names each sprint task's status" do
+        statuses = panel.find(".cal-group", text: "Sprint").all(".li-sub").map(&:text)
+
+        expect(statuses).to contain_exactly("in progress", "open")
       end
 
       it "links each post to its editor" do

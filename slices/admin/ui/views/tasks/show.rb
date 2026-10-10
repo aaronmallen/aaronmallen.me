@@ -11,10 +11,10 @@ module Admin
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           PREFIX = "#"
           STATUSES = {
-            Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle", ".statuses.open"],
-            Blog::Types::TaskStatus["in_progress"] => [:blue, "fa-solid fa-circle-play", ".statuses.in_progress"],
-            Blog::Types::TaskStatus["done"] => [:green, "fa-solid fa-circle-check", ".statuses.done"],
-            Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban", ".statuses.canceled"],
+            Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle"],
+            Blog::Types::TaskStatus["in_progress"] => [:blue, "fa-solid fa-circle-play"],
+            Blog::Types::TaskStatus["done"] => [:green, "fa-solid fa-circle-check"],
+            Blog::Types::TaskStatus["canceled"] => [:sand, "fa-solid fa-ban"],
           }.freeze
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -128,9 +128,9 @@ module Admin
           def sprint_day = @task.sprint ? l(@task.sprint.sprint_date, format: :medium) : t(".unscheduled")
 
           def status
-            color, icon, label_key = STATUSES.fetch(@task.status)
+            color, icon = STATUSES.fetch(@task.status)
 
-            Pill(color:, icon:) { t(label_key) }
+            Pill(color:, icon:) { t(Helpers::TaskStatuses.name(@task.status)) }
           end
 
           def status_bar

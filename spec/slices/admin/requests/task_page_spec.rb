@@ -114,7 +114,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows the #{status} status" do
         read(create(:task, *traits))
 
-        expect(page).to have_css(".read-meta .pill", text: label("statuses.#{status}"))
+        expect(page).to have_css(".read-meta .pill", text: i18n.t(Admin::Helpers::TaskStatuses.name(status.to_s)))
       end
     end
 

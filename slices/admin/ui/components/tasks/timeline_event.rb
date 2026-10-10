@@ -12,7 +12,6 @@ module Admin
             Blog::Types::TaskTimelineKind["untagged"] => ["fa-solid fa-tag", ".untagged"],
           }.freeze
           SESSION_ICON = "fa-regular fa-clock"
-          STATUSES = Blog::Types::TaskStatus.values.to_h { [it, ".statuses.#{it}"] }.freeze
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
 
@@ -54,7 +53,7 @@ module Admin
             Pill(color: :blue) { t(".running_pill") }
           end
 
-          def status_name(status) = status && t(STATUSES.fetch(status))
+          def status_name(status) = status && t(Helpers::TaskStatuses.name(status))
         end
       end
     end
