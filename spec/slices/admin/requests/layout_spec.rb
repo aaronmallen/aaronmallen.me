@@ -6,9 +6,9 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:page) { Capybara.string(last_response.body) }
   let(:screens) do
     %w[
-      /admin /admin/tasks /admin/calendar /admin/time /admin/journal /admin/decisions /admin/review /admin/posts
-      /admin/social /admin/people /admin/projects /admin/inbox /admin/messages /admin/webmentions /admin/analytics
-      /admin/activity /admin/search /admin/tags /admin/tasks/rules /admin/webmentions#webmention-settings
+      /admin /admin/tasks /admin/calendar /admin/journal /admin/decisions /admin/review /admin/posts /admin/social
+      /admin/projects /admin/inbox /admin/messages /admin/webmentions /admin/analytics /admin/activity /admin/time
+      /admin/search /admin/tags /admin/people /admin/tasks/rules /admin/webmentions#webmention-settings
       /admin/tokens /admin/services /admin/clients /admin/security
     ]
   end
@@ -51,7 +51,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "links the site and every settings tab from the avatar menu" do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
-        .to eq(%w[/writing /about /projects /contact /admin/tags /admin/tasks/rules
+        .to eq(%w[/writing /about /projects /contact /admin/tags /admin/people /admin/tasks/rules
                   /admin/webmentions#webmention-settings /admin/tokens /admin/services /admin/clients /admin/security])
     end
 
@@ -175,7 +175,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     it "lists the settings tabs as screen-tabs", :aggregate_failures do
       expect(page.all("a.screen-tab").map(&:text))
-        .to eq(["tags", "task rules", "webmentions", "API tokens", "connected services", "MCP clients", "security"])
+        .to eq(["tags", "people", "task rules", "webmentions", "API tokens", "connected services", "MCP clients",
+                "security"])
       expect(page).to have_css("a.screen-tab[aria-current='page']", text: "task rules")
     end
 

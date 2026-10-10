@@ -48,8 +48,10 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
     describe "with no range in the URL" do
       before { visit_time }
 
-      it "says the time screen is where you are" do
-        expect(page).to have_css(".screen-tab[aria-current='page']", text: "time")
+      it "says the time report is where you are, among the Insights tabs", :aggregate_failures do
+        expect(page).to have_css("a.pill-nav-link[aria-current='page']", text: "Insights")
+        expect(page.all("a.screen-tab").map(&:text)).to eq(["analytics", "activity", "time report", "search"])
+        expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "time report")
       end
 
       it "lists the time screen in the palette with its icon" do

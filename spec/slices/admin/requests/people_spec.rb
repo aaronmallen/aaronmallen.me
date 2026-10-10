@@ -36,6 +36,14 @@ RSpec.describe "Admin people", type: :request do
       expect(page).to have_css("[data-palette-href='/admin/people']", visible: :all)
     end
 
+    it "sits second among the settings tabs, under no pill", :aggregate_failures do
+      get "/admin/people"
+
+      expect(page).to have_no_css("a.pill-nav-link[aria-current]")
+      expect(page.all("a.screen-tab").map(&:text).first(2)).to eq(%w[tags people])
+      expect(page).to have_css("a.screen-tab[aria-current='page']", exact_text: "people")
+    end
+
     describe "the list" do
       it "says who to add when there is nobody yet" do
         get "/admin/people"

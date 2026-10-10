@@ -940,7 +940,7 @@ en:
           tags: "tags"
           task_rules: "task rules"
           tasks: "tasks"
-          time: "time"
+          time: "time report"
           today: "today"
           tokens: "API tokens"
           webmention_settings: "webmentions"
