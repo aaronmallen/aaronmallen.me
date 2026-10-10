@@ -98,7 +98,7 @@ RSpec.describe "Admin connected services", type: :request do
 
     describe "a service a spec defines, with no migration" do
       before do
-        fake = Services::Definition.new(
+        fake = Services::Structs::Definition.new(
           id: "fake", name: "Fakebook", icon: "fa-solid fa-ghost", group: "social", auth: "credentials",
           fields: %w[token], powers: ["Nothing at all"],
         )

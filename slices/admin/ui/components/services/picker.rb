@@ -15,7 +15,7 @@ module Admin
             spellcheck: "false",
           }.freeze
 
-          prop :definitions, Blog::Types::Array.of(Blog::Types::Instance(::Services::Definition))
+          prop :definitions, Blog::Types::Array.of(Blog::Types::Instance(::Services::Structs::Definition))
 
           def view_template
             Dialog(id: ID, title_id: "#{ID}-title", title: t(".title"), class: "modal", data: { dialog: true }) do

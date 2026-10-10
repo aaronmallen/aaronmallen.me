@@ -9,7 +9,7 @@ module Admin
           LINK_ICON = "fa-solid fa-link"
           PLAIN = %w[handle].freeze
 
-          prop :definition, Blog::Types::Instance(::Services::Definition)
+          prop :definition, Blog::Types::Instance(::Services::Structs::Definition)
           prop :errors, Blog::Types::Hash
           prop :refusal, Blog::Types::String.optional
 

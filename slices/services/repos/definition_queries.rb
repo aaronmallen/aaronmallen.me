@@ -6,7 +6,7 @@ module Services
       DIRECTORY = File.expand_path("../config/definitions", __dir__)
       GROUPS = %w[code social infrastructure].freeze
 
-      def initialize(all = Dir[File.join(DIRECTORY, "*.yml")].map { Definition.load(it) })
+      def initialize(all = Dir[File.join(DIRECTORY, "*.yml")].map { Structs::Definition.load(it) })
         @all = all.sort_by { [GROUPS.index(it.group), it.name] }.freeze
       end
 

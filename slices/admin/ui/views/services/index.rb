@@ -7,7 +7,7 @@ module Admin
         class Index < View
           include Components::Services
 
-          prop :connect, Blog::Types::Instance(::Services::Definition).optional
+          prop :connect, Blog::Types::Instance(::Services::Structs::Definition).optional
           prop :connectable, Blog::Types::Array.of(Blog::Types::String)
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :pickable, Blog::Types::Array
