@@ -26,10 +26,7 @@ module Admin
         def line(label, href, value, count)
           return unless count.positive?
 
-          a(class: "today-line", href:) do
-            span { t(label) }
-            span(class: "today-line-value warn") { t(value, count:) }
-          end
+          TodayLine(label: t(label), href:, warn: true) { t(value, count:) }
         end
       end
     end

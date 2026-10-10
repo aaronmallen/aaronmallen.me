@@ -60,7 +60,7 @@ module Admin
           def journal_line
             href = path(:admin_journal, write: Blog::Constants::CHECKED)
 
-            line(t(".journal"), href, data: { dialog_open: Components::Journal::WriteDialog::ID }) do
+            TodayLine(label: t(".journal"), href:, data: { dialog_open: Components::Journal::WriteDialog::ID }) do
               plain t(".journal_count", count: @entries.size)
               whitespace
               kbd(class: "kbd", aria: { hidden: "true" }) { JOURNAL_KEY }
@@ -84,13 +84,6 @@ module Admin
             t(".lede.carried", lead:, count: task.carried_count)
           end
 
-          def line(label, href, data: nil, &)
-            a(class: "today-line", href:, data:) do
-              span { label }
-              span(class: "today-line-value", &)
-            end
-          end
-
           def next_up
             [
               *posts[:scheduled].first(1).map { [it.published_at, path(:admin_edit_post, id: it.id)] },
@@ -104,16 +97,18 @@ module Admin
             Card do
               journal_line
               ships_next
-              line(t(".drafts"), path(:admin_posts, status: DRAFT)) { t(".draft_count", count: posts[:drafts].size) }
+              TodayLine(label: t(".drafts"), href: path(:admin_posts, status: DRAFT)) do
+                t(".draft_count", count: posts[:drafts].size)
+              end
               site_lines
             end
           end
 
           def ships_next
             at, href = next_up
-            return line(t(".ships_next"), path(:admin_calendar)) { t(".nothing_scheduled") } unless at
+            return TodayLine(label: t(".ships_next"), href: path(:admin_calendar)) { t(".nothing_scheduled") } unless at
 
-            line(t(".ships_next"), href) do
+            TodayLine(label: t(".ships_next"), href:) do
               Moment(at:)
               plain "#{DOT}#{t('.queued', count: queue[:count])}"
             end
@@ -126,8 +121,8 @@ module Admin
           end
 
           def site_lines
-            line(t(".visitors"), path(:admin_analytics)) { t(".visitor_count", count: @visitors) }
-            line(t(".clients"), path(:admin_clients)) { t(".client_count", count: @clients) }
+            TodayLine(label: t(".visitors"), href: path(:admin_analytics)) { t(".visitor_count", count: @visitors) }
+            TodayLine(label: t(".clients"), href: path(:admin_clients)) { t(".client_count", count: @clients) }
           end
 
           def sprint_tasks = @sprint[:tasks]

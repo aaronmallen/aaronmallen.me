@@ -212,6 +212,14 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
 
         expect(attention).to have_link(href: "/admin/webmentions?status=pending")
       end
+
+      it "warns on the attention line and not on the quiet lines", :aggregate_failures do
+        create(:webmention)
+        get "/admin"
+
+        expect(attention).to have_css(".today-line-value.warn", text: "1 waiting")
+        expect(line("Drafts")).to have_no_css(".warn")
+      end
     end
 
     describe "the Journal line" do
