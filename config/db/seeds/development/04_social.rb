@@ -70,7 +70,7 @@ Seeds.unwrap(
 
 postgres = Posts::Slice["repos.post_queries"].published_by_slug("domains-in-postgres")
 visitor_hashes = Analytics::Slice["operations.hash_visitor"].throttle_hashes("192.0.2.10")
-target = ->(post) { Hanami.app.settings.site_url("#{Hanami.app.settings.writing_path}/#{post.slug}") }
+target = ->(post) { Hanami.app.settings.site_url("#{Blog::Constants::WRITING_PATH}/#{post.slug}") }
 page = lambda do |mention|
   link = %(<a class="#{mention[:kind]}" href="#{target.call(mention[:post])}">#{mention[:author]}</a>)
 

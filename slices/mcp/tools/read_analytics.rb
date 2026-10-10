@@ -24,7 +24,7 @@ module MCP
         properties: {
           **Blog::Helpers::DayWindow::RANGE,
           path: { type: "string",
-                  description: "one page to read alone, such as #{Hanami.app.settings.writing_path}/hello" },
+                  description: "one page to read alone, such as #{Blog::Constants::WRITING_PATH}/hello" },
           since: { type: "string", description: "an ISO 8601 time, such as 2026-10-01T09:00:00-05:00" },
         },
         required: %w[from to],

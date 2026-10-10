@@ -52,7 +52,6 @@ module Blog
     DEFAULT_WEBMENTION_THROTTLE_LIMIT = 30
     DEFAULT_WEBMENTION_TOTAL_THROTTLE_LIMIT = 100
     DEFAULT_WEB_THREADS = 5
-    DEFAULT_WRITING_PATH = "/writing"
     MINUTES_BEFORE_THE_VISITOR_HASH_ROTATES = 1_440
     SECRETS = %i[reader_salt analytics_salt app_secret data_key].freeze
 
@@ -202,10 +201,7 @@ module Blog
       username?: Value,
     )
 
-    setting :site, default: {}, constructor: Schema.schema(
-      url: SiteUrl,
-      writing_path?: unless_set(Types::String, DEFAULT_WRITING_PATH),
-    )
+    setting :site, default: {}, constructor: Schema.schema(url: SiteUrl)
 
     setting :web_threads, default: DEFAULT_WEB_THREADS, constructor: unless_set(Threads, DEFAULT_WEB_THREADS)
 
@@ -234,7 +230,5 @@ module Blog
     def site_origin = URI(site[:url]).origin
 
     def site_url(path = "/") = URI.join(site[:url], path).to_s
-
-    def writing_path = site[:writing_path]
   end
 end

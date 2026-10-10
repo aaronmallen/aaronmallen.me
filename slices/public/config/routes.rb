@@ -3,7 +3,7 @@
 module Public
   class Routes < Hanami::Routes
     TAG = %r{[^/]+}
-    WRITING = Hanami.app.settings.writing_path
+    WRITING = Blog::Constants::WRITING_PATH
 
     get "/", to: "pages.index", as: :root
     get WRITING, to: "posts.index", as: :writing

@@ -9,12 +9,11 @@ module Admin
         page_queries: "analytics.repos.analytics_page_queries",
         post_reader_queries: "analytics.repos.post_reader_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",
-        settings: "settings",
       ]
 
       def call(post:, range:)
         to = Blog::TimeZone.today
-        window = { from: to - (range - 1), to:, path: "#{settings.writing_path}/#{post.slug}" }
+        window = { from: to - (range - 1), to:, path: "#{Blog::Constants::WRITING_PATH}/#{post.slug}" }
         page = page_queries.page_between(**window)
 
         {

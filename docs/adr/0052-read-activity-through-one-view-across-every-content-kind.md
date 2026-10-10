@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623", "#1013"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -98,9 +98,9 @@ The view and its indexes hold `Blog::TimeZone::NAME` as a literal, since Postgre
 immutable expression. A new zone means a rebuilt database.
 
 The post and webmention branches write `'/writing/' || posts.slug`, since SQL cannot call the router. The routes and
-`Social::Operations::ReceiveWebmention` build the path from `Blog::Site::WRITING`, and the feed and outbound
-webmentions call `routes.url(:post, ...)`. A new post path means replacing the view as well, and nothing fails if we
-forget: the Activity screen matches view counts by that link, so a stale one shows zero views.
+`Social::Operations::ReceiveWebmention` build the path from `Blog::Constants::WRITING_PATH` (#1013), and the feed and
+outbound webmentions call `routes.url(:post, ...)`. A new post path means replacing the view as well, and nothing
+fails if we forget: the Activity screen matches view counts by that link, so a stale one shows zero views.
 
 The tag filter reads the join tables `record` and `tasks` own, and the `tags` table, in SQL below their exports.
 

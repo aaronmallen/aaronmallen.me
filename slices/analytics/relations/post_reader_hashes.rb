@@ -3,7 +3,7 @@
 module Analytics
   module Relations
     class PostReaderHashes < Blog::DB::Relation
-      POST_PATH = Sequel.join(["#{Hanami.app.settings.writing_path}/", Sequel[:posts][:slug]])
+      POST_PATH = Sequel.join(["#{Blog::Constants::WRITING_PATH}/", Sequel[:posts][:slug]])
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       schema :post_reader_hashes, infer: true

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, db, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -54,8 +54,8 @@ exports refuses. These reads cross today:
 - **`Activity::Relations::Activities#tag_owners`**, a private method `#tagged` calls, joins
   `journal_entry_tags` and `task_tags` to `tags` to find the entries and tasks that carry every named tag.
 - **`Analytics::Relations::AnalyticsRollupPaths#views_by_post`** joins `posts` on
-  `'/writing/' || posts.slug`, built from `Blog::Site::WRITING`, so the admin posts list gets views keyed by post
-  id in one query.
+  `'/writing/' || posts.slug`, built from `Blog::Constants::WRITING_PATH` (#1013), so the admin posts list gets views
+  keyed by post id in one query.
 - **The `posts_default_webmentions_enabled` trigger**, in `config/db/migrate/20260928000005_create_posts.rb`,
   fills `webmentions_enabled` on insert from social's `webmention_settings`. Reading the setting in `SavePost`
   would make posts import a query from social, which already imports from posts, and ADR 0003 allows no such
@@ -114,7 +114,7 @@ breaks the tags screen or the trigger when it runs, and only the reader's specs 
 `views_by_post` meets neither test. It reads one slice's table, and an import from posts would close no cycle, so
 no record or issue says why it joins in SQL rather than taking an export.
 
-It also matches paths as text. The route and the join both build on `Blog::Site::WRITING`, and
+It also matches paths as text. The route and the join both build on `Blog::Constants::WRITING_PATH` (#1013), and
 `posts_lock_published_slug` refuses a new slug once a post is published. A new prefix still leaves every rollup
 row under the old path unmatched, so each post's past views drop to zero with no error.
 

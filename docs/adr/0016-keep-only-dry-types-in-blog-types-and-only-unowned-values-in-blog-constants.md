@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, posts, projects, public]
 issue: AA-665
-amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934"]
+amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934", "#1013"]
 tags: [types, constants, enums, dry-types, kernel]
 ---
 
@@ -43,12 +43,12 @@ takes its own host format, not the URL's.
 `TagColor.values` stands where `TAG_COLORS` stood, each enum's `*Param` fallback takes the first value of its own
 enum, and a caller that needs a value asks for it: `PostStatus["draft"]` rather than `POST_DRAFT`.
 
-**A value that is no type goes to `Blog::Constants` only when no slice owns it.** Each name there passes the test
-ADR 0002 sets for a kernel file: a kernel file reads it, or it reaches too many slices for one to own it. `CHECKED`
-and `GAP` pass, since `Blog::Types` reads both, and `INTEGER_MAX` passes, since `app` and the `api` slice read it.
-`Blog::Constants` is its own module and includes `Dry::Core::Constants`, so `EMPTY_HASH` and the rest read from it
-too. A name one slice owns lives in that slice's lib: `Admin::Auth::GitHub::USER_URL` in `lib/admin`,
-`Contact::Types::MAX_BODY` in `lib/contact`.
+**A value that is no type goes to `Blog::Constants` only when no slice owns it.** Each name there passes the test ADR
+0002 sets for a kernel file: a kernel file reads it, or it reaches too many slices for one to own it. `CHECKED` and
+`GAP` pass, since `Blog::Types` reads both, and `INTEGER_MAX` passes, since `app` and the `api` slice read it.
+`WRITING_PATH` passes since #1013, as five slices read it. `Blog::Constants` is its own module and includes
+`Dry::Core::Constants`, so `EMPTY_HASH` and the rest read from it too. A name one slice owns lives in that slice's lib:
+`Admin::Auth::GitHub::USER_URL` in `lib/admin`, `Contact::Types::MAX_BODY` in `lib/contact`.
 
 Anything inside `Blog::Types` that is not a type is `private_constant`: `Normalizers`, and each value that more than
 one type reads or that would not fit inside the block that reads it, such as `SLUG_RESERVED`, `SLUG_FORMAT` and the

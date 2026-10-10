@@ -9,5 +9,6 @@ module Blog
     CHECKED = "1"
     GAP = :gap
     INTEGER_MAX = (2**31) - 1
+    WRITING_PATH = "/writing"
   end
 end

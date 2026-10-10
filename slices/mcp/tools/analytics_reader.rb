@@ -61,7 +61,7 @@ module MCP
       end
 
       def post
-        slug = path.delete_prefix("#{Hanami.app.settings.writing_path}/")
+        slug = path.delete_prefix("#{Blog::Constants::WRITING_PATH}/")
         dep(:post_queries).published_by_slug(slug) unless slug == path
       end
 

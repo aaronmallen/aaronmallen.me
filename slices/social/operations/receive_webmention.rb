@@ -4,7 +4,7 @@ module Social
   module Operations
     class ReceiveWebmention < Blog::Operation
       MAX_URL = 2048
-      TARGET_PATH = %r{\A#{Hanami.app.settings.writing_path}/(?<slug>[^/]+)\z}
+      TARGET_PATH = %r{\A#{Blog::Constants::WRITING_PATH}/(?<slug>[^/]+)\z}
 
       include Deps[
         "settings",
