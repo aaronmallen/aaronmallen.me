@@ -191,8 +191,8 @@ RSpec.describe "Admin review note", :frozen_clock, type: :request do
       it "shows no entries and no words on the screen" do
         get "/admin/review", day: sunday.iso8601
 
-        expect(page.find_by_id("review-journal")).to have_css(".review-note",
-                                                              exact_text: "0 entries · 0 words · no streak")
+        expect(page.find_by_id("review-journal")).to have_css(".review-stat",
+                                                              exact_text: "0 entries · 0 words · 0 days written")
       end
 
       it "reads no entries and no words through read_review" do

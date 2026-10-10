@@ -7,41 +7,40 @@ module Admin
         class PublishedCard < Component
           POST = Blog::Types::ActivityKind["post"]
           POSTED = Blog::Types::SocialQueue["posted"]
-          TEXT_LIMIT = 80
 
           prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :social_posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :days, Blog::Types::Array.of(Blog::Types::Date)
 
           def view_template
-            Card(title: t(".title"), id: "review-published") do
-              next Empty { t(".empty") } if @posts.empty? && @social_posts.empty?
+            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(count)), id: "review-published") do
+              next Empty { t(".empty") } if count.zero?
 
-              group(t(".posts"), @posts)
-              group(t(".social_posts"), @social_posts)
+              Capped(items: groups) { |name, records, href| group(name, records, href) }
             end
           end
 
           private
 
-          def group(title, records)
-            return if records.empty?
+          def count = @posts.size + @social_posts.size
 
-            section(class: "review-group") do
-              h3(class: "review-group-title") { title }
-              records.each { ListItem(**item(it)) }
+          def group(name, records, href)
+            Group(name:, href:, items: records.reverse, days: @days, dated: :occurred_on) do |record|
+              Line(href: href(record), text: record.name, day: record.occurred_on)
             end
           end
 
-          def href(record)
-            record.type == POST ? path(:admin_edit_post, id: record.source_id) : path(:admin_social, filter: POSTED)
+          def groups
+            networks = Grouping.by(@social_posts) { it.targets.to_a.uniq }.map do |network, records|
+              [t(Structs::Network::LABELS.fetch(network)), records, path(:admin_social, filter: POSTED)]
+            end
+            @posts.empty? ? networks : [[t(".posts"), @posts, path(:admin_posts)], *networks]
           end
 
-          def item(record)
-            {
-              title: Blog::Helpers::Truncation.cut(record.name, keep: TEXT_LIMIT),
-              href: href(record),
-              sub: l(record.occurred_on, format: :weekday),
-            }
+          def href(record)
+            return path(:admin_social, filter: POSTED) unless record.type == POST
+
+            path(:admin_edit_post, id: record.source_id)
           end
         end
       end

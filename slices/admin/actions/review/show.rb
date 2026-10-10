@@ -15,6 +15,7 @@ module Admin
               period: params[:period], day: params[:day],
               contributor: params[:contributor], agent: params[:agent], model: params[:model],
             ),
+            group: Blog::Types::ReviewGroupParam[params[:group]],
           )
         end
       end

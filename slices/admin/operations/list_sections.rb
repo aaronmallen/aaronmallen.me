@@ -9,7 +9,7 @@ module Admin
         %i[calendar tasks fa-calendar-days admin_calendar].freeze,
         %i[journal journal fa-feather admin_journal].freeze,
         %i[decisions journal fa-scale-balanced admin_decisions].freeze,
-        %i[review journal fa-calendar-week admin_review].freeze,
+        %i[review journal fa-magnifying-glass-chart admin_review].freeze,
         %i[posts publish fa-file-lines admin_posts].freeze,
         %i[social publish fa-paper-plane admin_social].freeze,
         %i[projects publish fa-cube admin_projects].freeze,

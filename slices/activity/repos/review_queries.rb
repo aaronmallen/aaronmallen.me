@@ -40,7 +40,9 @@ module Activity
         end
       end
 
-      def done(from, to, credits) = review_tasks.done_between(from, to).credited(**credits).to_a.group_by(&:closed_on)
+      def done(from, to, credits)
+        review_tasks.done_between(from, to).credited(**credits).with_groups.to_a.group_by(&:closed_on)
+      end
 
       def published(found)
         {
@@ -66,7 +68,7 @@ module Activity
           done: done(from, to, credits),
           commits: between.commit_totals_by_repo_and_day.to_a,
           decisions: review_decisions.closed_between(from, to).to_a,
-          records: between.with_types(RECORDS).oldest_first.to_a.group_by(&:type),
+          records: between.with_types(RECORDS).oldest_first.with_tags.to_a.group_by(&:type),
           worked: worked(from, to),
         }
       end

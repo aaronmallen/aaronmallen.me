@@ -11,28 +11,25 @@ module Admin
           prop :decisions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            Card(title: t(".title"), id: "review-decisions") do
+            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(@decisions.size)), id: "review-decisions") do
               next Empty { t(".empty") } if @decisions.empty?
 
-              @decisions.each { ListItem(**item(it)) }
+              Capped(items: @decisions, more: path(:admin_decisions)) { row(it) }
             end
           end
 
           private
 
-          def item(decision)
-            {
-              title: Blog::Helpers::Truncation.cut(decision.title, keep: TEXT_LIMIT),
-              href: path(:admin_decision, id: decision.decision_id),
-              sub: sub(decision),
-            }
+          def outcome(decision)
+            return t(".dropped") unless decision.outcome == RESOLVED
+
+            t(".resolved", option: Blog::Helpers::Truncation.cut(decision.chosen, keep: TEXT_LIMIT))
           end
 
-          def sub(decision)
-            day = l(decision.closed_on, format: :weekday)
-            return t(".dropped", day:) unless decision.outcome == RESOLVED
+          def row(decision)
+            title = Blog::Helpers::Truncation.cut(decision.title, keep: TEXT_LIMIT)
 
-            t(".resolved", option: Blog::Helpers::Truncation.cut(decision.chosen, keep: TEXT_LIMIT), day:)
+            ListItem(title:, href: path(:admin_decision, id: decision.decision_id)) { plain outcome(decision) }
           end
         end
       end

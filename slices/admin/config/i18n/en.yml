@@ -1258,6 +1258,10 @@ en:
           remove: "Remove the link to %{title}"
           title: "Linked"
       review:
+        capped:
+          all: "All %{count} →"
+          hide: "Show fewer"
+          show: "Show %{count} more"
         carried_card:
           empty: "Nothing slipped."
           slipped:
@@ -1274,24 +1278,36 @@ en:
           model: "Model"
           owner: "Me"
         decisions_card:
-          dropped: "Dropped · %{day}"
+          dropped: "Dropped"
           empty: "No decisions closed."
-          resolved: "Chose %{option} · %{day}"
+          resolved: "Chose %{option}"
           title: "Decisions"
         done_card:
+          all: "All %{count} in Tasks →"
+          both: "Tasks with two tags count in both."
+          by_project: "by project"
+          by_tag: "by tag"
           empty: "Nothing done yet."
+          group: "Group by"
+          no_project: "no project"
           title: "Done"
+          untagged: "untagged"
+        group:
+          more: "+%{count} more"
+          open: "Open all %{count} in %{name}"
         journal_card:
+          days:
+            one: "%{count} day written"
+            other: "%{count} days written"
           empty: "No entries yet."
           entries:
-            one: "%{count} entry"
-            other: "%{count} entries"
-          streak:
-            one: "a %{count}-day streak"
-            other: "a %{count}-day streak"
-            zero: "no streak"
+            one: "entry"
+            other: "entries"
+          entries_more: "entries"
+          open: "Open journal →"
           title: "Journal"
-          totals: "%{entries} · %{words} · %{streak}"
+          totals: "%{entries} · %{words} · %{days}"
+          untagged: "untagged"
           words:
             one: "%{words} word"
             other: "%{words} words"
@@ -1322,7 +1338,6 @@ en:
         published_card:
           empty: "Nothing went out."
           posts: "Posts"
-          social_posts: "Social posts"
           title: "Published"
         repos_card:
           commits:
@@ -1330,9 +1345,14 @@ en:
             other: "%{count} commits"
           empty: "No commits."
           title: "Commits"
-          totals: "%{commits} · +%{additions} −%{deletions}"
         worked_card:
+          average: "%{average} avg · %{days}"
           day: "%{weekday} %{date}"
+          days:
+            one: "%{count} day worked"
+            other: "%{count} days worked"
+          empty: "No time logged."
+          longest: "Longest days"
           title: "Time worked"
       saved_view:
         change: "Use current filters"

@@ -8,26 +8,45 @@ module Admin
           prop :worked, Blog::Types::Hash.map(Blog::Types::Date, Blog::Types::Integer)
 
           def view_template
-            Card(title: t(".title"), id: "review-worked") do |card|
-              card.side { span(class: "review-total") { Blog::Helpers::Figures.hours(@worked.values.sum) } }
+            Card(title: t(".title"), id: "review-worked") do
+              next Empty { t(".empty") } if days.empty?
 
-              @worked.each { |day, seconds| row(day, seconds) }
+              totals
+              p(class: "review-label") { t(".longest") }
+              Capped(items: days.sort_by { |day, seconds| [-seconds, day] }) { |day, seconds| row(day, seconds) }
             end
           end
 
           private
 
+          def days = @days ||= @worked.select { |_, seconds| seconds.positive? }
+
+          def hours(seconds) = Blog::Helpers::Figures.hours(seconds)
+
           def row(day, seconds)
-            div(class: "meter-row") do
-              span(class: "meter-name") { t(".day", weekday: l(day, format: :day_name), date: l(day, format: :short)) }
-              span(class: "meter blue") do
-                span(class: "meter-fill", style: "width: #{Blog::Helpers::Figures.share(seconds, top)}%")
+            div(class: "review-bar") do
+              span(class: "review-bar-name") do
+                t(".day", weekday: l(day, format: :day_name), date: l(day, format: :short))
               end
-              span(class: "meter-count") { Blog::Helpers::Figures.hours(seconds) }
+              span(class: "review-bar-value") { hours(seconds) }
+              span(class: "review-bar-meter") { i(style: "width: #{Blog::Helpers::Figures.share(seconds, top)}%") }
             end
           end
 
-          def top = @top ||= @worked.values.max.to_i
+          def top = days.values.max
+
+          def total = days.values.sum
+
+          def totals
+            p(class: "today-stat review-stat") do
+              plain hours(total)
+              whitespace
+              small do
+                t(".average", average: hours(Blog::Helpers::Figures.average(total, days.size)),
+                              days: t(".days", count: days.size))
+              end
+            end
+          end
         end
       end
     end

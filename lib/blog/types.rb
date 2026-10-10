@@ -139,6 +139,8 @@ module Blog
     end.constrained(min_size: 1)
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
     RepoPattern = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/(?:\*|[a-z0-9._-]+)\z})
+    ReviewGroup = Types::String.enum("tag", "project")
+    ReviewGroupParam = ReviewGroup.fallback(ReviewGroup.values.first)
     ReviewPeriod = Types::String.enum("week", "month")
     ReviewPeriodParam = ReviewPeriod.fallback(ReviewPeriod.values.first)
     SavedViewScreen = Types::String.enum("activity", "journal", "posts", "tasks")

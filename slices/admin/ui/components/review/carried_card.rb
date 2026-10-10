@@ -8,21 +8,19 @@ module Admin
           prop :carried, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            Card(title: t(".title"), id: "review-carried") do
+            Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(@carried.size)), id: "review-carried") do
               next Empty { t(".empty") } if @carried.empty?
 
-              @carried.each { ListItem(**item(it)) }
+              Capped(items: @carried, more: path(:admin_tasks)) { row(it) }
             end
           end
 
           private
 
-          def item(task)
-            {
-              title: task.title,
-              href: path(:admin_task, id: task.task_id),
-              sub: t(".slipped", count: task.carried_count),
-            }
+          def row(task)
+            ListItem(title: task.title, href: path(:admin_task, id: task.task_id)) do
+              span(class: "review-slipped") { t(".slipped", count: task.carried_count) }
+            end
           end
         end
       end

@@ -2203,19 +2203,115 @@
 }
 
 @utility review-group {
-  @apply mt-5 first:mt-0;
+  @apply border-b border-line py-2.5 last-of-type:border-b-0;
 }
 
-@utility review-group-title {
-  @apply mb-2 font-mono text-label text-mk-comment uppercase;
+@utility review-group-head {
+  @apply grid items-center gap-3.5 text-ink no-underline admin-focus;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+
+  &:hover .review-group-name {
+    @apply underline;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
 }
 
-@utility review-note {
-  @apply mb-3 meta;
+@utility review-group-name {
+  @apply truncate font-display font-semibold;
 }
 
-@utility review-total {
-  @apply meta;
+@utility review-group-count {
+  @apply min-w-[3ch] text-right font-mono text-meta;
+}
+
+@utility review-spark {
+  @apply flex h-4.5 w-21 items-end gap-px;
+
+  & i {
+    @apply min-w-px flex-1 rounded-[1px] bg-mk-green;
+  }
+
+  & i.zero {
+    @apply h-0.5 bg-line;
+  }
+}
+
+@utility review-top {
+  @apply mt-1.5 flex flex-col gap-0.5;
+}
+
+@utility review-line {
+  @apply max-w-full truncate py-0.5 text-[.92rem] leading-[1.35] text-ink-muted no-underline hover:text-ink;
+  @apply admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap content-center;
+  }
+}
+
+@utility review-foot {
+  @apply mt-1 flex flex-wrap items-center justify-between gap-x-3.5 gap-y-1.5 border-t border-line pt-3;
+
+  & .hint {
+    @apply min-w-0 flex-[1_1_12ch] text-right;
+  }
+}
+
+@utility review-more {
+  @apply flex flex-col;
+
+  & > summary {
+    @apply order-last mt-1 cursor-pointer list-none border-t border-line pt-3;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+
+  &:not([open]) .review-more-hide,
+  &[open] .review-more-show {
+    @apply hidden;
+  }
+}
+
+@utility review-stat {
+  @apply text-[1.8rem];
+}
+
+@utility review-groups {
+  @apply mt-3.5;
+}
+
+@utility review-label {
+  @apply mt-4 mb-1 font-mono text-meta tracking-[.06em] text-ink-muted uppercase;
+}
+
+@utility review-slipped {
+  @apply font-mono text-meta text-mk-sand-text;
+}
+
+@utility review-bar {
+  @apply grid gap-x-3 gap-y-1 border-b border-line py-2 last-of-type:border-b-0;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+@utility review-bar-name {
+  @apply min-w-0 truncate font-mono text-meta text-ink;
+}
+
+@utility review-bar-value {
+  @apply font-mono text-meta text-ink-muted;
+}
+
+@utility review-bar-meter {
+  @apply col-span-full h-0.75 overflow-hidden rounded-full bg-line;
+
+  & i {
+    @apply block h-full bg-mk-green;
+  }
 }
 
 @utility review-notes {

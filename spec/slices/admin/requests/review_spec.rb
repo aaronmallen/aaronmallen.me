@@ -51,7 +51,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
 
       it "lists the review in the palette with its icon" do
-        expect(page).to have_css("#command-palette-review i.fa-calendar-week", visible: :all)
+        expect(page).to have_css("#command-palette-review i.fa-magnifying-glass-chart", visible: :all)
       end
 
       it "runs from Monday to Sunday" do
@@ -71,8 +71,8 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         expect(page).to have_css(".g-main > #review-notes.review-notes")
       end
 
-      it "draws a row of time worked for each day of the week" do
-        expect(card("worked")).to have_css(".meter-row", count: 7)
+      it "says no time was logged" do
+        expect(card("worked")).to have_css(".empty", text: "No time logged")
       end
 
       it "marks the week as the current period" do
@@ -106,57 +106,197 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
           .to eq("Sep 14 → Sep 20, 2026: 1 done, 1 carried, 1h 30m worked, 1 commit")
       end
 
-      it "groups each done task under its day and links it to its task, with the time worked on it" do
-        group = card("done").find(".review-group", text: "Wednesday, September 16")
+      it "titles each card with its count" do
+        titles = page.all(".g-main > .cols .card-title").map(&:text)
 
-        expect([group.find_link("Finish the review screen")[:href], group.find(".li-sub").text])
-          .to eq(["/admin/tasks/#{filled[:done].id}", "1h 30m · me"])
+        expect(titles).to eq(
+          ["Done · 1", "Carried over · 1", "Decisions · 2", "Journal", "Published · 2", "Commits · 1", "Time worked"],
+        )
       end
 
       it "links each carried task to its task and says how many days it slipped" do
-        link = card("carried").find_link("Call the accountant")
+        item = card("carried").find(".li", text: "Call the accountant")
 
-        expect([link[:href], card("carried").find(".li-sub").text])
+        expect([item.find_link("Call the accountant")[:href], item.find(".review-slipped").text])
           .to eq(["/admin/tasks/#{filled[:carried].id}", "Slipped 3 days"])
       end
 
-      it "lists the posts and social posts published" do
-        groups = card("published").all(".review-group-title").map(&:text)
+      it "groups the posts apart from each network the social posts went to" do
+        names = card("published").all(".review-group-name").map(&:text)
 
-        expect([groups, card("published")]).to match([["Posts", "Social posts"], have_link("A post that went out")])
+        expect([names, card("published")]).to match([%w[Posts Bluesky Mastodon], have_link("A post that went out")])
       end
 
-      it "sums the journal's entries, words and streak" do
-        expect(card("journal")).to have_css(".review-note", text: "2 entries · 5 words · a 2-day streak")
+      it "opens Posts and Social from their groups" do
+        heads = card("published").all("a.review-group-head").map { it[:href] }
+
+        expect(heads).to eq(%w[/admin/posts /admin/social?filter=posted /admin/social?filter=posted])
       end
 
-      it "links each journal entry to its day" do
-        expect(card("journal")).to have_link("one two three", href: "/admin/journal?to=2026-09-14#day-2026-09-14")
+      it "sums the journal's entries, words and days written" do
+        expect(card("journal").find(".review-stat").text).to eq("2 entries · 5 words · 2 days written")
+      end
+
+      it "links the journal" do
+        expect(card("journal")).to have_link("Open journal →", href: "/admin/journal")
       end
 
       it "totals the commits by repo" do
-        expect(card("commits").find(".li", text: "aaronmallen/one")).to have_text("1 commit · +10 −2")
+        expect(card("commits").find(".review-bar", text: "one")).to have_text("1 commit · +10 −2")
       end
 
       it "links each resolved decision to its decision and names the option chosen" do
         item = card("decisions").find(".li", text: "Pick a queue")
         href = item.find_link("Pick a queue for Finish the review screen")[:href]
 
-        expect([href, item.find(".li-sub").text])
-          .to eq(["/admin/decisions/#{filled[:decision].id}", "Chose Sidekiq · Wednesday, September 16"])
+        expect([href, item.find(".li-side").text]).to eq(["/admin/decisions/#{filled[:decision].id}", "Chose Sidekiq"])
       end
 
       it "links each dropped decision to its decision and says it was dropped" do
         item = card("decisions").find(".li", text: "Move to a VPS")
 
-        expect([item.find_link("Move to a VPS")[:href], item.find(".li-sub").text])
-          .to eq(["/admin/decisions/#{dropped.id}", "Dropped · Friday, September 18"])
+        expect([item.find_link("Move to a VPS")[:href], item.find(".li-side").text])
+          .to eq(["/admin/decisions/#{dropped.id}", "Dropped"])
       end
 
-      it "gives the time worked on each day and in all" do
-        row = card("worked").find(".meter-row", text: "Wed Sep 16")
+      it "gives the time worked in all, its average and the days worked" do
+        expect(card("worked").find(".review-stat").text).to eq("1h 30m 1h 30m avg · 1 day worked")
+      end
 
-        expect([row.find(".meter-count").text, card("worked").find(".review-total").text]).to eq(["1h 30m", "1h 30m"])
+      it "lists only the days with time on them, longest first" do
+        expect(card("worked").all(".review-bar-name").map(&:text)).to eq(["Wed Sep 16"])
+      end
+    end
+
+    describe "done tasks" do
+      def done_groups = card("done").all(".review-group-name").map(&:text)
+
+      def link(task, project)
+        Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
+      end
+
+      before do
+        site = create(:project, name: "aaronmallen.me")
+        link(create(:task, :done, title: "Fix the feed", tags: %w[site bug], completed_at: at(wednesday)), site)
+        link(create(:task, :done, title: "Fix the nav", tags: %w[site], completed_at: at(wednesday)), site)
+        create(:task, :done, title: "Fix the stove", completed_at: at(Date.new(2026, 9, 17)))
+      end
+
+      it "groups them by tag, the largest first, and counts a task in each of its tags" do
+        visit_review(day: "2026-09-16")
+
+        expect(done_groups).to eq(%w[#site #bug untagged])
+      end
+
+      it "notes that a task with two tags counts in both" do
+        visit_review(day: "2026-09-16")
+
+        expect(card("done")).to have_css(".review-foot .hint", text: "two tags count in both")
+      end
+
+      it "opens Tasks › Completed for the period from the card" do
+        visit_review(day: "2026-09-16")
+
+        expect(card("done"))
+          .to have_link("All 3 in Tasks →", href: "/admin/tasks?filter=completed&from=2026-09-14&to=2026-09-20")
+      end
+
+      it "adds the tag to the tasks search from its group" do
+        visit_review(day: "2026-09-16")
+
+        expect(card("done").find("a.review-group-head", text: "#site")[:href])
+          .to eq("/admin/tasks?filter=completed&from=2026-09-14&to=2026-09-20&q=tag:site")
+      end
+
+      it "previews two tasks of a group" do
+        visit_review(day: "2026-09-16")
+
+        expect(card("done").find(".review-group", text: "#site").all(".review-line").map(&:text))
+          .to eq(["Fix the feed", "Fix the nav"])
+      end
+
+      it "groups them by project" do
+        visit_review(day: "2026-09-16", group: "project")
+
+        expect(done_groups).to eq(["aaronmallen.me", "no project"])
+      end
+
+      it "adds the project's slug to the tasks search from its group" do
+        visit_review(day: "2026-09-16", group: "project")
+
+        expect(card("done").find("a.review-group-head", text: "aaronmallen.me")[:href])
+          .to end_with("&q=project:aaronmallen-me")
+      end
+
+      it "drops the note on two tags when grouped by project" do
+        visit_review(day: "2026-09-16", group: "project")
+
+        expect(card("done")).to have_no_css(".hint", text: "two tags")
+      end
+
+      it "switches the grouping and keeps the period", :aggregate_failures do
+        visit_review(day: "2026-09-16")
+
+        expect(card("done")).to have_link("by project", href: "/admin/review?day=2026-09-16&group=project")
+        expect(card("done")).to have_css(".seg-option.current", text: "by tag")
+      end
+
+      it "keeps the grouping on the arrows" do
+        visit_review(day: "2026-09-16", group: "project")
+
+        expect(page).to have_link("Previous week", href: "/admin/review?day=2026-09-09&group=project")
+      end
+    end
+
+    describe "caps" do
+      before do
+        7.times do |n|
+          create(:task, :done, title: "Task #{n}", tags: ["tag-#{n}"], completed_at: at(wednesday))
+          create(:commit, repo: "aaronmallen/repo-#{n}", commit_date: wednesday)
+          carry(create(:task, :in_sprint, title: "Carried #{n}"), wednesday)
+        end
+        visit_review(day: "2026-09-16")
+      end
+
+      it "shows five groups and folds the rest behind a toggle" do
+        summary = card("done").find(".review-more summary")
+
+        expect([summary.find(".review-more-show").text, summary.find(".review-more-hide").text])
+          .to eq(["Show 2 more", "Show fewer"])
+      end
+
+      it "keeps the groups past five inside the toggle" do
+        expect([card("done").all(".review-group", visible: :all).size,
+                card("done").all(".review-more .review-group", visible: :all).size])
+          .to eq([7, 2])
+      end
+
+      it "folds the commits past five behind a toggle" do
+        expect(card("commits").all(".review-more .review-bar", visible: :all).size).to eq(2)
+      end
+
+      it "shows five carried tasks and links the rest to Tasks › Today", :aggregate_failures do
+        expect(card("carried").all(".li").size).to eq(5)
+        expect(card("carried")).to have_link("All 7 →", href: "/admin/tasks")
+      end
+    end
+
+    describe "a group past two items" do
+      before do
+        4.times { create(:task, :done, title: "Site #{it}", tags: %w[site], completed_at: at(wednesday)) }
+        create(:journal_entry, entry_date: wednesday, body: "walked\nfar", tags: %w[health])
+        visit_review(day: "2026-09-16")
+      end
+
+      it "previews two items and counts the rest" do
+        group = card("done").find(".review-group", text: "#site")
+
+        expect([group.all(".review-line").size, group.find(".review-top > .meta").text]).to eq([2, "+2 more"])
+      end
+
+      it "groups the journal by tag and links each entry to its day by its first line" do
+        expect(card("journal").find(".review-group", text: "#health"))
+          .to have_link("Sep 16 walked", href: "/admin/journal?to=2026-09-16#day-2026-09-16")
       end
     end
 
@@ -181,9 +321,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
     end
 
     describe "contributors" do
-      def done_subs = card("done").all(".li-sub").map(&:text)
-
-      def done_titles = card("done").all(".li-title").map(&:text)
+      def done_titles = card("done").all(".review-line").map(&:text).uniq
 
       before do
         fill(wednesday, title: "Mine")
@@ -192,14 +330,6 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         create(:task_contributor, task_id: shared.id)
         sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(wednesday))
         create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
-      end
-
-      it "names who did each done task" do
-        visit_review(day: "2026-09-16")
-
-        expect(done_subs).to contain_exactly(
-          "1h 30m · me", "0m · me, claude-code on claude-opus-5-5", "0m · claude-code on claude-sonnet-5",
-        )
       end
 
       it "keeps the done tasks that list me, the default included, and counts only those" do
@@ -242,11 +372,11 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
 
       it "shows the tasks done across the calendar month" do
-        expect(card("done").all("a.li-title").map(&:text)).to eq(["Done on the first", "Done on the last"])
+        expect(card("done").all(".review-line").map(&:text)).to eq(["Done on the first", "Done on the last"])
       end
 
-      it "draws a row of time worked for each day of the month" do
-        expect(card("worked")).to have_css(".meter-row", count: 30)
+      it "counts the days worked across the month" do
+        expect(card("worked").find(".review-stat small").text).to eq("1h 30m avg · 2 days worked")
       end
 
       it "marks the month as the current period" do
@@ -271,7 +401,8 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
       {
         "done" => "Nothing done yet", "carried" => "Nothing slipped", "published" => "Nothing went out",
-        "commits" => "No commits", "decisions" => "No decisions closed",
+        "commits" => "No commits", "decisions" => "No decisions closed", "journal" => "No entries yet",
+        "worked" => "No time logged",
       }.each do |name, text|
         it "says #{name} holds nothing" do
           expect(card(name)).to have_css(".empty", text:)
@@ -279,7 +410,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
 
       it "sums an empty journal" do
-        expect(card("journal")).to have_css(".review-note", text: "0 entries · 0 words · no streak")
+        expect(card("journal").find(".review-stat").text).to eq("0 entries · 0 words · 0 days written")
       end
     end
 
