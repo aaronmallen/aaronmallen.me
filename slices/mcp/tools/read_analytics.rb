@@ -37,7 +37,10 @@ module MCP
                   "down a page and read it for at least #{READ_THROUGH_SECONDS} seconds, counted " \
                   "once per page and day by the daily hash. Totals give read_throughs across the range, and each " \
                   "top path gives its own. Days rolled up before the site counted read-throughs add none. " \
-                  "#{WeekdayGrid::DESCRIPTION}" \
+                  "weekday_hours gives the visitors in each #{Blog::TimeZone::NAME} hour of each weekday over " \
+                  "the last #{RAW_DAYS} days to today, whatever the range: 24 rows, one per hour from 0, each " \
+                  "with a count for monday through sunday, and the from, to and time_zone of the window. A " \
+                  "visitor counts once a cell by the daily hash, so one reader on two Mondays at 9 counts twice. " \
                   "sources gives the top #{TOP} ref tags by visitors, each with its views and visitors: a visit " \
                   "to a link that carries ?#{REF}=<source> counts under that source, so the " \
                   "site's crossposts (such as mastodon) and its feed (feed) credit where a reader tapped, and " \
@@ -51,8 +54,17 @@ module MCP
                   "reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
                   "the #{RAW_DAYS} days of raw visits. " \
-                  "#{PriorRange::DESCRIPTION}" \
-                  "#{format(Following::DESCRIPTION, top: TOP)}" \
+                  "change sets the range's views against the range of the same length just before it: that " \
+                  "range's from, to and views, and percent, the rise or fall in views as a whole percent of its " \
+                  "views, null when it had none. " \
+                  "feed counts the people who follow the site's feeds: days gives subscribers each day, the count " \
+                  "feed aggregators such as Feedly report plus the other readers that fetched a feed; latest " \
+                  "gives that count for the last day of the range, or yesterday when the range runs to today; " \
+                  "and aggregators gives each aggregator's latest count in the range, summed across the feeds, " \
+                  "most first. webmentions gives pending, the webmentions waiting for review now whatever the " \
+                  "range; received, the webmentions that came in over the range in any state; and posts, the " \
+                  "top #{TOP} posts by webmentions received over the range, each with its post_id, title and " \
+                  "received. " \
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
                   "have one, and a row with none gives visitors as null. " \
                   "A referrer of null means a direct visit, and a country of null one the site could not place. " \
@@ -68,7 +80,15 @@ module MCP
                   "webmentions. Its totals give its own read_throughs and its bounces. clicks counts the times " \
                   "a reader followed a link off the page, by link_host and link_path, most first. A " \
                   "page's referrers and countries always give visitors. A page nobody visited reads as zeros. " \
-                  "#{PublishedPost::DESCRIPTION}" \
+                  "For a published post's path, since_publish numbers each day of the range from the " \
+                  "#{Blog::TimeZone::NAME} day the post went out, which is day 1. The post also gets first_days " \
+                  "and unique_readers, whatever the range. first_days gives its visitors on each of its first " \
+                  "#{Analytics::Repos::AnalyticsPageQueries::FIRST_DAYS} days, day 1 first, up to today, and " \
+                  "median, the middle visitors on each of those days across the posts the site counted from " \
+                  "their first day, for comparison. unique_readers gives readers, the people who viewed the post " \
+                  "in the 12 months after it went out, each counted once by a hash kept for those months, and " \
+                  "final, true once the count can no longer change. readers is null for a post that went out " \
+                  "too long before the site began counting. " \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \
                   "#{Blog::Types::ScrollDepth.values.select(&:positive?).join(', ')}%, the views that scrolled at " \
                   "least that far and their share of those views, null when no view tracked it. Scroll depth is " \

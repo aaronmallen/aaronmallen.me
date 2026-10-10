@@ -5,6 +5,7 @@ module MCP
     class AnalyticsReader < Data.define(:range, :at, :path, :context)
       PAGE_RANKED = %i[referrers countries].freeze
       RANKED = %i[paths referrers countries sources devices].freeze
+      WEEKDAYS = %i[monday tuesday wednesday thursday friday saturday sunday].freeze
 
       def call = path ? page_summary : summary
 
@@ -17,13 +18,21 @@ module MCP
           devices: between(:analytics_page_queries, :devices_between, path: page_path) }
       end
 
+      def change(totals)
+        to = range.first - 1
+        from = to - (range.count - 1)
+        before = dep(:analytics_rollup_queries).summary_between(from:, to:).fetch(:totals).fetch(:views)
+
+        { from: from.iso8601, to: to.iso8601, views: before, percent: percent(totals.fetch(:views), before) }
+      end
+
       def dated(days) = days.map { it.merge(day: it.fetch(:day).iso8601) }
 
       def dep(name) = context.fetch(name)
 
-      def deps(keys) = keys.to_h { [it, dep(it)] }
-
       def events = dep(:analytics_event_queries)
+
+      def feed = between(:feed_fetch_queries, :feed_subscribers_between).then { it.merge(days: dated(it.fetch(:days))) }
 
       def heading
         { from: range.first.iso8601, to: range.last.iso8601, time_zone: Blog::TimeZone::NAME }
@@ -60,6 +69,8 @@ module MCP
         }
       end
 
+      def percent(views, before) = (Blog::Helpers::Figures.share(views - before, before) if before.positive?)
+
       def post
         slug = path.delete_prefix("#{Blog::Constants::WRITING_PATH}/")
         dep(:post_queries).published_by_slug(slug) unless slug == path
@@ -69,7 +80,11 @@ module MCP
         found = post
         return {} unless found
 
-        PublishedPost.call(found, path, days, **deps(PublishedPost::QUERIES))
+        {
+          since_publish: since_publish(days, Blog::TimeZone.today(found.published_at)),
+          first_days: dep(:analytics_page_queries).first_days(path),
+          unique_readers: dep(:post_reader_queries).unique_readers([found]).fetch(found.id),
+        }
       end
 
       def ranked
@@ -106,11 +121,19 @@ module MCP
         { at: stamped(at), **found.fetch(:totals), **found.slice(:paths).transform_values { it.take(top) } }
       end
 
+      def since_publish(days, first)
+        days.select { it.fetch(:day) >= first }.map do |found|
+          date = found.fetch(:day)
+          { day: (date - first).to_i + 1, date: date.iso8601, **found.except(:day) }
+        end
+      end
+
       def site_wide(found)
         {
-          weekday_hours: WeekdayGrid.call(events),
-          change: PriorRange.call(found.fetch(:totals), range, dep(:analytics_rollup_queries)),
-          **Following.call(range, top:, **deps(Following::QUERIES)),
+          weekday_hours:,
+          change: change(found.fetch(:totals)),
+          feed:,
+          webmentions:,
         }
       end
 
@@ -140,6 +163,26 @@ module MCP
 
       def totals(found, path: nil)
         found.fetch(:totals).merge(reach: between(:analytics_rollup_queries, :reach_between, path:))
+      end
+
+      def webmention_post(found, counts) = { post_id: found.id, title: found.title, received: counts.fetch(found.id) }
+
+      def webmentions
+        counts = between(:webmention_queries, :received_by_post)
+        posts = dep(:post_queries).by_ids(counts.keys).map { webmention_post(it, counts) }
+
+        {
+          pending: dep(:webmention_queries).pending_count,
+          received: between(:webmention_queries, :received_between),
+          posts: posts.sort_by { [-it[:received], it[:title]] }.take(top),
+        }
+      end
+
+      def weekday_hours(to = Blog::TimeZone.today)
+        found = events.weekday_hours(to:).fetch(:hours)
+        hours = found.each_with_index.map { |counts, hour| { hour:, **WEEKDAYS.zip(counts).to_h } }
+
+        { from: events.retention_start(to).iso8601, to: to.iso8601, time_zone: Blog::TimeZone::NAME, hours: }
       end
     end
   end
