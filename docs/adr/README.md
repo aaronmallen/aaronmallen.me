@@ -145,6 +145,7 @@ one.
 | [0138][0138] | Read dead jobs from the Sidekiq dead set in an activity query | ![Active][active] | 2026-10-09 |
 | [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Active][active] | 2026-10-10 |
 | [0140][0140] | Word a field error by its key, and keep a table only for the exceptions | ![Active][active] | 2026-10-10 |
+| [0144][0144] | Claim social post photos by row, and send them as native media | ![Active][active] | 2026-10-10 |
 | [0143][0143] | Send outside links in social posts through aa.cool short links | ![Active][active] | 2026-10-10 |
 | [0141][0141] | Keep file shares in a shares slice with their own public bucket | ![Active][active] | 2026-10-10 |
 | [0142][0142] | Serve shares on their own host, picked in config.ru, and let no cache keep them | ![Active][active] | 2026-10-10 |
@@ -289,6 +290,7 @@ one.
 [0138]: 0138-read-dead-jobs-from-the-sidekiq-dead-set-in-an-activity-query.md
 [0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
 [0140]: 0140-word-a-field-error-by-its-key-and-keep-a-table-only-for-the-exceptions.md
+[0144]: 0144-claim-social-post-photos-by-row-and-send-them-as-native-media.md
 [0143]: 0143-send-outside-links-in-social-posts-through-aa-cool-short-links.md
 [0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md

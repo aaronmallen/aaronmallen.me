@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [media, posts, record, tasks]
 issue: "#134"
-amended: ["#140", "#247", "#911"]
+amended: ["#140", "#247", "#911", "#1071"]
 tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
 ---
 
@@ -33,7 +33,8 @@ A photo belongs to the records whose Markdown points to it, and to nothing else.
   no longer points to loses one. A photo can carry claims from many records. #140 added a post's Open Graph image
   field, so a `/media/<key>` URL there claims too, and a card image can be an upload. Since #247 a post's edit
   notes claim for the post too, so a photo in a note lives as long as the post. Decision comments and review notes
-  claim the same way, as #911 records.
+  claim the same way, as #911 records. A social post part has no Markdown, so it claims its photos by row, as
+  [ADR 0144][0144] records for #1071.
 - **Deleting releases, and the last release deletes.** Deleting a record drops its claims, and deletes from the
   store and the table each photo left with no claim. Deleting a task does the same for its comments. Nothing deletes
   a review note, so its claims last (#911).
@@ -63,7 +64,8 @@ cached the entry and a site that shows a webmention excerpt both still point to 
 photos now answers with the empty 404 from [ADR 0080][0080].
 
 Only Markdown and a post's Open Graph field claim. A photo URL pasted into a social post holds no claim, and the
-sweep deletes the photo within a day unless some record also points to it.
+sweep deletes the photo within a day unless some record also points to it. A photo added to a social post part claims
+through the part instead ([ADR 0144][0144]).
 
 An edit that drops a photo from the text leaves it unclaimed, so putting the URL back more than a day later finds
 the photo gone.
@@ -74,4 +76,5 @@ does not will see its photos swept a day after upload.
 [0003]: 0003-reach-another-slice-only-through-its-exports.md
 [0012]: 0012-never-retry-a-scheduled-job-and-make-its-next-run-catch-up.md
 [0080]: 0080-store-photos-in-an-s3-store-and-serve-them-through-the-site.md
+[0144]: 0144-claim-social-post-photos-by-row-and-send-them-as-native-media.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
