@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, db, admin, api, mcp]
 issue: "#153"
-amended: ["#897"]
+amended: ["#897", "#927"]
 tags: [api, auth, tokens, cli, mcp, oauth, journal, tasks]
 ---
 
@@ -44,8 +44,25 @@ out. claude.ai and desktop connectors still need them.
 
 [ADR 0056][0056] says every admin operation needs a tool. We widen that to a tool and an endpoint. An endpoint and
 its tool share one layer, so they take the same input, run the same checks and return the same JSON. The rule
-binds one resource at a time, as each moves to the API: journal entries and tasks first (#152), the rest in later
-specs. Until a resource moves, its operations need a tool alone.
+binds one tool at a time, as each moves to the API: journal entries and tasks first (#152), the rest in later
+specs. Until a tool moves, its operation needs a tool alone.
+
+The rule binds per tool, not per resource, since #927. Several resources have some tools on the layer, mostly
+reads and bulk actions, while others still call operations or repos straight, and moving those would change what
+they return. These tools still wait:
+
+- posts: `create_post`, `update_post`, `list_posts`, `delete_post`, `write_post_seo` and `compose_announcement`;
+- suggestions: `suggest_edits`, `list_suggestions`, `accept_suggestion_edits` and `reject_suggestion_edits`;
+- tags: `list_tags`, `save_tag` and `remove_tag`;
+- projects: `list_projects`, `save_project`, `archive_project` and `restore_project`;
+- work entries: `list_work_entries`, `add_work_entry` and `delete_work_entry`;
+- webmentions: `moderate_webmention`, `read_webmention_settings` and `update_webmention_settings`;
+- messages: `list_messages`, `read_message` and `mark_message`;
+- commits and pull requests: `list_commits`, `import_commits` and `list_pull_requests`;
+- photos: `read_photo`;
+- API tokens: `list_api_tokens`.
+
+Analytics, MCP clients and the sync state have no endpoint, so their tools wait with their resource.
 
 ## Alternatives
 
@@ -75,8 +92,8 @@ Two kinds of token now guard the site, each with its own table, checks and specs
 in does not carry to the other.
 
 Every operation that moves to the API needs an endpoint beside its tool, and the shared layer has to keep the two
-in step. Until every resource has moved, the rule holds for some resources and not others, and a reader has to
-check which.
+in step. Until every tool has moved, the rule holds for some tools and not others, even within one resource,
+and a reader has to check which.
 
 [0056]: 0056-serve-mcp-from-our-own-oauth-2-1-server-and-the-official-ruby-sdk.md
 [0059]: 0059-gate-an-mcp-client-on-the-operators-consent-not-on-registration.md

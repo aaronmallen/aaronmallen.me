@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [lib, api, mcp]
 issue: "#155"
-amended: ["#1011"]
+amended: ["#1011", "#927"]
 tags: [api, mcp, json, serializers, alba, dependencies, journal, tasks]
 ---
 
@@ -32,9 +32,11 @@ We build every API response with [Alba] serializers.
 - Each resource gets its own serializer in `slices/api/serializers`, a subclass of `API::Serializer`: journal
   entries, tasks, task comments and sprints first (#152), the rest as each resource moves.
 
-An MCP tool for a resource on the API does not build its own hash. It gets its JSON from the same serializer,
-through the layer the API and MCP share. A tool for a resource that has not moved keeps its hand-built hash until
-its spec moves it.
+An MCP tool on the layer the API and MCP share does not build its own hash. It gets its JSON from the same
+serializer, through that layer. #927 made this rule bind tool by tool, as [ADR 0088][0088] moves a resource to the
+layer: a tool off the layer may keep its hand-built hash until it moves, even when other tools for its resource
+are on the layer. #959 moved many of those tools onto the API serializers, which they call themselves, such as
+`list_posts`, `list_messages` and `list_projects`.
 
 The first serializers give the keys the MCP tools return today, so moving a tool onto them changes no output.
 
@@ -54,9 +56,11 @@ handles `nil` changes every response at once.
 A serializer reads only what the record it gets has loaded. A ROM struct never fetches an association by itself,
 so a task serializer that lists tags or links needs the repo to load them first.
 
-Until every resource moves, two styles live side by side in `slices/mcp/tools`: tools that hand off to a
-serializer and tools that build their own hash. A reader has to check which kind a tool is.
+Until every tool moves, three styles live side by side in `slices/mcp/tools`: tools that hand off to the layer,
+tools that call a serializer themselves and tools that build their own hash. A reader has to check which kind a
+tool is.
 
 [0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
+[0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [Alba]: https://github.com/okuramasafumi/alba
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 area: [api, mcp]
 issue: "#154"
+amended: ["#927"]
 tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
 ---
 
@@ -45,8 +46,23 @@ serializer gives the response. No schema is written twice, so the document, the 
 disagree.
 
 The edge runs one way. `mcp` imports from `api`, and `api` never imports from `mcp`, so it adds no cycle to the three
-[ADR 0003][0003] names. A resource joins the layer when it moves to the API: journal entries and tasks first. Until
-then its tools call operations straight, as [ADR 0056][0056] says.
+[ADR 0003][0003] names. A tool joins the layer when it moves to the API: journal entries and tasks first. Until
+then it calls operations straight, as [ADR 0056][0056] says.
+
+A resource moves one tool at a time, since #927. A resource can have tools on the layer and tools off it, since
+moving a tool changes what it returns. These tools still call operations or repos straight while other tools for their
+resource sit on the layer:
+
+- posts: `create_post`, `update_post`, `list_posts`, `delete_post`, `write_post_seo` and `compose_announcement`;
+- suggestions: `suggest_edits`, `list_suggestions`, `accept_suggestion_edits` and `reject_suggestion_edits`;
+- tags: `list_tags`, `save_tag` and `remove_tag`;
+- projects: `list_projects`, `save_project`, `archive_project` and `restore_project`;
+- work entries: `list_work_entries`, `add_work_entry` and `delete_work_entry`;
+- webmentions: `moderate_webmention`, `read_webmention_settings` and `update_webmention_settings`;
+- messages: `list_messages`, `read_message` and `mark_message`;
+- commits and pull requests: `list_commits`, `import_commits` and `list_pull_requests`;
+- photos: `read_photo`;
+- API tokens: `list_api_tokens`.
 
 ## Alternatives
 
@@ -73,7 +89,8 @@ spec that compares a tool's answer with its endpoint's catches the rest.
 reached it, and `api` can never import from `mcp` without closing a cycle.
 
 A tool on the layer no longer shows its work. A reader follows it into `slices/api/endpoints` to see what it calls,
-and a moved tool and one still on its operations look different until every resource moves.
+and a moved tool and one still on its operations look different until every tool moves, even two tools for one
+resource.
 
 The layer, not the tool, now calls the operation the admin calls, so [ADR 0056][0056]'s rule that MCP refuses what
 the admin refuses still holds, one step further down.
