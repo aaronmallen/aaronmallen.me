@@ -77,8 +77,9 @@ module Admin
           end
 
           def search_field
-            label(class: "sr-only", for: SEARCH_ID) { t(".search") }
-            Input(type: "search", id: SEARCH_ID, name: "search", value: @list[:search], placeholder: t(".placeholder"))
+            SearchField(
+              id: SEARCH_ID, label: t(".search"), name: "search", value: @list[:search], placeholder: t(".placeholder"),
+            )
           end
 
           def tag_field

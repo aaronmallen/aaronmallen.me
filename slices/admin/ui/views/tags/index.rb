@@ -56,9 +56,8 @@ module Admin
           def filter_form
             AutoForm(action: path(:admin_tags), role: "search") do
               input(type: "hidden", name: "scope", value: @scope)
-              label(class: "sr-only", for: SEARCH_ID) { t(".search") }
-              Input(
-                type: "search", id: SEARCH_ID, name: "q", value: @query,
+              SearchField(
+                id: SEARCH_ID, label: t(".search"), name: "q", value: @query,
                 class: "tags-search", placeholder: t(".search_placeholder"),
               )
             end

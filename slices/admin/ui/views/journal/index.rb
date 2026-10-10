@@ -65,10 +65,11 @@ module Admin
           def search = @search.strip
 
           def search_form
-            form(action: path(:admin_journal), method: "get", role: "search", class: "journal-search") do
-              label(class: "sr-only", for: "journal-search") { t(".search") }
-              Input(id: "journal-search", type: "search", name: "q", value: @search,
-                    placeholder: t(".search_placeholder"))
+            AutoForm(action: path(:admin_journal), role: "search", class: "journal-search") do
+              SearchField(
+                id: "journal-search", label: t(".search"), name: "q", value: @search,
+                placeholder: t(".search_placeholder"),
+              )
             end
           end
 

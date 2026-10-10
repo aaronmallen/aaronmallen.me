@@ -51,6 +51,10 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-actions form[role='search'] input#journal-search[name='q']")
       end
 
+      it "labels the search and submits it on change" do
+        expect(page).to have_css("form[role='search'][data-autosubmit] label.sr-only[for='journal-search']")
+      end
+
       it "puts the saved views beside the screen tabs" do
         expect(page).to have_css(".screen-tabs-side .saved-views")
       end
