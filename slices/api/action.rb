@@ -15,7 +15,6 @@ module API
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     OK = 200
     STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
-    SCOPE = nil
     UNAUTHORIZED = 401
     VERB_SCOPES = { "DELETE" => Blog::Types::OAuthScope["delete"], "GET" => Blog::Types::OAuthScope["read"],
                     "HEAD" => Blog::Types::OAuthScope["read"] }.freeze
@@ -33,34 +32,7 @@ module API
 
     private
 
-    def answer(response, result)
-      case result
-        in Success(payload) then render_json(response, payload, status: success_status)
-        in Failure(Structs::Refusal => refusal)
-          render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
-      end
-    end
-
     def bearer(error) = error.key?(:error) ? %(Bearer error="#{error[:error]}") : "Bearer"
-
-    def body(request, response)
-      parsed = request.env.fetch(ACTION_PARSED_BODY, Blog::Constants::EMPTY_HASH)
-      return parsed if parsed.is_a?(Hash)
-
-      response.format = :json
-      halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
-    end
-
-    def number(value) = Blog::Types::IntegerParam[value]
-
-    def paged_query(request, *keys)
-      found = query(request, *keys, :page)
-      found.key?(:page) ? found.merge(page: number(found[:page])) : found
-    end
-
-    def query(request, *keys) = keys.to_h { [it, request.params[it]] }.compact
-
-    def record_id(request) = number(request.params[:id])
 
     def refuse_body(_request, response, _error) = render_json(response, NOT_AN_OBJECT, status: BAD_REQUEST)
 
@@ -71,7 +43,7 @@ module API
     end
 
     def require_scope(request, response, token)
-      scope = self.class::SCOPE || VERB_SCOPES.fetch(request.request_method, WRITE)
+      scope = required_scope(request)
       return if token.scopes.include?(scope)
 
       response.format = :json
@@ -92,10 +64,6 @@ module API
       end
     end
 
-    def split(values) = Blog::Types::ListParam[values]
-
-    def success_status
-      Operations::BuildDocument::SUCCESSES.fetch(Hanami.app.inflector.underscore(endpoint.class.name.split("::").last))
-    end
+    def required_scope(request) = VERB_SCOPES.fetch(request.request_method, WRITE)
   end
 end

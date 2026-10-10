@@ -133,8 +133,6 @@ module API
         ["read_document", "get", "/openapi.json", OK],
       ].freeze
 
-      SUCCESSES = OPERATIONS.to_h { |id, *, status| [id, status] }.freeze
-
       SOURCES = { "read_document" => Actions::Documents::Show, "read_token" => Actions::Tokens::Show }.freeze
 
       REFUSAL = Helpers::Schema.object(
@@ -176,13 +174,15 @@ module API
 
       Descriptor = Data.define(:id, :verb, :path, :status, :source) do
         def body
-          return {} unless BODIES.include?(verb) && rest.any?
+          return {} unless body?
 
           schema = { type: "object", additionalProperties: false, properties: rest, required: }.reject do |_, value|
             value == []
           end
           { requestBody: { required: required.any?, content: BuildDocument.json(schema) } }
         end
+
+        def body? = BODIES.include?(verb) && rest.any?
 
         def endpoint? = source < Endpoint
 
@@ -229,6 +229,13 @@ module API
 
       include Deps["inflector"]
 
+      def self.descriptor(id)
+        _, verb, path, status = OPERATIONS.assoc(id)
+        source = SOURCES.fetch(id) { Endpoints.const_get(Hanami.app.inflector.camelize(id)) }
+
+        Descriptor.new(id:, verb:, path:, status:, source:)
+      end
+
       def self.json(schema) = { JSON_TYPE => { schema: } }
 
       def call
@@ -252,12 +259,8 @@ module API
         }
       end
 
-      def descriptors
-        OPERATIONS.map { |id, verb, path, status| Descriptor.new(id:, verb:, path:, status:, source: source(id)) }
-      end
-
       def paths
-        descriptors.each_with_object({}) do |row, found|
+        OPERATIONS.map { BuildDocument.descriptor(it.first) }.each_with_object({}) do |row, found|
           found[row.path] = found.fetch(row.path, {}).merge(row.verb => row.to_h(summary: inflector.humanize(row.id)))
         end
       end
@@ -269,8 +272,6 @@ module API
       def serializers
         Serializers.constants.sort.map { Serializers.const_get(it) }.to_h { [it.component, it::SCHEMA] }
       end
-
-      def source(id) = SOURCES.fetch(id) { Endpoints.const_get(inflector.camelize(id)) }
     end
   end
 end

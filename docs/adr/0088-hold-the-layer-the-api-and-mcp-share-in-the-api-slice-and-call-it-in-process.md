@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [api, mcp]
 issue: "#154"
-amended: ["#927"]
+amended: ["#927", "#1001"]
 tags: [api, mcp, slices, exports, openapi, json-schema, journal, tasks]
 ---
 
@@ -36,7 +36,8 @@ comes back as a result too, such as the errors from an operation's contract.
 Both doors call the same class, in process:
 
 - An API action reads the request, calls the endpoint and turns its result into a status: 200 or 201 for a
-  success, 404 for a missing record, 422 for a contract's errors.
+  success, 404 for a missing record, 422 for a contract's errors. Since #1001 one action, `API::Actions::Forward`,
+  serves every endpoint, and the operation table in `BuildDocument` draws the routes as well as the document.
 - `api` exports each endpoint. `mcp` imports them in `slices/mcp/config/slice.rb` and puts them in the tool's server
   context, as it does an operation now. A tool keeps its name, description and scope, takes its input schema from
   the endpoint, hands the work over and wraps the payload as its answer, or the failure as its refusal.

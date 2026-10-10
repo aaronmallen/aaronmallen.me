@@ -17,10 +17,10 @@ RSpec.describe "API reach", type: :app do
   end
 
   def actions
-    Dir[API::Slice.root.join("actions", "**", "*.rb")].map do |path|
-      relative = Pathname(path).relative_path_from(API::Slice.root).sub_ext("").to_s
-      API::Slice[relative.tr("/", ".")]
-    end
+    API::Slice.routes
+    API::Routes.definitions.map { |*, kwargs, _| kwargs.fetch(:to) }.grep(String).map { API::Slice["actions.#{it}"] } +
+      (API::Operations::BuildDocument::OPERATIONS.map(&:first) - API::Routes::ACTIONS.keys)
+      .map { API::Actions::Forward.new(operation: it) }
   end
 
   def exempt = self.class.exempt
