@@ -226,8 +226,9 @@ RSpec.describe Record::Jobs::ImportPullRequests do
   describe "when another run is already going" do
     let(:connection) { Record::Slice["db.rom"].gateways.fetch(:default).connection }
     let(:elsewhere) { Sequel.connect(connection.opts) }
+    let(:lock) { Blog::DB::Relation.lock_key(Record::Repos::PullRequestMutations::IMPORT_LOCK) }
 
-    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Record::Repos::PullRequestMutations::IMPORT_LOCK)) }
+    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, lock)) }
 
     after { elsewhere.disconnect }
 

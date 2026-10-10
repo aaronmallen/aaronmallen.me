@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, record, contact, mcp, analytics, social, tasks]
 issue: AA-644
-amended: [AA-823, "#200", "#585"]
+amended: [AA-823, "#200", "#585", "#988"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -29,7 +29,9 @@ Every guard against a race or a flood lives in Postgres, beside the rows it guar
 
 **A session advisory lock, for a run that must not overlap itself and can skip a turn.**
 `Blog::DB::Relation#with_advisory_lock` holds the gateway's connection and takes `pg_try_advisory_lock`.
-When another run holds it, `Record::Repos::CommitRepo#with_import_lock` hands back `Failure(:lock_busy)`,
+Since #988 it takes a name, such as `"commit import"`, and locks on `hashtext` of it, so no lock id is numbered by
+hand. When another run holds the lock, it hands back `Failure(:lock_busy)`,
+`Record::Repos::CommitMutations#with_import_lock` passes it on,
 `Record::Jobs::ImportCommits` drops the tick, and the next one catches up.
 
 **A transaction advisory lock around a count and a write, for a step that must not run twice at once.** The throttle

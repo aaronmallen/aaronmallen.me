@@ -3,9 +3,7 @@
 module Record
   module Repos
     class PullRequestMutations < Blog::DB::Repo
-      include Dry::Monads[:result]
-
-      IMPORT_LOCK = 303_306
+      IMPORT_LOCK = "pull request import"
 
       def import(found)
         importer = pull_requests.command(:import)
@@ -13,7 +11,7 @@ module Record
         transaction { found.each { importer.call(it) } }
       end
 
-      def with_import_lock(&) = pull_requests.with_advisory_lock(IMPORT_LOCK, busy: Failure(:lock_busy), &)
+      def with_import_lock(&) = pull_requests.with_advisory_lock(IMPORT_LOCK, &)
     end
   end
 end

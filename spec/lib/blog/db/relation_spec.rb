@@ -42,19 +42,35 @@ RSpec.describe Blog::DB::Relation do
     let(:states) { relation(Record::Slice, :sync_states) }
 
     it "runs the block when the lock is free" do
-      expect(states.with_advisory_lock(7_000_585) { :ran }).to eq(:ran)
+      expect(states.with_advisory_lock("relation spec") { :ran }).to eq(:ran)
     end
 
-    it "hands back busy when another session holds the lock" do
-      free_elsewhere?(7_000_585)
+    it "locks on the hash of its name" do
+      held = states.with_advisory_lock("relation spec") { free_elsewhere?(hashtext("relation spec")) }
 
-      expect(states.with_advisory_lock(7_000_585, busy: :busy) { :ran }).to eq(:busy)
+      expect(held).to be(false)
+    end
+
+    it "fails with lock_busy when another session holds the lock" do
+      free_elsewhere?(hashtext("relation spec"))
+
+      expect(states.with_advisory_lock("relation spec") { :ran }).to eq(Dry::Monads::Failure(:lock_busy))
+    end
+
+    it "hands back busy when given one" do
+      free_elsewhere?(hashtext("relation spec"))
+
+      expect(states.with_advisory_lock("relation spec", busy: :busy) { :ran }).to eq(:busy)
+    end
+
+    it "leaves another name's lock free" do
+      expect(states.with_advisory_lock("relation spec") { free_elsewhere?(hashtext("other spec")) }).to be(true)
     end
 
     it "lets the lock go after the block" do
-      states.with_advisory_lock(7_000_585) { :ran }
+      states.with_advisory_lock("relation spec") { :ran }
 
-      expect(free_elsewhere?(7_000_585)).to be(true)
+      expect(free_elsewhere?(hashtext("relation spec"))).to be(true)
     end
   end
 end

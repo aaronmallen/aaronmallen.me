@@ -1181,8 +1181,9 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   describe "when another run is already going" do
     let(:connection) { Tasks::Slice["db.rom"].gateways.fetch(:default).connection }
     let(:elsewhere) { Sequel.connect(connection.opts) }
+    let(:lock) { Blog::DB::Relation.lock_key(Tasks::Repos::TaskSourceMutations::SYNC_LOCKS.fetch("github")) }
 
-    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, Tasks::Repos::TaskSourceMutations::SYNC_LOCK)) }
+    before { elsewhere.get(Sequel.function(:pg_try_advisory_lock, lock)) }
 
     after { elsewhere.disconnect }
 

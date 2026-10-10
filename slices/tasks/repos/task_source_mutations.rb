@@ -3,10 +3,7 @@
 module Tasks
   module Repos
     class TaskSourceMutations < Blog::DB::Repo
-      SYNC_LOCK = 303_304
-      SYNC_LOCKS = { "github" => SYNC_LOCK, "linear" => 303_305 }.freeze
-
-      include Dry::Monads[:result]
+      SYNC_LOCKS = { "github" => "github issue sync", "linear" => "linear issue sync" }.freeze
 
       root :task_sources
 
@@ -19,7 +16,7 @@ module Tasks
       end
 
       def with_sync_lock(provider, &)
-        task_sources.with_advisory_lock(SYNC_LOCKS.fetch(provider), busy: Failure(:lock_busy), &)
+        task_sources.with_advisory_lock(SYNC_LOCKS.fetch(provider), &)
       end
     end
   end

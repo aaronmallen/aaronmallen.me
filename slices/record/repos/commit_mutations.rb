@@ -3,10 +3,8 @@
 module Record
   module Repos
     class CommitMutations < Blog::DB::Repo
-      include Dry::Monads[:result]
-
       BACKFILL_KIND = CommitQueries::BACKFILL_KIND
-      IMPORT_LOCK = 303_303
+      IMPORT_LOCK = "commit import"
       SYNC_KIND = CommitQueries::SYNC_KIND
 
       def end_walk(repo) = sync_states.of(BACKFILL_KIND, repo:).delete
@@ -34,7 +32,7 @@ module Record
 
       def record_synced_through(repo, at:) = record_state(SYNC_KIND, at, repo:)
 
-      def with_import_lock(&) = sync_states.with_advisory_lock(IMPORT_LOCK, busy: Failure(:lock_busy), &)
+      def with_import_lock(&) = sync_states.with_advisory_lock(IMPORT_LOCK, &)
 
       private
 

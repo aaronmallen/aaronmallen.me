@@ -1177,7 +1177,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     let(:elsewhere) { Sequel.connect(connection.opts) }
 
     before do
-      lock = Tasks::Repos::TaskSourceMutations::SYNC_LOCKS.fetch("linear")
+      lock = Blog::DB::Relation.lock_key(Tasks::Repos::TaskSourceMutations::SYNC_LOCKS.fetch("linear"))
       elsewhere.get(Sequel.function(:pg_try_advisory_lock, lock))
     end
 

@@ -7,8 +7,11 @@ module Blog
   module DB
     class Relation < Hanami::DB::Relation
       LINKABLE_ORDER = [Sequel.desc(:day), Sequel.desc(:id)].freeze
+      LOCK_BUSY = Dry::Monads::Failure(:lock_busy)
       NUL = "\0"
       STAMPS = { create: %i[created_at updated_at], update: %i[updated_at] }.freeze
+
+      def self.lock_key(name) = Sequel.function(:hashtext, name)
 
       def self.site_day(*columns)
         moment = columns.one? ? columns.first : Sequel.function(:coalesce, *columns)
@@ -63,8 +66,9 @@ module Blog
 
       def unmatchable?(*texts) = texts.flatten.any? { it.to_s.include?(NUL) }
 
-      def with_advisory_lock(key, busy: nil)
+      def with_advisory_lock(lock, busy: LOCK_BUSY)
         db = dataset.db
+        key = self.class.lock_key(lock)
 
         db.synchronize do
           next busy unless db.get(Sequel.function(:pg_try_advisory_lock, key))
@@ -79,7 +83,7 @@ module Blog
 
       private
 
-      def table_key = Sequel.function(:hashtext, name.dataset.to_s)
+      def table_key = self.class.lock_key(name.dataset.to_s)
     end
   end
 end

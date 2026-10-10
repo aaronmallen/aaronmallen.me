@@ -8,7 +8,7 @@ RSpec.describe Tasks::Repos::TaskSourceMutations do
   after { elsewhere.disconnect }
 
   def hold(provider)
-    elsewhere.get(Sequel.function(:pg_try_advisory_lock, described_class::SYNC_LOCKS.fetch(provider)))
+    elsewhere.get(Sequel.function(:pg_try_advisory_lock, Blog::DB::Relation.lock_key(described_class::SYNC_LOCKS.fetch(provider))))
   end
 
   describe "each provider's sync lock" do
