@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, mcp, admin]
 issue: AA-262
-amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153"]
+amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153", "#551", "#932"]
 tags: [mcp, auth, oauth, github, tokens, claude, scopes]
 ---
 
@@ -65,8 +65,8 @@ the admin (AA-824):
   a short reason. It changes no content. Each edit waits for the operator to accept or reject it in the admin. A new
   set drops every open edit on that post, pending and stale alike, and any older suggestion left with no edits
   (`slices/suggestions/repos/suggestion_repo.rb`).
-- `write`: every write the admin makes, publishing a post, sending a social post and deleting a record included.
-  No scope sits above it.
+- `write`: every other write the admin makes. Since #551, publishing a post and sending a social post need
+  `publish`, and deleting a record needs `delete`, as [ADR 0114][0114] records (#932).
 
 A write tool calls the operation the admin calls for the same change, through the slice's exports, so the MCP
 refuses whatever the admin refuses and never saves a record the admin could not. Background jobs and sync
@@ -104,7 +104,7 @@ published posts. It lost because the operator wants to hand an agent a date rang
 ask it for any change the admin makes. Every feature that shipped left the agent further behind.
 
 **A scope of its own for publishing, sending and deleting.** It would keep those steps out of a connector granted
-only edits. AA-824 ruled it out and put every write under `write`.
+only edits. AA-824 ruled it out and put every write under `write`. #551 took it up, as [ADR 0114][0114] records.
 
 **Write tools that reach the repos.** Fewer layers, but a tool could then save a record the admin would refuse, and
 no slice lets another reach its repos.
@@ -130,9 +130,9 @@ A public route under `/.well-known`, `/oauth` or `/mcp` loses to `mcp`'s with no
 
 We follow the SDK's releases, and the MCP spec as the SDK tracks it.
 
-A leaked `write` token can publish, send and delete. A published post or a sent social post cannot be called
-back, so the hour an access token lasts is long enough to do lasting harm. A client that names no scope gets `read`
-alone, and that alone reads the journal, private commits and contact messages.
+A leaked token holding `publish` can publish and send, and since #551 `write` alone cannot. A published post or a
+sent social post cannot be called back, so the hour an access token lasts is long enough to do lasting harm. A
+client that names no scope gets `read` alone, and that alone reads the journal, private commits and contact messages.
 
 Every admin operation needs a tool, and the tool list grows with the admin. A spec fails when an operation or an
 activity kind lands with no tool, and a job or internal left without one goes on its exempt list with a reason.
@@ -144,4 +144,5 @@ Three tables sit in a presentation slice, so a reader after every table in the s
 well as the feature slices. No presentation slice holds a table beyond those three and the admin's one.
 
 [0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
+[0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
