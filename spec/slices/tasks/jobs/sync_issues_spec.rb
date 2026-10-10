@@ -440,6 +440,14 @@ RSpec.describe Tasks::Jobs::SyncIssues do
       expect(comments.map(&:remote_id)).to eq(%w[IC_2])
     end
 
+    it "keep every held comment and take the new ones when GitHub cuts the list short" do
+      cut = discussed(github_comment("IC_2"), github_comment("IC_3"))
+      cut[:comments][:pageInfo] = { hasNextPage: true }
+      sync_twice(discussed(github_comment("IC_1"), github_comment("IC_2")), cut)
+
+      expect(comments.map(&:remote_id)).to eq(%w[IC_1 IC_2 IC_3])
+    end
+
     it "leave my own comments alone" do
       task = tracked
       mine = create(:task_comment, task_id: task.id)

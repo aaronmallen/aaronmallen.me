@@ -5,6 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, admin, mcp, activity, tasks]
 issue: "#70"
+amended: ["#903"]
 tags: [tasks, comments, schema, sync, github, linear, providers, constraints, markdown]
 ---
 
@@ -44,7 +45,9 @@ One query lists a task's comments in order, and the activity view joins one tabl
 Provider and remote id sit empty on every local row. Each write path has to tell the two kinds apart by those
 columns, and an edit or delete that forgets the check would change a synced comment that the next sync puts back.
 
-A sync reads only the first 100 comments of an issue, so it can remove a copy only among the comments it read.
+A sync reads only the first 100 comments of an issue. Since #903, when an issue has more, the sync adds and
+updates the copies it read and removes none, so a copy of a deleted comment stays until the issue is back to 100 or
+fewer.
 
 Adding a provider reuses the key as it stands, since the provider already sits in it.
 

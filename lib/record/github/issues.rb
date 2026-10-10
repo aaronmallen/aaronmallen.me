@@ -18,7 +18,7 @@ module Record
             id number url title body state stateReason
             repository { nameWithOwner }
             assignees(first: #{MAX_ASSIGNEES}) { nodes { id } }
-            comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt author { login } } }
+            comments(first: #{MAX_COMMENTS}) { pageInfo { hasNextPage } nodes { id url body createdAt author { login } } }
             labels(first: #{MAX_LABELS}) { nodes { name } }
             blockedBy(first: #{MAX_RELATIONS}) { #{RELATED} }
             blocking(first: #{MAX_RELATIONS}) { #{RELATED} }
@@ -87,14 +87,19 @@ module Record
           created_at: Time.iso8601(node.fetch("createdAt")), id: node.fetch("id"), url: node.fetch("url") }
       end
 
+      def comments(node)
+        page = node["comments"]
+
+        { comments: page&.fetch("nodes").to_a.compact.map { comment(it) }, comments_cut_short: !whole?(page) }
+      end
+
       def issue(node, viewer)
         origin = node.dig("repository", "nameWithOwner")
 
         {
-          body: node["body"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), labels: labels(node), origin:, reference: "#{origin}##{node.fetch('number')}",
-          remote_state: remote_state(node, viewer), title: node.fetch("title"), url: node.fetch("url"),
-          **relations(node),
+          body: node["body"].to_s, **comments(node), id: node.fetch("id"), labels: labels(node), origin:,
+          reference: "#{origin}##{node.fetch('number')}", remote_state: remote_state(node, viewer),
+          title: node.fetch("title"), url: node.fetch("url"), **relations(node),
         }
       end
 

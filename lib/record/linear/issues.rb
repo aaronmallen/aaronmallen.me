@@ -13,7 +13,7 @@ module Record
 
         FIELDS = <<~GRAPHQL.freeze
           id identifier url title description trashed updatedAt state { type } assignee { id }
-          comments(first: #{MAX_COMMENTS}) { nodes { id url body createdAt user { displayName } } }
+          comments(first: #{MAX_COMMENTS}) { pageInfo { hasNextPage } nodes { id url body createdAt user { displayName } } }
           labels(first: #{MAX_LABELS}) { nodes { name } }
           parent { id }
           children(first: #{MAX_RELATIONS}) { #{RELATED} { id } }
@@ -99,15 +99,20 @@ module Record
           created_at: Time.iso8601(node.fetch("createdAt")), id: node.fetch("id"), url: node.fetch("url") }
       end
 
+      def comments(node)
+        page = node["comments"]
+
+        { comments: page&.fetch("nodes").to_a.compact.map { comment(it) }, comments_cut_short: more?(page) }
+      end
+
       def issue(node, viewer)
         key = node.fetch("identifier")
         url = node.fetch("url")
 
         {
-          body: node["description"].to_s, comments: node.dig("comments", "nodes").to_a.compact.map { comment(it) },
-          id: node.fetch("id"), key:, labels: labels(node), origin: origin(url, key), reference: key,
-          remote_state: remote_state(node, viewer), title: node.fetch("title"), updated_at: updated_at(node), url:,
-          **relations(node),
+          body: node["description"].to_s, **comments(node), id: node.fetch("id"), key:, labels: labels(node),
+          origin: origin(url, key), reference: key, remote_state: remote_state(node, viewer),
+          title: node.fetch("title"), updated_at: updated_at(node), url:, **relations(node),
         }
       end
 

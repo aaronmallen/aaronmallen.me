@@ -318,6 +318,14 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       expect(comments.map(&:remote_id)).to eq(%w[c2])
     end
 
+    it "keep every held comment and take the new ones when Linear cuts the list short" do
+      cut = discussed(linear_comment("c2"), linear_comment("c3"))
+      cut[:comments][:pageInfo] = { hasNextPage: true }
+      sync_twice(discussed(linear_comment("c1"), linear_comment("c2")), cut)
+
+      expect(comments.map(&:remote_id)).to eq(%w[c1 c2 c3])
+    end
+
     it "reach a tracked issue Linear reports through the check by id" do
       task = tracked
       stub_known(discussed(linear_comment("c1"), state: "started"))

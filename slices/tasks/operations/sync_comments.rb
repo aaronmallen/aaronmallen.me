@@ -18,7 +18,7 @@ module Tasks
         held = held(source, fresh.keys)
 
         fresh.each_value { keep(held[it[:remote_id]], source, it) }
-        drop(held.except(*fresh.keys).values)
+        drop(held.except(*fresh.keys).values) unless issue[:comments_cut_short]
       end
 
       private
