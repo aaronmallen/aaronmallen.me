@@ -5,8 +5,8 @@ module Admin
     module Components
       module Tasks
         class WorkedFields < Component
-          HOUR = 3600
-          PARTS = { hours: [".hours", 9999], minutes: [".minutes", 59] }.freeze
+          CONTRACT = ::Tasks::Contracts::WorkedContract
+          PARTS = { hours: [".hours", CONTRACT::HOURS.max], minutes: [".minutes", CONTRACT::MINUTES.max] }.freeze
 
           prop :name, Blog::Types::String
           prop :scope, Blog::Types::String
@@ -16,8 +16,7 @@ module Admin
 
           def view_template
             div(class: "task-worked-fields") do
-              part(:hours, @seconds / HOUR)
-              part(:minutes, (@seconds % HOUR) / Blog::Helpers::Figures::MINUTE)
+              CONTRACT.fields(@seconds).each { |field, shown| part(field, shown) }
             end
           end
 

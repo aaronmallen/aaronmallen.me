@@ -21,6 +21,8 @@ module Tasks
         key(:hours).failure(BLANK) if context[:required] && values[:hours].nil? && values[:minutes].nil?
       end
 
+      def self.fields(seconds) = { hours: seconds / HOUR, minutes: (seconds % HOUR) / Blog::Helpers::Figures::MINUTE }
+
       def self.seconds(fields)
         return if fields[:hours].nil? && fields[:minutes].nil?
 

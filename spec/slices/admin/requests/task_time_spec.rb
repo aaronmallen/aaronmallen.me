@@ -272,6 +272,13 @@ RSpec.describe "Admin task time", type: :request do
         expect(page.find(".task-total-edit input[name='total[hours]']", visible: :all)["value"]).to eq("1")
         expect(page.find(".task-total-edit input[name='total[minutes]']", visible: :all)["value"]).to eq("0")
       end
+
+      it "caps the fields at the limits the server holds", :aggregate_failures do
+        read
+
+        expect(page.find(".task-total-edit input[name='total[hours]']", visible: :all)["max"]).to eq("9999")
+        expect(page.find(".task-total-edit input[name='total[minutes]']", visible: :all)["max"]).to eq("59")
+      end
     end
 
     describe "completing a task by hand" do
