@@ -7,12 +7,13 @@ module Admin
         class JournalCard < Component
           prop :journal, Blog::Types::Instance(::Activity::Structs::ReviewJournal)
           prop :days, Blog::Types::Array.of(Blog::Types::Date)
+          prop :focused, Blog::Types::Bool, default: false
 
           def view_template
             Card(title: t(".title"), id: "review-journal") do
               totals
               tagged if groups.any? { |key, _| key }
-              next Empty { t(".empty") } if entries.empty?
+              next Empty { t(@focused ? ".empty_day" : ".empty") } if entries.empty?
 
               div(class: "review-foot") { a(class: "today-link", href: path(:admin_journal)) { t(".open") } }
             end

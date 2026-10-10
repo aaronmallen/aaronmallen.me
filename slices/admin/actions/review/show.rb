@@ -8,15 +8,9 @@ module Admin
 
         def handle(request, response)
           params = request.params
+          page = build_review_page.call(**params.to_h.slice(:period, :day, :focus, :by))
 
-          response.render(
-            view,
-            **build_review_page.call(
-              period: params[:period], day: params[:day],
-              contributor: params[:contributor], agent: params[:agent], model: params[:model],
-            ),
-            group: Blog::Types::ReviewGroupParam[params[:group]],
-          )
+          response.render(view, **page, group: Blog::Types::ReviewGroupParam[params[:group]])
         end
       end
     end

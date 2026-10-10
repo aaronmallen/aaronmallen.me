@@ -26,15 +26,21 @@ module Admin
 
           def view_template
             SegmentedLinks(label: t(".periods"), items: PERIODS.keys.map { period_link(it) })
-            nav(class: "review-pager", aria: { label: t(steps[:label]) }) { arrows }
+            nav(class: "seg", aria: { label: t(steps[:label]) }) { arrows }
           end
 
           private
 
           def arrows
-            step(earlier, rel: "prev", label: steps[:previous], icon: "fa-arrow-left")
-            Button(href: href(@period)) { t(steps[:current]) } unless current?
-            step(later, rel: "next", label: steps[:next], icon: "fa-arrow-right")
+            step(earlier, rel: "prev", label: steps[:previous], icon: "fa-chevron-left")
+            current
+            step(later, rel: "next", label: steps[:next], icon: "fa-chevron-right", disabled: current?)
+          end
+
+          def current
+            return span(class: "seg-option current", aria: { current: "page" }) { t(steps[:current]) } if current?
+
+            a(class: "seg-option", href: href(@period)) { t(steps[:current]) }
           end
 
           def current? = (@from..@to).cover?(@today)
@@ -57,10 +63,14 @@ module Admin
             }
           end
 
-          def step(day, rel:, label:, icon:)
-            Button(href: href(@period, day), rel:, icon: ["fa-solid", icon]) do
+          def step(day, rel:, label:, icon:, disabled: false)
+            inner = proc do
+              Icon(["fa-solid", icon])
               span(class: "sr-only") { t(label) }
             end
+            return span(class: "seg-option", aria: { disabled: true }, &inner) if disabled
+
+            a(class: "seg-option", href: href(@period, day), rel:, &inner)
           end
 
           def steps = STEPS.fetch(@period)

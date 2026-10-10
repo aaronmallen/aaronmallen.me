@@ -39,12 +39,16 @@ module Admin
           def head
             a(class: "review-group-head", href: @href, aria: { label: t(".open", count: @items.size, name: @name) }) do
               span(class: "review-group-name") { @name }
-              span(class: "review-spark", aria: { hidden: true }) { @days.each { bar(counts.fetch(it, 0)) } }
+              spark unless @days.empty?
               span(class: "review-group-count") { Blog::Helpers::Figures.count(@items.size) }
             end
           end
 
           def more_text(more) = [more, @label].compact.join(" ")
+
+          def spark
+            span(class: "review-spark", aria: { hidden: true }) { @days.each { bar(counts.fetch(it, 0)) } }
+          end
         end
       end
     end

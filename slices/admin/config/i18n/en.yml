@@ -1273,26 +1273,22 @@ en:
             one: "Slipped %{count} day"
             other: "Slipped %{count} days"
           title: "Carried over"
-        contributor_filter:
-          agent: "Agent"
-          agents: "Agents"
-          any_agent: "Any agent"
-          any_model: "Any model"
-          anyone: "Anyone"
-          label: "Done by"
-          model: "Model"
-          owner: "Me"
         decisions_card:
           dropped: "Dropped"
           empty: "No decisions closed."
           resolved: "Chose %{option}"
           title: "Decisions"
+        done_by:
+          anyone: "Anyone"
+          label: "Done by"
+          me: "Me"
         done_card:
           all: "All %{count} in Tasks →"
           both: "Tasks with two tags count in both."
           by_project: "by project"
           by_tag: "by tag"
           empty: "Nothing done yet."
+          empty_day: "Nothing done that day."
           group: "Group by"
           no_project: "no project"
           title: "Done"
@@ -1300,11 +1296,32 @@ en:
         group:
           more: "+%{count} more"
           open: "Open all %{count} in %{name}"
+        heat:
+          amounts:
+            commits:
+              one: "%{count} commit"
+              other: "%{count} commits"
+            done: "%{count} done"
+            journal:
+              one: "%{count} entry"
+              other: "%{count} entries"
+          hint: "Pick a day to scope every card to it."
+          label: "Activity by day"
+          rows:
+            commits: "commits"
+            done: "done"
+            journal: "journal"
+            worked: "worked"
+          scoped: " · every card below shows this day only"
+          whole:
+            month: "Whole month"
+            week: "Whole week"
         journal_card:
           days:
             one: "%{count} day written"
             other: "%{count} days written"
           empty: "No entries yet."
+          empty_day: "No entries that day."
           entries:
             one: "entry"
             other: "entries"
@@ -2336,7 +2353,7 @@ en:
             one: "%{count} commit"
             other: "%{count} commits"
           heading: "Review"
-          summary: "%{span}: %{done} done, %{carried} carried, %{worked} worked, %{commits}"
+          summary: "%{span}: %{done} done, %{commits}, %{worked} worked."
           week: "%{from} → %{to}"
       search:
         index:

@@ -82,6 +82,10 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       it "offers no way back to a week it already shows" do
         expect(page).to have_no_link("This week")
       end
+
+      it "offers no way past this week" do
+        expect(page).to have_css(".seg-option[aria-disabled]", text: "Next week")
+      end
     end
 
     describe "a week with records" do
@@ -101,9 +105,8 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: "Sep 14 → Sep 20, 2026")
       end
 
-      it "counts the tasks done, the tasks carried, the time worked and the commits" do
-        expect(page.find(".page-head-sub").text)
-          .to eq("Sep 14 → Sep 20, 2026: 1 done, 1 carried, 1h 30m worked, 1 commit")
+      it "counts the tasks done, the commits and the time worked" do
+        expect(page.find(".page-head-sub").text).to start_with("Sep 14 → Sep 20, 2026: 1 done, 1 commit, 1h 30m worked")
       end
 
       it "titles each card with its count" do
@@ -320,7 +323,7 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
     end
 
-    describe "contributors" do
+    describe "done by" do
       def done_titles = card("done").all(".review-line").map(&:text).uniq
 
       before do
@@ -328,34 +331,199 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         shared = create(:task, :done, title: "Shared", completed_at: at(wednesday))
         create(:task_contributor, :owner, task_id: shared.id)
         create(:task_contributor, task_id: shared.id)
-        sonnet = create(:task, :done, title: "Sonnet's", completed_at: at(wednesday))
-        create(:task_contributor, task_id: sonnet.id, model: "claude-sonnet-5")
+        other = create(:task, :done, title: "Codex's", completed_at: at(wednesday))
+        create(:task_contributor, task_id: other.id, agent: "codex")
       end
 
       it "keeps the done tasks that list me, the default included, and counts only those" do
-        visit_review(day: "2026-09-16", contributor: "owner")
+        visit_review(day: "2026-09-16", by: "me")
 
         expect([done_titles, page.find(".page-head-sub").text])
           .to match([contain_exactly("Mine", "Shared"), include(": 2 done,")])
       end
 
-      it "keeps the done tasks an agent worked on a model" do
-        visit_review(day: "2026-09-16", model: "claude-sonnet-5")
+      it "keeps the done tasks one contributor worked on" do
+        visit_review(day: "2026-09-16", by: "codex")
 
-        expect(done_titles).to eq(["Sonnet's"])
+        expect(done_titles).to eq(["Codex's"])
       end
 
-      it "offers each agent and model the tasks name, with the one picked selected", :aggregate_failures do
-        visit_review(day: "2026-09-16", model: "claude-sonnet-5")
+      it "keeps every done task for anyone" do
+        visit_review(day: "2026-09-16")
 
-        expect(page.all("#review-agent option").map(&:text)).to eq(["Any agent", "claude-code"])
-        expect(page.find("#review-model option[selected]").text).to eq("claude-sonnet-5")
+        expect(card("done").find(".card-title").text).to eq("Done · 3")
       end
 
-      it "keeps the filter on the arrows" do
-        visit_review(day: "2026-09-16", contributor: "agent")
+      it "leaves the other cards alone" do
+        visit_review(day: "2026-09-16", by: "codex")
 
-        expect(page).to have_link("Previous week", href: "/admin/review?day=2026-09-09&contributor=agent")
+        expect(card("decisions")).to have_link("Pick a queue for Mine")
+      end
+
+      it "offers anyone, me and each contributor, with the one picked selected", :aggregate_failures do
+        visit_review(day: "2026-09-16", by: "codex")
+
+        expect(page.all(".page-head select[name='by'] option").map(&:text))
+          .to eq(%w[Anyone Me claude-code codex])
+        expect(page.find(".page-head select[name='by'] option[selected]").text).to eq("codex")
+      end
+
+      it "keeps the period in the form and applies it without scripts", :aggregate_failures do
+        visit_review(day: "2026-09-16", group: "project")
+        form = page.find(".page-head form.review-by")
+
+        expect(form.all("input[type='hidden']", visible: :all).to_h { [it[:name], it[:value]] })
+          .to eq("day" => "2026-09-16", "group" => "project")
+        expect(form).to have_css("noscript", visible: :all)
+      end
+
+      it "falls back to anyone on a pick it cannot read" do
+        visit_review(day: "2026-09-16", by: ["me"])
+
+        expect(page.find(".page-head select[name='by'] option[selected]").text).to eq("Anyone")
+      end
+
+      it "keeps the pick on the arrows" do
+        visit_review(day: "2026-09-16", by: "me")
+
+        expect(page).to have_link("Previous week", href: "/admin/review?day=2026-09-09&by=me")
+      end
+    end
+
+    describe "the heat map" do
+      def heat = page.find_by_id("review-heat")
+
+      before do
+        fill(wednesday)
+        create(:task, :done, title: "Another", completed_at: at(wednesday))
+        create(:commit, repo: "aaronmallen/one", commit_date: Date.new(2026, 9, 15), additions: 1, deletions: 0)
+        create(:journal_entry, entry_date: Date.new(2026, 9, 14), body: "one")
+      end
+
+      it "heads a column for each day of the week" do
+        visit_review(day: "2026-09-16")
+
+        expect(heat.all(".review-heat-day").map(&:text)).to eq(
+          ["Mon 14", "Tue 15", "Wed 16", "Thu 17", "Fri 18", "Sat 19", "Sun 20"],
+        )
+      end
+
+      it "heads a column for each day of the month" do
+        visit_review(period: "month", day: "2026-09-16")
+
+        expect(heat.all(".review-heat-day").map(&:text)).to eq((1..30).map(&:to_s))
+      end
+
+      it "names the four rows" do
+        visit_review(day: "2026-09-16")
+
+        expect(heat.all(".review-heat-label").map(&:text)).to eq(%w[done commits worked journal])
+      end
+
+      it "counts each row on its day", :aggregate_failures do
+        visit_review(day: "2026-09-16")
+        labels = heat.all(".review-heat-cell").map { it["aria-label"] }
+
+        expect(labels).to include("Sep 16 · 2 done", "Sep 15 · 1 commit", "Sep 16 · 1h 30m", "Sep 14 · 1 entry")
+        expect(labels).to include("Sep 17 · 0 done")
+      end
+
+      it "shades each row against its own busiest day", :aggregate_failures do
+        visit_review(day: "2026-09-16")
+
+        expect(heat.find(".review-heat-cell[aria-label='Sep 15 · 1 commit']")[:style]).to eq("--heat: 100%")
+        expect(heat.find(".review-heat-cell[aria-label='Sep 16 · 0 commits']")[:style]).to eq("--heat: 0%")
+      end
+
+      it "links each past day to its scope" do
+        visit_review(day: "2026-09-16")
+
+        expect(heat.find(".review-heat-cell[aria-label='Sep 16 · 2 done']")[:href])
+          .to eq("/admin/review?day=2026-09-16&focus=2026-09-16")
+      end
+
+      it "disables the days still to come", :aggregate_failures do
+        visit_review(day: (today + 7).iso8601)
+
+        expect(heat).to have_no_css("a.review-heat-cell")
+        expect(heat.all(".review-heat-cell[aria-disabled]").size).to eq(28)
+      end
+
+      it "asks for a day when none is picked" do
+        visit_review(day: "2026-09-16")
+
+        expect(heat.find(".review-heat-foot")).to have_text("Pick a day to scope every card to it")
+      end
+    end
+
+    describe "a picked day" do
+      before do
+        fill(wednesday)
+        create(:task, :done, title: "Done on Thursday", completed_at: at(Date.new(2026, 9, 17)))
+        create(:journal_entry, entry_date: Date.new(2026, 9, 17), body: "thursday")
+        create(:commit, repo: "aaronmallen/one", commit_date: Date.new(2026, 9, 17))
+        visit_review(day: "2026-09-16", focus: "2026-09-16")
+      end
+
+      it "names the day and counts only its work" do
+        expect(page.find(".page-head-sub").text)
+          .to eq("Wednesday, September 16, 2026: 1 done, 0 commits, 1h 30m worked.")
+      end
+
+      it "scopes every card but Carried to the day", :aggregate_failures do
+        expect(card("done").all(".review-line").map(&:text)).to eq(["Finish the review screen"])
+        expect(card("journal")).to have_css(".empty", text: "No entries that day")
+        expect(card("commits")).to have_css(".empty", text: "No commits")
+        expect(card("carried")).to have_link("Call the accountant")
+      end
+
+      it "marks the day picked" do
+        expect(page.find("#review-heat .review-heat-day[aria-current='true']").text).to eq("Wed 16")
+      end
+
+      it "clears the day from the chip" do
+        expect(page.find_by_id("review-heat")).to have_link("Whole week", href: "/admin/review?day=2026-09-16")
+      end
+
+      it "clears the day when it is picked again" do
+        expect(page.find("#review-heat .review-heat-day", text: "Wed 16")[:href]).to eq("/admin/review?day=2026-09-16")
+      end
+
+      it "clears the day on a new period" do
+        expect(page).to have_link("Previous week", href: "/admin/review?day=2026-09-09")
+      end
+
+      it "says every card shows the day" do
+        expect(page.find("#review-heat .review-heat-foot")).to have_text("every card below shows this day only")
+      end
+
+      it "hides the sparklines" do
+        expect(page).to have_no_css(".review-spark")
+      end
+
+      it "drops the average and the longest days from the time worked", :aggregate_failures do
+        expect(card("worked").find(".review-stat").text).to eq("1h 30m")
+        expect(card("worked")).to have_no_text("Longest days")
+      end
+
+      it "opens Tasks › Completed for the day" do
+        expect(card("done"))
+          .to have_link("All 1 in Tasks →", href: "/admin/tasks?filter=completed&from=2026-09-16&to=2026-09-16")
+      end
+
+      it "keeps the day on the grouping switch" do
+        expect(card("done")).to have_link("by project",
+                                          href: "/admin/review?day=2026-09-16&focus=2026-09-16&group=project")
+      end
+
+      it "keeps the note on the period" do
+        expect(page.find_by_id("review-notes")).to have_text("filed under Sep 20, 2026")
+      end
+
+      it "ignores a day outside the period" do
+        visit_review(day: "2026-09-16", focus: "2026-09-01")
+
+        expect(page).to have_no_css("#review-heat .review-heat-day[aria-current]")
       end
     end
 

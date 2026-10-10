@@ -10,32 +10,25 @@ module Admin
           TAG = Blog::Types::ReviewGroup["tag"]
 
           prop :done, Blog::Types::Hash.map(Blog::Types::Date, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)))
-          prop :credits, Blog::Types::Hash
-          prop :choices, Blog::Types::Hash
           prop :keep, Blog::Types::Hash
           prop :group, Blog::Types::ReviewGroup
           prop :from, Blog::Types::Date
           prop :to, Blog::Types::Date
           prop :days, Blog::Types::Array.of(Blog::Types::Date)
+          prop :focused, Blog::Types::Bool, default: false
 
           def view_template
             Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(tasks.size)), id: "review-done") do |card|
               card.side { SegmentedLinks(label: t(".group"), items: GROUPS.map { |name, text| switch(name, text) }) }
-              filter_form
-              tasks.empty? ? Empty { t(".empty") } : listed
+              if tasks.empty?
+                Empty { t(@focused ? ".empty_day" : ".empty") }
+              else
+                listed
+              end
             end
           end
 
           private
-
-          def filter_form
-            AutoForm(action: path(:admin_review)) do
-              div(class: "form-stack") do
-                @keep.each { |name, value| input(type: "hidden", name: name.to_s, value:) }
-                ContributorFilter(credits: @credits, choices: @choices)
-              end
-            end
-          end
 
           def foot
             div(class: "review-foot") do
@@ -73,8 +66,7 @@ module Admin
           end
 
           def switch(name, text)
-            place = { **@keep.except(:group), **ContributorFilter.query(@credits),
-              group: (name unless name == TAG) }.compact
+            place = { **@keep, group: (name unless name == TAG) }.compact
 
             { href: path(:admin_review, **place), text: t(text), current: name == @group }
           end

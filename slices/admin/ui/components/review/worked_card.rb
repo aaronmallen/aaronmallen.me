@@ -6,12 +6,15 @@ module Admin
       module Review
         class WorkedCard < Component
           prop :worked, Blog::Types::Hash.map(Blog::Types::Date, Blog::Types::Integer)
+          prop :focused, Blog::Types::Bool, default: false
 
           def view_template
             Card(title: t(".title"), id: "review-worked") do
               next Empty { t(".empty") } if days.empty?
 
               totals
+              next if @focused
+
               p(class: "review-label") { t(".longest") }
               Capped(items: days.sort_by { |day, seconds| [-seconds, day] }) { |day, seconds| row(day, seconds) }
             end
@@ -40,6 +43,8 @@ module Admin
           def totals
             p(class: "today-stat review-stat") do
               plain hours(total)
+              next if @focused
+
               whitespace
               small do
                 t(".average", average: hours(Blog::Helpers::Figures.average(total, days.size)),
