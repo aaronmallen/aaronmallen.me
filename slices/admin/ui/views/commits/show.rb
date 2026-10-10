@@ -17,18 +17,13 @@ module Admin
               github_link
             end
 
-            div(class: "g-main") do
-              Card(label: t(".label"), title: t(".title")) { body }
-              aside { linked }
-            end
+            GitHubRecord(
+              body_html: @body_html, label: t(".label"), title: t(".title"), records: @records, kind: "commit",
+              id: @commit.id, find_path: path(:admin_commit, id: @commit.id),
+            ) { stats }
           end
 
           private
-
-          def body
-            message
-            div(class: "commit-stats") { stats }
-          end
 
           def clock = l(@commit.commit_time, format: :clock)
 
@@ -43,20 +38,6 @@ module Admin
           end
 
           def github_url = format(GITHUB_URL, @commit.repo, @commit.sha)
-
-          def linked
-            id = @commit.id
-
-            RecordLinks::Section(
-              records: @records, kind: "commit", id:, find_path: path(:admin_commit, id:),
-            )
-          end
-
-          def message
-            return Empty { t(".no_body") } unless @body_html
-
-            div(class: "commit-body post-body") { raw(safe(@body_html)) }
-          end
 
           def short_sha = Admin::Short.sha(@commit.sha)
 

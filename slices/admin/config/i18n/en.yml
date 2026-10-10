@@ -675,6 +675,10 @@ en:
         title: "What changed and why"
       footer:
         version: "Version %{version}"
+      github_record:
+        empty:
+          commit: "Nothing beyond the subject line."
+          pull_request: "No description."
       inbox:
         issue_item:
           edit: "Edit"
@@ -2171,7 +2175,6 @@ en:
           github: "View on GitHub"
           kicker: "Commit %{sha}"
           label: "Git"
-          no_body: "Nothing beyond the subject line."
           removed: "Removed"
           sha: "Commit"
           sub: "%{repo} · %{branch} · %{day} at %{clock}"
@@ -2344,7 +2347,6 @@ en:
           kicker: "Pull request #%{number}"
           label: "GitHub"
           merged: "Merged"
-          no_body: "No description."
           opened: "Opened"
           state: "State"
           states:

@@ -18,24 +18,13 @@ module Admin
               github_link
             end
 
-            div(class: "g-main") do
-              Card(label: t(".label"), title: t(".title")) { body }
-              aside { linked }
-            end
+            GitHubRecord(
+              body_html: @body_html, label: t(".label"), title: t(".title"), records: @records, kind: "pull_request",
+              id: @pull_request.id, find_path: path(:admin_pull_request, id: @pull_request.id),
+            ) { stats }
           end
 
           private
-
-          def body
-            description
-            div(class: "commit-stats") { stats }
-          end
-
-          def description
-            return Empty { t(".no_body") } unless @body_html
-
-            div(class: "commit-body post-body") { raw(safe(@body_html)) }
-          end
 
           def ended
             if @pull_request.merged_at
@@ -52,14 +41,6 @@ module Admin
             ) do
               t(".github")
             end
-          end
-
-          def linked
-            id = @pull_request.id
-
-            RecordLinks::Section(
-              records: @records, kind: "pull_request", id:, find_path: path(:admin_pull_request, id:),
-            )
           end
 
           def stamp(time) = l(Blog::TimeZone.local(time), format: :medium)

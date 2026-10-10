@@ -86,7 +86,7 @@ RSpec.describe "Admin commit page", :frozen_clock, type: :request do
     it "says so when the subject is the whole message" do
       visit_commit(commit_record(message: "admin: add the view"))
 
-      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.commits.show.no_body"))
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.github_record.empty.commit"))
     end
 
     it "names the short sha above the subject" do

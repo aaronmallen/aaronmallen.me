@@ -49,7 +49,13 @@ RSpec.describe "Admin pull request page", :frozen_clock, type: :request do
     it "says so when there is no description" do
       visit_pull_request(pull_request(body: ""))
 
-      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.pull_requests.show.no_body"))
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.github_record.empty.pull_request"))
+    end
+
+    it "puts the linked records beside the description" do
+      visit_pull_request(pull_request)
+
+      expect(page).to have_css(".g-main > .card + aside > .record-links")
     end
 
     it "shows an open pull request with its opened time" do
