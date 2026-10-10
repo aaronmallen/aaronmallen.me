@@ -1836,6 +1836,7 @@ en:
           label: "Reorder %{task}"
         import_acts:
           rules: "Task rules"
+          sync: "Sync issues"
         list_card:
           add_to: "Add to %{list}…"
           blurbs:
@@ -1947,8 +1948,6 @@ en:
           someday: "someday"
           today: "today"
           upcoming: "upcoming"
-        sync_button:
-          label: "Sync issues"
         task_form:
           list: "List"
           note: "Notes"
@@ -2090,19 +2089,6 @@ en:
           title: "Settings"
       work_entries:
         entry_form:
-          title: "A new role"
-        field_error:
-          from_year:
-            blank: "Add the year this started."
-            format: "Use a four digit year, as 2018."
-          org:
-            blank: "Name the organization."
-          role:
-            blank: "Name the role."
-          to_year:
-            before_from: "The end year falls before the start year."
-            format: "Use a four digit year, as 2021."
-        fields:
           add: "Add role"
           blurb: "Blurb"
           blurb_placeholder: "One line. What you did there."
@@ -2115,6 +2101,18 @@ en:
           role_placeholder: "Software Engineer"
           to: "To"
           to_placeholder: "2021"
+          title: "A new role"
+        field_error:
+          from_year:
+            blank: "Add the year this started."
+            format: "Use a four digit year, as 2018."
+          org:
+            blank: "Name the organization."
+          role:
+            blank: "Name the role."
+          to_year:
+            before_from: "The end year falls before the start year."
+            format: "Use a four digit year, as 2021."
         row:
           confirm_remove: "Remove %{role} at %{org}? You can't undo this."
           current: "Present"

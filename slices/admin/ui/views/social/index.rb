@@ -24,7 +24,7 @@ module Admin
             PageHead(title: t(".heading"), sub:)
 
             div(class: "g-main rev") do
-              div(class: "social-side") { SideStack { side } }
+              div(class: "social-side") { div(class: "side-stack") { side } }
               queue
             end
             render Components::People::PersonDialog.new

@@ -243,7 +243,6 @@
   --shadow-drawer: -30px 0 80px rgb(0 0 0 / 35%);
 
   --spacing-tap: 44px;
-  --container-g-3: 240px;
   --container-g-4: 190px;
   --container-rail: 248px;
   --container-editor-head: 420px;
@@ -1737,11 +1736,6 @@
   @media (width < 53.75rem) {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-@utility g-3 {
-  @apply grid gap-4;
-  grid-template-columns: repeat(auto-fit, minmax(min(var(--container-g-3), 100%), 1fr));
 }
 
 @utility g-4 {

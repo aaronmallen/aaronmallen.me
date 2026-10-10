@@ -32,7 +32,7 @@ module Admin
             PageHead(title: @post.title, kicker: t(".kicker"), sub:) { actions }
 
             div(class: "post-analytics") do
-              Grid(columns: 4) { stats }
+              div(class: "g-4") { stats }
               FirstDaysCard(**@first_days)
               div(class: "cols") { cards }
             end
