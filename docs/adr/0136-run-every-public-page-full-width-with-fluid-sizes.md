@@ -6,6 +6,7 @@ created: 2026-10-09
 area: [assets, config, public]
 supersedes: ["0034"]
 issue: "#842"
+amended: ["#925"]
 tags: [layout, design, css, tailwind, public, responsive]
 ---
 
@@ -29,9 +30,14 @@ entry blurb, 56ch for a lede, 60ch for the contact details.
 
 **No public page has a max-width container.** `page-column` and `--container-page` go. `main` fills the window
 inside the fluid gutter, and a page that wants two columns uses the shared grid rather than a narrower column.
+Since #925 a card grid may cap itself: the more posts grid under a post, `pgr`, stops at 1100px so its cards keep a
+width that reads.
 
 **Sizes are fluid.** Type, gaps and padding read `clamp()` tokens, and reuse the admin's tokens where the values
-match.
+match. #925 let small meta type keep the fixed sizes the design gives it: 12.5px for figure captions in `.pub` and
+`post-body` and for the meta lines in `post-feedback`, `post-edit-date` and `post-response-counts`, 12px for the
+label row in `pgr`, 10.5px for the icons in `post-back` and `pgr`, and 13px for the initials in
+`post-response-avatar`. Type this small barely scales, so a `clamp()` would gain nothing.
 
 **Prose keeps a measure, and each block opts in.** A post body, a lede, an entry blurb and any other run of reading
 text caps itself at the width the design gives it. The page sets how wide the layout is. The measure sets how wide a
