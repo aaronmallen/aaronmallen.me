@@ -11,8 +11,7 @@ module Posts
 
       include Deps[
         announcement: "operations.compose_announcement",
-        expand_for_network: "social.operations.expand_for_network",
-        networks: "social.networks.all",
+        check_network_fit: "social.operations.check_network_fit",
         resolve_mentions: "social.operations.resolve_mentions",
       ]
 
@@ -57,10 +56,7 @@ module Posts
 
         typed = Blog::Types::Text[values[:syndication_body]]
         body = announcement.compose(body: typed, slug: values[:slug], title: values[:title])
-        fits = values[:syndication_targets].to_a.all? do |name|
-          networks.fetch(name).within_limit?(expand_for_network.call([body], name).first.text)
-        end
-        next if fits
+        next if check_network_fit.call([body], values[:syndication_targets])
 
         key(:syndication_body).failure(typed.strip.empty? ? ANNOUNCEMENT_TOO_LONG : TOO_LONG)
       end

@@ -15,14 +15,14 @@ module Social
     import keys: %w[repos.connection_queries], from: :services
 
     export %w[
-      networks.all operations.act_on_webmentions operations.check_link operations.compose_social_post
-      operations.delete_person operations.delete_social_post operations.expand_for_network
-      operations.list_target_accounts operations.lock_editable_social_post operations.mark_webmention_seen
-      operations.measure_parts operations.moderate_webmention operations.move_social_post
-      operations.receive_webmention operations.replace_social_post_parts operations.resolve_mentions
-      operations.save_person operations.save_social_post operations.search_accounts operations.snooze_webmentions
-      operations.update_webmention_settings operations.wake_webmention repos.person_queries
-      repos.social_post_queries repos.webmention_queries
+      networks.all operations.act_on_webmentions operations.check_link operations.check_network_fit
+      operations.compose_social_post operations.delete_person operations.delete_social_post
+      operations.expand_for_network operations.list_target_accounts operations.lock_editable_social_post
+      operations.mark_webmention_seen operations.measure_parts operations.moderate_webmention
+      operations.move_social_post operations.receive_webmention operations.replace_social_post_parts
+      operations.resolve_mentions operations.save_person operations.save_social_post operations.search_accounts
+      operations.snooze_webmentions operations.update_webmention_settings operations.wake_webmention
+      repos.person_queries repos.social_post_queries repos.webmention_queries
     ]
   end
 end

@@ -6,10 +6,9 @@ module Suggestions
       PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[
-        expand_for_network: "social.operations.expand_for_network",
+        check_network_fit: "social.operations.check_network_fit",
         lock_editable_social_post: "social.operations.lock_editable_social_post",
         lock_post: "posts.operations.lock_post",
-        networks: "social.networks.all",
         replace_social_post_parts: "social.operations.replace_social_post_parts",
         revise_post_body: "posts.operations.revise_post_body",
         suggestion_mutations: "repos.suggestion_mutations",
@@ -53,7 +52,7 @@ module Suggestions
         return :stale unless body && edit.applies_to?(body)
 
         replaced = edit.apply_to(body)
-        return :refused unless fits?(replaced, targets)
+        return :refused unless check_network_fit.call([replaced], targets)
 
         bodies[index] = replaced
         :accepted
@@ -72,10 +71,6 @@ module Suggestions
 
       def find(id)
         found(suggestion_queries.by_id(id))
-      end
-
-      def fits?(body, targets)
-        targets.all? { networks.fetch(it).within_limit?(expand_for_network.call([body], it).first.text) }
       end
 
       def outcome(sifted)

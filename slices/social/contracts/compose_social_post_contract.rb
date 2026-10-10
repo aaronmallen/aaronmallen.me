@@ -13,7 +13,7 @@ module Social
       UNKNOWN_MENTION = "unknown_mention"
 
       include Deps[
-        expand_for_network: "operations.expand_for_network",
+        check_network_fit: "operations.check_network_fit",
         networks: "networks.all",
         resolve_mentions: "operations.resolve_mentions",
       ]
@@ -46,11 +46,7 @@ module Social
       rule(:parts, :targets) do |context:|
         next unless context[:intent] == SEND
 
-        parts, targets = values.values_at(:parts, :targets)
-        over = targets.any? do |name|
-          expand_for_network.call(parts, name).any? { !networks.fetch(name).within_limit?(it.text) }
-        end
-        key(:parts).failure(TOO_LONG) if over
+        key(:parts).failure(TOO_LONG) unless check_network_fit.call(*values.values_at(:parts, :targets))
       end
     end
   end

@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917"]
+amended: ["#917", "#994"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -46,8 +46,9 @@ Four other kinds of key may cross, since none of them holds a write repo:
 - **`endpoints.*`**, which `api` exports so `mcp` can call its endpoints in process, as ADR 0088 decides.
 - **`auth.session_reader`**, which `admin` exports so `public` and `mcp` can read the operator's GitHub session. ADR
   0003 names this edge.
-- **`networks.all`**, the provider `social` exports so `posts` and `suggestions` can measure text against each
-  network. ADR 0003 names this edge too.
+- **`networks.all`**, the provider `social` exports so `admin` can list each network and measure text against it.
+  ADR 0003 names this edge too. Since #994, `posts` and `suggestions` ask `operations.check_network_fit` whether
+  text fits a network instead of importing the provider.
 - **A client provider**: `github.client` and `linear.client` from `record`, and `store.client` from `media`. ADR 0001
   makes each client a provider in the slice that owns it, and a slice that calls one imports its key.
 
