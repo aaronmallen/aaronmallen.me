@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 area: [lib, api, mcp]
 issue: "#155"
+amended: ["#1011"]
 tags: [api, mcp, json, serializers, alba, dependencies, journal, tasks]
 ---
 
@@ -26,9 +27,8 @@ endpoint, and the two would drift. Every resource that moves to the API in a lat
 
 We build every API response with [Alba] serializers.
 
-- `Blog::Serializer` in `lib/blog/serializer.rb` includes `Alba::Resource`. It holds whatever every serializer in
-  the app shares, so a later slice that serves JSON starts from it.
-- `API::Serializer < Blog::Serializer` in the `api` slice holds what the API alone needs.
+- `API::Serializer` in the `api` slice includes `Alba::Resource` and holds what every serializer shares. #1011
+  folded `Blog::Serializer` from `lib/blog/serializer.rb` into it, since the API was its only subclass.
 - Each resource gets its own serializer in `slices/api/serializers`, a subclass of `API::Serializer`: journal
   entries, tasks, task comments and sprints first (#152), the rest as each resource moves.
 

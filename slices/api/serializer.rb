@@ -1,8 +1,12 @@
 # auto_register: false
 # frozen_string_literal: true
 
+require "alba"
+
 module API
-  class Serializer < Blog::Serializer
+  class Serializer
+    include Alba::Resource
+
     COMPONENTS = "#/components/schemas/"
     TIME_FORMAT = "%H:%M"
 
@@ -23,6 +27,10 @@ module API
     private
 
     def clock(time) = time.strftime(TIME_FORMAT)
+
+    def day(date) = date&.iso8601
+
+    def stamp(time) = time&.utc&.iso8601
 
     def tag_names(record) = record.tags.map(&:name)
   end
