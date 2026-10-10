@@ -5,11 +5,15 @@ module API
   module Endpoints
     module SavedViews
       ID = Helpers::Schema::ID
+      MAX_NAME = ::SavedViews::Contracts::SavedViewContract::MAX_NAME
       UNSAVED = "could not save the saved view"
 
       COMPLAINTS = {
         filters: { Blog::Contract::CONTROL => "filters hold a control character" },
-        name: { "blank" => "name needs a character that is not a space", "long" => "name runs past 100 characters" },
+        name: {
+          "blank" => "name needs a character that is not a space",
+          "long" => "name runs past #{MAX_NAME} characters",
+        },
       }.freeze
 
       FILTERS = {
@@ -22,7 +26,7 @@ module API
         ].join(" "),
       }.freeze
 
-      NAME = { type: "string", description: "what the view is called, up to 100 characters" }.freeze
+      NAME = { type: "string", description: "what the view is called, up to #{MAX_NAME} characters" }.freeze
 
       SCREEN = {
         type: "string",

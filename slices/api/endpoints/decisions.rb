@@ -12,7 +12,7 @@ module API
         body: { "blank" => "write the comment first" },
         note: {
           "blank" => "a resolved or dropped decision needs a note to say why it changed",
-          "long" => "keep the note to 500 characters",
+          "long" => "keep the note to #{::Decisions::Contracts::DecisionContract::NOTE_LIMIT} characters",
         },
         option_id: {
           Blog::Contract::FORMAT => "pick an option by its ID",

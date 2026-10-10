@@ -22,8 +22,8 @@ module MCP
           edit_note: {
             type: "string",
             description:
-              "what changed and why, in markdown, up to 500 characters; " \
-              "needed when the body of a published post changes, and shown to readers on the post",
+              "what changed and why, in markdown, up to #{Posts::Contracts::PostContract::EDIT_NOTE_LIMIT} " \
+              "characters; needed when the body of a published post changes, and shown to readers on the post",
           },
         },
         required: ["id"],

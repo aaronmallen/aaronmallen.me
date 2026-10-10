@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       class SavedViewName < Component
-        MAX = 100
+        MAX = ::SavedViews::Contracts::SavedViewContract::MAX_NAME
 
         prop :id, Blog::Types::String
         prop :submit, Blog::Types::String

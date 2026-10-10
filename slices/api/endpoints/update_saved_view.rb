@@ -8,7 +8,7 @@ module API
         properties: {
           filters: SavedViews::FILTERS.merge(description: "the new filters, which replace the old ones whole"),
           id: SavedViews::ID,
-          name: SavedViews::NAME.merge(description: "the new name, up to 100 characters"),
+          name: SavedViews::NAME.merge(description: "the new name, up to #{SavedViews::MAX_NAME} characters"),
         },
         required: ["id"],
       }.freeze

@@ -7,6 +7,7 @@ module API
       BULK = Helpers::Schema.bulk("blog posts")
       ID = Helpers::Schema::ID
       TAG = { type: "string", description: "one public tag, lowercase words" }.freeze
+      LONG_NOTE = "runs over #{::Posts::Contracts::PostContract::EDIT_NOTE_LIMIT} characters".freeze
       URL = "needs a URL starting with http:// or https://"
 
       COMPLAINTS = {
@@ -25,9 +26,9 @@ module API
         canonical_url: { Blog::Contract::FORMAT => URL },
         edit_note: {
           "blank" => "is needed when the body of a published post changes: say what changed and why",
-          "long" => "runs over 500 characters",
+          "long" => LONG_NOTE,
         },
-        note: { "blank" => "can't be blank: say what changed and why", "long" => "runs over 500 characters" },
+        note: { "blank" => "can't be blank: say what changed and why", "long" => LONG_NOTE },
         og_image_url: { Blog::Contract::FORMAT => URL },
         publish_at: { Blog::Contract::FORMAT => "needs a time as YYYY-MM-DDTHH:MM, in #{Blog::TimeZone::NAME} time" },
         slug: {
