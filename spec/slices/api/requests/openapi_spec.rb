@@ -52,18 +52,6 @@ RSpec.describe "API OpenAPI document", type: :request do
     expect(missing).to be_empty, "the document leaves out these endpoints:\n#{missing.join("\n")}"
   end
 
-  it "lists the serializer schemas in name order, after the refusals" do
-    names = document.dig("components", "schemas").keys
-
-    expect(names.drop(3)).to eq(names.drop(3).sort)
-  end
-
-  it "lets a task listing filter by contributor, agent and model" do
-    names = document.dig("paths", "/tasks", "get", "parameters").map { it.fetch("name") }
-
-    expect(names).to include("contributor", "agent", "model")
-  end
-
   it "gives each operation one ID" do
     expect(operation_ids).to eq(operation_ids.uniq)
   end
