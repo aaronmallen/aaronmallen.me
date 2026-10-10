@@ -44,7 +44,7 @@ module Admin
 
           def head
             PageHead(title: @task.title, kicker:) do
-              BackLink(origin: @origin, filter: @filter, data: { task_close: true })
+              Components::Tasks::BackLink(origin: @origin, filter: @filter, data: { task_close: true })
               edit
             end
           end
