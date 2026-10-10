@@ -8,13 +8,12 @@ module Backups
 
     COMMAND = "pg_dump"
 
-    def initialize(database:, command: COMMAND)
-      @command = command
+    def initialize(database:)
       @database = database
     end
 
     def call(path)
-      _, error, status = Open3.capture3(environment, command, "--format=custom", "--no-password", "--file=#{path}")
+      _, error, status = Open3.capture3(environment, COMMAND, "--format=custom", "--no-password", "--file=#{path}")
       raise Error, error.strip unless status.success?
 
       path
@@ -26,7 +25,7 @@ module Backups
 
     private
 
-    attr_reader :command, :database
+    attr_reader :database
 
     def environment
       {

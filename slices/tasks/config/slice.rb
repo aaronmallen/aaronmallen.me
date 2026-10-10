@@ -19,8 +19,8 @@ module Tasks
       operations.queue_issue_sync operations.reopen_task operations.reorder_task operations.save_task
       operations.save_task_rule operations.schedule_task operations.set_task_total operations.snooze_tasks
       operations.start_task operations.unlink_task operations.wake_task
-      repos.sprint_queries repos.task_comment_queries repos.task_link_queries repos.task_queries
-      repos.task_rule_queries repos.task_source_queries repos.time_report_queries repos.work_session_queries
+      repos.sprint_queries repos.task_comment_queries repos.task_queries
+      repos.task_rule_queries repos.task_source_queries repos.time_report_queries
     ]
   end
 end
