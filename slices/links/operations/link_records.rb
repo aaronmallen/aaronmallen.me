@@ -9,7 +9,6 @@ module Links
         "record_links_record_missing" => [:other_id, "missing"],
         "record_links_task_pair_check" => [:other_id, "task_pair"],
       }.freeze
-      FIELDS = %i[other_kind other_id].freeze
 
       include Deps[
         records: "repos.record_link_queries",
@@ -21,7 +20,7 @@ module Links
         side = step find(kind, id)
         fields = step validate(params)
 
-        step persist(side, fields.values_at(*FIELDS))
+        step persist(side, fields.values_at(:other_kind, :other_id))
       end
 
       private
@@ -33,8 +32,6 @@ module Links
         found(known && [kind, id])
       end
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
-
       def persist(side, other)
         Success(transaction { record_link_mutations.link(side, other) })
       rescue ROM::SQL::UniqueConstraintError, ROM::SQL::CheckConstraintError, ROM::SQL::ForeignKeyConstraintError => e
@@ -44,7 +41,7 @@ module Links
         Failure([:invalid, { field => [code] }])
       end
 
-      def validate(params) = validated(contract.call(form(params)))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

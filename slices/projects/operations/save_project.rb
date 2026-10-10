@@ -15,7 +15,6 @@ module Projects
         "projects_archived_order_check" => [:started_on, "after_archived"],
         "projects_repo_index" => [:repo, "taken"],
       }.freeze
-      FIELDS = %i[name og_image_url repo started_on tagline url visibility].freeze
 
       def call(params, id: nil, now: Time.now)
         attributes = step validate(params, now)
@@ -48,10 +47,10 @@ module Projects
       end
 
       def form(params)
-        given = FIELDS.to_h { [it, params[it]] }
+        given = every_field(params)
         repo, url = derive(*given.values_at(:repo, :url))
 
-        given.merge(repo:, url:, tags: params[:tags])
+        given.merge(repo:, url:)
       end
 
       def github_url(repo)

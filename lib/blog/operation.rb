@@ -18,9 +18,13 @@ module Blog
 
     def affected(count) = count.positive? ? Success(count) : Failure(:not_found)
 
+    def contract_keys = contract.schema.key_map.map(&:id)
+
     def each_record(ids)
       transaction { ids.map { |id| step(yield(id).alt_map { [:record, id, it] }) } }
     end
+
+    def every_field(params) = contract_keys.to_h { [it, params[it]] }
 
     def found(value) = value ? Success(value) : Failure(:not_found)
 

@@ -4,7 +4,6 @@ module Social
   module Operations
     class SavePerson < Blog::Operation
       BLUESKY = Blog::Types::NetworkName["bluesky"]
-      FIELDS = %i[bluesky_handle key mastodon_handle name].freeze
       KEY_INDEX = "people_key_index"
       TAKEN = "taken"
       UNREACHABLE = "unreachable"
@@ -60,7 +59,7 @@ module Social
         lookup(handle)
       end
 
-      def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

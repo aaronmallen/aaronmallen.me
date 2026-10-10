@@ -3,7 +3,6 @@
 module Decisions
   module Operations
     class EditDecisionOption < Blog::Operation
-      FIELDS = %i[title body note].freeze
       OPTION_EDITED = Blog::Types::DecisionEventKind["option_edited"]
 
       include Deps[
@@ -41,7 +40,7 @@ module Decisions
         Success(saved)
       end
 
-      def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

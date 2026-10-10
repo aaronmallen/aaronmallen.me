@@ -3,8 +3,6 @@
 module Social
   module Operations
     class ActOnWebmentions < Blog::Operation
-      FIELDS = %i[act ids].freeze
-
       include Deps[contract: "contracts.bulk_contract", moderate_webmention: "operations.moderate_webmention"]
 
       def call(params)
@@ -16,9 +14,7 @@ module Social
 
       private
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
-
-      def validate(params) = validated(contract.call(form(params)))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

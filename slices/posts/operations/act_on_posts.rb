@@ -4,7 +4,6 @@ module Posts
   module Operations
     class ActOnPosts < Blog::Operation
       DRAFT = Blog::Types::PostStatus["draft"]
-      FIELDS = %i[act ids tag].freeze
       TAG = Blog::Types::PostBulkAction["tag"]
 
       include Deps[
@@ -28,11 +27,9 @@ module Posts
         end
       end
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
-
       def single(id, fields) = fields[:act] == TAG ? tag_post.call(id, fields[:tag]) : delete_draft(id)
 
-      def validate(params) = validated(contract.call(form(params)))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

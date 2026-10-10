@@ -5,7 +5,6 @@ module Tasks
     class ActOnTasks < Blog::Operation
       CANCEL = Blog::Types::TaskBulkAction["cancel"]
       COMPLETE = Blog::Types::TaskBulkAction["complete"]
-      FIELDS = %i[act ids tag to].freeze
       MOVE = Blog::Types::TaskBulkAction["move"]
       TAG = Blog::Types::TaskBulkAction["tag"]
       UNTAG = Blog::Types::TaskBulkAction["untag"]
@@ -31,8 +30,6 @@ module Tasks
 
       private
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
-
       def single(act)
         case act
           when CANCEL then cancel_task
@@ -44,7 +41,7 @@ module Tasks
         end
       end
 
-      def validate(params) = validated(contract.call(form(params)))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

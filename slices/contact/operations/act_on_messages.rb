@@ -4,7 +4,6 @@ module Contact
   module Operations
     class ActOnMessages < Blog::Operation
       DELETE = Blog::Types::MessageBulkAction["delete"]
-      FIELDS = %i[act ids tag].freeze
       TAG = Blog::Types::MessageBulkAction["tag"]
       UNTAG = Blog::Types::MessageBulkAction["untag"]
 
@@ -25,8 +24,6 @@ module Contact
 
       private
 
-      def form(params) = FIELDS.to_h { [it, params[it]] }
-
       def single(act, id, tag)
         case act
           when DELETE then delete_message.call(id)
@@ -43,7 +40,7 @@ module Contact
         found(message_queries.by_id(id))
       end
 
-      def validate(params) = validated(contract.call(form(params)))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

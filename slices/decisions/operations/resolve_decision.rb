@@ -5,7 +5,6 @@ module Decisions
     class ResolveDecision < Blog::Operation
       CHOICE = "decisions_resolved_option_fkey"
       EVENT = Blog::Types::DecisionEventKind["resolved"]
-      FIELDS = %i[option_id reason].freeze
       STATUS = Blog::Types::DecisionStatus["resolved"]
 
       include Deps[
@@ -39,7 +38,7 @@ module Decisions
         Failure([:invalid, { option_id: ["missing"] }])
       end
 
-      def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end

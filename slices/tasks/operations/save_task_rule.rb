@@ -7,7 +7,6 @@ module Tasks
         "task_rule_projects_project_id_fkey" => [:projects, "missing"],
         "task_rules_provider_pattern_index" => [:pattern, "taken"],
       }.freeze
-      FIELDS = %i[pattern provider tags projects].freeze
       GITHUB = Blog::Types::TaskSourceProvider["github"]
 
       include Deps[
@@ -65,7 +64,7 @@ module Tasks
         task_rule_mutations.link_projects(task_ids, project_ids)
       end
 
-      def validate(params) = validated(contract.call(FIELDS.to_h { [it, params[it]] }))
+      def validate(params) = validated(contract.call(every_field(params)))
     end
   end
 end
