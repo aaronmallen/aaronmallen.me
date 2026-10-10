@@ -18,8 +18,6 @@ module Admin
             DRAFT => "ui.views.posts.index.drafts",
             SCHEDULED => "ui.views.posts.index.scheduled",
           }.freeze
-          MENTION_COLOR = :pink
-          UNIQUE_READERS = { true => ".final_unique_readers", false => ".unique_readers" }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :filter, Blog::Types::PostFilter
@@ -46,15 +44,6 @@ module Admin
 
           private
 
-          def analytics_link(post)
-            label = t(".analytics", title: post.title)
-
-            Button(
-              href: path(:admin_post_analytics, id: post.id), title: label, aria: { label: }, small: true,
-              icon: "fa-solid fa-chart-simple",
-            )
-          end
-
           def count(status) = @counts.fetch(status, 0)
 
           def filter_form
@@ -72,81 +61,31 @@ module Admin
             Pager(page: @posts, route: :admin_posts, params: { status: @filter })
           end
 
-          def mentions(post)
-            count = @webmention_counts.fetch(post.id, 0)
-            return unless count.positive?
-
-            Pill(color: MENTION_COLOR) do
-              span(aria: { hidden: "true" }) { t(".mentions", count:) }
-              span(class: "sr-only") { t(".mentions_label", count:) }
-            end
-          end
-
-          def meta(post)
-            div(class: "post-row-meta") do
-              mentions(post)
-              suggestions(post)
-              post.tags.each { Tag(tag: it) }
-            end
-          end
-
-          def pick(post) = { form: Bulk::ID, value: post.id, label: t(".pick", title: post.title) }
-
-          def readership(post)
-            [
-              t(".views", count: tally(:views, post)),
-              t(".visitors", count: tally(:visitors, post)),
-              unique_readers(post),
-              t(".read_throughs", count: tally(:read_throughs, post)),
-            ]
-          end
-
-          def row(post)
-            href = path(:admin_edit_post, id: post.id)
-
-            ListItem(title: post.title, href:, sub: row_sub(post), pick: pick(post)) do |item|
-              item.meta { meta(post) }
-              PublishForm(post:, filter: @filter, page: @posts.number) if post.status == DRAFT
-              analytics_link(post)
-              StatusPill(status: post.status)
-            end
-          end
-
-          def row_sub(post)
-            date = l(Blog::TimeZone.today(post.published_at || post.updated_at), format: :medium)
-            words = t(".words", count: @word_counts.fetch(post.id))
-            dotted(path(:post, slug: post.slug), date, words, *readership(post))
-          end
-
           def rows
             Card(class: "post-list", data: { key_list: true }) do
               Bulk(filter: @filter, page: @posts.number)
-              @posts.rows.each { |post| row(post) }
+              @posts.rows.each { |post| Row(post:, filter: @filter, page: @posts.number, stats: stats(post)) }
             end
+          end
+
+          def stats(post)
+            id = post.id
+
+            {
+              mentions: @webmention_counts.fetch(id, 0),
+              read_throughs: @read_through_counts.fetch(id),
+              suggestions: @suggestion_counts.fetch(id, 0),
+              unique_readers: @unique_reader_counts.fetch(id),
+              views: @view_counts.fetch(id),
+              visitors: @visitor_counts.fetch(id),
+              words: @word_counts.fetch(id),
+            }
           end
 
           def sub
             drafts = t(".draft_count", count: count(DRAFT))
 
             t(".lede", drafts:, published: count(PUBLISHED), scheduled: count(SCHEDULED))
-          end
-
-          def suggestions(post)
-            count = @suggestion_counts.fetch(post.id, 0)
-            return unless count.positive?
-
-            Pill(color: :blue) { IconLabel(icon: "fa-solid fa-robot") { t(".suggestions", count:) } }
-          end
-
-          def tallies = { read_throughs: @read_through_counts, views: @view_counts, visitors: @visitor_counts }
-
-          def tally(name, post) = tallies.fetch(name).fetch(post.id)
-
-          def unique_readers(post)
-            readers, final = @unique_reader_counts.fetch(post.id).values_at(:readers, :final)
-            return t(".no_unique_readers") unless readers
-
-            t(UNIQUE_READERS.fetch(final), count: readers)
           end
         end
       end

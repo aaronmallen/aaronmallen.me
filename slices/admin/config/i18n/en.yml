@@ -1104,6 +1104,35 @@ en:
           slug: "Slug"
           tags: "Tags"
           tags_placeholder: "ruby, patterns"
+        row:
+          analytics: "Analytics for %{title}"
+          final_unique_readers:
+            one: "%{count} unique reader, final"
+            other: "%{count} unique readers, final"
+          mentions: "@%{count}"
+          mentions_label:
+            one: "%{count} webmention"
+            other: "%{count} webmentions"
+          no_unique_readers: "no unique reader count"
+          pick: "Select %{title}"
+          read_throughs:
+            one: "%{count} read-through"
+            other: "%{count} read-throughs"
+          suggestions:
+            one: "%{count} suggestion"
+            other: "%{count} suggestions"
+          unique_readers:
+            one: "%{count} unique reader"
+            other: "%{count} unique readers"
+          views:
+            one: "%{count} view"
+            other: "%{count} views"
+          visitors:
+            one: "%{count} visitor"
+            other: "%{count} visitors"
+          words:
+            one: "%{count} word"
+            other: "%{count} words"
         seo:
           canonical_url: "Canonical link"
           canonical_url_note: "Only when this went out somewhere else first. Blank points at this site."
@@ -2261,46 +2290,18 @@ en:
           visitors: "Visitors"
         index:
           all: "all"
-          analytics: "Analytics for %{title}"
           draft_count:
             one: "%{count} draft"
             other: "%{count} drafts"
           drafts: "drafts"
           empty: "No posts"
           filter: "Status"
-          final_unique_readers:
-            one: "%{count} unique reader, final"
-            other: "%{count} unique readers, final"
           heading: "Publish"
           lede: "%{drafts} in progress. %{published} published, %{scheduled} scheduled."
-          mentions: "@%{count}"
-          mentions_label:
-            one: "%{count} webmention"
-            other: "%{count} webmentions"
           new_post: "New post"
-          no_unique_readers: "no unique reader count"
-          pick: "Select %{title}"
           published: "published"
-          read_throughs:
-            one: "%{count} read-through"
-            other: "%{count} read-throughs"
           scheduled: "scheduled"
-          suggestions:
-            one: "%{count} suggestion"
-            other: "%{count} suggestions"
           title: "Posts"
-          unique_readers:
-            one: "%{count} unique reader"
-            other: "%{count} unique readers"
-          views:
-            one: "%{count} view"
-            other: "%{count} views"
-          visitors:
-            one: "%{count} visitor"
-            other: "%{count} visitors"
-          words:
-            one: "%{count} word"
-            other: "%{count} words"
         new:
           title: "New post"
       projects:
