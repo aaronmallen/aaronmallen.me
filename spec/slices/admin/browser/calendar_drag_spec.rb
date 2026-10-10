@@ -171,7 +171,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
       Posts::Slice["repos.post_mutations"].delete(scheduled.id)
       drag("Hold still", cell(target))
 
-      expect(page).to have_css(".toast-failed", text: translate("ui.components.calendar.panel.failed"))
+      expect(page).to have_css(".toast-failed", text: translate("ui.components.calendar.move_form.failed"))
       expect(panel).to have_text("Hold still")
       expect(cell(day)).to have_css(".cal-mark.post", text: "Hold still")
     end

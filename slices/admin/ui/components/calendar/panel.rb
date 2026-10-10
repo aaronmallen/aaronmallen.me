@@ -5,11 +5,6 @@ module Admin
     module Components
       module Calendar
         class Panel < Component
-          MOVES = {
-            post: :admin_move_calendar_post,
-            social: :admin_move_calendar_social_post,
-            task: :admin_move_calendar_task,
-          }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
           POSTED_QUEUE = Blog::Types::SocialQueue["posted"]
           QUEUED = Blog::Types::SocialQueue["queued"]
@@ -55,21 +50,8 @@ module Admin
 
             ListItem(**item.except(:at), data: { calendar_item: "#{kind}-#{record.id}" }) do |row|
               row.meta { p(class: "li-sub") { dated(record, at) } } if at
-              move_form(kind, record.id, item[:title]) if movable
+              MoveForm(kind:, id: record.id, title: item[:title], date:, today: @today) if movable
             end
-          end
-
-          def grip(title)
-            label = t(".drag", title:)
-
-            Button(
-              small: true, class: "cal-grip", hidden: true, label:, data: grip_data,
-              icon: "fa-solid fa-grip-vertical",
-            )
-          end
-
-          def grip_data
-            { calendar_grip: "", calendar_failed: t(".failed"), calendar_past: t("calendar_page.toasts.past") }
           end
 
           def group(title, &)
@@ -83,18 +65,6 @@ module Admin
             return unless @day.journal
 
             group(t(".journal")) { ListItem(title: t(".journal_entry"), href: path(:admin_journal, to: date.iso8601)) }
-          end
-
-          def move_form(kind, id, title)
-            field = "cal-move-#{kind}-#{id}"
-
-            Form(action: path(MOVES.fetch(kind), id:), class: "cal-move") do
-              grip(title)
-              input(type: "hidden", name: "day", value: date.iso8601)
-              label(class: "sr-only", for: field) { t(".move_to", title:) }
-              Input(type: "date", id: field, name: "to", min: @today.iso8601, value: date.iso8601)
-              button(type: "submit", class: "bt sm") { t(".move") }
-            end
           end
 
           def post_item(post)
