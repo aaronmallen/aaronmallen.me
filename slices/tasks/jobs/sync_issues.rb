@@ -2,7 +2,7 @@
 
 module Tasks
   module Jobs
-    class SyncIssues < Blog::Job
+    class SyncIssues < Blog::ScheduledJob
       PROVIDER = Blog::Types::TaskSourceProvider["github"]
 
       include Deps[
@@ -11,8 +11,6 @@ module Tasks
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
       ]
-
-      sidekiq_options retry: false
 
       def perform
         return unless client.configured?

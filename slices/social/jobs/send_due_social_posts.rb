@@ -2,7 +2,7 @@
 
 module Social
   module Jobs
-    class SendDueSocialPosts < Blog::Job
+    class SendDueSocialPosts < Blog::ScheduledJob
       STALLED_AFTER = 15 * 60
 
       include Deps[
@@ -10,8 +10,6 @@ module Social
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",
       ]
-
-      sidekiq_options retry: false
 
       def perform
         now = Time.now

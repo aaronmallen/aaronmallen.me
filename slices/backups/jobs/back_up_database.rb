@@ -2,7 +2,7 @@
 
 module Backups
   module Jobs
-    class BackUpDatabase < Blog::Job
+    class BackUpDatabase < Blog::ScheduledJob
       class BackupFailed < StandardError; end
 
       NOT_CONFIGURED = "Backups are not configured, so no dump ran"
@@ -12,21 +12,13 @@ module Backups
         record_backup_sync_outcome: "record.operations.record_backup_sync_outcome",
       ]
 
-      sidekiq_options retry: false
-
       def perform
         case back_up_database.call
           in Failure(:not_configured) then logger.warn(NOT_CONFIGURED)
           in Success(*) => result then record_backup_sync_outcome.call(result)
-          in Failure(*reason) => result then report(result, reason)
+          in Failure(*reason) => result
+            record_and_raise(record_backup_sync_outcome, result, BackupFailed.new(reason.join(": ")))
         end
-      end
-
-      private
-
-      def report(result, reason)
-        record_backup_sync_outcome.call(result)
-        raise BackupFailed, reason.join(": ")
       end
     end
   end

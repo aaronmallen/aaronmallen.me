@@ -2,14 +2,12 @@
 
 module Record
   module Jobs
-    class ImportCommits < Blog::Job
+    class ImportCommits < Blog::ScheduledJob
       include Deps[
         commit_mutations: "repos.commit_mutations",
         import_commits: "operations.import_commits",
         record_sync_outcome: "operations.record_sync_outcome",
       ]
-
-      sidekiq_options retry: false
 
       def perform
         result = commit_mutations.with_import_lock { import_commits.call }

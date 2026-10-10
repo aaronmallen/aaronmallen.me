@@ -2,15 +2,13 @@
 
 module Analytics
   module Jobs
-    class RollUpAnalytics < Blog::Job
+    class RollUpAnalytics < Blog::ScheduledJob
       include Deps[
         prune_analytics_events: "operations.prune_analytics_events",
         record_rollup_sync_outcome: "record.operations.record_rollup_sync_outcome",
         roll_up_analytics: "operations.roll_up_analytics",
         save_reader_counts: "operations.save_reader_counts",
       ]
-
-      sidekiq_options retry: false
 
       def perform
         attempt(:rollup_failed) { roll_up_analytics.call }
@@ -24,8 +22,7 @@ module Analytics
       def attempt(reason)
         yield
       rescue StandardError => e
-        record_rollup_sync_outcome.call(Failure([reason, e.message]))
-        raise
+        record_and_raise(record_rollup_sync_outcome, Failure([reason, e.message]), e)
       end
     end
   end

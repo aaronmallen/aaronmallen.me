@@ -2,10 +2,8 @@
 
 module Record
   module Jobs
-    class ReapSyncStates < Blog::Job
+    class ReapSyncStates < Blog::ScheduledJob
       include Deps[reap_sync_states: "operations.reap_sync_states"]
-
-      sidekiq_options retry: false
 
       def perform = reap_sync_states.call
     end

@@ -2,7 +2,7 @@
 
 module Analytics
   module Jobs
-    class RefreshCountryDatabase < Blog::Job
+    class RefreshCountryDatabase < Blog::ScheduledJob
       class RefreshFailed < StandardError; end
 
       QUIET = :not_configured
@@ -12,20 +12,12 @@ module Analytics
         refresh_country_database: "operations.refresh_country_database",
       ]
 
-      sidekiq_options retry: false
-
       def perform
         case refresh_country_database.call
           in Success(*) | Failure(QUIET) then record_country_sync_outcome.call(Success(nil))
-          in Failure(*reason) then report(reason)
+          in Failure(*reason)
+            record_and_raise(record_country_sync_outcome, Failure(reason), RefreshFailed.new(reason.join(": ")))
         end
-      end
-
-      private
-
-      def report(reason)
-        record_country_sync_outcome.call(Failure(reason))
-        raise RefreshFailed, reason.join(": ")
       end
     end
   end

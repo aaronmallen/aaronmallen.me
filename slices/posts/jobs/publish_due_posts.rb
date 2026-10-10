@@ -2,12 +2,10 @@
 
 module Posts
   module Jobs
-    class PublishDuePosts < Blog::Job
+    class PublishDuePosts < Blog::ScheduledJob
       include Deps[
         honeybadger: "honeybadger.agent", post_queries: "repos.post_queries", publish_post: "operations.publish_post",
       ]
-
-      sidekiq_options retry: false
 
       def perform
         now = Time.now

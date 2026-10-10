@@ -2,10 +2,8 @@
 
 module Social
   module Jobs
-    class QueueHeldWebmentions < Blog::Job
+    class QueueHeldWebmentions < Blog::ScheduledJob
       include Deps[webmention_mutations: "repos.webmention_mutations", webmention_queries: "repos.webmention_queries"]
-
-      sidekiq_options retry: false
 
       def perform = webmention_queries.held.each { queue(it) }
 

@@ -14,10 +14,16 @@ RSpec.describe "The worker's schedule", type: :app do
     end
   end
 
-  it "names a job that exists in every entry" do
+  it "names a scheduled job that exists in every entry" do
     classes = schedule.values.map { it.fetch("class") }
 
-    expect(classes).to all(satisfy { Object.const_defined?(it) && Object.const_get(it) < Blog::Job })
+    expect(classes).to all(satisfy { Object.const_defined?(it) && Object.const_get(it) < Blog::ScheduledJob })
+  end
+
+  it "never retries a scheduled job, since its next run tries again" do
+    retries = schedule.values.map { Object.const_get(it.fetch("class")).get_sidekiq_options["retry"] }
+
+    expect(retries).to all(be(false))
   end
 
   it "puts every job on a queue the worker reads", :aggregate_failures do

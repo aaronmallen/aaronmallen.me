@@ -2,10 +2,8 @@
 
 module Media
   module Jobs
-    class SweepPhotos < Blog::Job
+    class SweepPhotos < Blog::ScheduledJob
       include Deps[sweep_photos: "operations.sweep_photos"]
-
-      sidekiq_options retry: false
 
       def perform = sweep_photos.call
     end
