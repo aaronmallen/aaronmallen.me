@@ -53,14 +53,14 @@ module Social
       end
 
       def deliver(source, target)
-        endpoint = endpoint_for(target)
-        return SKIPPED unless endpoint
+        page = client.fetch(target)
+        return FAILED if RETRY_STATUSES.cover?(page.status)
 
-        outcome(client.post(endpoint, source:, target:).status)
-      rescue Webmentions::Client::Refused
-        REJECTED
-      rescue Webmentions::Client::Error
+        mention(endpoint_in(page), source, target)
+      rescue Webmentions::Client::Unreachable
         FAILED
+      rescue Webmentions::Client::Error
+        SKIPPED
       end
 
       def eligible(post_id)
@@ -83,13 +83,10 @@ module Social
         nil
       end
 
-      def endpoint_for(target)
-        response = client.fetch(target)
-        return nil unless OK_STATUSES.cover?(response.status)
+      def endpoint_in(page)
+        return nil unless OK_STATUSES.cover?(page.status)
 
-        endpoint_in_headers(response) || endpoint_in_markup(response)
-      rescue Webmentions::Client::Error
-        nil
+        endpoint_in_headers(page) || endpoint_in_markup(page)
       end
 
       def endpoint_in_headers(response)
@@ -108,6 +105,16 @@ module Social
         html = ::Posts::Markdown.to_html(post.body)
 
         Nokogiri::HTML5.parse(html).css(LINK_SELECTOR).filter_map { elsewhere(source, it["href"]) }.uniq
+      end
+
+      def mention(endpoint, source, target)
+        return SKIPPED unless endpoint
+
+        outcome(client.post(endpoint, source:, target:).status)
+      rescue Webmentions::Client::Refused
+        REJECTED
+      rescue Webmentions::Client::Error
+        FAILED
       end
 
       def outcome(status)

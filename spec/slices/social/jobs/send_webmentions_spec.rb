@@ -87,18 +87,40 @@ RSpec.describe Social::Jobs::SendWebmentions do
     end
 
     {
-      "can't be read" => ->(url) { stub_request(:get, url).to_timeout },
       "is gone" => ->(url) { stub_request(:get, url).to_return(status: 404) },
-      "the resolver can't answer for" => ->(url) { unresolvable(URI(url).host) },
       "sits on a private address" => ->(url) { resolves(URI(url).host, "10.1.2.3") },
     }.each do |what, stub|
-      it "skips a page that #{what}" do
+      it "skips a page that #{what} without a retry", :aggregate_failures do
         instance_exec(target, &stub)
         post = post_with(target)
-        send_for(post)
 
+        expect { send_for(post) }.not_to raise_error
         expect(targets_of(post)).to eq([target])
       end
+    end
+  end
+
+  describe "a page that fails for now" do
+    {
+      "answers 503" => ->(url) { stub_request(:get, url).to_return(status: 503) },
+      "times out" => ->(url) { stub_request(:get, url).to_timeout },
+      "refuses the connection" => ->(url) { stub_request(:get, url).to_raise(Faraday::ConnectionFailed) },
+      "the resolver can't answer for" => ->(url) { unresolvable(URI(url).host) },
+    }.each do |what, stub|
+      it "raises so Sidekiq tries again on a page that #{what}" do
+        instance_exec(target, &stub)
+
+        expect { send_for(post_with(target)) }.to raise_error(described_class::EndpointUnreachable)
+      end
+    end
+
+    it "tells the page once it comes back" do
+      stub_page(target, status: 503)
+      post = post_with(target).tap { send_retrying(it) }
+      stub_target(target, endpoint)
+      send_for(post)
+
+      expect(a_request(:post, endpoint).with(body: { source:, target: })).to have_been_made.once
     end
   end
 
