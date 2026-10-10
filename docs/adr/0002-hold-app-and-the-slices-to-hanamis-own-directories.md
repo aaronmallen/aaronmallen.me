@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, assets, lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social,
   suggestions, tags, tasks]
 issue: AA-620
-amended: [AA-809, "#665", "#718"]
+amended: [AA-809, "#665", "#718", "#952"]
 tags: [layout, hanami, providers, lib, slices, assets]
 ---
 
@@ -29,7 +29,8 @@ it grew to 83 files, four of them used by one slice alone (AA-421).
 
 Every slice root holds only Hanami's directories, `actions`, `config`, `contracts`, `db`, `jobs`, `operations`,
 `relations`, `repos`, `structs` and `ui`, plus the base classes beside them. A slice uses the ones it needs. #665
-dropped `queries`, since ADR 0123 lets a read cross as a read repo.
+dropped `queries`, since ADR 0123 lets a read cross as a read repo. #952 added `helpers`, the presentation helpers
+ADR 0126 names, which each slice keeps out of its container through `no_auto_register_paths`.
 
 A slice may also keep the entry surface its own protocol forces, beside its actions. Two qualify:
 
@@ -37,6 +38,10 @@ A slice may also keep the entry surface its own protocol forces, beside its acti
   derives each wire name from the class name, so `MCP::Tools::SuggestEdits` answers to `suggest_edits`. Moving or
   renaming a class renames a tool.
 - `slices/admin/auth`. Its classes read and write the Rack session, so they answer to Rack, not to Hanami.
+
+The `api` slice keeps two more, which #952 added here: `slices/api/endpoints`, the layer the API and MCP share, one
+class per endpoint (ADR 0088), and `slices/api/serializers`, the Alba serializers every API response goes through,
+kept out of the container (ADR 0089).
 
 Everything else goes by what it is:
 
@@ -103,7 +108,8 @@ checks those strings until the code runs.
 Each slice that owns library code pays one `push_dir` line in its `config/slice.rb`, and its code sits one
 directory away from the slice, under `lib/` rather than inside `slices/<name>`.
 
-The rule has exceptions: `auth` in admin and `prompts`, `protocol` and `tools` in mcp. This record says why.
+The rule has exceptions: `auth` in admin, `endpoints` and `serializers` in api, and `prompts`, `protocol` and
+`tools` in mcp. This record says why.
 
 No spec checks the layout or who owns a kernel constant. A kernel constant that drops to one slice naming it stays
 in `lib/blog` until someone moves it to `lib/<slice>/`.
