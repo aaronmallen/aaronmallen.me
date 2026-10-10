@@ -8,7 +8,7 @@ module Admin
 
         def back(request)
           id = record_id(request)
-          "#{routes.path(:admin_messages, **Helpers::MessageList.from(request.params, :filter), open: id)}#read-#{id}"
+          Helpers::MessageList.back(routes, Helpers::MessageList.from(request.params, :filter), open: id)
         end
 
         def kind(_request) = "message"

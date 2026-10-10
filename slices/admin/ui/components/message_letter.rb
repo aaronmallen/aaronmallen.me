@@ -15,7 +15,7 @@ module Admin
         prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
         def view_template
-          article(id: "read-#{@message.id}", class: "msg-letter") do
+          article(id: Helpers::MessageList.anchor(@message.id), class: "msg-letter") do
             p(class: "inbox-meta") do
               span { @message.reply_to }
               Moment(at: @message.received_at)

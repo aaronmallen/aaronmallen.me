@@ -22,7 +22,7 @@ module Admin
           list = Helpers::MessageList.from(request.params)
           page = landing(request) { message_queries.page_listed(it, **list).past_end? }
 
-          routes.path(:admin_messages, **list, **Blog::Structs::Page.query(page))
+          Helpers::MessageList.back(routes, list, **Blog::Structs::Page.query(page))
         end
       end
     end

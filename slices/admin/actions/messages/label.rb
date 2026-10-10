@@ -24,7 +24,7 @@ module Admin
         private
 
         def back(request, id)
-          "#{routes.path(:admin_messages, **Helpers::MessageList.from(request.params, :filter), open: id)}#read-#{id}"
+          Helpers::MessageList.back(routes, Helpers::MessageList.from(request.params, :filter), open: id)
         end
 
         def refuse(response, back)
