@@ -1834,7 +1834,6 @@ CREATE TABLE public.oauth_clients (
     visitor_hash public.visitor_hash NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    revoked_at timestamp with time zone,
     last_used_at timestamp with time zone,
     CONSTRAINT oauth_clients_redirect_uris_check CHECK ((cardinality(redirect_uris) > 0))
 );
@@ -6471,4 +6470,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261009000804_add_pull_requests_to_record_links_and_search.rb'),
 ('20261010000140_create_post_link_checks.rb'),
 ('20261010000420_add_broken_links_to_attention.rb'),
-('20261010000440_add_scopes_and_expiry_to_api_tokens.rb');
+('20261010000440_add_scopes_and_expiry_to_api_tokens.rb'),
+('20261010000870_drop_revoked_at_from_oauth_clients.rb');

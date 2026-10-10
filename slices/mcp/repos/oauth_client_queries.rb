@@ -3,13 +3,13 @@
 module MCP
   module Repos
     class OAuthClientQueries < DB::Repo
-      def connected = oauth_clients.connected.holding_live_token.newest_first.to_a
+      def connected = oauth_clients.holding_live_token.newest_first.to_a
 
-      def connected_by_client_id(client_id) = oauth_clients.connected.with_client_id(client_id).one
+      def connected_by_client_id(client_id) = oauth_clients.with_client_id(client_id).one
 
-      def connected_by_id(id) = oauth_clients.connected.by_pk(id).one
+      def connected_by_id(id) = oauth_clients.by_pk(id).one
 
-      def connected_by_id_for_update(id) = oauth_clients.connected.by_pk(id).lock.one
+      def connected_by_id_for_update(id) = oauth_clients.by_pk(id).lock.one
 
       def count_from_visitor_since(visitor_hashes, time)
         oauth_clients.for_visitor(visitor_hashes).registered_since(time).count

@@ -72,8 +72,6 @@ RSpec.describe "OAuth token", type: :request do
 
   def resource = "https://aaronmallen.me/mcp"
 
-  def revoke_client = MCP::Slice["db.rom"].relations[:oauth_clients].update(revoked_at: Time.now)
-
   def tokens = MCP::Slice["db.rom"].relations[:oauth_tokens]
 
   describe "exchanging an authorization code" do
@@ -230,14 +228,6 @@ RSpec.describe "OAuth token", type: :request do
       expect(document["error"]).to eq("invalid_client")
     end
 
-    it "refuses a client that was revoked" do
-      code
-      revoke_client
-      exchange
-
-      expect(document["error"]).to eq("invalid_client")
-    end
-
     it "issues no token when it refuses" do
       exchange(code_verifier: Blog::Types::NewSecret[])
 
@@ -380,15 +370,6 @@ RSpec.describe "OAuth token", type: :request do
       refresh(token)
 
       expect(document["error"]).to eq("invalid_grant")
-    end
-
-    it "refuses a client that was revoked" do
-      exchange
-      token = document.fetch("refresh_token")
-      revoke_client
-      refresh(token)
-
-      expect(document["error"]).to eq("invalid_client")
     end
 
     it "refuses another client" do

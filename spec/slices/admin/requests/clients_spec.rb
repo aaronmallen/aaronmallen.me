@@ -183,13 +183,6 @@ RSpec.describe "Admin MCP clients", type: :request do
       expect(last_response).to be_ok
       expect(names).to eq([client.client_id])
     end
-
-    it "leaves out a client that was already revoked" do
-      connect(:revoked, client_name: "Gone")
-      get "/admin/clients"
-
-      expect(names).to be_empty
-    end
   end
 
   describe "revoking" do
@@ -252,12 +245,6 @@ RSpec.describe "Admin MCP clients", type: :request do
 
     it "answers 404 for a client it does not know" do
       revoke(0)
-
-      expect(last_response.status).to eq(404)
-    end
-
-    it "answers 404 for a client that was already revoked" do
-      revoke(mcp_create(:oauth_client, :revoked).id)
 
       expect(last_response.status).to eq(404)
     end

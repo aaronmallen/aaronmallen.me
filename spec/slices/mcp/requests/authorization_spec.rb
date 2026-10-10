@@ -557,20 +557,6 @@ RSpec.describe "OAuth authorization", type: :request do
 
       expect(codes.count).to eq(0)
     end
-
-    it "rejects a client revoked since the page loaded" do
-      MCP::Slice["db.rom"].relations[:oauth_clients].update(revoked_at: Time.now)
-      approve_with
-
-      expect(document["error"]).to eq("invalid_client")
-    end
-
-    it "issues no code for a client revoked since the page loaded" do
-      MCP::Slice["db.rom"].relations[:oauth_clients].update(revoked_at: Time.now)
-      approve_with
-
-      expect(codes.count).to eq(0)
-    end
   end
 
   describe "when the approval carries the wrong CSRF token" do
@@ -711,12 +697,6 @@ RSpec.describe "OAuth authorization", type: :request do
 
     it "names the client as the problem" do
       authorize(client_id: unknown_client_id)
-
-      expect(document["error"]).to eq("invalid_client")
-    end
-
-    it "rejects a client that was revoked" do
-      authorize(client_id: mcp_create(:oauth_client, :revoked).client_id)
 
       expect(document["error"]).to eq("invalid_client")
     end

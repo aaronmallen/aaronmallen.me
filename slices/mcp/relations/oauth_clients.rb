@@ -13,8 +13,6 @@ module MCP
         end
       end
 
-      def connected = where(revoked_at: nil)
-
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
       def held_token

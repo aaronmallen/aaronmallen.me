@@ -10,8 +10,4 @@ Spec::DB::Factories[:mcp].define(:oauth_client) do |f|
   f.response_types { %w[code] }
   f.token_endpoint_auth_method "none"
   f.sequence(:visitor_hash) { |n| Digest::SHA256.hexdigest("registrant-#{n}") }
-
-  f.trait :revoked do |t|
-    t.revoked_at { Time.now }
-  end
 end

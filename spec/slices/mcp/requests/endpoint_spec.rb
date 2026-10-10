@@ -253,14 +253,6 @@ RSpec.describe "MCP endpoint", type: :request do
       expect(last_response.status).to eq(401)
     end
 
-    it "refuses a token whose client was revoked" do
-      token = access_token
-      clients.update(revoked_at: Time.now)
-      rpc("tools/list", authorization: "Bearer #{token}")
-
-      expect(last_response.status).to eq(401)
-    end
-
     it "refuses a token the operator revoked from the admin" do
       token = access_token
       post "/admin/clients/#{clients.one[:id]}/revoke", _csrf_token: admin_csrf_token
