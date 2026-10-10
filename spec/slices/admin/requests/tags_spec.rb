@@ -269,6 +269,14 @@ RSpec.describe "Admin tags", type: :request do
       expect(page).to have_css(".empty")
     end
 
+    it "says the private tab has no tags yet", :aggregate_failures do
+      create(:post, :published, tags: %w[ruby])
+      get "/admin/tags", scope: "private"
+
+      expect(page).to have_css(".card-blurb", exact_text: "0 tags · only you see these, on tasks and the journal")
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tags.index.empty"))
+    end
+
     describe "adding a tag" do
       it "stores it" do
         add("ruby")

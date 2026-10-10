@@ -674,6 +674,13 @@ RSpec.describe "Admin social", type: :request do
         expect(page).to have_css(".sq-time", text: "in 1 hour")
       end
 
+      it "counts down in days to an item a day out" do
+        queued(at: Time.now + (26 * 60 * 60))
+        get "/admin/social"
+
+        expect(page).to have_css(".sq-time", exact_text: "in 1 day")
+      end
+
       it "counts down in minutes to an item due soon" do
         queued(at: Time.now + (5 * 60) + 30)
         get "/admin/social"
@@ -769,6 +776,12 @@ RSpec.describe "Admin social", type: :request do
         get "/admin/social"
 
         expect(page).to have_css(".empty", text: "Nothing waiting")
+      end
+
+      it "says nothing is posted" do
+        get "/admin/social", filter: "posted"
+
+        expect(page).to have_css(".empty", text: "Nothing posted yet")
       end
     end
 

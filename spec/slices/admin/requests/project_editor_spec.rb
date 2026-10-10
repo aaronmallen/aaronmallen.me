@@ -283,6 +283,13 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
         expect(page).to have_css("textarea[name='project[tagline]']", text: "Terminal colors", visible: :all)
       end
 
+      it "refuses a repository that is not owner/repo", :aggregate_failures do
+        save(repo: "Not a repo")
+
+        expect(last_response.status).to eq(422)
+        expect(page).to have_css(".field-error", text: i18n.t("ui.components.projects.field_error.repo.format"))
+      end
+
       it "refuses a repository another project already tracks", :aggregate_failures do
         create(:project, repo: "aaronmallen/sai", url: "https://github.com/aaronmallen/sai")
         save

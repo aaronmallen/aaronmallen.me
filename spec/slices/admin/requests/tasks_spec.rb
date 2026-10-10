@@ -2847,6 +2847,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         end
       end
 
+      it "asks for a day when it cannot read the one it is sent" do
+        plan("soon")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast] .toast", exact_text: "Pick a day first", visible: :all)
+      end
+
       it "lists each planned sprint with the day it falls on" do
         create(:sprint, sprint_date: tomorrow)
         upcoming

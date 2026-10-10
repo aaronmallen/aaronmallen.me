@@ -464,6 +464,13 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
     end
 
+    it "counts one pending mention in the singular" do
+      create(:webmention, :reply, post: create(:post, :published))
+      get "/admin/analytics"
+
+      expect(meter_card("Webmentions per post")).to have_css(".chart-peak", exact_text: "1 received · 1 pending")
+    end
+
     describe "with an ignored webmention" do
       before do
         hello = create(:post, :published, title: "Hello")

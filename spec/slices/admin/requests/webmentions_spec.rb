@@ -174,6 +174,12 @@ RSpec.describe "Admin webmentions", type: :request do
       expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.webmentions.index.empty.ignored"))
     end
 
+    it "shows an empty inbox for the approved filter with no approved mentions" do
+      get "/admin/webmentions", status: "approved"
+
+      expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.webmentions.index.empty.approved"))
+    end
+
     describe "with a seen pending mention" do
       let!(:seen) do
         create(:webmention, post: target, author_name: "Seen", seen_at: Time.now)

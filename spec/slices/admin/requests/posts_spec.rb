@@ -183,6 +183,15 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       expect(page).to have_css(".li-sub", exact_text: sub_line("/writing/hello · #{dated(today - 27)} · 3 words"))
     end
 
+    it "counts one view and one visitor in the singular" do
+      create(:post, :published, slug: "hello")
+      day = create(:analytics_rollup, day: today).day
+      create(:analytics_rollup_path, day:, path: "/writing/hello", views: 1, visitors: 1, bounces: 1)
+      get "/admin/posts"
+
+      expect(page.find(".li-sub").text).to include(" · 1 view · 1 visitor · ")
+    end
+
     describe "with rolled up views" do
       let(:head) { "/writing/hello · #{dated(today - 27)} · 3 words" }
 
