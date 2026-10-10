@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -66,7 +66,10 @@ order, which #148 saves through `fetch` alone.
   #201 added a read that swaps in no HTML: the command palette fetches the open tasks as JSON from
   `/admin/tasks/palette` when it first opens, as [ADR 0091][0091] records.
 
-We leave `config.actions.method_override` at Hanami's default, on. No form sends `_method`.
+We turn `config.actions.method_override` off in `config/app.rb`, and no form sends `_method`. #924 records the
+change: #196 turned it off because `Rack::MethodOverride` sat ahead of `Blog::ParamsGuard` and read the body of
+every POST, so Rack parsed a stranger's multipart upload before the guard could refuse it. The record had said we
+left it at Hanami's default, on.
 
 ## Alternatives
 
@@ -106,7 +109,8 @@ Six places break the rule today, and each fails with scripts off:
 - Task rows change order only through a script (#148), so with scripts off the admin cannot reorder tasks.
   ADR 0085 holds that cost.
 
-Method override costs a middleware on every request and gives nothing, since no form fakes a verb.
+Method override would cost a middleware on every request and give nothing, since no form fakes a verb. With it off
+(#196, recorded by #924), a `_method` field does nothing and the request stays a POST.
 
 [0071]: 0071-load-a-tasks-read-and-edit-pages-into-dialogs-with-fetch.md
 [0083]: 0083-upload-photos-by-fetch-from-the-markdown-editor.md
