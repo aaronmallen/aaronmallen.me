@@ -5,10 +5,7 @@ module Admin
     module Components
       module Tasks
         class Closed < Component
-          AT = {
-            Blog::Types::TaskStatus["canceled"] => ".canceled_at",
-            Blog::Types::TaskStatus["done"] => ".done_at",
-          }.freeze
+          AT = Blog::Types::ClosedTaskStatus.values.to_h { [it, ".#{it}_at"] }.freeze
 
           prop :task, Blog::Types::Instance(ROM::Struct)
 

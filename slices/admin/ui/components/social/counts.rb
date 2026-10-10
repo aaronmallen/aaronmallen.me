@@ -6,10 +6,7 @@ module Admin
       module Social
         class Counts < Component
           COUNT = /%\{count\}/
-          COUNTS = {
-            Blog::Types::NetworkName["bluesky"] => ".bluesky",
-            Blog::Types::NetworkName["mastodon"] => ".mastodon",
-          }.freeze
+          COUNTS = Blog::Types::NetworkName.values.to_h { [it, ".#{it}"] }.freeze
           FULL = 100
           LIMIT = /%\{limit\}/
 

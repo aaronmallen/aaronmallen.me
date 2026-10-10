@@ -7,16 +7,11 @@ module Admin
         class Index < View
           include Components::Projects
 
-          ARCHIVED = Blog::Types::ProjectFilter["archived"]
           LIVE = Blog::Types::ProjectFilter["live"]
           WORK = Blog::Types::ProjectFilter["work"]
 
-          EMPTY = { LIVE => ".empty.live", ARCHIVED => ".empty.archived", WORK => ".empty.work" }.freeze
-          FILTERS = {
-            LIVE => "ui.views.projects.index.live",
-            ARCHIVED => "ui.views.projects.index.archived",
-            WORK => "ui.views.projects.index.work",
-          }.freeze
+          EMPTY = Blog::Types::ProjectFilter.values.to_h { [it, ".empty.#{it}"] }.freeze
+          FILTERS = Blog::Types::ProjectFilter.values.to_h { [it, "ui.views.projects.index.#{it}"] }.freeze
 
           prop :archived_count, Blog::Types::Integer
           prop :filter, Blog::Types::ProjectFilter

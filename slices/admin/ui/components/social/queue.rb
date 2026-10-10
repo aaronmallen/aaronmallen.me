@@ -5,16 +5,8 @@ module Admin
     module Components
       module Social
         class Queue < Component
-          DRAFTS = Blog::Types::SocialQueue["drafts"]
-          POSTED = Blog::Types::SocialQueue["posted"]
-          QUEUED = Blog::Types::SocialQueue["queued"]
-
-          EMPTIES = { QUEUED => ".empty.queued", POSTED => ".empty.posted", DRAFTS => ".empty.drafts" }.freeze
-          FILTERS = {
-            QUEUED => "ui.components.social.queue.queued",
-            POSTED => "ui.components.social.queue.posted",
-            DRAFTS => "ui.components.social.queue.drafts",
-          }.freeze
+          EMPTIES = Blog::Types::SocialQueue.values.to_h { [it, ".empty.#{it}"] }.freeze
+          FILTERS = Blog::Types::SocialQueue.values.to_h { [it, "ui.components.social.queue.#{it}"] }.freeze
 
           prop :accounts, Blog::Types::Hash
           prop :filter, Blog::Types::String

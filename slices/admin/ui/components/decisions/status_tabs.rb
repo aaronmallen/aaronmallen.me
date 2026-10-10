@@ -5,11 +5,7 @@ module Admin
     module Components
       module Decisions
         class StatusTabs < Component
-          LABELS = {
-            Blog::Types::DecisionStatus["open"] => "ui.components.status_pill.open",
-            Blog::Types::DecisionStatus["resolved"] => "ui.components.status_pill.resolved",
-            Blog::Types::DecisionStatus["dropped"] => "ui.components.status_pill.dropped",
-          }.freeze
+          LABELS = Blog::Types::DecisionStatus.values.to_h { [it, "ui.components.status_pill.#{it}"] }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :filter, Blog::Types::DecisionStatus

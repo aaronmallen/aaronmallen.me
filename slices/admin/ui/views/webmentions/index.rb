@@ -8,22 +8,10 @@ module Admin
           include Components::Webmentions
 
           APPROVED = Blog::Types::WebmentionStatus["approved"]
-          IGNORED = Blog::Types::WebmentionStatus["ignored"]
           PENDING = Blog::Types::WebmentionStatus["pending"]
-          SPAM = Blog::Types::WebmentionStatus["spam"]
 
-          EMPTIES = {
-            PENDING => ".empty.pending",
-            APPROVED => ".empty.approved",
-            IGNORED => ".empty.ignored",
-            SPAM => ".empty.spam",
-          }.freeze
-          FILTERS = {
-            PENDING => "ui.views.webmentions.index.pending",
-            APPROVED => "ui.views.webmentions.index.approved",
-            IGNORED => "ui.views.webmentions.index.ignored",
-            SPAM => "ui.views.webmentions.index.spam",
-          }.freeze
+          EMPTIES = Blog::Types::WebmentionStatus.values.to_h { [it, ".empty.#{it}"] }.freeze
+          FILTERS = Blog::Types::WebmentionStatus.values.to_h { [it, "ui.views.webmentions.index.#{it}"] }.freeze
 
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :filter, Blog::Types::WebmentionStatus

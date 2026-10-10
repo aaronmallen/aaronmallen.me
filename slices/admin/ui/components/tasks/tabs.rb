@@ -5,17 +5,9 @@ module Admin
     module Components
       module Tasks
         class Tabs < Component
-          LABELS = {
-            Blog::Types::TaskTab["today"] => ".today",
-            Blog::Types::TaskTab["upcoming"] => ".upcoming",
-            Blog::Types::TaskTab["next"] => ".next",
-            Blog::Types::TaskTab["someday"] => ".someday",
-            Blog::Types::TaskTab["external"] => ".external",
-            Blog::Types::TaskTab["completed"] => ".completed",
-          }.freeze
           COMPLETED = Blog::Types::TaskTab["completed"]
           EXTERNAL = Blog::Types::TaskTab["external"]
-          NAMES = Blog::Types::TaskTab.values.freeze
+          LABELS = Blog::Types::TaskTab.values.to_h { [it, ".#{it}"] }.freeze
           UNSEEN = :unseen
 
           prop :counts, Blog::Types::Hash
@@ -26,7 +18,7 @@ module Admin
 
           def view_template
             div(class: "screen-tabs task-tabs") do
-              nav(class: "screen-tabs-list", aria: { label: t(".label") }) { NAMES.each { tab(it) } }
+              nav(class: "screen-tabs-list", aria: { label: t(".label") }) { LABELS.each { tab(*it) } }
               div(class: "screen-tabs-side") { SavedViews(**@saved_views) }
             end
           end
@@ -43,11 +35,11 @@ module Admin
             name == COMPLETED ? found.merge(@range) : found
           end
 
-          def tab(name)
+          def tab(name, label)
             current = name == @tab
 
             a(class: "screen-tab", href: href(name), aria: { current: ("page" if current) }) do
-              span { t(LABELS.fetch(name)) }
+              span { t(label) }
               count(name)
             end
           end

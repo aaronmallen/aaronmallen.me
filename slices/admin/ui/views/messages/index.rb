@@ -12,9 +12,7 @@ module Admin
           TAG_ID = "messages-tag"
           UNREAD = Blog::Types::MessageFilter["unread"]
 
-          EMPTIES = {
-            INBOX => ".empty.inbox", UNREAD => ".empty.unread", READ => ".empty.read", SPAM => ".empty.spam",
-          }.freeze
+          EMPTIES = Blog::Types::MessageFilter.values.to_h { [it, ".empty.#{it}"] }.freeze
           FILTERS = {
             INBOX => "ui.views.messages.index.inbox",
             UNREAD => "ui.views.messages.index.unread",

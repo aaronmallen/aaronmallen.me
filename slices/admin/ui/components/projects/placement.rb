@@ -7,8 +7,7 @@ module Admin
         class Placement < Component
           VISIBILITIES = {
             Blog::Constants::EMPTY_STRING => ".visibilities.unset",
-            Blog::Types::ProjectVisibility["public"] => ".visibilities.public",
-            Blog::Types::ProjectVisibility["private"] => ".visibilities.private",
+            **Blog::Types::ProjectVisibility.values.to_h { [it, ".visibilities.#{it}"] },
           }.freeze
 
           prop :values, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::String)

@@ -4,11 +4,7 @@ module Admin
   module Actions
     module Messages
       class Mark < Action
-        TOASTS = {
-          Blog::Types::MessageStatus["read"] => "messages_page.toasts.read",
-          Blog::Types::MessageStatus["spam"] => "messages_page.toasts.spam",
-          Blog::Types::MessageStatus["unread"] => "messages_page.toasts.unread",
-        }.freeze
+        TOASTS = Blog::Types::MessageStatus.values.to_h { [it, "messages_page.toasts.#{it}"] }.freeze
 
         include Deps[mark_message: "contact.operations.mark_message"]
 
