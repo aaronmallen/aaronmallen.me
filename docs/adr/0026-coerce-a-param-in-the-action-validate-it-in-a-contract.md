@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-462
-amended: [AA-542, AA-543, AA-809]
+amended: [AA-542, AA-543, AA-809, "#956"]
 tags: [actions, params, coercion, validation, types, contracts]
 ---
 
@@ -47,6 +47,13 @@ The rule holds wherever a raw param is first read, so an operation an action han
 same way. `Admin::Operations::BuildPostsPage` and `BuildActivityPage` take the filter and the dates through
 `PostFilterParam` and `DateParam`.
 
+Two kinds of check sit outside the rule, as #956 set out. An OAuth callback checks its own `state`, `error` and
+`code`: the GitHub sign-in in `Admin::Actions::Sessions::Create` and the Mastodon connect in
+`Admin::Actions::Services::MastodonCallback`. The `state` check reads the session, which only the action holds, and
+no form waits to show an error. An action may also answer 404 when a key it looks up names nothing, such as an
+unknown renderer in `Admin::Actions::Markdown::Preview` or a record id no row has. A missing page has no fields to
+word an error beside, so a contract would add nothing.
+
 ## Alternatives
 
 **Take Hanami's `params do` schema in the action.** It is the framework's answer and it would end the five
@@ -78,7 +85,7 @@ An action stays thin enough to read in one screen, and a reader who wants to kno
 opens the contract. The cost is that the action no longer says. Hanami's own answer sits unused.
 
 No spec checks the rule. A `params do` block, a test or parser over a raw param, or `to_i` on one passes the suite,
-so the rule holds by habit and review. The GitHub callback already breaks it: it asks
-`request.params[:error].nil?`.
+so the rule holds by habit and review. Since #956 the exemptions let an action check a param itself, so a
+reviewer has to tell an OAuth callback or a lookup 404 from a check that belongs in a contract.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
