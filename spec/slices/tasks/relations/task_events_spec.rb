@@ -3,8 +3,23 @@
 RSpec.describe Tasks::Relations::TaskEvents do
   let(:task) { create(:task) }
   let(:today) { Blog::TimeZone.today }
+  let(:relation) { Tasks::Slice["db.rom"].relations[:task_events] }
 
   def record(kind, **columns) = create(:task_event, task_id: task.id, kind:, tag_name: nil, **columns)
+
+  def rolled_back(tag_name)
+    record("tagged", tag_name:)
+    raise Sequel::Rollback
+  end
+
+  it "rolls back its own writes and keeps the ones around it" do
+    relation.dataset.db.transaction do
+      record("tagged", tag_name: "kept")
+      relation.track([task.id], Time.now, diff: ->(*) { [] }) { rolled_back("dropped") }
+    end
+
+    expect(relation.for_task(task.id).pluck(:tag_name)).to eq(["kept"])
+  end
 
   it "refuses a move with no destination" do
     expect { record("moved", from_list: "next") }

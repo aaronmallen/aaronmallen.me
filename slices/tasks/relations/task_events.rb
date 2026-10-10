@@ -19,7 +19,7 @@ module Tasks
       def in_order = order(self[:occurred_at].asc, self[:id].asc)
 
       def track(task_ids, at, diff:, seen: false)
-        dataset.db.transaction do
+        dataset.db.transaction(savepoint: true) do
           before = states(task_ids)
           result = yield
           events = diff.call(before, states(before.keys), at)
