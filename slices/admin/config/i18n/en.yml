@@ -1460,10 +1460,14 @@ en:
           token: "personal access token"
           way: "Signed in with"
         field_error:
-          app_password_blank: "Paste an app password first."
-          blank: "Paste a key first."
-          handle_blank: "Type a handle first."
-          token_blank: "Paste a token first."
+          access_token:
+            blank: "Paste a token first."
+          api_key:
+            blank: "Paste a key first."
+          app_password:
+            blank: "Paste an app password first."
+          handle:
+            blank: "Type a handle first."
         picker:
           asks: "The site will ask for"
           away: "You'll approve access on %{name}, then come straight back here."
@@ -1805,8 +1809,6 @@ en:
             format: "Give whole hours, up to 9999."
           kind:
             format: "Pick one of the four link types."
-          list:
-            format: "Pick one of the lists."
           minutes:
             format: "Give whole minutes, up to 59."
           other_id:

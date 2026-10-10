@@ -6,14 +6,14 @@ module Admin
       module Decisions
         class FieldError < Blog::UI::FieldError
           SCOPE = "decision"
-          MESSAGES = {
-            body: { "blank" => ".body.blank", "control" => ".control" },
-            note: { "blank" => ".note.blank", "control" => ".control", "long" => ".note.long" },
-            option_id: { "format" => ".option_id.missing", "missing" => ".option_id.missing" },
-            problem: { "blank" => ".problem.blank", "control" => ".control" },
-            reason: { "blank" => ".reason.blank", "control" => ".control" },
-            tags: { "format" => ".tags.format" },
-            title: { "blank" => ".title.blank", "control" => ".control" },
+          CONTROL = { "control" => ".control" }.freeze
+          OVERRIDES = {
+            body: CONTROL,
+            note: CONTROL,
+            option_id: { "format" => ".option_id.missing" },
+            problem: CONTROL,
+            reason: CONTROL,
+            title: CONTROL,
           }.freeze
 
           def self.field_slug(field) = super.tr("_", "-")

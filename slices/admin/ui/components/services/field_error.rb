@@ -6,12 +6,6 @@ module Admin
       module Services
         class FieldError < Blog::UI::FieldError
           SCOPE = "connection"
-          MESSAGES = {
-            access_token: { "blank" => ".token_blank" },
-            api_key: { "blank" => ".blank" },
-            app_password: { "blank" => ".app_password_blank" },
-            handle: { "blank" => ".handle_blank" },
-          }.freeze
         end
       end
     end

@@ -335,6 +335,12 @@ RSpec.describe "Admin tags", type: :request do
         expect(page).to have_css(".field-error", text: message("format"))
       end
 
+      it "says why it refused a name with a control character" do
+        add("ru\u0007by")
+
+        expect(page).to have_css(".field-error", text: message("control"))
+      end
+
       ["c++", "-ruby", "ruby-", "a/b", "open source"].each do |name|
         it "refuses #{name.inspect}, which is not a slug", :aggregate_failures do
           add(name)

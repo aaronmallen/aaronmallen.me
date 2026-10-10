@@ -4,6 +4,7 @@ module Blog
   module UI
     class FieldError < Component
       INVALID = "ui.field_error.invalid"
+      OVERRIDES = Blog::Constants::EMPTY_HASH
 
       prop :field, Blog::Types::Symbol
       prop :errors, Blog::Types::Hash
@@ -24,16 +25,20 @@ module Blog
         codes = @errors[@field]
         return unless codes
 
-        p(**error_attributes) { t(message_key(Array(codes).first)) }
+        p(**error_attributes) { message(Array(codes).first) }
       end
 
       private
+
+      def convention_key(code) = ".#{@field}.#{code}"
 
       def error_attributes = { class: "field-error", id: error_id }
 
       def error_id = "#{self.class.id_for(@field, @scope)}-error"
 
-      def message_key(code) = self.class::MESSAGES.fetch(@field, Blog::Constants::EMPTY_HASH).fetch(code, INVALID)
+      def message(code) = t(convention_key(code), default: nil) || t(override_key(code))
+
+      def override_key(code) = self.class::OVERRIDES.dig(@field, code) || INVALID
     end
   end
 end

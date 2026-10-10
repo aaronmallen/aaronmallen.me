@@ -23,7 +23,7 @@ module Public
         def view_template
           code = Array(@errors[@field]).first
 
-          p(**error_attributes(code)) { t(message_key(code)) if code }
+          p(**error_attributes(code)) { message(code) if code }
         end
 
         private

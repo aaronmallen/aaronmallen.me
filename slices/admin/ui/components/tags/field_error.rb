@@ -6,10 +6,6 @@ module Admin
       module Tags
         class FieldError < Blog::UI::FieldError
           SCOPE = "tag"
-          MESSAGES = {
-            color: { "format" => ".color.format" },
-            name: { "blank" => ".name.blank", "format" => ".name.format", "taken" => ".name.taken" },
-          }.freeze
         end
       end
     end
