@@ -5,6 +5,7 @@ status: active
 created: 2026-10-09
 area: [lib]
 issue: "#848"
+amended: ["#910"]
 tags: [posts, markdown, commonmarker, anchors, headings]
 ---
 
@@ -23,6 +24,9 @@ so the ids reach all three.
 
 `Posts::Markdown` turns on commonmarker's `header_ids` extension. Every heading, h1 to h6, gets an id slugged from its
 text, and a heading whose slug repeats an earlier one gets a numbered suffix. We write no slug code of our own.
+
+It renders a level one heading as an `h2`. Every page that shows rendered markdown draws its own `h1`, and
+[ADR 0037][0037] allows a page only one.
 
 ## Alternatives
 
@@ -44,4 +48,8 @@ so an upgrade has to check them.
 take ids too. The post page renders edit notes apart from the body, so a heading in a note can repeat an id the body
 already holds.
 
+A `#` line in a post joins the table of contents with the `h2`s, and a writer who wants a heading above the `h2`s
+cannot have one.
+
+[0037]: 0037-give-every-public-page-an-h1-hidden-where-the-design-draws-none.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

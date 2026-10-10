@@ -7,6 +7,7 @@ module Posts
     class Document
       def initialize(markdown)
         @root = Commonmarker.parse(markdown, options: OPTIONS)
+        @root.walk { it.header_level = 2 if it.type == :heading && it.header_level == 1 }
       end
 
       def first_paragraph

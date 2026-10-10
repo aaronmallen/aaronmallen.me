@@ -223,6 +223,14 @@ RSpec.describe "Writing", type: :request do
       expect(page.all(".prose h2, .prose h3").map { it[:id] }).to eq(%w[setup the-config-file setup-1])
     end
 
+    it "keeps one h1 when the body holds a level one heading", :aggregate_failures do
+      publish("hello", 1, body: "# Big\n\nthe rest")
+      get "/writing/hello"
+
+      expect(page).to have_css("h1", count: 1)
+      expect(page).to have_css(".prose h2#big", exact_text: "Big")
+    end
+
     it "leaves no empty link inside a heading" do
       publish("hello", 1, body: "## Setup\n\n### Deeper")
       get "/writing/hello"
