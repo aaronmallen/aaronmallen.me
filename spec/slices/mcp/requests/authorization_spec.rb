@@ -634,6 +634,7 @@ RSpec.describe "OAuth authorization", type: :request do
       "the PKCE challenge is missing" => { code_challenge: nil },
       "the PKCE challenge is too short" => { code_challenge: "short" },
       "the PKCE method is not S256" => { code_challenge_method: "plain" },
+      "the PKCE method is missing" => { code_challenge_method: nil },
       "the resource names another server" => { resource: "https://example.com/mcp" },
     }.each do |description, overrides|
       context "when #{description} and I am signed out" do
@@ -811,6 +812,7 @@ RSpec.describe "OAuth authorization", type: :request do
       "a PKCE challenge holding a slash" => [{ code_challenge: "#{'a' * 42}/" }, "invalid_request"],
       "an empty PKCE challenge" => [{ code_challenge: "" }, "invalid_request"],
       "an empty PKCE method" => [{ code_challenge_method: "" }, "invalid_request"],
+      "a missing PKCE method" => [{ code_challenge_method: nil }, "invalid_request"],
       "an empty response_type" => [{ response_type: "" }, "unsupported_response_type"],
       "a resource on another path of this server" => [{ resource: "https://aaronmallen.me/admin" }, "invalid_target"],
       "a resource on a host that only starts the same" =>
@@ -869,8 +871,7 @@ RSpec.describe "OAuth authorization", type: :request do
       "a resource with a trailing slash" => { resource: "https://aaronmallen.me/mcp/" },
       "the issuer itself as the resource" => { resource: "https://aaronmallen.me" },
       "an empty state" => { state: "" },
-      "no PKCE method, state, resource or scope" =>
-        { code_challenge_method: nil, resource: nil, scope: nil, state: nil },
+      "no state, resource or scope" => { resource: nil, scope: nil, state: nil },
     }.each do |description, overrides|
       it "issues a code for #{description}" do
         approve_authorization(authorize_path(**overrides))

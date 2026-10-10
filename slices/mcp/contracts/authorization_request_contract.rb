@@ -14,7 +14,7 @@ module MCP
       params do
         required(:response_type).filled(:string, included_in?: Blog::Types::OAuthResponseType.values)
         required(:code_challenge).filled(Blog::Types::PKCEValue)
-        optional(:code_challenge_method).value(Blog::Types::CodeChallengeMethod.optional)
+        required(:code_challenge_method).value(Blog::Types::CodeChallengeMethod)
         optional(:redirect_uri).value(UNCOERCED)
         optional(:resource).value(UNCOERCED)
         optional(:scope).maybe(:string, format?: SCOPE)
