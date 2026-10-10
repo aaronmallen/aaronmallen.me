@@ -5,6 +5,7 @@ module Admin
     ID = /\d+/
     INBOX_MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus["read"], Blog::Types::MessageStatus["spam"])
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
+    JID = /\h+/
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
     MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
@@ -20,6 +21,8 @@ module Admin
     get "/", to: "today.show", as: :root
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
+    post "/attention/dead-jobs/:jid/discard", to: "today.discard_dead_job", as: :discard_dead_job, jid: JID
+    post "/attention/dead-jobs/:jid/retry", to: "today.retry_dead_job", as: :retry_dead_job, jid: JID
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID

@@ -6,6 +6,9 @@ module Activity
 
     config.shared_app_component_keys += %w[sidekiq.dead_set]
 
-    export %w[operations.snooze_attention repos.activity_queries repos.attention_queries repos.review_queries]
+    export %w[
+      operations.discard_dead_job operations.retry_dead_job operations.snooze_attention repos.activity_queries
+      repos.attention_queries repos.review_queries
+    ]
   end
 end

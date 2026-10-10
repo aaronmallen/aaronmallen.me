@@ -321,8 +321,10 @@ en:
       unscheduled: "Unscheduled · back in %{list}"
   today_page:
     toasts:
+      discarded: "Job discarded"
       not_configured: "Connect GitHub first."
       queued: "Import queued · new commits show on the card shortly"
+      retried: "Job queued again"
       snoozed: "Snoozed for a week"
   tokens_page:
     toasts:
@@ -564,7 +566,10 @@ en:
         today: "Today"
         yesterday: "Yesterday"
       dead_jobs:
+        confirm_discard: "Discard %{job}? It cannot be retried after."
         died: "Died at %{at} · %{error}"
+        discard: "Discard"
+        retry: "Retry"
       decisions:
         closing:
           drop: "Drop"

@@ -71,6 +71,45 @@ RSpec.describe "Dead jobs on the attention list", :frozen_clock, type: :request 
     end
   end
 
+  describe "acting on a job from the card" do
+    let(:jid) { SecureRandom.hex(12) }
+
+    before { kill("Social::Jobs::SendWebmention", at: Time.now - 60, jid:) }
+
+    def submit(label)
+      action = card.find("form:has(button[aria-label='#{label}'])")[:action]
+      post action, _csrf_token: admin_csrf_token
+    end
+
+    it "queues the job again and takes it off the card when retried", :aggregate_failures do
+      submit("Retry")
+
+      expect(Sidekiq::Queues["default"].map { it["jid"] }).to eq([jid])
+      expect(page_has_card?).to be(false)
+    end
+
+    it "deletes the job and takes it off the card when discarded", :aggregate_failures do
+      submit("Discard")
+
+      expect([dead_set.size, Sidekiq::Queues["default"]]).to eq([0, []])
+      expect(page_has_card?).to be(false)
+    end
+
+    it "asks before it discards" do
+      expect(card.find("form:has(button[aria-label='Discard'])")["data-confirm"])
+        .to include("Social::Jobs::SendWebmention")
+    end
+
+    %w[discard retry].each do |verb|
+      it "answers a #{verb} of a job that is gone with not found" do
+        sign_in_to_admin
+        post "/admin/attention/dead-jobs/#{SecureRandom.hex(12)}/#{verb}", _csrf_token: admin_csrf_token
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+  end
+
   it "lists the newest death first" do
     kill("Posts::Jobs::Older", at: Time.now - 7200)
     kill("Posts::Jobs::Newer", at: Time.now - 60)
