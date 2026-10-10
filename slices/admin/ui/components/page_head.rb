@@ -8,23 +8,32 @@ module Admin
         prop :sub, Blog::Types::String.optional
         prop :sub_icon, Blog::Types::String.optional
         prop :kicker, Blog::Types::String.optional
-        prop :tabs_side, Blog::Types::Instance(Proc).optional
 
-        def view_template(&actions)
+        def tabs_side(&block)
+          @tabs_side = block
+          nil
+        end
+
+        def view_template(&)
           content_for(:title, @title) unless content_for(:title)
+          actions = block_given? ? capture(&) : ""
 
           header(class: "page-head") do
-            div do
-              span(class: "page-head-kicker") { @kicker } if @kicker
-              h1(class: "page-head-title") { @title }
-              render_sub
-            end
-            div(class: "page-head-actions", &actions) if actions
+            render_heading
+            div(class: "page-head-actions") { raw(safe(actions)) } unless actions.empty?
           end
           Nav::ScreenTabs(&@tabs_side)
         end
 
         private
+
+        def render_heading
+          div do
+            span(class: "page-head-kicker") { @kicker } if @kicker
+            h1(class: "page-head-title") { @title }
+            render_sub
+          end
+        end
 
         def render_sub
           return unless @sub

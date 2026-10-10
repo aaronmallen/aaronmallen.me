@@ -35,7 +35,8 @@ module Admin
 
           def view_template
             content_for(:title, t(".title"))
-            PageHead(title: t(".heading"), sub:, tabs_side:) do
+            PageHead(title: t(".heading"), sub:) do |head|
+              head.tabs_side { SavedViews(**@saved_views) }
               filter_form
               CreateLink(href: path(:admin_new_post), label: t(".new_post"))
             end
@@ -136,8 +137,6 @@ module Admin
 
             Pill(color: :blue) { IconLabel(icon: "fa-solid fa-robot") { t(".suggestions", count:) } }
           end
-
-          def tabs_side = proc { SavedViews(**@saved_views) }
 
           def tallies = { read_throughs: @read_through_counts, views: @view_counts, visitors: @visitor_counts }
 

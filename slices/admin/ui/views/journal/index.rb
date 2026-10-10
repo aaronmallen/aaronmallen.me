@@ -29,7 +29,10 @@ module Admin
 
           def view_template
             content_for(:journal_write) { capture { WriteDialog(today: @today, **@written) } } if @written
-            PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock", tabs_side:) { search_form }
+            PageHead(title: t(".heading"), sub:, sub_icon: "fa-solid fa-lock") do |head|
+              head.tabs_side { SavedViews(**@saved_views) }
+              search_form
+            end
 
             div(class: "g-main rev") do
               new_entry
@@ -78,8 +81,6 @@ module Admin
               t(".streak", written: @streak[:written], days: @streak[:days]),
             )
           end
-
-          def tabs_side = proc { SavedViews(**@saved_views) }
         end
       end
     end
