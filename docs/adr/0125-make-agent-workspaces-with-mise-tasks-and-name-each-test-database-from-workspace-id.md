@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [config]
 issue: "#711"
+amended: ["#1082"]
 tags: [mise, tasks, jj, workspaces, agents, orchestrate, database, testing, settings]
 ---
 
@@ -39,6 +40,9 @@ Two mise tasks make and remove a workspace, and nothing else does.
 database `<DATABASE_NAME or blog>_test_<id>`. With it unset, the name stays `<DATABASE_NAME or blog>_test`, so the
 root checkout and CI change nothing. Development and production never read it.
 
+Since #1082, a spec run across processes gives each worker after the first its own database, named as above with
+`_w<n>` on the end, as [ADR 0145][0145] says.
+
 `db:start` and `redis:start` join the stop tasks, and pitchfork runs them. `dev:stop` stops the pitchfork daemons
 and leaves the containers up.
 
@@ -65,4 +69,5 @@ The containers outlive `dev:stop`, so they run until someone stops them with `db
 
 [0005]: 0005-run-every-tool-through-a-mise-task-and-pin-tool-versions-in-mise-lock.md
 [0008]: 0008-build-the-database-url-from-settings-in-a-db-provider-in-every-slice.md
+[0145]: 0145-run-specs-in-parallel-with-parallel-tests-on-a-database-per-worker-and-split-ci-into-two-spec-jobs.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
