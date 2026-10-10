@@ -3,7 +3,9 @@
 module Admin
   module Operations
     class SummarizeToday < Operation
+      BACKFILL = Record::Jobs::BackfillRepoCommits.name
       COMMIT_LIMIT = 10
+      COMMITS = Blog::Types::SyncName["commits"]
       COUNTRIES = "countries"
       DRAFT = Blog::Types::PostStatus["draft"]
       SUMMARY_LIMIT = 60
@@ -41,9 +43,12 @@ module Admin
       private
 
       def attention(now)
+        failures = self.failures
+
         {
           rows: attention_queries.stalled(now:),
           failures:,
+          dead_jobs: unshown(attention_queries.dead_jobs, failures),
           failed_social_posts: social_post_queries.failed_statuses,
           inbox: inbox_queries.unseen_count,
           webmentions: webmention_queries.pending_count,
@@ -115,6 +120,12 @@ module Admin
         body = Blog::Helpers::Whitespace.squish(social_post.parts.first.body)
 
         Blog::Helpers::Truncation.cut(body, keep: SUMMARY_LIMIT)
+      end
+
+      def unshown(dead_jobs, failures)
+        repos = failures.filter_map { it[:repo] if it[:sync] == COMMITS }
+
+        dead_jobs.reject { it.name == BACKFILL && repos.include?(it.args.first) }
       end
     end
   end

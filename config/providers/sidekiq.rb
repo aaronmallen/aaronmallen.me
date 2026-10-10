@@ -3,6 +3,7 @@
 Hanami.app.register_provider :sidekiq do
   prepare do
     require "sidekiq"
+    require "sidekiq/api"
     require "sidekiq-scheduler"
   end
 
@@ -11,5 +12,7 @@ Hanami.app.register_provider :sidekiq do
 
     Sidekiq.configure_client { it.redis = redis }
     Sidekiq.configure_server { it.redis = redis }
+
+    register("sidekiq.dead_set") { -> { Sidekiq::DeadSet.new } }
   end
 end

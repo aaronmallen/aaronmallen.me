@@ -563,6 +563,8 @@ en:
           other: "%{count} days ago"
         today: "Today"
         yesterday: "Yesterday"
+      dead_jobs:
+        died: "Died at %{at} · %{error}"
       decisions:
         closing:
           drop: "Drop"
