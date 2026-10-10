@@ -22,7 +22,7 @@ module API
       def handle(from:, to:)
         found = Blog::Helpers::DayWindow.days(from, to).bind { |first, last| calendar_queries.between(from: first, to: last) }
 
-        found.either(->(days) { Success(listed(days)) }, ->(message) { invalid(from: [message], to: [message]) })
+        found.either(->(days) { Success(listed(days)) }, method(:bad_window))
       end
 
       private

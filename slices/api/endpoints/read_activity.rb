@@ -52,7 +52,7 @@ module API
 
         case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(window(first, last, filters))
-          in Failure(message) then invalid(from: [message], to: [message])
+          in Failure(message) then bad_window(message)
         end
       end
 

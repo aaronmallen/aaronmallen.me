@@ -15,9 +15,9 @@ module API
 
       def handle(from:, to:)
         case Blog::Helpers::DayWindow.days(from, to)
-          in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then too_long
+          in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then bad_window(Blog::Helpers::DayWindow::TOO_LONG)
           in Success[first, last] then Success(summary(first, last))
-          in Failure(message) then invalid(from: [message], to: [message])
+          in Failure(message) then bad_window(message)
         end
       end
 
@@ -34,8 +34,6 @@ module API
 
         serialized(Serializers::ActivitySummary, counted)
       end
-
-      def too_long = invalid(from: [Blog::Helpers::DayWindow::TOO_LONG], to: [Blog::Helpers::DayWindow::TOO_LONG])
     end
   end
 end

@@ -44,7 +44,7 @@ module API
       def handle(from: nil, to: nil, status: nil, post_id: nil, page: 1)
         case Blog::Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(first, last, status, post_id, page_of(page)))
-          in Failure(message) then invalid(from: [message], to: [message])
+          in Failure(message) then bad_window(message)
         end
       end
 

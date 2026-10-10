@@ -55,7 +55,7 @@ module API
 
         case Blog::Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(narrowed(**filters, sprint_on: day), first, last, page))
-          in Failure(message) then invalid(from: [message], to: [message])
+          in Failure(message) then bad_window(message)
         end
       end
 

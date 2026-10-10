@@ -25,6 +25,8 @@ module API
 
     private
 
+    def bad_window(message) = invalid(from: [message], to: [message])
+
     def complaints(error)
       missing = error.dig("details", "missing_keys")
       return missing.map { [it.to_sym, "#{it} is missing"] } if missing

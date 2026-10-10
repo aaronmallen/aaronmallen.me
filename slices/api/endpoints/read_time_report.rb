@@ -24,7 +24,7 @@ module API
       def handle(from:, to:, by: Blog::Types::TimeGrouping.values.first)
         case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(report(first, last, by))
-          in Failure(message) then invalid(from: [message], to: [message])
+          in Failure(message) then bad_window(message)
         end
       end
 
