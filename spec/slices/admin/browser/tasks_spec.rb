@@ -873,17 +873,19 @@ RSpec.describe "Admin tasks", type: :feature do
 
     def blocker = create(:task_link, from_task_id: other.id, to_task_id: task.id)
 
-    def editor(name, **) = translate(["ui.components.tasks.link_editor", name].join("."), **)
+    def editor(name) = translate(["ui.components.tasks.link_editor", name].join("."))
 
     def find_task(query)
       open_task("Email the accountant")
       fill_in(editor(:label), with: query)
-      click_button(editor(:find))
+      click_button(finder(:find))
     end
+
+    def finder(name) = translate(["ui.components.tasks.link_finder", name].join("."))
 
     def key(task) = "##{task.id}"
 
-    def kind(name) = translate(["ui.components.tasks.link_editor.kinds", name].join("."))
+    def kind(name) = translate(["ui.components.tasks.link_finder.kinds", name].join("."))
 
     def kind_select = find("#task-#{task.id}-link-kind")
 
@@ -892,7 +894,7 @@ RSpec.describe "Admin tasks", type: :feature do
     def pick_kind_and_find(query)
       kind_select.select(kind(:blocked_by))
       fill_in(editor(:label), with: query)
-      click_button(editor(:find))
+      click_button(finder(:find))
       find(".task-link-target", text: "Learn Elixir")
     end
 
@@ -957,7 +959,7 @@ RSpec.describe "Admin tasks", type: :feature do
     it "leaves the task itself out of the matches" do
       find_task(task.id.to_s)
 
-      expect(page).to have_css(".task-link-editor", text: editor(:no_match))
+      expect(page).to have_css(".task-link-editor", text: finder(:no_match))
     end
 
     describe "a task with a link" do
@@ -976,7 +978,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       it "removes it from the task's page", :aggregate_failures do
         open_task("Email the accountant")
-        click_button(editor(:remove, key: key(other)))
+        click_button(translate("ui.components.tasks.link_row.remove", key: key(other)))
 
         expect(page).to have_css(".toast", text: translate("tasks_page.toasts.unlinked"))
         expect(row("Email the accountant")).to have_no_css(".task-link")

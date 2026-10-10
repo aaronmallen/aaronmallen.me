@@ -13,7 +13,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     end
   end
 
-  def find_label = "ui.components.tasks.link_editor.find"
+  def find_label = "ui.components.tasks.link_finder.find"
 
   def find_link(query, id: task.id) = get("/admin/tasks/#{id}", filter: "next", link_q: query)
 
@@ -248,7 +248,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
     it "says when nothing matches" do
       find_link("nothing like it")
 
-      expect(page).to have_css(".task-link-editor", text: i18n.t("ui.components.tasks.link_editor.no_match"))
+      expect(page).to have_css(".task-link-editor", text: i18n.t("ui.components.tasks.link_finder.no_match"))
     end
 
     it "keeps the query in the field" do

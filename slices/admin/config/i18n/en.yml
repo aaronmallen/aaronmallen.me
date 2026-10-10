@@ -1857,6 +1857,8 @@ en:
             other: "%{count} open"
           sprint: "Sprint · %{date}"
         link_editor:
+          label: "Links"
+        link_finder:
           find: "Find"
           kind: "Link type"
           kinds:
@@ -1864,13 +1866,13 @@ en:
             blocks: "blocks"
             duplicates: "duplicates"
             relates: "relates to"
-          label: "Links"
           no_match: "No unlinked task matches."
+          placeholder: "Task number or title…"
+        link_row:
           places:
             canceled: "canceled"
             done: "done"
             in_progress: "in progress"
-          placeholder: "Task number or title…"
           remove: "Remove the link to %{key}"
         links:
           labels:

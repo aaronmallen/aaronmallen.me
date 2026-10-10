@@ -537,7 +537,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "says when nothing matches" do
         read(task, link_q: "nothing like it")
 
-        expect(page).to have_css(".task-link-editor", text: i18n.t("ui.components.tasks.link_editor.no_match"))
+        expect(page).to have_css(".task-link-editor", text: i18n.t("ui.components.tasks.link_finder.no_match"))
       end
 
       it "adds a link from the page and returns to where it was opened", :aggregate_failures do
