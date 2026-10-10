@@ -52,7 +52,7 @@ RSpec.describe "Admin events", type: :feature do
   def sync_issues
     connect_github_token
     stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search(github_issue("I_seven", number: 7, title: "Synced")))
-    Tasks::Jobs::SyncIssues.new.perform
+    Tasks::Jobs::SyncIssues.new.perform("github")
   end
 
   it "answers a signed in admin with an event stream" do

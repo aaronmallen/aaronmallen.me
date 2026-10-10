@@ -66,6 +66,8 @@ production:
     sync_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues
+      args: ["github"]
     sync_linear_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
-      class: Tasks::Jobs::SyncLinearIssues
+      class: Tasks::Jobs::SyncIssues
+      args: ["linear"]

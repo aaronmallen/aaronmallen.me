@@ -5,7 +5,7 @@ RSpec.describe "Admin issue sync", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:toast) { page.find("[data-toast] .toast", visible: :all).text(:all) }
 
-  def enqueued = Tasks::Jobs::SyncIssues.jobs
+  def enqueued(provider = "github") = Tasks::Jobs::SyncIssues.jobs.select { it["args"] == [provider] }
 
   def sync = post("/admin/tasks/issues/sync", _csrf_token: admin_csrf_token)
 
@@ -43,7 +43,7 @@ RSpec.describe "Admin issue sync", type: :request do
       connect_linear
       sync
 
-      expect(Tasks::Jobs::SyncLinearIssues.jobs).to be_empty
+      expect(enqueued("linear")).to be_empty
     end
 
     it "says the sync is queued" do
@@ -96,7 +96,7 @@ RSpec.describe "Admin issue sync", type: :request do
     it "queues the Linear sync alone", :aggregate_failures do
       sync
 
-      expect([Tasks::Jobs::SyncLinearIssues.jobs.size, enqueued.size]).to eq([1, 0])
+      expect([enqueued("linear").size, enqueued.size]).to eq([1, 0])
     end
 
     it "says the sync is queued" do
@@ -117,7 +117,7 @@ RSpec.describe "Admin issue sync", type: :request do
     it "queues both syncs" do
       sync
 
-      expect([Tasks::Jobs::SyncLinearIssues.jobs.size, enqueued.size]).to eq([1, 1])
+      expect([enqueued("linear").size, enqueued.size]).to eq([1, 1])
     end
   end
 

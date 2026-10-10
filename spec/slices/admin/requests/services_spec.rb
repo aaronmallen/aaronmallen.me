@@ -285,7 +285,7 @@ RSpec.describe "Admin connected services", type: :request do
 
       def connect_and_sync(api_key)
         connect(api_key:)
-        Tasks::Jobs::SyncLinearIssues.new.perform
+        Tasks::Jobs::SyncIssues.new.perform("linear")
       end
 
       it "joins the issue sync with no restart", :aggregate_failures do

@@ -3,13 +3,11 @@
 module Tasks
   module Operations
     class QueueIssueSync < Blog::Operation
-      JOBS = { "github" => Jobs::SyncIssues, "linear" => Jobs::SyncLinearIssues }.freeze
-
       include Deps[github: "record.github.client", linear: "record.linear.client"]
 
       def call
         sources = step configured
-        sources.each { |source| JOBS.fetch(source).perform_async }
+        sources.each { Jobs::SyncIssues.perform_async(it) }
       end
 
       private

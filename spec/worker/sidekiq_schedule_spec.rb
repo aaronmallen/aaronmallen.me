@@ -33,6 +33,14 @@ RSpec.describe "The worker's schedule", type: :app do
     expect(queues).to all(satisfy { |_job, queue| config[:queues].include?(queue) })
   end
 
+  it "syncs issues from GitHub and from Linear every fifteen minutes" do
+    syncs = schedule.values.select { it.fetch("class") == "Tasks::Jobs::SyncIssues" }
+
+    expect(syncs.to_h { [it.fetch("args"), it.fetch("cron")] }).to eq(
+      ["github"] => "*/15 * * * * #{Blog::TimeZone::NAME}", ["linear"] => "*/15 * * * * #{Blog::TimeZone::NAME}",
+    )
+  end
+
   describe "the sprint roll-over" do
     let(:entry) { schedule.fetch("roll_over_sprint") }
     let(:cron) { Fugit::Cron.parse(entry.fetch("cron")) }

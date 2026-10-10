@@ -39,7 +39,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     stub_rest("aaronmallen/aaronmallen.me/issues/7", response)
   end
 
-  def sync = described_class.new.perform
+  def sync = described_class.new.perform("github")
 
   def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
@@ -513,7 +513,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     def handed_over(id = "I_seven")
       gather(:assigned_issues)
       gather(:issues)
-      described_class.new(client:).perform
+      described_class.new(github: client).perform("github")
       found.find { it[:id] == id }
     end
 

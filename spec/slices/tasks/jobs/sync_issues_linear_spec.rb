@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Tasks::Jobs::SyncLinearIssues do
+RSpec.describe Tasks::Jobs::SyncIssues do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
   let(:url) { "https://linear.app/aaronmallen/issue/abc-1/sync-my-issues" }
 
@@ -32,7 +32,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     end
   end
 
-  def sync = described_class.new.perform
+  def sync = described_class.new.perform("linear")
 
   def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]
 
@@ -1141,7 +1141,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
 
     def both
       sync
-      Tasks::Jobs::SyncIssues.new.perform
+      described_class.new.perform("github")
     end
 
     it "leaves GitHub to run when Linear fails", :aggregate_failures do
@@ -1193,7 +1193,7 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
     it "leaves the GitHub run free" do
       connect_github_token
       stub_github(GitHubGraphQL::ASSIGNED_QUERY, github_issue_search)
-      Tasks::Jobs::SyncIssues.new.perform
+      described_class.new.perform("github")
 
       expect(github_request(GitHubGraphQL::ASSIGNED_QUERY)).to have_been_made
     end

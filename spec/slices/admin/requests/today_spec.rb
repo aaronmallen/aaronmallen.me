@@ -502,13 +502,13 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       def sync_issues_answered(response)
         connect_github_token
         stub_github(GitHubGraphQL::ASSIGNED_QUERY, response)
-        Tasks::Jobs::SyncIssues.new.perform
+        Tasks::Jobs::SyncIssues.new.perform("github")
       end
 
       def sync_linear_issues_answered(response)
         connect_linear(LinearGraphQL::KEY)
         stub_linear(LinearGraphQL::ASSIGNED_QUERY, response)
-        Tasks::Jobs::SyncLinearIssues.new.perform
+        Tasks::Jobs::SyncIssues.new.perform("linear")
       end
 
       def sync_state_mutations = Record::Slice["repos.sync_state_mutations"]

@@ -3,7 +3,7 @@
 RSpec.describe "API issue sync", type: :request do
   def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
 
-  def queued = [Tasks::Jobs::SyncIssues.jobs.size, Tasks::Jobs::SyncLinearIssues.jobs.size]
+  def queued = %w[github linear].map { |provider| Tasks::Jobs::SyncIssues.jobs.count { it["args"] == [provider] } }
 
   def status = last_response.status
 
