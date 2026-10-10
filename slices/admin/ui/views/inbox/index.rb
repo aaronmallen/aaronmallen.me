@@ -7,8 +7,8 @@ module Admin
         class Index < View
           include Components::Inbox
 
-          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
-          prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
+          prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
 
           def view_template

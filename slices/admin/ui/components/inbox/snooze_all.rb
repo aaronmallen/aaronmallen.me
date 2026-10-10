@@ -7,7 +7,7 @@ module Admin
         class SnoozeAll < Component
           DIALOG = "inbox-snooze-all"
 
-          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
 
           def view_template
             Button(small: true, icon: "fa-solid fa-bell-slash", data: { dialog_open: DIALOG }) { t(".label") }

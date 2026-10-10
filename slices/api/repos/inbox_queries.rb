@@ -3,8 +3,6 @@
 module API
   module Repos
     class InboxQueries < DB::Repo
-      Row = Data.define(:kind, :at, :record)
-
       include Deps[
         message_queries: "contact.repos.message_queries",
         task_source_queries: "tasks.repos.task_source_queries",
@@ -22,14 +20,18 @@ module API
       private
 
       def row(kind, arrived_at, record, snoozable = record)
-        Row.new(kind:, at: [arrived_at, snoozable.snoozed_until].compact.max, record:)
+        Structs::InboxRow.new(kind:, at: [arrived_at, snoozable.snoozed_until].compact.max, record:)
+      end
+
+      def snoozed_row(kind, record, snoozable = record)
+        Structs::InboxRow.new(kind:, at: snoozable.snoozed_until, record:)
       end
 
       def snoozed_rows
         [
-          *message_queries.snoozed.map { Row.new(kind: :message, at: it.snoozed_until, record: it) },
-          *webmention_queries.snoozed.map { Row.new(kind: :webmention, at: it.snoozed_until, record: it) },
-          *task_source_queries.snoozed_tasks.map { Row.new(kind: :task, at: it.source.snoozed_until, record: it) },
+          *message_queries.snoozed.map { snoozed_row(:message, it) },
+          *webmention_queries.snoozed.map { snoozed_row(:webmention, it) },
+          *task_source_queries.snoozed_tasks.map { snoozed_row(:task, it, it.source) },
         ]
       end
 

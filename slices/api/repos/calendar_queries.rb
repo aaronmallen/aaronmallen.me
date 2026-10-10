@@ -7,8 +7,6 @@ module API
     class CalendarQueries < DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
-      Day = Data.define(:date, :sprint, :posts, :social_posts, :journal)
-
       include Dry::Monads[:result]
       include Deps[
         sprint_queries: "tasks.repos.sprint_queries",
@@ -28,7 +26,7 @@ module API
       def by_day(rows) = rows.group_by { Blog::TimeZone.today(yield(it)) }
 
       def day(date, sprints:, posts:, social_posts:, journal:)
-        Day.new(
+        Structs::CalendarDay.new(
           date:, sprint: sprints[date], posts: posts.fetch(date, NONE), social_posts: social_posts.fetch(date, NONE),
           journal: journal.include?(date),
         )

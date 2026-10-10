@@ -25,7 +25,7 @@ module Admin
           }.freeze
           TEXT_LIMIT = 80
 
-          prop :day, Blog::Types::Instance(API::Repos::CalendarQueries::Day)
+          prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
 

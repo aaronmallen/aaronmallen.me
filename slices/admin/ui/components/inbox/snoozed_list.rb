@@ -5,7 +5,7 @@ module Admin
     module Components
       module Inbox
         class SnoozedList < Component
-          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Repos::InboxQueries::Row))
+          prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
 
           def view_template
             details(id: "inbox-snoozed", class: "inbox-snoozed") do

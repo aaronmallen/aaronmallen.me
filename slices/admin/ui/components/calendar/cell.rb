@@ -7,7 +7,7 @@ module Admin
         class Cell < Component
           SHOWN = 2
 
-          prop :day, Blog::Types::Instance(API::Repos::CalendarQueries::Day)
+          prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
           prop :month, Blog::Types::Date
           prop :picked, Blog::Types::Date
           prop :today, Blog::Types::Date

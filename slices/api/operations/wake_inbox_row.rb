@@ -15,7 +15,7 @@ module API
         wake = step found(WAKES[kind])
         record = step __send__(wake).call(id, now:)
 
-        Repos::InboxQueries::Row.new(kind: kind.to_sym, at: now, record:)
+        Structs::InboxRow.new(kind: kind.to_sym, at: now, record:)
       end
     end
   end
