@@ -32,6 +32,10 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     described_class.new(social_post_queries:).perform
   end
 
+  def orphaned(**)
+    queued(targets: %w[mastodon], **).tap { connect_social_networks(mastodon: {}) }
+  end
+
   def queued(targets: %w[mastodon bluesky], posted_at: Time.now - 60, connection_ids: [])
     social_post_mutations.create_with_parts(targets:, posted_at:, connection_ids:, status: "scheduled", parts: %w[one])
   end
@@ -70,12 +74,50 @@ RSpec.describe Social::Jobs::SendDueSocialPosts do
     expect(sent).to eq([[social_post.id, other.id]])
   end
 
-  it "waits while no account is connected on the networks it targets", :aggregate_failures do
-    social_post = queued(targets: %w[mastodon])
-    connect_social_networks(mastodon: {})
+  it "settles a due social post with no account left on the networks it targets", :aggregate_failures do
+    social_post = orphaned
     job.perform
 
     expect(sent).to be_empty
+    expect(social_post_queries.by_id(social_post.id).status).to eq("posted")
+  end
+
+  it "fails each network of a due social post with no account left", :aggregate_failures do
+    social_post = orphaned
+    job.perform
+
+    expect(social_post_queries.by_id(social_post.id).deliveries.map { [it.network, it.failed, it.error] })
+      .to eq([["mastodon", true, "No mastodon account is connected"]])
+    expect(social_post_queries.failed_statuses).to eq(["posted"])
+  end
+
+  it "fails a due social post whose picked accounts are gone" do
+    social_post = queued(targets: %w[mastodon], connection_ids: [0])
+    job.perform
+
+    expect(social_post_queries.by_id(social_post.id).deliveries.map(&:failed)).to eq([true])
+  end
+
+  it "fails a social post with no account left only once" do
+    social_post = orphaned
+    2.times { job.perform }
+
+    expect(social_post_queries.by_id(social_post.id).deliveries.size).to eq(1)
+  end
+
+  it "leaves a social post with no account left alone until it is due" do
+    social_post = orphaned(posted_at: Time.now + 3600)
+    job.perform
+
+    expect(social_post_queries.by_id(social_post.id).status).to eq("scheduled")
+  end
+
+  it "sends to the network still connected when the other is gone", :aggregate_failures do
+    social_post = queued
+    connect_social_networks(bluesky: {})
+    job.perform
+
+    expect(sent).to eq([[social_post.id, mastodon.id]])
     expect(social_post_queries.by_id(social_post.id).status).to eq("scheduled")
   end
 

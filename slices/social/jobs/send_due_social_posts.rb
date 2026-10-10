@@ -22,7 +22,10 @@ module Social
       private
 
       def queue(social_post, due_by:, stale_before:)
-        list_target_accounts.call(social_post).each do |account|
+        accounts = list_target_accounts.call(social_post)
+        return social_post_mutations.mark_unsendable(social_post, due_by:) if accounts.empty?
+
+        accounts.each do |account|
           next unless social_post_mutations.claim_delivery(social_post.id, account, due_by:, stale_before:)
 
           DeliverSocialPost.perform_async(social_post.id, account.id)

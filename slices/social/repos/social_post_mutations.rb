@@ -34,6 +34,18 @@ module Social
 
       def mark_posted(id, at: Time.now) = social_posts.mark_posted(id, at:)
 
+      def mark_unsendable(social_post, due_by:)
+        transaction do
+          next unless lock_due(social_post.id, due_by)
+
+          social_post.targets.each do |network|
+            social_post_deliveries.record(social_post_id: social_post.id, connection_id: nil, network:,
+                                          error: "No #{network} account is connected", failed: true)
+          end
+          mark_posted(social_post.id)
+        end
+      end
+
       def record_delivery(social_post_id, connection, **attrs)
         social_post_deliveries.record(social_post_id:, **account(connection), **attrs)
       end

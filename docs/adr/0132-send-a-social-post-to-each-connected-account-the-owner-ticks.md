@@ -5,7 +5,7 @@ status: active
 created: 2026-10-08
 area: [social, admin, db]
 issue: "#793"
-amended: ["#805"]
+amended: ["#805", "#899"]
 tags: [social, mastodon, bluesky, connections, delivery, composer]
 ---
 
@@ -53,7 +53,8 @@ remembers other accounts, so a post goes to it only after the owner ticks it.
 Delivery history has to outlive the account. Disconnecting deletes the connection, so it cannot take the account's
 delivery rows with it.
 
-A post due while no account is connected has nowhere to go, and waits as #790 says.
+A post due while none of its accounts is connected has nowhere to go. Since #899 it settles at once with a failed
+row per target network and no connection, so it shows among the failed social posts.
 
 [0040]: 0040-send-a-social-post-to-each-network-on-its-own-from-that-networks-delivery-row.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
