@@ -53,8 +53,8 @@ module Admin
             div(class: "jbox-foot") do
               date_field
               fields(:tags)
-              words
-              save_button
+              WordCount(count: @word_count)
+              SaveButton(body: @values[:body], feather: true) { t(".save") }
             end
           end
 
@@ -67,21 +67,7 @@ module Admin
             end
           end
 
-          def save_button
-            blank = EntryFields.blank?(@values[:body])
-            Button(variant: :pri, small: true, type: "submit", disabled: blank, data: { journal_save: "" }) do
-              i(class: "fa-solid fa-feather", aria: { hidden: "true" })
-              span { t(".save") }
-            end
-          end
-
           def title = @date == @today ? t(".today") : l(@date, format: :full)
-
-          def words
-            span(class: "journal-words", data: { journal_words: "", one: t(".words.one"), other: t(".words.other") }) do
-              t(".words", count: @word_count)
-            end
-          end
         end
       end
     end

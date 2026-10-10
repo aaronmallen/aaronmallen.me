@@ -121,11 +121,15 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
       it "gives the script the word templates" do
         words = page.find("[data-journal-words]")
 
-        expect([words["data-one"], words["data-other"]]).to eq(i18n.t("ui.components.journal.new_entry.words").values)
+        expect([words["data-one"], words["data-other"]]).to eq(i18n.t("ui.components.journal.word_count.words").values)
       end
 
       it "disables Save entry while the entry is empty" do
         expect(page).to have_button("Save entry", disabled: true)
+      end
+
+      it "puts the feather on Save entry" do
+        expect(page).to have_css("#journal-entry button[data-journal-save] i.fa-feather", visible: :all)
       end
 
       it "shows an empty state without entries" do

@@ -44,24 +44,17 @@ module Admin
           def foot
             div(class: "journal-modal-foot") do
               tags_field
-              words
+              WordCount(count: Blog::Helpers::Figures.words(@body))
               span(class: "journal-modal-hint") do
                 kbd(class: "kbd") { t(".save_key") }
                 plain " #{t('.save_hint')}"
               end
-              save_button
+              SaveButton(body: @body, feather: true) { t(".save") }
             end
           end
 
           def form_attributes
             { action: path(:admin_create_journal_entry), class: "journal-modal-form", data: { journal_entry: "" } }
-          end
-
-          def save_button
-            Button(
-              variant: :pri, small: true, type: "submit", disabled: EntryFields.blank?(@body),
-              data: { journal_save: "" }, icon: "fa-solid fa-feather",
-            ) { t(".save") }
           end
 
           def tags_attributes
@@ -74,12 +67,6 @@ module Admin
           end
 
           def title = t(".title", date: l(@today, format: :short))
-
-          def words
-            span(class: "journal-words", data: { journal_words: "", one: t(".words.one"), other: t(".words.other") }) do
-              t(".words", count: Blog::Helpers::Figures.words(@body))
-            end
-          end
         end
       end
     end

@@ -64,7 +64,7 @@ module Admin
               EntryFields(body:, tags:, errors:, scope:, height: BODY_HEIGHT, label: t(".body"))
               div(class: "journal-edit-foot") do
                 Button(small: true, data: { journal_cancel: "" }) { t(".cancel") }
-                save_button
+                SaveButton(body:) { t(".save") }
               end
             end
           end
@@ -113,13 +113,6 @@ module Admin
           end
 
           def records = @editing&.fetch(:records, nil)
-
-          def save_button
-            blank = EntryFields.blank?(body)
-            Button(variant: :pri, small: true, type: "submit", disabled: blank, data: { journal_save: "" }) do
-              t(".save")
-            end
-          end
 
           def scope = "journal-edit-#{@entry.id}"
 

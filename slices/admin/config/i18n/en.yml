@@ -746,9 +746,6 @@ en:
           private: "private"
           save: "Save entry"
           today: "Today"
-          words:
-            one: "%{count} word"
-            other: "%{count} words"
         write_dialog:
           body: "Journal entry"
           placeholder: "What happened? Only you will ever read this."
@@ -758,6 +755,7 @@ en:
           tags: "Tags"
           tags_placeholder: "tags: ruby, health"
           title: "journal · private · %{date}"
+        word_count:
           words:
             one: "%{count} word"
             other: "%{count} words"
