@@ -20,8 +20,12 @@ module Admin
         prop :value, Blog::Types::String
         prop :height, HEIGHT
         prop :renderer, Blog::Types::MarkdownRenderer
-        prop :id, Blog::Types::String
+        prop :id, Blog::Types::String.optional, default: nil
         prop :label, Blog::Types::String
+        prop :field, Blog::Types::Symbol.optional, default: nil
+        prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+        prop :error, Field::ERROR.optional, default: nil
+        prop :scope, Blog::Types::String.optional, default: nil
         prop :placeholder, Blog::Types::String.optional, default: nil
         prop :preview_path, Blog::Types::String.optional, default: nil
         prop :view, Blog::Types::String.optional, default: nil
@@ -34,14 +38,23 @@ module Admin
             write_pane
             preview_pane(&)
           end
+          render @error.new(field: @field, errors: @errors, scope:) if @field
         end
 
         private
 
         def body_attributes
-          own = { id: @id, class: "edit-body", name: @name, placeholder: @placeholder, data: { editor_body: "" } }
-          mix(own, @attributes)
+          own = { class: "edit-body", name: @name, placeholder: @placeholder, data: { editor_body: "" } }
+          mix(own, control_attributes, @attributes)
         end
+
+        def control_attributes
+          return { id: @id } unless @field
+
+          @error.control_attributes(@field, @errors, scope)
+        end
+
+        def control_id = @field ? @error.id_for(@field, scope) : @id
 
         def editor_data
           return { markdown_editor: "" } unless uploads?
@@ -74,6 +87,8 @@ module Admin
           end
         end
 
+        def scope = @scope || @error::SCOPE
+
         def selected = VIEWS.include?(@view) ? @view : WRITE
 
         def toolbar
@@ -103,13 +118,13 @@ module Admin
           @uploads = slice["media.store.client"].configured?
         end
 
-        def view_name = @view_name || "#{@id}-view"
+        def view_name = @view_name || "#{control_id}-view"
 
         def view_options = { WRITE => t(".write"), PREVIEW => t(".preview") }
 
         def write_pane
           div(class: "edit-pane", data: { editor_view: WRITE }, hidden: selected != WRITE) do
-            label(class: "sr-only", for: @id) { @label }
+            label(class: "sr-only", for: control_id) { @label }
             textarea(**body_attributes) { @value }
             p(class: "edit-alert", role: "alert", data: { editor_alert: "" }) if uploads?
           end

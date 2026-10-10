@@ -44,8 +44,7 @@ module Admin
             scope = self.class.scope(edit.id)
             errors = errors_for(edit.id)
 
-            MarkdownEditor(**FieldError.control_attributes(FIELD, errors, scope), **editor_props(edit, form))
-            FieldError(field: FIELD, errors:, scope:)
+            MarkdownEditor(field: FIELD, errors:, error: FieldError, scope:, **editor_props(edit, form))
             Button(variant: :pri, type: "submit", small: true, form:) { t(".save") }
           end
 

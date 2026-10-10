@@ -66,8 +66,7 @@ module Admin
             errors = errors_for(name)
 
             Field(label: t(".reason")) do
-              MarkdownEditor(**FieldError.control_attributes(:reason, errors, scope), **reason_props(name))
-              FieldError(field: :reason, errors:, scope:)
+              MarkdownEditor(field: :reason, errors:, error: FieldError, scope:, **reason_props(name))
             end
           end
 

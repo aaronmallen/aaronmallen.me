@@ -27,8 +27,7 @@ module Admin
 
           def body_field
             Field(label: t(".body")) do
-              MarkdownEditor(**FieldError.control_attributes(:body, @errors, scope), **body_props)
-              FieldError(field: :body, errors: @errors, scope:)
+              MarkdownEditor(field: :body, errors: @errors, error: FieldError, scope:, **body_props)
             end
           end
 

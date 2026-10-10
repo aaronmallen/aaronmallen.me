@@ -211,6 +211,12 @@ RSpec.describe "Admin decisions", type: :request do
           .to eq(t("ui.components.decisions.field_error.problem.blank"))
         expect(page).to have_field("decision[title]", with: "Pick a host")
       end
+
+      it "ties the problem field to its error" do
+        send_to("/admin/decisions", decision: { title: "Pick a host", problem: " " })
+
+        expect(page).to have_css("#decision-problem[aria-invalid='true'][aria-describedby='decision-problem-error']")
+      end
     end
 
     describe "the decision page" do
@@ -492,6 +498,12 @@ RSpec.describe "Admin decisions", type: :request do
           .to eq(t("ui.components.decisions.field_error.reason.blank"))
         expect(page).to have_select("decision[option_id]", selected: "Sidekiq")
         expect(reload.status).to eq("open")
+      end
+
+      it "ties the reason field to its error" do
+        close(:resolve, option_id: option.id, reason: " ")
+
+        expect(page.find_by_id("decision-resolve-reason")["aria-describedby"]).to eq("decision-resolve-reason-error")
       end
     end
 

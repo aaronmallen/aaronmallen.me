@@ -19,8 +19,7 @@ module Admin
         def view_template
           Card(label: t(".label"), data: { edit_note: "" }) do
             div(class: "form-stack", data: { edit_note_field: "" }) do
-              MarkdownEditor(**@error.control_attributes(@field, @errors, scope), **editor_props)
-              render @error.new(field: @field, errors: @errors, scope:)
+              MarkdownEditor(field: @field, errors: @errors, error: @error, scope:, **editor_props)
               Hint { @hint }
             end
           end

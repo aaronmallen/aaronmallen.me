@@ -67,8 +67,7 @@ module Admin
           value = mine?(id) ? @form[:body] : saved
 
           Field(label:) do
-            MarkdownEditor(**@error.control_attributes(:body, errors, scope), **editor_props(label, value))
-            render @error.new(field: :body, errors:, scope:)
+            MarkdownEditor(field: :body, errors:, error: @error, scope:, **editor_props(label, value))
           end
         end
 

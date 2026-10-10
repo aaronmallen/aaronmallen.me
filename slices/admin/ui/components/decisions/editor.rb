@@ -52,8 +52,7 @@ module Admin
 
           def problem_field
             Field(label: t(".problem")) do
-              MarkdownEditor(**FieldError.control_attributes(:problem, @errors), **problem_props)
-              FieldError(field: :problem, errors: @errors)
+              MarkdownEditor(field: :problem, errors: @errors, error: FieldError, **problem_props)
             end
           end
 
