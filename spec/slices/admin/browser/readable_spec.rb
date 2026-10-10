@@ -166,10 +166,12 @@ RSpec.describe "Admin screens", type: :feature do
       end,
       "inbox" => "/admin/inbox",
       "journal" => "/admin/journal",
+      "mastodon refused" => "/admin/auth/mastodon/callback",
       "messages" => "/admin/messages",
       "message open" => "/admin/messages?open=#{Contact::Slice['repos.message_queries'].by_status('unread').first.id}",
       "new post" => "/admin/posts/new",
       "new project" => "/admin/projects/new",
+      "new task" => "/admin/tasks/new",
       "not found" => "/admin/nothing-here",
       "post editor" => "/admin/posts/#{draft.id}/edit",
       "posts" => "/admin/posts",
@@ -181,6 +183,7 @@ RSpec.describe "Admin screens", type: :feature do
       "search results" => "/admin/search?q=accountant",
       "search by kind" => "/admin/search?q=quarterly&kind=task",
       "security" => "/admin/security",
+      "services" => "/admin/services",
       "sign-in failed" => "/admin/auth/github/callback",
       "social" => "/admin/social",
       "social editor" => "/admin/social?edit=#{social_post.id}",
@@ -253,6 +256,11 @@ RSpec.describe "Admin screens", type: :feature do
     @published ||= create(:post, :published, slug: "hello", title: "A published post with a fairly long title")
   end
 
+  def pull_requests
+    pull_request = create(:pull_request, title: "Fix the parser", body: "Handles **nested** lists")
+    { "pull request" => "/admin/pull-requests/#{pull_request.id}" }
+  end
+
   def record_search
     {
       "task record search" => "/admin/tasks/#{task.id}?record_q=published",
@@ -295,7 +303,7 @@ RSpec.describe "Admin screens", type: :feature do
   def screens
     pages.merge(
       calendars, people, person_search, record_search, linked_records, composers, dialogs, journal_editors,
-      saved_view_menus, selections, time_rows, decisions, post_screens, rule_project_search,
+      saved_view_menus, selections, time_rows, decisions, post_screens, rule_project_search, pull_requests,
     )
   end
 
