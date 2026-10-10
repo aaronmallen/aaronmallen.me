@@ -5,6 +5,7 @@ status: active
 created: 2026-09-30
 area: [admin, db, lib, mcp, social]
 issue: "#115"
+amended: ["#911"]
 tags: [webmentions, moderation, trust, spam, enums, schema]
 ---
 
@@ -26,9 +27,9 @@ activity view ([ADR 0052][0052]) pick mentions by that one column.
 We add `ignored` to `webmention_status`, before `spam`, so spam, the one verdict against an author, sorts last. An
 ignored mention stays off the public site and does nothing else.
 
-Ignored is neutral for trust. `Social::Repos::WebmentionRepo#known_author?` reads approved and spam mentions only,
-through `Social::Relations::Webmentions::APPROVED_NOT_SPAM`, so an ignored mention neither earns an author trust
-nor costs it.
+Ignored is neutral for trust. `Social::Repos::WebmentionQueries#known_author?` (the name #911 corrected) reads approved
+and spam mentions only, through `Social::Relations::Webmentions::APPROVED_NOT_SPAM`, so an ignored mention neither earns
+an author trust nor costs it.
 
 An ignored mention stays ignored on resend, as spam does. `Social::Relations::Webmentions#store` sends only a
 changed approved mention back to pending and leaves every other status alone.

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, contact, db, decisions, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013", "#957"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013", "#957", "#911"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -32,20 +32,24 @@ exports refuses. These reads cross today:
 - **The `activities` view**, built in `config/db/migrate/20260928000035_create_activities_view.rb` and read by
   `slices/activity/relations/activities.rb`, unions `commits`, `journal_entries`, `posts`, `social_posts`,
   `social_post_parts`, `webmentions`, `tasks`, `sprints`, `projects` and `suggestions`, which
-  `record`, `posts`, `social`, `tasks`, `projects` and `suggestions` own. AA-824 added the last three tables. The
+  `record`, `posts`, `social`, `tasks`, `projects` and `suggestions` own. AA-824 added the last three tables. As #911
+  records, it also reads `pull_requests`, `task_comments`, `work_sessions`, `decisions`, `decision_events`,
+  `decision_options` and `decision_comments`, which `record`, `tasks` and `decisions` own. The
   record on the activities view holds why one view beats merging rows in Ruby.
 - **The `attention` view**, built in `config/db/migrate/20261003000075_create_attention_view.rb` and read by
   `slices/activity/relations/attention.rb`, unions `tasks`, `posts`, `journal_entries` and `known_devices`, which
   `tasks`, `posts`, `record` and `security` own, and joins `api_tokens` and `oauth_clients`, which `api` and `mcp`
-  own, to name the credential. #706 added the last three tables. The record on the stalled list holds why it lives
-  in `activity`.
+  own, to name the credential. #706 added the last three tables. It also reads `post_link_checks`, which `posts`
+  owns, as #911 records. The record on the stalled list holds why it lives in `activity`.
 - **The `review_tasks` and `work_session_days` views**, built in
   `config/db/migrate/20261003000082_create_review_views.rb` and read by `slices/activity/relations/review_tasks.rb`
   and `slices/activity/relations/work_session_days.rb`, read `tasks`, `sprints` and `work_sessions`, which `tasks`
   owns. The record on building the review in one activity query holds why they live in `activity`. #957 added the
   `review_carries` view, which reads `tasks` and `task_events`, the `review_decisions` view, which reads
   `decisions`, `decision_events` and `decision_options`, which `decisions` owns, and the reads of
-  `task_contributors`, which `tasks` owns, in `review_tasks` and the `activities` view.
+  `task_contributors`, which `tasks` owns, in `review_tasks` and the `activities` view. As #911 records,
+  `review_tasks` no longer reads `sprints`, and `Activity::Relations::ReviewTasks#with_groups` joins `task_tags`,
+  `tags`, `record_links` and `projects` to name each done task's tags and projects.
 - **`Activity::Relations::TaskContributors`** reads `task_contributors`, which `tasks` owns, so the activity filters
   can list each agent and model that worked a task (#957).
 - **The `search_documents` view**, built in `config/db/migrate/20261003000076_create_search_documents.rb` and
@@ -60,7 +64,8 @@ exports refuses. These reads cross today:
 - **`Tags::Relations::Tags#last_tag_of_rules`** reads `task_rules`, `task_rule_tags` and `task_rule_projects`,
   which `tasks` owns, to name the rules a tag's removal would leave with no target (#957).
 - **`Activity::Relations::Activities#tag_owners`**, a private method `#tagged` calls, joins
-  `journal_entry_tags` and `task_tags` to `tags` to find the entries and tasks that carry every named tag.
+  `journal_entry_tags` and `task_tags` to `tags` to find the entries and tasks that carry every named tag. As #911
+  records, it joins `decision_tags` too, and `#with_tags` reads all three and `post_tags` to list each row's tags.
 - **`Analytics::Relations::AnalyticsRollupPaths#views_by_post`** joins `posts` on
   `'/writing/' || posts.slug`, built from `Blog::Constants::WRITING_PATH` (#1013), so the admin posts list gets views
   keyed by post id in one query. #957 found more analytics reads of `posts` on the same path: `#first_days`,

@@ -7,7 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
-amended: ["#917", "#994"]
+amended: ["#917", "#994", "#911"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -78,7 +78,8 @@ The lint catches a write repo or a stray key in an export. It cannot see inside 
 read repo crosses with it, and only review holds that line.
 
 The move rewrites every slice and every importer of its keys. It goes one slice at a time, and until the last one
-moves the cop's allow list takes both the old `queries.*` keys and the new read repo keys.
+moves the cop's allow list takes both the old `queries.*` keys and the new read repo keys. Every slice has moved, and
+as #911 records, the allow list in `.config/rubocop.yml` no longer takes a `queries.*` key.
 
 A read repo exports every read it holds. A slice that wants one read private keeps it in a repo it does not export.
 

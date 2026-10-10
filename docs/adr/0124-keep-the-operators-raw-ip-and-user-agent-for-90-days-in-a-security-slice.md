@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [admin, api, mcp, config, db]
 issue: "#701"
+amended: ["#911"]
 tags: [security, privacy, ip, user-agent, retention, geoip, slices, sign-in, api-tokens, mcp]
 ---
 
@@ -33,7 +34,8 @@ We keep the raw IP and user agent of the operator's own access, and nothing else
 - each call made with an API token or an MCP client.
 
 It never covers a visitor, an admin page load once signed in, or any other request. Logs and Honeybadger stay as
-ADR 0010 has them. The address comes from `Blog::VisitorAddress`, as [ADR 0013][0013] says.
+ADR 0010 has them. The address comes from `Blog::Operations::ReadVisitorAddress` (the name #911 corrected), as
+[ADR 0013][0013] says.
 
 **Raw rows last 90 days.** A scheduled job deletes every sign-in and every sighting older than that. What outlives
 it is the list of known devices and cities, so an old device does not alert as new. That list holds the browser, OS,

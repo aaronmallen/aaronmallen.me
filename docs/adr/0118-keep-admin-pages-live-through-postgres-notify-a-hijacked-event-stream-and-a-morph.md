@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, lib, admin, assets]
 issue: "#637"
+amended: ["#911"]
 tags: [admin, live, sse, eventsource, postgres, listen, notify, triggers, puma, threads, hijack, cloudflare, tunnel, idiomorph, javascript]
 ---
 
@@ -22,13 +23,13 @@ A change can come from anywhere. Sidekiq writes from its own process when it syn
 contact messages and webmentions, and the MCP server and the API write on their own. [ADR 0020][0020] keeps
 coordination in Postgres, not Redis.
 
-The web process is one Puma with 5 threads (`Blog::Concurrency`), and its pool holds a connection per thread plus
-one ([ADR 0006][0006]). Each photo cache miss already holds a thread ([ADR 0080][0080]). The site sits behind a
-Cloudflare Tunnel, and Cloudflare ends a request that sends nothing for 100 seconds. A deploy restarts Puma, and
-while it restarts the tunnel answers 502.
+The web process is one Puma with 5 threads (`settings.web_threads`, the name #911 corrected), and its pool holds a
+connection per thread plus one ([ADR 0006][0006]). Each photo cache miss already holds a thread ([ADR 0080][0080]). The
+site sits behind a Cloudflare Tunnel, and Cloudflare ends a request that sends nothing for 100 seconds. A deploy
+restarts Puma, and while it restarts the tunnel answers 502.
 
-Some reads write. A read of Today starts the day's sprint through `Tasks::Repos::SprintRepo#claim` when none exists,
-and an insert that loses the race to the midnight job does nothing.
+Some reads write. A read of Today starts the day's sprint through `Tasks::Repos::SprintMutations#claim` when none
+exists, and an insert that loses the race to the midnight job does nothing.
 
 The admin scripts are 22 `setup*` modules that `app.js` runs once. `task_order.js` and `markdown_editor.js` keep a
 `WeakSet` of the elements they have set up. `fetching.js` holds `setupFetch`, which waits, aborts a stale request
@@ -39,11 +40,12 @@ when a key is pressed, and moves focus to mark the current row ([ADR 0101][0101]
 
 **Postgres triggers announce every change.** One function, `notify_admin_change()`, calls
 `pg_notify('admin_changes', TG_TABLE_NAME)`. Each table the admin draws gets an `AFTER INSERT OR UPDATE OR DELETE`
-trigger `FOR EACH ROW` that calls it, and the update trigger fires only `WHEN (OLD.* IS DISTINCT FROM NEW.*)`. A
-write that changes nothing sends nothing, so an insert that loses a race wakes no page. Postgres sends a notice only on
-commit and folds duplicates within one transaction, so a sync of 50 issues sends one notice per table, after the
-rows are there to read. A table written on every public page view, such as `analytics_events`, gets no trigger.
-A new table the admin draws gets its trigger in the migration that adds it.
+trigger `FOR EACH ROW` that calls it. As #911 records, the function itself skips an update that changes nothing, through
+`OLD IS DISTINCT FROM NEW`, rather than a `WHEN` clause on the trigger. A write that changes nothing sends nothing, so
+an insert that loses a race wakes no page. Postgres sends a notice only on commit and folds duplicates within one
+transaction, so a sync of 50 issues sends one notice per table, after the rows are there to read. A table written on
+every public page view, such as `analytics_events`, gets no trigger. A new table the admin draws gets its trigger in the
+migration that adds it.
 
 **One hub per web process holds every stream.** A hub in `lib/admin`, which an admin slice provider starts on the
 first stream, keeps one Postgres connection outside the Sequel pool in `LISTEN admin_changes`. It writes each

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, activity, admin, api, mcp]
 issue: "#273"
+amended: ["#911"]
 tags: [decisions, slices, history, timeline, view, postgres, enums, constraints, comments, tags]
 ---
 
@@ -27,8 +28,8 @@ table, comments in their own, and a view that unions them. [ADR 0015][0015] type
 
 ## Decision
 
-**A new `decisions` feature slice owns every table here.** It exports its operations and queries to `admin`, `api`
-and `mcp` ([ADR 0003][0003]).
+**A new `decisions` feature slice owns every table here.** It exports its operations and queries to `admin` and `api`
+([ADR 0123][0123]). As #911 records, `mcp` reaches them through the `api` endpoints ([ADR 0088][0088]).
 
 **`decisions`** holds the title, the problem statement, a `decision_status` enum (`open`, `resolved`, `dropped`) and
 `resolved_option_id`. A `CHECK` holds that a resolved decision has a choice and an open or dropped one has none.
@@ -89,7 +90,6 @@ leaves a closed edit with no note or a gap in the timeline, and nothing in Postg
 ADR 0001 counts the feature slices, and ADR 0017 lists the mapped names. #274 updates both when it adds the slice.
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
-[0003]: 0003-reach-another-slice-only-through-its-exports.md
 [0015]: 0015-type-a-closed-set-as-a-postgres-enum-and-a-format-as-a-domain.md
 [0017]: 0017-enforce-rules-over-stored-state-in-postgres-not-in-contracts.md
 [0019]: 0019-open-every-transaction-as-a-savepoint.md
@@ -98,6 +98,8 @@ ADR 0001 counts the feature slices, and ADR 0017 lists the mapped names. #274 up
 [0075]: 0075-keep-local-and-synced-task-comments-in-one-table-keyed-by-remote-id.md
 [0082]: 0082-tie-a-photo-to-the-records-whose-markdown-points-to-it.md
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
+[0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0092]: 0092-keep-task-history-in-task-events-and-a-task-timeline-view.md
 [0093]: 0093-link-any-two-records-through-one-record-links-table-in-a-links-slice.md
+[0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

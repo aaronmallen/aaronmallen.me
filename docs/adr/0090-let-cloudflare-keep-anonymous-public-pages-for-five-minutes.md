@@ -5,7 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, public]
 issue: "#235"
-amended: ["#376", "#468"]
+amended: ["#376", "#468", "#911"]
 tags: [cache, cloudflare, cache-control, cookies, sessions, theme, deploy, public]
 ---
 
@@ -32,11 +32,11 @@ The server marks a page shared, and a Cloudflare cache rule keeps only what the 
 `Public::Action.share_with_caches` adds an after callback that sends `public, max-age=0, s-maxage=300`. It sends it
 only on a 200, only when nothing set `Cache-Control` first, and only when the request carries neither the
 `admin.session` nor the `site_theme` cookie. A shared page is then always the page a reader with no cookie gets.
-The home page, about, projects, the post index, a post and a tag page call it. A halt, such as a 404, skips after
-callbacks, and so does an error, so neither is ever marked shared. A redirect is not a 200. The contact page sends
-`private, no-store` itself. The feeds keep their own `ETag` and `Last-Modified` and do not call it. #376 has them send
-`private, no-cache`, so Cloudflare never keeps a feed and every fetch reaches the server to be counted, as
-[ADR 0106][0106] says.
+The home page, about, projects, the post index, a post and a tag page call it. As #911 records, the privacy page,
+`robots.txt` and the sitemap call it too. A halt, such as a 404, skips after callbacks, and so does an error, so neither
+is ever marked shared. A redirect is not a 200. The contact page sends `private, no-store` itself. The feeds keep their
+own `ETag` and `Last-Modified` and do not call it. #376 has them send `private, no-cache`, so Cloudflare never keeps a
+feed and every fetch reaches the server to be counted, as [ADR 0106][0106] says.
 
 `s-maxage=300` lets Cloudflare keep a page for five minutes. `max-age=0` makes a browser ask again each time, so a
 reader who signs in or picks a theme never sees a stale copy from their own browser cache.

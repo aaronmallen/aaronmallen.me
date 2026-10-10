@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [db, lib, admin, mcp, posts, projects, record, tags, tasks]
 issue: "#76"
-amended: ["#284"]
+amended: ["#284", "#911"]
 tags: [tags, scope, schema, migrations, constraints, foreign-keys, mcp, admin]
 ---
 
@@ -15,10 +15,10 @@ tags: [tags, scope, schema, migrations, constraints, foreign-keys, mcp, admin]
 
 ## Context
 
-Tags share one namespace across posts, projects, the journal and tasks (ADR 0065). Every tagging slice claims
-from one `tags` table through `Blog::DB::Tags` (ADR 0022), and `tags_name_key` keeps each name unique. `#hanakai`
-on a post and `#hanakai` on a task are one row with one color, so recoloring a task tag changes what readers see.
-Spec #67 splits them.
+Tags share one namespace across posts, projects, the journal and tasks (ADR 0065). Every tagging slice claims from one
+`tags` table through `Blog::DB::Plugins::Tags` (ADR 0022), and `tags_name_key` keeps each name unique. `#hanakai` on a
+post and `#hanakai` on a task are one row with one color, so recoloring a task tag changes what readers see. Spec #67
+splits them.
 
 ## Decision
 
@@ -33,10 +33,11 @@ Postgres holds each join table to its scope, as ADR 0017 asks of a rule over sto
 column with a default and a `CHECK` that pin it to the join's side, and the foreign key on `tag_id` becomes
 `(tag_id, tag_scope) REFERENCES tags (id, scope)`. A post can then never hold a private tag, whichever code writes
 the row. The key first said `ON DELETE RESTRICT`. #284 made it `ON DELETE CASCADE`, so deleting a tag takes it off
-every record that carries it, and `decision_tags` and `task_tag_rule_tags` follow the same rule.
+every record that carries it, and `decision_tags` and `task_rule_tags` follow the same rule.
 
-`Blog::DB::Tags#claim` and `#next_color` take a scope, so a new tag takes the least used color within its scope.
-Each slice's repo passes its own: `posts` and `projects` claim public tags, `record` and `tasks` claim private ones.
+`Blog::DB::Plugins::Tags#claim` and `#next_color` take a scope, so a new tag takes the least used color within its
+scope. Each slice's repo passes its own: `posts` and `projects` claim public tags, `record` and `tasks` claim private
+ones. As #911 records, `decisions` and `contact` claim private tags too.
 
 New migrations split the data. A tag joined from both sides becomes a public row and a private row with the same
 color, and its joins move to match. A tag joined from one side takes that side's scope.
@@ -46,7 +47,7 @@ The MCP tools `list_tags`, `save_tag` and `remove_tag` require `scope` and refus
 ## Alternatives
 
 **Two tables, `public_tags` and `private_tags`.** It keeps each scope apart with no guard on the joins. It lost
-because every tagging slice, `Blog::DB::Tags` and the tags screen would need two of everything, and ADR 0022
+because every tagging slice, `Blog::DB::Plugins::Tags` and the tags screen would need two of everything, and ADR 0022
 already pays for five copies of one relation.
 
 **One scope per kind.** Posts apart from projects, tasks apart from the journal. It lost because a post and a
@@ -58,7 +59,7 @@ point at the right side. It lost because it binds only the code that runs it, wh
 ## Consequences
 
 Each join row repeats a scope that its table already fixes. That buys the guard with a plain foreign key and no
-trigger, and `Blog::DB::Taggings#replace` writes no new column, since the default fills it.
+trigger, and `Blog::DB::Plugins::Taggings#replace` writes no new column, since the default fills it.
 
 A tag cannot move from one scope to the other. Its joins pin it, and the spec leaves moving out.
 

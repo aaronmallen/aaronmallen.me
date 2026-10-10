@@ -6,7 +6,7 @@ created: 2026-10-03
 area: [db, admin, api, mcp, assets, posts, projects, record, social, tasks, contact]
 supersedes: ["0091"]
 issue: "#299"
-amended: ["#773", "#818"]
+amended: ["#773", "#818", "#911"]
 tags: [search, postgres, full-text, tsvector, gin, view, palette, slices]
 ---
 
@@ -48,6 +48,7 @@ newest first on a tie, and narrows by kind and pages by number. It builds the sh
 spans six slices' tables, so no one of them owns it, by the reasoning ADR 0052 gives for `activity`. `admin`
 imports the query for the palette and the search screen, and `api` imports it for the endpoint and the MCP tool
 ([ADR 0088][0088]). The view joins the reads [ADR 0021][0021] lists: it reads the eleven tables and writes none.
+Since `decisions` and `pull_requests` joined, it reads thirteen, across seven slices, as #911 counts.
 
 **The palette asks search as I type.** A session-only admin route answers the query as JSON: the top 8 hits across
 every kind, best first, each with its kind. The palette lists them as one Records group and labels each row with its

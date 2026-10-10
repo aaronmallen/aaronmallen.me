@@ -6,6 +6,7 @@ created: 2026-10-04
 area: [analytics, lib]
 supersedes: ["0106"]
 issue: "#470"
+amended: ["#911"]
 tags: [analytics, feed, atom, subscribers, user-agent, aggregators]
 ---
 
@@ -22,9 +23,10 @@ name and a count. ADR 0106 weighed forged counts, not the rows that made up name
 
 ## Decision
 
-Only the aggregators in `Analytics::Aggregator::KNOWN` store a subscriber count: Feedly, Inoreader and NewsBlur.
-Any other user agent counts once a day as a reader by its daily hash, whatever count it names. The rest of ADR
-0106 stands: the feed fetch count, the readers' daily hashes, the feed skipping the cache, and outbound clicks.
+Only the aggregators in `Analytics::Operations::ParseAggregator::KNOWN` (the name #911 corrected) store a subscriber
+count: Feedly, Inoreader and NewsBlur. Any other user agent counts once a day as a reader by its daily hash, whatever
+count it names. The rest of ADR 0106 stands: the feed fetch count, the readers' daily hashes, the feed skipping the
+cache, and outbound clicks.
 
 Counting a new aggregator means adding it to `KNOWN`.
 

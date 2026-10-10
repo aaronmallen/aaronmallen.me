@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [admin, media]
 issue: "#133"
-amended: ["#137"]
+amended: ["#137", "#911"]
 tags: [media, photos, uploads, libvips, libheif, heic, metadata, privacy, gps]
 ---
 
@@ -33,6 +33,9 @@ Before libvips sees a file, the endpoint enforces the limits:
 - It refuses a file over 20 MB.
 - It judges the type by the file's bytes, not its name or the type the browser sent.
 - It takes JPEG, PNG, WebP, GIF and HEIC, and refuses SVG and everything else.
+
+One more limit, which #911 records, needs libvips to read the file: the endpoint refuses a photo over 100 megapixels
+before it processes it.
 
 The photo is stored under a random name. No step after this one sees the original file.
 

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [media, posts, record, tasks]
 issue: "#134"
-amended: ["#140", "#247"]
+amended: ["#140", "#247", "#911"]
 tags: [media, photos, uploads, claims, references, deletion, sweep, sidekiq, feeds, webmentions]
 ---
 
@@ -32,15 +32,17 @@ A photo belongs to the records whose Markdown points to it, and to nothing else.
   in its Markdown and makes the record's claims match them: a photo the text now points to gains a claim, and one it
   no longer points to loses one. A photo can carry claims from many records. #140 added a post's Open Graph image
   field, so a `/media/<key>` URL there claims too, and a card image can be an upload. Since #247 a post's edit
-  notes claim for the post too, so a photo in a note lives as long as the post.
+  notes claim for the post too, so a photo in a note lives as long as the post. Decision comments and review notes
+  claim the same way, as #911 records.
 - **Deleting releases, and the last release deletes.** Deleting a record drops its claims, and deletes from the
-  store and the table each photo left with no claim. Deleting a task does the same for its comments.
+  store and the table each photo left with no claim. Deleting a task does the same for its comments. Nothing deletes
+  a review note, so its claims last (#911).
 - **A sweep takes the rest.** A scheduled job deletes every photo that has no claim and was uploaded over 24 hours
   ago. That covers a draft abandoned before its first save and a photo an edit took out of the text. It never
   retries, and its next run catches up ([ADR 0012][0012]).
 
-The media slice owns the claims, next to the photos. Posts, record and tasks each call its exported operations from
-their save and delete operations ([ADR 0003][0003]).
+The media slice owns the claims, next to the photos. Posts, record, tasks and decisions each call its exported
+operations from their save and delete operations ([ADR 0003][0003]).
 
 ## Alternatives
 

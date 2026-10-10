@@ -5,6 +5,7 @@ status: active
 created: 2026-10-04
 area: [admin, lib, tasks]
 issue: "#466"
+amended: ["#911"]
 tags: [tasks, commits, markdown, images, privacy, csp]
 ---
 
@@ -29,20 +30,19 @@ URL.
 
 ## Decision
 
-We turn remote images into links in the renderers, not in the CSP. `Blog::RemoteImages` in
-`lib/blog/remote_images.rb` walks rendered HTML and keeps an `img` only when its `src` is a single file under
-`/media/`, either as a path or on the site's own origin, with no query or fragment. It swaps every other `img`
-for:
+We turn remote images into links in the renderers, not in the CSP. `Tasks::RemoteImages` in `lib/tasks/remote_images.rb`
+(the name and path #911 corrected) walks rendered HTML and keeps an `img` only when its `src` is a single file under
+`/media/`, either as a path or on the site's own origin, with no query or fragment. It swaps every other `img` for:
 
 - a link to its `src`, worded with its alt text or, with none, the URL, when the `src` is an `http` or `https` URL
   with a host;
 - the same words as plain text, when the `img` already sits inside a link, since a link cannot hold another;
 - its alt text alone, when the `src` is not such a URL.
 
-`Tasks::Markdown` runs the swap after sanitize cleans the HTML, in the pass that labels task-list checkboxes, so
-notes, comments, decisions and the markdown preview all get it. The admin commit page runs `Posts::Markdown` and
-then `Blog::RemoteImages.to_links`. `Posts::Markdown` itself does not change, so posts, journal entries and the feeds
-keep their images.
+`Tasks::Markdown` runs the swap after sanitize cleans the HTML, in the pass that labels task-list checkboxes, so notes,
+comments, decisions and the markdown preview all get it. The admin commit page runs `Posts::Markdown` and then
+`Tasks::RemoteImages.to_links`, and as #911 records, the pull request page does the same. `Posts::Markdown` itself does
+not change, so posts, journal entries and the feeds keep their images.
 
 We check against an allowlist of one path, not a list of remote hosts, so no spelling of a host gets past it.
 
@@ -60,7 +60,7 @@ An issue that relied on screenshots reads as a list of links. A relative image a
 `docs/shot.png`, shows its alt text, since it never loaded here anyway.
 
 Code that renders text someone else wrote through `Posts::Markdown` still shows remote images. Wrap it in
-`Blog::RemoteImages.to_links`, as the commit page does.
+`Tasks::RemoteImages.to_links`, as the commit page does.
 
 [0072]: 0072-render-raw-html-in-task-notes-through-the-sanitize-gem.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

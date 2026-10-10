@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, admin, api, contact, mcp, social, tasks]
 issue: "#650"
+amended: ["#911"]
 tags: [inbox, webmentions, messages, tasks, schema, bulk, transactions, savepoint, api, mcp]
 ---
 
@@ -29,12 +30,12 @@ operation for each id. That covers one kind at a time. The inbox holds three.
 
 ## Decision
 
-**A webmention's seen mark is a column, not a status.** A new migration adds a nullable `seen_at` to `webmentions`,
-with no backfill, so the mentions pending today stay in the inbox. The `social` slice gains a mark-seen operation that
-sets it to now on any mention that exists, whatever its status. It exports `unseen_webmentions` and
-`unseen_webmention_count`, which read pending mentions with no `seen_at`, and `API::Queries::Inbox` and `InboxCount`
-read those in place of `pending_webmentions` and `pending_webmention_count`. The Webmentions page, Today and the
-analytics figures keep counting every pending mention.
+**A webmention's seen mark is a column, not a status.** A new migration adds a nullable `seen_at` to `webmentions`, with
+no backfill, so the mentions pending today stay in the inbox. The `social` slice gains a mark-seen operation that sets
+it to now on any mention that exists, whatever its status. Its exported `repos.webmention_queries` answers `#unseen` and
+`#unseen_count`, which read pending mentions with no `seen_at`, and `API::Repos::InboxQueries#unseen` and
+`#unseen_count` read those in place of the pending reads. #911 corrected these names. The Webmentions page, Today and
+the analytics figures keep counting every pending mention.
 
 **One `api` operation clears the inbox.** `API::Operations::ClearInbox` takes three lists of ids, `tasks`,
 `messages` and `webmentions`, and opens one transaction. It calls `tasks.operations.mark_task_seen`,
@@ -44,9 +45,9 @@ the call had changed. The contract drops repeated ids and refuses a call whose t
 take the cap of 100 from [ADR 0098][0098]: the inbox has no pages, and the button posts every row it shows.
 
 **Each door posts ids, never "all".** The admin posts `post "/inbox/seen"` from a form outside the rows that carries
-each row's id, and imports the operation from `api` as it imports `queries.inbox`. The form asks to confirm before it
-sends. The endpoint and the MCP tool are one class in `slices/api/endpoints`, per [ADR 0088][0088]. A failure answers
-422 and puts the failing id under its kind in `errors`.
+each row's id, and imports the operation from `api` as it imports `repos.inbox_queries` (#911). The form asks to confirm
+before it sends. The endpoint and the MCP tool are one class in `slices/api/endpoints`, per [ADR 0088][0088]. A failure
+answers 422 and puts the failing id under its kind in `errors`.
 
 ## Alternatives
 

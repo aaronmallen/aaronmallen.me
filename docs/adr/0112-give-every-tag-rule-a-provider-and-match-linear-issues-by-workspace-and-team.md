@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [db, admin, api, mcp, record, tasks]
 issue: "#506"
+amended: ["#911"]
 tags: [tasks, tags, rules, imports, sync, github, linear, providers]
 ---
 
@@ -24,18 +25,18 @@ two it means.
 
 ## Decision
 
-**Every rule names a provider.** `task_tag_rules` takes a `provider` column of the `task_source_provider` type that
-`task_sources` already uses, and a new migration sets every rule that exists to `github`. A pattern is unique per
-provider, so a GitHub rule and a Linear rule for `acme/*` are two rules.
+**Every rule names a provider.** `task_tag_rules`, now `task_rules` ([ADR 0122][0122]), takes a `provider` column of the
+`task_source_provider` type that `task_sources` already uses, and a new migration sets every rule that exists to
+`github`. A pattern is unique per provider, so a GitHub rule and a Linear rule for `acme/*` are two rules.
 
 **A Linear rule matches `workspace/team`.** The pattern reads `acme/ENG`, or `acme/*` for every team in the
 workspace, and ignores case as a GitHub pattern does. The Linear client in `lib/record/linear` sets `origin` to the
 workspace from the issue's URL and the team from its key, as [ADR 0070][0070] keeps provider details in the client.
 
 **A rule matches only its own provider.** `SyncIssues` already knows the provider it syncs, and hands it to
-`TaskTagRuleRepo#tag_names_for` beside the `origin`. The one pass when a rule is created reads only the
-`task_sources` of the rule's provider, and reads the workspace and team from a Linear URL as it reads the repo from a
-GitHub one.
+`Tasks::Repos::TaskRuleQueries#targets` beside the `origin`. #911 corrected the table and method names here. The one
+pass when a rule is created reads only the `task_sources` of the rule's provider, and reads the workspace and team from
+a Linear URL as it reads the repo from a GitHub one.
 
 Everything else in [ADR 0103][0103] holds: rule tags land at import beside label tags, later syncs add none, and
 editing or deleting a rule changes no task's tags. The admin, the API and the MCP tools show and take the provider
@@ -71,4 +72,5 @@ A third provider that wants rule tags has to join the `task_source_provider` typ
 
 [0070]: 0070-share-one-issue-sync-across-providers-and-run-each-provider-as-its-own-job.md
 [0103]: 0103-tag-an-imported-task-from-repo-rules-on-import-and-once-on-create.md
+[0122]: 0122-widen-task-tag-rules-into-task-rules-that-assign-projects-and-match-a-projects-repo.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

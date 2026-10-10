@@ -6,7 +6,7 @@ created: 2026-10-04
 area: [social, admin, mcp, lib, db]
 supersedes: ["0042"]
 issue: "#461"
-amended: ["#946"]
+amended: ["#946", "#911"]
 tags: [webmentions, moderation, trust, spam, bridgy, security]
 ---
 
@@ -40,8 +40,8 @@ root half of this gap.
   `webmention_settings.single_author_hosts`, as one person's site. The owner keeps that list from the webmention
   settings in the admin and through `update_webmention_settings`. `Blog::Types::Normalized::Hosts` reads each entry
   down to a bare host and drops what does not parse.
-- `Social::Repos::WebmentionRepo#known_author?` finds at least one approved mention and no spam under the same
-  author URL.
+- `Social::Repos::WebmentionQueries#known_author?` (the name #911 corrected) finds at least one approved mention and
+  no spam under the same author URL.
 
 Anything else waits as pending. Author URL normalization and the rule that a changed resend goes back to pending
 stay as ADR 0042 set them.
