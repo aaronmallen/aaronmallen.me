@@ -20,8 +20,6 @@ AllCops:
 Hanami/SliceExports:
   ForbiddenExports:
     - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader|github\.client|linear\.client|networks\.all|store\.client)\z)/
-  Exclude:
-    - slices/backups/config/slice.rb
 
 I18n/GetText:
   Enabled: false
