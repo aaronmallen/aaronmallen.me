@@ -1753,6 +1753,12 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{time}"
           done_at: "done %{time}"
+        completed_card:
+          empty: "Nothing completed yet."
+          no_match: "Nothing completed matches these filters."
+          shown:
+            one: "%{count} shown · logged to the activity feed"
+            other: "%{count} shown · logged to the activity feed"
         controls:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."
@@ -1826,6 +1832,25 @@ en:
           label: "Reorder %{task}"
         import_acts:
           rules: "Task rules"
+        list_card:
+          add_to: "Add to %{list}…"
+          blurbs:
+            external: "open GitHub and Linear issues assigned to you"
+            next: "queued up, not today"
+            someday: "maybe, eventually, probably not"
+          carried_in:
+            one: "%{count} carried in"
+            other: "%{count} carried in"
+          empty:
+            external: "No open issues assigned to you."
+            next: "Nothing waiting."
+            no_match: "No matches in this list."
+            someday: "Nothing parked."
+            today: "Nothing open in today's sprint."
+          open:
+            one: "%{count} open"
+            other: "%{count} open"
+          sprint: "Sprint · %{date}"
         link_editor:
           find: "Find"
           kind: "Link type"
@@ -2459,37 +2484,17 @@ en:
           title: "Tags and projects by repo or team"
       tasks:
         index:
-          add_to: "Add to %{list}…"
-          blurbs:
-            external: "open GitHub and Linear issues assigned to you"
-            next: "queued up, not today"
-            someday: "maybe, eventually, probably not"
           carried_in:
             one: "%{count} carried in"
             other: "%{count} carried in"
-          empty:
-            completed: "Nothing completed yet."
-            completed_no_match: "Nothing completed matches these filters."
-            external: "No open issues assigned to you."
-            next: "Nothing waiting."
-            no_match: "No matches in this list."
-            someday: "Nothing parked."
-            today: "Nothing open in today's sprint."
           finished_today:
             one: "%{count} finished today"
             other: "%{count} finished today"
           footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
           heading: "Tasks"
-          open:
-            one: "%{count} open"
-            other: "%{count} open"
           open_in_today:
             one: "%{count} open in today"
             other: "%{count} open in today"
-          shown:
-            one: "%{count} shown · logged to the activity feed"
-            other: "%{count} shown · logged to the activity feed"
-          sprint: "Sprint · %{date}"
           sprint_on: "Sprint %{date}"
           upcoming_count:
             one: "%{count} upcoming"

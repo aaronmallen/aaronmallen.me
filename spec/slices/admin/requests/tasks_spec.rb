@@ -10,7 +10,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     post "/admin/tasks", { _csrf_token: admin_csrf_token, filter:, task: { title:, **fields } }.compact
   end
 
-  def empty_text(filter) = i18n.t(["ui.views.tasks.index.empty", filter].join("."))
+  def empty_text(filter) = i18n.t(["ui.components.tasks.list_card.empty", filter].join("."))
 
   def lose_the_roll
     allow(sprint_repo).to receive(:by_id).and_return(nil)
@@ -2236,7 +2236,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     describe "searching" do
       def filters(key) = i18n.t(["ui.components.tasks.filters", key].join("."))
 
-      def index(key) = i18n.t(["ui.views.tasks.index", key].join("."))
+      def list_card(key) = i18n.t(["ui.components.tasks.list_card", key].join("."))
 
       def search(query, **) = get("/admin/tasks", { q: query, filter: "next", ** })
 
@@ -2380,7 +2380,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says so when nothing in the list matches" do
         search("nothing here")
 
-        expect(page).to have_css(".empty", exact_text: index("empty.no_match"))
+        expect(page).to have_css(".empty", exact_text: list_card("empty.no_match"))
       end
 
       it "keeps the query in the field" do
@@ -2493,6 +2493,8 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
     end
 
     describe "the archive" do
+      def completed_card(key, **) = i18n.t(["ui.components.tasks.completed_card", key].join("."), **)
+
       def day_heads = page.all(".day-date").map(&:text)
 
       def finished(title, days, hour, **)
@@ -2501,8 +2503,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
         create(:task, :done, title:, completed_at: at, **)
       end
-
-      def index(key, **) = i18n.t(["ui.views.tasks.index", key].join("."), **)
 
       before do
         finished("Seed the queue", 2, 9)
@@ -2559,7 +2559,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says how many it is showing" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_css(".card-note", exact_text: index("shown", count: 4))
+        expect(page).to have_css(".card-note", exact_text: completed_card("shown", count: 4))
       end
 
       it "offers no move out of the archive on a finished task" do
@@ -2589,7 +2589,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "blames the filters when they empty it" do
         get "/admin/tasks", filter: "completed", q: "nothing here"
 
-        expect(page).to have_css(".empty", exact_text: index("empty.completed_no_match"))
+        expect(page).to have_css(".empty", exact_text: completed_card("no_match"))
       end
 
       it "offers no pager when every finished task fits" do
@@ -2671,7 +2671,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "blames the filters when the range is empty" do
         range(day(9), day(8))
 
-        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.completed_no_match"))
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.tasks.completed_card.no_match"))
       end
 
       it "keeps the range in the search form", :aggregate_failures do
@@ -2779,7 +2779,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says nothing is finished yet" do
         get "/admin/tasks", filter: "completed"
 
-        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.completed"))
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.tasks.completed_card.empty"))
       end
     end
 
