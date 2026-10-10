@@ -5,7 +5,7 @@ status: active
 created: 2026-09-30
 area: [admin, social]
 issue: "#120"
-amended: ["#225", "#226"]
+amended: ["#225", "#226", "#913"]
 tags: [social, mentions, mastodon, bluesky, delivery, directory, did]
 ---
 
@@ -35,7 +35,8 @@ it sends to (ADR 0040): the person's handle where they have one, their plain nam
 client adds a mention facet naming the DID. The counter in `Admin::Operations::CountNetworkLengths`, the limit
 check before delivery and the preview measure and show the expanded text for each network, not the token.
 
-A token that names nobody in the directory is refused when the post is saved.
+A token that names nobody in the directory is refused when the post is saved. The contract checks it in Ruby, which
+[ADR 0017][0017] lists as an exception since #913.
 
 The directory is a table in the social slice. The operator fills it in from the admin, with whichever handles a
 person has, through one people form that the people page and the composer's `@` list both show. Each handle field
@@ -77,7 +78,9 @@ A suggested edit or a raw read through the MCP server sees the token, not the ha
 A stored DID keeps a Bluesky mention linked through a handle change, but the handle text comes from the directory, so
 a post shows the old handle until the operator edits the person.
 
-Removing a person from the directory leaves their token in every post already saved. Saving refuses such a token,
-but delivery of a queued post still has to handle it.
+Removing a person from the directory leaves their token in every post already saved, even one still queued. Saving
+refuses such a token, but delivery does not. `ResolveMentions#expand` writes the token's key in its place, so
+`@{alice}` goes out as `alice` on both networks, with no handle and no Bluesky facet.
 
+[0017]: 0017-enforce-rules-over-stored-state-in-postgres-not-in-contracts.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
