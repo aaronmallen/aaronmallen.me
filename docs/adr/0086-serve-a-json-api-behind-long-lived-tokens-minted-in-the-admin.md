@@ -5,6 +5,7 @@ status: active
 created: 2026-10-01
 area: [config, db, admin, api, mcp]
 issue: "#153"
+amended: ["#897"]
 tags: [api, auth, tokens, cli, mcp, oauth, journal, tasks]
 ---
 
@@ -28,11 +29,14 @@ The site serves a JSON API at `/api/v1` from a new `api` slice, which `config/ro
 plain URLs, such as `/api/v1/journal_entries` and `/api/v1/tasks/:id/complete`.
 
 A client sends an API token as a bearer token. I mint tokens in the admin, see each one once, and revoke any of
-them there. A new table holds each token's name, a digest of it, when a client last used it and when I revoked
-it, never the token itself. A token:
+them there. A new table holds each token's name, a digest of it, its scopes, when it expires, when a client last
+used it and when I revoked it, never the token itself. A token:
 
-- never expires;
-- can do anything the admin can, with no scopes;
+- never expires unless I pick a day when I mint it. #897 added the day: the token stops working at local midnight
+  on it;
+- holds the scopes I check when I mint it, drawn from MCP's `read`, `suggest`, `write`, `publish` and `delete`.
+  #897 added scopes after a security audit. An endpoint asks for the scope its MCP tool asks for, and refuses a
+  token without it with a 403. A token minted before #897 holds every scope;
 - opens the API alone. MCP's OAuth tokens open MCP alone, and each door refuses the other's tokens with a 401.
 
 MCP keeps its OAuth flow, consent and scopes as [ADR 0056][0056], [ADR 0059][0059] and [ADR 0061][0061] lay them
@@ -61,7 +65,8 @@ token, ends a token I no longer trust.
 
 The CLI signs in once, with a token pasted into its config, and works until I revoke it.
 
-A leaked API token can do anything the admin can, for as long as nobody notices. Nothing expires it. The last use
+A leaked API token can do whatever its scopes allow, until somebody notices or the day it expires. A token with
+every scope and no expiry, which every token minted before #897 is, can do anything the admin can. The last use
 the admin shows is the only sign that a token I forgot about still works.
 
 The site keeps only a digest, so a token I lose cannot be shown again. I mint a new one and revoke the old.

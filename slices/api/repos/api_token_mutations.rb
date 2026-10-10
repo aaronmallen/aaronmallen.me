@@ -7,7 +7,7 @@ module API
 
       stamped_commands :create, :update
 
-      def mint(token:, name:) = create(name:, token_digest: Blog::Types::SecretDigest[token])
+      def mint(token:, **fields) = create(**fields, token_digest: Blog::Types::SecretDigest[token])
 
       def revoke(id, at: Time.now) = (update(id, revoked_at: at) if api_tokens.live.by_pk(id).exist?)
 

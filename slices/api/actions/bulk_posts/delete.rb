@@ -4,6 +4,8 @@ module API
   module Actions
     module BulkPosts
       class Delete < Action
+        SCOPE = Blog::Types::OAuthScope["delete"]
+
         include Deps[endpoint: "endpoints.delete_posts"]
 
         def handle(request, response) = answer(response, endpoint.call(body(request, response)))

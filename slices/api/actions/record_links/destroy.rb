@@ -4,6 +4,8 @@ module API
   module Actions
     module RecordLinks
       class Destroy < Action
+        SCOPE = Blog::Types::OAuthScope["write"]
+
         include Deps[endpoint: "endpoints.unlink_records"]
 
         def handle(request, response)

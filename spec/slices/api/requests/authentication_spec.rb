@@ -52,7 +52,9 @@ RSpec.describe "API authentication", type: :request do
     it "names the token as the problem" do
       read_token("Bearer #{Blog::Types::NewSecret[]}")
 
-      expect(document).to eq("error" => "invalid_token", "error_description" => "the API token is unknown or revoked")
+      expect(document).to eq(
+        "error" => "invalid_token", "error_description" => "the API token is unknown, revoked or expired",
+      )
     end
 
     it "names the error in the challenge" do
@@ -78,6 +80,14 @@ RSpec.describe "API authentication", type: :request do
     it "answers a revoked token with JSON" do
       value, token = minted.values_at(:value, :token)
       revoke(token.id)
+      read_token("Bearer #{value}")
+
+      expect(document["error"]).to eq("invalid_token")
+    end
+
+    it "refuses an expired token" do
+      value, token = minted.values_at(:value, :token)
+      stored.where(id: token.id).update(expires_at: Time.now - 1)
       read_token("Bearer #{value}")
 
       expect(document["error"]).to eq("invalid_token")
@@ -132,6 +142,13 @@ RSpec.describe "API authentication", type: :request do
       read_token("Bearer #{value}")
 
       expect(last_response.headers["Cache-Control"]).to eq("private, no-store")
+    end
+
+    it "takes a token before the day it expires" do
+      value = API::Slice["operations.mint_token"].call(name: "Terminal", expires_on: Blog::TimeZone.today + 1).value!
+      read_token("Bearer #{value[:value]}")
+
+      expect(last_response.status).to eq(200)
     end
 
     it "gets no way into MCP" do

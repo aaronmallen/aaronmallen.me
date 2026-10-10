@@ -148,9 +148,14 @@ module API
         optional: { error: { type: "string", enum: [Authenticate::INVALID_TOKEN] } },
       ).freeze
 
+      FORBIDDEN = Helpers::Schema.object(
+        { error: { type: "string", enum: [Action::INSUFFICIENT_SCOPE] }, error_description: Helpers::Schema::STRING },
+      ).freeze
+
       REFUSALS = {
         "400" => ["BadBody", "the body is not a JSON object", "Refusal"],
-        "401" => ["Unauthorized", "no token, or one that is unknown or revoked", "Unauthorized"],
+        "401" => ["Unauthorized", "no token, or one that is unknown, revoked or expired", "Unauthorized"],
+        "403" => ["Forbidden", "the token lacks the scope this operation needs", "Forbidden"],
         "404" => ["NotFound", "no record has that ID", "Refusal"],
         "422" => ["Invalid", "the input fails a check", "Refusal"],
         "500" => ["Failed", "the site could not finish the work", "Refusal"],
@@ -160,6 +165,7 @@ module API
       REFUSAL_TESTS = {
         "400" => -> { it.body.any? },
         "401" => ->(_row) { true },
+        "403" => ->(_row) { true },
         "404" => -> { it.fields.any? || it.finds? },
         "422" => -> { it.properties.any? },
         "500" => lambda(&:endpoint?),
@@ -238,7 +244,7 @@ module API
 
       def components
         {
-          schemas: { Refusal: REFUSAL, Unauthorized: UNAUTHORIZED, **serializers },
+          schemas: { Refusal: REFUSAL, Unauthorized: UNAUTHORIZED, Forbidden: FORBIDDEN, **serializers },
           responses: REFUSALS.values.to_h { |name, description, schema| [name, refusal(description, schema)] },
           securitySchemes: { token: { type: "http", scheme: "bearer" } },
         }

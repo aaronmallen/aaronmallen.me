@@ -4,6 +4,8 @@ module API
   module Actions
     module SocialPosts
       class Send < Action
+        SCOPE = Blog::Types::OAuthScope["publish"]
+
         include Deps[endpoint: "endpoints.send_social_post"]
 
         def handle(request, response)

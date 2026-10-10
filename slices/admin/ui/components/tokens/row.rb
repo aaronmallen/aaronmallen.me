@@ -16,6 +16,12 @@ module Admin
 
           private
 
+          def expiry
+            return plain(t(".never_expires")) if @token.expires_at.nil?
+
+            stamped(".expires", @token.expires_at)
+          end
+
           def last_used
             return plain(t(".never_used")) if @token.last_used_at.nil?
 
@@ -44,9 +50,13 @@ module Admin
           end
 
           def sub
+            plain(@token.scopes.join(", "))
+            plain(DOT)
             minted
             plain(DOT)
             last_used
+            plain(DOT)
+            expiry
           end
         end
       end

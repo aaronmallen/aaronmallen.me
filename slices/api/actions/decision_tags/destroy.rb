@@ -4,6 +4,8 @@ module API
   module Actions
     module DecisionTags
       class Destroy < Action
+        SCOPE = Blog::Types::OAuthScope["write"]
+
         include Deps[endpoint: "endpoints.untag_decision"]
 
         def handle(request, response)

@@ -9,11 +9,18 @@ module API
     BAD_REQUEST = 400
     CHALLENGE = "WWW-Authenticate"
     CREATED = 201
+    FORBIDDEN = 403
+    INSUFFICIENT_SCOPE = "insufficient_scope"
+    MISSING_SCOPE = "this endpoint needs a token with the %s scope"
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     OK = 200
     SEPARATOR = ","
     STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
+    SCOPE = nil
     UNAUTHORIZED = 401
+    VERB_SCOPES = { "DELETE" => Blog::Types::OAuthScope["delete"], "GET" => Blog::Types::OAuthScope["read"],
+                    "HEAD" => Blog::Types::OAuthScope["read"] }.freeze
+    WRITE = Blog::Types::OAuthScope["write"]
 
     include Deps[
       authenticate: "operations.authenticate",
@@ -64,10 +71,20 @@ module API
       response.body = JSON.generate(payload)
     end
 
+    def require_scope(request, response, token)
+      scope = self.class::SCOPE || VERB_SCOPES.fetch(request.request_method, WRITE)
+      return if token.scopes.include?(scope)
+
+      response.format = :json
+      response.headers[CHALLENGE] = %(Bearer error="#{INSUFFICIENT_SCOPE}", scope="#{scope}")
+      halt FORBIDDEN, JSON.generate({ error: INSUFFICIENT_SCOPE, error_description: format(MISSING_SCOPE, scope) })
+    end
+
     def require_token(request, response)
       case authenticate.call(request.env[AUTHORIZATION])
         in Success(token)
           record_sighting.call(request, api_token_id: token.id)
+          require_scope(request, response, token)
           response[:token] = token
         in Failure(error)
           response.format = :json

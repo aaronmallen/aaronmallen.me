@@ -1778,7 +1778,10 @@ CREATE TABLE public.api_tokens (
     revoked_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT api_tokens_name_length_check CHECK ((char_length((name)::text) <= 100))
+    scopes text[] DEFAULT '{read,suggest,write,publish,delete}'::text[] NOT NULL,
+    expires_at timestamp with time zone,
+    CONSTRAINT api_tokens_name_length_check CHECK ((char_length((name)::text) <= 100)),
+    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete}'::text[])))
 );
 
 
@@ -6467,4 +6470,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261009000803_add_pull_requests_to_activities.rb'),
 ('20261009000804_add_pull_requests_to_record_links_and_search.rb'),
 ('20261010000140_create_post_link_checks.rb'),
-('20261010000420_add_broken_links_to_attention.rb');
+('20261010000420_add_broken_links_to_attention.rb'),
+('20261010000440_add_scopes_and_expiry_to_api_tokens.rb');

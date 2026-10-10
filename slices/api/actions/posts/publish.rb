@@ -4,6 +4,8 @@ module API
   module Actions
     module Posts
       class Publish < Action
+        SCOPE = Blog::Types::OAuthScope["publish"]
+
         include Deps[endpoint: "endpoints.publish_post"]
 
         def handle(request, response)

@@ -6,7 +6,7 @@ module API
       BEARER = /\ABearer +(?<token>\S+)\z/i
       INVALID_TOKEN = "invalid_token"
       NO_TOKEN = "this endpoint takes a bearer API token"
-      UNUSABLE_TOKEN = "the API token is unknown or revoked"
+      UNUSABLE_TOKEN = "the API token is unknown, revoked or expired"
 
       include Deps["repos.api_token_mutations", "repos.api_token_queries"]
 

@@ -13,7 +13,7 @@ module Admin
         ]
 
         def handle(request, response)
-          params = Blog::Types::Fields[request.params[:token]]
+          params = minting(Blog::Types::Fields[request.params[:token]])
 
           case mint_token.call(params)
             in Success({ value: })
@@ -30,7 +30,8 @@ module Admin
           response.status = 422
           response.render(
             index_view,
-            errors:, minted: nil, name: params[:name].to_s, tokens: api_token_queries.live,
+            errors:, minted: nil, tokens: api_token_queries.live, name: params[:name].to_s,
+            scopes: Array(params[:scopes]), expires_on: params[:expires_on].to_s,
           )
         end
 
@@ -38,6 +39,13 @@ module Admin
           response.flash[UI::Views::Tokens::Index::MINTED] = value
           toast(response, MINTED)
           response.redirect_to(routes.path(:admin_tokens))
+        end
+
+        def minting(params)
+          scopes = params[:scopes]
+          return params unless scopes.is_a?(Hash)
+
+          params.merge(scopes: scopes.select { |_, value| value == Blog::Types::CHECKED }.keys.map(&:to_s))
         end
       end
     end

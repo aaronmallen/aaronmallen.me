@@ -5,9 +5,11 @@ RSpec.describe "Admin API tokens", type: :request do
 
   def call_api(value) = get("/api/v1/token", {}, { "HTTP_AUTHORIZATION" => "Bearer #{value}" })
 
-  def error(code) = Admin::Slice["i18n"].t(["ui.components.tokens.field_error.name", code].join("."))
+  def checked(*scopes) = Blog::Types::OAuthScope.values.to_h { [it, scopes.include?(it) ? "1" : "0"] }
 
-  def mint(name) = post("/admin/tokens", token: { name: }, _csrf_token: admin_csrf_token)
+  def error(code, field = "name") = Admin::Slice["i18n"].t(["ui.components.tokens.field_error", field, code].join("."))
+
+  def mint(name, **fields) = post("/admin/tokens", token: { name:, **fields }, _csrf_token: admin_csrf_token)
 
   def minted(name = "Terminal") = API::Slice["operations.mint_token"].call(name:).value!
 
@@ -152,6 +154,57 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(stored.count).to be_zero
     end
 
+    it "stores the scopes I check" do
+      mint("Terminal", scopes: checked("read", "write"))
+
+      expect(stored.one[:scopes]).to eq(%w[read write])
+    end
+
+    it "checks only read on a fresh form" do
+      get "/admin/tokens"
+
+      expect(page.all("input[type=checkbox][checked]").map { it[:name] }).to eq(["token[scopes][read]"])
+    end
+
+    it "refuses a token with no scope and says why", :aggregate_failures do
+      mint("Terminal", scopes: checked)
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".field-error", text: error("blank", "scopes"))
+    end
+
+    it "keeps the scopes I checked when it refuses" do
+      mint("", scopes: checked("publish"))
+
+      expect(page.all("input[type=checkbox][checked]").map { it[:name] }).to eq(["token[scopes][publish]"])
+    end
+
+    it "stores no expiry when I leave the day blank" do
+      mint("Terminal", scopes: checked("read"), expires_on: "")
+
+      expect(stored.one[:expires_at]).to be_nil
+    end
+
+    it "expires the token at local midnight on the day I pick" do
+      day = Blog::TimeZone.today + 7
+      mint("Terminal", scopes: checked("read"), expires_on: day.iso8601)
+
+      expect(stored.one[:expires_at]).to eq(Blog::TimeZone.day_start(day))
+    end
+
+    it "refuses an expiry of today and says why", :aggregate_failures do
+      mint("Terminal", scopes: checked("read"), expires_on: Blog::TimeZone.today.iso8601)
+
+      expect(last_response.status).to eq(422)
+      expect(page).to have_css(".field-error", text: error("past", "expires_on"))
+    end
+
+    it "refuses an expiry that is not a day" do
+      mint("Terminal", scopes: checked("read"), expires_on: "soon")
+
+      expect(page).to have_css(".field-error", text: error("format", "expires_on"))
+    end
+
     it "lists the live tokens beside the errors" do
       minted("Laptop")
       mint("")
@@ -213,6 +266,35 @@ RSpec.describe "Admin API tokens", type: :request do
       get "/admin/tokens"
 
       expect(row.find("time")[:datetime]).to eq(Blog::TimeZone.local(token.created_at).iso8601)
+    end
+
+    it "names each token's scopes" do
+      API::Slice["operations.mint_token"].call(name: "Terminal", scopes: %w[read publish])
+      get "/admin/tokens"
+
+      expect(row).to have_text("read, publish")
+    end
+
+    it "says a token with no expiry never expires" do
+      minted
+      get "/admin/tokens"
+
+      expect(row).to have_text("never expires")
+    end
+
+    it "shows when a token expires" do
+      day = Blog::TimeZone.today + 7
+      API::Slice["operations.mint_token"].call(name: "Terminal", expires_on: day)
+      get "/admin/tokens"
+
+      expect(row).to have_text("expires #{stamp(Blog::TimeZone.day_start(day))}")
+    end
+
+    it "leaves out an expired token" do
+      stored.where(id: minted[:token].id).update(expires_at: Time.now - 1)
+      get "/admin/tokens"
+
+      expect(names).to be_empty
     end
 
     it "says a token no client has used has never been used" do

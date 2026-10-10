@@ -1997,22 +1997,38 @@ en:
           shared: "shared"
       tokens:
         field_error:
+          expires_on:
+            format: "Pick a day for the token to expire."
+            past: "Pick a day after today."
           name:
             blank: "Give the token a name first."
             control: "A name can't hold control characters."
             long: "Keep the name to 100 characters."
+          scopes:
+            blank: "Pick at least one permission."
         mint:
+          expires_hint: "The token stops working at midnight that day. Leave it blank and the token never expires."
+          expires_on: "Expires on"
           label: "Token name"
           mint: "Mint token"
           placeholder: "Name the client that will use it…"
+          scope:
+            delete: "Delete records for good"
+            publish: "Publish posts and send social posts"
+            read: "Read every record"
+            suggest: "Suggest edits"
+            write: "Make changes short of publishing and deleting"
+          scopes: "Permissions"
         minted:
           hint: "Copy it now. The site keeps only a digest, so this page can't show it again."
           title: "Your new token"
         row:
           confirm_revoke: "Revoke %{token}? Any client using it loses the API at once."
+          expires: "expires"
           last_used: "last used"
           minted: "minted"
           never_used: "never used"
+          never_expires: "never expires"
           revoke: "Revoke"
       webmentions:
         bulk:

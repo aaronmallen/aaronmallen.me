@@ -5,7 +5,7 @@ module API
     class APITokens < Blog::DB::Relation
       schema :api_tokens, infer: true
 
-      def live = where(revoked_at: nil)
+      def live(at: Time.now) = where(revoked_at: nil).where { expires_at.is(nil) | (expires_at > at) }
 
       def newest_first = order(self[:created_at].desc, self[:id].desc)
 

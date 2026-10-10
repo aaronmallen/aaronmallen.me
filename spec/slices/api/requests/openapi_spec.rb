@@ -55,7 +55,7 @@ RSpec.describe "API OpenAPI document", type: :request do
   it "lists the serializer schemas in name order, after the refusals" do
     names = document.dig("components", "schemas").keys
 
-    expect(names.drop(2)).to eq(names.drop(2).sort)
+    expect(names.drop(3)).to eq(names.drop(3).sort)
   end
 
   it "lets a task listing filter by contributor, agent and model" do
