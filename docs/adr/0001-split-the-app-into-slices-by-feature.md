@@ -6,7 +6,7 @@ created: 2026-09-28
 area: [app, config, lib, activity, admin, analytics, api, contact, decisions, links, mcp, media, posts, projects,
   public, record, saved_views, search, social, suggestions, tags, tasks]
 issue: AA-587
-amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950"]
+amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -59,7 +59,13 @@ that calls another's client imports its key, as `projects` and `admin` import `g
 **The app shares only what no slice owns, and a slice names each piece it takes** in
 `config.shared_app_component_keys`: `assets`, the one compiled bundle, for `public`, `admin` and `mcp`; `http`, the
 connection builder under the GitHub, network, webmention and GeoLite2 clients, for `analytics`, `record` and
-`social` (AA-747); and `honeybadger.agent` for `mcp`.
+`social` (AA-747); `honeybadger.agent` for `admin`, `mcp`, `posts` and `social`; and `sidekiq.dead_set` for
+`activity` (#951).
+
+Four keys break the rule on purpose, and `config/app.rb` shares them with every slice:
+`contracts.contributor_terms_contract`, `contracts.review_range_contract`, `contracts.search_query_contract` and
+`operations.read_visitor_address`. They left `lib/blog` in #721, where every slice already reached them, and seven
+slices read them now, so no slice owns them. Sharing them once saves seven lists of the same keys (#951).
 
 What `app/` keeps and which `lib` a file goes in are ADR 0002's, since #950. This record first gave `app/` the
 asset sources and no Ruby.
