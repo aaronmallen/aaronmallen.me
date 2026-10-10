@@ -5,7 +5,7 @@ module Social
     class ResolveMentions
       BLUESKY = Blog::Types::NetworkName["bluesky"]
       MASTODON = Blog::Types::NetworkName["mastodon"]
-      TOKEN = /@\{([^{}[:space:]]+)\}/
+      TOKEN = /@\{([^{}\p{White_Space}]+)\}/
 
       include Deps[person_queries: "repos.person_queries"]
 

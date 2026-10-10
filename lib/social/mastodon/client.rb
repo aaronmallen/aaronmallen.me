@@ -61,6 +61,8 @@ module Social
         Structs::RemotePost.new(id: id.to_s, url: body["url"].to_s)
       end
 
+      def reserved_per_url = RESERVED_PER_URL
+
       def search(text, limit:)
         body = request(:get, SEARCH_PATH, q: text, type: "accounts", resolve: true, limit:)
 

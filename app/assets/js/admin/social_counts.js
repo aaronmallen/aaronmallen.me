@@ -5,13 +5,12 @@ const FULL = 100;
 const LINK = /(?<![\w@])https?:\/\/[^\s<>"]*[^\s<>".,;:!?]/gi;
 const MENTION = /@(\w[\w.-]*)@[\w-]+(?:\.[\w-]+)+/g;
 const OPENER = { ")": "(", "]": "[" };
-const REF = /(?:^|&)ref=/;
-const RESERVED_PER_URL = 23;
 const SEGMENTER = new Intl.Segmenter(undefined, { granularity: "grapheme" });
 
 const COUNTS = {
   bluesky: (text) => graphemes(text),
-  mastodon: (text) => graphemes(shrinkLinks(text).replace(MENTION, "@$1")),
+  mastodon: (text, counter) =>
+    graphemes(shrinkLinks(text, Number(counter.dataset.reservedPerUrl)).replace(MENTION, "@$1")),
 };
 
 export function renderCounts(root, text, selected) {
@@ -43,9 +42,9 @@ function hostname(address) {
 
 function renderCount(counter, typed, selected) {
   const network = counter.dataset.socialCount;
-  const text = expand(tagLinks(typed, counter.dataset.taggedHost, network), network);
+  const text = expand(tagLinks(typed, counter.dataset, network), network);
   const limit = Number(counter.dataset.limit);
-  const count = COUNTS[network](text);
+  const count = COUNTS[network](text, counter);
   const on = selected.has(network);
   const blown = count > limit || overBytes(counter, text);
   const over = on && blown;
@@ -71,8 +70,8 @@ function proseClose(url) {
   return open !== undefined && tally(url, close) > tally(url, open);
 }
 
-function shrinkLinks(text) {
-  return text.replace(LINK, (match) => "x".repeat(RESERVED_PER_URL) + match.slice(trimLink(match).length));
+function shrinkLinks(text, reserved) {
+  return text.replace(LINK, (match) => "x".repeat(reserved) + match.slice(trimLink(match).length));
 }
 
 function splitAt(text, char) {
@@ -81,22 +80,22 @@ function splitAt(text, char) {
   return at === -1 ? [text, null] : [text.slice(0, at), text.slice(at + 1)];
 }
 
-function tagLink(url, host, source) {
+function tagLink(url, { refKey, taggedHost }, source) {
   const [head, fragment] = splitAt(url, "#");
   const [address, query] = splitAt(head, "?");
-  if (!host || hostname(address) !== host || REF.test(query ?? "")) return url;
+  if (!taggedHost || hostname(address) !== taggedHost || `&${query ?? ""}`.includes(`&${refKey}=`)) return url;
 
   const path = /^https?:\/\/[^/]*$/i.test(address) ? `${address}/` : address;
-  const tagged = `${path}?${query ? `${query}&` : ""}ref=${source}`;
+  const tagged = `${path}?${query ? `${query}&` : ""}${refKey}=${source}`;
 
   return fragment === null ? tagged : `${tagged}#${fragment}`;
 }
 
-function tagLinks(text, host, source) {
+function tagLinks(text, rules, source) {
   return text.replace(LINK, (match) => {
     const url = trimLink(match);
 
-    return tagLink(url, host, source) + match.slice(url.length);
+    return tagLink(url, rules, source) + match.slice(url.length);
   });
 }
 

@@ -1,0 +1,14 @@
+"hello": {mastodon: 5, bluesky: 5}
+"Read https://aaronmallen.me/writing/hello and tell me": {mastodon: 40, bluesky: 65}
+"see (https://example.com/a(b))": {mastodon: 29, bluesky: 30}
+"see (https://x.y/z))": {mastodon: 30, bluesky: 20}
+"see [https://x.y/z]": {mastodon: 29, bluesky: 19}
+"write me@https://x.y/z": {mastodon: 22, bluesky: 22}
+"https://aaronmallen.me": {mastodon: 23, bluesky: 35}
+"https://aaronmallen.me/a?b=c#d": {mastodon: 23, bluesky: 42}
+"https://aaronmallen.me/a?ref=x": {mastodon: 23, bluesky: 30}
+"https://aaronmallen.me/a?href=x": {mastodon: 23, bluesky: 43}
+"hi @alice@mastodon.social and @bob@example.co.uk": {mastodon: 18, bluesky: 48}
+"thanks @{ada} and @{nobody}": {mastodon: 22, bluesky: 30}
+"not a token @{a b} or @{}": {mastodon: 25, bluesky: 25}
+"👍🏽 👨‍👩‍👧 done": {mastodon: 8, bluesky: 8}

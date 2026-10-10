@@ -1,28 +1,35 @@
 const PEOPLE = "[data-social-people]";
-const TOKEN = /@\{([^{}\s]+)\}/g;
 
 const parsed = new WeakMap();
 
 export function expand(text, network) {
-  const names = handles()[network] ?? {};
+  const { handles, token } = directory();
+  const names = handles[network] ?? {};
 
-  return text.replace(TOKEN, (_token, key) => names[key] ?? key);
+  return token ? text.replace(token, (_token, key) => names[key] ?? key) : text;
 }
 
 export function learn(people) {
-  const known = handles();
+  const { handles } = directory();
 
-  for (const [network, names] of Object.entries(people)) known[network] = { ...known[network], ...names };
+  for (const [network, names] of Object.entries(people)) handles[network] = { ...handles[network], ...names };
 }
 
 export function mentions(text) {
-  return text.search(TOKEN) !== -1;
+  const { token } = directory();
+
+  return token !== null && text.search(token) !== -1;
 }
 
-function handles() {
+function directory() {
   const element = document.querySelector(PEOPLE);
-  if (!element) return {};
-  if (!parsed.has(element)) parsed.set(element, JSON.parse(element.dataset.socialPeople));
+  if (!element) return { handles: {}, token: null };
+  if (!parsed.has(element)) {
+    parsed.set(element, {
+      handles: JSON.parse(element.dataset.socialPeople),
+      token: new RegExp(element.dataset.socialToken, "gu"),
+    });
+  }
 
   return parsed.get(element);
 }

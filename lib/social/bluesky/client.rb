@@ -74,6 +74,8 @@ module Social
         end
       end
 
+      def reserved_per_url = nil
+
       def resolve(handle)
         query(public_api, RESOLVE_HANDLE, handle:)["did"] or raise Error, "Bluesky resolved #{handle} without a DID"
       rescue Refused

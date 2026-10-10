@@ -19,6 +19,7 @@ module Admin
 
         Structs::Network.new(
           configured:, label: label(name), limit: client.limit, max_bytes: client.max_bytes, name:,
+          reserved_per_url: client.reserved_per_url,
           selected: configured && (selected.nil? || selected.include?(name)), tagged_host:,
         )
       end
