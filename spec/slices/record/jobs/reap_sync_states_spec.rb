@@ -95,10 +95,10 @@ RSpec.describe Record::Jobs::ReapSyncStates do
       expect(kept?).to be(true)
     end
 
-    it "reaps nothing when GitHub breaks" do
+    it "reaps nothing when GitHub breaks, and keeps GitHub's message", :aggregate_failures do
       stub_repos_answer({ status: 500, body: "something broke" })
-      reap
 
+      expect(reap).to eq(Dry::Monads::Failure([:github_failed, "GitHub answered 500 for GraphQL"]))
       expect(kept?).to be(true)
     end
 

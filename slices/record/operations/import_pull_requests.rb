@@ -3,6 +3,8 @@
 module Record
   module Operations
     class ImportPullRequests < Blog::Operation
+      include Record::Remote
+
       OVERLAP = 24 * 60 * 60
 
       include Deps[
@@ -21,14 +23,10 @@ module Record
       private
 
       def authored(now)
-        return Failure(:not_configured) unless client.configured?
-
-        updated_since = pull_request_queries.newest_import_at&.-(OVERLAP)
-        Success(client.authored_pull_requests(updated_since:, now:))
-      rescue Record::GitHub::Client::RateLimited
-        Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error => e
-        Failure([:github_failed, e.message])
+        remote(client) do
+          updated_since = pull_request_queries.newest_import_at&.-(OVERLAP)
+          Success(client.authored_pull_requests(updated_since:, now:))
+        end
       end
     end
   end

@@ -3,6 +3,8 @@
 module Projects
   module Operations
     class RefreshProjects < Blog::Operation
+      include Record::Remote
+
       include Deps[
         client: "record.github.client",
         project_mutations: "repos.project_mutations",
@@ -13,15 +15,7 @@ module Projects
 
       private
 
-      def refresh
-        return Failure(:not_configured) unless client.configured?
-
-        Success(project_queries.tracked.count { refreshed?(it) })
-      rescue Record::GitHub::Client::RateLimited
-        Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error => e
-        Failure([:github_failed, e.message])
-      end
+      def refresh = remote(client) { Success(project_queries.tracked.count { refreshed?(it) }) }
 
       def refreshed?(project)
         stars = client.stars(project.repo)

@@ -3,6 +3,8 @@
 module Record
   module Operations
     class ReapSyncStates < Blog::Operation
+      include Record::Remote
+
       SYNCS = [Blog::Types::SyncName["commits"]].freeze
 
       include Deps[
@@ -20,16 +22,12 @@ module Record
       private
 
       def repositories
-        return Failure(:not_configured) unless client.configured?
+        remote(client) do
+          listing = client.repository_names
+          next Failure(:page_limit) if listing.cut_short?
 
-        listing = client.repository_names
-        return Failure(:page_limit) if listing.cut_short?
-
-        listing.items.empty? ? Failure(:no_repositories) : Success(listing.items)
-      rescue Record::GitHub::Client::RateLimited
-        Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error
-        Failure(:github_failed)
+          listing.items.empty? ? Failure(:no_repositories) : Success(listing.items)
+        end
       end
     end
   end

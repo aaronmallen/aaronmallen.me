@@ -3,6 +3,8 @@
 module Tasks
   module Operations
     class SyncIssues < Blog::Operation
+      include Record::Remote
+
       CLOSED = Structs::TaskSource::CLOSED
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
       EMPTY_HASH = Blog::Constants::EMPTY_HASH
@@ -46,19 +48,13 @@ module Tasks
         { title: title&.match?(VISIBLE) ? title : issue.fetch(:reference), note: }
       end
 
-      def failed(provider, error)
-        error.is_a?(Record::RateLimited) ? Failure(:rate_limited) : Failure([:"#{provider}_failed", error.message])
-      end
-
       def fetch(provider, client, known, now)
-        return Failure(:not_configured) unless client.configured?
+        remote(client, provider) do
+          assigned = client.assigned_issues
+          checked = client.issues(unseen(known, assigned, now))
 
-        assigned = client.assigned_issues
-        checked = client.issues(unseen(known, assigned, now))
-
-        Success([assigned, checked, history(client, [*assigned, *checked], known)])
-      rescue Record::RateLimited, Record::Error => e
-        failed(provider, e)
+          Success([assigned, checked, history(client, [*assigned, *checked], known)])
+        end
       end
 
       def follow(source, issue, now, history: EMPTY_HASH, reached: false)
@@ -114,9 +110,7 @@ module Tasks
       end
 
       def reach(provider, client, assigned, known)
-        Success(reach_issues.call(client, assigned, known))
-      rescue Record::RateLimited, Record::Error => e
-        failed(provider, e)
+        remote(client, provider) { Success(reach_issues.call(client, assigned, known)) }
       end
 
       def relate(provider, client, known, now, (assigned, checked))

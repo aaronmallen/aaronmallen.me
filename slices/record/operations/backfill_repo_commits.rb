@@ -3,6 +3,8 @@
 module Record
   module Operations
     class BackfillRepoCommits < Blog::Operation
+      include Record::Remote
+
       GROUNDED = :repository_start
       RESERVE = 1_000
       SYNC = Blog::Types::SyncName["commits"]
@@ -76,13 +78,13 @@ module Record
       end
 
       def read(repo, edge, floor)
-        default, rest = client.commits(repo, since: floor, before: edge).items.partition { it[:default] }
+        found = remote(client) do
+          default, rest = client.commits(repo, since: floor, before: edge).items.partition { it[:default] }
 
-        Success(default + rest)
-      rescue Record::GitHub::Client::RateLimited
-        Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error => e
-        stop(repo, :github_failed, e.message)
+          Success(default + rest)
+        end
+
+        found.or { |failure| (failure in [reason, message]) ? stop(repo, reason, message) : Failure(failure) }
       end
 
       def settled?(branch, seen)

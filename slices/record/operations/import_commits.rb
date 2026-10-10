@@ -3,6 +3,8 @@
 module Record
   module Operations
     class ImportCommits < Blog::Operation
+      include Record::Remote
+
       STALLED_AFTER = 2 * 60 * 60
       SYNC = Blog::Types::SyncName["commits"]
 
@@ -27,13 +29,9 @@ module Record
       def going(walks, now) = walks.select { |_, held_at| held_at > now - STALLED_AFTER }.keys
 
       def pushed_since_floor
-        return Failure(:not_configured) unless client.configured?
-
-        Success(client.repositories(pushed_since: commit_queries.newest_commit_at&.-(PlanCommitWalk::OVERLAP)))
-      rescue Record::GitHub::Client::RateLimited
-        Failure(:rate_limited)
-      rescue Record::GitHub::Client::Error => e
-        Failure([:github_failed, e.message])
+        remote(client) do
+          Success(client.repositories(pushed_since: commit_queries.newest_commit_at&.-(PlanCommitWalk::OVERLAP)))
+        end
       end
 
       def start(repo, now)
