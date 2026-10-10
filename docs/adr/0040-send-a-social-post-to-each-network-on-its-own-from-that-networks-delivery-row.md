@@ -1,17 +1,18 @@
 ---
 id: "0040"
 title: Send a social post to each network on its own, from that network's delivery row
-status: active
+status: superseded
 created: 2026-09-28
 area: [db, lib, social, admin]
+superseded-by: "0132"
 issue: AA-577
-amended: [AA-814, "#793"]
+amended: [AA-814, "#793", "#922"]
 tags: [social, sidekiq, jobs, retry, mastodon, bluesky, idempotency]
 ---
 
 # ADR 0040: Send a social post to each network on its own, from that network's delivery row
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -72,4 +73,4 @@ A new network needs a client that answers the four methods, an entry in `network
 `network` enum and to `Blog::Types::NetworkName`.
 
 [0132]: 0132-send-a-social-post-to-each-connected-account-the-owner-ticks.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0132-black?style=for-the-badge&label=Superseded&labelColor=orange

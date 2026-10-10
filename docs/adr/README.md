@@ -44,7 +44,7 @@ one.
 | [0037][0037] | Give every public page an h1, hidden where the design draws none | ![Active][active] | 2026-09-28 |
 | [0038][0038] | Keep the schedule and the live time in one published_at, and never unpublish | ![Active][active] | 2026-09-28 |
 | [0039][0039] | Keep the announcement on the post and send it once | ![Active][active] | 2026-09-28 |
-| [0040][0040] | Send a social post to each network on its own, from that network's delivery row | ![Active][active] | 2026-09-28 |
+| [0040][0040] | Send a social post to each network on its own, from that network's delivery row | ![Superseded][superseded-0132] | 2026-09-28 |
 | [0041][0041] | Generate author_domain in Postgres, not in Ruby | ![Active][active] | 2026-09-28 |
 | [0042][0042] | Trust a webmention author by exact URL, on their own host | ![Superseded][superseded-0107] | 2026-09-28 |
 | [0043][0043] | Guard the contact form with a honeypot and a daily hash, not a cookie | ![Active][active] | 2026-09-28 |
@@ -293,6 +293,7 @@ one.
 [superseded-0123]: https://img.shields.io/badge/0123-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0128]: https://img.shields.io/badge/0128-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0131]: https://img.shields.io/badge/0131-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0132]: https://img.shields.io/badge/0132-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0136]: https://img.shields.io/badge/0136-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0139]: https://img.shields.io/badge/0139-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md

@@ -4,6 +4,7 @@ title: Send a social post to each connected account the owner ticks
 status: active
 created: 2026-10-08
 area: [social, admin, db]
+supersedes: ["0040"]
 issue: "#793"
 amended: ["#805", "#899"]
 tags: [social, mastodon, bluesky, connections, delivery, composer]
