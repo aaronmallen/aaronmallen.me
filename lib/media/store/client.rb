@@ -3,7 +3,7 @@
 module Media
   module Store
     class Client < Blog::ObjectStore::Client
-      class Error < Media::Error; end
+      class Error < StandardError; end
 
       Stored = Data.define(:body, :content_type)
 
