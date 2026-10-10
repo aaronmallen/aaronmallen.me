@@ -20,24 +20,26 @@ module Admin
           SOCIAL = Blog::Types::ActivityKind["social"]
           TASK = Blog::Types::ActivityKind["task"]
           WEBMENTION = Blog::Types::ActivityKind["webmention"]
+          KINDS = Blog::Helpers::RecordKinds
           PAGES = {
-            COMMIT => :admin_commit,
-            PULL_REQUEST_OPENED => :admin_pull_request,
-            PULL_REQUEST_MERGED => :admin_pull_request,
-            PULL_REQUEST_CLOSED => :admin_pull_request,
+            COMMIT => KINDS.fetch("commit").route,
+            POST => KINDS.fetch("post").route,
+            PULL_REQUEST_OPENED => KINDS.fetch("pull_request").route,
+            PULL_REQUEST_MERGED => KINDS.fetch("pull_request").route,
+            PULL_REQUEST_CLOSED => KINDS.fetch("pull_request").route,
           }.freeze
           TYPES = {
-            COMMIT => Type.new(icon: "fa-code-commit", color: :violet, prose: false),
-            PULL_REQUEST_OPENED => Type.new(icon: "fa-code-pull-request", color: :violet, prose: false),
+            COMMIT => Type.new(icon: KINDS.icon("commit"), color: :violet, prose: false),
+            PULL_REQUEST_OPENED => Type.new(icon: KINDS.icon("pull_request"), color: :violet, prose: false),
             PULL_REQUEST_MERGED => Type.new(icon: "fa-code-merge", color: :violet, prose: false),
             PULL_REQUEST_CLOSED => Type.new(icon: "fa-circle-xmark", color: :violet, prose: false),
-            POST => Type.new(icon: "fa-file-lines", color: :green, prose: false),
-            JOURNAL => Type.new(icon: "fa-feather", color: :sand, prose: true),
-            SOCIAL => Type.new(icon: "fa-paper-plane", color: :blue, prose: true),
+            POST => Type.new(icon: KINDS.icon("post"), color: :green, prose: false),
+            JOURNAL => Type.new(icon: KINDS.icon("journal_entry"), color: :sand, prose: true),
+            SOCIAL => Type.new(icon: KINDS.icon("social_post"), color: :blue, prose: true),
             TASK => Type.new(icon: "fa-circle-check", color: :orange, prose: false),
             SESSION => Type.new(icon: "fa-clock", color: :orange, prose: false),
             COMMENT => Type.new(icon: "fa-comment", color: :orange, prose: true),
-            DECISION => Type.new(icon: "fa-scale-balanced", color: :sand, prose: false),
+            DECISION => Type.new(icon: KINDS.icon("decision"), color: :sand, prose: false),
             DECISION_COMMENT => Type.new(icon: "fa-comments", color: :sand, prose: true),
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
           }.freeze
@@ -63,7 +65,6 @@ module Admin
           def href_for
             case @event.type
               when *PAGES.keys then path(PAGES.fetch(@event.type), id: @event.source_id)
-              when POST then path(:admin_edit_post, id: @event.source_id)
               when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
               when SOCIAL then path(:admin_social, filter: POSTED)
               when TASK, SESSION, COMMENT, DECISION, DECISION_COMMENT then owner_href

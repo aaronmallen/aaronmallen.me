@@ -5,6 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
+amended: ["#966"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -55,7 +56,8 @@ and `created_at`. The operation sorts the two sides, kind first and then id, so 
 **Titles and searches cross through exports** (ADR 0003). Each owning slice exports one query per kind, which names
 its records by id and finds them by text, and `links` imports all eight. The list query builds each admin URL from
 the kind and id through the app's routes helper (ADR 0004), so the pages and the tools share one map from kind to
-route.
+route. Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each kind's icon, label key and search
+kind, and admin search hits read their routes from it too.
 
 ## Alternatives
 

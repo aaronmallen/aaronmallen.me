@@ -3,16 +3,17 @@
 module Admin
   module Operations
     class ListSections
+      KINDS = Blog::Helpers::RecordKinds
       ALL = [
         %i[today today fa-sun admin_root].freeze,
-        %i[tasks tasks fa-list-check admin_tasks].freeze,
+        [:tasks, :tasks, KINDS.icon("task"), :admin_tasks].freeze,
         %i[calendar tasks fa-calendar-days admin_calendar].freeze,
-        %i[journal journal fa-feather admin_journal].freeze,
-        %i[decisions journal fa-scale-balanced admin_decisions].freeze,
+        [:journal, :journal, KINDS.icon("journal_entry"), :admin_journal].freeze,
+        [:decisions, :journal, KINDS.icon("decision"), :admin_decisions].freeze,
         %i[review journal fa-magnifying-glass-chart admin_review].freeze,
-        %i[posts publish fa-file-lines admin_posts].freeze,
-        %i[social publish fa-paper-plane admin_social].freeze,
-        %i[projects publish fa-cube admin_projects].freeze,
+        [:posts, :publish, KINDS.icon("post"), :admin_posts].freeze,
+        [:social, :publish, KINDS.icon("social_post"), :admin_social].freeze,
+        [:projects, :publish, KINDS.icon("project"), :admin_projects].freeze,
         %i[inbox inbox fa-inbox admin_inbox].freeze,
         %i[messages inbox fa-envelope admin_messages].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,

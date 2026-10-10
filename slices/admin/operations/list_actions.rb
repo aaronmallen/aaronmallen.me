@@ -3,6 +3,7 @@
 module Admin
   module Operations
     class ListActions
+      KINDS = Blog::Helpers::RecordKinds
       Entry = Data.define(:name, :icon, :route, :params, :dialog, :post, :needs, :from, :from_params, :key, :click) do
         def initialize(
           name:, icon:, route: nil, params: Blog::Constants::EMPTY_HASH, dialog: nil, post: false, needs: nil,
@@ -14,17 +15,17 @@ module Admin
 
       ALL = [
         Entry.new(
-          name: :create_task, icon: "fa-list-check", route: :admin_new_task,
+          name: :create_task, icon: KINDS.icon("task"), route: :admin_new_task,
           dialog: UI::Components::Tasks::CreateDialog::ID, key: "c",
         ),
-        Entry.new(name: :create_decision, icon: "fa-scale-balanced", route: :admin_new_decision),
+        Entry.new(name: :create_decision, icon: KINDS.icon("decision"), route: :admin_new_decision),
         Entry.new(
-          name: :create_journal_entry, icon: "fa-feather", route: :admin_journal,
+          name: :create_journal_entry, icon: KINDS.icon("journal_entry"), route: :admin_journal,
           params: { write: Blog::Constants::CHECKED }, dialog: UI::Components::Journal::WriteDialog::ID, key: "w",
         ),
-        Entry.new(name: :new_post, icon: "fa-file-lines", route: :admin_new_post),
+        Entry.new(name: :new_post, icon: KINDS.icon("post"), route: :admin_new_post),
         Entry.new(
-          name: :new_social_post, icon: "fa-paper-plane", route: :admin_social,
+          name: :new_social_post, icon: KINDS.icon("social_post"), route: :admin_social,
           params: { write: Blog::Constants::CHECKED },
         ),
         Entry.new(

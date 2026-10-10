@@ -16,7 +16,6 @@ module Links
         "work_entry" => :work_entries,
       }.freeze
       TITLE_LIMIT = 120
-      WORK = Blog::Types::ProjectFilter["work"]
 
       include Deps[
         "routes",
@@ -73,29 +72,9 @@ module Links
         end
       end
 
-      def listed_url(kind, row)
-        case kind
-          when "social_post" then routes.path(:admin_social, edit: row.id)
-          when "journal_entry" then "#{routes.path(:admin_journal, to: row.day)}#day-#{row.day.iso8601}"
-          when "work_entry" then routes.path(:admin_projects, filter: WORK)
-        end
-      end
-
       def rows(kind, **) = public_send(kind).linkable(RELATIONS.fetch(kind), **)
 
-      def url(kind, row)
-        id = row.id
-
-        case kind
-          when "task" then routes.path(:admin_task, id:)
-          when "post" then routes.path(:admin_edit_post, id:)
-          when "commit" then routes.path(:admin_commit, id:)
-          when "project" then routes.path(:admin_edit_project, id:)
-          when "decision" then routes.path(:admin_decision, id:)
-          when "pull_request" then routes.path(:admin_pull_request, id:)
-          else listed_url(kind, row)
-        end
-      end
+      def url(kind, row) = Blog::Helpers::RecordKinds.path(routes, kind, id: row.id, day: row.day)
     end
   end
 end

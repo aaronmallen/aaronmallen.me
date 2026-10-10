@@ -10,12 +10,16 @@ module Admin
           def view_template(&)
             div(class: "record-link-group") do
               h3(class: "record-link-kind") do
-                Icon(["fa-solid", Section::ICONS.fetch(@kind)])
-                plain t(Section.kind_name_key(@kind))
+                Icon(["fa-solid", row.icon])
+                plain t(row.label)
               end
               ul(class: "record-link-list", &)
             end
           end
+
+          private
+
+          def row = Blog::Helpers::RecordKinds.fetch(@kind)
         end
       end
     end

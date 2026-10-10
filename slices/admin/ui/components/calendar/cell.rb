@@ -33,6 +33,8 @@ module Admin
             end
           end
 
+          def icon(kind) = ["fa-solid", Blog::Helpers::RecordKinds.icon(kind)]
+
           def inside? = date.month == @month.month
 
           def link_attributes
@@ -48,10 +50,10 @@ module Admin
 
           def marks
             span(class: "cal-marks") do
-              @day.posts.each { |post| mark("fa-solid fa-file-lines", "post") { post.title } }
+              @day.posts.each { |post| mark(icon("post"), "post") { post.title } }
               social_marks
               sprint_mark
-              mark("fa-solid fa-feather", "journal") { t(".journal") } if @day.journal
+              mark(icon("journal_entry"), "journal") { t(".journal") } if @day.journal
             end
           end
 
@@ -63,7 +65,7 @@ module Admin
             rest = @day.social_posts.size - SHOWN
 
             @day.social_posts.first(SHOWN).each do |post|
-              mark("fa-solid fa-paper-plane", "social") do
+              mark(icon("social_post"), "social") do
                 social_text(post)
               end
             end
@@ -79,7 +81,7 @@ module Admin
           def sprint_mark
             sprint = @day.sprint
 
-            mark("fa-solid fa-list-check", "sprint") { t(".tasks", count: sprint.task_count) } if sprint
+            mark(icon("task"), "sprint") { t(".tasks", count: sprint.task_count) } if sprint
           end
 
           def today? = date == @today

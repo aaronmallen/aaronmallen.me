@@ -4,32 +4,21 @@ module Admin
   module Operations
     class LinkSearchHit
       PAGES = {
-        "commit" => :admin_commit, "decision" => :admin_decision, "person" => :admin_edit_person,
-        "post" => :admin_edit_post, "project" => :admin_edit_project, "pull_request" => :admin_pull_request,
-        "task" => :admin_task,
+        Blog::Types::SearchKind["message"] => :admin_messages,
+        Blog::Types::SearchKind["webmention"] => :admin_webmentions,
       }.freeze
-      WORK = Blog::Types::ProjectFilter["work"]
+      PERSON = Blog::Types::SearchKind["person"]
 
       include Deps["routes"]
 
       def call(hit)
-        page = PAGES[hit.kind]
+        kind = hit.kind
+        id = hit.source_id
+        row = Blog::Helpers::RecordKinds.searched(kind)
+        return Blog::Helpers::RecordKinds.path(routes, row.kind, id:, day: hit.day) if row
+        return routes.path(:admin_edit_person, id:) if kind == PERSON
 
-        page ? routes.path(page, id: hit.source_id) : listed(hit)
-      end
-
-      private
-
-      def journal(day) = "#{routes.path(:admin_journal, to: day)}##{UI::Components::Journal::Day.anchor(day)}"
-
-      def listed(hit)
-        case hit.kind
-          when "social" then routes.path(:admin_social, edit: hit.source_id)
-          when "journal" then journal(hit.day)
-          when "work" then routes.path(:admin_projects, filter: WORK)
-          when "message" then routes.path(:admin_messages, status: hit.status)
-          when "webmention" then routes.path(:admin_webmentions, status: hit.status)
-        end
+        routes.path(PAGES.fetch(kind), status: hit.status)
       end
     end
   end

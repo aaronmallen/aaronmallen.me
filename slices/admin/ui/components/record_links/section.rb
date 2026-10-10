@@ -5,27 +5,12 @@ module Admin
     module Components
       module RecordLinks
         class Section < Component
-          ICONS = {
-            Blog::Types::RecordKind["commit"] => "fa-code-commit",
-            Blog::Types::RecordKind["decision"] => "fa-scale-balanced",
-            Blog::Types::RecordKind["journal_entry"] => "fa-feather",
-            Blog::Types::RecordKind["post"] => "fa-file-lines",
-            Blog::Types::RecordKind["project"] => "fa-cube",
-            Blog::Types::RecordKind["pull_request"] => "fa-code-pull-request",
-            Blog::Types::RecordKind["social_post"] => "fa-paper-plane",
-            Blog::Types::RecordKind["task"] => "fa-list-check",
-            Blog::Types::RecordKind["work_entry"] => "fa-briefcase",
-          }.freeze
-          KINDS = "ui.components.record_links.kinds"
-
           prop :records, Blog::Types::Hash
           prop :kind, Blog::Types::RecordKind
           prop :find_path, Blog::Types::String
           prop :id, Blog::Types::Integer
           prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :label, Blog::Types::String.optional, default: nil
-
-          def self.kind_name_key(kind) = [KINDS, kind].join(".")
 
           def view_template
             Card(label: @label || t(".label"), title: t(".title"), class: "record-links") do
