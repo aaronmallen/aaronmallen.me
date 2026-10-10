@@ -6,7 +6,7 @@ created: 2026-10-03
 area: [analytics, public, admin, assets, db]
 superseded-by: "0110"
 issue: "#376"
-amended: ["#470"]
+amended: ["#470", "#1066"]
 tags: [analytics, privacy, feed, atom, subscribers, user-agent, clicks, beacon, cache, cloudflare]
 ---
 
@@ -63,7 +63,8 @@ development, the cost [ADR 0045][0045] weighed against a country header.
 
 **A redirect through the site for each outbound link.** The server would count every click, script or no script.
 It rewrites every link in every post, shows our address where a reader expects the link's own, adds a hop to each
-click, and opens a redirect anyone can point anywhere unless we sign each link.
+click, and opens a redirect anyone can point anywhere unless we sign each link. For social posts, #1066 set this
+aside: [ADR 0143][0143] sends their outside links through `aa.cool`.
 
 **Keep the feed in the cache for a shorter time.** It spares the Pi some fetches, but every fetch Cloudflare
 answers is a feed reader we do not count.
@@ -91,4 +92,5 @@ its host and path needs a new record.
 [0045]: 0045-count-visitors-with-a-daily-hash-and-no-cookies.md
 [0090]: 0090-let-cloudflare-keep-anonymous-public-pages-for-five-minutes.md
 [0102]: 0102-count-each-posts-unique-readers-with-an-undated-hash-kept-for-12-months.md
+[0143]: 0143-send-outside-links-in-social-posts-through-aa-cool-short-links.md
 [status]: https://img.shields.io/badge/0110-black?style=for-the-badge&label=Superseded&labelColor=orange
