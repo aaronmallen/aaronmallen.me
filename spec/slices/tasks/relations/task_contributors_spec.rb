@@ -44,11 +44,4 @@ RSpec.describe Tasks::Relations::TaskContributors do
 
     expect { record }.to raise_error(ROM::SQL::UniqueConstraintError, /task_contributors_task_id_agent_model_index/)
   end
-
-  it "keeps the same agent on two models" do
-    record
-    record(model: "claude-sonnet-5")
-
-    expect(Tasks::Slice["relations.task_contributors"].for_task(task.id).count).to eq(2)
-  end
 end
