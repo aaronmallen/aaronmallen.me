@@ -6,9 +6,7 @@ module Admin
       module Analytics
         class FirstDaysCard < Component
           HEADINGS = %w[.day_heading .post .median].freeze
-          HEIGHT = 100
           MEDIAN = "%g"
-          STEP = 10
 
           prop :days, Blog::Types::Array.of(Blog::Types::Integer)
           prop :median, Blog::Types::Array.of(Blog::Types::Integer | Blog::Types::Float)
@@ -21,7 +19,7 @@ module Admin
               card.side { key }
 
               div(class: "chart") do
-                curves
+                Curve(span: @span, lines: { "curve-median" => @median, "curve-post" => @days })
                 div(class: "chart-dates") { labels.each { |day| span { t(".day", day:) } } }
               end
               readings
@@ -32,14 +30,6 @@ module Admin
 
           def cell(value) = td { value }
 
-          def curves
-            svg(class: "curve", viewBox: "0 0 #{x(@span)} #{HEIGHT}", preserveAspectRatio: "none",
-                aria_hidden: "true") do |s|
-              s.polyline(class: "curve-median", points: points(@median))
-              s.polyline(class: "curve-post", points: points(@days))
-            end
-          end
-
           def key
             span(class: "curve-key curve-key-post") { t(".post") }
             span(class: "curve-key curve-key-median") { t(".median") }
@@ -48,14 +38,6 @@ module Admin
           def labels = [1, (@span + 1) / 2, @span]
 
           def median_text(value) = format(MEDIAN, value.round(1))
-
-          def peak = @peak ||= [*@days, *@median].max.to_f
-
-          def points(counts)
-            placed = counts.each_with_index.map { |count, index| "#{x(index + 1)},#{y(count)}" }
-
-            (placed.one? ? placed * 2 : placed).join(" ")
-          end
 
           def readings
             div(class: "sr-only") do
@@ -74,10 +56,6 @@ module Admin
               cell(@median[day - 1]&.then { median_text(it) })
             end
           end
-
-          def x(day) = (day - 1) * STEP
-
-          def y(count) = peak.zero? ? HEIGHT : (HEIGHT - (count * HEIGHT / peak)).round(1)
         end
       end
     end

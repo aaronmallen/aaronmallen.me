@@ -5,10 +5,8 @@ module Admin
     module Components
       module Analytics
         class FeedCard < Component
-          HEIGHT = 100
           LABELS = 3
           MIDDLE = 2
-          STEP = 10
 
           prop :aggregators, Blog::Types::Array.of(Blog::Types::Hash)
           prop :days, Blog::Types::Array.of(Blog::Types::Hash)
@@ -30,32 +28,17 @@ module Admin
 
           def chart
             div(class: "chart sm") do
-              curve
+              Curve(span: @days.size, lines: { "curve-post" => counts })
               div(class: "curve-dates") { labels.each { |day| span { short(day) } } }
             end
           end
 
           def counts = @days.map { it[:subscribers] }
 
-          def curve
-            svg(class: "curve", viewBox: "0 0 #{x(@days.size)} #{HEIGHT}", preserveAspectRatio: "none",
-                aria_hidden: "true") do |s|
-              s.polyline(class: "curve-post", points:)
-            end
-          end
-
           def labels
             found = @days.map { it[:day] }
 
             found.size < LABELS ? found : [found.first, found[found.size / MIDDLE], found.last]
-          end
-
-          def peak = @peak ||= counts.max.to_f
-
-          def points
-            placed = counts.each_with_index.map { |count, index| "#{x(index + 1)},#{y(count)}" }
-
-            (placed.one? ? placed * 2 : placed).join(" ")
           end
 
           def readings
@@ -74,10 +57,6 @@ module Admin
           end
 
           def short(day) = l(day, format: :short)
-
-          def x(day) = (day - 1) * STEP
-
-          def y(count) = peak.zero? ? HEIGHT : (HEIGHT - (count * HEIGHT / peak)).round(1)
         end
       end
     end
