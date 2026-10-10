@@ -23,7 +23,7 @@ module Posts
           publish_at:,
           **CARD.to_h { [it, public_send(it).to_s] },
           syndication_body:,
-          syndication_enabled: syndication_enabled ? Blog::Types::CHECKED : UNCHECKED,
+          syndication_enabled: syndication_enabled ? Blog::Constants::CHECKED : UNCHECKED,
           syndication_targets: syndication_targets.to_a,
         }
       end

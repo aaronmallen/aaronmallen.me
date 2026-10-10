@@ -8,7 +8,7 @@ module Blog
       PAGE = {
         type: "integer",
         minimum: 1,
-        maximum: Types::INTEGER_MAX,
+        maximum: Constants::INTEGER_MAX,
         description: "the page to read, counting from 1; 1 when left out",
       }.freeze
 

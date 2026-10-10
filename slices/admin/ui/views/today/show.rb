@@ -58,7 +58,7 @@ module Admin
           end
 
           def journal_line
-            href = path(:admin_journal, write: Blog::Types::CHECKED)
+            href = path(:admin_journal, write: Blog::Constants::CHECKED)
 
             line(t(".journal"), href, data: { dialog_open: Components::Journal::WriteDialog::ID }) do
               plain t(".journal_count", count: @entries.size)

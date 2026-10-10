@@ -20,7 +20,7 @@ RSpec.describe "API page and ID bounds", type: :request do
     [parameters, operation.fetch("requestBody", {})]
   end
 
-  def largest = Blog::Types::INTEGER_MAX
+  def largest = Blog::Constants::INTEGER_MAX
 
   def openapi_inputs
     get "/api/v1/openapi.json", nil, headers

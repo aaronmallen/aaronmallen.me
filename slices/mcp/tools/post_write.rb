@@ -5,7 +5,7 @@ require "time"
 module MCP
   module Tools
     class PostWrite < Base
-      CHECKED = Blog::Types::CHECKED
+      CHECKED = Blog::Constants::CHECKED
       FLAGS = %i[syndication_enabled webmentions_enabled].freeze
       TAG_SEPARATOR = ", "
       UNCHECKED = "0"

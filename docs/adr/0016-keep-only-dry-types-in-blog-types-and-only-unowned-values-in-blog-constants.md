@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, admin, posts, projects, public]
 issue: AA-665
-amended: [AA-561, AA-562, AA-809, "#17", "#647"]
+amended: [AA-561, AA-562, AA-809, "#17", "#647", "#934"]
 tags: [types, constants, enums, dry-types, kernel]
 ---
 
@@ -24,10 +24,9 @@ that read it. The rest wrote down again what an enum already held: `MASTODON` an
 with no check that it belonged to the enum it came from. The file showed accretion rather than a rule: the
 enum of live project statuses, gone since [ADR 0119][0119], took a constant and literals on one line.
 
-The values that were no type went to `Blog::Constants`, and nothing said what may go there. It holds six names today
-in `lib/blog/constants.rb`. Three have one reader: `ACTIVITY_RANGES` and `GITHUB_COMMIT_URL` only in `slices/admin`,
-`GITHUB_REPO_URL` only in `slices/projects`. AA-562 settled that `lib/blog` keeps only what no slice owns, and that
-code a slice owns lives in `lib/<slice>`.
+The values that were no type went to `Blog::Constants`, and nothing said what may go there. Some had one reader:
+an activity range list and a GitHub commit URL only in `slices/admin`. AA-562 settled that `lib/blog` keeps only what
+no slice owns, and that code a slice owns lives in `lib/<slice>`.
 
 ## Decision
 
@@ -45,13 +44,15 @@ takes its own host format, not the URL's.
 enum, and a caller that needs a value asks for it: `PostStatus["draft"]` rather than `POST_DRAFT`.
 
 **A value that is no type goes to `Blog::Constants` only when no slice owns it.** Each name there passes the test
-ADR 0002 sets for a kernel file: a kernel file reads it, or it reaches too many slices for one to own it. `CHECKED`,
-`GAP` and `SLUG_RESERVED` pass, since `Blog::Types` reads all three. A name one slice reads lives in that slice's lib:
-`ACTIVITY_RANGES` and `GITHUB_COMMIT_URL` in `lib/admin`, `GITHUB_REPO_URL` in `lib/projects`.
+ADR 0002 sets for a kernel file: a kernel file reads it, or it reaches too many slices for one to own it. `CHECKED`
+and `GAP` pass, since `Blog::Types` reads both, and `INTEGER_MAX` passes, since `app` and the `api` slice read it.
+`Blog::Constants` is its own module and includes `Dry::Core::Constants`, so `EMPTY_HASH` and the rest read from it
+too. A name one slice owns lives in that slice's lib: `Admin::Auth::GitHub::USER_URL` in `lib/admin`,
+`Contact::Types::MAX_BODY` in `lib/contact`.
 
-Anything inside `Blog::Types` that is not a type is `private_constant`: `Normalizers`, and the `REDIRECT_HOSTS`,
-`SLUG_FORMAT` and `URL_FORMAT` regexes and table that more than one type reads or that would not fit inside the
-block that reads them.
+Anything inside `Blog::Types` that is not a type is `private_constant`: `Normalizers`, and each value that more than
+one type reads or that would not fit inside the block that reads it, such as `SLUG_RESERVED`, `SLUG_FORMAT` and the
+`REDIRECT_HOSTS` table.
 
 ## Alternatives
 

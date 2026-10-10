@@ -22,7 +22,7 @@ module Admin
 
         def control_attributes
           { class: @switch ? "toggle" : "check", type: "checkbox", role: @switch && "switch", name: @name,
-            value: Blog::Types::CHECKED, checked: @checked }
+            value: Blog::Constants::CHECKED, checked: @checked }
         end
       end
     end

@@ -83,11 +83,11 @@ RSpec.describe "MCP list tool paging", type: :request do
       end
 
       it "refuses a page past the largest" do
-        expect(mcp_call(name, **arguments, page: Blog::Types::INTEGER_MAX + 1).fetch("isError")).to be(true)
+        expect(mcp_call(name, **arguments, page: Blog::Constants::INTEGER_MAX + 1).fetch("isError")).to be(true)
       end
 
       it "answers nothing on a distant page" do
-        expect(ids(name, key, **arguments, page: Blog::Types::INTEGER_MAX)).to be_empty
+        expect(ids(name, key, **arguments, page: Blog::Constants::INTEGER_MAX)).to be_empty
       end
     end
   end

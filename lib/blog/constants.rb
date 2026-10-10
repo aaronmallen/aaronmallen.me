@@ -3,5 +3,11 @@
 require "dry/core/constants"
 
 module Blog
-  Constants = Dry::Core::Constants
+  module Constants
+    include Dry::Core::Constants
+
+    CHECKED = "1"
+    GAP = :gap
+    INTEGER_MAX = (2**31) - 1
+  end
 end

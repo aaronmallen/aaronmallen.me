@@ -35,7 +35,7 @@ module Admin
         end
 
         def activity_path
-          query = { from: @today.iso8601, to: @today.iso8601, types: { COMMIT => Blog::Types::CHECKED } }
+          query = { from: @today.iso8601, to: @today.iso8601, types: { COMMIT => Blog::Constants::CHECKED } }
 
           "#{path(:admin_activity)}?#{Rack::Utils.build_nested_query(query)}"
         end

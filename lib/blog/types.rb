@@ -10,9 +10,6 @@ module Blog
   Types = Dry.Types(default: :strict)
 
   module Types
-    CHECKED = "1"
-    GAP = :gap
-    INTEGER_MAX = (2**31) - 1
     IPV6_PREFIX = 64
     REDIRECT_HOSTS = {
       "http" => ->(uri) { %w[127.0.0.1 ::1 localhost].include?(uri.hostname) },
@@ -52,7 +49,7 @@ module Blog
     AnalyticsRange = Types::Params::Integer.enum(7, 14, 30)
     AnalyticsRangeParam = AnalyticsRange.fallback(30)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link")
-    Checkbox = Types::Bool.constructor { |value| value == CHECKED }
+    Checkbox = Types::Bool.constructor { |value| value == Blog::Constants::CHECKED }
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")
     ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/, max_size: 64)
@@ -83,7 +80,7 @@ module Blog
 
       TimeZone.parse_input(text) || text
     rescue TZInfo::PeriodNotFound
-      GAP
+      Blog::Constants::GAP
     end
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")

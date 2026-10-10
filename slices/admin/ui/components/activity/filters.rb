@@ -7,7 +7,7 @@ module Admin
     module Components
       module Activity
         class Filters < Component
-          CHECKED = Blog::Types::CHECKED
+          CHECKED = Blog::Constants::CHECKED
           HINT_ID = "activity-q-hint"
           TYPES = Structs::ActivityEvent::KINDS
           LABELS = TYPES.to_h { [it, ".types.#{it}"] }.freeze

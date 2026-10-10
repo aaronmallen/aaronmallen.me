@@ -36,7 +36,7 @@ module Admin
 
         def chosen(edit_id) = edit_id.empty? ? nil : Array(Blog::Types::IdParam[edit_id])
 
-        def reviewing(edit_id) = edit_id.empty? ? Blog::Constants::EMPTY_HASH : { review: Blog::Types::CHECKED }
+        def reviewing(edit_id) = edit_id.empty? ? Blog::Constants::EMPTY_HASH : { review: Blog::Constants::CHECKED }
       end
     end
   end

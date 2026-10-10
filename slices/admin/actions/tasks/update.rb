@@ -52,7 +52,7 @@ module Admin
         def credits(form)
           return unless form.is_a?(::Hash)
 
-          owner = form[:owner] == Blog::Types::CHECKED ? [OWNER] : Blog::Constants::EMPTY_ARRAY
+          owner = form[:owner] == Blog::Constants::CHECKED ? [OWNER] : Blog::Constants::EMPTY_ARRAY
           owner + Blog::Types::Fields[form[:agents]].values.filter_map { agent(it) }
         end
 

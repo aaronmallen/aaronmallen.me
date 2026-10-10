@@ -45,7 +45,7 @@ module Admin
           scopes = params[:scopes]
           return params unless scopes.is_a?(Hash)
 
-          params.merge(scopes: scopes.select { |_, value| value == Blog::Types::CHECKED }.keys.map(&:to_s))
+          params.merge(scopes: scopes.select { |_, value| value == Blog::Constants::CHECKED }.keys.map(&:to_s))
         end
       end
     end

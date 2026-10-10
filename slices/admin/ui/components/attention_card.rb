@@ -52,7 +52,7 @@ module Admin
         end
 
         def journal(row)
-          href = path(:admin_journal, write: Blog::Types::CHECKED)
+          href = path(:admin_journal, write: Blog::Constants::CHECKED)
           link = { data: { dialog_open: Journal::WriteDialog::ID } }
           sub = t(".journal_gap", count: row.days)
 

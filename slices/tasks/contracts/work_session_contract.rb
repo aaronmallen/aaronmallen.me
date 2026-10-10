@@ -24,7 +24,7 @@ module Tasks
         case value
           when Time then nil
           when nil then BLANK
-          when Blog::Types::GAP then SKIPPED
+          when Blog::Constants::GAP then SKIPPED
           else FORMAT
         end
       end

@@ -44,7 +44,7 @@ module Posts
       rule(:publish_at) do
         next if value.nil? || value.is_a?(Time)
 
-        key.failure(value == Blog::Types::GAP ? SKIPPED : FORMAT)
+        key.failure(value == Blog::Constants::GAP ? SKIPPED : FORMAT)
       end
 
       rule(:syndication_body) do

@@ -19,7 +19,7 @@ module Admin
           def view_template
             Dialog(id: ID, title_id: TITLE_ID, title:, class: "modal journal-modal", data:) do
               Form(**form_attributes) do
-                input(type: "hidden", name: "modal", value: Blog::Types::CHECKED)
+                input(type: "hidden", name: "modal", value: Blog::Constants::CHECKED)
                 input(type: "hidden", name: "return_to", value: @return_to) if @return_to
                 body_field
                 foot
