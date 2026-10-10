@@ -24,7 +24,7 @@ module MCP
           text = Blog::Types::TrimmedText[query].downcase
           tag_queries = dep(:tag_queries, server_context)
           usage = tag_queries.usage(scope:)
-          tags = tag_queries.page_matching(scope, text, page(page, server_context))
+          tags = tag_queries.page_matching(scope, text, page(page))
 
           answer(
             tags: tags.rows.map { summary(it, usage.fetch(it.id, Blog::Constants::EMPTY_HASH)) },

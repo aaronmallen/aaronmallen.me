@@ -16,7 +16,6 @@ module Admin
         REASONS = %i[not_found].freeze
 
         include Deps[
-          "settings",
           message_queries: "contact.repos.message_queries",
           operation: "contact.operations.act_on_messages",
         ]

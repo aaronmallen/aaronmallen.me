@@ -46,7 +46,7 @@ module API
 
     def not_found(message) = Failure(Structs::Refusal.not_found(message))
 
-    def page_of(number) = Blog::Structs::Page.new(number:, size: settings.page_size[:mcp])
+    def page_of(number) = Helpers::Page.of(number)
 
     def rejected(errors, table)
       complaints = Helpers::Wording.complaints(errors, table)

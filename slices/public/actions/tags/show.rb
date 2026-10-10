@@ -5,7 +5,6 @@ module Public
     module Tags
       class Show < Action
         include Deps[
-          "settings",
           post_queries: "posts.repos.post_queries",
           project_queries: "projects.repos.project_queries",
         ]
@@ -14,7 +13,7 @@ module Public
 
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { not_found(response) }
-          page = requested_page(request, response, settings.page_size[:public])
+          page = requested_page(request, response)
           redirect_to_own_path(request, response, :tag, page, tag:)
           expose_listing(response, tag, page)
         end

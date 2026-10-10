@@ -7,11 +7,11 @@ module Admin
         SCREEN = Blog::Types::SavedViewScreen["posts"]
 
         include Deps[
-          "settings", build_posts_page: "operations.build_posts_page", list_saved_views: "operations.list_saved_views",
+          build_posts_page: "operations.build_posts_page", list_saved_views: "operations.list_saved_views",
         ]
 
         def handle(request, response)
-          page = requested_page(request, response, settings.page_size[:admin])
+          page = requested_page(request, response)
           exposures = build_posts_page.call(filter: request.params[:status], page:)
           not_found(response) if exposures[:posts].past_end?
 

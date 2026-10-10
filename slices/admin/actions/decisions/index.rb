@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Decisions
       class Index < Action
-        include Deps["settings", decision_queries: "decisions.repos.decision_queries"]
+        include Deps[decision_queries: "decisions.repos.decision_queries"]
 
         def handle(request, response)
           filter = Blog::Types::DecisionStatusParam[request.params[:status]]
@@ -18,7 +18,7 @@ module Admin
 
         private
 
-        def page(request, response) = requested_page(request, response, settings.page_size[:admin])
+        def page(request, response) = requested_page(request, response)
       end
     end
   end

@@ -7,7 +7,6 @@ module Admin
         FAILED = "posts_page.toasts.publish"
 
         include Deps[
-          "settings",
           describe_post_save: "operations.describe_post_save",
           post_queries: "posts.repos.post_queries",
           publish_draft: "posts.operations.publish_draft",

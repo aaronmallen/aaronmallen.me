@@ -14,7 +14,6 @@ module Admin
         REASONS = %i[not_found].freeze
 
         include Deps[
-          "settings",
           operation: "social.operations.act_on_webmentions",
           webmention_queries: "social.repos.webmention_queries",
         ]

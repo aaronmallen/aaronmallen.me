@@ -31,7 +31,7 @@ module MCP
       class << self
         def call(server_context:, from: nil, to: nil, status: nil, page: 1)
           case Blog::Helpers::DayWindow.open_days(from, to)
-            in Success[first, last] then listed(first, last, status, page(page, server_context), server_context)
+            in Success[first, last] then listed(first, last, status, page(page), server_context)
             in Failure(message) then refuse(message)
           end
         end

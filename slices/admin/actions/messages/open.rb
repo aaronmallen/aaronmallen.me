@@ -8,7 +8,6 @@ module Admin
         UNREAD = Blog::Types::MessageStatus["unread"]
 
         include Deps[
-          "settings",
           mark_message: "contact.operations.mark_message",
           message_queries: "contact.repos.message_queries",
         ]

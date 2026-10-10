@@ -35,7 +35,7 @@ module Admin
       number = Blog::Types::PageParam.call(request.params[:page]) { 1 }
       return number if number == 1
 
-      page = Blog::Structs::Page.new(number:, size: settings.page_size[:admin])
+      page = Blog::Structs::Page.new(number:, size: page_size)
       yield(page) ? number - 1 : number
     end
 

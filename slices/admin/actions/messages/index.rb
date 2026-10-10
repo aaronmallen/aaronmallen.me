@@ -7,7 +7,6 @@ module Admin
         PRIVATE = Blog::Types::TagScope["private"]
 
         include Deps[
-          "settings",
           message_queries: "contact.repos.message_queries",
           tag_queries: "tags.repos.tag_queries",
         ]
@@ -31,7 +30,7 @@ module Admin
           message_queries.by_id(id) if id
         end
 
-        def page(request, response) = requested_page(request, response, settings.page_size[:admin])
+        def page(request, response) = requested_page(request, response)
 
         def show_open(request, response)
           message = opened(request)

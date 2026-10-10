@@ -13,7 +13,6 @@ module Admin
         REASONS = %i[not_draft not_found].freeze
 
         include Deps[
-          "settings",
           operation: "posts.operations.act_on_posts",
           post_queries: "posts.repos.post_queries",
         ]

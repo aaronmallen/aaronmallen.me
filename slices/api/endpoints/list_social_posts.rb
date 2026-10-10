@@ -32,8 +32,6 @@ module API
         },
       ).freeze
 
-      include Deps["settings"]
-
       def handle(from: nil, to: nil, queue: nil, page: 1)
         case Blog::Helpers::DayWindow.open_days(from, to)
           in Success[first, last] then Success(listed(first, last, queue, page))

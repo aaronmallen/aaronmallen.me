@@ -35,7 +35,6 @@ module API
       ).freeze
 
       include Deps[
-        "settings",
         webmention_queries: "social.repos.webmention_queries",
       ]
 

@@ -29,7 +29,7 @@ module MCP
       class << self
         def call(from:, to:, server_context:, page: 1)
           case Blog::Helpers::DayWindow.days(from, to)
-            in Success[first, last] then listed(first..last, page(page, server_context), server_context)
+            in Success[first, last] then listed(first..last, page(page), server_context)
             in Failure(message) then refuse(message)
           end
         end

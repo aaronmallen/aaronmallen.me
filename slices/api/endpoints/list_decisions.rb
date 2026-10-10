@@ -32,7 +32,6 @@ module API
       ).freeze
 
       include Deps[
-        "settings",
         decision_queries: "decisions.repos.decision_queries",
       ]
 

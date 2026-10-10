@@ -239,7 +239,7 @@ module MCP
 
       def context(oauth_client_id)
         endpoints = CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }
-        endpoints.merge(oauth_client_id:, page_size: settings.page_size[:mcp])
+        endpoints.merge(oauth_client_id:)
       end
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])

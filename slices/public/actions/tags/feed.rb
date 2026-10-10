@@ -5,7 +5,6 @@ module Public
     module Tags
       class Feed < Action
         include Deps[
-          "settings",
           atom_feed: "operations.render_atom_feed",
           post_queries: "posts.repos.post_queries",
         ]
@@ -15,7 +14,7 @@ module Public
 
         def handle(request, response)
           tag = Blog::Types::Normalized::Tag.call(path_param(request, :tag)) { halt 404 }
-          page = requested_page(request, response, settings.page_size[:public])
+          page = requested_page(request, response)
           redirect_to_own_path(request, response, :tag_feed, page, tag:)
           posts = post_queries.published_page_by_tag(tag, page)
           halt 404 if posts.rows.empty?

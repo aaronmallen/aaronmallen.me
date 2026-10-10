@@ -7,7 +7,7 @@ module Admin
         SCREEN = Blog::Types::SavedViewScreen["tasks"]
 
         include Deps[
-          "settings", build_tasks_page: "operations.build_tasks_page", list_saved_views: "operations.list_saved_views",
+          build_tasks_page: "operations.build_tasks_page", list_saved_views: "operations.list_saved_views",
         ]
 
         def handle(request, response)
@@ -22,7 +22,7 @@ module Admin
 
         def build(request, response)
           build_tasks_page.call(
-            page: requested_page(request, response, settings.page_size[:admin]),
+            page: requested_page(request, response),
             tab: Blog::Types::TaskTabParam[request.params[:filter]],
             pool: request.params[:pool],
             query: request.params[:q],

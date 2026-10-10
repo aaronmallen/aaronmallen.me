@@ -8,7 +8,6 @@ module Admin
         RENAMED = "tags_page.toasts.renamed"
 
         include Deps[
-          "settings",
           build_tags_page: "operations.build_tags_page",
           index_view: "ui.views.tags.index",
           save_tag: "tags.operations.save_tag",
@@ -32,7 +31,7 @@ module Admin
         def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
 
         def invalid(request, response, scope, editing)
-          page = requested_page(request, response, settings.page_size[:admin])
+          page = requested_page(request, response)
           response.status = 422
           response.render(index_view, **build_tags_page.call(scope:, page:, editing:))
         end

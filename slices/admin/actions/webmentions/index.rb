@@ -5,14 +5,13 @@ module Admin
     module Webmentions
       class Index < Action
         include Deps[
-          "settings",
           post_queries: "posts.repos.post_queries",
           webmention_queries: "social.repos.webmention_queries",
         ]
 
         def handle(request, response)
           filter = Blog::Types::WebmentionStatusParam[request.params[:status]]
-          page = requested_page(request, response, settings.page_size[:admin])
+          page = requested_page(request, response)
           mentions = webmention_queries.page_by_status(filter, page)
           not_found(response) if mentions.past_end?
 

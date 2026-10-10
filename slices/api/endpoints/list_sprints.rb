@@ -13,7 +13,7 @@ module API
 
       REPLY = Helpers::Schema.paged({ sprints: Helpers::Schema.list(Serializers::Sprint.reference) }).freeze
 
-      include Deps["settings", sprint_queries: "tasks.repos.sprint_queries"]
+      include Deps[sprint_queries: "tasks.repos.sprint_queries"]
 
       def handle(from: nil, to: nil, page: 1)
         case Blog::Helpers::DayWindow.open_days(from || opening(to), to)

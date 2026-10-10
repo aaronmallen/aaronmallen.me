@@ -7,7 +7,6 @@ module Admin
         DELETED = "messages_page.toasts.deleted"
 
         include Deps[
-          "settings",
           delete_message: "contact.operations.delete_message",
           message_queries: "contact.repos.message_queries",
         ]

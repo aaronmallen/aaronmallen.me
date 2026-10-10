@@ -18,7 +18,6 @@ module Admin
 
         include Redirect
         include Deps[
-          "settings",
           build_tasks_page: "operations.build_tasks_page",
           operation: "tasks.operations.act_on_tasks",
           task_queries: "tasks.repos.task_queries",

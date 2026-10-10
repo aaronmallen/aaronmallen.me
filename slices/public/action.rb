@@ -16,6 +16,7 @@ module Public
 
     include Deps[
       "operations.read_visitor_address",
+      "settings",
       record_feed_fetch: "analytics.operations.record_feed_fetch",
       session_reader: "admin.auth.session_reader",
       version_atom_feed: "operations.version_atom_feed",
@@ -72,6 +73,8 @@ module Public
       sent = request.get_header(IF_MODIFIED_SINCE)
       HTTP_DATE_FORMATS.lazy.filter_map { parse_http_date(it, sent) }.first if sent
     end
+
+    def page_size = settings.page_size[:public]
 
     def parse_http_date(format, sent)
       Time.public_send(format, sent)

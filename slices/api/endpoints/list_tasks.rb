@@ -45,7 +45,7 @@ module API
         },
       ).freeze
 
-      include Deps["settings", task_queries: "tasks.repos.task_queries"]
+      include Deps[task_queries: "tasks.repos.task_queries"]
 
       def handle(from: nil, page: 1, sprint_on: nil, to: nil, **filters)
         day = sprint_on && Blog::TimeZone.parse_day(sprint_on)

@@ -14,7 +14,6 @@ module API
       UPCOMING = Blog::Types::TaskTab["upcoming"]
 
       include Deps[
-        "settings",
         activity_queries: "activity.repos.activity_queries",
         current_sprint: "tasks.operations.current_sprint",
         journal_entry_queries: "record.repos.journal_entry_queries",
@@ -71,7 +70,7 @@ module API
         listed(found, found.rows.to_h { [it.id, day] })
       end
 
-      def page_of(number) = Blog::Structs::Page.new(number:, size: settings.page_size[:mcp])
+      def page_of(number) = Helpers::Page.of(number)
 
       def paging(older) = older ? { partial: true, continue_to: older.fetch(:to) } : { partial: false }
 
