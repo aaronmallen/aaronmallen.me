@@ -29,7 +29,8 @@ module Admin
 
           def view_template
             Card(label: @label || t(".label"), title: t(".title"), class: "record-links") do
-              links.empty? ? Hint { t(".empty") } : links.each { |kind, rows| group(kind, rows) }
+              Hint { t(".empty") } if links.empty?
+              links.each { |kind, rows| KindGroup(kind:) { rows.each { row(it) } } }
               Picker(
                 scope:, link_path: path(:"admin_link_#{@kind}_record", id: @id), find_path: @find_path, fields: @fields,
                 **@records.slice(:query, :found, :errors),
@@ -38,13 +39,6 @@ module Admin
           end
 
           private
-
-          def group(kind, rows)
-            div(class: "record-link-group") do
-              KindHeading(kind:)
-              ul(class: "record-link-list") { rows.each { row(it) } }
-            end
-          end
 
           def links = @records.fetch(:links, Blog::Constants::EMPTY_HASH)
 
