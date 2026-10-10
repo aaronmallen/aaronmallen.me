@@ -8,7 +8,6 @@ module Admin
       class CommitsCard < Component
         COMMIT = Blog::Types::ActivityKind["commit"]
         OWNER_SEPARATOR = "/"
-        SHA_LENGTH = 7
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
         prop :last_synced_at, Blog::Types::Time.optional
@@ -66,7 +65,7 @@ module Admin
         end
 
         def entry_meta(commit)
-          [commit.sha[0, SHA_LENGTH], repo(commit), l(commit.commit_time, format: :clock)].join(DOT)
+          [Admin::Short.sha(commit.sha), repo(commit), l(commit.commit_time, format: :clock)].join(DOT)
         end
 
         def entry_row(commit)

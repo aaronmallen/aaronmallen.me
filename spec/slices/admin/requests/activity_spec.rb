@@ -129,6 +129,14 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(page).to have_css(".activity-event-time", text: "08:00")
       end
 
+      it "names a commit by its short sha" do
+        create(:commit, repo: "aaronmallen/blog", sha: "9f8e7d6#{'0' * 33}", additions: 3, deletions: 1,
+                        commit_date: today - 1)
+        visit_activity
+
+        expect(event_subs).to include("aaronmallen/blog · 9f8e7d6 · +3/−1")
+      end
+
       it "counts the events in the sub-line" do
         expect(page).to have_css(".page-head-sub", text: "3 events across 2 days")
       end

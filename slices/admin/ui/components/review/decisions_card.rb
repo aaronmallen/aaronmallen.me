@@ -6,7 +6,6 @@ module Admin
       module Review
         class DecisionsCard < Component
           RESOLVED = Blog::Types::DecisionEventKind["resolved"]
-          TEXT_LIMIT = 80
 
           prop :decisions, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
@@ -23,11 +22,11 @@ module Admin
           def outcome(decision)
             return t(".dropped") unless decision.outcome == RESOLVED
 
-            t(".resolved", option: Blog::Helpers::Truncation.cut(decision.chosen, keep: TEXT_LIMIT))
+            t(".resolved", option: Admin::Short.title(decision.chosen))
           end
 
           def row(decision)
-            title = Blog::Helpers::Truncation.cut(decision.title, keep: TEXT_LIMIT)
+            title = Admin::Short.title(decision.title)
 
             ListItem(title:, href: path(:admin_decision, id: decision.decision_id)) { plain outcome(decision) }
           end

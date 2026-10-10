@@ -22,7 +22,6 @@ module Admin
       OCCURRED_ON = :occurred_on.to_proc
       POST = Blog::Types::ActivityKind["post"]
       SESSION = Blog::Types::ActivityKind["session"]
-      SHA_LENGTH = 7
       SOCIAL = Blog::Types::ActivityKind["social"]
       STATUSES = {
         Blog::Types::PostStatus["published"] => "activity_page.statuses.published",
@@ -67,7 +66,7 @@ module Admin
       def commit_line(row)
         i18n.t!(
           "activity_page.sub_lines.commit",
-          repo: row.repo, sha: row.sha.to_s[0, SHA_LENGTH], additions: row.additions, deletions: row.deletions,
+          repo: row.repo, sha: Admin::Short.sha(row.sha), additions: row.additions, deletions: row.deletions,
         )
       end
 

@@ -85,6 +85,14 @@ RSpec.describe "Admin tag summary", type: :request do
       end
     end
 
+    it "cuts a long title to 80 characters" do
+      create(:journal_entry, body: "a" * 85, tags: %w[ruby])
+
+      get "/admin/tags/ruby"
+
+      expect(titles_in(:journal_entries)).to eq(["#{'a' * 80}…"])
+    end
+
     it "shows an empty state for a tag nothing carries", :aggregate_failures do
       create(:tag, :private, name: "unused")
 

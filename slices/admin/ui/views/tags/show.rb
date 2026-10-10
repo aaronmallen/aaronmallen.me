@@ -8,7 +8,6 @@ module Admin
           PRIVATE = Blog::Types::TagScope["private"]
           PUBLIC = Blog::Types::TagScope["public"]
           PUBLISHED = Blog::Types::PostStatus["published"]
-          TEXT_LIMIT = 80
 
           KINDS = {
             posts: [PUBLIC, :post, ".kinds.posts"],
@@ -62,7 +61,7 @@ module Admin
           def journal_title(entry)
             line = entry.body.each_line.map(&:strip).find { !it.empty? }
 
-            Blog::Helpers::Truncation.cut(line.to_s, keep: TEXT_LIMIT)
+            Admin::Short.title(line.to_s)
           end
 
           def post(post)

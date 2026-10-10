@@ -75,7 +75,7 @@ module Admin
           def social_text(social_post)
             at = l(Blog::TimeZone.local(social_post.posted_at), format: :clock)
 
-            "#{at} #{Blog::Helpers::Truncation.cut(social_post.parts.first&.body.to_s, keep: Panel::TEXT_LIMIT)}"
+            "#{at} #{Admin::Short.title(social_post.parts.first&.body.to_s)}"
           end
 
           def sprint_mark

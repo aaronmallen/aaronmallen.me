@@ -20,7 +20,6 @@ module Admin
             Blog::Types::SocialPostStatus["posted"] => ".statuses.posted",
             **Helpers::TaskStatuses::NAMES,
           }.freeze
-          TEXT_LIMIT = 80
 
           prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -116,7 +115,7 @@ module Admin
 
           def social_item(social_post)
             {
-              title: Blog::Helpers::Truncation.cut(social_post.parts.first&.body.to_s, keep: TEXT_LIMIT),
+              title: Admin::Short.title(social_post.parts.first&.body.to_s),
               href: social_href(social_post),
               at: social_post.posted_at,
             }

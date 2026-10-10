@@ -6,7 +6,6 @@ module Admin
       module Commits
         class Show < View
           GITHUB_URL = "https://github.com/%s/commit/%s"
-          SHA_LENGTH = 7
 
           prop :commit, Blog::Types::Instance(ROM::Struct)
           prop :body_html, Blog::Types::String.optional
@@ -59,7 +58,7 @@ module Admin
             div(class: "commit-body post-body") { raw(safe(@body_html)) }
           end
 
-          def short_sha = @commit.sha[0, SHA_LENGTH]
+          def short_sha = Admin::Short.sha(@commit.sha)
 
           def stats
             Stat(key: t(".added"), value: "+#{@commit.additions}")
