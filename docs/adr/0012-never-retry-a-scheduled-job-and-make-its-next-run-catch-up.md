@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, config, lib, mcp, media, posts, projects, record, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990"]
+amended: [AA-823, "#140", "#252", "#990", "#926"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -19,7 +19,7 @@ Sidekiq retries a job that raises 25 times, and after that moves it to the dead 
 job. Eleven run on the clock from `config/sidekiq.yml.erb`, from every minute (publishing due posts, sending due
 social posts) to once a week (the country database). The rest carry one item in their arguments: a chunk of one
 repository's commit walk, a social post for one network, a post whose webmentions go out, a
-webmention to verify, a post to cross-post.
+webmention to verify, a post to cross-post, the agents a commit credits.
 
 A scheduled job holds nothing a later run cannot find again. A per-item job does: drop it, and the item goes with
 it.
@@ -43,7 +43,7 @@ base's `record_and_raise`. Each scheduled operation finds its work again on ever
 newest stored commit and every failure recorded against a repository, the rollup walks every day since its newest
 rollup, and the reapers delete everything past its time.
 
-**A per-item job retries a few times.** `BackfillRepoCommits` takes 3, and
+**A per-item job retries a few times.** `BackfillRepoCommits` takes 3, as `CreditAgents` has since #926, and
 `DeliverSocialPost`, `SendWebmentions`, `VerifyWebmention` and `SyndicatePost` take 5, which three of the specs
 size for a network "only briefly down". The first three each raise for the one `Failure` a retry can fix and
 finish quietly on the rest, and `DeliverSocialPost` marks the delivery failed once its retries run out. The
