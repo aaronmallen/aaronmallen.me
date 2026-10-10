@@ -4,15 +4,11 @@
 module API
   module Endpoints
     class SocialPostEndpoint < Endpoint
-      COMPLAINTS = {
-        "blank" => "is empty",
-        Blog::Contract::CONTROL => Helpers::Wording::CONTROL,
+      COMPLAINTS = Helpers::Wording::SHARED.merge(
         Blog::Contract::FORMAT => "needs a date and time, as 2026-10-01T09:30",
-        Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
         "too_long" => "has a part over the limit for a network you picked",
         "unavailable" => "names a network that has no credentials",
-        "unknown_mention" => "mentions someone who is not in the directory",
-      }.freeze
+      ).freeze
       GONE = "social post %s has gone out, so nothing was %s"
       REPLY = Serializers::SocialPost::SCHEMA.merge(
         required: [*Serializers::SocialPost::SCHEMA.fetch(:required), "lengths"],

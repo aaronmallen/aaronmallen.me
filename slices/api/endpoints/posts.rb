@@ -14,17 +14,13 @@ module API
         tag: { "blank" => "name the tag first", Blog::Contract::FORMAT => "a tag is lowercase words" },
       }.freeze
 
-      REASONS = {
+      REASONS = Helpers::Wording::SHARED.merge(
         "announcement_too_long" => "is empty, and the title and link sent in its place run over a network's limit",
-        "blank" => "is empty",
-        Blog::Contract::CONTROL => "holds a control character",
         "locked" => "cannot change once the post is published",
         "reserved" => "belongs to a page on the site",
-        Blog::Contract::SKIPPED => "names a time the clocks skip in #{Blog::TimeZone::NAME}",
         "taken" => "belongs to another post",
         "too_long" => "runs over a network's limit",
-        "unknown_mention" => "mentions someone who is not in the directory",
-      }.freeze
+      ).freeze
 
       FIELD_REASONS = {
         canonical_url: { Blog::Contract::FORMAT => URL },

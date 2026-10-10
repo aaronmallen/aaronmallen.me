@@ -134,6 +134,12 @@ RSpec.describe "MCP post tools", type: :request do
       expect(admin_save(title: "Hello", publish_at: "next friday")).to eq(admin_error(:publish_at, "format"))
     end
 
+    it "refuses a publish time the clocks skip in the words a social post uses" do
+      call_tool("create_post", title: "Hello", publish_at: "2030-03-10T02:30")
+
+      expect(message).to eq("publish_at falls in the hour the clocks skip in America/Chicago")
+    end
+
     it "refuses a tag that is not a slug, as the admin does", :aggregate_failures do
       call_tool("create_post", title: "Hello", tags: ["two words"])
 

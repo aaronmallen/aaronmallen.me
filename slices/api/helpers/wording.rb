@@ -7,6 +7,13 @@ module API
       TAG_SEPARATOR = ","
       UNSAVED = "could not save the change"
 
+      SHARED = {
+        "blank" => "is empty",
+        Blog::Contract::CONTROL => CONTROL,
+        Blog::Contract::SKIPPED => "falls in the hour the clocks skip in #{Blog::TimeZone::NAME}",
+        "unknown_mention" => "mentions someone who is not in the directory",
+      }.freeze
+
       module_function
 
       def complaints(errors, table, named: false)
@@ -17,7 +24,7 @@ module API
 
       def reason(table, field, code, named: false)
         table.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code) do
-          plain = code == Blog::Contract::CONTROL ? CONTROL : code
+          plain = SHARED.fetch(code, code)
           named ? "#{field} #{plain}" : plain
         end
       end
