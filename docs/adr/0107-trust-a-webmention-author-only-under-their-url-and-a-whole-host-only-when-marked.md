@@ -6,6 +6,7 @@ created: 2026-10-04
 area: [social, admin, mcp, lib, db]
 supersedes: ["0042"]
 issue: "#461"
+amended: ["#946"]
 tags: [webmentions, moderation, trust, spam, bridgy, security]
 ---
 
@@ -31,9 +32,10 @@ root half of this gap.
 - `auto_approve_known_authors` is on.
 - The page links its author: `Social::Webmentions::Source#author_link` reads the h-card URL or a `rel=author` link.
   A page without one still stores the site root as its author, for show, but never approves by itself.
-- `Social::Webmentions::AuthorScope` covers both the source URL sent and the URL the fetch landed on after
-  redirects. A URL is covered when it shares the author URL's scheme, host and port, and its path segments begin
-  with the author URL's. A path holding a `.` or `..` segment, escaped or not, is never covered.
+- `Social::Operations::CheckAuthorScope` covers both the source URL sent and the URL the fetch landed on after
+  redirects. #946 moved it from `lib/social/webmentions` into the slice's operations, as ADR 0126 asks. A URL is
+  covered when it shares the author URL's scheme, host and port, and its path segments begin with the author
+  URL's. A path holding a `.` or `..` segment, escaped or not, is never covered.
 - An author URL at a host's root covers that host only when the owner has listed the host in
   `webmention_settings.single_author_hosts`, as one person's site. The owner keeps that list from the webmention
   settings in the admin and through `update_webmention_settings`. `Blog::Types::Normalized::Hosts` reads each entry

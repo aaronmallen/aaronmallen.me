@@ -11,6 +11,8 @@ module Social
       SETTINGS_ID = 1
       SPAM = Blog::Types::WebmentionStatus["spam"]
 
+      include Deps[normalize_author_url: "operations.normalize_author_url"]
+
       root :webmentions
 
       stamped_commands :create, :update
@@ -40,7 +42,7 @@ module Social
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
 
       def store(**attrs)
-        written = attrs.merge(author_url: Webmentions::AuthorUrl.normalize(attrs[:author_url]))
+        written = attrs.merge(author_url: normalize_author_url.call(attrs[:author_url]))
 
         webmentions.store(resent: written.slice(*RESENT_FIELDS).keys, **written)
       end

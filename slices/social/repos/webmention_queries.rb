@@ -8,6 +8,8 @@ module Social
       PENDING = Blog::Types::WebmentionStatus["pending"]
       SETTINGS_ID = 1
 
+      include Deps[normalize_author_url: "operations.normalize_author_url"]
+
       def by_id(id) = webmentions.by_pk(id).one
 
       def by_status(status) = webmentions.with_status(status).newest_first.to_a
@@ -34,7 +36,7 @@ module Social
       def held = held_webmentions.oldest_first.to_a
 
       def known_author?(author_url)
-        webmentions.by_author_url(Webmentions::AuthorUrl.normalize(author_url)).known_author?
+        webmentions.by_author_url(normalize_author_url.call(author_url)).known_author?
       end
 
       def listed_for(post_id) = approved_for(post_id, LISTED_TYPES).oldest_first.to_a

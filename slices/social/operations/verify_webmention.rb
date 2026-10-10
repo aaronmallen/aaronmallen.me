@@ -9,6 +9,7 @@ module Social
 
       include Deps[
         "webmentions.client",
+        check_author_scope: "operations.check_author_scope",
         post_queries: "posts.repos.post_queries",
         webmention_mutations: "repos.webmention_mutations",
         webmention_queries: "repos.webmention_queries",
@@ -38,8 +39,8 @@ module Social
         author_url = page.author_link
         return false unless settings.auto_approve_known_authors && author_url
 
-        scope = Webmentions::AuthorScope.new(author_url, single_author_hosts: settings.single_author_hosts)
-        [source, page.url].all? { scope.covers?(it) } && webmention_queries.known_author?(author_url)
+        check_author_scope.call(author_url, [source, page.url], single_author_hosts: settings.single_author_hosts) &&
+          webmention_queries.known_author?(author_url)
       end
 
       def fetch(post, source)
