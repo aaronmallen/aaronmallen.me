@@ -12,6 +12,7 @@ module Admin
         INVALID = "posts_page.toasts.bulk.invalid"
         REASONS = %i[not_draft not_found].freeze
 
+        include Redirect
         include Deps[
           operation: "posts.operations.act_on_posts",
           post_queries: "posts.repos.post_queries",
@@ -19,23 +20,7 @@ module Admin
 
         private
 
-        def back(request)
-          filter = Blog::Types::PostFilterParam[request.params[:status]]
-          page = landing(request) { post_queries.by_filter(filter, it).past_end? }
-
-          routes.path(:admin_posts, status: filter, **Blog::Structs::Page.query(page))
-        end
-
-        def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
-
         def named(id) = { post: post_queries.by_id(id)&.title || UI::Components::RecordKey.key(id) }
-
-        def refusal(errors)
-          case errors
-            in { tag: [message, *] } then "tag_#{message}"
-            else Blog::Contract::FORMAT
-          end
-        end
       end
     end
   end

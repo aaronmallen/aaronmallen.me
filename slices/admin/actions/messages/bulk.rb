@@ -29,17 +29,8 @@ module Admin
           Helpers::MessageList.back(routes, list, **Blog::Structs::Page.query(page))
         end
 
-        def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
-
         def named(id)
           { message: [UI::Components::RecordKey.key(id), message_queries.by_id(id)&.subject].compact.join(" ") }
-        end
-
-        def refusal(errors)
-          case errors
-            in { tag: [message, *] } then "tag_#{message}"
-            else Blog::Contract::FORMAT
-          end
         end
       end
     end

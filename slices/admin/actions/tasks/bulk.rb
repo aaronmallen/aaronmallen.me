@@ -34,10 +34,7 @@ module Admin
         end
 
         def details(request)
-          {
-            list: Helpers::TaskLists::NAMES[request.params[:to]]&.then { i18n.t!(it) },
-            tag: Blog::Types::Nullable::Tag[request.params[:tag]],
-          }
+          { **super, list: Helpers::TaskLists::NAMES[request.params[:to]]&.then { i18n.t!(it) } }
         end
 
         def named(id)
@@ -45,11 +42,7 @@ module Admin
         end
 
         def refusal(errors)
-          case errors
-            in { to: } then "to_#{Blog::Contract::BLANK}"
-            in { tag: [message, *] } then "tag_#{message}"
-            else Blog::Contract::FORMAT
-          end
+          errors.key?(:to) ? "to_#{Blog::Contract::BLANK}" : super
         end
       end
     end

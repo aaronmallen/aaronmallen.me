@@ -6,6 +6,7 @@ module Admin
       class Publish < BulkAction
         FAILED = "posts_page.toasts.publish"
 
+        include Redirect
         include Deps[
           describe_post_save: "operations.describe_post_save",
           post_queries: "posts.repos.post_queries",
@@ -27,13 +28,6 @@ module Admin
         end
 
         private
-
-        def back(request)
-          filter = Blog::Types::PostFilterParam[request.params[:status]]
-          page = landing(request) { post_queries.by_filter(filter, it).past_end? }
-
-          routes.path(:admin_posts, status: filter, **Blog::Structs::Page.query(page))
-        end
 
         def failed(response, id, reason)
           toast(response, "#{FAILED}.#{reason}", post: post_queries.by_id(id)&.title || UI::Components::RecordKey.key(id))

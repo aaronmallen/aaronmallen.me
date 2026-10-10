@@ -18,7 +18,7 @@ module Admin
 
     private
 
-    def details(_request) = {}
+    def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
 
     def done(request, response, count)
       toast(response, self.class::DONE.fetch(request.params[:act]), count:, **details(request))
@@ -45,6 +45,7 @@ module Admin
         in { ids: [LONG, *] } then LONG
         in { ids: [::String, *] } then Blog::Contract::BLANK
         in { ids: } then Blog::Contract::FORMAT
+        in { tag: [message, *] } then "tag_#{message}"
         else refusal(errors)
       end
     end
