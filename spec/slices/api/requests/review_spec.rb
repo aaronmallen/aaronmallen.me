@@ -371,6 +371,72 @@ RSpec.describe "API review", type: :request do
     end
   end
 
+  describe "a focused day" do
+    let(:thursday) { Date.new(2026, 9, 17) }
+    let(:review) { read(day: "2026-09-14", focus: wednesday.iso8601) }
+
+    def dates(found) = found.map { it.fetch("date") }
+
+    before do
+      [wednesday, thursday].each do |day|
+        fill(day, title: "Done on #{day}")
+        create(:post, :published, published_at: at(day))
+        create(:social_post, :posted, posted_at: at(day))
+        create(:journal_entry, entry_date: day, body: "a day")
+        create(:commit, repo: "aaronmallen/one", commit_date: day, additions: 1, deletions: 0)
+        close("resolved", day, chosen: "Sidekiq")
+      end
+    end
+
+    it "names the day it covers inside the whole period" do
+      expect(review.values_at("from", "to", "focus")).to eq(%w[2026-09-14 2026-09-20 2026-09-16])
+    end
+
+    it "keeps only that day's done tasks, decisions, journal, posts and social posts" do
+      found = review.values_at("done", "decisions", "posts", "social_posts").map { dates(it) }
+
+      expect([*found, dates(review.dig("journal", "entries"))]).to all(eq(["2026-09-16"]))
+    end
+
+    it "totals only that day's commits and time worked" do
+      expect([review.fetch("commits").map { it.fetch("commits") }, review.fetch("worked")])
+        .to eq([[1], [{ "date" => "2026-09-16", "seconds" => 5400 }]])
+    end
+
+    it "keeps every task carried in the period" do
+      expect(review.fetch("carried").size).to eq(2)
+    end
+
+    it "counts each day of the period whatever day it covers" do
+      counts = { "done" => 1, "commits" => 1, "worked_seconds" => 5400, "journal" => 1 }
+      busy = review.fetch("days").map { [it.delete("date"), it] }.select { |_, day| day.values.any?(&:positive?) }
+
+      expect(busy).to eq([["2026-09-16", counts], ["2026-09-17", counts]])
+    end
+
+    it "gives a row for every day of the period" do
+      week = (Date.new(2026, 9, 14)..Date.new(2026, 9, 20)).map(&:iso8601)
+
+      expect(review.fetch("days").map { it.fetch("date") }).to eq(week)
+    end
+
+    it "covers the whole period for a day outside it or not a date" do
+      expect([read(day: "2026-09-14", focus: "2026-09-21"), read(day: "2026-09-14", focus: "soon")])
+        .to all(include("focus" => nil, "done" => have(2).items))
+    end
+
+    it "runs the same statements as the whole period" do
+      api_token
+      whole = counting { read(day: "2026-09-14") }.size
+
+      expect(counting { read(day: "2026-09-14", focus: wednesday.iso8601) }).to have(whole).items
+    end
+
+    it "reads through read_review as the endpoint does" do
+      expect(mcp_answer("read_review", day: "2026-09-14", focus: wednesday.iso8601)).to eq(review)
+    end
+  end
+
   it "keeps a Sunday in the week before the next Monday" do
     expect(read(day: "2026-09-20").values_at("from", "to")).to eq(%w[2026-09-14 2026-09-20])
   end

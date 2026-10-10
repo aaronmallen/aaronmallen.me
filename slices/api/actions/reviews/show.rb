@@ -7,7 +7,7 @@ module API
         include Deps[endpoint: "endpoints.read_review"]
 
         def handle(request, response)
-          answer(response, endpoint.call(query(request, :period, :day, :contributor, :agent, :model)))
+          answer(response, endpoint.call(query(request, :period, :day, :focus, :contributor, :agent, :model)))
         end
       end
     end

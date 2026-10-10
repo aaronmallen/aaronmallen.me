@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api]
 issue: "#340"
-amended: ["#623"]
+amended: ["#623", "#873"]
 tags: [activity, review, tasks, posts, social, journal, commits, time, exports]
 ---
 
@@ -35,6 +35,11 @@ its MCP tool calls. The screen and the tool then run the same code over the same
 The query takes contributor terms (#623). They narrow the done tasks alone, which `review_tasks` reads with each
 task's contributors, the owner when it lists none ([ADR 0115][0115]). The carried tasks, the time worked and the
 other sections stay whole, so the time report and the review still agree on hours.
+
+The query can also focus on one day of the period (#873). Every section but the carried tasks then covers that day
+alone, in the site's time zone, and a day outside the period, or no day at all, leaves the whole period. The query
+still reads the whole period in the same statements and narrows the rows in Ruby, so it also counts the tasks done,
+commits, time worked and journal entries on each day of the period for the heat map, whichever day it focuses on.
 
 ## Alternatives
 

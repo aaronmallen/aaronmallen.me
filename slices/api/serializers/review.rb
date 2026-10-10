@@ -4,6 +4,7 @@ module API
   module Serializers
     class Review < Serializer
       OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
+      FOCUS = "the one day every section but carried covers, or null for the whole period"
       NOTE = "the note kept on the period, or null when it has none"
       CARRIED_TASK = Helpers::Schema.object(
         {
@@ -14,6 +15,8 @@ module API
         },
       ).freeze
       CREDITS = "who did the work; the owner when none is set"
+      DAILY = "every day of the period, whatever the focus, with the tasks done, commits, seconds worked and " \
+              "journal entries on it"
       DONE_TASK = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
@@ -31,6 +34,18 @@ module API
           period: { type: "string", enum: Blog::Types::ReviewPeriod.values },
           from: Helpers::Schema::DAY,
           to: Helpers::Schema::DAY,
+          focus: Helpers::Schema.nullable(Helpers::Schema::DAY).merge(description: FOCUS),
+          days: Helpers::Schema.list(
+            Helpers::Schema.object(
+              {
+                date: Helpers::Schema::DAY,
+                done: Helpers::Schema::INTEGER,
+                commits: Helpers::Schema::INTEGER,
+                worked_seconds: Helpers::Schema::INTEGER,
+                journal: Helpers::Schema::INTEGER,
+              },
+            ),
+          ).merge(description: DAILY),
           totals: Helpers::Schema.object(
             {
               done: Helpers::Schema::INTEGER,
@@ -98,6 +113,8 @@ module API
         review.commits.map { |repo, totals| { repo:, **totals.slice(:commits, :additions, :deletions) } }
       end
 
+      def days(review) = review.days.map { |date, counts| { date: day(date), **counts } }
+
       def decisions(review)
         review.decisions.map do |decision|
           {
@@ -116,6 +133,8 @@ module API
           { date: day(date), tasks: tasks.map { done_task(it) } }
         end
       end
+
+      def focus(review) = review.focus&.then { day(it) }
 
       def from(review) = day(review.from)
 

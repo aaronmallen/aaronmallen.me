@@ -4,6 +4,8 @@ module API
   module Endpoints
     class ReadReview < Endpoint
       BAD_DAY = "give the day as a date, such as 2026-01-01"
+      FOCUS = "one day of the period, as YYYY-MM-DD, that every section but carried covers; the whole period " \
+              "when left out, outside it or not a date"
 
       SCHEMA = {
         additionalProperties: false,
@@ -14,6 +16,7 @@ module API
             description: "week, from Monday to Sunday, or the calendar month; week when left out",
           },
           day: { type: "string", description: "a day inside the period, as YYYY-MM-DD; today when left out" },
+          focus: { type: "string", description: FOCUS },
           **Helpers::Schema::CREDITS,
         },
       }.freeze
@@ -26,11 +29,12 @@ module API
         review_queries: "activity.repos.review_queries",
       ]
 
-      def handle(period: Blog::Types::ReviewPeriod.values.first, day: nil, **credited)
+      def handle(period: Blog::Types::ReviewPeriod.values.first, day: nil, focus: nil, **credited)
         on = day ? Blog::TimeZone.parse_day(day) : Blog::TimeZone.today
         return invalid(day: [BAD_DAY]) unless on
 
-        found = review_queries.review(period:, on:, credits: contributor_terms.call(credited).to_h)
+        credits = contributor_terms.call(credited).to_h
+        found = review_queries.review(period:, on:, focus: Blog::TimeZone.parse_day(focus), credits:)
 
         Success(serialized(Serializers::Review, found, note: review_note_queries.note(found.period, found.from)))
       end

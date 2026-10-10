@@ -43,6 +43,12 @@ module Activity
 
       def commit_totals_by_repo = unordered.where(type: COMMIT).select(:repo, &COMMIT_TOTALS).group(:repo).order(:repo)
 
+      def commit_totals_by_repo_and_day
+        commits = unordered.where(type: COMMIT).select(:repo, :occurred_on, &COMMIT_TOTALS)
+
+        commits.group(:repo, :occurred_on).order(:repo, :occurred_on)
+      end
+
       def counts_by_day
         unordered.select(:occurred_on) { integer.count(occurred_on).as(:count) }.group(:occurred_on).order(
           self[:occurred_on].desc,
