@@ -16,11 +16,7 @@ module Contact
 
       def count_listed(**) = listed(**).count
 
-      def count_received_between(from:, to:)
-        counted = in_days(from, to).counts_by(:status).to_a
-
-        Blog::Types::MessageStatus.values.to_h { [it, 0] }.merge(counted.to_h { [it.status, it.count] })
-      end
+      def count_received_between(from:, to:) = in_days(from, to).tally(:status, Blog::Types::MessageStatus.values)
 
       def count_since(time) = messages.received_since(time).count
 

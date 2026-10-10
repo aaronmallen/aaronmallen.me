@@ -12,9 +12,9 @@ module Social
 
       def by_id(id) = webmentions.by_pk(id).one
 
-      def count_by_post(post_ids) = tallied(webmentions.for_posts(post_ids).counts_by(:post_id), :post_id)
+      def count_by_post(post_ids) = webmentions.for_posts(post_ids).tally(:post_id)
 
-      def count_by_status = tallied(webmentions.counts_by(:status), :status)
+      def count_by_status = webmentions.tally(:status)
 
       def count_receipts_from_visitor_since(visitor_hashes, time)
         webmention_receipts.for_visitor(visitor_hashes).received_since(time).count
@@ -26,10 +26,10 @@ module Social
         days = in_days(from, to)
         days = days.for_post(post_id) if post_id
 
-        Blog::Types::WebmentionStatus.values.to_h { [it, 0] }.merge(tallied(days.counts_by(:status), :status))
+        days.tally(:status, Blog::Types::WebmentionStatus.values)
       end
 
-      def counted_for(post_id) = tallied(approved_for(post_id, COUNTED_TYPES).counts_by(:type), :type)
+      def counted_for(post_id) = approved_for(post_id, COUNTED_TYPES).tally(:type)
 
       def held = held_webmentions.oldest_first.to_a
 
@@ -45,7 +45,7 @@ module Social
 
       def received_between(from:, to:) = in_days(from, to).count
 
-      def received_by_post(from:, to:) = tallied(in_days(from, to).counts_by(:post_id), :post_id)
+      def received_by_post(from:, to:) = in_days(from, to).tally(:post_id)
 
       def received_count(post_id) = webmentions.for_post(post_id).count
 
@@ -81,8 +81,6 @@ module Social
       end
 
       def stored_settings = webmention_settings.by_pk(SETTINGS_ID).one
-
-      def tallied(counts, key) = counts.to_a.to_h { [it[key], it.count] }
 
       def unseen_pending = webmentions.with_status(PENDING).unseen.awake
     end

@@ -13,13 +13,9 @@ module Decisions
 
       def comments(decision_id) = decision_comments.for_decision(decision_id).oldest_first.to_a
 
-      def count_by_status = count_statuses(decisions)
+      def count_by_status = decisions.tally(:status)
 
-      def count_found(tag: nil, text: nil)
-        counted = count_statuses(narrowed(decisions, tag:, text:))
-
-        STATUSES.to_h { [it, counted.fetch(it, 0)] }
-      end
+      def count_found(tag: nil, text: nil) = narrowed(decisions, tag:, text:).tally(:status, STATUSES)
 
       def exist?(id) = decisions.by_pk(id).exist?
 
@@ -39,8 +35,6 @@ module Decisions
       def timeline(decision_id) = decision_timeline.for_decision(decision_id).oldest_first.to_a
 
       private
-
-      def count_statuses(found) = found.counts_by_status.to_a.to_h { [it.status, it.count] }
 
       def narrowed(found, tag:, text:)
         found = found.tagged(tag) if tag

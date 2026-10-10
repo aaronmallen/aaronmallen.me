@@ -16,8 +16,6 @@ module Contact
         end
       end
 
-      def counts_by(column) = unordered.select(column) { integer.count(id).as(:count) }.group(column)
-
       def for_visitor(visitor_hash) = where(visitor_hash:)
 
       def marked_spam_before(time) = where { marked_spam_at < time }

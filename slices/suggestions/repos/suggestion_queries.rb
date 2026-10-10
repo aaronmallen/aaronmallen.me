@@ -47,9 +47,7 @@ module Suggestions
       def open_counts(suggestion_ids)
         return Blog::Constants::EMPTY_HASH if suggestion_ids.empty?
 
-        counts = suggestion_edits.for_suggestions(suggestion_ids).with_status(OPEN).counts_by_suggestion
-
-        counts.to_a.to_h { [it.suggestion_id, it.count] }
+        suggestion_edits.for_suggestions(suggestion_ids).with_status(OPEN).tally(:suggestion_id)
       end
 
       def with_edits = suggestions.combine(:suggestion_edits)

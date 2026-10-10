@@ -3,9 +3,9 @@
 module Tasks
   module Relations
     class Tasks < Blog::DB::Relation
-      COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
+      COMPLETED_ON = site_day(:completed_at)
       CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
-      CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
+      CREATED_ON = site_day(:created_at)
       CLOSED = Blog::Types::ClosedTaskStatus.values.freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze

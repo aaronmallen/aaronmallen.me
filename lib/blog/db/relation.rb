@@ -40,6 +40,8 @@ module Blog
         where(Sequel.|(*columns.map { Sequel.ilike(it, pattern) }))
       end
 
+      def counts_by(column) = unordered.select(column) { integer.count(id).as(:count) }.group(column)
+
       def excluded(columns) = columns.to_h { [it, Sequel[:excluded][it]] }
 
       def find_linkable(ids: nil, text: nil, limit: nil)
@@ -62,6 +64,10 @@ module Blog
         timestamps = [*STAMPS.fetch(type), *columns]
 
         command(type, result:, use: :timestamps, plugins_options: { timestamps: { timestamps: } })
+      end
+
+      def tally(column, values = Constants::EMPTY_ARRAY)
+        values.to_h { [it, 0] }.merge(counts_by(column).to_a.to_h { [it[column], it[:count]] })
       end
 
       def unmatchable?(*texts) = texts.flatten.any? { it.to_s.include?(NUL) }

@@ -18,8 +18,6 @@ module Social
 
       def by_author_url(author_url) = where(author_url:)
 
-      def counts_by(column) = unordered.select(column) { integer.count(id).as(:count) }.group(column)
-
       def for_post(post_id) = where(post_id:)
 
       def for_posts(post_ids) = where(post_id: post_ids)

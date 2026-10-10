@@ -34,10 +34,10 @@ module Social
 
       def claimed?(id) = social_post_deliveries.for_social_post(id).exist?
 
-      def count_by_status = count_statuses(social_posts)
+      def count_by_status = social_posts.tally(:status)
 
       def count_dated_between(from:, to:)
-        counted = count_statuses(social_posts.dated_between(*Blog::TimeZone.day_bounds(from, to)))
+        counted = social_posts.dated_between(*Blog::TimeZone.day_bounds(from, to)).tally(:status)
 
         QUEUES.transform_values { counted.fetch(it, 0) }
       end
@@ -74,8 +74,6 @@ module Social
       def unsent_page(page) = page_of(social_posts.unposted.in_unsent_order, page)
 
       private
-
-      def count_statuses(found) = found.counts_by_status.to_a.to_h { [it.status, it.count] }
 
       def page_of(listed, page)
         ids = page.fill(listed.paged(page).pluck(:id))

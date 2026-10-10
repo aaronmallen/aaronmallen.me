@@ -14,8 +14,6 @@ module Blog
           in_scope(scope).by_names(names).to_a.to_h { [it[:name], it[:id]] }
         end
 
-        def counts_by_color = unordered.select(:color) { integer.count(id).as(:count) }.group(:color)
-
         def in_name_order = order(self[:name].asc)
 
         def in_scope(scope) = where(scope:)
@@ -24,11 +22,7 @@ module Blog
 
         private
 
-        def color_counts(scope)
-          counts = in_scope(scope).counts_by_color.to_a.to_h { [it[:color], it[:count]] }
-
-          Blog::Types::TagColor.values.to_h { [it, 0] }.merge(counts)
-        end
+        def color_counts(scope) = in_scope(scope).tally(:color, Blog::Types::TagColor.values)
 
         def insert_missing(names, scope)
           now = Time.now

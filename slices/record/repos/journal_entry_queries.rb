@@ -10,7 +10,7 @@ module Record
       def between(from:, to:, limit: nil, tag: nil)
         found = searched(with_tags, tags: Array(tag)).between(from, to).newest_first
 
-        (limit ? found.limit(limit) : found).to_a
+        found.limit(limit).to_a
       end
 
       def by_id(id) = with_tags.by_pk(id).one
@@ -50,7 +50,7 @@ module Record
 
         Blog::Structs::DayCursor.page(oldest, to, size:, day: :entry_date.to_proc) do |low, high, limit|
           found = entries.between(low, high).newest_first
-          (limit ? found.limit(limit) : found).to_a
+          found.limit(limit).to_a
         end
       end
 

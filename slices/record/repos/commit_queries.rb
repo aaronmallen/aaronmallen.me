@@ -14,7 +14,7 @@ module Record
         found = found.in_repos(repos) unless repos.empty?
         found = found.newest_first
 
-        (limit ? found.limit(limit) : found).to_a
+        found.limit(limit).to_a
       end
 
       def by_id(id) = commits.by_pk(id).one
@@ -30,7 +30,7 @@ module Record
       def today(now: Time.now, limit: nil)
         found = commits.on(Blog::TimeZone.today(now)).newest_first
 
-        (limit ? found.limit(limit) : found).to_a
+        found.limit(limit).to_a
       end
 
       def today_repos(now: Time.now) = commits.on(Blog::TimeZone.today(now)).repo_names

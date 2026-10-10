@@ -5,10 +5,6 @@ module Suggestions
     class SuggestionEdits < Blog::DB::Relation
       schema :suggestion_edits, infer: true
 
-      def counts_by_suggestion
-        unordered.select(:suggestion_id) { integer.count(id).as(:count) }.group(:suggestion_id)
-      end
-
       def for_suggestions(suggestion_ids) = where(suggestion_id: suggestion_ids)
 
       def in_order = order(self[:position].asc)

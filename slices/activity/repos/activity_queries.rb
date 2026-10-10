@@ -9,7 +9,7 @@ module Activity
       def between(from:, to:, limit: nil, **filters)
         found = narrowed(from:, to:, **filters).newest_first.with_tags
 
-        (limit ? found.limit(limit) : found).to_a
+        found.limit(limit).to_a
       end
 
       def commit_totals(from:, to:, **filters)

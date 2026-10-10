@@ -15,8 +15,6 @@ module Social
         end
       end
 
-      def counts_by_status = unordered.select(:status) { integer.count(id).as(:count) }.group(:status)
-
       def dated_between(from, to)
         started = from ? where(DATED => from..) : self
         to ? started.where(DATED => ...to) : started

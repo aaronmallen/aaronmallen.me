@@ -28,12 +28,10 @@ module Posts
         dated.dated_between(*Blog::TimeZone.day_bounds(from, to)).oldest_first.to_a
       end
 
-      def count_by_status = posts.counts_by_status.to_a.to_h { [it.status, it.count] }
+      def count_by_status = posts.tally(:status)
 
       def count_dated_between(from:, to:)
-        counted = posts.dated_between(*Blog::TimeZone.day_bounds(from, to)).counts_by_status.to_a
-
-        Blog::Types::PostStatus.values.to_h { [it, 0] }.merge(counted.to_h { [it.status, it.count] })
+        posts.dated_between(*Blog::TimeZone.day_bounds(from, to)).tally(:status, Blog::Types::PostStatus.values)
       end
 
       def dated_between(from:, to:, page:, status: nil)

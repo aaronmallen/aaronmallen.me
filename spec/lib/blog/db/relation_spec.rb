@@ -38,6 +38,24 @@ RSpec.describe Blog::DB::Relation do
     end
   end
 
+  describe "#tally" do
+    let(:decisions) { relation(Decisions::Slice, :decisions) }
+
+    before do
+      create(:decision, status: "open")
+      create(:decision, status: "open")
+      create(:decision, status: "dropped")
+    end
+
+    it "counts rows by a column" do
+      expect(decisions.tally(:status)).to eq("open" => 2, "dropped" => 1)
+    end
+
+    it "fills the values it is given with zero" do
+      expect(decisions.tally(:status, %w[open resolved dropped])).to eq("open" => 2, "resolved" => 0, "dropped" => 1)
+    end
+  end
+
   describe "#with_advisory_lock" do
     let(:states) { relation(Record::Slice, :sync_states) }
 

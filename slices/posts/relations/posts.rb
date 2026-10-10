@@ -13,8 +13,6 @@ module Posts
         end
       end
 
-      def counts_by_status = unordered.select(:status) { integer.count(id).as(:count) }.group(:status)
-
       def dated_between(first, last)
         started = first ? where { published_at >= first } : self
         last ? started.where { published_at < last } : started
