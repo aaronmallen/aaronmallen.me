@@ -3,8 +3,6 @@
 module Analytics
   module Operations
     class PruneAnalyticsEvents
-      RETENTION_DAYS = 90
-
       include Deps[
         event_mutations: "repos.analytics_event_mutations",
         event_queries: "repos.analytics_event_queries",
@@ -19,7 +17,7 @@ module Analytics
 
       private
 
-      def cutoff = Blog::TimeZone.today - (RETENTION_DAYS - 1)
+      def cutoff = event_queries.retention_start
 
       def rolled_up_through(before)
         oldest = event_queries.oldest_day

@@ -16,7 +16,8 @@ module MCP
                   "deletions, status, targets, excerpt, task_id, decision_id, worked_seconds, views and " \
                   "contributors, null where its kind holds none. A task's contributors list who did the work, " \
                   "the owner when it lists none. contributor, agent and model keep only the tasks that match " \
-                  "and drop every other kind. A post's views count the last 90 days, as the admin's activity screen " \
+                  "and drop every other kind. A post's views count the last " \
+                  "#{Analytics::Repos::AnalyticsRollupQueries::VIEW_DAYS} days, as the admin's activity screen " \
                   "does. source_id is the ID of the row's own record, the one its kind's read tool " \
                   "takes: read_commit for a commit, read_post for a post, read_journal_entry for a journal entry, " \
                   "read_social_post for a social post, read_webmention for a webmention, read_task for a task and " \

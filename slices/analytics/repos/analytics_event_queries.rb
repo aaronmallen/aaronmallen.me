@@ -5,10 +5,11 @@ module Analytics
     class AnalyticsEventQueries < Blog::DB::Repo
       FLOORS = [0, 1, 10, 30, 60, 120, 300, 600].freeze
       HOURS = (0..23)
+      RETENTION_DAYS = 90
       WEEKDAYS = (1..7)
 
       def complete_from
-        [oldest_day, Blog::TimeZone.today - (Operations::PruneAnalyticsEvents::RETENTION_DAYS - 1)].compact.min
+        [oldest_day, retention_start].compact.min
       end
 
       def count_from_address_since(address_hashes, time)
@@ -50,6 +51,8 @@ module Analytics
         { median: window.read_median&.round(1), buckets: buckets(window.views_by_read_floor(FLOORS)) }
       end
 
+      def retention_start(to = Blog::TimeZone.today) = to - (RETENTION_DAYS - 1)
+
       def summary_for(day)
         window = analytics_events.on_day(day)
 
@@ -72,10 +75,10 @@ module Analytics
       def visitors_on(day) = analytics_events.on_day(day).visitor_count
 
       def weekday_hours(to: Blog::TimeZone.today)
-        days = Operations::PruneAnalyticsEvents::RETENTION_DAYS
-        counts = analytics_events.between_days(to - (days - 1), to).visitors_by_weekday_hour
+        counts = analytics_events.between_days(retention_start(to), to).visitors_by_weekday_hour
+        hours = HOURS.map { |hour| WEEKDAYS.map { |weekday| counts.fetch([weekday, hour], 0) } }
 
-        { days:, hours: HOURS.map { |hour| WEEKDAYS.map { |weekday| counts.fetch([weekday, hour], 0) } } }
+        { days: RETENTION_DAYS, hours: }
       end
 
       private

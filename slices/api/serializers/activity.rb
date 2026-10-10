@@ -5,7 +5,8 @@ module API
     class Activity < Serializer
       POST = Blog::Types::ActivityKind["post"]
       CREDITS = "who did a task's work, the owner when it lists none, or null for any other kind"
-      VIEWS = "a post's views over the last 90 days, or null for any other kind"
+      VIEWS = "a post's views over the last #{Analytics::Repos::AnalyticsRollupQueries::VIEW_DAYS} days, or null " \
+              "for any other kind".freeze
 
       SCHEMA = Helpers::Schema.object(
         {

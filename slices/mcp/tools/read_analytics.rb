@@ -9,8 +9,10 @@ module MCP
                     "the time a page sat on screen in a visible tab, capped at 20 minutes a view. Nothing counts " \
                     "while the owner is signed in, or from a known bot or a client with no user agent. Days run " \
                     "on #{Blog::TimeZone::NAME} time, and each answer names it as time_zone".freeze
-      RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for 90 days; " \
-                    "start from or since inside them to get these. The daily counts still hold"
+      RAW_DAYS = Analytics::Repos::AnalyticsEventQueries::RETENTION_DAYS
+      RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for " \
+                    "#{RAW_DAYS} days; start from or since inside them to get these. The daily counts still " \
+                    "hold".freeze
       READ_THROUGH_DEPTH, READ_THROUGH_SECONDS =
         Hanami.app.settings.analytics.values_at(:read_through_scroll_depth, :read_through_seconds)
       REF = Analytics::Operations::TagRef::KEY
@@ -48,7 +50,7 @@ module MCP
                   "month and adds up month by month: one reader on two days in a month is two visitors and one " \
                   "reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
-                  "the 90 days of raw visits. " \
+                  "the #{RAW_DAYS} days of raw visits. " \
                   "#{PriorRange::DESCRIPTION}" \
                   "#{format(Following::DESCRIPTION, top: TOP)}" \
                   "Some older days hold no visitor count for a referrer or country: a range sums the days that " \
@@ -89,10 +91,10 @@ module MCP
                   "readers to it, by visitors, each with its views; the site keeps the path of a referrer only " \
                   "when it is the site itself, and an outside referrer stays a host in referrers. " \
                   "Views from before the site kept referring paths are left out. " \
-                  "Hours, since, read_spread and navigation read raw visits, kept for 90 days: when the later of " \
-                  "from and since falls before them, the answer leaves them out and says why in refused, and the " \
-                  "daily counts still come back. With a path, hours, since and read_spread count that page " \
-                  "alone. #{DEFINITIONS}"
+                  "Hours, since, read_spread and navigation read raw visits, kept for #{RAW_DAYS} days: when the " \
+                  "later of from and since falls before them, the answer leaves them out and says why in " \
+                  "refused, and the daily counts still come back. With a path, hours, since and read_spread " \
+                  "count that page alone. #{DEFINITIONS}"
       input_schema(SCHEMA)
       scope Blog::Types::OAuthScope["read"]
 
