@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class WebmentionMutations < DB::Repo
+    class WebmentionMutations < Blog::DB::Repo
       include Dry::Monads[:result]
 
       APPROVED = Blog::Types::WebmentionStatus["approved"]

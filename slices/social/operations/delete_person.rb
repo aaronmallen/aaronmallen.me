@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class DeletePerson < Operation
+    class DeletePerson < Blog::Operation
       include Deps[person_mutations: "repos.person_mutations", person_queries: "repos.person_queries"]
 
       def call(id)

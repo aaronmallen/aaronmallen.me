@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class WakeInboxRow < Operation
+    class WakeInboxRow < Blog::Operation
       WAKES = { "message" => :wake_message, "task" => :wake_task, "webmention" => :wake_webmention }.freeze
 
       include Deps[

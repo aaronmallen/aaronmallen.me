@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class SocialPostMutations < DB::Repo
+    class SocialPostMutations < Blog::DB::Repo
       root :social_posts
 
       stamped_commands :create, :update

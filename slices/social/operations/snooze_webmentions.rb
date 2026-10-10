@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class SnoozeWebmentions < Operation
+    class SnoozeWebmentions < Blog::Operation
       include Deps[webmention_mutations: "repos.webmention_mutations"]
 
       def call(ids, ends_at)

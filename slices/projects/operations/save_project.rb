@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class SaveProject < Operation
+    class SaveProject < Blog::Operation
       REPO_URL = "https://github.com/%s"
 
       include Deps[

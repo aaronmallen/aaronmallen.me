@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class ConnectGitHub < Operation
+    class ConnectGitHub < Blog::Operation
       PROVIDER = "github"
 
       include Deps[add_connection: "services.operations.add_connection", github: "github.auth"]

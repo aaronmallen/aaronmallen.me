@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskSourceQueries < DB::Repo
+    class TaskSourceQueries < Blog::DB::Repo
       def for_provider(provider) = task_sources.where(provider:).to_a
 
       def snoozed_tasks = tasks.open.where(id: task_sources.unseen.asleep.task_ids).combine(:source, :tags).to_a

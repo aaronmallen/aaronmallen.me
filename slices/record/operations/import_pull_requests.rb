@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class ImportPullRequests < Operation
+    class ImportPullRequests < Blog::Operation
       OVERLAP = 24 * 60 * 60
 
       include Deps[

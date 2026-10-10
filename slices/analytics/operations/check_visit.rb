@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class CheckVisit < Operation
+    class CheckVisit < Blog::Operation
       include Deps[contract: "contracts.visit_contract"]
 
       def call(payload)

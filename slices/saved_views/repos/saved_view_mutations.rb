@@ -2,7 +2,7 @@
 
 module SavedViews
   module Repos
-    class SavedViewMutations < DB::Repo
+    class SavedViewMutations < Blog::DB::Repo
       root :saved_views
 
       stamped_commands :create, :update

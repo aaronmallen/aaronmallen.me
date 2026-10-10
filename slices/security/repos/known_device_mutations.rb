@@ -2,7 +2,7 @@
 
 module Security
   module Repos
-    class KnownDeviceMutations < DB::Repo
+    class KnownDeviceMutations < Blog::DB::Repo
       def know(at: Time.now, **row) = known_devices.know(row, at:)
     end
   end

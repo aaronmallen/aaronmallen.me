@@ -2,7 +2,7 @@
 
 module SavedViews
   module Operations
-    class RenameSavedView < Operation
+    class RenameSavedView < Blog::Operation
       include Deps[
         contract: "contracts.saved_view_contract",
         saved_view_mutations: "repos.saved_view_mutations",

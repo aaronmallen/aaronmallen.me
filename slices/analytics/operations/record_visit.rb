@@ -2,7 +2,7 @@
 
 module Analytics
   module Operations
-    class RecordVisit < Operation
+    class RecordVisit < Blog::Operation
       BOT = Regexp.union(
         %w[
           apis-google archiver axios bot crawl curl embedly facebookexternalhit feedfetcher feedly go-http-client

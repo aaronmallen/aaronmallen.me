@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class CommitMutations < DB::Repo
+    class CommitMutations < Blog::DB::Repo
       include Dry::Monads[:result]
 
       BACKFILL_KIND = CommitQueries::BACKFILL_KIND

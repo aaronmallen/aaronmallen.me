@@ -4,7 +4,7 @@ require "securerandom"
 
 module Media
   module Operations
-    class UploadPhoto < Operation
+    class UploadPhoto < Blog::Operation
       KEY_BYTES = 16
 
       include Deps[

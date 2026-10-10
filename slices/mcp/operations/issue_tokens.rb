@@ -2,7 +2,7 @@
 
 module MCP
   module Operations
-    class IssueTokens < Operation
+    class IssueTokens < Blog::Operation
       ACCESS_LIFETIME = 60 * 60
       BEARER = "Bearer"
       SCOPE_SEPARATOR = " "

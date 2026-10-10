@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class RefreshProjects < Operation
+    class RefreshProjects < Blog::Operation
       include Deps[
         client: "record.github.client",
         project_mutations: "repos.project_mutations",

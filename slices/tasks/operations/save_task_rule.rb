@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SaveTaskRule < Operation
+    class SaveTaskRule < Blog::Operation
       FIELDS = %i[pattern provider tags projects].freeze
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       MISSING = "missing"

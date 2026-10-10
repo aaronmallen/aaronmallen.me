@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class CreateMessage < Operation
+    class CreateMessage < Blog::Operation
       include Deps[
         "settings",
         contract: "contracts.message_contract",

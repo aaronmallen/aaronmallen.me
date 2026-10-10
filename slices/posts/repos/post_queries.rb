@@ -2,7 +2,7 @@
 
 module Posts
   module Repos
-    class PostQueries < DB::Repo
+    class PostQueries < Blog::DB::Repo
       ALL = Blog::Types::PostFilter["all"]
       SUMMARY = %i[id title slug webmentions_enabled].freeze
 

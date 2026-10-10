@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskContributorMutations < DB::Repo
+    class TaskContributorMutations < Blog::DB::Repo
       root :task_contributors
 
       def add_missing(task_ids, contributors)

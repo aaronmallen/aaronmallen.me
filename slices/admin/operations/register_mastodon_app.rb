@@ -4,7 +4,7 @@ require "multi_xml"
 
 module Admin
   module Operations
-    class RegisterMastodonApp < Operation
+    class RegisterMastodonApp < Blog::Operation
       PROVIDER = "mastodon"
       SERVER = /\A[\w-]+(\.[\w-]+)+\z/
 

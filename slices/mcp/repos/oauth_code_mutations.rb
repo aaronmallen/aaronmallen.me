@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthCodeMutations < DB::Repo
+    class OAuthCodeMutations < Blog::DB::Repo
       root :oauth_codes
 
       stamped_commands :create

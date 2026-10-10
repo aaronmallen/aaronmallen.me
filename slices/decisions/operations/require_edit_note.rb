@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class RequireEditNote < Operation
+    class RequireEditNote < Blog::Operation
       def call(needed:, note:)
         step written(note) if needed
       end

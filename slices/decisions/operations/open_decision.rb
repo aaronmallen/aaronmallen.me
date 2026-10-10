@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class OpenDecision < Operation
+    class OpenDecision < Blog::Operation
       FIELDS = %i[title problem tags].freeze
       OPENED = Blog::Types::DecisionEventKind["opened"]
 

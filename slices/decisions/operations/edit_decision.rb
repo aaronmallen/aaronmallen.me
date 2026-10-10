@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class EditDecision < Operation
+    class EditDecision < Blog::Operation
       EDITED = Blog::Types::DecisionEventKind["edited"]
       FIELDS = %i[title problem note].freeze
 

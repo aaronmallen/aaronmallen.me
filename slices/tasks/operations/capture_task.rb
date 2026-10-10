@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class CaptureTask < Operation
+    class CaptureTask < Blog::Operation
       NEXT = Blog::Types::TaskFilter["next"]
       PHOTO_OWNER = Blog::Types::PhotoOwner["task"]
       TODAY = Blog::Types::TaskFilter["today"]

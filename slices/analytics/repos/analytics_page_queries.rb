@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsPageQueries < DB::Repo
+    class AnalyticsPageQueries < Blog::DB::Repo
       FIGURES = %i[views visitors read_seconds].freeze
       COUNTED = [*FIGURES, :bounces].freeze
       FIRST_DAYS = 30

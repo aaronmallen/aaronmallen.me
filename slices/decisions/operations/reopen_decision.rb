@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class ReopenDecision < Operation
+    class ReopenDecision < Blog::Operation
       OPEN = Blog::Types::DecisionStatus["open"]
       REOPENED = Blog::Types::DecisionEventKind["reopened"]
 

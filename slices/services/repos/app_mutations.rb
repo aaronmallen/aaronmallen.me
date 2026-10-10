@@ -2,7 +2,7 @@
 
 module Services
   module Repos
-    class AppMutations < DB::Repo
+    class AppMutations < Blog::DB::Repo
       root :service_apps
 
       stamped_commands :create

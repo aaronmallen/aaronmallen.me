@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class ConnectService < Operation
+    class ConnectService < Blog::Operation
       BLANK = "blank"
       CREDENTIALS = ::Services::Structs::ServiceConnection::CREDENTIALS
 

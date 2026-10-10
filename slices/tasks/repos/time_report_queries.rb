@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TimeReportQueries < DB::Repo
+    class TimeReportQueries < Blog::DB::Repo
       DAY = Blog::Types::TimeGrouping["day"]
       NONE = [nil].freeze
       PROJECT = Blog::Types::TimeGrouping["project"]

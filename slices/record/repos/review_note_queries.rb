@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class ReviewNoteQueries < DB::Repo
+    class ReviewNoteQueries < Blog::DB::Repo
       def note(period, starts_on) = review_notes.of(period, starts_on).one
     end
   end

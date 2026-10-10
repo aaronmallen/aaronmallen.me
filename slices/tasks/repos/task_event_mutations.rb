@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskEventMutations < DB::Repo
+    class TaskEventMutations < Blog::DB::Repo
       root :task_events
 
       include Deps[diff: "operations.diff_task_history"]

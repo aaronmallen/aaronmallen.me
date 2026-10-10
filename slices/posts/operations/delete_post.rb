@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class DeletePost < Operation
+    class DeletePost < Blog::Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["post"]
 
       include Deps[post_mutations: "repos.post_mutations", release_photos: "media.operations.release_photos"]

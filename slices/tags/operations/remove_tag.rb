@@ -2,7 +2,7 @@
 
 module Tags
   module Operations
-    class RemoveTag < Operation
+    class RemoveTag < Blog::Operation
       LAST_TARGET = "task_rules_last_target"
 
       include Deps[tag_mutations: "repos.tag_mutations", tag_queries: "repos.tag_queries"]

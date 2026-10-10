@@ -2,7 +2,7 @@
 
 module Security
   module Repos
-    class SignInMutations < DB::Repo
+    class SignInMutations < Blog::DB::Repo
       root :sign_ins
 
       commands :create

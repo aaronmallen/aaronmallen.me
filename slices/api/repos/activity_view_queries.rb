@@ -2,7 +2,7 @@
 
 module API
   module Repos
-    class ActivityViewQueries < DB::Repo
+    class ActivityViewQueries < Blog::DB::Repo
       POST = Blog::Types::ActivityKind["post"]
 
       include Deps[rollup_queries: "analytics.repos.analytics_rollup_queries"]

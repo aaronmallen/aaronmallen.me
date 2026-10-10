@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class PullRequestQueries < DB::Repo
+    class PullRequestQueries < Blog::DB::Repo
       def between(from:, to:, limit: nil)
         found = pull_requests.between(from, to).newest_first
 

@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class TagPost < Operation
+    class TagPost < Blog::Operation
       include Deps[post_mutations: "repos.post_mutations", post_queries: "repos.post_queries"]
 
       def call(id, name)

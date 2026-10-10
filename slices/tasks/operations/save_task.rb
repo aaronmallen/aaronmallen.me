@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SaveTask < Operation
+    class SaveTask < Blog::Operation
       FIELDS = %i[list note tags title].freeze
       OPTIONAL = %i[contributors].freeze
       PHOTO_OWNER = Blog::Types::PhotoOwner["task"]

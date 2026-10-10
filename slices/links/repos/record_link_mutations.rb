@@ -2,7 +2,7 @@
 
 module Links
   module Repos
-    class RecordLinkMutations < DB::Repo
+    class RecordLinkMutations < Blog::DB::Repo
       KINDS = Blog::Types::RecordKind.values
 
       root :record_links

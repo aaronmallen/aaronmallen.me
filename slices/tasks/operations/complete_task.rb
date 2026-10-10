@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class CompleteTask < Operation
+    class CompleteTask < Blog::Operation
       include Deps[
         contract: "contracts.worked_contract",
         task_event_mutations: "repos.task_event_mutations",

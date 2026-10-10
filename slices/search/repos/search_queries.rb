@@ -2,7 +2,7 @@
 
 module Search
   module Repos
-    class SearchQueries < DB::Repo
+    class SearchQueries < Blog::DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
       def counts(text:, kinds: Blog::Types::SearchKind.values)

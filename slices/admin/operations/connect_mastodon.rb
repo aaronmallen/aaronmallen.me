@@ -4,7 +4,7 @@ require "multi_xml"
 
 module Admin
   module Operations
-    class ConnectMastodon < Operation
+    class ConnectMastodon < Blog::Operation
       PROVIDER = "mastodon"
 
       include Deps[

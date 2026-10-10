@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class PublishPost < Operation
+    class PublishPost < Blog::Operation
       include Deps[
         post_mutations: "repos.post_mutations",
         post_queries: "repos.post_queries",

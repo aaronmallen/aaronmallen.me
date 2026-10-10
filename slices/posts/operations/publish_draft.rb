@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class PublishDraft < Operation
+    class PublishDraft < Blog::Operation
       PUBLISH = Blog::Types::PostIntent["publish"]
       PUBLISHED = Blog::Types::PostStatus["published"]
       SCHEDULED = Blog::Types::PostStatus["scheduled"]

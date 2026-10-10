@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsEventQueries < DB::Repo
+    class AnalyticsEventQueries < Blog::DB::Repo
       FLOORS = [0, 1, 10, 30, 60, 120, 300, 600].freeze
       HOURS = (0..23)
       WEEKDAYS = (1..7)

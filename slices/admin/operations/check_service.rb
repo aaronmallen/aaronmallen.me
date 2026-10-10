@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class CheckService < Operation
+    class CheckService < Blog::Operation
       include Deps[
         github: "record.github.client", linear: "record.linear.client", networks: "social.networks.all",
       ]

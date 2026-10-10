@@ -2,7 +2,7 @@
 
 module Decisions
   module Operations
-    class DeleteDecisionOption < Operation
+    class DeleteDecisionOption < Blog::Operation
       CHOSEN = "decisions_resolved_option_fkey"
 
       include Deps[

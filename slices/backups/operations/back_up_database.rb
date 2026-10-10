@@ -4,7 +4,7 @@ require "tmpdir"
 
 module Backups
   module Operations
-    class BackUpDatabase < Operation
+    class BackUpDatabase < Blog::Operation
       KEEP = 7
       KEY_FORMAT = "database-%Y%m%dT%H%M%SZ.dump"
       PREFIX = "database-"

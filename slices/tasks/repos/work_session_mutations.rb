@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class WorkSessionMutations < DB::Repo
+    class WorkSessionMutations < Blog::DB::Repo
       root :work_sessions
 
       stamped_commands :update

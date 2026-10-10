@@ -2,7 +2,7 @@
 
 module Suggestions
   module Repos
-    class SuggestionQueries < DB::Repo
+    class SuggestionQueries < Blog::DB::Repo
       OPEN = [Blog::Types::SuggestionEditStatus["pending"], Blog::Types::SuggestionEditStatus["stale"]].freeze
 
       def by_id(id) = with_edits.by_pk(id).one

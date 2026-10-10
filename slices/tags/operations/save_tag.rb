@@ -2,7 +2,7 @@
 
 module Tags
   module Operations
-    class SaveTag < Operation
+    class SaveTag < Blog::Operation
       TAKEN = "taken"
 
       include Deps[

@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthClientQueries < DB::Repo
+    class OAuthClientQueries < Blog::DB::Repo
       def connected = oauth_clients.holding_live_token.newest_first.to_a
 
       def connected_by_client_id(client_id) = oauth_clients.with_client_id(client_id).one

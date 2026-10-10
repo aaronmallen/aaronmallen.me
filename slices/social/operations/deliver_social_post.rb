@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class DeliverSocialPost < Operation
+    class DeliverSocialPost < Blog::Operation
       OVER_LIMIT = :over_limit
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
       SEND_FAILED = :send_failed

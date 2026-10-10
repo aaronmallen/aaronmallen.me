@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class ListSavedViewRecords < Operation
+    class ListSavedViewRecords < Blog::Operation
       ACTIVITY = Blog::Types::SavedViewScreen["activity"]
       ACTIVITY_FIELDS = %i[repo tag contributor agent model].freeze
       COMPLETED = Blog::Types::TaskTab["completed"]

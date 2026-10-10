@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class QueueCommitImport < Operation
+    class QueueCommitImport < Blog::Operation
       include Deps["github.client"]
 
       def call

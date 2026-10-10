@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class SnoozeInbox < Operation
+    class SnoozeInbox < Blog::Operation
       KINDS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze
 
       include Deps[contract: "contracts.clear_inbox_contract", snooze_inbox_row: "operations.snooze_inbox_row"]

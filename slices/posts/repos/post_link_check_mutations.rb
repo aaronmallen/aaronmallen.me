@@ -2,7 +2,7 @@
 
 module Posts
   module Repos
-    class PostLinkCheckMutations < DB::Repo
+    class PostLinkCheckMutations < Blog::DB::Repo
       root :post_link_checks
 
       def forget_unlinked(post_id, urls) = post_link_checks.unlinked(post_id, urls).delete

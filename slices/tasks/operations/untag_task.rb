@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class UntagTask < Operation
+    class UntagTask < Blog::Operation
       include Deps[
         task_event_mutations: "repos.task_event_mutations",
         task_queries: "repos.task_queries",

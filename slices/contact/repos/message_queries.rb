@@ -2,7 +2,7 @@
 
 module Contact
   module Repos
-    class MessageQueries < DB::Repo
+    class MessageQueries < Blog::DB::Repo
       INBOX = Blog::Types::MessageFilter["inbox"]
       NAME = Blog::DB::Plugins::Taggings::NAME
       SPAM = Blog::Types::MessageStatus["spam"]

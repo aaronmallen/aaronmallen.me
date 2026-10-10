@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class WorkEntryQueries < DB::Repo
+    class WorkEntryQueries < Blog::DB::Repo
       def all = work_entries.in_order.to_a
 
       def between(from:, to:) = work_entries.overlapping(from.year, to.year).in_order.to_a

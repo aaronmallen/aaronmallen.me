@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class CommitQueries < DB::Repo
+    class CommitQueries < Blog::DB::Repo
       BACKFILL_KIND = Blog::Types::SyncStateKind["backfill"]
       NONE = Blog::Constants::EMPTY_ARRAY
       SYNC_KIND = Blog::Types::SyncStateKind["commits"]

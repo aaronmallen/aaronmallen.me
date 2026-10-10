@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class PullRequestMutations < DB::Repo
+    class PullRequestMutations < Blog::DB::Repo
       include Dry::Monads[:result]
 
       IMPORT_LOCK = 303_306

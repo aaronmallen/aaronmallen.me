@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class WorkEntryMutations < DB::Repo
+    class WorkEntryMutations < Blog::DB::Repo
       root :work_entries
 
       stamped_commands :create

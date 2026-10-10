@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class ModerateWebmention < Operation
+    class ModerateWebmention < Blog::Operation
       APPROVED = Blog::Types::WebmentionStatus["approved"]
       IGNORED = Blog::Types::WebmentionStatus["ignored"]
 

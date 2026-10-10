@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SyncIssues < Operation
+    class SyncIssues < Blog::Operation
       CLOSED = Structs::TaskSource::CLOSED
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
       EMPTY_HASH = Blog::Constants::EMPTY_HASH

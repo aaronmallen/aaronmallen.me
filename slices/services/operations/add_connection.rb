@@ -2,7 +2,7 @@
 
 module Services
   module Operations
-    class AddConnection < Operation
+    class AddConnection < Blog::Operation
       include Deps["repos.connection_mutations", "repos.connection_queries", "repos.definition_queries"]
 
       def call(provider:, account_id:, host: nil, **columns)

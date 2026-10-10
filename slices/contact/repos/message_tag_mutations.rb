@@ -2,7 +2,7 @@
 
 module Contact
   module Repos
-    class MessageTagMutations < DB::Repo
+    class MessageTagMutations < Blog::DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       root :message_tags

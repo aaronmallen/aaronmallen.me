@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class QueueSyndication < Operation
+    class QueueSyndication < Blog::Operation
       SCHEDULED = Blog::Types::SocialPostStatus["scheduled"]
 
       include Deps[

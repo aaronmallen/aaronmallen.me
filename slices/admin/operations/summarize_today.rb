@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class SummarizeToday < Operation
+    class SummarizeToday < Blog::Operation
       BACKFILL = Record::Jobs::BackfillRepoCommits.name
       COMMIT_LIMIT = 10
       COMMITS = Blog::Types::SyncName["commits"]

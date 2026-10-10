@@ -2,7 +2,7 @@
 
 module Security
   module Repos
-    class SightingQueries < DB::Repo
+    class SightingQueries < Blog::DB::Repo
       def newest_first = sightings.newest_first.to_a
     end
   end

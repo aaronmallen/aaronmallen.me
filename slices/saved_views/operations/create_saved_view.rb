@@ -2,7 +2,7 @@
 
 module SavedViews
   module Operations
-    class CreateSavedView < Operation
+    class CreateSavedView < Blog::Operation
       include Deps[
         contract: "contracts.saved_view_contract",
         filters_contract: "contracts.filters_contract",

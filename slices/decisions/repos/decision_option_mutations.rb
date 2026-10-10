@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionOptionMutations < DB::Repo
+    class DecisionOptionMutations < Blog::DB::Repo
       root :decision_options
 
       stamped_commands :create, :update

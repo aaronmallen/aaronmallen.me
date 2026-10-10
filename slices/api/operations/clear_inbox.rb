@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class ClearInbox < Operation
+    class ClearInbox < Blog::Operation
       KINDS = Contracts::ClearInboxContract::KINDS
       READ = Blog::Types::MessageStatus["read"]
 

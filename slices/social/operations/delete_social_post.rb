@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class DeleteSocialPost < Operation
+    class DeleteSocialPost < Blog::Operation
       include Deps[
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",

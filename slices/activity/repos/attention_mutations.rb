@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class AttentionMutations < DB::Repo
+    class AttentionMutations < Blog::DB::Repo
       def snooze(kind:, record_id:, ends_at:, now:)
         attention_snoozes.snooze(kind:, record_id:, ends_at:, now:)
         attention_snoozes.where(kind:, record_id:).one

@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class SnoozeInboxRow < Operation
+    class SnoozeInboxRow < Blog::Operation
       Snooze = Data.define(:kind, :id, :snoozed_until)
 
       include Deps[

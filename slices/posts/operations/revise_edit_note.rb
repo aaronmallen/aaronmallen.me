@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class ReviseEditNote < Operation
+    class ReviseEditNote < Blog::Operation
       include Deps[
         claim_post_photos: "operations.claim_post_photos",
         contract: "contracts.edit_note_contract",

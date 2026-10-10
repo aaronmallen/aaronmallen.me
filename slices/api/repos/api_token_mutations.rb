@@ -2,7 +2,7 @@
 
 module API
   module Repos
-    class APITokenMutations < DB::Repo
+    class APITokenMutations < Blog::DB::Repo
       root :api_tokens
 
       stamped_commands :create, :update

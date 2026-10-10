@@ -2,7 +2,7 @@
 
 module API
   module Repos
-    class InboxQueries < DB::Repo
+    class InboxQueries < Blog::DB::Repo
       include Deps[
         message_queries: "contact.repos.message_queries",
         task_source_queries: "tasks.repos.task_source_queries",

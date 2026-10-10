@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class WakeTask < Operation
+    class WakeTask < Blog::Operation
       include Deps[task_queries: "repos.task_queries", task_source_mutations: "repos.task_source_mutations"]
 
       def call(id, now: Time.now)

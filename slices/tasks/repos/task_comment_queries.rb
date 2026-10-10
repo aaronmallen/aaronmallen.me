@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskCommentQueries < DB::Repo
+    class TaskCommentQueries < Blog::DB::Repo
       def for_task(task_id) = task_comments.for_task(task_id).oldest_first.to_a
 
       def ids_for_task(task_id) = task_comments.for_task(task_id).pluck(:id)

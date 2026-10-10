@@ -2,7 +2,7 @@
 
 module Links
   module Repos
-    class RecordLinkQueries < DB::Repo
+    class RecordLinkQueries < Blog::DB::Repo
       FOUND_LIMIT = 5
       RELATIONS = {
         "commit" => :commits,

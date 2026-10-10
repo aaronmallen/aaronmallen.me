@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskRuleMutations < DB::Repo
+    class TaskRuleMutations < Blog::DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       root :task_rules

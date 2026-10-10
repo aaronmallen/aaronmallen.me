@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionCommentMutations < DB::Repo
+    class DecisionCommentMutations < Blog::DB::Repo
       root :decision_comments
 
       stamped_commands :create, :update

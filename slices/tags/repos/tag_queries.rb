@@ -2,7 +2,7 @@
 
 module Tags
   module Repos
-    class TagQueries < DB::Repo
+    class TagQueries < Blog::DB::Repo
       include Deps[
         decision_queries: "decisions.repos.decision_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",

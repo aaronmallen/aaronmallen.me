@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class SnoozeMessages < Operation
+    class SnoozeMessages < Blog::Operation
       include Deps[message_mutations: "repos.message_mutations"]
 
       def call(ids, ends_at)

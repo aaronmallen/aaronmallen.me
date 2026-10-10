@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class PostReaderQueries < DB::Repo
+    class PostReaderQueries < Blog::DB::Repo
       NONE = { readers: nil, final: true }.freeze
       UNREAD = { readers: 0, final: false }.freeze
 

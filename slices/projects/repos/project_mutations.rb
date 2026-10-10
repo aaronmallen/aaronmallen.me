@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class ProjectMutations < DB::Repo
+    class ProjectMutations < Blog::DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["public"]
 
       root :projects

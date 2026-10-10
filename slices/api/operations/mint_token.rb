@@ -2,7 +2,7 @@
 
 module API
   module Operations
-    class MintToken < Operation
+    class MintToken < Blog::Operation
       FIELDS = %i[name scopes expires_on].freeze
 
       include Deps[contract: "contracts.token_contract", api_token_mutations: "repos.api_token_mutations"]

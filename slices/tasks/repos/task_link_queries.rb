@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskLinkQueries < DB::Repo
+    class TaskLinkQueries < Blog::DB::Repo
       def open_ids(ids) = tasks.where(id: ids).open.pluck(:id)
 
       def synced?(task_id) = touching(task_id).where(synced: true).exist?

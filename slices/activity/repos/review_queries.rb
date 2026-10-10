@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class ReviewQueries < DB::Repo
+    class ReviewQueries < Blog::DB::Repo
       JOURNAL = Blog::Types::ActivityKind["journal"]
       NONE = Blog::Constants::EMPTY_ARRAY
       POST = Blog::Types::ActivityKind["post"]

@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskCommentMutations < DB::Repo
+    class TaskCommentMutations < Blog::DB::Repo
       root :task_comments
 
       stamped_commands :create, :update

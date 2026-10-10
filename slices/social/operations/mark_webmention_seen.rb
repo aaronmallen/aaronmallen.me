@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class MarkWebmentionSeen < Operation
+    class MarkWebmentionSeen < Blog::Operation
       include Deps[webmention_mutations: "repos.webmention_mutations"]
 
       def call(id, at: Time.now) = step found(webmention_mutations.see(id, at))

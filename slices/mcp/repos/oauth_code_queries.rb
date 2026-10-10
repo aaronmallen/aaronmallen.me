@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthCodeQueries < DB::Repo
+    class OAuthCodeQueries < Blog::DB::Repo
       def by_code(code) = oauth_codes.with_digest(Blog::Types::SecretDigest[code]).one
     end
   end

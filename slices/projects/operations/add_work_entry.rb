@@ -2,7 +2,7 @@
 
 module Projects
   module Operations
-    class AddWorkEntry < Operation
+    class AddWorkEntry < Blog::Operation
       FIELDS = %i[blurb from_year org role to_year].freeze
 
       include Deps[contract: "contracts.work_entry_contract", work_entry_mutations: "repos.work_entry_mutations"]

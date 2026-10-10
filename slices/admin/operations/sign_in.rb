@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class SignIn < Operation
+    class SignIn < Blog::Operation
       include Deps["repos.owner_identity_queries", github: "github.auth"]
 
       def call(code:, redirect_uri:)

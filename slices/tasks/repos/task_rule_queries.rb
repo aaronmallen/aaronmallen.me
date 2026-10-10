@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskRuleQueries < DB::Repo
+    class TaskRuleQueries < Blog::DB::Repo
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       LINEAR = Blog::Types::TaskSourceProvider["linear"]
 

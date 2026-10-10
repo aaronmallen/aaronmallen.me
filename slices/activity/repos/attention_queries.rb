@@ -2,7 +2,7 @@
 
 module Activity
   module Repos
-    class AttentionQueries < DB::Repo
+    class AttentionQueries < Blog::DB::Repo
       include Deps["settings", dead_set: "sidekiq.dead_set"]
 
       def dead_jobs

@@ -4,8 +4,6 @@ require "mcp"
 
 module MCP
   class Slice < Hanami::Slice
-    autoloader.push_dir(Hanami.app.root.join("lib/mcp"), namespace: MCP)
-
     OAUTH_PREFIX = "/oauth"
     RESOURCE_PATH = "/mcp"
 

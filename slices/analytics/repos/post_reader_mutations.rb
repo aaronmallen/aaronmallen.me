@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class PostReaderMutations < DB::Repo
+    class PostReaderMutations < Blog::DB::Repo
       root :post_reader_hashes
 
       include Deps[reader_window_start: "operations.find_reader_window_start"]

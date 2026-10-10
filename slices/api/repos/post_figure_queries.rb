@@ -2,7 +2,7 @@
 
 module API
   module Repos
-    class PostFigureQueries < DB::Repo
+    class PostFigureQueries < Blog::DB::Repo
       include Deps[
         post_reader_queries: "analytics.repos.post_reader_queries",
         rollup_queries: "analytics.repos.analytics_rollup_queries",

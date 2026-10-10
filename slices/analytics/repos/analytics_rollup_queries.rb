@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsRollupQueries < DB::Repo
+    class AnalyticsRollupQueries < Blog::DB::Repo
       KEYS = { countries: :country_code, paths: :path, referrers: :host }.freeze
       RANKS = { countries: :visitors, paths: :views, referrers: :visitors }.freeze
       SUMS = {

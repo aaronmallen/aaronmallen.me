@@ -4,7 +4,7 @@ require "nokogiri"
 
 module Social
   module Operations
-    class SendWebmentions < Operation
+    class SendWebmentions < Blog::Operation
       ENDPOINT_SELECTOR = "link[rel~='webmention'], a[rel~='webmention']"
       FAILED = :failed
       HEADER_LINK = /<([^>]*)>([^,]*)/

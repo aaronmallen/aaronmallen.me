@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class LabelMessage < Operation
+    class LabelMessage < Blog::Operation
       include Deps[
         contract: "contracts.label_contract",
         message_queries: "repos.message_queries",

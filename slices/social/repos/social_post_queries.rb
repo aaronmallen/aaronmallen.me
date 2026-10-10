@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class SocialPostQueries < DB::Repo
+    class SocialPostQueries < Blog::DB::Repo
       DRAFT = Blog::Types::SocialPostStatus["draft"]
       DRAFTS = Blog::Types::SocialQueue["drafts"]
       POSTED = Blog::Types::SocialPostStatus["posted"]

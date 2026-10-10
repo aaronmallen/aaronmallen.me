@@ -2,7 +2,7 @@
 
 module Contact
   module Operations
-    class ActOnMessages < Operation
+    class ActOnMessages < Blog::Operation
       DELETE = Blog::Types::MessageBulkAction["delete"]
       FIELDS = %i[act ids tag].freeze
       TAG = Blog::Types::MessageBulkAction["tag"]

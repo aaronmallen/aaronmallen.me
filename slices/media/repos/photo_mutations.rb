@@ -2,7 +2,7 @@
 
 module Media
   module Repos
-    class PhotoMutations < DB::Repo
+    class PhotoMutations < Blog::DB::Repo
       root :photos
 
       commands :create

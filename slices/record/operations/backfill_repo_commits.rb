@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class BackfillRepoCommits < Operation
+    class BackfillRepoCommits < Blog::Operation
       GROUNDED = :repository_start
       RESERVE = 1_000
       SYNC = Blog::Types::SyncName["commits"]

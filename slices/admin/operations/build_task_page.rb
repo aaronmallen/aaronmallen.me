@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class BuildTaskPage < Operation
+    class BuildTaskPage < Blog::Operation
       include Blog::Constants
 
       FORMS = { commenting: EMPTY_HASH, timing: EMPTY_HASH, totaling: EMPTY_HASH }.freeze

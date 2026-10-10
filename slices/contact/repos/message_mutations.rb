@@ -2,7 +2,7 @@
 
 module Contact
   module Repos
-    class MessageMutations < DB::Repo
+    class MessageMutations < Blog::DB::Repo
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 

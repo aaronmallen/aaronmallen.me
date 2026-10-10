@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class SettleTask < Operation
+    class SettleTask < Blog::Operation
       COMPLETED = Blog::Types::TaskSourceState["completed"]
       OPEN = Blog::Types::TaskSourceState["open"]
       STARTED = Blog::Types::TaskSourceState["started"]

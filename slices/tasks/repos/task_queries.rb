@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskQueries < DB::Repo
+    class TaskQueries < Blog::DB::Repo
       KEY = /\A#?(\d{1,9})\z/
       LINK_LIMIT = 6
       TODAY = Blog::Types::TaskFilter["today"]

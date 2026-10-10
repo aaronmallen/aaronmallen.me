@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthTokenMutations < DB::Repo
+    class OAuthTokenMutations < Blog::DB::Repo
       root :oauth_tokens
 
       stamped_commands :create

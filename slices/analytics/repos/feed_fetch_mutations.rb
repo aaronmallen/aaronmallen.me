@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class FeedFetchMutations < DB::Repo
+    class FeedFetchMutations < Blog::DB::Repo
       root :feed_readers
 
       def delete_hashes_before(day) = feed_reader_hashes.before(day).delete

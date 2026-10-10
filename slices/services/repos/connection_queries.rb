@@ -2,7 +2,7 @@
 
 module Services
   module Repos
-    class ConnectionQueries < DB::Repo
+    class ConnectionQueries < Blog::DB::Repo
       def all = service_connections.in_list_order.to_a
 
       def by_id(id) = service_connections.by_pk(id).one

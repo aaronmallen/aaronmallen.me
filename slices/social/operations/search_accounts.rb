@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class SearchAccounts < Operation
+    class SearchAccounts < Blog::Operation
       LIMIT = 8
       MINIMUM = 2
       RATE_LIMITED = [Social::Bluesky::Client::RateLimited, Social::Mastodon::Client::RateLimited].freeze

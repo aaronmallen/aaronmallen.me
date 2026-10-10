@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class QueueIssueSync < Operation
+    class QueueIssueSync < Blog::Operation
       JOBS = { "github" => Jobs::SyncIssues, "linear" => Jobs::SyncLinearIssues }.freeze
 
       include Deps[github: "record.github.client", linear: "record.linear.client"]

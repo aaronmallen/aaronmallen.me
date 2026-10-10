@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class SyncStateQueries < DB::Repo
+    class SyncStateQueries < Blog::DB::Repo
       COMMITS = Blog::Types::SyncName["commits"]
       FAILURE = Blog::Types::SyncStateKind["failure"]
       PAGE_LIMIT = "page_limit"

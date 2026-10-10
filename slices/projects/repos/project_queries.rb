@@ -2,7 +2,7 @@
 
 module Projects
   module Repos
-    class ProjectQueries < DB::Repo
+    class ProjectQueries < Blog::DB::Repo
       def archived = with_tags.archived.newest_archived_first.to_a
 
       def by_id(id) = with_tags.by_pk(id).one

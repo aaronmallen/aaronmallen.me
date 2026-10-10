@@ -2,7 +2,7 @@
 
 module Links
   module Operations
-    class UnlinkRecords < Operation
+    class UnlinkRecords < Blog::Operation
       include Deps[record_link_mutations: "repos.record_link_mutations"]
 
       def call(kind, id, other_kind, other_id)

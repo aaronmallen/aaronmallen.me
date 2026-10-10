@@ -2,7 +2,7 @@
 
 module Posts
   module Operations
-    class MovePost < Operation
+    class MovePost < Blog::Operation
       SCHEDULED = Blog::Types::PostStatus["scheduled"]
 
       include Deps[post_mutations: "repos.post_mutations", post_queries: "repos.post_queries"]

@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class AnalyticsEventMutations < DB::Repo
+    class AnalyticsEventMutations < Blog::DB::Repo
       root :analytics_events
 
       stamped_commands :create

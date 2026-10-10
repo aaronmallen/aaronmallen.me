@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class ReapSyncStates < Operation
+    class ReapSyncStates < Blog::Operation
       SYNCS = [Blog::Types::SyncName["commits"]].freeze
 
       include Deps[

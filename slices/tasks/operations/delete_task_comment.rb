@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class DeleteTaskComment < Operation
+    class DeleteTaskComment < Blog::Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["task_comment"]
 
       include Deps[

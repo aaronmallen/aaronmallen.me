@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class JournalEntryMutations < DB::Repo
+    class JournalEntryMutations < Blog::DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       root :journal_entries

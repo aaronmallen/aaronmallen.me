@@ -4,7 +4,7 @@ require "rack/utils"
 
 module MCP
   module Operations
-    class IssueToken < Operation
+    class IssueToken < Blog::Operation
       INVALID_CLIENT = "invalid_client"
       INVALID_GRANT = "invalid_grant"
       REJECT = :reject

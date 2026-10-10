@@ -2,7 +2,7 @@
 
 module Record
   module Operations
-    class SaveReviewNote < Operation
+    class SaveReviewNote < Blog::Operation
       PHOTO_OWNER = Blog::Types::PhotoOwner["review_note"]
 
       include Deps[

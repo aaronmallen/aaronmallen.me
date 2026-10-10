@@ -2,7 +2,7 @@
 
 module Analytics
   module Repos
-    class FeedFetchQueries < DB::Repo
+    class FeedFetchQueries < Blog::DB::Repo
       def feed_subscribers_between(from:, to:)
         subscribers = subscribers_by_day(from, to)
         readers = readers_by_day(from, to)

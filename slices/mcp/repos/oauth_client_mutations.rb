@@ -2,7 +2,7 @@
 
 module MCP
   module Repos
-    class OAuthClientMutations < DB::Repo
+    class OAuthClientMutations < Blog::DB::Repo
       root :oauth_clients
 
       def claim(visitor_hashes:, limit:, total_limit:, since:, **attrs)

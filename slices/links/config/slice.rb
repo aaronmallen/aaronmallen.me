@@ -2,8 +2,6 @@
 
 module Links
   class Slice < Hanami::Slice
-    autoloader.push_dir(Hanami.app.root.join("lib/links"), namespace: Links)
-
     import keys: %w[repos.decision_queries], from: :decisions
     import keys: %w[repos.post_queries], from: :posts
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects

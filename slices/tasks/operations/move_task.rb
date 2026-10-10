@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class MoveTask < Operation
+    class MoveTask < Blog::Operation
       TODAY = Blog::Types::TaskFilter["today"]
 
       include Deps[

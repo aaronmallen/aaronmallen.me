@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class WakeWebmention < Operation
+    class WakeWebmention < Blog::Operation
       include Deps[webmention_mutations: "repos.webmention_mutations", webmention_queries: "repos.webmention_queries"]
 
       def call(id, now: Time.now)

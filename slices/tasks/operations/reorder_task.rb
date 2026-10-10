@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class ReorderTask < Operation
+    class ReorderTask < Blog::Operation
       UP = Blog::Types::TaskMove["up"]
 
       include Deps[task_mutations: "repos.task_mutations", task_queries: "repos.task_queries"]

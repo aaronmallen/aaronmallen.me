@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class DeleteTaskRule < Operation
+    class DeleteTaskRule < Blog::Operation
       include Deps[task_rule_mutations: "repos.task_rule_mutations"]
 
       def call(id) = step found(task_rule_mutations.delete(id))

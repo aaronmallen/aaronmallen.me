@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class PlanSprint < Operation
+    class PlanSprint < Blog::Operation
       include Deps[sprint_mutations: "repos.sprint_mutations", sprint_queries: "repos.sprint_queries"]
 
       def call(date, now: Time.now)

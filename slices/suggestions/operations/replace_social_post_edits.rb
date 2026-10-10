@@ -2,7 +2,7 @@
 
 module Suggestions
   module Operations
-    class ReplaceSocialPostEdits < Operation
+    class ReplaceSocialPostEdits < Blog::Operation
       include Deps[contract: "contracts.edits_contract", suggestion_mutations: "repos.suggestion_mutations"]
 
       def call(social_post_id, edits:)

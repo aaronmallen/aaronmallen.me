@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class PersonQueries < DB::Repo
+    class PersonQueries < Blog::DB::Repo
       def all = people.in_name_order.to_a
 
       def by_id(id) = people.by_pk(id).one

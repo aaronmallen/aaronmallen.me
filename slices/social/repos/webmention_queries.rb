@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class WebmentionQueries < DB::Repo
+    class WebmentionQueries < Blog::DB::Repo
       COUNTED_TYPES = [Blog::Types::WebmentionType["like"], Blog::Types::WebmentionType["repost"]].freeze
       LISTED_TYPES = [Blog::Types::WebmentionType["reply"], Blog::Types::WebmentionType["mention"]].freeze
       PENDING = Blog::Types::WebmentionStatus["pending"]

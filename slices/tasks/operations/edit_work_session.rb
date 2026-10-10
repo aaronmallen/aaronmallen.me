@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class EditWorkSession < Operation
+    class EditWorkSession < Blog::Operation
       FUTURE = "future"
       ORDER = "order"
 

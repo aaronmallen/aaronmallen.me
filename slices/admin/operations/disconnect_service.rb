@@ -2,7 +2,7 @@
 
 module Admin
   module Operations
-    class DisconnectService < Operation
+    class DisconnectService < Blog::Operation
       GITHUB = "github"
       MASTODON = "mastodon"
 

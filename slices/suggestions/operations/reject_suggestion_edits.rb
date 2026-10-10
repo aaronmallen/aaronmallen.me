@@ -2,7 +2,7 @@
 
 module Suggestions
   module Operations
-    class RejectSuggestionEdits < Operation
+    class RejectSuggestionEdits < Blog::Operation
       include Deps[
         lock_editable_social_post: "social.operations.lock_editable_social_post",
         suggestion_mutations: "repos.suggestion_mutations",

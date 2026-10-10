@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class LinkTasks < Operation
+    class LinkTasks < Blog::Operation
       BLOCKED_BY = Blog::Types::TaskLinkKind["blocked_by"]
       BLOCKS = Blog::Types::TaskLinkType["blocks"]
       CONSTRAINTS = {

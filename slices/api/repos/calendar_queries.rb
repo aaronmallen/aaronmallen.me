@@ -4,7 +4,7 @@ require "dry/monads"
 
 module API
   module Repos
-    class CalendarQueries < DB::Repo
+    class CalendarQueries < Blog::DB::Repo
       NONE = Blog::Constants::EMPTY_ARRAY
 
       include Dry::Monads[:result]

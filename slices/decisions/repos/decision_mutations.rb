@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionMutations < DB::Repo
+    class DecisionMutations < Blog::DB::Repo
       TAG_SCOPE = Blog::Types::TagScope["private"]
 
       root :decisions

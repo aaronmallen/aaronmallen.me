@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class ScheduleTask < Operation
+    class ScheduleTask < Blog::Operation
       OPEN = Blog::Types::TaskStatus["open"]
 
       include Deps[

@@ -2,7 +2,7 @@
 
 module Services
   module Repos
-    class ConnectionMutations < DB::Repo
+    class ConnectionMutations < Blog::DB::Repo
       root :service_connections
 
       commands delete: :by_pk

@@ -2,7 +2,7 @@
 
 module Decisions
   module Repos
-    class DecisionQueries < DB::Repo
+    class DecisionQueries < Blog::DB::Repo
       STATUSES = Blog::Types::DecisionStatus.values.freeze
 
       def by_id(id) = decisions.combine(:options, :tags).by_pk(id).one

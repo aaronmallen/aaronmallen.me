@@ -2,7 +2,7 @@
 
 module Social
   module Operations
-    class ComposeSocialPost < Operation
+    class ComposeSocialPost < Blog::Operation
       DRAFT = Blog::Types::SocialIntent["draft"]
       DRAFTED = Blog::Types::SocialPostStatus["draft"]
       FIELDS = %i[mode parts schedule_at targets].freeze

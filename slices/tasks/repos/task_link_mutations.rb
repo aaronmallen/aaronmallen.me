@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class TaskLinkMutations < DB::Repo
+    class TaskLinkMutations < Blog::DB::Repo
       root :task_links
 
       def add_synced(from_task_id:, to_task_id:, type:)

@@ -2,7 +2,7 @@
 
 module Tags
   module Repos
-    class TagMutations < DB::Repo
+    class TagMutations < Blog::DB::Repo
       root :tags
 
       stamped_commands :create, :update

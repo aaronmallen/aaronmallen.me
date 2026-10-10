@@ -2,7 +2,7 @@
 
 module Services
   module Operations
-    class RemoveConnection < Operation
+    class RemoveConnection < Blog::Operation
       include Deps["repos.connection_mutations", "repos.connection_queries"]
 
       def call(id)

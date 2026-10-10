@@ -2,7 +2,7 @@
 
 module Tasks
   module Operations
-    class PauseTask < Operation
+    class PauseTask < Blog::Operation
       include Deps[
         task_event_mutations: "repos.task_event_mutations",
         task_mutations: "repos.task_mutations",

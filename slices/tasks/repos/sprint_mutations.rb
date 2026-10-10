@@ -2,7 +2,7 @@
 
 module Tasks
   module Repos
-    class SprintMutations < DB::Repo
+    class SprintMutations < Blog::DB::Repo
       EXTERNAL = Blog::Types::TaskList["external"]
       NEXT = Blog::Types::TaskList["next"]
 

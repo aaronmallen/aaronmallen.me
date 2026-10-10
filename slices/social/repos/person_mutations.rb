@@ -2,7 +2,7 @@
 
 module Social
   module Repos
-    class PersonMutations < DB::Repo
+    class PersonMutations < Blog::DB::Repo
       root :people
 
       stamped_commands :create, :update

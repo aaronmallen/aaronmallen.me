@@ -2,7 +2,7 @@
 
 module Record
   module Repos
-    class SyncStateMutations < DB::Repo
+    class SyncStateMutations < Blog::DB::Repo
       FAILURE = SyncStateQueries::FAILURE
 
       def clear_failure(sync, repo: nil) = failure_row(sync, repo).delete
