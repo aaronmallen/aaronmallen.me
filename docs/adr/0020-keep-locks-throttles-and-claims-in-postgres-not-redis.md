@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, record, contact, mcp, analytics, social, tasks]
 issue: AA-644
-amended: [AA-823, "#200", "#585", "#988"]
+amended: [AA-823, "#200", "#585", "#988", "#957"]
 tags: [postgres, redis, advisory-lock, throttle, upsert, concurrency, sidekiq]
 ---
 
@@ -35,9 +35,10 @@ hand. When another run holds the lock, it hands back `Failure(:lock_busy)`,
 `Record::Jobs::ImportCommits` drops the tick, and the next one catches up.
 
 **A transaction advisory lock around a count and a write, for a step that must not run twice at once.** The throttle
-claims on `Contact::Relations::Messages`, `MCP::Relations::OAuthClients`, `Analytics::Relations::AnalyticsEvents` and
-`Social::Relations::WebmentionReceipts` open a transaction, take `pg_advisory_xact_lock`, count and insert. The lock
-ends with the commit, and a row lock would hold nothing before a sender's first row.
+claims on `Contact::Relations::Messages`, `MCP::Relations::OAuthClients`, `Analytics::Relations::AnalyticsEvents`,
+`Analytics::Relations::AnalyticsClicks` (#957) and `Social::Relations::WebmentionReceipts` open a transaction, take
+`pg_advisory_xact_lock`, count and insert. The lock ends with the commit, and a row lock would hold nothing before a
+sender's first row.
 `Blog::DB::Relation#lock_until_commit` takes the lock on `hashtext` of the relation's table, with any extra keys
 after it, and `Blog::DB::Relation#capped_claim` holds the count against a sender's cap and the total cap.
 
@@ -46,8 +47,9 @@ inserts on `sprint_date` and the loser does nothing. `Social::Relations::SocialP
 `(social_post_id, network)` and takes a row again only when no job has touched it since `stale_before`.
 
 A new lock key follows the ones beside it. A lock on a sender takes two keys, `hashtext` of the table and `hashtext`
-of the sender. A lock on a whole table takes the table key alone. A lock on a job takes a bare integer, and
-`CommitRepo` holds the one in use, `IMPORT_LOCK`.
+of the sender. A lock on a whole table takes the table key alone. A lock on a job takes a name. #957 found three
+in use: `IMPORT_LOCK` in `CommitMutations` and in `PullRequestMutations`, and `SYNC_LOCKS`, one for each issue
+provider, in `TaskSourceMutations`.
 
 ## Alternatives
 
@@ -75,7 +77,7 @@ delivery that holds an error or has failed is not claimed again.
 
 Each site picks its key by hand, and nothing checks that two sites picked the same one. Postgres keeps the one-key
 and two-key forms apart, so a job lock cannot meet a lock on a sender. The table-wide webmention and contact locks share
-the one-key space with `IMPORT_LOCK`, and two tables whose names hash alike would share a lock.
+the one-key space with the job locks (#957), and two tables whose names hash alike would share a lock.
 
 A throttle lock on a sender makes a flood wait on itself while every other sender goes straight through. The
 webmention and contact caps across all senders lock the whole table, so a flood there makes every sender wait.

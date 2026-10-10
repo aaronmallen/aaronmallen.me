@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, public]
 issue: AA-668
-amended: ["#920"]
+amended: ["#920", "#957"]
 tags: [contact, forms, javascript, redirect, throttle, validation]
 ---
 
@@ -30,7 +30,7 @@ throttle gets.
 
 ## Decision
 
-One slot under the heading holds one thing, and the server picks it.
+One slot beside the heading holds one thing, and the server picks it.
 
 | What happened | Status | URL | The slot holds |
 | --- | --- | --- | --- |
@@ -40,8 +40,9 @@ One slot under the heading holds one thing, and the server picks it.
 | Sender throttled | 429 | `/contact` | the throttled panel |
 
 `Public::UI::Views::Pages::Contact#outcome` renders one of the three branches, so a form and a panel never stand
-together, and on the sent page the form is not in the document. The kicker, the heading, the lede and the block
-under the slot stay on every one. The redesign moved the lede out of the slot and into the header, as #920
+together, and on the sent page the form is not in the document. The kicker, the heading, the lede and `ContactInfo`
+stay on every one. #957 found `ContactInfo` in the sticky column with the header, beside the slot, where this
+record first put it under the slot. The redesign moved the lede out of the slot and into the header, as #920
 records. The throttled panel copies the sent one in its own tone. A caught bot gets the same
 redirect a sender gets, as AA-384 says.
 

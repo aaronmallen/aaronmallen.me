@@ -3,9 +3,9 @@ id: "0021"
 title: Let SQL read another slice's tables, never write them
 status: active
 created: 2026-09-28
-area: [activity, analytics, db, lib, links, posts, search, social, tags, tasks]
+area: [activity, analytics, contact, db, decisions, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013", "#957"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -42,20 +42,30 @@ exports refuses. These reads cross today:
 - **The `review_tasks` and `work_session_days` views**, built in
   `config/db/migrate/20261003000082_create_review_views.rb` and read by `slices/activity/relations/review_tasks.rb`
   and `slices/activity/relations/work_session_days.rb`, read `tasks`, `sprints` and `work_sessions`, which `tasks`
-  owns. The record on building the review in one activity query holds why they live in `activity`.
+  owns. The record on building the review in one activity query holds why they live in `activity`. #957 added the
+  `review_carries` view, which reads `tasks` and `task_events`, the `review_decisions` view, which reads
+  `decisions`, `decision_events` and `decision_options`, which `decisions` owns, and the reads of
+  `task_contributors`, which `tasks` owns, in `review_tasks` and the `activities` view.
+- **`Activity::Relations::TaskContributors`** reads `task_contributors`, which `tasks` owns, so the activity filters
+  can list each agent and model that worked a task (#957).
 - **The `search_documents` view**, built in `config/db/migrate/20261003000076_create_search_documents.rb` and
   read by `slices/search/relations/search_documents.rb`, unions `tasks`, `posts`, `social_posts`,
   `social_post_parts`, `journal_entries`, `commits`, `projects`, `work_entries`, `people`, `messages`,
   `webmentions`, `decisions` and `pull_requests`, which `tasks`, `posts`, `social`, `record`, `projects`, `contact`
   and `decisions` own. The record on searching every kind holds why one view serves every search.
-- **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags` and
-  `task_tags`. The tags screen is the one place that answers for all four kinds at once, and the SQL spares it
-  four imports.
+- **`Tags::Relations::Tags#counts_by_kind`** counts rows in `post_tags`, `project_tags`, `journal_entry_tags`,
+  `task_tags`, `decision_tags`, `task_rule_tags` and `message_tags`, seven kinds since #957 listed the last three.
+  The tags screen is the one place that answers for every kind at once, and the SQL spares it one import per
+  owning slice.
+- **`Tags::Relations::Tags#last_tag_of_rules`** reads `task_rules`, `task_rule_tags` and `task_rule_projects`,
+  which `tasks` owns, to name the rules a tag's removal would leave with no target (#957).
 - **`Activity::Relations::Activities#tag_owners`**, a private method `#tagged` calls, joins
   `journal_entry_tags` and `task_tags` to `tags` to find the entries and tasks that carry every named tag.
 - **`Analytics::Relations::AnalyticsRollupPaths#views_by_post`** joins `posts` on
   `'/writing/' || posts.slug`, built from `Blog::Constants::WRITING_PATH` (#1013), so the admin posts list gets views
-  keyed by post id in one query.
+  keyed by post id in one query. #957 found more analytics reads of `posts` on the same path: `#first_days`,
+  `#post_paths` and `#posts_at` on `AnalyticsRollupPaths`, and `#closed`, `#orphaned` and `#record` on
+  `Analytics::Relations::PostReaderHashes`.
 - **The `posts_default_webmentions_enabled` trigger**, in `config/db/migrate/20260928000005_create_posts.rb`,
   fills `webmentions_enabled` on insert from social's `webmention_settings`. Reading the setting in `SavePost`
   would make posts import a query from social, which already imports from posts, and ADR 0003 allows no such
@@ -65,7 +75,7 @@ exports refuses. These reads cross today:
   claims, so `/media/<key>` serves a visitor those alone. `posts` imports `operations.claim_photos` from `media`, so
   an import the other way would close a cycle.
 - **`Tasks::Relations::RecordLinks#project_ids_by_task`** reads `record_links`, which `links` owns, to find the
-  projects each task links to for the time report. `links` imports `queries.linkable_tasks` from `tasks`, so an
+  projects each task links to for the time report. `links` imports `repos.task_queries` from `tasks` (#957), so an
   import the other way would close a cycle.
 - **The `record_links_find_records` trigger**, in `config/db/migrate/20261003000094_create_record_links.rb`, finds
   and locks the row each side of a new link names in `tasks`, `posts`, `social_posts`, `journal_entries`, `commits`,

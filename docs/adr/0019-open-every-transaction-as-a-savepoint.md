@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, contact, mcp, analytics, social]
 issue: AA-645
-amended: [AA-819]
+amended: [AA-819, "#957"]
 tags: [transactions, savepoint, rom, sequel, dry-operation, after-commit, rollback]
 ---
 
@@ -43,8 +43,9 @@ after the outer commit. Outside any transaction it runs at once. Request specs t
 pass through the hook, but none pins the three cases apart.
 
 **A throttle's claim opens its own transaction.** `Contact::Relations::Messages#claim`,
-`MCP::Relations::OAuthClients#claim`, `Analytics::Relations::AnalyticsEvents#claim` and
-`Social::Relations::WebmentionReceipts#claim` open their own transaction, outside both seams, and take no
+`MCP::Relations::OAuthClients#claim`, `Analytics::Relations::AnalyticsEvents#claim`,
+`Analytics::Relations::AnalyticsClicks#claim` (#957) and `Social::Relations::WebmentionReceipts#claim` open their
+own transaction, outside both seams, and take no
 savepoint. There the transaction is the lifetime of a `pg_advisory_xact_lock`, not a unit of work. Postgres frees a
 lock taken outside a transaction at once, and each block commits whether it writes or refuses. Opening it in the repo
 would split the lock from the count it guards.
@@ -74,8 +75,7 @@ the savepoint can stop reaching subclasses without a word. The two specs are wha
 A job queued in a savepoint that rolls back is never queued, which is what a caller wants when the write it
 announces is gone.
 
-The four claims sit outside the rule. Called inside an outer transaction, a claim would join it and hold its lock
-until the outer commit. None is called that way today. A new throttle that copies one keeps the same exception, and
-the comment on `Messages#claim` still calls it the only one.
+The five claims sit outside the rule (#957). Called inside an outer transaction, a claim would join it and hold its
+lock until the outer commit. None is called that way today. A new throttle that copies one keeps the same exception.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

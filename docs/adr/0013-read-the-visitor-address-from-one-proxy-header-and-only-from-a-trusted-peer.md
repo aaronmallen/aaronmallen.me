@@ -3,8 +3,9 @@ id: "0013"
 title: Read the visitor address from one proxy header, and only from a trusted peer
 status: active
 created: 2026-09-28
-area: [config, public, mcp]
+area: [app, config, public, mcp, security]
 issue: AA-638
+amended: ["#957"]
 tags: [privacy, analytics, throttles, proxy, cloudflare, security]
 ---
 
@@ -31,8 +32,8 @@ port.
 
 ## Decision
 
-`Blog::VisitorAddress` is the one place that reads the visitor address. `public` exports it and
-`mcp` imports it.
+`Blog::Operations::ReadVisitorAddress` in `app/operations` is the one place that reads the visitor address.
+`config/app.rb` shares it with every slice, and `public`, `mcp` and `security` read it (#957).
 
 - It reads one header, the one `settings.proxy[:address_header]` names. `config/settings/production.yml` names
   `CF-Connecting-IP`. Development and test name none.

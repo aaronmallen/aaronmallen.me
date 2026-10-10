@@ -3,9 +3,9 @@ id: "0022"
 title: Declare the tags relation in every slice that tags
 status: active
 created: 2026-09-28
-area: [db, lib, posts, projects, record, tags, tasks]
+area: [contact, db, decisions, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76", "#718", "#954", "#992"]
+amended: [AA-809, "#76", "#718", "#954", "#992", "#957"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -30,11 +30,12 @@ then has several definitions. AA-561 item 2 found that `tags` has five, and aske
 
 ## Decision
 
-Each slice that tags declares its own `Relations::Tags` over the `tags` table: `posts`, `projects`, `record` and
-`tasks`, beside the one in `tags`. Each is `schema :tags, infer: true` and includes `Blog::DB::Tags`
-(`lib/blog/db/tags.rb`), which holds what the relation does: `by_names`, `claim`, `next_color` and the rest. Each
-join relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both
-mixins into ROM relation plugins that a relation opts into with `use` (ADR 0126).
+Each slice that tags declares its own `Relations::Tags` over the `tags` table: `contact`, `decisions`, `posts`,
+`projects`, `record` and `tasks`, beside the one in `tags`. #957 added `contact` and `decisions` to this list.
+Each is `schema :tags, infer: true` and includes `Blog::DB::Tags` (`lib/blog/db/tags.rb`), which holds what the
+relation does: `by_names`, `claim`, `next_color` and the rest. Each join relation includes `Blog::DB::Taggings`
+(`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both mixins into ROM relation plugins that a
+relation opts into with `use` (ADR 0126).
 
 A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` in `PostMutations#replace_tags` does, and
 the same in every other tagging repo. `claim` inserts each missing name with the least used colour and does nothing
@@ -56,8 +57,8 @@ every tagged list would pay a second query for its tags.
 
 A tagged list loads its tags in the same `combine` that loads the records.
 
-One schema block has five copies, kept in step only by the mixin. A scope added to one relation and not to
-`Blog::DB::Tags` leaves the other four behind, which is the cost the record on exports names.
+One schema block has seven copies (#957), kept in step only by the mixin. A scope added to one relation and not to
+`Blog::DB::Tags` leaves the other six behind, which is the cost the record on exports names.
 
 A new tagged kind needs a tags relation and a join relation in its own slice, a `replace_tags` repo method, and a
 `JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its join

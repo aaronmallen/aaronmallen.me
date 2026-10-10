@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -79,7 +79,7 @@ raises again.
 | `task_links_to_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
 | `task_rule_projects_project_id_fkey` | foreign key | `Tasks::Operations::SaveTaskRule` | `projects: missing` |
 | `task_rules_provider_pattern_index` | unique index | `Tasks::Operations::SaveTaskRule` | `pattern: taken` |
-| `task_tag_rules_last_tag` | trigger | `Tags::Operations::RemoveTag` | a toast naming the rules |
+| `task_rules_last_target` | trigger | `Tags::Operations::RemoveTag` | a toast naming the rules |
 
 `SaveTag`, `SaveTaskRule`, `SavePerson` and `AddConnection` mapped every error of a kind to one answer until #937
 gave them the lookup, so a new constraint on their tables raises until it gets a row here.
@@ -97,7 +97,9 @@ by `CHECK (id = 1)`, and their repos address it by that id. `tasks.sprint_id` ho
 off every record in the same statement. `RemoveTag` checks nothing first, and the foreign key stays the rule.
 
 One join breaks that, since #415. A task tag rule must hold a tag, so `task_tag_rules_last_tag` refuses to delete a
-tag that is the only tag on a rule, before the cascade runs. It raises with `ERRCODE = 'check_violation'`, and
+tag that is the only tag on a rule, before the cascade runs. #661 renamed it `task_rules_last_target`, as #957
+records: a rule may hold projects as well as tags, and the trigger now refuses to delete a tag or a project that is
+the last target on a rule. It raises with `ERRCODE = 'check_violation'`, and
 `RemoveTag` answers with the patterns of the rules that tag would empty, read after the refusal.
 
 ## Alternatives

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [posts, social, admin, db]
 issue: AA-646
-amended: ["#245", "#524"]
+amended: ["#245", "#524", "#957"]
 tags: [posts, social, syndication, announcement, limits, mastodon, bluesky]
 ---
 
@@ -69,7 +69,9 @@ A draft can hold text over a limit. The editor refuses it only when the author p
 Posts imports `networks.all` from social to read the limits, and `links.tagger` to measure the text social sends
 (#245). Both keys are a provider's, and the record on how slices reach each other covers why they do not count as a
 cycle (AA-571). #524 made the tagger the operation `operations.tag_links`, so the edge now carries an operation and a
-query, and counts as a cycle, which that record names.
+query, and counts as a cycle, which that record names. #994 moved the check into social: `posts` and
+`suggestions` import `operations.check_network_fit`, which reads `networks.all` and measures the text itself, so
+`posts` imports neither key now, as #957 records.
 
 A new network needs a client that answers `within_limit?` and `configured?`, registered in `networks.all`. Without the
 first, the editor cannot check the card for it.

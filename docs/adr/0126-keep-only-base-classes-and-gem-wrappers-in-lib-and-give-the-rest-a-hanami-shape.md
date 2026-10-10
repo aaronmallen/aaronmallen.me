@@ -6,6 +6,7 @@ created: 2026-10-07
 area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
   projects, public, record, saved_views, search, security, social, suggestions, tags, tasks]
 issue: "#718"
+amended: ["#957"]
 tags: [layout, hanami, lib, app, rom, plugins, operations, contracts, structs, enums, helpers, markdown]
 ---
 
@@ -53,7 +54,9 @@ of the slice that owns it, and the admin and public components that render Markd
 
 **`Analytics::Device`.** Nothing crosses. `lib/security` names its own `Security::Device`, which reads the browser
 and system, and `Analytics::Device`, which sorts a visit into a device class, is named only from the development
-seeds. Each becomes an operation in its own slice, and the seeds resolve the analytics one from its slice.
+seeds. Each becomes an operation in its own slice, and the seeds resolve the analytics one from its slice. They are now
+`Security::Operations::ReadDevice` and `Analytics::Operations::ClassifyDevice`, and #1003 emptied `lib/security`
+with nine other `lib/<slice>` folders and dropped their `push_dir` lines, as #957 records.
 
 ## Alternatives
 

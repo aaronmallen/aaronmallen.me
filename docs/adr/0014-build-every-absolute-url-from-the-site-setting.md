@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, config, lib, mcp, posts, public, social]
 issue: AA-655
-amended: [AA-819]
+amended: [AA-819, "#957"]
 tags: [urls, settings, routes, base-url, feeds, webmentions, oauth, tunnel]
 ---
 
@@ -39,9 +39,10 @@ run the whole sign-in against a host somebody else chose.
   `Posts::Operations::ComposeAnnouncement`, `Social::Operations::SendWebmentions`,
   `Public::Operations::RenderAtomFeed`, the feed actions, `Admin::Action#github_callback_url` and
   `MCP::OAuth::Metadata` do.
-- `Blog::Site` reads the same base back from `Hanami.app.config.base_url` for what is not a route: the canonical
+- `Blog::Settings#site_url` and `#site_origin` build on the same setting for what is not a route: the canonical
   link in `Public::UI::Layouts::Application`, the MCP issuer in `MCP::Action#issuer`, and the origin
-  `Public::Action#cross_site?` checks an `Origin` header against.
+  `Public::Action#cross_site?` checks an `Origin` header against. #957 named them in place of `Blog::Site`, which
+  did this job before.
 - A question about identity asks the setting too. `Blog::Settings#owns?` decides whether a webmention's target
   is ours, and it accepts the setting's host alone. `Blog::Providers::HTTPProvider` names the setting in the
   User-Agent of every outbound request.
@@ -84,8 +85,8 @@ arrives on the public host, so this costs nothing yet.
 `config/settings/test.yml` carries the production URL, `https://aaronmallen.me`, so specs assert the links the
 live site gives out, as the public request specs do when they read a page's canonical link. The cost is that a
 test run cannot tell its links from production's, and a spec that needs another host has to stub
-`Blog::Site.base_url`. Development sets `http://localhost:2300`, so a link built there works on the machine that
-built it.
+`Blog::Settings#site_url` (#957). Development sets `http://localhost:2300`, so a link built there works on the
+machine that built it.
 
 The analytics referrer check is the one place the asking host still counts. A new caller that reads
 `request.base_url` has to show the same reason, or build on the setting.

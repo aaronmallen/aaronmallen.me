@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, activity, admin, analytics, contact, mcp, posts, projects, record, social, suggestions, tags, tasks]
 issue: AA-594
-amended: [AA-808, "#711"]
+amended: [AA-808, "#711", "#957"]
 tags: [database, settings, providers, hanami, connection-pool, postgres]
 ---
 
@@ -36,11 +36,11 @@ We build the connection from the `database` settings, never from `DATABASE_URL`.
 
 - `Blog::Providers::DBProvider.configure` builds a `postgres://` URL from `settings.database`, escaping the user and
   password, and sets it on the default gateway.
-- `config/providers/db.rb` and a three-line `config/providers/db.rb` in each slice with `relations/` call it. Twelve
-  slices carry one today.
+- `config/providers/db.rb` and a three-line `config/providers/db.rb` in each slice with `relations/` call it. Twenty
+  slices carry one today (#957).
 - The pool holds a connection per thread plus one for the commit import lock, capped by `database.max_connections`
-  (`DBProvider.max_connections`, AA-309). `Blog::Concurrency.threads` reads Sidekiq's concurrency in the worker and
-  `HANAMI_MAX_THREADS` in the web process.
+  (`DBProvider.max_connections`, AA-309). `DBProvider` reads Sidekiq's concurrency in the worker and the
+  `web_threads` setting, which `HANAMI_MAX_THREADS` sets, in the web process (#957).
 - `config/settings/test.yml` adds `_test` to `DATABASE_NAME` itself. #711 adds `_<id>` after it when
   `WORKSPACE_ID` is set, so each agent workspace tests against a database of its own ([ADR 0125][0125]).
 

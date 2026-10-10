@@ -3,10 +3,10 @@ id: "0001"
 title: Split the app into slices by feature
 status: active
 created: 2026-09-28
-area: [app, config, lib, activity, admin, analytics, api, contact, decisions, links, mcp, media, posts, projects,
-  public, record, saved_views, search, social, suggestions, tags, tasks]
+area: [app, config, lib, activity, admin, analytics, api, backups, contact, decisions, links, mcp, media, posts,
+  projects, public, record, saved_views, search, security, services, social, suggestions, tags, tasks]
 issue: AA-587
-amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951"]
+amended: [AA-422, AA-525, AA-563, AA-570, AA-809, "#137", "#274", "#302", "#316", "#319", "#950", "#951", "#957"]
 tags: [slices, layout, hanami, exports, providers, clients, assets]
 ---
 
@@ -35,25 +35,28 @@ AA-508 found that two of those clients had one reader each. An app provider cann
 
 ## Decision
 
-We split the code by what it is about, not by who reads it. Nineteen slices, of two kinds, since #274 added
-`decisions`, #302 added `search`, #316 added `saved_views` and #319 added `links`.
+We split the code by what it is about, not by who reads it. Twenty-two slices, of two kinds, since #274 added
+`decisions`, #302 added `search`, #316 added `saved_views`, #319 added `links`, and `backups`, `security` and
+`services` came after (#957).
 
 **Four presentation slices** own routes, actions, layouts and views: `public`, `admin`, `api` and `mcp`.
 `config/routes.rb` mounts these four and nothing else. A presentation slice owns no feature's records, only the rows
-its own door needs: `admin` owns `session_validity`, `api` owns `api_tokens`, and `mcp` owns `oauth_clients`,
-`oauth_codes` and `oauth_tokens`. Any other needs its own record.
+its own door needs: `admin` owns `session_validity` and `owner_identities` (#957), `api` owns `api_tokens`, and
+`mcp` owns `oauth_clients`, `oauth_codes` and `oauth_tokens`. Any other needs its own record.
 
-**Fifteen feature slices** own relations, repos, structs, contracts, operations and jobs, and answer no route:
-`activity`, `analytics`, `contact`, `decisions`, `links`, `media`, `posts`, `projects`, `record`, `saved_views`,
-`search`, `social`, `suggestions`, `tags` and `tasks`. Each owns its tables outright, and a slice reaches another
-only through its exports.
+**Eighteen feature slices** own relations, repos, structs, contracts, operations and jobs, and answer no route:
+`activity`, `analytics`, `backups`, `contact`, `decisions`, `links`, `media`, `posts`, `projects`, `record`,
+`saved_views`, `search`, `security`, `services`, `social`, `suggestions`, `tags` and `tasks` (#957). Each owns its
+tables outright, and a slice reaches another only through its exports.
 
 Privacy rides on those exports, not on where a file sits. `record` exports its journal and commit reads to `admin`,
 `activity` exports its feed to `admin` and `mcp`, and `public` imports from neither.
 
-**Each client is a provider in the slice that owns it.** `record` registers `github.client`, `social` registers
-`networks.all` and `webmentions.client`, `analytics` registers `geo.countries` and `geo.geo_lite2.client`, `media`
-registers `store.client` (#137), and `admin` registers `github.auth`, each under its own `config/providers`. A slice
+**Each client is a provider in the slice that owns it.** `record` registers `github.client` and `linear.client`,
+`social` registers `networks.all` and `webmentions.client`, `analytics` registers `geo.countries` and
+`geo.geo_lite2.client`, `media` registers `store.client` (#137), `backups` registers `backup_store.client` and
+`dumper`, and `admin` registers `github.auth`, `mastodon.auth` and `live.hub` (#957), each under its own
+`config/providers`. A slice
 that calls another's client imports its key, as `projects` and `admin` import `github.client` from `record`.
 
 **The app shares only what no slice owns, and a slice names each piece it takes** in
@@ -97,7 +100,8 @@ A client with readers in four slices, as `networks.all` has, adds an import edge
 provider keys does not count toward a cycle, so `posts` can import `networks.all` from `social` while `social`
 imports from `posts`.
 
-Nineteen slices mean nineteen containers to boot and eighteen `db` providers, one for each slice that owns rows. A new
+Twenty-two slices mean twenty-two containers to boot and twenty `db` providers, one for each slice that owns
+rows (#957). A new
 feature costs a directory tree and a `slice.rb` before it holds a line of code.
 
 `app/` holds the asset sources and the few pieces no slice owns, as ADR 0002 lists them (#950). A reader who opens

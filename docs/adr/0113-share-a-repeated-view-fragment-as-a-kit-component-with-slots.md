@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, admin, mcp, public]
 issue: "#552"
+amended: ["#957"]
 tags: [phlex, components, kit, ui, slots, partials]
 ---
 
@@ -74,7 +75,8 @@ A slot reads in the caller as a block on the component, so its markup sits in th
 for what a region draws reads both files.
 
 Components that break the rule today stay until the issues that follow this record move them: the timelines, the day
-lists, `ListItem`, `People::Form`, `WorkEntries::Form` and the people dialog.
+lists, `ListItem`, `People::Form`, `WorkEntries::Form` and the people dialog. #1010 took `beside:` off `ListItem`,
+and `ListItem` stays on this list only for `sub:`, a String, as #957 records.
 
 Nothing checks the rule. A copied method and a shadowed kit name pass every spec.
 

@@ -3,9 +3,9 @@ id: "0012"
 title: Never retry a scheduled job, and make its next run catch up
 status: active
 created: 2026-09-28
-area: [analytics, config, lib, mcp, media, posts, projects, record, social, tasks]
+area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926"]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -56,14 +56,18 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 
 | Scheduled job | On failure |
 | --- | --- |
-| `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
+| `BackUpDatabase`, `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
 | `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks` | Raise |
-| `ImportCommits`, `RefreshProjects` | Record in `sync_states` |
-| `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos` | Drop it |
+| `ImportCommits`, `ImportPullRequests`, `RefreshProjects`, `SyncIssues` | Record in `sync_states` |
+| `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos`, `PruneAccessRecords`, `ReapSpamMessages` | Drop it |
 
-`RefreshCountryDatabase` stays quiet on `:not_configured`, since the site may run with no MaxMind key, and
-`ImportCommits` drops `:lock_busy`, since another import holds the lock. An exception none of them catch still
-raises from any job and reaches Honeybadger.
+The table took in the jobs that came after it in #957. `SyncIssues` runs twice on the schedule, as `sync_issues`
+for GitHub and `sync_linear_issues` for Linear, and skips a provider with no client set up.
+
+`BackUpDatabase` logs a warning on `:not_configured` and `RefreshCountryDatabase` stays quiet on it, since the site
+may run with no backup store or MaxMind key. `ImportCommits`, `ImportPullRequests` and `SyncIssues` drop
+`:lock_busy`, since another run holds the lock. An exception none of them catch still raises from any job and
+reaches Honeybadger.
 
 ## Alternatives
 
