@@ -676,6 +676,27 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       expect(sessions(task)).to match([session(ten)])
     end
 
+    describe "and a start on an earlier day" do
+      let!(:task) { tracked(history_cursor: late - 600) }
+
+      def late = Blog::TimeZone.day_start(Blog::TimeZone.today) - 600
+
+      def sprint_date = Tasks::Slice["relations.sprints"].by_pk(repo.by_id(task.id).sprint_id).one[:sprint_date]
+
+      before do
+        stub_started(start(late))
+        sync
+      end
+
+      it "puts the task in today's sprint" do
+        expect(sprint_date).to eq(Blog::TimeZone.today)
+      end
+
+      it "still starts the session when the issue went In Progress" do
+        expect(sessions(task)).to match([session(late)])
+      end
+    end
+
     it "replays a start, a stop and a start between two runs as two sessions" do
       task = tracked(history_cursor: cursor)
       stub_started(start, linear_change("started", "unstarted", at: at(5)), start(at(10)))

@@ -11,7 +11,7 @@ module Tasks
       ]
 
       def call(id, at: Time.now, seen: true)
-        sprint = step current_sprint.call(now: at)
+        sprint = step current_sprint.call
 
         transaction do
           step find(id)
