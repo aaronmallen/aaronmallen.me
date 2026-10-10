@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, mcp, db]
 issue: AA-617
-amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623", "#1013"]
+amended: [AA-792, AA-824, AA-826, "#17", "#75", "#279", "#263", "#623", "#1013", "#929"]
 tags: [activity, view, postgres, timeline, search, tags]
 ---
 
@@ -38,9 +38,9 @@ We read activity from one Postgres view, `activities`, that unions the nine tabl
   day of their `created_at`, and a sprint at midnight on its `sprint_date`, since it holds no time.
 - `slices/activity` owns the relation and its repo. The view spans tables six other slices own, so no one of them
   owns it, and a presentation slice owns no feature's records (ADR 0001).
-- The reads cross as four exported queries: `queries.activity_between`, `queries.activity_counts`,
-  `queries.activity_commit_totals` and `queries.activity_counts_by_month`. `mcp` imports all four for its activity
-  tools, `admin` imports the first two for the Activity screen, and `public` imports none.
+- The reads cross as one exported read repo, `repos.activity_queries` ([ADR 0123][0123], #929). `admin` imports it
+  for the Activity screen and `api` for its activity and saved view reads. `mcp` imports nothing from `activity`,
+  since it calls `api` in process ([ADR 0088][0088]), and `public` imports none.
 - The Activity screen shows the six kinds its Context names, listed in `Admin::Structs::ActivityEvent::KINDS`.
   Projects, sprints and suggestions reach the MCP alone, since the screen has no icon, link or sub-line for them.
 - Each read narrows by kind, by repo for commits, by text over the name and sub-line columns, and by tag. The view
@@ -105,7 +105,9 @@ fails if we forget: the Activity screen matches view counts by that link, so a s
 The tag filter reads the join tables `record` and `tasks` own, and the `tags` table, in SQL below their exports.
 
 The feed has a slice of its own, so a reader finds it under the name of the thing it answers. That slice costs a
-container and a `db` provider to hold one relation, and every reader of the feed costs an exported query.
+container and a `db` provider to hold one relation, and every slice that reads the feed imports its repo (#929).
 
+[0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0115]: 0115-keep-task-contributors-in-their-own-table-and-list-the-owner-when-a-task-has-none.md
+[0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
