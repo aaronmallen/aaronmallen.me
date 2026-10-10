@@ -5,17 +5,9 @@ module Admin
     module Components
       module Tasks
         class Pools < Component
-          EMPTY = {
-            Blog::Types::TaskList["next"] => ".empty.next",
-            Blog::Types::TaskList["someday"] => ".empty.someday",
-            Blog::Types::TaskList["external"] => ".empty.external",
-          }.freeze
+          EMPTY = Blog::Types::TaskList.values.to_h { [it, ".empty.#{it}"] }.freeze
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
-          LISTS = {
-            Blog::Types::TaskList["next"] => ".lists.next",
-            Blog::Types::TaskList["someday"] => ".lists.someday",
-            Blog::Types::TaskList["external"] => ".lists.external",
-          }.freeze
+          LISTS = Blog::Types::TaskList.values.to_h { [it, ".lists.#{it}"] }.freeze
           TODAY = Blog::Types::TaskFilter["today"]
 
           prop :counts, Blog::Types::Hash

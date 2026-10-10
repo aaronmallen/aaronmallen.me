@@ -18,12 +18,6 @@ module Admin
             Blog::Types::TaskBulkAction["tag"] => ".tag",
             Blog::Types::TaskBulkAction["untag"] => ".untag",
           }.freeze
-          LISTS = {
-            Blog::Types::TaskFilter["today"] => ".lists.today",
-            Blog::Types::TaskFilter["next"] => ".lists.next",
-            Blog::Types::TaskFilter["someday"] => ".lists.someday",
-            Blog::Types::TaskFilter["external"] => ".lists.external",
-          }.freeze
           MOVE = Blog::Types::TaskBulkAction["move"]
           TAG = Blog::Types::TaskBulkAction["tag"]
           UNTAG = Blog::Types::TaskBulkAction["untag"]
@@ -64,7 +58,11 @@ module Admin
             end
           end
 
-          def places = { Blog::Constants::EMPTY_STRING => t(".pick_list"), **LISTS.transform_values { t(it) } }
+          def places
+            lists = Blog::Types::TaskFilter.values.to_h { [it, t(Helpers::TaskLists.title(it))] }
+
+            { Blog::Constants::EMPTY_STRING => t(".pick_list"), **lists }
+          end
 
           def tagging
             div(class: "bulk-group") do

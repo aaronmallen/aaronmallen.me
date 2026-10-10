@@ -15,12 +15,7 @@ module Admin
             Blog::Types::TaskStatus["canceled"] => ".places.canceled",
             Blog::Types::TaskStatus["done"] => ".places.done",
             Blog::Types::TaskStatus["in_progress"] => ".places.in_progress",
-            Blog::Types::TaskFilter["today"] => ".places.today",
-            Blog::Types::TaskFilter["next"] => ".places.next",
-            Blog::Types::TaskFilter["someday"] => ".places.someday",
-            Blog::Types::TaskFilter["external"] => ".places.external",
           }.freeze
-          BY_STATUS = [*Blog::Types::ClosedTaskStatus.values, Blog::Types::TaskStatus["in_progress"]].freeze
           PREFIX = "#"
           TODAY = Blog::Types::TaskFilter["today"]
 
@@ -102,7 +97,7 @@ module Admin
             div(class: "task-link-list") { @task.links.each { link_row(it) } }
           end
 
-          def place(task) = t(PLACES.fetch(BY_STATUS.include?(task.status) ? task.status : task.list || TODAY))
+          def place(task) = t(PLACES.fetch(task.status) { Helpers::TaskLists.name(task.list || TODAY) })
 
           def query = @linking ? @linking[:query].to_s : Blog::Constants::EMPTY_STRING
 

@@ -11,7 +11,6 @@ module Admin
             Blog::Types::TaskTimelineKind["tagged"] => ["fa-solid fa-tag", ".tagged"],
             Blog::Types::TaskTimelineKind["untagged"] => ["fa-solid fa-tag", ".untagged"],
           }.freeze
-          LISTS = Blog::Types::TaskList.values.to_h { [it, ".lists.#{it}"] }.freeze
           SESSION_ICON = "fa-regular fa-clock"
           STATUSES = Blog::Types::TaskStatus.values.to_h { [it, ".statuses.#{it}"] }.freeze
 
@@ -43,7 +42,7 @@ module Admin
           end
 
           def place(list, sprint_on)
-            if list then t(LISTS.fetch(list))
+            if list then t(Helpers::TaskLists.name(list))
             elsif sprint_on then t(".sprint", day: l(sprint_on, format: :medium))
             end
           end

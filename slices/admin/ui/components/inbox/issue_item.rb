@@ -5,11 +5,7 @@ module Admin
     module Components
       module Inbox
         class IssueItem < Component
-          LISTS = {
-            Blog::Types::TaskFilter["today"] => ".lists.today",
-            Blog::Types::TaskFilter["next"] => ".lists.next",
-            Blog::Types::TaskFilter["someday"] => ".lists.someday",
-          }.freeze
+          LISTS = (Blog::Types::TaskFilter.values - [Blog::Types::TaskFilter["external"]]).freeze
           ORIGIN = Blog::Types::TaskOrigin["inbox"]
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -25,7 +21,7 @@ module Admin
           private
 
           def actions
-            LISTS.each { |filter, label_key| move(filter, label_key) unless filter == @task.place }
+            LISTS.each { move(it) unless it == @task.place }
             edit
             Form(action: path(:admin_inbox_see_task, id: @task.id)) do
               Button(type: "submit", variant: :gh, small: true) { t(".seen") }
@@ -45,8 +41,8 @@ module Admin
             @task.tags.each { Tag(tag: it) }
           end
 
-          def move(filter, label_key)
-            list = t(label_key)
+          def move(filter)
+            list = t(Helpers::TaskLists.title(filter))
 
             Form(action: path(:admin_inbox_move_task, id: @task.id, filter:)) do
               Button(type: "submit", small: true, aria: { label: t(".move", list:) }) { list }

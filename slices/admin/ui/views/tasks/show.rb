@@ -9,7 +9,6 @@ module Admin
 
           CREDIT_SEPARATOR = ", "
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
-          LISTS = %w[today next someday external].to_h { [Blog::Types::TaskFilter[it], ".lists.#{it}"] }.freeze
           PREFIX = "#"
           STATUSES = {
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle", ".statuses.open"],
@@ -110,7 +109,7 @@ module Admin
             p(class: "read-meta") do
               RecordKey(kind: "task", id: @task.id)
               status
-              span(class: "read-meta-list") { t(LISTS.fetch(@task.place)) }
+              span(class: "read-meta-list") { t(Helpers::TaskLists.name(@task.place)) }
               SourceLink(source: @task.source)
               @task.tags.each { Tag(tag: it) }
             end

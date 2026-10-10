@@ -242,6 +242,17 @@ en:
       recoloured: "Tag recoloured"
       removed: "Tag removed"
       renamed: "Tag renamed"
+  task_lists:
+    names:
+      external: "external"
+      next: "next"
+      someday: "someday"
+      today: "today"
+    titles:
+      external: "External"
+      next: "Next"
+      someday: "Someday"
+      today: "Today"
   task_rules_page:
     toasts:
       added: "Rule added · the tasks it matches now carry its tags and projects"
@@ -270,11 +281,6 @@ en:
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
           to_blank: "Pick a list first"
-        lists:
-          external: "external"
-          next: "next"
-          someday: "someday"
-          today: "today"
         moved:
           one: "Moved %{count} task to %{list}"
           other: "Moved %{count} tasks to %{list}"
@@ -456,8 +462,6 @@ en:
         journal_gap:
           one: "No entry in %{count} day"
           other: "No entry in %{count} days"
-        lists:
-          next: "Next"
         move: "Move to %{list}"
         open: "Open"
         open_security: "Open security"
@@ -667,10 +671,6 @@ en:
       inbox:
         issue_item:
           edit: "Edit"
-          lists:
-            next: "Next"
-            someday: "Someday"
-            today: "Today"
           move: "Move to %{list}"
           seen: "Seen"
         kind_label:
@@ -1721,11 +1721,6 @@ en:
           confirm_delete: "Delete the ticked tasks? This cannot be undone."
           delete: "Delete"
           label: "Ticked tasks"
-          lists:
-            external: "External"
-            next: "Next"
-            someday: "Someday"
-            today: "Today"
           move: "Move"
           move_to: "Move to"
           pick_list: "Move to…"
@@ -1747,10 +1742,6 @@ en:
             complete: "Complete the highlighted task"
             move: "Move the highlighted task one list over"
             start: "Start the highlighted task"
-          lists:
-            next: "Next"
-            someday: "Someday"
-            today: "Today"
           move: "Move to %{list}"
           reopen: "Reopen"
           start: "Start"
@@ -1827,11 +1818,7 @@ en:
           places:
             canceled: "canceled"
             done: "done"
-            external: "external"
             in_progress: "in progress"
-            next: "next"
-            someday: "someday"
-            today: "today"
           placeholder: "Task number or title…"
           remove: "Remove the link to %{key}"
         links:
@@ -1914,11 +1901,6 @@ en:
           label: "Sync issues"
         task_form:
           list: "List"
-          lists:
-            external: "external"
-            next: "next"
-            someday: "someday"
-            today: "today"
           note: "Notes"
           note_placeholder: "What done looks like."
           save: "Create task"
@@ -1933,10 +1915,6 @@ en:
           unknown_author: "unknown"
           view: "View"
         timeline_event:
-          lists:
-            external: "external"
-            next: "next"
-            someday: "someday"
           moved: "Moved from %{from} to %{to}"
           running: "Started work"
           running_pill: "running"
@@ -2515,9 +2493,7 @@ en:
             one: "%{count} finished today"
             other: "%{count} finished today"
           footnote: "Sprints last one day. Anything left open when the date rolls over moves into the next sprint. Marking a task in progress always pulls it into today; completing one files it under completed and onto that day's activity feed."
-          external: "External"
           heading: "Tasks"
-          next: "Next"
           open:
             one: "%{count} open"
             other: "%{count} open"
@@ -2527,7 +2503,6 @@ en:
           shown:
             one: "%{count} shown · logged to the activity feed"
             other: "%{count} shown · logged to the activity feed"
-          someday: "Someday"
           sprint: "Sprint · %{date}"
           sprint_on: "Sprint %{date}"
           upcoming_count:
@@ -2562,11 +2537,6 @@ en:
           created: "Created"
           edit: "Edit"
           links: "Links"
-          lists:
-            external: "external"
-            next: "next"
-            someday: "someday"
-            today: "today"
           note: "Note"
           note_label: "Task"
           owner: "Me"

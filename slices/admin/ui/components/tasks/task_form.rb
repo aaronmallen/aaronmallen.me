@@ -6,11 +6,7 @@ module Admin
       module Tasks
         class TaskForm < Component
           EXTERNAL = Blog::Types::TaskFilter["external"]
-          LISTS = {
-            Blog::Types::TaskFilter["today"] => ".lists.today",
-            Blog::Types::TaskFilter["next"] => ".lists.next",
-            Blog::Types::TaskFilter["someday"] => ".lists.someday",
-          }.freeze
+          LISTS = (Blog::Types::TaskFilter.values - [EXTERNAL]).freeze
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
           NEXT = Blog::Types::TaskFilter["next"]
           NOTE_HEIGHT = "160px"
@@ -68,13 +64,13 @@ module Admin
               Select(
                 **control,
                 name: "task[list]",
-                options: lists.transform_values { t(it) },
+                options: lists.to_h { [it, t(Helpers::TaskLists.name(it))] },
                 selected: @values.fetch(:list) { default_list },
               )
             end
           end
 
-          def lists = @task&.place == EXTERNAL ? LISTS.merge(EXTERNAL => ".lists.external") : LISTS
+          def lists = @task&.place == EXTERNAL ? Blog::Types::TaskFilter.values : LISTS
 
           def note_field
             label = t(".note")

@@ -7,26 +7,13 @@ module Admin
         class Index < View
           include Components::Tasks
 
-          BLURBS = {
-            Blog::Types::TaskFilter["next"] => ".blurbs.next",
-            Blog::Types::TaskFilter["someday"] => ".blurbs.someday",
-            Blog::Types::TaskFilter["external"] => ".blurbs.external",
-          }.freeze
+          BLURBS = Blog::Types::TaskList.values.to_h { [it, ".blurbs.#{it}"] }.freeze
           CARRIED = :carried_in
           COMPLETED = Blog::Types::TaskTab["completed"]
           EXTERNAL = Blog::Types::TaskTab["external"]
-          EMPTY = {
-            Blog::Types::TaskList["next"] => ".empty.next",
-            Blog::Types::TaskList["someday"] => ".empty.someday",
-            Blog::Types::TaskList["external"] => ".empty.external",
-          }.freeze
+          EMPTY = Blog::Types::TaskList.values.to_h { [it, ".empty.#{it}"] }.freeze
           FINISHED_TODAY = :finished_today
           LIST = { data: { key_list: true } }.freeze
-          TITLES = {
-            Blog::Types::TaskFilter["next"] => ".next",
-            Blog::Types::TaskFilter["someday"] => ".someday",
-            Blog::Types::TaskFilter["external"] => ".external",
-          }.freeze
           TODAY = Blog::Types::TaskTab["today"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
@@ -102,7 +89,7 @@ module Admin
             end
           end
 
-          def list_title = today? ? t(".sprint", date: l(@today, format: :short)) : t(TITLES.fetch(@tab))
+          def list_title = today? ? t(".sprint", date: l(@today, format: :short)) : t(Helpers::TaskLists.title(@tab))
 
           def open_note
             counts = [t(".open", count: filtering? ? @tasks.rows.size : @counts.fetch(@tab))]

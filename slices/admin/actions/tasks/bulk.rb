@@ -14,12 +14,6 @@ module Admin
         }.freeze
         FAILED = "tasks_page.toasts.bulk.failed"
         INVALID = "tasks_page.toasts.bulk.invalid"
-        LISTS = {
-          Blog::Types::TaskFilter["today"] => "tasks_page.toasts.bulk.lists.today",
-          Blog::Types::TaskFilter["next"] => "tasks_page.toasts.bulk.lists.next",
-          Blog::Types::TaskFilter["someday"] => "tasks_page.toasts.bulk.lists.someday",
-          Blog::Types::TaskFilter["external"] => "tasks_page.toasts.bulk.lists.external",
-        }.freeze
         REASONS = %i[closed not_found].freeze
 
         include Redirect
@@ -42,7 +36,7 @@ module Admin
 
         def details(request)
           {
-            list: LISTS[request.params[:to]]&.then { i18n.t!(it) },
+            list: Helpers::TaskLists::NAMES[request.params[:to]]&.then { i18n.t!(it) },
             tag: Blog::Types::Nullable::Tag[request.params[:tag]],
           }
         end

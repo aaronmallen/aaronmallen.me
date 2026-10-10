@@ -7,20 +7,15 @@ module Admin
         class Controls < Component
           COMPLETE = "x"
           LEFT = "fa-solid fa-arrow-left"
-          LISTS = {
-            Blog::Types::TaskFilter["today"] => ".lists.today",
-            Blog::Types::TaskFilter["next"] => ".lists.next",
-            Blog::Types::TaskFilter["someday"] => ".lists.someday",
-          }.freeze
           MOVE = "m"
           ORIGIN = Blog::Types::TaskOrigin["tasks"]
           RIGHT = "fa-solid fa-arrow-right"
-          TODAY, NEXT, SOMEDAY = LISTS.keys
+          TODAY, NEXT, SOMEDAY, EXTERNAL = %w[today next someday external].map { Blog::Types::TaskFilter[it] }
           MOVES = {
             TODAY => [[NEXT, RIGHT, MOVE]],
             NEXT => [[TODAY, LEFT, MOVE], [SOMEDAY, RIGHT, nil]],
             SOMEDAY => [[NEXT, LEFT, MOVE]],
-            Blog::Types::TaskFilter["external"] => [[TODAY, LEFT, MOVE]],
+            EXTERNAL => [[TODAY, LEFT, MOVE]],
           }.freeze
           START = "s"
           KEY_LABELS = { COMPLETE => ".keys.complete", MOVE => ".keys.move", START => ".keys.start" }.freeze
@@ -86,7 +81,7 @@ module Admin
           end
 
           def move(place, icon, key:)
-            list = t(LISTS.fetch(place))
+            list = t(Helpers::TaskLists.title(place))
             label = t(".move", list:)
 
             Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do

@@ -63,7 +63,7 @@ module Admin
         end
 
         def move(row)
-          list = t(".lists.next")
+          list = t(Helpers::TaskLists.title(NEXT))
 
           task_form(:admin_move_task, row, t(".move", list:), "fa-solid fa-arrow-right", filter: NEXT)
         end
