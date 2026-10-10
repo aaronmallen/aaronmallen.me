@@ -5,7 +5,7 @@ module Tasks
     class SyncIssues < Blog::Operation
       include Record::Remote
 
-      CLOSED = Structs::TaskSource::CLOSED
+      CLOSED = Blog::Types::ClosedTaskSourceState
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
       EMPTY_HASH = Blog::Constants::EMPTY_HASH
       EXTERNAL = Blog::Types::TaskList["external"]
@@ -103,7 +103,7 @@ module Tasks
       end
 
       def observed(task, source, state, reached)
-        return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.include?(state)
+        return source.remote_state if source.remote_state == UNASSIGNED && CLOSED.valid?(state)
         return state unless state == UNASSIGNED && !task.closed?
 
         reached || task_link_queries.synced?(task.id) ? OPEN : state
@@ -120,7 +120,7 @@ module Tasks
       end
 
       def restamp(source, state, issue, changes, now)
-        checked_at = now if CLOSED.include?(state)
+        checked_at = now if CLOSED.valid?(state)
         history_cursor = source.next_cursor(issue[:updated_at], changes, now)
         fields = { remote_state: state, url: issue[:url], checked_at:, history_cursor: }
         return if fields.all? { |name, value| source[name] == value }

@@ -50,6 +50,7 @@ module Blog
     AnalyticsRangeParam = AnalyticsRange.fallback(30)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link")
     Checkbox = Types::Bool.constructor { |value| value == Blog::Constants::CHECKED }
+    ClosedTaskSourceState = Types::String.enum("completed", "not_planned", "unassigned")
     ClosedTaskStatus = Types::String.enum("done", "canceled")
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")
@@ -70,6 +71,7 @@ module Blog
     DecisionTimelineKind = Types::String.enum("comment", *DecisionEventKind.values)
     DeviceClass = Types::String.enum("desktop", "mobile", "tablet", "in-app")
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
+    GoneTaskSourceState = Types::String.enum("moved", "deleted")
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)
@@ -138,6 +140,7 @@ module Blog
     rescue URI::InvalidURIError
       Blog::Constants::EMPTY_STRING
     end.constrained(min_size: 1)
+    ReachableTaskSourceState = Types::String.enum("open", "started", "unassigned")
     Repo = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/[a-z0-9._-]+\z})
     RepoPattern = Types::String.constrained(format: %r{\A[a-z0-9][a-z0-9-]*/(?:\*|[a-z0-9._-]+)\z})
     ReviewGroup = Types::String.enum("tag", "project")
@@ -187,7 +190,9 @@ module Blog
     TaskOrigin = Types::String.enum("tasks", "today", "inbox")
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
     TaskSourceProvider = Types::String.enum("github", "linear")
-    TaskSourceState = Types::String.enum(*%w[open completed not_planned unassigned moved deleted started])
+    TaskSourceState = Types::String.enum(
+      *ReachableTaskSourceState.values | ClosedTaskSourceState.values | GoneTaskSourceState.values,
+    )
     TaskStatus = Types::String.enum(*OpenTaskStatus.values, *ClosedTaskStatus.values)
     TaskTimelineKind = Types::String.enum("comment", "session", "moved", "tagged", "untagged", "status_changed")
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")

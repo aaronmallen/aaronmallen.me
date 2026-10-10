@@ -4,7 +4,7 @@ module Tasks
   module Operations
     class ReachIssues
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY
-      REACHABLE = %w[open started unassigned].map { Blog::Types::TaskSourceState[it] }.freeze
+      REACHABLE = Blog::Types::ReachableTaskSourceState
 
       include Deps[task_link_queries: "repos.task_link_queries"]
 
@@ -25,7 +25,7 @@ module Tasks
         named.map { it[:remote_id] }.uniq - known.keys
       end
 
-      def reachable?(issue) = REACHABLE.include?(issue[:remote_state]) && issue.key?(:title)
+      def reachable?(issue) = REACHABLE.valid?(issue[:remote_state]) && issue.key?(:title)
     end
   end
 end
