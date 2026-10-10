@@ -547,6 +547,14 @@
   }
 }
 
+@utility theme-toggle-light {
+  @apply dark:[--fa-display:none];
+}
+
+@utility theme-toggle-dark {
+  @apply light:[--fa-display:none];
+}
+
 @utility settings-menu-panel {
   @apply absolute top-[calc(100%+10px)] right-0 z-50 hidden w-menu flex-col p-1.5;
   @apply rounded-menu border border-line bg-ground-sunk shadow-menu;

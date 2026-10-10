@@ -67,6 +67,7 @@ en:
           projects: "projects"
           writing: "writing"
         skip_link: "Skip to content"
+        theme_toggle_label: "Toggle dark mode"
       posts:
         edits:
           edited: "Edited"

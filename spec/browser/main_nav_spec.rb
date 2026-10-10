@@ -21,6 +21,20 @@ RSpec.describe "The public header", type: :feature do
     expect(page).to have_no_css(".site-header button[aria-controls]:not(.settings-menu-toggle)", visible: :all)
   end
 
+  it "shows one theme icon at a time" do
+    expect(page).to have_css("[data-theme-toggle] i", count: 1)
+  end
+
+  it "flips the theme from the toggle", :aggregate_failures do
+    theme = -> { evaluate_script("document.documentElement.dataset.siteTheme") }
+
+    find("[data-theme-toggle]").click
+    first = theme.call
+    find("[data-theme-toggle]").click
+
+    expect([first, theme.call]).to contain_exactly("light", "dark")
+  end
+
   describe "on a phone" do
     before { page.current_window.resize_to(390, 844) }
 

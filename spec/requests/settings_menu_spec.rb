@@ -27,11 +27,11 @@ RSpec.describe "Settings menu", type: :request do
       end
     end
 
-    it "shows only the theme options", :aggregate_failures do
+    it "shows a theme toggle instead of the menu", :aggregate_failures do
       get "/"
 
-      expect(panel).to have_css(".settings-menu-option", count: 2, visible: :all)
-      expect(panel).to have_no_css(".settings-menu-separator", visible: :all)
+      expect(page).to have_button("Toggle dark mode", visible: :all)
+      expect(page).to have_no_css("#settings-menu", visible: :all)
     end
 
     it "tells the theme picker which cookie to set" do
@@ -40,12 +40,12 @@ RSpec.describe "Settings menu", type: :request do
       expect(page).to have_css("html[data-theme-cookie='site_theme']", visible: :all)
     end
 
-    it "shows only the theme options with a forged session cookie", :aggregate_failures do
+    it "shows the theme toggle with a forged session cookie", :aggregate_failures do
       set_cookie "#{Blog::SessionCookie::KEY}=forged"
       get "/"
 
       expect(last_response).to be_ok
-      expect(panel).to have_css(".settings-menu-option", count: 2, visible: :all)
+      expect(page).to have_no_css("#settings-menu", visible: :all)
     end
   end
 
@@ -74,11 +74,11 @@ RSpec.describe "Settings menu", type: :request do
       expect(last_response.headers["set-cookie"]).to be_nil
     end
 
-    it "hides the items once the session is older than 30 days" do
+    it "shows the theme toggle once the session is older than 30 days" do
       allow(Time).to receive(:now).and_return(Time.now + (30 * 24 * 60 * 60))
       get "/about"
 
-      expect(panel).to have_no_css(".settings-menu-separator", visible: :all)
+      expect(page).to have_no_css("#settings-menu", visible: :all)
     end
   end
 
@@ -98,7 +98,7 @@ RSpec.describe "Settings menu", type: :request do
       sign_out_from_menu("/about")
       follow_redirect!
 
-      expect(panel).to have_no_css(".settings-menu-separator", visible: :all)
+      expect(page).to have_no_css("#settings-menu", visible: :all)
       get "/admin"
       expect(last_response.location).to end_with("/admin/sign-in")
     end

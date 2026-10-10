@@ -20,7 +20,7 @@ module Public
             nav(class: "main-nav", aria: { label: t(".label") }) do
               PAGES.each { |(route, label_key)| nav_item(route:, label_key:) }
             end
-            div(class: "main-nav-settings") { SettingsMenu(session: @session) }
+            div(class: "main-nav-settings") { @session.signed_in? ? SettingsMenu(session: @session) : theme_toggle }
           end
         end
 
@@ -30,6 +30,18 @@ module Public
           href = path(route)
 
           a(class: "main-nav-link", href:, aria: { current: ("page" if request.path == href) }) { t(label_key) }
+        end
+
+        def theme_toggle
+          button(
+            type: "button",
+            class: "settings-menu-toggle",
+            aria: { label: t(".theme_toggle_label") },
+            data: { theme_toggle: true },
+          ) do
+            Icon("fa-solid fa-sun theme-toggle-light")
+            Icon("fa-solid fa-moon theme-toggle-dark")
+          end
         end
       end
     end
