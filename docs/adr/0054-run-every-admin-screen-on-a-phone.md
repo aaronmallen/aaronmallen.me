@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, admin, public, mcp]
 issue: AA-346
-amended: [AA-539, AA-765, AA-835, "#17", "#745"]
+amended: [AA-539, AA-765, AA-835, "#17", "#745", "#923"]
 tags: [admin, layout, responsive, accessibility, design]
 ---
 
@@ -48,8 +48,9 @@ Three rules hold:
 - **Every control keeps a 44px square.** `--spacing-tap` in `config/tailwind.css` holds that number and every
   phone rule reads it from there. A control and the label around it count as one target, so a switch stays 34x19
   inside a label that is 44 tall.
-- **No text drops under 12px,** on any slice at any width. Every type token in `config/tailwind.css` is 12px or
-  more, so no rule has to step a face up.
+- **No text drops under 12px,** on any slice at any width. Every type token for words in `config/tailwind.css` is
+  12px or more, so no rule has to step a face up. Since #923 icon glyphs sit outside this rule: `--text-pu-icon`
+  and the rules that size Font Awesome icons may go under 12px, as an icon holds no words.
 
 The width and tap rules turn on below 700px (`43.75rem`), the width of the handoff's own phone rule. The tap
 square holds in admin and on the MCP consent page, which borrows admin's controls. Public answers to the width
