@@ -75,9 +75,9 @@ module Social
       end
 
       def in_days(from, to)
-        days = webmentions
-        days = days.received_since(Blog::TimeZone.day_start(from)) if from
-        to ? days.received_before(Blog::TimeZone.day_start(to + 1)) : days
+        first, last = Blog::TimeZone.day_bounds(from, to)
+        days = first ? webmentions.received_since(first) : webmentions
+        last ? days.received_before(last) : days
       end
 
       def stored_settings = webmention_settings.by_pk(SETTINGS_ID).one

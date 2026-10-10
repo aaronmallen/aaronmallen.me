@@ -52,9 +52,9 @@ module Contact
       private
 
       def in_days(from, to)
-        found = messages
-        found = found.received_since(Blog::TimeZone.day_start(from)) if from
-        to ? found.received_before(Blog::TimeZone.day_start(to + 1)) : found
+        first, last = Blog::TimeZone.day_bounds(from, to)
+        found = first ? messages.received_since(first) : messages
+        last ? found.received_before(last) : found
       end
 
       def listed(status:, search: nil, tag: nil)

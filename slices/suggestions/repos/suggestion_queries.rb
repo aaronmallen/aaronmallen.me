@@ -8,8 +8,8 @@ module Suggestions
       def by_id(id) = with_edits.by_pk(id).one
 
       def created_between(from:, to:, page:)
-        found = with_edits.created_since(Blog::TimeZone.day_start(from))
-        found = found.created_before(Blog::TimeZone.day_start(to + 1))
+        first, last = Blog::TimeZone.day_bounds(from, to)
+        found = with_edits.created_since(first).created_before(last)
 
         page.fill(found.newest_first.paged(page).to_a)
       end

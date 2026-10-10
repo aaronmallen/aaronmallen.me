@@ -25,19 +25,19 @@ module Posts
       def calendar_between(from:, to:)
         dated = with_tags.scheduled_or_published
 
-        dated.dated_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1)).oldest_first.to_a
+        dated.dated_between(*Blog::TimeZone.day_bounds(from, to)).oldest_first.to_a
       end
 
       def count_by_status = posts.counts_by_status.to_a.to_h { [it.status, it.count] }
 
       def count_dated_between(from:, to:)
-        counted = posts.dated_between(*day_bounds(from, to)).counts_by_status.to_a
+        counted = posts.dated_between(*Blog::TimeZone.day_bounds(from, to)).counts_by_status.to_a
 
         Blog::Types::PostStatus.values.to_h { [it, 0] }.merge(counted.to_h { [it.status, it.count] })
       end
 
       def dated_between(from:, to:, page:, status: nil)
-        found = with_tags.dated_between(*day_bounds(from, to))
+        found = with_tags.dated_between(*Blog::TimeZone.day_bounds(from, to))
         found = found.with_status(status) if status
 
         page.fill(found.newest_first.paged(page).to_a)
@@ -80,8 +80,6 @@ module Posts
       def summaries = posts.newest_first.select(*SUMMARY).to_a
 
       private
-
-      def day_bounds(from, to) = [from && Blog::TimeZone.day_start(from), to && Blog::TimeZone.day_start(to + 1)]
 
       def with_tags = posts.combine(:tags)
     end

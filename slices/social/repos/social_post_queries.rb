@@ -29,7 +29,7 @@ module Social
       def calendar_between(from:, to:)
         dated = with_children.scheduled_or_posted
 
-        dated.posted_between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1)).oldest_first.to_a
+        dated.posted_between(*Blog::TimeZone.day_bounds(from, to)).oldest_first.to_a
       end
 
       def claimed?(id) = social_post_deliveries.for_social_post(id).exist?
@@ -37,13 +37,13 @@ module Social
       def count_by_status = count_statuses(social_posts)
 
       def count_dated_between(from:, to:)
-        counted = count_statuses(social_posts.dated_between(*day_bounds(from, to)))
+        counted = count_statuses(social_posts.dated_between(*Blog::TimeZone.day_bounds(from, to)))
 
         QUEUES.transform_values { counted.fetch(it, 0) }
       end
 
       def dated_between(from:, to:, page:, queue: nil)
-        days = social_posts.dated_between(*day_bounds(from, to))
+        days = social_posts.dated_between(*Blog::TimeZone.day_bounds(from, to))
         days = days.with_status(QUEUES.fetch(queue)) if queue
 
         page_of(days.newest_dated_first, page)
@@ -76,8 +76,6 @@ module Social
       private
 
       def count_statuses(found) = found.counts_by_status.to_a.to_h { [it.status, it.count] }
-
-      def day_bounds(from, to) = [from && Blog::TimeZone.day_start(from), to && Blog::TimeZone.day_start(to + 1)]
 
       def page_of(listed, page)
         ids = page.fill(listed.paged(page).pluck(:id))

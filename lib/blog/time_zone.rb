@@ -14,6 +14,8 @@ module Blog
 
     module_function
 
+    def day_bounds(first, last) = [first && day_start(first), last && day_start(last + 1)]
+
     def day_start(date) = local_time(date.year, date.month, date.day)
 
     def input_value(time) = local(time).strftime(INPUT_FORMAT)

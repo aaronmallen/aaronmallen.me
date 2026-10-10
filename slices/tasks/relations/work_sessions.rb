@@ -68,9 +68,11 @@ module Tasks
       def by_day(found, first, last) = found.cross_join(days(first, last).lateral.as(:days, [:day]))
 
       def clipped(first, last)
+        from, to = Blog::TimeZone.day_bounds(first, last)
+
         [
-          Sequel.function(:greatest, :started_at, Blog::TimeZone.day_start(first)).as(:started_at),
-          Sequel.function(:least, ENDED, Blog::TimeZone.day_start(last + 1)).as(:ended_at),
+          Sequel.function(:greatest, :started_at, from).as(:started_at),
+          Sequel.function(:least, ENDED, to).as(:ended_at),
         ]
       end
 
@@ -114,8 +116,9 @@ module Tasks
       end
 
       def overlapping(first, last)
-        where(Sequel[:started_at] < Blog::TimeZone.day_start(last + 1))
-          .where(Sequel.expr(ENDED) > Blog::TimeZone.day_start(first))
+        from, to = Blog::TimeZone.day_bounds(first, last)
+
+        where(Sequel[:started_at] < to).where(Sequel.expr(ENDED) > from)
       end
 
       def seconds(ended) = Sequel.function(:floor, Sequel.extract(:epoch, ended - :started_at)).cast(Integer)

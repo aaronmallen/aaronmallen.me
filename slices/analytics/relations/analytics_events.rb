@@ -47,7 +47,7 @@ module Analytics
 
       def between(from, to) = since(from).occurred_before(to)
 
-      def between_days(from, to) = between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
+      def between_days(from, to) = between(*Blog::TimeZone.day_bounds(from, to))
 
       def claim(address_hashes:, limit:, since:, **attrs)
         transaction do

@@ -95,8 +95,9 @@ module MCP
       end
 
       def raw_window
-        { from: [Blog::TimeZone.day_start(range.first), at].compact.max,
-          to: Blog::TimeZone.day_start(range.last + 1), path: }
+        from, to = Blog::TimeZone.day_bounds(range.first, range.last)
+
+        { from: [from, at].compact.max, to:, path: }
       end
 
       def read_throughs_by_path = between(:analytics_rollup_queries, :read_throughs_between)

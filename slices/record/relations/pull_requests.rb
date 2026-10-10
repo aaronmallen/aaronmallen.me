@@ -7,7 +7,11 @@ module Record
 
       schema :pull_requests, infer: true
 
-      def between(from, to) = where(MOVED_AT => Blog::TimeZone.day_start(from)...Blog::TimeZone.day_start(to + 1))
+      def between(from, to)
+        first, last = Blog::TimeZone.day_bounds(from, to)
+
+        where(MOVED_AT => first...last)
+      end
 
       def linkable = linkables(title: :title, day: self.class.site_day(MOVED_AT))
 
