@@ -20,7 +20,9 @@ module Tasks
       end
 
       def rewind(task_id, at)
-        work_sessions.running.for_task(task_id).stamped(:update, result: :many).call(started_at: at)
+        later = work_sessions.running.for_task(task_id).where(Sequel[:started_at] > at)
+
+        later.stamped(:update, result: :many).call(started_at: at)
       end
 
       def shift_total(task_id, seconds)

@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, lib, record, tasks]
 issue: "#737"
+amended: ["#902"]
 tags: [tasks, imports, sync, linear, history, time-tracking, work-sessions, cursors]
 ---
 
@@ -32,8 +33,9 @@ The sync reads history only for issues whose `updatedAt` passed their cursor. It
 today, then asks for the history of those that changed in one batched query: the same two steps `ReachIssues`
 takes. A run where no tracked issue changed sends no history query.
 
-When a replayed change matches one the owner already made by hand, Linear's time wins. The session moves to
-Linear's time and no second session opens. A hand change with no match in Linear stays as it is.
+When a replayed change matches one the owner already made by hand, the earlier time wins (#902). A replayed start
+moves a running session's start earlier, never later, and no second session opens. A hand change with no match in
+Linear stays as it is.
 
 Replay starts from the first run after #735 ships. No session logged before it changes.
 
@@ -61,8 +63,9 @@ pays for a history read that finds no state change.
 
 `task_sources` takes a column for the cursor, which takes a migration of its own.
 
-Linear's time beats the owner's hand on a matching change. A task the owner started at 10:02 under an issue that
-went In Progress at 10:00 starts at 10:00, and the owner cannot keep the later time.
+The earlier of Linear's time and the owner's hand wins on a matching change. A task the owner started at 10:02 under
+an issue that went In Progress at 10:00 starts at 10:00. A task the owner started at 09:00 under an issue that went
+In Progress at 10:00 keeps 09:00, so time already tracked stays.
 
 GitHub reports no started state, so its sync works as it did. Replay belongs to Linear alone.
 

@@ -737,6 +737,15 @@ RSpec.describe Tasks::Jobs::SyncLinearIssues do
       end
     end
 
+    it "keeps a session I started by hand before Linear's start" do
+      task = tracked(:in_progress, history_cursor: cursor)
+      create(:work_session, task_id: task.id, started_at: at(-30))
+      stub_started(start)
+      sync
+
+      expect(sessions(task)).to match([session(at(-30))])
+    end
+
     it "leaves a status I set by hand when Linear holds no matching change" do
       task = tracked(:done, history_cursor: cursor)
       stub_assigned(issue(updatedAt: ten.utc.iso8601(3)))
