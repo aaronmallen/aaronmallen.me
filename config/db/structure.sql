@@ -5665,6 +5665,27 @@ CREATE TRIGGER saved_views_notify_admin_change AFTER INSERT OR DELETE OR UPDATE 
 
 
 --
+-- Name: service_apps service_apps_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER service_apps_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.service_apps FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: service_connections service_connections_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER service_connections_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.service_connections FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
+-- Name: sign_ins sign_ins_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER sign_ins_notify_admin_change AFTER INSERT OR DELETE OR UPDATE ON public.sign_ins FOR EACH ROW EXECUTE FUNCTION public.notify_admin_change();
+
+
+--
 -- Name: social_post_deliveries social_post_deliveries_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -6484,4 +6505,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261010000420_add_broken_links_to_attention.rb'),
 ('20261010000440_add_scopes_and_expiry_to_api_tokens.rb'),
 ('20261010000870_drop_revoked_at_from_oauth_clients.rb'),
-('20261010001130_move_format_checks_into_domains.rb');
+('20261010001130_move_format_checks_into_domains.rb'),
+('20261010001570_notify_admin_changes_on_security_and_services.rb');

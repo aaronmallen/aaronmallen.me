@@ -63,6 +63,23 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     expect(page).to have_css("#webmention-#{mention.id}", text: "A neighbour")
   end
 
+  it "shows a new sign-in on the open security page" do
+    live "/admin/security"
+    Security::Slice["repos.sign_in_mutations"].create(
+      outcome: "denied", address: "203.0.113.9", user_agent: "Firefox/141", browser: "Firefox", os: "Linux",
+    )
+
+    expect(page).to have_css(".li-title", text: "Firefox · Linux")
+  end
+
+  it "shows a new connection on the open services page" do
+    live "/admin/services"
+    Services::Slice["repos.connection_mutations"]
+      .add(provider: "linear", account_id: "ws-1", label: "ROOT workspace", credentials: { api_key: "lin_api_secret" })
+
+    expect(page).to have_css(".svc-account", text: "ROOT workspace")
+  end
+
   it "morphs under a policy without unsafe-eval", :aggregate_failures do
     live "/admin/inbox"
     message = create(:message)
