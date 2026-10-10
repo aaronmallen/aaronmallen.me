@@ -53,6 +53,10 @@ module API
         { type: "object", additionalProperties: false, properties: properties.merge(optional), required: }
       end
 
+      def paged(properties, more: { next_page: INTEGER })
+        object(properties.merge(partial: BOOLEAN), optional: more)
+      end
+
       def widen(schema, **properties)
         required = schema.fetch(:required) + names(properties)
 

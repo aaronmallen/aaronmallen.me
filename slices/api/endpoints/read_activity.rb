@@ -30,15 +30,14 @@ module API
         required: %w[from to],
       }.freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           from: Helpers::Schema::DAY,
           to: Helpers::Schema::DAY,
           count: Helpers::Schema::INTEGER,
-          partial: Helpers::Schema::BOOLEAN,
           activity: Helpers::Schema.list(Serializers::Activity.reference),
         },
-        optional: { continue_to: Helpers::Schema::DAY },
+        more: { continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[

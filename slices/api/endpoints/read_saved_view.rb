@@ -30,14 +30,13 @@ module API
         required: ["id"],
       }.freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           saved_view: Serializers::SavedView.reference,
           count: Helpers::Schema::INTEGER,
-          partial: Helpers::Schema::BOOLEAN,
           records: Helpers::Schema.list({ anyOf: SERIALIZERS.values.map(&:reference) }),
         },
-        optional: { next_page: Helpers::Schema::INTEGER, continue_to: Helpers::Schema::DAY },
+        more: { next_page: Helpers::Schema::INTEGER, continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[

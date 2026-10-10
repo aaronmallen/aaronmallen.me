@@ -24,16 +24,14 @@ module API
         description: "how many webmentions in the range, and for the post when given, sit in each status",
       ).freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           from: Helpers::Schema.nullable(Helpers::Schema::DAY),
           to: Helpers::Schema.nullable(Helpers::Schema::DAY),
           time_zone: Helpers::Schema::STRING,
           counts: COUNTS,
           webmentions: Helpers::Schema.list(Serializers::Webmention.reference),
-          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps[

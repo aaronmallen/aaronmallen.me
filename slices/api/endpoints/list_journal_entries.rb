@@ -21,16 +21,15 @@ module API
         },
       ).merge(description: "the whole journal's entries and words, and the days written of the last few").freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           from: Helpers::Schema::DAY,
           to: Helpers::Schema::DAY,
           count: Helpers::Schema::INTEGER,
-          partial: Helpers::Schema::BOOLEAN,
           stats: STATS,
           entries: Helpers::Schema.list(Serializers::JournalEntry.reference),
         },
-        optional: { continue_to: Helpers::Schema::DAY },
+        more: { continue_to: Helpers::Schema::DAY },
       ).freeze
 
       include Deps[journal_entry_queries: "record.repos.journal_entry_queries"]

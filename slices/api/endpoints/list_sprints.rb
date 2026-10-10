@@ -11,10 +11,7 @@ module API
         },
       }.freeze
 
-      REPLY = Helpers::Schema.object(
-        { sprints: Helpers::Schema.list(Serializers::Sprint.reference), partial: Helpers::Schema::BOOLEAN },
-        optional: { next_page: Helpers::Schema::INTEGER },
-      ).freeze
+      REPLY = Helpers::Schema.paged({ sprints: Helpers::Schema.list(Serializers::Sprint.reference) }).freeze
 
       include Deps["settings", sprint_queries: "tasks.repos.sprint_queries"]
 

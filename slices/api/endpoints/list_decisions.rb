@@ -23,14 +23,12 @@ module API
         description: "how many decisions with the query and tag given sit in each status, whatever status asks for",
       ).freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           count: Helpers::Schema::INTEGER,
           counts: COUNTS,
           decisions: Helpers::Schema.list(Serializers::Decision.reference),
-          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps[

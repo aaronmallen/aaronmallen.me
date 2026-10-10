@@ -23,15 +23,13 @@ module API
         },
       }.freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           from: Helpers::Schema.nullable(Helpers::Schema::DAY),
           to: Helpers::Schema.nullable(Helpers::Schema::DAY),
           counts: COUNTS,
           social_posts: Helpers::Schema.list(SocialPostEndpoint::REPLY),
-          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps["settings"]

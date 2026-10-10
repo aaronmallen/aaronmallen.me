@@ -15,13 +15,11 @@ module API
         required: %w[query],
       }.freeze
 
-      REPLY = Helpers::Schema.object(
+      REPLY = Helpers::Schema.paged(
         {
           count: Helpers::Schema::INTEGER,
           results: Helpers::Schema.list(Serializers::SearchHit.reference),
-          partial: Helpers::Schema::BOOLEAN,
         },
-        optional: { next_page: Helpers::Schema::INTEGER },
       ).freeze
 
       include Deps["settings", search_queries: "search.repos.search_queries"]
