@@ -5,12 +5,6 @@ module Admin
     module Components
       module Decisions
         class Closing < Component
-          HEIGHT = "120px"
-          PLACEHOLDERS = {
-            drop: ".placeholders.drop", reopen: ".placeholders.reopen", resolve: ".placeholders.resolve",
-          }.freeze
-          RENDERER = Blog::Types::MarkdownRenderer["tasks"]
-
           prop :decision, Blog::Types::Instance(ROM::Struct)
           prop :form, Blog::Types::Hash
 
@@ -18,41 +12,27 @@ module Admin
             Card(title: t(".label")) do
               if @decision.open?
                 part(".resolve_title") { resolve }
-                part(".drop_title") { drop }
+                part(".drop_title") { reason_form(:drop, :warn) }
               else
-                reopen
+                reason_form(:reopen, :pri)
               end
             end
           end
 
           private
 
-          def choice_field(errors)
-            scope = scope_for(:resolve)
+          def choice_field
+            errors = @form[:name] == :resolve ? @form[:errors] : Blog::Constants::EMPTY_HASH
 
-            Field(label: t(".option"), name: :option_id, errors:, error: FieldError, scope:) do |control|
-              Select(
-                **control,
-                name: "decision[option_id]",
-                options: choices,
-                selected: value(:resolve, :option_id),
-                required: true,
-              )
+            Field(label: t(".option"), name: :option_id, errors:, error: FieldError,
+                  scope: "decision-resolve") do |control|
+              Select(**control, name: "decision[option_id]", options: choices, selected:, required: true)
             end
           end
 
           def choices
             { Blog::Constants::EMPTY_STRING => t(".pick") }.merge(@decision.options.to_h { [it.id.to_s, it.title] })
           end
-
-          def drop
-            Form(action: path(:admin_drop_decision, id: @decision.id), class: "stack-form") do
-              reason_field(:drop)
-              Button(variant: :warn, type: "submit", small: true) { t(".drop") }
-            end
-          end
-
-          def errors_for(name) = @form[:name] == name ? @form[:errors] : Blog::Constants::EMPTY_HASH
 
           def part(title_key)
             div(class: "decision-close-part") do
@@ -61,43 +41,21 @@ module Admin
             end
           end
 
-          def reason_field(name)
-            scope = scope_for(name)
-            errors = errors_for(name)
-
-            Field(label: t(".reason")) do
-              MarkdownEditor(field: :reason, errors:, error: FieldError, scope:, **reason_props(name))
-            end
-          end
-
-          def reason_props(name)
-            { name: "decision[reason]", value: value(name, :reason), height: HEIGHT, renderer: RENDERER,
-              label: t(".reason"), placeholder: t(PLACEHOLDERS.fetch(name)) }
-          end
-
-          def reopen
-            Form(action: path(:admin_reopen_decision, id: @decision.id), class: "stack-form") do
-              reason_field(:reopen)
-              Button(variant: :pri, type: "submit", small: true) { t(".reopen") }
-            end
+          def reason_form(name, variant, &)
+            route = :"admin_#{name}_decision"
+            ReasonForm(decision: @decision, form: @form, name:, route:, variant:, &)
           end
 
           def resolve
             return Hint { t(".no_options") } if @decision.options.empty?
 
-            Form(action: path(:admin_resolve_decision, id: @decision.id), class: "stack-form") do
-              choice_field(errors_for(:resolve))
-              reason_field(:resolve)
-              Button(variant: :pri, type: "submit", small: true) { t(".resolve") }
-            end
+            reason_form(:resolve, :pri) { choice_field }
           end
 
-          def scope_for(name) = "decision-#{name}"
+          def selected
+            return Blog::Constants::EMPTY_STRING unless @form[:name] == :resolve
 
-          def value(name, field)
-            return Blog::Constants::EMPTY_STRING unless @form[:name] == name
-
-            Blog::Types::Text[@form[:params][field]]
+            Blog::Types::Text[@form[:params][:option_id]]
           end
         end
       end

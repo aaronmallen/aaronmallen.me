@@ -583,19 +583,11 @@ en:
         retry: "Retry"
       decisions:
         closing:
-          drop: "Drop"
           drop_title: "Drop it"
           label: "Close"
           no_options: "Add an option before you resolve it."
           option: "Option"
           pick: "Pick an option"
-          placeholders:
-            drop: "Why it no longer needs a choice."
-            reopen: "What changed."
-            resolve: "Why this option wins."
-          reason: "Why"
-          reopen: "Reopen"
-          resolve: "Resolve"
           resolve_title: "Resolve it"
         comments:
           title: "Comments"
@@ -643,6 +635,16 @@ en:
           edit: "Edit"
           empty: "No options yet."
           title: "Options"
+        reason_form:
+          placeholders:
+            drop: "Why it no longer needs a choice."
+            reopen: "What changed."
+            resolve: "Why this option wins."
+          reason: "Why"
+          submit:
+            drop: "Drop"
+            reopen: "Reopen"
+            resolve: "Resolve"
         row:
           comments:
             one: "comment"
