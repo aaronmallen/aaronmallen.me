@@ -3,9 +3,9 @@ id: "0017"
 title: Enforce rules over stored state in Postgres, not in contracts
 status: active
 created: 2026-09-28
-area: [db, lib, admin, decisions, links, posts, projects, record, social, tags, tasks]
+area: [db, lib, admin, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -47,6 +47,11 @@ Mentions break it too, as [ADR 0079][0079] records and #913 wrote down. `Social:
 refuses a mention token that names nobody in the directory, and asks `Social::Operations::ResolveMentions#unknown`
 which tokens those are. It checks in Ruby, with no lock, because a rule in Postgres would need a trigger that parses
 tokens out of the body. A person deleted after the check leaves the token in the post, and delivery handles it.
+
+Services break it too, as #940 wrote down. `Services::Operations::AddConnection` refuses a second account for a
+service whose definition does not allow several. Definitions live in code ([ADR 0130][0130]), so Postgres cannot
+read the rule. It checks in Ruby, with no lock, so two writes at once can both land. A taken account is not this
+rule: `service_connections_provider_host_account_id_index` refuses it, and `AddConnection` checks nothing first.
 
 When a user can break such a rule from a form, the operation turns the refusal into a field error. It rescues
 `ROM::SQL::UniqueConstraintError`, `CheckConstraintError` or `ForeignKeyConstraintError`, asks
@@ -118,4 +123,5 @@ A reader cannot learn every rule from the contract. The ones over stored state a
 [0079]: 0079-store-a-mention-as-a-token-expanded-at-delivery.md
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [0099]: 0099-keep-decision-logs-in-a-decisions-slice-with-decision-events-and-a-decision-timeline-view.md
+[0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
