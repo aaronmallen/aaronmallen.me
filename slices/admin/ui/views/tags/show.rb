@@ -52,7 +52,7 @@ module Admin
 
           def journal_entry(entry)
             day = entry.entry_date
-            href = "#{path(:admin_journal, to: day.iso8601)}##{Components::Journal::Day.anchor(day)}"
+            href = Blog::Helpers::RecordKinds.journal_day(routes, day)
 
             ListItem(title: journal_title(entry), href:) do |item|
               item.meta { p(class: "li-sub") { l(day, format: :medium) } }

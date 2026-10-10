@@ -65,7 +65,7 @@ module Admin
           def href_for
             case @event.type
               when *PAGES.keys then path(PAGES.fetch(@event.type), id: @event.source_id)
-              when JOURNAL then "#{path(:admin_journal, to: @event.occurred_on)}##{Journal::Day.anchor(@event.occurred_on)}"
+              when JOURNAL then KINDS.journal_day(routes, @event.occurred_on)
               when SOCIAL then path(:admin_social, filter: POSTED)
               when TASK, SESSION, COMMENT, DECISION, DECISION_COMMENT then owner_href
               when WEBMENTION then path(:admin_webmentions)

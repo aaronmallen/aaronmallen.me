@@ -33,16 +33,20 @@ module Blog
 
       module_function
 
+      def day_anchor(day) = "day-#{day.iso8601}"
+
       def fetch(kind) = ALL.fetch(kind)
 
       def icon(kind) = fetch(kind).icon
+
+      def journal_day(routes, day) = "#{routes.path(fetch(JOURNAL_ENTRY).route, to: day)}##{day_anchor(day)}"
 
       def path(routes, kind, id:, day:)
         route = fetch(kind).route
 
         case kind
           when SOCIAL_POST then routes.path(route, edit: id)
-          when JOURNAL_ENTRY then "#{routes.path(route, to: day)}#day-#{day.iso8601}"
+          when JOURNAL_ENTRY then journal_day(routes, day)
           when WORK_ENTRY then routes.path(route, filter: WORK)
           else routes.path(route, id:)
         end

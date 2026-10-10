@@ -20,10 +20,9 @@ module Admin
           private
 
           def href(record)
-            day = record.occurred_on
             return path(:admin_edit_post, id: record.source_id) if record.type == POST
 
-            "#{path(:admin_journal, to: day.iso8601)}##{Journal::Day.anchor(day)}"
+            Blog::Helpers::RecordKinds.journal_day(routes, record.occurred_on)
           end
         end
       end

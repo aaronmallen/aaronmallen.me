@@ -11,10 +11,8 @@ module Admin
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linked, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
 
-          def self.anchor(date) = "day-#{date.iso8601}"
-
           def view_template
-            section(class: "journal-day", id: self.class.anchor(@date)) do
+            section(class: "journal-day", id: Blog::Helpers::RecordKinds.day_anchor(@date)) do
               DayHead(date: @date, today: @today)
               div do
                 @entries.each do |entry|

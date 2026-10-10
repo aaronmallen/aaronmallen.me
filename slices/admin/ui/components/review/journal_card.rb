@@ -26,9 +26,7 @@ module Admin
           def entry(record)
             day = record.occurred_on
 
-            href = "#{path(:admin_journal, to: day.iso8601)}##{Journal::Day.anchor(day)}"
-
-            Line(href:, text: record.name, day:)
+            Line(href: Blog::Helpers::RecordKinds.journal_day(routes, day), text: record.name, day:)
           end
 
           def group(key, members)
