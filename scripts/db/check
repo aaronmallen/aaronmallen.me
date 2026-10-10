@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+#MISE description="Build a scratch database from the migrations and fail when its schema dump differs from config/db/structure.sql"
+
+set -e
+
+export HANAMI_ENV="test"
+export DATABASE_NAME="blog_rebuild"
+
+committed="$(mktemp)"
+cp config/db/structure.sql "$committed"
+
+finish() {
+  cp "$committed" config/db/structure.sql
+  rm -f "$committed"
+  scripts/db/drop
+}
+trap finish EXIT
+
+scripts/db/rebuild
+diff -u "$committed" config/db/structure.sql
