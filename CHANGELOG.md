@@ -5,6 +5,59 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.9] - 2026-10-10
+
+### Added
+
+- The GitHub dialog on the Connected services tab takes a personal access token beside Sign in with GitHub. The site
+  asks GitHub who owns the token before it saves it, labels the connection with that account and shows GitHub's reason
+  when it refuses one. Test connection checks it, the connection detail says OAuth or token, and Disconnect reminds you
+  to revoke the token on GitHub.
+- `/sitemap.xml` lists the home, About, Projects, Contact and Writing pages, each published post with its last change,
+  and each tag page that has a published post. `/robots.txt` keeps crawlers off the admin, API, MCP, OAuth, pulse and
+  webmention paths and points them to the sitemap.
+- A post with three or more sections shows an On this page list beside the body from 1100px wide. It stays in view as
+  you scroll and marks the section you are reading. Without scripts it is a list of plain links.
+- Each post heading gets an id made from its text, so a link to `#its-text` lands on it, and a repeated heading gets a
+  numbered suffix. A code fence with a file name after the language, such as `ruby config/providers/redis.rb`, shows
+  the file name above the code. An image alone in its paragraph with a title shows as a figure, with the title as its
+  caption. The admin preview shows all three.
+- The contact page shows the time where the site lives and ticks over each minute. Without scripts it names the time
+  zone.
+- Each public page with no image of its own shares a default image as a large card. Every shared image carries alt
+  text.
+- The home, About, Projects, Contact, Writing and tag pages each have their own description for search and share
+  cards. The home page's tab reads "Writing and projects" beside the owner's name.
+- Posts carry JSON-LD that names them as blog posts, and the home page carries JSON-LD for the site and its owner, with
+  the owner's profile links.
+
+### Changed
+
+- The public site runs full width, with type and spacing that grow with the window. The header is a sticky bar of
+  pill links with the settings menu behind a round button, and on a phone the pills wrap to a full row in place of the
+  menu. The footer shows a glasses mark before the copyright.
+- The slash in the wordmark cycles through colors on hover or focus, in the public header and the admin top bar. It
+  stays still when you ask for reduced motion.
+- The home page sets writing beside projects from 900px wide. Writing rows set the date beside the title once the list
+  is 720px wide, and only the title links to the post. Project cards are boxed and fill a grid of one to four columns,
+  with the site's address at the foot and past projects left unfilled. About keeps a career sidebar in view, contact
+  sets its details beside the form, and the privacy, tag and Writing pages open with the same page head.
+- A post's title grows with the window over a serif body that ends in a glasses mark, and the meta line reads "N min".
+  Edits, Also posted on and responses sit in one block, where each response shows an initial and the author's domain.
+  Previous, All writing and Next cards replace the post footer.
+- Post images after the first load only when you scroll near them, and the site's own photos in a post carry their
+  size, so the page no longer jumps as they load.
+
+### Fixed
+
+- A post with no summary is described by its first paragraph cut to 160 characters, where it used to send the whole
+  paragraph. No page sends an empty description tag any more.
+
+### Security
+
+- `read_pull_request`, `list_pull_requests`, `search`, linked records, `read_activity` and activity saved views mark
+  pull request titles and descriptions as untrusted, since people other than the owner write them.
+
 ## [26.10.8] - 2026-10-09
 
 ### Fixed
@@ -621,7 +674,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.9...HEAD
+[26.10.9]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...26.10.9
 [26.10.8]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...26.10.8
 [26.10.7]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...26.10.7
 [26.10.6]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.5...26.10.6
