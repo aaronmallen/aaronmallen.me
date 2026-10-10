@@ -5,13 +5,11 @@ module Admin
     module Components
       module Services
         class Detail < Component
-          CLOSE_ICON = "fa-solid fa-xmark"
-
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
           prop :connectable, Blog::Types::Bool
 
           def view_template
-            head
+            Head(title: definition.name)
             p(class: "svc-status") do
               StatusPill(status: @row.status)
               span(class: "svc-account") { @row.account } if @row.account
@@ -34,8 +32,6 @@ module Admin
 
           def by_token? = @row.connection.by_credentials?
 
-          def close = { href: path(:admin_services), label: t(".close") }
-
           def credentials
             return no_credentials if @row.env.empty?
 
@@ -45,13 +41,6 @@ module Admin
           end
 
           def definition = @row.definition
-
-          def head
-            div(class: "svc-head") do
-              h2(class: "card-title") { definition.name }
-              Button(small: true, variant: :gh, icon: CLOSE_ICON, **close)
-            end
-          end
 
           def held(yes, color, held_key, lacking_key)
             yes ? Pill(color:) { t(held_key) } : Pill(color: :orange) { t(lacking_key) }

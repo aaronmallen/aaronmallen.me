@@ -1458,8 +1458,6 @@ en:
           open: "Open %{name}"
           test: "Test connection"
         connect:
-          close: "Close"
-          connect: "Connect %{name}"
           fields:
             access_token: "Personal access token"
             api_key: "API key"
@@ -1468,11 +1466,21 @@ en:
           heading: "Connect %{name}"
           hint: "The site checks these with %{name} before it saves them, and keeps them encrypted."
           token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes; an organization may still have to approve a fine-grained one. The site can't revoke a token, so revoke it on GitHub once you disconnect."
+        connect_dialog:
+          asks: "The site will ask for"
+          away: "You'll approve access on %{name}, then come straight back here."
+          connect: "Connect %{name}"
+          continue: "Continue to %{name}"
+          or_token: "Or paste a personal access token"
+          required: "Required · %{why}"
+          server: "Your server"
+          revoke: "Read-only unless it says otherwise. You can disconnect any time; the site revokes its token on %{name} too."
+          token: "Personal access token"
+          token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes; an organization may still have to approve a fine-grained one. The site can't revoke a token, so revoke it on GitHub once you disconnect."
         detail:
           access: "Access"
           app_credentials: "App credentials"
           bridgy: "webmentions →"
-          close: "Close"
           connected: "Connected %{time}"
           credentials: "Credentials"
           environment: "Set in the server environment. Change them there, then redeploy."
@@ -1495,21 +1503,15 @@ en:
             blank: "Paste an app password first."
           handle:
             blank: "Type a handle first."
+        head:
+          close: "Close"
         picker:
-          asks: "The site will ask for"
-          away: "You'll approve access on %{name}, then come straight back here."
-          connect: "Connect %{name}"
-          continue: "Continue to %{name}"
           hint: "Storage, MaxMind and Honeybadger read their keys from the server environment, so they aren't listed here."
-          or_token: "Or paste a personal access token"
-          required: "Required · %{why}"
-          server: "Your server"
-          revoke: "Read-only unless it says otherwise. You can disconnect any time; the site revokes its token on %{name} too."
-          token: "Personal access token"
-          token_hint: "Classic or fine-grained. A classic token needs the repo and read:org scopes; an organization may still have to approve a fine-grained one. The site can't revoke a token, so revoke it on GitHub once you disconnect."
           title: "Connect a service"
         row:
           used: "used %{time}"
+        token_form:
+          connect: "Connect %{name}"
       settings_head:
         heading: "Settings"
         lede: "The rarely-touched stuff, in one place."
