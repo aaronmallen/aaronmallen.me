@@ -11,7 +11,6 @@ module Social
       LINK_SCHEMES = %w[http https].freeze
       LINK_SELECTOR = "a[href]"
       OK_STATUSES = (200..299)
-      PUBLISHED = Blog::Types::PostStatus["published"]
       REJECTED = :rejected
       REL = "webmention"
       REL_PARAM = /rel\s*=\s*(?:"([^"]*)"|'([^']*)'|([^;\s]+))/i
@@ -67,7 +66,7 @@ module Social
         return Failure(:not_sending) unless webmention_queries.settings.send_on_publish
 
         post = post_queries.by_id(post_id)
-        return Failure(:not_a_post) unless post&.status == PUBLISHED
+        return Failure(:not_a_post) unless post&.published?
 
         Success(post)
       end

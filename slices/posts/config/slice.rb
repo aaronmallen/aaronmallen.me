@@ -15,7 +15,7 @@ module Posts
     ], from: :social
 
     export %w[
-      operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_post
+      operations.act_on_posts operations.compose_announcement operations.delete_post operations.lock_unpublished_post
       operations.move_post operations.publish_draft operations.record_post_webmentions operations.revise_edit_note
       operations.revise_post_body operations.save_post operations.save_post_seo repos.post_queries
     ]

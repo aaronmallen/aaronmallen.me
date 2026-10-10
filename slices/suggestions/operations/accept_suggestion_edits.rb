@@ -3,12 +3,10 @@
 module Suggestions
   module Operations
     class AcceptSuggestionEdits < Blog::Operation
-      PUBLISHED = Blog::Types::PostStatus["published"]
-
       include Deps[
         check_network_fit: "social.operations.check_network_fit",
         lock_editable_social_post: "social.operations.lock_editable_social_post",
-        lock_post: "posts.operations.lock_post",
+        lock_unpublished_post: "posts.operations.lock_unpublished_post",
         replace_social_post_parts: "social.operations.replace_social_post_parts",
         revise_post_body: "posts.operations.revise_post_body",
         suggestion_mutations: "repos.suggestion_mutations",
@@ -31,7 +29,7 @@ module Suggestions
       end
 
       def accept_on_post(post_id, edits)
-        post = step unpublished(lock_post.call(post_id))
+        post = step lock_unpublished_post.call(post_id)
         bodies, sifted = sift([post.body], still_pending(edits), Blog::Constants::EMPTY_ARRAY)
         revise_post_body.call(post.id, body: bodies.first) if sifted.fetch(:accepted).any?
 
@@ -96,10 +94,6 @@ module Suggestions
       end
 
       def still_pending(edits) = suggestion_mutations.lock_pending(edits.map(&:id))
-
-      def unpublished(post)
-        found(post).bind { it.status == PUBLISHED ? Failure(:published) : Success(it) }
-      end
     end
   end
 end

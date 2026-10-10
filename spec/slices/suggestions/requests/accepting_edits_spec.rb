@@ -133,6 +133,8 @@ RSpec.describe "Accepting suggested edits", type: :request do
       replace_component(key, ->(id) { yield(id).then { inner.call(id) } })
     end
 
+    def delete_post(id) = Thread.new { post_mutations.posts.by_pk(id).delete }.join
+
     def nowait(table, id)
       Thread.new do
         Thread.current.report_on_exception = false
@@ -162,7 +164,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "holds the post before it reads the body" do
       article = create(:post, :draft, body: "teh cat sat")
       suggest(article, typo)
-      probing("posts.operations.lock_post") { nowait(:posts, it) }
+      probing("posts.operations.lock_unpublished_post") { nowait(:posts, it) }
       accept(article)
 
       expect(held).to eq([:held])
@@ -180,7 +182,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "keeps out a rival write that lands between the read and the save", :aggregate_failures do
       article = create(:post, :draft, body: "teh cat sat")
       suggest(article, typo)
-      probing("posts.operations.lock_post") { rival_update(:posts, it, body: "teh cat sat on the mat") }
+      probing("posts.operations.lock_unpublished_post") { rival_update(:posts, it, body: "teh cat sat on the mat") }
       accept(article)
 
       expect([held, body_of(article)]).to eq([[:held], "the cat sat"])
@@ -189,7 +191,7 @@ RSpec.describe "Accepting suggested edits", type: :request do
     it "answers with a redirect rather than an error when the post is deleted under it" do
       article = create(:post, :draft, body: "teh cat sat")
       suggest(article, typo)
-      ahead_of("posts.operations.lock_post") { |id| Thread.new { post_mutations.posts.by_pk(id).delete }.join }
+      ahead_of("posts.operations.lock_unpublished_post") { delete_post(it) }
       accept(article)
 
       expect(last_response).to be_redirect.and have_attributes(location: "/admin/posts/#{article.id}/edit")

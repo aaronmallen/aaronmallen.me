@@ -56,8 +56,9 @@ RSpec.describe "Posts", type: :request do
     end
 
     def save_going_live(post, **fields)
-      going_live = Data.define(:id, :status, :published_at).new(post.id, "scheduled", post.published_at)
       post_mutations = Posts::Slice["repos.post_mutations"]
+      held = post_mutations.by_id_for_update(post.id)
+      going_live = held.class.new(**held.to_h, status: "scheduled")
       allow(post_mutations).to receive(:by_id_for_update).and_return(going_live)
       replace_component("repos.post_mutations", post_mutations)
       save("/admin/posts/#{post.id}", **fields)

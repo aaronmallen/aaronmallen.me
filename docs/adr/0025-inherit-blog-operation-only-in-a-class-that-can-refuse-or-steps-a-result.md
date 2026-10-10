@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [lib, activity, admin, analytics, contact, mcp, posts, projects, public, record, social, suggestions, tags, tasks]
 issue: AA-661
-amended: [AA-757, "#718", "#955"]
+amended: [AA-757, "#718", "#955", "#996"]
 tags: [operations, dry-operation, monads, result, callables, transactions]
 ---
 
@@ -46,7 +46,9 @@ it does the operation's, so no class inherits `Blog::Operation` only to borrow `
 `MCP::Operations::IssueTokens` did until #955.
 
 A plain write that another slice's operation steps may return a row or `nil`, and the caller turns `nil` into its
-`Failure`, the way `Suggestions::Operations::AcceptSuggestionEdits` does with `Posts::Operations::LockPost`.
+`Failure`, the way `Suggestions::Operations::AcceptSuggestionEdits` does with
+`Social::Operations::LockEditableSocialPost`. It did the same with `Posts::Operations::LockPost` until #996 folded
+the published check into `Posts::Operations::LockUnpublishedPost`, which answers a `Result`.
 
 Since #718, parsers and scanners from `lib` become operations too (ADR 0126). One that cannot refuse is a plain
 callable under this rule.

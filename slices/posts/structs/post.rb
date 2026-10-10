@@ -4,6 +4,9 @@ module Posts
   module Structs
     class Post < Blog::DB::Struct
       CARD = %i[og_title og_image_url canonical_url].freeze
+      DRAFT = Blog::Types::PostStatus["draft"]
+      PUBLISHED = Blog::Types::PostStatus["published"]
+      SCHEDULED = Blog::Types::PostStatus["scheduled"]
       TAG_SEPARATOR = ", "
       UNCHECKED = "0"
 
@@ -12,6 +15,8 @@ module Posts
       def canonical_url = written(:canonical_url)
 
       def changed_at = [published_at, updated_at].compact.max
+
+      def draft? = status == DRAFT
 
       def form
         {
@@ -34,7 +39,11 @@ module Posts
 
       def og_title = written(:og_title)
 
+      def published? = status == PUBLISHED
+
       def read_time = document.read_time
+
+      def scheduled? = status == SCHEDULED
 
       def summary = written_summary || document.first_paragraph
 

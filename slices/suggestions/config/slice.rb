@@ -4,7 +4,7 @@ module Suggestions
   class Slice < Hanami::Slice
     autoloader.push_dir(Hanami.app.root.join("lib/suggestions"), namespace: Suggestions)
 
-    import keys: %w[operations.lock_post operations.revise_post_body], from: :posts
+    import keys: %w[operations.lock_unpublished_post operations.revise_post_body], from: :posts
 
     import keys: %w[
       operations.check_network_fit operations.lock_editable_social_post

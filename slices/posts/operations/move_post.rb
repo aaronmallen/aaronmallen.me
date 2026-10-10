@@ -3,8 +3,6 @@
 module Posts
   module Operations
     class MovePost < Blog::Operation
-      SCHEDULED = Blog::Types::PostStatus["scheduled"]
-
       include Deps[post_mutations: "repos.post_mutations", post_queries: "repos.post_queries"]
 
       def call(id, date, now: Time.now)
@@ -20,7 +18,7 @@ module Posts
       private
 
       def scheduled(post)
-        found(post).bind { it.status == SCHEDULED ? Success(it) : Failure(:not_scheduled) }
+        found(post).bind { it.scheduled? ? Success(it) : Failure(:not_scheduled) }
       end
     end
   end

@@ -3,7 +3,6 @@
 module Posts
   module Operations
     class ActOnPosts < Blog::Operation
-      DRAFT = Blog::Types::PostStatus["draft"]
       TAG = Blog::Types::PostBulkAction["tag"]
 
       include Deps[
@@ -23,7 +22,7 @@ module Posts
 
       def delete_draft(id)
         found(post_mutations.by_id_for_update(id)).bind do |post|
-          post.status == DRAFT ? delete_post.call(id) : Failure(:not_draft)
+          post.draft? ? delete_post.call(id) : Failure(:not_draft)
         end
       end
 

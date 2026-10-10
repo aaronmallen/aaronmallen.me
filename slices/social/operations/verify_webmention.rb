@@ -5,7 +5,6 @@ module Social
     class VerifyWebmention < Blog::Operation
       GONE_STATUSES = [404, 410].freeze
       OK_STATUSES = (200..299)
-      PUBLISHED = Blog::Types::PostStatus["published"]
 
       include Deps[
         "webmentions.client",
@@ -66,7 +65,7 @@ module Social
 
       def open_post(post_id)
         post = post_queries.by_id(post_id)
-        post&.status == PUBLISHED && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
+        post&.published? && post.webmentions_enabled ? Success(post) : Failure(:not_a_post)
       end
 
       def status(page, source, settings)

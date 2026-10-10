@@ -468,8 +468,8 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before do
         rival = rival_accept(article)
-        inner = Suggestions::Slice["posts.operations.lock_post"]
-        replace_component("posts.operations.lock_post", ->(id) { rival.call.then { inner.call(id) } })
+        inner = Suggestions::Slice["posts.operations.lock_unpublished_post"]
+        replace_component("posts.operations.lock_unpublished_post", ->(id) { rival.call.then { inner.call(id) } })
       end
 
       it "applies it once", :aggregate_failures do
@@ -577,9 +577,9 @@ RSpec.describe "Admin post suggestions", type: :request do
 
       before do
         suggest(article, typo)
-        inner = Suggestions::Slice["posts.operations.lock_post"]
+        inner = Suggestions::Slice["posts.operations.lock_unpublished_post"]
         publishing = ->(id) { post_mutations.publish(id, at: Time.now).then { inner.call(id) } }
-        replace_component("posts.operations.lock_post", publishing)
+        replace_component("posts.operations.lock_unpublished_post", publishing)
       end
 
       it "leaves the body alone", :aggregate_failures do

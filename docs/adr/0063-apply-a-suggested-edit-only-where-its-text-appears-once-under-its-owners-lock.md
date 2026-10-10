@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [suggestions, posts, social, mcp]
 issue: AA-671
-amended: [AA-818]
+amended: [AA-818, "#996"]
 tags: [suggestions, edits, mcp, locks, transactions, gateways]
 ---
 
@@ -35,7 +35,8 @@ when its original appears exactly once in the body, and `apply_to` replaces that
 `proofread` prompt tells Claude to take in enough words that the original appears once.
 
 **Suggestions applies the edit, under the lock of the slice that owns the text.** `AcceptSuggestionEdits` opens one
-transaction. It locks the post through `posts.operations.lock_post`, or the unsent social post through
+transaction. It locks the post through `posts.operations.lock_unpublished_post` (`lock_post` until #996, which
+made it refuse a published post as well), or the unsent social post through
 `social.operations.lock_editable_social_post`, before it reads the text. It then locks the pending edits, applies
 them, and writes through `posts.operations.revise_post_body` or `social.operations.replace_social_post_parts`. The
 row stays held from the read until the write commits (AA-446).

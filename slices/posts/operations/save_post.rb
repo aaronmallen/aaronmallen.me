@@ -86,7 +86,7 @@ module Posts
       def resending(attributes) = attributes.except(:published_at).merge(unsent_webmention_targets: [])
 
       def save(post, attributes, intent, now)
-        return update_published(post, attributes) if post&.status == Blog::Types::PostStatus["published"]
+        return update_published(post, attributes) if post&.published?
         return draft(post, attributes) unless intent == PUBLISH
         return schedule(post, attributes) if attributes[:published_at]&.>(now)
 
