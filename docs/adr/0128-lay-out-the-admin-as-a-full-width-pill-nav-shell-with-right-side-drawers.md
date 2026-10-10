@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873"]
+amended: ["#873", "#919"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -27,7 +27,9 @@ looks, never what it does: where it differs from the app on function, the app wi
 ## Decision
 
 **The admin fills the window.** No admin screen has a max-width container. `--container-admin` goes, and the gutter
-grows with the window, `clamp(20px, 2.2vw, 56px)`. Prose keeps its measure under [ADR 0034][0034].
+grows with the window, `clamp(20px, 2.2vw, 56px)`. Prose keeps its own measure: a post body, a lede and a settings aside
+cap at `--container-measure`, 44em, in `config/tailwind.css`. #919 moved that rule here from [ADR 0034][0034], which ADR
+0136 superseded.
 
 **A sticky top bar replaces the context bar and the slash button.** It holds, in order, the wordmark, six pills,
 a search button that opens the palette, and an avatar menu. The pills are Today, Tasks, Journal, Publish, Inbox
@@ -77,7 +79,7 @@ redesign ships in one milestone anyway.
 The chrome now reaches every screen without scripts. ADR 0053 left the jump and slash buttons as `type="button"`,
 so without scripts a section was reached by typing its address.
 
-Lines run long at 4K. Prose under ADR 0034 keeps its measure, but anything in a card that never opted in, such as a
+Lines run long at 4K. Prose keeps its 44em measure, but anything in a card that never opted in, such as a
 table cell or a meta line, stretches with the window.
 
 The top bar is sticky, so it takes height on every screen, and side columns stick under it at 86px.
