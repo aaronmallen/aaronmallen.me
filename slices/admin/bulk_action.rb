@@ -3,7 +3,6 @@
 
 module Admin
   class BulkAction < Action
-    KEY = "#"
     LONG = "long"
 
     def handle(request, response)

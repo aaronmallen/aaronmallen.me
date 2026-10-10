@@ -40,7 +40,9 @@ module Admin
           }
         end
 
-        def named(id) = { task: ["#{KEY}#{id}", task_queries.detailed(id)&.title].compact.join(" ") }
+        def named(id)
+          { task: [UI::Components::RecordKey.key(id), task_queries.detailed(id)&.title].compact.join(" ") }
+        end
 
         def refusal(errors)
           case errors

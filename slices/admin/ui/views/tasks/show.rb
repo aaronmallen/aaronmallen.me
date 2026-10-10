@@ -9,7 +9,6 @@ module Admin
 
           CREDIT_SEPARATOR = ", "
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
-          PREFIX = "#"
           STATUSES = {
             Blog::Types::TaskStatus["open"] => [nil, "fa-regular fa-circle"],
             Blog::Types::TaskStatus["in_progress"] => [:blue, "fa-solid fa-circle-play"],
@@ -88,7 +87,7 @@ module Admin
             end
           end
 
-          def key = PREFIX + @task.id.to_s
+          def key = Components::RecordKey.key(@task.id)
 
           def kicker = dotted(key, reference)
 

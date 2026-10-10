@@ -31,7 +31,9 @@ module Admin
 
         def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
 
-        def named(id) = { message: ["#{KEY}#{id}", message_queries.by_id(id)&.subject].compact.join(" ") }
+        def named(id)
+          { message: [UI::Components::RecordKey.key(id), message_queries.by_id(id)&.subject].compact.join(" ") }
+        end
 
         def refusal(errors)
           case errors

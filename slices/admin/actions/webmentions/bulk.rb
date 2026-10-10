@@ -27,7 +27,7 @@ module Admin
           routes.path(:admin_webmentions, status:, **Blog::Structs::Page.query(page))
         end
 
-        def named(id) = { mention: "#{KEY}#{id}" }
+        def named(id) = { mention: UI::Components::RecordKey.key(id) }
       end
     end
   end

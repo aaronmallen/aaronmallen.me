@@ -28,7 +28,7 @@ module Admin
 
         def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
 
-        def named(id) = { post: post_queries.by_id(id)&.title || "#{KEY}#{id}" }
+        def named(id) = { post: post_queries.by_id(id)&.title || UI::Components::RecordKey.key(id) }
 
         def refusal(errors)
           case errors

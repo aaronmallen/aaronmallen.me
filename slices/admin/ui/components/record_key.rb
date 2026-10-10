@@ -14,6 +14,8 @@ module Admin
         }.freeze
         PREFIX = "#"
 
+        def self.key(id) = "#{PREFIX}#{id}"
+
         prop :kind, Blog::Types::String.enum(*COPY.keys)
         prop :id, Blog::Types::Integer
 
@@ -28,7 +30,7 @@ module Admin
 
         private
 
-        def key = "#{PREFIX}#{@id}"
+        def key = self.class.key(@id)
       end
     end
   end

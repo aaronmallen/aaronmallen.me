@@ -36,7 +36,7 @@ module Admin
         end
 
         def failed(response, id, reason)
-          toast(response, "#{FAILED}.#{reason}", post: post_queries.by_id(id)&.title || "#{KEY}#{id}")
+          toast(response, "#{FAILED}.#{reason}", post: post_queries.by_id(id)&.title || UI::Components::RecordKey.key(id))
         end
 
         def published(response, outcome, post)

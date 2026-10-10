@@ -7,7 +7,6 @@ module Admin
         class Edit < View
           include Components::Tasks
 
-          PREFIX = "#"
           TAG_SEPARATOR = ", "
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -57,7 +56,7 @@ module Admin
             Button(href: task_path, data: { task_close: true }, small: true, variant: :gh) { t(".cancel") }
           end
 
-          def key = PREFIX + @task.id.to_s
+          def key = Components::RecordKey.key(@task.id)
 
           def returns = { filter: @filter, origin: @origin }
 

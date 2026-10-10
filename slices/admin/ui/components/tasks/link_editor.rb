@@ -16,7 +16,6 @@ module Admin
             Blog::Types::TaskStatus["done"] => ".places.done",
             Blog::Types::TaskStatus["in_progress"] => ".places.in_progress",
           }.freeze
-          PREFIX = "#"
           TODAY = Blog::Types::TaskFilter["today"]
 
           prop :task, Blog::Types::Instance(ROM::Struct)
@@ -65,7 +64,7 @@ module Admin
             end
           end
 
-          def key(task) = "#{PREFIX}#{task.id}"
+          def key(task) = RecordKey.key(task.id)
 
           def key_badge(task)
             span(class: "record-key") { key(task) }
