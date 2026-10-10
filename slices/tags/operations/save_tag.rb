@@ -3,6 +3,7 @@
 module Tags
   module Operations
     class SaveTag < Blog::Operation
+      NAME_KEY = "tags_scope_name_key"
       TAKEN = "taken"
 
       include Deps[
@@ -28,7 +29,9 @@ module Tags
 
       def persist(id, scope, fields)
         Success(transaction { id ? tag_mutations.update(id, **fields.compact) : store(scope, fields) })
-      rescue ROM::SQL::UniqueConstraintError
+      rescue ROM::SQL::UniqueConstraintError => e
+        raise unless tag_mutations.violated_constraint(e) == NAME_KEY
+
         Failure([:invalid, { name: [TAKEN] }])
       end
 

@@ -5,6 +5,7 @@ module Social
     class SavePerson < Blog::Operation
       BLUESKY = Blog::Types::NetworkName["bluesky"]
       FIELDS = %i[bluesky_handle key mastodon_handle name].freeze
+      KEY_INDEX = "people_key_index"
       TAKEN = "taken"
       UNREACHABLE = "unreachable"
       UNRESOLVED = "unresolved"
@@ -44,7 +45,9 @@ module Social
         Success(transaction do
           person ? person_mutations.update(person.id, **fields) : person_mutations.create(**fields)
         end)
-      rescue ROM::SQL::UniqueConstraintError
+      rescue ROM::SQL::UniqueConstraintError => e
+        raise unless person_mutations.violated_constraint(e) == KEY_INDEX
+
         Failure([:invalid, { key: [TAKEN] }])
       end
 

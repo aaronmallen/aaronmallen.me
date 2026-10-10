@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -62,6 +62,7 @@ raises again.
 | --- | --- | --- | --- |
 | `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::DeleteDecisionOption` | `id: chosen` |
 | `decisions_resolved_option_fkey` | foreign key | `Decisions::Operations::ResolveDecision` | `option_id: missing` |
+| `people_key_index` | unique index | `Social::Operations::SavePerson` | `key: taken` |
 | `posts_slug_key` | unique | `Posts::Operations::SavePost` | `slug: taken` |
 | `posts_published_slug_locked` | trigger | `Posts::Operations::SavePost` | `slug: locked` |
 | `projects_repo_index` | unique index | `Projects::Operations::SaveProject` | `repo: taken` |
@@ -70,12 +71,18 @@ raises again.
 | `record_links_pair_key` | unique index | `Links::Operations::LinkRecords` | `other_id: taken` |
 | `record_links_record_missing` | trigger | `Links::Operations::LinkRecords` | `other_id: missing` |
 | `record_links_task_pair_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: task_pair` |
+| `service_connections_provider_host_account_id_index` | unique index | `Services::Operations::AddConnection` | the `taken` refusal |
 | `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
 | `task_links_pair_key` | unique index | `Tasks::Operations::LinkTasks` | `other_id: taken` |
 | `task_links_to_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
+| `task_rule_projects_project_id_fkey` | foreign key | `Tasks::Operations::SaveTaskRule` | `projects: missing` |
+| `task_rules_provider_pattern_index` | unique index | `Tasks::Operations::SaveTaskRule` | `pattern: taken` |
 | `task_tag_rules_last_tag` | trigger | `Tags::Operations::RemoveTag` | a toast naming the rules |
+
+`SaveTag`, `SaveTaskRule`, `SavePerson` and `AddConnection` mapped every error of a kind to one answer until #937
+gave them the lookup, so a new constraint on their tables raises until it gets a row here.
 
 Tags hold `tags_scope_name_key` since #77 split them into a public and a private scope (ADR 0074). It replaced
 `tags_name_key`.
@@ -105,9 +112,10 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the fifteen names has a
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the nineteen names has a
 spec that would fail: the posts request spec, the operation specs for decisions, record links, tags and task links,
-and the admin request specs for the post, project and tag editors. A new mapped name needs one too.
+and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped name
+needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

@@ -3,10 +3,12 @@
 module Tasks
   module Operations
     class SaveTaskRule < Blog::Operation
+      CONSTRAINTS = {
+        "task_rule_projects_project_id_fkey" => [:projects, "missing"],
+        "task_rules_provider_pattern_index" => [:pattern, "taken"],
+      }.freeze
       FIELDS = %i[pattern provider tags projects].freeze
       GITHUB = Blog::Types::TaskSourceProvider["github"]
-      MISSING = "missing"
-      TAKEN = "taken"
 
       include Deps[
         contract: "contracts.task_rule_contract",
@@ -48,10 +50,11 @@ module Tasks
 
       def persist(id, fields, now)
         Success(transaction { task_rule_queries.by_id(id ? edit(id, fields) : create(fields, now)) })
-      rescue ROM::SQL::UniqueConstraintError
-        Failure([:invalid, { pattern: [TAKEN] }])
-      rescue ROM::SQL::ForeignKeyConstraintError
-        Failure([:invalid, { projects: [MISSING] }])
+      rescue ROM::SQL::UniqueConstraintError, ROM::SQL::ForeignKeyConstraintError => e
+        field, code = CONSTRAINTS[task_rule_mutations.violated_constraint(e)]
+        raise unless field
+
+        Failure([:invalid, { field => [code] }])
       end
 
       def projects(fields) = fields[:projects] || Blog::Constants::EMPTY_ARRAY

@@ -3,6 +3,8 @@
 module Services
   module Operations
     class AddConnection < Blog::Operation
+      ACCOUNT_INDEX = "service_connections_provider_host_account_id_index"
+
       include Deps["repos.connection_mutations", "repos.connection_queries", "repos.definition_queries"]
 
       def call(provider:, account_id:, host: nil, **columns)
@@ -16,7 +18,9 @@ module Services
 
       def add(**columns)
         Success(transaction { connection_mutations.add(**columns) })
-      rescue ROM::SQL::UniqueConstraintError
+      rescue ROM::SQL::UniqueConstraintError => e
+        raise unless connection_mutations.violated_constraint(e) == ACCOUNT_INDEX
+
         Failure(:taken)
       end
 
