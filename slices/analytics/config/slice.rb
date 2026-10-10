@@ -6,7 +6,7 @@ module Analytics
 
     config.shared_app_component_keys += %w[http]
 
-    import keys: %w[operations.record_country_sync_outcome operations.record_rollup_sync_outcome], from: :record
+    import keys: %w[operations.record_sync_outcome], from: :record
 
     export %w[
       operations.check_visit operations.find_place operations.hash_visitor operations.record_feed_fetch

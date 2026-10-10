@@ -35,6 +35,7 @@ store_commits = Record::Slice["operations.store_commits"]
   )
 end
 
-Record::Slice["operations.record_linear_issue_sync_outcome"].call(
+Record::Slice["operations.record_sync_outcome"].call(
+  Blog::Types::SyncName["linear_issues"],
   Dry::Monads::Result::Failure.new([:linear_failed, "Linear answered 503 Service Unavailable"]),
 )

@@ -4,10 +4,11 @@ module Tasks
   module Jobs
     class SyncIssues < Blog::ScheduledJob
       PROVIDER = Blog::Types::TaskSourceProvider["github"]
+      SYNC = Blog::Types::SyncName["issues"]
 
       include Deps[
         client: "record.github.client",
-        record_issue_sync_outcome: "record.operations.record_issue_sync_outcome",
+        record_sync_outcome: "record.operations.record_sync_outcome",
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
       ]
@@ -19,7 +20,7 @@ module Tasks
 
         case result
           in Failure(:lock_busy) then nil
-          else record_issue_sync_outcome.call(result)
+          else record_sync_outcome.call(SYNC, result)
         end
       end
     end

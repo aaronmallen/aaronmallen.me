@@ -8,9 +8,7 @@ module Tasks
 
     import keys: %w[repos.project_queries], from: :projects
 
-    import keys: %w[
-      github.client linear.client operations.record_issue_sync_outcome operations.record_linear_issue_sync_outcome
-    ], from: :record
+    import keys: %w[github.client linear.client operations.record_sync_outcome], from: :record
 
     export %w[
       operations.act_on_tasks operations.add_task_comment operations.cancel_task operations.capture_task

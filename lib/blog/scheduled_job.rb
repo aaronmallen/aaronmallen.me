@@ -6,8 +6,8 @@ module Blog
 
     private
 
-    def record_and_raise(recorder, failure, error)
-      recorder.call(failure)
+    def record_and_raise(sync, failure, error)
+      record_sync_outcome.call(sync, failure)
       raise error
     end
   end
