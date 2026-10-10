@@ -191,7 +191,7 @@ RSpec.describe "API bulk message actions", type: :request do
       endpoint = act("read", [message.id])
       Contact::Slice["repos.message_mutations"].mark(message, "unread")
 
-      expect(mcp_answer("mark_messages_read", ids: [message.id])).to eq(endpoint)
+      expect(trusted(mcp_answer("mark_messages_read", ids: [message.id]))).to eq(endpoint)
     end
 
     it "mark unread as mark_messages_unread does" do
@@ -199,7 +199,7 @@ RSpec.describe "API bulk message actions", type: :request do
       endpoint = act("unread", [message.id])
       Contact::Slice["repos.message_mutations"].mark(message, "read")
 
-      expect(mcp_answer("mark_messages_unread", ids: [message.id])).to eq(endpoint)
+      expect(trusted(mcp_answer("mark_messages_unread", ids: [message.id]))).to eq(endpoint)
     end
 
     it "delete as delete_messages does" do
@@ -207,7 +207,7 @@ RSpec.describe "API bulk message actions", type: :request do
       last = create(:message, subject: "same")
       deleted = act("delete", [first.id])
 
-      expect(mcp_answer("delete_messages", ids: [last.id]))
+      expect(trusted(mcp_answer("delete_messages", ids: [last.id])))
         .to eq("messages" => deleted.fetch("messages").map { it.merge("id" => last.id) })
     end
 
@@ -215,7 +215,7 @@ RSpec.describe "API bulk message actions", type: :request do
       message = create(:message)
       tagged_answer = act("tag", [message.id], tag: "billing")
 
-      expect(mcp_answer("tag_messages", ids: [message.id], tag: "billing")).to eq(tagged_answer)
+      expect(trusted(mcp_answer("tag_messages", ids: [message.id], tag: "billing"))).to eq(tagged_answer)
     end
 
     it "untag as untag_messages does" do
@@ -223,7 +223,7 @@ RSpec.describe "API bulk message actions", type: :request do
       untagged = act("untag", [message.id], tag: "billing")
       tagging.add(message.id, "billing")
 
-      expect(mcp_answer("untag_messages", ids: [message.id], tag: "billing")).to eq(untagged)
+      expect(trusted(mcp_answer("untag_messages", ids: [message.id], tag: "billing"))).to eq(untagged)
     end
 
     it "refuse a gone ID with the message the endpoint gives" do

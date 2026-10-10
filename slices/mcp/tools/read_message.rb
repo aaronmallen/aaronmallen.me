@@ -21,14 +21,19 @@ module MCP
 
         def answered(message)
           answer(
-            id: message.id,
-            subject: Untrusted.call(message.subject),
-            body: Untrusted.call(message.body),
-            reply_to: Untrusted.call(message.reply_to),
-            status: message.status,
-            tags: message.tags.map(&:name),
-            received_at: stamp(message.received_at),
-            snoozed_until: stamp(message.snoozed_until),
+            Untrusted.present(
+              {
+                id: message.id,
+                subject: message.subject,
+                body: message.body,
+                reply_to: message.reply_to,
+                status: message.status,
+                tags: message.tags.map(&:name),
+                received_at: stamp(message.received_at),
+                snoozed_until: stamp(message.snoozed_until),
+              },
+              Untrusted::MESSAGE,
+            ),
           )
         end
 

@@ -53,15 +53,18 @@ module MCP
         end
 
         def summary(message)
-          {
-            id: message.id,
-            subject: Untrusted.call(message.subject),
-            reply_to: Untrusted.call(message.reply_to),
-            status: message.status,
-            tags: message.tags.map(&:name),
-            received_at: message.received_at.utc.iso8601,
-            snoozed_until: message.snoozed_until&.utc&.iso8601,
-          }
+          Untrusted.present(
+            {
+              id: message.id,
+              subject: message.subject,
+              reply_to: message.reply_to,
+              status: message.status,
+              tags: message.tags.map(&:name),
+              received_at: message.received_at.utc.iso8601,
+              snoozed_until: message.snoozed_until&.utc&.iso8601,
+            },
+            Untrusted::MESSAGE,
+          )
         end
       end
     end

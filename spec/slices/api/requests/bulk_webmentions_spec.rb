@@ -127,7 +127,7 @@ RSpec.describe "API bulk webmention actions", type: :request do
       it "#{name} as #{tool} does" do
         first, last = twins
 
-        expect(bare(mcp_answer(tool, ids: [last.id]))).to eq(bare(act(name, [first.id])))
+        expect(bare(trusted(mcp_answer(tool, ids: [last.id])))).to eq(bare(act(name, [first.id])))
       end
     end
 

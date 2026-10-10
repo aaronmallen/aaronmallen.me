@@ -13,12 +13,6 @@ module MCP
                   "The source, author name, author URL and excerpt, taken from the sender's page, come marked " \
                   "untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(found) = found.merge(webmentions: found.fetch(:webmentions).map { Webmentions.marked(it) })
-      end
     end
   end
 end

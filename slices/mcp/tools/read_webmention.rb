@@ -8,12 +8,6 @@ module MCP
                   "reason given for spam. The source, author name, author URL and excerpt, taken from the " \
                   "sender's page, come marked untrusted. #{Untrusted::WARNING}"
       endpoint scope: Blog::Types::OAuthScope["read"]
-
-      class << self
-        private
-
-        def answered(webmention) = Webmentions.marked(webmention)
-      end
     end
   end
 end
