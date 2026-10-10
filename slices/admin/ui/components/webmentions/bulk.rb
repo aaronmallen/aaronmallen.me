@@ -5,7 +5,6 @@ module Admin
     module Components
       module Webmentions
         class Bulk < Component
-          ACT = "act"
           ID = "webmention-bulk"
           VARIANTS = {
             Blog::Types::WebmentionVerdict["approved"] => :pri,
@@ -19,7 +18,7 @@ module Admin
           def view_template
             BulkBar(id: ID, action: path(:admin_bulk_webmentions), label: t(".label"), fields:) do
               VARIANTS.except(@filter).each do |verdict, variant|
-                WebmentionVerdict(verdict:, variant:, name: ACT, value: verdict)
+                WebmentionVerdict(verdict:, variant:, name: BulkBar::ACT, value: verdict)
               end
             end
           end

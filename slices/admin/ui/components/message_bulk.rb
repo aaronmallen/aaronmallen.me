@@ -4,7 +4,6 @@ module Admin
   module UI
     module Components
       class MessageBulk < Component
-        ACT = "act"
         DELETE = Blog::Types::MessageBulkAction["delete"]
         ID = "message-bulk"
         READ = Blog::Types::MessageBulkAction["read"]
@@ -19,17 +18,13 @@ module Admin
         prop :narrowed, Blog::Types::Hash
 
         def view_template
-          BulkBar(id: ID, action: path(:admin_bulk_messages), label: t(".label"), fields:) do
-            MARKS.except(@filter).each { |value, (icon, label)| act(value, icon, label) }
-            act(DELETE, "fa-regular fa-trash-can", ".delete", variant: :warn, data: confirm)
+          BulkBar(id: ID, action: path(:admin_bulk_messages), label: t(".label"), fields:) do |bar|
+            MARKS.except(@filter).each { |value, (icon, label)| bar.act(value, icon:, label: t(label)) }
+            bar.act(DELETE, icon: "fa-regular fa-trash-can", label: t(".delete"), variant: :warn, data: confirm)
           end
         end
 
         private
-
-        def act(value, icon, label, variant: nil, data: nil)
-          Button(type: "submit", variant:, small: true, name: ACT, value:, data:, icon:) { t(label) }
-        end
 
         def confirm = { confirm: t(".confirm_delete") }
 

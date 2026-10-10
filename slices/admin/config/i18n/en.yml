@@ -492,7 +492,11 @@ en:
         apply: "Apply"
       bulk_bar:
         all: "Select all"
+        tag: "Tag"
+        tag_name: "Tag name"
+        tag_placeholder: "tag"
         ticked: "%{count} ticked"
+        untag: "Untag"
       bulk_toggle:
         label: "Select"
       calendar:
@@ -1021,9 +1025,6 @@ en:
           confirm_delete: "Delete the ticked drafts? This cannot be undone."
           delete: "Delete"
           label: "Ticked posts"
-          tag: "Tag"
-          tag_name: "Tag name"
-          tag_placeholder: "tag"
         delete_form:
           confirm: "Delete this post? You can't undo it."
           confirm_webmentions:
@@ -1748,10 +1749,6 @@ en:
           move: "Move"
           move_to: "Move to"
           pick_list: "Move to…"
-          tag: "Tag"
-          tag_name: "Tag name"
-          tag_placeholder: "tag"
-          untag: "Untag"
         closed:
           canceled: "canceled"
           canceled_at: "canceled %{time}"
