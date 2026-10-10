@@ -15,7 +15,7 @@ module Admin
           discard = { confirm: t(".confirm_discard", job: job.name) }
 
           ListItem(title: job.name, href: nil, sub: nil, icon: "fa-solid fa-skull", hover: true) do |item|
-            item.body { p(class: "li-sub") { Stamped(text:, at: job.died_at) } }
+            item.meta { p(class: "li-sub") { Stamped(text:, at: job.died_at) } }
             job_form(:admin_retry_dead_job, job, t(".retry"), "fa-solid fa-rotate-right")
             job_form(:admin_discard_dead_job, job, t(".discard"), "fa-solid fa-trash", data: discard)
           end

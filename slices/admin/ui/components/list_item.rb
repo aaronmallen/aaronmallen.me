@@ -5,7 +5,6 @@ module Admin
     module Components
       class ListItem < Component
         prop :title, Blog::Types::String
-        prop :id, Blog::Types::String.optional, default: nil
         prop :href, Blog::Types::String.optional
         prop :sub, Blog::Types::String.optional
         prop :icon, Blog::Types::String.optional, default: nil
@@ -13,16 +12,6 @@ module Admin
         prop :link, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :hover, Blog::Types::Bool, default: false
-
-        def beside(&block)
-          @beside = block
-          nil
-        end
-
-        def body(&block)
-          @body = block
-          nil
-        end
 
         def meta(&block)
           @meta = block
@@ -32,7 +21,7 @@ module Admin
         def view_template(&)
           side = capture(&)
 
-          div(id: @id, class: "li", data: { key_row: true, **@data }) do
+          div(class: "li", data: { key_row: true, **@data }) do
             @pick ? render_picked : render_body
             div(class: ["li-side", ("hov" if @hover)]) { raw(safe(side)) } unless side.empty?
           end
@@ -40,17 +29,16 @@ module Admin
 
         private
 
-        def main? = @sub || @body || @meta
+        def main? = @sub || @meta
 
         def render_body = main? ? render_main : render_head
 
         def render_head
-          return render_title unless @beside || @icon
+          return render_title unless @icon
 
           div(class: "li-head") do
-            Icon([@icon, "li-icon"]) if @icon
+            Icon([@icon, "li-icon"])
             render_title
-            @beside&.call
           end
         end
 
@@ -58,7 +46,6 @@ module Admin
           div(class: "li-main") do
             render_head
             p(class: "li-sub") { @sub } if @sub
-            @body&.call
             @meta&.call
           end
         end
