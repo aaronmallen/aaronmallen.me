@@ -7,6 +7,7 @@ area: [activity, admin, analytics, api, backups, contact, decisions, links, mcp,
   record, saved_views, search, social, suggestions, tags, tasks]
 supersedes: ["0003"]
 issue: "#665"
+amended: ["#917"]
 tags: [slices, exports, repos, queries, mutations, rubocop, cycles]
 ---
 
@@ -40,8 +41,19 @@ A slice may keep one read repo and one write repo, or several of each, one per t
 method straight. A write crosses as an operation, so the contract's rules travel with it. A write repo never leaves
 its slice. The query classes and the `queries/` folders go.
 
+Four other kinds of key may cross, since none of them holds a write repo:
+
+- **`endpoints.*`**, which `api` exports so `mcp` can call its endpoints in process, as ADR 0088 decides.
+- **`auth.session_reader`**, which `admin` exports so `public` and `mcp` can read the operator's GitHub session. ADR
+  0003 names this edge.
+- **`networks.all`**, the provider `social` exports so `posts` and `suggestions` can measure text against each
+  network. ADR 0003 names this edge too.
+- **A client provider**: `github.client` and `linear.client` from `record`, and `store.client` from `media`. ADR 0001
+  makes each client a provider in the slice that owns it, and a slice that calls one imports its key.
+
 **The `Hanami/SliceExports` cop holds the rule.** It comes from `rubocop-hanami`, runs under `mise run lint`, and
-fails on any export that is not a read repo key or an `operations.*` key.
+fails on any export that is not a read repo key, an `operations.*` key or one of the keys above. A new kind of key
+needs a line here and in the cop's allow list.
 
 The rest of ADR 0003 stands, with a read repo key wherever it named a query key: a slice lists its exports in
 `slices/<name>/config/slice.rb` and leaves the rest private, no ROM association crosses a slice but the shared
