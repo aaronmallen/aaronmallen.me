@@ -349,7 +349,7 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     it "rotates the refresh token" do
-      expect(last_response.status).to eq(200)
+      expect(document["refresh_token"]).to be_a(String).and(satisfy { it != granted["refresh_token"] })
     end
 
     it "leaves the old access token to expire on its own" do
