@@ -5,10 +5,10 @@ module Admin
     module Posts
       class Publish < BulkAction
         FAILED = "posts_page.toasts.publish"
-        TOASTS = "post_form.toasts"
 
         include Deps[
           "settings",
+          describe_post_save: "operations.describe_post_save",
           post_queries: "posts.repos.post_queries",
           publish_draft: "posts.operations.publish_draft",
         ]
@@ -41,9 +41,9 @@ module Admin
         end
 
         def published(response, outcome, post)
-          date = i18n.l(Blog::TimeZone.local(post.published_at), format: :medium) if post.published_at
+          key, options = describe_post_save.call(outcome, post)
 
-          toast(response, "#{TOASTS}.#{outcome}", date:)
+          toast(response, key, **options)
         end
       end
     end

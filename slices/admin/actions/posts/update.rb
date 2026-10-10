@@ -5,10 +5,10 @@ module Admin
     module Posts
       class Update < Action
         KIND = Blog::Types::RecordKind["post"]
-        TOASTS = "post_form.toasts"
 
         include Deps[
           build_post_editor: "operations.build_post_editor",
+          describe_post_save: "operations.describe_post_save",
           list_record_links: "operations.list_record_links",
           post_queries: "posts.repos.post_queries",
           save_post: "posts.operations.save_post",
@@ -40,9 +40,9 @@ module Admin
         end
 
         def saved(response, outcome, post)
-          date = i18n.l(Blog::TimeZone.local(post.published_at), format: :medium) if post.published_at
+          key, options = describe_post_save.call(outcome, post)
 
-          toast(response, "#{TOASTS}.#{outcome}", date:)
+          toast(response, key, **options)
           response.redirect_to(routes.path(:admin_edit_post, id: post.id))
         end
       end

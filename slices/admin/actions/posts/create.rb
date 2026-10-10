@@ -4,10 +4,9 @@ module Admin
   module Actions
     module Posts
       class Create < Action
-        TOASTS = "post_form.toasts"
-
         include Deps[
           build_post_editor: "operations.build_post_editor",
+          describe_post_save: "operations.describe_post_save",
           save_post: "posts.operations.save_post",
         ]
 
@@ -29,9 +28,9 @@ module Admin
         def intent(request) = Blog::Types::PostIntentParam[request.params[:intent]]
 
         def saved(response, outcome, post)
-          date = i18n.l(Blog::TimeZone.local(post.published_at), format: :medium) if post.published_at
+          key, options = describe_post_save.call(outcome, post)
 
-          toast(response, "#{TOASTS}.#{outcome}", date:)
+          toast(response, key, **options)
           response.redirect_to(routes.path(:admin_edit_post, id: post.id))
         end
       end
