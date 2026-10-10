@@ -72,8 +72,10 @@ module Blog
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)
+    IntegerParam = Types::Params::Integer | Types::Any
     IssuedSecret = Types::String.constrained(format: /\A[A-Za-z0-9_-]{43}\z/)
     NewSecret = IssuedSecret.default { SecureRandom.urlsafe_base64(SECRET_BYTES) }
+    ListParam = Types::Any.constructor { |value| value.is_a?(::String) ? value.split(",") : value }
     LocalTime = Types::Instance(Object).constructor do |value|
       text = TrimmedText[value]
       next nil if text.empty?

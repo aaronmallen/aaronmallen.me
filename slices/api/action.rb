@@ -14,7 +14,6 @@ module API
     MISSING_SCOPE = "this endpoint needs a token with the %s scope"
     NOT_AN_OBJECT = { error: "invalid_json", message: "the body takes a JSON object" }.freeze
     OK = 200
-    SEPARATOR = ","
     STATUSES = { failed: 500, invalid: 422, not_found: 404, unavailable: 503 }.freeze
     SCOPE = nil
     UNAUTHORIZED = 401
@@ -52,7 +51,7 @@ module API
       halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
     end
 
-    def number(value) = Integer(value, 10, exception: false) || value
+    def number(value) = Blog::Types::IntegerParam[value]
 
     def paged_query(request, *keys)
       found = query(request, *keys, :page)
@@ -93,6 +92,6 @@ module API
       end
     end
 
-    def split(values) = values.is_a?(String) ? values.split(SEPARATOR) : values
+    def split(values) = Blog::Types::ListParam[values]
   end
 end
