@@ -32,10 +32,7 @@ module Public
         }.compact
       end
 
-      def profiles
-        urls = Components::Footer::PROFILES.map { settings.public_send(it.first)[:profile_url] }
-        urls.select { Blog::Types::Url.valid?(it) }
-      end
+      def profiles = Profiles.call(:github, :bluesky, :mastodon).values
 
       def settings = Hanami.app.settings
 

@@ -4,11 +4,11 @@ module Public
   module UI
     module Components
       class Footer < Component
-        PROFILES = [
-          %i[github fa-github .networks.github].freeze,
-          %i[bluesky fa-bluesky .networks.bluesky].freeze,
-          %i[mastodon fa-mastodon .networks.mastodon].freeze,
-        ].freeze
+        PROFILES = {
+          github: %w[fa-github .networks.github].freeze,
+          bluesky: %w[fa-bluesky .networks.bluesky].freeze,
+          mastodon: %w[fa-mastodon .networks.mastodon].freeze,
+        }.freeze
 
         prop :year, Blog::Types::Integer
 
@@ -56,14 +56,11 @@ module Public
         def identity
           span(class: "site-footer-group h-card") do
             copyright
-            PROFILES.each { |(name, icon, label_key)| profile_link(name:, icon:, label_key:) }
+            Profiles.call(*PROFILES.keys).each { |network, href| profile_link(href, *PROFILES.fetch(network)) }
           end
         end
 
-        def profile_link(name:, icon:, label_key:)
-          href = Hanami.app.settings.public_send(name)[:profile_url]
-          return unless Blog::Types::Url.valid?(href)
-
+        def profile_link(href, icon, label_key)
           a(class: "site-footer-link", href:, rel: "me") do
             IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
           end

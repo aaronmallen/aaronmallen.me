@@ -5,11 +5,11 @@ module Public
     module Components
       class ContactInfo < Component
         HANAKAI_URL = "https://hanakai.org"
-        PROFILES = [
-          %i[github fa-github .elsewhere.github].freeze,
-          %i[mastodon fa-mastodon .elsewhere.mastodon].freeze,
-          %i[bluesky fa-bluesky .elsewhere.bluesky].freeze,
-        ].freeze
+        PROFILES = {
+          github: %w[fa-github .elsewhere.github].freeze,
+          mastodon: %w[fa-mastodon .elsewhere.mastodon].freeze,
+          bluesky: %w[fa-bluesky .elsewhere.bluesky].freeze,
+        }.freeze
 
         def view_template
           dl(class: "ci") do
@@ -24,7 +24,7 @@ module Public
 
         def elsewhere
           ul(class: "links") do
-            PROFILES.each { |(network, icon, key)| profile(network, icon, key) }
+            Profiles.call(*PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
           end
         end
 
@@ -42,10 +42,7 @@ module Public
           end
         end
 
-        def profile(network, icon, key)
-          href = Hanami.app.settings.public_send(network)[:profile_url]
-          return unless Blog::Types::Url.valid?(href)
-
+        def profile(href, icon, key)
           li do
             a(href:) { IconLabel(icon: ["fa-brands", icon]) { t(key) } }
           end

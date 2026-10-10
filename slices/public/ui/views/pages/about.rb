@@ -11,11 +11,11 @@ module Public
             %w[.hobbies.dnd.name .hobbies.dnd.body].freeze,
             %w[.hobbies.games.name .hobbies.games.body].freeze,
           ].freeze
-          PROFILES = [
-            %i[github fa-github .cta.links.github].freeze,
-            %i[mastodon fa-mastodon .cta.links.mastodon].freeze,
-            %i[bluesky fa-bluesky .cta.links.bluesky].freeze,
-          ].freeze
+          PROFILES = {
+            github: %w[fa-github .cta.links.github].freeze,
+            mastodon: %w[fa-mastodon .cta.links.mastodon].freeze,
+            bluesky: %w[fa-bluesky .cta.links.bluesky].freeze,
+          }.freeze
 
           prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
@@ -59,7 +59,7 @@ module Public
               p { t(".cta.body") }
               ul(class: "links") do
                 li { link(path(:contact), "fa-solid fa-envelope", t(".cta.links.contact")) }
-                PROFILES.each { |(network, icon, key)| profile(network, icon, key) }
+                Profiles.call(*PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
               end
             end
           end
@@ -80,10 +80,7 @@ module Public
             linked_line(before, href, link, ".prose.open_source.closing")
           end
 
-          def profile(network, icon, key)
-            href = Hanami.app.settings.public_send(network)[:profile_url]
-            return unless Blog::Types::Url.valid?(href)
-
+          def profile(href, icon, key)
             li { link(href, "fa-brands #{icon}", t(key)) }
           end
 
