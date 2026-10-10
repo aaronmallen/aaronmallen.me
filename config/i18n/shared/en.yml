@@ -24,14 +24,6 @@ en:
       short: "%b %-d · %H:%M"
   ui:
     components:
-      main_nav:
-        label: "Main"
-        pages:
-          about: "about"
-          contact: "contact"
-          projects: "projects"
-          writing: "writing"
-        skip_link: "Skip to content"
       pager:
         label: "Pages"
         newer: "Newer"

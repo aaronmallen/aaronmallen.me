@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Blog
+module Public
   module UI
     module Components
       class MainNav < Component

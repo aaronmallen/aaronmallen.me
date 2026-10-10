@@ -59,6 +59,14 @@ en:
           bluesky: "bluesky"
           github: "github"
           mastodon: "mastodon"
+      main_nav:
+        label: "Main"
+        pages:
+          about: "about"
+          contact: "contact"
+          projects: "projects"
+          writing: "writing"
+        skip_link: "Skip to content"
       posts:
         edits:
           edited: "Edited"
