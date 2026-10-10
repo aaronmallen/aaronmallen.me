@@ -7,6 +7,7 @@ module Blog
         agent: [:agents, Types::Normalized::ContributorSlug],
         contributor: [:contributors, Types::Normalized::ContributorKind],
         model: [:models, Types::Normalized::ContributorSlug],
+        project: [:projects, Types::Normalized::Slug],
         repo: [:repos, Types::Normalized::Repo],
         tag: [:tags, Types::Normalized::Tag],
       }.freeze

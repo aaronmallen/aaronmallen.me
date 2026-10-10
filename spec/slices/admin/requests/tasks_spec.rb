@@ -2329,6 +2329,51 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to eq(["Ship the search"])
       end
 
+      describe "by project" do
+        def link(task, project)
+          Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "project", other_id: project.id })
+        end
+
+        let(:site) { create(:project, name: "aaronmallen.me") }
+
+        before do
+          link(create(:task, title: "Ship the site", tags: %w[ruby]), site)
+          link(create(:task, title: "Draft the site post", tags: %w[writing]), site)
+          link(create(:task, title: "Ship the gem", tags: %w[ruby]), create(:project, name: "Other Gem"))
+        end
+
+        it "narrows to the tasks linked to the project its slug names" do
+          search("project:aaronmallen-me")
+
+          expect(titles).to eq(["Ship the site", "Draft the site post"])
+        end
+
+        it "reads the slug in any case" do
+          search("project:Other-Gem")
+
+          expect(titles).to eq(["Ship the gem"])
+        end
+
+        it "narrows by tag beside it" do
+          search("project:aaronmallen-me tag:ruby")
+
+          expect(titles).to eq(["Ship the site"])
+        end
+
+        it "finds nothing for a project it does not know" do
+          search("project:nowhere")
+
+          expect(titles).to be_empty
+        end
+
+        it "narrows the completed tab the same way" do
+          link(create(:task, :done, title: "Shipped the site", completed_at: Time.now), site)
+          search("project:aaronmallen-me", filter: "completed")
+
+          expect(titles).to eq(["Shipped the site"])
+        end
+      end
+
       it "says so when nothing in the list matches" do
         search("nothing here")
 
@@ -2548,6 +2593,125 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         get "/admin/tasks", filter: "completed"
 
         expect(page).to have_no_css("nav.pager")
+      end
+    end
+
+    describe "the archive over a range of days" do
+      def day(days) = (Blog::TimeZone.today - days).iso8601
+
+      def finished(title, days, hour, **)
+        on = Blog::TimeZone.today - days
+        create(:task, :done, title:, completed_at: Blog::TimeZone.local_time(on.year, on.month, on.day, hour), **)
+      end
+
+      def range(from, to, **) = get("/admin/tasks", { filter: "completed", from:, to:, ** })
+
+      before do
+        finished("Seed the queue", 3, 23)
+        finished("Move the toggle", 2, 0)
+        finished("Index the activities", 1, 23)
+        finished("Ship the screen", 0, 0)
+      end
+
+      it "lists only the tasks closed in the range, both ends included" do
+        range(day(2), day(1))
+
+        expect(titles).to eq(["Index the activities", "Move the toggle"])
+      end
+
+      it "takes a range of one day" do
+        range(day(0), day(0))
+
+        expect(titles).to eq(["Ship the screen"])
+      end
+
+      it "keeps a canceled task closed in the range" do
+        finished("Drop the idea", 1, 12, status: "canceled")
+        range(day(1), day(1))
+
+        expect(titles).to eq(["Index the activities", "Drop the idea"])
+      end
+
+      it "narrows the range by a search" do
+        range(day(3), day(0), q: "toggle")
+
+        expect(titles).to eq(["Move the toggle"])
+      end
+
+      [["a bad date", "nope"], ["a day that does not exist", "2026-02-30"]].each do |(name, bad)|
+        it "lists every closed task for #{name}" do
+          range(bad, day(0))
+
+          expect(titles.size).to eq(4)
+        end
+      end
+
+      it "lists every closed task when only one end is given" do
+        get "/admin/tasks", filter: "completed", from: day(1)
+
+        expect(titles.size).to eq(4)
+      end
+
+      it "lists every closed task for a range that ends before it starts" do
+        range(day(0), day(2))
+
+        expect(titles.size).to eq(4)
+      end
+
+      it "leaves the open lists alone" do
+        create(:task, title: "Email the accountant")
+        get "/admin/tasks", filter: "next", from: day(0), to: day(0)
+
+        expect(titles).to eq(["Email the accountant"])
+      end
+
+      it "blames the filters when the range is empty" do
+        range(day(9), day(8))
+
+        expect(page).to have_css(".empty", exact_text: i18n.t("ui.views.tasks.index.empty.completed_no_match"))
+      end
+
+      it "keeps the range in the search form", :aggregate_failures do
+        range(day(2), day(1))
+
+        expect(page).to have_field("from", type: :hidden, with: day(2))
+        expect(page).to have_field("to", type: :hidden, with: day(1))
+      end
+
+      it "keeps the range on the completed tab and off the others", :aggregate_failures do
+        range(day(2), day(1))
+        tabs = page.all(".task-tabs .screen-tab").map { it["href"] }
+
+        expect(tabs.last).to eq("/admin/tasks?filter=completed&from=#{day(2)}&to=#{day(1)}")
+        expect(tabs[0...-1]).to all(satisfy { !it.include?("from=") })
+      end
+
+      it "offers to clear the range, keeping the search" do
+        range(day(2), day(1), q: "the")
+
+        expect(page).to have_link(href: "/admin/tasks?filter=completed&q=the", class: "bt")
+      end
+
+      it "names the range on the clear link" do
+        range(day(2), day(1))
+
+        expect(page.find("a[aria-label='Clear the date range']").text.strip).to eq(
+          [2, 1].map { (Blog::TimeZone.today - it).strftime("%b %-d") }.join(" → "),
+        )
+      end
+
+      it "offers no clear link without a range" do
+        get "/admin/tasks", filter: "completed"
+
+        expect(page).to have_no_css("a[aria-label='Clear the date range']")
+      end
+
+      it "keeps the range on the pager", :aggregate_failures do
+        lower_page_size(:admin, to: 1)
+        range(day(3), day(1))
+
+        expect(page.find("nav.pager a[rel='next']")[:href])
+          .to eq("/admin/tasks?filter=completed&from=#{day(3)}&to=#{day(1)}&page=2")
       end
     end
 

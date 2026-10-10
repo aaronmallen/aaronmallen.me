@@ -1762,6 +1762,7 @@ en:
           title:
             blank: "Write the task down first."
         filters:
+          clear_range: "Clear the date range"
           search: "Search tasks"
           search_placeholder: "search · tag:site…"
         grip:

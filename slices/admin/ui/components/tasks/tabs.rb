@@ -13,6 +13,7 @@ module Admin
             Blog::Types::TaskTab["external"] => ".external",
             Blog::Types::TaskTab["completed"] => ".completed",
           }.freeze
+          COMPLETED = Blog::Types::TaskTab["completed"]
           EXTERNAL = Blog::Types::TaskTab["external"]
           NAMES = Blog::Types::TaskTab.values.freeze
           UNSEEN = :unseen
@@ -20,6 +21,7 @@ module Admin
           prop :counts, Blog::Types::Hash
           prop :tab, Blog::Types::String
           prop :query, Blog::Types::String
+          prop :range, Blog::Types::Hash
           prop :saved_views, Blog::Types::Hash
 
           def view_template
@@ -38,7 +40,7 @@ module Admin
           def params(name)
             found = { filter: name }
             found[:q] = @query unless @query.empty?
-            found
+            name == COMPLETED ? found.merge(@range) : found
           end
 
           def tab(name)

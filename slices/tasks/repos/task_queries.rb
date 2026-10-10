@@ -24,8 +24,10 @@ module Tasks
         Structs::FoundTasks.new(paged: page.fill(rows), total: found.count)
       end
 
-      def finished(page:, **search)
-        page.fill(with_details.combine(:sprint).closed.searched(**search).newest_first.paged(page).to_a)
+      def finished(page:, from: nil, to: nil, **search)
+        days = (from..to if from && to)
+
+        page.fill(with_details.combine(:sprint).closed(days).searched(**search).newest_first.paged(page).to_a)
       end
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h

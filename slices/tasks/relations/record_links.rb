@@ -21,6 +21,10 @@ module Tasks
 
         linked.dataset.unordered.to_hash_groups(:left_id, :right_id)
       end
+
+      def task_ids_in(project_ids)
+        dataset.unordered.where(left_kind: TASK, right_kind: PROJECT, right_id: project_ids).select(:left_id)
+      end
     end
   end
 end

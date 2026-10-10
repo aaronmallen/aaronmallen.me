@@ -32,7 +32,7 @@ module Tasks
         stamped(:update, result: :many).call(carried_count: Sequel[:carried_count] + 1, sprint_id:).size
       end
 
-      def closed = where(status: CLOSED)
+      def closed(days = nil) = days ? where(status: CLOSED, COMPLETED_ON => days) : where(status: CLOSED)
 
       def credited(contributors: [], agents: [], models: [])
         return none if unmatchable?(agents, models) || (contributors - CONTRIBUTORS).any?
@@ -122,9 +122,9 @@ module Tasks
           .order(self[:position].desc, self[:id].desc)
       end
 
-      def searched(tags: [], text: "", **credits)
-        found = credited(**credits)
-        found = found.matching(text) unless text.empty?
+      def searched(tags: [], projects: [], text: "", **credits)
+        found = text.empty? ? credited(**credits) : credited(**credits).matching(text)
+        found = found.where(id: record_links.task_ids_in(self.projects.slugged(projects))) unless projects.empty?
         tags.empty? ? found : found.tagged(tags)
       end
 

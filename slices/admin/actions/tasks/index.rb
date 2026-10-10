@@ -26,6 +26,8 @@ module Admin
             tab: Blog::Types::TaskTabParam[request.params[:filter]],
             pool: request.params[:pool],
             query: request.params[:q],
+            from: Blog::Types::DateParam[request.params[:from]],
+            to: Blog::Types::DateParam[request.params[:to]],
           )
         end
 

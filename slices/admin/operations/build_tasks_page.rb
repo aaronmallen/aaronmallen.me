@@ -7,7 +7,7 @@ module Admin
 
       CARRIED = :carried_in
       COMPLETED = Blog::Types::TaskTab["completed"]
-      FIELDS = %i[tag contributor agent model].freeze
+      FIELDS = %i[tag project contributor agent model].freeze
       FINISHED_TODAY = :finished_today
       NEXT = Blog::Types::TaskFilter["next"]
       TODAY = Blog::Types::TaskTab["today"]
@@ -23,12 +23,12 @@ module Admin
         task_source_queries: "tasks.repos.task_source_queries",
       ]
 
-      def call(page:, tab: TODAY, pool: nil, query: nil, now: Time.now)
+      def call(page:, tab: TODAY, pool: nil, query: nil, from: nil, to: nil, now: Time.now)
         sprint = step current_sprint.call(now:)
         today = Blog::TimeZone.today(now)
         planned = sprint_queries.after(today)
-        filters = { query: Blog::Types::TrimmedText[query] }
-        tasks = step listed(tab, sprint, planned, page, filters[:query])
+        filters = { query: Blog::Types::TrimmedText[query], **closed_range(from, to) }
+        tasks = step listed(tab, sprint, planned, page, filters)
 
         {
           counts: counts(sprint, planned, today), filters:, lead: lead(tab, sprint, page, filters), tab:, tasks:,
@@ -37,6 +37,12 @@ module Admin
       end
 
       private
+
+      def closed_range(from, to)
+        range = ::Tasks::Contracts::ClosedRangeContract.new.call(from:, to:)
+
+        range.success? ? range.to_h : { from: nil, to: nil }
+      end
 
       def counts(sprint, planned, today)
         finished = task_queries.finished_counts(today)
@@ -57,10 +63,10 @@ module Admin
         task_queries.list(tab, sprint:, page: previous).rows.last&.id
       end
 
-      def listed(tab, sprint, planned, page, query)
-        search = search_query.call(query:, fields: FIELDS).to_h
+      def listed(tab, sprint, planned, page, filters)
+        search = search_query.call(query: filters[:query], fields: FIELDS).to_h
         tasks = case tab
-                  when COMPLETED then task_queries.finished(page:, **search)
+                  when COMPLETED then task_queries.finished(page:, **filters.slice(:from, :to), **search)
                   when UPCOMING then whole(task_queries.planned(planned, **search))
                   else task_queries.list(tab, sprint:, page:, **search)
                 end

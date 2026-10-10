@@ -43,11 +43,11 @@ module Admin
 
           def view_template
             PageHead(title: t(".heading"), sub:) do
-              Filters(tab: @tab, query: @filters[:query])
+              Filters(tab: @tab, query: @filters[:query], range:)
               BulkToggle(form: Bulk::ID) if bulk?
               CreateButton()
             end
-            Tabs(counts: @counts, tab: @tab, query: @filters[:query], saved_views: @filters[:saved_views])
+            Tabs(counts: @counts, tab: @tab, query: @filters[:query], range:, saved_views: @filters[:saved_views])
             body
             p(class: "task-note") { t(".footnote") }
           end
@@ -88,7 +88,7 @@ module Admin
 
           def external? = @tab == EXTERNAL
 
-          def filtering? = !@filters[:query].empty?
+          def filtering? = !@filters[:query].empty? || range.any?
 
           def list
             Card(title: list_title, class: "task-list", **LIST) do |card|
@@ -113,7 +113,9 @@ module Admin
 
           def pager = Pager(page: @tasks, route: :admin_tasks, params: pager_params)
 
-          def pager_params = filtering? ? { filter: @tab, q: @filters[:query] } : { filter: @tab }
+          def pager_params = { filter: @tab, q: (@filters[:query] unless @filters[:query].empty?), **range }.compact
+
+          def range = completed? ? @filters.slice(:from, :to).compact : Blog::Constants::EMPTY_HASH
 
           def row(task)
             Row(task:, filter: @tab, today: @today, lead: @lead, ordered: !filtering?, scheduled:, bulk: Bulk::ID,
