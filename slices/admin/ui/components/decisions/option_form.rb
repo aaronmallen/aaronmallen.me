@@ -43,8 +43,11 @@ module Admin
             path(:admin_update_decision_option, id: @decision.id, option_id: @option.id)
           end
 
-          def note
-            EditNote(name: "option[note]", scope:, value: value(:note), errors: @errors)
+          def note = EditNote(**note_props)
+
+          def note_props
+            { field: :note, name: "option[note]", value: value(:note), errors: @errors, error: FieldError, scope:,
+              renderer: RENDERER, hint: t(".note_hint"), placeholder: t(".note_placeholder") }
           end
 
           def noted? = @option && @decision.closed?

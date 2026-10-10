@@ -588,12 +588,10 @@ en:
           resolve_title: "Resolve it"
         comments:
           title: "Comments"
-        edit_note:
-          hint: "Needed when you change a closed decision. It goes on the timeline."
-          label: "What changed and why"
-          placeholder: "Added the cost of running it."
         editor:
           cancel: "Cancel"
+          note_hint: "Needed when you change a closed decision. It goes on the timeline."
+          note_placeholder: "Added the cost of running it."
           open: "Open decision"
           problem: "Problem"
           problem_placeholder: "What needs a choice, and why it matters."
@@ -623,6 +621,8 @@ en:
           add: "Add option"
           body: "Details"
           body_placeholder: "What it is, and its pros and cons."
+          note_hint: "Needed when you change a closed decision. It goes on the timeline."
+          note_placeholder: "Added the cost of running it."
           save: "Save option"
           title: "Option"
           title_placeholder: "Use Sidekiq"
@@ -656,6 +656,8 @@ en:
           resolved: "Resolved it with %{option}"
       dialog:
         close: "Close"
+      edit_note:
+        label: "What changed and why"
       edit_note_dialog:
         cancel: "Cancel"
         save: "Save"
@@ -1037,10 +1039,6 @@ en:
           delete: "Delete post"
           done: "Done"
           title: "Post details"
-        edit_note:
-          hint: "Needed when you change the body. Readers see it on the post."
-          label: "What changed and why"
-          placeholder: "Fixed the benchmark numbers; the first run used a debug build."
         edit_notes:
           edit: "Edit"
           edit_label: "Note"
@@ -1049,6 +1047,8 @@ en:
         editor:
           all_posts: "All posts"
           body: "Body"
+          edit_note_hint: "Needed when you change the body. Readers see it on the post."
+          edit_note_placeholder: "Fixed the benchmark numbers; the first run used a debug build."
           placeholder: "Write it."
           read_time: "~%{count} min read"
           summary: "Summary"

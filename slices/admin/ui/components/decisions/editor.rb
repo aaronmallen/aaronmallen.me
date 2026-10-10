@@ -43,7 +43,12 @@ module Admin
 
           def form_action = @decision ? path(:admin_update_decision, id: @decision.id) : path(:admin_create_decision)
 
-          def note = EditNote(name: "decision[note]", scope: FieldError::SCOPE, value: @values[:note], errors: @errors)
+          def note = EditNote(**note_props)
+
+          def note_props
+            { field: :note, name: "decision[note]", value: @values[:note], errors: @errors, error: FieldError,
+              renderer: RENDERER, hint: t(".note_hint"), placeholder: t(".note_placeholder") }
+          end
 
           def problem_field
             Field(label: t(".problem")) do

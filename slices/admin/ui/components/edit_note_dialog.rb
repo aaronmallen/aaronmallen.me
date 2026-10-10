@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       class EditNoteDialog < Component
-        prop :title_id, Blog::Types::String, default: -> { "edit-note-dialog-title" }
+        prop :title_id, Blog::Types::String
 
         def view_template
           Dialog(title_id: @title_id, class: "modal", data: { dialog: true, edit_note_dialog: true }) do |dialog|

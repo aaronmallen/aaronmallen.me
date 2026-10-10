@@ -255,6 +255,12 @@ RSpec.describe "Admin post editor", type: :request do
         expect(page).to have_field("What changed and why", with: "")
       end
 
+      it "tells the note box what readers see", :aggregate_failures do
+        scope = "ui.components.posts.editor"
+        expect(page).to have_field("What changed and why", placeholder: i18n.t("edit_note_placeholder", scope:))
+        expect(page).to have_css(".card .hint", exact_text: i18n.t("edit_note_hint", scope:))
+      end
+
       it "puts the note box below the body" do
         expect(page).to have_css(".editor-main > [data-markdown-editor]:has(#post-body) + .card #{note_box}")
       end

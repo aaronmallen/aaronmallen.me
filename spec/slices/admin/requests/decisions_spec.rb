@@ -335,11 +335,13 @@ RSpec.describe "Admin decisions", type: :request do
 
       before { close(:resolve, option_id: option.id, reason: "It runs") }
 
-      it "asks for a note in the form" do
+      it "asks for a note in the form", :aggregate_failures do
         get "/admin/decisions/#{decision.id}"
 
-        expect(page.find("form[action='/admin/decisions/#{decision.id}/options/#{option.id}']", visible: :all))
-          .to have_css("textarea[name='option[note]']", visible: :all)
+        form = page.find("form[action='/admin/decisions/#{decision.id}/options/#{option.id}']", visible: :all)
+        scope = "ui.components.decisions.option_form"
+        expect(form).to have_field("option[note]", placeholder: t("note_placeholder", scope:), visible: :all)
+        expect(form).to have_css(".hint", exact_text: t("note_hint", scope:), visible: :all)
       end
 
       it "refuses the save without a note" do
@@ -416,10 +418,11 @@ RSpec.describe "Admin decisions", type: :request do
 
       before { close(:drop, reason: "No need") }
 
-      it "asks for a note" do
+      it "asks for a note", :aggregate_failures do
         get "/admin/decisions/#{decision.id}/edit"
 
-        expect(page).to have_css("textarea[name='decision[note]']")
+        expect(page).to have_field("decision[note]", placeholder: t("ui.components.decisions.editor.note_placeholder"))
+        expect(page).to have_css(".hint", exact_text: t("ui.components.decisions.editor.note_hint"))
       end
 
       it "refuses a new problem without a note", :aggregate_failures do

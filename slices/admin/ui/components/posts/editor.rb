@@ -54,12 +54,20 @@ module Admin
             }
           end
 
+          def edit_note_props
+            {
+              field: :edit_note, name: "post[edit_note]", value: @values[:edit_note], errors: @errors,
+              error: FieldError, renderer: "posts", hint: t(".edit_note_hint"),
+              placeholder: t(".edit_note_placeholder"),
+            }
+          end
+
           def form_action = @post ? path(:admin_update_post, id: @post.id) : path(:admin_create_post)
 
           def main
             div(class: "editor-main") do
               MarkdownEditor(**body_editor_props) { Preview(**@preview) }
-              EditNote(value: @values[:edit_note], errors: @errors) if published?
+              EditNote(**edit_note_props) if published?
             end
           end
 
