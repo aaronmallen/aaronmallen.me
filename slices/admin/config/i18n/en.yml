@@ -884,7 +884,6 @@ en:
           anywhere: "anywhere"
           current: "current"
           escape: "esc"
-          go_to: "Go to"
           create_task: "Create task “%{query}”"
           label: "Command palette"
           move: "move"

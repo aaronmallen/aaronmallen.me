@@ -52,19 +52,37 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(evaluate_script("document.activeElement.getBoundingClientRect().height")).to be >= 44
     end
 
-    it "lists every section and settings tab under Go to", :aggregate_failures do
-      within("[aria-labelledby='command-palette-group-go-to']") do
-        expect(page).to have_css(".pal-g", text: /go to/i)
+    it "heads each screen with its category", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-inbox']") do
+        expect(page).to have_css(".pal-g", text: /inbox/i)
         expect(page).to have_css("#command-palette-messages")
-        expect(page).to have_css("#command-palette-security")
       end
     end
 
-    it "orders the groups Actions, Saved views, Go to, Records, Search" do
+    it "puts the time report under Insights" do
+      expect(page).to have_css("[aria-labelledby='command-palette-group-insights'] #command-palette-time")
+    end
+
+    it "holds every settings tab under Settings" do
+      rows = page.all("[aria-labelledby='command-palette-group-settings'] [data-palette-option]").map { it[:id] }
+
+      expect(rows).to eq(%w[tags people task_rules webmention_settings tokens services clients security]
+        .map { "command-palette-#{it}" })
+    end
+
+    it "keeps each screen's jump letter" do
+      within("[aria-labelledby='command-palette-group-journal']") do
+        expect(page).to have_css("#command-palette-journal[data-key='g j']")
+      end
+    end
+
+    it "orders the groups Actions, Records, Saved views, each category, then Search" do
       groups = page.all("#command-palette [data-palette-group]", visible: :all).map { it["aria-labelledby"] }
       names = groups.map { it.sub(/\Acommand-palette-(group-)?/, "").sub(/\Akind-.+/, "records") }
 
-      expect(names.uniq).to eq(%w[actions saved-views go-to records see-all])
+      expect(names.uniq).to eq(
+        %w[actions records saved-views today tasks journal publish inbox insights settings see-all],
+      )
     end
 
     it "shows the key on the actions that have one", :aggregate_failures do
@@ -148,6 +166,11 @@ RSpec.describe "Admin command palette", type: :feature do
       expect(active).to eq("command-palette-messages")
     end
 
+    it "hides the categories it filters out", :aggregate_failures do
+      expect(page).to have_css("[aria-labelledby='command-palette-group-inbox']")
+      expect(page).to have_no_css("[aria-labelledby='command-palette-group-publish']")
+    end
+
     it "announces how many rows are left" do
       expect(page).to have_css("[data-palette-status]", text: "1 result", visible: :all)
     end
@@ -158,6 +181,21 @@ RSpec.describe "Admin command palette", type: :feature do
 
     it "offers a row that sees every result for the query" do
       expect(page).to have_css("#command-palette-see-all", text: "See all results for “mess”")
+    end
+  end
+
+  describe "typing a category name" do
+    before do
+      open_palette
+      query.send_keys(*"publish".chars)
+    end
+
+    it "lists that category's screens", :aggregate_failures do
+      within("[aria-labelledby='command-palette-group-publish']") do
+        expect(page).to have_css("#command-palette-posts")
+        expect(page).to have_css("#command-palette-social")
+        expect(page).to have_css("#command-palette-projects")
+      end
     end
   end
 

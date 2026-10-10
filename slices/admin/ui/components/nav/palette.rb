@@ -8,7 +8,6 @@ module Admin
           ACTIONS_GROUP = "command-palette-group-actions"
           CREATE_TASK_ID = "command-palette-create-task-typed"
           DIALOG_ID = "command-palette"
-          GO_TO_GROUP = "command-palette-group-go-to"
           HINTS = { ".move" => "↑↓", ".open" => "↵", ".anywhere" => "⌘K" }.freeze
           LIST_ID = "command-palette-list"
           QUERY = "{query}"
@@ -68,6 +67,14 @@ module Admin
             end
           end
 
+          def category_groups
+            @sections.group_by(&:group).each do |group, sections|
+              row_group("command-palette-group-#{group}", t(sections.first.group_key)) do
+                sections.each { section_row(it) }
+              end
+            end
+          end
+
           def footer
             div(class: "pal-f", aria: { hidden: "true" }) do
               HINTS.each do |key, keys|
@@ -77,12 +84,6 @@ module Admin
                   plain(t(key))
                 end
               end
-            end
-          end
-
-          def go_to_group
-            row_group(GO_TO_GROUP, t(".go_to")) do
-              @sections.each { section_row(it) }
             end
           end
 
@@ -104,9 +105,9 @@ module Admin
               aria: { label: t(".results_label") }, data: { palette_list: true },
             ) do
               action_group
-              PaletteSavedViews()
-              go_to_group
               PaletteRecords()
+              PaletteSavedViews()
+              category_groups
               search_group
             end
           end

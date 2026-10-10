@@ -38,10 +38,11 @@ security) move to the avatar menu, with the site links, the key help, the theme 
 sub-tabs are links, so every screen they name opens without scripts. `live.js`
 morphs the top bar where it morphed the context bar ([ADR 0118][0118]).
 
-**The palette stays, regrouped.** It lists Actions, Saved views, Go to, Records and Search, in that order. Go to
-holds every screen and every Settings tab, and keeps each section's jump letter. Records search works as it does
-today ([ADR 0096][0096]). Actions keep `ListActions::ALL` and its `needs` and `from` rules, and a new action
-joins as an entry there.
+**The palette stays, regrouped.** It lists Actions, Records, Saved views, one group per category (Today, Tasks,
+Journal, Publish, Inbox, Insights and Settings) and Search, in that order. Each screen sits under its category's
+header and keeps its jump letter, and Settings holds every Settings tab. A search hides each header whose rows it
+filters out, and a category's name finds its screens. Records search works as it does today ([ADR 0096][0096]).
+Actions keep `ListActions::ALL` and its `needs` and `from` rules, and a new action joins as an entry there.
 
 **Drawers open from the right.** A drawer is `min(620px, 100%)` wide, or 760px for the wide variant, with a header,
 a body that scrolls and a footer. The task panel becomes the wide drawer and loads `/admin/tasks/:id` the way it
