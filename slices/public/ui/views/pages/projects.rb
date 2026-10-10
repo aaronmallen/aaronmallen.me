@@ -23,14 +23,6 @@ module Public
 
           def card_image = @projects.map(&:og_image_url).find { !it.to_s.empty? }
 
-          def page_head
-            header(class: "hd") do
-              span(class: "kicker") { t(".kicker") }
-              h1 { t(".heading") }
-              p(class: "ld") { t(".lede") }
-            end
-          end
-
           def past
             return if @past_projects.empty?
 

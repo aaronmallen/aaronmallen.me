@@ -56,12 +56,7 @@ module Public
           end
 
           def feedback_note
-            p(class: "post-feedback") do
-              plain t(".feedback.before")
-              whitespace
-              a(href: path(:contact)) { t(".feedback.link") }
-              plain t(".feedback.after")
-            end
+            linked_line(".feedback.before", path(:contact), ".feedback.link", ".feedback.after", class: "post-feedback")
           end
 
           def head_row

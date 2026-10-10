@@ -37,11 +37,7 @@ module Public
           def view_template
             content_for(:title, t(".title"))
 
-            header(class: "hd") do
-              span(class: "kicker") { t(".kicker") }
-              h1 { t(".heading") }
-              p(class: "ld") { t(".lede") }
-            end
+            page_head
             div(class: "prose") do
               SECTIONS.each_value { topic(**it) }
               requests
@@ -54,12 +50,7 @@ module Public
 
           def requests
             h2 { t(".requests.heading") }
-            p do
-              plain(t(".requests.body"))
-              whitespace
-              a(href: path(:contact)) { t(".requests.link") }
-              plain(t(".requests.closing"))
-            end
+            linked_line(".requests.body", path(:contact), ".requests.link", ".requests.closing")
           end
 
           def topic(heading:, paragraphs: [], items: [], closing: [])

@@ -72,25 +72,12 @@ module Public
 
           def open_source
             h2 { t(".prose.open_source.heading") }
-            paragraph_with_link(".prose.open_source.rust", path(:projects), ".prose.open_source.projects_link")
-            paragraph_with_link(".prose.open_source.ruby", HANAKAI_URL, ".prose.open_source.hanakai_link")
+            open_source_line(".prose.open_source.rust", path(:projects), ".prose.open_source.projects_link")
+            open_source_line(".prose.open_source.ruby", HANAKAI_URL, ".prose.open_source.hanakai_link")
           end
 
-          def page_head
-            header(class: "hd") do
-              span(class: "kicker") { t(".kicker") }
-              h1 { t(".heading") }
-              p(class: "ld") { t(".lede") }
-            end
-          end
-
-          def paragraph_with_link(lead, href, label)
-            p do
-              plain(t(lead))
-              whitespace
-              a(href:) { t(label) }
-              plain(t(".prose.open_source.closing"))
-            end
+          def open_source_line(before, href, link)
+            linked_line(before, href, link, ".prose.open_source.closing")
           end
 
           def profile(network, icon, key)

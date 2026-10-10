@@ -22,7 +22,7 @@ module Public
 
             div(class: "g even") do
               div(class: "stick") do
-                head
+                page_head
                 ContactInfo()
               end
               div { outcome }
@@ -76,14 +76,6 @@ module Public
             body_row
             honeypot
             input(type: "hidden", name: field_name(STAMP), value: @values[STAMP])
-          end
-
-          def head
-            header(class: "hd") do
-              span(class: "kicker") { t(".kicker") }
-              h1 { t(".heading") }
-              p(class: "ld") { t(".lede") }
-            end
           end
 
           def honeypot
