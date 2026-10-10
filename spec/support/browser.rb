@@ -172,7 +172,10 @@ RSpec.configure do |config|
 
   config.include Spec::Browser, :browser
 
-  config.before(:each, :browser) { today }
+  config.before(:each, :browser) do
+    Analytics::Slice.start(:geo)
+    today
+  end
 
   config.after(:each, :browser) { request_gate.reset }
 end

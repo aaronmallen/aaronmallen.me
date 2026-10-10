@@ -5,6 +5,7 @@ require "sidekiq"
 require "yaml"
 
 Sidekiq.testing!(:fake)
+Hanami.app.start(:sidekiq)
 Sidekiq.default_configuration.logger.level = Logger::WARN
 
 module Spec
