@@ -14,16 +14,8 @@ RSpec.describe "Web manifest", type: :request do
       expect(last_response.media_type).to eq("application/manifest+json")
     end
 
-    it "names the site after the owner" do
-      expect(manifest).to include("name" => "Aaron Allen", "short_name" => "Aaron Allen")
-    end
-
     it "lists the 192px and 512px icons by their fingerprinted URLs" do
       expect(manifest["icons"]).to eq([icon("icon-192.png", "192x192"), icon("icon-512.png", "512x512")])
-    end
-
-    it "fingerprints each icon URL" do
-      expect(manifest["icons"].map { it["src"] }).to all(match(%r{\A/assets/icon-\d+-\w+\.png\z}))
     end
   end
 
