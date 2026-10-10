@@ -28,14 +28,6 @@ RSpec.describe "Admin security", type: :request do
 
   def token(name) = API::Slice["operations.mint_token"].call(name:).value![:token]
 
-  describe "signed out" do
-    it "sends me to sign-in" do
-      get "/admin/security"
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

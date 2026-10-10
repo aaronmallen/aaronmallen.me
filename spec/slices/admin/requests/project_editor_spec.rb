@@ -600,18 +600,6 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
   end
 
   describe "signed out" do
-    it "redirects the new editor to sign-in" do
-      get "/admin/projects/new"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
-    it "redirects the editor to sign-in" do
-      get "/admin/projects/#{create(:project).id}/edit"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "refuses to create" do
       post "/admin/projects", project: { name: "sai" }
 

@@ -1232,14 +1232,6 @@ RSpec.describe "Admin post editor", type: :request do
   end
 
   describe "signed out" do
-    %w[/admin/posts/new /admin/posts/1/edit].each do |path|
-      it "redirects #{path} to sign-in" do
-        get path
-
-        expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-      end
-    end
-
     it "deletes nothing", :aggregate_failures do
       article = create(:post)
       post "/admin/posts/#{article.id}/delete"

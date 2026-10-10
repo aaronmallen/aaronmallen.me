@@ -613,12 +613,6 @@ RSpec.describe "Admin people", type: :request do
   describe "signed out" do
     let(:person) { create(:person, name: "Ada Lovelace") }
 
-    it "sends anybody who has not signed in to sign in" do
-      get "/admin/people"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "adds nobody" do
       post "/admin/people", person: { name: "Ada", key: "ada", mastodon_handle: "@ada@ruby.social" }
 

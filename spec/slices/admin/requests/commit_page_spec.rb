@@ -16,12 +16,6 @@ RSpec.describe "Admin commit page", :frozen_clock, type: :request do
   describe "signed out" do
     let(:record) { commit_record(repo: "employer/payroll", message: "fix the rate table\n\nfor the March run") }
 
-    it "redirects to sign-in" do
-      visit_commit(record)
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "sends neither the repo nor the message", :aggregate_failures do
       visit_commit(record)
 

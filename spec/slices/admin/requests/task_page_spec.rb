@@ -33,12 +33,6 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   def stamp(time) = Blog::TimeZone.local(time).strftime("%b %-d, %Y, %H:%M")
 
   describe "signed out" do
-    it "redirects to sign-in" do
-      read
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "sends neither the title nor the note", :aggregate_failures do
       read
 

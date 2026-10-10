@@ -19,12 +19,6 @@ RSpec.describe "Admin decisions", type: :request do
   def titles = page.all(".decision-row .decision-row-title").map(&:text)
 
   describe "signed out" do
-    it "sends the list to sign in" do
-      get "/admin/decisions"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "opens nothing" do
       post "/admin/decisions", decision: { title: "Pick", problem: "Why" }
 

@@ -100,6 +100,26 @@ RSpec.describe "Admin sessions", type: :request do
     end
   end
 
+  describe "every admin screen signed out" do
+    let(:paths) do
+      Admin::Slice.routes
+      Admin::Routes.definitions.filter_map do |(verb, (path))|
+        next if verb != :get || %w[/auth/github/callback /sign-in].include?(path)
+
+        "/admin#{path.gsub(/:\w+/) { it == ':network' ? 'mastodon' : '1' }}".chomp("/")
+      end
+    end
+
+    it "redirects to sign-in, or answers 401 where a script asks" do
+      unguarded = paths.reject do |path|
+        get path
+        last_response.unauthorized? || last_response.location.to_s.end_with?("/admin/sign-in")
+      end
+
+      expect([paths.size, unguarded]).to match([be > 40, []])
+    end
+  end
+
   describe "signing in as the operator" do
     it "opens the admin URL first asked for" do
       sign_in("/admin?tab=today")

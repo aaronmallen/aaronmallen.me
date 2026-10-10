@@ -340,12 +340,6 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     end
   end
 
-  it "redirects to sign-in when signed out" do
-    get "/admin/projects"
-
-    expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-  end
-
   it "refuses to archive when signed out" do
     project = create(:project)
     post "/admin/projects/#{project.id}/archive"

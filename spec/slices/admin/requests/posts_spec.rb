@@ -423,10 +423,4 @@ RSpec.describe "Admin posts", :frozen_clock, type: :request do
       expect(page).to have_css(".screen-tab[aria-current='page']", text: "posts")
     end
   end
-
-  it "redirects to sign-in when signed out" do
-    get "/admin/posts"
-
-    expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-  end
 end

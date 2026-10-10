@@ -3105,12 +3105,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
   describe "signed out" do
     let(:task) { create(:task, title: "Email the accountant") }
 
-    it "keeps the list off the screen" do
-      get "/admin/tasks"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "shows no task to anybody who has not signed in" do
       task
       get "/admin/tasks"

@@ -15,12 +15,6 @@ RSpec.describe "Admin pull request page", :frozen_clock, type: :request do
   describe "signed out" do
     let(:record) { pull_request(repo: "employer/payroll", body: "for the March run") }
 
-    it "redirects to sign-in" do
-      visit_pull_request(record)
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "sends neither the repo nor the description", :aggregate_failures do
       visit_pull_request(record)
 

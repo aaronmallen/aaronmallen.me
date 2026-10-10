@@ -30,14 +30,6 @@ RSpec.describe "Admin calendar", :frozen_clock, type: :request do
 
   def visit_calendar(params = {}) = get("/admin/calendar", params)
 
-  describe "signed out" do
-    it "redirects to sign-in" do
-      visit_calendar
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

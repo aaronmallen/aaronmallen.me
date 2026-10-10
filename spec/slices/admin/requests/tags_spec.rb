@@ -772,12 +772,6 @@ RSpec.describe "Admin tags", type: :request do
   describe "signed out" do
     let(:tag) { create(:tag, name: "ruby") }
 
-    it "keeps the screen off the screen" do
-      get "/admin/tags"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "shows no tag to anybody who has not signed in" do
       tag
       get "/admin/tags"

@@ -208,11 +208,6 @@ RSpec.describe "Admin search", type: :request do
       get "/admin/search", q: "accountant"
     end
 
-    it "sends me to sign in", :aggregate_failures do
-      expect(last_response).to be_redirect
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "lists nothing" do
       expect(last_response.body).not_to include("Email the accountant")
     end

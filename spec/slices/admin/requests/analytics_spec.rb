@@ -569,12 +569,4 @@ RSpec.describe "Admin analytics", :frozen_clock, type: :request do
       end
     end
   end
-
-  describe "signed out" do
-    it "redirects the dashboard to sign-in" do
-      get "/admin/analytics", range: "7"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-  end
 end

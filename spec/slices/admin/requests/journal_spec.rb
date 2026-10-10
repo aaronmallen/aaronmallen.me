@@ -894,12 +894,6 @@ RSpec.describe "Admin journal", :frozen_clock, type: :request do
   end
 
   describe "signed out" do
-    it "redirects the journal to sign-in" do
-      get "/admin/journal"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "saves nothing" do
       post "/admin/journal", entry: { body: "walked" }
 

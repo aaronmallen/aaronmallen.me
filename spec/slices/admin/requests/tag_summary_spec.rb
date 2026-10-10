@@ -14,14 +14,6 @@ RSpec.describe "Admin tag summary", type: :request do
 
   def tag_named(name, scope) = Tags::Slice["repos.tag_queries"].all_in(scope).find { it.name == name }
 
-  describe "signed out" do
-    it "sends the summary to sign in" do
-      get "/admin/tags/ruby"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

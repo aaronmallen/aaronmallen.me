@@ -525,10 +525,4 @@ RSpec.describe "Admin webmentions", type: :request do
       end
     end
   end
-
-  it "redirects to sign-in when signed out" do
-    get "/admin/webmentions"
-
-    expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-  end
 end

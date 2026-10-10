@@ -337,12 +337,4 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
       expect(last_response.status).to eq(404)
     end
   end
-
-  describe "signed out" do
-    it "redirects to sign-in" do
-      get "/admin/posts/#{post.id}/analytics", range: "7"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-  end
 end

@@ -1186,10 +1186,4 @@ RSpec.describe "Admin social", type: :request do
       expect(page).to have_css(".field-error", text: "That network has no credentials")
     end
   end
-
-  it "asks an unknown visitor to sign in" do
-    get "/admin/social"
-
-    expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-  end
 end

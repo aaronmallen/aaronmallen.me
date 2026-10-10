@@ -29,14 +29,6 @@ RSpec.describe "Admin connected services", type: :request do
 
   def toast = page.find("[data-toast]").text
 
-  describe "signed out" do
-    it "sends me to sign-in" do
-      get "/admin/services"
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

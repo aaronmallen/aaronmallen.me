@@ -26,12 +26,6 @@ RSpec.describe "Admin API tokens", type: :request do
   def stamp(time) = Blog::TimeZone.local(time).strftime("%b %-d, %Y, %H:%M")
 
   describe "signed out" do
-    it "sends me to sign-in" do
-      get "/admin/tokens"
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "mints nothing" do
       post "/admin/tokens", token: { name: "Terminal" }
 

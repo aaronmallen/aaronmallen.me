@@ -589,13 +589,6 @@ RSpec.describe "Admin messages", type: :request do
   describe "signed out" do
     let(:record) { create(:message, reply_to: "ada@example.com", subject: "A question", body: "How?") }
 
-    it "redirects to sign-in" do
-      record
-      get "/admin/messages"
-
-      expect(last_response).to be_redirect.and have_attributes(location: end_with("/admin/sign-in"))
-    end
-
     it "sends neither the address, the subject nor the body", :aggregate_failures do
       record
       get "/admin/messages"

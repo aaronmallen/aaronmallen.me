@@ -38,12 +38,6 @@ RSpec.describe "Admin MCP clients", type: :request do
   end
 
   describe "signed out" do
-    it "sends me to sign-in" do
-      get "/admin/clients"
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-
     it "refuses a revoke and leaves the tokens alone" do
       client = mcp_create(:oauth_client)
       stock_token(client, type: "access")

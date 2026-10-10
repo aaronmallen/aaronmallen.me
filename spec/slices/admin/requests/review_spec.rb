@@ -32,14 +32,6 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
 
   def visit_review(params = {}) = get("/admin/review", params)
 
-  describe "signed out" do
-    it "redirects to sign-in" do
-      visit_review
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 

@@ -34,14 +34,6 @@ RSpec.describe "Admin time", :frozen_clock, type: :request do
     task
   end
 
-  describe "signed out" do
-    it "redirects to sign-in" do
-      visit_time
-
-      expect(last_response.location).to end_with("/admin/sign-in")
-    end
-  end
-
   describe "signed in" do
     before { sign_in_to_admin }
 
