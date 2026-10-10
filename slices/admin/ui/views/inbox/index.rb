@@ -14,7 +14,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size)) { head_actions if @rows.any? }
 
-            Card(class: "inbox-card") do
+            Card do
               div(data: { key_list: true }) do
                 @rows.empty? ? Empty { t(".empty") } : @rows.each { row(it) }
               end

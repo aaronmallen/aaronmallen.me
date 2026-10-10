@@ -79,7 +79,7 @@ module Admin
           def group(title, &)
             section(class: "cal-group") do
               h3(class: "cal-group-title") { title }
-              div(class: "cal-group-items", &)
+              div(&)
             end
           end
 

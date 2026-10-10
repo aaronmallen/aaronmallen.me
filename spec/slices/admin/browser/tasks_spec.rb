@@ -642,12 +642,12 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "comes back to Today with the task in the sprint", :aggregate_failures do
-        expect(page).to have_css(".sprint-panel .task-title", text: "Ship the screen")
+        expect(page).to have_css("[data-sprint-panel] .task-title", text: "Ship the screen")
         expect(page).to have_current_path("/admin")
       end
 
       it "puts the task in today's sprint" do
-        page.assert_selector(".sprint-panel .task-title", text: "Ship the screen")
+        page.assert_selector("[data-sprint-panel] .task-title", text: "Ship the screen")
 
         expect(repo.in_sprint(sprint_repo.on(today).id).map(&:title)).to eq(["Ship the screen"])
       end

@@ -101,7 +101,7 @@ module Admin
           def open = @open ||= sprint_tasks.reject(&:closed?)
 
           def quiet_lines
-            Card(class: "today-quiet") do
+            Card do
               journal_line
               ships_next
               line(t(".drafts"), path(:admin_posts, status: DRAFT)) { t(".draft_count", count: posts[:drafts].size) }

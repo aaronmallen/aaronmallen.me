@@ -48,7 +48,7 @@ module Admin
             ) do
               plain text
               whitespace
-              span(class: "search-kind-count") { count.to_s }
+              span { count.to_s }
             end
           end
 

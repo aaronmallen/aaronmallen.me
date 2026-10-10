@@ -16,7 +16,7 @@ module Admin
           def view_template
             section(class: "journal-day", id: self.class.anchor(@date)) do
               DayHead(date: @date, today: @today)
-              div(class: "journal-day-entries") do
+              div do
                 @entries.each do |entry|
                   Entry(entry:, date: @date, editing: editing_for(entry), linked: @linked.fetch(entry.id, 0))
                 end

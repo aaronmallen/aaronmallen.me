@@ -18,7 +18,7 @@ module Admin
             PageHead(title: t(".heading"), sub:)
 
             Filters(**@filters, saved_views: @saved_views)
-            Card(class: "activity-main") { timeline }
+            Card { timeline }
             DayPager(older: @older, newer: @newer, **@filters.slice(:from, :to, :types, :text))
           end
 

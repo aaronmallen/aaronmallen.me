@@ -68,7 +68,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
     it "lists the quiet lines under Shipped today" do
       get "/admin"
 
-      expect(page.all(".today-side > .today-quiet .today-line > span:first-child").map(&:text))
+      expect(page.all(".today-side > .card:last-child .today-line > span:first-child").map(&:text))
         .to eq(["Journal", "What ships next", "Drafts", "Visitors", "MCP clients"])
     end
 
@@ -820,7 +820,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
         replace_component("tasks.repos.sprint_queries", failing)
       end
 
-      def panel = page.find(".sprint-panel")
+      def panel = page.find("[data-sprint-panel]")
 
       def plan(*titles, done: 0)
         titles.each_with_index do |title, index|
@@ -948,7 +948,7 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       it "puts the panel first in the main column" do
         get "/admin"
 
-        expect(page).to have_css(".g-main > .today-main > .sprint-panel:first-child")
+        expect(page).to have_css(".g-main > .today-main > [data-sprint-panel]:first-child")
       end
 
       it "titles the panel Today's sprint" do

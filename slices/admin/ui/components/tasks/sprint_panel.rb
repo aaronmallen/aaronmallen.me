@@ -18,7 +18,7 @@ module Admin
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
           def view_template
-            Card(title: t(".title"), class: "sprint-panel", data: { key_list: true }) do |card|
+            Card(title: t(".title"), data: { key_list: true, sprint_panel: true }) do |card|
               card.side { side }
               progress unless @tasks.empty?
               rows

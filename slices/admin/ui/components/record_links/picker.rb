@@ -42,7 +42,7 @@ module Admin
           end
 
           def pick(kind, link)
-            Form(action: @link_path, class: "record-picker-pick") do
+            Form(action: @link_path) do
               hidden_fields({ **@fields, record_q: @query, "record[other_kind]": kind, "record[other_id]": link.id })
               button(type: "submit", class: "record-picker-target") do
                 Icon("fa-solid fa-plus")

@@ -55,7 +55,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "lays out the filters in a bar above the timeline" do
-        expect(page).to have_css(".activity-bar + .card.activity-main")
+        expect(page).to have_css(".activity-bar + .card")
       end
 
       it "groups the types as chips under one label" do
@@ -122,7 +122,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "heads each day on the card ground" do
-        expect(page).to have_css(".activity-main .day-head.sunk", count: 2)
+        expect(page).to have_css(".activity-bar + .card .day-head.sunk", count: 2)
       end
 
       it "shows the time each event happened" do

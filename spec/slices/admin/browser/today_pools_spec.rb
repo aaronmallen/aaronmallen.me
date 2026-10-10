@@ -8,7 +8,7 @@ RSpec.describe "Admin today pools", type: :feature do
     visit "/admin"
   end
 
-  def panel = find(".sprint-panel")
+  def panel = find("[data-sprint-panel]")
 
   def scroll_down
     execute_script(<<~JS)

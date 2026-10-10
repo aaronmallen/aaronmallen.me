@@ -178,7 +178,7 @@ RSpec.describe "Admin task record links", type: :request do
 
     it "posts the link from each match", :aggregate_failures do
       find_records("hosting")
-      form = section.find(".record-picker-pick")
+      form = section.find(:button, class: "record-picker-target").ancestor("form")
 
       expect(form["action"]).to eq("/admin/tasks/#{task.id}/records")
       expect(form.find("input[name='record[other_kind]']", visible: :all).value).to eq("post")

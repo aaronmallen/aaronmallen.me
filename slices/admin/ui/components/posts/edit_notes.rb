@@ -52,7 +52,7 @@ module Admin
           def item(edit)
             li(class: "edit-note", id: self.class.scope(edit.id)) do
               Moment(at: edit.created_at, class: "edit-note-time")
-              div(class: "post-body edit-note-body") { raw(safe(::Posts::Markdown.to_html(edit.note).strip)) }
+              div(class: "post-body") { raw(safe(::Posts::Markdown.to_html(edit.note).strip)) }
               edit_form(edit)
             end
           end

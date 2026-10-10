@@ -22,7 +22,7 @@ module Admin
             form = @form[:name] == :add_option ? @form : Blog::Constants::EMPTY_HASH
 
             details(class: "decision-add", open: form.any?) do
-              summary(class: "decision-add-toggle") { t(".add") }
+              summary { t(".add") }
               OptionForm(decision: @decision, params: form[:params], errors: form.fetch(:errors, {}))
             end
           end

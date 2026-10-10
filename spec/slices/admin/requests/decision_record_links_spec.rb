@@ -96,7 +96,9 @@ RSpec.describe "Admin decision record links", type: :request do
     it "posts the link from each match" do
       get "/admin/decisions/#{decision.id}", record_q: "server"
 
-      expect(section.find(".record-picker-pick")["action"]).to eq("/admin/decisions/#{decision.id}/records")
+      form = section.find(:button, class: "record-picker-target").ancestor("form")
+
+      expect(form["action"]).to eq("/admin/decisions/#{decision.id}/records")
     end
   end
 

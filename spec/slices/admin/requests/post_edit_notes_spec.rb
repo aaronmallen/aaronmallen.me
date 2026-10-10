@@ -38,7 +38,7 @@ RSpec.describe "Admin post edit notes", type: :request do
         create(:post_edit, post: article, note: "Second", created_at: Time.utc(2026, 9, 2))
         read
 
-        expect(card.all(".edit-note-body").map(&:text)).to eq(%w[Second First])
+        expect(card.all(".edit-note .post-body").map(&:text)).to eq(%w[Second First])
       end
 
       it "dates each note" do
@@ -52,7 +52,7 @@ RSpec.describe "Admin post edit notes", type: :request do
         create(:post_edit, post: article, note: "Fixed the `numbers`")
         read
 
-        expect(card).to have_css(".edit-note-body code", text: "numbers")
+        expect(card).to have_css(".edit-note .post-body code", text: "numbers")
       end
 
       it "sits in the Details drawer while the new note box sits below the body", :aggregate_failures do
@@ -136,7 +136,7 @@ RSpec.describe "Admin post edit notes", type: :request do
         follow_redirect!
 
         expect(page.find("[data-toast] .toast", visible: :all).text(:all)).to eq("Note saved")
-        expect(card.find(".edit-note-body").text).to eq("After")
+        expect(card.find(".edit-note .post-body").text).to eq("After")
       end
 
       it "takes a note of 500 characters" do

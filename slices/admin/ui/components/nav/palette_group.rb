@@ -10,7 +10,7 @@ module Admin
           prop :data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
           def view_template(&)
-            div(class: "pal-grp", role: "group", aria: { labelledby: @id }, data: { palette_group: true, **@data }) do
+            div(role: "group", aria: { labelledby: @id }, data: { palette_group: true, **@data }) do
               p(id: @id, class: "pal-g") { @heading }
               yield if block_given?
             end
