@@ -1180,6 +1180,20 @@ RSpec.describe "Visits", type: :request do
       expect(Capybara.string(last_response.body)).to have_no_css("body[data-beacon]", visible: :all)
     end
 
+    it "caps the read time the beacon sends at the cap the server keeps" do
+      get "/about"
+
+      expect(Capybara.string(last_response.body).find("body", visible: :all)["data-beacon-read-cap"])
+        .to eq(Analytics::Operations::RecordVisit::MAX_READ_SECONDS.to_s)
+    end
+
+    it "sends only the scroll depths the server takes" do
+      get "/about"
+
+      expect(Capybara.string(last_response.body).find("body", visible: :all)["data-beacon-depths"].split.map(&:to_i))
+        .to eq(Blog::Types::ScrollDepth.values.select(&:positive?))
+    end
+
     it "counts clicks on a post" do
       get "/writing/hello"
 

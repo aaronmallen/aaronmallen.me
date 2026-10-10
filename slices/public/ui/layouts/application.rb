@@ -7,6 +7,8 @@ module Public
         include Components
 
         ARTICLE = "article"
+        BEACON_DEPTHS = Blog::Types::ScrollDepth.values.select(&:positive?).join(" ")
+        BEACON_READ_CAP = ::Analytics::Operations::RecordVisit::MAX_READ_SECONDS
         BEACON_REF = ::Analytics::Operations::TagRef::KEY
         IMAGE_CARD = "summary_large_image"
         SHARE_IMAGE = "share.png"
@@ -16,7 +18,7 @@ module Public
 
         def view_template(&)
           document do
-            body(class: "pub", data: { beacon: path(:visit), beacon_ref: BEACON_REF, beacon_clicks: article? }) do
+            body(class: "pub", data: beacon_data) do
               MainNav(session: admin_session)
               main(id: "main", class: "site-main", &)
               Footer(year: Blog::TimeZone.today.year)
@@ -31,6 +33,13 @@ module Public
         end
 
         def article? = page_kind == ARTICLE
+
+        def beacon_data
+          {
+            beacon: path(:visit), beacon_ref: BEACON_REF, beacon_clicks: article?, beacon_depths: BEACON_DEPTHS,
+            beacon_read_cap: BEACON_READ_CAP,
+          }
+        end
 
         def own_image
           image = content_for(:image).to_s

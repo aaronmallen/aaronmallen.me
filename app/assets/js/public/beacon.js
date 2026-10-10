@@ -1,16 +1,14 @@
-const MAX_READ_SECONDS = 20 * 60;
 const MIDDLE_BUTTON = 1;
-const SCROLL_DEPTHS = [100, 75, 50, 25];
 const TYPE = "application/json";
 const WEB = ["http:", "https:"];
 
 const mintToken = () =>
   Array.from(crypto.getRandomValues(new Uint8Array(16)), (byte) => byte.toString(16).padStart(2, "0")).join("");
 
-const depthReached = () => {
+const depthReached = (depths) => {
   const seen = (100 * Math.ceil(scrollY + innerHeight)) / document.documentElement.scrollHeight;
 
-  return SCROLL_DEPTHS.find((depth) => seen >= depth) ?? 0;
+  return depths.find((depth) => seen >= depth) ?? 0;
 };
 
 const referrerOf = (url) => {
@@ -40,8 +38,19 @@ const outboundLink = (event) => {
 };
 
 export function setupBeacon() {
-  const { beacon: endpoint, beaconClicks: clicks, beaconRef: refKey } = document.body.dataset;
+  const {
+    beacon: endpoint,
+    beaconClicks: clicks,
+    beaconDepths,
+    beaconReadCap: readCap,
+    beaconRef: refKey,
+  } = document.body.dataset;
   if (!endpoint || !navigator.sendBeacon) return;
+
+  const depths = beaconDepths
+    .split(" ")
+    .map(Number)
+    .sort((a, b) => b - a);
 
   const path = location.pathname;
   const ref = refKey && new URLSearchParams(location.search).get(refKey);
@@ -49,7 +58,7 @@ export function setupBeacon() {
   let opened = Date.now();
   let read = 0;
   let left = false;
-  let deepest = depthReached();
+  let deepest = depthReached(depths);
 
   const send = (visit) => {
     const body = JSON.stringify({ path, view_token: viewToken, ...visit });
@@ -61,7 +70,7 @@ export function setupBeacon() {
     if (left) return;
     left = true;
     read += Math.ceil((Date.now() - opened) / 1000);
-    send({ kind: "read", read_seconds: Math.min(read, MAX_READ_SECONDS) });
+    send({ kind: "read", read_seconds: Math.min(read, Number(readCap)) });
   };
 
   const readAgain = () => {
@@ -71,7 +80,7 @@ export function setupBeacon() {
   };
 
   const scrolled = () => {
-    const depth = depthReached();
+    const depth = depthReached(depths);
     if (depth <= deepest) return;
     deepest = depth;
     send({ kind: "scroll", scroll_depth: depth });
