@@ -12,19 +12,17 @@ module Admin
             Card(title: t(".title")) do
               next Empty { t(".empty") } if @views.zero?
 
-              @reached.each { row(it) }
+              Meters(color: :blue, empty: t(".empty"), rows:, total: @views)
             end
           end
 
           private
 
-          def percent(entry) = Blog::Helpers::Figures.share(entry.fetch(:views), @views)
-
-          def row(entry)
-            div(class: "meter-row") do
-              span(class: "meter-name") { t(".depth", depth: entry[:depth]) }
-              span(class: "meter blue") { span(class: "meter-fill", style: "width: #{percent(entry)}%") }
-              span(class: "meter-count") { t(".share", percent: percent(entry)) }
+          def rows
+            @reached.map do |entry|
+              views = entry.fetch(:views)
+              { count: views, label: t(".depth", depth: entry[:depth]),
+                value: t(".share", percent: Blog::Helpers::Figures.share(views, @views)) }
             end
           end
         end

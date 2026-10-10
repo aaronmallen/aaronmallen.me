@@ -124,6 +124,11 @@ RSpec.describe "Admin post analytics", :frozen_clock, type: :request do
         expect(counts("Scroll depth")).to eq(%w[80% 60% 40% 30%])
       end
 
+      it "fills each scroll meter by its share of the views, not of the deepest" do
+        expect(card("Scroll depth").all(".meter-fill").map { it[:style] })
+          .to eq(["width: 80%", "width: 60%", "width: 40%", "width: 30%"])
+      end
+
       it "ranks the post's referrers by visitors, naming a direct visit", :aggregate_failures do
         expect(names("Referrers")).to eq(%w[direct news.example])
         expect(counts("Referrers")).to eq(%w[3 2])

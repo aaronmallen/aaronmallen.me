@@ -10,6 +10,7 @@ module Admin
           prop :color, Blog::Types::Symbol.enum(*COLORS)
           prop :empty, Blog::Types::String
           prop :rows, Blog::Types::Array.of(Blog::Types::Hash)
+          prop :total, Blog::Types::Integer.optional, default: nil
 
           def view_template
             return Empty { @empty } if @rows.empty?
@@ -29,11 +30,13 @@ module Admin
             div(class: "meter-row") do
               span(class: "meter-name") { entry[:label] }
               bar(entry)
-              span(class: "meter-count") { Blog::Helpers::Figures.count(entry[:count]) if entry[:count] }
+              span(class: "meter-count") { value(entry) }
             end
           end
 
-          def top = @top ||= @rows.filter_map { it[:count] }.max.to_i
+          def top = @top ||= @total || @rows.filter_map { it[:count] }.max.to_i
+
+          def value(entry) = entry.fetch(:value) { Blog::Helpers::Figures.count(entry[:count]) if entry[:count] }
         end
       end
     end
