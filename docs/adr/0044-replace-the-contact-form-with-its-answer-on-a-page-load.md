@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, public]
 issue: AA-668
+amended: ["#920"]
 tags: [contact, forms, javascript, redirect, throttle, validation]
 ---
 
@@ -33,14 +34,15 @@ One slot under the heading holds one thing, and the server picks it.
 
 | What happened | Status | URL | The slot holds |
 | --- | --- | --- | --- |
-| Nothing yet | 200 | `/contact` | the lede and the form |
+| Nothing yet | 200 | `/contact` | the form |
 | A message stored | 302, then 200 | `/contact?sent=1` | the sent panel |
-| Entries refused | 422 | `/contact` | the lede and the form, holding what was typed, each bad field named |
+| Entries refused | 422 | `/contact` | the form, holding what was typed, each bad field named |
 | Sender throttled | 429 | `/contact` | the throttled panel |
 
 `Public::UI::Views::Pages::Contact#outcome` renders one of the three branches, so a form and a panel never stand
-together, and on the sent page the form is not in the document. The kicker, the heading and the block under the
-slot stay on every one. The throttled panel copies the sent one in its own tone. A caught bot gets the same
+together, and on the sent page the form is not in the document. The kicker, the heading, the lede and the block
+under the slot stay on every one. The redesign moved the lede out of the slot and into the header, as #920
+records. The throttled panel copies the sent one in its own tone. A caught bot gets the same
 redirect a sender gets, as AA-384 says.
 
 Nothing on the page owns the submit. The form posts, and `Contact::Contracts::MessageContract` makes the only
