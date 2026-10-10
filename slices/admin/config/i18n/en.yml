@@ -1412,8 +1412,6 @@ en:
             other: "%{count} calls"
           first_seen: "first seen %{time}"
           last_seen: "last seen %{time}"
-          unknown_device: "Unknown device"
-          unknown_place: "Unknown place"
         sign_in_row:
           outcomes:
             denied: "denied"
@@ -1421,8 +1419,8 @@ en:
             signed_in: "signed in"
             unexpected: "unexpected error"
             wrong_account: "wrong account"
-          unknown_device: "Unknown device"
-          unknown_place: "Unknown place"
+        unknown_device: "Unknown device"
+        unknown_place: "Unknown place"
       services:
         actions:
           another: "Add another account"

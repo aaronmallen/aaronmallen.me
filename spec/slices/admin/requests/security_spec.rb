@@ -92,6 +92,13 @@ RSpec.describe "Admin security", type: :request do
       expect(credential("Terminal").find(".li")).to have_text("London · United Kingdom · 3 calls")
     end
 
+    it "names a sighting's device and place it could not read" do
+      sight(api_token_id: token("Terminal").id, browser: nil, os: nil, city: nil, country: nil)
+      get "/admin/security"
+
+      expect(credential("Terminal").find(".li")).to have_text("Unknown device").and have_text("Unknown place")
+    end
+
     it "lists an MCP client's sightings under that client" do
       found = client("Claude")
       sight(oauth_client_id: found.id, browser: "Chrome")

@@ -5,24 +5,22 @@ module Admin
     module Components
       module Security
         class SightingRow < Component
+          include Located
+
           prop :sighting, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: device) do |item|
+            ListItem(title: device(@sighting)) do |item|
               item.meta do
-                p(class: "li-sub") { dotted(place, t(".calls", count: @sighting.calls), @sighting.last_address) }
+                p(class: "li-sub") do
+                  dotted(place(@sighting), t(".calls", count: @sighting.calls), @sighting.last_address)
+                end
                 p(class: "li-sub") { seen }
               end
             end
           end
 
           private
-
-          def country = @sighting.country_name || @sighting.country
-
-          def device = dotted(@sighting.browser, @sighting.os).then { it.empty? ? t(".unknown_device") : it }
-
-          def place = dotted(@sighting.city, country).then { it.empty? ? t(".unknown_place") : it }
 
           def seen
             Stamped(text: t(".first_seen", time: Stamped::MARK), at: @sighting.first_seen_at)
