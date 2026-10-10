@@ -19,7 +19,7 @@ module MCP
         body: { type: "string", description: "the whole post, in markdown" },
         publish_at: {
           type: "string",
-          description: "when the post goes out, as YYYY-MM-DDTHH:MM in Chicago time; empty leaves it unset",
+          description: "when it goes out, as YYYY-MM-DDTHH:MM in #{Blog::TimeZone::NAME} time; empty leaves it unset",
         },
         og_title: { type: "string", description: "a title for the social card; empty uses the post title" },
         og_image_url: { type: "string", description: "a link to the social card image" },

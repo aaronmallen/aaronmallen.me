@@ -129,7 +129,7 @@ RSpec.describe "MCP post tools", type: :request do
     it "refuses a publish time it cannot read, as the admin does", :aggregate_failures do
       call_tool("create_post", title: "Hello", publish_at: "next friday")
 
-      expect(message).to eq("publish_at needs a time as YYYY-MM-DDTHH:MM, in Chicago time")
+      expect(message).to eq("publish_at needs a time as YYYY-MM-DDTHH:MM, in America/Chicago time")
       expect(admin_save(title: "Hello", publish_at: "next friday")).to eq(admin_error(:publish_at, "format"))
     end
 
@@ -151,7 +151,7 @@ RSpec.describe "MCP post tools", type: :request do
 
       expect(message).to eq(
         "og_image_url needs a URL starting with http:// or https://; " \
-        "publish_at needs a time as YYYY-MM-DDTHH:MM, in Chicago time",
+        "publish_at needs a time as YYYY-MM-DDTHH:MM, in America/Chicago time",
       )
     end
 

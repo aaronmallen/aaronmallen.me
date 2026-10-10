@@ -44,8 +44,9 @@ module MCP
                   "#{Blog::Types::DeviceClass.values.join(', ')}, worked out from the user agent when the view " \
                   "came in. in-app means a browser inside another app, such as Mastodon, Bluesky or Reddit, which " \
                   "often sends no referrer. Views from before the site kept a class are left out. " \
-                  "Totals also give reach, which counts each reader once per Chicago calendar month and adds up " \
-                  "month by month: one reader on two days in a month is two visitors and one reach, and one on " \
+                  "Totals also give reach, which counts each reader once per #{Blog::TimeZone::NAME} calendar " \
+                  "month and adds up month by month: one reader on two days in a month is two visitors and one " \
+                  "reach, and one on " \
                   "Sep 30 and Oct 1 is two reach. Reach is null when the range takes part of a month older than " \
                   "the 90 days of raw visits. " \
                   "#{PriorRange::DESCRIPTION}" \

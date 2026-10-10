@@ -20,7 +20,7 @@ module API
         Blog::Contract::CONTROL => "holds a control character",
         "locked" => "cannot change once the post is published",
         "reserved" => "belongs to a page on the site",
-        Blog::Contract::SKIPPED => "names a time the clocks skip in Chicago",
+        Blog::Contract::SKIPPED => "names a time the clocks skip in #{Blog::TimeZone::NAME}",
         "taken" => "belongs to another post",
         "too_long" => "runs over a network's limit",
         "unknown_mention" => "mentions someone who is not in the directory",
@@ -34,7 +34,7 @@ module API
         },
         note: { "blank" => "can't be blank: say what changed and why", "long" => "runs over 500 characters" },
         og_image_url: { Blog::Contract::FORMAT => URL },
-        publish_at: { Blog::Contract::FORMAT => "needs a time as YYYY-MM-DDTHH:MM, in Chicago time" },
+        publish_at: { Blog::Contract::FORMAT => "needs a time as YYYY-MM-DDTHH:MM, in #{Blog::TimeZone::NAME} time" },
         slug: {
           "blank" => "needs a letter or number, from itself or from the title",
           Blog::Contract::FORMAT => "takes lowercase letters, numbers and single dashes",

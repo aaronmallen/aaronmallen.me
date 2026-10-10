@@ -3,8 +3,9 @@
 module MCP
   module Tools
     module PublishedPost
-      DESCRIPTION = "For a published post's path, since_publish numbers each day of the range from the Chicago day " \
-                    "the post went out, which is day 1. The post also gets first_days and unique_readers, " \
+      DESCRIPTION = "For a published post's path, since_publish numbers each day of the range from the " \
+                    "#{Blog::TimeZone::NAME} day the post went out, which is day 1. The post also gets " \
+                    "first_days and unique_readers, " \
                     "whatever the range. first_days gives its visitors on each of its first " \
                     "#{Analytics::Repos::AnalyticsPageQueries::FIRST_DAYS} days, day 1 first, up to today, and " \
                     "median, the middle " \

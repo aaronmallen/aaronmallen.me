@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [activity, admin, config, db, lib, public, record, tasks]
 issue: AA-669
-amended: [AA-819]
+amended: [AA-819, "#943"]
 tags: [time-zone, postgres, indexes, activity, sidekiq, cron, dates]
 ---
 
@@ -30,6 +30,9 @@ on the worker's clock, UTC in a container, and moved an hour against the other j
 ## Decision
 
 One zone runs the site, and `Blog::TimeZone::NAME` in `lib/blog/time_zone.rb` is the only place that names it.
+
+Admin copy may name the city instead, as "Publish time (Chicago)" does. MCP and API text interpolates `NAME`
+(#943).
 
 - `config/db/migrate/20260928000035_create_activities_view.rb` writes it as a literal into the four expression
   indexes and into every branch of the view that converts a `timestamptz`.
