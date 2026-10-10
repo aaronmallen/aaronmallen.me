@@ -53,6 +53,14 @@ RSpec.describe "Admin inbox snooze", type: :request do
               ["Next week", "2026-10-12T08:00"]])
   end
 
+  context "when later today would land on tomorrow" do
+    let(:now) { Blog::TimeZone.local_time(2026, 10, 7, 22, 15) }
+
+    it "leaves later today out" do
+      expect(dialog.all("button[name=pick]", visible: :all).map(&:text)).to eq(["Tomorrow morning", "Next week"])
+    end
+  end
+
   it "offers a date and time field that starts now" do
     expect(dialog.find("input[type=datetime-local]", visible: :all)[:min]).to eq("2026-10-07T10:10")
   end

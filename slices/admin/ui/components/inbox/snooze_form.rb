@@ -46,12 +46,13 @@ module Admin
 
           def quick_picks
             today = Blog::TimeZone.today(@now)
+            later = Time.at(((@now.to_i / HOUR) + LATER_HOURS) * HOUR)
 
             {
-              ".later_today" => Time.at(((@now.to_i / HOUR) + LATER_HOURS) * HOUR),
+              ".later_today" => (later if Blog::TimeZone.today(later) == today),
               ".tomorrow" => morning(today + 1),
               ".next_week" => morning(today + 7 - ((today.wday - MONDAY) % 7)),
-            }
+            }.compact
           end
         end
       end
