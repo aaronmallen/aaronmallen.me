@@ -97,6 +97,12 @@ RSpec.describe "Admin GitHub connection", type: :request do
     expect(page).to have_css("#connect-service .svc-pick", text: "GitHub", visible: :all)
   end
 
+  it "asks for no server in the picker" do
+    get "/admin/services"
+
+    expect(page).to have_no_css("form[action='/admin/services/github/connect'] input[name='server']", visible: :all)
+  end
+
   describe "refusals" do
     it "saves nothing when I decline on GitHub", :aggregate_failures do
       callback(error: "access_denied", state: start_connect)

@@ -6,7 +6,7 @@ module Social
   module Providers
     module NetworksProvider
       HEADERS = { "Accept" => "application/json" }.freeze
-      MASTODON = "mastodon"
+      MASTODON = Blog::Types::ServiceProvider["mastodon"]
       PDS_URL = "https://bsky.social"
       PUBLIC_URL = "https://public.api.bsky.app"
 

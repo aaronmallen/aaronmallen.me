@@ -5,7 +5,7 @@ require "multi_xml"
 module Admin
   module Operations
     class RegisterMastodonApp < Blog::Operation
-      PROVIDER = "mastodon"
+      PROVIDER = Blog::Types::ServiceProvider["mastodon"]
       SERVER = /\A[\w-]+(\.[\w-]+)+\z/
 
       include Deps[

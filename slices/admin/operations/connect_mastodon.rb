@@ -5,7 +5,7 @@ require "multi_xml"
 module Admin
   module Operations
     class ConnectMastodon < Blog::Operation
-      PROVIDER = "mastodon"
+      PROVIDER = Blog::Types::ServiceProvider["mastodon"]
 
       include Deps[
         add_connection: "services.operations.add_connection",

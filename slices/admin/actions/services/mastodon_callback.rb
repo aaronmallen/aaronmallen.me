@@ -5,7 +5,7 @@ module Admin
     module Services
       class MastodonCallback < Action
         NAME = "Mastodon"
-        PROVIDER = "mastodon"
+        PROVIDER = Blog::Types::ServiceProvider["mastodon"]
         TOASTS = "services_page.toasts"
 
         include Deps[connect_mastodon: "operations.connect_mastodon"]

@@ -4,7 +4,6 @@ module Admin
   module Actions
     module Services
       class Connect < Action
-        MASTODON = "mastodon"
         TOASTS = "services_page.toasts"
 
         include Deps[
@@ -27,7 +26,7 @@ module Admin
 
         def connect_url(request, definition)
           scope = definition.scopes.map { it[:id] }.join(" ")
-          definition.id == MASTODON ? mastodon_url(request, scope) : github_url(request, definition, scope)
+          definition.host ? mastodon_url(request, definition, scope) : github_url(request, definition, scope)
         end
 
         def github_url(request, definition, scope)
@@ -37,12 +36,12 @@ module Admin
           Success(github.connect_url(redirect_uri: github_callback_url, scope:, **started))
         end
 
-        def mastodon_url(request, scope)
+        def mastodon_url(request, definition, scope)
           redirect_uri = mastodon_service_callback_url
 
           register_mastodon_app.call(request.params[:server], redirect_uri:, scope:).fmap do |registered|
             host, app = registered.values_at(:host, :app)
-            started = Auth::ConnectState.new(request.session).start(MASTODON, host:)
+            started = Auth::ConnectState.new(request.session).start(definition.id, host:)
             mastodon.connect_url(host, app, redirect_uri:, scope:, **started)
           end
         end

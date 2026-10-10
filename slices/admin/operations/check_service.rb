@@ -24,7 +24,11 @@ module Admin
       end
 
       def clients
-        { "bluesky" => networks.fetch(Blog::Types::NetworkName["bluesky"]), "github" => github, "linear" => linear }
+        {
+          Blog::Types::ServiceProvider["bluesky"] => networks.fetch(Blog::Types::NetworkName["bluesky"]),
+          Blog::Types::ServiceProvider["github"] => github,
+          Blog::Types::ServiceProvider["linear"] => linear,
+        }
       end
     end
   end

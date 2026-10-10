@@ -10,7 +10,7 @@ module Record
       Error = Transport::Error
       RateLimited = Transport::RateLimited
 
-      PROVIDER = "linear"
+      PROVIDER = Blog::Types::ServiceProvider["linear"]
       WORKSPACE = "query { organization { id name } }"
 
       def initialize(connections:, transport:)

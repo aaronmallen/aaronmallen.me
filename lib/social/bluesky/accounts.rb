@@ -3,7 +3,7 @@
 module Social
   module Bluesky
     class Accounts
-      PROVIDER = "bluesky"
+      PROVIDER = Blog::Types::ServiceProvider["bluesky"]
 
       def initialize(connections, &sign_in)
         @authors = {}

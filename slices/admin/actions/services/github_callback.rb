@@ -5,7 +5,7 @@ module Admin
     module Services
       class GitHubCallback < Action
         NAME = "GitHub"
-        PROVIDER = "github"
+        PROVIDER = Blog::Types::ServiceProvider["github"]
         TOASTS = "services_page.toasts"
 
         include Deps[connect_github: "operations.connect_github"]

@@ -3,8 +3,8 @@
 module Admin
   module Operations
     class DisconnectService < Blog::Operation
-      GITHUB = "github"
-      MASTODON = "mastodon"
+      GITHUB = Blog::Types::ServiceProvider["github"]
+      MASTODON = Blog::Types::ServiceProvider["mastodon"]
 
       include Deps[
         connection_queries: "services.repos.connection_queries",

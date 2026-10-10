@@ -153,6 +153,7 @@ module Blog
     )
     SearchKindParam = SearchKind.optional.fallback(nil)
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)
+    ServiceProvider = Types::String.enum("bluesky", "github", "linear", "mastodon")
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)
     SocialMode = Types::String.enum("now", "schedule")

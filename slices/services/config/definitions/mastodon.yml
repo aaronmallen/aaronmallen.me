@@ -1,6 +1,7 @@
 name: Mastodon
 group: social
 auth: oauth
+host: true
 multiple: true
 powers:
   - Posting from the social queue

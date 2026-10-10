@@ -9,7 +9,6 @@ module Admin
           CHEVRON = "fa-solid fa-chevron-right"
           GO = "fa-solid fa-arrow-up-right-from-square"
           LINK_ICON = "fa-solid fa-link"
-          MASTODON = "mastodon"
           SERVER_FIELD = {
             autocapitalize: "none", autocomplete: "off", name: "server", placeholder: "mastodon.social", required: true,
             spellcheck: "false",
@@ -42,7 +41,7 @@ module Admin
 
           def continue(definition)
             Form(action: path(:admin_connect_service, provider: definition.id)) do
-              server if definition.id == MASTODON
+              server if definition.host
               Button(variant: :pri, type: "submit", icon: GO) { t(".continue", name: definition.name) }
             end
           end

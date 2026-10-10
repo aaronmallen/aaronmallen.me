@@ -8,7 +8,7 @@ module Record
         "Accept" => "application/vnd.github+json",
         "X-GitHub-Api-Version" => "2022-11-28",
       }.freeze
-      PROVIDER = "github"
+      PROVIDER = Blog::Types::ServiceProvider["github"]
 
       class << self
         def client(connection_queries, http)
