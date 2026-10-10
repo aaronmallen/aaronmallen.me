@@ -20,33 +20,30 @@ module Contact
       private
 
       def claim(attributes, visitor_hashes:)
-        limits = settings.contact
         status = message_queries.sender_status(attributes[:reply_to])
         message = message_mutations.claim(
-          status:, visitor_hashes:, since: window_opened_at,
-          limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit], **attributes,
+          status:, visitor_hashes:, since: throttle.since,
+          limit: throttle.limit, total_limit: throttle.total_limit, **attributes,
         )
 
-        message ? Success(message) : Failure([:throttled])
+        message ? Success(message) : Failure(Blog::Throttle::THROTTLED)
       end
 
       def form(params)
         { body: params[:body], reply_to: params[:reply_to], subject: params[:subject] }
       end
 
+      def throttle = Blog::Throttle.new(settings.contact)
+
       def validate(params) = validated(contract.call(form(params)))
 
-      def window_opened_at
-        Time.now - (settings.contact[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
-      end
-
       def within_limits(visitor_hashes)
-        since = window_opened_at
-        limits = settings.contact
-        under = message_queries.count_from_visitor_since(visitor_hashes, since) < limits[:throttle_limit] &&
-                message_queries.count_since(since) < limits[:total_throttle_limit]
+        since = throttle.since
+        under = throttle.under?(
+          message_queries.count_from_visitor_since(visitor_hashes, since), message_queries.count_since(since),
+        )
 
-        under ? Success(visitor_hashes) : Failure([:throttled])
+        under ? Success(visitor_hashes) : Failure(Blog::Throttle::THROTTLED)
       end
     end
   end

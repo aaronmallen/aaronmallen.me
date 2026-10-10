@@ -9,7 +9,6 @@ module MCP
       INVALID_REDIRECT_URI = "invalid_redirect_uri"
       NOT_AN_OBJECT = "the request body must be a JSON object"
       REJECT = :reject
-      THROTTLED = :throttled
       UNUSABLE_METADATA =
         "client_name may hold up to #{Contracts::ClientRegistrationContract::MAX_NAME} characters and " \
         "client_uri and logo_uri up to #{Contracts::ClientRegistrationContract::MAX_URI}, " \
@@ -42,12 +41,12 @@ module MCP
           token_endpoint_auth_method: Blog::Types::OAuthTokenAuthMethod["none"],
           **attributes,
           visitor_hashes:,
-          limit:,
-          total_limit:,
-          since: window_opened_at,
+          limit: throttle.limit,
+          total_limit: throttle.total_limit,
+          since: throttle.since,
         )
 
-        client ? Success(client) : Failure(THROTTLED)
+        client ? Success(client) : Failure(Blog::Throttle::THROTTLED)
       end
 
       def document(client)
@@ -64,11 +63,9 @@ module MCP
         }.compact
       end
 
-      def limit = settings.client_registration[:throttle_limit]
-
       def refuse(error, description) = Failure([REJECT, { error:, error_description: description }])
 
-      def total_limit = settings.client_registration[:total_throttle_limit]
+      def throttle = Blog::Throttle.new(settings.client_registration)
 
       def validate(payload)
         return refuse(INVALID_METADATA, NOT_AN_OBJECT) unless payload.is_a?(Hash)
@@ -80,16 +77,13 @@ module MCP
         refuse(INVALID_METADATA, UNUSABLE_METADATA)
       end
 
-      def window_opened_at
-        Time.now - (settings.client_registration[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
-      end
-
       def within_limit(visitor_hashes)
-        since = window_opened_at
-        under = oauth_client_queries.count_from_visitor_since(visitor_hashes, since) < limit &&
-                oauth_client_queries.count_since(since) < total_limit
+        since = throttle.since
+        under = throttle.under?(
+          oauth_client_queries.count_from_visitor_since(visitor_hashes, since), oauth_client_queries.count_since(since),
+        )
 
-        under ? Success(visitor_hashes) : Failure(THROTTLED)
+        under ? Success(visitor_hashes) : Failure(Blog::Throttle::THROTTLED)
       end
     end
   end

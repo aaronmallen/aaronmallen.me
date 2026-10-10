@@ -23,7 +23,7 @@ module MCP
               render_json(response, client, status: CREATED)
             in Failure(Operations::RegisterClient::REJECT, payload)
               render_json(response, payload, status: REJECTED)
-            in Failure(Operations::RegisterClient::THROTTLED)
+            in Failure(Blog::Throttle::THROTTLED)
               render_json(response, { error: TOO_MANY }, status: THROTTLED)
             else
               reject_json(response)

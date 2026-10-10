@@ -29,7 +29,7 @@ module Public
         def status_for(outcome)
           case outcome
             in Success(_) then ACCEPTED
-            in Failure(:throttled) then THROTTLED
+            in Failure(Blog::Throttle::THROTTLED) then THROTTLED
             else REJECTED
           end
         end

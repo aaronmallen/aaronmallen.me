@@ -20,7 +20,7 @@ module Social
       def claim_receipt(post_id:, source_url:, visitor_hashes:, since:, limit:, total_limit:)
         receipt = webmention_receipts.claim(post_id:, source_url:, visitor_hashes:, since:, limit:, total_limit:)&.first
 
-        receipt ? Success(receipt) : Failure(:throttled)
+        receipt ? Success(receipt) : Failure(Blog::Throttle::THROTTLED)
       end
 
       def delete_by_source(post_id, source_url) = webmentions.for_post(post_id).from_source(source_url).delete

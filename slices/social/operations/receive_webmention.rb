@@ -51,10 +51,9 @@ module Social
       end
 
       def queue(source_url, target_url, post, visitor_hashes)
-        limits = settings.webmentions
         step webmention_mutations.claim_receipt(
-          post_id: post.id, source_url: source_url.to_s, visitor_hashes:, since: window_opened_at,
-          limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit],
+          post_id: post.id, source_url: source_url.to_s, visitor_hashes:, since: throttle.since,
+          limit: throttle.limit, total_limit: throttle.total_limit,
         )
 
         verify(post.id, source_url.to_s, target_url.to_s)
@@ -65,6 +64,8 @@ module Social
         slug = escaped && ::Rack::Utils.unescape_path(escaped)
         slug if slug&.valid_encoding? && Blog::Types::Slug.valid?(slug)
       end
+
+      def throttle = Blog::Throttle.new(settings.webmentions)
 
       def url(value)
         uri = URI.parse(Blog::Types::Normalized::Url.call(value.to_s) { return Failure(:invalid_url) })
@@ -81,17 +82,14 @@ module Social
         webmention_mutations.hold(post_id:, source_url:, target_url:)
       end
 
-      def window_opened_at
-        Time.now - (settings.webmentions[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
-      end
-
       def within_limits(visitor_hashes)
-        since = window_opened_at
-        limits = settings.webmentions
-        under = webmention_queries.count_receipts_from_visitor_since(visitor_hashes, since) < limits[:throttle_limit] &&
-                webmention_queries.count_receipts_since(since) < limits[:total_throttle_limit]
+        since = throttle.since
+        under = throttle.under?(
+          webmention_queries.count_receipts_from_visitor_since(visitor_hashes, since),
+          webmention_queries.count_receipts_since(since),
+        )
 
-        under ? Success(visitor_hashes) : Failure(:throttled)
+        under ? Success(visitor_hashes) : Failure(Blog::Throttle::THROTTLED)
       end
     end
   end

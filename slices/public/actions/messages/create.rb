@@ -28,7 +28,7 @@ module Public
 
           case create_message.call(params, visitor_hashes: visitor_hashes(request))
             in Success(_) then confirm(response)
-            in Failure[:throttled] then refuse(response)
+            in Failure(Blog::Throttle::THROTTLED) then refuse(response)
             in Failure[:invalid, errors] then reject(response, params, errors)
           end
         end

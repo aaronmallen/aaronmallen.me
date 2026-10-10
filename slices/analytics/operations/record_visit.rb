@@ -49,7 +49,7 @@ module Analytics
         return Failure(:unknown_visit) unless event_id
 
         clicked = event_mutations.record_click(event_id:, limit: MAX_CLICKS, **visit.slice(:link_host, :link_path))
-        clicked ? Success(clicked) : Failure(:throttled)
+        clicked ? Success(clicked) : Failure(Blog::Throttle::THROTTLED)
       end
 
       def click?(visit) = visit[:kind] == Contracts::VisitContract::CLICK
@@ -123,6 +123,8 @@ module Analytics
         view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
       end
 
+      def throttle = Blog::Throttle.new(settings.analytics)
+
       def title(value)
         found = value.to_s.strip
         found unless found.empty?
@@ -137,10 +139,10 @@ module Analytics
           **origin(visit, address:, user_agent:, base_url:),
           view_token: visit[:view_token],
           **visit.slice(:scroll_depth),
-          limit: settings.analytics[:throttle_limit],
-          since: window_opened_at,
+          limit: throttle.limit,
+          since: throttle.since,
         )
-        return Failure(:throttled) unless event
+        return Failure(Blog::Throttle::THROTTLED) unless event
 
         record_reader(visit[:path], address:, user_agent:)
         Success(event)
@@ -161,14 +163,10 @@ module Analytics
         }
       end
 
-      def window_opened_at
-        Time.now - (settings.analytics[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
-      end
-
       def within_limit(address_hashes)
-        stored = event_queries.count_from_address_since(address_hashes, window_opened_at)
+        stored = event_queries.count_from_address_since(address_hashes, throttle.since)
 
-        stored < settings.analytics[:throttle_limit] ? Success(stored) : Failure(:throttled)
+        throttle.under?(stored) ? Success(stored) : Failure(Blog::Throttle::THROTTLED)
       end
     end
   end
