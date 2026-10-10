@@ -21,30 +21,16 @@ module Admin
 
           private
 
-          def actions(edit)
-            div(class: "sg-actions") do
-              next dismissal(edit) if stale?(edit)
+          def actions(edit, stale)
+            return Button(small: true, **submit(edit, reject: true)) { t(".dismiss") } if stale
 
-              Button(variant: :pri, small: true, **submit(edit)) { t(".accept") }
-              Button(small: true, **submit(edit, reject: true)) { t(".reject") }
-            end
+            Button(variant: :pri, small: true, **submit(edit)) { t(".accept") }
+            Button(small: true, **submit(edit, reject: true)) { t(".reject") }
           end
 
           def bulk_actions
             Button(variant: :pri, small: true, **submit) { t(".accept_all") }
             Button(small: true, **submit(reject: true)) { t(".reject_all") }
-          end
-
-          def diff(edit)
-            p(class: "sg-diff") do
-              del(class: "sg-before") { edit.original }
-              ins(class: "sg-after") { edit.replacement }
-            end
-          end
-
-          def dismissal(edit)
-            Pill(color: :sand) { t(".stale") }
-            Button(small: true, **submit(edit, reject: true)) { t(".dismiss") }
           end
 
           def stale?(edit) = edit.stale? || !edit.applies_to?(@body)
@@ -56,10 +42,10 @@ module Admin
           end
 
           def suggestion(edit)
-            div(class: "sg-edit") do
-              diff(edit)
-              p(class: "sg-reason") { edit.reason }
-              actions(edit)
+            stale = stale?(edit)
+
+            SuggestionEdit(original: edit.original, replacement: edit.replacement, reason: edit.reason, stale:) do
+              actions(edit, stale)
             end
           end
         end

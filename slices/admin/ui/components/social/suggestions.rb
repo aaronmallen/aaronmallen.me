@@ -25,13 +25,11 @@ module Admin
           def accept_path = path(:admin_accept_social_suggestions, id: @social_post_id)
 
           def actions(edit)
-            div(class: "sg-actions") do
-              next dismissal(edit) if edit[:stale]
-              next refusal(edit) if edit[:over]
+            return Button(small: true, **submit(edit, reject: true)) { t(".dismiss") } if edit[:stale]
+            return refusal(edit) if edit[:over]
 
-              Button(variant: :pri, small: true, **submit(edit)) { t(".accept") }
-              Button(small: true, **submit(edit, reject: true)) { t(".reject") }
-            end
+            Button(variant: :pri, small: true, **submit(edit)) { t(".accept") }
+            Button(small: true, **submit(edit, reject: true)) { t(".reject") }
           end
 
           def bulk_actions
@@ -39,21 +37,7 @@ module Admin
             Button(small: true, **submit(reject: true)) { t(".reject_all") }
           end
 
-          def diff(edit)
-            p(class: "sg-diff") do
-              del(class: "sg-before") { edit[:original] }
-              ins(class: "sg-after") { edit[:replacement] }
-            end
-          end
-
-          def dismissal(edit)
-            Pill(color: :sand) { t(".stale") }
-            Button(small: true, **submit(edit, reject: true)) { t(".dismiss") }
-          end
-
-          def part_label(edit)
-            p(class: "sg-part") { t(".part", number: edit[:part]) } if @parts > 1
-          end
+          def part_label(edit) = (t(".part", number: edit[:part]) if @parts > 1)
 
           def refusal(edit)
             Pill(color: :orange) { t(".over_limit", limit: edit[:over].limit, network: edit[:over].label) }
@@ -68,10 +52,7 @@ module Admin
           end
 
           def suggestion(edit)
-            div(class: "sg-edit") do
-              part_label(edit)
-              diff(edit)
-              p(class: "sg-reason") { edit[:reason] }
+            SuggestionEdit(**edit.slice(:original, :replacement, :reason, :stale), label: part_label(edit)) do
               actions(edit)
             end
           end

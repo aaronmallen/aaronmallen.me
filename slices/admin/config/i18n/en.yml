@@ -1145,7 +1145,6 @@ en:
           heading: "Suggestions"
           reject: "Reject"
           reject_all: "Reject all"
-          stale: "stale"
         suggestions_banner:
           count:
             one: "%{count} suggestion"
@@ -1584,7 +1583,6 @@ en:
           part: "Part %{number}"
           reject: "Reject"
           reject_all: "Reject all"
-          stale: "stale"
         targets:
           label: "Networks"
       status_pill:
@@ -1613,6 +1611,8 @@ en:
           sand: "Sand"
           violet: "Violet"
         pick: "Colour it %{color}"
+      suggestion_edit:
+        stale: "stale"
       sync_failures:
         line: "%{sync} failed at %{at} · %{reason}"
         message_line: "%{line} · %{message}"
