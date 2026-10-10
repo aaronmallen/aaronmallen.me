@@ -19,7 +19,7 @@ module API
         },
         tags: {
           Blog::Contract::BLANK => "name a tag or a project first",
-          Blog::Contract::FORMAT => "a tag is lowercase words joined by hyphens",
+          Blog::Contract::FORMAT => Helpers::Tags::REFUSAL,
         },
       }.freeze
 
@@ -47,7 +47,7 @@ module API
       TAGS = {
         type: "array",
         items: { type: "string" },
-        description: "the private tags the rule gives, lowercase words joined by hyphens; a new one is made",
+        description: "the private tags the rule gives, #{Helpers::Tags::FORMAT}; a new one is made",
       }.freeze
     end
   end

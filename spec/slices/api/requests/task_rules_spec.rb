@@ -213,7 +213,7 @@ RSpec.describe "API task rules", type: :request do
         .to eq("tags" => ["name a tag or a project first"])
     end
 
-    it "refuses a tag that is not lowercase words" do
+    it "refuses a tag that is not lowercase words joined by hyphens" do
       expect(create_rule(pattern: "aaronmallen/*", tags: ["ruby_rails"]).fetch("errors"))
         .to eq("tags" => ["a tag is lowercase words joined by hyphens"])
     end

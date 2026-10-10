@@ -6,13 +6,11 @@ module API
     module Posts
       BULK = Helpers::Schema.bulk("blog posts")
       ID = Helpers::Schema::ID
-      TAG = { type: "string", description: "one public tag, lowercase words" }.freeze
       LONG_NOTE = "runs over #{::Posts::Contracts::PostContract::EDIT_NOTE_LIMIT} characters".freeze
+      TAG = Helpers::Tags.schema("public")
       URL = "needs a URL starting with http:// or https://"
 
-      COMPLAINTS = {
-        tag: { "blank" => "name the tag first", Blog::Contract::FORMAT => "a tag is lowercase words" },
-      }.freeze
+      COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
 
       REASONS = Helpers::Wording::SHARED.merge(
         "announcement_too_long" => "is empty, and the title and link sent in its place run over a network's limit",
@@ -35,7 +33,7 @@ module API
           "blank" => "needs a letter or number, from itself or from the title",
           Blog::Contract::FORMAT => "takes lowercase letters, numbers and single dashes",
         },
-        tags: { Blog::Contract::FORMAT => "each take lowercase letters, numbers and single dashes" },
+        tags: { Blog::Contract::FORMAT => "are each #{Helpers::Tags::FORMAT}" },
       }.freeze
 
       module_function

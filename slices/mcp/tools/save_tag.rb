@@ -9,7 +9,7 @@ module MCP
         color: { "format" => "pick one of the six colours" },
         name: {
           "blank" => "give the tag a name first",
-          "format" => "a tag is lowercase words joined by hyphens",
+          "format" => API::Helpers::Tags::REFUSAL,
           "taken" => "another tag already holds that name",
         },
       }.freeze
@@ -21,7 +21,7 @@ module MCP
           id: API::Helpers::Schema::ID.merge(
             description: "the tag to rename or recolour; leave it out to add a new one",
           ),
-          name: { type: "string", description: "lowercase words joined by hyphens" },
+          name: { type: "string", description: API::Helpers::Tags::FORMAT },
           scope: TAG_SCOPE,
         },
         required: ["scope"],

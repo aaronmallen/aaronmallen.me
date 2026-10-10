@@ -606,7 +606,7 @@ RSpec.describe "API tasks", type: :request do
 
     it "refuses a tag that is not a lowercase word with a 422" do
       expect([capture(title: "Email the accountant", tags: ["not_a_tag"]).fetch("errors"), status])
-        .to eq([{ "tags" => ["tags are lowercase words"] }, 422])
+        .to eq([{ "tags" => ["a tag is lowercase words joined by hyphens"] }, 422])
     end
 
     it "captures a task into today's sprint" do
@@ -679,7 +679,8 @@ RSpec.describe "API tasks", type: :request do
     end
 
     it "refuses a tag that is not a lowercase word with a 422" do
-      expect(save(task.id, tags: ["two words!"]).fetch("errors")).to eq("tags" => ["tags are lowercase words"])
+      expect(save(task.id, tags: ["two words!"]).fetch("errors"))
+        .to eq("tags" => ["a tag is lowercase words joined by hyphens"])
     end
 
     it "schedules the task for a later sprint" do

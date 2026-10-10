@@ -143,7 +143,7 @@ RSpec.describe "MCP post tools", type: :request do
     it "refuses a tag that is not a slug, as the admin does", :aggregate_failures do
       call_tool("create_post", title: "Hello", tags: ["two words"])
 
-      expect(message).to eq("tags each take lowercase letters, numbers and single dashes")
+      expect(message).to eq("tags are each lowercase words joined by hyphens")
       expect(admin_save(title: "Hello", tags: "two words")).to eq(admin_error(:tags, "format"))
     end
 

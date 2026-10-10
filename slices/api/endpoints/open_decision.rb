@@ -8,7 +8,8 @@ module API
         properties: {
           title: { type: "string", description: "the decision to make" },
           problem: { type: "string", description: "the problem it solves, in Markdown" },
-          tags: { type: "array", items: { type: "string" }, description: "private tags for it, lowercase words" },
+          tags: { type: "array", items: { type: "string" },
+                  description: "private tags for it, #{Helpers::Tags::FORMAT}" },
         },
         required: %w[title problem],
       }.freeze

@@ -13,7 +13,7 @@ module API
       ID = Helpers::Schema::ID
       LISTS = Blog::Types::TaskFilter.values.freeze
       SPRINT_PAST = "a sprint opens on today or a day after it"
-      TAG = { type: "string", description: "one private tag, lowercase words" }.freeze
+      TAG = Helpers::Tags.schema("private")
       WORKED = {
         hours: { type: "integer", description: "whole hours worked, 0 to 9999" },
         minutes: { type: "integer", description: "minutes on top of the hours, 0 to 59" },
@@ -51,8 +51,8 @@ module API
           Blog::Contract::SKIPPED => "that start falls in the hour the clocks skip",
           "future" => "a session cannot start later than now",
         },
-        tag: { "blank" => "name the tag first", Blog::Contract::FORMAT => "a tag is lowercase words" },
-        tags: { Blog::Contract::FORMAT => "tags are lowercase words" },
+        tag: Helpers::Tags::COMPLAINTS,
+        tags: { Blog::Contract::FORMAT => Helpers::Tags::REFUSAL },
         title: { "blank" => "write the task down first" },
       }.freeze
 

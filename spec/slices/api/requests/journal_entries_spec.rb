@@ -204,7 +204,7 @@ RSpec.describe "API journal entries", type: :request do
 
     it "refuses a tag the admin would refuse with a 422" do
       expect([create_entry(body: "Tagged", tags: ["no_good"]).fetch("message"), status])
-        .to eq(["tags take lowercase letters, numbers and single dashes in each tag", 422])
+        .to eq(["a tag is lowercase words joined by hyphens", 422])
     end
 
     it "refuses a day after today and saves nothing" do

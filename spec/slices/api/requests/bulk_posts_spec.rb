@@ -93,10 +93,10 @@ RSpec.describe "API bulk post actions", type: :request do
         .to eq([refusal(missing(gone)), 422, [%w[ruby], []]])
     end
 
-    it "refuses a tag that is not lowercase words" do
+    it "refuses a tag that is not lowercase words joined by hyphens" do
       answer = act("tag", ids(picked), tag: "two words")
 
-      expect([answer.fetch("errors"), status]).to eq([{ "tag" => ["a tag is lowercase words"] }, 422])
+      expect([answer.fetch("errors"), status]).to eq([{ "tag" => ["a tag is lowercase words joined by hyphens"] }, 422])
     end
 
     it "refuses a blank tag" do

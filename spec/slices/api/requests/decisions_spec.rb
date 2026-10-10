@@ -351,9 +351,9 @@ RSpec.describe "API decisions", type: :request do
       expect(call_api(:post, "/#{closed.id}/tags", { tags: %w[ruby] }).fetch("tags")).to eq(["ruby"])
     end
 
-    it "refuses a tag that is not lowercase words" do
+    it "refuses a tag that is not lowercase words joined by hyphens" do
       expect(call_api(:post, "/#{decision.id}/tags", { tags: ["no way!"] }).fetch("errors"))
-        .to eq("tags" => ["tags are lowercase words"])
+        .to eq("tags" => ["a tag is lowercase words joined by hyphens"])
     end
 
     it "takes one tag off" do

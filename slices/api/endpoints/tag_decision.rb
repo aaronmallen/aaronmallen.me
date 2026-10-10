@@ -11,7 +11,7 @@ module API
             type: "array",
             items: { type: "string" },
             minItems: 1,
-            description: "private tags to add, lowercase words; tags it already carries stay",
+            description: "private tags to add, #{Helpers::Tags::FORMAT}; tags it already carries stay",
           },
         },
         required: %w[id tags],

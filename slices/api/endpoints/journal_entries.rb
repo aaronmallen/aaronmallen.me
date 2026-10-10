@@ -12,13 +12,13 @@ module API
           Blog::Contract::FORMAT => "entry_date needs a day, such as 2026-01-01",
           "future" => "entry_date falls after today; pick today or an earlier day",
         },
-        tags: { Blog::Contract::FORMAT => "tags take lowercase letters, numbers and single dashes in each tag" },
+        tags: { Blog::Contract::FORMAT => Helpers::Tags::REFUSAL },
       }.freeze
 
       TAGS = {
         type: "array",
         items: { type: "string" },
-        description: "tag names, such as ruby or health, in lowercase letters, numbers and single dashes",
+        description: "tag names, such as ruby or health, in #{Helpers::Tags::FORMAT}",
       }.freeze
     end
   end

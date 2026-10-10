@@ -19,7 +19,7 @@ module MCP
           "format" => "use the year and the month, as 2024-06",
           "future" => "pick this month or one before it",
         },
-        tags: { "format" => "use lowercase letters, numbers and single dashes in each tag" },
+        tags: { "format" => API::Helpers::Tags::REFUSAL },
         url: { "format" => "enter a link that starts with http:// or https://" },
         visibility: { "blank" => "pick public or private", "format" => "pick public or private" },
       }.freeze

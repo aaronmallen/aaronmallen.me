@@ -21,7 +21,7 @@ module API
         },
         problem: { "blank" => "write the problem down first" },
         reason: { "blank" => "write down why first" },
-        tags: { Blog::Contract::FORMAT => "tags are lowercase words" },
+        tags: { Blog::Contract::FORMAT => Helpers::Tags::REFUSAL },
         title: { "blank" => "give it a title first" },
       }.freeze
 
