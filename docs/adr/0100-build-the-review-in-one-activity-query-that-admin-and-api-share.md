@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api]
 issue: "#340"
-amended: ["#623", "#873"]
+amended: ["#623", "#873", "#872"]
 tags: [activity, review, tasks, posts, social, journal, commits, time, exports]
 ---
 
@@ -40,6 +40,10 @@ The query can also focus on one day of the period (#873). Every section but the 
 alone, in the site's time zone, and a day outside the period, or no day at all, leaves the whole period. The query
 still reads the whole period in the same statements and narrows the rows in Ruby, so it also counts the tasks done,
 commits, time worked and journal entries on each day of the period for the heat map, whichever day it focuses on.
+
+The query also lists the journal entries and published posts from the same dates in earlier years (#872), newest
+first. A week's dates stay calendar dates, not the same ISO week. This list reads only the days the review shows, the
+focused day or the whole period, in its own statement, since the heat map never counts it.
 
 ## Alternatives
 

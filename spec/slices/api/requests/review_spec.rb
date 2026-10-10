@@ -509,6 +509,64 @@ RSpec.describe "API review", type: :request do
     end
   end
 
+  describe "earlier years" do
+    def earlier(**query) = read(**query).fetch("earlier").map { it.values_at("type", "date", "name") }
+
+    let!(:entry) { create(:journal_entry, entry_date: Date.new(2025, 9, 15), body: "A year ago") }
+    let!(:published) { create(:post, :published, title: "Two years ago", published_at: at(Date.new(2024, 9, 20))) }
+
+    before do
+      create(:post, :draft, title: "A draft", published_at: at(Date.new(2025, 9, 16)))
+      create(:journal_entry, entry_date: Date.new(2025, 9, 21), body: "The week after")
+      create(:journal_entry, entry_date: Date.new(2026, 9, 10), body: "Earlier this month")
+    end
+
+    it "lists the journal entries and published posts from the same dates, newest year first" do
+      expect(earlier(day: wednesday.iso8601))
+        .to eq([["journal", "2025-09-15", "A year ago"], ["post", "2024-09-20", "Two years ago"]])
+    end
+
+    it "names each row's record" do
+      expect(read(day: wednesday.iso8601).fetch("earlier").map { it.fetch("id") }).to eq([entry.id, published.id])
+    end
+
+    it "follows the period it pages to" do
+      expect(earlier(day: "2026-09-21")).to eq([["journal", "2025-09-21", "The week after"]])
+    end
+
+    it "covers the whole month in earlier years" do
+      expect(earlier(period: "month", day: wednesday.iso8601).map { it[1] })
+        .to eq(%w[2025-09-21 2025-09-15 2024-09-20])
+    end
+
+    it "keeps to a focused day" do
+      expect(earlier(day: wednesday.iso8601, focus: "2026-09-15")).to eq([["journal", "2025-09-15", "A year ago"]])
+    end
+
+    it "is empty when no earlier year has anything" do
+      expect(earlier(day: "2026-10-07")).to eq([])
+    end
+
+    it "reads through read_review as the endpoint does" do
+      expect(mcp_answer("read_review", day: wednesday.iso8601)).to eq(read(day: wednesday.iso8601))
+    end
+  end
+
+  describe "earlier years across a new year" do
+    it "takes the same dates on both sides of it" do
+      create(:journal_entry, entry_date: Date.new(2024, 12, 30), body: "Before")
+      create(:journal_entry, entry_date: Date.new(2025, 1, 2), body: "After")
+
+      expect(read(day: "2026-01-01").fetch("earlier").map { it.fetch("date") }).to eq(%w[2025-01-02 2024-12-30])
+    end
+
+    it "keeps a leap day in its month" do
+      create(:journal_entry, entry_date: Date.new(2024, 2, 29), body: "Leap")
+
+      expect(read(period: "month", day: "2026-02-10").fetch("earlier").map { it.fetch("date") }).to eq(%w[2024-02-29])
+    end
+  end
+
   describe "the MCP tool" do
     it "reads as read_review does" do
       fill(wednesday)

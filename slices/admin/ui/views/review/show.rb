@@ -46,8 +46,7 @@ module Admin
             DoneCard(**done_card)
             CarriedCard(carried: @review.carried)
             DecisionsCard(decisions: @review.decisions)
-            JournalCard(journal: @review.journal, days:, focused: day?)
-            PublishedCard(posts: @review.posts, social_posts: @review.social_posts, days:)
+            records
             ReposCard(commits: @review.commits)
             WorkedCard(worked: @review.worked, focused: day?)
           end
@@ -89,6 +88,12 @@ module Admin
 
           def place
             { period: (@review.period if @review.period == MONTH), day: (@on.iso8601 unless @on == @today) }.compact
+          end
+
+          def records
+            JournalCard(journal: @review.journal, days:, focused: day?)
+            PublishedCard(posts: @review.posts, social_posts: @review.social_posts, days:)
+            EarlierCard(earlier: @review.earlier)
           end
 
           def span

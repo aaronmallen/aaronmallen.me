@@ -8,6 +8,7 @@ module Activity
       POST = Blog::Types::ActivityKind["post"]
       SOCIAL = Blog::Types::ActivityKind["social"]
       RECORDS = [POST, SOCIAL, JOURNAL].freeze
+      REMEMBERED = [POST, JOURNAL].freeze
       TOTALS = %i[commits additions deletions].freeze
 
       include Deps[review_range: "contracts.review_range_contract"]
@@ -20,7 +21,7 @@ module Activity
 
         Structs::Review.new(
           period:, from:, to:, focus:, carried: review_carries.per_task_between(from, to).to_a,
-          days: days(from..to, found), **scoped(shown, found),
+          days: days(from..to, found), earlier: earlier(shown), **scoped(shown, found),
         )
       end
 
@@ -44,6 +45,20 @@ module Activity
         review_tasks.done_between(from, to).credited(**credits).with_groups.to_a.group_by(&:closed_on)
       end
 
+      def earlier(shown)
+        years = earlier_years(shown)
+        return NONE if years.empty?
+
+        remembered.where(Sequel.|(*years.map { Sequel[occurred_on: it] })).newest_first.to_a
+      end
+
+      def earlier_years(shown)
+        first = remembered.dataset.where(Sequel[:occurred_on] < shown.begin).min(:occurred_on)
+        return NONE unless first
+
+        (1..(shown.end.year - first.year)).map { shown.begin.prev_year(it)..((shown.end + 1).prev_year(it) - 1) }
+      end
+
       def published(found)
         {
           posts: found.fetch(POST, NONE),
@@ -51,6 +66,8 @@ module Activity
           journal: Structs::ReviewJournal.from(found.fetch(JOURNAL, NONE)),
         }
       end
+
+      def remembered = activities.with_types(REMEMBERED)
 
       def scoped(shown, found)
         {

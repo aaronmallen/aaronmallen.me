@@ -10,6 +10,7 @@ module Admin
           prop :href, Blog::Types::String
           prop :text, Blog::Types::String
           prop :day, Blog::Types::Date.optional, default: nil
+          prop :format, Blog::Types::Symbol, default: :short
 
           def view_template
             a(class: "review-line", href: @href) do
@@ -21,7 +22,7 @@ module Admin
           private
 
           def dated
-            span(class: "meta") { l(@day, format: :short) }
+            span(class: "meta") { l(@day, format: @format) }
             whitespace
           end
         end

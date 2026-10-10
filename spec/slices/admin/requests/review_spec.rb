@@ -527,6 +527,43 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
       end
     end
 
+    describe "earlier years" do
+      def rows = card("earlier").all(".review-line").map { [it.find(".meta").text, it[:href]] }
+
+      let!(:published) { create(:post, :published, title: "Two years ago", published_at: at(Date.new(2024, 9, 20))) }
+
+      before do
+        create(:journal_entry, entry_date: Date.new(2025, 9, 15), body: "A year ago")
+        create(:journal_entry, entry_date: Date.new(2025, 9, 21), body: "The week after")
+      end
+
+      it "titles the card with its count" do
+        visit_review(day: "2026-09-16")
+
+        expect(card("earlier").find(".card-title").text).to eq("On this day · 2")
+      end
+
+      it "names each row's year and links it to its record, newest year first" do
+        visit_review(day: "2026-09-16")
+
+        journal = "/admin/journal?to=2025-09-15#day-2025-09-15"
+
+        expect(rows).to eq([["Sep 15, 2025", journal], ["Sep 20, 2024", "/admin/posts/#{published.id}/edit"]])
+      end
+
+      it "shows the earlier years of the period it pages to" do
+        visit_review(day: "2026-09-21")
+
+        expect(rows.map(&:first)).to eq(["Sep 21, 2025"])
+      end
+
+      it "hides when no earlier year has anything" do
+        visit_review(day: "2026-10-07")
+
+        expect(page).to have_no_css("#review-earlier")
+      end
+    end
+
     describe "the month" do
       before do
         fill(Date.new(2026, 8, 31), title: "Done in August")

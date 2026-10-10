@@ -1293,6 +1293,8 @@ en:
           no_project: "no project"
           title: "Done"
           untagged: "untagged"
+        earlier_card:
+          title: "On this day"
         group:
           more: "+%{count} more"
           open: "Open all %{count} in %{name}"

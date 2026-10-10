@@ -3,7 +3,9 @@
 module API
   module Serializers
     class Review < Serializer
+      REMEMBERED = %w[journal post].map { Blog::Types::ActivityKind[it] }.freeze
       OUTCOMES = %w[resolved dropped].map { Blog::Types::DecisionEventKind[it] }.freeze
+      EARLIER = "the journal entries and posts from the same dates in earlier years, newest first"
       FOCUS = "the one day every section but carried covers, or null for the whole period"
       NOTE = "the note kept on the period, or null when it has none"
       CARRIED_TASK = Helpers::Schema.object(
@@ -97,6 +99,16 @@ module API
           worked: Helpers::Schema.list(
             Helpers::Schema.object({ date: Helpers::Schema::DAY, seconds: Helpers::Schema::INTEGER }),
           ),
+          earlier: Helpers::Schema.list(
+            Helpers::Schema.object(
+              {
+                type: { type: "string", enum: REMEMBERED },
+                id: Helpers::Schema::INTEGER,
+                date: Helpers::Schema::DAY,
+                name: Helpers::Schema::STRING,
+              },
+            ),
+          ).merge(description: EARLIER),
           note: { oneOf: [ReviewNote.reference, { type: "null" }], description: NOTE },
         },
       ).freeze
@@ -133,6 +145,8 @@ module API
           { date: day(date), tasks: tasks.map { done_task(it) } }
         end
       end
+
+      def earlier(review) = review.earlier.map { { type: it.type, **record(it) } }
 
       def focus(review) = review.focus&.then { day(it) }
 
@@ -174,7 +188,9 @@ module API
         }
       end
 
-      def records(found) = found.map { { id: it.source_id, date: day(it.occurred_on), name: it.name } }
+      def record(found) = { id: found.source_id, date: day(found.occurred_on), name: found.name }
+
+      def records(found) = found.map { record(it) }
     end
   end
 end
