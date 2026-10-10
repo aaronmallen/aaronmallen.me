@@ -654,6 +654,13 @@ RSpec.describe Social::Jobs::VerifyWebmention do
         expect(verify_from("https://ada.example/notes/1", author: "https://ada.example/")).to eq("approved")
       end
 
+      it "approves a mention once a host named by its IPv6 address is marked as one person's site" do
+        approve_author("https://[2600:1f18::1]/")
+        webmention_mutations.update_settings(single_author_hosts: ["2600:1f18::1"])
+
+        expect(verify_from("https://[2600:1f18::1]/notes/1", author: "https://[2600:1f18::1]/")).to eq("approved")
+      end
+
       it "leaves a mention waiting once another host is the one marked" do
         webmention_mutations.update_settings(single_author_hosts: ["grace.example"])
 

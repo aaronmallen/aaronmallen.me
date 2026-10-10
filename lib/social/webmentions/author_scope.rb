@@ -17,18 +17,20 @@ module Social
 
         page_segments = segments(page)
         return false unless page_segments
-        return @single_author_hosts.include?(@author.host) if @author_segments.empty?
+        return @single_author_hosts.include?(host(@author)) if @author_segments.empty?
 
         page_segments.first(@author_segments.size) == @author_segments
       end
 
       private
 
-      def origin(uri) = [uri.scheme, uri.host, uri.port]
+      def host(uri) = Blog::Types::Normalized::Host.call(uri.to_s) { nil }
+
+      def origin(uri) = [uri.scheme, host(uri), uri.port]
 
       def parse(url)
         uri = URI.parse(Blog::Types::Normalized::Url.call(url.to_s) { nil }.to_s)
-        uri if uri.is_a?(URI::HTTP) && uri.host
+        uri if uri.is_a?(URI::HTTP) && host(uri)
       rescue URI::Error
         nil
       end

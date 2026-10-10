@@ -16,9 +16,10 @@ module Tasks
 
     def find(fragment) = fragment.css(IMG).reject { own?(it[SRC]) }
 
+    def host?(src) = Blog::Types::Normalized::Host.valid?(src.to_s)
+
     def linkable?(src)
-      uri = URI(src)
-      uri.is_a?(URI::HTTP) && !uri.host.to_s.empty?
+      URI(src).is_a?(URI::HTTP) && host?(src)
     rescue URI::InvalidURIError
       false
     end
@@ -27,7 +28,7 @@ module Tasks
       uri = URI(src.to_s)
       return false unless MEDIA.match?(uri.path) && uri.query.nil? && uri.fragment.nil?
 
-      uri.is_a?(URI::HTTP) ? uri.origin == site_origin : uri.host.nil? && uri.scheme.nil?
+      uri.is_a?(URI::HTTP) ? uri.origin == site_origin : !host?(src) && uri.scheme.nil?
     rescue URI::InvalidURIError
       false
     end

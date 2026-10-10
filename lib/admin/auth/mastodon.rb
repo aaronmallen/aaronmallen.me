@@ -32,7 +32,10 @@ module Admin
       end
 
       def register(host, redirect_uri:, scope:)
-        app = { client_name: URI(@website).host, redirect_uris: redirect_uri, scopes: scope, website: @website }
+        app = {
+          client_name: Blog::Types::Normalized::Host.call(@website), redirect_uris: redirect_uri, scopes: scope,
+          website: @website,
+        }
         found = body(client(host).request(:post, APPS_PATH, body: app))
 
         { client_id: found.fetch("client_id"), client_secret: found.fetch("client_secret") }
