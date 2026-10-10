@@ -6,7 +6,7 @@ module API
       BAD_SPRINT_DAY = "give sprint_on as a day, such as 2026-01-01"
       CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       LISTS = Blog::Types::TaskList.values.freeze
-      OPEN = [Blog::Types::TaskStatus["open"], Blog::Types::TaskStatus["in_progress"]].freeze
+      OPEN = Blog::Types::OpenTaskStatus.values.freeze
       STATUSES = Blog::Types::TaskStatus.values.freeze
 
       SCHEMA = {

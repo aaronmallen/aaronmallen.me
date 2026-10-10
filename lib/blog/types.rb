@@ -50,6 +50,7 @@ module Blog
     AnalyticsRangeParam = AnalyticsRange.fallback(30)
     AttentionKind = Types::String.enum("carried", "draft", "someday", "journal", "new_device", "broken_link")
     Checkbox = Types::Bool.constructor { |value| value == Blog::Constants::CHECKED }
+    ClosedTaskStatus = Types::String.enum("done", "canceled")
     CodeChallengeMethod = Types::String.enum("S256")
     ContributorKind = Types::String.enum("owner", "agent")
     ContributorSlug = Types::String.constrained(format: /\A[a-z0-9]+(?:[.-][a-z0-9]+)*\z/, max_size: 64)
@@ -97,6 +98,7 @@ module Blog
     OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete")
     OAuthTokenAuthMethod = Types::String.enum("none")
     OAuthTokenType = Types::String.enum("access", "refresh")
+    OpenTaskStatus = Types::String.enum("open", "in_progress")
     OptionalText = Types::String.optional.constructor do |value|
       text = TrimmedText[value]
       text.empty? ? nil : text
@@ -185,7 +187,7 @@ module Blog
     TaskOriginParam = TaskOrigin.fallback(TaskOrigin.values.first)
     TaskSourceProvider = Types::String.enum("github", "linear")
     TaskSourceState = Types::String.enum(*%w[open completed not_planned unassigned moved deleted started])
-    TaskStatus = Types::String.enum("open", "in_progress", "done", "canceled")
+    TaskStatus = Types::String.enum(*OpenTaskStatus.values, *ClosedTaskStatus.values)
     TaskTimelineKind = Types::String.enum("comment", "session", "moved", "tagged", "untagged", "status_changed")
     TaskView = Types::String.enum("today", "upcoming", "next", "someday", "external")
     TaskTab = Types::String.enum(*TaskView.values, "completed")

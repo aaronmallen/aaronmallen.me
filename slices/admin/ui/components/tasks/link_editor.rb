@@ -20,9 +20,7 @@ module Admin
             Blog::Types::TaskFilter["someday"] => ".places.someday",
             Blog::Types::TaskFilter["external"] => ".places.external",
           }.freeze
-          BY_STATUS = [
-            Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["in_progress"],
-          ].freeze
+          BY_STATUS = [*Blog::Types::ClosedTaskStatus.values, Blog::Types::TaskStatus["in_progress"]].freeze
           PREFIX = "#"
           TODAY = Blog::Types::TaskFilter["today"]
 

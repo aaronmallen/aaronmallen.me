@@ -6,7 +6,7 @@ module Tasks
       COMPLETED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :completed_at).cast(Date)
       CONTRIBUTORS = Blog::Types::ContributorKind.values.freeze
       CREATED_ON = Sequel.function(:timezone, Blog::TimeZone::NAME, :created_at).cast(Date)
-      CLOSED = [Blog::Types::TaskStatus["done"], Blog::Types::TaskStatus["canceled"]].freeze
+      CLOSED = Blog::Types::ClosedTaskStatus.values.freeze
       IN_PROGRESS = Blog::Types::TaskStatus["in_progress"]
       LISTS = Blog::Types::TaskList.values.freeze
       MANUAL = (Sequel[:worked_seconds] - Sequel.function(:coalesce, Sequel[:sessions][:seconds], 0)).cast(Integer)

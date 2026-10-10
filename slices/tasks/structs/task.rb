@@ -9,7 +9,7 @@ module Tasks
 
       def canceled? = status == Blog::Types::TaskStatus["canceled"]
 
-      def closed? = done? || canceled?
+      def closed? = Blog::Types::ClosedTaskStatus.valid?(status)
 
       def credits
         return [OWNER] if contributors.empty?

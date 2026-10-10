@@ -14,7 +14,7 @@ module Admin
             "parent_of" => "fa-solid fa-sitemap",
             "relates" => "fa-solid fa-link",
           }.freeze
-          CLOSED = [Blog::Types::TaskStatus["canceled"], Blog::Types::TaskStatus["done"]].freeze
+          CLOSED = Blog::Types::ClosedTaskStatus
           LABELS = "ui.components.tasks.links.labels"
 
           prop :links, Blog::Types::Array.of(Blog::Types::Instance(Data))
@@ -37,7 +37,7 @@ module Admin
           end
 
           def chip_class(link)
-            ["task-link", ("blocker" if link.blocker?), ("done" if CLOSED.include?(link.task.status))]
+            ["task-link", ("blocker" if link.blocker?), ("done" if CLOSED.valid?(link.task.status))]
           end
         end
       end
