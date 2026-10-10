@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, analytics, db, projects, record]
 issue: AA-688
-amended: [AA-821, AA-823]
+amended: [AA-821, AA-823, "#941"]
 tags: [sync-states, sync, failures, today, schema, postgres, slices, exports]
 ---
 
@@ -50,17 +50,19 @@ place of `name`, under one unique index: `kind`, `sync` and `repo`. We edit the 
 
 | `kind` | `sync` | `repo` | Owner | The row holds |
 | --- | --- | --- | --- | --- |
-| `commits` | | set | `CommitRepo` | A repository's forward edge |
-| `backfill` | | set | `CommitRepo` | Where a walk that is going has read down to, and when a chunk last touched it |
-| `failure` | a `sync_name` | set or empty | `SyncStateRepo` | Why the sync last failed |
+| `commits` | | set | `CommitMutations` | A repository's forward edge |
+| `backfill` | | set | `CommitMutations` | Where a walk that is going has read down to, and when a chunk last touched it |
+| `failure` | a `sync_name` | set or empty | `SyncStateMutations` | Why the sync last failed |
 
-`SyncStateRepo` also owns the four failure columns. Neither repo reads or writes the other's rows. Each picks rows
-by equal columns and reads the sync and the repository from their own columns.
+`SyncStateMutations` also owns the four failure columns, and `SyncStateQueries` reads them. Neither commit repo
+reads or writes the failure rows, and neither sync state repo touches the commit rows. Each picks rows by equal
+columns and reads the sync and the repository from their own columns. #941 corrected these repo names from
+`CommitRepo` and `SyncStateRepo`.
 
-Another slice writes its health only through record's exports. A new sync takes a `SyncStateRepo` constant and an
-enum value, a `record_*_sync_outcome` operation that record exports, an import in the slice that runs it, and, if it
-fails per repository, an entry in `Record::Operations::ReapSyncStates::SYNCS` so the reaper drops rows for
-repositories that are gone.
+Another slice writes its health only through record's exports. A new sync takes an enum value, matched in
+`Blog::Types::SyncName`, an import of `record.operations.record_sync_outcome` in the slice that runs it (#941 corrected
+this from one `record_*_sync_outcome` export per sync), and, if it fails per repository, an entry in
+`Record::Operations::ReapSyncStates::SYNCS` so the reaper drops rows for repositories that are gone.
 
 ## Alternatives
 
@@ -68,25 +70,26 @@ repositories that are gone.
 parsing spread across `CommitRepo` and `SyncStateRepo`: each builds names, scans by prefix and cuts names apart,
 and a comment has to hold the line between them. Its one gain, no migration, does not apply before deploy.
 
-**A health table per slice, with a query Today reads.** Each slice would own its failures outright, the way the
-record on slices has each slice own its tables. It lost to AA-308's rule to build the failure record once, which
-AA-550 held the rollup to: one table gives Today one query, `record.queries.sync_failures`, where a table per slice
-means one more table and one more query for every slice that syncs.
+**A health table per slice, with a query Today reads.** Each slice would own its failures outright, the way the record
+on slices has each slice own its tables. It lost to AA-308's rule to build the failure record once, which AA-550 held
+the rollup to: one table gives Today one query, `record.repos.sync_state_queries` (#941), where a table per slice means
+one more table and one more query for every slice that syncs.
 
 ## Consequences
 
 A row says what it is in its columns. No code builds a name or splits one, no read scans with `LIKE`, and the
 comment that divides the table goes.
 
-A new kind or sync is a schema change: an enum value in the migration, kept in step with `SyncStateRepo`'s
-constants by hand. After deploy that is `ALTER TYPE ... ADD VALUE`.
+A new kind or sync is a schema change: an enum value in the migration, kept in step with `Blog::Types::SyncName` and
+`Blog::Types::SyncStateKind` by hand (#941). After deploy that is `ALTER TYPE ... ADD VALUE`.
 
 Record holds other slices' health, so `analytics` and `projects` depend on it to report their own failures, and a
 new sync touches record, the slice that runs it, and the migration.
 
 The country file's health does not fit. It comes from the file on disk, not from a run, so
-`Admin::Operations::SummarizeToday` reads `analytics.queries.country_database_failure` and builds a `countries`
-failure by hand beside the rows.
+`Admin::Operations::SummarizeToday` reads `analytics.repos.country_queries#database_failure` and builds a
+`countries` failure by hand beside the rows. A refresh run fits: `Analytics::Jobs::RefreshCountryDatabase` records
+its outcome as a `country_database` failure row through `record_sync_outcome` (#941).
 
 Editing the original migration means every local database drops and builds again to pick it up.
 

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, record]
 issue: AA-684
-amended: [AA-758, AA-821, AA-823, "#248"]
+amended: [AA-758, AA-821, AA-823, "#248", "#941"]
 tags: [commits, github, sync, walk, sidekiq, rate-limit, sync-states]
 ---
 
@@ -48,12 +48,12 @@ own clock and passing that clock to the job, which hands it on to every chunk it
 - `commits:<repo>` is the forward edge, and the walk's floor. A repository with none walks to the start of its
   history, and a step past its creation date ends the walk there. Reaching the floor, or a step that would pass
   it, starts the sweep below it.
-- The sweep reads under the floor with no lower bound. GitHub filters history by commit date, not push date, so a
-  branch pushed days after its commits holds history under the floor that no walk has read (#248). A branch is
-  done once its page holds a commit already stored, reads to its end or comes back empty. A chunk with every
-  branch done moves the forward edge to a day before the walk began (`Record::CommitEdge::OVERLAP`), and the walk
-  ends. Otherwise the back edge moves down the branches still open, and the next chunk sweeps on from there. A back
-  edge at or under the floor marks a walk as sweeping.
+- The sweep reads under the floor with no lower bound. GitHub filters history by commit date, not push date, so a branch
+  pushed days after its commits holds history under the floor that no walk has read (#248). A branch is done once its
+  page holds a commit already stored, reads to its end or comes back empty. A chunk with every branch done moves the
+  forward edge to a day before the walk began (`Record::Operations::PlanCommitWalk::OVERLAP`, a name #941 corrected),
+  and the walk ends. Otherwise the back edge moves down the branches still open, and the next chunk sweeps on from
+  there. A back edge at or under the floor marks a walk as sweeping.
 - `backfill:<repo>` is the back edge, where the walk has read down to. It lives only while a walk is going.
 
 AA-823 settled how the finder tells a walk is going: its back edge exists, and a chunk has touched the row's

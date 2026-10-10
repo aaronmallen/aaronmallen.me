@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [admin, assets, lib]
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924", "#941"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
@@ -24,8 +24,9 @@ sends the values with `fetch` and patches the page with the reply.
 
 Every admin write is an HTML form that posts to the server, and the server answers with a page. Scripts add to a
 form. They never replace its submit, except in the task modal, where #41 lets a script send the same form, in the
-people dialog, where #225 does the same, in photo uploads, which #135 sends through `fetch` alone, and in task
-order, which #148 saves through `fetch` alone.
+people dialog, where #225 does the same, in photo uploads, which #135 sends through `fetch` alone, in task
+order, which #148 saves through `fetch` alone, and in calendar drag, where #360 lets a script send a day panel's
+move form.
 
 - **Routes.** Every create, update and delete in `slices/admin/config/routes.rb` is a `post`, and an update or a
   delete names itself in the path, such as `post "/posts/:id/delete"`. `Blog::UI::Components::Form` takes only
@@ -63,6 +64,10 @@ order, which #148 saves through `fetch` alone.
   person's row for the list, not a redirect and a toast. A 422 swaps the form back in with its errors, and any
   other answer, or a failed request, posts the form. With scripts off a plain **Add New** link under the post
   leads to the people page, and the form posts there as before.
+  #360 added a fifth, which #941 brought into this list: `calendar_drag.js` fills a calendar item's move form in
+  the day panel with the day the item lands on, sends it through `fetch`, and swaps in the month and the panel from
+  the page that comes back. With scripts off the grips stay hidden, and the move form's date field and Move button
+  post as before.
   #201 added a read that swaps in no HTML: the command palette fetches the open tasks as JSON from
   `/admin/tasks/palette` when it first opens, as [ADR 0091][0091] records.
 
@@ -88,11 +93,11 @@ reason written down.
 Each write works the same way, and the request specs drive the forms with rack-test, which runs no script. A
 failed write keeps what the operator typed, since the server renders it back.
 
-Every write reloads the page. The previews, the task dialogs, the people dialog, photo uploads and task order are
-the only places that pay for a script to avoid a reload. Four of them write: the task modal, so a failed save can
-keep it open (#41), the people dialog, so the post being written survives adding someone to mention (#225), the
-photo upload, so the photo lands at the cursor (#135), and task order, so a task moves any number of places in one
-drop (#148).
+Every write reloads the page. The previews, the task dialogs, the people dialog, photo uploads, task order and calendar
+drag are the only places that pay for a script to avoid a reload. Five of them write: the task modal, so a failed save
+can keep it open (#41), the people dialog, so the post being written survives adding someone to mention (#225), the
+photo upload, so the photo lands at the cursor (#135), task order, so a task moves any number of places in one drop
+(#148), and calendar drag, so both days redraw with no reload (#360, recorded by #941).
 
 Six places break the rule today, and each fails with scripts off:
 

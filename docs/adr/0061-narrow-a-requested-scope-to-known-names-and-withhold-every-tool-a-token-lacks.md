@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, lib]
 issue: AA-677
-amended: [AA-811, "#551"]
+amended: [AA-811, "#551", "#941"]
 tags: [mcp, oauth, scopes, tools, consent, sdk]
 ---
 
@@ -23,8 +23,9 @@ a token may call, and what a client hears when it may not, are the two parts of 
 
 ## Decision
 
-**A grant keeps only the names the server knows.** `MCP::OAuth::Scope.granted` keeps the names in `Scope::ALL`
-that the client asked for and falls back to `Scope::DEFAULT`, `read` alone, when none are left.
+**A grant keeps only the names the server knows.** `MCP::Operations::Authorize#granted_scopes` keeps the names in
+`Blog::Types::OAuthScope` that the client asked for and falls back to `read` alone when none are left. #941
+corrected these names from `MCP::OAuth::Scope.granted`, `Scope::ALL` and `Scope::DEFAULT`.
 `MCP::Operations::Authorize` narrows the request before the consent page, so the page shows what the token will
 carry, not what the client asked for. A scope that breaks the OAuth grammar still gets `invalid_scope` from
 `MCP::Contracts::AuthorizationRequestContract`; a well formed name the server does not know is dropped. The
@@ -38,11 +39,11 @@ and it leaves every tool the token lacks out of `tools/list`. A call to one of t
 tool and the missing permission and says to connect again, where the SDK would say `Tool not found`. To do that,
 `ScopedServer` overrides the SDK's private `MCP::Server#call_tool`.
 
-A new scope needs three things: a name in `Scope::ALL`, a consent line under `scopes` in
-`slices/mcp/config/i18n/en.yml`, and a tool that names it. `scopes_supported` in the metadata reads `Scope::ALL`
+A new scope needs three things: a value in `Blog::Types::OAuthScope`, a consent line under `scopes` in
+`slices/mcp/config/i18n/en.yml`, and a tool that names it. `scopes_supported` in the metadata reads `OAuthScope`
 on its own.
 
-Since #551 split `publish` and `delete` out of `write`, `Scope::ALL` holds five names. ADR 0114 says which tools each
+Since #551 split `publish` and `delete` out of `write`, `OAuthScope` holds five names. ADR 0114 says which tools each
 one guards.
 
 ## Alternatives

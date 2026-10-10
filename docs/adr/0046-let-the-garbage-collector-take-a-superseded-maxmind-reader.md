@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics]
 issue: AA-681
+amended: ["#941"]
 tags: [analytics, geolite2, maxmind, concurrency]
 ---
 
@@ -14,8 +15,9 @@ tags: [analytics, geolite2, maxmind, concurrency]
 
 ## Context
 
-`Analytics::Countries` (`lib/analytics/countries.rb`) looks a visitor's country up in a GeoLite2 database at
-`tmp/maxmind/GeoLite2-Country.mmdb`, the path `Analytics::Providers::GeoProvider::DATABASE_PATH` names.
+`Analytics::GeoLite2::Countries` (`lib/analytics/geo_lite2/countries.rb`) looks a visitor's country up in a GeoLite2
+database at `tmp/maxmind/GeoLite2-City.mmdb`, the path `Analytics::Providers::GeoProvider::DATABASE_PATH` names. In
+this paragraph, #941 corrected the names of the class, its file and the database.
 `Analytics::Jobs::RefreshCountryDatabase` downloads a fresh copy at 03:00 each Wednesday (`config/sidekiq.yml.erb`),
 and `Countries#replace` writes it beside the old file and renames it into place.
 
@@ -60,7 +62,9 @@ Anyone who moves `Countries` off `MODE_MEMORY` takes on a real leak and a real r
 lives in one place, `Countries#open_database`, and this record is the reason it is not a setting.
 
 The file sits under `tmp/` and nothing fetches it at boot, so a fresh host looks up no country until the first
-Wednesday run. Until then `Analytics::Queries::CountryDatabaseFailure` reports the database missing to the admin
-once settings hold a MaxMind account ID and license key. AA-307 has to plan for that on the Pi.
+Wednesday run. Until then `Analytics::Repos::CountryQueries#database_failure` reports the database missing to the
+admin once settings hold a MaxMind account ID and license key. AA-307 has to plan for that on the Pi. A refresh
+that fails lands as a `country_database` failure row, which `RefreshCountryDatabase` records through
+`record.operations.record_sync_outcome` (#941).
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

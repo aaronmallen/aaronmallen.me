@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, activity]
 issue: AA-426
-amended: [AA-434, AA-811, AA-824, "#935"]
+amended: [AA-434, AA-811, AA-824, "#935", "#941"]
 tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
 ---
 
@@ -44,7 +44,8 @@ events and comments, and pull requests past the list. A report on a date range r
 A commit crosses whole: repository, sha, full message, additions and deletions, private and employer
 repositories included. A subject line is not what a review reads.
 
-`read_activity` answers one window at a time: about 200 rows, rounded out to the end of a day, with `partial`
+`read_activity` answers one window at a time: about 100 rows (`Blog::Helpers::DayWindow::CAP`, which #941
+corrected from 200), rounded out to the end of a day, with `partial`
 set and a `continue_to` day to send as `to` for the next window. The client may pass `kinds`, `repos`, `tags` and
 `text`. These narrow a read, but the client picks them, so they control nothing.
 
@@ -74,14 +75,16 @@ system reaches whoever holds the token, which for claude.ai is not this machine.
 reviewing from one that should have stayed in, so the grant is the whole control.
 
 **`read` alone reads the journal.** A client that names no scope gets `read` alone (`MCP::Operations::Authorize`),
-and both `scopes` columns in `config/db/structure.sql` default to `{read}`, so a proofreading connector now reads
-private entries, private commits and text strangers wrote. One connector does both jobs, and there is one to revoke.
+and the `scopes` columns of `oauth_codes` and `oauth_tokens` in `config/db/structure.sql` default to `{read}`, so a
+proofreading connector now reads private entries, private commits and text strangers wrote. One connector does both
+jobs, and there is one to revoke. An API token minted in the admin is not an MCP grant: since #897 its `scopes`
+column defaults to all five scopes, and #941 named the MCP tables here to tell the two apart.
 
 **A leaked token reads the journal for any range it asks for.** An access token lasts an hour and a refresh token
 30 days (`slices/mcp/operations/issue_tokens.rb`), and the revoke button on the admin's clients page is the rest of
 the limit.
 
-**A year takes many calls.** One answer stops near 200 rows, and a feed of many kinds fills a window sooner, so a
+**A year takes many calls.** One answer stops near 100 rows (#941), and a feed of many kinds fills a window sooner, so a
 client counts first with `summarize_activity` and walks the months with `read_activity`, following `continue_to`.
 A client that ignores `partial` sees only the newest rows of its window.
 

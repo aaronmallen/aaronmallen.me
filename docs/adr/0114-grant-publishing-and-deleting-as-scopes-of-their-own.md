@@ -5,6 +5,7 @@ status: active
 created: 2026-10-06
 area: [lib, mcp]
 issue: "#551"
+amended: ["#941"]
 tags: [mcp, oauth, scopes, tools, consent, publish, delete]
 ---
 
@@ -21,7 +22,8 @@ on the consent page. The owner wants to grant edits without either power.
 
 ## Decision
 
-`MCP::OAuth::Scope::ALL` holds two more names, `publish` and `delete`.
+`Blog::Types::OAuthScope` holds two more names, `publish` and `delete`. #941 corrected its name from
+`MCP::OAuth::Scope::ALL`.
 
 - **`publish`** guards the tools whose result nobody can call back: `publish_post` and `send_social_post`.
 - **`delete`** guards every tool that removes a record for good: each `delete_*` tool and `remove_tag`.
@@ -30,7 +32,7 @@ on the consent page. The owner wants to grant edits without either power.
 
 The consent page shows a line for each, and the warning that a post cannot be taken back sits on the `publish`
 line, not on `write`. The server instructions in `MCP::Protocol::Handler` name the scope that grants publishing,
-sending and deleting. ADR 0061's rule still applies: each scope has a name in `Scope::ALL`, a consent line and
+sending and deleting. ADR 0061's rule still applies: each scope has a name in `OAuthScope`, a consent line and
 the tools that name it, and `MCP::Protocol::ScopedServer` withholds them from a token that lacks it.
 
 ## Alternatives

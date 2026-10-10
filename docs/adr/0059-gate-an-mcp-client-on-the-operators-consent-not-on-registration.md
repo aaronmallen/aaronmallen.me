@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, mcp, admin]
 issue: AA-670
-amended: ["#176", "#463", "#465"]
+amended: ["#176", "#463", "#465", "#941"]
 tags: [mcp, oauth, consent, registration, clients, revoke]
 ---
 
@@ -29,7 +29,8 @@ Anyone may register a client, and the operator approves every connection. The ru
 admin's clients page follows it.
 
 - `MCP::Operations::RegisterClient` registers a public client with no secret. It sets `grant_types`,
-  `response_types` and `token_endpoint_auth_method` itself from `MCP::OAuth::Metadata`, and
+  `response_types` and `token_endpoint_auth_method` itself from `Blog::Types::OAuthGrantType`,
+  `OAuthResponseType` and `OAuthTokenAuthMethod`, which #941 corrected from `MCP::OAuth::Metadata`, and
   `MCP::Contracts::ClientRegistrationContract` takes only redirect URIs, a name and two URIs from the client.
 - `MCP::Operations::Authorize` renders the consent page unless the request carries approve or cancel. The page
   names the client, what each scope grants and where the answer goes. Approve is a guarded POST, cancel sends
@@ -37,8 +38,9 @@ admin's clients page follows it.
 - Nothing remembers a grant. A client that reconnects meets the page again.
 - `MCP::Operations::RevokeClient` deletes the client's codes and tokens and keeps its row, so it can sign in again
   (AA-269). Nothing marks a client revoked, and `oauth_clients` has no `revoked_at`.
-- `queries.connected_clients` lists only clients holding an unexpired, unrevoked token (AA-693), so a revoked client
-  leaves the admin page and a registration that never connected never shows.
+- `repos.oauth_client_queries#connected`, which #941 corrected from `queries.connected_clients`, lists only clients
+  holding an unexpired, unrevoked token (AA-693), so a revoked client leaves the admin page and a registration that
+  never connected never shows.
 
 ## Alternatives
 

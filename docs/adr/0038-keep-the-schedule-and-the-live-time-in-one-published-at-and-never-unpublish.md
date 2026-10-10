@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, posts, public, social]
 issue: AA-651
+amended: ["#941"]
 tags: [posts, social-posts, publishing, scheduling, published_at, posted_at, delete, webmentions]
 ---
 
@@ -33,10 +34,10 @@ read it as the live time, and only for published rows.
 **The earlier time wins.** `Posts::Relations::Posts#publish` writes `least(coalesce(published_at, at), at)`. A post
 the job publishes late keeps the time it was due, and a publish time in the past backdates the post.
 
-**Published is the last state.** `PostRepo#publish` touches only unpublished rows, and `PostRepo#publish_due`
-only rows still scheduled and due (AA-618). `SavePost#update_published` saves a published post without its date,
-whatever the intent, and the `posts_lock_published_slug` trigger refuses to change its slug. No operation moves
-a post back.
+**Published is the last state.** `PostMutations#publish` touches only unpublished rows, and `PostMutations#publish_due`
+only rows still scheduled and due (AA-618; #941 corrected the names from `PostRepo`). `SavePost#update_published` saves
+a published post without its date, whatever the intent, and the `posts_lock_published_slug` trigger refuses to change
+its slug. No operation moves a post back.
 
 **Deleting is the only way to retract a post** (AA-290). `DeletePost` removes the row. Its webmentions, webmention
 receipts, suggestions and tag links go with it by cascade, and its social post stays, with `post_id` set to null.

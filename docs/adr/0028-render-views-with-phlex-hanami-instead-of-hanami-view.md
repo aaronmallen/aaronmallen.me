@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, lib, admin, mcp, public]
 issue: AA-632
-amended: [AA-783, AA-809, "#570"]
+amended: [AA-783, AA-809, "#570", "#941"]
 tags: [views, phlex, phlex-hanami, hanami-view, dry-types, props, components, layouts, ui]
 ---
 
@@ -27,10 +27,10 @@ builds from many small components, so the shape of a component decides how the r
 Every view, layout and component is a Phlex class, rendered through phlex-hanami. The app does not bundle
 hanami-view.
 
-The `Gemfile` pins `phlex-hanami ~> 0.2` from the `gem.coop/@aaron` source, locked at 0.2.2. `Blog::UI::View`,
-`Blog::UI::Layouts::Application` and `Blog::UI::Component` in `lib/blog/ui` subclass `Phlex::Hanami::View`,
-`Phlex::Hanami::Layout` and `Phlex::Hanami::Component`. Each slice keeps its own under `slices/<slice>/ui`, and each
-slice's `UI::View` subclasses `Blog::UI::View`.
+The `Gemfile` pins `phlex-hanami ~> 0.3` from the `gem.coop/@aaron` source, locked at 0.3.0 (#941 corrected both from
+0.2). `Blog::UI::View`, `Blog::UI::Layouts::Application` and `Blog::UI::Component` in `lib/blog/ui` subclass
+`Phlex::Hanami::View`, `Phlex::Hanami::Layout` and `Phlex::Hanami::Component`. Each slice keeps its own under
+`slices/<slice>/ui`, and each slice's `UI::View` subclasses `Blog::UI::View`.
 
 Components and views type their props with dry types through `Phlex::Hanami::Props`, which `Blog::UI::Component`
 and `Blog::UI::View` include (`lib/blog/ui/component.rb`, `lib/blog/ui/view.rb`). A view declares a prop for each

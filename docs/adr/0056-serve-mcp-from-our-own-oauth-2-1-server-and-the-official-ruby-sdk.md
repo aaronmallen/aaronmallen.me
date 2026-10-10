@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, mcp, admin]
 issue: AA-262
-amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153", "#551", "#932"]
+amended: [AA-348, AA-390, AA-408, AA-480, AA-525, AA-537, AA-663, AA-809, AA-824, "#153", "#551", "#932", "#941"]
 tags: [mcp, auth, oauth, github, tokens, claude, scopes]
 ---
 
@@ -35,12 +35,15 @@ We run an MCP server in `slices/mcp` and take the protocol from the official Rub
 `slices/mcp/config/slice.rb` loads, rather than writing it ourselves.
 
 The slice holds its own OAuth 2.1 server: discovery, dynamic client registration, authorize and token
-(`slices/mcp/config/routes.rb`). `MCP::OAuth::Metadata` allows only PKCE `S256` and public clients. Authorize signs
-the operator in through the admin's GitHub sign-in, locked to the owner's GitHub ID, and asks the operator to approve
-the client before it issues a code. Any other account gets no code and no token.
+(`slices/mcp/config/routes.rb`). `Blog::Types::CodeChallengeMethod` allows only PKCE `S256`, and
+`Blog::Types::OAuthTokenAuthMethod` only public clients. Authorize signs the operator in through the admin's GitHub
+sign-in, which takes only a GitHub account listed in the admin's `owner_identities` table, and asks the operator to
+approve the client before it issues a code. Any other account gets no code and no token. The types were
+`MCP::OAuth::Metadata`, and the sign-in check named one GitHub ID, until #941 corrected them here.
 
 - An access token lasts one hour and a refresh token 30 days (`MCP::Operations::IssueTokens`).
-- We store a SHA-256 digest of each token and code, never the value (`Blog::SecretToken`).
+- We store a SHA-256 digest of each token and code, never the value (`Blog::Types::SecretDigest`, which #941
+  corrected from `Blog::SecretToken`).
 - A token is bound to this server. `MCP::Operations::Authorize` fills in the resource from the protected resource
   metadata when a client sends none, since RFC 8707 leaves it optional there, and `MCP::Operations::Authenticate`
   refuses a token that names no resource or another one (AA-408).
@@ -141,7 +144,8 @@ Since #153 the rule asks for a tool and an endpoint, for each resource once it m
 ([ADR 0086][0086]).
 
 Three tables sit in a presentation slice, so a reader after every table in the site has to open `slices/mcp` as
-well as the feature slices. No presentation slice holds a table beyond those three and the admin's one.
+well as the feature slices. Beyond those three, the presentation slices hold only `admin`'s `session_validity` and
+`owner_identities` and `api`'s `api_tokens` (#941).
 
 [0086]: 0086-serve-a-json-api-behind-long-lived-tokens-minted-in-the-admin.md
 [0114]: 0114-grant-publishing-and-deleting-as-scopes-of-their-own.md

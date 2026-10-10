@@ -6,6 +6,7 @@ created: 2026-09-29
 area: [lib, record, projects, tasks]
 supersedes: ["0048"]
 issue: "#33"
+amended: ["#941"]
 tags: [github, graphql, rest, commits, issues, import, sync, rate-limit]
 ---
 
@@ -52,13 +53,17 @@ call it.
 - `Record::GitHub::Transport` reads the point budget from each response's `rateLimit` field, and keeps the data from
   a body whose errors are all `FORBIDDEN` or `NOT_FOUND` (AA-378).
 
-REST serves three reads, on the same token through `Record::Providers::GitHubProvider`:
+REST serves three reads on the same token through `Record::Providers::GitHubProvider`, and a fourth on a token the
+operator has not saved yet:
 
 - `latest_release` and `stars`, which `Projects::Operations::RefreshProjects` reads. AA-378 moved the import alone,
   though AA-311 found GraphQL answers both.
 - The move check. When GraphQL has no node for a known issue, the client asks REST for the issue at its stored URL.
   GitHub answers a moved issue with a 301, which the connection follows, and the answer's `html_url` names where it
   went. A 404 or 410 means the issue is gone, and `Transport#get` reads both as nothing.
+- The account check. `Record::GitHub::Client#account` asks REST for `GET /user` with the candidate token, which
+  `Admin::Operations::CheckService` hands it, to read the account and the scopes GitHub granted from the
+  `X-OAuth-Scopes` header. #941 added this read to the list.
 
 ## Alternatives
 

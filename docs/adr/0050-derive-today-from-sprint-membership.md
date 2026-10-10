@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, admin, tasks]
 issue: AA-689
-amended: [AA-397, AA-398, "#53", "#81"]
+amended: [AA-397, AA-398, "#53", "#81", "#941"]
 tags: [tasks, sprints, schema, today, upcoming, rollover, dashboard]
 ---
 
@@ -49,10 +49,10 @@ These moves change membership, and nothing else does:
   (AA-397). After days away there is one sprint for today holding the work across the gap, not one per missed day.
 
 A task in progress belongs to Today, so every move that takes a task out of Today and into a list or a later sprint
-sends it back to open, while a move into Today leaves its status alone. `TaskRepo#move_to_list` and
-`TaskRepo#release_sprint` write the rule, so `MoveTask`, `ScheduleTask`, `DropSprint` and the MCP tools that call them
-all follow it. A finished task stays finished. An issue sync still acts only when the provider reports a new state
-(ADR 0068), so a started issue whose task was moved to a list leaves the task open (#81).
+sends it back to open, while a move into Today leaves its status alone. `TaskMutations#move_to_list` and
+`SprintMutations#release` write the rule (#941 corrected both names), so `MoveTask`, `ScheduleTask`, `DropSprint` and
+the MCP tools that call them all follow it. A finished task stays finished. An issue sync still acts only when the
+provider reports a new state (ADR 0068), so a started issue whose task was moved to a list leaves the task open (#81).
 
 Finishing a task writes `status` and `completed_at` and changes no membership, so a finished task keeps the sprint
 it was finished in. Reopening one changes none either, and the next rollover carries a task reopened in an earlier
