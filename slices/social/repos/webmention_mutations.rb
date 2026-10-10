@@ -17,8 +17,8 @@ module Social
 
       def approve(id) = update(id, status: APPROVED, spam_reason: nil)
 
-      def claim_receipt(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
-        receipt = webmention_receipts.claim(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)&.first
+      def claim_receipt(post_id:, source_url:, visitor_hashes:, since:, limit:, total_limit:)
+        receipt = webmention_receipts.claim(post_id:, source_url:, visitor_hashes:, since:, limit:, total_limit:)&.first
 
         receipt ? Success(receipt) : Failure(:throttled)
       end

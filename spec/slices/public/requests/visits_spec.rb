@@ -909,6 +909,27 @@ RSpec.describe "Visits", type: :request do
     end
   end
 
+  describe "a beacon just after midnight from a visitor throttled just before it" do
+    let(:limit) { Hanami.app["settings"].analytics[:throttle_limit] }
+
+    before do
+      lower_throttle_limit(:analytics, to: 5)
+      midnight = Blog::TimeZone.day_start(Blog::TimeZone.today + 1)
+      allow(Time).to receive(:now).and_return(midnight - 600)
+      limit.times { view }
+      allow(Time).to receive(:now).and_return(midnight + 60)
+      view
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the limit" do
+      expect(stored).to have(limit).items
+    end
+  end
+
   describe "a run of beacons past the limit from one address with a new browser on each" do
     let(:limit) { Hanami.app["settings"].analytics[:throttle_limit] }
 

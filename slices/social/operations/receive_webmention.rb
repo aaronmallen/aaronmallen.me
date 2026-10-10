@@ -14,14 +14,14 @@ module Social
         webmention_queries: "repos.webmention_queries",
       ]
 
-      def call(source:, target:, visitor_hash:)
-        step within_limits(visitor_hash)
+      def call(source:, target:, visitor_hashes:)
+        step within_limits(visitor_hashes)
         source_url = step url(source)
         target_url = step url(target)
         step distinct(source_url, target_url)
         step accepted(source_url, webmention_queries.settings)
         post = step post_for(target_url)
-        queue(source_url, target_url, post, visitor_hash)
+        queue(source_url, target_url, post, visitor_hashes)
 
         post
       end
@@ -50,10 +50,10 @@ module Social
         Success(post)
       end
 
-      def queue(source_url, target_url, post, visitor_hash)
+      def queue(source_url, target_url, post, visitor_hashes)
         limits = settings.webmentions
         step webmention_mutations.claim_receipt(
-          post_id: post.id, source_url: source_url.to_s, visitor_hash:, since: window_opened_at,
+          post_id: post.id, source_url: source_url.to_s, visitor_hashes:, since: window_opened_at,
           limit: limits[:throttle_limit], total_limit: limits[:total_throttle_limit],
         )
 
@@ -85,13 +85,13 @@ module Social
         Time.now - (settings.webmentions[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
-      def within_limits(visitor_hash)
+      def within_limits(visitor_hashes)
         since = window_opened_at
         limits = settings.webmentions
-        under = webmention_queries.count_receipts_from_visitor_since(visitor_hash, since) < limits[:throttle_limit] &&
+        under = webmention_queries.count_receipts_from_visitor_since(visitor_hashes, since) < limits[:throttle_limit] &&
                 webmention_queries.count_receipts_since(since) < limits[:total_throttle_limit]
 
-        under ? Success(visitor_hash) : Failure(:throttled)
+        under ? Success(visitor_hashes) : Failure(:throttled)
       end
     end
   end

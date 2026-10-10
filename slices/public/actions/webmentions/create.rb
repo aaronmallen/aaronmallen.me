@@ -17,7 +17,7 @@ module Public
 
         def handle(request, response)
           outcome = receive_webmention.call(
-            source: request.params[:source], target: request.params[:target], visitor_hash: visitor_hash(request),
+            source: request.params[:source], target: request.params[:target], visitor_hashes: visitor_hashes(request),
           )
 
           response.status = status_for(outcome)
@@ -34,9 +34,7 @@ module Public
           end
         end
 
-        def visitor_hash(request)
-          hash_visitor.call(address: Blog::Types::ThrottleKey[read_visitor_address.call(request)])
-        end
+        def visitor_hashes(request) = hash_visitor.throttle_hashes(read_visitor_address.call(request))
       end
     end
   end

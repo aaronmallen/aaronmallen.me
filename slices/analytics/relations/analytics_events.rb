@@ -49,12 +49,12 @@ module Analytics
 
       def between_days(from, to) = between(Blog::TimeZone.day_start(from), Blog::TimeZone.day_start(to + 1))
 
-      def claim(address_hash:, limit:, since:, **attrs)
+      def claim(address_hashes:, limit:, since:, **attrs)
         transaction do
-          lock_until_commit(Sequel.function(:hashtext, address_hash))
-          next unless from_address(address_hash).since(since).count < limit
+          address_hashes.sort.each { lock_until_commit(Sequel.function(:hashtext, it)) }
+          next unless from_address(address_hashes).since(since).count < limit
 
-          stamped(:create).call(**attrs, address_hash:)
+          stamped(:create, :occurred_at).call(**attrs, address_hash: address_hashes.first)
         end
       end
 

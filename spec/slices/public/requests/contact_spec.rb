@@ -546,6 +546,26 @@ RSpec.describe "Contact", type: :request do
     end
   end
 
+  describe "a submission just after midnight from a sender throttled just before it" do
+    let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
+
+    before do
+      midnight = Blog::TimeZone.day_start(Blog::TimeZone.today + 1)
+      allow(Time).to receive(:now).and_return(midnight - 600)
+      limit.times { send_message }
+      allow(Time).to receive(:now).and_return(midnight + 60)
+      send_message
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores nothing more" do
+      expect(message_queries.messages.count).to eq(limit)
+    end
+  end
+
   describe "a run of submissions forging a forwarded address" do
     let(:limit) { Hanami.app["settings"].contact[:throttle_limit] }
 

@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
@@ -59,8 +59,9 @@ readers.
 address alone, since a sender writes the user agent and a new one each post would make a new sender (AA-708). There
 is no counter table and no Redis key: the rows are the count and the flood record. The limit and the window are
 settings with defaults in `config/settings.rb`, so a file that lost the line throttles on the shipped number rather
-than raising (AA-505). `ThrottleWindow` refuses a window of a day or more. The salt turns at midnight, so a longer
-window would expire without saying so.
+than raising (AA-505). The salt turns at midnight, so `HashVisitor#throttle_hashes` hands back today's hash and
+yesterday's: a new row stores today's, and the count matches both, so a window that spans midnight still counts what
+came before it (#898). `ThrottleWindow` refuses a window of a day or more, since two days of hashes cover no longer.
 
 **An IPv6 sender is its /64.** One home or phone holds a whole /64, so a hash of the full address hands a script
 2^64 senders. `Blog::ThrottleKey` masks an IPv6 address to its /64 and reads a mapped IPv4 address as IPv4 before
@@ -136,7 +137,7 @@ The honeypot catches a bot that fills every field. One that renders the page ski
 a bot that posts the moment it loads the form or never loads it, and passes one that fetches the page and waits. One
 stamp serves any number of posts until it expires (#504). Past both, the throttle is all that is left. The throttle
 stops a repeat, not an attacker: a sender with many addresses passes until the total cap refuses everyone, real senders
-included, and midnight is a fresh count whatever the window says. The header check stops a browser on another site's
+included. The header check stops a browser on another site's
 page, not a script, since a post with neither header goes through.
 
 Only stored rows count, so a bot that fills the honeypot or fails the timer leaves no trace at all. A person who

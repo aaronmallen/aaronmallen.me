@@ -11,7 +11,9 @@ module Analytics
         [oldest_day, Blog::TimeZone.today - (Operations::PruneAnalyticsEvents::RETENTION_DAYS - 1)].compact.min
       end
 
-      def count_from_address_since(address_hash, time) = analytics_events.from_address(address_hash).since(time).count
+      def count_from_address_since(address_hashes, time)
+        analytics_events.from_address(address_hashes).since(time).count
+      end
 
       def hourly_between(from:, to:, path: nil)
         return unless kept?(from)

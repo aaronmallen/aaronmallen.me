@@ -10,9 +10,9 @@ module Contact
         end
       end
 
-      def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
-        capped_claim(received_since(since), visitor_hash:, limit:, total_limit:) do
-          stamped(:create, :received_at).call(**attrs, visitor_hash:)
+      def claim(visitor_hashes:, limit:, total_limit:, since:, **attrs)
+        capped_claim(received_since(since), visitor_hashes:, limit:, total_limit:) do
+          stamped(:create, :received_at).call(**attrs, visitor_hash: visitor_hashes.first)
         end
       end
 

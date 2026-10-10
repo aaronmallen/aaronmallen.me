@@ -26,7 +26,7 @@ module Public
           params = Blog::Types::Fields[request.params[:message]]
           return confirm(response) if baited?(params) || !check_stamp.call(params[STAMP])
 
-          case create_message.call(params, visitor_hash: visitor_hash(request))
+          case create_message.call(params, visitor_hashes: visitor_hashes(request))
             in Success(_) then confirm(response)
             in Failure[:throttled] then refuse(response)
             in Failure[:invalid, errors] then reject(response, params, errors)
@@ -53,9 +53,7 @@ module Public
           %i[body reply_to subject].to_h { [it, params[it].to_s] }.merge(STAMP => issue_stamp.call)
         end
 
-        def visitor_hash(request)
-          hash_visitor.call(address: Blog::Types::ThrottleKey[read_visitor_address.call(request)])
-        end
+        def visitor_hashes(request) = hash_visitor.throttle_hashes(read_visitor_address.call(request))
       end
     end
   end

@@ -18,7 +18,7 @@ module MCP
         ]
 
         def handle(request, response)
-          case register_client.call(payload(request), visitor_hash: visitor_hash(request))
+          case register_client.call(payload(request), visitor_hashes: visitor_hashes(request))
             in Success(client)
               render_json(response, client, status: CREATED)
             in Failure(Operations::RegisterClient::REJECT, payload)
@@ -40,9 +40,7 @@ module MCP
           nil
         end
 
-        def visitor_hash(request)
-          hash_visitor.call(address: Blog::Types::ThrottleKey[read_visitor_address.call(request)])
-        end
+        def visitor_hashes(request) = hash_visitor.throttle_hashes(read_visitor_address.call(request))
       end
     end
   end

@@ -69,7 +69,7 @@ Seeds.unwrap(
 )
 
 postgres = Posts::Slice["repos.post_queries"].published_by_slug("domains-in-postgres")
-visitor_hash = Analytics::Slice["operations.hash_visitor"].call(address: "192.0.2.10")
+visitor_hashes = Analytics::Slice["operations.hash_visitor"].throttle_hashes("192.0.2.10")
 target = ->(post) { Hanami.app.settings.site_url("#{Hanami.app.settings.writing_path}/#{post.slug}") }
 page = lambda do |mention|
   link = %(<a class="#{mention[:kind]}" href="#{target.call(mention[:post])}">#{mention[:author]}</a>)
@@ -107,7 +107,7 @@ moderate = Social::Slice["operations.moderate_webmention"]
 mentions.each do |mention|
   source = mention[:source]
   url = target.call(mention[:post])
-  Seeds.unwrap(receive.call(source:, target: url, visitor_hash:))
+  Seeds.unwrap(receive.call(source:, target: url, visitor_hashes:))
   stored = Seeds.unwrap(verify.call(source:, target: url, post_id: mention[:post].id))
   next if mention[:status] == "pending"
 

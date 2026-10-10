@@ -20,10 +20,10 @@ module Blog
 
       def awake(at = Time.now) = where(Sequel.|({ snoozed_until: nil }, Sequel[:snoozed_until] <= at))
 
-      def capped_claim(fresh, visitor_hash:, limit:, total_limit:)
+      def capped_claim(fresh, visitor_hashes:, limit:, total_limit:)
         transaction do
           lock_until_commit
-          next unless fresh.where(visitor_hash:).count < limit && fresh.count < total_limit
+          next unless fresh.where(visitor_hash: visitor_hashes).count < limit && fresh.count < total_limit
 
           yield
         end

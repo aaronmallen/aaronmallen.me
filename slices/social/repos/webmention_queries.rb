@@ -16,8 +16,8 @@ module Social
 
       def count_by_status = tallied(webmentions.counts_by(:status), :status)
 
-      def count_receipts_from_visitor_since(visitor_hash, time)
-        webmention_receipts.for_visitor(visitor_hash).received_since(time).count
+      def count_receipts_from_visitor_since(visitor_hashes, time)
+        webmention_receipts.for_visitor(visitor_hashes).received_since(time).count
       end
 
       def count_receipts_since(time) = webmention_receipts.received_since(time).count

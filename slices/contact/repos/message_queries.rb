@@ -12,7 +12,9 @@ module Contact
 
       def by_status(status) = messages.with_status(status).newest_first.to_a
 
-      def count_from_visitor_since(visitor_hash, time) = messages.for_visitor(visitor_hash).received_since(time).count
+      def count_from_visitor_since(visitor_hashes, time)
+        messages.for_visitor(visitor_hashes).received_since(time).count
+      end
 
       def count_listed(**) = listed(**).count
 

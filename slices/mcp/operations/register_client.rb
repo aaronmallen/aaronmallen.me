@@ -25,23 +25,23 @@ module MCP
         contract: "contracts.client_registration_contract",
       ]
 
-      def call(payload, visitor_hash:)
-        step within_limit(visitor_hash)
+      def call(payload, visitor_hashes:)
+        step within_limit(visitor_hashes)
         attributes = step validate(payload)
 
-        document(step(claim(attributes, visitor_hash:)))
+        document(step(claim(attributes, visitor_hashes:)))
       end
 
       private
 
-      def claim(attributes, visitor_hash:)
+      def claim(attributes, visitor_hashes:)
         client = oauth_client_mutations.claim(
           client_id: SecureRandom.uuid,
           grant_types: Blog::Types::OAuthGrantType.values,
           response_types: Blog::Types::OAuthResponseType.values,
           token_endpoint_auth_method: Blog::Types::OAuthTokenAuthMethod["none"],
           **attributes,
-          visitor_hash:,
+          visitor_hashes:,
           limit:,
           total_limit:,
           since: window_opened_at,
@@ -84,12 +84,12 @@ module MCP
         Time.now - (settings.client_registration[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
-      def within_limit(visitor_hash)
+      def within_limit(visitor_hashes)
         since = window_opened_at
-        under = oauth_client_queries.count_from_visitor_since(visitor_hash, since) < limit &&
+        under = oauth_client_queries.count_from_visitor_since(visitor_hashes, since) < limit &&
                 oauth_client_queries.count_since(since) < total_limit
 
-        under ? Success(visitor_hash) : Failure(THROTTLED)
+        under ? Success(visitor_hashes) : Failure(THROTTLED)
       end
     end
   end

@@ -7,9 +7,9 @@ create_message = contact["operations.create_message"]
 hash_visitor = Analytics::Slice["operations.hash_visitor"]
 
 message = lambda do |number, reply_to, subject, body|
-  visitor_hash = hash_visitor.call(address: "192.0.2.#{number}")
+  visitor_hashes = hash_visitor.throttle_hashes("192.0.2.#{number}")
 
-  Seeds.unwrap(create_message.call({ reply_to:, subject:, body: }, visitor_hash:))
+  Seeds.unwrap(create_message.call({ reply_to:, subject:, body: }, visitor_hashes:))
 end
 
 message.call(21, "reader@example.com", "Loved the Hanami post", "Thanks for the write-up. Did you keep the old URLs?")

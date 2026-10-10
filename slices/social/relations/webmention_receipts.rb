@@ -5,9 +5,9 @@ module Social
     class WebmentionReceipts < Blog::DB::Relation
       schema :webmention_receipts, infer: true
 
-      def claim(post_id:, source_url:, visitor_hash:, since:, limit:, total_limit:)
-        capped_claim(received_since(since), visitor_hash:, limit:, total_limit:) do
-          take(since, post_id:, source_url:, visitor_hash:)
+      def claim(post_id:, source_url:, visitor_hashes:, since:, limit:, total_limit:)
+        capped_claim(received_since(since), visitor_hashes:, limit:, total_limit:) do
+          take(since, post_id:, source_url:, visitor_hash: visitor_hashes.first)
         end
       end
 

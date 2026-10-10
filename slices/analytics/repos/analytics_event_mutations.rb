@@ -7,8 +7,8 @@ module Analytics
 
       stamped_commands :create
 
-      def claim(address_hash:, limit:, since:, **attrs)
-        analytics_events.claim(address_hash:, limit:, since:, **attrs)
+      def claim(address_hashes:, limit:, since:, **attrs)
+        analytics_events.claim(address_hashes:, limit:, since:, **attrs)
       end
 
       def delete_before(time) = analytics_events.occurred_before(time).delete

@@ -31,10 +31,10 @@ module Analytics
         visit = step validate(payload)
         return nil if signed_in || bot?(user_agent)
 
-        address_hash = hash_visitor.call(address: Blog::Types::ThrottleKey[address])
-        step within_limit(address_hash) unless view?(visit)
+        address_hashes = hash_visitor.throttle_hashes(address)
+        step within_limit(address_hashes) unless view?(visit)
         hashes = visitor_hashes(address:, user_agent:)
-        step store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
+        step store(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
       end
 
       private
@@ -115,12 +115,12 @@ module Analytics
 
       def scroll?(visit) = visit[:kind] == Contracts::VisitContract::SCROLL
 
-      def store(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
+      def store(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
         return read(visit, view_hashes(hashes, address:, user_agent:)) if read?(visit)
         return scroll(visit, view_hashes(hashes, address:, user_agent:)) if scroll?(visit)
         return click(visit, view_hashes(hashes, address:, user_agent:)) if click?(visit)
 
-        view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
+        view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
       end
 
       def title(value)
@@ -133,12 +133,12 @@ module Analytics
         result.success? ? Success(result.to_h) : Failure(:malformed)
       end
 
-      def view(visit, hashes:, address_hash:, address:, user_agent:, base_url:)
+      def view(visit, hashes:, address_hashes:, address:, user_agent:, base_url:)
         event = event_mutations.claim(
           path: visit[:path],
           title: title(visit[:title]),
           **hashes,
-          address_hash:,
+          address_hashes:,
           **origin(visit, address:, user_agent:, base_url:),
           view_token: visit[:view_token],
           **visit.slice(:scroll_depth),
@@ -170,8 +170,8 @@ module Analytics
         Time.now - (settings.analytics[:throttle_window_minutes] * Blog::Helpers::Figures::MINUTE)
       end
 
-      def within_limit(address_hash)
-        stored = event_queries.count_from_address_since(address_hash, window_opened_at)
+      def within_limit(address_hashes)
+        stored = event_queries.count_from_address_since(address_hashes, window_opened_at)
 
         stored < settings.analytics[:throttle_limit] ? Success(stored) : Failure(:throttled)
       end

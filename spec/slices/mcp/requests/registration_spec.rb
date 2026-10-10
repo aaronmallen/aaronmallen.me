@@ -72,7 +72,10 @@ RSpec.describe "Dynamic client registration", type: :request do
   end
 
   describe "a registration whose visitor hash comes back as the bare address" do
-    before { replace_component("analytics.operations.hash_visitor", ->(address:, **) { address }) }
+    before do
+      bare = instance_double(Analytics::Operations::HashVisitor, throttle_hashes: ["127.0.0.1"])
+      replace_component("analytics.operations.hash_visitor", bare)
+    end
 
     it "refuses to store it" do
       expect { register(redirect_uris: [redirect_uri]) }.to raise_error(Dry::Types::ConstraintError)
@@ -88,6 +91,24 @@ RSpec.describe "Dynamic client registration", type: :request do
       register_refused
 
       expect(clients.count).to eq(0)
+    end
+  end
+
+  describe "a registration just after midnight from a registrant throttled just before it" do
+    before do
+      midnight = Blog::TimeZone.day_start(Blog::TimeZone.today + 1)
+      allow(Time).to receive(:now).and_return(midnight - 600)
+      limit.times { register(client_name: "Claude", redirect_uris: [redirect_uri]) }
+      allow(Time).to receive(:now).and_return(midnight + 60)
+      register(client_name: "Claude", redirect_uris: [redirect_uri])
+    end
+
+    it "comes back throttled" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "stores no more than the limit" do
+      expect(clients.count).to eq(limit)
     end
   end
 

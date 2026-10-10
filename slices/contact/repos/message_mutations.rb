@@ -11,10 +11,10 @@ module Contact
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def claim(visitor_hash:, limit:, total_limit:, since:, status: UNREAD, **attrs)
+      def claim(visitor_hashes:, limit:, total_limit:, since:, status: UNREAD, **attrs)
         marked_spam_at = spam_marked_at(status, Time.now)
 
-        messages.claim(visitor_hash:, limit:, total_limit:, since:, **attrs, status:, marked_spam_at:)
+        messages.claim(visitor_hashes:, limit:, total_limit:, since:, **attrs, status:, marked_spam_at:)
       end
 
       def delete_spam_marked_before(time) = messages.marked_spam_before(time).delete

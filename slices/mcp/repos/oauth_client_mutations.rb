@@ -5,8 +5,8 @@ module MCP
     class OAuthClientMutations < DB::Repo
       root :oauth_clients
 
-      def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
-        oauth_clients.claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
+      def claim(visitor_hashes:, limit:, total_limit:, since:, **attrs)
+        oauth_clients.claim(visitor_hashes:, limit:, total_limit:, since:, **attrs)
       end
 
       def delete_idle(since:, at: Time.now) = delete_locked(oauth_clients.idle(since:, at:))

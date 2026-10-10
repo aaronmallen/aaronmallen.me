@@ -16,6 +16,13 @@ module Analytics
 
         Digest::SHA256.hexdigest(parts.join(SEPARATOR))
       end
+
+      def throttle_hashes(address, at: Time.now)
+        key = Blog::Types::ThrottleKey[address]
+        yesterday = Blog::TimeZone.day_start(Blog::TimeZone.today(at) - 1)
+
+        [call(address: key, at:), call(address: key, at: yesterday)]
+      end
     end
   end
 end

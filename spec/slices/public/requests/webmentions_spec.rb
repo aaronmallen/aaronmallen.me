@@ -264,6 +264,27 @@ RSpec.describe "Webmentions", type: :request do
     end
   end
 
+  describe "a receipt just after midnight from a sender throttled just before it" do
+    let(:limit) { Hanami.app["settings"].webmentions[:throttle_limit] }
+
+    before do
+      lower_throttle_limit(:webmentions, to: 5)
+      midnight = Blog::TimeZone.day_start(Blog::TimeZone.today + 1)
+      allow(Time).to receive(:now).and_return(midnight - 600)
+      limit.times { |sent| notify(source: "https://ada.example/notes/#{sent}") }
+      allow(Time).to receive(:now).and_return(midnight + 60)
+      notify(source: "https://ada.example/notes/after")
+    end
+
+    it "comes back refused" do
+      expect(last_response.status).to eq(429)
+    end
+
+    it "queues no more than the limit" do
+      expect(Social::Jobs::VerifyWebmention.jobs).to have(limit).items
+    end
+  end
+
   describe "a run of receipts past the limit from one address with a new browser on each" do
     let(:limit) { Hanami.app["settings"].webmentions[:throttle_limit] }
 

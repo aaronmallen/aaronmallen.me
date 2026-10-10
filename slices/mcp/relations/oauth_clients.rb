@@ -7,9 +7,9 @@ module MCP
         attribute :visitor_hash, Blog::Types::VisitorHash
       end
 
-      def claim(visitor_hash:, limit:, total_limit:, since:, **attrs)
-        capped_claim(registered_since(since), visitor_hash:, limit:, total_limit:) do
-          stamped(:create).call(**attrs, visitor_hash:)
+      def claim(visitor_hashes:, limit:, total_limit:, since:, **attrs)
+        capped_claim(registered_since(since), visitor_hashes:, limit:, total_limit:) do
+          stamped(:create).call(**attrs, visitor_hash: visitor_hashes.first)
         end
       end
 
