@@ -23,10 +23,10 @@ module Admin
 
           def button
             label = t(".publish", title: @post.title)
-            aria = { label:, keyshortcuts: KEY }
+            aria = { keyshortcuts: KEY }
 
             Button(
-              type: "submit", small: true, title: label, aria:, data: { key: KEY, key_label: t(".key") },
+              type: "submit", small: true, label:, aria:, data: { key: KEY, key_label: t(".key") },
               icon: "fa-solid fa-arrow-up-right-from-square",
             )
           end

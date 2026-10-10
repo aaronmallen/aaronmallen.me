@@ -63,7 +63,7 @@ module Admin
             label = t(".drag", title:)
 
             Button(
-              small: true, class: "cal-grip", hidden: true, title: label, aria: { label: }, data: grip_data,
+              small: true, class: "cal-grip", hidden: true, label:, data: grip_data,
               icon: "fa-solid fa-grip-vertical",
             )
           end

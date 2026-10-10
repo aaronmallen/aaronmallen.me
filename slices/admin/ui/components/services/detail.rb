@@ -34,7 +34,7 @@ module Admin
 
           def by_token? = @row.connection.by_credentials?
 
-          def close = { href: path(:admin_services), aria: { label: t(".close") } }
+          def close = { href: path(:admin_services), label: t(".close") }
 
           def credentials
             return no_credentials if @row.env.empty?

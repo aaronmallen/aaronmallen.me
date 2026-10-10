@@ -38,7 +38,7 @@ module Admin
           def edit_link
             Button(
               href: path(:admin_social, filter: @filter, edit: @social_post.id), small: true,
-              title: t(".edit"), aria: { label: t(".edit") }, icon: "fa-regular fa-pen-to-square",
+              label: t(".edit"), icon: "fa-regular fa-pen-to-square",
               data: { social_edit: "", key_open: true },
             )
           end
@@ -62,7 +62,7 @@ module Admin
             Form(action: path(:admin_delete_social_post, id: @social_post.id)) do
               input(type: "hidden", name: "filter", value: @filter)
               Button(
-                type: "submit", variant: :warn, small: true, title: t(".remove"), aria: { label: t(".remove") },
+                type: "submit", variant: :warn, small: true, label: t(".remove"),
                 icon: "fa-regular fa-trash-can", data: { social_remove_item: "" },
               )
             end

@@ -24,10 +24,10 @@ module Admin
           def counts = USE_KEYS.filter_map { |kind, key| t(key, count: @uses[kind]) if @uses[kind] }
 
           def edit
-            a(class: "bt sm tag-pen", href: "##{Editor.id_for(@tag)}", title: t(".edit")) do
-              Icon("fa-regular fa-pen-to-square")
-              span(class: "sr-only") { t(".edit") }
-            end
+            Button(
+              href: "##{Editor.id_for(@tag)}", small: true, class: "tag-pen", label: t(".edit"),
+              icon: "fa-regular fa-pen-to-square",
+            )
           end
 
           def uses

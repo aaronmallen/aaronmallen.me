@@ -44,7 +44,7 @@ module Admin
             Form(action: path(:admin_unlink_task, id: @task.id, other_id: other.id)) do
               HiddenFields(values: { filter: @tab, origin: @origin })
               Button(
-                type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",
+                type: "submit", variant: :gh, small: true, label:, icon: "fa-solid fa-xmark",
               )
             end
           end

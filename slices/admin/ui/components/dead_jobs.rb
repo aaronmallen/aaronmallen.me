@@ -23,7 +23,7 @@ module Admin
 
         def job_form(route, job, label, icon, data: nil)
           Form(action: path(route, jid: job.jid), data:) do
-            Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
+            Button(type: "submit", small: true, label:, icon:)
           end
         end
       end

@@ -33,15 +33,13 @@ module Admin
           def links
             Button(
               href: path(:admin_projects, filter: WORK, edit: @entry.id), small: true, icon: "fa-solid fa-link",
-              title: t(".links"), aria: { current: @linking && "true" },
-            ) { span(class: "sr-only") { t(".links") } }
+              label: t(".links"), aria: { current: @linking && "true" },
+            )
           end
 
           def remove
             Form(action: remove_path, data: { confirm: }) do
-              Button(type: "submit", variant: :warn, small: true, title: t(".remove"), icon: "fa-solid fa-trash-can") do
-                span(class: "sr-only") { t(".remove") }
-              end
+              Button(type: "submit", variant: :warn, small: true, label: t(".remove"), icon: "fa-solid fa-trash-can")
             end
           end
 

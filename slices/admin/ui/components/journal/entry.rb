@@ -84,7 +84,7 @@ module Admin
           end
 
           def icon(label, name)
-            { small: true, title: label, aria: { label: }, icon: name }
+            { small: true, label:, icon: name }
           end
 
           def linked

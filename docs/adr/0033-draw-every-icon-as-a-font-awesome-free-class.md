@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, config, db, lib, admin, public, tasks]
 issue: AA-685
-amended: [AA-801, "#17", "#19"]
+amended: [AA-801, "#17", "#19", "#1030"]
 tags: [icons, font-awesome, svg, css, tailwind, accessibility, enums]
 ---
 
@@ -34,7 +34,9 @@ Every icon is an `<i>` with a Font Awesome Free class from the solid, regular or
 - **Labels.** An icon beside text, or inside a control that carries its own `aria-label`, is `aria-hidden`, as in
   `Admin::UI::Components::StatusPill` and the caret buttons in `Tasks::Order`. An icon that stands alone takes
   `role: "img"` and an `aria-label` from its slice's `config/i18n`, as the heart in
-  `Public::UI::Components::Footer` does.
+  `Public::UI::Components::Footer` does. #1030 gave `Admin::UI::Components::Button` a `label:` for a button that
+  shows only its icon: it sets `title` and `aria-label` to the label and renders no text, so no caller writes them
+  or a `sr-only` span by hand.
 - **No icon comes from stored data.** Task types once stored a Font Awesome Free solid name in `task_types.icon`,
   and `TypeTag` drew it. `Blog::Types::TaskTypeIcon` checked the name against `config/solid_icons.txt`, a list of
   every Free solid name that `mise run assets:icons` built from the package. ADR 0065 retired task types, and #19

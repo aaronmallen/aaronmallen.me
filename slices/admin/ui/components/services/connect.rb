@@ -26,7 +26,7 @@ module Admin
 
           private
 
-          def close = { href: path(:admin_services), aria: { label: t(".close") } }
+          def close = { href: path(:admin_services), label: t(".close") }
 
           def field(name)
             Field(label: t(".fields").fetch(name.to_sym), name: name.to_sym, errors: @errors,

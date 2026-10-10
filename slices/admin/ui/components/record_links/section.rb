@@ -49,7 +49,7 @@ module Admin
             Form(action: path(:"admin_unlink_#{@kind}_record", id: @id, other_kind: link.kind, other_id: link.id)) do
               HiddenFields(values: @fields.compact)
               Button(
-                type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",
+                type: "submit", variant: :gh, small: true, label:, icon: "fa-solid fa-xmark",
               )
             end
           end

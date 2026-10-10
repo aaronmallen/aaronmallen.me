@@ -40,14 +40,14 @@ module Admin
           def change(route, icon, label, variant: nil, data: nil, key: nil)
             Form(action: path(route, id: @task.id), data:) do
               origin_fields
-              Button(type: "submit", variant:, small: true, title: label, **keyed(key, label:), icon:)
+              Button(type: "submit", variant:, small: true, label:, **keyed(key), icon:)
             end
           end
 
-          def keyed(key, **aria)
-            return { aria: } unless @row && key
+          def keyed(key)
+            return Blog::Constants::EMPTY_HASH unless @row && key
 
-            { aria: { **aria, keyshortcuts: key }, data: { key:, key_label: t(KEY_LABELS.fetch(key)) } }
+            { aria: { keyshortcuts: key }, data: { key:, key_label: t(KEY_LABELS.fetch(key)) } }
           end
 
           def move(place, icon, key:)
@@ -56,7 +56,7 @@ module Admin
 
             Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do
               origin_field
-              Button(type: "submit", small: true, title: label, **keyed(key, label:), icon:)
+              Button(type: "submit", small: true, label:, **keyed(key), icon:)
             end
           end
 

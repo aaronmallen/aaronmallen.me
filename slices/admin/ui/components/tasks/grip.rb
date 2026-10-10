@@ -12,14 +12,14 @@ module Admin
 
           def view_template
             Button(
-              small: true, class: "task-grip", hidden: true, title: label, aria:, data:,
+              small: true, class: "task-grip", hidden: true, label:, aria:, data:,
               icon: "fa-solid fa-grip-vertical",
             )
           end
 
           private
 
-          def aria = { label:, keyshortcuts: KEYS }
+          def aria = { keyshortcuts: KEYS }
 
           def data
             {

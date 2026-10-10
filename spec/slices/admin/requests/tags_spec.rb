@@ -122,7 +122,9 @@ RSpec.describe "Admin tags", type: :request do
         get "/admin/tags"
         editor = "tag-#{named('ruby').id}-editor"
 
-        expect(page.find(".tag-row", text: "#ruby")).to have_css("a.bt.tag-pen[href='##{editor}']", text: "Edit")
+        pen = "a.bt.tag-pen[href='##{editor}'][title='Edit'][aria-label='Edit']"
+
+        expect(page.find(".tag-row", text: "#ruby")).to have_css(pen, exact_text: "")
         expect(page).to have_css("aside.settings-side ##{editor}.tag-editor", visible: :all)
       end
 

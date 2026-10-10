@@ -57,10 +57,10 @@ module Admin
             href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)
             label = t(".edit")
 
-            aria = { label:, keyshortcuts: EDIT }
+            aria = { keyshortcuts: EDIT }
             data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
 
-            Button(href:, title: label, aria:, data:, small: true, icon: "fa-regular fa-pen-to-square")
+            Button(href:, label:, aria:, data:, small: true, icon: "fa-regular fa-pen-to-square")
           end
 
           def order

@@ -29,7 +29,7 @@ module Admin
             label = t(".analytics", title: @post.title)
 
             Button(
-              href: path(:admin_post_analytics, id: @post.id), title: label, aria: { label: }, small: true,
+              href: path(:admin_post_analytics, id: @post.id), label:, small: true,
               icon: "fa-solid fa-chart-simple",
             )
           end

@@ -33,7 +33,7 @@ module Admin
           div(class: "dialog-head") do
             h2(id: @title_id, class: "card-title", data: @title_data) { @title }
             Button(
-              variant: :gh, small: true, aria: { label: t(".close") }, data: { dialog_close: true },
+              variant: :gh, small: true, label: t(".close"), data: { dialog_close: true },
               icon: "fa-solid fa-xmark",
             )
           end

@@ -31,7 +31,7 @@ module Admin
             change(*(@project.archived? ? RESTORE : ARCHIVE))
             label = t(".edit")
 
-            Button(href: edit_path, small: true, title: label, icon: EDIT_ICON) { span(class: "sr-only") { label } }
+            Button(href: edit_path, small: true, label:, icon: EDIT_ICON)
           end
 
           def archived_on
@@ -41,9 +41,7 @@ module Admin
           def change(route, label_key, icon, variant)
             Form(action: path(route, id: @project.id)) do
               input(type: "hidden", name: "filter", value: @filter)
-              Button(type: "submit", variant:, small: true, title: t(label_key), icon:) do
-                span(class: "sr-only") { t(label_key) }
-              end
+              Button(type: "submit", variant:, small: true, label: t(label_key), icon:)
             end
           end
 

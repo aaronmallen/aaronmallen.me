@@ -597,7 +597,7 @@ RSpec.describe "Admin project editor", :frozen_clock, type: :request do
       end
 
       it "offers Edit on a row" do
-        expect(page).to have_css(".project-card-acts a[href='/admin/projects/#{project.id}/edit']", text: "Edit")
+        expect(page).to have_css(".project-card-acts a[href='/admin/projects/#{project.id}/edit'][aria-label='Edit']")
       end
 
       it "links the name to the editor" do

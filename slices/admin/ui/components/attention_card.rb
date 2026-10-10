@@ -44,11 +44,11 @@ module Admin
         def draft(row) = post(row, row.record_id, t(".untouched", count: row.days), "fa-regular fa-file-lines")
 
         def icon_button(label, icon)
-          Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
+          Button(type: "submit", small: true, label:, icon:)
         end
 
         def icon_link(href, label, icon, **)
-          Button(href:, small: true, title: label, aria: { label: }, icon:, **)
+          Button(href:, small: true, label:, icon:, **)
         end
 
         def journal(row)

@@ -10,12 +10,13 @@ module Admin
         prop :disabled, Blog::Types::Bool, default: false
         prop :href, Blog::Types::String.optional, default: nil
         prop :icon, Blog::UI::Components::Icon::NAME.optional, default: nil
+        prop :label, Blog::Types::String.optional, default: nil
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template(&)
-          return a(**mix(link_attributes, @attributes)) { inner(&) } if @href
+          return a(**mix(link_attributes, named, @attributes)) { inner(&) } if @href
 
-          button(**mix(button_attributes, @attributes)) { inner(&) }
+          button(**mix(button_attributes, named, @attributes)) { inner(&) }
         end
 
         private
@@ -26,10 +27,12 @@ module Admin
 
         def inner
           Icon(@icon) if @icon
-          yield if block_given?
+          yield if block_given? && !@label
         end
 
         def link_attributes = { href: @href, class: classes }
+
+        def named = @label ? { title: @label, aria: { label: @label } } : Blog::Constants::EMPTY_HASH
       end
     end
   end

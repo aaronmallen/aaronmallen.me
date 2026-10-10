@@ -28,9 +28,9 @@ module Admin
             label = t(".edit", name: person.name)
 
             Button(
-              href: path(:admin_edit_person, id: person.id), small: true, title: label,
+              href: path(:admin_edit_person, id: person.id), small: true, label:,
               icon: "fa-regular fa-pen-to-square", data: { dialog_open: drawer(person) },
-            ) { span(class: "sr-only") { label } }
+            )
           end
 
           def list
