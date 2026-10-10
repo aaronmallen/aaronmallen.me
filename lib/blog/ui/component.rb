@@ -6,6 +6,8 @@ module Blog
       include Phlex::Hanami::Props
       include Components
       include Wording
+
+      OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
     end
   end
 end

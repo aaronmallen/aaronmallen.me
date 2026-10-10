@@ -25,7 +25,7 @@ module Admin
           end
 
           def link(href, network, handle)
-            a(class: ["person-link", network], href:, target: "_blank", rel: "noopener noreferrer") do
+            a(class: ["person-link", network], href:, **OUTBOUND) do
               IconLabel(icon: ["fa-brands", "fa-#{network}"]) { handle }
             end
           end

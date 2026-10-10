@@ -5,8 +5,6 @@ module Admin
     module Components
       module Social
         class NetworkLabel < Component
-          OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
-
           prop :network, Blog::Types::NetworkName
           prop :text, Blog::Types::String
           prop :failing, Blog::Types::Bool, default: false

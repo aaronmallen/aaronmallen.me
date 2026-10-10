@@ -50,7 +50,7 @@ module Admin
             }
           end
 
-          def external = { href: definition.dashboard, target: "_blank", rel: "noopener" }
+          def external = { href: definition.dashboard, **OUTBOUND }
 
           def test
             Form(action: path(:admin_test_service, id: connection.id)) do

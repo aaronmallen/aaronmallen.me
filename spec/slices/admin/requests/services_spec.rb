@@ -311,6 +311,14 @@ RSpec.describe "Admin connected services", type: :request do
       expect(page).to have_css("form[action='/admin/services/#{connection.id}/disconnect'][data-confirm]")
     end
 
+    it "opens the Linear dashboard in a new tab with no opener or referrer" do
+      get "/admin/services?selected=#{connection.id}"
+
+      expect(page).to have_css(
+        "a[href='https://linear.app/settings/account/security'][target='_blank'][rel='noopener noreferrer']",
+      )
+    end
+
     it "reports that Linear answers a test" do
       stub_linear(LinearGraphQL::WORKSPACE_QUERY, linear_workspace("ws-root", "ROOT"), key: "lin_api_root")
       post "/admin/services/#{connection.id}/test", _csrf_token: admin_csrf_token

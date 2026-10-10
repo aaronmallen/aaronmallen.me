@@ -50,7 +50,7 @@ module Admin
 
           def honeybadger_link
             Button(
-              href: @honeybadger_url, target: "_blank", rel: "noopener noreferrer", icon: "fa-solid fa-bug",
+              href: @honeybadger_url, **Blog::UI::Component::OUTBOUND, icon: "fa-solid fa-bug",
             ) { t(".honeybadger") }
           end
 

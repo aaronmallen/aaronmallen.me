@@ -37,7 +37,7 @@ module Admin
 
           def github_link
             Button(
-              href: github_url, target: "_blank", rel: "noopener noreferrer", variant: :gh, icon: "fa-brands fa-github",
+              href: github_url, **Blog::UI::Component::OUTBOUND, variant: :gh, icon: "fa-brands fa-github",
             ) do
               t(".github")
             end

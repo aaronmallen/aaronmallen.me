@@ -15,7 +15,7 @@ module Admin
           def view_template
             return if @source.nil?
 
-            a(class: "task-source", href: @source.url, target: "_blank", rel: "noopener noreferrer") do
+            a(class: "task-source", href: @source.url, **OUTBOUND) do
               IconLabel(icon: ICONS.fetch(@source.provider)) { ::Tasks::Structs::SourceReference.for(@source).name }
             end
           end

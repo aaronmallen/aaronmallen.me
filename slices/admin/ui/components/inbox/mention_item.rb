@@ -7,7 +7,6 @@ module Admin
         class MentionItem < Component
           APPROVED = Blog::Types::WebmentionStatus["approved"]
           IGNORED = Blog::Types::WebmentionStatus["ignored"]
-          OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
           SPAM = Blog::Types::WebmentionStatus["spam"]
 
           prop :mention, Blog::Types::Instance(ROM::Struct)

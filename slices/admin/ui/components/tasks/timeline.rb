@@ -39,7 +39,7 @@ module Admin
           end
 
           def source(comment)
-            a(class: "task-source", href: comment.url, target: "_blank", rel: "noopener noreferrer") { t(".view") }
+            a(class: "task-source", href: comment.url, **OUTBOUND) { t(".view") }
           end
 
           def thread
