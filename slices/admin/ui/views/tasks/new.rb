@@ -7,7 +7,6 @@ module Admin
         class New < View
           include Components::Tasks
 
-          FROM_TODAY = Blog::Types::TaskOrigin["today"]
           SCOPE = "new"
 
           prop :errors, Blog::Types::Hash
@@ -15,7 +14,7 @@ module Admin
           prop :origin, Blog::Types::TaskOrigin
 
           def view_template
-            PageHead(title: t(".heading"), sub: t(".sub")) { back }
+            PageHead(title: t(".heading"), sub: t(".sub")) { BackLink(origin: @origin) }
 
             Card(label: t(".label"), title: t(".title")) do
               TaskForm(
@@ -24,16 +23,6 @@ module Admin
               )
             end
           end
-
-          private
-
-          def back
-            BackLink(href: back_path) { t(today? ? ".back_today" : ".back_tasks") }
-          end
-
-          def back_path = today? ? path(:admin_root) : path(:admin_tasks)
-
-          def today? = @origin == FROM_TODAY
         end
       end
     end

@@ -7,7 +7,11 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:task) { create(:task, title: "Ship the read page", note: "say **why** it matters") }
   let(:other) { create(:task, title: "Write the migration") }
 
+  def back(key) = i18n.t(key, scope: "ui.components.tasks.back_link")
+
   def body = page.find(".markdown-body")
+
+  def fact(key, **) = i18n.t(key, scope: "ui.components.tasks.facts", **)
 
   def facts = page.all(".task-fact").to_h { [it.find("dt").text, it.find("dd").text] }
 
@@ -155,15 +159,15 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows when it was created and last changed", :aggregate_failures do
         read
 
-        expect(facts[label(:created)]).to eq(stamp(task.created_at))
-        expect(facts[label(:updated)]).to eq(stamp(task.updated_at))
+        expect(facts[fact(:created)]).to eq(stamp(task.created_at))
+        expect(facts[fact(:updated)]).to eq(stamp(task.updated_at))
       end
 
       it "shows when it was completed" do
         done = create(:task, :done)
         read(done)
 
-        expect(facts[label(:completed)]).to eq(stamp(done.completed_at))
+        expect(facts[fact(:completed)]).to eq(stamp(done.completed_at))
       end
 
       it "names each date's instant in local time" do
@@ -176,20 +180,20 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "leaves completed off an open task" do
         read
 
-        expect(facts).not_to have_key(label(:completed))
+        expect(facts).not_to have_key(fact(:completed))
       end
 
       it "shows the sprint day it is set for" do
         day = Blog::TimeZone.today + 2
         read(create(:task, :in_sprint, sprint_id: create(:sprint, sprint_date: day).id))
 
-        expect(facts[label(:sprint)]).to eq(day.strftime("%b %-d, %Y"))
+        expect(facts[fact(:sprint)]).to eq(day.strftime("%b %-d, %Y"))
       end
 
       it "rolls a task left in yesterday's sprint into today's before it shows the day" do
         read(left_yesterday)
 
-        expect(facts[label(:sprint)]).to eq(Blog::TimeZone.today.strftime("%b %-d, %Y"))
+        expect(facts[fact(:sprint)]).to eq(Blog::TimeZone.today.strftime("%b %-d, %Y"))
       end
 
       it "answers with a server error when the day's sprint cannot be rolled" do
@@ -203,13 +207,13 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "says when it is set for no sprint day" do
         read
 
-        expect(facts[label(:sprint)]).to eq(label(:unscheduled))
+        expect(facts[fact(:sprint)]).to eq(fact(:unscheduled))
       end
 
       it "shows how many times it carried over" do
         read(create(:task, :carried))
 
-        expect(facts[label(:carried)]).to eq(label(:carried_count, count: 2))
+        expect(facts[fact(:carried)]).to eq(fact(:carried_count, count: 2))
       end
     end
 
@@ -477,13 +481,13 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "leads back to the list it was opened from" do
         read(task, filter: "next")
 
-        expect(page).to have_link(label(:back_tasks), href: "/admin/tasks?filter=next")
+        expect(page).to have_link(back(:tasks), href: "/admin/tasks?filter=next")
       end
 
       it "leads back to Today when it was opened there" do
         read(task, origin: "today")
 
-        expect(page).to have_link(label(:back_today), href: "/admin")
+        expect(page).to have_link(back(:today), href: "/admin")
       end
     end
 

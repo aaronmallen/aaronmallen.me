@@ -110,6 +110,6 @@ RSpec.describe "Admin task activity", type: :request do
   it "shows the task's total time in the facts" do
     read(create(:task, worked_seconds: 5_700))
 
-    expect(facts).to include(i18n.t("ui.views.tasks.show.worked") => "1h 35m")
+    expect(facts).to include(i18n.t("ui.components.tasks.facts.worked") => "1h 35m")
   end
 end

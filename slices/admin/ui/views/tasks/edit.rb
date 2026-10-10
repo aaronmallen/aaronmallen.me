@@ -32,7 +32,7 @@ module Admin
           private
 
           def back
-            BackLink(href: task_path) { t(".back") }
+            Components::BackLink(href: task_path) { t(".back") }
           end
 
           def delete_form

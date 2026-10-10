@@ -8,7 +8,7 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
 
   def credit(model: "claude-opus-5-5") = create(:task_contributor, task_id: task.id, model:)
 
-  def credits_fact = page.find(".task-fact", text: i18n.t("ui.views.tasks.show.contributors")).find("dd").text
+  def credits_fact = page.find(".task-fact", text: i18n.t("ui.components.tasks.facts.contributors")).find("dd").text
 
   def form = page.find("#task-#{task.id}-form")
 

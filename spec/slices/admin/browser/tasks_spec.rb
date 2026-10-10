@@ -437,7 +437,7 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     it "closes on the back button" do
-      panel.click_link(translate("ui.views.tasks.show.back_tasks"))
+      panel.click_link(translate("ui.components.tasks.back_link.tasks"))
 
       expect(page).to have_no_css("dialog#task-panel[open]").and have_current_path("/admin/tasks?filter=next")
     end

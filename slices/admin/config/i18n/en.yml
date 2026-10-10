@@ -1772,6 +1772,9 @@ en:
           note: "Saving changes only what new imports take. Tasks already imported keep the tags and projects they have."
           save: "Save"
       tasks:
+        back_link:
+          tasks: "Tasks"
+          today: "Today"
         bulk:
           cancel: "Cancel"
           complete: "Done"
@@ -1854,6 +1857,21 @@ en:
             format: "Tags are lowercase words, separated by commas."
           title:
             blank: "Write the task down first."
+        facts:
+          agent: "%{agent} on %{model}"
+          carried: "Carried over"
+          carried_count:
+            one: "once"
+            other: "%{count} times"
+            zero: "never"
+          completed: "Completed"
+          contributors: "Contributors"
+          created: "Created"
+          owner: "Me"
+          sprint: "Sprint day"
+          unscheduled: "not set"
+          updated: "Updated"
+          worked: "Time worked"
         filters:
           clear_range: "Clear the date range"
           search: "Search tasks"
@@ -2537,35 +2555,17 @@ en:
           sub: "Editing task %{key}"
           title: "Edit the task"
         new:
-          back_tasks: "Tasks"
-          back_today: "Today"
           heading: "New task"
           label: "Tasks"
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
         show:
-          agent: "%{agent} on %{model}"
-          back_tasks: "Tasks"
-          back_today: "Today"
-          carried: "Carried over"
-          carried_count:
-            one: "once"
-            other: "%{count} times"
-            zero: "never"
-          completed: "Completed"
-          contributors: "Contributors"
-          created: "Created"
           edit: "Edit"
           links: "Links"
           note: "Note"
           note_label: "Task"
-          owner: "Me"
           related: "Related"
           running: "running"
-          sprint: "Sprint day"
-          unscheduled: "not set"
-          updated: "Updated"
-          worked: "Time worked"
           worked_total: "%{span} worked"
       time_report:
         show:
