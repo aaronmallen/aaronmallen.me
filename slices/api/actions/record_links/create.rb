@@ -9,7 +9,7 @@ module API
         def handle(request, response)
           side = { "kind" => request.params[:kind], "id" => record_id(request) }
 
-          answer(response, endpoint.call(body(request, response).merge(side)), status: CREATED)
+          answer(response, endpoint.call(body(request, response).merge(side)))
         end
       end
     end

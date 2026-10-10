@@ -33,9 +33,9 @@ module API
 
     private
 
-    def answer(response, result, status: OK)
+    def answer(response, result)
       case result
-        in Success(payload) then render_json(response, payload, status:)
+        in Success(payload) then render_json(response, payload, status: success_status)
         in Failure(Structs::Refusal => refusal)
           render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))
       end
@@ -93,5 +93,9 @@ module API
     end
 
     def split(values) = Blog::Types::ListParam[values]
+
+    def success_status
+      Operations::BuildDocument::SUCCESSES.fetch(Hanami.app.inflector.underscore(endpoint.class.name.split("::").last))
+    end
   end
 end

@@ -7,7 +7,7 @@ module API
         include Deps[endpoint: "endpoints.tag_decision"]
 
         def handle(request, response)
-          answer(response, endpoint.call(body(request, response).merge("id" => record_id(request))), status: CREATED)
+          answer(response, endpoint.call(body(request, response).merge("id" => record_id(request))))
         end
       end
     end

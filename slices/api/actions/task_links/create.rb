@@ -7,7 +7,7 @@ module API
         include Deps[endpoint: "endpoints.link_tasks"]
 
         def handle(request, response)
-          answer(response, endpoint.call(body(request, response).merge("id" => record_id(request))), status: CREATED)
+          answer(response, endpoint.call(body(request, response).merge("id" => record_id(request))))
         end
       end
     end

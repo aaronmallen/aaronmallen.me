@@ -6,7 +6,7 @@ module API
       class Create < Action
         include Deps[endpoint: "endpoints.create_saved_view"]
 
-        def handle(request, response) = answer(response, endpoint.call(body(request, response)), status: CREATED)
+        def handle(request, response) = answer(response, endpoint.call(body(request, response)))
       end
     end
   end

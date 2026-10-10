@@ -22,6 +22,11 @@ RSpec.describe "API OpenAPI document", type: :request do
 
   def operations = OpenAPI.document.fetch("paths").flat_map { |path, verbs| verbs.map { |verb, _| [verb, path] } }
 
+  def routes
+    API::Slice.routes
+    API::Routes.definitions.map { |verb, (path)| [verb.to_s, path.gsub(/:(\w+)/, '{\1}')] }
+  end
+
   def try(verb, path)
     call_api(verb.to_sym, path.gsub(/\{\w+\}/, "0"), %w[patch post].include?(verb) ? "{}" : nil)
     OpenAPI.answer_errors(last_request, last_response).map { "#{verb.upcase} #{path}: #{it}" }
@@ -50,6 +55,18 @@ RSpec.describe "API OpenAPI document", type: :request do
     missing = endpoints - operation_ids
 
     expect(missing).to be_empty, "the document leaves out these endpoints:\n#{missing.join("\n")}"
+  end
+
+  it "describes every route" do
+    missing = routes - operations
+
+    expect(missing).to be_empty, "the document leaves out these routes:\n#{missing.map { it.join(' ') }.join("\n")}"
+  end
+
+  it "describes no operation without a route" do
+    extra = operations - routes
+
+    expect(extra).to be_empty, "no route serves these operations:\n#{extra.map { it.join(' ') }.join("\n")}"
   end
 
   it "gives each operation one ID" do

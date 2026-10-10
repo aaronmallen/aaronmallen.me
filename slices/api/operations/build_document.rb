@@ -4,10 +4,10 @@ module API
   module Operations
     class BuildDocument
       BODIES = %w[patch post].freeze
-      CREATED = Action::CREATED.to_s
+      CREATED = Action::CREATED
       FIELD = /\{(\w+)\}/
       JSON_TYPE = "application/json"
-      OK = Action::OK.to_s
+      OK = Action::OK
       OPENAPI = "3.1.0"
       RESPONSES = "#/components/responses/"
       SCHEMAS = "#/components/schemas/"
@@ -133,6 +133,8 @@ module API
         ["read_document", "get", "/openapi.json", OK],
       ].freeze
 
+      SUCCESSES = OPERATIONS.to_h { |id, *, status| [id, status] }.freeze
+
       SOURCES = { "read_document" => Actions::Documents::Show, "read_token" => Actions::Tokens::Show }.freeze
 
       REFUSAL = Helpers::Schema.object(
@@ -217,7 +219,7 @@ module API
 
         def responses
           {
-            status => { description: SUCCESS, content: BuildDocument.json(source::REPLY) },
+            status.to_s => { description: SUCCESS, content: BuildDocument.json(source::REPLY) },
             **refusal_codes.to_h { [it, { "$ref": "#{RESPONSES}#{REFUSALS.fetch(it).first}" }] },
           }
         end
