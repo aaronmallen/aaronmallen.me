@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
@@ -88,10 +88,11 @@ window the pair counts as a first send: 202 and a verify job (#204).
 **A throttled person and a caught bot see different pages.** The bot is told it worked. The person gets 429, the
 contact page, and a line saying they have sent enough for now. It never names the limit.
 
-**What each table keeps about a visitor.** A message keeps its `reply_to`, subject, body and hash, and nothing
-deletes one: `contact` exports no delete, and the admin can only list and mark. A webmention receipt keeps a hash
-until `ReapWebmentionReceipts` drops it once it falls outside the throttle window. An analytics event keeps its
-hashes for 90 days.
+**What each table keeps about a visitor.** A message keeps its `reply_to`, subject, body and hash until something
+deletes it. As #918 records, `contact` exports `operations.delete_message`, the admin, API and MCP delete messages one
+at a time or in bulk, and `ReapSpamMessages` drops a spam message 30 days after it is marked. A webmention receipt
+keeps a hash until `ReapWebmentionReceipts` drops it once it falls outside the throttle window. An analytics event
+keeps its hashes for 90 days.
 
 ## Alternatives
 
@@ -121,9 +122,9 @@ No cookie, no banner and no third party on the public site.
 A message's hash stops meaning anything at midnight: nothing matches it after the salt turns, and nothing turns it
 back into an address. What an old hash still says is that two rows came from one address on one day.
 
-Nothing ends a message. AA-323 asked whether read and spam messages stay for ever or go after 90 days the way
-analytics events do, and left it open. Until someone decides, a stranger's address and hash stay until someone
-deletes the row by hand.
+Spam goes 30 days after it is marked, and every other message stays until someone deletes it (#918). AA-323 asked
+whether messages stay for ever or go after 90 days the way analytics events do, and that is still open for all but
+spam: a stranger's address and hash in any other message stay until someone deletes the row.
 
 Analytics shares `hash_visitor`, so the daily hash is not its own. `public` and `mcp` both import it, and no check
 asks whether the next caller should.
