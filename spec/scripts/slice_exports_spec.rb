@@ -23,11 +23,10 @@ RSpec.describe "Hanami/SliceExports", type: :script do
     expect(lint("repos.queries", "repos.post_queries", "operations.save_post").first).to be(true)
   end
 
-  %w[repos.mutations repos.post_mutations repos.post_repo queries.by_id relations.posts].each do |key|
-    it "fails on #{key}" do
-      offense = a_string_including("#{key} matches ForbiddenExports")
+  it "fails on each forbidden key" do
+    keys = %w[repos.mutations repos.post_mutations repos.post_repo queries.by_id relations.posts]
+    offenses = a_string_including(*keys.map { |key| "#{key} matches ForbiddenExports" })
 
-      expect(lint("operations.save_post", key)).to match([false, offense])
-    end
+    expect(lint("operations.save_post", *keys)).to match([false, offenses])
   end
 end
