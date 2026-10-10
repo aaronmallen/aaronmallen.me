@@ -55,9 +55,9 @@ module Admin
                 chosen if chosen?(option)
                 div(class: "comment-acts hov") { edit(option) }
               end
-              div(class: "markdown-body post-body decision-option-body") do
-                raw(safe(::Tasks::Markdown.to_html(option.body).strip))
-              end
+              MarkdownBody(
+                source: option.body, markdown: ::Tasks::Markdown, class: "markdown-body decision-option-body",
+              )
             end
           end
 

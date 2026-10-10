@@ -77,9 +77,7 @@ module Admin
 
           li(class: "comment", id: "#{@scope}-comment-#{id}", data: { "#{@scope}_comment": id }) do
             head(comment)
-            div(class: "markdown-body post-body comment-body") do
-              raw(safe(::Tasks::Markdown.to_html(comment.body).strip))
-            end
+            MarkdownBody(source: comment.body, markdown: ::Tasks::Markdown, class: "markdown-body comment-body")
           end
         end
 

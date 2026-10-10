@@ -71,7 +71,7 @@ module Admin
 
           def problem
             Card(title: t(".problem")) do
-              div(class: "markdown-body post-body") { raw(safe(::Tasks::Markdown.to_html(@decision.problem).strip)) }
+              MarkdownBody(source: @decision.problem, markdown: ::Tasks::Markdown, class: "markdown-body")
             end
           end
 

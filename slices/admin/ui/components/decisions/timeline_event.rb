@@ -23,7 +23,7 @@ module Admin
               Moment(at: @entry.occurred_at, format: :short, class: "decision-event-time")
               div(class: "decision-event-text") do
                 line
-                div(class: "markdown-body post-body") { raw(safe(::Tasks::Markdown.to_html(body).strip)) } if body
+                MarkdownBody(source: body, markdown: ::Tasks::Markdown, class: "markdown-body") if body
               end
             end
           end

@@ -16,7 +16,10 @@ module Admin
           def view_template
             article(class: "journal-entry", data: { journal_item: "" }) do
               head
-              Body(body: @entry.body, hidden: editing?, data: { journal_text: "" })
+              MarkdownBody(
+                source: @entry.body, markdown: ::Posts::Markdown, class: "journal-entry-body", hidden: editing?,
+                data: { journal_text: "" },
+              )
               edit_form
               linked if records
             end
