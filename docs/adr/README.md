@@ -145,6 +145,7 @@ one.
 | [0138][0138] | Read dead jobs from the Sidekiq dead set in an activity query | ![Active][active] | 2026-10-09 |
 | [0139][0139] | Test through behavior first, and unit test only SQL, parsers and logic hard to reach from outside | ![Active][active] | 2026-10-10 |
 | [0140][0140] | Word a field error by its key, and keep a table only for the exceptions | ![Active][active] | 2026-10-10 |
+| [0141][0141] | Keep file shares in a shares slice with their own public bucket | ![Active][active] | 2026-10-10 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -286,6 +287,7 @@ one.
 [0138]: 0138-read-dead-jobs-from-the-sidekiq-dead-set-in-an-activity-query.md
 [0139]: 0139-test-through-behavior-first-and-unit-test-only-sql-parsers-and-logic-hard-to-reach-from-outside.md
 [0140]: 0140-word-a-field-error-by-its-key-and-keep-a-table-only-for-the-exceptions.md
+[0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
