@@ -72,4 +72,11 @@ RSpec.describe "The error pages in production", type: :request do
 
     it_behaves_like "a page of the site", 500
   end
+
+  it "builds the pages in public/ from config/error_page.html", :aggregate_failures do
+    Dir.mktmpdir do |dir|
+      system("scripts/assets/error-pages", dir, exception: true)
+      Dir.children(dir).each { |page| expect(File.read("#{dir}/#{page}")).to eq(File.read("public/#{page}")), page }
+    end
+  end
 end

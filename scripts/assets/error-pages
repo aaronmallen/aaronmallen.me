@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+#MISE description="Render the static error pages in public/ from config/error_page.html"
+#USAGE arg "[dir]" default="public" help="Where to write the pages"
+
+set -e
+
+dir=${1:-public}
+
+render() {
+  sed -e "s|{{status}}|$1|" -e "s|{{title}}|$2|g" -e "s|{{message}}|$3|" config/error_page.html >"$dir/$1.html"
+}
+
+render 400 "Bad request" "The site could not read what this link or form sent. Check it and try again."
+render 404 "Page not found" "Nothing lives at this address. The link may be wrong, or the page may have moved."
+render 413 "Too large" "What this form sent is too large for the site. Send less and try again."
+render 415 "Not accepted" "The site does not take files at this address."
+render 500 "Something went wrong" "The server hit an error it could not handle. Try again in a moment."
