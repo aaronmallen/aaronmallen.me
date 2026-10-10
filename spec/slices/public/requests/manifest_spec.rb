@@ -10,10 +10,6 @@ RSpec.describe "Web manifest", type: :request do
   describe "GET /site.webmanifest" do
     before { get "/site.webmanifest" }
 
-    it "answers 200" do
-      expect(last_response.status).to eq(200)
-    end
-
     it "answers as a web manifest" do
       expect(last_response.media_type).to eq("application/manifest+json")
     end

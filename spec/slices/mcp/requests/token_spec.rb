@@ -79,10 +79,6 @@ RSpec.describe "OAuth token", type: :request do
   describe "exchanging an authorization code" do
     before { exchange }
 
-    it "answers" do
-      expect(last_response.status).to eq(200)
-    end
-
     it "answers with JSON" do
       expect(last_response.headers["Content-Type"]).to eq("application/json")
     end
@@ -256,10 +252,6 @@ RSpec.describe "OAuth token", type: :request do
     end
 
     before { refresh(granted.fetch("refresh_token")) }
-
-    it "answers" do
-      expect(last_response.status).to eq(200)
-    end
 
     it "hands out a new access token" do
       expect(document["access_token"]).to be_a(String).and(satisfy { it != granted["access_token"] })

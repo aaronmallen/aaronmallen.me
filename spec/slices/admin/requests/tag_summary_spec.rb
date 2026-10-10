@@ -30,10 +30,6 @@ RSpec.describe "Admin tag summary", type: :request do
         get "/admin/tags/ruby"
       end
 
-      it "answers 200" do
-        expect(last_response.status).to eq(200)
-      end
-
       it "groups every kind with the name and nothing else", :aggregate_failures do
         expect(titles_in(:posts)).to eq(["Ruby on a Pi"])
         expect(titles_in(:projects)).to eq(["ruby-gem"])

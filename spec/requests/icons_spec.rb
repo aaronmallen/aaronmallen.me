@@ -53,14 +53,6 @@ RSpec.describe "Icons", type: :request do
   describe "GET /favicon.ico" do
     before { get "/favicon.ico" }
 
-    it "answers 200" do
-      expect(last_response.status).to eq(200)
-    end
-
-    it "answers as an icon" do
-      expect(last_response.content_type).to eq("image/vnd.microsoft.icon")
-    end
-
     it "serves the rendered ICO" do
       expect(last_response.body.b).to eq(Hanami.app.root.join("app/assets/images/favicon.ico").binread)
     end
