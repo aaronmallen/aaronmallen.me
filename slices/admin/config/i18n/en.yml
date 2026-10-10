@@ -1556,6 +1556,9 @@ en:
         queue_item:
           edit: "Edit"
           failure: "%{network}: %{detail}"
+          remove: "Remove"
+          retry_queued: "%{error} · retry queued"
+        queue_meta:
           in_a_moment: "in a moment"
           in_days:
             one: "in %{count} day"
@@ -1567,10 +1570,8 @@ en:
             one: "in %{count} minute"
             other: "in %{count} minutes"
           likes: "Likes"
-          remove: "Remove"
           replies: "Replies"
           reposts: "Reposts"
-          retry_queued: "%{error} · retry queued"
           suggestions:
             one: "%{count} suggestion"
             other: "%{count} suggestions"
