@@ -1723,10 +1723,6 @@
 
 @utility stat-change {
   @apply mt-1 font-mono text-meta text-mk-green-text;
-
-  &.down {
-    @apply text-mk-pink-text;
-  }
 }
 
 @utility g-2 {

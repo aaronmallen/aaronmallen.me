@@ -6,10 +6,7 @@ module Admin
       class StatusPill < Component
         STATUSES = {
           published: [:green, "fa-solid fa-circle-check", ".published"],
-          posted: [:green, "fa-solid fa-circle-check", ".posted"],
-          approved: [:green, "fa-solid fa-circle-check", ".approved"],
           draft: [:orange, "fa-regular fa-pen-to-square", ".draft"],
-          pending: [:orange, "fa-regular fa-clock", ".pending"],
           scheduled: [:blue, "fa-regular fa-clock", ".scheduled"],
           spam: [:pink, "fa-solid fa-ban", ".spam"],
           connected: [:green, "fa-solid fa-circle-check", ".connected"],

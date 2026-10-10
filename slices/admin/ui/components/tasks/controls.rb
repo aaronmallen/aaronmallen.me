@@ -8,7 +8,6 @@ module Admin
           COMPLETE = "x"
           LEFT = "fa-solid fa-arrow-left"
           MOVE = "m"
-          ORIGIN = Blog::Types::TaskOrigin["tasks"]
           RIGHT = "fa-solid fa-arrow-right"
           TODAY, NEXT, SOMEDAY, EXTERNAL = %w[today next someday external].map { Blog::Types::TaskFilter[it] }
           MOVES = {
@@ -22,10 +21,9 @@ module Admin
 
           prop :task, Blog::Types::Instance(ROM::Struct)
           prop :filter, Blog::Types::String
-          prop :origin, Blog::Types::String, default: ORIGIN
+          prop :origin, Blog::Types::String
           prop :moves, Blog::Types::Bool, default: true
-          prop :keys, Blog::Types::Bool, default: false
-          prop :compact, Blog::Types::Bool, default: false
+          prop :row, Blog::Types::Bool, default: false
 
           def view_template
             @task.closed? ? reopen : progress
@@ -61,7 +59,7 @@ module Admin
           end
 
           def complete_toggle
-            return summary(class: "bt pri sm", **keyed(COMPLETE)) { done_label } unless @compact
+            return summary(class: "bt pri sm", **keyed(COMPLETE)) { done_label } unless @row
 
             label = t(".complete")
             summary(class: "bt sm", title: label, **keyed(COMPLETE, label:)) do
@@ -75,7 +73,7 @@ module Admin
           end
 
           def keyed(key, **aria)
-            return { aria: } unless @keys && key
+            return { aria: } unless @row && key
 
             { aria: { **aria, keyshortcuts: key }, data: { key:, key_label: t(KEY_LABELS.fetch(key)) } }
           end

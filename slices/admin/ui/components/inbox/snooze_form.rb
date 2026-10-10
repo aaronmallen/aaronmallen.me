@@ -12,9 +12,10 @@ module Admin
 
           prop :action, Blog::Types::String
           prop :field_id, Blog::Types::String
-          prop :now, Blog::Types::Instance(Time), default: -> { Time.now }
 
           def view_template(&)
+            @now = Time.now
+
             Form(action: @action, class: "snooze-form") do
               yield if block_given?
               picks

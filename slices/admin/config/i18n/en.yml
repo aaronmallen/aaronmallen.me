@@ -1593,7 +1593,6 @@ en:
           label: "Networks"
       status_pill:
         active: "active"
-        approved: "approved"
         archived: "archived"
         connected: "connected"
         draft: "draft"
@@ -1602,8 +1601,6 @@ en:
         not_set_up: "not set up"
         open: "open"
         paused: "paused"
-        pending: "pending"
-        posted: "posted"
         published: "published"
         resolved: "resolved"
         scheduled: "scheduled"
