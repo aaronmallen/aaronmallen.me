@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, activity]
 issue: AA-426
-amended: [AA-434, AA-811, AA-824]
+amended: [AA-434, AA-811, AA-824, "#935"]
 tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
 ---
 
@@ -28,17 +28,18 @@ contact messages and settings included. From then on `activity` guarded nothing 
 
 ## Decision
 
-The feed crosses to a client holding `read`. There is no `activity` scope: `Scope::ALL` holds `read`, `suggest`
-and `write`, and the consent page spells out under `read` that it sends the journal and every commit whole
-(`slices/mcp/config/i18n/en.yml`).
+The feed crosses to a client holding `read`. There is no `activity` scope. ADR 0061 names the scopes a token can
+hold, and #935 points there now that `Blog::Types::OAuthScope` holds five. The consent page spells out under
+`read` that it sends the journal and every commit whole (`slices/mcp/config/i18n/en.yml`).
 
 Two tools carry the feed, and `spec/slices/mcp/requests/scopes_spec.rb` pins the pair. `read_activity` sends rows.
 `summarize_activity` (AA-434) sends counts by kind, by month and per repository, and no message, entry or title.
 `MCP::Protocol::ScopedServer` leaves out of the list every tool a token's scopes do not cover and refuses a call
 to one.
 
-Every kind in the view crosses, and neither tool cuts one out: commits, posts, journal entries, social posts,
-webmentions, tasks, projects, sprints and suggestions. A report on a date range reads one feed.
+Every kind in the view crosses, and neither tool cuts one out. The view and `Blog::Types::ActivityKind` say what
+those kinds are; #935 stopped listing them here, since the feed had grown task comments, work sessions, decision
+events and comments, and pull requests past the list. A report on a date range reads one feed.
 
 A commit crosses whole: repository, sha, full message, additions and deletions, private and employer
 repositories included. A subject line is not what a review reads.
@@ -72,7 +73,7 @@ operator makes after it. The `repos` filter on `read_activity` is not this list,
 system reaches whoever holds the token, which for claude.ai is not this machine. No tool can tell a commit worth
 reviewing from one that should have stayed in, so the grant is the whole control.
 
-**`read` alone reads the journal.** A client that names no scope gets `read` alone (`MCP::OAuth::Scope::DEFAULT`),
+**`read` alone reads the journal.** A client that names no scope gets `read` alone (`MCP::Operations::Authorize`),
 and both `scopes` columns in `config/db/structure.sql` default to `{read}`, so a proofreading connector now reads
 private entries, private commits and text strangers wrote. One connector does both jobs, and there is one to revoke.
 
@@ -80,7 +81,7 @@ private entries, private commits and text strangers wrote. One connector does bo
 30 days (`slices/mcp/operations/issue_tokens.rb`), and the revoke button on the admin's clients page is the rest of
 the limit.
 
-**A year takes many calls.** One answer stops near 200 rows, and a feed of nine kinds fills a window sooner, so a
+**A year takes many calls.** One answer stops near 200 rows, and a feed of many kinds fills a window sooner, so a
 client counts first with `summarize_activity` and walks the months with `read_activity`, following `continue_to`.
 A client that ignores `partial` sees only the newest rows of its window.
 
