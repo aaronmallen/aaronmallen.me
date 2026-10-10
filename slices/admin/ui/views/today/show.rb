@@ -7,10 +7,7 @@ module Admin
         class Show < View
           include Components::Tasks
 
-          DRAFT = Blog::Types::PostStatus["draft"]
-          JOURNAL_KEY = "w"
           ORIGIN = Blog::Types::TaskOrigin["today"]
-          QUEUED = Blog::Types::SocialQueue["queued"]
           UPCOMING = Blog::Types::TaskTab["upcoming"]
 
           prop :attention, Blog::Types::Hash
@@ -18,9 +15,9 @@ module Admin
           prop :commits, Blog::Types::Hash
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-          prop :posts, Blog::Types::Hash, reader: :private
-          prop :queue, Blog::Types::Hash, reader: :private
-          prop :social, Blog::Types::Hash, reader: :private
+          prop :posts, Blog::Types::Hash
+          prop :queue, Blog::Types::Hash
+          prop :social, Blog::Types::Hash
           prop :sprint, Blog::Types::Hash
           prop :visitors, Blog::Types::Integer
 
@@ -57,16 +54,6 @@ module Admin
             t(".headline.left", count: open.size)
           end
 
-          def journal_line
-            href = path(:admin_journal, write: Blog::Constants::CHECKED)
-
-            TodayLine(label: t(".journal"), href:, data: { dialog_open: Components::Journal::WriteDialog::ID }) do
-              plain t(".journal_count", count: @entries.size)
-              whitespace
-              kbd(class: "kbd", aria: { hidden: "true" }) { JOURNAL_KEY }
-            end
-          end
-
           def kicker = dotted(l(@sprint[:date], format: :weekday), l(Blog::TimeZone.local(Time.now), format: :clock))
 
           def lede
@@ -84,45 +71,14 @@ module Admin
             t(".lede.carried", lead:, count: task.carried_count)
           end
 
-          def next_up
-            [
-              *posts[:scheduled].first(1).map { [it.published_at, path(:admin_edit_post, id: it.id)] },
-              *social[:scheduled].first(1).map { [it.posted_at, path(:admin_social, filter: QUEUED)] },
-            ].min_by(&:first)
-          end
-
           def open = @open ||= sprint_tasks.reject(&:closed?)
-
-          def quiet_lines
-            Card do
-              journal_line
-              ships_next
-              TodayLine(label: t(".drafts"), href: path(:admin_posts, status: DRAFT)) do
-                t(".draft_count", count: posts[:drafts].size)
-              end
-              site_lines
-            end
-          end
-
-          def ships_next
-            at, href = next_up
-            return TodayLine(label: t(".ships_next"), href: path(:admin_calendar)) { t(".nothing_scheduled") } unless at
-
-            TodayLine(label: t(".ships_next"), href:) do
-              Moment(at:)
-              plain "#{DOT}#{t('.queued', count: queue[:count])}"
-            end
-          end
 
           def side_cards
             AttentionCard(**@attention)
             CommitsCard(**@commits, totals: @commit_totals)
-            quiet_lines
-          end
-
-          def site_lines
-            TodayLine(label: t(".visitors"), href: path(:admin_analytics)) { t(".visitor_count", count: @visitors) }
-            TodayLine(label: t(".clients"), href: path(:admin_clients)) { t(".client_count", count: @clients) }
+            QuietCard(
+              entries: @entries, posts: @posts, social: @social, queue: @queue, visitors: @visitors, clients: @clients,
+            )
           end
 
           def sprint_tasks = @sprint[:tasks]

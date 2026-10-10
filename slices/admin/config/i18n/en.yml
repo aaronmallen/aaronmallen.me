@@ -1240,6 +1240,30 @@ en:
           stars:
             one: "%{stars} star"
             other: "%{stars} stars"
+      quiet_card:
+        client_count:
+          one: "%{count} connected"
+          other: "%{count} connected"
+        clients: "MCP clients"
+        draft_count:
+          one: "%{count}"
+          other: "%{count}"
+          zero: "none"
+        drafts: "Drafts"
+        journal: "Journal"
+        journal_count:
+          one: "%{count} today"
+          other: "%{count} today"
+          zero: "nothing yet"
+        nothing_scheduled: "nothing scheduled"
+        queued:
+          one: "%{count} queued"
+          other: "%{count} queued"
+        ships_next: "What ships next"
+        visitor_count:
+          one: "%{count} visitor today"
+          other: "%{count} visitors today"
+        visitors: "Visitors"
       range_presets:
         preset: "%{count}d"
         range: "Range"
@@ -2544,15 +2568,6 @@ en:
           span: "%{from} → %{to} · %{total}. Starting a task opens a work session, and stopping or finishing it closes the session."
       today:
         show:
-          client_count:
-            one: "%{count} connected"
-            other: "%{count} connected"
-          clients: "MCP clients"
-          draft_count:
-            one: "%{count}"
-            other: "%{count}"
-            zero: "none"
-          drafts: "Drafts"
           heading: "Today"
           headline:
             clear: "Sprint clear."
@@ -2560,11 +2575,6 @@ en:
             left:
               one: "One thing left."
               other: "%{count} things left."
-          journal: "Journal"
-          journal_count:
-            one: "%{count} today"
-            other: "%{count} today"
-            zero: "nothing yet"
           lede:
             carried:
               one: "%{lead}, carried over %{count} day"
@@ -2576,16 +2586,7 @@ en:
             empty: "What do you want to get done today? Anything still open tonight rolls into tomorrow."
             next: "Up next: %{task}"
             open: "%{lead}. %{done} of %{total} done."
-          nothing_scheduled: "nothing scheduled"
           plan: "Plan tomorrow"
-          queued:
-            one: "%{count} queued"
-            other: "%{count} queued"
-          ships_next: "What ships next"
-          visitor_count:
-            one: "%{count} visitor today"
-            other: "%{count} visitors today"
-          visitors: "Visitors"
       tokens:
         index:
           count:
