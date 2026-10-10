@@ -5,7 +5,6 @@ module Tasks
     class TaskRuleProjects < Blog::DB::Relation
       schema :task_rule_projects, infer: true do
         associations do
-          belongs_to :project
           belongs_to :task_rule
         end
       end

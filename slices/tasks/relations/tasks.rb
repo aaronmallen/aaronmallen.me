@@ -122,9 +122,9 @@ module Tasks
           .order(self[:position].desc, self[:id].desc)
       end
 
-      def searched(tags: [], projects: [], text: "", **credits)
+      def searched(tags: [], project_ids: nil, text: "", **credits)
         found = text.empty? ? credited(**credits) : credited(**credits).matching(text)
-        found = found.where(id: record_links.task_ids_in(self.projects.slugged(projects))) unless projects.empty?
+        found = found.where(id: record_links.task_ids_in(project_ids)) if project_ids
         tags.empty? ? found : found.tagged(tags)
       end
 

@@ -8,7 +8,6 @@ module Tasks
           has_many :task_rule_tags
           has_many :tags, through: :task_rule_tags, view: :in_name_order
           has_many :task_rule_projects
-          has_many :projects, through: :task_rule_projects, view: :in_name_order
         end
       end
     end

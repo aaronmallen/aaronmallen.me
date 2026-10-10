@@ -5,6 +5,8 @@ module Tasks
     class TaskRule < Blog::DB::Struct
       ANY_REPO = "*"
 
+      attribute?(:projects, ROM::Types::Array.default { [] })
+
       def matches?(repo)
         owner, name = pattern.split("/", 2)
 

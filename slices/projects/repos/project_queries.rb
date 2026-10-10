@@ -7,7 +7,15 @@ module Projects
 
       def by_id(id) = with_tags.by_pk(id).one
 
+      def by_ids(ids) = projects.where(id: ids).in_name_order.to_a
+
+      def by_name = projects.in_name_order.to_a
+
       def by_tag(tag) = with_tags.tagged(tag).in_order.to_a
+
+      def ids_by_repo(repo) = projects.where(repo:).pluck(:id)
+
+      def ids_by_slug(slugs) = projects.slugged(slugs)
 
       def live = with_tags.live.in_order.to_a
 

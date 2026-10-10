@@ -6,13 +6,15 @@ module Tasks
       GITHUB = Blog::Types::TaskSourceProvider["github"]
       LINEAR = Blog::Types::TaskSourceProvider["linear"]
 
-      def all = with_targets.order(:pattern, :provider).to_a
+      include Deps[project_queries: "projects.repos.project_queries"]
 
-      def by_id(id) = with_targets.by_pk(id).one
+      def all = with_projects(with_targets.order(:pattern, :provider).to_a)
+
+      def by_id(id) = with_projects(with_targets.by_pk(id).to_a).first
 
       def matching_task_ids(rule) = task_ids_from(rule.provider) { rule.matches?(it) }
 
-      def project_choices = projects.in_name_order.to_a
+      def project_choices = project_queries.by_name
 
       def repo_task_ids(repo) = task_ids_from(GITHUB) { it == repo }
 
@@ -20,9 +22,9 @@ module Tasks
         found = origin&.downcase
         rules = found ? with_targets(task_rules.where(provider:)).to_a.select { it.matches?(found) } : []
 
-        project_ids = [*owners(provider, found), *rules.flat_map { it.projects.map(&:id) }]
+        ids = [*owners(provider, found), *rules.flat_map { project_ids(it) }]
 
-        [rules.flat_map { it.tags.map(&:name) }, project_ids.uniq]
+        [rules.flat_map { it.tags.map(&:name) }, ids.uniq]
       end
 
       private
@@ -34,7 +36,9 @@ module Tasks
         end.to_s.downcase
       end
 
-      def owners(provider, repo) = provider == GITHUB && repo ? projects.where(repo:).pluck(:id) : []
+      def owners(provider, repo) = provider == GITHUB && repo ? project_queries.ids_by_repo(repo) : []
+
+      def project_ids(rule) = rule.task_rule_projects.map(&:project_id)
 
       def task_ids_from(provider)
         sources = task_sources.where(provider:).unordered.pluck(:task_id, :url)
@@ -42,7 +46,13 @@ module Tasks
         sources.filter_map { |task_id, url| task_id if yield(origin(provider, url)) }.uniq
       end
 
-      def with_targets(rules = task_rules) = rules.combine(:tags, :projects)
+      def with_projects(rules)
+        found = project_queries.by_ids(rules.flat_map { project_ids(it) }.uniq)
+
+        rules.map { |rule| rule.new(projects: found.select { project_ids(rule).include?(it.id) }) }
+      end
+
+      def with_targets(rules = task_rules) = rules.combine(:tags, :task_rule_projects)
     end
   end
 end

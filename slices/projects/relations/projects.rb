@@ -3,6 +3,8 @@
 module Projects
   module Relations
     class Projects < Blog::DB::Relation
+      SLUG = Blog::Types::Normalized::Slug
+
       schema :projects, infer: true do
         associations do
           has_many :project_tags
@@ -13,6 +15,8 @@ module Projects
       def archived = exclude(archived_on: nil)
 
       def by_stars = order(self[:stars].desc, self[:id].asc)
+
+      def in_name_order = order(self[:name].asc, self[:id].asc)
 
       def in_order = order(self[:id].asc)
 
@@ -26,9 +30,17 @@ module Projects
 
       def newest_archived_first = order(Sequel.desc(:archived_on, nulls: :last), self[:id].desc)
 
+      def slugged(slugs)
+        dataset.unordered.select_map(%i[id name]).filter_map { |id, name| id if slugs.include?(slug(name)) }
+      end
+
       def tagged(tag) = join(:tags).where(Sequel[:tags][:name] => tag)
 
       def tracked = exclude(repo: nil)
+
+      private
+
+      def slug(name) = SLUG.call(name) { nil }
     end
   end
 end
