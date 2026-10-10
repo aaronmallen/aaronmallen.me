@@ -62,8 +62,7 @@ module Admin
           end
 
           def return_fields
-            input(type: "hidden", name: "filter", value: @tab)
-            input(type: "hidden", name: "origin", value: @origin)
+            HiddenFields(values: { filter: @tab, origin: @origin })
           end
 
           def route(name) = path(name, id: @task.id, session_id: @entry.source_id)

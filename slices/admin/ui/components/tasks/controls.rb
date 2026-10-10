@@ -98,10 +98,7 @@ module Admin
 
           def origin_field = input(type: "hidden", name: "origin", value: @origin)
 
-          def origin_fields
-            input(type: "hidden", name: "filter", value: @filter)
-            origin_field
-          end
+          def origin_fields = HiddenFields(values: { filter: @filter, origin: @origin })
 
           def progress
             running? ? running : start

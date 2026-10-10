@@ -14,7 +14,7 @@ module Admin
           def view_template
             Form(action: path(:admin_publish_post, id: @post.id)) do
               input(type: "hidden", name: "status", value: @filter)
-              Blog::Structs::Page.query(@page).each { |name, value| input(type: "hidden", name:, value:) }
+              HiddenFields(values: Blog::Structs::Page.query(@page))
               button
             end
           end

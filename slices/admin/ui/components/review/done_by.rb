@@ -14,7 +14,7 @@ module Admin
 
           def view_template
             AutoForm(action: path(:admin_review), class: "review-by") do
-              @keep.each { |name, value| input(type: "hidden", name: name.to_s, value:) }
+              HiddenFields(values: @keep)
               Select(name: "by", options:, selected: @by || ANYONE, aria: { label: t(".label") }, class: "w-auto")
             end
           end

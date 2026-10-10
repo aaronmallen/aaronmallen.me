@@ -104,8 +104,7 @@ module Admin
           def query_id = FieldError.id_for(:other_id, scope)
 
           def return_fields
-            input(type: "hidden", name: "filter", value: @tab)
-            input(type: "hidden", name: "origin", value: @origin)
+            HiddenFields(values: { filter: @tab, origin: @origin })
           end
 
           def scope = "task-#{@task.id}-link"

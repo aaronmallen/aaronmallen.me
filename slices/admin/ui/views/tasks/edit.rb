@@ -41,7 +41,7 @@ module Admin
               action: path(:admin_delete_task, id: @task.id), id: delete_id,
               data: { confirm: t(".confirm_delete", task: @task.title) },
             ) do
-              returns.each { |name, value| input(type: "hidden", name:, value:) }
+              HiddenFields(values: returns)
             end
           end
 

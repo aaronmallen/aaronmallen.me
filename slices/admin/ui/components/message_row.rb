@@ -39,7 +39,7 @@ module Admin
           { aria: { keyshortcuts: READ_KEY }, data: { key_open: true, key: READ_KEY, key_label: t(".read_key") } }
         end
 
-        def narrowing = @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
+        def narrowing = HiddenFields(values: @narrowed)
 
         def pick = { form: @bulk, value: @message.id, label: t(".pick", subject: @message.subject) }
 

@@ -57,7 +57,7 @@ module Admin
           end
         end
 
-        def narrowing = @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
+        def narrowing = HiddenFields(values: @narrowed)
 
         def snooze
           Inbox::Snooze(kind: "message", id: @message.id, action: path(:admin_snooze_message, id: @message.id)) do

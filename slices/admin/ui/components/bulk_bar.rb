@@ -13,7 +13,7 @@ module Admin
 
         def view_template(&)
           Form(id: @id, action: @action, class: "bulk-bar", aria: { label: @label }, data: { bulk: FIELD }) do
-            @fields.each { |name, value| input(type: "hidden", name:, value:) }
+            HiddenFields(values: @fields)
             all
             span(class: "bulk-count", aria: { live: "polite" }, data: { bulk_count: t(".ticked") })
             div(class: "bulk-acts", data: { bulk_acts: true }, &)

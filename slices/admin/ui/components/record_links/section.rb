@@ -62,7 +62,7 @@ module Admin
             label = t(".remove", title: link.title)
 
             Form(action: path(:"admin_unlink_#{@kind}_record", id: @id, other_kind: link.kind, other_id: link.id)) do
-              @fields.compact.each { |name, value| input(type: "hidden", name: name.to_s, value:) }
+              HiddenFields(values: @fields.compact)
               Button(
                 type: "submit", variant: :gh, small: true, title: label, aria: { label: }, icon: "fa-solid fa-xmark",
               )

@@ -23,7 +23,7 @@ module Admin
 
           def view_template(&)
             Form(action:, class: "task-form", id: form_id) do
-              @returns.each { |name, value| input(type: "hidden", name:, value:) }
+              HiddenFields(values: @returns)
               title_field
               note_field
               pair

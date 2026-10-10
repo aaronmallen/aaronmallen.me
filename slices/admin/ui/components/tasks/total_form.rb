@@ -14,8 +14,7 @@ module Admin
             details(class: "task-total-edit", open: @totaling.key?(:errors)) do
               summary(class: "bt sm") { t(".set") }
               Form(action: path(:admin_update_task_total, id: @task.id)) do
-                input(type: "hidden", name: "filter", value: @tab)
-                input(type: "hidden", name: "origin", value: @origin)
+                HiddenFields(values: { filter: @tab, origin: @origin })
                 Hint { t(".hint") }
                 WorkedFields(name: "total", scope: "task-#{@task.id}-total", seconds: @task.worked_seconds, **state)
                 Button(variant: :pri, type: "submit", small: true) { t(".save") }

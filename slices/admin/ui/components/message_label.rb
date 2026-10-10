@@ -21,7 +21,7 @@ module Admin
           ) do
             Form(action: path(:admin_label_message, id: @message.id), class: "label-form", data: DATA) do
               input(type: "hidden", name: "filter", value: @filter)
-              @narrowed.each { |name, value| input(type: "hidden", name:, value:) }
+              HiddenFields(values: @narrowed)
               find
               list
               foot
