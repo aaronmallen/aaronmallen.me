@@ -7,10 +7,10 @@ module Admin
         class Bulk < Component
           ACT = "act"
           ID = "webmention-bulk"
-          VERDICTS = {
-            Blog::Types::WebmentionVerdict["approved"] => ["fa-solid fa-check", ".approve", :pri],
-            Blog::Types::WebmentionVerdict["ignored"] => ["fa-regular fa-eye-slash", ".ignore", nil],
-            Blog::Types::WebmentionVerdict["spam"] => ["fa-solid fa-ban", ".spam", :warn],
+          VARIANTS = {
+            Blog::Types::WebmentionVerdict["approved"] => :pri,
+            Blog::Types::WebmentionVerdict["ignored"] => nil,
+            Blog::Types::WebmentionVerdict["spam"] => :warn,
           }.freeze
 
           prop :filter, Blog::Types::String
@@ -18,15 +18,13 @@ module Admin
 
           def view_template
             BulkBar(id: ID, action: path(:admin_bulk_webmentions), label: t(".label"), fields:) do
-              VERDICTS.except(@filter).each { |value, (icon, label, variant)| act(value, icon, label, variant) }
+              VARIANTS.except(@filter).each do |verdict, variant|
+                WebmentionVerdict(verdict:, variant:, name: ACT, value: verdict)
+              end
             end
           end
 
           private
-
-          def act(value, icon, label, variant)
-            Button(type: "submit", variant:, small: true, name: ACT, value:, icon:) { t(label) }
-          end
 
           def fields = { status: @filter, **Blog::Structs::Page.query(@page) }
         end

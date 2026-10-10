@@ -47,6 +47,15 @@ RSpec.describe "Admin bulk webmention actions", type: :request do
         end
       end
 
+      it "marks each action with its icon" do
+        get "/admin/webmentions"
+        icons = page.all("form#webmention-bulk button[name='act']").to_h { [it.value, it.find("i")[:class]] }
+
+        expect(icons).to eq(
+          "approved" => "fa-solid fa-check", "ignored" => "fa-regular fa-eye-slash", "spam" => "fa-solid fa-ban",
+        )
+      end
+
       it "gives each row a box that joins the bar" do
         get "/admin/webmentions"
 

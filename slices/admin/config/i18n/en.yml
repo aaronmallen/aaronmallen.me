@@ -682,17 +682,8 @@ en:
             task: "issue"
             webmention: "webmention"
         mention_item:
-          approve: "Approve"
-          ignore: "Ignore"
-          no_content: "no content · like only"
           reason: "Why spam? (optional)"
-          spam: "Spam"
           summary: "%{type} on %{path}"
-          types:
-            like: "like"
-            mention: "mention"
-            reply: "reply"
-            repost: "repost"
         message_item:
           read: "Read"
           reply: "Reply"
@@ -2034,30 +2025,30 @@ en:
           never_used: "never used"
           never_expires: "never expires"
           revoke: "Revoke"
+      webmention_excerpt:
+        no_content: "no content · like only"
+      webmention_kind:
+        types:
+          like: "like"
+          mention: "mention"
+          reply: "reply"
+          repost: "repost"
+      webmention_verdict:
+        approve: "Approve"
+        ignore: "Ignore"
+        spam: "Spam"
       webmentions:
         bulk:
-          approve: "Approve"
-          ignore: "Ignore"
           label: "Ticked webmentions"
-          spam: "Spam"
         posts_card:
           disabled: "off"
           empty: "No posts yet."
           enabled: "on"
           title: "Per post"
         row:
-          approve: "Approve"
-          ignore: "Ignore"
-          no_content: "no content · like only"
           pick: "Select %{author}"
           reason: "Why spam? (optional)"
-          spam: "Spam"
           spam_reason: "Spam: %{reason}"
-          types:
-            like: "like"
-            mention: "mention"
-            reply: "reply"
-            repost: "repost"
         settings_card:
           accept_bridgy: "Accept Mastodon + Bluesky replies from Bridgy"
           auto_approve: "Auto-approve known authors"

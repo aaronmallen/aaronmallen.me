@@ -333,6 +333,14 @@ RSpec.describe "Admin webmentions", type: :request do
         end
       end
 
+      it "marks Approve and Spam with icons and leaves Ignore bare" do
+        create(:webmention, post: target)
+        get "/admin/webmentions"
+        icons = page.all(".wm-acts button").to_h { [it.text, it.first("i", minimum: 0)&.[](:class)] }
+
+        expect(icons).to eq("Approve" => "fa-solid fa-check", "Ignore" => nil, "Spam" => "fa-solid fa-ban")
+      end
+
       it "hides Approve on an approved mention", :aggregate_failures do
         create(:webmention, :approved, post: target)
         get "/admin/webmentions", status: "approved"

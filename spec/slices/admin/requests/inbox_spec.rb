@@ -223,6 +223,28 @@ RSpec.describe "Admin inbox", type: :request do
 
       before { mention }
 
+      it "names its type and shows its excerpt", :aggregate_failures do
+        get "/admin/inbox"
+
+        expect(page).to have_css(".inbox-row", text: /mention on \S+/)
+        expect(page).to have_css(".wm-excerpt.inbox-row-body", text: mention.excerpt)
+      end
+
+      it "says a like carries no content" do
+        create(:webmention, :like)
+        get "/admin/inbox"
+
+        expect(page).to have_css(".wm-excerpt.inbox-row-body.quiet", text: "no content · like only")
+      end
+
+      it "draws its verdict buttons without icons", :aggregate_failures do
+        get "/admin/inbox"
+        row = page.find("#webmention-#{mention.id}")
+
+        expect(row.all("button").map(&:text)).to include("Approve", "Ignore", "Spam")
+        expect(row).to have_no_css("button.bt i")
+      end
+
       { "approved" => "Approved", "ignored" => "Ignored", "spam" => "Marked as spam" }.each do |verdict, toast|
         it "moderates it #{verdict} and drops it", :aggregate_failures do
           act("/admin/inbox/webmentions/#{mention.id}/moderate/#{verdict}")

@@ -9,12 +9,6 @@ module Admin
           IGNORED = Blog::Types::WebmentionStatus["ignored"]
           OUTBOUND = { target: "_blank", rel: "noopener noreferrer" }.freeze
           SPAM = Blog::Types::WebmentionStatus["spam"]
-          TYPES = {
-            Blog::Types::WebmentionType["like"] => ".types.like",
-            Blog::Types::WebmentionType["mention"] => ".types.mention",
-            Blog::Types::WebmentionType["reply"] => ".types.reply",
-            Blog::Types::WebmentionType["repost"] => ".types.repost",
-          }.freeze
 
           prop :mention, Blog::Types::Instance(ROM::Struct)
           prop :slug, Blog::Types::String
@@ -25,7 +19,7 @@ module Admin
               href: @mention.source_url, link: OUTBOUND,
             ) do |row|
               row.meta { meta }
-              row.body { excerpt }
+              row.body { WebmentionExcerpt(mention: @mention, class: "inbox-row-body") }
               actions
             end
           end
@@ -33,18 +27,12 @@ module Admin
           private
 
           def actions
-            moderate(APPROVED, ".approve", nil)
-            moderate(IGNORED, ".ignore", :gh)
-            moderate(SPAM, ".spam", :warn, class: "wm-spam") do
+            moderate(APPROVED, nil)
+            moderate(IGNORED, :gh)
+            moderate(SPAM, :warn, class: "wm-spam") do
               Input(name: "reason", placeholder: t(".reason"), aria: { label: t(".reason") })
             end
             Inbox::Snooze(kind: "webmention", id: @mention.id)
-          end
-
-          def excerpt
-            text = @mention.excerpt.to_s.strip
-
-            p(class: ["wm-excerpt inbox-row-body", ("quiet" if text.empty?)]) { text.empty? ? t(".no_content") : text }
           end
 
           def meta
@@ -52,14 +40,16 @@ module Admin
             span { summary }
           end
 
-          def moderate(verdict, label_key, variant, **attributes)
+          def moderate(verdict, variant, **attributes)
             Form(action: path(:admin_inbox_moderate_webmention, id: @mention.id, verdict:), **attributes) do
               yield if block_given?
-              Button(type: "submit", variant:, small: true) { t(label_key) }
+              WebmentionVerdict(verdict:, variant:, icon: false)
             end
           end
 
-          def summary = t(".summary", type: t(TYPES.fetch(@mention.type)), path: path(:post, slug: @slug))
+          def summary = t(".summary", type:, path: path(:post, slug: @slug))
+
+          def type = t(WebmentionKind.label_key(@mention.type))
         end
       end
     end
