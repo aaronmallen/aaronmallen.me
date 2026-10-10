@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib]
 issue: AA-609
-amended: [AA-758, AA-801, AA-819, "#17", "#791"]
+amended: [AA-758, AA-801, AA-819, "#17", "#791", "#931"]
 tags: [postgres, schema, enums, domains, constraints, types]
 ---
 
@@ -25,8 +25,9 @@ Any copy could drift from the others.
 
 A column that takes one of a fixed list of values takes a Postgres enum. A text column that must match a format
 takes a domain over `text`. A rule that relates two columns, such as `visitors <= views`, stays a `CHECK`, since
-no type can say it. `config/db/structure.sql` holds 16 enums and 9 domains, and each list or pattern is written
-once.
+no type can say it. `config/db/structure.sql` holds 31 enums and 15 domains, and each list or pattern is written
+once. #931 moved the last four format `CHECK`s onto domains: `feed_subscribers.aggregator` takes `ref_source`,
+`people.key` takes `tag_name`, and `mastodon_handle` and `photo_key` are new.
 
 An array of a closed set is an array of its enum, so `posts.syndication_targets` and `social_posts.targets` are
 `network[]` and need no `<@ ARRAY[...]` check.
@@ -45,7 +46,7 @@ icons (ADR 0065).
 One set grows by design and stays text. #791 checks `service_connections.provider` against the service definitions
 in code, so a new service takes no migration ([ADR 0130][0130]).
 
-`Blog::Types` keeps a Ruby enum for 11 of the 16 sets, and relations and operations take their values from it
+`Blog::Types` keeps a Ruby enum for 29 of the 31 sets (#931), and relations and operations take their values from it
 (`slices/posts/relations/posts.rb`).
 
 ## Alternatives
@@ -70,10 +71,8 @@ The sort rule lives in one comment. Nothing fails if someone declares a new enum
 `Blog::Types` is a second copy, kept in step by hand, and no spec compares the two. A value missing from the Ruby
 twin refuses input the database would take. A value missing from the enum passes the Ruby check and fails the
 write, which a request spec that sends it would catch as a 500. The order drifts freely: `NetworkName` lists
-`mastodon` first, where the enum sorts `bluesky` first. `code_challenge_method`, `oauth_token_type` and
-`suggestion_edit_status` have no twin. Their values sit as plain strings in `lib/mcp/oauth/pkce.rb`,
-`slices/mcp/repos/oauth_token_repo.rb` and `slices/suggestions/repos/suggestion_repo.rb`. No spec compares a
-domain's pattern with its Ruby type either.
+`mastodon` first, where the enum sorts `bluesky` first. As of #931, `sign_in_outcome` and `task_event_kind` have
+no twin. No spec compares a domain's pattern with its Ruby type either.
 
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
