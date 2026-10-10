@@ -18,23 +18,7 @@ module MCP
           answer(projects: projects.map { summary(it) })
         end
 
-        def summary(project)
-          {
-            id: project.id,
-            name: project.name,
-            tagline: project.tagline,
-            status: project.status,
-            visibility: project.visibility,
-            started_on: project.started_on&.iso8601,
-            archived_on: project.archived_on&.iso8601,
-            tags: project.tags.map(&:name),
-            repo: project.repo,
-            url: project.url,
-            og_image_url: project.og_image_url,
-            stars: project.stars,
-            release: project.release,
-          }
-        end
+        def summary(project) = API::Serializers::Project.new(project).serializable_hash
       end
     end
   end

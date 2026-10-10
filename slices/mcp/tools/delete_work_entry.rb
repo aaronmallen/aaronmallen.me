@@ -12,7 +12,7 @@ module MCP
       class << self
         def call(id:, server_context:)
           case dep(:delete_work_entry, server_context).call(id)
-            in Success(entry) then answer(ListWorkEntries.summary(entry).merge(deleted: true))
+            in Success(entry) then answer(ListWorkEntries.summary(entry).merge("deleted" => true))
             in Failure(:not_found) then refuse(API::Helpers::Wording.missing("role", id))
             else refuse(UNDELETED)
           end

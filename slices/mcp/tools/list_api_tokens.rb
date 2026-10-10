@@ -12,17 +12,8 @@ module MCP
       scope Blog::Types::OAuthScope["read"]
 
       class << self
-        def call(server_context:) = answer(tokens: dep(:api_token_queries, server_context).live.map { entry(it) })
-
-        private
-
-        def entry(token)
-          {
-            id: token.id,
-            name: token.name,
-            created_at: token.created_at.utc.iso8601,
-            last_used_at: token.last_used_at&.utc&.iso8601,
-          }
+        def call(server_context:)
+          answer(tokens: API::Serializers::APIToken.new(dep(:api_token_queries, server_context).live).serializable_hash)
         end
       end
     end

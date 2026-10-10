@@ -54,10 +54,11 @@ RSpec.describe "MCP post tools", type: :request do
     it "answers with the post it wrote" do
       call_tool("create_post", title: "Hello")
 
-      expect(content).to eq(
-        "id" => post_queries.all.last.id, "status" => "draft", "title" => "Hello", "slug" => "hello",
-        "published_at" => nil, "outcome" => "drafted",
-      )
+      post = post_queries.all.last
+      written = { "status" => "draft", "title" => "Hello", "slug" => "hello", "published_at" => nil, "tags" => [] }
+
+      expect(content).to eq("id" => post.id, **written, "updated_at" => post.updated_at.utc.iso8601,
+                            "outcome" => "drafted")
     end
 
     it "takes the slug from the title when it names none" do

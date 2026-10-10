@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "time"
-
 module MCP
   module Tools
     class ListPosts < Base
@@ -72,17 +70,8 @@ module MCP
         end
 
         def summary(post, figures)
-          {
-            id: post.id,
-            draft: post.status == DRAFT,
-            published_at: post.published_at&.utc&.iso8601,
-            slug: post.slug,
-            status: post.status,
-            tags: post.tags.map(&:name),
-            title: post.title,
-            updated_at: post.updated_at.utc.iso8601,
-            **tally(post.id, figures),
-          }
+          serialized = API::Serializers::Post.new(post).serializable_hash
+          serialized.merge("draft" => post.status == DRAFT, **tally(post.id, figures))
         end
 
         def tally(id, figures)

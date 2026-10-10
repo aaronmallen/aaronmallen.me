@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "time"
-
 module MCP
   module Tools
     class ReadMessage < Base
@@ -20,24 +18,8 @@ module MCP
         private
 
         def answered(message)
-          answer(
-            Untrusted.present(
-              {
-                id: message.id,
-                subject: message.subject,
-                body: message.body,
-                reply_to: message.reply_to,
-                status: message.status,
-                tags: message.tags.map(&:name),
-                received_at: stamp(message.received_at),
-                snoozed_until: stamp(message.snoozed_until),
-              },
-              Untrusted::MESSAGE,
-            ),
-          )
+          answer(Untrusted.present(API::Serializers::Message.new(message).serializable_hash, Untrusted::MESSAGE))
         end
-
-        def stamp(time) = time&.utc&.iso8601
       end
     end
   end

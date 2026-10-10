@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "time"
-
 module MCP
   module Tools
     class PostWrite < Base
@@ -59,21 +57,12 @@ module MCP
 
         def saved(result, id = nil)
           case result
-            in Success[outcome, post] then answer(written(post).merge(outcome: outcome.to_s))
+            in Success[outcome, post]
+              answer(API::Serializers::Post.new(post).serializable_hash.merge("outcome" => outcome.to_s))
             in Failure[:invalid, errors] then refuse(complaint(errors))
             in Failure(:not_found) then missing(id)
             else refuse(UNSAVED)
           end
-        end
-
-        def written(post)
-          {
-            id: post.id,
-            status: post.status,
-            title: post.title,
-            slug: post.slug,
-            published_at: post.published_at&.utc&.iso8601,
-          }
         end
       end
     end

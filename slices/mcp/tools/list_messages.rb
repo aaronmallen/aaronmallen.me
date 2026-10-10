@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "time"
-
 module MCP
   module Tools
     class ListMessages < Base
@@ -53,18 +51,7 @@ module MCP
         end
 
         def summary(message)
-          Untrusted.present(
-            {
-              id: message.id,
-              subject: message.subject,
-              reply_to: message.reply_to,
-              status: message.status,
-              tags: message.tags.map(&:name),
-              received_at: message.received_at.utc.iso8601,
-              snoozed_until: message.snoozed_until&.utc&.iso8601,
-            },
-            Untrusted::MESSAGE,
-          )
+          Untrusted.present(API::Serializers::Message.new(message).serializable_hash.except("body"), Untrusted::MESSAGE)
         end
       end
     end

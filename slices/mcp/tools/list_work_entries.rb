@@ -30,17 +30,7 @@ module MCP
           answer(from: first.iso8601, to: last.iso8601, work_entries: entries.map { summary(it) })
         end
 
-        def summary(entry)
-          {
-            id: entry.id,
-            org: entry.org,
-            role: entry.role,
-            blurb: entry.blurb,
-            from_year: entry.from_year,
-            to_year: entry.to_year,
-            current: entry.current?,
-          }
-        end
+        def summary(entry) = API::Serializers::WorkEntry.new(entry).serializable_hash
       end
     end
   end

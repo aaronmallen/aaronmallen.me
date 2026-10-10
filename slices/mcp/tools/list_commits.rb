@@ -3,8 +3,6 @@
 module MCP
   module Tools
     class ListCommits < Base
-      TIME_FORMAT = "%H:%M"
-
       SCHEMA = {
         additionalProperties: false,
         properties: {
@@ -34,20 +32,6 @@ module MCP
 
         private
 
-        def fields(commit)
-          {
-            id: commit.id,
-            sha: commit.sha,
-            repo: commit.repo,
-            branch: commit.branch,
-            message: commit.message,
-            date: commit.commit_date.iso8601,
-            time: commit.commit_time.strftime(TIME_FORMAT),
-            additions: commit.additions,
-            deletions: commit.deletions,
-          }
-        end
-
         def listed(first, last, repos, server_context)
           page = Blog::Helpers::DayWindow.page(first, last, day: :commit_date.to_proc) do |from, to, limit|
             dep(:commit_queries, server_context).between(from:, to:, repos:, limit:)
@@ -55,7 +39,7 @@ module MCP
           rows = page.fetch(:rows)
           window = { from: first.iso8601, to: last.iso8601, count: rows.length, **page.except(:rows) }
 
-          answer(window.merge(commits: rows.map { fields(it) }))
+          answer(window.merge(commits: API::Serializers::Commit.new(rows).serializable_hash))
         end
       end
     end

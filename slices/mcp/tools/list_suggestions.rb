@@ -36,17 +36,6 @@ module MCP
 
         private
 
-        def edit(row)
-          {
-            id: row.id,
-            part: row.part,
-            original: row.original,
-            replacement: row.replacement,
-            reason: row.reason,
-            status: row.status,
-          }
-        end
-
         def listed(range, page, server_context)
           found = dep(:suggestion_queries, server_context).created_between(from: range.first, to: range.last, page:)
 
@@ -63,7 +52,7 @@ module MCP
             id: suggestion.id,
             **target(suggestion),
             created_at: suggestion.created_at.utc.iso8601,
-            edits: suggestion.edits.map { edit(it) },
+            edits: API::Serializers::SuggestionEdit.new(suggestion.edits).serializable_hash,
           }
         end
 
