@@ -5,6 +5,70 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.10] - 2026-10-10
+
+### Added
+
+- A weekly job checks every outbound link in each published post. A link that fails two checks in a row shows on the
+  attention card with its post and the reason, links to the post's editor and can be snoozed. It drops off once it
+  answers again or leaves the post. `list_attention` returns broken links too.
+- Jobs that died after their last retry show on the attention card with their name, when they died and their error,
+  with Retry and Discard buttons. `list_attention` returns them as `dead_jobs`. A dead job the card already shows as a
+  sync failure is not listed twice, and the card still loads while Redis is down.
+- The Review screen has a heat map with one column per day and rows for done, commits, time worked and journal
+  entries. Pick a day to narrow every card but Carried over to it, and pick it again or change period to clear it. A
+  Done by select narrows done tasks to anyone, you or one contributor. The API's review and `read_review` take a
+  `focus` day and return counts for each day.
+- An On this day card on the Review screen lists journal entries and posts from the same dates in earlier years. The
+  API's review and `read_review` return them as `earlier`.
+- The Completed tab on Tasks takes a date range, and the task search takes `project:` beside `tag:`. Review links
+  into both.
+- API tokens take scopes and an optional last day when you mint them. An endpoint refuses a token without the scope
+  it needs with a 403 that names the scope, and an expired token gets a 401. Tokens minted before keep every scope and
+  never expire.
+- `mise run db:check` builds a scratch database from the migrations and fails when the schema dump does not match.
+- The Security and Connected services screens update on their own when a sign-in or a connection changes.
+
+### Changed
+
+- The Review cards follow the new design. Each shows at most five rows or groups, with two items per group and a
+  "+N more" count, opens the rest in place without scripts, and links to the full list in Tasks, Decisions, the
+  journal, Posts or Social. Done groups by tag or by project.
+- Time sits under Insights as "time report", and People sits under Settings beside Tags.
+- The command palette groups screens under their category, such as Inbox, Insights and Settings, and hides a header
+  once a search empties it.
+- The journal search box searches as you type, like the other search boxes. Without scripts it keeps its button.
+- Icon-only buttons in the admin show their name on hover.
+- MCP and API text names the site's time zone as America/Chicago.
+- Tag refusals across the API and MCP read "lowercase words joined by hyphens".
+- `list_projects`, `save_project` and the post write tools answer with the same fields as the API, which adds
+  `created_at`, `updated_at` and post tags.
+- `POST /posts/{id}/publish` ignores a request body, as its OpenAPI entry already said.
+
+### Fixed
+
+- A visitor throttled just before local midnight stays throttled after it. The contact form, webmentions, MCP client
+  sign-up and the analytics beacon used to start the count over at midnight.
+- A social post due to go out with none of its accounts left now shows as failed. It used to stay scheduled for good.
+- A webmention whose target page answered with a server error or didn't answer at all is now retried. It used to be
+  skipped.
+- A start replayed from Linear joins the sprint current when the sync runs, and never moves a running session's start
+  later.
+- Issue comment sync no longer deletes the copy of a comment past the first 100 on a long thread.
+- Later today in the snooze menu no longer offers a time tomorrow late in the evening.
+- A `#` heading in a post body renders as a second-level heading, so the page keeps one top heading.
+- A single-author host given as an IPv6 address now matches its webmentions.
+- Connecting an account someone already connected says the account is taken, where it used to show an error page.
+- MCP refusals for projects, work entries and tags say what is wrong in words, where they used to say "check this
+  field". A tag name with a control character says so on the tag form too.
+- The light theme color matches the page background, and every static error page keeps a full tap target on a phone.
+
+### Security
+
+- MCP's `/authorize` refuses a request without `code_challenge_method`, where it used to let one through.
+- The bulk message and webmention MCP tools mark the subject, body and reply address, and the author name, URL,
+  excerpt and source, as untrusted, as the single-record tools already did. So does `delete_messages`.
+
 ## [26.10.9] - 2026-10-10
 
 ### Added
@@ -674,7 +738,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.9...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.10...HEAD
+[26.10.10]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.9...26.10.10
 [26.10.9]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...26.10.9
 [26.10.8]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...26.10.8
 [26.10.7]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.6...26.10.7
