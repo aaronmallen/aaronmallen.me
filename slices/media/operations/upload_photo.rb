@@ -5,8 +5,6 @@ require "securerandom"
 module Media
   module Operations
     class UploadPhoto < Blog::Operation
-      KEY_BYTES = 16
-
       include Deps[
         "operations.detect_photo_type",
         "store.client",
@@ -30,7 +28,7 @@ module Media
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def key_for(type) = "#{SecureRandom.hex(KEY_BYTES)}.#{type}"
+      def key_for(type) = "#{SecureRandom.hex(Blog::Types::PHOTO_KEY_BYTES)}.#{type}"
 
       def measure(bytes, type)
         pixels = processor.pixels(bytes, type)

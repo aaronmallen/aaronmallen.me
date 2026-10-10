@@ -3,7 +3,7 @@
 module Media
   module Structs
     class Photo < Blog::DB::Struct
-      def path = "/media/#{key}"
+      def path = "#{Blog::Types::PHOTO_PATH}#{key}"
 
       def url = Hanami.app.settings.site_url(path)
     end

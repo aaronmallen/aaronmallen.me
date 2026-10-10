@@ -18,7 +18,7 @@ module Posts
     ].freeze
     LAZY_IMAGE = '<img loading="lazy" decoding="async" '
     LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
-    MEDIA_IMAGE = %r{<img (?=[^>]*src="[^"]*/media/([0-9a-f]{32}\.(?:gif|jpg|png|webp))")}
+    MEDIA_IMAGE = /<img (?=[^>]*src="[^"]*#{Blog::Types::PHOTO_REFERENCE}")/
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/
