@@ -271,12 +271,15 @@ RSpec.describe "Admin projects", :frozen_clock, type: :request do
     end
 
     describe "archiving" do
-      let(:project) { create(:project) }
+      let(:project) { create(:project, :private, repo: "aaronmallen/kept", stars: 12) }
 
-      it "archives the project as of today" do
+      it "archives the project as of today and keeps the repo, the stars and the visibility" do
         post "/admin/projects/#{project.id}/archive", _csrf_token: admin_csrf_token
 
-        expect(repo.by_id(project.id)).to have_attributes(archived?: true, archived_on: Blog::TimeZone.today)
+        expect(repo.by_id(project.id)).to have_attributes(
+          archived?: true, archived_on: Blog::TimeZone.today,
+          repo: "aaronmallen/kept", stars: 12, visibility: "private",
+        )
       end
 
       it "shows the archived toast" do
