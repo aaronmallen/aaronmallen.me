@@ -1766,16 +1766,17 @@ en:
           cancel: "Cancel"
           confirm_cancel: "Cancel %{task}? It moves to completed."
           confirm_move: "Move %{task} to %{list}? It stops and goes back to open."
-          ask: "How long did this take?"
-          complete: "Done"
           keys:
-            complete: "Complete the highlighted task"
             move: "Move the highlighted task one list over"
             start: "Start the highlighted task"
           move: "Move to %{list}"
           reopen: "Reopen"
           start: "Start"
           stop: "Stop"
+        complete_form:
+          ask: "How long did this take?"
+          complete: "Done"
+          key: "Complete the highlighted task"
         create_button:
           label: "Create Task"
         create_dialog:

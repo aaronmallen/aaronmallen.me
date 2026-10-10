@@ -290,7 +290,7 @@ RSpec.describe "Admin task time", type: :request do
         read
 
         legend = page.find("form[action$='/complete'] legend", visible: :all)
-        expect(legend.text(:all)).to eq(t("ui.components.tasks.controls.ask"))
+        expect(legend.text(:all)).to eq(t("ui.components.tasks.complete_form.ask"))
         expect([field(:hours)["value"], field(:minutes)["value"]]).to eq(%w[0 40])
       end
 

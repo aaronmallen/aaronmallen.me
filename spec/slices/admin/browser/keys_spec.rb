@@ -152,7 +152,7 @@ RSpec.describe "Admin keys", type: :feature do
   describe "x" do
     let(:sprint) { create(:sprint, sprint_date: today) }
 
-    def done = Admin::Slice["i18n"].t("ui.components.tasks.controls.complete")
+    def done = Admin::Slice["i18n"].t("ui.components.tasks.complete_form.complete")
 
     before do
       create(:task, :in_progress, :in_sprint, sprint_id: sprint.id, title: "Ship the screen")

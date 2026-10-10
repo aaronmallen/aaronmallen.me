@@ -51,7 +51,7 @@ module Admin
             ]
           end
 
-          def complete_label = t("ui.components.tasks.controls.complete")
+          def complete_label = t("ui.components.tasks.complete_form.complete")
 
           def edit
             href = path(:admin_edit_task, id: @task.id, filter: tab, origin: @origin)

@@ -12,7 +12,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   def complete_task(scope)
-    done = translate("ui.components.tasks.controls.complete")
+    done = translate("ui.components.tasks.complete_form.complete")
 
     scope.find("summary", text: done).click
     scope.click_button(done)
