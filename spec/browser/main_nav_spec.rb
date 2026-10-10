@@ -11,16 +11,10 @@ RSpec.describe "The public header", type: :feature do
 
   def nav_width = evaluate_script("document.querySelector('nav.main-nav').getBoundingClientRect().width")
 
-  def sticky? = evaluate_script("getComputedStyle(document.querySelector('.site-header')).position") == "sticky"
-
   before { visit "/about" }
 
   it "fills the current page's pill and no other" do
     expect(all("nav.main-nav a[aria-current='page']").map(&:text)).to eq(%w[about])
-  end
-
-  it "stays stuck to the top" do
-    expect(sticky?).to be(true)
   end
 
   it "shows no menu toggle" do

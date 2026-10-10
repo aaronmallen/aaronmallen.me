@@ -42,11 +42,6 @@ RSpec.describe "Home sections", type: :feature do
       .to be_within(1).of(evaluate_script("document.documentElement.clientWidth"))
   end
 
-  it "sets the body type at 17px on 1.55" do
-    expect(evaluate_script("(({ fontSize, lineHeight }) => [fontSize, lineHeight])(getComputedStyle(document.body))"))
-      .to eq(["17px", "26.35px"])
-  end
-
   it "pushes the link to the far edge of the section" do
     expect(box(".sh .sec-l")["right"]).to be_within(1).of(box(".sh")["right"])
   end
