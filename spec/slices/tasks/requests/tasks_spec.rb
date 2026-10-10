@@ -71,55 +71,6 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     end
   end
 
-  describe "opening a canceled task again" do
-    let(:task) { create(:task, :canceled) }
-
-    it "reopens it" do
-      send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
-
-      expect(repo.by_id(task.id).status).to eq("open")
-    end
-
-    it "clears the close time" do
-      send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
-
-      expect(repo.by_id(task.id).completed_at).to be_nil
-    end
-
-    it "clears the close time when it is started" do
-      send_to("/admin/tasks/#{task.id}/start", filter: "completed")
-
-      expect(repo.by_id(task.id)).to have_attributes(status: "in_progress", completed_at: nil)
-    end
-  end
-
-  describe "a canceled task among the finished ones" do
-    let(:page) { Capybara.string(last_response.body) }
-
-    before do
-      create(:task, :done, title: "Filed already")
-      create(:task, :canceled, title: "Dropped")
-    end
-
-    it "lists it on the completed tab" do
-      get "/admin/tasks", filter: "completed"
-
-      expect(page.all(".task-title").map(&:text)).to contain_exactly("Filed already", "Dropped")
-    end
-
-    it "counts it on the completed tab" do
-      get "/admin/tasks"
-
-      expect(page.all(".task-tab-count").map(&:text).last).to eq("2")
-    end
-
-    it "counts it as closed today in the page sub" do
-      get "/admin/tasks"
-
-      expect(page).to have_css(".page-head-sub", text: "2 finished today")
-    end
-  end
-
   describe "placing a task in today's sprint" do
     let(:sprint) { create(:sprint, sprint_date: today) }
 

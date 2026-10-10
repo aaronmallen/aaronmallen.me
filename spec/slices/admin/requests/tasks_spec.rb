@@ -96,11 +96,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: "0 carried in")
       end
 
-      it "counts every tab whichever is open" do
-        create(:task, :done, title: "Filed already")
-        get "/admin/tasks", filter: "someday"
+      %i[done canceled].each do |status|
+        it "counts every tab whichever is open with a #{status} task" do
+          create(:task, status, title: "Filed already")
+          get "/admin/tasks", filter: "someday"
 
-        expect(page.all(".task-tab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
+          expect(page.all(".task-tab-count").map(&:text)).to eq(%w[1 0 1 1 0 1])
+        end
       end
 
       it "keeps the count off the lists a finished task has left" do
@@ -116,11 +118,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(page).to have_css(".page-head-sub", text: "1 open in today · 0 carried in · 0 finished today")
       end
 
-      it "counts what was finished today in the page sub" do
-        create(:task, :done, title: "Filed already")
-        get "/admin/tasks"
+      %i[done canceled].each do |status|
+        it "counts a #{status} task as finished today in the page sub" do
+          create(:task, status, title: "Filed already")
+          get "/admin/tasks"
 
-        expect(page).to have_css(".page-head-sub", text: "1 finished today")
+          expect(page).to have_css(".page-head-sub", text: "1 finished today")
+        end
       end
 
       it "leaves a task finished on an earlier day out of the page sub" do
@@ -153,11 +157,13 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         end
       end
 
-      it "lists the finished tasks on the completed tab" do
-        create(:task, :done, title: "Filed already")
-        get "/admin/tasks", filter: "completed"
+      %i[done canceled].each do |status|
+        it "lists a #{status} task on the completed tab" do
+          create(:task, status, title: "Filed already")
+          get "/admin/tasks", filter: "completed"
 
-        expect(titles).to include("Filed already")
+          expect(titles).to include("Filed already")
+        end
       end
 
       it "dates the sprint in the page sub" do
@@ -1196,6 +1202,15 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
         expect(page).to have_css("form[action$='/start']")
       end
+
+      %i[done canceled].each do |status|
+        it "clears the close time on a #{status} task" do
+          task = create(:task, status)
+          send_to("/admin/tasks/#{task.id}/start", filter: "completed")
+
+          expect(repo.by_id(task.id)).to have_attributes(status: "in_progress", completed_at: nil)
+        end
+      end
     end
 
     describe "stopping a task" do
@@ -1264,11 +1279,20 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(repo.by_id(task.id).completed_at).not_to be_nil
       end
 
-      it "opens it again" do
-        task = create(:task, :done)
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "next")
+      %i[done canceled].each do |status|
+        it "opens a #{status} task again" do
+          task = create(:task, status)
+          send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
 
-        expect(repo.by_id(task.id).status).to eq("open")
+          expect(repo.by_id(task.id).status).to eq("open")
+        end
+
+        it "clears the time when a #{status} task is opened again" do
+          task = create(:task, status)
+          send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
+
+          expect(repo.by_id(task.id).completed_at).to be_nil
+        end
       end
 
       it "says it reopened" do
@@ -1277,13 +1301,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         follow_redirect!
 
         expect(page).to have_css("[data-toast] .toast", exact_text: "Reopened", visible: :all)
-      end
-
-      it "clears the time when it is opened again" do
-        task = create(:task, :done)
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "next")
-
-        expect(repo.by_id(task.id).completed_at).to be_nil
       end
 
       it "offers reopen rather than done on a finished task" do
@@ -1390,13 +1407,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(titles).to be_empty
       end
 
-      it "moves it to the completed tab" do
-        create(:task, :canceled, title: "Dropped")
-        get "/admin/tasks", filter: "completed"
-
-        expect(titles).to eq(["Dropped"])
-      end
-
       it "marks it canceled on the completed tab" do
         create(:task, :canceled, title: "Dropped")
         get "/admin/tasks", filter: "completed"
@@ -1432,13 +1442,6 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
         expect(page).to have_css("form[action$='/reopen']")
         expect(page).to have_no_css("form[action$='/cancel'], form[action$='/complete'], form[action*='/move/']")
-      end
-
-      it "opens it again" do
-        task = create(:task, :canceled)
-        send_to("/admin/tasks/#{task.id}/reopen", filter: "completed")
-
-        expect(repo.by_id(task.id)).to have_attributes(status: "open", completed_at: nil)
       end
 
       it "puts it back on its list once opened again" do
