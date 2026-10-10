@@ -3,23 +3,13 @@
 module Contact
   module Repos
     class MessageTagMutations < Blog::DB::Repo
-      TAG_SCOPE = Blog::Types::TagScope["private"]
-
       root :message_tags
 
-      def add(message_id, name)
-        tag_id = tags.claim([name], scope: TAG_SCOPE).fetch(name)
+      def add(message_id, name) = message_tags.tag(message_id, [name], tags)
 
-        message_tags.dataset.insert_conflict.insert(message_id:, tag_id:)
-      end
+      def remove(message_id, name) = message_tags.untag(message_id, [name], tags)
 
-      def remove(message_id, name)
-        message_tags.for_owner(message_id).where(tag_id: tags.in_scope(TAG_SCOPE).by_names([name]).pluck(:id)).delete
-      end
-
-      def replace(message_id, names)
-        message_tags.replace(message_id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
-      end
+      def replace(message_id, names) = message_tags.retag(message_id, names, tags)
     end
   end
 end

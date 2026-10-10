@@ -11,12 +11,6 @@ module Tasks
         end
       end
 
-      def add_missing(task_ids, tag_ids)
-        rows = task_ids.product(tag_ids).map { |task_id, tag_id| { task_id:, tag_id: } }
-
-        dataset.insert_conflict.multi_insert(rows) unless rows.empty?
-      end
-
       def names_by_task(task_ids)
         name = Sequel[:tags][:name]
 

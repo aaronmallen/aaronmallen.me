@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, posts, projects, record, tags, tasks]
 issue: AA-584
-amended: [AA-809, "#76", "#718", "#954"]
+amended: [AA-809, "#76", "#718", "#954", "#992"]
 tags: [tags, rom, relations, combine, slices, exports]
 ---
 
@@ -36,10 +36,12 @@ Each slice that tags declares its own `Relations::Tags` over the `tags` table: `
 join relation includes `Blog::DB::Taggings` (`lib/blog/db/taggings.rb`) and names its `owner_key`. #718 turns both
 mixins into ROM relation plugins that a relation opts into with `use` (ADR 0126).
 
-A tagging repo writes tags itself, as `post_tags.replace(id, tags.claim(names).values_at(*names))` in
-`PostRepo#replace_tags` does, and the same in the project, journal entry and task repos. `claim` inserts each
-missing name with the least used colour and does nothing for a name that exists. Since #76 it claims within a scope
-(ADR 0074): `posts` and `projects` claim public tags, `record` and `tasks` private ones.
+A tagging repo writes tags itself, as `post_tags.retag(id, names, tags)` in `PostMutations#replace_tags` does, and
+the same in every other tagging repo. `claim` inserts each missing name with the least used colour and does nothing
+for a name that exists. Since #76 it claims within a scope (ADR 0074): `posts` and `projects` claim public tags,
+`record` and `tasks` private ones. Since #992 the join relation's `retag`, `tag` and `untag` claim and write the tags,
+and `Blog::DB::Plugins::Taggings::SCOPES` names each join table's scope once, for the owner slice and for the tags
+slice's counts.
 
 Several slices write `tags`, an exception to reaching another slice only through its exports. It is not the only
 table more than one slice writes: #954 names the tasks write to `record_links` in ADR 0021.
@@ -59,7 +61,7 @@ One schema block has five copies, kept in step only by the mixin. A scope added 
 
 A new tagged kind needs a tags relation and a join relation in its own slice, a `replace_tags` repo method, and a
 `JOINS` entry in `Tags::Relations::Tags` so the tags screen counts it. Since #76 it also picks a scope, and its join
-table holds a `tag_scope` column pinned to that scope (ADR 0074).
+table holds a `tag_scope` column pinned to that scope (ADR 0074). Since #992 that scope goes in `Taggings::SCOPES`.
 
 A tag that `claim` writes runs none of `Tags::Contracts::TagContract`. Its name passes only the tagged record's
 contract, through `Blog::Types::TagList` and the `tag_slugs` rule, and the `tag_name` domain in Postgres.

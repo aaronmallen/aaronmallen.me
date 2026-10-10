@@ -7,7 +7,6 @@ module Tasks
       DONE = Blog::Types::TaskStatus["done"]
       EXTERNAL = Blog::Types::TaskList["external"]
       NEXT = Blog::Types::TaskList["next"]
-      TAG_SCOPE = Blog::Types::TagScope["private"]
 
       root :tasks
 
@@ -16,7 +15,7 @@ module Tasks
       stamped_commands :create, :update
       commands delete: :by_pk
 
-      def add_tags(id, names) = task_tags.add(id, tags.in_scope(TAG_SCOPE).by_names(names).pluck(:id))
+      def add_tags(id, names) = task_tags.add(id, tags.in_scope(task_tags.tag_scope).by_names(names).pluck(:id))
 
       def append(**fields)
         transaction do
@@ -48,7 +47,7 @@ module Tasks
         end
       end
 
-      def replace_tags(id, names) = task_tags.replace(id, tags.claim(names, scope: TAG_SCOPE).values_at(*names))
+      def replace_tags(id, names) = task_tags.retag(id, names, tags)
 
       def return_to_list(id, at: Time.now) = move_to_list(id, tasks.sourced.by_pk(id).exist? ? EXTERNAL : NEXT, at:)
 

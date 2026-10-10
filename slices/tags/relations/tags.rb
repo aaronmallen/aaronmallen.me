@@ -14,15 +14,12 @@ module Tags
         task_rules: :task_rule_tags,
         messages: :message_tags,
       }.freeze
-      KINDS = {
-        Blog::Types::TagScope["public"] => %i[posts projects],
-        Blog::Types::TagScope["private"] => %i[journal_entries tasks decisions task_rules messages],
-      }.freeze
+      SCOPES = Blog::DB::Plugins::Taggings::SCOPES
 
       schema :tags, infer: true
 
       def counts_by_kind(scope)
-        JOINS.slice(*KINDS.fetch(scope)).transform_values do |join|
+        JOINS.select { |_, join| SCOPES.fetch(join) == scope }.transform_values do |join|
           dataset.db[join].group_and_count(:tag_id).as_hash(:tag_id, :count)
         end
       end

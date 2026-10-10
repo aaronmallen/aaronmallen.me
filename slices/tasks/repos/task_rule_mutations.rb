@@ -3,8 +3,6 @@
 module Tasks
   module Repos
     class TaskRuleMutations < Blog::DB::Repo
-      TAG_SCOPE = Blog::Types::TagScope["private"]
-
       root :task_rules
 
       stamped_commands :create, :update
@@ -14,13 +12,9 @@ module Tasks
 
       def replace_projects(id, project_ids) = task_rule_projects.replace(id, project_ids)
 
-      def replace_tags(id, names)
-        tag_ids = tags.claim(names, scope: TAG_SCOPE).values_at(*names)
-        task_rule_tags.replace(id, tag_ids)
-        tag_ids
-      end
+      def replace_tags(id, names) = task_rule_tags.retag(id, names, tags)
 
-      def tag_tasks(task_ids, tag_ids) = task_tags.add_missing(task_ids, tag_ids)
+      def tag_tasks(task_ids, tag_ids) = task_tags.add(task_ids, tag_ids)
     end
   end
 end
