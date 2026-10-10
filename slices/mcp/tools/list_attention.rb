@@ -7,9 +7,11 @@ module MCP
       TITLE = "title"
 
       description "List the rows the admin's needs attention card shows, worst first: a sign-in, API token or MCP " \
-                  "client seen from a device or place it had not used before, with days since; open tasks carried " \
-                  "too many days, with carried_count; drafts and someday tasks left alone too long, with days " \
-                  "since the last edit; and the journal, with days since the last entry. Snoozed rows stay out. " \
+                  "client seen from a device or place it had not used before, with days since; links in published " \
+                  "posts that failed the weekly check twice or more in a row, with the post's title and post_id, " \
+                  "the url, the reason and failures; open tasks carried too many days, with carried_count; " \
+                  "drafts and someday tasks left alone too long, with days since the last edit; and the journal, " \
+                  "with days since the last entry. Snoozed rows stay out. " \
                   "Beside them, dead_jobs lists the background jobs that ran out of retries, newest first, with " \
                   "the job's name, when it died and its error. " \
                   "A new device row's title names an MCP client as the client named itself, so it comes marked " \

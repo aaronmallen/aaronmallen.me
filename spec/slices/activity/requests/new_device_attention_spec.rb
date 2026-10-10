@@ -30,6 +30,8 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
     call_api(address: "198.51.100.7")
   end
 
+  def no_links = %w[post_id url reason failures].to_h { [it, nil] }
+
   def rows = stalled.select { it.kind == "new_device" }
 
   def security_table(name) = Security::Slice["db.rom"].gateways[:default].connection[name]
@@ -140,9 +142,9 @@ RSpec.describe "New devices on the attention list", :frozen_clock, type: :reques
       record_id = known_devices.max(:id)
       title = { "untrusted" => true, "text" => "MCP client Claude: Firefox on Linux in London, GB" }
 
-      expect(mcp_answer("list_attention").fetch("attention")).to eq(
-        [{ "kind" => "new_device", "record_id" => record_id, "carried_count" => nil, "days" => 0, "title" => title }],
-      )
+      row = { "kind" => "new_device", "record_id" => record_id, "carried_count" => nil, "days" => 0, "title" => title }
+
+      expect(mcp_answer("list_attention").fetch("attention")).to eq([row.merge(no_links)])
     end
   end
 

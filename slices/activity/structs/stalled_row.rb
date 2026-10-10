@@ -2,8 +2,9 @@
 
 module Activity
   module Structs
-    class StalledRow < Data.define(:kind, :record_id, :title, :days, :limit)
+    class StalledRow < Data.define(:kind, :record_id, :title, :days, :limit, :post_id, :url, :reason)
       LIMITS = {
+        Blog::Types::AttentionKind["broken_link"] => :broken_link_failures,
         Blog::Types::AttentionKind["carried"] => :carried_count,
         Blog::Types::AttentionKind["draft"] => :draft_days,
         Blog::Types::AttentionKind["journal"] => :journal_days,
@@ -17,8 +18,11 @@ module Activity
           kind: row.kind,
           record_id: row.record_id,
           title: row.title,
-          days: row.carried_count || (on - row.touched_on).to_i,
+          days: row.carried_count || row.failures || (on - row.touched_on).to_i,
           limit: limits.fetch(LIMITS.fetch(row.kind)),
+          post_id: row.post_id,
+          url: row.url,
+          reason: row.reason,
         )
       end
 

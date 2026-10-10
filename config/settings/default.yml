@@ -5,6 +5,7 @@ analytics:
   throttle_limit: <%= ENV["ANALYTICS_THROTTLE_LIMIT"].to_json %>
   throttle_window_minutes: <%= ENV["ANALYTICS_THROTTLE_WINDOW_MINUTES"].to_json %>
 attention:
+  broken_link_failures: 2
   carried_count: 3
   draft_days: 30
   journal_days: 2

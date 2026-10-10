@@ -4,6 +4,7 @@ module Admin
   module UI
     module Components
       class AttentionCard < Component
+        BROKEN_LINK = Blog::Types::AttentionKind["broken_link"]
         CARRIED = Blog::Types::AttentionKind["carried"]
         DRAFT = Blog::Types::AttentionKind["draft"]
         JOURNAL = Blog::Types::AttentionKind["journal"]
@@ -33,23 +34,14 @@ module Admin
 
         private
 
+        def broken_link(row) = post(row, row.post_id, row.url, "fa-solid fa-link-slash", row.reason)
+
         def cancel(row)
-          label = t(".cancel")
           data = { confirm: t(".confirm_cancel", task: row.title) }
-
-          task_form(:admin_cancel_task, row, label, "fa-solid fa-ban", data:)
+          task_form(:admin_cancel_task, row, t(".cancel"), "fa-solid fa-ban", data:)
         end
 
-        def draft(row)
-          sub = t(".untouched", count: row.days)
-
-          ListItem(title: row.title, href: edit_post_path(row), sub:, icon: "fa-regular fa-file-lines", hover: true) do
-            icon_link(edit_post_path(row), t(".open"), "fa-regular fa-pen-to-square")
-            snooze(row)
-          end
-        end
-
-        def edit_post_path(row) = path(:admin_edit_post, id: row.record_id)
+        def draft(row) = post(row, row.record_id, t(".untouched", count: row.days), "fa-regular fa-file-lines")
 
         def icon_button(label, icon)
           Button(type: "submit", small: true, title: label, aria: { label: }, icon:)
@@ -85,6 +77,16 @@ module Admin
           end
         end
 
+        def post(row, id, sub, icon, reason = nil)
+          href = path(:admin_edit_post, id:)
+
+          ListItem(title: row.title, href:, sub:, icon:, hover: true) do |item|
+            item.meta { p(class: "li-sub") { reason } } if reason
+            icon_link(href, t(".open"), "fa-regular fa-pen-to-square")
+            snooze(row)
+          end
+        end
+
         def row(row)
           case row.kind
             when CARRIED then task(row, t(".carried", count: row.days), "fa-solid fa-rotate-left")
@@ -92,6 +94,7 @@ module Admin
             when DRAFT then draft(row)
             when JOURNAL then journal(row)
             when NEW_DEVICE then new_device(row)
+            when BROKEN_LINK then broken_link(row)
           end
         end
 

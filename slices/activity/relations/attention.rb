@@ -3,6 +3,7 @@
 module Activity
   module Relations
     class Attention < Blog::DB::Relation
+      BROKEN_LINK = Blog::Types::AttentionKind["broken_link"]
       CARRIED = Blog::Types::AttentionKind["carried"]
       DRAFT = Blog::Types::AttentionKind["draft"]
       JOURNAL = Blog::Types::AttentionKind["journal"]
@@ -15,9 +16,12 @@ module Activity
 
       schema :attention, infer: true
 
-      def stalled(on:, now:, carried_count:, draft_days:, journal_days:, new_device_days:, someday_days:)
+      def stalled(
+        on:, now:, broken_link_failures:, carried_count:, draft_days:, journal_days:, new_device_days:, someday_days:
+      )
         where(
           Sequel.|(
+            failing(broken_link_failures),
             carried(carried_count),
             seen_since(NEW_DEVICE, on - new_device_days),
             untouched(DRAFT, on - draft_days),
@@ -30,6 +34,8 @@ module Activity
       private
 
       def carried(count) = Sequel[kind: CARRIED] & (Sequel[:carried_count] >= count)
+
+      def failing(count) = Sequel[kind: BROKEN_LINK] & (Sequel[:failures] >= count)
 
       def seen_since(kind, since) = Sequel[kind:] & (Sequel[:touched_on] > since)
 

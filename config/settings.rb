@@ -131,6 +131,7 @@ module Blog
     SECRETS.each { setting it, constructor: Secret }
 
     setting :attention, constructor: Schema.schema(
+      broken_link_failures: AttentionLimit,
       carried_count: AttentionLimit,
       draft_days: AttentionLimit,
       journal_days: AttentionLimit,

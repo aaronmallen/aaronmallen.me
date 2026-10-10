@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [activity, admin, api, db]
 issue: "#350"
-amended: ["#351", "#353", "#655", "#706", "#869"]
+amended: ["#351", "#353", "#655", "#706", "#869", "#868"]
 tags: [activity, attention, today, snooze, view, postgres, tasks, posts, journal]
 ---
 
@@ -56,16 +56,22 @@ The card, the endpoint and the tool read one exported query, and a new kind join
 
 The view reads `tasks.title`, `tasks.status`, `tasks.updated_at`, `tasks.list`, `tasks.carried_count`,
 `posts.title`, `posts.status`, `posts.updated_at`, `journal_entries.entry_date`, every column of `known_devices`,
-`api_tokens.name`, `oauth_clients.client_name` and `oauth_clients.client_id`. Postgres will not change a
-column a view reads, so a migration that touches one has to replace `attention` too.
+`api_tokens.name`, `oauth_clients.client_name`, `oauth_clients.client_id`, `posts.id` and every column of
+`post_link_checks`. Postgres will not change a column a view reads, so a migration that touches one has to replace
+`attention` too.
 
 `updated_at` moves on every write through a repo's update command. Dragging a someday task to a new place in its
 list, or a sync of its issue, counts as a touch and puts the task's ninety days back to zero.
 
-A snooze points at records in two tables, so no foreign key holds it. A `tasks_drop_attention_snoozes` and a
-`posts_drop_attention_snoozes` trigger delete a record's snoozes when the record goes, the way the record link
-triggers do. A migration that drops and rebuilds `tasks` or `posts` loses its trigger. A snooze that has ended stays
-in the table, and the stalled list ignores it.
+A snooze points at records in four tables, so no foreign key holds it. The `tasks_drop_attention_snoozes`,
+`posts_drop_attention_snoozes`, `known_devices_drop_attention_snoozes` and `post_link_checks_drop_attention_snoozes`
+triggers delete a record's snoozes when the record goes, the way the record link triggers do. A migration that drops
+and rebuilds `tasks` or `posts` loses its trigger. A snooze that has ended stays in the table, and the stalled list
+ignores it.
+
+A broken link (#868) joins as a row per `post_link_checks` row of a published post. Its record id is the check's
+id, so a snooze holds one link, and the row carries the post's id, the URL, the reason and the failures in a row.
+The `broken_link_failures` setting holds the limit, two by default. The other kinds leave those four columns null.
 
 Dead jobs stay out of the view. #869 reads them from Sidekiq's dead set in a second `activity` query, as
 [ADR 0138][0138] says.
