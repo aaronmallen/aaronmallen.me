@@ -294,8 +294,8 @@ RSpec.describe "Visits", type: :request do
       view(agent: "Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/130.0")
       roll_up_tomorrow
 
-      expect(Analytics::Slice["repos.analytics_rollup_queries"].by_day(Blog::TimeZone.today - 1))
-        .to have_attributes(visitors: 2)
+      expect(Analytics::Slice["relations.analytics_rollups"].by_pk(Blog::TimeZone.today - 1).one)
+        .to include(visitors: 2)
     end
   end
 

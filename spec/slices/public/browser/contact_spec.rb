@@ -22,7 +22,7 @@ RSpec.describe "Contact form", type: :feature do
     click_button "Send message"
   end
 
-  def stored = message_queries.by_status(Blog::Types::MessageStatus["unread"]).first
+  def stored = message_queries.unread.first
 
   def tab
     page.driver.browser.keyboard.type(:Tab)

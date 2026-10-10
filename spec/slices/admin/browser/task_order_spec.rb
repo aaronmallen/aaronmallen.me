@@ -28,7 +28,7 @@ RSpec.describe "Admin task order", type: :feature do
     JS
   end
 
-  def listed(list = "next") = repo.in_list(list).map(&:title)
+  def listed(list = "next") = repo.open_in_list(list).map(&:title)
 
   def nudge(title, key)
     execute_script("arguments[0].focus()", row(title).find(".task-title"))
@@ -192,7 +192,7 @@ RSpec.describe "Admin task order", type: :feature do
 
   describe "a save that fails" do
     before do
-      Tasks::Slice["operations.complete_task"].call(repo.in_list("next").find { it.title == "first" }.id)
+      Tasks::Slice["operations.complete_task"].call(repo.open_in_list("next").find { it.title == "first" }.id)
       nudge("first", :down)
     end
 

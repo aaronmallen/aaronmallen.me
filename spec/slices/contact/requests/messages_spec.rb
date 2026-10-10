@@ -10,7 +10,7 @@ RSpec.describe "Contact messages", type: :request do
 
   def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
-  def stored = message_queries.by_status(Blog::Types::MessageStatus["unread"])
+  def stored = message_queries.unread
 
   describe "a message" do
     it "is stored with the ends of every field trimmed" do

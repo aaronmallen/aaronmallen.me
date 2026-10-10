@@ -168,7 +168,7 @@ RSpec.describe "Admin screens", type: :feature do
       "journal" => "/admin/journal",
       "mastodon refused" => "/admin/auth/mastodon/callback",
       "messages" => "/admin/messages",
-      "message open" => "/admin/messages?open=#{Contact::Slice['repos.message_queries'].by_status('unread').first.id}",
+      "message open" => "/admin/messages?open=#{Contact::Slice['repos.message_queries'].unread.first.id}",
       "new post" => "/admin/posts/new",
       "new project" => "/admin/projects/new",
       "new task" => "/admin/tasks/new",

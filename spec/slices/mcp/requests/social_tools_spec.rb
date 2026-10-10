@@ -19,6 +19,8 @@ RSpec.describe "MCP social tools", type: :request do
 
   def content = JSON.parse(message)
 
+  def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
+
   def message = result.fetch("content").first.fetch("text")
 
   def refused? = result.fetch("isError", false)
@@ -501,13 +503,13 @@ RSpec.describe "MCP social tools", type: :request do
       call_tool("moderate_webmention", id: mention.id, verdict: "spam", reason: "link farm")
 
       expect(content).to eq("id" => mention.id, "status" => "spam")
-      expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+      expect(filed("spam", :spam_reason)).to eq(["link farm"])
     end
 
     it "refuses a verdict it does not know" do
       call_tool("moderate_webmention", id: mention.id, verdict: "pending")
 
-      expect(webmention_queries.by_status("pending").map(&:id)).to eq([mention.id])
+      expect(filed("pending", :id)).to eq([mention.id])
     end
 
     it "refuses an unknown ID" do

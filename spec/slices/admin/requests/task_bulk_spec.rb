@@ -418,7 +418,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       it "keeps the page while it still has rows" do
         lower_page_size(:admin, to: 1)
         tasks(3)
-        act("complete", [repo.in_list("next").last], page: 2)
+        act("complete", [repo.open_in_list("next").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next&page=2")
       end
@@ -426,7 +426,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
       it "steps back a page when the batch emptied the last one" do
         lower_page_size(:admin, to: 1)
         tasks(2)
-        act("complete", [repo.in_list("next").last], page: 2)
+        act("complete", [repo.open_in_list("next").last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/tasks?filter=next")
       end
@@ -452,7 +452,7 @@ RSpec.describe "Admin bulk task actions", :frozen_clock, type: :request do
         follow_redirect!
 
         expect(toast).to eq("Tick 100 tasks or fewer")
-        expect(repo.in_list("next").size).to eq(101)
+        expect(repo.open_in_list("next").size).to eq(101)
       end
 
       it "counts a repeated task once" do

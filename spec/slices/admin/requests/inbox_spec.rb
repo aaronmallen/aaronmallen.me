@@ -10,6 +10,8 @@ RSpec.describe "Admin inbox", type: :request do
 
   def arrived = Time.utc(2026, 9, 7, 17, 30)
 
+  def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
+
   def inbox
     get "/admin/inbox"
     page.all("[data-key-list] .inbox-row-title").map(&:text)
@@ -227,7 +229,7 @@ RSpec.describe "Admin inbox", type: :request do
           follow_redirect!
 
           expect(page).to have_css("[data-toast]", text: toast)
-          expect(webmention_queries.by_status(verdict).map(&:id)).to eq([mention.id])
+          expect(filed(verdict, :id)).to eq([mention.id])
           expect(inbox).to be_empty
         end
       end
@@ -235,14 +237,14 @@ RSpec.describe "Admin inbox", type: :request do
       it "keeps the reason it was spam" do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "Selling pills")
 
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["Selling pills"])
+        expect(filed("spam", :spam_reason)).to eq(["Selling pills"])
       end
 
       it "keeps no reason when it holds only Unicode spaces", :aggregate_failures do
         act("/admin/inbox/webmentions/#{mention.id}/moderate/spam", reason: "\u3000\u00a0")
 
         expect(last_response).to be_redirect
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(filed("spam", :spam_reason)).to eq([nil])
       end
 
       it "refuses to set it back to pending" do

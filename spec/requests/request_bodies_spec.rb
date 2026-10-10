@@ -16,7 +16,7 @@ RSpec.describe "A request body", type: :request do
     Rack::Test::UploadedFile.new(StringIO.new(bytes), "image/jpeg", original_filename: "a.jpg")
   end
 
-  def messages = Contact::Slice["repos.message_queries"].by_status(Blog::Types::MessageStatus["unread"])
+  def messages = Contact::Slice["repos.message_queries"].unread
 
   def rpc(size) = JSON.generate({ jsonrpc: "2.0", id: 1, method: "tools/list", params: { note: "a" * size } })
 

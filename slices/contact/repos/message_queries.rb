@@ -10,8 +10,6 @@ module Contact
 
       def by_id(id) = messages.combine(:tags).by_pk(id).one
 
-      def by_status(status) = messages.with_status(status).newest_first.to_a
-
       def count_from_visitor_since(visitor_hashes, time)
         messages.for_visitor(visitor_hashes).received_since(time).count
       end

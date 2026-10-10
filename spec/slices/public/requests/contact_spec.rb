@@ -20,7 +20,7 @@ RSpec.describe "Contact", type: :request do
 
   def sent_path = "/contact?sent=1"
 
-  def stored = message_queries.by_status(Blog::Types::MessageStatus["unread"])
+  def stored = message_queries.unread
 
   describe "the page" do
     before { get "/contact" }

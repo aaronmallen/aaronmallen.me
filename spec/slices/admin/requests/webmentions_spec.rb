@@ -6,6 +6,7 @@ RSpec.describe "Admin webmentions", type: :request do
   let(:target) { create(:post, :published, slug: "hello", title: "Hello") }
 
   def authors = page.all(".wm-author").map(&:text)
+  def filed(status, field) = Social::Slice["relations.webmentions"].with_status(status).pluck(field)
   def webmention_mutations = Social::Slice["repos.webmention_mutations"]
 
   def webmention_queries = Social::Slice["repos.webmention_queries"]
@@ -205,32 +206,32 @@ RSpec.describe "Admin webmentions", type: :request do
       it "approves a mention" do
         post "/admin/webmentions/#{mention.id}/approve", _csrf_token: admin_csrf_token
 
-        expect(webmention_queries.by_status("approved").map(&:id)).to eq([mention.id])
+        expect(filed("approved", :id)).to eq([mention.id])
       end
 
       it "marks a mention as spam" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token
 
-        expect(webmention_queries.by_status("spam").map(&:id)).to eq([mention.id])
+        expect(filed("spam", :id)).to eq([mention.id])
       end
 
       it "stores the note given with spam" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "link farm"
 
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq(["link farm"])
+        expect(filed("spam", :spam_reason)).to eq(["link farm"])
       end
 
       it "marks a mention as spam without a note" do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: ""
 
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(filed("spam", :spam_reason)).to eq([nil])
       end
 
       it "marks a mention as spam without a note when the note holds only Unicode spaces", :aggregate_failures do
         post "/admin/webmentions/#{mention.id}/spam", _csrf_token: admin_csrf_token, reason: "\u3000\u00a0"
 
         expect(last_response).to be_redirect
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(filed("spam", :spam_reason)).to eq([nil])
       end
 
       %w[approve ignore].each do |action|
@@ -246,7 +247,7 @@ RSpec.describe "Admin webmentions", type: :request do
           spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
           post "/admin/webmentions/#{spam.id}/#{action}", _csrf_token: admin_csrf_token
 
-          expect(webmention_queries.by_status(status).map(&:spam_reason)).to eq([nil])
+          expect(filed(status, :spam_reason)).to eq([nil])
         end
       end
 
@@ -254,7 +255,7 @@ RSpec.describe "Admin webmentions", type: :request do
         spam = create(:webmention, :spam, post: target, spam_reason: "link farm")
         post "/admin/webmentions/#{spam.id}/spam", _csrf_token: admin_csrf_token
 
-        expect(webmention_queries.by_status("spam").map(&:spam_reason)).to eq([nil])
+        expect(filed("spam", :spam_reason)).to eq([nil])
       end
 
       it "offers a note field beside Spam" do
@@ -274,7 +275,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "ignores a mention" do
         post "/admin/webmentions/#{mention.id}/ignore", _csrf_token: admin_csrf_token
 
-        expect(webmention_queries.by_status("ignored").map(&:id)).to eq([mention.id])
+        expect(filed("ignored", :id)).to eq([mention.id])
       end
 
       it "keeps the filter on the way back" do
@@ -328,7 +329,7 @@ RSpec.describe "Admin webmentions", type: :request do
           post "/admin/webmentions/#{mention.id}/#{verdict}", _csrf_token: admin_csrf_token
 
           expect(last_response.status).to eq(404)
-          expect(webmention_queries.by_status("pending").map(&:id)).to eq([mention.id])
+          expect(filed("pending", :id)).to eq([mention.id])
         end
       end
 

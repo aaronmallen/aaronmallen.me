@@ -423,7 +423,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     def roll_up_source(day, source, path: nil, views: 5, visitors: 3)
-      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_queries"].by_day(day)
+      create(:analytics_rollup, day:) unless Analytics::Slice["relations.analytics_rollups"].by_pk(day).exist?
       create(:analytics_rollup_source, day:, path:, source:, views:, visitors:)
     end
 
@@ -489,7 +489,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     def roll_up_device(day, device_class, path: nil, views: 5, visitors: 3)
-      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_queries"].by_day(day)
+      create(:analytics_rollup, day:) unless Analytics::Slice["relations.analytics_rollups"].by_pk(day).exist?
       create(:analytics_rollup_device, day:, path:, device_class:, views:, visitors:)
     end
 
@@ -547,7 +547,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     end
 
     def roll_up_scroll(day, depths, path: "/writing/hello")
-      create(:analytics_rollup, day:) unless Analytics::Slice["repos.analytics_rollup_queries"].by_day(day)
+      create(:analytics_rollup, day:) unless Analytics::Slice["relations.analytics_rollups"].by_pk(day).exist?
       depths.each do |scroll_depth, views|
         create(:analytics_rollup_scroll_depth, day:, path:, scroll_depth:, views:, visitors: views)
       end
@@ -648,7 +648,7 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
       end
 
       def roll_up_origin(factory, day, *, path: "/writing/hello", **)
-        roll_up(day, views: 50, visitors: 20) unless Analytics::Slice["repos.analytics_rollup_queries"].by_day(day)
+        roll_up(day, views: 50, visitors: 20) unless Analytics::Slice["relations.analytics_rollups"].by_pk(day).exist?
         create(factory, *, day:, path:, **)
       end
 

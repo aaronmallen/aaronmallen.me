@@ -21,13 +21,13 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
     it "writes nothing for a form with no title field" do
       send_to("/admin/tasks", filter: "next", task: { note: "" })
 
-      expect(repo.in_list("next")).to be_empty
+      expect(repo.open_in_list("next")).to be_empty
     end
 
     it "ignores a type left over from an older form" do
       send_to("/admin/tasks", filter: "next", task: { title: "Email the accountant", task_type_id: "1" })
 
-      expect(repo.in_list("next").map(&:title)).to eq(["Email the accountant"])
+      expect(repo.open_in_list("next").map(&:title)).to eq(["Email the accountant"])
     end
   end
 
@@ -37,7 +37,7 @@ RSpec.describe "Tasks", :frozen_clock, type: :request do
       create(:task, title: "old", position: 2)
       send_to("/admin/tasks", filter: "next", task: { title: "new" })
 
-      expect(repo.in_list("next").map(&:title)).to eq(%w[older old new])
+      expect(repo.open_in_list("next").map(&:title)).to eq(%w[older old new])
     end
   end
 

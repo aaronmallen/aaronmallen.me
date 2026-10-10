@@ -12,8 +12,6 @@ module Social
 
       def by_id(id) = webmentions.by_pk(id).one
 
-      def by_status(status) = webmentions.with_status(status).newest_first.to_a
-
       def count_by_post(post_ids) = tallied(webmentions.for_posts(post_ids).counts_by(:post_id), :post_id)
 
       def count_by_status = tallied(webmentions.counts_by(:status), :status)

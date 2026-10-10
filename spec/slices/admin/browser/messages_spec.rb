@@ -3,7 +3,8 @@
 RSpec.describe "Admin messages", type: :feature do
   let(:pane) { find(".msg-pane") }
   let(:i18n) { Admin::Slice["i18n"] }
-  let(:repo) { Contact::Slice["repos.message_queries"] }
+
+  def read = Contact::Slice["relations.messages"].with_status("read").pluck(:subject)
 
   before do
     create(:message, subject: "Newer", body: "The newer body", received_at: Time.now)
@@ -22,7 +23,7 @@ RSpec.describe "Admin messages", type: :feature do
     expect(pane).to have_css("h2", text: "Older")
     expect(pane).to have_no_css("h2", text: "Newer")
     expect(page).to have_no_css(".msg-item-title", text: "Older")
-    expect(repo.by_status("read").map(&:subject)).to eq(%w[Older])
+    expect(read).to eq(%w[Older])
   end
 
   it "moves the open message back to unread from the pane" do
@@ -38,6 +39,6 @@ RSpec.describe "Admin messages", type: :feature do
 
     expect(message).to eq(i18n.t("ui.components.message_letter.confirm_delete"))
     expect(page).to have_css(".toast", text: "Message deleted")
-    expect(repo.by_status("read")).to be_empty
+    expect(read).to be_empty
   end
 end

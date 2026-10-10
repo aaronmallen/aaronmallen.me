@@ -130,7 +130,7 @@ RSpec.describe "Admin bulk task actions", type: :feature do
       bulk("Move", to: "Someday")
 
       expect(page).to have_css("[data-toast] .toast", text: "Moved 1 task to someday")
-      expect(repo.in_list("someday").map(&:title)).to contain_exactly("first", "elsewhere")
+      expect(repo.open_in_list("someday").map(&:title)).to contain_exactly("first", "elsewhere")
     end
 
     it "tags rather than finishes when Enter goes in the tag field", :aggregate_failures do

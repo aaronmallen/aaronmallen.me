@@ -18,8 +18,6 @@ module Analytics
 
       include Deps[event_queries: "repos.analytics_event_queries"]
 
-      def by_day(day) = analytics_rollups.by_pk(day).one
-
       def days(from:, to:) = analytics_rollups.between(from, to).oldest_first.to_a
 
       def newest_day = analytics_rollups.newest_day

@@ -244,7 +244,7 @@ RSpec.describe "Admin bulk message actions", type: :request do
       it "keeps the page while it still has rows" do
         lower_page_size(:admin, to: 1)
         messages(3)
-        act("read", [repo.by_status("unread").last], page: 2)
+        act("read", [repo.unread.last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/messages?status=unread&page=2")
       end
@@ -252,7 +252,7 @@ RSpec.describe "Admin bulk message actions", type: :request do
       it "steps back a page when the batch emptied the last one" do
         lower_page_size(:admin, to: 1)
         messages(2)
-        act("read", [repo.by_status("unread").last], page: 2)
+        act("read", [repo.unread.last], page: 2)
 
         expect(last_response.headers["location"]).to eq("/admin/messages?status=unread")
       end

@@ -1,15 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin bulk message actions", type: :feature do
-  let(:repo) { Contact::Slice["repos.message_queries"] }
-
   def acts = find("[data-bulk-acts]", visible: :all)
 
   def all_box = find("[data-bulk-all] input")
 
   def box(subject) = find(".msg-item", text: subject).find("input[name='ids[]']")
 
-  def subjects(status) = repo.by_status(status).map(&:subject)
+  def subjects(status) = Contact::Slice["relations.messages"].with_status(status).newest_first.pluck(:subject)
 
   before do
     %w[first second third].each_with_index do |subject, index|

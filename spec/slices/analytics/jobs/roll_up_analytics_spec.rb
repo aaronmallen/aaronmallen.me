@@ -57,6 +57,8 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
 
   def roll_up = described_class.new.perform
 
+  def rolled(on) = rollup_repo.analytics_rollups.by_pk(on).one
+
   def rollup(on, **) = create(:analytics_rollup, day: on, **)
 
   def rollup_repo = Analytics::Slice["repos.analytics_rollup_queries"]
@@ -86,7 +88,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(visitor_hash:, read_seconds: 30)
       roll_up
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 2, visitors: 1, read_seconds: 120)
+      expect(rolled(day)).to have_attributes(views: 2, visitors: 1, read_seconds: 120)
     end
 
     it "stores the per-path figures" do
@@ -338,20 +340,20 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       create(:analytics_event, occurred_at: Blog::TimeZone.day_start(today))
       roll_up
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 0)
+      expect(rolled(day)).to have_attributes(views: 0)
     end
 
     it "counts the first moment of the day" do
       create(:analytics_event, occurred_at: Blog::TimeZone.day_start(day))
       roll_up
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 1)
+      expect(rolled(day)).to have_attributes(views: 1)
     end
 
     it "stores a day with no events" do
       roll_up
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 0, visitors: 0, read_seconds: 0)
+      expect(rolled(day)).to have_attributes(views: 0, visitors: 0, read_seconds: 0)
     end
   end
 
@@ -408,7 +410,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     it "stores the same totals" do
       2.times { roll_up }
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 1, visitors: 1)
+      expect(rolled(day)).to have_attributes(views: 1, visitors: 1)
     end
 
     it "stores the same rows", :aggregate_failures do
@@ -426,7 +428,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(on: day - 1)
       roll_up
 
-      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 1)
+      expect(rolled(day - 1)).to have_attributes(views: 1)
     end
 
     it "rolls up yesterday in the same run" do
@@ -435,14 +437,14 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event
       roll_up
 
-      expect(rollup_repo.by_day(day)).to have_attributes(views: 1)
+      expect(rolled(day)).to have_attributes(views: 1)
     end
 
     it "rolls up a day the events ran dry on" do
       rollup(day - 2)
       roll_up
 
-      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 0, visitors: 0)
+      expect(rolled(day - 1)).to have_attributes(views: 0, visitors: 0)
     end
 
     it "fills every day a run that skipped nights left behind" do
@@ -458,14 +460,14 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(on: day - 3)
       roll_up
 
-      expect(rollup_repo.by_day(day - 100)).to be_nil
+      expect(rolled(day - 100)).to be_nil
     end
 
     it "leaves a day it already rolled up alone" do
       rollup(day - 1, views: 5, visitors: 3)
       roll_up
 
-      expect(rollup_repo.by_day(day - 1)).to have_attributes(views: 5, visitors: 3)
+      expect(rolled(day - 1)).to have_attributes(views: 5, visitors: 3)
     end
   end
 
@@ -488,14 +490,14 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
       event(on: today - 91)
       roll_up
 
-      expect(rollup_repo.by_day(today - 91)).to have_attributes(views: 9)
+      expect(rolled(today - 91)).to have_attributes(views: 9)
     end
 
     it "rolls a day up before the prune takes its events" do
       event(on: today - 91)
       roll_up
 
-      expect(rollup_repo.by_day(today - 91)).to have_attributes(views: 1)
+      expect(rolled(today - 91)).to have_attributes(views: 1)
     end
 
     it "deletes the whole day that falls out of the window" do

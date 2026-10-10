@@ -232,7 +232,7 @@ RSpec.describe "Admin messages", type: :request do
 
     describe "a row" do
       let(:arrived) { Time.utc(2026, 9, 7, 17, 30) }
-      let(:id) { repo.by_status("unread").first.id }
+      let(:id) { repo.unread.first.id }
 
       before do
         create(:message, reply_to: "ada@example.com", subject: "A question", body: "How?", received_at: arrived)

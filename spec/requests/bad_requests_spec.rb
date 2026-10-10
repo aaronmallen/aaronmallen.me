@@ -51,7 +51,7 @@ RSpec.describe "A request the site cannot read", type: :request do
     it_behaves_like "a bad request"
 
     it "stores no message" do
-      expect(Contact::Slice["repos.message_queries"].by_status(Blog::Types::MessageStatus["unread"])).to be_empty
+      expect(Contact::Slice["repos.message_queries"].unread).to be_empty
     end
   end
 

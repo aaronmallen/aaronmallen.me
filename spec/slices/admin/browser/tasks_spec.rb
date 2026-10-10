@@ -121,7 +121,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "creating a task from the dialog" do
-    let(:created) { repo.in_list("someday").find { it.title == "Call the #plumber" } }
+    let(:created) { repo.open_in_list("someday").find { it.title == "Call the #plumber" } }
 
     before { create_task("Call the #plumber", list: "someday", note: "the sink leaks", tags: "home, chores") }
 
@@ -142,7 +142,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "the key" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { "##{task.id}" }
 
     describe "clicking it" do
@@ -238,7 +238,7 @@ RSpec.describe "Admin tasks", type: :feature do
   describe "confirming a cancel" do
     let(:cancel) { translate("ui.components.tasks.controls.cancel") }
     let(:message) { translate("ui.components.tasks.controls.confirm_cancel", task: "Email the accountant") }
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
 
     def focused_label = evaluate_script("document.activeElement.getAttribute('aria-label')")
 
@@ -410,7 +410,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "opening a task" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
     let(:key) { "##{task.id}" }
 
     def sideways?(selector) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{selector})")
@@ -474,7 +474,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "commenting from the panel" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
     let(:comments) { Tasks::Slice["relations.task_comments"] }
 
     def bodies = comments.to_a.map { it[:body] }
@@ -525,7 +525,7 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "writing Markdown in a task" do
-    let(:task) { repo.in_list("next").find { it.title == "Email the accountant" } }
+    let(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
     let(:unsafe) { "<script>window.ran = true</script>\n\n<details><summary>M</summary>x</details>" }
 
     def add_label = translate("ui.components.comment_thread.add_label")
@@ -763,7 +763,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_no_css("dialog#task-create[open]")
       expect(active).to eq("Email the accountant")
-      expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+      expect(repo.open_in_list("next").map(&:title)).to include("Email the accountant")
     end
 
     it "keeps the X after the swap to the edit form" do
@@ -782,7 +782,7 @@ RSpec.describe "Admin tasks", type: :feature do
 
       expect(page).to have_no_css("dialog#task-create[open]")
       expect(active).to eq("Email the accountant")
-      expect(repo.in_list("next").map(&:title)).to include("Email the accountant")
+      expect(repo.open_in_list("next").map(&:title)).to include("Email the accountant")
     end
 
     it "gives the Create Task dialog back its X once closed" do

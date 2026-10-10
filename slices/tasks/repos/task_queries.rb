@@ -36,8 +36,6 @@ module Tasks
 
       def finished_counts(day) = tasks.finished_counts(day).one.to_h
 
-      def in_list(list) = with_details.in_list(list).in_order.to_a
-
       def in_progress = all_open.select(&:in_progress?)
 
       def in_sprint(sprint_id) = with_details.for_sprint(sprint_id).in_order.to_a
