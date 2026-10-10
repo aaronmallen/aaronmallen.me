@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config]
 issue: AA-353
-amended: [AA-797]
+amended: [AA-797, "#953"]
 tags: [settings, environment, yaml, erb, secrets, fork, hanami-settings-stores]
 ---
 
@@ -47,9 +47,9 @@ A key inside a file opts into the environment through ERB, one line per variable
 `config/settings.rb` takes that `nil` as unset: `Value` keeps it, and a throttle falls back to its default. AA-797
 added this rule.
 
-A fork changes `default.yml`, or sets `OWNER_GITHUB_ID` to change only whose GitHub account signs in. A deploy sets
-only variables: the secrets, where Postgres and Redis answer, and `PROXY_TRUSTED_PROXIES`. `.env.example` lists
-them all.
+A fork changes `default.yml`. No setting names whose GitHub account signs in: [ADR 0131][0131] keeps that in the
+database, and #953 took the old variable out of this record. A deploy sets only variables: the secrets, where
+Postgres and Redis answer, and `PROXY_TRUSTED_PROXIES`. `.env.example` lists them all.
 
 ## Alternatives
 
@@ -83,4 +83,5 @@ sees no secrets.
 
 `FileStore` raises when its file is missing, so the app boots only as `development`, `test` or `production`.
 
+[0131]: 0131-keep-owner-identities-in-the-database-and-add-the-first-by-hand.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
