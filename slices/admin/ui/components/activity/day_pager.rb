@@ -7,9 +7,7 @@ module Admin
     module Components
       module Activity
         class DayPager < Component
-          LABEL = "ui.components.pager.label"
-          NEWER = "ui.components.pager.newer"
-          OLDER = "ui.components.pager.older"
+          Days = Data.define(:newer_query, :older_query)
 
           prop :from, Blog::Types::Date
           prop :newer, Blog::Types::Date.optional
@@ -19,12 +17,7 @@ module Admin
           prop :types, Blog::Types::Array.of(Blog::Types::String)
 
           def view_template
-            return unless @newer || @older
-
-            nav(class: "pager", aria: { label: t(LABEL) }) do
-              link(@newer, rel: "prev", label: NEWER, icon: "fa-arrow-left")
-              link(@older, rel: "next", label: OLDER, icon: "fa-arrow-right")
-            end
+            Pager(page: Days.new(newer_query: @newer, older_query: @older), href: method(:href))
           end
 
           private
@@ -34,14 +27,6 @@ module Admin
             query[:day] = day.iso8601 unless day == @to
 
             "#{path(:admin_activity)}?#{Rack::Utils.build_nested_query(query)}"
-          end
-
-          def link(day, rel:, label:, icon:)
-            return unless day
-
-            a(class: ["pager-link", rel], href: href(day), rel:) do
-              IconLabel(icon: ["fa-solid", icon]) { t(label) }
-            end
           end
         end
       end

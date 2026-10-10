@@ -5,7 +5,8 @@ module Blog
     module Components
       class Pager < Component
         prop :page, Blog::Types::Interface(:newer_query, :older_query)
-        prop :route, Blog::Types::Symbol
+        prop :route, Blog::Types::Symbol.optional, default: nil
+        prop :href, Blog::Types::Interface(:call).optional, default: nil
         prop :params, Blog::Types::Hash, default: -> { {} }
 
         def view_template
@@ -19,10 +20,12 @@ module Blog
 
         private
 
+        def href(query) = @href ? @href.call(query) : path(@route, **@params, **query)
+
         def link(query, rel:, label_key:, icon:)
           return unless query
 
-          a(class: ["pager-link", rel], href: path(@route, **@params, **query), rel:) do
+          a(class: ["pager-link", rel], href: href(query), rel:) do
             IconLabel(icon: ["fa-solid", icon]) { t(label_key) }
           end
         end
