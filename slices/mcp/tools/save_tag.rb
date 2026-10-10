@@ -49,7 +49,7 @@ module MCP
         def saved(result, id)
           case result
             in Success(tag) then answer(id: tag.id, name: tag.name, color: tag.color)
-            in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
+            in Failure[:invalid, errors] then invalid(errors, MESSAGES)
             in Failure(:not_found) then refuse(missing(id))
             else refuse(UNSAVED)
           end

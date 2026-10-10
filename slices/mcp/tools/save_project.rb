@@ -84,7 +84,7 @@ module MCP
         def saved(result, id)
           case result
             in Success(project) then answer(ListProjects.summary(project))
-            in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
+            in Failure[:invalid, errors] then invalid(errors, MESSAGES)
             in Failure(:not_found) then refuse(API::Helpers::Wording.missing("project", id))
             else refuse(UNSAVED)
           end

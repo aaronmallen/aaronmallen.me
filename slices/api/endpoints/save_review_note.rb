@@ -3,10 +3,7 @@
 module API
   module Endpoints
     class SaveReviewNote < Endpoint
-      COMPLAINTS = {
-        Blog::Contract::BLANK => "body needs a character that is not a space",
-        Blog::Contract::CONTROL => "body holds a control character",
-      }.freeze
+      COMPLAINTS = { body: { Blog::Contract::BLANK => "body needs a character that is not a space" } }.freeze
       UNSAVED = "could not save the review note"
 
       SCHEMA = {
@@ -37,7 +34,7 @@ module API
 
         case save_review_note.call(body, period:, on:)
           in Success(note) then Success(answered(note))
-          in Failure[:invalid, errors] then invalid(reasons(errors))
+          in Failure[:invalid, errors] then invalid(Helpers::Wording.complaints(errors, COMPLAINTS, named: true))
           else failed(UNSAVED)
         end
       end
@@ -48,10 +45,6 @@ module API
         review_range.call(period: note.period, on: note.starts_on).to_h => { from:, to: }
 
         { period: note.period, from: from.iso8601, to: to.iso8601, **serialized(Serializers::ReviewNote, note) }
-      end
-
-      def reasons(errors)
-        errors.to_h { |field, tokens| [field, tokens.map { COMPLAINTS.fetch(it) { "#{field} #{it}" } }] }
       end
     end
   end

@@ -15,7 +15,7 @@ module API
           in Success[*mentions] then Success(webmentions: serialized(Serializers::Webmention, mentions))
           in Failure[:record, id, :not_found] then invalid(ids: [Helpers::Wording.missing("webmention", id)])
           in Failure[:record, id, _] then failed(format(UNCHANGED, id))
-          in Failure[:invalid, errors] then invalid(flat(errors))
+          in Failure[:invalid, errors] then rejected(flat(errors), Blog::Constants::EMPTY_HASH)
           else failed(Helpers::Wording::UNSAVED)
         end
       end

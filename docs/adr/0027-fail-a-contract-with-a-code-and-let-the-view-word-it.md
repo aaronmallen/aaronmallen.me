@@ -3,9 +3,9 @@ id: "0027"
 title: Fail a contract with a code and let the view word it
 status: active
 created: 2026-09-28
-area: [lib, admin, public, mcp]
+area: [lib, admin, api, public, mcp]
 issue: AA-662
-amended: ["#17", "#255", "#606"]
+amended: ["#17", "#255", "#606", "#960"]
 tags: [contracts, validation, errors, i18n, dry-validation, forms]
 ---
 
@@ -48,8 +48,9 @@ places:
   `Public::UI::Components::ContactFieldError`, maps field and code to a relative i18n key in its `MESSAGES`
   table. The key resolves under that component's scope in its slice's locale file. A code with no row falls back
   to `ui.field_error.invalid`, "Check this field.", in `config/i18n/shared/en.yml`.
-- `MCP::Tools::SuggestEdits` and `MCP::Tools::WritePostSeo` word the codes for Claude in their `COMPLAINTS`
-  tables.
+- MCP tools and API endpoints word the codes through `API::Helpers::Wording`, which #960 made the one place they
+  do it. Each holds a table of its own codes, and `Wording::SHARED` words the codes every contract can raise. A
+  code with neither falls back to "is not valid", never the bare code.
 - The MCP OAuth operations read which field failed and answer with the protocol's codes, such as
   `invalid_request` and `invalid_grant`, which no person reads.
 
@@ -71,9 +72,10 @@ handed in from outside. The eight share a base in `lib/blog/ui/field_error.rb` i
 
 One contract serves a form and an MCP tool, and each words the same code for its own reader.
 
-A new rule touches three places: the contract, the form's `MESSAGES` table and the slice's locale file. Miss the
-row and the form shows "Check this field." while every spec passes. Miss the locale key and the page shows a
-missing translation, which fails any request spec that renders that page (#606).
+A new rule touches three places: the contract, the form's `MESSAGES` table and the slice's locale file. Miss
+the row and the form shows "Check this field.", or an MCP tool "is not valid" (#960), while every spec passes.
+Miss the locale key and the page shows a missing translation, which fails any request spec that renders that page
+(#606).
 
 A field shows only its first code. A field failing two checks names one, and fixing it can bring up the next.
 

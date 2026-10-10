@@ -219,6 +219,12 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       expect(project_queries.live).to be_empty
     end
 
+    it "refuses a name holding a control character, and says so" do
+      call_tool("save_project", name: "Pick\u0007a queue", visibility: "public")
+
+      expect(message).to eq("name: holds a control character")
+    end
+
     it "keeps a name with Unicode spaces around real words as typed" do
       call_tool("save_project", name: "\u2003Pick a queue\u00a0", visibility: "public")
       call_tool("read_project", id: content.fetch("id"))
@@ -299,6 +305,12 @@ RSpec.describe "MCP project and work entry tools", type: :request do
       call_tool("add_work_entry", org: " ", role: "Engineer", from_year: 2019)
 
       expect(message).to eq("org: name the organization")
+    end
+
+    it "refuses a role holding a control character, and says so" do
+      call_tool("add_work_entry", org: "Acme", role: "Engi\u0007neer", from_year: 2019)
+
+      expect(message).to eq("role: holds a control character")
     end
   end
 

@@ -46,6 +46,10 @@ module MCP
           end
         end
 
+        def invalid(errors, table)
+          refuse(API::Helpers::Wording.summary(API::Helpers::Wording.complaints(errors, table)))
+        end
+
         def page(number, server_context) = Blog::Structs::Page.new(number:, size: dep(:page_size, server_context))
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)

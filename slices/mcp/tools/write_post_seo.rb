@@ -3,9 +3,7 @@
 module MCP
   module Tools
     class WritePostSeo < Base
-      COMPLAINTS = { Blog::Contract::CONTROL => Complaints::CONTROL }.freeze
       FIELDS = %i[og_image_url og_title].freeze
-      UNLINKED = "needs a URL starting with http:// or https://"
       UNSAVED = "could not save the social card fields"
 
       SCHEMA = {
@@ -37,7 +35,7 @@ module MCP
         private
 
         def complaint(errors)
-          errors.map { |field, (token)| "#{field} #{COMPLAINTS.fetch(token, UNLINKED)}" }.join("; ")
+          errors.map { |field, (token)| "#{field} #{API::Endpoints::Posts.field_reason(field, token)}" }.join("; ")
         end
 
         def seo(post)

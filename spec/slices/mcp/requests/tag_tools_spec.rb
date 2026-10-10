@@ -201,6 +201,12 @@ RSpec.describe "MCP tag tools", type: :request do
       expect(message).to eq("name: a tag is lowercase words joined by hyphens")
     end
 
+    it "refuses a name holding a control character in words" do
+      call_tool("save_tag", scope: "public", name: "ru\u0007by")
+
+      expect(message).to eq("name: holds a control character")
+    end
+
     it "names one rule as one" do
       Tasks::Slice["operations.save_task_rule"].call({ pattern: "rails/*", tags: "ruby" })
       id = tag_queries.all_in("private").first.id

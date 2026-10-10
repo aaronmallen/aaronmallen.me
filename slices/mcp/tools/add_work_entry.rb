@@ -37,7 +37,7 @@ module MCP
 
           case dep(:add_work_entry, server_context).call(params)
             in Success(entry) then answer(ListWorkEntries.summary(entry))
-            in Failure[:invalid, errors] then refuse(Complaints.call(errors, MESSAGES))
+            in Failure[:invalid, errors] then invalid(errors, MESSAGES)
             else refuse(UNSAVED)
           end
         end

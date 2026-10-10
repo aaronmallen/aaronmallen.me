@@ -1635,6 +1635,7 @@ en:
             format: "Pick one of the six colours."
           name:
             blank: "Give the tag a name first."
+            control: "Take out the control characters."
             format: "A tag is lowercase words joined by hyphens."
             taken: "Another tag already holds that name."
         editor:

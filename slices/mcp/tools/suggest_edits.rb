@@ -10,11 +10,10 @@ module MCP
       SOCIAL_POST = "social_post"
       UNSTORED = "could not store the edits"
 
-      COMPLAINTS = {
+      COMPLAINTS = API::Helpers::Wording::SHARED.merge(
         Blog::Contract::BLANK => "needs a character that is not a space",
-        Blog::Contract::CONTROL => Complaints::CONTROL,
         LONG => "is too long",
-      }.freeze
+      ).freeze
 
       EDIT = {
         type: "object",
@@ -73,7 +72,7 @@ module MCP
           faults.flat_map { |index, fields| fields.map { |field, (token)| fault(index, field, token) } }.join("; ")
         end
 
-        def fault(index, field, token) = "edit #{index + 1}: #{field} #{COMPLAINTS.fetch(token, token)}"
+        def fault(index, field, token) = "edit #{index + 1}: #{field} #{API::Helpers::Wording.plain(token, COMPLAINTS)}"
 
         def for_post(id, edits, server_context)
           if dep(:post_queries, server_context).by_id(id).nil?

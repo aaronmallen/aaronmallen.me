@@ -4,6 +4,7 @@ module API
   module Helpers
     module Wording
       CONTROL = "holds a control character"
+      INVALID = "is not valid"
       TAG_SEPARATOR = ","
       UNSAVED = "could not save the change"
 
@@ -22,10 +23,11 @@ module API
 
       def missing(noun, id, by: "ID") = "no #{noun} has the #{by} #{id}"
 
+      def plain(code, reasons = SHARED) = reasons.fetch(code, INVALID)
+
       def reason(table, field, code, named: false)
         table.fetch(field, Blog::Constants::EMPTY_HASH).fetch(code) do
-          plain = SHARED.fetch(code, code)
-          named ? "#{field} #{plain}" : plain
+          named ? "#{field} #{plain(code)}" : plain(code)
         end
       end
 

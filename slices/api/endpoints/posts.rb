@@ -6,7 +6,6 @@ module API
     module Posts
       BULK = Helpers::Schema.bulk("blog posts")
       ID = Helpers::Schema::ID
-      INVALID = "is not valid"
       TAG = { type: "string", description: "one public tag, lowercase words" }.freeze
       URL = "needs a URL starting with http:// or https://"
 
@@ -40,7 +39,7 @@ module API
 
       module_function
 
-      def field_reason(field, code) = FIELD_REASONS.dig(field, code) || REASONS.fetch(code, INVALID)
+      def field_reason(field, code) = FIELD_REASONS.dig(field, code) || Helpers::Wording.plain(code, REASONS)
 
       def form_complaints(errors) = errors.to_h { |field, (code)| [field, ["#{field} #{field_reason(field, code)}"]] }
 

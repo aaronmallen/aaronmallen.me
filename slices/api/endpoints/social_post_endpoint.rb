@@ -59,7 +59,7 @@ module API
 
       def refusals(errors, params)
         errors.to_h do |field, (token)|
-          said = "#{field} #{COMPLAINTS.fetch(token, token)}"
+          said = "#{field} #{Helpers::Wording.plain(token, COMPLAINTS)}"
           [field, [token == TOO_LONG ? "#{said}: #{overruns(params)}" : said]]
         end
       end
