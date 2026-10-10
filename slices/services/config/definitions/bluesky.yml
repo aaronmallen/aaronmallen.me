@@ -1,5 +1,4 @@
 name: Bluesky
-icon: fa-brands fa-bluesky
 group: social
 auth: credentials
 multiple: true

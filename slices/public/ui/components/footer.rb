@@ -5,9 +5,9 @@ module Public
     module Components
       class Footer < Component
         PROFILES = {
-          github: %w[fa-github .networks.github].freeze,
-          bluesky: %w[fa-bluesky .networks.bluesky].freeze,
-          mastodon: %w[fa-mastodon .networks.mastodon].freeze,
+          github: ["fa-brands fa-github", ".networks.github"].freeze,
+          bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".networks.bluesky"].freeze,
+          mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".networks.mastodon"].freeze,
         }.freeze
 
         prop :year, Blog::Types::Integer
@@ -62,7 +62,7 @@ module Public
 
         def profile_link(href, icon, label_key)
           a(class: "site-footer-link", href:, rel: "me") do
-            IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
+            IconLabel(icon:) { t(label_key) }
           end
         end
       end

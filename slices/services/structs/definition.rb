@@ -10,7 +10,7 @@ module Services
       end
 
       def initialize(
-        id:, name:, icon:, group:, auth:,
+        id:, name:, group:, auth:, icon: Blog::Constants::NETWORK_ICONS.fetch(id),
         account: nil, dashboard: nil, env: {}, fields: [], jobs: [], multiple: false, powers: [], scopes: []
       )
         super

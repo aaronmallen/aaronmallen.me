@@ -5,9 +5,9 @@ module Public
     module Components
       module Posts
         class Syndication < Component
-          NETWORKS = {
-            Blog::Types::NetworkName["bluesky"] => %w[fa-bluesky .networks.bluesky].freeze,
-            Blog::Types::NetworkName["mastodon"] => %w[fa-mastodon .networks.mastodon].freeze,
+          LABELS = {
+            Blog::Types::NetworkName["bluesky"] => ".networks.bluesky",
+            Blog::Types::NetworkName["mastodon"] => ".networks.mastodon",
           }.freeze
 
           prop :urls, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::String)
@@ -24,10 +24,8 @@ module Public
           private
 
           def link(network, url)
-            icon, label_key = NETWORKS[network]
-
             a(class: "u-syndication", href: url) do
-              IconLabel(icon: ["fa-brands", icon]) { t(label_key) }
+              IconLabel(icon: Blog::Constants::NETWORK_ICONS[network]) { t(LABELS[network]) }
             end
           end
         end

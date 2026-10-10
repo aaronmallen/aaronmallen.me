@@ -12,9 +12,9 @@ module Public
             %w[.hobbies.games.name .hobbies.games.body].freeze,
           ].freeze
           PROFILES = {
-            github: %w[fa-github .cta.links.github].freeze,
-            mastodon: %w[fa-mastodon .cta.links.mastodon].freeze,
-            bluesky: %w[fa-bluesky .cta.links.bluesky].freeze,
+            github: ["fa-brands fa-github", ".cta.links.github"].freeze,
+            mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".cta.links.mastodon"].freeze,
+            bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".cta.links.bluesky"].freeze,
           }.freeze
 
           prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
@@ -81,7 +81,7 @@ module Public
           end
 
           def profile(href, icon, key)
-            li { link(href, "fa-brands #{icon}", t(key)) }
+            li { link(href, icon, t(key)) }
           end
 
           def prose

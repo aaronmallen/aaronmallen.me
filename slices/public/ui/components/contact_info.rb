@@ -6,9 +6,9 @@ module Public
       class ContactInfo < Component
         HANAKAI_URL = "https://hanakai.org"
         PROFILES = {
-          github: %w[fa-github .elsewhere.github].freeze,
-          mastodon: %w[fa-mastodon .elsewhere.mastodon].freeze,
-          bluesky: %w[fa-bluesky .elsewhere.bluesky].freeze,
+          github: ["fa-brands fa-github", ".elsewhere.github"].freeze,
+          mastodon: [Blog::Constants::NETWORK_ICONS.fetch("mastodon"), ".elsewhere.mastodon"].freeze,
+          bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".elsewhere.bluesky"].freeze,
         }.freeze
 
         def view_template
@@ -44,7 +44,7 @@ module Public
 
         def profile(href, icon, key)
           li do
-            a(href:) { IconLabel(icon: ["fa-brands", icon]) { t(key) } }
+            a(href:) { IconLabel(icon:) { t(key) } }
           end
         end
 

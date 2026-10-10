@@ -5,10 +5,6 @@ module Admin
     module Components
       module People
         class Finder < Component
-          ICONS = {
-            Blog::Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
-            Blog::Types::NetworkName["mastodon"] => "fa-brands fa-mastodon",
-          }.freeze
           ID = "person-finder"
           INPUT_ID = "#{ID}-q".freeze
           TITLE_ID = "#{ID}-title".freeze
@@ -46,7 +42,7 @@ module Admin
                 },
               )
               span do
-                Icon(ICONS.fetch(network))
+                Icon(Blog::Constants::NETWORK_ICONS.fetch(network))
                 plain network_label(network)
               end
             end

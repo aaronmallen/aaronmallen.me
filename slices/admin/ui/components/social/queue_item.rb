@@ -12,10 +12,6 @@ module Admin
             [".replies", "fa-regular fa-comment", :reply_count],
           ].freeze
           HOUR = 3600
-          NETWORK_ICONS = {
-            Blog::Types::NetworkName["bluesky"] => "fa-brands fa-bluesky",
-            Blog::Types::NetworkName["mastodon"] => "fa-brands fa-mastodon",
-          }.freeze
           POSTED = Blog::Types::SocialPostStatus["posted"]
 
           prop :social_post, Blog::Types::Instance(ROM::Struct)

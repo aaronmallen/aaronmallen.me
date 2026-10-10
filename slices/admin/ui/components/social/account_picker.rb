@@ -43,7 +43,7 @@ module Admin
               class: ["compose-chip", account.network], title: account.label, hidden: true,
               data: { social_chip: account.id, handle: account.handle },
             ) do
-              Icon(QueueItem::NETWORK_ICONS.fetch(account.network))
+              Icon(Blog::Constants::NETWORK_ICONS.fetch(account.network))
               span(class: "compose-chip-handle") { account.handle }
               span(class: "compose-chip-host", hidden: true) { account.host } if account.host
               remove(account)
@@ -77,7 +77,7 @@ module Admin
             label = accounts.first.network_label
             div(class: ["compose-account-group", network], role: "group", aria: { label: }) do
               div(class: "compose-account-group-head") do
-                IconLabel(icon: QueueItem::NETWORK_ICONS.fetch(network)) { label }
+                IconLabel(icon: Blog::Constants::NETWORK_ICONS.fetch(network)) { label }
                 group_link
               end
               accounts.each { account(it) }

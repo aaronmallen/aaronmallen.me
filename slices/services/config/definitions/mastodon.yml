@@ -1,5 +1,4 @@
 name: Mastodon
-icon: fa-brands fa-mastodon
 group: social
 auth: oauth
 multiple: true

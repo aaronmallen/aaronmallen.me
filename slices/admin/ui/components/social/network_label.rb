@@ -21,7 +21,7 @@ module Admin
           private
 
           def content
-            IconLabel(icon: QueueItem::NETWORK_ICONS.fetch(@network)) do
+            IconLabel(icon: Blog::Constants::NETWORK_ICONS.fetch(@network)) do
               @failing ? t(".failed", network: @text) : @text
             end
           end

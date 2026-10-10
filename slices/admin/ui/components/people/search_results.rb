@@ -44,7 +44,7 @@ module Admin
             div(class: "person-result-body") do
               p(class: "person-result-name") { name(account) }
               p(class: "person-result-handle #{@network}") do
-                Icon(Finder::ICONS.fetch(@network))
+                Icon(Blog::Constants::NETWORK_ICONS.fetch(@network))
                 plain handle(account)
               end
             end
