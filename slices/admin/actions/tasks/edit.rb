@@ -3,18 +3,13 @@
 module Admin
   module Actions
     module Tasks
-      class Edit < Action
-        include Redirect
-        include Deps[current_sprint: "tasks.operations.current_sprint", task_queries: "tasks.repos.task_queries"]
+      class Edit < Show
+        FRESH = { errors: Blog::Constants::EMPTY_HASH, values: nil }.freeze
+        PARTS = %i[task timeline forms linking].freeze
 
-        def handle(request, response)
-          halt 500 if current_sprint.call.failure?
+        private
 
-          task = task_queries.detailed(record_id(request))
-          not_found(response) unless task
-
-          response.render(view, task:, errors: Blog::Constants::EMPTY_HASH, values: nil, **return_to(request))
-        end
+        def shown(page) = page.slice(*PARTS).merge(FRESH)
       end
     end
   end

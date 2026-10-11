@@ -14,6 +14,7 @@ module Admin
 
         include Redirect
         include Deps[
+          build_task_page: "operations.build_task_page",
           edit_view: "ui.views.tasks.edit",
           save_task: "tasks.operations.save_task",
           task_queries: "tasks.repos.task_queries",
@@ -66,13 +67,13 @@ module Admin
         end
 
         def invalid(request, response, id, fields, errors)
-          task = task_queries.detailed(id) || halt(404)
+          page = build_task_page.call(id).value_or { halt 404 }
           values = FIELDS.to_h { [it, Blog::Types::Text[fields[it]]] }
           credits = credits(fields[:contributors])
           values[:contributors] = credits if credits
 
           response.status = 422
-          response.render(edit_view, task:, errors:, values:, **return_to(request))
+          response.render(edit_view, **page.slice(*Edit::PARTS), errors:, values:, **return_to(request))
         end
       end
     end

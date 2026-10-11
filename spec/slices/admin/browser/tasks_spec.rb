@@ -11,6 +11,11 @@ RSpec.describe "Admin tasks", type: :feature do
     confirm_yes
   end
 
+  def close_panel
+    panel.find("[data-task-read] .task-drawer-close").click
+    page.assert_no_selector("dialog#task-panel[open]")
+  end
+
   def complete_task(scope)
     done = translate("ui.components.tasks.complete_form.complete")
 
@@ -28,6 +33,8 @@ RSpec.describe "Admin tasks", type: :feature do
     end
   end
 
+  def edit_form = find("dialog#task-panel[open] [data-task-edit]")
+
   def modal = find("dialog#task-create[open]")
 
   def modal_x = "button[aria-label='#{translate('ui.components.dialog.close')}']"
@@ -41,12 +48,12 @@ RSpec.describe "Admin tasks", type: :feature do
   def open_editor(title)
     open_task(title)
     panel.click_link(translate("ui.views.tasks.show.edit"))
-    modal.assert_selector("[data-task-edit]")
+    edit_form
   end
 
   def open_task(title)
     find(".task", text: title).find(".task-title").click
-    panel.assert_selector("h1", exact_text: title)
+    panel.assert_selector("[data-task-read] h1", exact_text: title)
     settle("#task-panel")
   end
 
@@ -64,6 +71,7 @@ RSpec.describe "Admin tasks", type: :feature do
     open_editor(title)
     fill_in("task[tags]", with: tags)
     click_button("Save")
+    close_panel
   end
 
   def translate(key, **) = Admin::Slice["i18n"].t(key, **)
@@ -572,19 +580,19 @@ RSpec.describe "Admin tasks", type: :feature do
       end
     end
 
-    describe "the note in the editor dialog" do
+    describe "the note in the drawer's editor" do
       def note_label = translate("ui.components.tasks.task_form.note")
 
       before { open_editor("Email the accountant") }
 
       it "inserts a snippet from the toolbar" do
-        bold(editor(modal, note_label))
+        bold(editor(panel, note_label))
 
-        expect(modal.find_field(note_label).value).to eq("**bold**")
+        expect(panel.find_field(note_label).value).to eq("**bold**")
       end
 
       it "previews the note through the task renderer", :aggregate_failures do
-        box = editor(modal, note_label)
+        box = editor(panel, note_label)
         write_and_preview(box, note_label, "<script>window.ran = true</script>\n\nsay **why**")
 
         expect(box).to have_css(".preview strong", exact_text: "why")
@@ -592,10 +600,10 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "saves the note it formats" do
-        bold(editor(modal, note_label))
-        modal.click_button("Save")
+        bold(editor(panel, note_label))
+        panel.click_button("Save")
 
-        page.assert_no_selector("dialog#task-create[open]")
+        panel.assert_selector("[data-task-read]")
 
         expect(repo.by_id(task.id).note).to eq("**bold**")
       end
@@ -709,101 +717,113 @@ RSpec.describe "Admin tasks", type: :feature do
   end
 
   describe "editing a task" do
-    before { open_editor("Email the accountant") }
+    def fail_save = save_with(title: " ", tags: "not_a_tag")
 
-    it "closes the panel and opens the modal filled with the task", :aggregate_failures do
-      expect(page).to have_no_css("dialog#task-panel[open]")
-      expect(modal).to have_field("task[title]", with: "Email the accountant")
-      expect(modal).to have_css(".card-title", exact_text: translate("ui.components.tasks.create_dialog.edit_title"))
+    def foot_sizes = evaluate_script(<<~JS)
+      [...document.querySelectorAll("#task-panel .task-drawer-foot :is(a, button)")]
+        .map((control) => { const r = control.getBoundingClientRect(); return [r.width, r.height]; })
+    JS
+
+    def save_with(**fields)
+      fields.each { |name, value| edit_form.fill_in("task[#{name}]", with: value) }
+      panel.click_button(translate("ui.views.tasks.edit.save"))
     end
 
-    it "saves what I change and comes back to the list", :aggregate_failures do
-      fill_in("task[tags]", with: "admin")
-      click_button("Save")
+    def sideways?(element) = evaluate_script("(d => d.scrollWidth > d.clientWidth)(#{element})")
 
+    let!(:task) { repo.open_in_list("next").find { it.title == "Email the accountant" } }
+
+    before { open_editor("Email the accountant") }
+
+    it "turns the drawer into the form, filled with the task", :aggregate_failures do
+      expect(edit_form).to have_field("task[title]", with: "Email the accountant")
+      expect(page).to have_no_css("dialog#task-create[open]")
+      expect(panel).to have_no_css("[data-task-read]")
+    end
+
+    it "footers Cancel and Save" do
+      expect(panel.find(".task-drawer-foot")).to have_link(translate("ui.views.tasks.edit.cancel"))
+        .and have_button(translate("ui.views.tasks.edit.save"))
+    end
+
+    it "saves and returns the drawer to reading the new values", :aggregate_failures do
+      save_with(title: "Email the bookkeeper", tags: "admin")
+
+      expect(panel).to have_css("[data-task-read] h1", exact_text: "Email the bookkeeper")
       expect(page).to have_css(".toast", text: "Task saved")
-      expect(page).to have_current_path("/admin/tasks?filter=next")
+      expect(repo.by_id(task.id).tags.map(&:name)).to eq(["admin"])
+    end
+
+    it "reloads the list once the drawer closes after a save" do
+      save_with(tags: "admin")
+      close_panel
+
       expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
     end
 
     it "moves the task through the list field" do
       select("someday", from: "task[list]")
-      click_button("Save")
+      save_with
+      close_panel
       find(".task-tabs .screen-tab", text: "someday").click
 
       expect(page).to have_css(".task-title", text: "Email the accountant")
     end
 
-    def fail_save = save_with(title: " ", tags: "not_a_tag")
-
-    def save_with(**fields)
-      fields.each { |name, value| modal.fill_in("task[#{name}]", with: value) }
-      modal.click_button("Save")
-    end
-
-    it "keeps what I typed and says what went wrong in the modal when the save fails", :aggregate_failures do
+    it "stays in the form and says what went wrong when the save fails", :aggregate_failures do
       fail_save
 
-      expect(modal).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
-      expect(modal).to have_field("task[tags]", with: "not_a_tag")
+      expect(edit_form).to have_css(".field-error", text: translate("ui.components.tasks.field_error.title.blank"))
+      expect(edit_form).to have_field("task[tags]", with: "not_a_tag")
       expect(page).to have_current_path("/admin/tasks?filter=next")
     end
 
     it "saves once the errors are fixed" do
       fail_save
-      modal.assert_selector(".field-error", count: 2)
+      edit_form.assert_selector(".field-error", count: 2)
       save_with(title: "Email the bookkeeper", tags: "")
 
-      expect(page).to have_css(".task-title", text: "Email the bookkeeper")
+      expect(panel).to have_css("[data-task-read] h1", exact_text: "Email the bookkeeper")
     end
 
-    it "closes on Cancel without saving and hands focus back to the row", :aggregate_failures do
-      modal.fill_in("task[title]", with: "Something else")
-      modal.click_link(translate("ui.views.tasks.edit.cancel"))
+    it "finds a task to link without leaving the form" do
+      create(:task, title: "Book the flight")
+      edit_form.find("[name='link_q']").set("flight")
+      edit_form.click_button(translate("ui.components.tasks.link_finder.find"))
 
-      expect(page).to have_no_css("dialog#task-create[open]")
-      expect(active).to eq("Email the accountant")
-      expect(repo.open_in_list("next").map(&:title)).to include("Email the accountant")
+      expect(panel).to have_css("[data-task-edit] .task-link-target", text: "Book the flight")
     end
 
-    it "keeps the X after the swap to the edit form" do
-      expect(modal).to have_css(modal_x)
+    it "returns to reading on Cancel without saving", :aggregate_failures do
+      edit_form.fill_in("task[title]", with: "Something else")
+      panel.click_link(translate("ui.views.tasks.edit.cancel"))
+
+      expect(panel).to have_css("[data-task-read] h1", exact_text: "Email the accountant")
+      expect(repo.by_id(task.id).title).to eq("Email the accountant")
     end
 
-    it "keeps the X after a failed save swaps the form again" do
-      fail_save
-
-      expect(modal).to have_css(modal_x)
-    end
-
-    it "closes on the X without saving and hands focus back to the row", :aggregate_failures do
-      modal.fill_in("task[title]", with: "Something else")
-      modal.find(modal_x).click
-
-      expect(page).to have_no_css("dialog#task-create[open]")
-      expect(active).to eq("Email the accountant")
-      expect(repo.open_in_list("next").map(&:title)).to include("Email the accountant")
-    end
-
-    it "gives the Create Task dialog back its X once closed" do
-      modal.send_keys(:escape)
-      click_link("Create Task")
-
-      expect(modal).to have_css(modal_x)
-    end
-
-    it "gives the Create Task dialog back its own form once closed", :aggregate_failures do
-      modal.send_keys(:escape)
-      click_link("Create Task")
-
-      expect(modal).to have_css(".card-title", exact_text: translate("ui.components.tasks.create_dialog.title"))
-      expect(modal).to have_field("task[title]", with: "")
-    end
-
-    it "fits a phone without scrolling the page sideways" do
+    it "fits a phone without scrolling sideways, with tap squares in the footer", :aggregate_failures do
       page.driver.resize(375, 800)
 
-      expect(evaluate_script("(d => d.scrollWidth > d.clientWidth)(document.documentElement)")).to be(false)
+      expect(sideways?("document.documentElement")).to be(false)
+      expect(sideways?("document.querySelector('[data-task-panel-body]')")).to be(false)
+      expect(foot_sizes).to all(satisfy { |width, height| width >= 44 && height >= 44 })
+    end
+  end
+
+  describe "the E key in the drawer" do
+    before { open_task("Email the accountant") }
+
+    it "turns the drawer into the form" do
+      panel.send_keys("e")
+
+      expect(edit_form).to have_field("task[title]", with: "Email the accountant")
+    end
+
+    it "types an e into a field instead" do
+      panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "the")
+
+      expect(panel).to have_no_css("[data-task-edit]")
     end
   end
 
@@ -814,35 +834,18 @@ RSpec.describe "Admin tasks", type: :feature do
 
     before do
       pen.click
-      modal.assert_selector("[data-task-edit]")
+      edit_form
     end
 
-    it "opens the modal filled with the task and never opens the panel", :aggregate_failures do
-      expect(modal).to have_field("task[title]", with: "Email the accountant")
+    it "opens the drawer in edit mode, filled with the task", :aggregate_failures do
+      expect(edit_form).to have_field("task[title]", with: "Email the accountant")
+      expect(page).to have_no_css("dialog#task-create[open]")
+    end
+
+    it "hands focus back to the pen when the drawer closes on Escape", :aggregate_failures do
+      panel.send_keys(:escape)
+
       expect(page).to have_no_css("dialog#task-panel[open]")
-      expect(evaluate_script("document.querySelector('[data-task-panel-body]').childElementCount")).to eq(0)
-    end
-
-    it "saves what I change and reloads the list", :aggregate_failures do
-      fill_in("task[tags]", with: "admin")
-      click_button("Save")
-
-      expect(page).to have_css(".toast", text: "Task saved")
-      expect(page).to have_current_path("/admin/tasks?filter=next")
-      expect(find(".task", text: "Email the accountant")).to have_css(".task-meta .tag", text: "#admin")
-    end
-
-    it "hands focus back to the pen when the modal closes on Cancel", :aggregate_failures do
-      modal.click_link(translate("ui.views.tasks.edit.cancel"))
-
-      expect(page).to have_no_css("dialog#task-create[open]")
-      expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
-    end
-
-    it "hands focus back to the pen when the modal closes on Escape", :aggregate_failures do
-      modal.send_keys(:escape)
-
-      expect(page).to have_no_css("dialog#task-create[open]")
       expect(pen_label).to eq(translate("ui.components.tasks.row.edit"))
     end
   end

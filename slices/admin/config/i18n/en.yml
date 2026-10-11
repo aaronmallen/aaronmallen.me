@@ -1933,7 +1933,6 @@ en:
           label: "Create Task"
         create_dialog:
           cancel: "Cancel"
-          edit_title: "Edit the task"
           title: "New task"
         credit_fields:
           agent: "%{agent} on %{model}"
@@ -1943,6 +1942,8 @@ en:
           new_agent: "New agent"
           new_model: "New agent's model"
           owner: "Me"
+        drawer_head:
+          close: "Close"
         field_error:
           body:
             blank: "Write the comment first."
@@ -2727,13 +2728,12 @@ en:
             one: "%{count} upcoming"
             other: "%{count} upcoming"
         edit:
-          back: "Task"
           cancel: "Cancel"
           confirm_delete: "Delete %{task}? This cannot be undone."
           delete: "Delete"
-          label: "Tasks"
-          sub: "Editing task %{key}"
-          title: "Edit the task"
+          no_sessions: "No sessions yet."
+          save: "Save"
+          worked: "Time worked · %{span}"
         new:
           heading: "New task"
           label: "Tasks"

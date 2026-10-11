@@ -9,12 +9,13 @@ module Admin
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
           prop :linking, Blog::Types::Hash.optional, default: nil
+          prop :find_path, Blog::Types::String.optional, default: nil
 
           def view_template
             div(class: "task-link-editor") do
               Field(label: t(".label"), id: LinkFinder.query_id(@task)) do
                 links unless @task.links.empty?
-                LinkFinder(task: @task, tab: @tab, origin: @origin, linking: @linking)
+                LinkFinder(task: @task, tab: @tab, origin: @origin, linking: @linking, find_path: @find_path)
               end
             end
           end

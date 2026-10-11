@@ -5,14 +5,20 @@ RSpec.describe "Admin inbox", type: :feature do
     let(:repo) { Tasks::Slice["repos.task_queries"] }
     let(:task) { create(:task, :external, title: "Fix the feed") }
 
-    def modal = find("dialog#task-create[open]")
+    def close
+      panel.find(".task-drawer-close").click
+      page.assert_no_selector("dialog#task-panel[open]")
+    end
+
+    def panel = find("dialog#task-panel[open]")
 
     def save(**fields)
       within(".inbox-row", text: "Fix the feed") { click_link("Edit") }
-      modal.assert_selector("[data-task-edit]")
+      panel.assert_selector("[data-task-edit]")
       expect(page).to have_current_path("/admin/inbox")
-      fields.each { |name, value| modal.fill_in("task[#{name}]", with: value) }
-      modal.click_button("Save")
+      fields.each { |name, value| panel.fill_in("task[#{name}]", with: value) }
+      panel.click_button("Save")
+      panel.assert_selector("[data-task-read]")
     end
 
     before do
@@ -21,17 +27,18 @@ RSpec.describe "Admin inbox", type: :feature do
       visit "/admin/inbox"
     end
 
-    it "saves a tag change in the dialog, stays on the inbox and drops the issue", :aggregate_failures do
+    it "saves a tag change in the drawer, stays on the inbox and drops the issue", :aggregate_failures do
       save(tags: "feeds")
+      close
 
-      expect(page).to have_css("[data-toast]", text: "Task saved")
       expect(page).to have_current_path("/admin/inbox")
       expect(page).to have_no_css(".inbox-row", text: "Fix the feed")
       expect(repo.by_id(task.id).tags.map(&:name)).to eq(["feeds"])
     end
 
-    it "keeps the issue when the dialog saves only a note", :aggregate_failures do
+    it "keeps the issue when the drawer saves only a note", :aggregate_failures do
       save(note: "Look at the cache")
+      close
 
       expect(page).to have_current_path("/admin/inbox")
       expect(page).to have_css(".inbox-row", text: "Fix the feed")

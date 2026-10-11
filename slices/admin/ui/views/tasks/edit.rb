@@ -7,60 +7,82 @@ module Admin
         class Edit < View
           include Components::Tasks
 
+          CANCEL = { task_open: true, task_cancel: true }.freeze
           TAG_SEPARATOR = ", "
 
           prop :task, Blog::Types::Instance(ROM::Struct)
+          prop :timeline, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :forms, Blog::Types::Hash
+          prop :linking, Blog::Types::Hash
           prop :errors, Blog::Types::Hash
           prop(:values, Blog::Types::Hash) { it || stored }
           prop :filter, Blog::Types::String
           prop :origin, Blog::Types::TaskOrigin
 
           def view_template
-            PageHead(title: @task.title, sub: t(".sub", key:)) { back }
-
-            Card(label: t(".label"), title: t(".title")) do
-              div(class: "task-edit", data: { task_edit: @task.id }) do
-                TaskForm(
-                  errors: @errors, returns:, scope:, task: @task, today: Blog::TimeZone.today,
-                  values: @values, autofocus: true,
-                ) { foot }
-                delete_form
-              end
+            article(class: "task-drawer", data: { task_edit: @task.id }) do
+              DrawerHead(task: @task, filter: @filter, origin: @origin)
+              div(class: "task-drawer-body") { body }
+              footer(class: "task-drawer-foot") { foot }
             end
           end
 
           private
 
-          def back
-            BackLink(href: task_path) { t(".back") }
+          def body
+            h1(class: "sr-only") { @task.title }
+            TaskForm(
+              errors: @errors, returns:, scope:, task: @task, today: Blog::TimeZone.today, values: @values,
+              autofocus: true, bare: true,
+            )
+            sessions
+            LinkEditor(
+              task: @task, tab: @filter, origin: @origin, linking: @linking,
+              find_path: path(:admin_edit_task, id: @task.id, **returns),
+            )
           end
 
-          def delete_form
+          def delete
             Form(
-              action: path(:admin_delete_task, id: @task.id), id: delete_id,
+              action: path(:admin_delete_task, id: @task.id), class: "task-drawer-delete",
               data: { confirm: t(".confirm_delete", task: @task.title) },
             ) do
               HiddenFields(values: returns)
+              Button(variant: :warn, type: "submit", small: true, icon: "fa-regular fa-trash-can") { t(".delete") }
             end
           end
-
-          def delete_id = "task-#{@task.id}-delete"
 
           def foot
-            Button(
-              variant: :warn, type: "submit", small: true, form: delete_id, class: "task-form-delete",
-              icon: "fa-regular fa-trash-can",
-            ) do
-              t(".delete")
+            delete
+            Button(href: path(:admin_task, id: @task.id, **returns), data: CANCEL, small: true, variant: :gh) do
+              t(".cancel")
             end
-            Button(href: task_path, data: { task_close: true }, small: true, variant: :gh) { t(".cancel") }
+            Button(
+              variant: :pri, type: "submit", small: true, form: "task-#{@task.id}-form",
+              icon: "fa-regular fa-floppy-disk",
+            ) { t(".save") }
           end
-
-          def key = Components::RecordKey.key(@task.id)
 
           def returns = { filter: @filter, origin: @origin }
 
           def scope = "task-#{@task.id}"
+
+          def session(entry)
+            TimelineEvent(entry:) do
+              SessionActs(task: @task, entry:, timing: @forms[:timing], tab: @filter, origin: @origin)
+            end
+          end
+
+          def sessions
+            entries = @timeline.select(&:session?)
+
+            Field(label: t(".worked", span: Blog::Helpers::Figures.hours(@task.tracked_seconds))) do
+              if entries.empty? then Hint { t(".no_sessions") }
+              else ol(class: "timeline") { entries.each { session(it) } }
+              end
+              TotalForm(task: @task, totaling: @forms[:totaling], tab: @filter, origin: @origin)
+            end
+          end
 
           def stored
             {
@@ -72,8 +94,6 @@ module Admin
               title: @task.title,
             }
           end
-
-          def task_path = path(:admin_task, id: @task.id, **returns)
         end
       end
     end

@@ -7,7 +7,6 @@ module Admin
         prop :id, Blog::Types::String.optional, default: nil
         prop :title_id, Blog::Types::String
         prop :title, Blog::Types::String.optional, default: nil
-        prop :title_data, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
         prop :attributes, Blog::Types::Hash, :**
 
         def foot(&block)
@@ -31,7 +30,7 @@ module Admin
 
         def head
           div(class: "dialog-head") do
-            h2(id: @title_id, class: "card-title", data: @title_data) { @title }
+            h2(id: @title_id, class: "card-title") { @title }
             Button(
               variant: :gh, small: true, label: t(".close"), data: { dialog_close: true },
               icon: "fa-solid fa-xmark",

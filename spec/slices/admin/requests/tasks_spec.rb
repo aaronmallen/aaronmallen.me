@@ -686,7 +686,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
 
       it "answers 200 asking for every field a task has but its type", :aggregate_failures do
         expect(last_response.status).to eq(200)
-        expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]"])
       end
 
       it "puts a new task in next unless told otherwise" do
@@ -722,7 +722,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       end
 
       it "holds the same fields as the new task page" do
-        expect(fields).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+        expect(fields).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]"])
       end
 
       it "starts on next away from Today", :aggregate_failures do
@@ -1510,7 +1510,67 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         open_edit
 
         expect(last_response.status).to eq(200)
-        expect(page).to have_css("h1.page-head-title", exact_text: "Email accountant")
+        expect(page).to have_css("h1", exact_text: "Email accountant")
+      end
+
+      it "draws the drawer's header, body and footer", :aggregate_failures do
+        open_edit
+        drawer = page.find("main article.task-drawer[data-task-edit='#{task.id}']")
+
+        expect(drawer).to have_css("header.task-drawer-head a[data-task-close]")
+        expect(drawer).to have_css(".task-drawer-body form#task-#{task.id}-form")
+        expect(drawer).to have_css("footer.task-drawer-foot")
+      end
+
+      it "footers Delete, Cancel and Save" do
+        open_edit
+
+        expect(page.find(".task-drawer-foot").all("a, button").map(&:text))
+          .to eq(%w[delete cancel save].map { i18n.t(it, scope: "ui.views.tasks.edit") })
+      end
+
+      it "saves the task's form from the footer", :aggregate_failures do
+        open_edit
+
+        expect(page).to have_css(".task-drawer-foot button[type='submit'][form='task-#{task.id}-form']")
+        expect(page).to have_no_css("#task-#{task.id}-form button[type='submit']")
+      end
+
+      it "puts tags and list side by side, then the sprint date" do
+        open_edit
+
+        pair = ".task-form-pair:has([name='task[tags]']):has([name='task[list]'])"
+
+        expect(page).to have_css("#{pair} + .field [name='task[sprint_on]']", visible: :all)
+      end
+
+      it "lists the sessions with their edit forms and the set total form", :aggregate_failures do
+        session = create(:work_session, :closed, task_id: task.id)
+        open_edit
+
+        expect(page).to have_css("#task-session-#{session.id} form[action$='/sessions/#{session.id}']", visible: :all)
+        expect(page).to have_css("form[action='/admin/tasks/#{task.id}/total']", visible: :all)
+      end
+
+      it "says when there are no sessions" do
+        open_edit
+
+        expect(page).to have_css(".task-drawer-body .hint", text: i18n.t("ui.views.tasks.edit.no_sessions"))
+      end
+
+      it "offers the link editor, whose finder searches the edit page", :aggregate_failures do
+        open_edit(filter: "next", origin: "tasks")
+
+        expect(page).to have_css("form[action='/admin/tasks/#{task.id}/links']", visible: :all)
+        expect(page.find("[data-task-find]")["data-task-find"])
+          .to eq("/admin/tasks/#{task.id}/edit?filter=next&origin=tasks")
+      end
+
+      it "finds tasks to link from the edit page" do
+        create(:task, title: "Book the flight")
+        open_edit(link_q: "flight")
+
+        expect(page).to have_css(".task-link-target", text: "Book the flight")
       end
 
       it "posts to the task's update" do
@@ -1522,7 +1582,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "leads with the same fields as the new task page" do
         open_edit
 
-        expect(fields.first(5)).to eq(["task[title]", "task[note]", "task[list]", "task[sprint_on]", "task[tags]"])
+        expect(fields.first(5)).to eq(["task[title]", "task[note]", "task[tags]", "task[list]", "task[sprint_on]"])
       end
 
       it "fills the fields with the task", :aggregate_failures do
@@ -1565,20 +1625,19 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
         expect(form.find("input[name='origin']", visible: :all).value).to eq("today")
       end
 
-      it "leads Cancel and the back button to the task's page", :aggregate_failures do
+      it "leads Cancel to the task's page" do
         open_edit(filter: "next", origin: "tasks")
-        read = "/admin/tasks/#{task.id}?filter=next&origin=tasks"
+        cancel = page.find(".task-drawer-foot a[data-task-cancel]", text: i18n.t("ui.views.tasks.edit.cancel"))
 
-        expect(page.find(".task-form-foot a", text: i18n.t("ui.views.tasks.edit.cancel"))["href"]).to eq(read)
-        expect(page.find(".page-head-actions a", text: i18n.t("ui.views.tasks.edit.back"))["href"]).to eq(read)
+        expect(cancel["href"]).to eq("/admin/tasks/#{task.id}?filter=next&origin=tasks")
       end
 
       it "offers a delete that asks first, naming the task", :aggregate_failures do
         open_edit
-        form = page.find("form#task-#{task.id}-delete[action='/admin/tasks/#{task.id}/delete']")
+        form = page.find(".task-drawer-foot form[action='/admin/tasks/#{task.id}/delete']")
 
         expect(form["data-confirm"]).to include("Email accountant")
-        expect(page).to have_css("button[form='task-#{task.id}-delete']", text: i18n.t("ui.views.tasks.edit.delete"))
+        expect(form).to have_button(i18n.t("ui.views.tasks.edit.delete"))
       end
 
       it "wraps the form in a part a dialog can lift" do

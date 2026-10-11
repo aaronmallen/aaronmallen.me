@@ -9,7 +9,7 @@ module Admin
 
         def handle(request, response)
           case build_task_page.call(record_id(request), **page_params(request))
-            in Success(page) then response.render(view, **page, **return_to(request))
+            in Success(page) then response.render(view, **shown(page), **return_to(request))
             in Failure(:not_found) then not_found(response)
             else halt 500
           end
@@ -22,6 +22,8 @@ module Admin
 
           { query: params[:link_q], kind: Blog::Types::Text[params[:link_kind]], records: { query: params[:record_q] } }
         end
+
+        def shown(page) = page
       end
     end
   end

@@ -135,7 +135,7 @@ RSpec.describe "Admin keys", type: :feature do
       before { press("j", "e") }
 
       it "opens the task for editing the way the pen does" do
-        expect(page).to have_css("dialog[open] [data-task-edit] form.task-form")
+        expect(page).to have_css("dialog#task-panel[open] [data-task-edit] form.task-form")
       end
     end
 

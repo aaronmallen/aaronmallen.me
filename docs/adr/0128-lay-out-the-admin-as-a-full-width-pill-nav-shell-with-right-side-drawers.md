@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919", "#1102"]
+amended: ["#873", "#919", "#1102", "#1106"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -59,7 +59,7 @@ another breakpoint. Below 700px every tap target keeps [ADR 0054][0054]'s 44px s
 
 **Keys stay, and three join.** Every key [ADR 0101][0101] binds works as it does today. `⌘K` opens the palette
 beside `/` and `⌘/`, `w` opens a journal entry, and `e` opens a highlighted row on lists where no row key claims
-it. On a task row `e` keeps editing the task.
+it. On a task row `e` opens the task's drawer in edit mode, as #1106 made it.
 
 The rebuild adds no `fetch` exception to ADR 0055. The task drawer fetches what the panel fetches today, and
 nothing else the rebuild draws calls `fetch`.

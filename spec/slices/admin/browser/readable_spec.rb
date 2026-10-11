@@ -73,7 +73,7 @@ RSpec.describe "Admin screens", type: :feature do
         find("dialog#person-#{person.id}-drawer[open] form[data-person-form]")
       end,
       "snooze drawer" => -> { open_snooze },
-      "task modal" => -> { open_modal },
+      "task editor" => -> { open_editor },
       "task panel" => -> { open_panel },
     }
   end
@@ -133,17 +133,17 @@ RSpec.describe "Admin screens", type: :feature do
     find("[data-confirm-ask]")
   end
 
+  def open_editor
+    open_panel
+    find("dialog#task-panel .bt", text: "Edit").click
+    find("dialog#task-panel[open] [data-task-edit]")
+  end
+
   def open_key_help
     draft
     visit "/admin/posts"
     find("body").send_keys("?")
     find("dialog#key-help[open]")
-  end
-
-  def open_modal
-    open_panel
-    find("dialog#task-panel .bt", text: "Edit").click
-    find("dialog#task-create[open] [data-task-edit]")
   end
 
   def open_palette

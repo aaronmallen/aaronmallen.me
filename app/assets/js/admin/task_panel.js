@@ -1,26 +1,28 @@
 import { setupConfirms } from "./confirm.js";
-import { focusField, openDialog, showDialog } from "./dialog.js";
+import { FIELD, focusField, showDialog } from "./dialog.js";
 import { fresh } from "./fresh.js";
-import { plain, setupPost, setupVisit } from "./in_place.js";
+import { parse, plain, setupPost, setupVisit } from "./in_place.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupRecordKeys } from "./record_key.js";
 import { setupTaskOrder } from "./task_order.js";
+import { showToast } from "./toast.js";
 
+const CANCEL = "a[data-task-cancel]";
 const EDIT = "[data-task-edit]";
+const EDIT_KEY = "e";
+const EDIT_LINK = "footer a[data-task-open-edit]";
 const FIND = "[data-task-find]";
 const LINKS = "a[data-task-open], a[data-task-open-edit], a[data-task-close]";
-const READ = "[data-task-read]";
+const TASK = "[data-task-read], [data-task-edit]";
+const TOAST = "[data-toast]";
 
 const ready = new WeakSet();
 let bound = false;
 let follow = null;
 
 export function setupTaskPanel() {
-  const body = document.querySelector("[data-task-modal-body]");
-  if (!body) return;
-
   for (const panel of fresh(ready, document.querySelectorAll("[data-task-panel]"))) {
-    follow = setupPanel(panel, body.closest("dialog"));
+    follow = setupPanel(panel);
   }
 
   if (bound || !follow) return;
@@ -54,54 +56,57 @@ function here() {
   return window.location.pathname + window.location.search;
 }
 
-function setupPanel(panel, modal) {
+function typing(event) {
+  return event.ctrlKey || event.metaKey || event.altKey || event.isComposing || event.target.closest(FIELD);
+}
+
+function setupPanel(panel) {
   const panelBody = panel.querySelector("[data-task-panel-body]");
-  const modalBody = modal.querySelector("[data-task-modal-body]");
-  const modalTitle = modal.querySelector("[data-task-modal-title]");
   const visit = setupVisit();
   let opener = null;
-  let created = null;
+  let saved = false;
 
-  const read = (task, keep = false, hash = "") => {
+  const show = (task, keep = false, hash = "") => {
     const scroll = keep ? panelBody.scrollTop : 0;
-    const field = keep ? document.activeElement?.name : null;
+    const name = keep ? document.activeElement?.name : null;
 
     panelBody.replaceChildren(task);
     bind(task);
 
     if (!panel.open) showDialog(panel);
 
-    const focus = (field && task.querySelector(`[name="${field}"]`)) || panelBody;
-    focus.focus({ preventScroll: true });
+    const field = name && task.querySelector(`[name="${name}"]`);
+    if (field) field.focus({ preventScroll: true });
+    else if (task.matches(EDIT)) focusField(task);
+    else panelBody.focus({ preventScroll: true });
+
     panelBody.scrollTop = scroll;
     if (hash) task.querySelector(`[id="${CSS.escape(hash.slice(1))}"]`)?.scrollIntoView({ block: "start" });
   };
 
-  const showEdit = (edit) => {
-    if (!created) created = { nodes: [...modalBody.childNodes], title: modalTitle.textContent };
+  const reread = async (url) => {
+    const response = await fetch(url).catch(() => null);
+    const page = response?.ok ? parse(await response.text()) : null;
+    const task = page?.querySelector(TASK);
+    if (!task) return window.location.assign(here());
 
-    modalBody.replaceChildren(edit);
-    modalTitle.textContent = modalTitle.dataset.taskModalTitle;
-    bind(edit);
+    show(task);
 
-    if (!modal.open) openDialog(modal.id);
-    focusField(edit);
-  };
-
-  const edit = (form) => {
-    panel.close();
-    showEdit(form);
+    const toast = page.querySelector(TOAST);
+    if (toast) showToast(toast.textContent.trim());
   };
 
   const post = setupPost({
     selector: EDIT,
-    saved: (response) => {
+    saved: async (response) => {
       if (response.type !== "opaqueredirect") return false;
 
-      window.location.assign(here());
+      saved = true;
+      await reread(panelBody.querySelector(CANCEL).href);
       return true;
     },
-    invalid: showEdit,
+    invalid: (task) => show(task),
+    live: (form) => panel.contains(form),
   });
 
   const click = (event) => {
@@ -115,46 +120,42 @@ function setupPanel(panel, modal) {
 
       event.preventDefault();
       dialog.close();
-    } else if (link.hasAttribute("data-task-open-edit")) {
-      if (dialog && dialog !== panel) return;
-
-      event.preventDefault();
-      if (!dialog) opener = link;
-      visit(link.href, EDIT, edit);
-    } else {
-      event.preventDefault();
-      if (!panel.open) opener = link;
-      visit(link.href, READ, (task) => read(task, false, link.hash));
+      return;
     }
+
+    if (link.hasAttribute("data-task-open-edit") && dialog && dialog !== panel) return;
+
+    event.preventDefault();
+    if (!panel.open) opener = link;
+    visit(link.href, TASK, (task) => show(task, false, link.hash));
   };
 
   panel.addEventListener("submit", (event) => {
     const find = event.submitter?.closest(FIND);
-    if (!find) return;
+
+    if (find) {
+      event.preventDefault();
+      visit(findUrl(event.target, find), TASK, (task) => show(task, true));
+    } else if (event.target.matches(`${EDIT} form.task-form`)) {
+      event.preventDefault();
+      post(event.target);
+    }
+  });
+
+  panel.addEventListener("keydown", (event) => {
+    if (event.key !== EDIT_KEY || event.defaultPrevented || typing(event)) return;
+
+    const edit = panelBody.querySelector(EDIT_LINK);
+    if (!edit) return;
 
     event.preventDefault();
-    visit(findUrl(event.target, find), READ, (task) => read(task, true));
+    edit.click();
   });
 
   panel.addEventListener("close", () => {
     panelBody.replaceChildren();
-    opener?.focus();
-  });
+    if (saved) return window.location.assign(here());
 
-  modal.addEventListener("submit", (event) => {
-    const form = event.target;
-    if (!created || !form.matches(`${EDIT} form.task-form`)) return;
-
-    event.preventDefault();
-    post(form);
-  });
-
-  modal.addEventListener("close", () => {
-    if (!created) return;
-
-    modalBody.replaceChildren(...created.nodes);
-    modalTitle.textContent = created.title;
-    created = null;
     opener?.focus();
   });
 

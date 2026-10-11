@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
-amended: ["#41", "#90", "#745", "#1102"]
+amended: ["#41", "#90", "#745", "#1102", "#1106"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -44,10 +44,11 @@ Every form inside the swapped HTML stays a plain POST under ADR 0055. An action 
 page the task was opened from, through the `origin` the forms carry. A failed save answers 422 with the edit
 page.
 
-One write goes through `fetch`, which #41 added. In the modal, the script sends the edit form's own fields to the
-form's own action. A 422 swaps the edit page's form into the modal, errors and all. A redirect loads the page the
-modal opened on, and the toast the redirect set shows there. Any other answer, or a failed request, falls back to
+One write goes through `fetch`, which #41 added. The script sends the edit form's own fields to the form's own
+action. A 422 swaps the edit page's form in, errors and all. Any other answer, or a failed request, falls back to
 posting the form. With scripts off, the form posts as before, and the server needs no second way to answer.
+Since #1106 the form sits in the drawer: a redirect loads the task's read page back into the drawer and shows the
+toast it carries, and the list behind reloads when the drawer closes.
 
 ## Alternatives
 

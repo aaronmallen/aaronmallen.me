@@ -16,6 +16,7 @@ module Admin
           prop :tab, Blog::Types::String
           prop :origin, Blog::Types::String
           prop :linking, Blog::Types::Hash.optional, default: nil
+          prop :find_path, Blog::Types::String.optional, default: nil
 
           def self.query_id(task) = FieldError.id_for(:other_id, scope(task))
 
@@ -44,7 +45,7 @@ module Admin
               )
               Button(
                 type: "submit", small: true, form: form_id, name: "link_find", value: "1",
-                data: { task_find: path(:admin_task, id: @task.id, filter: @tab, origin: @origin) },
+                data: { task_find: @find_path || path(:admin_task, id: @task.id, filter: @tab, origin: @origin) },
               ) { t(".find") }
             end
           end

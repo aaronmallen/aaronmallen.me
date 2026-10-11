@@ -21,7 +21,7 @@ module Admin
 
           def view_template
             article(class: "task-drawer", data: { task_read: @task.id }) do
-              header(class: "task-drawer-head") { meta }
+              DrawerHead(task: @task, filter: @filter, origin: @origin)
               div(class: "task-drawer-body") { body }
               footer(class: "task-drawer-foot") { foot }
             end
@@ -40,7 +40,7 @@ module Admin
             Timeline(task: @task, entries: @timeline, forms: @forms, tab: @filter, origin: @origin)
           end
 
-          def close(**, &) = OriginLink(origin: @origin, filter: @filter, variant: :gh, small: true, data: CLOSE, **, &)
+          def close(&) = OriginLink(origin: @origin, filter: @filter, variant: :gh, small: true, data: CLOSE, &)
 
           def delete
             Form(
@@ -84,15 +84,6 @@ module Admin
           end
 
           def links = LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
-
-          def meta
-            RecordKey(kind: "task", id: @task.id)
-            Status(status: @task.status)
-            span(class: "read-meta-list") { t(Helpers::TaskLists.name(@task.place)) }
-            SourceLink(source: @task.source)
-            label = t(".close")
-            close(label:, icon: "fa-solid fa-xmark", class: "task-drawer-close") { label }
-          end
 
           def note
             Field(label: t(".notes")) do

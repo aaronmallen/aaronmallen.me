@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [admin, assets]
 issue: "#297"
-amended: ["#745", "#915"]
+amended: ["#745", "#915", "#1106"]
 tags: [admin, keyboard, shortcuts, palette, help, accessibility, javascript]
 ---
 
@@ -60,12 +60,14 @@ such key. A published post draws no publish button, so `p` does nothing on it.
   and Alt+Down. `/` is a plain key, on the slash button alone, and since #745 on the search button that replaced it.
 
 **Keys #745 adds.** `w` sits on a control that opens a journal entry, as `c` sits on the create button. `e`
-opens the highlighted row on lists where no row key claims it, and on a task row it keeps editing the task.
+opens the highlighted row on lists where no row key claims it, and on a task row it opens the task's drawer in
+edit mode.
 
 **When keys stay quiet.** A plain key does nothing while focus is in a field that takes text (a text input, a
 `textarea`, a `select` or anything `contenteditable`), or while any modal `dialog` is open, the palette and help
 among them. A checkbox is not a field, so a ticked row ([ADR 0098][0098]) still takes keys. A plain key held with
-Ctrl, Meta or Alt is left to the browser. Escape belongs to the open dialog.
+Ctrl, Meta or Alt is left to the browser. Escape belongs to the open dialog. The task drawer is the one
+exception: since #1106 it listens for `e` itself and edits the task, as [ADR 0148][0148] asks.
 
 ## Alternatives
 
@@ -100,4 +102,5 @@ section uses.
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [0098]: 0098-run-each-bulk-action-as-one-operation-per-list-in-one-transaction.md
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
+[0148]: 0148-edit-a-task-in-the-task-drawer-and-keep-the-task-modal-for-new-tasks.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

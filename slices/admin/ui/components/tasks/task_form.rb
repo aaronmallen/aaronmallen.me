@@ -20,6 +20,7 @@ module Admin
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :returns, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
           prop :autofocus, Blog::Types::Bool, default: false
+          prop :bare, Blog::Types::Bool, default: false
 
           def view_template(&)
             Form(action:, class: "task-form", id: form_id) do
@@ -27,9 +28,9 @@ module Admin
               title_field
               note_field
               pair
-              tags_field
+              SprintField(scope: @scope, scheduled:, today: @today)
               credit_fields if @task
-              foot(&)
+              foot(&) unless @bare
             end
           end
 
@@ -91,8 +92,8 @@ module Admin
 
           def pair
             div(class: "task-form-pair") do
+              tags_field
               list_field
-              SprintField(scope: @scope, scheduled:, today: @today)
             end
           end
 
