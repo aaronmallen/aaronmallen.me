@@ -15,20 +15,20 @@ RSpec.describe "Admin post preview", :frozen_clock, type: :request do
 
       expect(last_response).to be_ok
       expect(last_response.content_type).to start_with("text/html")
-      expect(last_response.body).to start_with("<h2")
+      expect(last_response.body).to start_with("<header")
       expect(last_response.body).not_to include("<main")
     end
 
     it "renders the trimmed title" do
       preview(title: "  Hello  ")
 
-      expect(page).to have_css("h2.preview-title", exact_text: "Hello")
+      expect(page).to have_css("h2.post-title", exact_text: "Hello")
     end
 
     it "leaves the title out when it is blank" do
       preview(title: " ", body: "one")
 
-      expect(page).to have_no_css(".preview-title")
+      expect(page).to have_no_css(".post-title")
     end
 
     it "renders the tags as the article does, trimmed and without repeats" do
@@ -71,14 +71,14 @@ RSpec.describe "Admin post preview", :frozen_clock, type: :request do
         expected = article_body
         preview(body:)
 
-        expect(page.find(".post-body").native.inner_html).to eq(expected)
+        expect(page.find(".prose").native.inner_html).to eq(expected)
       end
     end
 
     it "renders with no fields" do
       post "/admin/posts/preview", { _csrf_token: admin_csrf_token }
 
-      expect(page).to have_css(".post-body", exact_text: "")
+      expect(page).to have_css(".prose", exact_text: "")
     end
 
     it "rejects a preview without a CSRF token" do
@@ -103,7 +103,7 @@ RSpec.describe "Admin post preview", :frozen_clock, type: :request do
     it "renders no preview" do
       preview(token: session_token, title: "Hello")
 
-      expect(last_response.body).not_to include("preview-title")
+      expect(last_response.body).not_to include("post-title")
     end
   end
 end

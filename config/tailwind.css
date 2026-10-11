@@ -122,9 +122,6 @@
   --text-cta: 1.35rem;
   --text-cta--line-height: 1.2;
   --text-cta--letter-spacing: -0.02em;
-  --text-preview-title: 1.7rem;
-  --text-preview-title--line-height: 1.1;
-  --text-preview-title--letter-spacing: -0.03em;
   --text-editor: 0.84375rem;
   --text-editor--line-height: 1.6;
   --text-li: 0.9375rem;
@@ -312,7 +309,7 @@
 }
 
 @utility prose {
-  .pub & {
+  :is(.pub, .preview) & {
     @apply max-w-prose font-serif text-prose;
 
     & > * {
@@ -2610,10 +2607,6 @@
   & .post-body {
     @apply mt-6;
   }
-}
-
-@utility preview-title {
-  @apply font-display text-preview-title font-extrabold text-ink;
 }
 
 @utility edit-pane-head {

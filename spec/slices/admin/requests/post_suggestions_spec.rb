@@ -357,7 +357,7 @@ RSpec.describe "Admin post suggestions", type: :request do
         accept(article, edit_id: first_edit_id(article))
         follow_redirect!
 
-        expect(page).to have_css(".preview .post-body p", exact_text: "the cat sat", visible: :all)
+        expect(page).to have_css(".preview .prose p", exact_text: "the cat sat", visible: :all)
       end
 
       it "drops it from the card" do

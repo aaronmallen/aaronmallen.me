@@ -12,9 +12,11 @@ module Admin
           prop :title, Blog::Types::String
 
           def view_template
-            h2(class: "preview-title") { @title } unless @title.empty?
-            Meta(time: @time, tags: @tags, read_time: @read_time)
-            div(class: "post-body") { raw(safe(@body_html)) }
+            header(class: "post-h") do
+              h2(class: "post-title") { @title } unless @title.empty?
+              Meta(time: @time, tags: @tags, read_time: @read_time)
+            end
+            div(class: "prose lead") { raw(safe(@body_html)) }
           end
         end
       end

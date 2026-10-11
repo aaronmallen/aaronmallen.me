@@ -126,7 +126,7 @@ RSpec.describe "Admin post editor", type: :request do
       end
 
       it "renders an empty body in the preview" do
-        expect(page).to have_css(".preview .post-body", exact_text: "", visible: :all)
+        expect(page).to have_css(".preview .prose", exact_text: "", visible: :all)
       end
 
       it "renders the publishing card", :aggregate_failures do
@@ -187,10 +187,10 @@ RSpec.describe "Admin post editor", type: :request do
       it "renders the post in the preview", :aggregate_failures do
         preview = page.find("[data-post-editor] .preview", visible: :all)
 
-        expect(preview).to have_css("h2.preview-title", exact_text: "Hello", visible: :all)
+        expect(preview).to have_css("h2.post-title", exact_text: "Hello", visible: :all)
         expect(preview).to have_css(".post-meta time", exact_text: "Sep 7, 2030", visible: :all)
         expect(preview.all(".post-meta .post-tag", visible: :all).map(&:text)).to eq(%w[hanami ruby])
-        expect(preview).to have_css(".post-body p", exact_text: "one two", visible: :all)
+        expect(preview).to have_css(".prose p", exact_text: "one two", visible: :all)
       end
 
       it "shows the publish time on the Chicago clock" do
