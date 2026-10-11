@@ -1,6 +1,6 @@
 .env
 app/assets/css/tailwind.css
-coverage
+/coverage
 log/*
 node_modules
 public/*

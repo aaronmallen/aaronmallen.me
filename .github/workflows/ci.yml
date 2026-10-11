@@ -19,10 +19,10 @@ env:
   REDIS_PASSWORD: redis
 
 jobs:
-  check:
-    name: Lint and test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    services:
+    services: &services
       postgres:
         env:
           POSTGRES_PASSWORD: *database-password
@@ -33,27 +33,32 @@ jobs:
         ports:
           - 5432:5432
     steps:
-      - name: Check out the repository
+      - &checkout
+        name: Check out the repository
         uses: actions/checkout@v7
 
-      - name: Install the pinned tools
+      - &install-tools
+        name: Install the pinned tools
         uses: jdx/mise-action@v5
 
-      - name: Restore the gems
+      - &restore-gems
+        name: Restore the gems
         uses: actions/cache@v6
         with:
           key: gems-${{ runner.os }}-${{ hashFiles('Gemfile.lock', '.config/mise.lock') }}
           path: ${{ runner.temp }}/gems
           restore-keys: gems-${{ runner.os }}-
 
-      - name: Install the dependencies
+      - &install-dependencies
+        name: Install the dependencies
         run: |
           export GEM_HOME="$RUNNER_TEMP/gems"
           echo "GEM_HOME=$GEM_HOME" >>"$GITHUB_ENV"
           echo "$GEM_HOME/bin" >>"$GITHUB_PATH"
           mise run setup:dependencies
 
-      - name: Install the Postgres 18 client
+      - &install-postgres-client
+        name: Install the Postgres 18 client
         run: |
           key=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
           sudo install -d "$(dirname "$key")"
@@ -69,5 +74,71 @@ jobs:
       - name: Lint
         run: mise run lint
 
+  ruby:
+    name: Ruby specs
+    runs-on: ubuntu-latest
+    services: *services
+    steps:
+      - *checkout
+      - *install-tools
+      - *restore-gems
+      - *install-dependencies
+      - *install-postgres-client
+
       - name: Test
-        run: mise run test
+        run: mise run test --tag '~browser'
+
+      - name: Keep the coverage results
+        uses: actions/upload-artifact@v7
+        with:
+          include-hidden-files: true
+          name: coverage-ruby
+          path: coverage/.resultset.json
+
+  browser:
+    name: Browser specs
+    runs-on: ubuntu-latest
+    services: *services
+    steps:
+      - *checkout
+      - *install-tools
+      - *restore-gems
+      - *install-dependencies
+      - *install-postgres-client
+
+      - name: Test
+        run: mise run test:browser
+
+      - name: Keep the coverage results
+        uses: actions/upload-artifact@v7
+        with:
+          include-hidden-files: true
+          name: coverage-browser
+          path: coverage/.resultset.json
+
+  coverage:
+    name: Coverage
+    needs:
+      - browser
+      - ruby
+    runs-on: ubuntu-latest
+    steps:
+      - *checkout
+      - *install-tools
+      - *restore-gems
+      - *install-dependencies
+
+      - name: Fetch the coverage results
+        uses: actions/download-artifact@v8
+        with:
+          path: tmp/coverage
+          pattern: coverage-*
+
+      - name: Merge the coverage results
+        run: mise run test:coverage tmp/coverage/*/.resultset.json
+
+      - name: Keep the coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage
