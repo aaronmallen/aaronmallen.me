@@ -386,7 +386,7 @@ RSpec.describe Analytics::Jobs::RollUpAnalytics, :frozen_clock do
     end
 
     it "stores no reach for a month whose start the raw visits no longer hold" do
-      old = ((today - 120)..(today - 95)).find { it.mday != 1 }
+      old = ((today - 91)..(today - 90)).find { it.mday != 1 }
       event(on: old)
       roll_up
 

@@ -13,9 +13,9 @@ RSpec.describe Analytics::Repos::AnalyticsPageQueries do
   end
 
   it "keeps the clicks once the prune takes the day's events" do
-    click(today - 120)
+    click(today - 91)
     Analytics::Slice["jobs.roll_up_analytics"].perform
 
-    expect(clicks(from: today - 120)).to eq([["docs.example", "/guide", 1]])
+    expect(clicks(from: today - 91)).to eq([["docs.example", "/guide", 1]])
   end
 end

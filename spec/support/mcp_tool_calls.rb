@@ -32,9 +32,11 @@ module MCPToolCalls
   private
 
   def mcp_access_token
-    @mcp_access_token ||= mcp_connect(
-      Spec::DB::Factories[:mcp].create(:oauth_client), verifier: Blog::Types::NewSecret[], scope: SCOPES,
-    ).fetch("access_token")
+    @mcp_access_token ||= MCP::Slice["operations.issue_tokens"].call(
+      oauth_client_id: Spec::DB::Factories[:mcp].create(:oauth_client).id,
+      resource: MCP::Slice["operations.describe_protected_resource"].call(Hanami.app.settings.site_url.chomp("/"))[:resource],
+      scopes: SCOPES.split,
+    ).fetch(:access_token)
   end
 end
 

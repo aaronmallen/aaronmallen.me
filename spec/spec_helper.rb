@@ -22,8 +22,14 @@ support_path = File.expand_path("support", File.dirname(__FILE__))
 require File.join(support_path, "stdout")
 
 ENV["HANAMI_ENV"] ||= "test"
+ENV["HANAMI_LOG_LEVEL"] ||= "info"
 require "hanami/prepare"
 require "rspec/collection_matchers"
+require "test_prof/core"
+
+TestProf.configure { it.output = $stderr }
+
+require "test-prof"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!

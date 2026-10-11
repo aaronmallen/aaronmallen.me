@@ -37,11 +37,11 @@ RSpec.describe Analytics::Repos::AnalyticsRollupQueries do
   end
 
   it "keeps the count once the prune takes the day's events", :aggregate_failures do
-    read(today - 120)
+    read(today - 91)
     roll_up
 
     expect(Analytics::Slice["repos.analytics_event_queries"].oldest_day).to be_nil
-    expect(read_throughs(from: today - 120)).to eq("/writing/hello" => 1)
+    expect(read_throughs(from: today - 91)).to eq("/writing/hello" => 1)
   end
 
   it "counts nothing for a day rolled up before the site counted read-throughs" do

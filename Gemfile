@@ -76,5 +76,6 @@ group :test do
   gem "rom-factory"
   gem "rspec-collection_matchers"
   gem "simplecov"
+  gem "test-prof"
   gem "webmock"
 end
