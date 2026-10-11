@@ -25,6 +25,8 @@ module Admin
 
     def github_callback_url = routes.url(:admin_github_callback).to_s
 
+    def google_health_service_callback_url = routes.url(:admin_google_health_service_callback).to_s
+
     def handle_invalid_csrf_token(_request, response)
       halt 403, response.render(rejected_view)
     end

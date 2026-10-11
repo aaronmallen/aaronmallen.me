@@ -89,9 +89,11 @@ module Admin
       repos.sign_in_queries
     ], from: :security
 
+    import keys: %w[google.client], from: :health
+
     import keys: %w[
-      operations.add_connection operations.remove_connection operations.save_app repos.app_queries
-      repos.connection_queries repos.definition_queries
+      operations.add_connection operations.change_connection operations.remove_connection operations.save_app
+      repos.app_queries repos.connection_queries repos.definition_queries
     ], from: :services
 
     import keys: %w[

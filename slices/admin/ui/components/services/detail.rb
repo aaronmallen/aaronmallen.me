@@ -10,10 +10,7 @@ module Admin
 
           def view_template
             Head(title: definition.name, definition:)
-            p(class: "svc-status") do
-              StatusPill(status: @row.status)
-              span(class: "svc-account") { @row.account } if @row.account
-            end
+            status
             powers
             access if definition.oauth? && @row.connection
             credentials
@@ -84,6 +81,14 @@ module Admin
           def scope(scope)
             granted = @row.connection.scopes.include?(scope[:id])
             line(scope[:label], scope[:why]) { held(granted, :green, ".granted", ".not_granted") }
+          end
+
+          def status
+            p(class: "svc-status") do
+              StatusPill(status: @row.status)
+              span(class: "svc-account") { @row.account } if @row.account
+            end
+            Hint { t(".revoked", name: definition.name) } if @row.status == :reconnect
           end
 
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }

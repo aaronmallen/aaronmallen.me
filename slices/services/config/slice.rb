@@ -3,8 +3,8 @@
 module Services
   class Slice < Hanami::Slice
     export %w[
-      operations.add_connection operations.remove_connection operations.save_app repos.app_queries
-      repos.connection_queries repos.definition_queries
+      operations.add_connection operations.change_connection operations.remove_connection operations.save_app
+      repos.app_queries repos.connection_queries repos.definition_queries
     ]
   end
 end

@@ -7,11 +7,17 @@ module Services
 
       commands delete: :by_pk
 
-      stamped_commands :create
+      stamped_commands :create, :update
 
-      def add(credentials:, **columns)
-        create(credentials: Blog::Encryptor.new.seal(JSON.generate(credentials)), **columns)
+      def add(credentials:, **columns) = create(credentials: seal(credentials), **columns)
+
+      def change(id, credentials: nil, **columns)
+        update(id, **(credentials ? { credentials: seal(credentials) } : {}), **columns)
       end
+
+      private
+
+      def seal(credentials) = Blog::Encryptor.new.seal(JSON.generate(credentials))
     end
   end
 end

@@ -16,7 +16,7 @@ module Admin
 
       def call
         connections = connection_queries.all.group_by(&:provider)
-        connected = definition_queries.all.select { !it.connectable? || connections.key?(it.id) }
+        connected = definition_queries.all.select { !it.connectable? || connections.key?(it.id) || unready?(it) }
 
         { pickable: pickable(connections), rows: rows(connected, connections) }
       end
@@ -32,7 +32,7 @@ module Admin
 
       def pickable(connections)
         definition_queries.all.select do |definition|
-          (definition.oauth? || check_service.checks?(definition.id)) &&
+          (definition.oauth? || check_service.checks?(definition.id)) && !unready?(definition) &&
             (definition.multiple || !connections.key?(definition.id))
         end
       end
@@ -44,7 +44,7 @@ module Admin
         Structs::ServiceRow.new(
           key: connection ? connection.id.to_s : definition.id,
           definition:, connection:, env:, jobs:,
-          status: status(definition, env, jobs, bridgy),
+          status: status(definition, connection, env, jobs, bridgy),
         )
       end
 
@@ -57,13 +57,16 @@ module Admin
         end
       end
 
-      def status(definition, env, jobs, bridgy)
+      def status(definition, connection, env, jobs, bridgy)
         return :not_set_up unless env.values.all?
+        return :reconnect if connection&.revoked_at
         return :paused if definition.id == BRIDGY && !bridgy
         return :failing if jobs.any? { it[:failure] }
 
         :connected
       end
+
+      def unready?(definition) = definition.oauth? && !definition.credentials? && !env(definition).values.all?
     end
   end
 end

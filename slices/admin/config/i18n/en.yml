@@ -224,8 +224,9 @@ en:
       declined: "%{name} didn't grant access · nothing was saved"
       disconnected: "%{name} disconnected"
       github_failed: "GitHub didn't answer · nothing was saved"
+      google_health_failed: "Google didn't answer · nothing was saved"
       mastodon_failed: "That server didn't answer as Mastodon · nothing was saved"
-      not_configured: "GitHub sign-in isn't set up, so GitHub can't connect"
+      not_configured: "%{name} sign-in isn't set up, so %{name} can't connect"
       refused: "That sign-in didn't start here or has expired · nothing was saved"
       revoke_token: "%{name} disconnected · revoke its token on GitHub too"
       single: "GitHub takes one account · disconnect it first"
@@ -1556,6 +1557,7 @@ en:
           confirm_disconnect: "Disconnect %{name} (%{account})? Its jobs stop until you connect it again."
           disconnect: "Disconnect"
           open: "Open %{name}"
+          reconnect: "Reconnect"
           test: "Test connection"
         connect:
           fields:
@@ -1591,6 +1593,7 @@ en:
           not_granted: "not granted"
           oauth: "OAuth"
           powers: "Powers"
+          revoked: "%{name} stopped taking the site's token. Reconnect to pick up where it left off."
           set: "set"
           token: "personal access token"
           way: "Signed in with"
@@ -1747,6 +1750,7 @@ en:
         open: "open"
         paused: "paused"
         published: "published"
+        reconnect: "needs reconnect"
         resolved: "resolved"
         scheduled: "scheduled"
         spam: "spam"
@@ -2628,6 +2632,7 @@ en:
           glance: "At a glance"
           groups:
             code: "Code and sign-in"
+            health: "Health"
             infrastructure: "Infrastructure"
             social: "Social"
           heading: "Connected services"

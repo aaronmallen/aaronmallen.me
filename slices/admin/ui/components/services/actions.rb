@@ -8,6 +8,7 @@ module Admin
           ANOTHER_ICON = "fa-solid fa-plus"
           DISCONNECT_ICON = "fa-solid fa-link-slash"
           OPEN_ICON = "fa-solid fa-arrow-up-right-from-square"
+          RECONNECT_ICON = "fa-solid fa-rotate"
           TEST_ICON = "fa-solid fa-plug-circle-check"
 
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
@@ -15,6 +16,7 @@ module Admin
 
           def view_template
             div(class: "svc-actions") do
+              reconnect if @row.status == :reconnect
               test if @connectable && connection
               another if @connectable && definition.multiple
               dashboard
@@ -53,6 +55,12 @@ module Admin
           end
 
           def external = { href: definition.dashboard, **OUTBOUND }
+
+          def reconnect
+            Form(action: path(:admin_connect_service, provider: definition.id)) do
+              Button(small: true, variant: :pri, type: "submit", icon: RECONNECT_ICON) { t(".reconnect") }
+            end
+          end
 
           def test
             Form(action: path(:admin_test_service, id: connection.id)) do

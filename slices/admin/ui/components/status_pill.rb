@@ -13,6 +13,7 @@ module Admin
           failing: [:pink, "fa-solid fa-triangle-exclamation", ".failing"],
           paused: [nil, "fa-solid fa-pause", ".paused"],
           not_set_up: [:orange, "fa-solid fa-circle-exclamation", ".not_set_up"],
+          reconnect: [:pink, "fa-solid fa-rotate", ".reconnect"],
           open: [:orange, "fa-regular fa-circle", ".open"],
           resolved: [:green, "fa-solid fa-circle-check", ".resolved"],
           dropped: [nil, "fa-solid fa-ban", ".dropped"],

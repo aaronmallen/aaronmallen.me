@@ -4,7 +4,8 @@ module Admin
   module Operations
     class CheckService < Blog::Operation
       include Deps[
-        github: "record.github.client", linear: "record.linear.client", networks: "social.networks.all",
+        github: "record.github.client", google_health: "health.google.client", linear: "record.linear.client",
+        networks: "social.networks.all",
       ]
 
       def call(provider, credentials)
@@ -19,7 +20,7 @@ module Admin
 
       def account(client, credentials)
         Success(client.account(**credentials))
-      rescue Record::Error, Social::Error => e
+      rescue Health::Error, Record::Error, Social::Error => e
         Failure[:refused, e.message]
       end
 
@@ -27,6 +28,7 @@ module Admin
         {
           Blog::Types::ServiceProvider["bluesky"] => networks.fetch(Blog::Types::NetworkName["bluesky"]),
           Blog::Types::ServiceProvider["github"] => github,
+          Blog::Types::ServiceProvider["google_health"] => google_health,
           Blog::Types::ServiceProvider["linear"] => linear,
         }
       end

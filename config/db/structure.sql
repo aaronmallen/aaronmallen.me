@@ -3046,7 +3046,8 @@ CREATE TABLE public.service_connections (
     scopes text[] DEFAULT '{}'::text[] NOT NULL,
     last_used_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    revoked_at timestamp with time zone
 );
 
 
@@ -6770,4 +6771,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261010001570_notify_admin_changes_on_security_and_services.rb'),
 ('20261010001731_create_social_post_photos.rb'),
 ('20261010002210_create_short_codes_and_shares.rb'),
-('20261010002450_create_short_links.rb');
+('20261010002450_create_short_links.rb'),
+('20261011120000_add_revoked_at_to_service_connections.rb');

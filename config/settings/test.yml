@@ -20,6 +20,9 @@ github:
   client_id: null
   client_secret: null
   profile_url: https://github.com/aaronmallen
+google_health:
+  client_id: null
+  client_secret: null
 honeybadger:
   api_key: null
 mastodon:
