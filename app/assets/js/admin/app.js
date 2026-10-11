@@ -5,6 +5,7 @@ import { setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
 import { setupDialogs } from "./dialog.js";
 import { setupEditNotes } from "./edit_note.js";
+import { setupFileDrops } from "./file_drop.js";
 import { setupJournals } from "./journal.js";
 import { setupKeys } from "./keys.js";
 import { setupLive } from "./live.js";
@@ -35,6 +36,7 @@ function setup() {
   setupConfirms();
   setupDialogs();
   setupEditNotes();
+  setupFileDrops();
   setupJournals();
   setupKeys();
   setupMessageLabels();

@@ -66,6 +66,8 @@ module Admin
     post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
     post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
     get "/events", to: "events.show", as: :events
+    get "/files", to: "files.index", as: :files
+    post "/files", to: "files.create", as: :create_files
     get "/inbox", to: "inbox.index", as: :inbox
     post(
       "/inbox/messages/:id/mark/:status",

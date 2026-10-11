@@ -10,6 +10,8 @@ module Blog
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
+    SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
+    SHARE_UPLOAD_PATH = "/admin/files"
     TOO_LARGE = 413
     UNSUPPORTED = 415
     UPLOAD_LIMIT = 25 * 1024 * 1024
@@ -19,7 +21,9 @@ module Blog
       UPLOAD_PATH => UPLOAD_LIMIT,
       "/api/v1/photos" => ENCODED_UPLOAD_LIMIT,
       "/mcp" => ENCODED_UPLOAD_LIMIT,
+      SHARE_UPLOAD_PATH => SHARE_UPLOAD_LIMIT,
     }.freeze
+    UPLOAD_PATHS = [UPLOAD_PATH, SHARE_UPLOAD_PATH].freeze
 
     def initialize(app)
       @app = app
@@ -37,7 +41,12 @@ module Blog
 
     def form(request) = FORM_TYPES.include?(request.media_type) ? request.POST : Blog::Constants::EMPTY_HASH
 
-    def limit(request) = (request.post? && UPLOAD_LIMITS[request.path_info]) || BODY_LIMIT
+    def limit(request)
+      return BODY_LIMIT unless request.post?
+      return BODY_LIMIT if UPLOAD_PATHS.include?(request.path_info) && !signed_in?(request)
+
+      UPLOAD_LIMITS.fetch(request.path_info, BODY_LIMIT)
+    end
 
     def readable?(request)
       [::Rack::Utils.unescape_path(request.path_info), request.GET, form(request)].all? { utf8?(it) }
@@ -52,7 +61,11 @@ module Blog
       end
     end
 
-    def upload?(request) = request.post? && request.path_info == UPLOAD_PATH
+    def signed_in?(request)
+      Admin::Slice["auth.session_reader"].call(::Rack::Request.new(request.env.dup)).signed_in?
+    end
+
+    def upload?(request) = request.post? && UPLOAD_PATHS.include?(request.path_info)
 
     def utf8?(value)
       case value

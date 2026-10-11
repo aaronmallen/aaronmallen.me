@@ -60,6 +60,21 @@ en:
       reopened: "Reopened"
       resolved: "Resolved"
       saved: "Decision saved"
+  files_page:
+    toasts:
+      failed:
+        blank: "Nothing uploaded · pick a file first"
+        invalid:
+          one: "Uploaded %{count} file, then one had no name · nothing more was uploaded"
+          other: "Uploaded %{count} files, then one had no name · nothing more was uploaded"
+          zero: "Nothing uploaded · that file had no name"
+        unavailable:
+          one: "Uploaded %{count} file, then the share store stopped answering"
+          other: "Uploaded %{count} files, then the share store stopped answering"
+          zero: "Nothing uploaded · the share store isn't answering"
+      uploaded:
+        one: "Uploaded"
+        other: "%{count} files uploaded"
   inbox_page:
     toasts:
       invalid: "Pick a time first"
@@ -676,6 +691,14 @@ en:
         cancel: "Cancel"
         save: "Save"
         title: "What changed and why"
+      files:
+        tile:
+          copied: "Link copied"
+          copy: "Copy link"
+          downloads:
+            one: "%{downloads} download"
+            other: "%{downloads} downloads"
+          open: "Open %{name}"
       footer:
         version: "Version %{version}"
       github_record:
@@ -933,6 +956,7 @@ en:
           calendar: "calendar"
           clients: "MCP clients"
           decisions: "decisions"
+          files: "files"
           inbox: "waiting"
           journal: "journal"
           messages: "messages"
@@ -2250,6 +2274,28 @@ en:
           kicker: "Decision"
           opened: "opened %{date}"
           problem: "Why it came up"
+      files:
+        index:
+          all: "all"
+          copied: "Uploaded · link copied"
+          drop: "Drop files here to share them, or choose them"
+          empty: "Nothing shared yet. Drop a file above."
+          filter: "Show"
+          heading: "Files"
+          images: "images"
+          lede:
+            one: "%{count} file shared on %{host}, %{size} in all. Anyone with the link can download it."
+            other: "%{count} files shared on %{host}, %{size} in all. Anyone with a link can download it."
+          matches:
+            one: "%{count} match"
+            other: "%{count} matches"
+          no_match: "No files match."
+          other: "other"
+          placeholder: "Search by name, type or short link"
+          search: "Search files"
+          upload: "Upload"
+          upload_failed: "Nothing uploaded · try again"
+          uploading: "Uploading…"
       forms:
         rejected:
           heading: "Form expired"

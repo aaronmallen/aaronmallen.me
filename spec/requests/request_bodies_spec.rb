@@ -112,16 +112,38 @@ RSpec.describe "A request body", type: :request do
   end
 
   describe "a photo upload over 1 MB" do
-    before { post "/admin/photos", photo: file("a" * 2 * megabyte) }
+    before do
+      sign_in_to_admin
+      post "/admin/photos", photo: file("a" * 2 * megabyte)
+    end
 
-    it "reaches the action", :aggregate_failures do
+    it "reaches the action" do
       expect(Rack::Multipart).to have_received(:parse_multipart).at_least(:once)
-      expect(last_response.status).to eq(403)
+    end
+  end
+
+  describe "a photo upload over 1 MB while signed out" do
+    before { post "/admin/photos", { photo: file }, "CONTENT_LENGTH" => ((2 * megabyte) + 1).to_s }
+
+    it_behaves_like "a refusal", 413
+
+    it "parses none of it" do
+      expect(Rack::Multipart).not_to have_received(:parse_multipart)
     end
   end
 
   describe "a photo upload over 25 MB" do
     before { post "/admin/photos", { photo: file }, "CONTENT_LENGTH" => ((25 * megabyte) + 1).to_s }
+
+    it_behaves_like "a refusal", 413
+
+    it "parses none of it" do
+      expect(Rack::Multipart).not_to have_received(:parse_multipart)
+    end
+  end
+
+  describe "a share upload over 1 MB while signed out" do
+    before { post "/admin/files", { files: [file] }, "CONTENT_LENGTH" => ((2 * megabyte) + 1).to_s }
 
     it_behaves_like "a refusal", 413
 

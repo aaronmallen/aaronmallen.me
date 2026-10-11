@@ -1,0 +1,90 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Views
+      module Files
+        class Index < View
+          include Components::Files
+
+          FILTERS = Blog::Types::ShareFilter.values.to_h { [it, "ui.views.files.index.#{it}"] }.freeze
+          FILES_ID = "files-upload"
+          SEARCH_ID = "files-search"
+
+          prop :count, Blog::Types::Integer
+          prop :list, Blog::Types::Hash
+          prop :shares, Blog::Types::Instance(Blog::Structs::Paged)
+          prop :totals, Blog::Types::Hash
+
+          def view_template
+            PageHead(title: t(".heading"), sub:) { filter_form }
+            upload_form
+            search_form
+            @shares.rows.empty? ? Card { Empty { t(empty) } } : grid
+            Pager(page: @shares, route: :admin_files, params: query)
+          end
+
+          private
+
+          def empty = @totals[:count].zero? ? ".empty" : ".no_match"
+
+          def filter = @list[:filter]
+
+          def filter_form
+            AutoForm(action: path(:admin_files)) do
+              input(type: "hidden", name: "search", value: search) if search
+              SegmentedControl(label: t(".filter"), name: "kind", options:, selected: filter)
+            end
+          end
+
+          def grid
+            div(class: "file-grid") { @shares.rows.each { Tile(share: it) } }
+          end
+
+          def options = FILTERS.transform_values { t(it) }
+
+          def query = { kind: filter, search: }.compact
+
+          def search = @list[:search]
+
+          def search_form
+            AutoForm(action: path(:admin_files), role: "search", class: "file-search") do
+              input(type: "hidden", name: "kind", value: filter)
+              SearchField(
+                id: SEARCH_ID, label: t(".search"), name: "search", value: search, placeholder: t(".placeholder"),
+              )
+              Hint { t(".matches", count: @count) } if search
+            end
+          end
+
+          def sub
+            t(
+              ".lede",
+              count: @totals[:count], host: Helpers::ShareLink.host,
+              size: Blog::Helpers::Figures.size(@totals[:bytes]),
+            )
+          end
+
+          def upload_form
+            Form(
+              action: path(:admin_create_files), enctype: "multipart/form-data", class: "file-drop",
+              data: {
+                file_drop: "", file_drop_busy: t(".uploading"), file_drop_copied: t(".copied"),
+                file_drop_failed: t(".upload_failed"),
+              },
+            ) do
+              Icon("fa-solid fa-cloud-arrow-up")
+              label(for: FILES_ID, data: { file_drop_status: true }) { t(".drop") }
+              input(id: FILES_ID, class: "file-drop-input", type: "file", name: "files[]", multiple: true)
+              noscript do
+                Button(type: "submit", small: true, variant: :pri, icon: "fa-solid fa-arrow-up-from-bracket") do
+                  t(".upload")
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+end

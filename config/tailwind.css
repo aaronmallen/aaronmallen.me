@@ -3815,6 +3815,85 @@
   }
 }
 
+@utility file-drop {
+  @apply mb-stack flex flex-wrap items-center justify-center gap-3 rounded-menu border-[1.5px] border-dashed border-line p-[22px];
+  @apply font-mono text-meta text-ink-muted;
+
+  & > i {
+    @apply text-[18px];
+  }
+}
+
+@utility file-drop-on {
+  @apply border-mk-green-text;
+  background: color-mix(in oklab, var(--color-mk-green) 6%, transparent);
+}
+
+@utility file-drop-input {
+  @apply max-w-full cursor-pointer rounded-input font-mono text-badge text-ink admin-focus;
+
+  &::file-selector-button {
+    @apply mr-3 cursor-pointer rounded-full border border-line bg-transparent px-3 py-2 font-mono text-badge text-ink;
+  }
+
+  &:hover::file-selector-button {
+    @apply border-ink-muted;
+  }
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility file-search {
+  @apply mb-4 flex max-w-[520px] flex-wrap items-center gap-2.5;
+
+  & input.inp {
+    @apply w-auto flex-1;
+  }
+
+  & .hint {
+    @apply m-0 whitespace-nowrap;
+  }
+}
+
+@utility file-grid {
+  @apply grid gap-stack;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+
+@utility file-card {
+  @apply flex min-w-0 flex-col overflow-hidden rounded-menu border border-line bg-ground-sunk;
+}
+
+@utility file-card-thumb {
+  @apply flex aspect-[4/3] w-full items-center justify-center border-b border-line bg-wash object-cover text-[36px] text-ink-muted;
+}
+
+@utility file-card-body {
+  @apply flex min-w-0 flex-1 flex-col gap-1.5 px-3.5 pt-3 pb-3.5;
+}
+
+@utility file-card-name {
+  @apply truncate font-display text-[1rem] font-semibold text-ink;
+}
+
+@utility file-card-link {
+  @apply mt-0.5 truncate font-mono text-[12.5px] text-ink-muted;
+}
+
+@utility file-card-meta {
+  @apply flex flex-wrap gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+
+  & > span {
+    @apply whitespace-nowrap;
+  }
+}
+
+@utility file-card-acts {
+  @apply mt-auto flex items-center gap-1.5 pt-1.5;
+}
+
 @utility work-row {
   @apply grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;

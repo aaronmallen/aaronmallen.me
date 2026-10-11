@@ -14,7 +14,7 @@ threads min_threads_count, max_threads_count
 puma_concurrency = Integer(ENV.fetch("HANAMI_WEB_CONCURRENCY", 0))
 puma_cluster_mode = puma_concurrency > 1
 workers puma_concurrency
-http_content_length_limit Blog::ParamsGuard::ENCODED_UPLOAD_LIMIT
+http_content_length_limit Blog::ParamsGuard::SHARE_UPLOAD_LIMIT
 
 if puma_cluster_mode
   before_fork do

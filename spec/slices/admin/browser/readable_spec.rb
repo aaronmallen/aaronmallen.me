@@ -36,7 +36,7 @@ RSpec.describe "Admin screens", type: :feature do
         find(".compose-accounts summary").click
         find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
-    }
+    }.merge(files)
   end
 
   def decision(title, close: nil)
@@ -75,6 +75,18 @@ RSpec.describe "Admin screens", type: :feature do
       "snooze drawer" => -> { open_snooze },
       "task modal" => -> { open_modal },
       "task panel" => -> { open_panel },
+    }
+  end
+
+  def files
+    {
+      "files" => lambda do
+        connect_share_store
+        stub_request(:put, %r{\A#{share_store_url}/})
+        upload_share("%PDF", "deck.pdf", "application/pdf")
+        upload_share("png", "shot.png", "image/png")
+        visit "/admin/files"
+      end,
     }
   end
 

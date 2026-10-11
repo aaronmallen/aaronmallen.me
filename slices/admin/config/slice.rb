@@ -78,6 +78,8 @@ module Admin
 
     import keys: %w[repos.search_queries], from: :search
 
+    import keys: %w[operations.upload_share repos.share_queries], from: :shares
+
     import keys: %w[
       operations.record_sign_in
       repos.sighting_queries
