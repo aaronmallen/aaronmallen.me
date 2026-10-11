@@ -20,10 +20,13 @@ module Admin
 
       def held?(provider, state) = !find(started, provider, state).nil?
 
-      def start(provider, host: nil)
+      def start(provider, host: nil, connection: nil)
         state = SecureRandom.urlsafe_base64(32)
         verifier = SecureRandom.urlsafe_base64(48)
-        entry = { "at" => @now, "host" => host, "provider" => provider, "state" => state, "verifier" => verifier }
+        entry = {
+          "at" => @now, "connection" => connection, "host" => host, "provider" => provider, "state" => state,
+          "verifier" => verifier,
+        }
         @session[KEY] = started.push(entry).last(LIMIT)
 
         { code_challenge: Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false), state: }
@@ -35,7 +38,7 @@ module Admin
         return if matched.nil?
 
         @session[KEY] = held - [matched]
-        matched.slice("host", "verifier") if @now - matched["at"].to_i < LIFETIME
+        matched.slice("connection", "host", "verifier") if @now - matched["at"].to_i < LIFETIME
       end
 
       private

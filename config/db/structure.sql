@@ -6917,4 +6917,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011130100_create_workouts.rb'),
 ('20261011130200_add_health_to_sync_name.rb'),
 ('20261011160000_add_health_to_api_token_scopes.rb'),
-('20261011170000_add_workouts_to_activities.rb');
+('20261011170000_add_workouts_to_activities.rb'),
+('20261011180000_move_google_health_connection_to_google.rb');

@@ -2,22 +2,22 @@
 
 require "oauth2"
 
-module Health
+module Google
   module Providers
-    module GoogleProvider
+    module ClientProvider
       AUTHORIZE_URL = "https://accounts.google.com/o/oauth2/v2/auth"
       TIMEOUT = 10
       TOKEN_URL = "https://oauth2.googleapis.com/token"
 
       class << self
         def client(settings, connection_queries, change_connection)
-          Google::Client.new(oauth: oauth(settings), connection_queries:, change_connection:)
+          Client.new(oauth: oauth(settings), connection_queries:, change_connection:)
         end
 
         private
 
         def oauth(settings)
-          credentials = settings.google_health.values_at(:client_id, :client_secret)
+          credentials = settings.google.values_at(:client_id, :client_secret)
           return unless credentials.all?
 
           OAuth2::Client.new(

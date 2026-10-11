@@ -5,6 +5,8 @@ module Admin
     module Components
       module Services
         class Detail < Component
+          GRANTS = %w[google].freeze
+
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
           prop :connectable, Blog::Types::Bool
 
@@ -38,6 +40,15 @@ module Admin
           end
 
           def definition = @row.definition
+
+          def grant
+            return Pill(color: :orange) { t(".not_granted") } unless GRANTS.include?(definition.id)
+
+            Form(action: path(:admin_connect_service, provider: definition.id)) do
+              input(type: "hidden", name: "connection", value: @row.connection.id)
+              Button(small: true, variant: :gh, type: "submit") { t(".grant") }
+            end
+          end
 
           def held(yes, color, held_key, lacking_key)
             yes ? Pill(color:) { t(held_key) } : Pill(color: :orange) { t(lacking_key) }
@@ -79,8 +90,8 @@ module Admin
           end
 
           def scope(scope)
-            granted = @row.connection.scopes.include?(scope[:id])
-            line(scope[:label], scope[:why]) { held(granted, :green, ".granted", ".not_granted") }
+            granted = scope[:id].split.all? { @row.connection.scopes.include?(it) }
+            line(scope[:label], scope[:why]) { granted ? Pill(color: :green) { t(".granted") } : grant }
           end
 
           def status

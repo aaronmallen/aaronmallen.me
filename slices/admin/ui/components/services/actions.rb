@@ -58,6 +58,7 @@ module Admin
 
           def reconnect
             Form(action: path(:admin_connect_service, provider: definition.id)) do
+              input(type: "hidden", name: "connection", value: connection.id) if connection
               Button(small: true, variant: :pri, type: "submit", icon: RECONNECT_ICON) { t(".reconnect") }
             end
           end

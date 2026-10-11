@@ -35,9 +35,9 @@ github:
   client_id: <%= ENV["GITHUB_CLIENT_ID"].to_json %>
   client_secret: <%= ENV["GITHUB_CLIENT_SECRET"].to_json %>
   profile_url: https://github.com/aaronmallen
-google_health:
-  client_id: <%= ENV["GOOGLE_HEALTH_CLIENT_ID"].to_json %>
-  client_secret: <%= ENV["GOOGLE_HEALTH_CLIENT_SECRET"].to_json %>
+google:
+  client_id: <%= ENV["GOOGLE_CLIENT_ID"].to_json %>
+  client_secret: <%= ENV["GOOGLE_CLIENT_SECRET"].to_json %>
 honeybadger:
   api_key: <%= ENV["HONEYBADGER_API_KEY"].to_json %>
   project_url: <%= ENV["HONEYBADGER_PROJECT_URL"].to_json %>

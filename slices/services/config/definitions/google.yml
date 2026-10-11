@@ -1,0 +1,28 @@
+name: Google
+icon: fa-brands fa-google
+group: health
+auth: oauth
+multiple: true
+dashboard: https://myaccount.google.com/connections
+env:
+  google: [client_id, client_secret]
+powers:
+  - Sleep, heart rate and workouts beside each day's work
+scopes:
+  - id: "openid https://www.googleapis.com/auth/userinfo.email"
+    label: See your address
+    why: Which account mail and events come from
+  - {id: "https://www.googleapis.com/auth/gmail.modify", label: "Read, label and archive mail", why: Mail}
+  - {id: "https://www.googleapis.com/auth/gmail.send", label: Send mail as you, why: Reply and compose on Mail}
+  - id: "https://www.googleapis.com/auth/calendar.events"
+    label: See and edit calendar events
+    why: Events on the calendar
+  - id: "https://www.googleapis.com/auth/googlehealth.activity_and_fitness.readonly"
+    label: Read workouts, steps and activity
+    why: Workouts and zone minutes
+  - {id: "https://www.googleapis.com/auth/googlehealth.sleep.readonly", label: Read sleep, why: Sleep on each day}
+  - id: "https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly"
+    label: Read heart rate and HRV
+    why: Resting heart rate and HRV
+jobs:
+  - {name: Google Health sync, every: every 15 minutes, sync: health}

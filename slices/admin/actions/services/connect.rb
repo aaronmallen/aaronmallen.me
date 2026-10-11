@@ -4,13 +4,13 @@ module Admin
   module Actions
     module Services
       class Connect < Action
-        GOOGLE_HEALTH = Blog::Types::ServiceProvider["google_health"]
+        GOOGLE = Blog::Types::ServiceProvider["google"]
         TOASTS = "services_page.toasts"
 
         include Deps[
           definition_queries: "services.repos.definition_queries",
           github: "github.auth",
-          google_health: "health.google.client",
+          google: "google.google.client",
           mastodon: "mastodon.auth",
           register_mastodon_app: "operations.register_mastodon_app",
         ]
@@ -33,8 +33,7 @@ module Admin
           client, redirect_uri = oauth_client(definition)
           return Failure(:not_configured) unless client.configured?
 
-          started = Auth::ConnectState.new(request.session).start(definition.id)
-          Success(client.connect_url(redirect_uri:, scope:, **started))
+          Success(client.connect_url(redirect_uri:, scope:, **started(request, definition)))
         end
 
         def mastodon_url(request, definition, scope)
@@ -48,7 +47,7 @@ module Admin
         end
 
         def oauth_client(definition)
-          return [google_health, google_health_service_callback_url] if definition.id == GOOGLE_HEALTH
+          return [google, google_service_callback_url] if definition.id == GOOGLE
 
           [github, github_callback_url]
         end
@@ -56,6 +55,11 @@ module Admin
         def refuse(response, reason, name)
           toast(response, "#{TOASTS}.#{reason}", name:)
           response.redirect_to(routes.path(:admin_services))
+        end
+
+        def started(request, definition)
+          connection = Blog::Types::IdParam[request.params[:connection]]
+          Auth::ConnectState.new(request.session).start(definition.id, connection:)
         end
       end
     end

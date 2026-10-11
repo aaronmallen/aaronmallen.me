@@ -166,7 +166,7 @@ module Blog
     ShortLinkSort = Types::String.enum("recent", "clicks")
     ShortLinkSortParam = ShortLinkSort.fallback(ShortLinkSort.values.first)
     ShortCode = Types::String.constrained(format: SLUG_FORMAT)
-    ServiceProvider = Types::String.enum("bluesky", "github", "google_health", "linear", "mastodon")
+    ServiceProvider = Types::String.enum("bluesky", "github", "google", "linear", "mastodon")
     SocialIntent = Types::String.enum("draft", "send")
     SocialIntentParam = SocialIntent.fallback(SocialIntent.values.first)
     SocialMode = Types::String.enum("now", "schedule")

@@ -169,7 +169,7 @@ module Blog
       profile_url?: Value,
     )
 
-    setting :google_health, default: {}, constructor: Schema.schema(client_id?: Value, client_secret?: Value)
+    setting :google, default: {}, constructor: Schema.schema(client_id?: Value, client_secret?: Value)
 
     setting :honeybadger, default: {}, constructor: Schema.schema(
       api_key?: Value,

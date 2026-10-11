@@ -3,12 +3,12 @@
 module Admin
   module Actions
     module Services
-      class GoogleHealthCallback < Action
-        NAME = "Google Health"
-        PROVIDER = Blog::Types::ServiceProvider["google_health"]
+      class GoogleCallback < Action
+        NAME = "Google"
+        PROVIDER = Blog::Types::ServiceProvider["google"]
         TOASTS = "services_page.toasts"
 
-        include Deps[connect_google_health: "operations.connect_google_health"]
+        include Deps[connect_google: "operations.connect_google"]
 
         def handle(request, response)
           started = Auth::ConnectState.new(request.session).take(PROVIDER, request.params[:state])
@@ -26,8 +26,9 @@ module Admin
         private
 
         def connect(started, code)
-          connect_google_health.call(
-            code:, code_verifier: started.fetch("verifier"), redirect_uri: google_health_service_callback_url,
+          connect_google.call(
+            code:, code_verifier: started.fetch("verifier"), redirect_uri: google_service_callback_url,
+            connection: started["connection"],
           )
         end
 

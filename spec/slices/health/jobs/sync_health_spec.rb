@@ -86,7 +86,7 @@ RSpec.describe Health::Jobs::SyncHealth do
   def workouts = Health::Slice["relations.workouts"].to_a.map(&:to_h)
 
   describe "with Google Health connected" do
-    before { connect_google_health }
+    before { connect_google }
 
     describe "a day Google holds" do
       before do
@@ -185,10 +185,26 @@ RSpec.describe Health::Jobs::SyncHealth do
   end
 
   it "records a revoked token as needing a reconnect" do
-    connect_google_health(revoked_at: Time.now)
+    connect_google(revoked_at: Time.now)
     run
 
-    expect(failure).to include(reason: "google_health_failed", message: "Google Health needs a reconnect")
+    expect(failure).to include(reason: "google_health_failed", message: "aaron@example.com needs a reconnect")
+  end
+
+  it "reads from the account that granted Health and leaves the others alone" do
+    connect_google(account_id: "work@example.com", scopes: %w[openid], token: "ya29.work")
+    connect_google
+    stub_google_health.then { run }
+
+    expect(a_request(:any, /health\.googleapis\.com/).with(headers: { "Authorization" => "Bearer ya29.work" }))
+      .not_to have_been_made
+  end
+
+  it "asks Google nothing while no account granted Health" do
+    connect_google(scopes: %w[openid])
+    run
+
+    expect(a_request(:any, /health\.googleapis\.com/)).not_to have_been_made
   end
 
   it "asks Google nothing and records nothing while Google Health is not connected", :aggregate_failures do

@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 module Spec
-  module GoogleHealth
+  module GoogleAccounts
     DATA_TYPES = "https://health.googleapis.com/v4/users/me/dataTypes"
+    HEALTH_SCOPES = %w[sleep activity_and_fitness health_metrics_and_measurements]
+                    .map { "https://www.googleapis.com/auth/googlehealth.#{it}.readonly" }.freeze
     LISTS = %w[sleep daily-resting-heart-rate daily-heart-rate-variability exercise].freeze
     ROLLUPS = %w[steps active-zone-minutes].freeze
 
-    def connect_google_health(revoked_at: nil)
-      set_up_google_health_client
+    def connect_google(account_id: "aaron@example.com", scopes: HEALTH_SCOPES, revoked_at: nil, token: "ya29.token")
+      set_up_google_client
       Services::Slice["repos.connection_mutations"].add(
-        provider: "google_health", account_id: "me", label: "Google account", revoked_at:,
-        credentials: { access_token: "ya29.token", expires_at: Time.now.to_i + 3600, refresh_token: "1//refresh" },
+        provider: "google", account_id:, label: account_id, revoked_at:, scopes:,
+        credentials: { access_token: token, expires_at: Time.now.to_i + 3600, refresh_token: "1//#{account_id}" },
       )
     end
 
@@ -22,15 +24,14 @@ module Spec
 
     def google_time(time) = time.utc.iso8601
 
-    def set_up_google_health_client
-      allow(Hanami.app.settings).to receive(:google_health)
-        .and_return({ client_id: "google-id", client_secret: "google-secret" })
-      Health::Slice.start(:google)
-      client = Health::Providers::GoogleProvider.client(
-        Hanami.app.settings, Health::Slice["services.repos.connection_queries"],
-        Health::Slice["services.operations.change_connection"],
+    def set_up_google_client(credentials = { client_id: "google-id", client_secret: "google-secret" })
+      allow(Hanami.app.settings).to receive(:google).and_return(credentials)
+      ::Google::Slice.start(:google)
+      client = ::Google::Providers::ClientProvider.client(
+        Hanami.app.settings, ::Google::Slice["services.repos.connection_queries"],
+        ::Google::Slice["services.operations.change_connection"],
       )
-      %w[google.client health.google.client].each { replace_component(it, client) }
+      %w[google.client google.google.client].each { replace_component(it, client) }
     end
 
     def stub_google_health(**bodies)
@@ -47,5 +48,5 @@ module Spec
 end
 
 RSpec.configure do |config|
-  config.include Spec::GoogleHealth
+  config.include Spec::GoogleAccounts
 end

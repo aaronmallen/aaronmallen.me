@@ -10,7 +10,7 @@ RSpec.describe Health::Jobs::BackfillHealth do
   def steps_on(date) = { rollupDataPoints: [{ civilStartTime: google_civil(date), steps: { countSum: "5000" } }] }
 
   describe "with Google Health connected" do
-    before { connect_google_health }
+    before { connect_google }
 
     it "stores the 90 days up to the day it starts from" do
       stub_google_health(steps: steps_on(today - 89))
