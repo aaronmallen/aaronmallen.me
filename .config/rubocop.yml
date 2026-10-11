@@ -24,7 +24,8 @@ Hanami/ContainerLookup:
   Enabled: true
 
 Hanami/ProviderTopLevelRequire:
-  Enabled: false
+  Exclude:
+    - config/providers/db.rb
 
 Hanami/SliceExports:
   ForbiddenExports:
