@@ -25,8 +25,9 @@ module Blog
     }.freeze
     UPLOAD_PATHS = [UPLOAD_PATH, SHARE_UPLOAD_PATH].freeze
 
-    def initialize(app)
+    def initialize(app, session_reader)
       @app = app
+      @session_reader = session_reader
       @errors_app = Hanami::Middleware::PublicErrorsApp.new(Hanami.app.root.join(PUBLIC))
     end
 
@@ -62,7 +63,7 @@ module Blog
     end
 
     def signed_in?(request)
-      Admin::Slice["auth.session_reader"].call(::Rack::Request.new(request.env.dup)).signed_in?
+      @session_reader.call(::Rack::Request.new(request.env.dup)).signed_in?
     end
 
     def upload?(request) = request.post? && UPLOAD_PATHS.include?(request.path_info)

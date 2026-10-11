@@ -36,7 +36,7 @@ module Blog
     ]
 
     config.middleware.use Honeybadger::Rack::ErrorNotifier
-    config.middleware.use ParamsGuard
+    config.middleware.use ParamsGuard, ->(request) { Admin::Slice["auth.session_reader"].call(request) }
     config.middleware.use Rack::Static, root: "public", urls: ["/favicon.ico"]
 
     config.settings_store = Hanami::Settings::CompositeStore.new(
