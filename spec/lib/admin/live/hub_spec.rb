@@ -47,7 +47,8 @@ RSpec.describe Admin::Live::Hub do
 
   def terminate_listener
     Sequel.connect(url, keep_reference: false) do |db|
-      listeners = db[:pg_stat_activity].where(application_name: described_class::APPLICATION_NAME)
+      here = { application_name: described_class::APPLICATION_NAME, datname: Sequel.function(:current_database) }
+      listeners = db[:pg_stat_activity].where(here)
       listeners.select_map(Sequel.function(:pg_terminate_backend, :pid))
     end
   end

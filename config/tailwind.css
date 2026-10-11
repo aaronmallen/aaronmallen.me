@@ -1522,7 +1522,7 @@
 
   :where([data-key-row], .decision-option, .journal-entry):is(:hover, :focus-within) &,
   &:focus-within,
-  &:has([open], [aria-current="true"]) {
+  &:has([open], [aria-current="true"], [data-confirm-ask]) {
     @apply opacity-100;
   }
 

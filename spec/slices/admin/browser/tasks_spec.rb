@@ -1008,7 +1008,10 @@ RSpec.describe "Admin tasks", type: :feature do
     end
 
     describe "a refused link" do
-      before { find_task("elixir") }
+      before do
+        find_task("elixir")
+        find(".task-link-target", text: "Learn Elixir")
+      end
 
       def error = find("#task-#{task.id}-link-other-id-error")
 
@@ -1020,7 +1023,6 @@ RSpec.describe "Admin tasks", type: :feature do
       end
 
       it "says a task cannot link to itself" do
-        find(".task-link-target", text: "Learn Elixir")
         page.execute_script("document.querySelector('.task-link-target').value = arguments[0]", task.id.to_s)
         pick("Learn Elixir")
 
