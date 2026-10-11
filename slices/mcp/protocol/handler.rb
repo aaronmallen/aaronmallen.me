@@ -68,7 +68,8 @@ module MCP
         "leave them for the owner in the admin. Make any change the admin makes, save minting and revoking API tokens",
         "and MCP clients. The write permission grants edits, publish grants publishing posts and sending social posts,",
         "and delete grants every tool that removes a record for good. A published post or a sent social post cannot be",
-        "called back. The tool list holds only what this connection was granted.",
+        "called back. Only the health permission grants the owner's health days, workouts and their patterns. The",
+        "tool list holds only what this connection was granted.",
         Tools::Untrusted::WARNING,
       ].join(" ").freeze
       PROMPTS = [Prompts::Proofread, Prompts::Report].freeze
@@ -158,6 +159,7 @@ module MCP
         Tools::ReadCommit,
         Tools::ReadCurrentSprint,
         Tools::ReadDecision,
+        Tools::ReadHealthDays,
         Tools::ReadJournalEntry,
         Tools::ReadMessage,
         Tools::ReadPerson,

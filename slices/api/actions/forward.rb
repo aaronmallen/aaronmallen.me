@@ -5,12 +5,13 @@ module API
   module Actions
     class Forward < Action
       DELETE = Blog::Types::OAuthScope["delete"]
+      HEALTH = Blog::Types::OAuthScope["health"]
       PARAMS = { "array" => Blog::Types::ListParam, "integer" => Blog::Types::IntegerParam }.freeze
       PUBLISH = Blog::Types::OAuthScope["publish"]
       SCOPES = {
         "delete_messages" => DELETE, "delete_posts" => DELETE, "delete_tasks" => DELETE,
-        "drop_sprint" => WRITE, "publish_post" => PUBLISH, "send_social_post" => PUBLISH,
-        "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
+        "drop_sprint" => WRITE, "publish_post" => PUBLISH, "read_health_days" => HEALTH,
+        "send_social_post" => PUBLISH, "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
       }.freeze
 
       include Deps[build_document: "operations.build_document"]

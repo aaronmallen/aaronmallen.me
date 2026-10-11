@@ -34,6 +34,7 @@ RSpec.describe "MCP tool scopes", type: :request do
         update_social_post update_webmention_settings update_work_session upload_photo wake_inbox_row write_post_seo
       ],
       "publish" => %w[publish_post send_social_post],
+      "health" => %w[read_health_days],
       "delete" => %w[
         delete_decision_comment delete_decision_option delete_journal_entry delete_messages delete_person delete_post
         delete_posts delete_saved_view delete_social_post delete_task delete_task_comment delete_task_rule

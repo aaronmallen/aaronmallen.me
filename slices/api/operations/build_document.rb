@@ -122,6 +122,7 @@ module API
         ["update_task_rule", "patch", "/task_rules/{id}", OK],
         ["delete_task_rule", "delete", "/task_rules/{id}", OK],
         ["read_saved_view", "get", "/saved_views/{id}/records", OK],
+        ["read_health_days", "get", "/health/days", OK],
         ["read_time_report", "get", "/time_report", OK],
         ["list_webmentions", "get", "/webmentions", OK],
         ["approve_webmentions", "post", "/webmentions/bulk/approve", OK],

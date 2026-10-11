@@ -2345,6 +2345,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_sync_state" => {},
         "read_tag" => { name: "ruby" },
         "read_task" => { id: 1 },
+        "read_health_days" => { from: "2026-01-01", to: "2026-01-31" },
         "read_time_report" => { from: "2026-01-01", to: "2026-12-31" },
         "read_webmention" => { id: 1 },
         "read_webmention_settings" => {},

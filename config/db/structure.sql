@@ -1807,7 +1807,7 @@ CREATE TABLE public.api_tokens (
     scopes text[] DEFAULT '{read,suggest,write,publish,delete}'::text[] NOT NULL,
     expires_at timestamp with time zone,
     CONSTRAINT api_tokens_name_length_check CHECK ((char_length((name)::text) <= 100)),
-    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete}'::text[])))
+    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete,health}'::text[])))
 );
 
 
@@ -6896,4 +6896,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011120000_add_revoked_at_to_service_connections.rb'),
 ('20261011130000_create_health_days.rb'),
 ('20261011130100_create_workouts.rb'),
-('20261011130200_add_health_to_sync_name.rb');
+('20261011130200_add_health_to_sync_name.rb'),
+('20261011160000_add_health_to_api_token_scopes.rb');

@@ -2216,8 +2216,9 @@ en:
           placeholder: "Name the client that will use it…"
           scope:
             delete: "Delete records for good"
+            health: "Read health data"
             publish: "Publish posts and send social posts"
-            read: "Read every record"
+            read: "Read every record but health data"
             suggest: "Suggest edits"
             write: "Make changes short of publishing and deleting"
           scopes: "Permissions"

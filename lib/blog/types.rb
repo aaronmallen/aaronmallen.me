@@ -97,7 +97,7 @@ module Blog
     OAuthDecisionParam = OAuthDecision.fallback(OAuthDecision.values.first)
     OAuthGrantType = Types::String.enum("authorization_code", "refresh_token")
     OAuthResponseType = Types::String.enum("code")
-    OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete")
+    OAuthScope = Types::String.enum("read", "suggest", "write", "publish", "delete", "health")
     OAuthTokenAuthMethod = Types::String.enum("none")
     OAuthTokenType = Types::String.enum("access", "refresh")
     OpenTaskStatus = Types::String.enum("open", "in_progress")

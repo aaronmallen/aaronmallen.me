@@ -27,6 +27,8 @@ module API
       operations.reopen_decision operations.resolve_decision repos.decision_queries
     ], from: :decisions
 
+    import keys: %w[repos.health_queries], from: :health
+
     import keys: %w[operations.link_records operations.unlink_records repos.record_link_queries], from: :links
 
     import keys: %w[operations.upload_photo], from: :media
@@ -97,7 +99,8 @@ module API
       endpoints.mark_messages_read endpoints.mark_messages_unread endpoints.mark_task_seen
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
-      endpoints.read_current_sprint endpoints.read_decision endpoints.read_journal_entry endpoints.read_person
+      endpoints.read_current_sprint endpoints.read_decision endpoints.read_health_days endpoints.read_journal_entry
+      endpoints.read_person
       endpoints.read_post endpoints.read_project endpoints.read_pull_request endpoints.read_review
       endpoints.read_saved_view
       endpoints.read_social_post endpoints.read_tag endpoints.read_task endpoints.read_time_report
