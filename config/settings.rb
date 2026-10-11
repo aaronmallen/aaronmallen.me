@@ -201,6 +201,8 @@ module Blog
       username?: Value,
     )
 
+    setting :share_site, default: {}, constructor: Schema.schema(url: SiteUrl)
+
     setting :share_store, default: {}, constructor: object_store
 
     setting :site, default: {}, constructor: Schema.schema(url: SiteUrl)
@@ -228,6 +230,8 @@ module Blog
       host = Blog::Types::Normalized::Host
       host.call(url) { return false } == host.call(site[:url]) { nil }
     end
+
+    def share_host = URI(share_site[:url]).host
 
     def site_origin = URI(site[:url]).origin
 

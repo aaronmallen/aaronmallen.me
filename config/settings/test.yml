@@ -41,6 +41,8 @@ redis:
   reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
   timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
+share_site:
+  url: http://shares.localhost
 share_store:
   access_key: null
   bucket: null

@@ -12,6 +12,13 @@ module Shares
         key
       end
 
+      def stream(key, range: nil, &)
+        return unless configured?
+
+        request { connection.get_object({ bucket:, key:, range: }.compact, &) }
+        nil
+      end
+
       private
 
       def failure = "The share store failed"
