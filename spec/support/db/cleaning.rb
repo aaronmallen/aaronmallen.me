@@ -17,8 +17,8 @@ RSpec.configure do |config|
   config.before :suite do
     all_databases.call.each do |db|
       name = db.opts[:database]
-      unless name.match?(/_test(_\d+)?\z/)
-        raise "#{name} does not end in _test or _test_<id>, so the suite will not empty it"
+      unless name.match?(/_test(_\d+)?(_w\d+)?\z/)
+        raise "#{name} does not end in _test, _test_<id> or either with _w<n>, so the suite will not empty it"
       end
 
       Spec::DB::Locks.hold_suite(db)

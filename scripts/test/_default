@@ -10,5 +10,4 @@ if ! scripts/util/check_libvips; then
 fi
 
 scripts/assets/build
-scripts/test/prepare
-scripts/util/ensure_postgres bundle exec rspec --require spec_helper "$@"
+exec scripts/test/ruby "$@"

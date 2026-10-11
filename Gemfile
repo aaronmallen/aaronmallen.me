@@ -71,6 +71,7 @@ group :test do
   gem "cuprite"
   gem "database_cleaner-sequel"
   gem "faker"
+  gem "parallel_tests"
   gem "rack-test"
   gem "rom-factory"
   gem "rspec-collection_matchers"

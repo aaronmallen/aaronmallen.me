@@ -168,7 +168,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     before { open_day(day) }
 
     it "says it failed and leaves the post where it was", :aggregate_failures do
-      Posts::Slice["repos.post_mutations"].delete(scheduled.id)
+      execute_script("arguments[0].closest('form').action = '/admin/calendar/posts/0/move'", grip("Hold still"))
       drag("Hold still", cell(target))
 
       expect(page).to have_css(".toast-failed", text: translate("ui.components.calendar.move_form.failed"))

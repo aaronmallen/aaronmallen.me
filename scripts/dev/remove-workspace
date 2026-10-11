@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-#MISE description="Drop a workspace's test database, forget the workspace and delete its directory"
+#MISE description="Drop a workspace's test databases, forget the workspace and delete its directory"
 #USAGE arg "<id>" help="The number the workspace was created with"
 
 set -e
@@ -13,6 +13,6 @@ esac
 
 id="$1"
 
-HANAMI_ENV="test" WORKSPACE_ID="$id" scripts/db/drop
+HANAMI_ENV="test" WORKSPACE_ID="$id" bundle exec parallel_test --exec scripts/db/drop
 jj workspace forget "ws${id}"
 rm -rf ".claude/worktrees/ws${id}"
