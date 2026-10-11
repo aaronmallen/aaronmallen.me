@@ -16,6 +16,7 @@ export function setupLive() {
   if (started || !url) return;
 
   started = true;
+  const untouched = trackEdits();
   let next = null;
 
   const morph = () => {
@@ -24,7 +25,8 @@ export function setupLive() {
     for (const selector of PARTS) {
       const now = document.querySelector(selector);
       const drawn = next.querySelector(selector);
-      if (now && drawn) Idiomorph.morph(now, drawn, { ignoreActiveValue: true });
+      if (now && drawn)
+        Idiomorph.morph(now, drawn, { ignoreActiveValue: true, callbacks: { beforeNodeMorphed: untouched } });
     }
 
     next = null;
@@ -41,6 +43,24 @@ export function setupLive() {
 
   document.addEventListener("close", morph, true);
   listen(url, () => refetch.later());
+}
+
+function trackEdits() {
+  const edits = new WeakSet();
+
+  document.addEventListener("input", (event) => edits.add(event.target), true);
+  document.addEventListener(
+    "reset",
+    (event) => {
+      for (const control of event.target.elements) edits.delete(control);
+    },
+    true,
+  );
+
+  return (node) => {
+    const controls = node instanceof HTMLFormElement ? [...node.elements] : [node];
+    return !controls.some((control) => edits.has(control));
+  };
 }
 
 function listen(url, changed) {

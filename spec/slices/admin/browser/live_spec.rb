@@ -108,6 +108,26 @@ RSpec.describe "Admin pages that stay live", type: :feature do
     end
   end
 
+  describe "while a draft has unsaved edits" do
+    before do
+      live "/admin/posts/new"
+      fill_in "Title", with: "A fresh title"
+      fill_in "Body", with: "Hello there"
+      execute_script("document.activeElement.blur()")
+      create(:message)
+      assert_selector ".top-bar .pill-nav-dot"
+    end
+
+    it "keeps every edited field", :aggregate_failures do
+      expect(find_field("Title").value).to eq("A fresh title")
+      expect(find_field("Body").value).to eq("Hello there")
+    end
+
+    it "keeps what the editor drew from them" do
+      expect(page).to have_css("[data-editor-words]", exact_text: "2 words")
+    end
+  end
+
   describe "while a dialog is open" do
     let(:message) { create(:message) }
 
