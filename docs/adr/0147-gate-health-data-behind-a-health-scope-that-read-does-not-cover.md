@@ -5,7 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, admin, api, mcp]
 issue: "#1112"
-amended: ["#1118"]
+amended: ["#1118", "#1123"]
 tags: [health, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -62,5 +62,8 @@ a refresh never widens a grant (ADR 0061). The refusal names the scope.
 The `read_activity` endpoint checks a scope itself, where every other check sits in `ScopedServer` or
 `API::Action#require_scope`. A later endpoint on `read` that joins health rows has to make the same check or name
 `health`, and nothing but its specs will catch one that forgets.
+
+Since #1123, ADR 0151 gates mail the same way, behind a `mail` scope, and `read` endpoints drop mail threads as
+they drop workouts.
 
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

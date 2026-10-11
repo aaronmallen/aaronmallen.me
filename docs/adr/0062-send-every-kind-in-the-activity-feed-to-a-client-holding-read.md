@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [mcp, activity]
 issue: AA-426
-amended: [AA-434, AA-811, AA-824, "#935", "#941"]
+amended: [AA-434, AA-811, AA-824, "#935", "#941", "#1123"]
 tags: [mcp, oauth, scopes, activity, journal, commits, privacy]
 ---
 
@@ -40,6 +40,9 @@ to one.
 Every kind in the view crosses, and neither tool cuts one out. The view and `Blog::Types::ActivityKind` say what
 those kinds are; #935 stopped listing them here, since the feed had grown task comments, work sessions, decision
 events and comments, and pull requests past the list. A report on a date range reads one feed.
+
+Two kinds now need a scope of their own. ADR 0147 keeps workouts from a token without `health`, and since #1123
+ADR 0151 keeps mail threads, contact messages among them, from a token without `mail`.
 
 A commit crosses whole: repository, sha, full message, additions and deletions, private and employer
 repositories included. A subject line is not what a review reads.
