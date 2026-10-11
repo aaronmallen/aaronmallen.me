@@ -11,6 +11,8 @@ module MCP
     OK = 200
     REJECTED = 400
 
+    include Deps["settings"]
+
     private
 
     def allow_any_origin(response)
@@ -19,7 +21,7 @@ module MCP
 
     def cross_origin? = true
 
-    def issuer = Hanami.app.settings.site_url.chomp("/")
+    def issuer = settings.site_url.chomp("/")
 
     def reject_json(response) = render_json(response, { error: INVALID_REQUEST }, status: REJECTED)
 

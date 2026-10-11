@@ -239,7 +239,7 @@ module MCP
 
       def context(oauth_client_id)
         endpoints = CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }
-        endpoints.merge(oauth_client_id:)
+        endpoints.merge(oauth_client_id:, settings:)
       end
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
@@ -253,6 +253,7 @@ module MCP
       def server(scopes, oauth_client_id)
         ScopedServer.new(
           configuration: Configuration.new(exception_reporter: method(:report)),
+          descriptions: { Tools::ReadAnalytics.name_value => Tools::ReadAnalytics.described(settings.analytics) },
           instructions: format(INSTRUCTIONS, owner),
           name:,
           prompts: PROMPTS,

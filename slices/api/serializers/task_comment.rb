@@ -20,7 +20,7 @@ module API
       schema_attributes
       stamps :created_at, :updated_at
 
-      def author(comment) = comment.remote_id ? comment.author : Hanami.app.settings.owner_name
+      def author(comment) = comment.remote_id ? comment.author : params.fetch(:owner)
 
       def source(comment) = comment.provider || LOCAL
     end

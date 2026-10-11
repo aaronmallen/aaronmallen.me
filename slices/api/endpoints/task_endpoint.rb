@@ -41,7 +41,8 @@ module API
       def sprint_past = invalid(sprint_on: [Tasks::SPRINT_PAST])
 
       def task_reply(task, **extra)
-        comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id))
+        comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id),
+                              owner: settings.owner_name)
 
         record_links = linked(KIND, task.id)
 

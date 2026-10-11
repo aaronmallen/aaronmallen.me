@@ -18,7 +18,7 @@ module API
 
       def handle(id:, body:)
         case add_task_comment.call(id, { body: })
-          in Success(comment) then Success(serialized(Serializers::TaskComment, comment))
+          in Success(comment) then Success(serialized(Serializers::TaskComment, comment, owner: settings.owner_name))
           in Failure(:not_found) then not_found(Helpers::Wording.missing("task", id))
           in Failure[:invalid, errors] then rejected(errors, Tasks::COMPLAINTS)
           else failed(Helpers::Wording::UNSAVED)

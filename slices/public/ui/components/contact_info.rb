@@ -11,6 +11,8 @@ module Public
           bluesky: [Blog::Constants::NETWORK_ICONS.fetch("bluesky"), ".elsewhere.bluesky"].freeze,
         }.freeze
 
+        include Deps["settings"]
+
         def view_template
           dl(class: "ci") do
             row(".where.heading") { where }
@@ -24,7 +26,7 @@ module Public
 
         def elsewhere
           ul(class: "links") do
-            Profiles.call(*PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
+            Profiles.call(settings, *PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
           end
         end
 

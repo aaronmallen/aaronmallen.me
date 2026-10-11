@@ -13,10 +13,12 @@ module API
         "unlink_records" => WRITE, "unlink_task" => WRITE, "untag_decision" => WRITE,
       }.freeze
 
+      include Deps[build_document: "operations.build_document"]
+
       def self.route(operation) = ->(env) { new(operation:).call(env) }
 
       def initialize(operation:, **)
-        @descriptor = Operations::BuildDocument.descriptor(operation)
+        @operation = operation
         @endpoint = Slice["endpoints.#{operation}"]
         super(**)
       end
@@ -31,7 +33,7 @@ module API
 
       private
 
-      attr_reader :descriptor, :endpoint
+      attr_reader :endpoint, :operation
 
       def body(request, response)
         parsed = request.env.fetch(ACTION_PARSED_BODY, Blog::Constants::EMPTY_HASH)
@@ -40,6 +42,8 @@ module API
         response.format = :json
         halt BAD_REQUEST, JSON.generate(NOT_AN_OBJECT)
       end
+
+      def descriptor = build_document.descriptor(operation)
 
       def input(request, response)
         found = names.filter_map { |name| request.params[name]&.then { [name.to_s, param(name, it)] } }.to_h

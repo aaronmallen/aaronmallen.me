@@ -4,13 +4,15 @@ module MCP
   module UI
     module Layouts
       class Application < Blog::UI::Layouts::Application
+        include Deps["settings"]
+
         def view_template(&)
           document { body { main(id: "main", class: "adm-main", &) } }
         end
 
         private
 
-        def page_title = t(".title", owner: Hanami.app.settings.owner_name)
+        def page_title = t(".title", owner: settings.owner_name)
 
         def render_head
           super

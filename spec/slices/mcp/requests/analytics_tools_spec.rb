@@ -270,6 +270,15 @@ RSpec.describe "MCP analytics tools", :frozen_clock, type: :request do
     it "gives zero to a page no one read through" do
       expect(read(path: "/writing/quiet").fetch("totals").fetch("read_throughs")).to eq(0)
     end
+
+    it "names the site's read-through depth and seconds in the tool's description" do
+      headers = { "CONTENT_TYPE" => "application/json", "HTTP_AUTHORIZATION" => "Bearer #{mcp_access_token}" }
+      post "/mcp", JSON.generate(jsonrpc: "2.0", id: 1, method: "tools/list"), headers
+      tools = JSON.parse(last_response.body).dig("result", "tools")
+      described = tools.find { it.fetch("name") == "read_analytics" }.fetch("description")
+
+      expect(described).to include("scrolled at least 75% down a page and read it for at least 30 seconds")
+    end
   end
 
   describe "read_analytics weekday_hours" do

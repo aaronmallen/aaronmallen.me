@@ -8,6 +8,8 @@ module Analytics
       RETENTION_DAYS = 90
       WEEKDAYS = (1..7)
 
+      include Deps["settings"]
+
       def complete_from
         [oldest_day, retention_start].compact.min
       end
@@ -111,7 +113,7 @@ module Analytics
           page_referrers: window.page_counts_by(:referrer_host, as: :host).to_a.map(&:to_h),
           page_countries: window.page_countries.to_a.map(&:to_h),
           scroll_depths: window.known(:scroll_depth).page_counts_by(:scroll_depth).to_a.map(&:to_h),
-          read_throughs: window.read_throughs_by_path.to_a.to_h { [it.path, it.read_throughs] },
+          read_throughs: read_throughs(window).to_a.to_h { [it.path, it.read_throughs] },
           **clicks(window),
         }
       end
@@ -120,6 +122,12 @@ module Analytics
         rows = analytics_events.between(from, to).counts_by(:path).to_a.map(&:to_h)
 
         rows.sort_by { [-it.fetch(:views), it.fetch(:path)] }
+      end
+
+      def read_throughs(window)
+        depth, seconds = settings.analytics.values_at(:read_through_scroll_depth, :read_through_seconds)
+
+        window.read_throughs_by_path(scroll_depth: depth, read_seconds: seconds)
       end
 
       def scoped(window, path) = path ? window.for_path(path) : window

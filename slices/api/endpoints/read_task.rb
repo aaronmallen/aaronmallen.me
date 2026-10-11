@@ -23,7 +23,10 @@ module API
         task = task_queries.detailed(id)
         return not_found(Helpers::Wording.missing("task", id)) if task.nil?
 
-        task_reply(task, timeline: task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it) })
+        owner = settings.owner_name
+        timeline = task_queries.timeline(task.id).map { serialized(SERIALIZERS.fetch(it.kind), it, owner:) }
+
+        task_reply(task, timeline:)
       end
     end
   end

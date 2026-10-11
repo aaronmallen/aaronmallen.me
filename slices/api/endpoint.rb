@@ -12,6 +12,7 @@ module API
     UNAVAILABLE = false
 
     include Dry::Monads[:result]
+    include Deps["settings"]
 
     def self.checker = @checker ||= JSONSchemer.schema(JSON.parse(JSON.generate(self::SCHEMA)))
 
@@ -46,7 +47,7 @@ module API
 
     def not_found(message) = Failure(Structs::Refusal.not_found(message))
 
-    def page_of(number) = Helpers::Page.of(number)
+    def page_of(number) = Helpers::Page.of(number, settings)
 
     def rejected(errors, table)
       complaints = Helpers::Wording.complaints(errors, table)

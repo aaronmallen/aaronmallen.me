@@ -24,7 +24,7 @@ module Public
         def icons = ICONS.map { |source, sizes| { src: assets[source].url, sizes:, type: ICON_TYPE } }
 
         def manifest
-          name = Hanami.app.settings.owner_name
+          name = settings.owner_name
           { name:, short_name: name, start_url: "/", display: "minimal-ui", icons: }
         end
       end

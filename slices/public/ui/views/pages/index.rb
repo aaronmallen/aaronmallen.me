@@ -10,10 +10,12 @@ module Public
           prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :projects, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
+          include Deps["settings"]
+
           def view_template
             head_wording
-            content_for(:social_title, Hanami.app.settings.owner_name)
-            content_for(:structured_data, StructuredData.site)
+            content_for(:social_title, settings.owner_name)
+            content_for(:structured_data, StructuredData.new.site)
 
             h1(class: "sr-only") { t(".heading") }
             div(class: "g") do

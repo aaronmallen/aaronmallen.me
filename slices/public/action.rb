@@ -51,7 +51,7 @@ module Public
       return !SAME_ORIGIN_FETCHES.include?(fetch_site) if fetch_site
 
       origin = request.get_header("HTTP_ORIGIN")
-      !origin.nil? && origin != Hanami.app.settings.site_origin
+      !origin.nil? && origin != settings.site_origin
     end
 
     def halt_if_feed_unchanged(request, response, version)

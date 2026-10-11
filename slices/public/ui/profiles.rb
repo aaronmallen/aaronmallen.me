@@ -5,9 +5,9 @@ module Public
     module Profiles
       module_function
 
-      def call(*networks)
+      def call(settings, *networks)
         networks
-          .to_h { [it, Hanami.app.settings.public_send(it)[:profile_url]] }
+          .to_h { [it, settings.public_send(it)[:profile_url]] }
           .select { |_, url| Blog::Types::Url.valid?(url) }
       end
     end

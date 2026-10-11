@@ -13,8 +13,6 @@ module MCP
       RAW_REFUSAL = "hours, since, read_spread and navigation read raw visits, which the site keeps for " \
                     "#{RAW_DAYS} days; start from or since inside them to get these. The daily counts still " \
                     "hold".freeze
-      READ_THROUGH_DEPTH, READ_THROUGH_SECONDS =
-        Hanami.app.settings.analytics.values_at(:read_through_scroll_depth, :read_through_seconds)
       REF = Analytics::Operations::TagRef::KEY
       SINCE_REFUSAL = "give since as an ISO 8601 time, such as 2026-10-01T09:00:00-05:00"
       TOP = 25
@@ -33,8 +31,8 @@ module MCP
       description "Read the site's analytics over a range: total views, visitors and seconds read, views and " \
                   "visitors day by day, the top #{TOP} paths by views, and the top #{TOP} referrers and countries by " \
                   "visitors, each with its views and visitors. " \
-                  "A read-through is a visitor who scrolled at least #{READ_THROUGH_DEPTH}% " \
-                  "down a page and read it for at least #{READ_THROUGH_SECONDS} seconds, counted " \
+                  "A read-through is a visitor who scrolled at least %<read_through_scroll_depth>s%% " \
+                  "down a page and read it for at least %<read_through_seconds>s seconds, counted " \
                   "once per page and day by the daily hash. Totals give read_throughs across the range, and each " \
                   "top path gives its own. Days rolled up before the site counted read-throughs add none. " \
                   "weekday_hours gives the visitors in each #{Blog::TimeZone::NAME} hour of each weekday over " \
@@ -90,7 +88,7 @@ module MCP
                   "final, true once the count can no longer change. readers is null for a post that went out " \
                   "too long before the site began counting. " \
                   "A page's scroll gives the views that tracked scrolling and, for each depth of " \
-                  "#{Blog::Types::ScrollDepth.values.select(&:positive?).join(', ')}%, the views that scrolled at " \
+                  "#{Blog::Types::ScrollDepth.values.select(&:positive?).join(', ')}%%, the views that scrolled at " \
                   "least that far and their share of those views, null when no view tracked it. Scroll depth is " \
                   "kept forever, and views from before the site tracked it are left out. " \
                   "hours gives views and visitors for each #{Blog::TimeZone::NAME} hour of the range that had a " \
@@ -129,6 +127,8 @@ module MCP
             in Failure(message) then refuse(message)
           end
         end
+
+        def described(analytics) = format(description_value, analytics)
 
         private
 

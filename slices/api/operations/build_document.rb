@@ -229,13 +229,6 @@ module API
 
       include Deps["inflector"]
 
-      def self.descriptor(id)
-        _, verb, path, status = OPERATIONS.assoc(id)
-        source = SOURCES.fetch(id) { Endpoints.const_get(Hanami.app.inflector.camelize(id)) }
-
-        Descriptor.new(id:, verb:, path:, status:, source:)
-      end
-
       def self.json(schema) = { JSON_TYPE => { schema: } }
 
       def call
@@ -249,6 +242,13 @@ module API
         }
       end
 
+      def descriptor(id)
+        _, verb, path, status = OPERATIONS.assoc(id)
+        source = SOURCES.fetch(id) { Endpoints.const_get(inflector.camelize(id)) }
+
+        Descriptor.new(id:, verb:, path:, status:, source:)
+      end
+
       private
 
       def components
@@ -260,7 +260,7 @@ module API
       end
 
       def paths
-        OPERATIONS.map { BuildDocument.descriptor(it.first) }.each_with_object({}) do |row, found|
+        OPERATIONS.map { descriptor(it.first) }.each_with_object({}) do |row, found|
           found[row.path] = found.fetch(row.path, {}).merge(row.verb => row.to_h(summary: inflector.humanize(row.id)))
         end
       end

@@ -7,7 +7,8 @@ module MCP
       RECONNECT = "%s needs the %s permission, and this connection was never granted it. " \
                   "Connect the app again to grant it"
 
-      def initialize(scopes:, tools: [], **)
+      def initialize(scopes:, descriptions: {}, tools: [], **)
+        @descriptions = descriptions
         @withheld = tools.reject { scopes.include?(it.scope_value) }.to_h { [it.name_value, it] }
 
         super(tools: tools - @withheld.values, **)
@@ -22,6 +23,12 @@ module MCP
         raise RequestHandlerError.new(
           format(RECONNECT, withheld.name_value, withheld.scope_value), request, error_type: :invalid_params,
         )
+      end
+
+      def list_tools(request)
+        super.tap do |listed|
+          listed[:tools].each { |tool| tool[:description] = @descriptions.fetch(tool[:name], tool[:description]) }
+        end
       end
     end
   end

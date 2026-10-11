@@ -16,9 +16,11 @@ module Admin
 
           prop :settings, Blog::Types::Array.of(Blog::Types::Instance(Structs::Section))
 
+          include Deps[app_settings: "settings"]
+
           def view_template
             button(type: "button", class: "avatar", popovertarget: ID, aria: { label: t(".label") }) do
-              plain Hanami.app.settings.owner_name[0]
+              plain app_settings.owner_name[0]
             end
 
             div(id: ID, class: "avatar-menu", popover: "auto") { entries }

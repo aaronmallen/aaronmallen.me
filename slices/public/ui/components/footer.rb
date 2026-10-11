@@ -12,6 +12,8 @@ module Public
 
         prop :year, Blog::Types::Integer
 
+        include Deps["settings"]
+
         def view_template
           footer(class: "site-footer") do
             div(class: "site-footer-content") do
@@ -47,7 +49,7 @@ module Public
               plain t(".copyright", year: @year)
               whitespace
               a(class: "site-footer-text-link p-name u-url u-uid", href: path(:root), rel: "me") do
-                Hanami.app.settings.owner_name
+                settings.owner_name
               end
             end
           end
@@ -56,7 +58,9 @@ module Public
         def identity
           span(class: "site-footer-group h-card") do
             copyright
-            Profiles.call(*PROFILES.keys).each { |network, href| profile_link(href, *PROFILES.fetch(network)) }
+            Profiles.call(settings, *PROFILES.keys).each do |network, href|
+              profile_link(href, *PROFILES.fetch(network))
+            end
           end
         end
 

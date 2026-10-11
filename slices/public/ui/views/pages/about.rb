@@ -19,6 +19,8 @@ module Public
 
           prop :work_entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
+          include Deps["settings"]
+
           def view_template
             head_wording
 
@@ -59,7 +61,7 @@ module Public
               p { t(".cta.body") }
               ul(class: "links") do
                 li { link(path(:contact), "fa-solid fa-envelope", t(".cta.links.contact")) }
-                Profiles.call(*PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
+                Profiles.call(settings, *PROFILES.keys).each { |network, href| profile(href, *PROFILES.fetch(network)) }
               end
             end
           end

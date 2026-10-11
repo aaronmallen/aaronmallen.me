@@ -23,13 +23,6 @@ module Analytics
       MEDIAN_READ = Sequel.function(:percentile_cont, 0.5).within_group(:read_seconds)
       NEWEST_FIRST = Sequel.desc(:occurred_at)
       REACH = Sequel.function(:count, :month_visitor_hash).distinct
-      READ_THROUGH = Hanami.app.settings.analytics.then do |analytics|
-        Sequel.&(
-          Sequel[:scroll_depth] >= analytics[:read_through_scroll_depth],
-          Sequel[:read_seconds] >= analytics[:read_through_seconds],
-        )
-      end
-      READ_THROUGHS = proc { integer.count(visitor_hash).distinct.filter(READ_THROUGH).as(:read_throughs) }
       SINGLE_VIEW = Sequel.expr(Sequel.function(:count).* => 1)
       TITLED = Sequel.~(title: nil)
       TOTALS = proc do
@@ -113,7 +106,13 @@ module Analytics
 
       def read_median = unordered.exclude(read_seconds: 0).dataset.get(MEDIAN_READ)
 
-      def read_throughs_by_path = unordered.select(:path, &READ_THROUGHS).group(:path)
+      def read_throughs_by_path(scroll_depth:, read_seconds:)
+        read_through = Sequel.&(Sequel[:scroll_depth] >= scroll_depth, Sequel[:read_seconds] >= read_seconds)
+
+        unordered.select(:path) do
+          integer.count(visitor_hash).distinct.filter(read_through).as(:read_throughs)
+        end.group(:path)
+      end
 
       def record_read_seconds(read_seconds) = raise_newest(:read_seconds, read_seconds)
 

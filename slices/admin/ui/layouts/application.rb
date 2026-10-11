@@ -7,6 +7,7 @@ module Admin
         include Components
         include Components::Nav
         include Navigated
+        include Deps["settings"]
 
         def view_template(&)
           document do
@@ -51,7 +52,7 @@ module Admin
           render_palette(navigation)
         end
 
-        def title_suffix = t(".title", owner: Hanami.app.settings.owner_name)
+        def title_suffix = t(".title", owner: settings.owner_name)
 
         def toast_message = flash[Components::Toast::FLASH_KEY]
       end

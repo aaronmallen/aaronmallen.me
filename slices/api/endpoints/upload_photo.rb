@@ -35,7 +35,7 @@ module API
         return refuse(:unreadable) unless bytes
 
         case upload_photo.call(Blog::Types::UploadParam[upload(bytes, filename)])
-          in Success(photo) then Success(serialized(Serializers::Photo, photo))
+          in Success(photo) then Success(serialized(Serializers::Photo, photo, url: settings.site_url(photo.path)))
           in Failure[:invalid, { photo: [code, *] }] then refuse(code)
           in Failure[:unavailable] then Failure(Structs::Refusal.unavailable(message(:unavailable)))
           in Failure[reason] then refuse(reason)

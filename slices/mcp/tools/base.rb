@@ -50,7 +50,7 @@ module MCP
           refuse(API::Helpers::Wording.summary(API::Helpers::Wording.complaints(errors, table)))
         end
 
-        def page(number) = API::Helpers::Page.of(number)
+        def page(number, server_context) = API::Helpers::Page.of(number, dep(:settings, server_context))
 
         def refuse(message) = Tool::Response.new([{ type: TEXT, text: message }], error: true)
 

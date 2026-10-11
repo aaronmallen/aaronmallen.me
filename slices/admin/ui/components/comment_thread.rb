@@ -17,6 +17,8 @@ module Admin
         prop :form, Blog::Types::Hash
         prop :error, Blog::Types::Instance(Class)
 
+        include Deps["settings"]
+
         def author(&block)
           @author = block
           nil
@@ -114,7 +116,7 @@ module Admin
         def head(comment)
           div(class: "comment-head") do
             span(class: "comment-author") do
-              comment.synced? ? @author&.call(comment) : plain(Hanami.app.settings.owner_name)
+              comment.synced? ? @author&.call(comment) : plain(settings.owner_name)
             end
             Moment(at: comment.occurred_at, class: "timeline-time")
             comment.synced? ? @source&.call(comment) : acts(comment)

@@ -117,7 +117,8 @@ module Public
             content_for(:description, description)
             content_for(:image, @post.og_image_url)
             content_for(:social_title, @post.og_title)
-            content_for(:structured_data, StructuredData.post(@post, description:, path: path(:post, slug: @post.slug)))
+            data = StructuredData.new.post(@post, description:, path: path(:post, slug: @post.slug))
+            content_for(:structured_data, data)
           end
 
           def stamp(time) = time.utc.iso8601

@@ -38,7 +38,7 @@ RSpec.describe "MCP photo tools", type: :request do
       end
 
       it "takes the photo's URL" do
-        expect(JSON.parse(text(photo.url).fetch("text")).fetch("key")).to eq(photo.key)
+        expect(JSON.parse(text(Hanami.app.settings.site_url(photo.path)).fetch("text")).fetch("key")).to eq(photo.key)
       end
 
       it "shows a photo no published post claims" do

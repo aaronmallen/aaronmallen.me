@@ -12,6 +12,8 @@ module API
       ).freeze
 
       schema_attributes
+
+      def url(_photo) = params.fetch(:url)
     end
   end
 end

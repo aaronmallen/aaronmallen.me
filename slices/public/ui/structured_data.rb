@@ -4,10 +4,10 @@ require "time"
 
 module Public
   module UI
-    module StructuredData
+    class StructuredData
       CONTEXT = "https://schema.org"
 
-      module_function
+      include Deps["settings"]
 
       def owner = { "@type": "Person", "@id": owner_id, name: settings.owner_name, url: settings.site_url }
 
@@ -32,9 +32,7 @@ module Public
         }.compact
       end
 
-      def profiles = Profiles.call(:github, :bluesky, :mastodon).values
-
-      def settings = Hanami.app.settings
+      def profiles = Profiles.call(settings, :github, :bluesky, :mastodon).values
 
       def site = { "@context": CONTEXT, "@graph": [website, owner.merge(sameAs: profiles)] }
 
