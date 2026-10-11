@@ -56,10 +56,41 @@ RSpec.describe "Admin task comments", type: :request do
     before { sign_in_to_admin }
 
     describe "the list on the task page" do
-      it "says when there are none" do
+      it "heads the block Comments" do
         read
 
-        expect(page).to have_css(".timeline-card .hint", text: t("ui.components.tasks.timeline.empty"))
+        expect(page).to have_css(".task-comments > .f", exact_text: t("ui.components.tasks.comments.label"))
+      end
+
+      it "lists no comment when there are none" do
+        read
+
+        expect(page).to have_no_css(".task-comments .comment")
+      end
+
+      it "flags a comment edited after it was made" do
+        comment = create(:task_comment, task_id: task.id, body: "First try")
+        edit(comment, "Second try")
+        read
+        flag = t("ui.components.comment_thread.edited")
+
+        expect(comment_on_page(comment)).to have_css(".comment-edited", exact_text: flag)
+      end
+
+      it "flags no comment left as it was made", :aggregate_failures do
+        local = create(:task_comment, task_id: task.id)
+        synced = create(:task_comment, :synced, task_id: task.id, created_at: Time.now - 60)
+        read
+
+        expect([comment_on_page(local), comment_on_page(synced)]).to all(have_no_css(".comment-edited"))
+      end
+
+      it "puts the add button in the page for a browser with no script" do
+        read
+
+        add = t("ui.components.comment_thread.add")
+
+        expect(page).to have_css("form[data-comment-add] button[type='submit']:not([hidden])", text: add)
       end
 
       it "lists them oldest first" do

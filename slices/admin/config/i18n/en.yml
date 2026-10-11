@@ -588,6 +588,7 @@ en:
         delete: "Delete comment"
         edit: "Edit"
         edit_label: "Comment"
+        edited: "edited"
         save: "Save"
       confirm:
         accept: "Yes"
@@ -1908,6 +1909,10 @@ en:
           canceled: "canceled"
           canceled_at: "canceled %{time}"
           done_at: "done %{time}"
+        comments:
+          label: "Comments"
+          unknown_author: "unknown"
+          view: "View"
         completed_card:
           empty: "Nothing completed yet."
           no_match: "Nothing completed matches these filters."
@@ -2131,21 +2136,23 @@ en:
           tags_placeholder: "ruby, admin"
           title: "Title"
           update: "Save"
+        time_worked:
+          empty: "No sessions yet."
+          label: "Time worked · %{span}"
+          now: "now"
+          running: "running"
         timeline:
+          count:
+            one: "%{count} event"
+            other: "%{count} events"
           empty: "Nothing has happened yet."
-          label: "Timeline"
-          title: "Activity"
-          unknown_author: "unknown"
-          view: "View"
+          title: "Timeline"
         timeline_event:
           moved: "Moved from %{from} to %{to}"
-          running: "Started work"
-          running_pill: "running"
           sprint: "the %{day} sprint"
           status_changed: "Changed the status from %{from} to %{to}"
           tagged: "Added the tag %{tag}"
           untagged: "Removed the tag %{tag}"
-          worked: "Worked %{span}"
         total_form:
           hint: "This replaces the total. Sessions after it add to it."
           save: "Save total"
@@ -2731,9 +2738,7 @@ en:
           cancel: "Cancel"
           confirm_delete: "Delete %{task}? This cannot be undone."
           delete: "Delete"
-          no_sessions: "No sessions yet."
           save: "Save"
-          worked: "Time worked · %{span}"
         new:
           heading: "New task"
           label: "Tasks"

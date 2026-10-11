@@ -1,3 +1,4 @@
+import { setupCommentAdds } from "./comment_add.js";
 import { setupConfirms } from "./confirm.js";
 import { FIELD, focusField, showDialog } from "./dialog.js";
 import { fresh } from "./fresh.js";
@@ -32,6 +33,7 @@ export function setupTaskPanel() {
 }
 
 function bind(root) {
+  setupCommentAdds(root);
   setupConfirms(root);
   setupMarkdownEditors(root);
   setupRecordKeys(root);

@@ -159,19 +159,19 @@ RSpec.describe "Admin task time", type: :request do
         expect([sessions, total]).to eq([[], 1800])
       end
 
-      it "takes it off the timeline" do
+      it "takes it off Time worked" do
         session = closed
         send_to("/admin/tasks/#{task.id}/sessions/#{session.id}/delete")
         read
 
-        expect(page).to have_no_css(".timeline-event[data-task-event='session']")
+        expect(page).to have_no_css("#task-session-#{session.id}")
       end
 
       it "leaves no other mark on the timeline" do
         send_to("/admin/tasks/#{task.id}/sessions/#{closed.id}/delete")
         read
 
-        expect(page).to have_css(".timeline-card .hint", text: t("ui.components.tasks.timeline.empty"))
+        expect(page).to have_css(".task-timeline .hint", visible: :all, text: t("ui.components.tasks.timeline.empty"))
       end
 
       it "keeps the total at zero or more" do

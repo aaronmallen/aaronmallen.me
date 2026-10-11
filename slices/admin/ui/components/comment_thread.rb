@@ -16,16 +16,12 @@ module Admin
         prop :scope, Blog::Types::String
         prop :form, Blog::Types::Hash
         prop :error, Blog::Types::Instance(Class)
+        prop :edited, Blog::Types::Array.of(Blog::Types::Integer), default: Blog::Constants::EMPTY_ARRAY
 
         include Deps["settings"]
 
         def author(&block)
           @author = block
-          nil
-        end
-
-        def event(&block)
-          @event = block
           nil
         end
 
@@ -42,7 +38,7 @@ module Admin
         def view_template(&)
           vanish(&)
 
-          ol(class: "timeline") { @entries.each { entry(it) } } unless @entries.empty?
+          ol(class: "timeline") { @entries.each { comment(it) } } unless @entries.empty?
           add_form
         end
 
@@ -56,7 +52,7 @@ module Admin
         end
 
         def add_form
-          Form(action: path(@routes[:create], id: @record_id), class: "stack-form") do
+          Form(action: path(@routes[:create], id: @record_id), class: "stack-form", data: { comment_add: true }) do
             @fields&.call
             body_field(nil, t(".add_label"))
             Button(variant: :pri, type: "submit", small: true) { t(".add") }
@@ -111,14 +107,13 @@ module Admin
           { name: "comment[body]", value: value.to_s, height: EDITOR_HEIGHT, renderer: RENDERER, label: }
         end
 
-        def entry(entry) = entry.comment? ? comment(entry) : @event&.call(entry)
-
         def head(comment)
           div(class: "comment-head") do
             span(class: "comment-author") do
               comment.synced? ? @author&.call(comment) : plain(settings.owner_name)
             end
             Moment(at: comment.occurred_at, class: "timeline-time")
+            span(class: "comment-edited") { t(".edited") } if @edited.include?(comment.source_id)
             comment.synced? ? @source&.call(comment) : acts(comment)
           end
         end

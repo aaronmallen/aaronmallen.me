@@ -295,7 +295,7 @@ RSpec.describe "Admin calendar moves", :frozen_clock, type: :request do
       get "/admin/tasks/#{task.id}", filter: "next"
       dates = [day, target].map { "the #{it.strftime('%b %-d, %Y')} sprint" }
 
-      expect(page).to have_css(".timeline-event", text: "Moved from #{dates.first} to #{dates.last}")
+      expect(page).to have_css(".timeline-event", text: "Moved from #{dates.first} to #{dates.last}", visible: :all)
     end
 
     it "leaves a task where it was on a move to a past day, and says why", :aggregate_failures do

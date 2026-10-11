@@ -11,26 +11,22 @@ module Admin
             Blog::Types::TaskTimelineKind["tagged"] => ["fa-solid fa-tag", ".tagged"],
             Blog::Types::TaskTimelineKind["untagged"] => ["fa-solid fa-tag", ".untagged"],
           }.freeze
-          SESSION_ICON = "fa-regular fa-clock"
 
           prop :entry, Blog::Types::Instance(ROM::Struct)
 
-          def view_template(&)
-            li(class: "timeline-event", id:, data: { task_event: @entry.kind }) do
-              Icon(["timeline-event-icon", icon])
-              span(class: "timeline-event-text") { @entry.session? ? session : event }
-              Moment(at: @entry.occurred_at, class: "timeline-time")
-              yield if block_given?
+          def view_template
+            icon, key = EVENTS.fetch(@entry.kind)
+
+            li(class: "timeline-event", data: { task_event: @entry.kind }) do
+              Moment(at: @entry.occurred_at, format: :short, class: "timeline-time")
+              span(class: "timeline-event-text") do
+                Icon(["timeline-event-icon", icon])
+                plain t(key, **parts)
+              end
             end
           end
 
           private
-
-          def event = plain(t(EVENTS.fetch(@entry.kind).last, **parts))
-
-          def icon = @entry.session? ? SESSION_ICON : EVENTS.fetch(@entry.kind).first
-
-          def id = @entry.session? ? "task-session-#{@entry.source_id}" : nil
 
           def parts
             {
@@ -44,13 +40,6 @@ module Admin
             if list then t(Helpers::TaskLists.name(list))
             elsif sprint_on then t(".sprint", day: l(sprint_on, format: :medium))
             end
-          end
-
-          def session
-            return plain(t(".worked", span: Blog::Helpers::Figures.hours(@entry.seconds))) unless @entry.running?
-
-            plain(t(".running"))
-            Pill(color: :blue) { t(".running_pill") }
           end
 
           def status_name(status) = status && t(Helpers::TaskStatuses.name(status))

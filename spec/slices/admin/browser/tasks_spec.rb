@@ -492,9 +492,16 @@ RSpec.describe "Admin tasks", type: :feature do
     describe "with none yet" do
       before { open_task("Email the accountant") }
 
-      it "heads the section Activity" do
-        expect(panel).to have_css(".timeline-card .card-title",
-                                  exact_text: translate("ui.components.tasks.timeline.title"))
+      it "hides the add button while the box is blank" do
+        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "  ")
+
+        expect(panel).to have_no_button(translate("ui.components.comment_thread.add"))
+      end
+
+      it "shows the add button once the box holds text" do
+        panel.fill_in(translate("ui.components.comment_thread.add_label"), with: "Sent")
+
+        expect(panel).to have_button(translate("ui.components.comment_thread.add"))
       end
 
       it "adds a comment and comes back to the list", :aggregate_failures do

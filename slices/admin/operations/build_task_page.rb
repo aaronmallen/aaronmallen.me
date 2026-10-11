@@ -11,6 +11,7 @@ module Admin
       include Deps[
         current_sprint: "tasks.operations.current_sprint",
         list_record_links: "operations.list_record_links",
+        task_comment_queries: "tasks.repos.task_comment_queries",
         task_queries: "tasks.repos.task_queries",
       ]
 
@@ -20,6 +21,7 @@ module Admin
         query = Blog::Types::TrimmedText[query]
 
         { task:, note_html: note_html(task.note), timeline: task_queries.timeline(id),
+          edited: task_comment_queries.edited_ids(id),
           forms: FORMS.merge(forms),
           linking: { errors:, kind:, query:, targets: task_queries.link_targets(id, query) },
           records: list_record_links.call(KIND, task.id, **records, except: [KIND]) }

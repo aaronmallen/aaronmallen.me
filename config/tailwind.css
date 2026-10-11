@@ -3196,7 +3196,11 @@
 }
 
 @utility timeline-event {
-  @apply flex min-w-0 flex-wrap items-center gap-2 border-t border-line py-2 text-li text-ink first:border-t-0 first:pt-0;
+  @apply grid min-w-0 grid-cols-[110px_minmax(0,1fr)] gap-2.5 border-b border-line py-[7px] text-li text-ink;
+
+  @media (width < 43.75rem) {
+    @apply grid-cols-1 gap-1;
+  }
 }
 
 @utility timeline-event-icon {
@@ -4547,6 +4551,22 @@
       @apply block;
     }
   }
+}
+
+@utility task-sessions {
+  @apply flex flex-col;
+}
+
+@utility task-session {
+  @apply flex min-w-0 flex-wrap items-center gap-3 border-b border-line py-1.5 font-mono text-badge text-ink;
+}
+
+@utility task-session-length {
+  @apply text-ink-muted;
+}
+
+@utility task-timeline-count {
+  @apply ml-auto;
 }
 
 @utility task-read-title {

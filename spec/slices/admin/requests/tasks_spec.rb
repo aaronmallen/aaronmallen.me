@@ -1555,7 +1555,7 @@ RSpec.describe "Admin tasks", :frozen_clock, type: :request do
       it "says when there are no sessions" do
         open_edit
 
-        expect(page).to have_css(".task-drawer-body .hint", text: i18n.t("ui.views.tasks.edit.no_sessions"))
+        expect(page).to have_css(".task-drawer-body .hint", text: i18n.t("ui.components.tasks.time_worked.empty"))
       end
 
       it "offers the link editor, whose finder searches the edit page", :aggregate_failures do

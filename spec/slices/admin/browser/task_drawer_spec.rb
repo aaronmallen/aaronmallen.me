@@ -9,7 +9,7 @@ RSpec.describe "Admin task drawer", type: :feature do
 
   def controls(blocks = ".task-drawer-head, .task-drawer-foot")
     evaluate_script(<<~JS)
-      [...document.querySelectorAll("#task-panel :is(#{blocks}) :is(a, button)")]
+      [...document.querySelectorAll("#task-panel :is(#{blocks}) :is(a, button, summary)")]
         .filter((control) => control.checkVisibility())
         .map((control) => { const r = control.getBoundingClientRect(); return [r.width, r.height]; })
     JS
@@ -93,6 +93,8 @@ RSpec.describe "Admin task drawer", type: :feature do
 
   describe "on a phone" do
     before do
+      create(:work_session, :closed, task_id: task.id, started_at: Time.now - 3600)
+      create(:task_event, task_id: task.id, kind: "tagged", tag_name: "home")
       page.driver.resize(375, 800)
       open_task("Clear the gutters")
     end
@@ -106,6 +108,22 @@ RSpec.describe "Admin task drawer", type: :feature do
 
       expect(found.size).to be >= 4
       expect(found).to all(satisfy { |_, height| height >= 44 })
+    end
+
+    it "gives Time worked, the comments and the timeline a tap height", :aggregate_failures do
+      panel.find(".task-timeline > summary").click
+      found = controls(".task-session, .task-comments, .task-timeline")
+
+      expect(found.size).to be >= 4
+      expect(found).to all(satisfy { |_, height| height >= 44 })
+    end
+
+    it "lays the timeline out in one column" do
+      panel.find(".task-timeline > summary").click
+
+      expect(evaluate_script(<<~JS)).to eq(1)
+        getComputedStyle(document.querySelector("#task-panel .timeline-event")).gridTemplateColumns.split(" ").length
+      JS
     end
 
     it "does not scroll sideways", :aggregate_failures do

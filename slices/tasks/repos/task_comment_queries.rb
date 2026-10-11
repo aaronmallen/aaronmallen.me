@@ -3,6 +3,8 @@
 module Tasks
   module Repos
     class TaskCommentQueries < Blog::DB::Repo
+      def edited_ids(task_id) = task_comments.local.for_task(task_id).where { updated_at > created_at }.pluck(:id)
+
       def for_task(task_id) = task_comments.for_task(task_id).oldest_first.to_a
 
       def ids_for_task(task_id) = task_comments.for_task(task_id).pluck(:id)

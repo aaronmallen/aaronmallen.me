@@ -15,6 +15,7 @@ module Admin
           prop :linking, Blog::Types::Hash
           prop :records, Blog::Types::Hash
           prop :timeline, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :edited, Blog::Types::Array.of(Blog::Types::Integer)
           prop :forms, Blog::Types::Hash
           prop :filter, Blog::Types::String
           prop :origin, Blog::Types::TaskOrigin
@@ -34,10 +35,12 @@ module Admin
             status_bar
             h1(class: "task-read-title") { @task.title }
             note
-            facts
+            Facts(task: @task)
+            TimeWorked(task: @task, entries: @timeline, forms: @forms, tab: @filter, origin: @origin)
             links
             linked
-            Timeline(task: @task, entries: @timeline, forms: @forms, tab: @filter, origin: @origin)
+            Comments(task: @task, entries: @timeline, edited: @edited, forms: @forms, tab: @filter, origin: @origin)
+            Timeline(entries: @timeline)
           end
 
           def close(&) = OriginLink(origin: @origin, filter: @filter, variant: :gh, small: true, data: CLOSE, &)
@@ -62,11 +65,6 @@ module Admin
           end
 
           def edit_path = path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)
-
-          def facts
-            Facts(task: @task)
-            TotalForm(task: @task, totaling: @forms[:totaling], tab: @filter, origin: @origin)
-          end
 
           def foot
             delete

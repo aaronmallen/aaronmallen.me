@@ -35,7 +35,7 @@ module Admin
               errors: @errors, returns:, scope:, task: @task, today: Blog::TimeZone.today, values: @values,
               autofocus: true, bare: true,
             )
-            sessions
+            TimeWorked(task: @task, entries: @timeline, forms: @forms, tab: @filter, origin: @origin)
             LinkEditor(
               task: @task, tab: @filter, origin: @origin, linking: @linking,
               find_path: path(:admin_edit_task, id: @task.id, **returns),
@@ -66,23 +66,6 @@ module Admin
           def returns = { filter: @filter, origin: @origin }
 
           def scope = "task-#{@task.id}"
-
-          def session(entry)
-            TimelineEvent(entry:) do
-              SessionActs(task: @task, entry:, timing: @forms[:timing], tab: @filter, origin: @origin)
-            end
-          end
-
-          def sessions
-            entries = @timeline.select(&:session?)
-
-            Field(label: t(".worked", span: Blog::Helpers::Figures.hours(@task.tracked_seconds))) do
-              if entries.empty? then Hint { t(".no_sessions") }
-              else ol(class: "timeline") { entries.each { session(it) } }
-              end
-              TotalForm(task: @task, totaling: @forms[:totaling], tab: @filter, origin: @origin)
-            end
-          end
 
           def stored
             {

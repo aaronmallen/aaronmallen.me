@@ -77,7 +77,14 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         read
 
         expect(page).to have_css(".task-drawer-body h1", exact_text: "Ship the read page")
-        expect(page).to have_css(".task-drawer-body .timeline-card")
+        expect(page).to have_css(".task-drawer-body > details.task-timeline")
+      end
+
+      it "puts Time worked after the facts, and the timeline after the comments, last", :aggregate_failures do
+        read
+
+        expect(page).to have_css(".task-drawer-body > .task-facts + .field > .task-total-edit", visible: :all)
+        expect(page).to have_css(".task-drawer-body > .task-comments + details.task-timeline:last-child")
       end
 
       it "shows the list in the header" do

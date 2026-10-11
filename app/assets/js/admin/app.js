@@ -1,6 +1,7 @@
 import { setupAutosubmit } from "./autosubmit.js";
 import { setupBulk } from "./bulk.js";
 import { setupCalendars } from "./calendar.js";
+import { setupCommentAdds } from "./comment_add.js";
 import { setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
 import { setupDialogs } from "./dialog.js";
@@ -33,6 +34,7 @@ function setup() {
   setupAutosubmit();
   setupBulk();
   setupCalendars();
+  setupCommentAdds();
   setupCommitImports();
   setupConfirms();
   setupDialogs();
