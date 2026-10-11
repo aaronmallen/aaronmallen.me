@@ -2948,7 +2948,7 @@
 }
 
 @utility task-meta {
-  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1 font-mono text-badge text-ink-muted;
+  @apply flex flex-wrap items-center gap-x-3.5 gap-y-1.5 font-mono text-badge text-ink-muted;
 }
 
 @utility task-mark {

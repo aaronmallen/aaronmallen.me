@@ -357,6 +357,7 @@ RSpec.describe "Admin screens", type: :feature do
   def seed_tasks
     create(:tag, :private, name: "site", color: "mk-blue")
     task
+    seed_wrapped_task
     create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
     running = create(:task, :in_progress, title: "Ship the phone layout")
     create(:task_link, from_task_id: task.id, to_task_id: running.id)
@@ -371,6 +372,12 @@ RSpec.describe "Admin screens", type: :feature do
     [project, create(:project, name: "a-second-project-with-a-long-name")].each do |linked|
       Links::Slice["operations.link_records"].call("task", timed.id, { other_kind: "project", other_id: linked.id })
     end
+  end
+
+  def seed_wrapped_task
+    tags = %w[cooking finance fitness homelab reading writing]
+    tags.each { create(:tag, name: it) }
+    create(:task, id: 100_301, title: "Wrap a long key over a short tag", tags:)
   end
 
   def seed_writing
