@@ -2970,7 +2970,7 @@
 }
 
 @utility task-source {
-  @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent-text hover:underline focus-ring;
+  @apply inline-flex items-center gap-1 min-w-0 font-mono text-badge wrap-anywhere text-ink-muted no-underline hover:text-accent-text hover:underline focus-ring;
 
   @media (width < 43.75rem) {
     @apply min-h-tap;

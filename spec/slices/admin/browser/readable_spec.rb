@@ -404,7 +404,8 @@ RSpec.describe "Admin screens", type: :feature do
   def seed_wrapped_task
     tags = %w[cooking finance fitness homelab reading writing]
     tags.each { create(:tag, name: it) }
-    create(:task, id: 100_301, title: "Wrap a long key over a short tag", tags:)
+    wrapped = create(:task, id: 100_301, title: "Wrap a long key over a short tag", tags:)
+    create(:task_source, task: wrapped, url: "https://github.com/aaronmallen/aaronmallen.me/issues/1091")
   end
 
   def seed_writing
