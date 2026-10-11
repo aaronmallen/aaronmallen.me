@@ -17,9 +17,27 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 4
 
+Hanami/AppReferenceInSlice:
+  Enabled: false
+
+Hanami/ContainerLookup:
+  Enabled: false
+
+Hanami/ProviderTopLevelRequire:
+  Enabled: false
+
 Hanami/SliceExports:
   ForbiddenExports:
     - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader|github\.client|linear\.client|networks\.all|store\.client)\z)/
+
+Hanami/SliceNamespace:
+  Enabled: false
+
+Hanami/UnusedDeps:
+  Enabled: false
+
+Hanami/UnvalidatedParams:
+  Enabled: false
 
 I18n/GetText:
   Enabled: false
