@@ -3,19 +3,15 @@
 module Admin
   module Actions
     module Projects
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["project"]
 
-        include RecordLinking
         include Deps[
           build_project_editor: "operations.build_project_editor",
           edit_view: "ui.views.projects.edit",
-          link_records: "links.operations.link_records",
           list_record_links: "operations.list_record_links",
           project_queries: "projects.repos.project_queries",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 
@@ -25,8 +21,8 @@ module Admin
           project = project_queries.by_id(id)
           halt 404 unless project
 
-          response.render(edit_view, **build_project_editor.call(project:),
-records: linked_records(request, id, errors))
+          records = list_record_links.call(KIND, id, **records_query(request, errors))
+          response.render(edit_view, **build_project_editor.call(project:), records:)
         end
       end
     end

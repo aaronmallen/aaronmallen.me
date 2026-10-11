@@ -3,16 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class UpdateSession < Action
+      class UpdateSession < PageAction
         SAVED = "tasks_page.toasts.session_saved"
 
-        include PageForm
-        include Redirect
-        include Deps[
-          build_task_page: "operations.build_task_page",
-          edit_work_session: "tasks.operations.edit_work_session",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[edit_work_session: "tasks.operations.edit_work_session"]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)

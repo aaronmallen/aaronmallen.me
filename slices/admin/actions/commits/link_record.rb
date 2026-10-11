@@ -3,17 +3,13 @@
 module Admin
   module Actions
     module Commits
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["commit"]
 
-        include RecordLinking
         include Deps[
           build_commit_page: "operations.build_commit_page",
-          link_records: "links.operations.link_records",
           show_view: "ui.views.commits.show",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

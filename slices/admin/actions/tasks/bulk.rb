@@ -18,12 +18,14 @@ module Admin
 
         include Redirect
         include Deps[
+          act_on_tasks: "tasks.operations.act_on_tasks",
           build_tasks_page: "operations.build_tasks_page",
-          operation: "tasks.operations.act_on_tasks",
           task_queries: "tasks.repos.task_queries",
         ]
 
         private
+
+        def act(params) = act_on_tasks.call(params)
 
         def back(request)
           query = Blog::Types::TrimmedText[request.params[:q]]

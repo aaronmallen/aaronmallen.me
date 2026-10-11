@@ -3,18 +3,14 @@
 module Admin
   module Actions
     module Journal
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["journal_entry"]
 
-        include RecordLinking
         include Deps[
           index_view: "ui.views.journal.index",
-          link_records: "links.operations.link_records",
           open_journal_entry: "operations.open_journal_entry",
           summarize_journal: "operations.summarize_journal",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

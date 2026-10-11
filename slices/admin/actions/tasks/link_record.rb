@@ -3,19 +3,15 @@
 module Admin
   module Actions
     module Tasks
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["task"]
         LINKED = "tasks_page.toasts.record_linked"
 
         include Redirect
-        include RecordLinking
         include Deps[
           build_task_page: "operations.build_task_page",
-          link_records: "links.operations.link_records",
           task_view: "ui.views.tasks.show",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

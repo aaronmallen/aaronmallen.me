@@ -6,10 +6,7 @@ module Admin
       class RejectSuggestions < SuggestionRejectionAction
         REJECTED = "social_suggestions.toasts.rejected"
 
-        include Deps[
-          reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits",
-          suggestion_queries: "suggestions.repos.suggestion_queries",
-        ]
+        include Deps[suggestion_queries: "suggestions.repos.suggestion_queries"]
 
         def handle(request, response)
           id = record_id(request)

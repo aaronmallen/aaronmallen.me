@@ -3,15 +3,10 @@
 module Admin
   module Actions
     module Decisions
-      class CreateComment < Action
+      class CreateComment < PageAction
         ADDED = "decisions_page.toasts.comment_added"
 
-        include PageForm
-        include Deps[
-          add_decision_comment: "decisions.operations.add_decision_comment",
-          build_decision_page: "operations.build_decision_page",
-          show_view: "ui.views.decisions.show",
-        ]
+        include Deps[add_decision_comment: "decisions.operations.add_decision_comment"]
 
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:comment]]

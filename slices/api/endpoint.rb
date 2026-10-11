@@ -41,9 +41,7 @@ module API
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
 
-    def linked(kind, id)
-      record_link_queries.for_record(kind, id).transform_values { serialized(Serializers::Link, it) }
-    end
+    def linked(groups) = groups.transform_values { serialized(Serializers::Link, it) }
 
     def not_found(message) = Failure(Structs::Refusal.not_found(message))
 

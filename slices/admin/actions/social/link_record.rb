@@ -3,18 +3,14 @@
 module Admin
   module Actions
     module Social
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["social_post"]
 
-        include RecordLinking
         include Deps[
           build_social_page: "operations.build_social_page",
           index_view: "ui.views.social.index",
-          link_records: "links.operations.link_records",
           social_post_queries: "social.repos.social_post_queries",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

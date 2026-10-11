@@ -3,16 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class UpdateComment < Action
+      class UpdateComment < PageAction
         SAVED = "tasks_page.toasts.comment_saved"
 
-        include PageForm
-        include Redirect
-        include Deps[
-          build_task_page: "operations.build_task_page",
-          edit_task_comment: "tasks.operations.edit_task_comment",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[edit_task_comment: "tasks.operations.edit_task_comment"]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)

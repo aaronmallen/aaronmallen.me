@@ -16,7 +16,8 @@ module API
         project = project_queries.by_id(id)
         return not_found(Helpers::Wording.missing("project", id)) if project.nil?
 
-        Success(serialized(Serializers::Project, project).merge(record_links: linked(KIND, project.id)))
+        record_links = linked(record_link_queries.for_record(KIND, project.id))
+        Success(serialized(Serializers::Project, project).merge(record_links:))
       end
     end
   end

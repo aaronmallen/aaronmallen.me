@@ -23,7 +23,7 @@ module API
 
       private
 
-      def answered(kind, id) = Success(kind:, id:, links: linked(kind, id))
+      def answered(kind, id) = Success(kind:, id:, links: linked(record_link_queries.for_record(kind, id)))
     end
   end
 end

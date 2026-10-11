@@ -3,6 +3,8 @@
 
 module Admin
   class SuggestionRejectionAction < Action
+    include Deps[reject_suggestion_edits: "suggestions.operations.reject_suggestion_edits"]
+
     private
 
     def chosen(edit_id) = edit_id.empty? ? nil : Array(Blog::Types::IdParam[edit_id])

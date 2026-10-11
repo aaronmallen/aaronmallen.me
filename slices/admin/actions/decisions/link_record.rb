@@ -3,18 +3,14 @@
 module Admin
   module Actions
     module Decisions
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["decision"]
         LINKED = "decisions_page.toasts.record_linked"
 
-        include RecordLinking
         include Deps[
           build_decision_page: "operations.build_decision_page",
-          link_records: "links.operations.link_records",
           show_view: "ui.views.decisions.show",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

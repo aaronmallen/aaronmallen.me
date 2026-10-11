@@ -17,6 +17,7 @@ module API
 
       include Deps[
         record_link_queries: "links.repos.record_link_queries",
+        social_post_queries: "social.repos.social_post_queries",
         suggestion_queries: "suggestions.repos.suggestion_queries",
       ]
 
@@ -32,7 +33,7 @@ module API
       def read(social_post)
         answered(social_post).merge(
           **suggested(suggestion_queries.for_social_post(social_post.id)),
-          record_links: linked(KIND, social_post.id),
+          record_links: linked(record_link_queries.for_record(KIND, social_post.id)),
         )
       end
     end

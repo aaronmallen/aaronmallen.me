@@ -14,11 +14,13 @@ module Admin
 
         include Redirect
         include Deps[
-          operation: "posts.operations.act_on_posts",
+          act_on_posts: "posts.operations.act_on_posts",
           post_queries: "posts.repos.post_queries",
         ]
 
         private
+
+        def act(params) = act_on_posts.call(params)
 
         def named(id) = { post: post_queries.by_id(id)&.title || UI::Components::RecordKey.key(id) }
       end

@@ -24,7 +24,6 @@ module API
       include Deps[
         list_target_accounts: "social.operations.list_target_accounts",
         measure_parts: "social.operations.measure_parts",
-        social_post_queries: "social.repos.social_post_queries",
       ]
 
       private

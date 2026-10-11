@@ -3,14 +3,9 @@
 module Admin
   module Actions
     module Decisions
-      class UnlinkRecord < Action
+      class UnlinkRecord < UnlinkRecordAction
         KIND = Blog::Types::RecordKind["decision"]
         UNLINKED = "decisions_page.toasts.record_unlinked"
-
-        include RecordLinking
-        include Deps[unlink_records: "links.operations.unlink_records"]
-
-        def handle(request, response) = unlink(request, response)
 
         private
 

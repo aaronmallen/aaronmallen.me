@@ -16,11 +16,13 @@ module Admin
         REASONS = %i[not_found].freeze
 
         include Deps[
+          act_on_messages: "contact.operations.act_on_messages",
           message_queries: "contact.repos.message_queries",
-          operation: "contact.operations.act_on_messages",
         ]
 
         private
+
+        def act(params) = act_on_messages.call(params)
 
         def back(request)
           list = Helpers::MessageList.from(request.params)

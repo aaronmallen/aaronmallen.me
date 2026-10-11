@@ -16,7 +16,8 @@ module API
         entry = journal_entry_queries.by_id(id)
         return not_found(Helpers::Wording.missing("journal entry", id)) if entry.nil?
 
-        Success(serialized(Serializers::JournalEntry, entry).merge(record_links: linked(KIND, id)))
+        record_links = linked(record_link_queries.for_record(KIND, id))
+        Success(serialized(Serializers::JournalEntry, entry).merge(record_links:))
       end
     end
   end

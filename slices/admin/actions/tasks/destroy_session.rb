@@ -3,16 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class DestroySession < Action
+      class DestroySession < PageAction
         DELETED = "tasks_page.toasts.session_deleted"
 
-        include PageForm
-        include Redirect
-        include Deps[
-          build_task_page: "operations.build_task_page",
-          delete_work_session: "tasks.operations.delete_work_session",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[delete_work_session: "tasks.operations.delete_work_session"]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:session_id]] || halt(404)

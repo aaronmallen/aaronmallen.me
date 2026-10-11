@@ -44,7 +44,7 @@ module API
         comments = serialized(Serializers::TaskComment, task_comment_queries.for_task(task.id),
                               owner: settings.owner_name)
 
-        record_links = linked(KIND, task.id)
+        record_links = linked(record_link_queries.for_record(KIND, task.id))
 
         Success(serialized(Serializers::Task, task).merge(comments:, record_links:, **extra))
       end

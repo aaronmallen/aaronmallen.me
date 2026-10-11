@@ -3,13 +3,8 @@
 module Admin
   module Actions
     module Projects
-      class UnlinkRecord < Action
+      class UnlinkRecord < UnlinkRecordAction
         KIND = Blog::Types::RecordKind["project"]
-
-        include RecordLinking
-        include Deps[unlink_records: "links.operations.unlink_records"]
-
-        def handle(request, response) = unlink(request, response)
 
         private
 

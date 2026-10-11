@@ -3,17 +3,13 @@
 module Admin
   module Actions
     module PullRequests
-      class LinkRecord < Action
+      class LinkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["pull_request"]
 
-        include RecordLinking
         include Deps[
           build_pull_request_page: "operations.build_pull_request_page",
-          link_records: "links.operations.link_records",
           show_view: "ui.views.pull_requests.show",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

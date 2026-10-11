@@ -14,11 +14,13 @@ module Admin
         REASONS = %i[not_found].freeze
 
         include Deps[
-          operation: "social.operations.act_on_webmentions",
+          act_on_webmentions: "social.operations.act_on_webmentions",
           webmention_queries: "social.repos.webmention_queries",
         ]
 
         private
+
+        def act(params) = act_on_webmentions.call(params)
 
         def back(request)
           status = Blog::Types::WebmentionStatusParam[request.params[:status]]

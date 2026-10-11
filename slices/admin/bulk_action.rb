@@ -6,7 +6,7 @@ module Admin
     LONG = "long"
 
     def handle(request, response)
-      case operation.call(request.params.to_h)
+      case act(request.params.to_h)
         in Success[*records] then done(request, response, records.size)
         in Failure[:record, id, reason] then failed(response, id, reason)
         in Failure[:invalid, errors] then toast(response, "#{self.class::INVALID}.#{refused(errors)}")

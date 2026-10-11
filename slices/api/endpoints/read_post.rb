@@ -41,7 +41,7 @@ module API
           webmentions_received: webmention_queries.received_count(post.id),
           edit_notes: serialized(Serializers::PostEdit, post_queries.edits_newest_first(post.id)),
           **suggested(suggestion_queries.for_post(post.id)),
-          record_links: linked(KIND, post.id),
+          record_links: linked(record_link_queries.for_record(KIND, post.id)),
         )
       end
     end

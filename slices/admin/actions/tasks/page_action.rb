@@ -4,8 +4,9 @@
 module Admin
   module Actions
     module Tasks
-      module PageForm
-        include Dry::Monads[:result]
+      class PageAction < Action
+        include Redirect
+        include Deps[build_task_page: "operations.build_task_page", task_view: "ui.views.tasks.show"]
 
         private
 

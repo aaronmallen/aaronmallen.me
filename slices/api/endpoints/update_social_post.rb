@@ -20,7 +20,10 @@ module API
         required: ["id"],
       }.freeze
 
-      include Deps[compose_social_post: "social.operations.compose_social_post"]
+      include Deps[
+        compose_social_post: "social.operations.compose_social_post",
+        social_post_queries: "social.repos.social_post_queries",
+      ]
 
       def handle(id:, **fields)
         stored = social_post_queries.editable(id)

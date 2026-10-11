@@ -3,18 +3,14 @@
 module Admin
   module Actions
     module Projects
-      class LinkWorkRecord < Action
+      class LinkWorkRecord < LinkRecordAction
         KIND = Blog::Types::RecordKind["work_entry"]
         WORK = Blog::Types::ProjectFilter["work"]
 
-        include RecordLinking
         include Deps[
           build_projects_page: "operations.build_projects_page",
           index_view: "ui.views.projects.index",
-          link_records: "links.operations.link_records",
         ]
-
-        def handle(request, response) = link(request, response)
 
         private
 

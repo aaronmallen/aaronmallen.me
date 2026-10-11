@@ -16,7 +16,8 @@ module API
         commit = commit_queries.by_id(id)
         return not_found(Helpers::Wording.missing("commit", id)) if commit.nil?
 
-        Success(serialized(Serializers::Commit, commit).merge(record_links: linked(KIND, commit.id)))
+        record_links = linked(record_link_queries.for_record(KIND, commit.id))
+        Success(serialized(Serializers::Commit, commit).merge(record_links:))
       end
     end
   end

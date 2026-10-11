@@ -36,9 +36,6 @@ Hanami/SliceNamespace:
     api: API
     mcp: MCP
 
-Hanami/UnusedDeps:
-  Enabled: false
-
 Hanami/UnvalidatedParams:
   Enabled: false
 

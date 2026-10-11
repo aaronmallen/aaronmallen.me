@@ -3,16 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class CreateComment < Action
+      class CreateComment < PageAction
         ADDED = "tasks_page.toasts.comment_added"
 
-        include PageForm
-        include Redirect
-        include Deps[
-          add_task_comment: "tasks.operations.add_task_comment",
-          build_task_page: "operations.build_task_page",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[add_task_comment: "tasks.operations.add_task_comment"]
 
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:comment]]

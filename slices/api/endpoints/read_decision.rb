@@ -44,7 +44,7 @@ module API
         serialized(Serializers::Decision, decision).merge(
           choice: choice(decision, timeline),
           comments: serialized(Serializers::DecisionComment, decision_queries.comments(decision.id)),
-          record_links: linked(KIND, decision.id),
+          record_links: linked(record_link_queries.for_record(KIND, decision.id)),
           timeline: timeline.map { serialized(SERIALIZERS.fetch(it.kind), it) },
         )
       end

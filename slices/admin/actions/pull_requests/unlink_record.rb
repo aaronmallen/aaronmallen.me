@@ -3,13 +3,8 @@
 module Admin
   module Actions
     module PullRequests
-      class UnlinkRecord < Action
+      class UnlinkRecord < UnlinkRecordAction
         KIND = Blog::Types::RecordKind["pull_request"]
-
-        include RecordLinking
-        include Deps[unlink_records: "links.operations.unlink_records"]
-
-        def handle(request, response) = unlink(request, response)
 
         private
 

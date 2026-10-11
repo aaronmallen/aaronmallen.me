@@ -3,15 +3,10 @@
 module Admin
   module Actions
     module Decisions
-      class UpdateOption < Action
+      class UpdateOption < PageAction
         SAVED = "decisions_page.toasts.option_saved"
 
-        include PageForm
-        include Deps[
-          build_decision_page: "operations.build_decision_page",
-          edit_decision_option: "decisions.operations.edit_decision_option",
-          show_view: "ui.views.decisions.show",
-        ]
+        include Deps[edit_decision_option: "decisions.operations.edit_decision_option"]
 
         def handle(request, response)
           option_id = Blog::Types::IdParam[request.params[:option_id]] || halt(404)

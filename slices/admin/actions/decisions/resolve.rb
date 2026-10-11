@@ -3,16 +3,11 @@
 module Admin
   module Actions
     module Decisions
-      class Resolve < Action
+      class Resolve < PageAction
         CLOSED = "decisions_page.toasts.closed"
         DONE = "decisions_page.toasts.resolved"
 
-        include PageForm
-        include Deps[
-          build_decision_page: "operations.build_decision_page",
-          resolve_decision: "decisions.operations.resolve_decision",
-          show_view: "ui.views.decisions.show",
-        ]
+        include Deps[resolve_decision: "decisions.operations.resolve_decision"]
 
         def handle(request, response)
           params = decision_params(request)

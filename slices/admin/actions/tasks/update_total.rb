@@ -3,16 +3,10 @@
 module Admin
   module Actions
     module Tasks
-      class UpdateTotal < Action
+      class UpdateTotal < PageAction
         SAVED = "tasks_page.toasts.total_saved"
 
-        include PageForm
-        include Redirect
-        include Deps[
-          build_task_page: "operations.build_task_page",
-          set_task_total: "tasks.operations.set_task_total",
-          task_view: "ui.views.tasks.show",
-        ]
+        include Deps[set_task_total: "tasks.operations.set_task_total"]
 
         def handle(request, response)
           params = Blog::Types::Fields[request.params[:total]]

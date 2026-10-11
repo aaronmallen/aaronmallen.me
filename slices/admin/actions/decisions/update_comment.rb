@@ -3,15 +3,10 @@
 module Admin
   module Actions
     module Decisions
-      class UpdateComment < Action
+      class UpdateComment < PageAction
         SAVED = "decisions_page.toasts.comment_saved"
 
-        include PageForm
-        include Deps[
-          build_decision_page: "operations.build_decision_page",
-          edit_decision_comment: "decisions.operations.edit_decision_comment",
-          show_view: "ui.views.decisions.show",
-        ]
+        include Deps[edit_decision_comment: "decisions.operations.edit_decision_comment"]
 
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)

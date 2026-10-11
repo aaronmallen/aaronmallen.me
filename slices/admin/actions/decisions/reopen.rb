@@ -3,16 +3,11 @@
 module Admin
   module Actions
     module Decisions
-      class Reopen < Action
+      class Reopen < PageAction
         DONE = "decisions_page.toasts.reopened"
         OPEN = "decisions_page.toasts.open"
 
-        include PageForm
-        include Deps[
-          build_decision_page: "operations.build_decision_page",
-          reopen_decision: "decisions.operations.reopen_decision",
-          show_view: "ui.views.decisions.show",
-        ]
+        include Deps[reopen_decision: "decisions.operations.reopen_decision"]
 
         def handle(request, response)
           params = decision_params(request)
