@@ -156,6 +156,7 @@ one.
 | [0149][0149] | Keep Google accounts in a google slice with one connection each | ![Active][active] | 2026-10-11 |
 | [0150][0150] | Mirror Gmail and contact messages in a mail slice | ![Active][active] | 2026-10-11 |
 | [0151][0151] | Gate mail behind a mail scope that read does not cover | ![Active][active] | 2026-10-11 |
+| [0152][0152] | Mirror Google events in a calendar slice and write every change back to Google | ![Active][active] | 2026-10-11 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -308,6 +309,7 @@ one.
 [0149]: 0149-keep-google-accounts-in-a-google-slice-with-one-connection-each.md
 [0150]: 0150-mirror-gmail-and-contact-messages-in-a-mail-slice.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
+[0152]: 0152-mirror-google-events-in-a-calendar-slice-and-write-every-change-back-to-google.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
