@@ -386,7 +386,7 @@ RSpec.describe "Admin task links", :frozen_clock, type: :request do
                                                   link: { kind: "blocks", other_id: waiting.id.to_s })
 
       expect(page).to have_css("#task-#{waiting.id}-link-other-id-error")
-      expect(page.find(".page-head-actions a", text: "Tasks")["href"]).to eq("/admin/tasks?filter=upcoming")
+      expect(page.find(".task-drawer-foot a[data-task-close]")["href"]).to eq("/admin/tasks?filter=upcoming")
     end
 
     it "comes back to Today when it was added there" do

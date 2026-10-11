@@ -11,7 +11,9 @@ module Admin
           prop :filter, Blog::Types::String.optional, default: nil
           prop :attributes, Blog::Types::Hash, :**
 
-          def view_template
+          def view_template(&block)
+            return Button(href:, **@attributes, &block) if block
+
             BackLink(href:, **@attributes) { t(today? ? ".today" : ".tasks") }
           end
 

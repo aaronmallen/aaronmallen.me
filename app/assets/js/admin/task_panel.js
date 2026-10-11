@@ -136,7 +136,10 @@ function setupPanel(panel, modal) {
     visit(findUrl(event.target, find), READ, (task) => read(task, true));
   });
 
-  panel.addEventListener("close", () => opener?.focus());
+  panel.addEventListener("close", () => {
+    panelBody.replaceChildren();
+    opener?.focus();
+  });
 
   modal.addEventListener("submit", (event) => {
     const form = event.target;

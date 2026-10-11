@@ -7,9 +7,9 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:task) { create(:task, title: "Ship the read page", note: "say **why** it matters") }
   let(:other) { create(:task, title: "Write the migration") }
 
-  def back(key) = i18n.t(key, scope: "ui.components.tasks.origin_link")
-
   def body = page.find(".markdown-body")
+
+  def closes = page.all("a[data-task-close]").map { it["href"] }.uniq
 
   def fact(key, **) = i18n.t(key, scope: "ui.components.tasks.facts", **)
 
@@ -97,6 +97,58 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       end
     end
 
+    describe "the frame" do
+      def foot = page.find("article.task-drawer > footer.task-drawer-foot")
+
+      def head = page.find("article.task-drawer > header.task-drawer-head")
+
+      it "puts the header, then the body, then the footer" do
+        read
+
+        expect(page).to have_css("header.task-drawer-head + .task-drawer-body + footer.task-drawer-foot")
+      end
+
+      it "keeps the title and the timeline in the body", :aggregate_failures do
+        read
+
+        expect(page).to have_css(".task-drawer-body h1", exact_text: "Ship the read page")
+        expect(page).to have_css(".task-drawer-body .timeline-card")
+      end
+
+      it "shows the list in the header" do
+        read(create(:task, list: "someday"))
+
+        expect(head).to have_css(".read-meta-list", exact_text: i18n.t(Admin::Helpers::TaskLists.name("someday")))
+      end
+
+      it "closes from the header" do
+        read(task, filter: "next")
+
+        expect(head).to have_css("a.task-drawer-close[data-task-close][aria-label='#{label(:close)}']")
+      end
+
+      it "puts Delete, Close and Edit in the footer in that order" do
+        read
+
+        expect(foot.all("a, button").map(&:text)).to eq([label(:delete), label(:close), label(:edit)])
+      end
+
+      it "marks Edit with its key" do
+        read
+
+        expect(foot).to have_css("a[data-task-open-edit][data-key='e'][title='#{label(:edit_title)}']")
+      end
+
+      it "asks before Delete posts", :aggregate_failures do
+        read(task, filter: "next")
+        form = foot.find("form.task-drawer-delete")
+
+        expect(form["action"]).to eq("/admin/tasks/#{task.id}/delete")
+        expect(form["data-confirm"]).to eq(label(:confirm_delete, key: "##{task.id}"))
+        expect(form.find("input[name='filter']", visible: :all).value).to eq("next")
+      end
+    end
+
     it "titles the tab with the task" do
       read
 
@@ -106,7 +158,9 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
     it "draws the key as a badge that copies it" do
       read
 
-      expect(page).to have_css(".read-meta button.record-key[data-record-key='##{task.id}']", text: "##{task.id}")
+      expect(page).to have_css(
+        ".task-drawer-head button.record-key[data-record-key='##{task.id}']", text: "##{task.id}",
+      )
     end
 
     {
@@ -118,14 +172,14 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows the #{status} status" do
         read(create(:task, *traits))
 
-        expect(page).to have_css(".read-meta .pill", text: i18n.t(Admin::Helpers::TaskStatuses.name(status.to_s)))
+        expect(page).to have_css(".task-drawer-head .pill", text: i18n.t(Admin::Helpers::TaskStatuses.name(status.to_s)))
       end
     end
 
     it "shows the tags" do
       read(create(:task, tags: %w[site admin]))
 
-      expect(page.all(".read-meta .tag").map(&:text)).to contain_exactly("#site", "#admin")
+      expect(page.all(".task-drawer-head .tag").map(&:text)).to contain_exactly("#site", "#admin")
     end
 
     it "links each tag to its summary" do
@@ -478,16 +532,16 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         end
       end
 
-      it "leads back to the list it was opened from" do
+      it "closes back to the list it was opened from" do
         read(task, filter: "next")
 
-        expect(page).to have_link(back(:tasks), href: "/admin/tasks?filter=next")
+        expect(closes).to eq(["/admin/tasks?filter=next"])
       end
 
-      it "leads back to Today when it was opened there" do
+      it "closes back to Today when it was opened there" do
         read(task, origin: "today")
 
-        expect(page).to have_link(back(:today), href: "/admin")
+        expect(closes).to eq(["/admin"])
       end
     end
 

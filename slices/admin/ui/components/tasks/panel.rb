@@ -6,7 +6,9 @@ module Admin
       module Tasks
         class Panel < Component
           ID = "task-panel"
-          ATTRIBUTES = { id: ID, class: "dialog wide", hidden: true, data: { dialog: true, task_panel: true } }.freeze
+          ATTRIBUTES = {
+            id: ID, class: "dialog wide task-panel", hidden: true, data: { dialog: true, task_panel: true },
+          }.freeze
 
           def view_template
             dialog(**ATTRIBUTES, aria: { label: t(".label") }) do

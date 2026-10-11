@@ -3348,8 +3348,55 @@
   @apply mt-3.5 meta;
 }
 
-@utility read-page {
-  @apply flex min-w-0 flex-col gap-4;
+@utility task-panel {
+  & .dialog-body {
+    @apply gap-0 p-0;
+  }
+}
+
+@utility task-drawer {
+  @apply mx-auto flex w-full max-w-drawer-wide min-w-0 flex-col;
+
+  :where(.dialog) & {
+    @apply max-w-none flex-1;
+  }
+}
+
+@utility task-drawer-head {
+  @apply sticky top-top-bar z-10 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 border-b border-line bg-ground;
+  @apply px-[22px] py-4;
+
+  :where(.dialog) & {
+    @apply top-0 bg-ground-sunk;
+  }
+}
+
+@utility task-drawer-close {
+  @apply ml-auto;
+}
+
+@utility task-drawer-body {
+  @apply flex min-w-0 flex-1 flex-col gap-4 p-6;
+
+  & [id] {
+    @apply scroll-mt-[calc(var(--spacing-top-bar)+5rem)];
+  }
+
+  :where(.dialog) & [id] {
+    @apply scroll-mt-20;
+  }
+}
+
+@utility task-drawer-foot {
+  @apply sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t border-line bg-ground px-[22px] py-3.5;
+
+  :where(.dialog) & {
+    @apply bg-ground-sunk;
+  }
+}
+
+@utility task-drawer-delete {
+  @apply mr-auto;
 }
 
 @utility read-meta {

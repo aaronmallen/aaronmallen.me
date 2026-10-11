@@ -2729,7 +2729,12 @@ en:
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
         show:
+          close: "Close"
+          confirm_delete: "Delete %{key}? This cannot be undone."
+          delete: "Delete"
           edit: "Edit"
+          edit_key: "Edit the task"
+          edit_title: "Edit (E)"
           links: "Links"
           note: "Note"
           note_label: "Task"

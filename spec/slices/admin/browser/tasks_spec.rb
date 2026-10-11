@@ -436,8 +436,8 @@ RSpec.describe "Admin tasks", type: :feature do
       expect(active).to eq("Email the accountant")
     end
 
-    it "closes on the back button" do
-      panel.click_link(translate("ui.components.tasks.origin_link.tasks"))
+    it "closes on the footer's Close" do
+      panel.find(".task-drawer-foot").click_link(translate("ui.views.tasks.show.close"))
 
       expect(page).to have_no_css("dialog#task-panel[open]").and have_current_path("/admin/tasks?filter=next")
     end
