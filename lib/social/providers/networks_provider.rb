@@ -23,14 +23,14 @@ module Social
           )
         end
 
-        def mastodon(connection_queries, http, scan_links:)
+        def mastodon(connection_queries, http, fit:, scan_links:)
           account = lambda do
             found = connection_queries.for(MASTODON).first
             found && [found.host, found.credentials.fetch(:access_token)]
           end
           connect = ->(host, token) { json(http, url: "https://#{host}", headers: bearer(token)) }
 
-          Mastodon::Client.new(account:, connect:, scan_links:)
+          Mastodon::Client.new(account:, connect:, fit:, scan_links:)
         end
 
         private

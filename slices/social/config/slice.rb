@@ -9,7 +9,8 @@ module Social
     import keys: %w[operations.tag_ref], from: :analytics
 
     import keys: %w[
-      operations.claim_photo_keys operations.read_photo operations.release_photos repos.photo_queries
+      operations.claim_photo_keys operations.process_photo operations.read_photo operations.release_photos
+      repos.photo_queries
     ], from: :media
 
     import keys: %w[

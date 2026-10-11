@@ -8,7 +8,8 @@ Social::Slice.register_provider :networks do
       scan_links:, scan_tags: target["operations.scan_tags"],
     )
     mastodon = Social::Providers::NetworksProvider.mastodon(
-      target["services.repos.connection_queries"], target["http"], scan_links:,
+      target["services.repos.connection_queries"], target["http"],
+      fit: target["media.operations.process_photo"].method(:fit), scan_links:,
     )
 
     register "networks.all", Social::Providers::NetworksProvider.all(bluesky, mastodon)

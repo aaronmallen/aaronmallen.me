@@ -5,8 +5,8 @@ module Media
     autoloader.push_dir(Hanami.app.root.join("lib/media"), namespace: Media)
 
     export %w[
-      operations.claim_photo_keys operations.claim_photos operations.read_photo operations.release_photos
-      operations.upload_photo repos.photo_queries store.client
+      operations.claim_photo_keys operations.claim_photos operations.process_photo operations.read_photo
+      operations.release_photos operations.upload_photo repos.photo_queries store.client
     ]
   end
 end

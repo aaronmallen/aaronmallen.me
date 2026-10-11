@@ -14,7 +14,7 @@ module SocialCredentials
   def connect_another_mastodon(host: "hachyderm.io", access_token: "other")
     Services::Slice["repos.connection_mutations"].add(
       provider: "mastodon", host:, account_id: "2", label: "@ada@#{host}", credentials: { access_token: },
-      scopes: %w[write:statuses read:accounts read:search read:statuses],
+      scopes: %w[write:statuses write:media read:accounts read:search read:statuses],
     )
   end
 
@@ -48,7 +48,7 @@ module SocialCredentials
 
     Services::Slice["repos.connection_mutations"].add(
       provider: "mastodon", host:, account_id: "1", label: "@aaronmallen@#{host}", credentials: { access_token: },
-      scopes: %w[write:statuses read:accounts read:search read:statuses],
+      scopes: %w[write:statuses write:media read:accounts read:search read:statuses],
     )
   end
 
@@ -61,7 +61,8 @@ module SocialCredentials
       scan_links:, scan_tags: Social::Slice["operations.scan_tags"],
     )
     mastodon = Social::Providers::NetworksProvider.mastodon(
-      Social::Slice["services.repos.connection_queries"], Hanami.app["http"], scan_links:,
+      Social::Slice["services.repos.connection_queries"], Hanami.app["http"],
+      fit: Social::Slice["media.operations.process_photo"].method(:fit), scan_links:,
     )
     all = Social::Providers::NetworksProvider.all(bluesky, mastodon)
 

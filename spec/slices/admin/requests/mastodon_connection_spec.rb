@@ -3,7 +3,7 @@
 RSpec.describe "Admin Mastodon connection", type: :request do
   let(:apps_url) { "https://ruby.social/api/v1/apps" }
   let(:revoke_url) { "https://ruby.social/oauth/revoke" }
-  let(:scope) { "write:statuses read:accounts read:search read:statuses" }
+  let(:scope) { "write:statuses write:media read:accounts read:search read:statuses" }
 
   before do
     sign_in_to_admin

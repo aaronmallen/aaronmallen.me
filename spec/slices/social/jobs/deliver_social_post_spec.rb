@@ -138,6 +138,103 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "photos to Mastodon" do
+    let(:photos) { [create(:photo), create(:photo)] }
+    let(:uploads) { [] }
+
+    before do
+      connect_media_store
+      stub_mastodon("1", "2")
+      stub_size_limit(16_777_216)
+      stub_request(:post, SocialNetworks::MASTODON_MEDIA).to_return do |request|
+        uploads << request.body.b
+        json_response(id: "m#{uploads.size}")
+      end
+      photos.each { stub_stored(it, "jpeg #{it.key}") }
+    end
+
+    def large_png
+      create(:photo, key: format("%032x.png", 999))
+        .tap { stub_stored(it, File.binread("spec/fixtures/photos/large.png"), type: "image/png") }
+    end
+
+    def stub_size_limit(bytes)
+      stub_request(:get, SocialNetworks::MASTODON_INSTANCE)
+        .to_return(**json_response(configuration: { media_attachments: { image_size_limit: bytes } }))
+    end
+
+    def stub_stored(photo, body, type: "image/jpeg")
+      stub_request(:get, media_store_url(photo.key)).to_return(body:, headers: { "Content-Type" => type })
+    end
+
+    def uploaded_file(upload) = upload[%r{Content-Type: image/\w+\r\n\r\n(.*)\r\n--}m, 1]
+
+    def with_photos(*held, parts: %w[one two])
+      social_post_mutations.create_with_parts(
+        targets: %w[mastodon], parts:, photos: held, status: "scheduled", posted_at: Time.now - 60,
+      )
+    end
+
+    it "attaches the photos to the status in order", :aggregate_failures do
+      deliver(with_photos({ part: 1, key: photos[0].key }, { part: 1, key: photos[1].key }), "mastodon")
+
+      expect(uploads.map { uploaded_file(it) }).to eq(["jpeg #{photos[0].key}", "jpeg #{photos[1].key}"])
+      expect(a_request(:post, statuses).with(body: hash_including("status" => "one", "media_ids" => %w[m1 m2])))
+        .to have_been_made
+    end
+
+    it "sends each photo's alt text as its description", :aggregate_failures do
+      deliver(with_photos({ part: 1, key: photos[0].key, alt: "A cat on a mat" }), "mastodon")
+
+      expect(uploads.first).to include(%(name="description"\r\n\r\nA cat on a mat\r\n))
+      expect(uploads.first).to include(%(filename="file.jpeg"))
+    end
+
+    it "leaves the description out for a photo with no alt text" do
+      deliver(with_photos({ part: 1, key: photos[0].key }), "mastodon")
+
+      expect(uploads.first).not_to include("description")
+    end
+
+    it "shrinks a photo over the server's limit until it fits" do
+      stub_size_limit(300)
+      deliver(with_photos({ part: 1, key: large_png.key }), "mastodon")
+      sent = uploaded_file(uploads.first)
+
+      expect([sent.bytesize, Vips::Image.new_from_buffer(sent, "").width]).to match([be <= 300, be < 3000])
+    end
+
+    it "posts a part with no photos as before", :aggregate_failures do
+      deliver(with_photos({ part: 1, key: photos[0].key }), "mastodon")
+
+      expect(a_request(:post, statuses).with(body: { status: "two", in_reply_to_id: "1", visibility: "public" }))
+        .to have_been_made
+      expect(uploads.size).to eq(1)
+    end
+
+    it "asks the server for its limit only when a part holds photos" do
+      deliver(with_photos(parts: %w[one]), "mastodon")
+
+      expect(a_request(:get, SocialNetworks::MASTODON_INSTANCE)).not_to have_been_made
+    end
+
+    it "keeps the error when a photo can't be read" do
+      stub_request(:get, media_store_url(photos[0].key)).to_return(status: 404)
+      social_post = with_photos({ part: 1, key: photos[0].key })
+      refused(social_post, "mastodon")
+
+      expect(delivery(social_post, "mastodon").error).to eq("Photo #{photos[0].key} is unavailable")
+    end
+
+    it "keeps the error when Mastodon refuses a photo" do
+      stub_request(:post, SocialNetworks::MASTODON_MEDIA).to_return(status: 422)
+      social_post = with_photos({ part: 1, key: photos[0].key })
+      refused(social_post, "mastodon")
+
+      expect(delivery(social_post, "mastodon").error).to eq("Mastodon answered 422 for POST /api/v2/media")
+    end
+  end
+
   describe "Mastodon refusing the send" do
     let(:social_post) { queued }
 

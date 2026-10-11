@@ -51,7 +51,7 @@ bluesky = add_connection.add(
 )
 mastodon = add_connection.add(
   provider: "mastodon", host: "social.example.com", account_id: "1", label: "@ada@social.example.com",
-  credentials: { access_token: "seed" }, scopes: %w[write:statuses read:accounts read:search read:statuses],
+  credentials: { access_token: "seed" }, scopes: %w[write:statuses write:media read:accounts read:search read:statuses],
 )
 
 deliver = Social::Operations::DeliverSocialPost.new(networks: Seeds.networks)

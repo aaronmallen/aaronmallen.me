@@ -4,6 +4,8 @@ module SocialNetworks
   BLUESKY_DID = "did:plc:ada"
   BLUESKY_PDS = "https://bsky.social/xrpc"
   BLUESKY_PUBLIC = "https://public.api.bsky.app/xrpc"
+  MASTODON_INSTANCE = "https://ruby.social/api/v2/instance"
+  MASTODON_MEDIA = "https://ruby.social/api/v2/media"
   MASTODON_SEARCH = "https://ruby.social/api/v2/search"
   MASTODON_STATUSES = "https://ruby.social/api/v1/statuses"
 

@@ -13,15 +13,29 @@ module Media
       MAX_PIXELS = 100_000_000
       PAGE_HEIGHT = "page-height"
       QUALITY = 85
+      SHRINK = 0.8
 
       Processed = Data.define(:body, :width, :height)
 
       def call(bytes, type)
-        image = Vips::Image.thumbnail_buffer(
-          bytes, LONG_EDGE, height: LONG_EDGE, size: :down, option_string: load_options(type),
-        )
+        image = thumbnail(bytes, LONG_EDGE, type)
 
         Processed.new(body: save(image, type), width: image.width, height: frame_height(image))
+      rescue Vips::Error
+        nil
+      end
+
+      def fit(bytes, content_type, max_bytes)
+        type = Blog::Types::PhotoType.mapping.key(content_type)
+        first = Vips::Image.new_from_buffer(bytes, FIRST_PAGE)
+        edge = [first.width, first.height].max * Math.sqrt(max_bytes.fdiv(bytes.bytesize))
+
+        until edge < 1
+          body = save(thumbnail(bytes, edge.floor, type), type)
+          return body if body.bytesize <= max_bytes
+
+          edge *= SHRINK
+        end
       rescue Vips::Error
         nil
       end
@@ -45,6 +59,10 @@ module Media
       def save(image, type)
         options = LOSSY.include?(type) ? { Q: QUALITY } : Blog::Constants::EMPTY_HASH
         image.write_to_buffer(".#{type}", strip: true, **options)
+      end
+
+      def thumbnail(bytes, edge, type)
+        Vips::Image.thumbnail_buffer(bytes, edge, height: edge, size: :down, option_string: load_options(type))
       end
     end
   end
