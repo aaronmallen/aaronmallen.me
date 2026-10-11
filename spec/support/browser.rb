@@ -63,7 +63,7 @@ module Spec
 
       using_wait_time(10) { evaluate_async_script(<<~JS, %w[wcag2a wcag2aa wcag21a wcag21aa wcag22aa]) }
         const done = arguments[arguments.length - 1];
-        axe.run(document, { runOnly: { type: 'tag', values: arguments[0] } }).then(({ violations }) => done(
+        axe.run(document, { runOnly: { type: 'tag', values: arguments[0] }, rules: { 'color-contrast': { enabled: false } } }).then(({ violations }) => done(
           violations.flatMap(({ id, nodes }) => nodes.map((node) => `${id} at ${node.target.join(' ')}: ${node.failureSummary}`))
         ));
       JS

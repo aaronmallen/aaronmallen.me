@@ -25,29 +25,34 @@
 }
 
 @theme {
-  --color-ground: light-dark(#f2f1ea, #272822);
-  --color-ground-sunk: light-dark(#e7e6dd, #1e1f1c);
-  --color-ink: light-dark(#26271f, #f8f8f2);
-  --color-ink-muted: light-dark(#5f6055, #a8a391);
-  --color-line: light-dark(#cfcec2, #3b3a32);
+  --color-ground: light-dark(#faf4f2, #222222);
+  --color-ground-sunk: light-dark(#ede7e5, #191919);
+  --color-ink: light-dark(#29242a, #f7f1ff);
+  --color-ink-muted: light-dark(#706b6e, #bab6c0);
+  --color-line: light-dark(#d3cdcc, #363537);
 
-  --color-accent: light-dark(#b3105a, #ff6e9c);
-  --color-accent-on: light-dark(#fff5f8, #1a0710);
+  --color-accent: light-dark(#e14775, #fc618d);
+  --color-accent-on: light-dark(#faf4f2, #191919);
+  --color-accent-text: light-dark(#e14775, #fc618d);
 
-  --color-mk-pink: light-dark(#b3105a, #f92672);
-  --color-mk-green: light-dark(#4b7a12, #a6e22e);
-  --color-mk-blue: light-dark(#0f6f85, #66d9ef);
-  --color-mk-violet: light-dark(#6b3fc0, #ae81ff);
-  --color-mk-sand: light-dark(#8a6a0a, #e6db74);
-  --color-mk-orange: light-dark(#a1600a, #fd971f);
-  --color-mk-pink-text: light-dark(#b3105a, #fb5a94);
-  --color-mk-green-text: light-dark(#3a5f0e, #a6e22e);
-  --color-mk-blue-text: light-dark(#0c5f71, #66d9ef);
-  --color-mk-sand-text: light-dark(#735808, #e6db74);
-  --color-mk-orange-text: light-dark(#855008, #fd971f);
-  --color-mk-comment: light-dark(#696658, #939081);
-  --color-mk-selection: light-dark(#dcdacb, #49483e);
-  --color-wash: light-dark(#e4e2d6, #3e3d32);
+  --color-mk-pink: light-dark(#e14775, #fc618d);
+  --color-mk-green: light-dark(#269d69, #7bd88f);
+  --color-mk-blue: light-dark(#1c8ca8, #5ad4e6);
+  --color-mk-violet: light-dark(#7058be, #948ae3);
+  --color-mk-sand: light-dark(#cc7a0a, #fce566);
+  --color-mk-orange: light-dark(#e16032, #fd9353);
+  --color-mk-pink-text: light-dark(#e14775, #fc618d);
+  --color-mk-green-text: light-dark(#269d69, #7bd88f);
+  --color-mk-blue-text: light-dark(#1c8ca8, #5ad4e6);
+  --color-mk-violet-text: light-dark(#7058be, #948ae3);
+  --color-mk-sand-text: light-dark(#cc7a0a, #fce566);
+  --color-mk-orange-text: light-dark(#e16032, #fd9353);
+  --color-mk-comment: light-dark(#918c8e, #69676c);
+  --color-mk-selection: light-dark(#bfb9ba, #525053);
+  --color-wash: light-dark(#ede7e5, #363537);
+
+  --color-mastodon-text: light-dark(#4a3fd6, #9a9bff);
+  --color-bluesky-text: light-dark(#0b63c4, #5aaeff);
 
   --animate-mk-cycle: mk-cycle 7.2s linear infinite;
 
@@ -464,11 +469,11 @@
 }
 
 @utility site-footer-link {
-  @apply inline-flex items-center gap-1.5 text-ink-muted no-underline hover:text-accent focus-ring;
+  @apply inline-flex items-center gap-1.5 text-ink-muted no-underline hover:text-accent-text focus-ring;
 }
 
 @utility site-footer-text-link {
-  @apply text-ink-muted no-underline hover:text-accent hover:underline focus-ring;
+  @apply text-ink-muted no-underline hover:text-accent-text hover:underline focus-ring;
 }
 
 @utility site-footer-heart {
@@ -491,12 +496,12 @@
 
 @utility main-nav-brand {
   @apply mr-[clamp(4px,1vw,16px)] text-brand pub-focus;
-  --cy0: var(--color-mk-pink);
-  --cy1: var(--color-mk-orange);
-  --cy2: var(--color-mk-sand);
-  --cy3: var(--color-mk-green);
-  --cy4: var(--color-mk-blue);
-  --cy5: var(--color-mk-violet);
+  --cy0: var(--color-mk-pink-text);
+  --cy1: var(--color-mk-orange-text);
+  --cy2: var(--color-mk-sand-text);
+  --cy3: var(--color-mk-green-text);
+  --cy4: var(--color-mk-blue-text);
+  --cy5: var(--color-mk-violet-text);
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
@@ -602,7 +607,7 @@
 }
 
 @utility sec-l {
-  @apply inline-flex items-center gap-2 meta whitespace-nowrap no-underline hover:text-accent focus-ring;
+  @apply inline-flex items-center gap-2 meta whitespace-nowrap no-underline hover:text-accent-text focus-ring;
 }
 
 @utility writing-empty {
@@ -618,7 +623,7 @@
 }
 
 @utility pager-link {
-  @apply inline-flex items-center gap-1.5 meta no-underline hover:text-accent focus-ring;
+  @apply inline-flex items-center gap-1.5 meta no-underline hover:text-accent-text focus-ring;
 
   &.next {
     @apply ml-auto flex-row-reverse;
@@ -647,7 +652,7 @@
 }
 
 @utility entry-link {
-  @apply text-inherit no-underline hover:text-accent focus-ring;
+  @apply text-inherit no-underline hover:text-accent-text focus-ring;
 }
 
 @utility entry-blurb {
@@ -679,7 +684,7 @@
   }
 
   &.violet {
-    @apply text-mk-violet;
+    @apply text-mk-violet-text;
   }
 
   &.sand {
@@ -714,7 +719,7 @@
   }
 
   &:is(a):hover .pn {
-    @apply text-accent;
+    @apply text-accent-text;
   }
 
   & .ps {
@@ -937,7 +942,7 @@
 }
 
 @utility post-back {
-  @apply mb-[clamp(18px,2vw,30px)] inline-flex items-center gap-2 meta no-underline hover:text-accent focus-ring;
+  @apply mb-[clamp(18px,2vw,30px)] inline-flex items-center gap-2 meta no-underline hover:text-accent-text focus-ring;
 
   & i {
     @apply text-[10.5px];
@@ -962,7 +967,7 @@
 }
 
 @utility post-author {
-  @apply text-inherit no-underline hover:text-accent focus-ring;
+  @apply text-inherit no-underline hover:text-accent-text focus-ring;
 }
 
 @utility post-body {
@@ -1132,7 +1137,7 @@
 }
 
 @utility post-response-author {
-  @apply font-display text-base font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply font-display text-base font-semibold text-ink no-underline hover:text-accent-text focus-ring;
 }
 
 @utility post-response-text {
@@ -1162,7 +1167,7 @@
   }
 
   & a:hover .t {
-    @apply text-accent;
+    @apply text-accent-text;
   }
 
   & .all {
@@ -1311,7 +1316,7 @@
   @apply mr-3 text-wordmark admin-focus;
   --cy0: var(--color-mk-green-text);
   --cy1: var(--color-mk-blue-text);
-  --cy2: var(--color-mk-violet);
+  --cy2: var(--color-mk-violet-text);
   --cy3: var(--color-mk-pink-text);
   --cy4: var(--color-mk-orange-text);
   --cy5: var(--color-mk-sand-text);
@@ -1481,10 +1486,10 @@
   }
 
   &.pri {
-    @apply border-mk-green-text bg-mk-green text-ground;
+    @apply border-mk-green-text bg-mk-green text-accent-on;
 
     & > i {
-      @apply text-ground;
+      @apply text-accent-on;
     }
   }
 
@@ -1973,7 +1978,7 @@
   @apply w-4 shrink-0 text-center text-icon-sm;
 
   &.violet {
-    @apply text-mk-violet;
+    @apply text-mk-violet-text;
   }
 
   &.green {
@@ -2006,7 +2011,7 @@
   }
 
   &:is(a):hover .activity-event-name {
-    @apply text-accent;
+    @apply text-accent-text;
   }
 }
 
@@ -2509,7 +2514,7 @@
   @apply truncate text-[.96rem] font-medium;
 
   .commit:hover & {
-    @apply text-accent;
+    @apply text-accent-text;
   }
 }
 
@@ -2747,7 +2752,7 @@
   }
 
   &.violet {
-    @apply text-mk-violet;
+    @apply text-mk-violet-text;
   }
 
   &.sand {
@@ -2777,7 +2782,7 @@
   }
 
   &:is(a) {
-    @apply hover:text-accent focus-ring;
+    @apply hover:text-accent-text focus-ring;
 
     @media (width < 43.75rem) {
       @apply flex min-h-tap items-center;
@@ -2894,7 +2899,7 @@
   }
 
   &.doing > .record-key {
-    @apply border-mk-blue text-mk-blue;
+    @apply border-mk-blue text-mk-blue-text;
   }
 
   &.done .task-title {
@@ -2940,7 +2945,7 @@
 }
 
 @utility task-title {
-  @apply min-w-0 font-display text-task font-semibold text-pretty text-ink no-underline hover:text-accent focus-ring;
+  @apply min-w-0 font-display text-task font-semibold text-pretty text-ink no-underline hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -2955,7 +2960,7 @@
   @apply inline-flex items-center gap-1.5 whitespace-nowrap;
 
   &.blue {
-    @apply text-mk-blue;
+    @apply text-mk-blue-text;
   }
 
   &.pink {
@@ -2972,7 +2977,7 @@
 }
 
 @utility task-source {
-  @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent hover:underline focus-ring;
+  @apply inline-flex items-center gap-1 font-mono text-badge whitespace-nowrap text-ink-muted no-underline hover:text-accent-text hover:underline focus-ring;
 
   @media (width < 43.75rem) {
     @apply min-h-tap;
@@ -3037,7 +3042,7 @@
   }
 
   & a.task-link-title {
-    @apply no-underline hover:text-accent hover:underline focus-ring;
+    @apply no-underline hover:text-accent-text hover:underline focus-ring;
 
     @media (width < 43.75rem) {
       @apply block min-h-tap basis-full content-center;
@@ -3112,7 +3117,7 @@
   @apply flex min-w-0 items-center gap-2 border-b border-line py-1.5 last:border-b-0;
 
   & > a.record-link-title {
-    @apply no-underline hover:text-accent hover:underline focus-ring;
+    @apply no-underline hover:text-accent-text hover:underline focus-ring;
 
     @media (width < 43.75rem) {
       @apply min-h-tap content-center;
@@ -3362,7 +3367,7 @@
 }
 
 @utility decision-row-title {
-  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -3501,7 +3506,7 @@
 
 @utility inbox-kind {
   &.violet {
-    @apply text-mk-violet;
+    @apply text-mk-violet-text;
   }
 
   &.blue {
@@ -3517,7 +3522,7 @@
   @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline;
 
   &:is(a) {
-    @apply hover:text-accent focus-ring;
+    @apply hover:text-accent-text focus-ring;
 
     @media (width < 43.75rem) {
       @apply flex min-h-tap items-center;
@@ -3705,7 +3710,7 @@
 }
 
 @utility wm-author {
-  @apply text-ink no-underline hover:text-accent focus-ring;
+  @apply text-ink no-underline hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply inline-flex min-h-tap items-center;
@@ -3730,7 +3735,7 @@
 }
 
 @utility person-row-name {
-  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent focus-ring;
+  @apply font-display text-[1.08rem] leading-[1.3] font-semibold text-ink no-underline hover:text-accent-text focus-ring;
   @apply after:absolute after:inset-0;
 
   @media (width < 43.75rem) {
@@ -3759,7 +3764,7 @@
 }
 
 @utility project-card-name {
-  @apply font-mono text-[1.15rem] font-medium text-ink no-underline hover:text-accent focus-ring;
+  @apply font-mono text-[1.15rem] font-medium text-ink no-underline hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply flex min-h-tap items-center;
@@ -3995,7 +4000,7 @@
 
 @utility today-line {
   @apply flex w-full items-baseline justify-between gap-3 border-b border-line py-3 last:border-b-0;
-  @apply font-display font-medium text-ink no-underline hover:text-accent admin-focus;
+  @apply font-display font-medium text-ink no-underline hover:text-accent-text admin-focus;
 
   @media (width < 43.75rem) {
     @apply min-h-tap items-center;
@@ -4199,7 +4204,7 @@
 }
 
 @utility task-stbar-running {
-  @apply text-mk-blue before:content-['·_'];
+  @apply text-mk-blue-text before:content-['·_'];
 }
 
 @utility markdown-body {
@@ -4491,7 +4496,7 @@
   }
 
   &.violet {
-    @apply text-mk-violet;
+    @apply text-mk-violet-text;
   }
 
   &.sand {
@@ -4678,7 +4683,7 @@
 
 @utility project-pick-remove {
   @apply inline-flex size-6 cursor-pointer items-center justify-center rounded-full text-ink-muted;
-  @apply hover:text-accent focus-ring;
+  @apply hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply min-h-tap min-w-tap;
@@ -4764,7 +4769,7 @@
 }
 
 @utility settings-link {
-  @apply text-ink-muted underline hover:text-accent focus-ring;
+  @apply text-ink-muted underline hover:text-accent-text focus-ring;
 
   @media (width < 43.75rem) {
     @apply inline-flex min-h-tap items-center;
@@ -4835,7 +4840,7 @@
   }
 
   &:hover .svc-line-name {
-    @apply text-accent;
+    @apply text-accent-text;
   }
 }
 
@@ -5453,18 +5458,18 @@
   @apply relative inline-flex items-center gap-1.5 rounded-sm text-ink-muted no-underline focus-ring;
 
   &.mastodon {
-    @apply hover:text-mk-violet;
+    @apply hover:text-mastodon-text;
 
     & i {
-      @apply text-mk-violet;
+      @apply text-mastodon-text;
     }
   }
 
   &.bluesky {
-    @apply hover:text-mk-blue-text;
+    @apply hover:text-bluesky-text;
 
     & i {
-      @apply text-mk-blue-text;
+      @apply text-bluesky-text;
     }
   }
 
@@ -5485,11 +5490,11 @@
 
 @utility field-net {
   &.mastodon {
-    --net: var(--color-mk-violet);
+    --net: var(--color-mastodon-text);
   }
 
   &.bluesky {
-    --net: var(--color-mk-blue-text);
+    --net: var(--color-bluesky-text);
   }
 
   & .f-icon {
@@ -5503,11 +5508,11 @@
 
 @utility person-finder {
   & .seg-option.mastodon:has(:checked) {
-    @apply text-mk-violet;
+    @apply text-mastodon-text;
   }
 
   & .seg-option.bluesky:has(:checked) {
-    @apply text-mk-blue-text;
+    @apply text-bluesky-text;
   }
 
   & .seg-option i {
@@ -5551,11 +5556,11 @@
   @apply meta truncate;
 
   &.mastodon {
-    @apply text-mk-violet;
+    @apply text-mastodon-text;
   }
 
   &.bluesky {
-    @apply text-mk-blue-text;
+    @apply text-bluesky-text;
   }
 
   & i {
@@ -5616,11 +5621,11 @@
   @apply meta transition-colors duration-150 ease-in-out;
 
   &.bluesky:has(:checked) {
-    @apply text-mk-blue-text;
+    @apply text-bluesky-text;
   }
 
   &.mastodon:has(:checked) {
-    @apply text-mk-violet;
+    @apply text-mastodon-text;
   }
 
   &:has(:checked) {
@@ -5667,11 +5672,11 @@
   background-color: color-mix(in oklab, var(--net) 14%, transparent);
 
   &.mastodon {
-    --net: var(--color-mk-violet);
+    --net: var(--color-mastodon-text);
   }
 
   &.bluesky {
-    --net: var(--color-mk-blue-text);
+    --net: var(--color-bluesky-text);
   }
 
   & > i {
@@ -5749,11 +5754,11 @@
   }
 
   &.mastodon {
-    --net: var(--color-mk-violet);
+    --net: var(--color-mastodon-text);
   }
 
   &.bluesky {
-    --net: var(--color-mk-blue-text);
+    --net: var(--color-bluesky-text);
   }
 }
 
@@ -5840,11 +5845,11 @@
   @apply inline-flex items-center gap-1.5 rounded-sm text-(--net);
 
   &.mastodon {
-    --net: var(--color-mk-violet);
+    --net: var(--color-mastodon-text);
   }
 
   &.bluesky {
-    --net: var(--color-mk-blue-text);
+    --net: var(--color-bluesky-text);
   }
 
   &:is(a) {
@@ -6000,7 +6005,7 @@
     min-height: 100dvh;
   }
   ::selection { background-color: var(--color-mk-selection); color: var(--color-ink); }
-  a { color: var(--color-accent); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a { color: var(--color-accent-text); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
   a:hover { text-decoration-color: currentColor; }
   h1, h2, h3 { font-family: var(--font-display); }
   code, pre { font-family: var(--font-mono); }
@@ -6027,7 +6032,7 @@
     color: var(--color-mk-green-text);
   }
   .syntax-highlighting .hl-string { color: var(--color-mk-sand-text); }
-  .syntax-highlighting :is(.hl-entity.hl-name.hl-function, .hl-support.hl-function) { color: var(--color-mk-blue); }
+  .syntax-highlighting :is(.hl-entity.hl-name.hl-function, .hl-support.hl-function) { color: var(--color-mk-blue-text); }
   .syntax-highlighting :is(.hl-comment, .hl-comment *) { color: var(--color-mk-comment); }
 }
 

@@ -11,8 +11,8 @@ module Blog
         MANIFEST_PATH = "/site.webmanifest"
         THEME_COOKIE = "site_theme"
         THEMES = {
-          "light" => { color: "#f2f1ea", icon: "fa-sun", label_key: ".themes.light" }.freeze,
-          "dark" => { color: "#272822", icon: "fa-moon", label_key: ".themes.dark" }.freeze,
+          "light" => { color: "#faf4f2", icon: "fa-sun", label_key: ".themes.light" }.freeze,
+          "dark" => { color: "#222222", icon: "fa-moon", label_key: ".themes.dark" }.freeze,
         }.freeze
 
         private

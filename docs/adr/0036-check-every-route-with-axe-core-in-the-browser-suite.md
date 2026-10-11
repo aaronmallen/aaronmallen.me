@@ -5,6 +5,7 @@ status: active
 created: 2026-09-28
 area: [public, admin, mcp]
 issue: AA-836
+amended: ["#1063"]
 tags: [accessibility, wcag, axe-core, testing, capybara, cuprite, browser]
 ---
 
@@ -25,6 +26,9 @@ A new faint color or an unnamed button would ship without a failing spec.
 
 The browser suite runs axe-core against every route in public, admin and MCP, once in light mode and once in dark
 mode, and fails on any WCAG 2.2 AA breach. It runs as part of `mise run test:browser`.
+
+Issue #1063 turned off axe's `color-contrast` rule, so the site's colors can match the design, whose light text
+hues read below 4.5. Contrast is now a design choice, and no spec checks it.
 
 The `axe-core-api` gem supplies the axe script, pinned to its version. Its runner drives Selenium and breaks under
 Cuprite, the driver the suite already uses, so the suite injects the script through Cuprite and calls `axe.run`
