@@ -5,6 +5,7 @@ status: active
 created: 2026-10-07
 area: [db, api, contact, social, tasks]
 issue: "#655"
+amended: ["#1122"]
 tags: [inbox, snooze, schema, slices, tasks, messages, webmentions]
 ---
 
@@ -28,6 +29,9 @@ goes.
 
 **Each record's table carries its own snooze.** A new migration adds a nullable `snoozed_until` to `task_sources`,
 `messages` and `webmentions`, beside the seen marks. A row waits while `snoozed_until` is empty or past.
+
+Since #1122, `messages` lives on as threads in the `mail` slice, and a thread keeps its snooze in its own
+`snoozed_until` ([ADR 0150][0150]).
 
 **Each slice filters its own rows.** `tasks`, `contact` and `social` each leave a snoozed row out of the waiting query
 and the count they export, and each owns the operations that snooze and wake its rows. The Snoozed section reads one
@@ -60,4 +64,5 @@ snooze belongs to before looking for it.
 
 [0094]: 0094-keep-a-seen-at-on-task-sources-and-merge-the-inbox-in-the-api-slice.md
 [0095]: 0095-build-the-stalled-list-in-the-activity-slice-and-keep-snoozes-in-attention-snoozes.md
+[0150]: 0150-mirror-gmail-and-contact-messages-in-a-mail-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

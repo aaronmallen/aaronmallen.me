@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [config, analytics, contact, public, social]
 issue: AA-601
-amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918"]
+amended: [AA-490, AA-505, AA-561, AA-708, AA-717, AA-749, "#200", "#204", "#463", "#504", "#532", "#898", "#918", "#1122"]
 tags: [concurrency, contact, csrf, honeypot, privacy, retention, spam, throttle, timer]
 ---
 
@@ -94,6 +94,10 @@ at a time or in bulk, and `ReapSpamMessages` drops a spam message 30 days after 
 keeps a hash until `ReapWebmentionReceipts` drops it once it falls outside the throttle window. An analytics event
 keeps its hashes for 90 days.
 
+**Messages move to the `mail` slice.** #1122 grows `contact` into a `mail` slice and moves every contact form
+message into its threads ([ADR 0150][0150]). The guards above stand. Where this record names `messages`, a
+`Contact::` class or a `contact` export, it names the shape before that move.
+
 ## Alternatives
 
 **Turn on sessions and ship a CSRF token.** The Hanami answer, three lines, and every form the public site grows
@@ -152,4 +156,5 @@ closes. Until then the stored mention shows the first version.
 
 The day the public slice grows an action that acts for a signed-in visitor, this record breaks and needs a new one.
 
+[0150]: 0150-mirror-gmail-and-contact-messages-in-a-mail-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

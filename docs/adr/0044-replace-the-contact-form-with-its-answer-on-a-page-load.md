@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [assets, public]
 issue: AA-668
-amended: ["#920", "#957"]
+amended: ["#920", "#957", "#1122"]
 tags: [contact, forms, javascript, redirect, throttle, validation]
 ---
 
@@ -24,6 +24,9 @@ AA-384 had already decided the other way. A confirmation rendered in answer to a
 a refresh, so `POST /contact` answers a stored message with a 302 to `/contact?sent=1`, and the page that follows
 renders the confirmation. The record on guarding the contact form rules out a session, which is why the URL
 carries the state. AA-511 asked which shape stands.
+
+Since #1122 the contact form lives in a `mail` slice, where a stored message becomes a thread ([ADR 0150][0150]).
+The page and its states below stay as they are.
 
 Two more states need a place, and the design draws neither: the 422 a bad entry gets and the 429 the
 throttle gets.
@@ -94,4 +97,5 @@ that refusal lands on the server and renders in the same slot.
 Nobody can link to a filled form or to an error. The day a public page needs a state the URL cannot carry, this
 record runs out of room at the same moment the refusal of a session does.
 
+[0150]: 0150-mirror-gmail-and-contact-messages-in-a-mail-slice.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
