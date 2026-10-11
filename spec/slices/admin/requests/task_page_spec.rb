@@ -7,7 +7,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
   let(:task) { create(:task, title: "Ship the read page", note: "say **why** it matters") }
   let(:other) { create(:task, title: "Write the migration") }
 
-  def back(key) = i18n.t(key, scope: "ui.components.tasks.back_link")
+  def back(key) = i18n.t(key, scope: "ui.components.tasks.origin_link")
 
   def body = page.find(".markdown-body")
 

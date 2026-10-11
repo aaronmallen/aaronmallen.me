@@ -4,7 +4,7 @@ module Admin
   module UI
     module Components
       module Tasks
-        class BackLink < Component
+        class OriginLink < Component
           FROM_TODAY = Blog::Types::TaskOrigin["today"]
 
           prop :origin, Blog::Types::TaskOrigin
@@ -12,7 +12,7 @@ module Admin
           prop :attributes, Blog::Types::Hash, :**
 
           def view_template
-            Components::BackLink(href:, **@attributes) { t(today? ? ".today" : ".tasks") }
+            BackLink(href:, **@attributes) { t(today? ? ".today" : ".tasks") }
           end
 
           private

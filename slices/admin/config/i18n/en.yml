@@ -1772,9 +1772,6 @@ en:
           note: "Saving changes only what new imports take. Tasks already imported keep the tags and projects they have."
           save: "Save"
       tasks:
-        back_link:
-          tasks: "Tasks"
-          today: "Today"
         bulk:
           cancel: "Cancel"
           complete: "Done"
@@ -1939,6 +1936,9 @@ en:
           in_progress: "in progress"
           in_progress_for: "in progress · %{span}"
           scheduled: "%{date}"
+        origin_link:
+          tasks: "Tasks"
+          today: "Today"
         panel:
           label: "Task"
         pools:
