@@ -11,19 +11,24 @@ module Admin
           prop :id, Blog::Types::Integer
           prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
           prop :label, Blog::Types::String.optional, default: nil
+          prop :card, Blog::Types::Bool, default: true
 
           def view_template
-            Card(label: @label || t(".label"), title: t(".title"), class: "record-links") do
-              Hint { t(".empty") } if links.empty?
-              links.each { |kind, rows| KindGroup(kind:) { rows.each { row(it) } } }
-              Picker(
-                scope:, link_path: path(:"admin_link_#{@kind}_record", id: @id), find_path: @find_path, fields: @fields,
-                **@records.slice(:query, :found, :errors),
-              )
-            end
+            return Field(label: t(".heading"), class: "record-links") { content } unless @card
+
+            Card(label: @label || t(".label"), title: t(".title"), class: "record-links") { content }
           end
 
           private
+
+          def content
+            Hint { t(".empty") } if links.empty?
+            links.each { |kind, rows| KindGroup(kind:) { rows.each { row(it) } } }
+            Picker(
+              scope:, link_path: path(:"admin_link_#{@kind}_record", id: @id), find_path: @find_path, fields: @fields,
+              **@records.slice(:query, :found, :errors),
+            )
+          end
 
           def links = @records.fetch(:links, Blog::Constants::EMPTY_HASH)
 

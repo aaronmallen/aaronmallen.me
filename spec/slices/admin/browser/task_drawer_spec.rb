@@ -2,14 +2,14 @@
 
 RSpec.describe "Admin task drawer", type: :feature do
   let(:repo) { Tasks::Slice["repos.task_queries"] }
-  let!(:task) { create(:task, title: "Clear the gutters") }
+  let!(:task) { create(:task, title: "Clear the gutters", tags: %w[home]) }
   let(:other) { create(:task, title: "Buy a ladder") }
 
   def box(selector) = evaluate_script("(r => ({ top: r.top, bottom: r.bottom }))(#{selector}.getBoundingClientRect())")
 
-  def controls
+  def controls(blocks = ".task-drawer-head, .task-drawer-foot")
     evaluate_script(<<~JS)
-      [...document.querySelectorAll("#task-panel :is(.task-drawer-head, .task-drawer-foot) :is(a, button)")]
+      [...document.querySelectorAll("#task-panel :is(#{blocks}) :is(a, button)")]
         .filter((control) => control.checkVisibility())
         .map((control) => { const r = control.getBoundingClientRect(); return [r.width, r.height]; })
     JS
@@ -99,6 +99,13 @@ RSpec.describe "Admin task drawer", type: :feature do
 
     it "gives every header and footer control a tap square" do
       expect(controls).to all(satisfy { |width, height| width >= 44 && height >= 44 })
+    end
+
+    it "gives the status bar, the notes and the facts a tap height", :aggregate_failures do
+      found = controls(".task-stbar, .task-read-empty, .task-facts")
+
+      expect(found.size).to be >= 4
+      expect(found).to all(satisfy { |_, height| height >= 44 })
     end
 
     it "does not scroll sideways", :aggregate_failures do

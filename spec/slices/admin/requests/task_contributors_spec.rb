@@ -8,7 +8,9 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
 
   def credit(model: "claude-opus-5-5") = create(:task_contributor, task_id: task.id, model:)
 
-  def credits_fact = page.find(".task-fact", text: i18n.t("ui.components.tasks.facts.contributors")).find("dd").text
+  def credits_fact
+    page.find(".task-fact", text: i18n.t("ui.components.tasks.facts.contributors")).all(".pill").map(&:text)
+  end
 
   def form = page.find("#task-#{task.id}-form")
 
@@ -116,7 +118,7 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
       save("#{new_agent}[agent]" => "claude-code", "#{new_agent}[model]" => "claude-opus-5-5")
       get "/admin/tasks/#{task.id}"
 
-      expect(credits_fact).to eq("Me, claude-code on claude-opus-5-5")
+      expect(credits_fact).to eq(["Me", "claude-code on claude-opus-5-5"])
     end
 
     it "checks the saved contributors when the editor opens again", :aggregate_failures do
@@ -151,7 +153,7 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
     it "lists me for a task with no contributors" do
       get "/admin/tasks/#{task.id}"
 
-      expect(credits_fact).to eq("Me")
+      expect(credits_fact).to eq(["Me"])
     end
 
     it "lists each agent with its model" do
@@ -159,7 +161,7 @@ RSpec.describe "Admin task contributors", :frozen_clock, type: :request do
       credit(model: "claude-sonnet-5")
       get "/admin/tasks/#{task.id}"
 
-      expect(credits_fact).to eq("claude-code on claude-opus-5-5, claude-code on claude-sonnet-5")
+      expect(credits_fact).to eq(["claude-code on claude-opus-5-5", "claude-code on claude-sonnet-5"])
     end
   end
 end

@@ -54,47 +54,12 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       expect(last_response.status).to eq(404)
     end
 
-    it "heads the page with the title" do
+    it "puts the status bar first, then the title" do
       read
 
-      expect(page).to have_css(".page-head h1", exact_text: "Ship the read page")
-    end
+      title = ".task-drawer-body > .task-stbar:first-child + h1.task-read-title"
 
-    describe "the kicker" do
-      def kicker_text = page.find(".page-head .page-head-kicker").text
-
-      it "sits above the title" do
-        read
-
-        expect(page).to have_css(".page-head .page-head-kicker + h1.page-head-title")
-      end
-
-      it "shows the key alone on a task typed in the admin" do
-        read
-
-        expect(kicker_text).to eq("##{task.id}")
-      end
-
-      it "adds the GitHub reference on a task synced from GitHub" do
-        create(:task_source, task:, url: "https://github.com/aaronmallen/aaronmallen.me/issues/42")
-        read
-
-        expect(kicker_text).to eq("##{task.id} · aaronmallen/aaronmallen.me#42")
-      end
-
-      it "adds the issue key on a task synced from Linear" do
-        url = "https://linear.app/acme/issue/ABC-123/ship-the-release"
-        create(:task_source, task:, provider: "linear", remote_id: "lin-1", url:)
-        read
-
-        expect(kicker_text).to eq("##{task.id} · ABC-123")
-      end
-
-      it "draws no key line under the title" do
-        read
-
-        expect(page).to have_no_css(".page-head .page-head-sub")
-      end
+      expect(page).to have_css(title, exact_text: "Ship the read page")
     end
 
     describe "the frame" do
@@ -176,10 +141,10 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       end
     end
 
-    it "shows the tags" do
+    it "shows the tags among the facts" do
       read(create(:task, tags: %w[site admin]))
 
-      expect(page.all(".task-drawer-head .tag").map(&:text)).to contain_exactly("#site", "#admin")
+      expect(page.all(".task-fact .tag").map(&:text)).to contain_exactly("#site", "#admin")
     end
 
     it "links each tag to its summary" do
@@ -207,6 +172,32 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       read
 
       expect(page).to have_no_css(".task-source")
+    end
+
+    describe "the facts" do
+      it "lays them out as List, Sprint, Tags, Contributors, then the dates and tallies" do
+        read
+
+        expect(facts.keys).to eq(%i[list sprint tags contributors created updated carried worked].map { fact(it) })
+      end
+
+      it "shows the list" do
+        read(create(:task, list: "someday"))
+
+        expect(facts[fact(:list)]).to eq(i18n.t(Admin::Helpers::TaskLists.name("someday")))
+      end
+
+      it "says when there are no tags" do
+        read
+
+        expect(facts[fact(:tags)]).to eq(fact(:no_tags))
+      end
+
+      it "shows the contributors as pills" do
+        read
+
+        expect(page.all(".task-fact .pill").map(&:text)).to eq([fact(:owner)])
+      end
     end
 
     describe "the dates" do
@@ -282,6 +273,18 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
         read_note("")
 
         expect(page).to have_no_css(".markdown-body")
+      end
+
+      it "says a task has no notes" do
+        read_note("")
+
+        expect(page).to have_css(".task-read-empty", text: "#{label(:no_notes)} #{label(:add_notes)}")
+      end
+
+      it "links Add some to the editor" do
+        read(create(:task, note: ""), filter: "next")
+
+        expect(page).to have_css(".task-read-empty a[data-task-open-edit][href*='/edit?filter=next']")
       end
 
       it "shows no empty block when nothing survives the cleaning" do
@@ -546,6 +549,14 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
     end
 
     describe "the links" do
+      it "draws a plain block headed Task links, not a card" do
+        read
+
+        heading = i18n.t("ui.components.tasks.link_editor.label")
+
+        expect(page).to have_css(".task-drawer-body > .task-link-editor > .field > .f:first-child", exact_text: heading)
+      end
+
       def hidden_fields(form) = form.all("input[type='hidden']", visible: :all).to_h { [it["name"].to_sym, it.value] }
 
       def link(kind: "blocks", other_id: other.id)
@@ -614,7 +625,7 @@ RSpec.describe "Admin task page", :frozen_clock, type: :request do
       it "shows the page again with the error beside the field", :aggregate_failures do
         link(other_id: task.id)
 
-        expect(page).to have_css(".page-head h1", exact_text: "Ship the read page")
+        expect(page).to have_css("h1.task-read-title", exact_text: "Ship the read page")
         expect(page.find("#task-#{task.id}-link-other-id-error").text)
           .to eq(i18n.t("ui.components.tasks.field_error.other_id.self"))
       end

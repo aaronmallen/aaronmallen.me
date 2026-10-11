@@ -11,8 +11,6 @@ module Tasks
 
       def self.for(source) = new(provider: source.provider, path: URI(source.url).path)
 
-      def key = linear? ? linear_parts&.last : name
-
       def name = linear? ? linear_parts&.join(LINEAR_SEPARATOR) : github_name
 
       private

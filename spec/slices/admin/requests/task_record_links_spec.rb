@@ -44,6 +44,14 @@ RSpec.describe "Admin task record links", type: :request do
   describe "the Linked section" do
     before { sign_in_to_admin }
 
+    it "draws a plain block headed Linked records, not a card" do
+      get "/admin/tasks/#{task.id}"
+
+      block = ".task-drawer-body > .field.record-links:not(.card) > .f:first-child"
+
+      expect(page).to have_css(block, exact_text: i18n.t("ui.components.record_links.section.heading"))
+    end
+
     it "says nothing is linked yet on a task with no links" do
       get "/admin/tasks/#{task.id}"
 
@@ -54,7 +62,7 @@ RSpec.describe "Admin task record links", type: :request do
       %w[commit project post].each { link_records(it, linkable_record(it).id) }
       get "/admin/tasks/#{task.id}"
 
-      expect(section.all(".card-body > .record-link-group .record-link-kind").map(&:text))
+      expect(page.all(".record-links > .record-link-group .record-link-kind").map(&:text))
         .to eq(%w[post commit project].map { kind_name(it) })
     end
 

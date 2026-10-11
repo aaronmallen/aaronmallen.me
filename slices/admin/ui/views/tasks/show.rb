@@ -30,8 +30,9 @@ module Admin
           private
 
           def body
-            PageHead(title: @task.title, kicker:)
+            content_for(:title, @task.title)
             status_bar
+            h1(class: "task-read-title") { @task.title }
             note
             facts
             links
@@ -52,14 +53,15 @@ module Admin
           end
 
           def edit
-            href = path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)
             data = { task_open_edit: true, key: EDIT, key_label: t(".edit_key") }
 
             Button(
-              href:, small: true, icon: "fa-regular fa-pen-to-square", title: t(".edit_title"),
+              href: edit_path, small: true, icon: "fa-regular fa-pen-to-square", title: t(".edit_title"),
               aria: { keyshortcuts: EDIT }, data:,
             ) { t(".edit") }
           end
+
+          def edit_path = path(:admin_edit_task, id: @task.id, filter: @filter, origin: @origin)
 
           def facts
             Facts(task: @task)
@@ -74,40 +76,35 @@ module Admin
 
           def key = Components::RecordKey.key(@task.id)
 
-          def kicker = dotted(key, reference)
-
           def linked
             RecordLinks::Section(
               records: @records, kind: "task", id: @task.id, fields: { filter: @filter, origin: @origin },
-              find_path: path(:admin_task, id: @task.id),
+              find_path: path(:admin_task, id: @task.id), card: false,
             )
           end
 
-          def links
-            Card(label: t(".related"), title: t(".links")) do
-              LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
-            end
-          end
+          def links = LinkEditor(task: @task, tab: @filter, origin: @origin, linking: @linking)
 
           def meta
             RecordKey(kind: "task", id: @task.id)
             Status(status: @task.status)
             span(class: "read-meta-list") { t(Helpers::TaskLists.name(@task.place)) }
             SourceLink(source: @task.source)
-            @task.tags.each { Tag(tag: it) }
             label = t(".close")
             close(label:, icon: "fa-solid fa-xmark", class: "task-drawer-close") { label }
           end
 
           def note
-            return unless @note_html
+            Field(label: t(".notes")) do
+              next div(class: "markdown-body post-body") { raw(safe(@note_html)) } if @note_html
 
-            Card(label: t(".note_label"), title: t(".note")) do
-              div(class: "markdown-body post-body") { raw(safe(@note_html)) }
+              Hint(class: "task-read-empty") do
+                plain t(".no_notes")
+                whitespace
+                a(href: edit_path, data: { task_open_edit: true }) { t(".add_notes") }
+              end
             end
           end
-
-          def reference = @task.source && ::Tasks::Structs::SourceReference.for(@task.source).key
 
           def status_bar
             div(class: "task-stbar") do

@@ -1405,6 +1405,7 @@ en:
           placeholder: "Post, commit, project…"
         section:
           empty: "Nothing linked yet."
+          heading: "Linked records"
           label: "Records"
           remove: "Remove the link to %{title}"
           title: "Linked"
@@ -1978,7 +1979,7 @@ en:
             blank: "Write the task down first."
         facts:
           agent: "%{agent} on %{model}"
-          carried: "Carried over"
+          carried: "Carried"
           carried_count:
             one: "once"
             other: "%{count} times"
@@ -1986,11 +1987,14 @@ en:
           completed: "Completed"
           contributors: "Contributors"
           created: "Created"
+          list: "List"
+          no_tags: "none"
           owner: "Me"
-          sprint: "Sprint day"
-          unscheduled: "not set"
+          sprint: "Sprint"
+          tags: "Tags"
+          unscheduled: "unscheduled"
           updated: "Updated"
-          worked: "Time worked"
+          worked: "Worked"
         filters:
           clear_range: "Clear the date range"
           search: "Search tasks"
@@ -2021,7 +2025,7 @@ en:
             other: "%{count} open"
           sprint: "Sprint · %{date}"
         link_editor:
-          label: "Links"
+          label: "Task links"
         link_finder:
           find: "Find"
           kind: "Link type"
@@ -2736,16 +2740,15 @@ en:
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
         show:
+          add_notes: "Add some"
           close: "Close"
           confirm_delete: "Delete %{key}? This cannot be undone."
           delete: "Delete"
           edit: "Edit"
           edit_key: "Edit the task"
           edit_title: "Edit (E)"
-          links: "Links"
-          note: "Note"
-          note_label: "Task"
-          related: "Related"
+          no_notes: "No notes."
+          notes: "Notes"
           running: "running"
           worked_total: "%{span} worked"
       time_report:
