@@ -441,6 +441,98 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
   end
 
+  describe "photos to Bluesky" do
+    let(:photos) { Array.new(2) { create(:photo, width: 640, height: 480) } }
+    let(:uploads) { [] }
+
+    def blob(index) = { "$type" => "blob", "ref" => { "$link" => "cid-#{index}" }, "mimeType" => "image/jpeg" }
+
+    def held(*alts, part: 1) = alts.each_with_index.map { |alt, index| { part:, key: photos[index].key, alt: } }
+
+    def image(index, alt)
+      { "alt" => alt, "aspectRatio" => { "height" => 480, "width" => 640 }, "image" => blob(index) }
+    end
+
+    def images = bluesky_writes.first.dig("record", "embed", "images")
+
+    def noise = Vips::Image.gaussnoise(1200, 1200).cast(:uchar).bandjoin([Vips::Image.gaussnoise(1200, 1200)] * 2)
+
+    def store(photo, body = "photo-#{photo.key}", type: "image/jpeg")
+      stub_request(:get, media_store_url(photo.key)).to_return(body:, headers: { "Content-Type" => type })
+    end
+
+    def with_photos(photos, parts: %w[one])
+      social_post_mutations.create_with_parts(targets: %w[bluesky], parts:, photos:, status: "scheduled",
+                                              posted_at: Time.now - 60)
+    end
+
+    before do
+      connect_media_store
+      stub_bluesky
+      photos.each { store(it) }
+      stub_request(:post, bluesky_url("com.atproto.repo.uploadBlob")).to_return do |request|
+        uploads << request
+        json_response(blob: blob(uploads.size))
+      end
+    end
+
+    it "uploads each photo and embeds them in order, each with its alt text" do
+      deliver(with_photos(held("A cat", "A dog")), "bluesky")
+
+      expect(bluesky_writes.first.dig("record", "embed"))
+        .to eq("$type" => "app.bsky.embed.images", "images" => [image(1, "A cat"), image(2, "A dog")])
+    end
+
+    it "uploads the bytes from the store under their type, with the session token" do
+      deliver(with_photos(held(nil)), "bluesky")
+
+      headers = { "Authorization" => "Bearer jwt", "Content-Type" => "image/jpeg" }
+
+      expect(uploads.first).to have_attributes(body: "photo-#{photos[0].key}", headers: include(headers))
+    end
+
+    it "sends empty alt text for a photo with none" do
+      deliver(with_photos(held(nil)), "bluesky")
+
+      expect(images.first["alt"]).to eq("")
+    end
+
+    it "embeds each part's photos on that part alone" do
+      social_post = with_photos(held(nil, part: 2), parts: %w[one two])
+      stub_bluesky_parent(bluesky_uri(rkey(social_post, 1)))
+      deliver(social_post, "bluesky")
+
+      expect(bluesky_writes.map { it.dig("record", "embed", "images")&.size }).to eq([nil, 1])
+    end
+
+    it "shrinks a photo over Bluesky's cap to a JPEG under it" do
+      big = noise.write_to_buffer(".png")
+      store(photos[0], big, type: "image/png")
+      deliver(with_photos(held(nil)), "bluesky")
+
+      expect([big.bytesize, uploads.first.body.bytesize, uploads.first.headers["Content-Type"]])
+        .to match([be > 1_000_000, be <= 1_000_000, "image/jpeg"])
+    end
+
+    it "keeps the error and posts nothing when the store has lost the photo" do
+      stub_request(:get, media_store_url(photos[0].key)).to_return(status: 404)
+      social_post = with_photos(held(nil))
+      refused(social_post, "bluesky")
+
+      expect([delivery(social_post, "bluesky").error, bluesky_writes])
+        .to eq(["Photo #{photos[0].key} is unavailable", []])
+    end
+
+    it "keeps the error and posts nothing when an upload comes back without a blob" do
+      stub_request(:post, bluesky_url("com.atproto.repo.uploadBlob")).to_return(**json_response(size: 1))
+      social_post = with_photos(held(nil))
+      refused(social_post, "bluesky")
+
+      expect([delivery(social_post, "bluesky").error, bluesky_writes])
+        .to eq(["Bluesky returned no blob for an uploaded image", []])
+    end
+  end
+
   describe "Bluesky refusing the send" do
     let(:social_post) { queued(targets: %w[bluesky]) }
 

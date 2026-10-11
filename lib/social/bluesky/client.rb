@@ -63,12 +63,12 @@ module Social
 
       def max_bytes = MAX_BYTES
 
-      def post(text, idempotency_key:, mentions: [], reply_to: nil)
+      def post(text, idempotency_key:, mentions: [], photos: [], reply_to: nil)
         sessions = accounts.sessions(reply_to && address(reply_to)[:repo], @credentials)
 
         sessions.use do |session|
           accounts.wrote(session.did, sessions)
-          uri = write(record(text, mentions, reply_to, session), session, rkey(idempotency_key))
+          uri = write(record(text, mentions, photos, reply_to, session), session, rkey(idempotency_key))
 
           Structs::RemotePost.new(id: uri, url: web_url(session.handle, uri))
         end
@@ -108,12 +108,13 @@ module Social
         request(connection, :get, nsid, params, token)
       end
 
-      def record(text, mentions, reply_to, session)
+      def record(text, mentions, photos, reply_to, session)
         facets = Facets.for(mentions:, links: scan_links.call(text), tags: scan_tags.call(text))
 
         {
           "$type" => COLLECTION,
           createdAt: Time.now.utc.iso8601,
+          embed: Images.embed(photos) { |body, type| upload(body, type, session) },
           facets: facets.empty? ? nil : facets,
           reply: reply_to && reply_ref(reply_to, session),
           text:,
@@ -129,9 +130,10 @@ module Social
         { parent: strong, root: parent.dig("value", "reply", "root") || strong }
       end
 
-      def request(connection, verb, nsid, body, token)
+      def request(connection, verb, nsid, body, token, type: nil)
         response = connection.public_send(verb, "#{XRPC_PATH}/#{nsid}", body) do |http|
           http.headers["Authorization"] = "Bearer #{token}" if token
+          http.headers["Content-Type"] = type if type
         end
 
         return response.body if response.success? && response.body.is_a?(Hash)
@@ -150,6 +152,8 @@ module Social
 
         Session.new(did:, handle: author, token:)
       end
+
+      def upload(body, type, session) = request(pds, :post, Images::UPLOAD_BLOB, body, session.token, type:)
 
       def web_url(author, uri) = "#{APP_URL}/profile/#{author}/post/#{uri.split('/').last}"
 

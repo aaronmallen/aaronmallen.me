@@ -11,6 +11,7 @@ module Social
         expand_for_network: "operations.expand_for_network",
         list_target_accounts: "operations.list_target_accounts",
         networks: "networks.all",
+        read_photo: "media.operations.read_photo",
         social_post_mutations: "repos.social_post_mutations",
         social_post_queries: "repos.social_post_queries",
       ]
@@ -49,6 +50,23 @@ module Social
 
       def expanded(social_post, network) = expand_for_network.call(social_post.parts.map(&:body), network)
 
+      def held_photos(parts)
+        held = social_post_queries.photos_by_part(parts.map(&:id))
+
+        parts.map { held.fetch(it.id, Blog::Constants::EMPTY_ARRAY) }
+      end
+
+      def photos(held)
+        held.map do |row|
+          read = read_photo.call(row.photo_key).value_or { raise Social::Error, "Photo #{row.photo_key} is unavailable" }
+
+          Structs::PartPhoto.new(
+            alt: row.alt_text, body: read.stored.body, content_type: read.stored.content_type,
+            height: read.photo.height, width: read.photo.width,
+          )
+        end
+      end
+
       def refuse(social_post, account, reason, error)
         transaction do
           social_post_mutations.record_delivery(social_post.id, account, error:, failed: true)
@@ -58,8 +76,9 @@ module Social
         Failure(reason)
       end
 
-      def send_part(social_post, account, client, delivery, (part, body))
-        remote = client.post(body.text, mentions: body.mentions, reply_to: delivery.remote_ids.last,
+      def send_part(social_post, account, client, delivery, (part, body, held))
+        remote = client.post(body.text, mentions: body.mentions, photos: photos(held),
+                                        reply_to: delivery.remote_ids.last,
                                         idempotency_key: Structs::PartKey.new(connection_id: account.id, part:))
 
         social_post_mutations.record_delivery(
@@ -70,7 +89,9 @@ module Social
       end
 
       def send_parts(social_post, account, client, delivery, bodies)
-        social_post.parts.zip(bodies).drop(delivery.remote_ids.size).each do |sending|
+        parts = social_post.parts.zip(bodies, held_photos(social_post.parts))
+
+        parts.drop(delivery.remote_ids.size).each do |sending|
           delivery = send_part(social_post, account, client, delivery, sending)
         end
 
