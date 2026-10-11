@@ -1,17 +1,18 @@
 ---
 id: "0055"
 title: Make every admin write a plain form POST that scripts only add to
-status: active
+status: superseded
 created: 2026-09-28
 area: [admin, assets, lib]
+superseded-by: "0153"
 issue: AA-676
-amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924", "#941"]
+amended: ["#37", "#41", "#80", "#135", "#148", "#231", "#225", "#201", "#331", "#924", "#941", "#1126"]
 tags: [admin, forms, javascript, routes, flash, toast, fetch, method-override]
 ---
 
 # ADR 0055: Make every admin write a plain form POST that scripts only add to
 
-![Active][status]
+![Superseded][status]
 
 ## Context
 
@@ -122,4 +123,4 @@ Method override would cost a middleware on every request and give nothing, since
 [0084]: 0084-keep-edit-notes-in-a-post-edits-table-and-require-one-under-the-posts-lock.md
 [0085]: 0085-reorder-tasks-by-drag-and-save-the-order-through-fetch.md
 [0091]: 0091-fetch-the-palettes-open-tasks-from-a-session-only-admin-route-when-it-opens.md
-[status]: https://img.shields.io/badge/Active-green?style=for-the-badge
+[status]: https://img.shields.io/badge/0153-black?style=for-the-badge&label=Superseded&labelColor=orange

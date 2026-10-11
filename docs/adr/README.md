@@ -59,7 +59,7 @@ one.
 | [0052][0052] | Read activity through one view across every content kind | ![Active][active] | 2026-09-28 |
 | [0053][0053] | Navigate the admin through a command palette, not a tab strip | ![Superseded][superseded-0128] | 2026-09-28 |
 | [0054][0054] | Run every admin screen on a phone | ![Active][active] | 2026-09-28 |
-| [0055][0055] | Make every admin write a plain form POST that scripts only add to | ![Active][active] | 2026-09-28 |
+| [0055][0055] | Make every admin write a plain form POST that scripts only add to | ![Superseded][superseded-0153] | 2026-09-28 |
 | [0056][0056] | Serve MCP from our own OAuth 2.1 server and the official Ruby SDK | ![Active][active] | 2026-09-28 |
 | [0057][0057] | Put the mcp slice inside the SDK's own MCP module | ![Active][active] | 2026-09-28 |
 | [0058][0058] | Serve MCP as one stateless POST action | ![Active][active] | 2026-09-28 |
@@ -157,6 +157,7 @@ one.
 | [0150][0150] | Mirror Gmail and contact messages in a mail slice | ![Active][active] | 2026-10-11 |
 | [0151][0151] | Gate mail behind a mail scope that read does not cover | ![Active][active] | 2026-10-11 |
 | [0152][0152] | Mirror Google events in a calendar slice and write every change back to Google | ![Active][active] | 2026-10-11 |
+| [0153][0153] | Update admin row actions and filters in place by fetch and morph, and let them need scripts | ![Active][active] | 2026-10-11 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -310,6 +311,7 @@ one.
 [0150]: 0150-mirror-gmail-and-contact-messages-in-a-mail-slice.md
 [0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [0152]: 0152-mirror-google-events-in-a-calendar-slice-and-write-every-change-back-to-google.md
+[0153]: 0153-update-admin-row-actions-and-filters-in-place-by-fetch-and-morph-and-let-them-need-scripts.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
@@ -323,4 +325,5 @@ one.
 [superseded-0136]: https://img.shields.io/badge/0136-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0139]: https://img.shields.io/badge/0139-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0140]: https://img.shields.io/badge/0140-black?style=for-the-badge&label=Superseded&labelColor=orange
+[superseded-0153]: https://img.shields.io/badge/0153-black?style=for-the-badge&label=Superseded&labelColor=orange
 [writing ADRs]: ../writing-adrs.md
