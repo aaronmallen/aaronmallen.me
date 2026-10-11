@@ -78,6 +78,13 @@ RSpec.describe "Admin links", type: :request do
 
       expect(page.find(".page-head-sub").text).to start_with("1 short link on shares.localhost, 1,204 clicks in all.")
     end
+
+    it "says click for a single click in the lede" do
+      relation.by_pk(made.id).update(click_count: 1)
+      get "/admin/links"
+
+      expect(page.find(".page-head-sub").text).to start_with("1 short link on shares.localhost, 1 click in all.")
+    end
   end
 
   describe "search and sort" do
@@ -228,6 +235,175 @@ RSpec.describe "Admin links", type: :request do
 
         expect(last_response.status).to eq(422)
       end
+    end
+  end
+
+  describe "a drawer" do
+    let!(:made) { link("https://www.example.com/talk", code: "talk", at: Time.utc(2026, 9, 3, 12), clicks: 1) }
+    let(:drawer) { page.find("dialog#link-#{made.id}-drawer", visible: :all) }
+    let(:confirm) { i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/talk") }
+
+    before { get "/admin/links" }
+
+    it "opens from the row's title, which links to the edit page without scripts" do
+      expect(page).to have_css(
+        ".link-row-title a[href='/admin/links/#{made.id}/edit'][data-dialog-open='link-#{made.id}-drawer']",
+      )
+    end
+
+    it "shows the title, clicks, date and last click", :aggregate_failures do
+      Shares::Slice["relations.short_links"].by_pk(made.id).update(last_clicked_at: Time.utc(2026, 9, 5, 12))
+      get "/admin/links"
+
+      expect(drawer).to have_css(".file-drawer-name", exact_text: "example.com", visible: :all)
+      expect(drawer.find(".file-drawer-meta", visible: :all).text(:all))
+        .to include("1 click", "made September 3, 2026", "last clicked Sep 5, 2026")
+    end
+
+    it "copies the link and the host as markdown", :aggregate_failures do
+      expect(drawer).to have_css(".file-drawer-link", exact_text: "http://shares.localhost/talk", visible: :all)
+      expect(drawer).to have_css("button[data-record-key='http://shares.localhost/talk']", visible: :all)
+      expect(drawer).to have_css("button[data-record-key='[example.com](http://shares.localhost/talk)']", visible: :all)
+    end
+
+    it "copies the title as markdown once it has one" do
+      Shares::Slice["operations.set_short_link_title"].call(made.id, { title: "My talk" })
+      get "/admin/links"
+
+      expect(drawer).to have_css("button[data-record-key='[My talk](http://shares.localhost/talk)']", visible: :all)
+    end
+
+    it "escapes brackets and backslashes in the title it copies as markdown" do
+      Shares::Slice["operations.set_short_link_title"].call(made.id, { title: "My [talk] \\ slides" })
+      get "/admin/links"
+      copy = drawer.find("button[data-record-key^='[']", visible: :all)
+
+      expect(copy["data-record-key"]).to eq("[My \\[talk\\] \\\\ slides](http://shares.localhost/talk)")
+    end
+
+    it "edits the destination, code and title", :aggregate_failures do
+      expect(drawer).to have_field("link[destination]", with: "https://www.example.com/talk", visible: :all)
+      expect(drawer).to have_field("link[code]", with: "talk", visible: :all)
+      expect(drawer).to have_field("link[title]", with: "", visible: :all)
+    end
+
+    it "asks before it deletes", :aggregate_failures do
+      expect(page).to have_css(
+        "form#link-#{made.id}-delete[action='/admin/links/#{made.id}/delete'][data-confirm='#{confirm}']",
+        visible: :all,
+      )
+      expect(drawer).to have_css("button[form='link-#{made.id}-delete']", visible: :all)
+    end
+  end
+
+  describe "the edit page" do
+    it "shows the form without scripts", :aggregate_failures do
+      made = link(code: "talk")
+      get "/admin/links/#{made.id}/edit"
+
+      expect(page).to have_css("form[action='/admin/links/#{made.id}'] input[name='link[destination]']")
+      expect(page).to have_css("button[form='link-#{made.id}-form'][type='submit']")
+    end
+
+    it "answers 404 for a missing link" do
+      get "/admin/links/0/edit"
+
+      expect(last_response).to be_not_found
+    end
+  end
+
+  describe "saving" do
+    let(:made) { link(code: "talk") }
+    let(:server) { Rack::MockRequest.new(Shares::Slice["server"]) }
+
+    def fields = { destination: "https://example.com/talk", code: "talk", title: "" }
+
+    def save(**changes)
+      post("/admin/links/#{made.id}", { link: fields.merge(changes) }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+    end
+
+    def stored = relation.with_code.by_pk(made.id).one.to_h.slice(:destination, :code, :title)
+
+    it "says it saved" do
+      save(title: "My talk")
+      follow_redirect!
+
+      expect(page).to have_css("[data-toast]", text: i18n.t("links_page.toasts.saved"))
+    end
+
+    it "sends the code to a new destination" do
+      save(destination: "https://example.org/talk")
+
+      expect(server.get("/talk").headers["Location"]).to eq("https://example.org/talk")
+    end
+
+    it "answers at the new code and 404 at the old one", :aggregate_failures do
+      save(code: "keynote")
+
+      expect(server.get("/keynote").headers["Location"]).to eq("https://example.com/talk")
+      expect(server.get("/talk").status).to eq(404)
+    end
+
+    it "saves the title" do
+      save(title: "My talk")
+
+      expect(stored[:title]).to eq("My talk")
+    end
+
+    describe "refused" do
+      let!(:was) { stored }
+
+      before do
+        link("https://example.com/other", code: "other")
+        Shares::Slice["relations.short_codes"].command(:create).call(code: "deck")
+      end
+
+      {
+        "a bad destination" => [{ destination: "javascript:alert(1)" }, "destination.format"],
+        "a blank code" => [{ code: " " }, "code.blank"],
+        "a code another link holds" => [{ code: "other" }, "code.taken"],
+        "a code a share holds" => [{ code: "deck" }, "code.taken"],
+      }.each do |name, (changes, reason)|
+        it "refuses #{name} and changes nothing", :aggregate_failures do
+          save(title: "My talk", destination: "https://example.org/talk", **changes)
+
+          expect(last_response.status).to eq(422)
+          expect(page).to have_css(".field-error", text: error(reason))
+          expect(stored).to eq(was)
+        end
+      end
+    end
+
+    it "keeps what I typed when it refuses" do
+      save(code: "no--way", title: "My talk")
+
+      expect(%w[code title].map { page.find("#link-#{made.id}-#{it}").value }).to eq(["no--way", "My talk"])
+    end
+  end
+
+  describe "deleting" do
+    let(:made) { link(code: "talk") }
+
+    def delete_link(id = made.id) = post("/admin/links/#{id}/delete", {}, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+
+    it "removes the link and frees its code", :aggregate_failures do
+      delete_link
+
+      expect(links).to be_empty
+      expect(Rack::MockRequest.new(Shares::Slice["server"]).get("/talk").status).to eq(404)
+    end
+
+    it "says it deleted" do
+      delete_link
+      follow_redirect!
+
+      expect(page).to have_css("[data-toast]", text: i18n.t("links_page.toasts.deleted"))
+    end
+
+    it "answers 404 for a missing link" do
+      delete_link(0)
+
+      expect(last_response).to be_not_found
     end
   end
 end

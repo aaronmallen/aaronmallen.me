@@ -11,10 +11,12 @@ module Admin
 
           prop :link, Blog::Types::Instance(ROM::Struct)
 
+          def self.host(destination) = URI.parse(destination).host.to_s.delete_prefix("www.")
+
           def view_template
             div(class: "link-row") do
               div(class: "link-row-main") do
-                p(class: "link-row-title") { @link.title || host }
+                p(class: "link-row-title") { opener }
                 p(class: "link-row-url", title: @link.destination) { @link.destination.sub(SCHEME, "") }
                 p(class: "link-row-meta") { meta }
               end
@@ -40,12 +42,18 @@ module Admin
 
           def date(time) = l(Blog::TimeZone.today(time), format: :medium)
 
-          def host = URI.parse(@link.destination).host.to_s.delete_prefix("www.")
+          def host = self.class.host(@link.destination)
 
           def meta
             span { t(".clicks", count: @link.click_count, clicks: Blog::Helpers::Figures.count(@link.click_count)) }
             span { t(".made", on: date(@link.created_at)) }
             span { t(".retargeted", on: date(@link.retargeted_at)) } if @link.retargeted_at
+          end
+
+          def opener
+            a(href: path(:admin_edit_link, id: @link.id), data: { dialog_open: Drawer.id_for(@link) }) do
+              @link.title || host
+            end
           end
 
           def short = Helpers::ShareLink.for(@link.code)

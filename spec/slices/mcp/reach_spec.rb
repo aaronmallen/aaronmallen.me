@@ -123,6 +123,7 @@ RSpec.describe "MCP reach", type: :app do
       "shares.operations.delete_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.retarget_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.save_share" => "spec #1053 keeps MCP tools out of shares",
+      "shares.operations.save_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.set_share_alt_text" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.set_short_link_title" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.upload_share" => "spec #1053 keeps MCP tools out of shares",

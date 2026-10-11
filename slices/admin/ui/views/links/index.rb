@@ -22,7 +22,7 @@ module Admin
             PageHead(title: t(".heading"), sub:) { sort_form }
             new_form
             search_form
-            Card(class: "link-list") { @links.rows.empty? ? Empty { t(empty) } : @links.rows.each { Row(link: it) } }
+            list
             Pager(page: @links, route: :admin_links, params: query)
           end
 
@@ -49,6 +49,11 @@ module Admin
           end
 
           def empty = @totals[:count].zero? ? ".empty" : ".no_match"
+
+          def list
+            Card(class: "link-list") { @links.rows.empty? ? Empty { t(empty) } : @links.rows.each { Row(link: it) } }
+            @links.rows.each { Drawer(link: it) }
+          end
 
           def new_form
             Form(
@@ -91,7 +96,7 @@ module Admin
             t(
               ".lede",
               count: @totals[:count], host: Helpers::ShareLink.host,
-              clicks: Blog::Helpers::Figures.count(@totals[:clicks]),
+              clicks: t(".clicks", count: @totals[:clicks], clicks: Blog::Helpers::Figures.count(@totals[:clicks])),
             )
           end
 

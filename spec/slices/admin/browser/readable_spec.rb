@@ -446,6 +446,12 @@ RSpec.describe "Admin screens", type: :feature do
         click_button "Shorten"
         find(".link-new .hint")
       end,
+      "link drawer" => lambda do
+        seed_short_links.then { visit "/admin/links" }
+        find(".link-row-title a", text: "A talk with a fairly long title").click
+        find("dialog[open].file-drawer [name='link[title]']")
+      end,
+      "link editor" => -> { visit "/admin/links/#{seed_short_links.value!.id}/edit" },
     }
   end
 

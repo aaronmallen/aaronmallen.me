@@ -74,4 +74,47 @@ RSpec.describe "Admin links", type: :feature do
     expect(page).to have_css(".toast", text: "Link copied")
     expect(copied).to eq(["http://shares.localhost/talk"])
   end
+
+  describe "a row's drawer" do
+    def drawer(&) = within("dialog[open].file-drawer", &)
+
+    before do
+      talk
+      visit("/admin/links").then { watch_clipboard_items }
+      find(".link-row").click
+    end
+
+    it "opens when I click the row" do
+      expect(page).to have_css("dialog[open].file-drawer .file-drawer-name", text: "example.com")
+    end
+
+    it "copies the link as markdown with the host", :aggregate_failures do
+      drawer { click_button "Copy as markdown" }
+
+      expect(page).to have_css(".toast", text: "Markdown copied")
+      expect(copied).to eq(["[example.com](http://shares.localhost/talk)"])
+    end
+
+    it "saves a new title" do
+      drawer { fill_in("Title", with: "My talk").then { click_button "Save" } }
+
+      expect(page).to have_css(".link-row-title", exact_text: "My talk")
+    end
+
+    describe "deleting" do
+      before { drawer { click_button "Delete link" } }
+
+      it "asks first" do
+        confirm = i18n.t("ui.components.links.link_form.confirm_delete", link: "shares.localhost/talk")
+
+        expect(page).to have_css("[data-confirm-message]", text: confirm)
+      end
+
+      it "removes the row once I say yes" do
+        drawer { click_button "Delete link" }
+
+        expect(page).to have_no_css(".link-row")
+      end
+    end
+  end
 end

@@ -97,6 +97,9 @@ module Admin
     )
     get "/links", to: "links.index", as: :links
     post "/links", to: "links.create", as: :create_link
+    get "/links/:id/edit", to: "links.edit", as: :edit_link, id: ID
+    post "/links/:id", to: "links.update", as: :update_link, id: ID
+    post "/links/:id/delete", to: "links.destroy", as: :delete_link, id: ID
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
     post "/messages/bulk", to: "messages.bulk", as: :bulk_messages

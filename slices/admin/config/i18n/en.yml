@@ -107,6 +107,8 @@ en:
       updated: "Entry updated"
   links_page:
     toasts:
+      deleted: "Link deleted"
+      saved: "Link saved"
       shortened: "Shortened"
   messages_page:
     toasts:
@@ -818,13 +820,37 @@ en:
             one: "%{count} word"
             other: "%{count} words"
       links:
+        drawer:
+          title: "Short link"
         field_error:
           code:
+            blank: "Give it a code."
             format: "Use lowercase letters, numbers and single hyphens."
             taken: "A file or another link already uses that code."
           destination:
             blank: "Paste a link to shorten."
             format: "That doesn't look like a web link. It has to start with http:// or https://."
+        foot:
+          delete: "Delete link"
+          save: "Save"
+        link_form:
+          clicks:
+            one: "%{clicks} click"
+            other: "%{clicks} clicks"
+          code: "Short code"
+          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
+          confirm_delete: "Delete %{link}? Anyone following it gets a 404."
+          copy_link: "Copy link"
+          copy_markdown: "Copy as markdown"
+          destination: "Destination"
+          destination_hint: "Where %{link} sends people."
+          last_clicked: "last clicked %{on}"
+          link: "Short link"
+          link_copied: "Link copied"
+          made: "made %{on}"
+          markdown_copied: "Markdown copied"
+          title: "Title"
+          title_hint: "Only you see this. Used for search and markdown."
         row:
           clicks:
             one: "%{clicks} click"
@@ -2394,8 +2420,13 @@ en:
             one: "%{count} word"
             other: "%{count} words"
       links:
+        edit:
+          all_links: "All links"
         index:
           again: "Already shortened as %{link}. Shorten again to get a second code."
+          clicks:
+            one: "%{clicks} click"
+            other: "%{clicks} clicks"
           code: "Short code · optional"
           code_placeholder: "random"
           copied: "Shortened · link copied"
@@ -2404,8 +2435,8 @@ en:
           empty: "Nothing shortened yet. Paste a link above."
           heading: "Links"
           lede:
-            one: "%{count} short link on %{host}, %{clicks} clicks in all. Change where one points any time; the short link stays the same."
-            other: "%{count} short links on %{host}, %{clicks} clicks in all. Change where one points any time; the short link stays the same."
+            one: "%{count} short link on %{host}, %{clicks} in all. Change where one points any time; the short link stays the same."
+            other: "%{count} short links on %{host}, %{clicks} in all. Change where one points any time; the short link stays the same."
           matches:
             one: "%{count} match"
             other: "%{count} matches"

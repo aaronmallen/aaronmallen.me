@@ -3920,8 +3920,12 @@
 }
 
 @utility link-row {
-  @apply grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line py-4;
+  @apply relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;
+
+  @media (width < 43.75rem) {
+    @apply grid-cols-1;
+  }
 }
 
 @utility link-row-main {
@@ -3930,6 +3934,14 @@
 
 @utility link-row-title {
   @apply font-display text-[1.08rem] leading-[1.3] font-semibold break-words text-ink;
+
+  & a {
+    @apply text-inherit no-underline admin-focus after:absolute after:inset-0;
+
+    @media (width < 43.75rem) {
+      @apply block min-h-tap;
+    }
+  }
 }
 
 @utility link-row-url {
@@ -3945,7 +3957,11 @@
 }
 
 @utility link-row-acts {
-  @apply flex flex-wrap items-center justify-end gap-2;
+  @apply relative flex flex-wrap items-center justify-end gap-2;
+
+  @media (width < 43.75rem) {
+    @apply justify-start;
+  }
 }
 
 @utility link-chip {
