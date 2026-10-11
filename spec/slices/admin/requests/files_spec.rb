@@ -79,6 +79,13 @@ RSpec.describe "Admin files", type: :request do
       expect(page).to have_css("img.file-card-thumb[alt='A cat'][src^='http://shares.localhost/']")
     end
 
+    it "asks for a thumbnail as a preview the download count skips" do
+      found = share("shot.png", "image/png")
+      get "/admin/files"
+
+      expect(page).to have_css("img.file-card-thumb[src='http://shares.localhost/#{found.code}?preview']")
+    end
+
     describe "search and the filter" do
       before do
         share("notes.txt")

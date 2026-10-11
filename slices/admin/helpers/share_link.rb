@@ -3,6 +3,7 @@
 module Admin
   module Helpers
     module ShareLink
+      PREVIEW = "?preview"
       SCHEME = %r{\Ahttps?://}
 
       module_function
@@ -14,6 +15,8 @@ module Admin
       def host = bare(origin)
 
       def origin = Hanami.app.settings.share_site[:url].chomp("/")
+
+      def preview(code) = "#{self.for(code)}#{PREVIEW}"
     end
   end
 end

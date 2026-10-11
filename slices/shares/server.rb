@@ -9,10 +9,14 @@ module Shares
     end
 
     CODE_PATH = %r{\A/(?<code>[^/]+)\z}
+    PROBE_END = 1
     INLINE_TYPE = %r{\A(?:(?:image/(?!svg)|video/|audio/)|application/pdf\z)}i
+    PREVIEW = "preview"
     UNSAFE_FILENAME = /[^\x20-\x7e]|["\\]/
 
-    include Deps[client: "share_store.client", share_queries: "repos.share_queries"]
+    include Deps[
+      client: "share_store.client", share_mutations: "repos.share_mutations", share_queries: "repos.share_queries",
+    ]
 
     def call(env)
       request = ::Rack::Request.new(env)
@@ -24,6 +28,14 @@ module Shares
     end
 
     private
+
+    def count(request, share, range)
+      return if request.head? || request.query_string == PREVIEW
+      return if range && (range.begin.positive? || range.end <= PROBE_END)
+      return if Blog::Helpers::Bot.match?(request.user_agent)
+
+      share_mutations.count_download(share.id)
+    end
 
     def disposition(share)
       kind = INLINE_TYPE.match?(share.content_type) ? "inline" : "attachment"
@@ -49,6 +61,7 @@ module Shares
       return [416, { "content-range" => "bytes */#{share.byte_size}" }, []] if ranges && ranges.empty?
 
       range = ranges.first if ranges&.one?
+      count(request, share, range)
       body = request.head? ? [] : Body.new(client, share.key, range)
       range ? [206, partial(share, range), body] : [200, share_headers(share), body]
     end

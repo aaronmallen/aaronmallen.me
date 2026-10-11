@@ -116,6 +116,66 @@ RSpec.describe "The share host", type: :request do
     end
   end
 
+  describe "the download count" do
+    let(:browser) { "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 Safari/605.1.15" }
+    let(:file) { share("clip.mp4", "video/mp4") }
+
+    def downloads = Shares::Slice["relations.shares"].by_pk(file.id).one[:download_count]
+
+    before { stub_object(file) }
+
+    it "rises by one for a browser download" do
+      expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => browser) }.to change { downloads }.from(0).to(1)
+    end
+
+    it "rises by one for a range that starts at byte 0" do
+      expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => browser, "HTTP_RANGE" => "bytes=0-5") }
+        .to change { downloads }.by(1)
+    end
+
+    it "rises by one for an open range from byte 0" do
+      expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => browser, "HTTP_RANGE" => "bytes=0-") }
+        .to change { downloads }.by(1)
+    end
+
+    %w[bytes=0-1 bytes=0-0].each do |range|
+      it "stays put for Safari's #{range} probe" do
+        expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => browser, "HTTP_RANGE" => range) }
+          .not_to(change { downloads })
+      end
+    end
+
+    it "stays put for a range that starts past byte 0" do
+      expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => browser, "HTTP_RANGE" => "bytes=2-5") }
+        .not_to(change { downloads })
+    end
+
+    {
+      "Slack" => "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)",
+      "iMessage" => "Mozilla/5.0 (Macintosh) AppleWebKit/601.2.4 facebookexternalhit/1.1 Facebot Twitterbot/1.0",
+      "curl" => "curl/8.4.0",
+      "no user agent" => "",
+    }.each do |named, agent|
+      it "stays put for #{named}" do
+        expect { fetch("/#{file.code}", "HTTP_USER_AGENT" => agent) }.not_to(change { downloads })
+      end
+    end
+
+    it "stays put for a head request" do
+      expect { head "/#{file.code}", {}, "HTTP_HOST" => "shares.localhost", "HTTP_USER_AGENT" => browser }
+        .not_to(change { downloads })
+    end
+
+    it "stays put for the admin's thumbnail preview" do
+      expect { fetch("/#{file.code}?preview", "HTTP_USER_AGENT" => browser) }.not_to(change { downloads })
+    end
+
+    it "stays put for a 404", :aggregate_failures do
+      expect { fetch("/#{file.code}x", "HTTP_USER_AGENT" => browser) }.not_to(change { downloads })
+      expect(last_response.status).to eq(404)
+    end
+  end
+
   it "answers 416 for a range past the end", :aggregate_failures do
     file = share
     fetch("/#{file.code}", "HTTP_RANGE" => "bytes=20-30")

@@ -57,8 +57,10 @@ module Admin
             span { t(".downloads", count: @share.download_count, downloads: downloads) }
           end
 
+          def preview = Helpers::ShareLink.preview(@share.code)
+
           def thumb
-            return img(class: "file-card-thumb", src: link, alt: @share.alt_text.to_s, loading: "lazy") if image?
+            return img(class: "file-card-thumb", src: preview, alt: @share.alt_text.to_s, loading: "lazy") if image?
 
             span(class: "file-card-thumb", aria: { hidden: true }) { Icon(icon) }
           end

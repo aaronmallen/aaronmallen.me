@@ -3,17 +3,9 @@
 module Analytics
   module Operations
     class RecordVisit < Blog::Operation
-      BOT = Regexp.union(
-        %w[
-          apis-google archiver axios bot crawl curl embedly facebookexternalhit feedfetcher feedly go-http-client
-          httpclient java/ libwww lighthouse mediapartners monitor node-fetch okhttp phantomjs pingdom postman
-          preview python-requests ruby scrape slurp spider validator wget yandex
-        ],
-      )
       MAX_CLICKS = 50
       MAX_REFERRER = 2048
       MAX_READ_SECONDS = 20 * Blog::Helpers::Figures::MINUTE
-      private_constant :BOT
 
       include Deps[
         "geo.countries",
@@ -29,7 +21,7 @@ module Analytics
 
       def call(payload, address:, user_agent:, base_url:, signed_in: false)
         visit = step check_visit.call(payload)
-        return nil if signed_in || bot?(user_agent)
+        return nil if signed_in || Blog::Helpers::Bot.match?(user_agent)
 
         address_hashes = hash_visitor.throttle_hashes(address)
         step within_limit(address_hashes) unless view?(visit)
@@ -38,11 +30,6 @@ module Analytics
       end
 
       private
-
-      def bot?(user_agent)
-        agent = user_agent.to_s.strip
-        agent.empty? || BOT.match?(agent.downcase)
-      end
 
       def click(visit, visitor_hashes)
         event_id = event_queries.view_id(visitor_hashes:, view_token: visit[:view_token], path: visit[:path])
