@@ -75,6 +75,12 @@ RSpec.describe "API photo upload", type: :request do
       end
     end
 
+    it "draws a key the public media route accepts" do
+      upload(bytes_of("small.png"))
+
+      expect(Blog::Types::PhotoKey.valid?(photos.first[:key])).to be(true)
+    end
+
     it "answers the size it stored" do
       expect(upload(bytes_of("rotated_with_gps.jpg")).slice("width", "height")).to eq("width" => 20, "height" => 40)
     end
