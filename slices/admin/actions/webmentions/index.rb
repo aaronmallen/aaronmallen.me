@@ -21,15 +21,9 @@ module Admin
         private
 
         def exposures(filter, mentions)
-          posts = post_queries.summaries
+          slugs = post_queries.summaries.to_h { [it.id, it.slug] }
 
-          {
-            counts: webmention_queries.count_by_status,
-            filter:,
-            inbox: { mentions:, slugs: posts.to_h { [it.id, it.slug] } },
-            posts:,
-            settings: webmention_queries.settings,
-          }
+          { counts: webmention_queries.count_by_status, filter:, inbox: { mentions:, slugs: } }
         end
       end
     end

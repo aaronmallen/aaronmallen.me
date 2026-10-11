@@ -369,6 +369,39 @@ RSpec.describe "Admin webmentions", type: :request do
       end
     end
 
+    describe "the inbox page head" do
+      before { get "/admin/webmentions" }
+
+      it "links to the settings screen" do
+        expect(page).to have_link("Settings", href: "/admin/webmentions/settings")
+      end
+
+      it "leaves the settings and per post cards to the settings screen", :aggregate_failures do
+        expect(page).to have_no_css("#webmention-settings")
+        expect(page).to have_no_css(".card-title", text: "Per post")
+      end
+    end
+
+    describe "the settings screen" do
+      before { get "/admin/webmentions/settings" }
+
+      it "heads the page as Settings with the webmentions tab current", :aggregate_failures do
+        expect(page).to have_css(".page-head h1", exact_text: "Settings")
+        expect(page).to have_css("a.screen-tab[aria-current='page']", exact_text: "webmentions")
+      end
+
+      it "shows the settings and per post cards", :aggregate_failures do
+        expect(page).to have_css("#webmention-settings")
+        expect(page).to have_css(".card-title", text: "Per post")
+      end
+
+      it "marks no inbox section current", :aggregate_failures do
+        expect(page).to have_no_css("a.pill-nav-link[aria-current]")
+        expect(page).to have_no_css("#command-palette-webmentions .pal-r-sub", visible: :all)
+        expect(page).to have_css("#command-palette-webmention_settings .pal-r-sub", visible: :all)
+      end
+    end
+
     describe "the settings" do
       let(:toggles) do
         {
@@ -389,14 +422,14 @@ RSpec.describe "Admin webmentions", type: :request do
 
         it "shows #{name} turned off on the next request" do
           webmention_mutations.update_settings(name => false)
-          get "/admin/webmentions"
+          get "/admin/webmentions/settings"
 
           expect(page).to have_css("input.toggle[name='settings[#{name}]']:not([checked])", visible: :all)
         end
       end
 
       it "draws a setting as a switch" do
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_css("input.toggle[role='switch'][name='settings[receive]']", visible: :all)
       end
@@ -405,6 +438,12 @@ RSpec.describe "Admin webmentions", type: :request do
         post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: { receive: "0" }
 
         expect(webmention_queries.settings).to have_attributes(receive: false, send_on_publish: true)
+      end
+
+      it "returns to the settings screen" do
+        post "/admin/webmentions/settings", _csrf_token: admin_csrf_token, settings: toggles.merge(receive: "0")
+
+        expect(last_response.location).to end_with("/admin/webmentions/settings")
       end
 
       it "shows the saved toast" do
@@ -456,14 +495,14 @@ RSpec.describe "Admin webmentions", type: :request do
 
       it "shows the stored hosts, one per line" do
         webmention_mutations.update_settings(single_author_hosts: %w[ada.example grace.example])
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page.find("textarea[name='settings[single_author_hosts]']").value)
           .to eq("ada.example\ngrace.example")
       end
 
       it "names the endpoint" do
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_css("#webmention-settings .card-side", exact_text: "Endpoint: POST /webmention")
       end
@@ -472,27 +511,27 @@ RSpec.describe "Admin webmentions", type: :request do
     describe "the per post card" do
       it "shows a post with webmentions on" do
         create(:post, title: "On")
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_css(".li", text: "On").and have_css(".li-side .pill.green", text: "on")
       end
 
       it "shows a post with webmentions off" do
         create(:post, title: "Off", webmentions_enabled: false)
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_css(".li-side .pill.sand", text: "off")
       end
 
       it "links each post to its editor" do
         record = create(:post, title: "Linked")
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_link("Linked", href: "/admin/posts/#{record.id}/edit")
       end
 
       it "shows an empty state without posts" do
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page).to have_css(".empty", exact_text: i18n.t("ui.components.webmentions.posts_card.empty"))
       end
@@ -500,7 +539,7 @@ RSpec.describe "Admin webmentions", type: :request do
       it "lists the newest post first" do
         create(:post, :published, title: "Older", published_at: Time.utc(2026, 9, 1))
         create(:post, :published, title: "Newer", published_at: Time.utc(2026, 9, 2))
-        get "/admin/webmentions"
+        get "/admin/webmentions/settings"
 
         expect(page.all(".li-title").map(&:text)).to eq(%w[Newer Older])
       end

@@ -11,12 +11,10 @@ module Admin
 
         def handle(request, response)
           toast(response, "#{TOASTS}.#{save(request)}")
-          response.redirect_to(routes.path(:admin_webmentions, status: filter(request)))
+          response.redirect_to(routes.path(:admin_webmention_settings))
         end
 
         private
-
-        def filter(request) = Blog::Types::WebmentionStatusParam[request.params[:status]]
 
         def save(request)
           case update_webmention_settings.call(**settings(request))

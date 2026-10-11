@@ -15,13 +15,11 @@ module Admin
           HOSTS_ID = "webmention-single-author-hosts"
 
           prop :settings, Blog::Types::Instance(ROM::Struct)
-          prop :filter, Blog::Types::String
 
           def view_template
             Card(title: t(".title"), id: "webmention-settings") do |card|
               card.side { span(class: "settings-count") { t(".endpoint", path: path(:webmention)) } }
               Form(action: path(:admin_update_webmention_settings), data: { autosubmit: "" }) do
-                input(type: "hidden", name: "status", value: @filter)
                 div(class: "form-stack") { fields }
                 noscript { Button(type: "submit", small: true) { t(".save") } }
               end

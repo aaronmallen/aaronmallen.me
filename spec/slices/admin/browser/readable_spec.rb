@@ -218,6 +218,7 @@ RSpec.describe "Admin screens", type: :feature do
       "time by day" => "/admin/time?by=day",
       "today" => "/admin",
       "tokens" => "/admin/tokens",
+      "webmention settings" => "/admin/webmentions/settings",
       "webmentions" => "/admin/webmentions",
     }
   end

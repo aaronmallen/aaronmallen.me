@@ -8,7 +8,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     %w[
       /admin /admin/tasks /admin/calendar /admin/journal /admin/decisions /admin/review /admin/posts /admin/social
       /admin/projects /admin/files /admin/inbox /admin/messages /admin/webmentions /admin/analytics /admin/activity
-      /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules /admin/webmentions#webmention-settings
+      /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules /admin/webmentions/settings
       /admin/tokens /admin/services /admin/clients /admin/security
     ]
   end
@@ -52,7 +52,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "links the site and every settings tab from the avatar menu" do
       expect(page.all("#avatar-menu a.avatar-menu-item", visible: :all).map { it["href"] })
         .to eq(%w[/writing /about /projects /contact /admin/tags /admin/people /admin/tasks/rules
-                  /admin/webmentions#webmention-settings /admin/tokens /admin/services /admin/clients /admin/security])
+                  /admin/webmentions/settings /admin/tokens /admin/services /admin/clients /admin/security])
     end
 
     it "offers the keys, the themes and sign out in the avatar menu", :aggregate_failures do
@@ -182,7 +182,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
 
     {
       "/admin/tags" => "Tags", "/admin/tasks/rules" => "Task rules", "/admin/tokens" => "API tokens",
-      "/admin/services" => "Connected services", "/admin/clients" => "MCP clients", "/admin/security" => "Security",
+      "/admin/webmentions/settings" => "Webmentions", "/admin/services" => "Connected services",
+      "/admin/clients" => "MCP clients", "/admin/security" => "Security",
     }.each do |route, title|
       it "heads #{route} as Settings and titles it #{title}", :aggregate_failures do
         get route

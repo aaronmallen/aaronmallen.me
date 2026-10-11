@@ -210,7 +210,7 @@ RSpec.describe "Admin connected services", type: :request do
       it "sends Bridgy to the webmention toggle" do
         get "/admin/services?selected=bridgy"
 
-        expect(page).to have_link("webmentions →", href: "/admin/webmentions#webmention-settings")
+        expect(page).to have_link("webmentions →", href: "/admin/webmentions/settings")
       end
     end
   end

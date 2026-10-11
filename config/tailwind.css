@@ -3714,10 +3714,6 @@
   @apply mt-4 flex flex-wrap items-center gap-2;
 }
 
-@utility wm-settings {
-  @apply mt-stack;
-}
-
 @utility person-row {
   @apply relative grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-1 border-b border-line py-4;
   @apply first:pt-0 last:border-b-0 last:pb-0;

@@ -72,7 +72,7 @@ module Admin
             Hint do
               plain(t(".no_credentials"))
               whitespace
-              a(class: "settings-link", href: "#{path(:admin_webmentions)}#webmention-settings") { t(".bridgy") }
+              a(class: "settings-link", href: path(:admin_webmention_settings)) { t(".bridgy") }
             end
           end
 

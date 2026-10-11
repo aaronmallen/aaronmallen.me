@@ -16,14 +16,14 @@ module Admin
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
           prop :filter, Blog::Types::WebmentionStatus
           prop :inbox, Blog::Types::Hash
-          prop :posts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
-          prop :settings, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            PageHead(title: t(".heading"), sub:) { filter_form }
+            PageHead(title: t(".heading"), sub:) do
+              filter_form
+              Button(href: path(:admin_webmention_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
+            end
 
             inbox
-            div(class: "g-main wm-settings") { side_cards }
           end
 
           private
@@ -55,11 +55,6 @@ module Admin
 
             Bulk(filter: @filter, page: mentions.number)
             div(class: "cols", data: { key_list: true }) { mentions.rows.each { |mention| row(mention) } }
-          end
-
-          def side_cards
-            SettingsCard(settings: @settings, filter: @filter)
-            PostsCard(posts: @posts)
           end
 
           def sub

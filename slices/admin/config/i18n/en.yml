@@ -2708,8 +2708,11 @@ en:
           ignored: "ignored"
           pending: "pending"
           pending_count: "%{count} pending"
+          settings: "Settings"
           shown_count: "%{count} shown on the site"
           spam: "spam"
+        settings:
+          heading: "Webmentions"
   webmentions_page:
     toasts:
       approved: "Approved · now visible on the post"

@@ -25,7 +25,7 @@ module Admin
         %i[tags settings fa-tag admin_tags].freeze,
         %i[people settings fa-address-book admin_people].freeze,
         %i[task_rules settings fa-wand-magic-sparkles admin_task_rules].freeze,
-        %i[webmention_settings settings fa-at admin_webmentions webmention-settings].freeze,
+        %i[webmention_settings settings fa-at admin_webmention_settings].freeze,
         %i[tokens settings fa-key admin_tokens].freeze,
         %i[services settings fa-link admin_services].freeze,
         %i[clients settings fa-plug admin_clients].freeze,
@@ -58,11 +58,7 @@ module Admin
         current_path == path || current_path.start_with?("#{path}/")
       end
 
-      def located
-        ALL.map do |(name, group, icon, route, anchor)|
-          [name, group, icon, [routes.path(route), anchor].compact.join("#")]
-        end
-      end
+      def located = ALL.map { |(name, group, icon, route)| [name, group, icon, routes.path(route)] }
     end
   end
 end

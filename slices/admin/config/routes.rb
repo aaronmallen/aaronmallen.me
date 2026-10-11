@@ -242,6 +242,7 @@ module Admin
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
+    get "/webmentions/settings", to: "webmentions.settings", as: :webmention_settings
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post(
       "/webmentions/:id/:verdict",
