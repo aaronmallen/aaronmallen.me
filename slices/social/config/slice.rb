@@ -8,6 +8,8 @@ module Social
 
     import keys: %w[operations.tag_ref], from: :analytics
 
+    import keys: %w[operations.claim_photo_keys operations.release_photos repos.photo_queries], from: :media
+
     import keys: %w[
       operations.compose_announcement operations.record_post_webmentions repos.post_queries
     ], from: :posts

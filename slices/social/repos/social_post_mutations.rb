@@ -16,10 +16,10 @@ module Social
         end
       end
 
-      def create_with_parts(parts:, **attrs)
+      def create_with_parts(parts:, photos: nil, **attrs)
         social_post = transaction do
           created = create(**attrs)
-          insert_parts(created.id, parts)
+          write_parts(created.id, parts, photos)
           created
         end
 
@@ -56,19 +56,17 @@ module Social
         transaction do
           next unless lock_unclaimed(id)
 
-          social_post_parts.for_social_post(id).delete
-          insert_parts(id, parts)
+          write_parts(id, parts)
           by_id(id)
         end
       end
 
-      def update_with_parts(id, parts:, **attrs)
+      def update_with_parts(id, parts:, photos: nil, **attrs)
         transaction do
           next unless lock_unclaimed(id)
 
           update(id, **attrs)
-          social_post_parts.for_social_post(id).delete
-          insert_parts(id, parts)
+          write_parts(id, parts, photos)
           by_id(id)
         end
       end
@@ -79,12 +77,6 @@ module Social
 
       def by_id(id) = social_posts.combine(:parts, :deliveries).by_pk(id).one
 
-      def insert_parts(social_post_id, parts)
-        rows = parts.each_with_index.map { |body, index| { social_post_id:, position: index + 1, body: } }
-
-        social_post_parts.stamped(:create, result: :many).call(rows)
-      end
-
       def lock_due(id, time) = social_posts.due_at(time).by_pk(id).lock(mode: :share).one
 
       def lock_unclaimed(id) = unposted(id).lock.one && unclaimed(id).exist?
@@ -92,6 +84,16 @@ module Social
       def unclaimed(id) = unposted(id).unclaimed
 
       def unposted(id) = social_posts.by_pk(id).unposted
+
+      def write_parts(social_post_id, parts, photos = nil)
+        social_post_parts.write(social_post_id, parts)
+        write_photos(social_post_id, photos) if photos
+      end
+
+      def write_photos(social_post_id, photos)
+        part_ids = social_post_parts.for_social_post(social_post_id).to_a.to_h { [it.position, it.id] }
+        social_post_photos.write(part_ids, photos)
+      end
     end
   end
 end

@@ -59,6 +59,13 @@ module Social
 
       def failed_statuses = social_posts.with_failed_delivery.pluck(:status)
 
+      def part_photo_keys(social_post_id)
+        part_ids = social_post_parts.for_social_post(social_post_id).pluck(:id)
+        held = social_post_photos.for_parts(part_ids).in_order.to_a.group_by(&:social_post_part_id)
+
+        part_ids.to_h { [it, held.fetch(it, Blog::Constants::EMPTY_ARRAY).map(&:photo_key)] }
+      end
+
       def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
 
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a

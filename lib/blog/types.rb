@@ -116,7 +116,9 @@ module Blog
     PHOTO_PATH = "/media/"
     PHOTO_REFERENCE = /#{PHOTO_PATH}(#{PHOTO_KEY})/
     PhotoKey = Types::String.constrained(format: /\A#{PHOTO_KEY}\z/)
-    PhotoOwner = Types::String.enum("post", "journal_entry", "task", "task_comment", "decision_comment", "review_note")
+    PhotoOwner = Types::String.enum(
+      "post", "journal_entry", "task", "task_comment", "decision_comment", "review_note", "social_post_part",
+    )
     PostBulkAction = Types::String.enum("tag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")
     PostFilter = Types::String.enum("all", *PostStatus.values)

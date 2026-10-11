@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module Media
+  module Operations
+    class ClaimPhotoKeys
+      include Deps[photo_mutations: "repos.photo_mutations"]
+
+      def call(owner, owner_id, keys)
+        photo_mutations.transaction { photo_mutations.claim(Blog::Types::PhotoOwner[owner], owner_id, keys.uniq) }
+      end
+    end
+  end
+end
