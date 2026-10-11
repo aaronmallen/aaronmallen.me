@@ -5,6 +5,44 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.12] - 2026-10-11
+
+### Added
+
+- Google Health joins Settings > Services. It connects one Google account with read-only access to sleep, activity
+  and health metrics, renews its token on its own and shows that it needs a reconnect when Google revokes it.
+  Disconnect revokes the token at Google too. A job syncs every 15 minutes and reads the last 3 days again, and the
+  first connect pulls all the history Google holds. `read_sync_state` shows each run.
+- A Health tab under Insights lays out 14, 30 or 90 days of sleep, HRV, resting heart rate, exercise, focused time
+  and commits. It flags short nights, low HRV, high resting heart rate and commits after 22:00, opens any day with
+  its workouts and work, and shows patterns such as focused time after short nights. A card lists the MCP clients
+  and API tokens that can read health data.
+- Today shows last night's sleep, HRV and resting heart rate. Activity lists workouts under a Workouts filter, and
+  each day with health data shows a strip of its figures.
+- A `health` scope for MCP consent and API tokens. It grants `GET /api/v1/health/days` and the `read_health_days`
+  MCP tool, which return day rows, workouts and patterns for a date range. `read` no longer reaches health data:
+  `read_activity`, `summarize_activity` and `read_saved_view` leave workouts out without `health`.
+
+### Changed
+
+- The task drawer keeps a header with the key, status, list, source and close, and a footer with Delete, Close and
+  Edit, in view while the body scrolls. The body shows the title, notes and a grid of list, sprint, tags,
+  contributors, dates, carried and worked. Tags moved from the header into that grid.
+- Edit, a row's pen or `e` turn the task drawer into the edit form in place, and Save or Cancel turn it back. The
+  task modal now only adds tasks.
+- A task's timeline splits into Time worked, with each session's start, end and length and Set total, Comments, and
+  a closed list of moves, tag changes and status changes. A comment shows when it was edited. The Add button on task
+  and decision comments shows once the box holds text.
+- The Services screen shows a tile for each service, in brand colors for Mastodon and Bluesky, and the connect
+  dialog moves Continue to its footer.
+
+### Fixed
+
+- Task, comment and session rows in Activity open the task in the drawer, scrolled to that comment or session. A
+  task row used to open the tasks list.
+- A task with a six-digit id and a GitHub source link no longer pushes the ticked tasks list wider than a phone
+  screen.
+
 ## [26.10.11] - 2026-10-11
 
 ### Added
@@ -783,7 +821,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.11...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.12...HEAD
+[26.10.12]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.11...26.10.12
 [26.10.11]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.10...26.10.11
 [26.10.10]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.9...26.10.10
 [26.10.9]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...26.10.9
