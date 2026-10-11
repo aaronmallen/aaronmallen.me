@@ -8,6 +8,6 @@ module Health
 
     import keys: %w[operations.change_connection repos.connection_queries], from: :services
 
-    export %w[google.client operations.queue_backfill]
+    export %w[google.client operations.queue_backfill repos.health_queries]
   end
 end

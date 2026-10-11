@@ -5,7 +5,8 @@ status: active
 created: 2026-09-28
 area: [activity, analytics, contact, db, decisions, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
-amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818", "#954", "#1013", "#957", "#911"]
+amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818",
+  "#954", "#1013", "#957", "#911", "#1115"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -93,6 +94,10 @@ exports refuses. These reads cross today:
   `config/db/migrate/20261003000196_create_attention_snoozes.rb`, hangs on `tasks` and `posts`, which `tasks` and
   `posts` own, and deletes a deleted row's snoozes from `attention_snoozes`, a table `activity` owns. The record on
   the stalled list (ADR 0095) holds why snoozes live there.
+- **`Health::Relations::HealthDays#with_work`** reads `work_session_days`, `work_sessions`, `tasks`, `commits`,
+  `pull_requests` and `journal_entries`, which `activity`, `tasks` and `record` own, to lay each day's work beside its
+  health in one query (#1115). Focus minutes come from `work_session_days`, so overlapping sessions count once
+  and time set by hand lands on top, as ADR 0133 decides for the review, and the merge SQL gains no third copy.
 
 One write crosses a slice line in SQL, and #954 names it. `Tasks::Relations::RecordLinks#link_projects` inserts
 into `record_links`, which `links` owns, when a task rule or a repo match links tasks to projects (ADR 0122).

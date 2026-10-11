@@ -9,6 +9,12 @@ module Health
 
       schema :workouts, infer: true
 
+      def between(first, last)
+        from, to = Blog::TimeZone.day_bounds(first, last)
+
+        where(self[:started_at] >= from).where(self[:started_at] < to).order(self[:started_at].asc, self[:id].asc)
+      end
+
       def store(rows, now:)
         rows = rows.map { it.merge(created_at: now, updated_at: now) }
 
