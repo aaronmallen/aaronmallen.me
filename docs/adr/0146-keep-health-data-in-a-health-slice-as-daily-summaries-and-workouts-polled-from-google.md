@@ -5,6 +5,7 @@ status: active
 created: 2026-10-11
 area: [config, db, record, services]
 issue: "#1111"
+amended: ["#1121"]
 tags: [health, google, slices, sync, polling, webhooks, sleep, workouts, privacy, time-zone]
 ---
 
@@ -43,7 +44,8 @@ No heart rate samples, SpO2 or GPS routes reach the database.
 late still lands. On the first connect it reads all the history the API gives. The job never retries and catches up
 on its next run ([ADR 0012][0012]), and its outcome goes to `sync_states` ([ADR 0047][0047]). Google Health is a
 service definition in the `services` slice, and the client looks up its OAuth token there on each call
-([ADR 0130][0130]).
+([ADR 0130][0130]). #1121 moves the client to a `google` slice and the definition to one `google` service
+with a connection per account, and health syncs on the main one ([ADR 0149][0149]).
 
 ## Alternatives
 
@@ -74,4 +76,5 @@ Health data lands in the nightly backups ([ADR 0105][0105]).
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
 [0126]: 0126-keep-only-base-classes-and-gem-wrappers-in-lib-and-give-the-rest-a-hanami-shape.md
 [0130]: 0130-keep-service-credentials-encrypted-in-a-services-slice-and-define-each-service-in-code.md
+[0149]: 0149-keep-google-accounts-in-a-google-slice-with-one-connection-each.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

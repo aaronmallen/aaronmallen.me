@@ -5,7 +5,7 @@ status: active
 created: 2026-10-08
 area: [admin, config, db, lib, record, social, tasks]
 issue: "#791"
-amended: ["#831"]
+amended: ["#831", "#1121"]
 tags: [services, credentials, encryption, settings, providers, clients, oauth, github, linear, mastodon, bluesky]
 ---
 
@@ -23,7 +23,8 @@ their credentials into the database.
 
 Services sign in four ways. GitHub and Mastodon use OAuth, Mastodon after asking for my server. Bluesky takes a
 handle and an app password, and Linear an API key. Honeybadger, MaxMind and the media and backup stores keep their
-keys in the environment. Bridgy needs nothing. More services will come, Google first (#708).
+keys in the environment. Bridgy needs nothing. More services will come, Google first (#708). #1121 keeps
+every Google account under one `google` service ([ADR 0149][0149]).
 
 ## Decision
 
@@ -71,4 +72,5 @@ Until I connect each service after the deploy, jobs that need it skip, and a soc
 
 [0009]: 0009-register-every-service-client-with-or-without-its-credentials.md
 [0015]: 0015-type-a-closed-set-as-a-postgres-enum-and-a-format-as-a-domain.md
+[0149]: 0149-keep-google-accounts-in-a-google-slice-with-one-connection-each.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
