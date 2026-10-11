@@ -31,7 +31,9 @@ Hanami/SliceExports:
     - !ruby/regexp /\A(?!(?:operations\.\w+|repos\.\w*queries|endpoints\.\w+|auth\.session_reader|github\.client|linear\.client|networks\.all|store\.client)\z)/
 
 Hanami/SliceNamespace:
-  Enabled: false
+  Inflections:
+    api: API
+    mcp: MCP
 
 Hanami/UnusedDeps:
   Enabled: false
