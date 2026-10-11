@@ -105,6 +105,9 @@ en:
       deleted: "Entry deleted"
       saved: "Journal entry saved · private"
       updated: "Entry updated"
+  links_page:
+    toasts:
+      shortened: "Shortened"
   messages_page:
     toasts:
       bulk:
@@ -814,6 +817,23 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+      links:
+        field_error:
+          code:
+            format: "Use lowercase letters, numbers and single hyphens."
+            taken: "A file or another link already uses that code."
+          destination:
+            blank: "Paste a link to shorten."
+            format: "That doesn't look like a web link. It has to start with http:// or https://."
+        row:
+          clicks:
+            one: "%{clicks} click"
+            other: "%{clicks} clicks"
+          copied: "Link copied"
+          copy: "Copy %{link}"
+          made: "made %{on}"
+          open: "Open %{link}"
+          retargeted: "retargeted %{on}"
       markdown_editor:
         preview: "Preview"
         toolbar: "Formatting"
@@ -988,6 +1008,7 @@ en:
           files: "files"
           inbox: "waiting"
           journal: "journal"
+          links: "links"
           messages: "messages"
           people: "people"
           posts: "posts"
@@ -2372,6 +2393,30 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+      links:
+        index:
+          again: "Already shortened as %{link}. Shorten again to get a second code."
+          code: "Short code · optional"
+          code_placeholder: "random"
+          copied: "Shortened · link copied"
+          destination: "Long link"
+          destination_placeholder: "Paste a link to shorten"
+          empty: "Nothing shortened yet. Paste a link above."
+          heading: "Links"
+          lede:
+            one: "%{count} short link on %{host}, %{clicks} clicks in all. Change where one points any time; the short link stays the same."
+            other: "%{count} short links on %{host}, %{clicks} clicks in all. Change where one points any time; the short link stays the same."
+          matches:
+            one: "%{count} match"
+            other: "%{count} matches"
+          no_match: "No links match."
+          placeholder: "Search by title, destination or short code"
+          search: "Search links"
+          shorten: "Shorten"
+          sort: "Sort"
+          sorts:
+            clicks: "most clicked"
+            recent: "recent"
       messages:
         index:
           all_tags: "All tags"

@@ -36,7 +36,7 @@ RSpec.describe "Admin screens", type: :feature do
         find(".compose-accounts summary").click
         find(".compose-account-group.mastodon .compose-account:has(:checked)")
       end,
-    }.merge(files)
+    }.merge(files, short_links)
   end
 
   def decision(title, close: nil)
@@ -123,6 +123,8 @@ RSpec.describe "Admin screens", type: :feature do
       "work entry links" => "/admin/projects?filter=work&edit=#{work_entry.id}",
     }
   end
+
+  def long_link = "https://example.com/a-talk-with-a-very-long-path-on-a-conference-site"
 
   def open_confirm
     journal_entry
@@ -370,6 +372,15 @@ RSpec.describe "Admin screens", type: :feature do
     )
   end
 
+  def seed_short_links
+    @seed_short_links ||= begin
+      shorten = Shares::Slice["operations.create_short_link"]
+      made = shorten.call({ destination: long_link, code: "a-talk", title: "A talk with a fairly long title" }).value!
+      Shares::Slice["operations.retarget_short_link"].call(made.id, { destination: "#{long_link}/v2" })
+      shorten.call({ destination: "https://github.com/aaronmallen" })
+    end
+  end
+
   def seed_tasks
     create(:tag, :private, name: "site", color: "mk-blue")
     task
@@ -423,6 +434,19 @@ RSpec.describe "Admin screens", type: :feature do
       upload_share("%PDF", "deck.pdf", "application/pdf")
       upload_share("png", "shot.png", "image/png").value!
     end
+  end
+
+  def short_links
+    {
+      "links" => -> { seed_short_links.then { visit "/admin/links" } },
+      "links shortened before" => lambda do
+        seed_short_links
+        visit "/admin/links"
+        fill_in "Long link", with: "#{long_link}/v2"
+        click_button "Shorten"
+        find(".link-new .hint")
+      end,
+    }
   end
 
   def tick(path, box)

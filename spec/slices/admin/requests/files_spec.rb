@@ -35,7 +35,7 @@ RSpec.describe "Admin files", type: :request do
       get "/admin/files"
 
       expect(page.all(".screen-tabs a.screen-tab").map { it[:href] })
-        .to eq(%w[/admin/posts /admin/social /admin/projects /admin/files])
+        .to eq(%w[/admin/posts /admin/social /admin/projects /admin/files /admin/links])
     end
 
     it "says when nothing is shared yet" do

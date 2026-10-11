@@ -7,8 +7,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:screens) do
     %w[
       /admin /admin/tasks /admin/calendar /admin/journal /admin/decisions /admin/review /admin/posts /admin/social
-      /admin/projects /admin/files /admin/inbox /admin/messages /admin/webmentions /admin/analytics /admin/activity
-      /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules /admin/webmentions/settings
+      /admin/projects /admin/files /admin/links /admin/inbox /admin/messages /admin/webmentions /admin/analytics
+      /admin/activity /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules /admin/webmentions/settings
       /admin/tokens /admin/services /admin/clients /admin/security
     ]
   end

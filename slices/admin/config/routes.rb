@@ -95,6 +95,8 @@ module Admin
       "/journal/:id/records/:other_kind/:other_id/delete",
       to: "journal.unlink_record", as: :unlink_journal_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
+    get "/links", to: "links.index", as: :links
+    post "/links", to: "links.create", as: :create_link
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/messages", to: "messages.index", as: :messages
     post "/messages/bulk", to: "messages.bulk", as: :bulk_messages

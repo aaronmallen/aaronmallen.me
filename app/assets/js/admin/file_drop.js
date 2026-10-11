@@ -36,7 +36,7 @@ function setup(form) {
     form.setAttribute("aria-busy", "true");
 
     const sent = upload(files).catch(() => ({ ok: false, links: [], message: fileDropFailed }));
-    const copied = files.length === 1 ? copy(sent) : Promise.resolve(false);
+    const copied = files.length === 1 ? copyLater(sent.then(only)) : Promise.resolve(false);
     const { ok, links, message } = await sent;
 
     status.textContent = idle;
@@ -65,12 +65,13 @@ function setup(form) {
   });
 }
 
-function copy(sent) {
-  const link = sent.then(({ links }) => {
-    if (links.length !== 1) throw new Error("no link");
+function only({ links }) {
+  if (links.length !== 1) throw new Error("no link");
 
-    return links[0];
-  });
+  return links[0];
+}
+
+export function copyLater(link) {
   const written = window.ClipboardItem
     ? navigator.clipboard.write([
         new ClipboardItem({ "text/plain": link.then((text) => new Blob([text], { type: "text/plain" })) }),
@@ -83,10 +84,14 @@ function copy(sent) {
   );
 }
 
-async function refresh() {
+export async function refresh() {
   const next = await load(window.location.href, "main").catch(() => null);
   if (!next) return window.location.reload();
 
+  show(next);
+}
+
+export function show(next) {
   Idiomorph.morph(document.querySelector("main"), next);
   document.dispatchEvent(new Event(MORPHED));
 }

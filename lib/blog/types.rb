@@ -160,6 +160,8 @@ module Blog
     Slug = Types::String.constrained(format: SLUG_FORMAT, excluded_from: SLUG_RESERVED)
     ShareFilter = Types::String.enum("all", "images", "other")
     ShareFilterParam = ShareFilter.fallback(ShareFilter.values.first)
+    ShortLinkSort = Types::String.enum("recent", "clicks")
+    ShortLinkSortParam = ShortLinkSort.fallback(ShortLinkSort.values.first)
     ShortCode = Types::String.constrained(format: SLUG_FORMAT)
     ServiceProvider = Types::String.enum("bluesky", "github", "linear", "mastodon")
     SocialIntent = Types::String.enum("draft", "send")

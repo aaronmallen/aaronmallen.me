@@ -15,6 +15,7 @@ module Admin
         [:social, :publish, KINDS.icon("social_post"), :admin_social].freeze,
         [:projects, :publish, KINDS.icon("project"), :admin_projects].freeze,
         %i[files publish fa-paperclip admin_files].freeze,
+        %i[links publish fa-link admin_links].freeze,
         %i[inbox inbox fa-inbox admin_inbox].freeze,
         %i[messages inbox fa-envelope admin_messages].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,

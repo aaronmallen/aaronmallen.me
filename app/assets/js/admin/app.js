@@ -8,6 +8,7 @@ import { setupEditNotes } from "./edit_note.js";
 import { setupFileDrops } from "./file_drop.js";
 import { setupJournals } from "./journal.js";
 import { setupKeys } from "./keys.js";
+import { setupLinkForms } from "./link_form.js";
 import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupMessageLabels } from "./message_label.js";
@@ -39,6 +40,7 @@ function setup() {
   setupFileDrops();
   setupJournals();
   setupKeys();
+  setupLinkForms();
   setupMessageLabels();
   setupMarkdownEditors();
   setupPalette();
