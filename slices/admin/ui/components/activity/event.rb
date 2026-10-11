@@ -52,7 +52,7 @@ module Admin
             href = href_for
 
             if href
-              a(class: "activity-event", href:) { row }
+              a(class: "activity-event", href:, data: { task_open: task? || nil }) { row }
             else
               div(class: "activity-event") { row }
             end
@@ -93,8 +93,10 @@ module Admin
             time(class: "activity-event-time", datetime: "#{@event.occurred_on.iso8601}T#{clock}") { clock }
           end
 
+          def task? = [TASK, SESSION, COMMENT].include?(@event.type) && !@event.decision_id
+
           def task_href
-            return path(:admin_tasks) if @event.type == TASK
+            return path(:admin_task, id: @event.source_id) if @event.type == TASK
 
             "#{path(:admin_task, id: @event.task_id)}##{ANCHORS.fetch(@event.type)}-#{@event.source_id}"
           end

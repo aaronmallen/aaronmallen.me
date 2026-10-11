@@ -34,6 +34,8 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
     }.fetch(type)
   end
 
+  def task_opener(href) = "a.activity-event[href='#{href}'][data-task-open]"
+
   def visit_activity(params = {}) = get("/admin/activity", params)
 
   describe "signed in" do
@@ -266,7 +268,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity
 
         expect(page).to have_css(
-          "a.activity-event[href='/admin/tasks/#{task.id}#task-comment-#{made.id}']", text: "bought a ladder",
+          task_opener("/admin/tasks/#{task.id}#task-comment-#{made.id}"), text: "bought a ladder",
         )
       end
 
@@ -372,7 +374,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity
 
         expect(page).to have_css(
-          "a.activity-event[href='/admin/tasks/#{task.id}#task-session-#{made.id}']", text: "clear the gutters",
+          task_opener("/admin/tasks/#{task.id}#task-session-#{made.id}"), text: "clear the gutters",
         )
       end
 
@@ -467,6 +469,13 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity
 
         expect(opening(".activity-event-name.prose strong").map(&:text)).to eq(["ops"])
+      end
+
+      it "opens a comment on its decision's page, not the task panel" do
+        comment
+        visit_activity
+
+        expect(page).to have_no_css("a.activity-event[data-task-open]")
       end
 
       it "names the decision a comment is on" do
@@ -1156,11 +1165,11 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         expect(page).to have_link(class: "activity-event", href: "/admin/social?filter=posted")
       end
 
-      it "opens a task on the tasks page" do
-        create(:task, :done, title: "clear the gutters", completed_at: at(16))
+      it "opens a task in the task panel" do
+        task = create(:task, :done, title: "clear the gutters", completed_at: at(16))
         visit_activity
 
-        expect(page).to have_link("clear the gutters", href: "/admin/tasks")
+        expect(page).to have_css(task_opener("/admin/tasks/#{task.id}"), text: "clear the gutters")
       end
 
       it "opens a webmention on the webmentions page" do

@@ -62,7 +62,7 @@ function setupPanel(panel, modal) {
   let opener = null;
   let created = null;
 
-  const read = (task, keep = false) => {
+  const read = (task, keep = false, hash = "") => {
     const scroll = keep ? panelBody.scrollTop : 0;
     const field = keep ? document.activeElement?.name : null;
 
@@ -74,6 +74,7 @@ function setupPanel(panel, modal) {
     const focus = (field && task.querySelector(`[name="${field}"]`)) || panelBody;
     focus.focus({ preventScroll: true });
     panelBody.scrollTop = scroll;
+    if (hash) task.querySelector(`[id="${CSS.escape(hash.slice(1))}"]`)?.scrollIntoView({ block: "start" });
   };
 
   const showEdit = (edit) => {
@@ -123,7 +124,7 @@ function setupPanel(panel, modal) {
     } else {
       event.preventDefault();
       if (!panel.open) opener = link;
-      visit(link.href, READ, read);
+      visit(link.href, READ, (task) => read(task, false, link.hash));
     }
   };
 
