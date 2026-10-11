@@ -12,7 +12,7 @@ module Admin
           prop :origin, Blog::Types::String
 
           def view_template
-            Field(label: t(".label", span: Blog::Helpers::Figures.hours(@task.tracked_seconds))) do
+            Field(label: -> { Tracked(task: @task, text: t(".label", span: Tracked::SPAN)) }) do
               if sessions.empty? then Hint { t(".empty") }
               else ol(class: "task-sessions") { sessions.each { session(it) } }
               end

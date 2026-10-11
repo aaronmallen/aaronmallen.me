@@ -100,7 +100,7 @@ module Admin
               Controls(task: @task, filter: @filter, origin: @origin, moves: false)
               p(class: "task-stbar-worked") do
                 Icon("fa-regular fa-clock")
-                plain t(".worked_total", span: Blog::Helpers::Figures.hours(@task.tracked_seconds))
+                Tracked(task: @task, text: t(".worked_total", span: Tracked::SPAN))
                 span(class: "task-stbar-running") { t(".running") } if @task.running_session
               end
             end

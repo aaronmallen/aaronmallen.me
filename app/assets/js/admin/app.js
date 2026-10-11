@@ -27,6 +27,7 @@ import { setupSocialComposers } from "./social_composer.js";
 import { setupTaskOrder } from "./task_order.js";
 import { setupTaskPanel } from "./task_panel.js";
 import { setupToasts } from "./toast.js";
+import { setupTracked } from "./tracked.js";
 import { setupWorkForms } from "./work_form.js";
 
 function setup() {
@@ -63,4 +64,5 @@ function setup() {
 
 setup();
 setupLive();
+setupTracked();
 document.addEventListener("admin:morphed", setup);

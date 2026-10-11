@@ -6,7 +6,7 @@ module Admin
       class Field < Component
         ERROR = Blog::Types::Class.constrained(lteq: Blog::UI::FieldError)
 
-        prop :label, Blog::Types::String
+        prop :label, Blog::Types::String | Blog::Types::Instance(Proc)
         prop :id, Blog::Types::String.optional, default: nil
         prop :name, Blog::Types::Symbol.optional, default: nil
         prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
@@ -42,7 +42,7 @@ module Admin
 
         def label_text
           i(class: "#{@icon} f-icon", aria: { hidden: "true" }) if @icon
-          plain @label
+          @label.is_a?(Proc) ? @label.call : plain(@label)
         end
 
         def render_label

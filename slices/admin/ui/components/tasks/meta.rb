@@ -38,10 +38,11 @@ module Admin
           def hours(seconds) = Blog::Helpers::Figures.hours(seconds)
 
           def in_progress
-            tracked = @task.tracked_seconds
+            span(class: ["task-mark", :blue]) do
+              Icon("fa-solid fa-circle-play")
+              next plain(t(".in_progress")) unless @task.running_session || @task.tracked_seconds.positive?
 
-            mark(:blue, "fa-solid fa-circle-play") do
-              tracked.positive? ? t(".in_progress_for", span: hours(tracked)) : t(".in_progress")
+              Tracked(task: @task, text: t(".in_progress_for", span: Tracked::SPAN))
             end
           end
 

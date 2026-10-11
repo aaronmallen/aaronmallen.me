@@ -326,5 +326,44 @@ RSpec.describe "Admin task time", type: :request do
         expect(last_response).to be_redirect
       end
     end
+
+    describe "the running time" do
+      let(:task) do
+        found = create(:task, :in_progress, :in_sprint, sprint_id: create(:sprint, sprint_date: Blog::TimeZone.today).id,
+                                                        worked_seconds: 600)
+        create(:work_session, task_id: found.id, started_at: Time.now - 1830)
+        found
+      end
+
+      def ticking = "[data-tracked-since='#{((sessions.first[:started_at].to_r - 600) * 1000).floor}']"
+
+      it "counts from the moment the tracked time began on the Tasks list" do
+        task
+        get "/admin/tasks"
+
+        expect(page).to have_css(".task-meta .task-mark.blue #{ticking}", exact_text: "40m")
+      end
+
+      it "counts from the same moment on Today" do
+        task
+        get "/admin"
+
+        expect(page).to have_css(".task-meta #{ticking}", exact_text: "40m")
+      end
+
+      it "counts in the drawer and over its work sessions", :aggregate_failures do
+        read
+
+        expect(page).to have_css(".task-stbar-worked #{ticking}", exact_text: "40m")
+        expect(page).to have_css(".field .f #{ticking}", exact_text: "40m")
+      end
+
+      it "leaves a paused task's time still" do
+        paused = create(:task, worked_seconds: 600)
+        get "/admin/tasks/#{paused.id}", filter: "next"
+
+        expect(page).to have_no_css("[data-tracked-since]")
+      end
+    end
   end
 end
