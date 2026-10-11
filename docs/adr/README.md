@@ -151,6 +151,7 @@ one.
 | [0141][0141] | Keep file shares in a shares slice with their own public bucket | ![Active][active] | 2026-10-10 |
 | [0142][0142] | Serve shares on their own host, picked in config.ru, and let no cache keep them | ![Active][active] | 2026-10-10 |
 | [0146][0146] | Keep health data in a health slice as daily summaries and workouts polled from Google | ![Active][active] | 2026-10-11 |
+| [0147][0147] | Gate health data behind a health scope that read does not cover | ![Active][active] | 2026-10-11 |
 
 [0001]: 0001-split-the-app-into-slices-by-feature.md
 [0002]: 0002-hold-app-and-the-slices-to-hanamis-own-directories.md
@@ -298,6 +299,7 @@ one.
 [0141]: 0141-keep-file-shares-in-a-shares-slice-with-their-own-public-bucket.md
 [0142]: 0142-serve-shares-on-their-own-host-picked-in-config-ru-and-let-no-cache-keep-them.md
 [0146]: 0146-keep-health-data-in-a-health-slice-as-daily-summaries-and-workouts-polled-from-google.md
+[0147]: 0147-gate-health-data-behind-a-health-scope-that-read-does-not-cover.md
 [active]: https://img.shields.io/badge/Active-green?style=for-the-badge
 [superseded-0069]: https://img.shields.io/badge/0069-black?style=for-the-badge&label=Superseded&labelColor=orange
 [superseded-0096]: https://img.shields.io/badge/0096-black?style=for-the-badge&label=Superseded&labelColor=orange
