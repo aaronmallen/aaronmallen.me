@@ -10,8 +10,13 @@ module Admin
 
         prop :day, Blog::Types::Instance(ROM::Struct)
         prop :steps, Blog::Types::Bool, default: false
+        prop :stacked, Blog::Types::Bool, default: false
 
-        def view_template = plain(dotted(asleep, hrv, resting_heart_rate, steps))
+        def view_template
+          return plain(dotted(asleep, hrv, resting_heart_rate, steps)) unless @stacked
+
+          [asleep, dotted(hrv, resting_heart_rate), steps].reject { it.to_s.empty? }.each { |line| span { line } }
+        end
 
         private
 

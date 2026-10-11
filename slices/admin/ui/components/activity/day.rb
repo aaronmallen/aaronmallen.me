@@ -15,7 +15,7 @@ module Admin
               DayHead(date: @date, today: @today, count: @events.size, sunk: true)
               if @health
                 p(class: "activity-health", aria: { label: t(".health") }) do
-                  HealthFigures(day: @health, steps: true)
+                  HealthFigures(day: @health, steps: true, stacked: true)
                 end
               end
               div(class: "activity-events") { @events.each { Event(event: it) } }

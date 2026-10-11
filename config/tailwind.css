@@ -5780,11 +5780,24 @@
 
   @media (width >= 53.75rem) {
     grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
 
     & > .day-head {
       @apply self-start bg-transparent pt-1;
     }
+
+    & > .activity-health {
+      @apply col-start-1 row-start-2 self-start;
+    }
+
+    & > .activity-events {
+      @apply col-start-2 row-span-2 row-start-1;
+    }
   }
+}
+
+@utility activity-health {
+  @apply mt-1.5 flex flex-col gap-0.5 text-meta text-ink-muted;
 }
 
 @utility activity-events {

@@ -585,7 +585,9 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity
       end
 
-      def health(date) = page.find(".activity-day:has(time[datetime='#{date.iso8601}']) .activity-health").text
+      def health(date)
+        page.all(".activity-day:has(time[datetime='#{date.iso8601}']) .activity-health span").map(&:text)
+      end
 
       it "lists a workout by its type, with how long it ran and the device", :aggregate_failures do
         expect(day_names(today)).to eq(["Strength Training"])
@@ -597,7 +599,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "gives a day its sleep, HRV, resting heart rate and steps" do
-        expect(health(today)).to eq("7h 05m asleep · hrv 48 · rhr 54 · 8,421 steps")
+        expect(health(today)).to eq(["7h 05m asleep", "hrv 48 · rhr 54", "8,421 steps"])
       end
 
       it "leaves the strip off a day with no health data" do
