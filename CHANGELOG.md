@@ -5,6 +5,51 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.11] - 2026-10-11
+
+### Added
+
+- File shares at `aa.cool`. A Files tab under Publish uploads one or more files up to 100 MB, by form or by drop, and
+  gives each a five-character link on `aa.cool`, copied as the upload ends. It searches, filters images from other
+  files and pages twelve at a time. A drawer for each file changes its code and alt text, copies the link or Markdown,
+  shows its downloads and deletes it. Images, PDFs, video and audio open in the browser, other files download under
+  their own name, and range requests work. A download counts once, and bots, later ranges and the admin's own
+  previews don't count.
+- Short links at `aa.cool`. A Links tab under Publish shortens a link with a code you pick or one it draws, and says
+  when you shortened the link before. It searches, sorts by newest or most clicked and pages fifteen at a time. A
+  drawer for each link changes where it points, its code and its title, copies it and deletes it. A link answers with
+  a redirect and counts each click from a browser.
+- A social post takes up to four photos on each part, each with alt text. Drop, paste or pick them, then move or
+  remove them, and the preview shows them. Mastodon and Bluesky get them as photos with their alt text, shrunk to fit
+  each network's limit.
+- `mise run test:profile <files>` runs spec files in one process for test-prof, and `mise run test:coverage` merges
+  coverage results.
+
+### Changed
+
+- A social post sends each outside link as its `aa.cool` short link and reuses a code made before. Links to the site
+  stay long, and the saved post keeps every link as written. The counter and preview count the short length.
+- The site and the admin take the new design's brighter palette in both themes, text colors included.
+- Signed out, the public header shows a theme toggle in place of the settings menu, and admin pages show the public
+  site header.
+- The post editor's Preview tab sets the title and body in the public post page's type.
+- Webmention settings have their own screen, and the webmention inbox links to it from a Settings button.
+- On the Review screen, a decision's outcome sits on its own line under its title.
+- `mise run test` runs the specs across processes, each on its own database. CI runs lint, Ruby specs and browser
+  specs as separate jobs and merges their coverage.
+
+### Fixed
+
+- A live refresh in the admin keeps what you typed in a form. It used to empty every field but the focused one, so a
+  change from a job, the API or MCP could wipe a draft.
+- The task page and the new task page no longer fail on their back link when the admin's other back link loads first.
+- The copy button and tags on the tasks list keep a full tap target when the line wraps.
+
+### Security
+
+- A signed-out post over 1 MB to the photo upload path is refused before the site reads it. It used to parse up to
+  25 MB.
+
 ## [26.10.10] - 2026-10-10
 
 ### Added
@@ -738,7 +783,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.10...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.11...HEAD
+[26.10.11]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.10...26.10.11
 [26.10.10]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.9...26.10.10
 [26.10.9]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.8...26.10.9
 [26.10.8]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.7...26.10.8
