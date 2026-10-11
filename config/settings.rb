@@ -201,6 +201,8 @@ module Blog
       username?: Value,
     )
 
+    setting :share_store, default: {}, constructor: object_store
+
     setting :site, default: {}, constructor: Schema.schema(url: SiteUrl)
 
     setting :web_threads, default: DEFAULT_WEB_THREADS, constructor: unless_set(Threads, DEFAULT_WEB_THREADS)

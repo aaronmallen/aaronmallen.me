@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [db, lib, admin, decisions, links, posts, projects, record, services, social, tags, tasks]
 issue: AA-653
-amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957"]
+amended: [AA-816, "#17", "#77", "#143", "#274", "#319", "#284", "#415", "#913", "#940", "#937", "#957", "#1056"]
 tags: [postgres, constraints, triggers, contracts, validation, operations]
 ---
 
@@ -72,6 +72,8 @@ raises again.
 | `record_links_record_missing` | trigger | `Links::Operations::LinkRecords` | `other_id: missing` |
 | `record_links_task_pair_check` | `CHECK` | `Links::Operations::LinkRecords` | `other_id: task_pair` |
 | `service_connections_provider_host_account_id_index` | unique index | `Services::Operations::AddConnection` | the `taken` refusal |
+| `short_codes_code_key` | unique | `Shares::Operations::ChangeShareCode` | `code: taken` |
+| `short_codes_code_key` | unique | `Shares::Operations::UploadShare` | a new random code, up to five tries |
 | `tags_scope_name_key` | unique | `Tags::Operations::SaveTag` | `name: taken` |
 | `task_links_distinct_check` | `CHECK` | `Tasks::Operations::LinkTasks` | `other_id: self` |
 | `task_links_from_task_id_fkey` | foreign key | `Tasks::Operations::LinkTasks` | `other_id: missing` |
@@ -114,10 +116,10 @@ that run it, where the database binds every write.
 ## Consequences
 
 The name is a string two files share, one in a migration and one in an operation constant. Rename the constraint
-and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the nineteen names has a
-spec that would fail: the posts request spec, the operation specs for decisions, record links, tags and task links,
-and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped name
-needs one too.
+and the mapping misses, the error raises, and the form answers 500 instead of 422. Each of the twenty names has a
+spec that would fail: the posts request spec, the operation specs for decisions, record links, shares, tags and task
+links, and the admin request specs for the people, post, project, services, tag and task rule screens. A new mapped
+name needs one too.
 
 `violated_constraint` reads `error_info`, which belongs to Sequel's Postgres adapter. The repo base holds the one
 reach past ROM, and moving off Postgres would break every mapping at once.

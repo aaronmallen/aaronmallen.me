@@ -41,5 +41,10 @@ redis:
   reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
   timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
+share_store:
+  access_key: null
+  bucket: null
+  endpoint: null
+  secret_key: null
 site:
   url: https://aaronmallen.me

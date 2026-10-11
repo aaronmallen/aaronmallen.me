@@ -24,5 +24,11 @@ redis:
   reconnect_attempts: <%= ENV["REDIS_RECONNECT_ATTEMPTS"].to_json %>
   timeout: <%= ENV["REDIS_TIMEOUT"].to_json %>
   username: <%= ENV["REDIS_USER"].to_json %>
+share_store:
+  access_key: <%= ENV["MEDIA_STORE_ACCESS_KEY"].to_json %>
+  bucket: shares-development
+  endpoint: <%= "http://localhost:#{ENV.fetch("MEDIA_STORE_PORT", 9000)}".to_json %>
+  path_style: true
+  secret_key: <%= ENV["MEDIA_STORE_SECRET_KEY"].to_json %>
 site:
   url: http://localhost:2300

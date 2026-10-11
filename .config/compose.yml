@@ -58,7 +58,7 @@ services:
       - sh
       - -c
       - >-
-        status=$$(curl -sS -o /dev/null -w "%{http_code}" -X PUT --aws-sigv4 aws:amz:us-east-1:s3 --user "$$RUSTFS_ACCESS_KEY:$$RUSTFS_SECRET_KEY" http://media-store:9000/blog-development) && case "$$status" in 200|409) ;; *) echo "creating the bucket answered $$status" >&2; exit 1 ;; esac
+        for bucket in blog-development shares-development; do status=$$(curl -sS -o /dev/null -w "%{http_code}" -X PUT --aws-sigv4 aws:amz:us-east-1:s3 --user "$$RUSTFS_ACCESS_KEY:$$RUSTFS_SECRET_KEY" "http://media-store:9000/$$bucket") && case "$$status" in 200|409) ;; *) echo "creating $$bucket answered $$status" >&2; exit 1 ;; esac || exit 1; done
     container_name: aaronmallen.me-media-store-bucket
     depends_on:
       media-store:
