@@ -55,6 +55,12 @@ What it touches, abstractions needed, testing difficulty.
 
 ## What nobody has decided
 Questions for the user. No answers.
+
+## Size
+`issue` or `spec`, with one line on why.
 ```
+
+Call it `issue` when one person could finish the work in a sitting and it needs one pull request. Call it `spec`
+when it splits into parts that ship on their own, or when an open question changes its shape.
 
 Keep it factual. Flag what you are unsure of. Do not propose a solution. That is the caller's job.

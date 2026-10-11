@@ -5,7 +5,7 @@ name: brainstorm
 
 # Brainstorm
 
-Turn a rough idea into a spec, or split a spec that grew too big.
+Turn a rough idea into a spec or a single issue, or split a spec that grew too big.
 
 ## 1. Work out the mode
 
@@ -20,6 +20,9 @@ A rough idea means start from nothing. Send the idea to the **brainstormer** age
 `.claude/CLAUDE.md`, the records in `docs/adr`, the code and the tests, and comes back with what already exists,
 what constrains the idea, and what nobody has decided yet. Work from that report, not from your own guess at the
 codebase.
+
+The report ends with a size. When it says `issue`, skip the spec: ask only the questions the
+issue needs, skip step 3 and go to step 5.
 
 ## 2. Ask one question at a time
 
@@ -43,6 +46,8 @@ Then ask with `AskUserQuestion` so the user picks one.
 
 ## 4. Write the spec
 
+Skip this step for a single issue.
+
 Invoke `/write-spec` with the approach the user picked. That files the spec on GitHub and prints its number.
 
 Pass on the session too: the user's prompt, word for word, and each question you asked with its answer.
@@ -51,5 +56,9 @@ as they stand: `/write-spec` redacts them before it files, by the list in [`.cla
 
 Splitting a large spec means one `/write-spec` per piece, each one filed as a sub-issue of the original. Pass the
 same prompt and questions to each piece.
+
+## 5. Write the issue
+
+Only when the work fits in one issue. Invoke `/write-issue` with what the user decided. It files no parent.
 
 [issues]: .claude/issues.md
