@@ -555,7 +555,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
 
     def images = bluesky_writes.first.dig("record", "embed", "images")
 
-    def noise = Vips::Image.gaussnoise(1200, 1200).cast(:uchar).bandjoin([Vips::Image.gaussnoise(1200, 1200)] * 2)
+    def noise = Vips::Image.gaussnoise(1200, 1200).bandjoin([Vips::Image.gaussnoise(1200, 1200)] * 2).cast(:uchar)
 
     def store(photo, body = "photo-#{photo.key}", type: "image/jpeg")
       stub_request(:get, media_store_url(photo.key)).to_return(body:, headers: { "Content-Type" => type })
