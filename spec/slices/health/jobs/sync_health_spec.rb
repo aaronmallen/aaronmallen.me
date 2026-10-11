@@ -5,6 +5,12 @@ RSpec.describe Health::Jobs::SyncHealth do
   let(:today) { Blog::TimeZone.today }
   let(:yesterday) { today - 1 }
 
+  def asked_for_summary(field)
+    filter = %(#{field}.date >= "#{today - 2}" AND #{field}.date < "#{today + 1}")
+
+    a_request(:get, %r{dataTypes/#{field.tr('_', '-')}/dataPoints\?}).with(query: hash_including("filter" => filter))
+  end
+
   def asked_for_workouts_from(first)
     field = "exercise.interval.civil_start_time"
     filter = %(#{field} >= "#{first}" AND #{field} < "#{today + 1}")
@@ -137,6 +143,14 @@ RSpec.describe Health::Jobs::SyncHealth do
       run
 
       expect(asked_for_workouts_from(today - 2)).to have_been_made
+    end
+
+    it "filters the daily summaries on the field names Google takes", :aggregate_failures do
+      stub_google_health
+      run
+
+      expect(asked_for_summary("daily_resting_heart_rate")).to have_been_made
+      expect(asked_for_summary("daily_heart_rate_variability")).to have_been_made
     end
 
     it "stores no row for a day Google holds nothing for" do

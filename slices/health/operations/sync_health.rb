@@ -32,7 +32,7 @@ module Health
       end
 
       def hrvs(first, last)
-        summaries("daily-heart-rate-variability", "dailyHeartRateVariability", first, last) do |summary|
+        summaries("daily-heart-rate-variability", "daily_heart_rate_variability", first, last) do |summary|
           { hrv: summary["averageHeartRateVariabilityMilliseconds"] }
         end
       end
@@ -69,7 +69,7 @@ module Health
       end
 
       def resting_heart_rates(first, last)
-        summaries("daily-resting-heart-rate", "dailyRestingHeartRate", first, last) do |summary|
+        summaries("daily-resting-heart-rate", "daily_resting_heart_rate", first, last) do |summary|
           { resting_heart_rate: summary["beatsPerMinute"]&.to_i }
         end
       end
