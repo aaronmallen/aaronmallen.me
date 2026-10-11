@@ -21,8 +21,8 @@ module Admin
           private
 
           def line(definition)
-            Icon(definition.icon)
-            span do
+            Tile(definition:)
+            span(class: "svc-pick-text") do
               span(class: "svc-line-name") { definition.name }
               span(class: "svc-line-note") { definition.powers.join(DOT) }
             end

@@ -12,7 +12,7 @@ module Admin
           prop :refusal, Blog::Types::String.optional
 
           def view_template
-            Head(title: t(".heading", name: @definition.name))
+            Head(title: t(".heading", name: @definition.name), definition: @definition)
             TokenForm(definition: @definition) do
               p(class: "field-error", role: "alert") { @refusal } if @refusal
               @definition.fields.each { field(it) }

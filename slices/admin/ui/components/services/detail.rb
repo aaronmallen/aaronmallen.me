@@ -9,7 +9,7 @@ module Admin
           prop :connectable, Blog::Types::Bool
 
           def view_template
-            Head(title: definition.name)
+            Head(title: definition.name, definition:)
             p(class: "svc-status") do
               StatusPill(status: @row.status)
               span(class: "svc-account") { @row.account } if @row.account
@@ -36,7 +36,7 @@ module Admin
             return no_credentials if @row.env.empty?
 
             label(t(definition.oauth? ? ".app_credentials" : ".credentials"))
-            @row.env.each { |name, set| line(name) { held(set, nil, ".set", ".missing") } }
+            @row.env.each { |name, set| line(name, name: "svc-env") { held(set, nil, ".set", ".missing") } }
             Hint { t(".environment") }
           end
 
@@ -50,16 +50,16 @@ module Admin
             return if @row.jobs.empty?
 
             label(t(".jobs"))
-            @row.jobs.each { line(it[:name], it[:every]) }
+            @row.jobs.each { line(it[:name], it[:every], name: "svc-job") }
             SyncFailures(failures: @row.failing_jobs.map { it[:failure] })
           end
 
           def label(text) = p(class: "svc-group-label") { text }
 
-          def line(name, note = nil, &)
+          def line(text, note = nil, name: "svc-line-name", &)
             div(class: "svc-line") do
               span do
-                span(class: "svc-line-name") { name }
+                span(class: name) { text }
                 span(class: "svc-line-note") { note } if note
               end
               yield if block_given?

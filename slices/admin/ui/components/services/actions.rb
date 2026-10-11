@@ -5,6 +5,7 @@ module Admin
     module Components
       module Services
         class Actions < Component
+          ANOTHER_ICON = "fa-solid fa-plus"
           DISCONNECT_ICON = "fa-solid fa-link-slash"
           OPEN_ICON = "fa-solid fa-arrow-up-right-from-square"
           TEST_ICON = "fa-solid fa-plug-circle-check"
@@ -24,7 +25,8 @@ module Admin
           private
 
           def another
-            Button(small: true, variant: :gh, href: path(:admin_services, connect: definition.id)) { t(".another") }
+            href = path(:admin_services, connect: definition.id)
+            Button(small: true, variant: :gh, icon: ANOTHER_ICON, href:) { t(".another") }
           end
 
           def connection = @row.connection

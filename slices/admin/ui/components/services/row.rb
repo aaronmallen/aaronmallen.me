@@ -9,8 +9,14 @@ module Admin
           prop :selected, Blog::Types::Bool
 
           def view_template
-            ListItem(title: @row.definition.name, href:, icon: @row.definition.icon, link:) do |item|
-              item.meta { p(class: "li-sub") { sub } }
+            div(class: "li svc", data: { key_row: true }) do
+              div(class: "svc-start") do
+                Tile(definition: @row.definition)
+                div(class: "li-main") do
+                  a(class: "li-title", href:, data: { key_open: true }, **link) { @row.definition.name }
+                  p(class: "li-sub") { sub }
+                end
+              end
               StatusPill(status: @row.status)
             end
           end

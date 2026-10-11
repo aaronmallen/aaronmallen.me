@@ -7,6 +7,8 @@ module Admin
         class Index < View
           include Components::Services
 
+          WARNING_ICON = "fa-solid fa-triangle-exclamation"
+
           prop :connect, Blog::Types::Instance(::Services::Structs::Definition).optional
           prop :connectable, Blog::Types::Array.of(Blog::Types::String)
           prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
@@ -35,11 +37,11 @@ module Admin
           def failing = @rows.select { it.status == :failing }
 
           def glance
-            h2(class: "card-title") { t(".glance") }
+            div(class: "svc-head") { h2(class: "card-title") { t(".glance") } }
             if failing.empty?
               p(class: "settings-aside") { t(".all_answered") }
             else
-              failing.each { SyncFailures(failures: it.failing_jobs.map { it[:failure] }) }
+              failing.each { warning(it) }
             end
             Hint { t(".pick_hint") }
           end
@@ -52,7 +54,7 @@ module Admin
           end
 
           def list
-            Card(title: t(".connected"), data: { key_list: true }) do |card|
+            Card(title: t(".connected"), class: "svc-list", data: { key_list: true }) do |card|
               card.side do
                 span(class: "settings-count") { summary }
                 connect_button unless @pickable.empty?
@@ -72,6 +74,16 @@ module Admin
           def summary
             count = t(".count", count: @rows.size)
             failing.empty? ? count : dotted(count, t(".failing", count: failing.size))
+          end
+
+          def warning(row)
+            div(class: "svc-warn") do
+              Icon(WARNING_ICON)
+              div do
+                p(class: "svc-warn-title") { row.definition.name }
+                SyncFailures(failures: row.failing_jobs.map { it[:failure] })
+              end
+            end
           end
         end
       end

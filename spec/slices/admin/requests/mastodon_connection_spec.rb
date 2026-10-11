@@ -34,6 +34,15 @@ RSpec.describe "Admin Mastodon connection", type: :request do
     expect(page).to have_css("form[action='/admin/services/mastodon/connect'] input[name='server']", visible: :all)
   end
 
+  it "continues to my server from the dialog footer, beside a cancel that only closes it", :aggregate_failures do
+    get "/admin/services"
+    dialog = page.find_by_id("connect-service-mastodon", visible: :all)
+
+    expect(dialog).to have_css(".dialog-foot [type='submit'][form='connect-service-mastodon-form']", visible: :all)
+    expect(dialog).to have_css("form#connect-service-mastodon-form input[name='server']", visible: :all)
+    expect(dialog).to have_css(".dialog-foot button[type='button'][data-dialog-close]", text: "Cancel", visible: :all)
+  end
+
   describe "starting" do
     before { start_connect("https://Ruby.Social/@aaronmallen") }
 
