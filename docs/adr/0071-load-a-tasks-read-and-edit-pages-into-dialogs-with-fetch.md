@@ -5,7 +5,7 @@ status: active
 created: 2026-09-29
 area: [admin, assets]
 issue: "#37"
-amended: ["#41", "#90", "#745"]
+amended: ["#41", "#90", "#745", "#1102"]
 tags: [admin, tasks, dialog, fetch, javascript, forms, progressive-enhancement]
 ---
 
@@ -37,7 +37,8 @@ A linked task clicked inside the panel loads into the same panel. With scripts o
 link opens the page in full.
 
 Since #745 the panel is a wide drawer that opens from the right, as [ADR 0128][0128] records. It loads the read
-page the same way.
+page the same way. #1102 moved editing into the drawer, as [ADR 0148][0148] records. The edit page stays for a
+browser with no script, and the task modal now opens only for new tasks.
 
 Every form inside the swapped HTML stays a plain POST under ADR 0055. An action redirects with its toast to the
 page the task was opened from, through the `origin` the forms carry. A failed save answers 422 with the edit
@@ -86,4 +87,5 @@ The script cannot read where a redirect points without following it, and followi
 list a row draws on, except that the reload keeps a search or a pool the redirect would drop.
 
 [0128]: 0128-lay-out-the-admin-as-a-full-width-pill-nav-shell-with-right-side-drawers.md
+[0148]: 0148-edit-a-task-in-the-task-drawer-and-keep-the-task-modal-for-new-tasks.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

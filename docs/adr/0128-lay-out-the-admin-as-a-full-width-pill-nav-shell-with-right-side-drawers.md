@@ -6,7 +6,7 @@ created: 2026-10-07
 area: [admin, assets, config]
 supersedes: ["0053"]
 issue: "#745"
-amended: ["#873", "#919"]
+amended: ["#873", "#919", "#1102"]
 tags: [admin, layout, navigation, palette, drawer, keyboard, responsive, design]
 ---
 
@@ -48,10 +48,10 @@ Actions keep `ListActions::ALL` and its `needs` and `from` rules, and a new acti
 
 **Drawers open from the right.** A drawer is `min(620px, 100%)` wide, or 760px for the wide variant, with a header,
 a body that scrolls and a footer. The task panel becomes the wide drawer and loads `/admin/tasks/:id` the way it
-does now ([ADR 0071][0071]); the edit page keeps the task modal. Every other drawer, the avatar menu, the bulk bar
-and the confirm open markup the page already drew. The confirm draws in place of the button that asked, and keeps
-what [ADR 0055][0055] asks of it: it stops the submit only on No, and with scripts off the form posts without
-asking.
+does now ([ADR 0071][0071]). #1102 moved editing a task into the drawer, as [ADR 0148][0148] records, and the task
+modal keeps only new tasks. Every other drawer, the avatar menu, the bulk bar and the confirm open markup the page
+already drew. The confirm draws in place of the button that asked, and keeps what [ADR 0055][0055] asks of it: it
+stops the submit only on No, and with scripts off the form posts without asking.
 
 **Two breakpoints.** The admin folds at 700px and 860px alone. Two-column layouts start at 860px, and the pill nav
 drops onto its own row below it. Between them the pills and the search button shrink with `clamp` rather than at
@@ -101,4 +101,5 @@ rebuild lands, the README's table of pills and sub-tabs survives only in the cod
 [0096]: 0096-search-every-kind-through-tsvector-columns-and-one-view-in-a-search-slice.md
 [0101]: 0101-bind-every-admin-key-through-one-key-map-that-reads-keys-from-the-markup.md
 [0118]: 0118-keep-admin-pages-live-through-postgres-notify-a-hijacked-event-stream-and-a-morph.md
+[0148]: 0148-edit-a-task-in-the-task-drawer-and-keep-the-task-modal-for-new-tasks.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge
