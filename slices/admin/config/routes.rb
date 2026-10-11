@@ -71,6 +71,7 @@ module Admin
     get "/files/:id/edit", to: "files.edit", as: :edit_file, id: ID
     post "/files/:id", to: "files.update", as: :update_file, id: ID
     post "/files/:id/delete", to: "files.destroy", as: :delete_file, id: ID
+    get "/health", to: "health.show", as: :health
     get "/inbox", to: "inbox.index", as: :inbox
     post(
       "/inbox/messages/:id/mark/:status",

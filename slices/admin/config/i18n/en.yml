@@ -741,6 +741,77 @@ en:
         empty:
           commit: "Nothing beyond the subject line."
           pull_request: "No description."
+      health:
+        agents_card:
+          about: "Agents read health days only through a client or token that holds the health scope. Read alone never reaches them."
+          client: "MCP client"
+          empty: "No client or token holds health."
+          title: "What agents see"
+          token: "API token"
+        day_detail:
+          activity: "This day in activity"
+          ago:
+            one: "%{count} day ago"
+            other: "%{count} days ago"
+          asleep: "Asleep"
+          asleep_between: "Asleep %{bed} → %{woke}"
+          based: "%{label} · 30-day %{base}"
+          body: "Body"
+          bpm: "%{count} bpm"
+          commits: "Commits"
+          days: "Days"
+          focused: "Focused time"
+          hrv: "HRV"
+          late: "Commits after 22:00"
+          movement: "Steps · zone minutes"
+          ms: "%{count} ms"
+          next: "Next day"
+          none: "no data"
+          previous: "Previous day"
+          resting: "Resting heart rate"
+          tasks_done: "Tasks done"
+          today: "Today"
+          work: "Work"
+          yesterday: "Yesterday"
+        grid:
+          asleep: "Asleep"
+          bpm: "%{count} bpm"
+          commits: "Commits"
+          exercise: "Exercise"
+          focused: "Focused"
+          hrv: "HRV"
+          label: "Daily health and work"
+          late: "After 22:00"
+          late_count:
+            one: "%{count} commit"
+            other: "%{count} commits"
+          ms: "%{count} ms"
+          none: "no data"
+          resting: "Resting HR"
+          today: "today"
+          work: "Work"
+        patterns_card:
+          empty: "Not enough days in this range to say anything yet."
+          hint: "Averages over the days you have, not advice. Agents with health access get the same numbers."
+          late_commits:
+            days: "%{days} nights after late commits vs %{rest} others"
+            text: "After commits past 22:00 you slept %{asleep} with HRV at %{hrv} ms, against %{rest_asleep} and %{rest_hrv} ms after other nights."
+          morning_workouts:
+            days: "%{days} workout mornings vs %{rest} days without · weekdays"
+            text: "Weekdays with a morning workout averaged %{focus} of focused time, against %{rest_focus} on days without one."
+          resting_heart_rate:
+            days: "last %{days} days vs the %{rest} before"
+            text: "Resting heart rate averaged %{bpm} bpm over the last week, against %{rest_bpm} bpm before it."
+          short_nights:
+            days: "%{days} short nights vs %{rest} others · weekdays"
+            text: "After nights under 6 hours you averaged %{focus} of focused time, against %{rest_focus} after the others."
+          span: "last %{count} days"
+          title: "Patterns"
+        workout:
+          heart_rate: "avg %{count} bpm"
+          kcal: "%{count} kcal"
+          km: "%{count} km"
+          zone_minutes: "%{count} zone min"
       inbox:
         issue_item:
           edit: "Edit"
@@ -1034,6 +1105,7 @@ en:
           clients: "MCP clients"
           decisions: "decisions"
           files: "files"
+          health: "health"
           inbox: "waiting"
           journal: "journal"
           links: "links"
@@ -2413,6 +2485,19 @@ en:
         rejected:
           heading: "Form expired"
           message: "Nothing changed. Reload the page and try again."
+      health:
+        show:
+          days: "%{count}d"
+          google_health: "Google Health"
+          grid: "Body and work, day by day"
+          heading: "Health"
+          hint: "Each column is one day. Pink marks a short night, low HRV, raised resting heart rate or late commits."
+          no_sleep: "Last %{count} days: no sleep synced yet, and %{workouts}."
+          span: "Span"
+          sub: "Last %{count} days: %{asleep} asleep a night on average, and %{workouts}."
+          workouts:
+            one: "%{count} workout"
+            other: "%{count} workouts"
       inbox:
         index:
           empty: "Nothing waits on you."

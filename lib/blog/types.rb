@@ -72,6 +72,8 @@ module Blog
     DeviceClass = Types::String.enum("desktop", "mobile", "tablet", "in-app")
     Fields = Types::Hash.constructor { |value| value.is_a?(::Hash) ? value : Blog::Constants::EMPTY_HASH }
     GoneTaskSourceState = Types::String.enum("moved", "deleted")
+    HealthSpan = Types::Params::Integer.enum(14, 30, 90)
+    HealthSpanParam = HealthSpan.fallback(30)
     Id = Types::Params::Integer.constrained(gt: 0, lt: 2**31)
     IdList = Types::Array.of(Id).constructor { |ids| ids.is_a?(::Array) ? ids.uniq : ids }
     IdParam = Id.optional.fallback(nil)

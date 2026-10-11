@@ -181,6 +181,7 @@ RSpec.describe "Admin screens", type: :feature do
         visit "/admin/tags"
         forge_form "/admin/tags"
       end,
+      "health" => "/admin/health",
       "inbox" => "/admin/inbox",
       "journal" => "/admin/journal",
       "mastodon refused" => "/admin/auth/mastodon/callback",
@@ -332,8 +333,8 @@ RSpec.describe "Admin screens", type: :feature do
     seed_writing
     seed_links
     create(:message, subject: "A question about the site")
-    create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
-    create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
+    seed_health
+    seed_saved_views
     seed_security(create(:oauth_token, oauth_client: create(:oauth_client, client_name: "Claude")).oauth_client_id)
     person
   end
@@ -355,11 +356,21 @@ RSpec.describe "Admin screens", type: :feature do
     create(:social_post, :posted, posted_at: at(0, 45))
   end
 
+  def seed_health
+    create(:health_day, minutes_asleep: 300, hrv: 40, resting_heart_rate: 60, steps: 8000, active_zone_minutes: 20)
+    create(:workout, kind: "STRENGTH_TRAINING", distance_meters: 1200, device: "Pixel Watch 3")
+  end
+
   def seed_links
     link = Links::Slice["operations.link_records"]
     link.call("journal_entry", journal_entry.id, { other_kind: "post", other_id: draft.id })
     link.call("work_entry", work_entry.id, { other_kind: "project", other_id: project.id })
     link.call("social_post", social_post.id, { other_kind: "commit", other_id: commit.id })
+  end
+
+  def seed_saved_views
+    create(:saved_view, screen: "tasks", name: "Next up for the week", filters: { "filter" => "next" })
+    create(:saved_view, screen: "activity", name: "Shipped this week", filters: { "q" => "ship" })
   end
 
   def seed_security(client_id)

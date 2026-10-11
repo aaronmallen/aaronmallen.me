@@ -18,6 +18,8 @@ module MCP
       def count_since(time) = oauth_clients.registered_since(time).count
 
       def held_token?(id) = oauth_clients.by_pk(id).held_token.exist?
+
+      def holding(scope) = oauth_clients.holding_scope(scope).newest_first.to_a
     end
   end
 end

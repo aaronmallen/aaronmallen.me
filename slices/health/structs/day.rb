@@ -9,6 +9,8 @@ module Health
     ) do
       def health? = [minutes_asleep, resting_heart_rate, hrv, steps, active_zone_minutes].any?
 
+      def short_night? = !minutes_asleep.nil? && minutes_asleep < Patterns::SHORT_NIGHT
+
       def weekday? = !(day.saturday? || day.sunday?)
     end
   end

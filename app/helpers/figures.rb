@@ -31,6 +31,8 @@ module Blog
         hours.zero? ? format(MINUTES, rest / MINUTE) : format(HOURS, hours, rest / MINUTE)
       end
 
+      def minutes(count) = hours(count * MINUTE)
+
       def rate(part, whole) = whole.zero? ? 0.0 : (part.to_f / whole).round(1)
 
       def share(part, whole) = whole.zero? ? ZERO : ((part * PERCENT.to_f) / whole).round

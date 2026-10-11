@@ -2413,6 +2413,157 @@
   }
 }
 
+@utility health-bar {
+  @apply mb-stack flex flex-wrap items-center gap-x-3.5 gap-y-2.5;
+}
+
+@utility health-grid {
+  @apply grid items-center gap-x-3 gap-y-1.5;
+  grid-template-columns: 92px minmax(0, 1fr);
+}
+
+@utility health-grid-label {
+  @apply meta leading-tight;
+}
+
+@utility health-grid-sep {
+  @apply col-span-full mt-2 mb-0.5 border-t border-line pt-3 font-mono text-meta tracking-[.08em] text-ink-muted uppercase;
+}
+
+@utility health-grid-row {
+  @apply flex h-9.5 items-stretch gap-0.5;
+
+  &.vi {
+    --tone: var(--color-mk-violet);
+  }
+
+  &.gr {
+    --tone: var(--color-mk-green);
+  }
+
+  &.or {
+    --tone: var(--color-mk-orange);
+  }
+
+  &.bl {
+    --tone: var(--color-mk-blue);
+  }
+
+  &.pk {
+    --tone: var(--color-mk-pink);
+  }
+}
+
+@utility health-grid-day {
+  @apply flex min-w-0 flex-1 items-end rounded-[3px];
+
+  &.we {
+    background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+  }
+
+  &.on {
+    background: color-mix(in oklab, var(--color-accent) 22%, transparent);
+  }
+
+  & i {
+    @apply block w-full rounded-t-[2px];
+    background: color-mix(in oklab, var(--tone, var(--color-ink-muted)) 72%, var(--color-ground));
+  }
+
+  &:hover i {
+    background: var(--tone, var(--color-ink));
+  }
+
+  & i.lo {
+    @apply bg-mk-pink-text;
+  }
+
+  @media (width < 43.75rem) {
+    @apply contents;
+
+    & i {
+      @apply flex-1 self-end;
+    }
+
+    &.on i {
+      @apply outline-1 outline-offset-1 outline-ink;
+    }
+  }
+}
+
+@utility health-grid-axis {
+  @apply col-start-2 mt-0.5 flex justify-between meta;
+}
+
+@utility health-day {
+  @apply mt-5.5 border-t border-line pt-4.5;
+}
+
+@utility health-day-head {
+  @apply mb-3 flex flex-wrap items-center gap-3;
+}
+
+@utility health-day-title {
+  @apply font-display text-[1.1rem] font-bold text-ink;
+}
+
+@utility health-day-date {
+  @apply grow meta;
+}
+
+@utility health-day-cols {
+  @apply grid gap-x-8 gap-y-4.5;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+@utility health-day-key {
+  @apply mb-1 font-mono text-meta tracking-[.06em] text-ink-muted uppercase;
+}
+
+@utility health-row {
+  @apply grid gap-x-3 border-b border-line py-2.25 text-[.98rem] text-ink last:border-b-0;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+@utility health-row-value {
+  @apply meta;
+
+  &.lo {
+    @apply text-mk-pink-text;
+  }
+}
+
+@utility health-day-link {
+  @apply mt-3 inline-flex items-center font-mono text-meta text-accent-text no-underline hover:underline;
+  @apply admin-focus;
+
+  @media (width < 43.75rem) {
+    @apply min-h-tap;
+  }
+}
+
+@utility health-workout {
+  @apply grid items-baseline gap-x-3.5 gap-y-0.5 py-2.5;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+
+  & > i {
+    @apply text-center text-xs text-mk-blue-text;
+  }
+}
+
+@utility health-workout-name {
+  @apply font-display font-semibold text-ink;
+}
+
+@utility health-pattern {
+  @apply grid items-baseline gap-3 border-b border-line py-3;
+  grid-template-columns: 22px minmax(0, 1fr);
+
+  & > i {
+    @apply text-mk-violet-text;
+  }
+}
+
 @utility time-total {
   @apply meta;
 }
