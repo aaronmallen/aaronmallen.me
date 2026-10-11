@@ -21,7 +21,7 @@ module Admin
             article(class: "file-card") do
               thumb
               div(class: "file-card-body") do
-                p(class: "file-card-name", title: @share.filename) { @share.filename }
+                p(class: "file-card-name", title: @share.filename) { opener }
                 p(class: "file-card-link", title: link) { Helpers::ShareLink.bare(link) }
                 p(class: "file-card-meta") { meta }
                 div(class: "file-card-acts") { acts }
@@ -55,6 +55,13 @@ module Admin
             span { Blog::Helpers::Figures.size(@share.byte_size) }
             span { l(Blog::TimeZone.today(@share.created_at), format: :medium) }
             span { t(".downloads", count: @share.download_count, downloads: downloads) }
+          end
+
+          def opener
+            a(
+              href: path(:admin_edit_file, id: @share.id),
+              data: { dialog_open: Drawer.id_for(@share) },
+            ) { @share.filename }
           end
 
           def preview = Helpers::ShareLink.preview(@share.code)

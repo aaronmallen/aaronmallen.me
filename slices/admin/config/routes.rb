@@ -68,6 +68,9 @@ module Admin
     get "/events", to: "events.show", as: :events
     get "/files", to: "files.index", as: :files
     post "/files", to: "files.create", as: :create_files
+    get "/files/:id/edit", to: "files.edit", as: :edit_file, id: ID
+    post "/files/:id", to: "files.update", as: :update_file, id: ID
+    post "/files/:id/delete", to: "files.destroy", as: :delete_file, id: ID
     get "/inbox", to: "inbox.index", as: :inbox
     post(
       "/inbox/messages/:id/mark/:status",

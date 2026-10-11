@@ -3856,7 +3856,7 @@
 }
 
 @utility file-card {
-  @apply flex min-w-0 flex-col overflow-hidden rounded-menu border border-line bg-ground-sunk;
+  @apply relative flex min-w-0 flex-col overflow-hidden rounded-menu border border-line bg-ground-sunk;
 }
 
 @utility file-card-thumb {
@@ -3869,6 +3869,14 @@
 
 @utility file-card-name {
   @apply truncate font-display text-[1rem] font-semibold text-ink;
+
+  & a {
+    @apply text-inherit no-underline admin-focus after:absolute after:inset-0;
+
+    @media (width < 43.75rem) {
+      @apply block truncate leading-(--spacing-tap);
+    }
+  }
 }
 
 @utility file-card-link {
@@ -3884,7 +3892,53 @@
 }
 
 @utility file-card-acts {
-  @apply mt-auto flex items-center gap-1.5 pt-1.5;
+  @apply relative mt-auto flex items-center gap-1.5 pt-1.5;
+}
+
+@utility file-drawer {
+  & .dialog-foot {
+    @apply justify-between;
+  }
+
+  & .card-body {
+    @apply flex flex-col gap-3;
+  }
+}
+
+@utility file-drawer-preview {
+  @apply block max-h-[340px] w-full rounded-menu border border-line bg-wash object-contain;
+
+  &:is(span) {
+    @apply flex aspect-video flex-col items-center justify-center gap-2.5 text-[44px] text-ink-muted;
+
+    & > span {
+      @apply font-mono text-[12px] tracking-[0.08em];
+    }
+  }
+}
+
+@utility file-drawer-name {
+  @apply mt-1 font-display text-[1.2rem] font-semibold break-words text-ink;
+}
+
+@utility file-drawer-meta {
+  @apply file-card-meta;
+}
+
+@utility file-drawer-head {
+  @apply mt-3 border-t border-line pt-4 font-display text-[1.1rem] font-bold text-ink;
+}
+
+@utility file-drawer-link {
+  @apply block rounded-field border border-line bg-ground px-2.5 py-2 font-mono text-[13px] break-all text-ink;
+}
+
+@utility file-drawer-copy {
+  @apply flex flex-wrap gap-2;
+}
+
+@utility file-drawer-foot {
+  @apply flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4;
 }
 
 @utility work-row {

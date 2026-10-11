@@ -118,6 +118,7 @@ RSpec.describe "MCP reach", type: :app do
       "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
       "shares.operations.change_share_code" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.delete_share" => "spec #1053 keeps MCP tools out of shares",
+      "shares.operations.save_share" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.set_share_alt_text" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.upload_share" => "spec #1053 keeps MCP tools out of shares",
       "social.operations.check_author_scope" => "verify_webmention and the webmention repos check an author owns pages",

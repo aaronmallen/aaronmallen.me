@@ -39,6 +39,7 @@ module Admin
 
           def grid
             div(class: "file-grid") { @shares.rows.each { Tile(share: it) } }
+            @shares.rows.each { Drawer(share: it) }
           end
 
           def options = FILTERS.transform_values { t(it) }

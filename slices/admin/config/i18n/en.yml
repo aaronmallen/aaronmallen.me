@@ -72,6 +72,9 @@ en:
           one: "Uploaded %{count} file, then the share store stopped answering"
           other: "Uploaded %{count} files, then the share store stopped answering"
           zero: "Nothing uploaded · the share store isn't answering"
+        delete: "Nothing deleted · the share store isn't answering"
+      deleted: "File deleted"
+      saved: "File saved"
       uploaded:
         one: "Uploaded"
         other: "%{count} files uploaded"
@@ -692,6 +695,32 @@ en:
         save: "Save"
         title: "What changed and why"
       files:
+        drawer:
+          title: "Shared file"
+        field_error:
+          code:
+            blank: "Give it a code."
+            format: "Use lowercase letters, numbers and single hyphens."
+            taken: "Another file or short link already uses that code."
+        foot:
+          delete: "Delete file"
+          save: "Save"
+        share_form:
+          alt_text: "Alt text"
+          alt_text_hint: "Used when you copy it as markdown."
+          alt_text_placeholder: "What the image shows"
+          code: "Short code"
+          code_hint: "The part after %{host}/. Save a new one to switch the link, and the old one stops working at once."
+          confirm_delete: "Delete %{name}? Its link stops working at once."
+          copy_link: "Copy link"
+          copy_markdown: "Copy as markdown"
+          downloads:
+            one: "%{downloads} download"
+            other: "%{downloads} downloads"
+          link: "Share link"
+          link_copied: "Link copied"
+          markdown_copied: "Markdown copied"
+          uploaded: "uploaded %{on}"
         tile:
           copied: "Link copied"
           copy: "Copy link"
@@ -2291,6 +2320,8 @@ en:
           opened: "opened %{date}"
           problem: "Why it came up"
       files:
+        edit:
+          all_files: "All files"
         index:
           all: "all"
           copied: "Uploaded · link copied"

@@ -1,0 +1,26 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Views
+      module Files
+        class Edit < View
+          include Components::Files
+
+          prop :share, Blog::Types::Instance(ROM::Struct)
+          prop :values, Blog::Types::Hash.optional, default: nil
+          prop :errors, Blog::Types::Hash, default: Blog::Constants::EMPTY_HASH
+
+          def view_template
+            BackLink(href: path(:admin_files), variant: :gh, small: true, class: "editor-back") { t(".all_files") }
+            PageHead(title: @share.filename)
+            Card(class: "file-drawer") do
+              ShareForm(share: @share, values: @values, errors: @errors)
+              div(class: "file-drawer-foot") { Foot(share: @share) }
+            end
+          end
+        end
+      end
+    end
+  end
+end

@@ -68,4 +68,55 @@ RSpec.describe "Admin files", type: :feature do
     expect(page).to have_css(".toast", text: "Link copied")
     expect(copied).to eq([link("deck.pdf")] * 2)
   end
+
+  describe "a card's drawer" do
+    def drawer(&) = within("dialog[open].file-drawer", &)
+
+    def open_card(name) = find(".file-card", text: name).click
+
+    def save_alt_text(text)
+      drop(["shot.png", "png", "image/png"])
+      open_card("shot.png")
+      drawer { fill_in("Alt text", with: text).then { click_button "Save" } }
+      find(".toast", text: "File saved")
+      watch_clipboard_items
+    end
+
+    it "opens when I click the card" do
+      drop(["deck.pdf", "%PDF-1.7", "application/pdf"])
+      open_card("deck.pdf")
+
+      expect(page).to have_css("dialog[open].file-drawer .file-drawer-name", text: "deck.pdf")
+    end
+
+    it "copies an image as markdown with the alt text I saved", :aggregate_failures do
+      save_alt_text("A cat")
+      open_card("shot.png")
+      drawer { click_button "Copy as markdown" }
+
+      expect(page).to have_css(".toast", text: "Markdown copied")
+      expect(copied).to eq(["![A cat](#{link('shot.png')})"])
+    end
+
+    describe "deleting" do
+      before do
+        drop(["deck.pdf", "%PDF-1.7", "application/pdf"])
+        stub_request(:delete, %r{\A#{share_store_url}/})
+        open_card("deck.pdf")
+        drawer { click_button "Delete file" }
+      end
+
+      it "asks first" do
+        confirm = Admin::Slice["i18n"].t("ui.components.files.share_form.confirm_delete", name: "deck.pdf")
+
+        expect(page).to have_css("[data-confirm-message]", text: confirm)
+      end
+
+      it "removes the card once I say yes" do
+        drawer { click_button "Delete file" }
+
+        expect(page).to have_no_css(".file-card")
+      end
+    end
+  end
 end

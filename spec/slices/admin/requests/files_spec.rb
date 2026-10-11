@@ -211,6 +211,198 @@ RSpec.describe "Admin files", type: :request do
         expect(json["message"]).to eq(i18n.t("files_page.toasts.failed.blank"))
       end
     end
+
+    describe "a drawer" do
+      let!(:file) { share("deck.pdf", "application/pdf") }
+      let(:drawer) { page.find("dialog#share-#{file.id}-drawer", visible: :all) }
+      let(:confirm) { i18n.t("ui.components.files.share_form.confirm_delete", name: "deck.pdf") }
+
+      def link = "http://shares.localhost/#{file.code}"
+
+      before { get "/admin/files" }
+
+      it "opens from the card's name, which links to the edit page without scripts" do
+        expect(page).to have_css(
+          ".file-card-name a[href='/admin/files/#{file.id}/edit'][data-dialog-open='share-#{file.id}-drawer']",
+        )
+      end
+
+      it "shows the name, size, type, date and downloads", :aggregate_failures do
+        expect(drawer).to have_css(".file-drawer-name", exact_text: "deck.pdf", visible: :all)
+        expect(drawer.find(".file-drawer-meta", visible: :all).text(:all))
+          .to include("2 KB", "application/pdf", "uploaded ", "0 downloads")
+      end
+
+      it "shows and copies the link", :aggregate_failures do
+        expect(drawer).to have_css(".file-drawer-link", exact_text: link, visible: :all)
+        expect(drawer).to have_css("button[data-record-key='#{link}']", visible: :all)
+      end
+
+      it "edits the code but no alt text for a file that is no image", :aggregate_failures do
+        expect(drawer).to have_field("share[code]", with: file.code, visible: :all)
+        expect(drawer).to have_no_field("share[alt_text]", visible: :all)
+        expect(drawer).to have_no_css("[data-record-key^='![']", visible: :all)
+      end
+
+      it "asks before it deletes", :aggregate_failures do
+        expect(page).to have_css(
+          "form#share-#{file.id}-delete[action='/admin/files/#{file.id}/delete'][data-confirm='#{confirm}']",
+          visible: :all,
+        )
+        expect(drawer).to have_css("button[form='share-#{file.id}-delete']", visible: :all)
+      end
+    end
+
+    describe "an image's drawer" do
+      let(:file) { share("shot.png", "image/png") }
+      let(:drawer) { page.find("dialog#share-#{file.id}-drawer", visible: :all) }
+
+      before do
+        Shares::Slice["relations.shares"].by_pk(file.id).update(alt_text: "A cat")
+        get "/admin/files"
+      end
+
+      it "edits the alt text" do
+        expect(drawer).to have_field("share[alt_text]", with: "A cat", visible: :all)
+      end
+
+      it "copies the image as markdown with its alt text" do
+        markdown = "![A cat](http://shares.localhost/#{file.code})"
+
+        expect(drawer).to have_css("button[data-record-key='#{markdown}']", visible: :all)
+      end
+    end
+
+    it "escapes brackets and backslashes in the alt text it copies as markdown" do
+      file = share("shot.png", "image/png")
+      Shares::Slice["relations.shares"].by_pk(file.id).update(alt_text: "A [cat] \\ dog")
+      get "/admin/files"
+      copy = page.find("dialog#share-#{file.id}-drawer button[data-record-key^='!']", visible: :all)
+
+      expect(copy["data-record-key"]).to eq("![A \\[cat\\] \\\\ dog](http://shares.localhost/#{file.code})")
+    end
+
+    describe "the edit page" do
+      it "shows the form without scripts", :aggregate_failures do
+        file = share("deck.pdf", "application/pdf")
+        get "/admin/files/#{file.id}/edit"
+
+        expect(page).to have_css("form[action='/admin/files/#{file.id}'] input[name='share[code]']")
+        expect(page).to have_css("button[form='share-#{file.id}-form'][type='submit']")
+      end
+
+      it "answers 404 for a missing file" do
+        get "/admin/files/0/edit"
+
+        expect(last_response).to be_not_found
+      end
+    end
+
+    describe "saving" do
+      let(:file) { share("shot.png", "image/png") }
+      let(:server) { Rack::MockRequest.new(Shares::Slice["server"]) }
+
+      def error(reason) = i18n.t(reason, scope: "ui.components.files.field_error.code")
+
+      def save(**fields)
+        post("/admin/files/#{file.id}", { share: fields }, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+      end
+
+      def stored = Shares::Slice["relations.shares"].with_code.by_pk(file.id).one.to_h.slice(:code, :alt_text)
+
+      it "says it saved" do
+        save(code: "resume", alt_text: "")
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: i18n.t("files_page.toasts.saved"))
+      end
+
+      it "serves the file at the new code and no longer at the old one", :aggregate_failures do
+        old = file.code
+        stub_request(:get, share_store_url(file.key)).to_return(body: "x" * 2048)
+        save(code: "resume", alt_text: "")
+
+        expect(server.get("/resume").status).to eq(200)
+        expect(server.get("/#{old}").status).to eq(404)
+      end
+
+      it "saves the alt text" do
+        save(code: file.code, alt_text: "A cat")
+
+        expect(stored[:alt_text]).to eq("A cat")
+      end
+
+      { "a bad code" => ["Re Sume", "format"], "a blank code" => [" ", "blank"] }.each do |name, (code, reason)|
+        it "refuses #{name} and changes nothing", :aggregate_failures do
+          was = stored
+          save(code:, alt_text: "A cat")
+
+          expect(last_response.status).to eq(422)
+          expect(page).to have_css(".field-error", text: error(reason))
+          expect(stored).to eq(was)
+        end
+      end
+
+      it "refuses a code another share holds" do
+        save(code: share("deck.pdf").code)
+
+        expect(page).to have_css(".field-error", text: error("taken"))
+      end
+
+      it "keeps the code when it refuses the alt text", :aggregate_failures do
+        was = stored
+        save(code: "resume", alt_text: "A\u0000cat")
+
+        expect(last_response.status).to eq(422)
+        expect(stored).to eq(was)
+      end
+
+      it "refuses a code a short link holds", :aggregate_failures do
+        Shares::Slice["relations.short_codes"].command(:create).call(code: "resume")
+        save(code: "resume", alt_text: "A cat")
+
+        expect(page).to have_css("#share-#{file.id}-code[aria-invalid='true']")
+        expect(stored[:alt_text]).to be_nil
+      end
+    end
+
+    describe "deleting" do
+      let(:file) { share("deck.pdf") }
+
+      def delete_file = post("/admin/files/#{file.id}/delete", {}, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token })
+
+      it "removes the share, its code and its file", :aggregate_failures do
+        removed = stub_request(:delete, share_store_url(file.key))
+        delete_file
+
+        expect(shares).to be_empty
+        expect(Shares::Slice["relations.short_codes"].to_a).to be_empty
+        expect(removed).to have_been_requested
+      end
+
+      it "says it deleted" do
+        stub_request(:delete, share_store_url(file.key))
+        delete_file
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: i18n.t("files_page.toasts.deleted"))
+      end
+
+      it "keeps the share when the store fails", :aggregate_failures do
+        stub_request(:delete, share_store_url(file.key)).to_return(status: 500)
+        delete_file
+        follow_redirect!
+
+        expect(page).to have_css("[data-toast]", text: i18n.t("files_page.toasts.failed.delete"))
+        expect(shares.size).to eq(1)
+      end
+
+      it "answers 404 for a missing file" do
+        post "/admin/files/0/delete", {}, { "HTTP_X_CSRF_TOKEN" => admin_csrf_token }
+
+        expect(last_response).to be_not_found
+      end
+    end
   end
 
   describe "with no store" do

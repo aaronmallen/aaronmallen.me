@@ -80,12 +80,15 @@ RSpec.describe "Admin screens", type: :feature do
 
   def files
     {
-      "files" => lambda do
-        connect_share_store
-        stub_request(:put, %r{\A#{share_store_url}/})
-        upload_share("%PDF", "deck.pdf", "application/pdf")
-        upload_share("png", "shot.png", "image/png")
-        visit "/admin/files"
+      "files" => -> { visit_files },
+      "file drawer" => lambda do
+        visit_files
+        find(".file-card-name a", text: "shot.png").click
+        find("dialog[open].file-drawer [name='share[alt_text]']")
+      end,
+      "file editor" => lambda do
+        share = visit_files
+        visit "/admin/files/#{share.id}/edit"
       end,
     }
   end
@@ -412,6 +415,15 @@ RSpec.describe "Admin screens", type: :feature do
     }
   end
 
+  def shared_image
+    @shared_image ||= begin
+      connect_share_store
+      stub_request(:put, %r{\A#{share_store_url}/})
+      upload_share("%PDF", "deck.pdf", "application/pdf")
+      upload_share("png", "shot.png", "image/png").value!
+    end
+  end
+
   def tick(path, box)
     visit path
     find("[data-bulk-toggle]").click if path.start_with?("/admin/tasks")
@@ -427,6 +439,10 @@ RSpec.describe "Admin screens", type: :feature do
         find(".time-group[open] .time-tasks")
       end,
     }
+  end
+
+  def visit_files
+    shared_image.tap { visit "/admin/files" }
   end
 
   def work_entry = @work_entry ||= create(:work_entry, org: "Rackspace", role: "Software Engineer")
