@@ -144,14 +144,16 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         item = card("decisions").find(".li", text: "Pick a queue")
         href = item.find_link("Pick a queue for Finish the review screen")[:href]
 
-        expect([href, item.find(".li-side").text]).to eq(["/admin/decisions/#{filled[:decision].id}", "Chose Sidekiq"])
+        expect([href, item.find(".li-main .li-sub").text, item.has_no_css?(".li-side")])
+          .to eq(["/admin/decisions/#{filled[:decision].id}", "Chose Sidekiq", true])
       end
 
       it "links each dropped decision to its decision and says it was dropped" do
         item = card("decisions").find(".li", text: "Move to a VPS")
 
-        expect([item.find_link("Move to a VPS")[:href], item.find(".li-side").text])
-          .to eq(["/admin/decisions/#{dropped.id}", "Dropped"])
+        expect([item.find_link("Move to a VPS")[:href], item.find(".li-main .li-sub").text,
+                item.has_no_css?(".li-side")])
+          .to eq(["/admin/decisions/#{dropped.id}", "Dropped", true])
       end
 
       it "gives the time worked in all, its average and the days worked" do
