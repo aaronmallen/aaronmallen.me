@@ -7,6 +7,10 @@ module Shares
 
       def by_code(code) = short_links.with_code.where(Sequel[:short_codes][:code] => code).one
 
+      def by_destination(destination)
+        short_links.with_code.where(destination:).order(Sequel[:short_links][:id]).limit(1).one
+      end
+
       def count_listed(search: nil) = listed(search).count
 
       def find(id) = short_links.with_code.by_pk(id).one

@@ -80,10 +80,10 @@ RSpec.describe "Admin social", type: :request do
         expect(counts).to eq(["Mastodon 29/500", "Bluesky 54/300"])
       end
 
-      it "counts a link elsewhere as typed" do
+      it "counts a link elsewhere at its short link's length" do
         compose(parts: ["https://example.com/hello there"], targets: %w[])
 
-        expect(counts).to eq(["Mastodon 29/500", "Bluesky 31/300"])
+        expect(counts).to eq(["Mastodon 29/500", "Bluesky 35/300"])
       end
 
       it "marks a part over the limit once its link to the site is tagged" do

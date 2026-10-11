@@ -36,7 +36,7 @@ module Admin
           def counter_data(network, template)
             {
               limit: network.limit, max_bytes: network.max_bytes, ref_key: ::Analytics::Operations::TagRef::KEY,
-              reserved_per_url: network.reserved_per_url, social_count: network.name,
+              reserved_per_url: network.reserved_per_url, short_link:, social_count: network.name,
               tagged_host: network.tagged_host, template:,
             }
           end
@@ -48,6 +48,8 @@ module Admin
               span(class: "compose-meter-fill", style: "width: #{fill(measured, limit)}%", data: { social_meter: "" })
             end
           end
+
+          def short_link = "#{Helpers::ShareLink.origin}/#{::Social::Operations::ShortenLinks::UNMADE}"
 
           def template(network) = t(COUNTS.fetch(network.name)).sub(LIMIT, network.limit.to_s)
         end

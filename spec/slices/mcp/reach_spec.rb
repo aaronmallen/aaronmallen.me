@@ -119,7 +119,6 @@ RSpec.describe "MCP reach", type: :app do
       "services.operations.save_app" => "keeps the app the admin registers on a Mastodon server; no tool does",
       "shares.operations.change_share_code" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.change_short_link_code" => "spec #1064 keeps MCP tools out of short links",
-      "shares.operations.create_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.delete_share" => "spec #1053 keeps MCP tools out of shares",
       "shares.operations.delete_short_link" => "spec #1064 keeps MCP tools out of short links",
       "shares.operations.retarget_short_link" => "spec #1064 keeps MCP tools out of short links",

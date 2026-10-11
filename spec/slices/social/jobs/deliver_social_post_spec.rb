@@ -51,6 +51,8 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     Social::Bluesky::Tid.for(part.id, part.created_at)
   end
 
+  def short_code(url) = Shares::Slice["repos.short_link_queries"].by_destination(url).code
+
   def statuses = SocialNetworks::MASTODON_STATUSES
 
   def tag_facet(tag, start, finish)
@@ -330,7 +332,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
   describe "a post to Bluesky" do
     before { stub_bluesky }
 
-    let(:social_post) { queued(targets: %w[bluesky], parts: ["go 🎉 https://a.example"]) }
+    let(:social_post) { queued(targets: %w[bluesky], parts: ["go 🎉 http://shares.localhost"]) }
 
     it "signs in with the handle and the app password" do
       deliver(social_post, "bluesky")
@@ -362,7 +364,7 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     it "writes each post under a key of its own" do
-      other = queued(targets: %w[bluesky], parts: ["go 🎉 https://a.example"])
+      other = queued(targets: %w[bluesky], parts: ["go 🎉 http://shares.localhost"])
       [social_post, other].each { deliver(it, "bluesky") }
 
       expect(bluesky_writes.map { it.fetch("rkey") }.uniq.size).to eq(2)
@@ -379,22 +381,23 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       deliver(social_post, "bluesky")
 
       expect(bluesky_writes.first.fetch("record"))
-        .to include("$type" => "app.bsky.feed.post", "text" => "go 🎉 https://a.example",
+        .to include("$type" => "app.bsky.feed.post", "text" => "go 🎉 http://shares.localhost",
                     "createdAt" => match(/\A\d{4}-\d{2}-\d{2}T/))
     end
 
     it "marks a link with a facet over its byte range" do
       deliver(social_post, "bluesky")
 
-      expect(bluesky_writes.first.dig("record", "facets")).to eq([facet("https://a.example", 8, 25)])
+      expect(bluesky_writes.first.dig("record", "facets")).to eq([facet("http://shares.localhost", 8, 31)])
     end
 
     {
       "stops a link at the paren the prose opened" =>
-        ["see (https://a.example/Foo_(bar)).", "https://a.example/Foo_(bar)", 5, 32],
+        ["see (http://shares.localhost/Foo_(bar)).", "http://shares.localhost/Foo_(bar)", 5, 38],
       "stops a link at the bracket the prose opened" =>
-        ["see [https://a.example/post].", "https://a.example/post", 5, 27],
-      "leaves trailing punctuation out of a link" => ["read https://a.example/post.", "https://a.example/post", 5, 27],
+        ["see [http://shares.localhost/post].", "http://shares.localhost/post", 5, 33],
+      "leaves trailing punctuation out of a link" => ["read http://shares.localhost/post.",
+                                                      "http://shares.localhost/post", 5, 33],
     }.each do |what, (text, url, start, finish)|
       it what do
         deliver(queued(targets: %w[bluesky], parts: [text]), "bluesky")
@@ -404,11 +407,11 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     it "marks every link in order and none in the middle of a word" do
-      deliver(queued(targets: %w[bluesky], parts: ["xhttps://no.example https://a.example http://b.example/x"]),
+      deliver(queued(targets: %w[bluesky], parts: ["xhttps://no.example http://shares.localhost/a http://shares.localhost/x"]),
               "bluesky")
 
       expect(bluesky_writes.first.dig("record", "facets").map { it.dig("features", 0, "uri") })
-        .to eq(%w[https://a.example http://b.example/x])
+        .to eq(%w[http://shares.localhost/a http://shares.localhost/x])
     end
 
     it "sends no facets for text without links or tags" do
@@ -430,16 +433,16 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     it "orders tag and link facets by where they start" do
-      expect(facets_for("#ruby https://a.example #hanami"))
-        .to eq([tag_facet("ruby", 0, 5), facet("https://a.example", 6, 23), tag_facet("hanami", 24, 31)])
+      expect(facets_for("#ruby http://shares.localhost #hanami"))
+        .to eq([tag_facet("ruby", 0, 5), facet("http://shares.localhost", 6, 29), tag_facet("hanami", 30, 37)])
     end
 
     it "marks no tag for a hash inside a link" do
-      expect(facets_for("see https://example.com/#top")).to eq([facet("https://example.com/#top", 4, 28)])
+      expect(facets_for("see http://shares.localhost/#top")).to eq([facet("http://shares.localhost/#top", 4, 32)])
     end
 
     it "marks no tag that runs into a link" do
-      expect(facets_for("#see/https://a.example")).to eq([facet("https://a.example", 5, 22)])
+      expect(facets_for("#see/http://shares.localhost")).to eq([facet("http://shares.localhost", 5, 28)])
     end
 
     it "leaves trailing punctuation out of a tag" do
@@ -936,15 +939,15 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
     end
 
     it "keeps mention, link and tag facets apart and in order" do
-      expect(bluesky_record("@{ada} #ruby https://a.example").fetch("facets"))
+      expect(bluesky_record("@{ada} #ruby http://shares.localhost").fetch("facets"))
         .to eq([mention_facet("did:plc:ada-lovelace", 0, 16), tag_facet("ruby", 17, 22),
-                facet("https://a.example", 23, 40)])
+                facet("http://shares.localhost", 23, 46)])
     end
 
     it "lets no facet overlap a mention" do
-      facets = bluesky_record("https://a.example/@{ada}").fetch("facets")
+      facets = bluesky_record("http://shares.localhost/@{ada}").fetch("facets")
 
-      expect(facets).to eq([mention_facet("did:plc:ada-lovelace", 18, 34)])
+      expect(facets).to eq([mention_facet("did:plc:ada-lovelace", 24, 40)])
     end
 
     it "names someone with no Bluesky handle and still sends", :aggregate_failures do
@@ -1027,9 +1030,46 @@ RSpec.describe Social::Jobs::DeliverSocialPost do
       expect(reloaded(social_post).parts.map(&:body)).to eq(["read #{post_url}"])
     end
 
-    it "leaves links to other sites as written" do
-      expect(mastodon_text(queued(parts: ["see https://example.com/post and #{post_url}"])))
-        .to eq("see https://example.com/post and #{post_url}?ref=mastodon")
+    it "swaps a link to another site for its aa.cool link and keeps the site's long", :aggregate_failures do
+      text = mastodon_text(queued(parts: ["see https://github.com/ada and #{post_url}"]))
+      code = short_code("https://github.com/ada")
+
+      expect(code).to match(/\A[a-z2-9]{5}\z/)
+      expect(text).to eq("see http://shares.localhost/#{code} and #{post_url}?ref=mastodon")
+    end
+
+    it "sends a link already on aa.cool as typed" do
+      expect(mastodon_text(queued(parts: ["see http://shares.localhost/talk"]))).to eq("see http://shares.localhost/talk")
+    end
+
+    it "reuses the code of a link I shortened before", :aggregate_failures do
+      Shares::Slice["operations.create_short_link"].call(destination: "https://github.com/ada", code: "gh")
+
+      expect(mastodon_text(queued(parts: ["see https://github.com/ada"]))).to eq("see http://shares.localhost/gh")
+      expect(Shares::Slice["relations.short_links"].count).to eq(1)
+    end
+
+    it "gives each network the same new code", :aggregate_failures do
+      social_post = queued(targets: %w[mastodon bluesky], parts: ["see https://github.com/ada"])
+      sent = [mastodon_text(social_post), bluesky_text(social_post)]
+
+      expect(sent.uniq.size).to eq(1)
+      expect(Shares::Slice["relations.short_links"].count).to eq(1)
+    end
+
+    it "keeps the long link in the stored parts" do
+      social_post = queued(targets: %w[mastodon bluesky], parts: ["see https://github.com/ada"])
+      mastodon_text(social_post)
+      bluesky_text(social_post)
+
+      expect(reloaded(social_post).parts.map(&:body)).to eq(["see https://github.com/ada"])
+    end
+
+    it "marks the aa.cool link with a Bluesky facet" do
+      facets = facets_for("see https://github.com/ada")
+      code = short_code("https://github.com/ada")
+
+      expect(facets).to eq([facet("http://shares.localhost/#{code}", 4, 33)])
     end
 
     {

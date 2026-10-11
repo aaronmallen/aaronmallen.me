@@ -80,10 +80,18 @@ function splitAt(text, char) {
   return at === -1 ? [text, null] : [text.slice(0, at), text.slice(at + 1)];
 }
 
-function tagLink(url, { refKey, taggedHost }, source) {
+function sendLink(url, rules, source) {
+  const host = hostname(url);
+  if (host && host === rules.taggedHost) return tagLink(url, rules, source);
+  if (!host || !rules.shortLink || host === hostname(rules.shortLink)) return url;
+
+  return rules.shortLink;
+}
+
+function tagLink(url, { refKey }, source) {
   const [head, fragment] = splitAt(url, "#");
   const [address, query] = splitAt(head, "?");
-  if (!taggedHost || hostname(address) !== taggedHost || `&${query ?? ""}`.includes(`&${refKey}=`)) return url;
+  if (`&${query ?? ""}`.includes(`&${refKey}=`)) return url;
 
   const path = /^https?:\/\/[^/]*$/i.test(address) ? `${address}/` : address;
   const tagged = `${path}?${query ? `${query}&` : ""}${refKey}=${source}`;
@@ -95,7 +103,7 @@ function tagLinks(text, rules, source) {
   return text.replace(LINK, (match) => {
     const url = trimLink(match);
 
-    return tagLink(url, rules, source) + match.slice(url.length);
+    return sendLink(url, rules, source) + match.slice(url.length);
   });
 }
 

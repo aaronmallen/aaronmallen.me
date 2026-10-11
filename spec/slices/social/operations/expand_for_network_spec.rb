@@ -1,12 +1,48 @@
 # frozen_string_literal: true
 
 RSpec.describe Social::Operations::ExpandForNetwork do
-  def expand(bodies, network) = Social::Slice["operations.expand_for_network"].call(bodies, network)
+  def expand(bodies, network, **) = Social::Slice["operations.expand_for_network"].call(bodies, network, **)
 
-  it "tags the site's links with the network and leaves other links alone" do
+  def short_links = Shares::Slice["relations.short_links"]
+
+  it "tags the site's links with the network and counts other links at a short link's length" do
     expansion = expand(["Read https://aaronmallen.me/a and https://example.com/b"], "bluesky").first
 
-    expect(expansion.text).to eq("Read https://aaronmallen.me/a?ref=bluesky and https://example.com/b")
+    expect(expansion.text).to eq("Read https://aaronmallen.me/a?ref=bluesky and http://shares.localhost/xxxxx")
+  end
+
+  it "makes no short link unless asked" do
+    expand(["Read https://example.com/b"], "bluesky")
+
+    expect(short_links.count).to eq(0)
+  end
+
+  it "counts a link I shortened before at its own code" do
+    Shares::Slice["operations.create_short_link"].call(destination: "https://example.com/b", code: "my-talk")
+
+    expect(expand(["Read https://example.com/b"], "mastodon").first.text).to eq("Read http://shares.localhost/my-talk")
+  end
+
+  it "makes a short link for a new outside link when asked" do
+    text = expand(["Read https://example.com/b"], "mastodon", make_links: true).first.text
+    link = Shares::Slice["repos.short_link_queries"].by_destination("https://example.com/b")
+
+    expect(text).to eq("Read http://shares.localhost/#{link.code}")
+  end
+
+  it "reuses the short link it made before", :aggregate_failures do
+    first = expand(["Read https://example.com/b"], "mastodon", make_links: true).first.text
+
+    expect(expand(["Read https://example.com/b"], "bluesky", make_links: true).first.text).to eq(first)
+    expect(short_links.count).to eq(1)
+  end
+
+  it "keeps the mention offsets after a link gets shorter" do
+    create(:person, :bluesky, key: "ada", bluesky_handle: "ada.bsky.social")
+    expansion = expand(["https://example.com/a/long/path @{ada}"], "bluesky", make_links: true).first
+
+    expect(expansion.text.byteslice(expansion.mentions.first.byte_start...expansion.mentions.first.byte_end))
+      .to eq("@ada.bsky.social")
   end
 
   it "expands mentions to the network's handle" do

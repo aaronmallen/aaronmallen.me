@@ -48,7 +48,9 @@ module Social
 
       def due?(social_post) = social_post.status == SCHEDULED && social_post.posted_at <= Time.now
 
-      def expanded(social_post, network) = expand_for_network.call(social_post.parts.map(&:body), network)
+      def expanded(social_post, network)
+        expand_for_network.call(social_post.parts.map(&:body), network, make_links: true)
+      end
 
       def held_photos(parts)
         held = social_post_queries.photos_by_part(parts.map(&:id))

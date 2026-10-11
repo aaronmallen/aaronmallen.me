@@ -23,6 +23,8 @@ module Shares
       end
 
       def delete(short_code_id) = short_codes.by_pk(short_code_id).delete
+
+      def lock_destination(destination) = short_links.lock_until_commit(Sequel.function(:hashtext, destination))
     end
   end
 end

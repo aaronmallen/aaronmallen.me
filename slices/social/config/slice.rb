@@ -19,6 +19,8 @@ module Social
 
     import keys: %w[repos.connection_queries], from: :services
 
+    import keys: %w[operations.shorten_link repos.short_link_queries], from: :shares
+
     export %w[
       networks.all operations.act_on_webmentions operations.check_link operations.check_network_fit
       operations.compose_social_post operations.delete_person operations.delete_social_post
