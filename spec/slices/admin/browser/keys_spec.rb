@@ -170,6 +170,7 @@ RSpec.describe "Admin keys", type: :feature do
 
     it "completes the task from there" do
       find("details.task-complete[open]").click_button(done)
+      find(".toast", text: Admin::Slice["i18n"].t("tasks_page.toasts.completed"))
 
       expect(Tasks::Slice["repos.task_queries"].all_open).to be_empty
     end

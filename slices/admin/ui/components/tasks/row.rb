@@ -36,7 +36,7 @@ module Admin
           def box
             route, label = @task.closed? ? [:admin_reopen_task, reopen_label] : [:admin_complete_task, complete_label]
 
-            Form(action: path(route, id: @task.id)) do
+            Form(action: path(route, id: @task.id), data: { morph: true }) do
               HiddenFields(values: { filter: @filter, origin: @origin })
               button(type: "submit", class: "task-box", title: label, aria: { label: }) do
                 Icon(@task.canceled? ? "fa-solid fa-xmark" : "fa-solid fa-check")

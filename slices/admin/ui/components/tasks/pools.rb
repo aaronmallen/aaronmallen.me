@@ -57,7 +57,7 @@ module Admin
           end
 
           def pull_form(task, list)
-            Form(action: path(:admin_move_task, id: task.id, filter: TODAY)) do
+            Form(action: path(:admin_move_task, id: task.id, filter: TODAY), data: { morph: true }) do
               input(type: "hidden", name: "origin", value: @origin)
               input(type: "hidden", name: "pool", value: list)
               Button(type: "submit", small: true, class: "go", aria: { label: t(".pull_task", task: task.title) }) do

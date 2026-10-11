@@ -14,7 +14,7 @@ module Admin
           prop :keyed, Blog::Types::Bool, default: false
 
           def view_template
-            Form(action: path(:admin_complete_task, id: @task.id), data: { task_act: "complete" }) do
+            Form(action: path(:admin_complete_task, id: @task.id), data: { morph: true, task_act: "complete" }) do
               HiddenFields(values: { filter: @filter, origin: @origin })
               details(class: "task-complete") do
                 toggle

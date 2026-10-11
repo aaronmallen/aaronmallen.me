@@ -2387,6 +2387,7 @@ en:
           sub: "%{org} · %{from}–%{to}"
     layouts:
       application:
+        morph_failed: "Nothing changed · that didn't go through"
         title: "Admin | %{owner}"
     views:
       activity:

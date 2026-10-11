@@ -37,8 +37,8 @@ module Admin
             change(:admin_cancel_task, "fa-solid fa-ban", t(".cancel"), data:)
           end
 
-          def change(route, icon, label, variant: nil, data: nil, key: nil)
-            Form(action: path(route, id: @task.id), data:) do
+          def change(route, icon, label, variant: nil, data: Blog::Constants::EMPTY_HASH, key: nil)
+            Form(action: path(route, id: @task.id), data: { morph: true, **data }) do
               origin_fields
               Button(type: "submit", variant:, small: true, label:, **keyed(key), icon:)
             end
@@ -53,15 +53,16 @@ module Admin
           def move(place, icon, key:)
             list = t(Helpers::TaskLists.title(place))
             label = t(".move", list:)
+            data = { morph: true, **move_confirm(list) }
 
-            Form(action: path(:admin_move_task, id: @task.id, filter: place), data: move_confirm(list)) do
+            Form(action: path(:admin_move_task, id: @task.id, filter: place), data:) do
               origin_field
               Button(type: "submit", small: true, label:, **keyed(key), icon:)
             end
           end
 
           def move_confirm(list)
-            { confirm: t(".confirm_move", task: @task.title, list:) } if running?
+            running? ? { confirm: t(".confirm_move", task: @task.title, list:) } : Blog::Constants::EMPTY_HASH
           end
 
           def moves = MOVES.fetch(@task.place).each { |place, side, key| move(place, side, key:) }

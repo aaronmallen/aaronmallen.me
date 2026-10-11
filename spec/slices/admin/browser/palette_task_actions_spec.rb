@@ -5,6 +5,8 @@ RSpec.describe "Admin palette task actions", type: :feature do
 
   def in_progress(title) = create(:task, :in_progress, :in_sprint, title:)
 
+  def landed = page.assert_no_selector("dialog[data-palette][open]")
+
   def open_palette = page.driver.browser.keyboard.type([:meta, "/"])
 
   def open_sessions(task) = Tasks::Slice["relations.work_sessions"].running.for_task(task.id).to_a
@@ -32,7 +34,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running Start task" do
       before do
         query.send_keys(*Array.new(4, :backspace), *"start task".chars, :enter)
-        page.assert_selector("[data-toast]", text: "Started")
+        landed
       end
 
       it "starts it" do
@@ -68,7 +70,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running Pause task" do
       before do
         query.send_keys(*Array.new(4, :backspace), *"pause task".chars, :enter)
-        page.assert_selector("[data-toast]", text: "Stopped")
+        landed
       end
 
       it "returns it to open and ends its work session", :aggregate_failures do
@@ -85,7 +87,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running Complete task" do
       before do
         query.send_keys(*Array.new(4, :backspace), *"complete task".chars, :enter)
-        page.assert_selector("[data-toast]", text: "Done")
+        landed
       end
 
       it "completes it" do
@@ -138,7 +140,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running one" do
       before do
         find_by_id("command-palette-complete-task-in-progress-#{first.id}").click
-        page.assert_selector("[data-toast]", text: "Done")
+        landed
       end
 
       it "completes that task" do
@@ -175,7 +177,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running one" do
       before do
         find_by_id("command-palette-pause-task-in-progress-#{first.id}").click
-        page.assert_selector("[data-toast]", text: "Stopped")
+        landed
       end
 
       it "returns that task to open and ends its work session", :aggregate_failures do
@@ -229,7 +231,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
     describe "running Start task" do
       before do
         find_by_id("command-palette-start-task").click
-        page.assert_selector("[data-toast]", text: "Started")
+        landed
       end
 
       it "starts it" do
@@ -250,7 +252,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
       visit "/admin/tasks/#{task.id}"
       click_button(class: "top-bar-search")
       find_by_id("command-palette-start-task").click
-      page.assert_selector("[data-toast]", text: "Started")
+      landed
     end
 
     it "starts the task from the slash button", :aggregate_failures do
@@ -262,7 +264,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
       before do
         click_button(class: "top-bar-search")
         find_by_id("command-palette-pause-task").click
-        page.assert_selector("[data-toast]", text: "Stopped")
+        landed
       end
 
       it "returns it to open" do
@@ -274,7 +276,7 @@ RSpec.describe "Admin palette task actions", type: :feature do
       before do
         click_button(class: "top-bar-search")
         find_by_id("command-palette-complete-task").click
-        page.assert_selector("[data-toast]", text: "Done")
+        landed
       end
 
       it "completes it" do

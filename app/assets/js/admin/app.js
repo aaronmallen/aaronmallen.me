@@ -13,6 +13,7 @@ import { setupLinkForms } from "./link_form.js";
 import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupMessageLabels } from "./message_label.js";
+import { setupMorphForms } from "./morph_form.js";
 import { setupPalette } from "./palette.js";
 import { setupPersonFinder } from "./person_finder.js";
 import { setupPersonForms } from "./person_form.js";
@@ -64,5 +65,6 @@ function setup() {
 
 setup();
 setupLive();
+setupMorphForms();
 setupTracked();
 document.addEventListener("admin:morphed", setup);
