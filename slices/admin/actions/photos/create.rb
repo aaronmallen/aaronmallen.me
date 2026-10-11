@@ -25,7 +25,7 @@ module Admin
         def handle(request, response)
           case upload_photo.call(Blog::Types::UploadParam[request.params[:photo]])
             in Success(photo)
-              answer(response, CREATED, url: photo.url)
+              answer(response, CREATED, url: photo.url, key: photo.key)
             in Failure[:invalid, { photo: [code, *] }]
               refuse(response, REFUSED, code)
             in Failure[reason]

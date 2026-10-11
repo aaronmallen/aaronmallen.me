@@ -5667,6 +5667,66 @@
   @apply min-w-0 font-mono text-input break-words whitespace-pre-wrap text-ink;
 }
 
+@utility compose-photos {
+  @apply flex flex-col gap-2;
+}
+
+@utility compose-photo-list {
+  @apply grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3 empty:hidden;
+}
+
+@utility compose-photo {
+  @apply flex flex-col gap-2 rounded-card border border-line bg-ground p-2;
+}
+
+@utility compose-photo-img {
+  @apply block aspect-[16/10] w-full rounded-sm bg-ground-sunk object-cover;
+}
+
+@utility compose-photo-alt {
+  @apply flex flex-col gap-1;
+}
+
+@utility compose-photo-alt-label {
+  @apply meta;
+}
+
+@utility compose-photo-tools {
+  @apply flex items-center justify-end gap-1;
+
+  @media (width < 43.75rem) {
+    & .bt {
+      @apply min-h-tap min-w-tap justify-center;
+    }
+  }
+}
+
+@utility compose-photo-bar {
+  @apply flex flex-wrap items-center gap-3;
+
+  & .edit-alert {
+    @apply w-full border-0 px-0 py-0;
+  }
+
+  @media (width < 43.75rem) {
+    & .bt {
+      @apply min-h-tap;
+    }
+  }
+}
+
+@utility compose-photo-count {
+  @apply meta;
+}
+
+@utility compose-preview-photos {
+  @apply flex flex-wrap gap-2 empty:hidden;
+}
+
+@utility compose-preview-photo {
+  @apply size-16 rounded-sm border border-line object-cover;
+}
+
 @utility compose-counts {
   @apply flex flex-wrap items-center gap-4;
 }

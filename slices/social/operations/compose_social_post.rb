@@ -47,10 +47,21 @@ module Social
 
       def form(params, social_post)
         found = FIELDS.to_h { [it, params[it]] }
+        found[:photos] = photos(params) if params.key?(:photos)
         return widened(found, social_post) unless params.key?(:accounts)
 
         picked = picked(Array(params[:accounts]).map(&:to_s).reject(&:empty?).uniq)
         picked && found.merge(picked)
+      end
+
+      def photos(params)
+        written = Array(params[:parts]).each.with_index(1).filter_map do |body, number|
+          number unless Blog::Types::TrimmedText[body].empty?
+        end
+
+        Array(params[:photos]).grep(::Hash).map do |photo|
+          photo.merge(part: written.index(Blog::Types::IdParam[photo[:part]])&.succ)
+        end
       end
 
       def picked(wanted)
@@ -61,7 +72,7 @@ module Social
       end
 
       def save(attributes, intent, now, social_post)
-        fields = attributes.slice(:parts, :targets, :connection_ids)
+        fields = attributes.slice(:parts, :targets, :connection_ids, :photos)
         outcome, status, posted_at = disposition(attributes, intent, now)
 
         [outcome, step(save_social_post.call(id: social_post&.id, status:, posted_at:, **fields))]

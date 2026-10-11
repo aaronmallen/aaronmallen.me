@@ -66,6 +66,12 @@ module Social
         part_ids.to_h { [it, held.fetch(it, Blog::Constants::EMPTY_ARRAY).map(&:photo_key)] }
       end
 
+      def part_photos(social_post_id)
+        numbers = social_post_parts.for_social_post(social_post_id).to_a.to_h { [it.id, it.position] }
+
+        social_post_photos.for_parts(numbers.keys).in_order.to_a.map { photo_values(it, numbers) }
+      end
+
       def posted_page(page) = page_of(social_posts.with_status(POSTED).newest_first, page)
 
       def posted_since(time) = with_children.posted_since(time).newest_first.to_a
@@ -86,6 +92,10 @@ module Social
         ids = page.fill(listed.paged(page).pluck(:id))
 
         ids.with(rows: listed.where(id: ids.rows).combine(:parts, :deliveries).to_a)
+      end
+
+      def photo_values(photo, numbers)
+        { part: numbers.fetch(photo.social_post_part_id), key: photo.photo_key, alt: photo.alt_text.to_s }
       end
 
       def with_children = social_posts.combine(:parts, :deliveries)

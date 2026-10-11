@@ -1,8 +1,8 @@
 import { setupFetch } from "./fetching.js";
+import { uploadPhoto } from "./photo_upload.js";
 
 const BRACKET = 2;
 const EDITOR = "[data-markdown-editor]";
-const PHOTO = "photo";
 const TOKEN = "_csrf_token";
 
 const ready = new WeakSet();
@@ -95,20 +95,8 @@ function setupUploads(editor, body) {
     }
   };
 
-  const upload = async (file) => {
-    const data = new FormData();
-    data.append(PHOTO, file);
-    const response = await fetch(endpoint, {
-      method: "POST",
-      body: data,
-      headers: { Accept: "application/json", "X-CSRF-Token": tokenFor(body) },
-      redirect: "manual",
-    });
-    const answer = await response.json().catch(() => ({}));
-    if (response.ok && answer.url) return answer.url;
-
-    throw new Error(answer.error ?? editor.dataset.editorUploadFailed);
-  };
+  const upload = async (file) =>
+    (await uploadPhoto(endpoint, file, tokenFor(body), editor.dataset.editorUploadFailed)).url;
 
   const settle = (text, replacement) => {
     const at = body.value.indexOf(text);
@@ -138,7 +126,7 @@ function setupUploads(editor, body) {
         body.setSelectionRange(at + BRACKET, at + BRACKET);
       } catch (error) {
         settle(markers[index], "");
-        say(error instanceof TypeError ? editor.dataset.editorUploadFailed : error.message);
+        say(error.message);
       }
     });
   };

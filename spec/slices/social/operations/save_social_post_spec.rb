@@ -86,6 +86,14 @@ RSpec.describe Social::Operations::SaveSocialPost do
     expect(result.failure).to eq([:invalid, { photos: ["many"] }])
   end
 
+  it "refuses the same photo twice in a part" do
+    expect(save(photos: [photo(0), photo(0)]).failure).to eq([:invalid, { photos: ["duplicate"] }])
+  end
+
+  it "takes the same photo on two parts" do
+    expect(save(photos: [photo(0), photo(0, part: 2)])).to be_success
+  end
+
   it "takes four photos on each of two parts" do
     result = save(photos: Array.new(4) { photo(it) } + Array.new(4) { photo(it, part: 2) })
 

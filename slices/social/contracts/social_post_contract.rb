@@ -3,6 +3,7 @@
 module Social
   module Contracts
     class SocialPostContract < Blog::Contract
+      DUPLICATE = "duplicate"
       MANY = "many"
       MAX_PHOTOS = 4
       MISSING = "missing"
@@ -38,7 +39,9 @@ module Social
 
         photos = values[:photos]
         key(:photos).failure(MISSING) if photos.any? { it[:part] > values[:parts].size }
-        key(:photos).failure(MANY) if photos.group_by { it[:part] }.any? { |_, held| held.size > MAX_PHOTOS }
+        held = photos.group_by { it[:part] }.values
+        key(:photos).failure(MANY) if held.any? { it.size > MAX_PHOTOS }
+        key(:photos).failure(DUPLICATE) if held.any? { |part| part.uniq { it[:key] }.size < part.size }
       end
     end
   end

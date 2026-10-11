@@ -2,6 +2,7 @@ import { fresh } from "./fresh.js";
 import { renderCounts, selectedTargets } from "./social_counts.js";
 import { expand, mentions } from "./social_expand.js";
 import { setupMentions } from "./social_mentions.js";
+import { pendingPhotos, renderPhotos, setupPhotos } from "./social_photos.js";
 import { setupPicks } from "./social_picks.js";
 
 const SCHEDULE = "schedule";
@@ -24,12 +25,12 @@ function setupComposer(form) {
   const render = () => {
     const selected = selectedTargets(form);
     const bodies = [...parts.querySelectorAll("[data-social-part]")];
-    const over = bodies.map((part) => renderPart(part, selected, bodies.length > 1)).some(Boolean);
+    const over = bodies.map((part, index) => renderPart(part, index + 1, selected, bodies.length > 1)).some(Boolean);
     const blank = bodies.every((part) => part.querySelector("[data-social-body]").value.trim() === "");
 
     const count = form.querySelectorAll("[data-social-target]:checked").length;
     picked.textContent = picked.dataset.template.replace("%{picked}", count);
-    draft.disabled = blank || selected.size === 0;
+    draft.disabled = blank || selected.size === 0 || pendingPhotos(form);
     send.disabled = draft.disabled || over;
   };
 
@@ -61,19 +62,21 @@ function setupComposer(form) {
   });
   setupMentions(form);
   setupPicks(form);
+  setupPhotos(form, render);
   render();
 }
 
-function renderPart(part, selected, removable) {
+function renderPart(part, number, selected, removable) {
   const text = part.querySelector("[data-social-body]").value;
   part.querySelector("[data-social-remove]").hidden = !removable;
-  renderPreview(part.querySelector("[data-social-preview]"), text, selected);
+  const photos = renderPhotos(part, number);
+  renderPreview(part.querySelector("[data-social-preview]"), text, photos, selected);
 
   return renderCounts(part, text, selected);
 }
 
-function renderPreview(preview, text, selected) {
-  preview.hidden = !mentions(text) || selected.size === 0;
+function renderPreview(preview, text, photos, selected) {
+  preview.hidden = (!mentions(text) && photos === 0) || selected.size === 0;
 
   for (const line of preview.querySelectorAll("[data-social-preview-line]")) {
     const network = line.dataset.socialPreviewLine;

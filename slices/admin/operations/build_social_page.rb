@@ -8,6 +8,7 @@ module Admin
       DEFAULT_VALUES = {
         mode: Blog::Types::SocialMode["now"],
         parts: [EMPTY_STRING].freeze,
+        photos: EMPTY_HASH,
         restore_accounts: true,
         schedule_at: EMPTY_STRING,
       }.freeze
@@ -42,8 +43,12 @@ module Admin
 
       private
 
+      def by_part(values)
+        values.merge(photos: Array.new(values[:parts].size) { values[:photos].fetch(it + 1, EMPTY_ARRAY) })
+      end
+
       def composer(params, editing, errors, accounts)
-        values = values(params, editing)
+        values = by_part(values(params, editing))
         people = person_queries.all
 
         {
@@ -72,6 +77,17 @@ module Admin
         found.empty? ? [EMPTY_STRING] : found
       end
 
+      def photos(params)
+        found = Array(params).grep(::Hash).filter_map do |photo|
+          key = Blog::Types::Text[photo[:key]]
+          next unless Blog::Types::PhotoKey.valid?(key)
+
+          { part: Blog::Types::IdParam[photo[:part]], key:, alt: Blog::Types::Text[photo[:alt]] }
+        end
+
+        found.group_by { it[:part] }
+      end
+
       def picked(params, editing)
         return Array(params[:accounts]).map(&:to_i) if params
 
@@ -91,6 +107,7 @@ module Admin
         {
           mode: scheduled ? Blog::Types::SocialMode["schedule"] : Blog::Types::SocialMode["now"],
           parts: parts(social_post.parts.map(&:body)),
+          photos: social_post_queries.part_photos(social_post.id).group_by { it[:part] },
           schedule_at: scheduled ? Blog::TimeZone.input_value(social_post.posted_at) : EMPTY_STRING,
         }
       end
@@ -102,6 +119,7 @@ module Admin
         {
           mode: Blog::Types::SocialModeParam[params[:mode]],
           parts: parts(params[:parts]),
+          photos: photos(params[:photos]),
           schedule_at: Blog::Types::Text[params[:schedule_at]],
         }
       end

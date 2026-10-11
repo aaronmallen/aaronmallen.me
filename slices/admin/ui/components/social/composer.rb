@@ -89,8 +89,8 @@ module Admin
             @networks.select(&:selected).any? { |network| @counts.any? { it[network.name]&.over } }
           end
 
-          def part(body, counts, autofocus: false, removable: @values[:parts].size > 1)
-            Part(body:, counts:, networks: @networks, removable:, autofocus:)
+          def part(body, counts, removable: @values[:parts].size > 1, **)
+            Part(body:, counts:, networks: @networks, removable:, **)
           end
 
           def part_template
@@ -99,12 +99,12 @@ module Admin
 
           def parts
             div(class: "compose-parts", data: { social_parts: "" }) do
-              @values[:parts].each_with_index do |body, index|
-                part(body, @counts.fetch(index, Blog::Constants::EMPTY_HASH), autofocus: @autofocus && index.zero?)
+              @values[:parts].zip(@counts, @values[:photos]).each_with_index do |(body, counts, photos), index|
+                part(body, counts, photos:, autofocus: @autofocus && index.zero?)
               end
             end
             Mentions(handles: @handles, people: @people)
-            FieldError(field: :parts, errors: @errors)
+            %i[parts photos].each { FieldError(field: it, errors: @errors) }
           end
 
           def schedule_field

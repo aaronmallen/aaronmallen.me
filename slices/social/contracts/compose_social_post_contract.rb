@@ -8,6 +8,7 @@ module Social
         text.empty? ? Blog::Types::SocialMode["now"] : text
       end
       SEND = Blog::Types::SocialIntent["send"]
+      SILENT_PART = "silent_part"
       TOO_LONG = "too_long"
       UNAVAILABLE = "unavailable"
       UNKNOWN_MENTION = "unknown_mention"
@@ -24,12 +25,19 @@ module Social
         optional(:connection_ids).value(Blog::Types::IdList)
         required(:mode).value(MODE)
         required(:schedule_at).value(Blog::Types::LocalTime)
+        optional(:photos).value(:array)
       end
 
       rule(:parts).validate(:without_controls, :visible)
 
       rule(:parts) do
         key.failure(UNKNOWN_MENTION) if resolve_mentions.unknown(value).any?
+      end
+
+      rule(:photos) do
+        next unless key?
+
+        key.failure(SILENT_PART) if value.any? { it.is_a?(::Hash) && it[:part].nil? }
       end
 
       rule(:schedule_at, :mode) do
