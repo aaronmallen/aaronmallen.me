@@ -5,10 +5,6 @@ require "securerandom"
 module Shares
   module Operations
     class UploadShare < Blog::Operation
-      ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789".chars.freeze
-      ATTEMPTS = 5
-      CODE_KEY = "short_codes_code_key"
-      CODE_LENGTH = 5
       KEY_BYTES = 16
       UNKNOWN_TYPE = "application/octet-stream"
 
@@ -30,13 +26,13 @@ module Shares
 
       def available = client.configured? ? Success(client) : Failure([:unavailable])
 
-      def create(fields, attempts = ATTEMPTS)
+      def create(fields, attempts = Code::ATTEMPTS)
         share_mutations.create(
-          code: SecureRandom.alphanumeric(CODE_LENGTH, chars: ALPHABET), key: SecureRandom.hex(KEY_BYTES),
+          code: Code.random, key: SecureRandom.hex(KEY_BYTES),
           filename: fields[:filename], content_type: fields[:content_type], byte_size: fields[:file].size,
         )
       rescue ROM::SQL::UniqueConstraintError => e
-        raise unless share_mutations.violated_constraint(e) == CODE_KEY && attempts > 1
+        raise unless share_mutations.violated_constraint(e) == Code::KEY && attempts > 1
 
         create(fields, attempts - 1)
       end

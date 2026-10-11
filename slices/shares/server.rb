@@ -16,15 +16,19 @@ module Shares
 
     include Deps[
       client: "share_store.client", share_mutations: "repos.share_mutations", share_queries: "repos.share_queries",
+      short_link_mutations: "repos.short_link_mutations", short_link_queries: "repos.short_link_queries",
     ]
 
     def call(env)
       request = ::Rack::Request.new(env)
-      share = find(request)
-      return [404, {}, []] unless share
-      return [503, {}, []] unless client.configured?
+      code = requested_code(request)
+      return [404, {}, []] unless code
 
-      serve(request, share)
+      share = share_queries.by_code(code)
+      return client.configured? ? serve(request, share) : [503, {}, []] if share
+
+      link = short_link_queries.by_code(code)
+      link ? redirect(request, link) : [404, {}, []]
     end
 
     private
@@ -43,17 +47,20 @@ module Shares
       "#{kind}; filename=\"#{fallback}\"; filename*=UTF-8''#{ERB::Util.url_encode(share.filename)}"
     end
 
-    def find(request)
-      code = CODE_PATH.match(request.path_info)&.[](:code)
-      return unless code && (request.get? || request.head?) && Blog::Types::ShortCode.valid?(code)
-
-      share_queries.by_code(code)
-    end
-
     def partial(share, range)
       share_headers(share).merge(
         "content-length" => range.size.to_s, "content-range" => "bytes #{range.begin}-#{range.end}/#{share.byte_size}",
       )
+    end
+
+    def redirect(request, link)
+      short_link_mutations.count_click(link.id) unless request.head? || Blog::Helpers::Bot.match?(request.user_agent)
+      [302, { "location" => link.destination }, []]
+    end
+
+    def requested_code(request)
+      code = CODE_PATH.match(request.path_info)&.[](:code)
+      code if code && (request.get? || request.head?) && Blog::Types::ShortCode.valid?(code)
     end
 
     def serve(request, share)

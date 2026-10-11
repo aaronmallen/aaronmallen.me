@@ -3,9 +3,6 @@
 module Shares
   module Operations
     class ChangeShareCode < Blog::Operation
-      CODE_KEY = "short_codes_code_key"
-      TAKEN = "taken"
-
       include Deps[
         contract: "contracts.share_contract", share_mutations: "repos.share_mutations",
         share_queries: "repos.share_queries",
@@ -24,9 +21,9 @@ module Shares
         transaction { share_mutations.change_code(share.short_code_id, code) }
         Success(share_queries.find(share.id))
       rescue ROM::SQL::UniqueConstraintError => e
-        raise unless share_mutations.violated_constraint(e) == CODE_KEY
+        raise unless share_mutations.violated_constraint(e) == Code::KEY
 
-        Failure([:invalid, { code: [TAKEN] }])
+        Failure([:invalid, { code: [Code::TAKEN] }])
       end
 
       def validate(form) = validated(contract.call(form))
