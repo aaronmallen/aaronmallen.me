@@ -20,6 +20,7 @@ module Admin
           SOCIAL = Blog::Types::ActivityKind["social"]
           TASK = Blog::Types::ActivityKind["task"]
           WEBMENTION = Blog::Types::ActivityKind["webmention"]
+          WORKOUT = Blog::Types::ActivityKind["workout"]
           KINDS = Blog::Helpers::RecordKinds
           PAGES = {
             COMMIT => KINDS.fetch("commit").route,
@@ -42,6 +43,7 @@ module Admin
             DECISION => Type.new(icon: KINDS.icon("decision"), color: :sand, prose: false),
             DECISION_COMMENT => Type.new(icon: "fa-comments", color: :sand, prose: true),
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
+            WORKOUT => Type.new(icon: "fa-person-running", color: :blue, prose: false),
           }.freeze
           ANCHORS = { COMMENT => "task-comment", SESSION => "task-session" }.freeze
           POSTED = Blog::Types::SocialQueue["posted"]

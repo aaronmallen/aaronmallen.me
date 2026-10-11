@@ -24,11 +24,11 @@ module API
         task_queries: "tasks.repos.task_queries",
       ]
 
-      def call(view, page: 1, continue_to: nil, now: Time.now)
+      def call(view, page: 1, continue_to: nil, kinds: Blog::Types::ActivityKind.values, now: Time.now)
         filters = view.filters
 
         case view.screen
-          when ACTIVITY then activity(filters, continue_to)
+          when ACTIVITY then activity(filters, continue_to, kinds)
           when JOURNAL then journal(filters, continue_to)
           when POSTS then posts(filters, page_of(page))
           else tasks(filters, page_of(page), now)
@@ -37,9 +37,10 @@ module API
 
       private
 
-      def activity(filters, continue_to)
+      def activity(filters, continue_to, kinds)
         window = activity_window(filters.merge("day" => continue_to || filters["day"]))
-        search = { types: window[:types], **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
+        search = { types: window[:types] & kinds,
+                   **search_query.call(query: filters["q"], fields: ACTIVITY_FIELDS).to_h }
 
         Blog::Helpers::DayWindow.page(window[:from], window[:day], day: :occurred_on.to_proc) do |from, to, limit|
           activity_queries.between(from:, to:, limit:, **search)

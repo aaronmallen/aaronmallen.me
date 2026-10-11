@@ -9,6 +9,7 @@ module Admin
 
           prop :events, Blog::Types::Array.of(Blog::Types::Instance(Structs::ActivityEvent))
           prop :filters, Blog::Types::Hash
+          prop :health, Blog::Types::Hash
           prop :saved_views, Blog::Types::Hash
           prop :totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :older, Blog::Types::Date.optional
@@ -42,7 +43,7 @@ module Admin
           def timeline
             return Empty { t(".empty") } if days.empty?
 
-            days.each { |(date, events)| Day(date:, events:, today: @filters[:today]) }
+            days.each { |(date, events)| Day(date:, events:, today: @filters[:today], health: @health[date]) }
           end
         end
       end

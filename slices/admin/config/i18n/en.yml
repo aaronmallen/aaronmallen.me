@@ -368,6 +368,8 @@ en:
   ui:
     components:
       activity:
+        day:
+          health: "Health that day"
         filters:
           contains: "Contains"
           contains_hint: "Add tag:ruby to search by tag, repo:owner/name for one repo, or contributor:owner, agent:claude-code or model:claude-opus-5-5 for tasks by who did them."
@@ -387,6 +389,7 @@ en:
             social: "Social"
             task: "Tasks"
             webmention: "Webmentions"
+            workout: "Workouts"
       analytics:
         chart_card:
           peak: "peak %{views}"
@@ -812,6 +815,13 @@ en:
           kcal: "%{count} kcal"
           km: "%{count} km"
           zone_minutes: "%{count} zone min"
+      health_figures:
+        asleep: "%{span} asleep"
+        hrv: "hrv %{value}"
+        resting_heart_rate: "rhr %{value}"
+        steps:
+          one: "%{formatted} step"
+          other: "%{formatted} steps"
       inbox:
         issue_item:
           edit: "Edit"
@@ -1432,6 +1442,7 @@ en:
           one: "%{count} today"
           other: "%{count} today"
           zero: "nothing yet"
+        last_night: "Last night"
         nothing_scheduled: "nothing scheduled"
         queued:
           one: "%{count} queued"

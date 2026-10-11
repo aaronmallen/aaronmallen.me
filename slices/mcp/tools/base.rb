@@ -40,7 +40,7 @@ module MCP
         def dep(name, server_context) = server_context.fetch(name)
 
         def hand_over(endpoint, input, server_context, &shape)
-          case dep(endpoint, server_context).call(input)
+          case dep(endpoint, server_context).call(input, scopes: dep(:scopes, server_context))
             in Success(payload) then answer(shape ? yield(payload) : payload)
             in Failure(refusal) then refuse(refusal.message)
           end

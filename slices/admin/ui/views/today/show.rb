@@ -15,6 +15,7 @@ module Admin
           prop :commits, Blog::Types::Hash
           prop :commit_totals, Blog::Types::Hash.map(Blog::Types::Symbol, Blog::Types::Integer)
           prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :last_night, Blog::Types::Instance(ROM::Struct).optional, default: nil
           prop :posts, Blog::Types::Hash
           prop :queue, Blog::Types::Hash
           prop :social, Blog::Types::Hash
@@ -77,7 +78,8 @@ module Admin
             AttentionCard(**@attention)
             CommitsCard(**@commits, totals: @commit_totals)
             QuietCard(
-              entries: @entries, posts: @posts, social: @social, queue: @queue, visitors: @visitors, clients: @clients,
+              entries: @entries, last_night: @last_night, posts: @posts, social: @social, queue: @queue,
+              visitors: @visitors, clients: @clients,
             )
           end
 

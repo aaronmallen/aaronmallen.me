@@ -9,6 +9,7 @@ module Admin
         QUEUED = Blog::Types::SocialQueue["queued"]
 
         prop :entries, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+        prop :last_night, Blog::Types::Instance(ROM::Struct).optional, default: nil
         prop :posts, Blog::Types::Hash
         prop :social, Blog::Types::Hash
         prop :queue, Blog::Types::Hash
@@ -19,6 +20,7 @@ module Admin
           Card do
             journal_line
             ships_next
+            last_night
             TodayLine(label: t(".drafts"), href: path(:admin_posts, status: DRAFT)) do
               t(".draft_count", count: @posts[:drafts].size)
             end
@@ -36,6 +38,12 @@ module Admin
             whitespace
             kbd(class: "kbd", aria: { hidden: "true" }) { JOURNAL_KEY }
           end
+        end
+
+        def last_night
+          return unless HealthFigures.slept?(@last_night)
+
+          TodayLine(label: t(".last_night"), href: path(:admin_activity)) { HealthFigures(day: @last_night) }
         end
 
         def next_up

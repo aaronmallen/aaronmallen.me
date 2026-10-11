@@ -8,6 +8,7 @@ module Admin
       include Deps[
         "settings",
         activity_queries: "activity.repos.activity_queries",
+        health_queries: "health.repos.health_queries",
         list_activity_events: "operations.list_activity_events",
         search_query: "contracts.search_query_contract",
       ]
@@ -29,11 +30,18 @@ module Admin
 
       def filter_window(**) = ::Activity::Contracts::FiltersContract.new.call(**).to_h
 
+      def health(events)
+        return Blog::Constants::EMPTY_HASH if events.empty?
+
+        health_queries.days(from: events.last.occurred_on, to: events.first.occurred_on)
+      end
+
       def timeline(search, day)
         paged = search.merge(day:, size: settings.page_size[:admin])
         found = list_activity_events.call(**paged.except(:to))
+        events = found.rows
 
-        { events: found.rows, older: found.continue_to, newer: list_activity_events.newer_day(**paged) }
+        { events:, health: health(events), older: found.continue_to, newer: list_activity_events.newer_day(**paged) }
       end
 
       def totals(search, counts)

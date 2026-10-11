@@ -25,7 +25,7 @@ module API
       end
 
       def handle(request, response)
-        case endpoint.call(input(request, response))
+        case endpoint.call(input(request, response), scopes: response[:token].scopes)
           in Success(payload) then render_json(response, payload, status: descriptor.status)
           in Failure(Structs::Refusal => refusal)
             render_json(response, refusal.to_h, status: STATUSES.fetch(refusal.error))

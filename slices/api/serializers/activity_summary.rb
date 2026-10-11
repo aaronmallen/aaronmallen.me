@@ -3,8 +3,10 @@
 module API
   module Serializers
     class ActivitySummary < Serializer
+      WORKOUT = Blog::Types::ActivityKind["workout"]
       KINDS = Helpers::Schema.object(
-        Blog::Types::ActivityKind.values.to_h { [it.to_sym, Helpers::Schema::INTEGER] },
+        (Blog::Types::ActivityKind.values - [WORKOUT]).to_h { [it.to_sym, Helpers::Schema::INTEGER] },
+        optional: { WORKOUT.to_sym => Helpers::Schema::INTEGER.merge(description: "only for a token with health") },
       ).freeze
       MONTH = "^[0-9]{4}-[0-9]{2}$"
       TOTALS = Helpers::Schema.object(

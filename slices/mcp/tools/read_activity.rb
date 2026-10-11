@@ -6,8 +6,10 @@ module MCP
       description "Read one window of the activity feed, newest first, every kind in it: commits with their " \
                   "whole message, repository, sha and lines added and deleted, published posts, journal entries, " \
                   "posted social posts, approved webmentions, done tasks but never canceled ones, comments on " \
-                  "tasks, closed work sessions, projects, sprints, suggestions, decision events and comments on " \
-                  "decisions. A work session lands on the day it started, named for its task, with task_id and " \
+                  "tasks, closed work sessions, projects, sprints, suggestions, decision events, comments on " \
+                  "decisions and, for a connection granted health, workouts. A workout's name is its type, its " \
+                  "excerpt the device and worked_seconds how long it ran. A work session lands on the day it " \
+                  "started, named for its task, with task_id and " \
                   "the seconds it ran as worked_seconds, whether or not the task is done. A comment's " \
                   "name is its text and its excerpt the title of its task or decision. A decision event's name " \
                   "is the decision's title, its status what happened, and its excerpt the reason, the edit " \

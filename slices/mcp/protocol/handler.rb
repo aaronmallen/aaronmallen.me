@@ -239,9 +239,9 @@ module MCP
         false
       end
 
-      def context(oauth_client_id)
+      def context(scopes, oauth_client_id)
         endpoints = CONTEXT.merge(TOOL_ENDPOINTS).keys.to_h { [it, public_send(it)] }
-        endpoints.merge(oauth_client_id:, settings:)
+        endpoints.merge(oauth_client_id:, scopes:, settings:)
       end
 
       def name = Blog::Types::Normalized::Host.call(settings.site[:url])
@@ -260,7 +260,7 @@ module MCP
           name:,
           prompts: PROMPTS,
           scopes:,
-          server_context: context(oauth_client_id),
+          server_context: context(scopes, oauth_client_id),
           title: format(TITLE, owner),
           tools: TOOLS,
           version: Blog::Version::CURRENT,

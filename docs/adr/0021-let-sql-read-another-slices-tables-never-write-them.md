@@ -6,7 +6,8 @@ created: 2026-09-28
 area: [activity, analytics, contact, db, decisions, lib, links, posts, search, social, tags, tasks]
 issue: AA-686
 amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818",
-  "#954", "#1013", "#957", "#911", "#1115"]
+  "#954", "#1013", "#957", "#911", "#1115",
+  "#1118"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -35,8 +36,8 @@ exports refuses. These reads cross today:
   `social_post_parts`, `webmentions`, `tasks`, `sprints`, `projects` and `suggestions`, which
   `record`, `posts`, `social`, `tasks`, `projects` and `suggestions` own. AA-824 added the last three tables. As #911
   records, it also reads `pull_requests`, `task_comments`, `work_sessions`, `decisions`, `decision_events`,
-  `decision_options` and `decision_comments`, which `record`, `tasks` and `decisions` own. The
-  record on the activities view holds why one view beats merging rows in Ruby.
+  `decision_options` and `decision_comments`, which `record`, `tasks` and `decisions` own. #1118 added
+  `workouts`, which `health` owns. The record on the activities view holds why one view beats merging rows in Ruby.
 - **The `attention` view**, built in `config/db/migrate/20261003000075_create_attention_view.rb` and read by
   `slices/activity/relations/attention.rb`, unions `tasks`, `posts`, `journal_entries` and `known_devices`, which
   `tasks`, `posts`, `record` and `security` own, and joins `api_tokens` and `oauth_clients`, which `api` and `mcp`

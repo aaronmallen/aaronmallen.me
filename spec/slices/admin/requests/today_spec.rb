@@ -186,6 +186,24 @@ RSpec.describe "Admin today", :frozen_clock, type: :request do
       end
     end
 
+    describe "Last night" do
+      it "gives last night's sleep, HRV and resting heart rate after What ships next", :aggregate_failures do
+        create(:health_day, day: today, minutes_asleep: 425, hrv: 47.6, resting_heart_rate: 54, steps: 9000)
+        get "/admin"
+
+        expect(line_value("Last night")).to eq("7h 05m asleep · hrv 48 · rhr 54")
+        expect(page.all(".today-line > span:first-child").map(&:text)[2]).to eq("Last night")
+      end
+
+      it "leaves the line out without last night's data" do
+        create(:health_day, day: today - 1, minutes_asleep: 425)
+        create(:health_day, day: today, steps: 9000)
+        get "/admin"
+
+        expect(page).to have_no_css(".today-line", text: "Last night")
+      end
+    end
+
     describe "pending webmentions" do
       def attention = page.find("section.card[data-attention]")
 

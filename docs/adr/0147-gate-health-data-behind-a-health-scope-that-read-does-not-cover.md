@@ -5,6 +5,7 @@ status: active
 created: 2026-10-11
 area: [lib, admin, api, mcp]
 issue: "#1112"
+amended: ["#1118"]
 tags: [health, oauth, scopes, consent, api-tokens, mcp, privacy]
 ---
 
@@ -34,7 +35,8 @@ takes a consent line, as ADR 0061 asks of every scope.
   maps the endpoint to it, since a `GET` would otherwise need only `read`. `MCP::Protocol::ScopedServer` withholds
   the tool from a token without it, as ADR 0061 says.
 - **The `read_activity` endpoint and tool stay on `read`**, and the endpoint leaves out workout rows unless the
-  token also holds `health`. The rest of the feed reads as it does now.
+  token also holds `health`. The rest of the feed reads as it does now. As #1118 records, `summarize_activity`
+  and an activity saved view read through `read_saved_view` leave workouts out the same way.
 - **Nothing public** reads health data, whatever scope a request carries.
 
 The Insights > Health card lists the clients and tokens whose scopes hold `health`. It shows the grant; it does not

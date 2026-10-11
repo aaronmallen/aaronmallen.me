@@ -30,7 +30,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       "decision_comment" => "comments", "journal" => "feather", "post" => "file-lines", "session" => "clock",
       "social" => "paper-plane", "task" => "circle-check", "webmention" => "at",
       "pull_request_opened" => "code-pull-request", "pull_request_merged" => "code-merge",
-      "pull_request_closed" => "circle-xmark",
+      "pull_request_closed" => "circle-xmark", "workout" => "person-running",
     }.fetch(type)
   end
 
@@ -61,7 +61,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "groups the types as chips under one label" do
-        expect(page).to have_css(".activity-types[role='group'][aria-label='Include'] label.activity-type", count: 13)
+        expect(page).to have_css(".activity-types[role='group'][aria-label='Include'] label.activity-type", count: 14)
       end
 
       it "ties the search hint to the search box" do
@@ -81,7 +81,7 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
       end
 
       it "checks every type" do
-        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 13, visible: :all)
+        expect(page).to have_css(".activity-type input[type='checkbox'][checked]", count: 14, visible: :all)
       end
 
       it "submits the filters as a get" do
@@ -574,6 +574,34 @@ RSpec.describe "Admin activity", :frozen_clock, type: :request do
         visit_activity(types: { pull_request_opened: "0", pull_request_merged: "1" })
 
         expect(event_subs).to eq(["merged into aaronmallen/blog"])
+      end
+    end
+
+    describe "workouts and health" do
+      before do
+        create(:workout, kind: "STRENGTH_TRAINING", started_at: at(7), minutes: 65, device: "Pixel Watch 3")
+        create(:commit, commit_date: today - 1, message: "add the view")
+        create(:health_day, day: today, minutes_asleep: 425, hrv: 47.6, resting_heart_rate: 54, steps: 8421)
+        visit_activity
+      end
+
+      def health(date) = page.find(".activity-day:has(time[datetime='#{date.iso8601}']) .activity-health").text
+
+      it "lists a workout by its type, with how long it ran and the device", :aggregate_failures do
+        expect(day_names(today)).to eq(["Strength Training"])
+        expect(event_subs.first).to eq("1h 05m · Pixel Watch 3")
+      end
+
+      it "counts workouts as a type of their own" do
+        expect(count_for("workout")).to eq("1")
+      end
+
+      it "gives a day its sleep, HRV, resting heart rate and steps" do
+        expect(health(today)).to eq("7h 05m asleep · hrv 48 · rhr 54 · 8,421 steps")
+      end
+
+      it "leaves the strip off a day with no health data" do
+        expect(page).to have_no_css(".activity-day:has(time[datetime='#{(today - 1).iso8601}']) .activity-health")
       end
     end
 

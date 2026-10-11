@@ -4,6 +4,7 @@ module API
   module Endpoints
     class ReadActivity < Endpoint
       KINDS = Blog::Types::ActivityKind.values
+      SCOPED = true
 
       SCHEMA = {
         additionalProperties: false,
@@ -13,7 +14,7 @@ module API
           kinds: {
             type: "array",
             items: { type: "string", enum: KINDS },
-            description: "which kinds to read; every kind when you leave it out",
+            description: "which kinds to read; every kind when you leave it out. workout needs the health scope",
           },
           repos: {
             type: "array",
@@ -46,8 +47,8 @@ module API
         contributor_terms: "contracts.contributor_terms_contract",
       ]
 
-      def handle(from:, to:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
-        filters = { kinds:, repos:, tags:, text:, credits: contributor_terms.call(credited).to_h }
+      def handle(from:, to:, scopes:, kinds: nil, repos: nil, tags: nil, text: nil, **credited)
+        filters = { kinds: types(kinds, scopes), repos:, tags:, text:, credits: contributor_terms.call(credited).to_h }
 
         case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] then Success(window(first, last, filters))
@@ -61,7 +62,7 @@ module API
         activity_queries.between(
           from:,
           to:,
-          types: types(filters[:kinds]),
+          types: filters[:kinds],
           repos: Array(filters[:repos]),
           tags: Array(filters[:tags]),
           text: filters[:text],
@@ -70,10 +71,10 @@ module API
         )
       end
 
-      def types(chosen)
-        asked = KINDS & Array(chosen)
+      def types(chosen, scopes)
+        shown = activity_kinds(scopes)
 
-        asked.empty? ? KINDS : asked
+        Array(chosen).empty? ? shown : shown & chosen
       end
 
       def window(first, last, filters)

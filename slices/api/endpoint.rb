@@ -8,23 +8,32 @@ require "json_schemer"
 module API
   class Endpoint
     FINDS = false
+    HEALTH = Blog::Types::OAuthScope["health"]
     ROOT = :input
+    SCOPED = false
     UNAVAILABLE = false
+    WORKOUT = Blog::Types::ActivityKind["workout"]
 
     include Dry::Monads[:result]
     include Deps["settings"]
 
     def self.checker = @checker ||= JSONSchemer.schema(JSON.parse(JSON.generate(self::SCHEMA)))
 
-    def call(input = {})
+    def call(input = {}, scopes: Blog::Constants::EMPTY_ARRAY)
       fields = input.transform_keys(&:to_s)
       errors = self.class.checker.validate(fields).flat_map { complaints(it) }
       return invalid(errors.group_by(&:first).transform_values { it.map(&:last) }) if errors.any?
 
-      handle(**fields.transform_keys(&:to_sym))
+      fields = fields.transform_keys(&:to_sym)
+      self.class::SCOPED ? handle(**fields, scopes:) : handle(**fields)
     end
 
     private
+
+    def activity_kinds(scopes)
+      kinds = Blog::Types::ActivityKind.values
+      scopes.include?(HEALTH) ? kinds : kinds - [WORKOUT]
+    end
 
     def bad_window(message) = invalid(from: [message], to: [message])
 

@@ -17,6 +17,7 @@ module Admin
         commit_queries: "record.repos.commit_queries",
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",
+        health_queries: "health.repos.health_queries",
         inbox_queries: "api.repos.inbox_queries",
         journal_entry_queries: "record.repos.journal_entry_queries",
         oauth_client_queries: "mcp.repos.oauth_client_queries",
@@ -36,6 +37,7 @@ module Admin
           commits: commits(now),
           commit_totals: commit_queries.today_totals(now:),
           entries: journal_entry_queries.today(now:),
+          last_night: last_night(now),
           sprint:,
         }
       end
@@ -83,6 +85,12 @@ module Admin
 
       def failures
         sync_state_queries.failures + [countries_failure].compact
+      end
+
+      def last_night(now)
+        today = Blog::TimeZone.today(now)
+
+        health_queries.days(from: today, to: today)[today]
       end
 
       def posts(scheduled)

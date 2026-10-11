@@ -10,25 +10,26 @@ module API
       }.freeze
 
       REPLY = Serializers::ActivitySummary.reference
+      SCOPED = true
 
       include Deps[activity_queries: "activity.repos.activity_queries"]
 
-      def handle(from:, to:)
+      def handle(from:, to:, scopes:)
         case Blog::Helpers::DayWindow.days(from, to)
           in Success[first, last] if Blog::Helpers::DayWindow.too_long?(first, last) then bad_window(Blog::Helpers::DayWindow::TOO_LONG)
-          in Success[first, last] then Success(summary(first, last))
+          in Success[first, last] then Success(summary(first, last, activity_kinds(scopes)))
           in Failure(message) then bad_window(message)
         end
       end
 
       private
 
-      def summary(from, to)
+      def summary(from, to, types)
         counted = {
           from:,
           to:,
-          kinds: activity_queries.counts(from:, to:),
-          months: activity_queries.counts_by_month(from:, to:),
+          kinds: activity_queries.counts(from:, to:, types:),
+          months: activity_queries.counts_by_month(from:, to:, types:),
           repos: activity_queries.commit_totals(from:, to:),
         }
 

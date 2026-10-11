@@ -565,7 +565,7 @@ RSpec.describe "MCP endpoint", type: :request do
       call_tool("read_activity", from: from.to_s, to: to.to_s, **arguments)
     end
 
-    def scopes = "read"
+    def scopes = "read health"
 
     def statements_to_read
       issued
@@ -591,6 +591,7 @@ RSpec.describe "MCP endpoint", type: :request do
       deciding
       planning(article)
       pulling
+      create(:workout, started_at: at(7))
     end
 
     def work_on_tasks

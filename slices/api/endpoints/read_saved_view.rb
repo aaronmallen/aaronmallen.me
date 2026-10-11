@@ -5,6 +5,7 @@ module API
     class ReadSavedView < Endpoint
       BAD_DAY = "give continue_to as a day, such as 2026-01-01"
       NO_SPRINT = "could not open today's sprint"
+      SCOPED = true
       ACTIVITY = Blog::Types::SavedViewScreen["activity"]
       TASKS = Blog::Types::SavedViewScreen["tasks"]
 
@@ -45,14 +46,14 @@ module API
         saved_view_queries: "saved_views.repos.saved_view_queries",
       ]
 
-      def handle(id:, page: 1, continue_to: nil)
+      def handle(id:, scopes:, page: 1, continue_to: nil)
         cursor = continue_to && Blog::TimeZone.parse_day(continue_to)
         return invalid(continue_to: [BAD_DAY]) if continue_to && cursor.nil?
 
         view = saved_view_queries.by_id(id)
         return not_found(Helpers::Wording.missing("saved view", id)) if view.nil?
 
-        case list_saved_view_records.call(view, page:, continue_to: cursor)
+        case list_saved_view_records.call(view, page:, continue_to: cursor, kinds: activity_kinds(scopes))
           in Success(found) then Success(answered(view, found))
           else failed(NO_SPRINT)
         end

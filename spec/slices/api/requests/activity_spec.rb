@@ -170,6 +170,11 @@ RSpec.describe "API reading the activity feed", type: :request do
   end
 
   describe "the MCP tools" do
+    def api_token
+      @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal", scopes: MCPToolCalls::SCOPES.split)
+                                                        .value!.fetch(:value)
+    end
+
     it "answers read_activity as GET /api/v1/activity does" do
       create(:commit, commit_date: march)
       visitors
@@ -202,6 +207,53 @@ RSpec.describe "API reading the activity feed", type: :request do
       visitors
 
       expect(mcp_answer("summarize_activity", **range)).to eq(summarize)
+    end
+  end
+
+  describe "workouts" do
+    def read_only = API::Slice["operations.mint_token"].call(name: "Reader", scopes: %w[read]).value!.fetch(:value)
+
+    before do
+      create(:workout, kind: "STRENGTH_TRAINING", started_at: at(march, 7), minutes: 65, device: "Pixel Watch 3")
+      create(:commit, commit_date: march)
+    end
+
+    it "gives a token with health each workout's type, device and the seconds it ran" do
+      expect(read(kinds: "workout").fetch("activity").map { it.values_at("name", "excerpt", "worked_seconds") })
+        .to eq([["Strength Training", "Pixel Watch 3", 3900]])
+    end
+
+    it "counts workouts for a token with health" do
+      expect(summarize.dig("kinds", "workout")).to eq(1)
+    end
+
+    describe "for a token with only read" do
+      let(:api_token) { read_only }
+
+      it "leaves workouts out of the feed" do
+        expect(kinds(read)).to eq(["commit"])
+      end
+
+      it "reads nothing when asked for workouts alone" do
+        expect(read(kinds: "workout").fetch("activity")).to be_empty
+      end
+
+      it "leaves workouts out of the summary", :aggregate_failures do
+        expect(summarize.fetch("kinds")).not_to have_key("workout")
+        expect(summarize.dig("months", "2026-03")).not_to have_key("workout")
+      end
+
+      it "leaves workouts out of an activity saved view" do
+        view = create(:saved_view, screen: "activity", filters: { **range, day: "2026-03-31" })
+
+        expect(get_json("/api/v1/saved_views/#{view.id}/records").fetch("records").map { it.fetch("kind") })
+          .to eq(["commit"])
+      end
+    end
+
+    it "leaves workouts out of the MCP tools for a connection without health", :aggregate_failures do
+      expect(kinds(mcp_answer("read_activity", **range))).to eq(["commit"])
+      expect(mcp_answer("summarize_activity", **range).fetch("kinds")).not_to have_key("workout")
     end
   end
 end

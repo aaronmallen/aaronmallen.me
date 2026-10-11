@@ -10,6 +10,7 @@ module Admin
       DECISION = Blog::Types::ActivityKind["decision"]
       DECISION_COMMENT = Blog::Types::ActivityKind["decision_comment"]
       DECISION_EVENTS = "activity_page.decision_events"
+      DOT = Blog::UI::Wording::DOT
       JOURNAL = Blog::Types::ActivityKind["journal"]
       TASK = Blog::Types::ActivityKind["task"]
       LINES = {
@@ -36,6 +37,7 @@ module Admin
         SOCIAL => :social_line,
         TASK => :task_line,
         WEBMENTION => :webmention_line,
+        Blog::Types::ActivityKind["workout"] => :workout_line,
       }.freeze
 
       include Deps[
@@ -95,6 +97,8 @@ module Admin
         )
       end
 
+      def hours(seconds) = Blog::Helpers::Figures.hours(seconds)
+
       def name_html(row)
         InlineMarkdown.to_html(row.name, keep: NAME_LIMIT) if MARKDOWN.include?(row.type)
       end
@@ -134,9 +138,7 @@ module Admin
 
       def rows_before?(from, day, filters) = activity_queries.between(from:, to: day.prev_day, limit: 1, **filters).any?
 
-      def session_line(row)
-        i18n.t!("activity_page.sub_lines.session", span: Blog::Helpers::Figures.hours(row.worked_seconds))
-      end
+      def session_line(row) = i18n.t!("activity_page.sub_lines.session", span: hours(row.worked_seconds))
 
       def shortened(name)
         Blog::Helpers::Truncation.cut(Blog::Helpers::Whitespace.squish(Blog::Types::Text[name]), keep: NAME_LIMIT)
@@ -172,6 +174,8 @@ module Admin
 
         i18n.t!("activity_page.sub_lines.webmention_excerpt", link: row.link, excerpt: row.excerpt)
       end
+
+      def workout_line(row) = [hours(row.worked_seconds), row.excerpt].compact.join(DOT)
     end
   end
 end
