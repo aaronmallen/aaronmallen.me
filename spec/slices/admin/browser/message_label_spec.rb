@@ -3,7 +3,7 @@
 RSpec.describe "Admin message labels", type: :feature do
   let(:message) { create(:message, :read, subject: "Invoice") }
   let(:dialog) { find("dialog#label-message-#{message.id}") }
-  let(:repo) { Contact::Slice["repos.message_queries"] }
+  let(:repo) { Mail::Slice["repos.message_queries"] }
   let(:bad) { Admin::Slice["i18n"].t("ui.components.message_label.bad") }
 
   def tags = repo.by_id(message.id).tags.map(&:name)
@@ -11,7 +11,7 @@ RSpec.describe "Admin message labels", type: :feature do
   before do
     create(:tag, :private, name: "billing")
     create(:tag, :private, name: "urgent")
-    Contact::Slice["repos.message_tag_mutations"].add(message.id, "billing")
+    Mail::Slice["repos.message_tag_mutations"].add(message.id, "billing")
     sign_in_to_admin
     visit "/admin/messages?status=read&open=#{message.id}"
     find(".msg-pane").click_button "Label"

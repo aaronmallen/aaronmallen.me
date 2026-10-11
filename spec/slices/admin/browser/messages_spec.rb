@@ -4,7 +4,7 @@ RSpec.describe "Admin messages", type: :feature do
   let(:pane) { find(".msg-pane") }
   let(:i18n) { Admin::Slice["i18n"] }
 
-  def read = Contact::Slice["relations.messages"].with_status("read").pluck(:subject)
+  def read = Mail::Slice["relations.mail_threads"].with_status("read").pluck(:subject)
 
   before do
     create(:message, subject: "Newer", body: "The newer body", received_at: Time.now)

@@ -12,13 +12,13 @@ RSpec.describe "API bulk message actions", type: :request do
     JSON.parse(last_response.body)
   end
 
-  def gone_id = create(:message).id.tap { Contact::Slice["repos.message_mutations"].delete(it) }
+  def gone_id = create(:message).id.tap { Mail::Slice["repos.message_mutations"].delete(it) }
 
   def ids(messages) = messages.map(&:id)
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
-  def repo = Contact::Slice["repos.message_queries"]
+  def repo = Mail::Slice["repos.message_queries"]
 
   def status = last_response.status
 
@@ -28,7 +28,7 @@ RSpec.describe "API bulk message actions", type: :request do
 
   def tagged(*names) = create(:message).tap { |message| names.each { tagging.add(message.id, it) } }
 
-  def tagging = Contact::Slice["repos.message_tag_mutations"]
+  def tagging = Mail::Slice["repos.message_tag_mutations"]
 
   def whole(message)
     {
@@ -189,7 +189,7 @@ RSpec.describe "API bulk message actions", type: :request do
     it "mark read as mark_messages_read does" do
       message = create(:message)
       endpoint = act("read", [message.id])
-      Contact::Slice["repos.message_mutations"].mark(message, "unread")
+      Mail::Slice["repos.message_mutations"].mark(message, "unread")
 
       expect(trusted(mcp_answer("mark_messages_read", ids: [message.id]))).to eq(endpoint)
     end
@@ -197,7 +197,7 @@ RSpec.describe "API bulk message actions", type: :request do
     it "mark unread as mark_messages_unread does" do
       message = create(:message, :read)
       endpoint = act("unread", [message.id])
-      Contact::Slice["repos.message_mutations"].mark(message, "read")
+      Mail::Slice["repos.message_mutations"].mark(message, "read")
 
       expect(trusted(mcp_answer("mark_messages_unread", ids: [message.id]))).to eq(endpoint)
     end

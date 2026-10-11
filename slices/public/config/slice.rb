@@ -15,7 +15,7 @@ module Public
       operations.tag_ref
     ], from: :analytics
 
-    import keys: %w[operations.create_message], from: :contact
+    import keys: %w[operations.create_message], from: :mail
 
     import keys: %w[repos.photo_queries store.client], from: :media
 

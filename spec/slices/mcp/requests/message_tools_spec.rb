@@ -3,7 +3,7 @@
 RSpec.describe "MCP contact message tools", type: :request do
   def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
-  def message_queries = Contact::Slice["repos.message_queries"]
+  def message_queries = Mail::Slice["repos.message_queries"]
 
   def today = Blog::TimeZone.today
 
@@ -42,7 +42,7 @@ RSpec.describe "MCP contact message tools", type: :request do
 
     it "lists each message's tags in name order" do
       message = create(:message)
-      %w[urgent billing].each { Contact::Slice["repos.message_tag_mutations"].add(message.id, it) }
+      %w[urgent billing].each { Mail::Slice["repos.message_tag_mutations"].add(message.id, it) }
 
       expect(listed.first.fetch("tags")).to eq(%w[billing urgent])
     end
@@ -130,7 +130,7 @@ RSpec.describe "MCP contact message tools", type: :request do
 
     it "says which tags it carries" do
       message = create(:message)
-      Contact::Slice["repos.message_tag_mutations"].add(message.id, "billing")
+      Mail::Slice["repos.message_tag_mutations"].add(message.id, "billing")
 
       expect(mcp_answer("read_message", id: message.id).fetch("tags")).to eq(%w[billing])
     end

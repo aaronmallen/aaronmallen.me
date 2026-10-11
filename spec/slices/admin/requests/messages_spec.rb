@@ -3,7 +3,7 @@
 RSpec.describe "Admin messages", type: :request do
   let(:i18n) { Admin::Slice["i18n"] }
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Contact::Slice["repos.message_queries"] }
+  let(:repo) { Mail::Slice["repos.message_queries"] }
 
   def empty_text(status) = i18n.t(["ui.views.messages.index.empty", status].join("."))
 
@@ -104,7 +104,7 @@ RSpec.describe "Admin messages", type: :request do
     end
 
     describe "searching" do
-      def tagging = Contact::Slice["repos.message_tag_mutations"]
+      def tagging = Mail::Slice["repos.message_tag_mutations"]
 
       before do
         create(:message, subject: "Invoice overdue", reply_to: "ada@example.com", body: "please pay")
@@ -178,7 +178,7 @@ RSpec.describe "Admin messages", type: :request do
     end
 
     describe "the tag select" do
-      def tagging = Contact::Slice["repos.message_tag_mutations"]
+      def tagging = Mail::Slice["repos.message_tag_mutations"]
 
       it "hides when no message has tags" do
         create(:message)

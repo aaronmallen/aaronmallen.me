@@ -7,7 +7,7 @@ RSpec.describe "Admin bulk message actions", type: :feature do
 
   def box(subject) = find(".msg-item", text: subject).find("input[name='ids[]']")
 
-  def subjects(status) = Contact::Slice["relations.messages"].with_status(status).newest_first.pluck(:subject)
+  def subjects(status) = Mail::Slice["relations.mail_threads"].with_status(status).newest_first.pluck(:subject)
 
   before do
     %w[first second third].each_with_index do |subject, index|

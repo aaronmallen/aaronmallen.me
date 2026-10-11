@@ -3,7 +3,7 @@
 RSpec.describe "Admin message snooze", type: :request do
   let(:now) { Time.utc(2026, 10, 7, 15, 10) }
   let(:later) { Time.utc(2026, 10, 9, 13) }
-  let(:repo) { Contact::Slice["repos.message_queries"] }
+  let(:repo) { Mail::Slice["repos.message_queries"] }
 
   def act(path, **params) = post(path, { _csrf_token: admin_csrf_token, **params })
 

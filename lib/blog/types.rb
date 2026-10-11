@@ -90,6 +90,7 @@ module Blog
     rescue TZInfo::PeriodNotFound
       Blog::Constants::GAP
     end
+    MailProvider = Types::String.enum("contact_form", "gmail")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
     MessageFilter = Types::String.enum("unread", "read", "spam", "inbox")

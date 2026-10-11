@@ -5,7 +5,7 @@ require "digest"
 RSpec.describe "Contact", type: :request do
   let(:fields) { { reply_to: "ada@example.com", subject: "A question", body: "About the beacon" } }
   let(:i18n) { Public::Slice["i18n"] }
-  let(:message_queries) { Contact::Slice["repos.message_queries"] }
+  let(:message_queries) { Mail::Slice["repos.message_queries"] }
   let(:page) { Capybara.string(last_response.body) }
 
   def copy(key) = i18n.t(key, scope: "ui.views.pages.contact")
@@ -21,6 +21,8 @@ RSpec.describe "Contact", type: :request do
   def sent_path = "/contact?sent=1"
 
   def stored = message_queries.unread
+
+  def stored_hash = message_queries.mail_messages.pluck(:visitor_hash).first
 
   describe "the page" do
     before { get "/contact" }
@@ -106,8 +108,8 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "caps the subject and the message at the length the contract takes", :aggregate_failures do
-      expect(page).to have_css("#cf-subject[maxlength='#{Contact::Types::MAX_SUBJECT}']")
-      expect(page).to have_css("#cf-message[maxlength='#{Contact::Types::MAX_BODY}']")
+      expect(page).to have_css("#cf-subject[maxlength='#{Mail::Types::MAX_SUBJECT}']")
+      expect(page).to have_css("#cf-message[maxlength='#{Mail::Types::MAX_BODY}']")
     end
 
     describe "the count under the message" do
@@ -231,7 +233,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores nothing, since anyone can ask for it" do
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "ends at the answer, with no other way to write" do
@@ -292,14 +294,14 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores the sender's daily hash rather than an address" do
-      expect(stored.first.visitor_hash).to match(/\A[0-9a-f]{64}\z/)
+      expect(stored_hash).to match(/\A[0-9a-f]{64}\z/)
     end
 
     it "keys that hash on the salted day and the address alone", :aggregate_failures do
       address = "127.0.0.1"
 
-      expect(stored.first.visitor_hash).to eq(Analytics::Slice["operations.hash_visitor"].call(address:))
-      expect(stored.first.visitor_hash).not_to eq(Digest::SHA256.hexdigest(address))
+      expect(stored_hash).to eq(Analytics::Slice["operations.hash_visitor"].call(address:))
+      expect(stored_hash).not_to eq(Digest::SHA256.hexdigest(address))
     end
 
     it "confirms it on the page that follows" do
@@ -317,7 +319,7 @@ RSpec.describe "Contact", type: :request do
     it "stores nothing further when that page is asked for again" do
       2.times { get(sent_path) }
 
-      expect(message_queries.messages.count).to eq(1)
+      expect(message_queries.mail_threads.count).to eq(1)
     end
   end
 
@@ -334,14 +336,14 @@ RSpec.describe "Contact", type: :request do
       send_from("HTTP_SEC_FETCH_SITE" => "cross-site")
 
       expect(last_response.status).to eq(403)
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "refuses one from a browser that names only another origin", :aggregate_failures do
       send_from("HTTP_ORIGIN" => "https://evil.example")
 
       expect(last_response.status).to eq(403)
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
   end
 
@@ -350,14 +352,14 @@ RSpec.describe "Contact", type: :request do
       send_from("HTTP_SEC_FETCH_SITE" => "same-origin", "HTTP_ORIGIN" => "https://aaronmallen.me")
 
       expect(last_response.status).to eq(302)
-      expect(message_queries.messages.count).to eq(1)
+      expect(message_queries.mail_threads.count).to eq(1)
     end
 
     it "stores one from a client that sends neither header", :aggregate_failures do
       send_from({})
 
       expect(last_response.status).to eq(302)
-      expect(message_queries.messages.count).to eq(1)
+      expect(message_queries.mail_threads.count).to eq(1)
     end
   end
 
@@ -367,7 +369,7 @@ RSpec.describe "Contact", type: :request do
         send_from("HTTP_ACCEPT" => accept)
 
         expect(last_response.status).to eq(302)
-        expect(message_queries.messages.count).to eq(1)
+        expect(message_queries.mail_threads.count).to eq(1)
       end
     end
 
@@ -383,7 +385,7 @@ RSpec.describe "Contact", type: :request do
     before { send_message(reference: "http://spam.example") }
 
     it "stores nothing" do
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "follows the redirect a real sender follows", :aggregate_failures do
@@ -402,7 +404,7 @@ RSpec.describe "Contact", type: :request do
     def caught(**message)
       post("/contact", message:)
 
-      [last_response.status, last_response.headers["location"], message_queries.messages.count]
+      [last_response.status, last_response.headers["location"], message_queries.mail_threads.count]
     end
 
     def minimum = Hanami.app["settings"].contact[:minimum_submit_seconds]
@@ -508,7 +510,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores nothing more" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
 
     it "comes back with the contact page" do
@@ -562,7 +564,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores nothing more" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
   end
 
@@ -581,7 +583,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores no more than the limit" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
   end
 
@@ -599,7 +601,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores no more than the limit" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
   end
 
@@ -617,7 +619,7 @@ RSpec.describe "Contact", type: :request do
 
     it "goes through, since the first address spent only its own allowance", :aggregate_failures do
       expect(last_response.status).to eq(302)
-      expect(message_queries.messages.count).to eq(limit + 1)
+      expect(message_queries.mail_threads.count).to eq(limit + 1)
     end
   end
 
@@ -637,7 +639,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores no more than the total limit" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
   end
 
@@ -650,7 +652,7 @@ RSpec.describe "Contact", type: :request do
 
     it "takes twenty from all senders together and refuses the next", :aggregate_failures do
       expect(last_response.status).to eq(429)
-      expect(message_queries.messages.count).to eq(20)
+      expect(message_queries.mail_threads.count).to eq(20)
     end
   end
 
@@ -668,13 +670,13 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores no more than the limit" do
-      expect(message_queries.messages.count).to eq(limit)
+      expect(message_queries.mail_threads.count).to eq(limit)
     end
 
     it "keys the hash on the network rather than the address" do
       network = Analytics::Slice["operations.hash_visitor"].call(address: "2001:db8:1:2::")
 
-      expect(stored.first.visitor_hash).to eq(network)
+      expect(stored_hash).to eq(network)
     end
   end
 
@@ -712,7 +714,7 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "stores nothing" do
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "comes back with the page" do
@@ -767,7 +769,7 @@ RSpec.describe "Contact", type: :request do
       it "stores nothing for #{name}" do
         send_message(field => value)
 
-        expect(message_queries.messages.count).to eq(0)
+        expect(message_queries.mail_threads.count).to eq(0)
       end
     end
   end
@@ -794,14 +796,14 @@ RSpec.describe "Contact", type: :request do
   end
 
   describe "a submission longer than the field says it takes" do
-    before { send_message(body: "a" * (Contact::Types::MAX_BODY + 1)) }
+    before { send_message(body: "a" * (Mail::Types::MAX_BODY + 1)) }
 
     it "comes back unprocessable" do
       expect(last_response.status).to eq(422)
     end
 
     it "stores nothing" do
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "names the failing field" do
@@ -841,7 +843,7 @@ RSpec.describe "Contact", type: :request do
     it "stores nothing" do
       send_control
 
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     {

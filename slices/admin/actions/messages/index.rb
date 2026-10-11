@@ -7,7 +7,7 @@ module Admin
         PRIVATE = Blog::Types::TagScope["private"]
 
         include Deps[
-          message_queries: "contact.repos.message_queries",
+          message_queries: "mail.repos.message_queries",
           tag_queries: "tags.repos.tag_queries",
         ]
 

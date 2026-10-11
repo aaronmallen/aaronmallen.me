@@ -65,7 +65,7 @@ RSpec.describe "Admin inbox Snooze All", type: :request do
   end
 
   it "changes nothing when one row is gone and names it", :aggregate_failures do
-    gone = create(:message).id.tap { Contact::Slice["repos.message_mutations"].delete(it) }
+    gone = create(:message).id.tap { Mail::Slice["repos.message_mutations"].delete(it) }
     snooze_all(tasks: [synced(title: "Kept").id], messages: [gone], pick: "2026-10-08T08:00")
 
     expect(toast).to eq("Nothing changed · message #{gone} is gone")

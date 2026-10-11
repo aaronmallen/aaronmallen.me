@@ -6,7 +6,7 @@ module API
       Snooze = Data.define(:kind, :id, :snoozed_until)
 
       include Deps[
-        snooze_messages: "contact.operations.snooze_messages",
+        snooze_messages: "mail.operations.snooze_messages",
         snooze_tasks: "tasks.operations.snooze_tasks",
         snooze_webmentions: "social.operations.snooze_webmentions",
       ]

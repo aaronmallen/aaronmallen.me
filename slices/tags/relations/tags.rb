@@ -12,7 +12,7 @@ module Tags
         tasks: :task_tags,
         decisions: :decision_tags,
         task_rules: :task_rule_tags,
-        messages: :message_tags,
+        messages: :mail_thread_tags,
       }.freeze
       SCOPES = Blog::DB::Plugins::Taggings::SCOPES
 

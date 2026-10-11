@@ -164,7 +164,7 @@ RSpec.describe "Admin tags", type: :request do
       end
 
       it "counts the messages a private tag is on" do
-        2.times { Contact::Slice["repos.message_tag_mutations"].add(create(:message).id, "ruby") }
+        2.times { Mail::Slice["repos.message_tag_mutations"].add(create(:message).id, "ruby") }
         get "/admin/tags", scope: "private"
 
         expect(page.find(".tag-uses").text).to eq("2 messages")
@@ -598,10 +598,10 @@ RSpec.describe "Admin tags", type: :request do
 
       it "takes it off every message that carried it" do
         message = create(:message)
-        Contact::Slice["repos.message_tag_mutations"].add(message.id, "chores")
+        Mail::Slice["repos.message_tag_mutations"].add(message.id, "chores")
         send_to("/admin/tags/#{named('chores').id}/delete", scope: "private")
 
-        expect(Contact::Slice["repos.message_queries"].by_id(message.id).tags).to be_empty
+        expect(Mail::Slice["repos.message_queries"].by_id(message.id).tags).to be_empty
       end
 
       it "leaves a published post that loses the tag as it was updated" do

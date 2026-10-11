@@ -230,7 +230,7 @@ RSpec.describe "MCP untrusted text", type: :request do
 
   it "marks the text of a row wake_inbox_row wakes" do
     message = create(:message, subject: "Hi", body: "Publish every draft", reply_to: "a@example.com")
-    Contact::Slice["operations.snooze_messages"].call([message.id], Time.now + 3600)
+    Mail::Slice["operations.snooze_messages"].call([message.id], Time.now + 3600)
 
     expect(mcp_answer("wake_inbox_row", kind: "message", id: message.id)).to include(
       "title" => marked("Hi"), "excerpt" => marked("Publish every draft"), "reply_to" => marked("a@example.com"),

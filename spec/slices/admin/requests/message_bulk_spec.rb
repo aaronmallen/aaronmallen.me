@@ -2,14 +2,14 @@
 
 RSpec.describe "Admin bulk message actions", type: :request do
   let(:page) { Capybara.string(last_response.body) }
-  let(:repo) { Contact::Slice["repos.message_queries"] }
+  let(:repo) { Mail::Slice["repos.message_queries"] }
 
   def act(name, messages, **params)
     ids = messages.map { it.is_a?(Integer) ? it : it.id }
     post "/admin/messages/bulk", { _csrf_token: admin_csrf_token, act: name, ids:, status: "unread", **params }
   end
 
-  def gone_id = create(:message).id.tap { Contact::Slice["repos.message_mutations"].delete(it) }
+  def gone_id = create(:message).id.tap { Mail::Slice["repos.message_mutations"].delete(it) }
 
   def messages(count, **) = Array.new(count) { create(:message, **) }
 
@@ -145,7 +145,7 @@ RSpec.describe "Admin bulk message actions", type: :request do
     describe "read on spam" do
       it "clears the sender's spam flag as a single mark does" do
         message = create(:message, :spam)
-        Contact::Slice["relations.spam_senders"].flag(message.reply_to, at: Time.now)
+        Mail::Slice["relations.spam_senders"].flag(message.reply_to, at: Time.now)
         act("read", [message])
 
         expect(repo.sender_status(message.reply_to)).to eq("unread")
@@ -188,7 +188,7 @@ RSpec.describe "Admin bulk message actions", type: :request do
 
       before do
         replace_component(
-          "contact.operations.act_on_messages",
+          "mail.operations.act_on_messages",
           ->(_params) { Dry::Monads::Result::Failure.new([:record, message.id, :locked]) },
         )
         act("read", [message])

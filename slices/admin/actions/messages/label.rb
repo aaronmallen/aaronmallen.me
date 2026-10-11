@@ -8,7 +8,7 @@ module Admin
         INVALID = "messages_page.toasts.labels_invalid"
         SAVED = "messages_page.toasts.labels_saved"
 
-        include Deps[label_message: "contact.operations.label_message"]
+        include Deps[label_message: "mail.operations.label_message"]
 
         def handle(request, response)
           id = record_id(request)

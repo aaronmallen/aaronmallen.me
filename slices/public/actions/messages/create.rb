@@ -13,7 +13,7 @@ module Public
         include Deps[
           check_stamp: "operations.check_contact_stamp",
           contact_view: "ui.views.pages.contact",
-          create_message: "contact.operations.create_message",
+          create_message: "mail.operations.create_message",
           hash_visitor: "analytics.operations.hash_visitor",
           issue_stamp: "operations.issue_contact_stamp",
         ]

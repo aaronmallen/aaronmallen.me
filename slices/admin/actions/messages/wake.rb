@@ -6,7 +6,7 @@ module Admin
       class Wake < Action
         WOKEN = "messages_page.toasts.woken"
 
-        include Deps[wake_message: "contact.operations.wake_message"]
+        include Deps[wake_message: "mail.operations.wake_message"]
 
         def handle(request, response)
           id = record_id(request)

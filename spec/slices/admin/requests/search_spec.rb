@@ -171,6 +171,14 @@ RSpec.describe "Admin search", type: :request do
 
         expect(page).to have_link("Hello", href: "/admin/messages?status=read")
       end
+
+      it "lists a thread once when more than one of its messages match" do
+        thread = create(:message, subject: "Hello", body: "Loved your piece on sourdough")
+        create(:mail_message, mail_thread_id: thread.id, subject: "Re: Hello", body: "More sourdough questions")
+        get "/admin/search", q: "sourdough"
+
+        expect(page).to have_link("Hello", count: 1)
+      end
     end
 
     it "dates each result" do

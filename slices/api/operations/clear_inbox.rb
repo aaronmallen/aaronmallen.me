@@ -8,7 +8,7 @@ module API
 
       include Deps[
         contract: "contracts.clear_inbox_contract",
-        mark_message: "contact.operations.mark_message",
+        mark_message: "mail.operations.mark_message",
         mark_task_seen: "tasks.operations.mark_task_seen",
         mark_webmention_seen: "social.operations.mark_webmention_seen",
       ]

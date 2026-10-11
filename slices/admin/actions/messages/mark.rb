@@ -6,7 +6,7 @@ module Admin
       class Mark < Action
         TOASTS = Blog::Types::MessageStatus.values.to_h { [it, "messages_page.toasts.#{it}"] }.freeze
 
-        include Deps[mark_message: "contact.operations.mark_message"]
+        include Deps[mark_message: "mail.operations.mark_message"]
 
         def handle(request, response)
           status = request.params[:status]

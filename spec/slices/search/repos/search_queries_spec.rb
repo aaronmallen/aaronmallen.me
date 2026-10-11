@@ -7,7 +7,7 @@ RSpec.describe Search::Repos::SearchQueries do
   describe "the query plan" do
     let(:tables) do
       %w[
-        tasks posts social_post_parts journal_entries commits projects work_entries people messages webmentions
+        tasks posts social_post_parts journal_entries commits projects work_entries people mail_messages webmentions
         decisions pull_requests
       ]
     end

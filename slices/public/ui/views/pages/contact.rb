@@ -48,7 +48,7 @@ module Public
               textarea(
                 **ContactFieldError.control_attributes(:body, @errors),
                 class: "f-i",
-                maxlength: ::Contact::Types::MAX_BODY,
+                maxlength: ::Mail::Types::MAX_BODY,
                 name: field_name(:body),
                 placeholder: t(".placeholders.body"),
                 required: true,
@@ -72,7 +72,7 @@ module Public
 
           def fields
             input_row(:reply_to, ".fields.reply_to", ".placeholders.reply_to", type: "email", autocomplete: "email")
-            input_row(:subject, ".fields.subject", ".placeholders.subject", maxlength: ::Contact::Types::MAX_SUBJECT)
+            input_row(:subject, ".fields.subject", ".placeholders.subject", maxlength: ::Mail::Types::MAX_SUBJECT)
             body_row
             honeypot
             input(type: "hidden", name: field_name(STAMP), value: @values[STAMP])

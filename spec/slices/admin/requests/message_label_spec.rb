@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin message labels", type: :request do
-  let(:repo) { Contact::Slice["repos.message_queries"] }
-  let(:tagging) { Contact::Slice["repos.message_tag_mutations"] }
+  let(:repo) { Mail::Slice["repos.message_queries"] }
+  let(:tagging) { Mail::Slice["repos.message_tag_mutations"] }
   let(:message) { create(:message, :read, subject: "Invoice") }
 
   def label(**params) = post("/admin/messages/#{message.id}/label", { _csrf_token: admin_csrf_token, **params })

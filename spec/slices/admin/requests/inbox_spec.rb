@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe "Admin inbox", type: :request do
-  let(:messages) { Contact::Slice["repos.message_queries"] }
+  let(:messages) { Mail::Slice["repos.message_queries"] }
   let(:page) { Capybara.string(last_response.body) }
   let(:tasks) { Tasks::Slice["repos.task_queries"] }
   let(:webmention_queries) { Social::Slice["repos.webmention_queries"] }
@@ -362,7 +362,7 @@ RSpec.describe "Admin inbox", type: :request do
         }
       end
 
-      def slice(kind) = { message: Contact::Slice, webmention: Social::Slice, task: Tasks::Slice }.fetch(kind)
+      def slice(kind) = { message: Mail::Slice, webmention: Social::Slice, task: Tasks::Slice }.fetch(kind)
 
       def snooze(kind, ends_at) = slice(kind)["operations.snooze_#{kind}s"].call([records.fetch(kind).id], ends_at)
 
@@ -396,7 +396,7 @@ RSpec.describe "Admin inbox", type: :request do
       it "snoozes many rows at once" do
         more = create(:message, subject: "more")
 
-        Contact::Slice["operations.snooze_messages"].call([records[:message].id, more.id], Time.now + 3600)
+        Mail::Slice["operations.snooze_messages"].call([records[:message].id, more.id], Time.now + 3600)
 
         expect(inbox).to eq(%w[task webmention])
       end
@@ -410,7 +410,7 @@ RSpec.describe "Admin inbox", type: :request do
       end
 
       it "snoozes nothing when one of the ids is missing", :aggregate_failures do
-        result = Contact::Slice["operations.snooze_messages"].call([records[:message].id, 0], Time.now + 3600)
+        result = Mail::Slice["operations.snooze_messages"].call([records[:message].id, 0], Time.now + 3600)
 
         expect(result.failure).to eq([:record, 0, :not_found])
         expect(inbox).to include("message")

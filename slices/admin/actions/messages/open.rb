@@ -8,8 +8,8 @@ module Admin
         UNREAD = Blog::Types::MessageStatus["unread"]
 
         include Deps[
-          mark_message: "contact.operations.mark_message",
-          message_queries: "contact.repos.message_queries",
+          mark_message: "mail.operations.mark_message",
+          message_queries: "mail.repos.message_queries",
         ]
 
         def handle(request, response)

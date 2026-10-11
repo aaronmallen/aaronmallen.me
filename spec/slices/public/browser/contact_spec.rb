@@ -8,7 +8,7 @@ RSpec.describe "Contact form", type: :feature do
     JS
   end
   let(:i18n) { Public::Slice["i18n"] }
-  let(:message_queries) { Contact::Slice["repos.message_queries"] }
+  let(:message_queries) { Mail::Slice["repos.message_queries"] }
 
   before { change_contact_setting(:minimum_submit_seconds, to: 0) }
 
@@ -41,7 +41,7 @@ RSpec.describe "Contact form", type: :feature do
     2.times { page.refresh }
 
     expect(page).to have_css(".f-ok strong", text: i18n.t("ui.views.pages.contact.sent.heading"))
-    expect(message_queries.messages.count).to eq(1)
+    expect(message_queries.mail_threads.count).to eq(1)
   end
 
   it "stores what was typed" do
@@ -64,7 +64,7 @@ RSpec.describe "Contact form", type: :feature do
   end
 
   describe "the count under the message" do
-    let(:total) { Contact::Types::MAX_BODY }
+    let(:total) { Mail::Types::MAX_BODY }
 
     before { visit "/contact" }
 
@@ -146,7 +146,7 @@ RSpec.describe "Contact form", type: :feature do
 
       expect(page).to have_css("#cf-email-error", exact_text: error("reply_to.format"))
       expect(page).to have_current_path("/contact")
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
 
     it "asks for a subject that was left blank" do
@@ -242,7 +242,7 @@ RSpec.describe "Contact form", type: :feature do
 
       expect(page).to have_no_css("#cf-subject-error")
       expect(page).to have_current_path("/contact")
-      expect(message_queries.messages.count).to eq(0)
+      expect(message_queries.mail_threads.count).to eq(0)
     end
   end
 end

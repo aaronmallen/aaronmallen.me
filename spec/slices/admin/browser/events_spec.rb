@@ -74,7 +74,7 @@ RSpec.describe "Admin events", type: :feature do
     opened = Array.new(2) { open_stream }
     create(:message)
 
-    expect(changes(opened, "messages")).to all(include(change("messages")))
+    expect(changes(opened, "mail_threads")).to all(include(change("mail_threads")))
   end
 
   it "tells every open stream about a new webmention" do
@@ -96,6 +96,6 @@ RSpec.describe "Admin events", type: :feature do
     listen_in_browser
     create(:message)
 
-    expect { evaluate_script("window.changes") }.to eventually(include("messages"))
+    expect { evaluate_script("window.changes") }.to eventually(include("mail_threads"))
   end
 end

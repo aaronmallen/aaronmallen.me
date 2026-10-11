@@ -17,7 +17,20 @@ module ROM
         end
       end
 
+      module Threading
+        def create(name, *traits, **attrs)
+          return super unless name == :message
+
+          letter = attrs.slice(*Spec::DB::Threading::LETTER)
+          thread = super(name, *traits, **attrs.except(*letter.keys))
+          super(:mail_message, mail_thread_id: thread.id, **thread.to_h.slice(:subject, :received_at), **letter)
+
+          Mail::Slice["repos.message_queries"].by_id(thread.id)
+        end
+      end
+
       prepend Linking
+      prepend Threading
       prepend Tagging
     end
   end
@@ -104,6 +117,10 @@ module Spec
           linked[:"#{key}_id"] = record.id if record
         end
       end
+    end
+
+    module Threading
+      LETTER = %i[reply_to body visitor_hash].freeze
     end
 
     module Tagging

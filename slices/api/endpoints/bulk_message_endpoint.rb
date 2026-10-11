@@ -8,8 +8,8 @@ module API
       REPLY = Helpers::Schema.object({ messages: Helpers::Schema.list(Serializers::Message.reference) }).freeze
 
       include Deps[
-        act_on_messages: "contact.operations.act_on_messages",
-        message_queries: "contact.repos.message_queries",
+        act_on_messages: "mail.operations.act_on_messages",
+        message_queries: "mail.repos.message_queries",
       ]
 
       def handle(ids:) = acted(ids)

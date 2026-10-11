@@ -18,7 +18,7 @@ module API
       operations.snooze_messages
       operations.wake_message
       repos.message_queries
-    ], from: :contact
+    ], from: :mail
 
     import keys: %w[
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment

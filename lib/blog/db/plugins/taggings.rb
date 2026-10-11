@@ -14,7 +14,7 @@ module Blog
           task_tags: PRIVATE,
           decision_tags: PRIVATE,
           task_rule_tags: PRIVATE,
-          message_tags: PRIVATE,
+          mail_thread_tags: PRIVATE,
         }.freeze
 
         def self.apply(relation, owner_key:)

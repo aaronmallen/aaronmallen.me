@@ -21,7 +21,7 @@ RSpec.describe "Admin inbox snoozed section", type: :request do
   end
 
   def snooze(kind, record, ends_at)
-    slice = { message: Contact::Slice, webmention: Social::Slice, task: Tasks::Slice }.fetch(kind)
+    slice = { message: Mail::Slice, webmention: Social::Slice, task: Tasks::Slice }.fetch(kind)
     slice["operations.snooze_#{kind}s"].call([record.id], ends_at)
   end
 

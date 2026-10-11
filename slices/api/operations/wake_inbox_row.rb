@@ -6,7 +6,7 @@ module API
       WAKES = { "message" => :wake_message, "task" => :wake_task, "webmention" => :wake_webmention }.freeze
 
       include Deps[
-        wake_message: "contact.operations.wake_message",
+        wake_message: "mail.operations.wake_message",
         wake_task: "tasks.operations.wake_task",
         wake_webmention: "social.operations.wake_webmention",
       ]

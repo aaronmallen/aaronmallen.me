@@ -6,7 +6,7 @@ module Admin
       class MarkMessage < Action
         TOASTS = "messages_page.toasts"
 
-        include Deps[mark_message: "contact.operations.mark_message"]
+        include Deps[mark_message: "mail.operations.mark_message"]
 
         def handle(request, response)
           status = request.params[:status]

@@ -31,7 +31,7 @@ module MCP
 
     import keys: %w[
       operations.mark_message repos.message_queries
-    ], from: :contact
+    ], from: :mail
 
     import keys: %w[
       operations.compose_announcement operations.delete_post operations.save_post operations.save_post_seo

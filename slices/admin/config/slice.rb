@@ -45,7 +45,7 @@ module Admin
     import keys: %w[
       operations.act_on_messages operations.delete_message operations.label_message operations.mark_message
       operations.wake_message repos.message_queries
-    ], from: :contact
+    ], from: :mail
 
     import keys: %w[
       github.client linear.client operations.delete_journal_entry operations.queue_commit_import
