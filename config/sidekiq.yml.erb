@@ -63,6 +63,9 @@ production:
     sweep_photos:
       cron: "30 5 * * * <%= Blog::TimeZone::NAME %>"
       class: Media::Jobs::SweepPhotos
+    sync_health:
+      cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Health::Jobs::SyncHealth
     sync_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues

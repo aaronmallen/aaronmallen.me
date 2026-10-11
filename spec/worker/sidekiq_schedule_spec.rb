@@ -41,6 +41,12 @@ RSpec.describe "The worker's schedule", type: :app do
     )
   end
 
+  it "syncs Google Health every fifteen minutes" do
+    expect(schedule.fetch("sync_health")).to include(
+      "class" => "Health::Jobs::SyncHealth", "cron" => "*/15 * * * * #{Blog::TimeZone::NAME}",
+    )
+  end
+
   describe "the sprint roll-over" do
     let(:entry) { schedule.fetch("roll_over_sprint") }
     let(:cron) { Fugit::Cron.parse(entry.fetch("cron")) }

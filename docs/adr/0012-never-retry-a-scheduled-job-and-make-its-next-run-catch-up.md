@@ -5,7 +5,7 @@ status: active
 created: 2026-09-28
 area: [analytics, backups, config, contact, lib, mcp, media, posts, projects, record, security, social, tasks]
 issue: AA-657
-amended: [AA-823, "#140", "#252", "#990", "#926", "#957"]
+amended: [AA-823, "#140", "#252", "#990", "#926", "#957", "#1114"]
 tags: [sidekiq, jobs, retries, schedule, sync-states, honeybadger, failures]
 ---
 
@@ -41,7 +41,8 @@ picks up what this one missed. A job that records a failure in `sync_states` and
 base's `record_and_raise`. Each scheduled operation finds its work again on every run.
 `PostRepo#due_scheduled` and `SocialPostRepo#due_scheduled` take every row due by now, the commit finder starts from the
 newest stored commit and every failure recorded against a repository, the rollup walks every day since its newest
-rollup, and the reapers delete everything past its time.
+rollup, the health sync reads again from two days before its failure began (#1114), and the reapers delete everything
+past its time.
 
 **A per-item job retries a few times.** `BackfillRepoCommits` takes 3, as `CreditAgents` has since #926, and
 `DeliverSocialPost`, `SendWebmentions`, `VerifyWebmention` and `SyndicatePost` take 5, which three of the specs
@@ -51,6 +52,8 @@ commit walk raises for nothing it returns. A GitHub rate limit spends no retry: 
 GitHub gave, a minute from now at the soonest. A GitHub failure records itself in `sync_states` and ends the walk,
 and the finder's next run starts it again, so a walk never waits on Sidekiq's retries for GitHub. Its retries
 cover only an exception, and a walk whose retries run out stalls until the finder starts it again (ADR 0049).
+`BackfillHealth`, which walks Google Health's history 90 days at a time, takes 3 retries and raises for every
+`Failure` (#1114).
 
 **A scheduled failure the operator has to act on goes to `sync_states`,** where Today shows it with its reason.
 
@@ -58,7 +61,7 @@ cover only an exception, and a walk whose retries run out stalls until the finde
 | --- | --- |
 | `BackUpDatabase`, `RefreshCountryDatabase`, `RollUpAnalytics` | Record in `sync_states`, then raise |
 | `RollOverSprint`, `QueueHeldFollowUps`, `QueueHeldWebmentions`, `CheckPostLinks` | Raise |
-| `ImportCommits`, `ImportPullRequests`, `RefreshProjects`, `SyncIssues` | Record in `sync_states` |
+| `ImportCommits`, `ImportPullRequests`, `RefreshProjects`, `SyncHealth`, `SyncIssues` | Record in `sync_states` |
 | `ReapSyncStates`, `RefreshSocialEngagement`, `PublishDuePosts`, `SendDueSocialPosts`, `ReapExpiredCredentials`, `ReapWebmentionReceipts`, `SweepPhotos`, `PruneAccessRecords`, `ReapSpamMessages` | Drop it |
 
 The table took in the jobs that came after it in #957. `SyncIssues` runs twice on the schedule, as `sync_issues`

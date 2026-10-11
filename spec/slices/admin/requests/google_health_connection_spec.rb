@@ -128,6 +128,10 @@ RSpec.describe "Admin Google Health connection", type: :request do
         expect(connection.scopes).to eq(["https://www.googleapis.com/auth/googlehealth.sleep.readonly"])
       end
 
+      it "queues a backfill from today" do
+        expect(Health::Jobs::BackfillHealth.jobs.map { it["args"] }).to eq([[Blog::TimeZone.today.iso8601]])
+      end
+
       it "opens the connection as connected", :aggregate_failures do
         expect(toast).to include("Google Health connected")
         expect(page.find(".settings-side")).to have_css(".pill", text: "connected")

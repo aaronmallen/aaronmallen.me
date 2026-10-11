@@ -10,6 +10,7 @@ module Health
       CHALLENGE_METHOD = "S256"
       CHECK_PATH = "users/me/dataTypes/steps/dataPoints"
       INVALID_GRANT = "invalid_grant"
+      JSON_HEADERS = { "Content-Type" => "application/json" }.freeze
       LATENCY = 60
       NOT_CONNECTED = "Google Health isn't connected"
       NOT_SET_UP = "Google Health sign-in isn't set up"
@@ -40,20 +41,17 @@ module Health
         )
       end
 
-      def get(path, **params)
-        return unless configured?
+      def connected? = configured? && !@connection_queries.for(PROVIDER).first.nil?
 
-        connection = current
-        token = token(connection.credentials)
-        token = renew(connection, token) if token.expired?
-        fetch(connection, token, path, params)
-      end
+      def get(path, **params) = request(:get, path, params:)
 
       def grant(code:, redirect_uri:, code_verifier:)
         token = oauth.auth_code.get_token(code, redirect_uri:, code_verifier:)
 
         { **ACCOUNT, credentials: stored(token), scopes: token.params["scope"].to_s.split }
       end
+
+      def post(path, body) = request(:post, path, body: body.to_json, headers: JSON_HEADERS.dup)
 
       def revoke(credentials)
         oauth.request(:post, REVOKE_URL, body: { token: credentials[:refresh_token] || credentials[:access_token] })
@@ -71,12 +69,12 @@ module Health
         connection
       end
 
-      def fetch(connection, token, path, params, renewed: false)
-        token.get(URI.join(API_URL, path).to_s, params:).parsed
+      def fetch(connection, token, verb, path, options, renewed: false)
+        token.request(verb, URI.join(API_URL, path).to_s, options).parsed
       rescue OAuth2::Error => e
         raise Error, refusal(e) if renewed || e.response&.status != UNAUTHORIZED
 
-        fetch(connection, renew(connection, token), path, params, renewed: true)
+        fetch(connection, renew(connection, token), verb, path, options, renewed: true)
       rescue Faraday::Error => e
         raise Error, e.message
       end
@@ -92,6 +90,15 @@ module Health
         raise Error, RECONNECT
       rescue Faraday::Error => e
         raise Error, e.message
+      end
+
+      def request(verb, path, **options)
+        return unless configured?
+
+        connection = current
+        token = token(connection.credentials)
+        token = renew(connection, token) if token.expired?
+        fetch(connection, token, verb, path, options)
       end
 
       def stored(token)

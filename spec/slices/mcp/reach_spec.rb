@@ -80,6 +80,8 @@ RSpec.describe "MCP reach", type: :app do
       "contact.operations.create_message" => "a reader sends a message through the public form",
       "contact.operations.label_message" => "sets a message's tags from the admin; tag_messages covers it",
       "contact.operations.reap_spam_messages" => "a background job reaps old spam messages",
+      "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",
+      "health.operations.sync_health" => "background jobs sync health days and workouts from Google",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
       "mcp.operations.authenticate" => "OAuth: checks the token on each MCP request",
       "mcp.operations.authorize" => "OAuth: the owner grants a client in the browser",

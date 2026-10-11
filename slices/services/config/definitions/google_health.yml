@@ -15,3 +15,5 @@ scopes:
   - id: "https://www.googleapis.com/auth/googlehealth.health_metrics_and_measurements.readonly"
     label: Read heart rate and HRV
     why: Resting heart rate and HRV
+jobs:
+  - {name: Google Health sync, every: every 15 minutes, sync: health}
