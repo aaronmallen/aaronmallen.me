@@ -9,7 +9,8 @@ module Admin
         include Deps[delete_person: "social.operations.delete_person"]
 
         def handle(request, response)
-          settle(response, delete_person.call(record_id(request)), REMOVED, routes.path(:admin_people))
+          back = back_here(request) || routes.path(:admin_people)
+          settle(response, delete_person.call(record_id(request)), REMOVED, back)
         end
       end
     end

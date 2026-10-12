@@ -8,6 +8,7 @@ module Admin
         CHECK = "fa-solid fa-check"
         ITEM = "ctx-item"
         MENU = { class: "ctx", role: "menu", tabindex: "-1" }.freeze
+        TAG_PATTERN = '\s*[A-Za-z0-9]+(-[A-Za-z0-9]+)*\s*'
 
         prop :label, Blog::Types::String
         prop :return_to, Blog::Types::String.optional, default: nil
@@ -56,6 +57,17 @@ module Admin
           end
         end
 
+        def tags(label, names:, tags:, new_tag:, invalid:)
+          sub(label, icon: "fa-solid fa-tag", hint: (names.size.to_s unless names.empty?)) do
+            tags.each do |tag|
+              on = names.include?(tag.name)
+              check("#{Tag::PREFIX}#{tag.name}", on:, **yield(tag.name, on))
+            end
+            separator unless tags.empty?
+            field(new_tag, name: "tag", pattern: TAG_PATTERN, invalid:, **yield(nil, false))
+          end
+        end
+
         def view_template
           div(**MENU, aria: { label: @label }, data: { context_menu: true }) do
             p(class: "ctx-head", title: @label) { @label }
@@ -66,7 +78,7 @@ module Admin
         private
 
         def hidden(fields)
-          HiddenFields(values: @return_to ? { **fields, return_to: @return_to } : fields)
+          HiddenFields(values: { return_to: @return_to, **fields }.compact)
         end
 
         def inner(label, icon:, hint: nil, key: nil)

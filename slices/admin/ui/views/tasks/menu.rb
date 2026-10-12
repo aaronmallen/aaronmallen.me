@@ -12,7 +12,6 @@ module Admin
           FROM_INBOX = Blog::Types::TaskOrigin["inbox"]
           ISSUE = "fa-solid fa-arrow-up-right-from-square"
           TAG = Blog::Types::TaskBulkAction["tag"]
-          TAG_PATTERN = '\s*[A-Za-z0-9]+(-[A-Za-z0-9]+)*\s*'
           UNTAG = Blog::Types::TaskBulkAction["untag"]
 
           layout nil
@@ -61,15 +60,6 @@ module Admin
 
           def key = Components::RecordKey.key(@task.id)
 
-          def new_tag(menu)
-            invalid = t("tasks_page.toasts.bulk.invalid.tag_format")
-            fields = { act: TAG, "ids[]": @task.id }
-
-            label = t(".new_tag")
-
-            menu.field(label, action: path(:admin_bulk_tasks), name: "tag", pattern: TAG_PATTERN, invalid:, fields:)
-          end
-
           def open_path = act(:admin_task, filter: @filter, origin: @origin)
 
           def progress(menu)
@@ -112,19 +102,14 @@ module Admin
             end
           end
 
-          def tag_item(menu, name, on)
-            fields = { act: on ? UNTAG : TAG, "ids[]": @task.id, tag: name }
-
-            menu.check("#{Components::Tag::PREFIX}#{name}", on:, action: path(:admin_bulk_tasks), fields:)
-          end
-
           def tags(menu)
             names = @task.tags.map(&:name)
+            invalid = t("tasks_page.toasts.bulk.invalid.tag_format")
 
-            menu.sub(t(".tags"), icon: "fa-solid fa-tag", hint: (names.size.to_s unless names.empty?)) do
-              @tags.each { tag_item(menu, it.name, names.include?(it.name)) }
-              menu.separator unless @tags.empty?
-              new_tag(menu)
+            menu.tags(t(".tags"), names:, tags: @tags, new_tag: t(".new_tag"), invalid:) do |name, on|
+              tag = name ? { tag: name } : Blog::Constants::EMPTY_HASH
+
+              { action: path(:admin_bulk_tasks), fields: { act: on ? UNTAG : TAG, "ids[]": @task.id, **tag } }
             end
           end
         end

@@ -8,6 +8,7 @@ module Admin
           include Components::Social
 
           ACCOUNTS_SEPARATOR = " and "
+          LINKS = "social-links"
 
           prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(Structs::SocialAccount))
           prop :filter, Blog::Types::SocialQueue
@@ -43,10 +44,12 @@ module Admin
           def linked
             id = @composer[:editing]
 
-            RecordLinks::Section(
-              records: @records, kind: "social_post", id:, fields: { filter: @filter, edit: id },
-              find_path: path(:admin_social),
-            )
+            div(id: LINKS) do
+              RecordLinks::Section(
+                records: @records, kind: "social_post", id:, fields: { filter: @filter, edit: id },
+                find_path: path(:admin_social),
+              )
+            end
           end
 
           def queue

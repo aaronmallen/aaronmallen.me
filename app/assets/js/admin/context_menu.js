@@ -5,6 +5,7 @@ import { showToast } from "./toast.js";
 export const MENU = "[data-context-menu]";
 
 const BESIDE = { x: 24, y: 40 };
+const CONTROL = "a, input, textarea, select";
 const EDGE = 8;
 const ITEM = "[data-context-item]";
 const LIST = "[role=menu]";
@@ -126,6 +127,15 @@ function keyed(event) {
   open(row, box.left + BESIDE.x, box.top + Math.min(box.height, BESIDE.y), true);
 }
 
+function onControl({ target, clientX: x, clientY: y }) {
+  const control = target.closest(CONTROL);
+  if (!control) return false;
+
+  return [...control.getClientRects()].some(
+    (box) => x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
+  );
+}
+
 async function open(row, x, y, keys) {
   close();
 
@@ -167,7 +177,7 @@ function pointed(event) {
   }
 
   const row = event.target.closest?.(ROW);
-  if (!row || event.shiftKey || event.target.closest("a, input, textarea, select")) return;
+  if (!row || event.shiftKey || onControl(event)) return;
 
   event.preventDefault();
   open(row, event.clientX, event.clientY, false);

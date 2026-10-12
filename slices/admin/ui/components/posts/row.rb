@@ -15,7 +15,7 @@ module Admin
           prop :stats, Blog::Types::Hash
 
           def view_template
-            ListItem(title: @post.title, href: path(:admin_edit_post, id: @post.id), sub:, pick:) do |item|
+            ListItem(title: @post.title, href: path(:admin_edit_post, id: @post.id), sub:, pick:, data:) do |item|
               item.meta { meta }
               PublishForm(post: @post, filter: @filter, page: @page) if @post.status == DRAFT
               analytics_link
@@ -33,6 +33,8 @@ module Admin
               icon: "fa-solid fa-chart-simple",
             )
           end
+
+          def data = { menu: path(:admin_post_menu, id: @post.id, status: @filter, **Blog::Structs::Page.query(@page)) }
 
           def mentions
             count = @stats.fetch(:mentions)

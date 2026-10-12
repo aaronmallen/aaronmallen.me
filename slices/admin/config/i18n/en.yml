@@ -2855,6 +2855,12 @@ en:
             one: "%{count} person you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
             other: "%{count} people you can mention. A social post names someone by their key; each network gets their handle, or their name where they have none."
           token: "@{%{key}}"
+        menu:
+          confirm_remove: "Click again to remove"
+          copied_mention: "Mention copied"
+          copy_mention: "Copy mention"
+          edit: "Edit"
+          remove: "Remove"
       posts:
         analytics:
           back: "All posts"
@@ -2899,9 +2905,30 @@ en:
           published: "published"
           scheduled: "scheduled"
           title: "Posts"
+        menu:
+          analytics: "Analytics"
+          confirm_delete: "Click again to delete"
+          copied_link: "Link copied"
+          copy_link: "Copy link"
+          delete: "Delete draft"
+          edit: "Edit"
+          keep_writing: "Keep writing"
+          new_tag: "New tag…"
+          tags: "Tags"
+          view: "View on site"
         new:
           title: "New post"
       projects:
+        menu:
+          archive: "Archive"
+          copied_repo: "Repo copied"
+          copy_repo: "Copy repo"
+          edit: "Edit"
+          new_tag: "New tag…"
+          open_repo: "Open repo"
+          open_site: "Open site"
+          restore: "Restore"
+          tags: "Tags"
         index:
           archive_note: "Archiving keeps the repo link and history but removes the project from /projects."
           archived: "archived"
@@ -3018,6 +3045,14 @@ en:
           heading: "Social"
           no_accounts: "No network is connected"
           queued: "%{count} queued"
+        menu:
+          confirm_remove: "Click again to remove"
+          copied_text: "Text copied"
+          copy_text: "Copy text"
+          delete_draft: "Delete draft"
+          edit: "Edit"
+          linked: "Linked records"
+          remove: "Remove from queue"
       tags:
         index:
           aside: "Click a tag to rename it, recolour it or take it away."

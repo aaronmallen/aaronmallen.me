@@ -14,7 +14,7 @@ module Admin
           prop :suggestions, Blog::Types::Integer, default: 0
 
           def view_template
-            article(class: "sq-item", data: { social_item: @social_post.id, key_row: true }) do
+            article(class: "sq-item", data: { social_item: @social_post.id, key_row: true, menu: }) do
               div(class: "sq-body") do
                 div(class: "sq-text") { @social_post.parts.each { |part| p(class: "sq-part") { part.body } } }
                 failures
@@ -57,6 +57,8 @@ module Admin
               p(class: "sq-fail") { failure_text(delivery) }
             end
           end
+
+          def menu = path(:admin_social_post_menu, id: @social_post.id, filter: @filter)
 
           def remove_form
             Form(action: path(:admin_delete_social_post, id: @social_post.id)) do

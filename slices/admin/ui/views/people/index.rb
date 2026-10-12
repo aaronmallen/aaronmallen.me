@@ -47,7 +47,7 @@ module Admin
           end
 
           def row(person)
-            div(class: "person-row", data: { key_row: true }) do
+            div(class: "person-row", data: { key_row: true, menu: path(:admin_person_menu, id: person.id) }) do
               div(class: "person-row-body") do
                 a(
                   class: "person-row-name", href: path(:admin_edit_person, id: person.id),

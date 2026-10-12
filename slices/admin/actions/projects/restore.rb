@@ -10,10 +10,12 @@ module Admin
 
         def handle(request, response)
           result = restore_project.call(record_id(request))
-          settle(response, result, RESTORED, routes.path(:admin_projects, filter: filter(request)))
+          settle(response, result, RESTORED, back_path(request))
         end
 
         private
+
+        def back_path(request) = back_here(request) || routes.path(:admin_projects, filter: filter(request))
 
         def filter(request) = Blog::Types::ProjectFilterParam[request.params[:filter]]
       end

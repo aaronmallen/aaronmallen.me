@@ -14,7 +14,8 @@ module Admin
           prop :filter, Blog::Types::String
 
           def view_template
-            section(class: "card project-card", data: { key_row: true }) do
+            section(class: "card project-card",
+                    data: { key_row: true, menu: path(:admin_project_menu, id: @project.id) }) do
               div(class: "project-card-head") do
                 a(class: "project-card-name", href: edit_path, data: { key_open: true }) { @project.name }
                 pills

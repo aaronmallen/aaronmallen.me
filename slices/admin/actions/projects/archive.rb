@@ -16,11 +16,13 @@ module Admin
 
           case result
             in Failure(:not_started) then not_started(response, id)
-            else settle(response, result, ARCHIVED, routes.path(:admin_projects, filter: filter(request)))
+            else settle(response, result, ARCHIVED, back_path(request))
           end
         end
 
         private
+
+        def back_path(request) = back_here(request) || routes.path(:admin_projects, filter: filter(request))
 
         def filter(request) = Blog::Types::ProjectFilterParam[request.params[:filter]]
 

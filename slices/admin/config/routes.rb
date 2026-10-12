@@ -130,6 +130,7 @@ module Admin
     get "/people/new", to: "people.new", as: :new_person
     get "/people/search/:network", to: "people.search", as: :search_people, network: NETWORK
     get "/people/:id/edit", to: "people.edit", as: :edit_person, id: ID
+    get "/people/:id/menu", to: "people.menu", as: :person_menu, id: ID
     post "/people/:id", to: "people.update", as: :update_person, id: ID
     post "/people/:id/delete", to: "people.destroy", as: :delete_person, id: ID
     post "/photos", to: "photos.create", as: :create_photo
@@ -139,6 +140,7 @@ module Admin
     get "/posts/new", to: "posts.new", as: :new_post
     get "/posts/:id/analytics", to: "posts.analytics", as: :post_analytics, id: ID
     get "/posts/:id/edit", to: "posts.edit", as: :edit_post, id: ID
+    get "/posts/:id/menu", to: "posts.menu", as: :post_menu, id: ID
     post "/posts/:id", to: "posts.update", as: :update_post, id: ID
     post "/posts/:id/delete", to: "posts.destroy", as: :delete_post, id: ID
     post "/posts/:id/publish", to: "posts.publish", as: :publish_post, id: ID
@@ -156,6 +158,7 @@ module Admin
     post "/projects", to: "projects.create", as: :create_project
     get "/projects/new", to: "projects.new", as: :new_project
     get "/projects/:id/edit", to: "projects.edit", as: :edit_project, id: ID
+    get "/projects/:id/menu", to: "projects.menu", as: :project_menu, id: ID
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
     post "/projects/:id/archive", to: "projects.archive", as: :archive_project, id: ID
     post "/projects/:id/records", to: "projects.link_record", as: :link_project_record, id: ID
@@ -197,6 +200,7 @@ module Admin
     post "/services/:id/work", to: "services.work", as: :work_service, id: ID
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
+    get "/social/:id/menu", to: "social.menu", as: :social_post_menu, id: ID
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID
     post "/social/:id/delete", to: "social.destroy", as: :delete_social_post, id: ID
     post "/social/:id/records", to: "social.link_record", as: :link_social_post_record, id: ID

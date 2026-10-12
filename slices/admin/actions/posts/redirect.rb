@@ -8,6 +8,10 @@ module Admin
         private
 
         def back(request)
+          back_here(request) || listed(request)
+        end
+
+        def listed(request)
           filter = Blog::Types::PostFilterParam[request.params[:status]]
           page = landing(request) { post_queries.by_filter(filter, it).past_end? }
 
