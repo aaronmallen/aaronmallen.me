@@ -17,7 +17,7 @@ module Admin
           case result
             in Failure(:open) then to_decision(request, response, OPEN)
             in Failure[:invalid, errors] then refuse_form(request, response, { name: :reopen, params:, errors: })
-            else settle(response, result, DONE, decision_path(request))
+            else settle(response, result, DONE, back_here(request) || decision_path(request))
           end
         end
       end

@@ -13,8 +13,10 @@ module Admin
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :linked, Blog::Types::Integer, default: 0
 
+          def self.links_id(id) = "journal-links-#{id}"
+
           def view_template
-            article(class: "journal-entry", data: { journal_item: "" }) do
+            article(class: "journal-entry", data: { journal_item: "", menu: }) do
               head
               MarkdownBody(
                 source: @entry.body, markdown: ::Posts::Markdown, class: "journal-entry-body", hidden: editing?,
@@ -90,7 +92,7 @@ module Admin
           def linked
             id = @entry.id
 
-            div(class: "journal-links", data: { journal_links: "" }) do
+            div(class: "journal-links", id: self.class.links_id(id), data: { journal_links: "" }) do
               RecordLinks::Section(
                 records:, kind: "journal_entry", id:, fields: { to: @date.iso8601, edit: id },
                 find_path: path(:admin_journal),
@@ -111,6 +113,8 @@ module Admin
             Button(href: path(:admin_journal, to: @date.iso8601, edit: @entry.id),
                    **icon(t(".links"), "fa-solid fa-link"))
           end
+
+          def menu = path(:admin_journal_entry_menu, id: @entry.id)
 
           def records = @editing&.fetch(:records, nil)
 

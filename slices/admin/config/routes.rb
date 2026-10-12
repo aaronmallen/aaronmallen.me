@@ -48,6 +48,7 @@ module Admin
     get "/decisions/new", to: "decisions.new", as: :new_decision
     get "/decisions/:id", to: "decisions.show", as: :decision, id: ID
     get "/decisions/:id/edit", to: "decisions.edit", as: :edit_decision, id: ID
+    get "/decisions/:id/menu", to: "decisions.menu", as: :decision_menu, id: ID
     post "/decisions/:id", to: "decisions.update", as: :update_decision, id: ID
     post "/decisions/:id/comments", to: "decisions.create_comment", as: :create_decision_comment, id: ID
     post(
@@ -77,6 +78,7 @@ module Admin
     get "/files", to: "files.index", as: :files
     post "/files", to: "files.create", as: :create_files
     get "/files/:id/edit", to: "files.edit", as: :edit_file, id: ID
+    get "/files/:id/menu", to: "files.menu", as: :file_menu, id: ID
     post "/files/:id", to: "files.update", as: :update_file, id: ID
     post "/files/:id/delete", to: "files.destroy", as: :delete_file, id: ID
     get "/health", to: "health.show", as: :health
@@ -97,6 +99,7 @@ module Admin
     )
     get "/journal", to: "journal.index", as: :journal
     post "/journal", to: "journal.create", as: :create_journal_entry
+    get "/journal/:id/menu", to: "journal.menu", as: :journal_entry_menu, id: ID
     post "/journal/:id", to: "journal.update", as: :update_journal_entry, id: ID
     post "/journal/:id/delete", to: "journal.destroy", as: :delete_journal_entry, id: ID
     post "/journal/:id/records", to: "journal.link_record", as: :link_journal_entry_record, id: ID
@@ -109,6 +112,7 @@ module Admin
     get "/links", to: "links.index", as: :links
     post "/links", to: "links.create", as: :create_link
     get "/links/:id/edit", to: "links.edit", as: :edit_link, id: ID
+    get "/links/:id/menu", to: "links.menu", as: :link_menu, id: ID
     post "/links/:id", to: "links.update", as: :update_link, id: ID
     post "/links/:id/delete", to: "links.destroy", as: :delete_link, id: ID
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
@@ -213,6 +217,7 @@ module Admin
     get "/tags", to: "tags.index", as: :tags
     post "/tags", to: "tags.create", as: :create_tag
     get "/tags/:name", to: "tags.show", as: :tag, name: TAG
+    get "/tags/:id/menu", to: "tags.menu", as: :tag_menu, id: ID
     post "/tags/:id", to: "tags.update", as: :update_tag, id: ID
     post "/tags/:id/delete", to: "tags.destroy", as: :delete_tag, id: ID
     get "/tasks", to: "tasks.index", as: :tasks

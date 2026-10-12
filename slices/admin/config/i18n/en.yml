@@ -1207,6 +1207,9 @@ en:
           uploading: "Uploading"
         view: "Editor view"
         write: "Write"
+      menu_tags:
+        new_tag: "New tag…"
+        tags: "Tags"
       nav:
         actions:
           complete_task:
@@ -2686,6 +2689,14 @@ en:
           waiting:
             one: "%{count} decision waits on a choice. %{resolved} resolved, %{dropped} dropped."
             other: "%{count} decisions wait on a choice. %{resolved} resolved, %{dropped} dropped."
+        menu:
+          copy_number: "Copy number"
+          drop: "Drop…"
+          drop_title: "Drop it"
+          edit: "Edit"
+          open: "Open"
+          reopen: "Reopen…"
+          reopen_title: "Reopen it"
         new:
           back: "All decisions"
           heading: "New decision"
@@ -2721,6 +2732,15 @@ en:
           upload: "Upload"
           upload_failed: "Nothing uploaded · try again"
           uploading: "Uploading…"
+        menu:
+          confirm_delete: "Click again · link stops working"
+          copied_link: "Link copied"
+          copied_markdown: "Markdown copied"
+          copy_link: "Copy link"
+          copy_markdown: "Copy as markdown"
+          delete: "Delete file"
+          details: "Details"
+          open: "Open file"
       forms:
         rejected:
           heading: "Form expired"
@@ -2763,6 +2783,13 @@ en:
           words:
             one: "%{count} word"
             other: "%{count} words"
+        menu:
+          confirm_delete: "Click again · can't undo"
+          copied_text: "Entry copied"
+          copy_text: "Copy text"
+          delete: "Delete entry"
+          edit: "Edit"
+          links: "Linked records"
       links:
         edit:
           all_links: "All links"
@@ -2792,6 +2819,17 @@ en:
           sorts:
             clicks: "most clicked"
             recent: "recent"
+        menu:
+          confirm_delete: "Click again · it will 404"
+          copied_destination: "Destination copied"
+          copied_markdown: "Markdown copied"
+          copied_short: "Short link copied"
+          copy_destination: "Copy destination"
+          copy_markdown: "Copy as markdown"
+          copy_short: "Copy short link"
+          delete: "Delete link"
+          edit: "Edit"
+          open: "Open destination"
       mail:
         index:
           account: "Account"
@@ -3076,6 +3114,13 @@ en:
           title:
             private: "Task and journal tags"
             public: "Post and project tags"
+        menu:
+          color: "Colour"
+          confirm_delete: "Click again · comes off everything"
+          copied: "%{tag} copied"
+          copy: "Copy"
+          delete: "Delete tag"
+          rename: "Rename…"
         show:
           back: "Tags"
           count:

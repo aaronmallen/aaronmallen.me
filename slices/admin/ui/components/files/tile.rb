@@ -18,7 +18,7 @@ module Admin
           prop :share, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            article(class: "file-card") do
+            article(class: "file-card", data: { menu: path(:admin_file_menu, id: @share.id) }) do
               thumb
               div(class: "file-card-body") do
                 p(class: "file-card-name", title: @share.filename) { opener }

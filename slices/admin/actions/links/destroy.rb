@@ -9,7 +9,9 @@ module Admin
         include Deps[delete_short_link: "shares.operations.delete_short_link"]
 
         def handle(request, response)
-          settle(response, delete_short_link.call(record_id(request)), DELETED, routes.path(:admin_links))
+          back = auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_links)
+
+          settle(response, delete_short_link.call(record_id(request)), DELETED, back)
         end
       end
     end

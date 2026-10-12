@@ -12,7 +12,8 @@ module Admin
           prop :uses, Blog::Types::Hash
 
           def view_template
-            div(class: "tag-row", data: { key_row: true }) do
+            div(class: "tag-row",
+                data: { key_row: true, menu: path(:admin_tag_menu, id: @tag.id, scope: @tag.scope) }) do
               p(class: "tag-name") { Tag(tag: @tag) }
               p(class: "tag-uses") { uses }
               div(class: "tag-acts") { edit }

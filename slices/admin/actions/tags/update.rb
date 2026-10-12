@@ -22,11 +22,15 @@ module Admin
 
           case result
             in Failure[:invalid, errors] then invalid(request, response, scope, editing(id, params, errors))
-            else settle(response, result, saved_key(params), routes.path(:admin_tags, scope:))
+            else settle(response, result, saved_key(params), back(request, scope))
           end
         end
 
         private
+
+        def back(request, scope)
+          auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_tags, scope:)
+        end
 
         def editing(id, params, errors) = { errors:, id:, name: Blog::Types::Text[params[:name]] }
 

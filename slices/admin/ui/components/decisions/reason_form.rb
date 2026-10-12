@@ -13,9 +13,12 @@ module Admin
           prop :name, Blog::Types::Symbol.enum(:drop, :reopen, :resolve)
           prop :route, Blog::Types::Symbol
           prop :variant, Blog::Types::Symbol
+          prop :morph, Blog::Types::Bool, default: false
+
+          def self.id_for(name) = "decision-#{name}-form"
 
           def view_template(&)
-            Form(action: path(@route, id: @decision.id), class: "stack-form") do
+            Form(**attributes) do
               yield if block_given?
               reason_field
               Button(variant: @variant, type: "submit", small: true) { t([".submit", @name].join(".")) }
@@ -23,6 +26,13 @@ module Admin
           end
 
           private
+
+          def attributes
+            {
+              id: self.class.id_for(@name), action: path(@route, id: @decision.id), class: "stack-form",
+              data: { morph: (true if @morph) },
+            }
+          end
 
           def errors = @form[:name] == @name ? @form[:errors] : Blog::Constants::EMPTY_HASH
 

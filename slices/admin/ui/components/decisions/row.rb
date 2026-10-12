@@ -8,7 +8,7 @@ module Admin
           prop :decision, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            div(class: "decision-row", data: { key_row: true }) do
+            div(class: "decision-row", data: { key_row: true, menu: path(:admin_decision_menu, id: @decision.id) }) do
               RecordKey(kind: "decision", id: @decision.id)
               div(class: "decision-row-body") do
                 a(class: "decision-row-title", href: path(:admin_decision, id: @decision.id),

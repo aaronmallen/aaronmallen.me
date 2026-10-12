@@ -9,7 +9,9 @@ module Admin
         include Deps[delete_journal_entry: "record.operations.delete_journal_entry"]
 
         def handle(request, response)
-          settle(response, delete_journal_entry.call(record_id(request)), DELETED, routes.path(:admin_journal))
+          back = auth_session(request).admin_return_path(request.params[:return_to]) || routes.path(:admin_journal)
+
+          settle(response, delete_journal_entry.call(record_id(request)), DELETED, back)
         end
       end
     end

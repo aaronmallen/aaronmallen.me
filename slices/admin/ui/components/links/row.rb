@@ -14,7 +14,7 @@ module Admin
           def self.host(destination) = URI.parse(destination).host.to_s.delete_prefix("www.")
 
           def view_template
-            div(class: "link-row") do
+            div(class: "link-row", data: { menu: path(:admin_link_menu, id: @link.id) }) do
               div(class: "link-row-main") do
                 p(class: "link-row-title") { opener }
                 p(class: "link-row-url", title: @link.destination) { @link.destination.sub(SCHEME, "") }

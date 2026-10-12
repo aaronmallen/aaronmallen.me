@@ -1,3 +1,4 @@
+import { openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
 import { copy } from "./record_key.js";
 import { showToast } from "./toast.js";
@@ -9,6 +10,7 @@ const CONTROL = "a, input, textarea, select";
 const EDGE = 8;
 const ITEM = "[data-context-item]";
 const LIST = "[role=menu]";
+const MORPHED = "admin:morphed";
 const OPEN = "[data-key-open]";
 const ROW = "[data-menu]";
 const STEPS = { ArrowDown: 1, ArrowUp: -1 };
@@ -43,6 +45,10 @@ function clicked(event) {
   if ("confirmInline" in item.dataset && !("sure" in item.dataset)) {
     event.preventDefault();
     return sure(item);
+  }
+  if ("dialogOpen" in item.dataset) {
+    event.preventDefault();
+    return summon(item);
   }
   if ("copy" in item.dataset) {
     copy(item.dataset.copy, item.dataset.copied);
@@ -229,6 +235,19 @@ function submitted(event) {
   }
 
   setTimeout(() => close(true));
+}
+
+function summon(item) {
+  const id = item.dataset.dialogOpen;
+  const carried = shown.menu.querySelector(`dialog[id="${id}"]`);
+
+  close();
+  if (carried) {
+    for (const old of document.querySelectorAll(`dialog[id="${id}"]`)) old.remove();
+    document.querySelector("main").append(carried);
+    document.dispatchEvent(new Event(MORPHED));
+  }
+  if (!openDialog(id)) window.location.assign(item.href);
 }
 
 function sure(item) {

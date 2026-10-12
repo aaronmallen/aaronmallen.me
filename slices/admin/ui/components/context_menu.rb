@@ -32,8 +32,9 @@ module Admin
           end
         end
 
-        def link(label, href:, icon:, key: nil, outbound: false)
-          a(href:, **item, **(outbound ? OUTBOUND : Blog::Constants::EMPTY_HASH)) { inner(label, icon:, key:) }
+        def link(label, href:, icon:, key: nil, outbound: false, dialog: nil)
+          data = dialog ? { dialog_open: dialog } : Blog::Constants::EMPTY_HASH
+          a(href:, **item(data:), **(outbound ? OUTBOUND : Blog::Constants::EMPTY_HASH)) { inner(label, icon:, key:) }
         end
 
         def post(label, action:, icon: nil, hint: nil, fields: Blog::Constants::EMPTY_HASH, confirm: nil, **)
