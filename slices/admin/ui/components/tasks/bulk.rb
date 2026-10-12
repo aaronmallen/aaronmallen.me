@@ -18,7 +18,8 @@ module Admin
           prop :query, Blog::Types::String
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_tasks), label: t(".label"), fields:) do |bar|
+            BulkBar(id: ID, action: path(:admin_bulk_tasks), label: t(".label"), fields:,
+                    menu: path(:admin_tasks_bulk_menu, **fields)) do |bar|
               bar.act(COMPLETE, icon: "fa-solid fa-check", label: t(".complete"), variant: :pri)
               bar.act(CANCEL, icon: "fa-solid fa-ban", label: t(".cancel"))
               move(bar)

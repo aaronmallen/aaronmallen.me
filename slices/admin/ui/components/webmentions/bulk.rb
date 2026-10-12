@@ -16,7 +16,8 @@ module Admin
           prop :page, Blog::Types::Integer
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_webmentions), label: t(".label"), fields:) do
+            BulkBar(id: ID, action: path(:admin_bulk_webmentions), label: t(".label"), fields:,
+                    menu: path(:admin_webmentions_bulk_menu, **fields)) do
               VARIANTS.except(@filter).each do |verdict, variant|
                 WebmentionVerdict(verdict:, variant:, name: BulkBar::ACT, value: verdict)
               end

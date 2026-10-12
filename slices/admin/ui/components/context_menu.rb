@@ -17,6 +17,12 @@ module Admin
           post(label, icon: on ? CHECK : nil, role: "menuitemcheckbox", aria: { checked: on.to_s }, **)
         end
 
+        def clear(label, form:)
+          button(type: "button", **item(data: { bulk_clear: form })) do
+            inner(label, icon: "fa-regular fa-square-minus")
+          end
+        end
+
         def copy(label, text:, copied:, icon:, hint: nil)
           button(type: "button", **item(data: { copy: text, copied: })) { inner(label, icon:, hint:) }
         end

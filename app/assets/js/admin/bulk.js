@@ -45,6 +45,15 @@ export function setupBulk(root = document) {
   });
 }
 
+export function clear(form) {
+  for (const box of picks(form)) box.checked = false;
+  show(form);
+}
+
+export function picks(form) {
+  return [...form.elements].filter((element) => element.name === form.dataset.bulk);
+}
+
 function all(form) {
   return form.querySelector(ALL).querySelector("input");
 }
@@ -52,12 +61,8 @@ function all(form) {
 function pick(form, button, on) {
   button.setAttribute("aria-pressed", String(on));
   form.toggleAttribute("data-bulk-off", !on);
-  if (!on) for (const box of picks(form)) box.checked = false;
-  show(form);
-}
-
-function picks(form) {
-  return [...form.elements].filter((element) => element.name === form.dataset.bulk);
+  if (on) show(form);
+  else clear(form);
 }
 
 function show(form) {

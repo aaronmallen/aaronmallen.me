@@ -42,6 +42,8 @@ module Admin
 
     def page_size = settings.page_size[:admin]
 
+    def picked_ids(request) = Array(request.params[:ids]).filter_map { Blog::Types::IdParam[it] }.uniq
+
     def record_id(request) = Blog::Types::IdParam[request.params[:id]] || halt(404)
 
     def require_sign_in(request, response)

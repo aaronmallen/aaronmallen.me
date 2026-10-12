@@ -13,7 +13,8 @@ module Admin
           prop :page, Blog::Types::Integer
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_posts), label: t(".label"), fields:) do |bar|
+            BulkBar(id: ID, action: path(:admin_bulk_posts), label: t(".label"), fields:,
+                    menu: path(:admin_posts_bulk_menu, **fields)) do |bar|
               bar.tagging(tag: TAG)
               bar.act(DELETE, icon: "fa-regular fa-trash-can", label: t(".delete"), variant: :warn, data: confirm)
             end

@@ -13,6 +13,8 @@ module Tasks
 
       def by_id(id) = with_details.by_pk(id).one
 
+      def by_ids(ids) = tasks.where(id: ids).combine(:tags).to_a
+
       def by_tag(tag) = with_details.combine(:sprint).tagged([tag]).open_first.to_a
 
       def detailed(id) = with_details.combine(:sprint).by_pk(id).one

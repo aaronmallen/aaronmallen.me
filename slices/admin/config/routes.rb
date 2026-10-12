@@ -141,6 +141,7 @@ module Admin
     get "/posts", to: "posts.index", as: :posts
     post "/posts", to: "posts.create", as: :create_post
     post "/posts/bulk", to: "posts.bulk", as: :bulk_posts
+    get "/posts/bulk/menu", to: "posts.bulk_menu", as: :posts_bulk_menu
     get "/posts/new", to: "posts.new", as: :new_post
     get "/posts/:id/analytics", to: "posts.analytics", as: :post_analytics, id: ID
     get "/posts/:id/edit", to: "posts.edit", as: :edit_post, id: ID
@@ -223,6 +224,7 @@ module Admin
     get "/tasks", to: "tasks.index", as: :tasks
     post "/tasks", to: "tasks.create", as: :create_task
     post "/tasks/bulk", to: "tasks.bulk", as: :bulk_tasks
+    get "/tasks/bulk/menu", to: "tasks.bulk_menu", as: :tasks_bulk_menu
     get "/tasks/in-progress", to: "tasks.in_progress", as: :tasks_in_progress
     get "/tasks/new", to: "tasks.new", as: :new_task
     get "/tasks/rules", to: "task_rules.index", as: :task_rules
@@ -276,6 +278,7 @@ module Admin
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
+    get "/webmentions/bulk/menu", to: "webmentions.bulk_menu", as: :webmentions_bulk_menu
     get "/webmentions/settings", to: "webmentions.settings", as: :webmention_settings
     get "/webmentions/:id/menu", to: "webmentions.menu", as: :webmention_menu, id: ID
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings

@@ -1,3 +1,4 @@
+import { clear, picks } from "./bulk.js";
 import { openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
 import { copy } from "./record_key.js";
@@ -12,7 +13,8 @@ const ITEM = "[data-context-item]";
 const LIST = "[role=menu]";
 const MORPHED = "admin:morphed";
 const OPEN = "[data-key-open]";
-const ROW = "[data-menu]";
+const PICK = "input[name='ids[]'][form]";
+const ROW = "[data-menu], [data-key-row]";
 const STEPS = { ArrowDown: 1, ArrowUp: -1 };
 
 let bound = false;
@@ -49,6 +51,10 @@ function clicked(event) {
   if ("dialogOpen" in item.dataset) {
     event.preventDefault();
     return summon(item);
+  }
+  if ("bulkClear" in item.dataset) {
+    clear(document.getElementById(item.dataset.bulkClear));
+    return close(true);
   }
   if ("copy" in item.dataset) {
     copy(item.dataset.copy, item.dataset.copied);
@@ -126,11 +132,12 @@ function keyed(event) {
   if (event.key !== "ContextMenu" && !(event.key === "F10" && event.shiftKey)) return;
 
   const row = event.target.closest?.(ROW);
-  if (!row) return;
+  const url = row && source(row);
+  if (!url) return;
 
   const box = row.getBoundingClientRect();
   event.preventDefault();
-  open(row, box.left + BESIDE.x, box.top + Math.min(box.height, BESIDE.y), true);
+  open(row, url, box.left + BESIDE.x, box.top + Math.min(box.height, BESIDE.y), true);
 }
 
 function onControl({ target, clientX: x, clientY: y }) {
@@ -142,11 +149,10 @@ function onControl({ target, clientX: x, clientY: y }) {
   );
 }
 
-async function open(row, x, y, keys) {
+async function open(row, url, x, y, keys) {
   close();
 
   const mine = { row, keys, menu: null };
-  const url = new URL(row.dataset.menu, window.location.href);
   url.searchParams.set("return_to", window.location.pathname + window.location.search);
   shown = mine;
 
@@ -185,8 +191,11 @@ function pointed(event) {
   const row = event.target.closest?.(ROW);
   if (!row || event.shiftKey || onControl(event)) return;
 
+  const url = source(row);
+  if (!url) return;
+
   event.preventDefault();
-  open(row, event.clientX, event.clientY, false);
+  open(row, url, event.clientX, event.clientY, false);
 }
 
 function press(event) {
@@ -216,6 +225,18 @@ function press(event) {
     event.preventDefault();
     item.click();
   }
+}
+
+function source(row) {
+  const form = row.querySelector(PICK)?.form;
+  const picked = form?.dataset.bulkMenu ? picks(form).filter((pick) => pick.checked) : [];
+
+  if (picked.length > 1 && picked.some((pick) => row.contains(pick))) {
+    const url = new URL(form.dataset.bulkMenu, window.location.href);
+    for (const pick of picked) url.searchParams.append("ids[]", pick.value);
+    return url;
+  }
+  return row.dataset.menu ? new URL(row.dataset.menu, window.location.href) : null;
 }
 
 function step(list, item, by) {

@@ -573,6 +573,10 @@ en:
         tag_placeholder: "tag"
         ticked: "%{count} ticked"
         untag: "Untag"
+      bulk_tags:
+        add: "Add tag"
+        new: "New tag…"
+        remove: "Remove tag"
       bulk_toggle:
         label: "Select"
       calendar:
@@ -2929,6 +2933,12 @@ en:
           unkept: "no count kept"
           views: "Page views"
           visitors: "Visitors"
+        bulk_menu:
+          confirm_delete: "Click again to delete"
+          delete: "Delete"
+          label:
+            one: "%{count} post picked"
+            other: "%{count} posts picked"
         index:
           all: "all"
           draft_count:
@@ -3150,6 +3160,16 @@ en:
           sub: "Each rule gives the issues it matches private tags and projects on import."
           title: "Tags and projects by repo or team"
       tasks:
+        bulk_menu:
+          cancel: "Cancel"
+          clear: "Clear selection"
+          complete: "Complete"
+          confirm_delete: "Click again to delete"
+          delete: "Delete"
+          label:
+            one: "%{count} task picked"
+            other: "%{count} tasks picked"
+          move: "Move to"
         index:
           carried_in:
             one: "%{count} carried in"
@@ -3243,6 +3263,10 @@ en:
           live: "Live tokens"
           mint: "Mint a token"
       webmentions:
+        bulk_menu:
+          label:
+            one: "%{count} webmention picked"
+            other: "%{count} webmentions picked"
         index:
           approved: "approved"
           empty:
