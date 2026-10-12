@@ -5,6 +5,19 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.16] - 2026-10-12
+
+### Changed
+
+- Connecting Google lets you untick mail, calendar or any Health scope, and asks Google only for what stays ticked.
+  Each Google account's detail has a Change access button that opens the same choice with what the account holds,
+  and a scope you left off shows as off rather than asking you to grant it.
+
+### Fixed
+
+- Google sits under a Personal group on Connected services, and its picker line names Gmail and Google Calendar. It
+  used to sit under Health.
+
 ## [26.10.15] - 2026-10-12
 
 ### Added
@@ -892,7 +905,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...HEAD
+[26.10.16]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...26.10.16
 [26.10.15]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.14...26.10.15
 [26.10.14]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.13...26.10.14
 [26.10.13]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.12...26.10.13
