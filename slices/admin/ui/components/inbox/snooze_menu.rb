@@ -10,6 +10,8 @@ module Admin
           prop :menu, Blog::Types::Instance(ContextMenu)
           prop :kind, Blog::Types::String
           prop :id, Blog::Types::Integer
+          prop :action, Blog::Types::String.optional, default: nil
+          prop :fields, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
 
           def view_template
             now = Time.now
@@ -28,8 +30,8 @@ module Admin
           end
 
           def pick(key, at, today)
-            action = path(:admin_inbox_snooze, kind: @kind, id: @id)
-            fields = { pick: Blog::TimeZone.input_value(at) }
+            action = @action || path(:admin_inbox_snooze, kind: @kind, id: @id)
+            fields = { **@fields, pick: Blog::TimeZone.input_value(at) }
             label = "#{LABELS}.#{key}"
 
             @menu.post(t(label), action:, fields:, hint: hint(at, today))

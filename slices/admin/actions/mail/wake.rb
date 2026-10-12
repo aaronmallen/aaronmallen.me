@@ -13,7 +13,8 @@ module Admin
           result = wake_message.call(id)
           halt 422 if result in Failure(:not_snoozed)
 
-          back = Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: id)
+          list = Helpers::MailList.from(request.params)
+          back = back_here(request) || Helpers::MailList.back(routes, list, thread: id)
           settle(response, result, WOKEN, back)
         end
       end

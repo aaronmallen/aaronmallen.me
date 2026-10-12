@@ -51,8 +51,8 @@ module Admin
 
     import keys: %w[
       operations.act_on_messages operations.change_thread operations.delete_message operations.download_attachment
-      operations.mark_message operations.save_draft operations.send_mail operations.update_mail_settings
-      operations.wake_message repos.message_queries repos.thread_queries
+      operations.mark_message operations.save_draft operations.send_mail operations.snooze_messages
+      operations.update_mail_settings operations.wake_message repos.message_queries repos.thread_queries
     ], from: :mail
 
     import keys: %w[

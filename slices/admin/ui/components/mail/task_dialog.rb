@@ -10,9 +10,10 @@ module Admin
 
           prop :thread, Blog::Types::Instance(ROM::Struct)
           prop :list, Blog::Types::Hash
+          prop :trigger, Blog::Types::Bool, default: true
 
           def view_template
-            Button(small: true, icon: "fa-solid fa-square-check", data: { dialog_open: id }) { t(".open") }
+            Button(small: true, icon: "fa-solid fa-square-check", data: { dialog_open: id }) { t(".open") } if @trigger
             Dialog(id:, title_id: "#{id}-heading", title: t(".title"), class: "modal", data: { dialog: true }) do
               Form(action: path(:admin_make_mail_task, id: @thread.id), class: "form-stack") do
                 HiddenFields(values: @list)

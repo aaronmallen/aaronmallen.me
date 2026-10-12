@@ -5,7 +5,7 @@ module Admin
     module Mail
       class Bulk < BulkAction
         ACT = Blog::Types::MessageBulkAction
-        DONES = %w[archive delete inbox read spam star tag trash unread untag].freeze
+        DONES = %w[archive delete inbox read spam star tag trash unread unstar untag].freeze
         DONE = DONES.to_h { [ACT[it], "mail_page.toasts.bulk.#{it}"] }.freeze
         FAILED = "mail_page.toasts.bulk.failed"
         INVALID = "mail_page.toasts.bulk.invalid"
@@ -22,12 +22,7 @@ module Admin
 
         def act(params) = act_on_messages.call(params)
 
-        def back(request)
-          list = Helpers::MailList.from(request.params)
-          page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
-
-          Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page))
-        end
+        def back(request) = back_here(request) || listed(request)
 
         def done(request, response, records)
           act = request.params[:act]
@@ -43,6 +38,13 @@ module Admin
           label = request.params[:label].split(":", 2).last
 
           toast(response, skipped.positive? && count.positive? ? SKIPPED : LABELED, count:, skipped:, label:)
+        end
+
+        def listed(request)
+          list = Helpers::MailList.from(request.params)
+          page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
+
+          Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page))
         end
 
         def named(id)

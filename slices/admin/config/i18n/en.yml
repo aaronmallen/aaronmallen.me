@@ -151,6 +151,9 @@ en:
         read:
           one: "Marked %{count} thread read"
           other: "Marked %{count} threads read"
+        snoozed:
+          one: "Snoozed %{count} thread until %{date}"
+          other: "Snoozed %{count} threads until %{date}"
         spam:
           one: "Moved %{count} thread to Spam"
           other: "Moved %{count} threads to Spam"
@@ -166,6 +169,9 @@ en:
         unread:
           one: "Moved %{count} thread back to unread"
           other: "Moved %{count} threads back to unread"
+        unstar:
+          one: "Unstarred %{count} thread"
+          other: "Unstarred %{count} threads"
         untag:
           one: "Untagged %{count} thread %{tag}"
           other: "Untagged %{count} threads %{tag}"
@@ -1128,6 +1134,16 @@ en:
             starred: "Starred"
             trash: "Trash"
             updates: "Updates"
+        menu_labels:
+          invalid: "A label takes lowercase letters, numbers and dashes"
+          label: "Label"
+          new: "New label…"
+        move_menu:
+          archive: "Archive"
+          inbox: "Inbox"
+          move_to: "Move to"
+          spam: "Spam"
+          trash: "Trash"
         reader:
           confirm_delete: "Delete this thread? This cannot be undone."
           confirm_delete_forever: "Delete forever?"
@@ -2863,6 +2879,28 @@ en:
           edit: "Edit"
           open: "Open destination"
       mail:
+        bulk_menu:
+          archive:
+            one: "Archive %{count}"
+            other: "Archive %{count}"
+          confirm: "Click again to delete"
+          confirm_forever: "Click again · can’t undo"
+          delete:
+            one: "Delete %{count}"
+            other: "Delete %{count}"
+          delete_forever:
+            one: "Delete %{count} forever"
+            other: "Delete %{count} forever"
+          label:
+            one: "%{count} thread picked"
+            other: "%{count} threads picked"
+          label_as: "Label"
+          read: "Mark read"
+          restore:
+            one: "Restore %{count}"
+            other: "Restore %{count}"
+          star: "Star"
+          unread: "Mark unread"
         index:
           account: "Account"
           all_accounts: "All accounts"
@@ -2889,6 +2927,25 @@ en:
             one: "%{count} Gmail account and the contact form"
             other: "%{count} Gmail accounts and the contact form"
             zero: "the contact form"
+        menu:
+          archive: "Archive"
+          confirm: "Click again to delete"
+          confirm_forever: "Click again · can’t undo"
+          copied_address: "Address copied"
+          copy_address: "Copy address"
+          delete: "Delete"
+          delete_forever: "Delete forever"
+          draft: "Draft"
+          inbox: "Move to Inbox"
+          make_task: "Make a task"
+          open: "Open"
+          open_task: "Open task #%{id}"
+          read: "Mark read"
+          reply: "Reply"
+          star: "Star"
+          unread: "Mark unread"
+          unstar: "Unstar"
+          wake: "Wake now"
         settings:
           accounts: "Accounts"
           back: "Mail"

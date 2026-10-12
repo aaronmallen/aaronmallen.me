@@ -128,6 +128,8 @@ module Admin
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/mail", to: "mail.index", as: :mail
     post "/mail/bulk", to: "mail.bulk", as: :bulk_mail
+    get "/mail/bulk/menu", to: "mail.bulk_menu", as: :mail_bulk_menu
+    post "/mail/bulk/snooze", to: "mail.bulk_snooze", as: :snooze_bulk_mail
     get "/mail/settings", to: "mail.settings", as: :mail_settings
     post "/mail/settings", to: "mail.update_settings", as: :update_mail_settings
     post "/mail/send", to: "mail.send", as: :send_mail
@@ -135,6 +137,7 @@ module Admin
     get "/mail/messages/:id/attachments/:part", to: "mail.attachment", as: :mail_attachment, id: ID, part: PART
     post "/mail/:id/change/:act", to: "mail.change", as: :change_mail, id: ID, act: MAIL_CHANGE
     post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
+    get "/mail/:id/menu", to: "mail.menu", as: :mail_menu, id: ID
     post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID
     post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
     post "/mail/:id/task", to: "mail.make_task", as: :make_mail_task, id: ID

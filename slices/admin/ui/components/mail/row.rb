@@ -17,7 +17,7 @@ module Admin
 
           def view_template
             div(id: "thread-#{@thread.id}", class: ["mail-row", ("unread" if unread?), ("snoozed" if snoozed?),
-                                                    ("on" if @open)], data: { key_row: true }) do
+                                                    ("on" if @open)], data: { key_row: true, menu: menu_path }) do
               grip
               BulkCheck(form: Bulk::ID, value: @thread.id, label: t(".pick", subject: @thread.subject))
               Form(action: path(:admin_open_mail, id: @thread.id), class: "mail-row-form") do
@@ -63,6 +63,8 @@ module Admin
           def labels
             [*@thread.mail_labels, *@thread.tags].map(&:name).uniq - [Helpers::MailList.label(@list[:folder])]
           end
+
+          def menu_path = path(:admin_mail_menu, id: @thread.id, **@list, **Blog::Structs::Page.query(@page))
 
           def meta
             span(class: "mail-row-meta") do

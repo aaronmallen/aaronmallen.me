@@ -26,7 +26,8 @@ module Admin
           prop :chips, Blog::Types::Hash
 
           def view_template
-            BulkBar(id: ID, action: path(:admin_bulk_mail), label: t(".label"), fields:) do |bar|
+            BulkBar(id: ID, action: path(:admin_bulk_mail), label: t(".label"), fields:,
+                    menu: path(:admin_mail_bulk_menu, **fields)) do |bar|
               @list[:folder] == TRASH ? trash(bar) : filed(bar)
             end
           end

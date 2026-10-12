@@ -16,7 +16,7 @@ module Admin
           prop :task, Blog::Types::Integer.optional, default: nil
 
           def view_template
-            Row(id: "message-#{@message.id}", kind: :message, title: @message.subject) do |row|
+            Row(id: "message-#{@message.id}", kind: :message, title: @message.subject, menu: menu_path) do |row|
               row.meta { meta }
               row.body { p(class: "msg-body inbox-row-body") { @message.body } }
               actions
@@ -40,6 +40,8 @@ module Admin
               Button(type: "submit", variant:, small: true) { t(label_key) }
             end
           end
+
+          def menu_path = path(:admin_mail_menu, id: @message.id, origin: FROM_INBOX)
 
           def meta
             span { Stamped(text: Stamped::MARK, at: @message.received_at) }

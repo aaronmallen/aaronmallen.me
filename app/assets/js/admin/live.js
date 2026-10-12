@@ -8,6 +8,7 @@ const LONGEST_WAIT = 30000;
 const MORPHED = "admin:morphed";
 const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
+const TYPED = "input, textarea, select, [contenteditable]";
 const WAIT = 1000;
 const HOLD = `dialog:modal, ${ASKING}, ${MENU}`;
 
@@ -22,13 +23,14 @@ export function forgetEdits(form) {
 }
 
 export function morphPage(next) {
+  const typing = Boolean(document.activeElement?.matches(TYPED));
   morphs += 1;
   for (const selector of PARTS) {
     const now = document.querySelector(selector);
     const drawn = next.querySelector(selector);
     if (now && drawn)
       Idiomorph.morph(now, drawn, {
-        ignoreActiveValue: true,
+        ignoreActiveValue: typing,
         callbacks: { beforeNodeMorphed: untouched, beforeAttributeUpdated: keepsOpen },
       });
   }
