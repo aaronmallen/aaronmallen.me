@@ -12,7 +12,7 @@ module Admin
           prop :page, Blog::Types::Integer
 
           def view_template
-            Form(action: path(:admin_publish_post, id: @post.id)) do
+            Form(action: path(:admin_publish_post, id: @post.id), data: { morph: true }) do
               input(type: "hidden", name: "status", value: @filter)
               HiddenFields(values: Blog::Structs::Page.query(@page))
               button

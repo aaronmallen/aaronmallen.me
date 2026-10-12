@@ -18,7 +18,7 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            Form(action: path(MOVES.fetch(@kind), id: @id), class: "cal-move") do
+            Form(action: path(MOVES.fetch(@kind), id: @id), class: "cal-move", data: { morph: true }) do
               grip
               input(type: "hidden", name: "day", value: @date.iso8601)
               label(class: "sr-only", for: field) { t(".move_to", title: @title) }

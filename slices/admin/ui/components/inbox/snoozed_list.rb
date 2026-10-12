@@ -30,7 +30,7 @@ module Admin
                 p(class: "inbox-snoozed-title") { title(found) }
                 p(class: "inbox-meta") { meta(found) }
               end
-              Form(action: path(:admin_inbox_wake, kind: found.kind, id: found.record.id)) do
+              Form(action: path(:admin_inbox_wake, kind: found.kind, id: found.record.id), data: { morph: true }) do
                 Button(type: "submit", variant: :gh, small: true) { t(".wake") }
               end
             end

@@ -40,7 +40,7 @@ module Admin
         end
 
         def delete(label_key, confirm_key)
-          Form(action: path(:admin_delete_message, id: @message.id)) do
+          Form(action: path(:admin_delete_message, id: @message.id), data: { morph: true }) do
             input(type: "hidden", name: "status", value: @filter)
             input(type: "hidden", name: "page", value: @page)
             narrowing
@@ -49,7 +49,7 @@ module Admin
         end
 
         def mark(status, label_key, variant: nil)
-          Form(action: path(:admin_mark_message, id: @message.id, status:)) do
+          Form(action: path(:admin_mark_message, id: @message.id, status:), data: { morph: true }) do
             input(type: "hidden", name: "filter", value: @filter)
             input(type: "hidden", name: "open", value: @message.id)
             narrowing
@@ -83,7 +83,7 @@ module Admin
         end
 
         def wake
-          Form(action: path(:admin_wake_message, id: @message.id)) do
+          Form(action: path(:admin_wake_message, id: @message.id), data: { morph: true }) do
             input(type: "hidden", name: "filter", value: @filter)
             narrowing
             Button(type: "submit", small: true) { t(".wake") }

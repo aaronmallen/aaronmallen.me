@@ -16,7 +16,7 @@ module Admin
           def view_template(&)
             @now = Time.now
 
-            Form(action: @action, class: "snooze-form") do
+            Form(action: @action, class: "snooze-form", data: { morph: true }) do
               yield if block_given?
               picks
               field

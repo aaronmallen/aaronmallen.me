@@ -23,7 +23,7 @@ module Admin
           def actions
             LISTS.each { move(it) unless it == @task.place }
             edit
-            Form(action: path(:admin_inbox_see_task, id: @task.id)) do
+            Form(action: path(:admin_inbox_see_task, id: @task.id), data: { morph: true }) do
               Button(type: "submit", variant: :gh, small: true) { t(".seen") }
             end
             Inbox::Snooze(kind: "task", id: @task.id)
@@ -44,7 +44,7 @@ module Admin
           def move(filter)
             list = t(Helpers::TaskLists.title(filter))
 
-            Form(action: path(:admin_inbox_move_task, id: @task.id, filter:)) do
+            Form(action: path(:admin_inbox_move_task, id: @task.id, filter:), data: { morph: true }) do
               Button(type: "submit", small: true, aria: { label: t(".move", list:) }) { list }
             end
           end

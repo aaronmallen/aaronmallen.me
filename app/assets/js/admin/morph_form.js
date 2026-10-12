@@ -40,6 +40,7 @@ async function post(form, submitter) {
   if (!landed) return showToast(document.querySelector(FAILED)?.dataset.morphFailed ?? "", { failed: true });
 
   form.reset();
+  form.closest("dialog")?.close();
   if (landed.url !== window.location.href) history.replaceState(history.state, "", landed.url);
   morphPage(landed.page);
   refocus(form);

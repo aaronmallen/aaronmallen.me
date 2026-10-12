@@ -46,7 +46,7 @@ module Admin
           def delete_form
             Form(
               id: self.class.delete_id(@link), action: path(:admin_delete_link, id: @link.id),
-              data: { confirm: t(".confirm_delete", link: Helpers::ShareLink.bare(short)) },
+              data: { morph: true, confirm: t(".confirm_delete", link: Helpers::ShareLink.bare(short)) },
             )
           end
 

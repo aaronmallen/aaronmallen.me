@@ -32,7 +32,7 @@ module Admin
           def address = ERB::Util.url_encode(@message.reply_to).gsub(ENCODED_AT, AT)
 
           def mark(status, label_key, variant)
-            Form(action: path(:admin_inbox_mark_message, id: @message.id, status:)) do
+            Form(action: path(:admin_inbox_mark_message, id: @message.id, status:), data: { morph: true }) do
               Button(type: "submit", variant:, small: true) { t(label_key) }
             end
           end

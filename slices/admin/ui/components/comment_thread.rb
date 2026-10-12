@@ -82,7 +82,7 @@ module Admin
 
         def delete_form(comment)
           label = t(".delete")
-          data = { confirm: t(".confirm_delete") }
+          data = { morph: true, confirm: t(".confirm_delete") }
 
           Form(action: comment_route(:delete, comment), data:) do
             @fields&.call

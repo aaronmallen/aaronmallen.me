@@ -48,7 +48,8 @@ module Admin
           def moderation(status, variant, icon: true, **attributes)
             verdict = Blog::Types::WebmentionModeration.mapping.fetch(status)
 
-            Form(action: path(:admin_moderate_webmention, id: @mention.id, verdict:), **attributes) do
+            Form(action: path(:admin_moderate_webmention, id: @mention.id, verdict:), data: { morph: true },
+                 **attributes) do
               input(type: "hidden", name: "status", value: @filter)
               yield if block_given?
               WebmentionVerdict(verdict: status, variant:, icon:)

@@ -40,7 +40,8 @@ module Admin
           end
 
           def moderate(verdict, variant, **attributes)
-            Form(action: path(:admin_inbox_moderate_webmention, id: @mention.id, verdict:), **attributes) do
+            Form(action: path(:admin_inbox_moderate_webmention, id: @mention.id, verdict:), data: { morph: true },
+                 **attributes) do
               yield if block_given?
               WebmentionVerdict(verdict:, variant:, icon: false)
             end

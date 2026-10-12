@@ -24,7 +24,7 @@ module Admin
           def drop_attributes(sprint)
             {
               action: path(:admin_drop_sprint, id: sprint.id),
-              data: { confirm: t(".confirm_drop", date: l(sprint.sprint_date, format: :medium)) },
+              data: { morph: true, confirm: t(".confirm_drop", date: l(sprint.sprint_date, format: :medium)) },
             }
           end
 
