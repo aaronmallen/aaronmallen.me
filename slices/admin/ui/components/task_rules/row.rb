@@ -11,8 +11,10 @@ module Admin
           prop :editing, Blog::Types::Hash.optional, default: nil
           prop :choices, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
 
+          def self.toggle_id(id) = "rule-#{id}-edit"
+
           def view_template
-            div(class: "rule-row", data: { key_row: true }) do
+            div(class: "rule-row", data:) do
               input(type: "checkbox", class: "sr-only rule-toggle", id: toggle_id, checked: editing?)
               head
               p(class: "rule-tags") do
@@ -36,6 +38,8 @@ module Admin
           end
 
           def cancel = label(class: "bt sm gh", for: toggle_id) { t(".cancel") }
+
+          def data = { key_row: true, menu: path(:admin_task_rule_menu, id: @rule.id) }
 
           def delete
             Form(
@@ -85,7 +89,7 @@ module Admin
 
           def scope = "rule-#{@rule.id}"
 
-          def toggle_id = "rule-#{@rule.id}-edit"
+          def toggle_id = self.class.toggle_id(@rule.id)
 
           def values
             return @editing.slice(:errors, :pattern, :provider, :tags, :projects) if editing?

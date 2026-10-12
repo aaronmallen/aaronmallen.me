@@ -9,9 +9,10 @@ module Admin
           prop :text, Blog::Types::String
           prop :day, Blog::Types::Date.optional, default: nil
           prop :format, Blog::Types::Symbol, default: :short
+          prop :menu, Blog::Types::String.optional, default: nil
 
           def view_template
-            a(class: "review-line", href: @href) do
+            a(class: "review-line", href: @href, data: { menu: @menu }) do
               dated if @day
               plain Admin::Short.title(@text.lines.first.to_s.strip)
             end

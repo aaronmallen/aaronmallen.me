@@ -43,20 +43,22 @@ module Admin
 
         def draft(row) = post(row, row.record_id, t(".untouched", count: row.days), "fa-regular fa-file-lines")
 
-        def icon_button(label, icon)
-          Button(type: "submit", small: true, label:, icon:)
-        end
+        def hovered(row) = { hover: true, data: { menu: path(:admin_attention_menu, **identity(row)) } }
+
+        def icon_button(label, icon) = Button(type: "submit", small: true, label:, icon:)
 
         def icon_link(href, label, icon, **)
           Button(href:, small: true, label:, icon:, **)
         end
+
+        def identity(row) = { kind: row.kind, record_id: row.record_id }.compact
 
         def journal(row)
           href = path(:admin_journal, write: Blog::Constants::CHECKED)
           link = { data: { dialog_open: Journal::WriteDialog::ID } }
           sub = t(".journal_gap", count: row.days)
 
-          ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", hover: true) do
+          ListItem(title: t(".journal"), href:, link:, sub:, icon: "fa-solid fa-feather", **hovered(row)) do
             icon_link(href, t(".write"), "fa-solid fa-feather", **link)
             snooze(row)
           end
@@ -71,7 +73,7 @@ module Admin
         def new_device(row)
           sub = t(".first_seen", count: row.days)
 
-          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved", hover: true) do
+          ListItem(title: row.title, href: nil, sub:, icon: "fa-solid fa-shield-halved", **hovered(row)) do
             icon_link(path(:admin_security), t(".open_security"), "fa-solid fa-shield-halved")
             snooze(row)
           end
@@ -80,7 +82,7 @@ module Admin
         def post(row, id, sub, icon, reason = nil)
           href = path(:admin_edit_post, id:)
 
-          ListItem(title: row.title, href:, sub:, icon:, hover: true) do |item|
+          ListItem(title: row.title, href:, sub:, icon:, **hovered(row)) do |item|
             item.meta { p(class: "li-sub") { reason } } if reason
             icon_link(href, t(".open"), "fa-regular fa-pen-to-square")
             snooze(row)
@@ -100,8 +102,7 @@ module Admin
 
         def snooze(row)
           Form(action: path(:admin_snooze_attention)) do
-            input(type: "hidden", name: "kind", value: row.kind)
-            input(type: "hidden", name: "record_id", value: row.record_id) if row.record_id
+            HiddenFields(values: identity(row))
             icon_button(t(".snooze"), "fa-solid fa-bell-slash")
           end
         end
@@ -109,7 +110,7 @@ module Admin
         def task(row, sub, icon)
           href = path(:admin_task, id: row.record_id, origin: ORIGIN)
 
-          ListItem(title: row.title, href:, sub:, icon:, hover: true) do
+          ListItem(title: row.title, href:, sub:, icon:, **hovered(row)) do
             move(row)
             cancel(row)
             snooze(row)

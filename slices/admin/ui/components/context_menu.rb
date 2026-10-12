@@ -43,8 +43,9 @@ module Admin
           a(href:, **item(data:), **(outbound ? OUTBOUND : Blog::Constants::EMPTY_HASH)) { inner(label, icon:, key:) }
         end
 
-        def post(label, action:, icon: nil, hint: nil, fields: Blog::Constants::EMPTY_HASH, confirm: nil, **)
-          Form(action:, data: { morph: true }) do
+        def post(label, action:, icon: nil, hint: nil, fields: Blog::Constants::EMPTY_HASH, confirm: nil, morph: true,
+                 **)
+          Form(action:, data: { morph: (true if morph) }) do
             hidden(fields)
             button(type: "submit", **item(data: confirm ? { confirm_inline: confirm } : {}, **)) do
               inner(label, icon:, hint:)

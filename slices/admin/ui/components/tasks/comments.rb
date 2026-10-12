@@ -7,7 +7,7 @@ module Admin
         class Comments < Component
           ROUTES = {
             create: :admin_create_task_comment, update: :admin_update_task_comment,
-            delete: :admin_delete_task_comment,
+            delete: :admin_delete_task_comment, menu: :admin_task_comment_menu,
           }.freeze
 
           prop :task, Blog::Types::Instance(ROM::Struct)

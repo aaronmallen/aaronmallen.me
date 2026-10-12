@@ -40,7 +40,9 @@ module Admin
           def group(key, members)
             Group(name: name(key), href: tasks_path(query(key)), items: members, days: @days,
                   dated: :closed_on) do |task|
-              Line(href: path(:admin_task, id: task.task_id), text: task.title)
+              id = task.task_id
+
+              Line(href: path(:admin_task, id:), text: task.title, menu: path(:admin_task_menu, id:))
             end
           end
 

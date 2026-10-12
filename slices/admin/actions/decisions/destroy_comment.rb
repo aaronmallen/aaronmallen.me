@@ -12,7 +12,9 @@ module Admin
         def handle(request, response)
           id = Blog::Types::IdParam[request.params[:comment_id]] || halt(404)
 
-          settle(response, delete_decision_comment.call(record_id(request), id), DELETED, decision_path(request))
+          back = back_here(request) || decision_path(request)
+
+          settle(response, delete_decision_comment.call(record_id(request), id), DELETED, back)
         end
       end
     end

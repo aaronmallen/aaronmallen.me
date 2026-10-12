@@ -34,8 +34,10 @@ module Admin
             plain Blog::Helpers::Figures.hours(entry.seconds)
           end
 
+          def menu(entry) = path(:admin_task_session_menu, id: @task.id, session_id: entry.source_id)
+
           def session(entry)
-            li(class: "task-session", id: "task-session-#{entry.source_id}") do
+            li(class: "task-session", id: "task-session-#{entry.source_id}", data: { menu: menu(entry) }) do
               span(class: "task-session-span") do
                 Moment(at: entry.occurred_at, format: :short)
                 plain "–"

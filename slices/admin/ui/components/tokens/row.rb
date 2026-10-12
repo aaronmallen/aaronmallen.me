@@ -8,7 +8,7 @@ module Admin
           prop :token, Blog::Types::Instance(ROM::Struct)
 
           def view_template
-            ListItem(title: @token.name) do |item|
+            ListItem(title: @token.name, data: { menu: path(:admin_token_menu, id: @token.id) }) do |item|
               item.meta { p(class: "li-sub") { sub } }
               revoke_form
             end

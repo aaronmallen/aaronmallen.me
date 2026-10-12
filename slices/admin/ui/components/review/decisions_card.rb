@@ -28,7 +28,12 @@ module Admin
           def row(decision)
             title = Admin::Short.title(decision.title)
 
-            ListItem(title:, href: path(:admin_decision, id: decision.decision_id), sub: outcome(decision))
+            id = decision.decision_id
+
+            ListItem(
+              title:, href: path(:admin_decision, id:), sub: outcome(decision),
+              data: { menu: path(:admin_decision_menu, id:) },
+            )
           end
         end
       end

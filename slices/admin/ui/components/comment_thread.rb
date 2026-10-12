@@ -8,6 +8,7 @@ module Admin
         RENDERER = Blog::Types::MarkdownRenderer["tasks"]
         ROUTES = Blog::Types::Hash.schema(
           create: Blog::Types::Symbol, update: Blog::Types::Symbol, delete: Blog::Types::Symbol,
+          menu: Blog::Types::Symbol,
         )
 
         prop :record_id, Blog::Types::Integer
@@ -72,7 +73,7 @@ module Admin
         def comment(comment)
           id = comment.source_id
 
-          li(class: "comment", id: "#{@scope}-comment-#{id}", data: { "#{@scope}_comment": id }) do
+          li(class: "comment", id: "#{@scope}-comment-#{id}", data: { "#{@scope}_comment": id, menu: menu(id) }) do
             head(comment)
             MarkdownBody(source: comment.body, markdown: ::Tasks::Markdown, class: "markdown-body comment-body")
           end
@@ -117,6 +118,8 @@ module Admin
             comment.synced? ? @source&.call(comment) : acts(comment)
           end
         end
+
+        def menu(id) = path(@routes[:menu], id: @record_id, comment_id: id)
 
         def mine?(id) = @form.key?(:id) && @form[:id] == id
       end

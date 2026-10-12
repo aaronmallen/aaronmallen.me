@@ -2676,7 +2676,26 @@ en:
             zero: "Nothing has connected yet"
           empty: "No client has connected yet."
           heading: "MCP clients"
+        menu:
+          confirm_revoke: "Click again to revoke"
+          revoke: "Revoke"
+          sightings: "Sign-ins"
+      comments:
+        menu:
+          confirm_delete: "Click again to delete"
+          copied_text: "Text copied"
+          copy_text: "Copy text"
+          delete: "Delete comment"
+          edit: "Edit"
+          view_source: "View on source"
       commits:
+        menu:
+          copied_message: "Message copied"
+          copied_sha: "SHA copied"
+          copy_message: "Copy message"
+          copy_sha: "Copy SHA"
+          github: "View on GitHub"
+          open: "Open"
         show:
           added: "Added"
           back: "Activity"
@@ -3088,6 +3107,14 @@ en:
           heading: "Connected services"
           hint: "Every outside service the site talks to. Services you sign in to keep an encrypted token in the database; the rest read keys from the server environment."
           pick_hint: "Click a service to see what it powers, what it can access, and when its jobs last ran."
+        menu:
+          another: "Connect another"
+          confirm_disconnect: "Click again to disconnect"
+          details: "Details"
+          disconnect: "Disconnect"
+          open: "Open %{name}"
+          reconnect: "Reconnect"
+          test: "Test"
       sessions:
         failed:
           denied: "GitHub sign-in did not finish. Try again."
@@ -3110,6 +3137,12 @@ en:
           edit: "Edit"
           linked: "Linked records"
           remove: "Remove from queue"
+      sprints:
+        menu:
+          calendar: "Open on calendar"
+          confirm_drop: "Click again to drop"
+          drop: "Drop sprint"
+          label: "Sprint · %{date}"
       tags:
         index:
           aside: "Click a tag to rename it, recolour it or take it away."
@@ -3168,6 +3201,10 @@ en:
           note: "Deleting a rule, or taking a tag or project out of one, takes nothing off a task."
           sub: "Each rule gives the issues it matches private tags and projects on import."
           title: "Tags and projects by repo or team"
+        menu:
+          confirm_delete: "Click again to delete"
+          delete: "Delete rule"
+          edit: "Edit"
       tasks:
         bulk_menu:
           cancel: "Cancel"
@@ -3224,6 +3261,11 @@ en:
           label: "Tasks"
           sub: "Title, notes, list, sprint and tags in one go."
           title: "Create a task"
+        session_menu:
+          confirm_delete: "Click again to delete"
+          delete: "Delete session"
+          edit: "Edit"
+          label: "Session · %{at}"
         show:
           add_notes: "Add some"
           close: "Close"
@@ -3241,6 +3283,21 @@ en:
           heading: "Time"
           span: "%{from} → %{to} · %{total}. Starting a task opens a work session, and stopping or finishing it closes the session."
       today:
+        attention_menu:
+          cancel: "Cancel task"
+          confirm_cancel: "Click again to cancel"
+          journal: "Journal"
+          move: "Move to %{list}"
+          open: "Open"
+          open_security: "Open security"
+          snooze: "Snooze"
+          write: "Write"
+        dead_job_menu:
+          confirm_discard: "Click again to discard"
+          copied_error: "Error copied"
+          copy_error: "Copy error"
+          discard: "Discard"
+          retry: "Retry"
         show:
           heading: "Today"
           headline:
@@ -3271,6 +3328,9 @@ en:
           heading: "API tokens"
           live: "Live tokens"
           mint: "Mint a token"
+        menu:
+          confirm_revoke: "Click again to revoke"
+          revoke: "Revoke"
       webmentions:
         bulk_menu:
           label:

@@ -13,7 +13,7 @@ module Admin
 
           def view_template
             Card(title: dotted(t(".title"), Blog::Helpers::Figures.count(@earlier.size)), id: "review-earlier") do
-              Capped(items: @earlier) { Line(href: href(it), text: it.name, day: it.occurred_on, format: :medium) }
+              Capped(items: @earlier) { line(it) }
             end
           end
 
@@ -23,6 +23,14 @@ module Admin
             return path(:admin_edit_post, id: record.source_id) if record.type == POST
 
             Blog::Helpers::RecordKinds.journal_day(routes, record.occurred_on)
+          end
+
+          def line(record)
+            Line(href: href(record), text: record.name, day: record.occurred_on, format: :medium, menu: menu(record))
+          end
+
+          def menu(record)
+            path(record.type == POST ? :admin_post_menu : :admin_journal_entry_menu, id: record.source_id)
           end
         end
       end

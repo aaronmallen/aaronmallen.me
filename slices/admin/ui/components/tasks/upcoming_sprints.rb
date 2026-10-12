@@ -78,10 +78,10 @@ module Admin
 
           def sprint_card(sprint, tasks)
             open = tasks.reject(&:closed?)
-
             date = sprint.sprint_date
+            data = { key_list: true, menu: path(:admin_sprint_menu, id: sprint.id) }
 
-            Card(title: relative(date), data: { key_list: true }) do |card|
+            Card(title: relative(date), data:) do |card|
               card.side { sprint_side(sprint, open) }
               rows(sprint, open)
               QuickAdd(filter: NEXT, sprint_on: date, placeholder: t(".add_to", date: l(date, format: :short)))

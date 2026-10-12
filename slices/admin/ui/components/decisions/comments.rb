@@ -7,7 +7,7 @@ module Admin
         class Comments < Component
           ROUTES = {
             create: :admin_create_decision_comment, update: :admin_update_decision_comment,
-            delete: :admin_delete_decision_comment,
+            delete: :admin_delete_decision_comment, menu: :admin_decision_comment_menu,
           }.freeze
 
           prop :decision, Blog::Types::Instance(ROM::Struct)

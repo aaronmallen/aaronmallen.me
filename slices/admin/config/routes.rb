@@ -13,6 +13,7 @@ module Admin
     PART = /[\d.]+/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
+    SERVICE_KEY = /[a-z0-9_]+/
     TAG = %r{[^/]+}
     TASK_FILTER = Regexp.union(Blog::Types::TaskFilter.values)
     WEBMENTION_VERDICT = Regexp.union(Blog::Types::WebmentionModeration.mapping.values)
@@ -23,7 +24,9 @@ module Admin
     get "/activity", to: "activity.show", as: :activity
     get "/analytics", to: "analytics.show", as: :analytics
     post "/attention/dead-jobs/:jid/discard", to: "today.discard_dead_job", as: :discard_dead_job, jid: JID
+    get "/attention/dead-jobs/:jid/menu", to: "today.dead_job_menu", as: :dead_job_menu, jid: JID
     post "/attention/dead-jobs/:jid/retry", to: "today.retry_dead_job", as: :retry_dead_job, jid: JID
+    get "/attention/menu", to: "today.attention_menu", as: :attention_menu
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar
     post "/calendar/calendars", to: "calendar.show_calendars", as: :show_calendars
@@ -36,8 +39,10 @@ module Admin
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
     post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID
     get "/clients", to: "clients.index", as: :clients
+    get "/clients/:id/menu", to: "clients.menu", as: :client_menu, id: ID
     post "/clients/:id/revoke", to: "clients.revoke", as: :revoke_client, id: ID
     get "/commits/:id", to: "commits.show", as: :commit, id: ID
+    get "/commits/:id/menu", to: "commits.menu", as: :commit_menu, id: ID
     post "/commits/import", to: "commits.import", as: :import_commits
     post "/commits/:id/records", to: "commits.link_record", as: :link_commit_record, id: ID
     post(
@@ -52,6 +57,10 @@ module Admin
     get "/decisions/:id/menu", to: "decisions.menu", as: :decision_menu, id: ID
     post "/decisions/:id", to: "decisions.update", as: :update_decision, id: ID
     post "/decisions/:id/comments", to: "decisions.create_comment", as: :create_decision_comment, id: ID
+    get(
+      "/decisions/:id/comments/:comment_id/menu",
+      to: "decisions.comment_menu", as: :decision_comment_menu, id: ID, comment_id: ID,
+    )
     post(
       "/decisions/:id/comments/:comment_id",
       to: "decisions.update_comment", as: :update_decision_comment, id: ID, comment_id: ID,
@@ -199,6 +208,7 @@ module Admin
     get "/search/palette", to: "search.palette", as: :palette_search
     get "/security", to: "security.show", as: :security
     get "/services", to: "services.index", as: :services
+    get "/services/:key/menu", to: "services.menu", as: :service_menu, key: SERVICE_KEY
     post "/services/:provider", to: "services.create", as: :create_service, provider: SERVICE
     post "/services/:provider/connect", to: "services.connect", as: :connect_service, provider: OAUTH_SERVICE
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
@@ -231,6 +241,7 @@ module Admin
     get "/tasks/rules", to: "task_rules.index", as: :task_rules
     post "/tasks/rules", to: "task_rules.create", as: :create_task_rule
     post "/tasks/rules/:id", to: "task_rules.update", as: :update_task_rule, id: ID
+    get "/tasks/rules/:id/menu", to: "task_rules.menu", as: :task_rule_menu, id: ID
     post "/tasks/rules/:id/delete", to: "task_rules.destroy", as: :delete_task_rule, id: ID
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
@@ -238,6 +249,10 @@ module Admin
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID
     post "/tasks/:id/cancel", to: "tasks.cancel", as: :cancel_task, id: ID
     post "/tasks/:id/comments", to: "tasks.create_comment", as: :create_task_comment, id: ID
+    get(
+      "/tasks/:id/comments/:comment_id/menu",
+      to: "tasks.comment_menu", as: :task_comment_menu, id: ID, comment_id: ID,
+    )
     post(
       "/tasks/:id/comments/:comment_id",
       to: "tasks.update_comment", as: :update_task_comment, id: ID, comment_id: ID,
@@ -262,6 +277,10 @@ module Admin
     post "/tasks/:id/start", to: "tasks.start", as: :start_task, id: ID
     post "/tasks/:id/stop", to: "tasks.stop", as: :stop_task, id: ID
     post "/tasks/:id/total", to: "tasks.update_total", as: :update_task_total, id: ID
+    get(
+      "/tasks/:id/sessions/:session_id/menu",
+      to: "tasks.session_menu", as: :task_session_menu, id: ID, session_id: ID,
+    )
     post(
       "/tasks/:id/sessions/:session_id",
       to: "tasks.update_session", as: :update_task_session, id: ID, session_id: ID,
@@ -273,9 +292,11 @@ module Admin
     post "/tasks/issues/sync", to: "issues.sync", as: :sync_issues
     post "/tasks/sprints", to: "sprints.create", as: :plan_sprint
     post "/tasks/sprints/:id/delete", to: "sprints.destroy", as: :drop_sprint, id: ID
+    get "/tasks/sprints/:id/menu", to: "sprints.menu", as: :sprint_menu, id: ID
     get "/time", to: "time_report.show", as: :time
     get "/tokens", to: "tokens.index", as: :tokens
     post "/tokens", to: "tokens.create", as: :create_token
+    get "/tokens/:id/menu", to: "tokens.menu", as: :token_menu, id: ID
     post "/tokens/:id/revoke", to: "tokens.revoke", as: :revoke_token, id: ID
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions

@@ -110,6 +110,7 @@ module Admin
               title: Admin::Short.title(social_post.parts.first&.body.to_s),
               href: social_href(social_post),
               at: social_post.posted_at,
+              data: { menu: path(:admin_social_post_menu, id: social_post.id) },
             }
           end
 

@@ -26,7 +26,7 @@ module Admin
 
           def group(name, records, href)
             Group(name:, href:, items: records.reverse, days: @days, dated: :occurred_on) do |record|
-              Line(href: href(record), text: record.name, day: record.occurred_on)
+              Line(href: href(record), text: record.name, day: record.occurred_on, menu: menu(record))
             end
           end
 
@@ -41,6 +41,10 @@ module Admin
             return path(:admin_social, filter: POSTED) unless record.type == POST
 
             path(:admin_edit_post, id: record.source_id)
+          end
+
+          def menu(record)
+            path(record.type == POST ? :admin_post_menu : :admin_social_post_menu, id: record.source_id)
           end
         end
       end

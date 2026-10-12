@@ -18,7 +18,9 @@ module Admin
           private
 
           def row(task)
-            ListItem(title: task.title, href: path(:admin_task, id: task.task_id)) do
+            data = { menu: path(:admin_task_menu, id: task.task_id) }
+
+            ListItem(title: task.title, href: path(:admin_task, id: task.task_id), data:) do
               span(class: "review-slipped") { t(".slipped", count: task.carried_count) }
             end
           end

@@ -1,5 +1,5 @@
 import { clear, picks } from "./bulk.js";
-import { openDialog } from "./dialog.js";
+import { focusField, openDialog } from "./dialog.js";
 import { load } from "./in_place.js";
 import { copy } from "./record_key.js";
 import { showToast } from "./toast.js";
@@ -140,9 +140,9 @@ function keyed(event) {
   open(row, url, box.left + BESIDE.x, box.top + Math.min(box.height, BESIDE.y), true);
 }
 
-function onControl({ target, clientX: x, clientY: y }) {
+function onControl({ target, clientX: x, clientY: y }, row) {
   const control = target.closest(CONTROL);
-  if (!control) return false;
+  if (!control || control === row) return false;
 
   return [...control.getClientRects()].some(
     (box) => x >= box.left && x <= box.right && y >= box.top && y <= box.bottom,
@@ -165,7 +165,7 @@ async function open(row, url, x, y, keys) {
   menu.addEventListener("keydown", press);
   menu.addEventListener("pointerover", hovered);
   menu.addEventListener("submit", submitted);
-  document.body.append(menu);
+  (row.closest("dialog[open]") ?? document.body).append(menu);
   row.classList.add("ctx-on");
   place(menu, x, y);
   focus(keys ? items(menu)[0] : menu);
@@ -189,7 +189,7 @@ function pointed(event) {
   }
 
   const row = event.target.closest?.(ROW);
-  if (!row || event.shiftKey || onControl(event)) return;
+  if (!row || event.shiftKey || onControl(event, row)) return;
 
   const url = source(row);
   if (!url) return;
@@ -225,6 +225,22 @@ function press(event) {
     event.preventDefault();
     item.click();
   }
+}
+
+function reveal(found) {
+  if (!found || found.matches("dialog")) return false;
+
+  const toggle = found.matches("input[type=checkbox]");
+  const target = toggle ? found : found.querySelector("details");
+  if (!target) return false;
+
+  if (toggle) target.checked = true;
+  else target.open = true;
+  found.scrollIntoView({ block: "nearest" });
+
+  const root = toggle ? target.parentElement.querySelector("form") : target;
+  if (root) focusField(root);
+  return true;
 }
 
 function source(row) {
@@ -268,6 +284,7 @@ function summon(item) {
     document.querySelector("main").append(carried);
     document.dispatchEvent(new Event(MORPHED));
   }
+  if (reveal(document.getElementById(id))) return;
   if (!openDialog(id)) window.location.assign(item.href);
 }
 

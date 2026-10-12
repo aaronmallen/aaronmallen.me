@@ -9,7 +9,7 @@ module Admin
           prop :selected, Blog::Types::Bool
 
           def view_template
-            div(class: "li svc", data: { key_row: true }) do
+            div(class: "li svc", data: { key_row: true, menu: path(:admin_service_menu, key: @row.key) }) do
               div(class: "svc-start") do
                 Tile(definition: @row.definition)
                 div(class: "li-main") do

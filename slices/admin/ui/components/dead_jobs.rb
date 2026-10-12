@@ -14,7 +14,9 @@ module Admin
           text = t(".died", at: Stamped::MARK, error: job.error)
           discard = { confirm: t(".confirm_discard", job: job.name) }
 
-          ListItem(title: job.name, href: nil, sub: nil, icon: "fa-solid fa-skull", hover: true) do |item|
+          data = { menu: path(:admin_dead_job_menu, jid: job.jid) }
+
+          ListItem(title: job.name, href: nil, sub: nil, icon: "fa-solid fa-skull", hover: true, data:) do |item|
             item.meta { p(class: "li-sub") { Stamped(text:, at: job.died_at) } }
             job_form(:admin_retry_dead_job, job, t(".retry"), "fa-solid fa-rotate-right")
             job_form(:admin_discard_dead_job, job, t(".discard"), "fa-solid fa-trash", data: discard)

@@ -69,7 +69,8 @@ module Admin
         end
 
         def entry_row(commit)
-          a(class: "commit", href: path(:admin_commit, id: commit.id)) do
+          a(class: "commit", href: path(:admin_commit, id: commit.id),
+            data: { menu: path(:admin_commit_menu, id: commit.id) }) do
             div(class: "commit-main") do
               p(class: "commit-message") { subject(commit) }
               p(class: "commit-meta") { entry_meta(commit) }

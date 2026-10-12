@@ -45,6 +45,14 @@ module Admin
             WEBMENTION => Type.new(icon: "fa-at", color: :pink, prose: false),
             WORKOUT => Type.new(icon: "fa-person-running", color: :blue, prose: false),
           }.freeze
+          MENUS = {
+            COMMIT => :admin_commit_menu,
+            JOURNAL => :admin_journal_entry_menu,
+            POST => :admin_post_menu,
+            SOCIAL => :admin_social_post_menu,
+            TASK => :admin_task_menu,
+            WEBMENTION => :admin_webmention_menu,
+          }.freeze
           ANCHORS = { COMMENT => "task-comment", SESSION => "task-session" }.freeze
           POSTED = Blog::Types::SocialQueue["posted"]
 
@@ -52,11 +60,12 @@ module Admin
 
           def view_template
             href = href_for
+            menu = menu_for
 
             if href
-              a(class: "activity-event", href:, data: { task_open: task? || nil }) { row }
+              a(class: "activity-event", href:, data: { task_open: task? || nil, menu: }) { row }
             else
-              div(class: "activity-event") { row }
+              div(class: "activity-event", data: { menu: }) { row }
             end
           end
 
@@ -71,6 +80,18 @@ module Admin
               when SOCIAL then path(:admin_social, filter: POSTED)
               when TASK, SESSION, COMMENT, DECISION, DECISION_COMMENT then owner_href
               when WEBMENTION then path(:admin_webmentions)
+            end
+          end
+
+          def menu_for
+            id = @event.source_id
+
+            case @event.type
+              when *MENUS.keys then path(MENUS.fetch(@event.type), id:)
+              when DECISION then path(:admin_decision_menu, id: @event.decision_id)
+              when DECISION_COMMENT then path(:admin_decision_comment_menu, id: @event.decision_id, comment_id: id)
+              when SESSION then path(:admin_task_session_menu, id: @event.task_id, session_id: id)
+              when COMMENT then path(:admin_task_comment_menu, id: @event.task_id, comment_id: id) if @event.task_id
             end
           end
 

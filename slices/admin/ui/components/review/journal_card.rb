@@ -26,7 +26,10 @@ module Admin
           def entry(record)
             day = record.occurred_on
 
-            Line(href: Blog::Helpers::RecordKinds.journal_day(routes, day), text: record.name, day:)
+            Line(
+              href: Blog::Helpers::RecordKinds.journal_day(routes, day), text: record.name, day:,
+              menu: path(:admin_journal_entry_menu, id: record.source_id),
+            )
           end
 
           def group(key, members)

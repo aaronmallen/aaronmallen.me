@@ -6,8 +6,10 @@ module Admin
       class ClientRow < Component
         prop :client, Blog::Types::Instance(ROM::Struct)
 
+        def self.label(client) = new(client:).send(:name)
+
         def view_template
-          ListItem(title: name) do |item|
+          ListItem(title: name, data: { menu: path(:admin_client_menu, id: @client.id) }) do |item|
             item.meta { p(class: "li-sub") { sub } }
             revoke_form
           end
