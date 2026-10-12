@@ -29,7 +29,7 @@ RSpec.describe "Admin menus for the remaining rows with actions", type: :feature
 
   describe "a task comment" do
     let(:task) { create(:task) }
-    let(:comment) { create(:task_comment, task_id: task.id, body: "First try") }
+    let!(:comment) { create(:task_comment, task_id: task.id, body: "First try") }
 
     before do
       visit "/admin/tasks/#{task.id}"
