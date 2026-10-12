@@ -28,6 +28,7 @@ RSpec.describe "Admin social queue", type: :feature do
   describe "editing a draft" do
     before do
       find(".seg-option", text: "drafts").click
+      page.assert_selector(".sq-part", text: "a-draft")
       click_link "Edit"
     end
 
