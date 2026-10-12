@@ -4015,6 +4015,40 @@
   }
 }
 
+@utility mail-drop {
+  outline: 1px dashed color-mix(in oklab, var(--color-ink-muted) 50%, transparent);
+  outline-offset: -1px;
+}
+
+@utility mail-over {
+  @apply text-ink;
+  background: color-mix(in oklab, var(--tone, var(--color-mk-green-text)) 18%, var(--color-ground-sunk));
+  outline: 2px solid var(--tone, var(--color-mk-green-text));
+  outline-offset: -2px;
+}
+
+@utility mail-grip {
+  @apply cursor-grab touch-none self-center border-transparent bg-transparent text-ink-muted select-none hover:text-ink;
+
+  @media (width < 1180px) {
+    &.bt {
+      @apply hidden;
+    }
+  }
+}
+
+@utility mail-dragging {
+  @apply opacity-45;
+
+  & .mail-grip {
+    @apply cursor-grabbing;
+  }
+}
+
+@utility mail-ghost {
+  @apply pointer-events-none fixed z-50 max-w-65 truncate rounded-[10px] border border-line bg-ground-sunk px-3 py-2 font-mono text-badge text-ink shadow-toast;
+}
+
 @utility mail-folder-name {
   @apply min-w-0 flex-1 truncate;
 }

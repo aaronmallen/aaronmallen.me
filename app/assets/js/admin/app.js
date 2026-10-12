@@ -12,6 +12,7 @@ import { setupJournals } from "./journal.js";
 import { setupKeys } from "./keys.js";
 import { setupLinkForms } from "./link_form.js";
 import { setupLive } from "./live.js";
+import { setupMailDrag } from "./mail_drag.js";
 import { setupMailEditors } from "./mail_editor.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
 import { setupMorphForms } from "./morph_form.js";
@@ -47,6 +48,7 @@ function setup() {
   setupJournals();
   setupKeys();
   setupLinkForms();
+  setupMailDrag();
   setupMailEditors();
   setupMarkdownEditors();
   setupPalette();

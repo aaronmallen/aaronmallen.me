@@ -18,6 +18,7 @@ module Admin
           def view_template
             div(id: "thread-#{@thread.id}", class: ["mail-row", ("unread" if unread?), ("snoozed" if snoozed?),
                                                     ("on" if @open)], data: { key_row: true }) do
+              grip
               BulkCheck(form: Bulk::ID, value: @thread.id, label: t(".pick", subject: @thread.subject))
               Form(action: path(:admin_open_mail, id: @thread.id), class: "mail-row-form") do
                 HiddenFields(values: { **@list, **Blog::Structs::Page.query(@page) })
@@ -31,6 +32,13 @@ module Admin
           def draft
             span(class: "mail-draft") { t(".draft") }
             span(class: "mail-dim") { t(".to", address: @thread.reply_to) }
+          end
+
+          def grip
+            Button(
+              small: true, class: "mail-grip", hidden: true, label: t(".drag", subject: @thread.subject),
+              icon: "fa-solid fa-grip-vertical", data: { mail_grip: @thread.subject },
+            )
           end
 
           def head
