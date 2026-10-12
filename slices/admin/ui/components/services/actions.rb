@@ -56,9 +56,15 @@ module Admin
 
           def external = { href: definition.dashboard, **OUTBOUND }
 
+          def held
+            input(type: "hidden", name: "connection", value: connection.id)
+            granted = definition.scopes.select { definition.granted?(it, connection.scopes) }
+            granted.each { input(type: "hidden", name: "scopes[]", value: it[:id]) }
+          end
+
           def reconnect
             Form(action: path(:admin_connect_service, provider: definition.id)) do
-              input(type: "hidden", name: "connection", value: connection.id) if connection
+              held if connection
               Button(small: true, variant: :pri, type: "submit", icon: RECONNECT_ICON) { t(".reconnect") }
             end
           end

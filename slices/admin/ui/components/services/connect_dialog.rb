@@ -12,10 +12,13 @@ module Admin
           }.freeze
           SHELL = { class: "modal", data: { dialog: true } }.freeze
 
+          def self.id_for(definition, connection = nil) = [Picker::ID, definition.id, connection&.id].compact.join("-")
+
           prop :definition, Blog::Types::Instance(::Services::Structs::Definition)
+          prop :connection, Blog::Types::Instance(::Services::Structs::ServiceConnection).optional, default: nil
 
           def view_template
-            Dialog(id:, title_id: "#{id}-title", title: t(".connect", name:), **SHELL) do |dialog|
+            Dialog(id:, title_id: "#{id}-title", title:, **SHELL) do |dialog|
               head
               continue
               asks
@@ -35,6 +38,7 @@ module Admin
           def continue
             Form(id: form_id, action: path(:admin_connect_service, provider: @definition.id)) do
               server if @definition.host
+              input(type: "hidden", name: "connection", value: @connection.id) if @connection
             end
           end
 
@@ -57,16 +61,18 @@ module Admin
             end
           end
 
-          def id = "#{Picker::ID}-#{@definition.id}"
+          def id = self.class.id_for(@definition, @connection)
 
           def name = @definition.name
 
           def scope(scope)
+            optional = scope[:optional]
             label(class: "svc-scope") do
-              input(class: "check", type: "checkbox", checked: true, disabled: true)
+              input(class: "check", type: "checkbox", name: "scopes[]", value: scope[:id], form: form_id,
+                    checked: ticked?(scope), disabled: !optional)
               span do
                 span(class: "svc-scope-name") { scope[:label] }
-                span(class: "svc-scope-why") { t(".required", why: scope[:why]) }
+                span(class: "svc-scope-why") { optional ? scope[:why] : t(".required", why: scope[:why]) }
               end
             end
           end
@@ -76,6 +82,10 @@ module Admin
               Input(**control, **SERVER_FIELD)
             end
           end
+
+          def ticked?(scope) = !scope[:optional] || @connection.nil? || @definition.granted?(scope, @connection.scopes)
+
+          def title = @connection ? t(".change", account: @connection.label) : t(".connect", name:)
 
           def token
             TokenForm(definition: @definition) do

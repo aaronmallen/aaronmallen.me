@@ -20,7 +20,13 @@ module Services
 
       def credentials? = ways.include?("credentials")
 
+      def granted?(scope, held) = scope[:id].split.all? { held.include?(it) }
+
       def oauth? = ways.include?("oauth")
+
+      def optional? = scopes.any? { it[:optional] }
+
+      def wanted(ids) = scopes.select { !it[:optional] || ids.include?(it[:id]) }
 
       def ways = Array(auth)
     end

@@ -5,8 +5,8 @@ module Admin
     module Components
       module Services
         class Detail < Component
+          CHANGE_ICON = "fa-solid fa-sliders"
           GOOGLE = "google"
-          GRANTS = [GOOGLE].freeze
 
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
           prop :connectable, Blog::Types::Bool
@@ -27,11 +27,20 @@ module Admin
           def access
             label(t(".access"))
             way if definition.credentials?
-            definition.scopes.each { scope(it) } unless by_token? && @row.connection.scopes.empty?
+            scopes
             Hint { Stamped(text: t(".connected", time: Stamped::MARK), at: @row.connection.created_at) }
           end
 
           def by_token? = @row.connection.by_credentials?
+
+          def change
+            return if by_token? || !definition.optional?
+
+            connection = @row.connection
+            data = { dialog_open: ConnectDialog.id_for(definition, connection) }
+            Button(small: true, variant: :gh, icon: CHANGE_ICON, data:) { t(".change") }
+            ConnectDialog(definition:, connection:)
+          end
 
           def credentials
             return no_credentials if @row.env.empty?
@@ -42,15 +51,6 @@ module Admin
           end
 
           def definition = @row.definition
-
-          def grant
-            return Pill(color: :orange) { t(".not_granted") } unless GRANTS.include?(definition.id)
-
-            Form(action: path(:admin_connect_service, provider: definition.id)) do
-              input(type: "hidden", name: "connection", value: @row.connection.id)
-              Button(small: true, variant: :gh, type: "submit") { t(".grant") }
-            end
-          end
 
           def held(yes, color, held_key, lacking_key)
             yes ? Pill(color:) { t(held_key) } : Pill(color: :orange) { t(lacking_key) }
@@ -92,8 +92,18 @@ module Admin
           end
 
           def scope(scope)
-            granted = scope[:id].split.all? { @row.connection.scopes.include?(it) }
-            line(scope[:label], scope[:why]) { granted ? Pill(color: :green) { t(".granted") } : grant }
+            line(scope[:label], scope[:why]) do
+              next Pill(color: :green) { t(".granted") } if definition.granted?(scope, @row.connection.scopes)
+
+              scope[:optional] ? Pill { t(".left_off") } : Pill(color: :orange) { t(".not_granted") }
+            end
+          end
+
+          def scopes
+            return if by_token? && @row.connection.scopes.empty?
+
+            definition.scopes.each { scope(it) }
+            change
           end
 
           def status

@@ -27,7 +27,7 @@ module Admin
         private
 
         def connect_url(request, definition)
-          scope = definition.scopes.map { it[:id] }.join(" ")
+          scope = definition.wanted(Array(request.params[:scopes])).map { it[:id] }.join(" ")
           return mastodon_url(request, definition, scope) if definition.host
 
           client, redirect_uri = oauth_client(definition)

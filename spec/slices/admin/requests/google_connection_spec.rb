@@ -15,6 +15,8 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def account(account_id) = connections.find { it.account_id == account_id }
 
+  def asked_scopes = authorize_query.fetch("scope").split
+
   def authorize_query = Rack::Utils.parse_query(URI(last_response.location).query)
 
   def callback(**) = get("/admin/auth/google/callback", **)
@@ -32,6 +34,8 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def connections = Services::Slice["repos.connection_queries"].for(:google)
 
+  def every_scope = Services::Slice["repos.definition_queries"].find(:google).scopes.map { it[:id] }
+
   def grant(email, scopes, access_token: "ya29.new")
     stub_token({ access_token:, expires_in: 3599, refresh_token: "1//#{email}", token_type: "Bearer" }
       .merge(scope: scopes.join(" ")))
@@ -39,6 +43,8 @@ RSpec.describe "Admin Google connection", type: :request do
       .with(headers: { "Authorization" => "Bearer #{access_token}" })
       .to_return(json({ email: }))
   end
+
+  def health = /googlehealth\./
 
   def json(body) = { headers: { "Content-Type" => "application/json" }, body: body.to_json }
 
@@ -52,10 +58,14 @@ RSpec.describe "Admin Google connection", type: :request do
 
   def reconnect_field = "form[action='/admin/services/google/connect'] input[value='#{connection.id}']"
 
+  def scope_box(label, within: "#connect-service-google")
+    page.find("#{within} .svc-scope", text: label, visible: :all).find("input", visible: :all)
+  end
+
   def scope_line(label) = page.find(".svc-line", text: label)
 
-  def start_connect(**)
-    post("/admin/services/google/connect", _csrf_token: admin_csrf_token, **)
+  def start_connect(scopes: every_scope, **)
+    post("/admin/services/google/connect", _csrf_token: admin_csrf_token, scopes:, **)
     authorize_query.fetch("state")
   end
 
@@ -107,6 +117,34 @@ RSpec.describe "Admin Google connection", type: :request do
       expect(pickable).to include("Google")
     end
 
+    describe "picking the scopes to ask for" do
+      it "ticks every scope in the dialog and locks the address on", :aggregate_failures do
+        get "/admin/services"
+
+        expect(scope_box("Read sleep")).to be_checked.and(have_attributes(disabled?: false))
+        expect(scope_box("See your address")).to be_checked.and(be_disabled)
+      end
+
+      it "leaves Health out when I untick it", :aggregate_failures do
+        start_connect(scopes: every_scope.grep_v(health))
+
+        expect(asked_scopes).to include("openid", mail_scope)
+        expect(asked_scopes.grep(health)).to be_empty
+      end
+
+      it "always asks for the address" do
+        start_connect(scopes: [mail_scope])
+
+        expect(asked_scopes).to contain_exactly("openid", "https://www.googleapis.com/auth/userinfo.email", mail_scope)
+      end
+
+      it "ignores a scope the definition doesn't list" do
+        start_connect(scopes: [mail_scope, "https://www.googleapis.com/auth/drive"])
+
+        expect(asked_scopes).not_to include("https://www.googleapis.com/auth/drive")
+      end
+    end
+
     describe "starting" do
       before { start_connect }
 
@@ -118,7 +156,7 @@ RSpec.describe "Admin Google connection", type: :request do
       end
 
       it "asks for the address, mail, calendar and Health" do
-        expect(authorize_query.fetch("scope").split).to include(*asked)
+        expect(asked_scopes).to include(*asked)
       end
 
       it "sends a PKCE challenge and comes back to the Google callback", :aggregate_failures do
@@ -180,17 +218,29 @@ RSpec.describe "Admin Google connection", type: :request do
         get "/admin/services", selected: account("work@example.com").id.to_s
 
         expect(scope_line("Read, send, label and delete mail")).to have_css(".pill", text: "granted")
-        expect(scope_line("Read sleep")).to have_button("Grant")
+        expect(scope_line("Read sleep")).to have_css(".pill", text: "off")
       end
     end
 
-    describe "an account missing a scope" do
-      before { connect_account }
-
-      it "shows Grant, which reconnects that account" do
+    describe "an account that left a scope off" do
+      before do
+        connect_account
         get "/admin/services", selected: connection.id.to_s
+      end
 
-        expect(scope_line("Read, send, label and delete mail")).to have_css(reconnect_field, visible: :all)
+      def dialog = "#connect-service-google-#{connection.id}"
+
+      it "marks the scope off without asking me to grant it", :aggregate_failures do
+        expect(scope_line("Read, send, label and delete mail")).to have_css(".pill", text: "off")
+        expect(page).to have_no_button("Grant")
+        expect(scope_line("Read, send, label and delete mail")).to have_no_css(".pill.orange")
+      end
+
+      it "offers Change access, which reconnects that account with its scopes ticked", :aggregate_failures do
+        expect(page).to have_css("[data-dialog-open='#{dialog.delete('#')}']", text: "Change access")
+        expect(page).to have_css(reconnect_field, visible: :all)
+        expect(scope_box("Read sleep", within: dialog)).to be_checked
+        expect(scope_box("Read, send, label and delete mail", within: dialog)).not_to be_checked
       end
 
       it "adds the scope to the same account when Google grants it", :aggregate_failures do
