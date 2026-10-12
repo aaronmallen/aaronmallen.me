@@ -2,13 +2,13 @@
 
 module Admin
   module Actions
-    module Messages
+    module Mail
       class Destroy < BulkAction
-        DELETED = "messages_page.toasts.deleted"
+        DELETED = "mail_page.toasts.deleted"
 
         include Deps[
           delete_message: "mail.operations.delete_message",
-          message_queries: "mail.repos.message_queries",
+          thread_queries: "mail.repos.thread_queries",
         ]
 
         def handle(request, response)
@@ -18,10 +18,10 @@ module Admin
         private
 
         def back(request)
-          list = Helpers::MessageList.from(request.params)
-          page = landing(request) { message_queries.page_listed(it, **list).past_end? }
+          list = Helpers::MailList.from(request.params)
+          page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
 
-          Helpers::MessageList.back(routes, list, **Blog::Structs::Page.query(page))
+          Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page))
         end
       end
     end

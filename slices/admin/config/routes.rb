@@ -103,14 +103,13 @@ module Admin
     post "/links/:id", to: "links.update", as: :update_link, id: ID
     post "/links/:id/delete", to: "links.destroy", as: :delete_link, id: ID
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
-    get "/messages", to: "messages.index", as: :messages
-    post "/messages/bulk", to: "messages.bulk", as: :bulk_messages
-    post "/messages/:id/delete", to: "messages.destroy", as: :delete_message, id: ID
-    post "/messages/:id/label", to: "messages.label", as: :label_message, id: ID
-    post "/messages/:id/mark/:status", to: "messages.mark", as: :mark_message, id: ID, status: MESSAGE_STATUS
-    post "/messages/:id/open", to: "messages.open", as: :open_message, id: ID
-    post "/messages/:id/snooze", to: "messages.snooze", as: :snooze_message, id: ID
-    post "/messages/:id/wake", to: "messages.wake", as: :wake_message, id: ID
+    get "/mail", to: "mail.index", as: :mail
+    post "/mail/bulk", to: "mail.bulk", as: :bulk_mail
+    post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
+    post "/mail/:id/mark/:status", to: "mail.mark", as: :mark_mail, id: ID, status: MESSAGE_STATUS
+    post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID
+    post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
+    post "/mail/:id/wake", to: "mail.wake", as: :wake_mail, id: ID
     get "/people", to: "people.index", as: :people
     post "/people", to: "people.create", as: :create_person
     get "/people/new", to: "people.new", as: :new_person

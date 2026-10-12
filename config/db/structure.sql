@@ -2538,6 +2538,7 @@ CREATE TABLE public.mail_threads (
     trashed boolean DEFAULT false NOT NULL,
     sent boolean DEFAULT false NOT NULL,
     category public.mail_category,
+    draft boolean DEFAULT false NOT NULL,
     CONSTRAINT mail_threads_marked_spam_at_check CHECK (((status = 'spam'::public.message_status) = (marked_spam_at IS NOT NULL)))
 );
 
@@ -7354,4 +7355,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011193000_add_mail_to_sync_name.rb'),
 ('20261011193100_add_gmail_to_mail_tables.rb'),
 ('20261011194000_create_calendars.rb'),
-('20261011194100_add_calendar_to_sync_name.rb');
+('20261011194100_add_calendar_to_sync_name.rb'),
+('20261011194200_add_draft_to_mail_threads.rb');

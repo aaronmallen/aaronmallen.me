@@ -134,6 +134,12 @@ RSpec.describe Mail::Jobs::SyncGmail do
         expect(thread).to have_attributes(status: "spam", marked_spam_at: be_within(5).of(Time.now))
       end
 
+      it "files a draft" do
+        sync_message(labels: %w[DRAFT])
+
+        expect(thread.draft).to be(true)
+      end
+
       it "moves the thread to the trash" do
         sync_message(labels: %w[TRASH])
 

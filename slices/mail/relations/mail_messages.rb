@@ -13,6 +13,8 @@ module Mail
 
       def from_visitors = exclude(visitor_hash: nil)
 
+      def oldest_first = order(self[:received_at].asc, self[:id].asc)
+
       def received_since(time) = where { received_at >= time }
     end
   end

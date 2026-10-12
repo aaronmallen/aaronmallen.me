@@ -120,7 +120,7 @@ module Spec
     end
 
     module Threading
-      LETTER = %i[reply_to body visitor_hash].freeze
+      LETTER = %i[reply_to body visitor_hash from_name].freeze
     end
 
     module Tagging

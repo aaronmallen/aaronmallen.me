@@ -8,6 +8,7 @@ module Mail
     ADDRESS = /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/
     CATEGORY = "CATEGORY_"
     CHARSET = /charset="?([^";\s]+)/i
+    FLAGS = { starred: "STARRED", trashed: "TRASH", sent: "SENT", draft: "DRAFT" }.freeze
     FROM = /\A\s*"?(?<name>[^"<]*?)"?\s*<(?<address>[^>]*)>\s*\z/
     HTML = "text/html"
     NO_SUBJECT = "(no subject)"
@@ -32,8 +33,8 @@ module Mail
 
       {
         gmail_id:, subject: messages.first&.fetch(:subject) || NO_SUBJECT, status: status(spam),
-        marked_spam_at: (now if spam), starred: labels.include?("STARRED"), archived: !labels.include?("INBOX"),
-        trashed: labels.include?("TRASH"), sent: labels.include?("SENT"), category:,
+        marked_spam_at: (now if spam), **FLAGS.transform_values { labels.include?(it) },
+        archived: !labels.include?("INBOX"), category:,
         received_at: messages.map { it[:received_at] }.max || now,
       }
     end

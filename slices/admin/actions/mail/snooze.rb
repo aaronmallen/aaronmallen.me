@@ -2,13 +2,12 @@
 
 module Admin
   module Actions
-    module Messages
+    module Mail
       class Snooze < Inbox::Snooze
         private
 
         def back(request)
-          id = record_id(request)
-          Helpers::MessageList.back(routes, Helpers::MessageList.from(request.params, :filter), open: id)
+          Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: record_id(request))
         end
 
         def kind(_request) = "message"

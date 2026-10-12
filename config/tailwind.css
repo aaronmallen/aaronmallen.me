@@ -3568,18 +3568,6 @@
   }
 }
 
-@utility msg-filters {
-  @apply flex flex-wrap items-center gap-2;
-
-  & input.inp {
-    @apply w-56;
-  }
-
-  & select.inp {
-    @apply w-auto;
-  }
-}
-
 @utility tasks-filters {
   @apply flex flex-wrap items-center gap-2;
 
@@ -3881,7 +3869,7 @@
   @apply font-display text-base font-medium text-ink;
 }
 
-@utility msg-panes {
+@utility mail-panes {
   @apply grid grid-cols-1 items-start gap-stack;
 
   @media (width >= 53.75rem) {
@@ -3889,101 +3877,278 @@
   }
 }
 
-@utility msg-list {
+@utility mail-list {
   @media (width >= 53.75rem) {
     @apply sticky top-[calc(var(--spacing-top-bar)+1rem)];
   }
+
+  &:has(form[data-bulk-off]) {
+    & .bulk-pick,
+    & .bulk-bar {
+      @apply hidden;
+    }
+  }
 }
 
-@utility msg-item {
-  @apply relative flex flex-wrap items-start gap-x-1.5 gap-y-2 border-b border-line py-3 pl-3 last:border-b-0;
+@utility mail-pane {
+  @media (width < 53.75rem) {
+    &:not(:has(.mail-reader)) {
+      @apply hidden;
+    }
+  }
+}
+
+@utility mail-filters {
+  @apply flex flex-wrap items-center gap-2;
+
+  & input.inp {
+    @apply w-56;
+  }
+
+  & select.inp {
+    @apply w-auto;
+  }
+}
+
+@utility mail-folder-select {
+  @media (width >= 1180px) {
+    @apply hidden;
+  }
+}
+
+@utility mail-layout {
+  @apply grid grid-cols-1 items-start gap-stack;
+
+  @media (width >= 1180px) {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+}
+
+@utility mail-folders {
+  @apply hidden;
+
+  @media (width >= 1180px) {
+    @apply sticky top-[calc(var(--spacing-top-bar)+1rem)] flex max-h-[calc(100vh-110px)] flex-col gap-px overflow-auto;
+  }
+}
+
+@utility mail-folder {
+  @apply flex min-h-9 w-full items-center gap-2.5 rounded-[10px] px-3 py-2 font-display text-[0.95rem] font-medium text-ink-muted focus-ring;
+
+  &.gr {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.or {
+    --tone: var(--color-mk-orange-text);
+  }
+
+  &.bl {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.vi {
+    --tone: var(--color-mk-violet-text);
+  }
+
+  &.pk {
+    --tone: var(--color-mk-pink-text);
+  }
+
+  &:hover {
+    @apply text-ink;
+    background: color-mix(in oklab, var(--color-ink) 4%, transparent);
+  }
+
+  &.on {
+    @apply bg-ground-sunk text-ink;
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+
+  & > i {
+    @apply w-3.5 flex-none text-center text-icon-sm;
+  }
+
+  & > .mail-dot {
+    @apply mx-[3px];
+  }
+}
+
+@utility mail-folder-name {
+  @apply min-w-0 flex-1 truncate;
+}
+
+@utility mail-folder-count {
+  @apply font-mono text-badge text-ink-muted;
+
+  .on > & {
+    @apply text-ink;
+  }
+}
+
+@utility mail-folder-group {
+  @apply mt-3 border-t border-line pt-2.5;
+}
+
+@utility mail-folder-head {
+  @apply flex items-center gap-2 px-3 pt-1 pb-1.5 font-mono text-badge tracking-[.08em] text-ink-muted uppercase;
+}
+
+@utility mail-account {
+  @apply inline-flex items-center gap-1.5 text-(--tone);
+
+  &.gr {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.or {
+    --tone: var(--color-mk-orange-text);
+  }
+
+  &.bl {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.vi {
+    --tone: var(--color-mk-violet-text);
+  }
+
+  &.pk {
+    --tone: var(--color-mk-pink-text);
+  }
+}
+
+@utility mail-dot {
+  @apply inline-block size-2 flex-none rounded-full;
+  background: var(--tone, var(--color-ink-muted));
+}
+
+@utility mail-label {
+  @apply text-(--tone,var(--color-mk-violet-text));
+}
+
+@utility mail-dim {
+  @apply font-normal text-ink-muted;
+}
+
+@utility mail-draft {
+  @apply text-mk-orange-text;
+}
+
+@utility mail-row {
+  @apply relative flex items-start gap-1.5 border-b border-line py-3 pl-3 last:border-b-0;
 
   &.unread::before {
     @apply absolute top-[21px] left-0 size-1.5 rounded-full bg-mk-pink content-[''];
   }
 
   &.snoozed {
-    @apply opacity-60;
+    @apply opacity-70;
   }
 
-  &:has(.msg-item-open:hover) {
+  &.on {
+    @apply rounded-xl bg-ground-sunk;
+  }
+
+  &:has(.mail-row-open:hover) {
     background: color-mix(in oklab, var(--color-ink) 3%, transparent);
   }
 }
 
-@utility msg-item-form {
+@utility mail-row-form {
   @apply min-w-0 flex-1;
 }
 
-@utility msg-item-open {
+@utility mail-row-open {
   @apply block w-full cursor-pointer pl-1 text-left text-ink focus-ring;
 }
 
-@utility msg-item-head {
+@utility mail-row-head {
   @apply flex justify-between gap-2.5 font-display text-base font-medium;
 
   .unread & {
     @apply font-semibold;
   }
+}
 
-  & > time {
-    @apply font-mono text-badge font-normal whitespace-nowrap text-ink-muted;
+@utility mail-row-from {
+  @apply min-w-0 truncate;
+}
+
+@utility mail-row-when {
+  @apply flex items-center gap-1.5 font-mono text-badge font-normal whitespace-nowrap text-ink-muted;
+
+  & > i {
+    @apply text-[11px] text-mk-sand-text;
   }
 }
 
-@utility msg-item-snoozed {
-  @apply font-mono text-badge font-normal text-ink-muted;
+@utility mail-row-subject {
+  @apply mt-0.5 block truncate text-[0.95rem] text-ink;
+
+  .unread & {
+    @apply font-semibold;
+  }
 }
 
-@utility msg-item-tags {
-  @apply flex basis-full flex-wrap gap-x-2 pl-1;
+@utility mail-row-meta {
+  @apply mt-1 flex flex-wrap items-center gap-x-3.5 gap-y-0.5 font-mono text-badge text-ink-muted;
 }
 
-@utility msg-item-title {
-  @apply min-w-0;
-}
-
-@utility msg-item-from {
-  @apply mt-1 block font-mono text-badge text-ink-muted;
-}
-
-@utility msg-item-preview {
+@utility mail-row-preview {
   @apply mt-1 line-clamp-2 text-[0.92rem] leading-[1.45] text-ink-muted;
 }
 
-@utility msg-pane {
-  @media (width < 53.75rem) {
-    &:not(:has(.msg-letter)) {
-      @apply hidden;
-    }
-  }
-}
-
-@utility msg-letter {
+@utility mail-reader {
   & > .inbox-meta {
     @apply mb-2.5;
   }
 }
 
-@utility msg-letter-acts {
-  @apply mt-4 flex flex-wrap items-center gap-2;
-}
-
-@utility msg-letter-far {
-  @apply ml-auto flex flex-wrap gap-2;
-}
-
-@utility msg-letter-tags {
-  @apply mt-2 flex flex-wrap gap-x-2;
-}
-
-@utility msg-letter-title {
+@utility mail-title {
   @apply font-display text-[clamp(1.6rem,2.2vw,2.4rem)] leading-[1.1] font-extrabold tracking-[-0.03em] text-ink;
 }
 
-@utility msg-letter-body {
-  @apply mt-6 max-w-[68ch] text-[1.15rem] leading-[1.7] text-ink;
+@utility mail-who {
+  @apply mt-4.5 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-line bg-ground px-3.5 py-3;
 }
+
+@utility mail-who-name {
+  @apply m-0 flex flex-wrap items-center gap-2 font-display text-base font-semibold;
+
+  & > i {
+    @apply text-icon-sm text-ink-muted;
+  }
+}
+
+@utility mail-earlier {
+  @apply mt-5 border-t border-line;
+
+  & > summary {
+    @apply cursor-pointer py-3 font-mono text-[12.5px] text-ink-muted hover:text-ink focus-ring;
+  }
+}
+
+@utility mail-message {
+  @apply mt-5 border-t border-line pt-5;
+
+  &.me .mail-message-body {
+    @apply text-ink-muted;
+  }
+}
+
+@utility mail-message-body {
+  @apply mt-2.5 max-w-[68ch] text-[1.15rem] leading-[1.7] text-ink;
+}
+
+@utility mail-acts {
+  @apply mt-7 flex flex-wrap items-center gap-2 border-t border-line pt-4.5;
+}
+
+@utility mail-acts-far {
+  @apply ml-auto flex flex-wrap gap-2;
+}
+
 
 @utility wm-card {
   @apply flex flex-col;
@@ -4961,22 +5126,6 @@
 
 @utility snooze-form {
   @apply flex flex-col gap-3;
-}
-
-@utility label-form {
-  @apply flex flex-col gap-3;
-}
-
-@utility label-list {
-  @apply grid max-h-65 justify-items-start gap-0.5 overflow-auto;
-}
-
-@utility label-choice {
-  @apply py-1.5;
-}
-
-@utility label-count {
-  @apply mr-auto hint;
 }
 
 @utility snooze-picks {

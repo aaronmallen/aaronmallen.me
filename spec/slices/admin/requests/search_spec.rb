@@ -165,11 +165,18 @@ RSpec.describe "Admin search", type: :request do
         expect(page).to have_link("Walked the levee at dawn", href: "/admin/journal?to=2026-10-01#day-2026-10-01")
       end
 
-      it "sends a message to the list that holds it" do
-        create(:message, :read, subject: "Hello", body: "Loved your piece on sourdough")
+      it "sends a message to its thread in Mail" do
+        thread = create(:message, :read, subject: "Hello", body: "Loved your piece on sourdough")
         get "/admin/search", q: "sourdough"
 
-        expect(page).to have_link("Hello", href: "/admin/messages?status=read")
+        expect(page).to have_link("Hello", href: "/admin/mail?folder=all&thread=#{thread.id}#read-#{thread.id}")
+      end
+
+      it "sends a spam message to its thread in the Spam folder" do
+        thread = create(:message, :spam, subject: "Hello", body: "Loved your piece on sourdough")
+        get "/admin/search", q: "sourdough"
+
+        expect(page).to have_link("Hello", href: "/admin/mail?folder=spam&thread=#{thread.id}#read-#{thread.id}")
       end
 
       it "lists a thread once when more than one of its messages match" do

@@ -7,7 +7,7 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
   let(:screens) do
     %w[
       /admin /admin/tasks /admin/calendar /admin/journal /admin/decisions /admin/review /admin/posts /admin/social
-      /admin/projects /admin/files /admin/links /admin/inbox /admin/messages /admin/webmentions /admin/analytics
+      /admin/projects /admin/files /admin/links /admin/inbox /admin/mail /admin/webmentions /admin/analytics
       /admin/activity /admin/health /admin/time /admin/search /admin/tags /admin/people /admin/tasks/rules
       /admin/webmentions/settings /admin/tokens /admin/services /admin/clients /admin/security
     ]
@@ -158,7 +158,8 @@ RSpec.describe "Admin layout", :frozen_clock, type: :request do
     it "lists the pill's screens as screen-tabs under the page head", :aggregate_failures do
       tabs = page.all(".page-head + .screen-tabs a.screen-tab")
 
-      expect(tabs.map { it["href"] }).to eq(%w[/admin/inbox /admin/messages /admin/webmentions])
+      expect(tabs.map { it["href"] }).to eq(%w[/admin/inbox /admin/mail /admin/webmentions])
+      expect(tabs.map(&:text)).to eq(%w[waiting mail mentions])
       expect(page).to have_css("a.screen-tab[aria-current='page']", count: 1, text: "waiting")
     end
   end

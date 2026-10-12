@@ -184,9 +184,9 @@ RSpec.describe "Admin screens", type: :feature do
       "health" => "/admin/health",
       "inbox" => "/admin/inbox",
       "journal" => "/admin/journal",
+      "mail" => "/admin/mail",
+      "mail open" => "/admin/mail?thread=#{Mail::Slice['repos.message_queries'].unread.first.id}",
       "mastodon refused" => "/admin/auth/mastodon/callback",
-      "messages" => "/admin/messages",
-      "message open" => "/admin/messages?open=#{Mail::Slice['repos.message_queries'].unread.first.id}",
       "new post" => "/admin/posts/new",
       "new project" => "/admin/projects/new",
       "new task" => "/admin/tasks/new",
@@ -432,7 +432,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def selections
     {
-      "messages ticked" => -> { tick("/admin/messages", "input[name='ids[]']") },
+      "mail ticked" => -> { tick("/admin/mail", "input[name='ids[]']") },
       "posts ticked" => -> { tick("/admin/posts", "input[name='ids[]'][value='#{draft.id}']") },
       "tasks ticked" => -> { tick("/admin/tasks?filter=next", "input[name='ids[]'][value='#{task.id}']") },
       "webmentions ticked" => -> { tick("/admin/webmentions", "input[name='ids[]']") },
@@ -469,7 +469,7 @@ RSpec.describe "Admin screens", type: :feature do
 
   def tick(path, box)
     visit path
-    find("[data-bulk-toggle]").click if path.start_with?("/admin/tasks")
+    find("[data-bulk-toggle]").click if path.start_with?("/admin/tasks", "/admin/mail")
     find(box).check
     find("[data-bulk-acts]")
   end

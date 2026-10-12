@@ -17,7 +17,7 @@ module Admin
         %i[files publish fa-paperclip admin_files].freeze,
         %i[links publish fa-link admin_links].freeze,
         %i[inbox inbox fa-inbox admin_inbox].freeze,
-        %i[messages inbox fa-envelope admin_messages].freeze,
+        %i[mail inbox fa-envelope admin_mail].freeze,
         %i[webmentions inbox fa-at admin_webmentions].freeze,
         %i[analytics insights fa-chart-simple admin_analytics].freeze,
         %i[activity insights fa-timeline admin_activity].freeze,

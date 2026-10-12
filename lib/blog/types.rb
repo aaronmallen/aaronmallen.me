@@ -91,11 +91,13 @@ module Blog
       Blog::Constants::GAP
     end
     MailCategory = Types::String.enum("personal", "social", "promotions", "updates", "forums")
+    MailFolder = Types::String.enum("inbox", "updates", "starred", "snoozed", "sent", "drafts", "all", "spam", "trash")
+    MailFolderParam = MailFolder.fallback(MailFolder.values.first)
     MailProvider = Types::String.enum("contact_form", "gmail")
+    MailShow = Types::String.enum("all", "unread")
+    MailShowParam = MailShow.fallback(MailShow.values.first)
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
-    MessageFilter = Types::String.enum("unread", "read", "spam", "inbox")
-    MessageFilterParam = MessageFilter.fallback(MessageFilter.values.first)
     MessageStatus = Types::String.enum("unread", "read", "spam")
     NetworkName = Types::String.enum("mastodon", "bluesky")
     OAuthDecision = Types::String.enum("cancel", "approve")

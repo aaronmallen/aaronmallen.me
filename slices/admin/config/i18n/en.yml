@@ -111,37 +111,34 @@ en:
       deleted: "Link deleted"
       saved: "Link saved"
       shortened: "Shortened"
-  messages_page:
+  mail_page:
     toasts:
       bulk:
         deleted:
-          one: "Deleted %{count} message"
-          other: "Deleted %{count} messages"
+          one: "Deleted %{count} thread"
+          other: "Deleted %{count} threads"
         failed:
-          not_found: "Nothing changed · message %{message} is gone"
-          other: "Nothing changed · message %{message} would not change"
+          not_found: "Nothing changed · thread %{thread} is gone"
+          other: "Nothing changed · thread %{thread} would not change"
         invalid:
-          blank: "Tick a message first"
+          blank: "Tick a thread first"
           format: "Nothing changed · pick an action from the bar"
-          long: "Tick 100 messages or fewer"
+          long: "Tick 100 threads or fewer"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
         read:
-          one: "Marked %{count} message read"
-          other: "Marked %{count} messages read"
+          one: "Marked %{count} thread read"
+          other: "Marked %{count} threads read"
         tagged:
-          one: "Tagged %{count} message %{tag}"
-          other: "Tagged %{count} messages %{tag}"
+          one: "Tagged %{count} thread %{tag}"
+          other: "Tagged %{count} threads %{tag}"
         unread:
-          one: "Moved %{count} message back to unread"
-          other: "Moved %{count} messages back to unread"
+          one: "Moved %{count} thread back to unread"
+          other: "Moved %{count} threads back to unread"
         untagged:
-          one: "Untagged %{count} message %{tag}"
-          other: "Untagged %{count} messages %{tag}"
-      deleted: "Message deleted"
-      labels_cleared: "Labels cleared"
-      labels_invalid: "Use lowercase letters, numbers and single dashes."
-      labels_saved: "Labels saved"
+          one: "Untagged %{count} thread %{tag}"
+          other: "Untagged %{count} threads %{tag}"
+      deleted: "Thread deleted"
       read: "Marked read"
       spam: "Marked as spam"
       unread: "Moved back to unread"
@@ -958,6 +955,59 @@ en:
           made: "made %{on}"
           open: "Open %{link}"
           retargeted: "retargeted %{on}"
+      mail:
+        bulk:
+          confirm_delete: "Delete the ticked threads? This cannot be undone."
+          delete: "Delete"
+          label: "Ticked mail"
+          read: "Read"
+          unread: "Unread"
+        folder_select:
+          folders: "Folders"
+          label: "Folder or label"
+          labels: "Labels"
+        folders:
+          label: "Folders and labels"
+          labels: "labels"
+          names:
+            all: "All mail"
+            drafts: "Drafts"
+            inbox: "Inbox"
+            sent: "Sent"
+            snoozed: "Snoozed"
+            spam: "Spam"
+            starred: "Starred"
+            trash: "Trash"
+            updates: "Updates"
+        reader:
+          confirm_delete: "Delete this thread? This cannot be undone."
+          confirm_delete_forever: "Delete forever?"
+          delete: "Delete"
+          delete_forever: "Delete forever"
+          earlier:
+            one: "%{count} earlier message · %{names}"
+            other: "%{count} earlier messages · %{names}"
+          gmail: "Gmail"
+          mark_read: "Mark read"
+          mark_unread: "Mark unread"
+          not_spam: "Not spam"
+          spam: "Spam"
+          wake: "Wake"
+          you: "you"
+        row:
+          archived: "archived"
+          draft: "Draft"
+          pick: "Select %{subject}"
+          read_key: "Open the highlighted thread and mark it read"
+          starred: "Starred"
+          to: " to %{address}"
+          unread_mark: "Unread: "
+          wakes: "wakes %{date}"
+        who:
+          add_person: "Add to People"
+          open_person: "Open person"
+          stranger: "%{name} isn’t in People"
+          stranger_form: "%{name} isn’t in People · via the contact form"
       markdown_editor:
         preview: "Preview"
         toolbar: "Formatting"
@@ -979,38 +1029,6 @@ en:
           uploading: "Uploading"
         view: "Editor view"
         write: "Write"
-      message_bulk:
-        confirm_delete: "Delete the ticked messages? This cannot be undone."
-        delete: "Delete"
-        label: "Ticked messages"
-        read: "Read"
-        unread: "Unread"
-      message_label:
-        bad: "Use lowercase letters, numbers and single dashes."
-        cancel: "Cancel"
-        count: "%{count} selected"
-        create: "Create “#%{name}”"
-        empty: "No labels yet. Type one above to create it."
-        find: "find or create a label…"
-        find_label: "Find or create a label"
-        open: "Label"
-        save: "Save"
-        title: "Label · %{subject}"
-      message_letter:
-        confirm_delete: "Delete this message? This cannot be undone."
-        confirm_delete_forever: "Delete forever?"
-        delete: "Delete"
-        delete_forever: "Delete forever"
-        mark_read: "Mark read"
-        mark_unread: "Mark unread"
-        not_spam: "Not spam"
-        spam: "Spam"
-        wake: "Wake"
-      message_row:
-        pick: "Select %{subject}"
-        read_key: "Open the highlighted message and mark it read"
-        snoozed: "snoozed"
-        unread_mark: "Unread: "
       nav:
         actions:
           complete_task:
@@ -1134,7 +1152,7 @@ en:
           inbox: "waiting"
           journal: "journal"
           links: "links"
-          messages: "messages"
+          mail: "mail"
           people: "people"
           posts: "posts"
           projects: "projects"
@@ -1150,7 +1168,7 @@ en:
           today: "today"
           tokens: "API tokens"
           webmention_settings: "webmentions"
-          webmentions: "webmentions"
+          webmentions: "mentions"
         top_bar:
           label: "Admin"
           palette: "Open the command palette"
@@ -2584,28 +2602,32 @@ en:
           sorts:
             clicks: "most clicked"
             recent: "recent"
-      messages:
+      mail:
         index:
-          all_tags: "All tags"
-          empty:
-            inbox: "No messages."
-            read: "Nothing read yet."
-            spam: "No spam."
-            unread: "Nothing waiting."
-          filter: "Status"
-          heading: "Messages"
-          inbox: "inbox"
-          no_match: "No messages match."
-          pick: "Pick a message to read it."
-          placeholder: "Search messages"
-          read: "read"
-          search: "Search messages"
-          spam: "spam"
+          account: "Account"
+          all_accounts: "All accounts"
+          empty: "%{name} is empty."
+          gmail:
+            one: "%{count} Gmail account"
+            other: "%{count} Gmail accounts"
+            zero: "no Gmail account"
+          heading: "Mail"
+          no_match: "No mail matches."
+          nothing_unread: "Nothing unread in %{name}."
+          pick: "Pick a thread to read it."
+          placeholder: "Search mail"
+          search: "Search mail"
+          show: "Show"
+          shows:
+            all: "all"
+            unread: "unread"
           sub:
-            one: "%{count} message"
-            other: "%{count} messages"
-          tag: "Tag"
-          unread: "unread"
+            one: "%{count} unread across %{sources}"
+            other: "%{count} unread across %{sources}"
+          with_form:
+            one: "%{count} Gmail account and the contact form"
+            other: "%{count} Gmail accounts and the contact form"
+            zero: "the contact form"
       not_found:
         heading: "Page not found"
         message: "Nothing lives at this address. The link may be wrong, or the page may have moved."

@@ -98,11 +98,11 @@ RSpec.describe "Admin list row actions", type: :feature do
     it_behaves_like "a row action in place", "Published"
   end
 
-  describe "an open message" do
-    let(:message) { create(:message, subject: "Hello there") }
-    let(:screen) { "/admin/messages?open=#{message.id}" }
+  describe "an open mail thread" do
+    let(:thread) { create(:message, subject: "Hello there") }
+    let(:screen) { "/admin/mail?thread=#{thread.id}" }
 
-    def letter = find(".msg-letter")
+    def letter = find(".mail-reader")
 
     describe "marking it read" do
       def act = letter.click_button("Mark read")
@@ -122,7 +122,7 @@ RSpec.describe "Admin list row actions", type: :feature do
     describe "deleting it" do
       def act = confirm_yes { letter.click_button("Delete") }
 
-      it_behaves_like "a row action in place", "Message deleted"
+      it_behaves_like "a row action in place", "Thread deleted"
     end
   end
 

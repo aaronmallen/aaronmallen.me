@@ -117,11 +117,11 @@ RSpec.describe "Admin palette search", type: :request do
         expect(hit("person").fetch("href")).to eq("/admin/people/#{person.id}/edit")
       end
 
-      it "sends a message to the list that holds it" do
-        create(:message, :read, subject: "Hello", body: "Loved your piece on sourdough")
+      it "sends a message to its thread in Mail" do
+        thread = create(:message, :read, subject: "Hello", body: "Loved your piece on sourdough")
         search("sourdough")
 
-        expect(hit("message").fetch("href")).to eq("/admin/messages?status=read")
+        expect(hit("message").fetch("href")).to eq("/admin/mail?folder=all&thread=#{thread.id}#read-#{thread.id}")
       end
 
       it "sends a decision to its page" do

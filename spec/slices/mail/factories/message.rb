@@ -19,10 +19,25 @@ Spec::DB::Factories.define(:message, relation: :mail_threads) do |f|
   end
 end
 
+Spec::DB::Factories.define(:mail_account) do |f|
+  f.provider "gmail"
+  f.sequence(:name) { |n| "account-#{n}@example.com" }
+end
+
 Spec::DB::Factories.define(:mail_message) do |f|
   f.sequence(:reply_to) { |n| "sender-#{n}@example.com" }
   f.subject { Faker::Book.title }
   f.body { Faker::Lorem.paragraph }
   f.sequence(:visitor_hash) { |n| Digest::SHA256.hexdigest("sender-#{n}") }
   f.received_at { Time.now }
+end
+
+Spec::DB::Factories.define(:mail_label) do |f|
+  f.sequence(:name) { |n| "label-#{n}" }
+  f.sequence(:gmail_id) { |n| "Label_#{n}" }
+end
+
+Spec::DB::Factories.define(:mail_thread_label) do |f|
+  f.mail_thread_id 0
+  f.mail_label_id 0
 end

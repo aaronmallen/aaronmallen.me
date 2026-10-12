@@ -4,7 +4,7 @@ module Admin
   module Actions
     module Inbox
       class MarkMessage < Action
-        TOASTS = "messages_page.toasts"
+        TOASTS = "mail_page.toasts"
 
         include Deps[mark_message: "mail.operations.mark_message"]
 

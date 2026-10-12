@@ -55,7 +55,7 @@ RSpec.describe "Admin command palette", type: :feature do
     it "heads each screen with its category", :aggregate_failures do
       within("[aria-labelledby='command-palette-group-inbox']") do
         expect(page).to have_css(".pal-g", text: /inbox/i)
-        expect(page).to have_css("#command-palette-messages")
+        expect(page).to have_css("#command-palette-mail")
       end
     end
 
@@ -151,11 +151,11 @@ RSpec.describe "Admin command palette", type: :feature do
   describe "typing a query" do
     before do
       open_palette
-      query.send_keys(*"mess".chars)
+      query.send_keys(*"mail".chars)
     end
 
     it "keeps the rows that match" do
-      expect(page).to have_css("#command-palette-messages")
+      expect(page).to have_css("#command-palette-mail")
     end
 
     it "drops the rows that do not" do
@@ -163,7 +163,7 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "moves the selection onto the first match" do
-      expect(active).to eq("command-palette-messages")
+      expect(active).to eq("command-palette-mail")
     end
 
     it "hides the categories it filters out", :aggregate_failures do
@@ -176,11 +176,11 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "offers a row that writes the query down as a task" do
-      expect(page).to have_css("#command-palette-create-task-typed", text: "Create task “mess”")
+      expect(page).to have_css("#command-palette-create-task-typed", text: "Create task “mail”")
     end
 
     it "offers a row that sees every result for the query" do
-      expect(page).to have_css("#command-palette-see-all", text: "See all results for “mess”")
+      expect(page).to have_css("#command-palette-see-all", text: "See all results for “mail”")
     end
   end
 
@@ -465,11 +465,11 @@ RSpec.describe "Admin command palette", type: :feature do
     before do
       open_palette
       page.assert_no_selector("[data-palette-list][aria-busy]")
-      find_by_id("command-palette-messages").hover
+      find_by_id("command-palette-mail").hover
     end
 
     it "picks it out" do
-      expect(active).to eq("command-palette-messages")
+      expect(active).to eq("command-palette-mail")
     end
   end
 
@@ -499,11 +499,11 @@ RSpec.describe "Admin command palette", type: :feature do
   describe "pressing enter" do
     before do
       open_palette
-      query.send_keys(*"mess".chars, :enter)
+      query.send_keys(*"mail".chars, :enter)
     end
 
     it "goes to the section" do
-      expect(page).to have_current_path("/admin/messages")
+      expect(page).to have_current_path("/admin/mail")
     end
   end
 
@@ -594,7 +594,7 @@ RSpec.describe "Admin command palette", type: :feature do
     end
 
     it "drops out when the query does not match" do
-      query.send_keys(*"mess".chars)
+      query.send_keys(*"mail".chars)
 
       expect(page).to have_no_css("#command-palette-create-journal-entry")
     end
@@ -818,9 +818,9 @@ RSpec.describe "Admin command palette", type: :feature do
       end
 
       it "goes where you tap" do
-        find_by_id("command-palette-messages").click
+        find_by_id("command-palette-mail").click
 
-        expect(page).to have_current_path("/admin/messages")
+        expect(page).to have_current_path("/admin/mail")
       end
 
       {

@@ -273,16 +273,16 @@ RSpec.describe "Admin keys", type: :feature do
     end
   end
 
-  describe "r on the messages list" do
+  describe "r on the mail list" do
     let(:repo) { Mail::Slice["repos.message_queries"] }
     let!(:first) { create(:message, subject: "First", received_at: Time.now) }
     let!(:second) { create(:message, subject: "Second", received_at: Time.now - 60) }
 
-    before { visit "/admin/messages" }
+    before { visit "/admin/mail" }
 
-    it "opens the highlighted message and marks it read", :aggregate_failures do
+    it "opens the highlighted thread and marks it read", :aggregate_failures do
       press("j", "r")
-      find(".msg-letter h2", text: "First")
+      find(".mail-reader h2", text: "First")
 
       expect(repo.by_id(first.id).status).to eq("read")
       expect(repo.by_id(second.id).status).to eq("unread")
@@ -298,7 +298,7 @@ RSpec.describe "Admin keys", type: :feature do
       press("?")
 
       expect(find_by_id("key-help"))
-        .to have_css(".keys-row", text: /\Ar\s+Open the highlighted message and mark it read\z/)
+        .to have_css(".keys-row", text: /\Ar\s+Open the highlighted thread and mark it read\z/)
     end
   end
 

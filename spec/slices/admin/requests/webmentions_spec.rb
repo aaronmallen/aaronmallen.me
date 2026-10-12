@@ -123,10 +123,10 @@ RSpec.describe "Admin webmentions", type: :request do
         expect(page).to have_css(".wm-kind i[aria-hidden='true']")
       end
 
-      it "says webmentions is where you are" do
+      it "says mentions is where you are" do
         get "/admin/webmentions"
 
-        expect(page).to have_css(".screen-tab[aria-current='page']", text: "webmentions")
+        expect(page).to have_css(".screen-tab[aria-current='page']", exact_text: "mentions")
       end
     end
 

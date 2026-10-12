@@ -6,7 +6,7 @@ module Mail
       GMAIL = Blog::Types::MailProvider["gmail"]
       MESSAGE_COLUMNS = %i[subject reply_to from_name body html_body received_at updated_at].freeze
       SPAM = Blog::Types::MessageStatus["spam"]
-      THREAD_COLUMNS = %i[subject status starred archived trashed sent category received_at updated_at].freeze
+      THREAD_COLUMNS = %i[subject status starred archived trashed sent draft category received_at updated_at].freeze
 
       def account(address)
         mail_accounts.dataset.insert_conflict(target: :address).insert(provider: GMAIL, name: address, address:)

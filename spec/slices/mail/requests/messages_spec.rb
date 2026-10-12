@@ -89,7 +89,7 @@ RSpec.describe "Contact messages", type: :request do
   describe "a sender marked as spam" do
     def admin_mark(message, status)
       sign_in_to_admin
-      post("/admin/messages/#{message.id}/mark/#{status}", _csrf_token: admin_csrf_token)
+      post("/admin/mail/#{message.id}/mark/#{status}", _csrf_token: admin_csrf_token)
     end
 
     def arrived = message_queries.mail_threads.order(:id).to_a.last

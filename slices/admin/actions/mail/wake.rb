@@ -2,9 +2,9 @@
 
 module Admin
   module Actions
-    module Messages
+    module Mail
       class Wake < Action
-        WOKEN = "messages_page.toasts.woken"
+        WOKEN = "mail_page.toasts.woken"
 
         include Deps[wake_message: "mail.operations.wake_message"]
 
@@ -13,13 +13,8 @@ module Admin
           result = wake_message.call(id)
           halt 422 if result in Failure(:not_snoozed)
 
-          settle(response, result, WOKEN, back(request, id))
-        end
-
-        private
-
-        def back(request, id)
-          Helpers::MessageList.back(routes, Helpers::MessageList.from(request.params, :filter), open: id)
+          back = Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: id)
+          settle(response, result, WOKEN, back)
         end
       end
     end

@@ -45,8 +45,8 @@ module Admin
     ], from: :decisions
 
     import keys: %w[
-      operations.act_on_messages operations.delete_message operations.label_message operations.mark_message
-      operations.wake_message repos.message_queries
+      operations.act_on_messages operations.delete_message operations.mark_message operations.wake_message
+      repos.message_queries repos.thread_queries
     ], from: :mail
 
     import keys: %w[

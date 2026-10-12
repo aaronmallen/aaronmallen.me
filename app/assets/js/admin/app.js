@@ -12,7 +12,6 @@ import { setupKeys } from "./keys.js";
 import { setupLinkForms } from "./link_form.js";
 import { setupLive } from "./live.js";
 import { setupMarkdownEditors } from "./markdown_editor.js";
-import { setupMessageLabels } from "./message_label.js";
 import { setupMorphForms } from "./morph_form.js";
 import { setupPalette } from "./palette.js";
 import { setupPersonFinder } from "./person_finder.js";
@@ -45,7 +44,6 @@ function setup() {
   setupJournals();
   setupKeys();
   setupLinkForms();
-  setupMessageLabels();
   setupMarkdownEditors();
   setupPalette();
   setupPersonFinder();
