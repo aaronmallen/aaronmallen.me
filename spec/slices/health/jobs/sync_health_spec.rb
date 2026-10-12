@@ -184,6 +184,43 @@ RSpec.describe Health::Jobs::SyncHealth do
     end
   end
 
+  describe "an account that also granted mail and calendar" do
+    let(:scopes) { ["https://mail.google.com/", "https://www.googleapis.com/auth/calendar", *health_scopes] }
+    let(:health_scopes) { Spec::GoogleAccounts::HEALTH_SCOPES }
+
+    def narrowed = a_request(:post, Spec::GoogleAccounts::TOKEN_URL)
+
+    def stored_token = Services::Slice["repos.connection_queries"].for(:google).first.credentials[:access_token]
+
+    before do
+      connect_google(scopes:)
+      stub_google_health
+    end
+
+    it "reads Health with one token narrowed to the Health scopes", :aggregate_failures do
+      run
+
+      expect(narrowed.with(body: hash_including("scope" => health_scopes.join(" ")))).to have_been_made.once
+      expect(a_request(:any, /health\.googleapis\.com/).with(headers: { "Authorization" => "Bearer ya29.token" }))
+        .not_to have_been_made
+    end
+
+    it "keeps the stored token, which mail and calendar still need" do
+      run
+
+      expect(stored_token).to eq("ya29.token")
+    end
+
+    it "narrows again once when Google turns the narrowed token away", :aggregate_failures do
+      stub_request(:get, %r{dataTypes/sleep/dataPoints\?})
+        .to_return({ status: 401 }, google_health_json({ dataPoints: [] }))
+      run
+
+      expect(narrowed).to have_been_made.twice
+      expect(failure).to be_nil
+    end
+  end
+
   it "records a revoked token as needing a reconnect" do
     connect_google(revoked_at: Time.now)
     run

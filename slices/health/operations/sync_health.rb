@@ -63,7 +63,7 @@ module Health
       end
 
       def points(account, type, filter, **params)
-        page = google.get("#{DATA_TYPES}/#{type}/dataPoints", account:, filter:, **params)
+        page = google.get("#{DATA_TYPES}/#{type}/dataPoints", account:, narrow: SCOPE, filter:, **params)
         rows = page.fetch("dataPoints", [])
         token = page["nextPageToken"].to_s
         token.empty? ? rows : rows + points(account, type, filter, **params, page_token: token)
@@ -77,7 +77,7 @@ module Health
 
       def rollup(account, type, first, last)
         body = { range: { start: civil(first), end: civil(last + 1) }, windowSizeDays: 1 }
-        page = google.post("#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp", body, account:)
+        page = google.post("#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp", body, account:, narrow: SCOPE)
         rows = page.fetch("rollupDataPoints", [])
 
         rows.to_h { [date(it.dig("civilStartTime", "date")), yield(it)] }

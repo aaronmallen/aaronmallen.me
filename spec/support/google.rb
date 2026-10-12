@@ -9,6 +9,7 @@ module Spec
                     .map { "https://www.googleapis.com/auth/googlehealth.#{it}.readonly" }.freeze
     LISTS = %w[sleep daily-resting-heart-rate daily-heart-rate-variability exercise].freeze
     ROLLUPS = %w[steps active-zone-minutes].freeze
+    TOKEN_URL = "https://oauth2.googleapis.com/token"
 
     def connect_google(account_id: "aaron@example.com", scopes: HEALTH_SCOPES, revoked_at: nil, token: "ya29.token", **)
       set_up_google_client
@@ -70,6 +71,7 @@ module Spec
     end
 
     def stub_google_health(**bodies)
+      stub_google_token("ya29.health", HEALTH_SCOPES)
       LISTS.each do |type|
         stub_request(:get, %r{\A#{DATA_TYPES}/#{type}/dataPoints\?})
           .to_return(google_health_json(bodies.fetch(type.tr("-", "_").to_sym, { dataPoints: [] })))
@@ -78,6 +80,11 @@ module Spec
         stub_request(:post, "#{DATA_TYPES}/#{type}/dataPoints:dailyRollUp")
           .to_return(google_health_json(bodies.fetch(type.tr("-", "_").to_sym, { rollupDataPoints: [] })))
       end
+    end
+
+    def stub_google_token(token, scopes)
+      stub_request(:post, TOKEN_URL)
+        .to_return(google_health_json({ access_token: token, expires_in: 3600, scope: scopes.join(" ") }))
     end
   end
 end
