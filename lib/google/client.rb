@@ -8,6 +8,7 @@ module Google
     INVALID_GRANT = "invalid_grant"
     JSON_HEADERS = { "Content-Type" => "application/json" }.freeze
     LATENCY = 60
+    NOT_FOUND = 404
     NOT_CONNECTED = "%s isn't connected"
     NOT_SET_UP = "Google sign-in isn't set up"
     PROMPT = "select_account consent"
@@ -51,11 +52,13 @@ module Google
       { **named(token), credentials: stored(token), scopes: token.params["scope"].to_s.split }
     end
 
-    def holding(scope)
-      return unless configured?
+    def holders(scope)
+      return [] unless configured?
 
-      connections.find { |connection| connection.scopes.any? { it.start_with?(scope) } }&.account_id
+      connections.select { |connection| connection.scopes.any? { it.start_with?(scope) } }.map(&:account_id)
     end
+
+    def holding(scope) = holders(scope).first
 
     def post(url, body, account:) = request(account, :post, url, body: body.to_json, headers: JSON_HEADERS.dup)
 
@@ -80,7 +83,9 @@ module Google
     def fetch(connection, token, verb, url, options, renewed: false)
       token.request(verb, url.to_s, options).parsed
     rescue OAuth2::Error => e
-      raise Error, refusal(e) if renewed || e.response&.status != UNAUTHORIZED
+      status = e.response&.status
+      raise NotFound, refusal(e) if status == NOT_FOUND
+      raise Error, refusal(e) if renewed || status != UNAUTHORIZED
 
       fetch(connection, renew(connection, token), verb, url, options, renewed: true)
     rescue Faraday::Error => e

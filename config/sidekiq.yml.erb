@@ -66,6 +66,9 @@ production:
     sync_health:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Health::Jobs::SyncHealth
+    sync_gmail:
+      cron: "*/5 * * * * <%= Blog::TimeZone::NAME %>"
+      class: Mail::Jobs::SyncGmail
     sync_issues:
       cron: "*/15 * * * * <%= Blog::TimeZone::NAME %>"
       class: Tasks::Jobs::SyncIssues

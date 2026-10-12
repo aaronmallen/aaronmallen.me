@@ -1884,6 +1884,7 @@ en:
           health: "Google Health sync"
           issues: "GitHub issue sync"
           linear_issues: "Linear issue sync"
+          mail: "Gmail sync"
           projects: "Project refresh"
           pull_requests: "Pull request import"
       tags:

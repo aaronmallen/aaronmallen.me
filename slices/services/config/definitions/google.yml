@@ -25,4 +25,5 @@ scopes:
     label: Read heart rate and HRV
     why: Resting heart rate and HRV
 jobs:
+  - {name: Gmail sync, every: every 5 minutes, sync: mail}
   - {name: Google Health sync, every: every 15 minutes, sync: health}

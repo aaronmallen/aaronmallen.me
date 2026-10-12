@@ -90,6 +90,7 @@ module Blog
     rescue TZInfo::PeriodNotFound
       Blog::Constants::GAP
     end
+    MailCategory = Types::String.enum("personal", "social", "promotions", "updates", "forums")
     MailProvider = Types::String.enum("contact_form", "gmail")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
@@ -178,7 +179,7 @@ module Blog
     SuggestionEditStatus = Types::String.enum("pending", "accepted", "rejected", "stale")
     SyncName = Types::String.enum(
       "analytics_rollup", "commits", "country_database", "projects", "issues", "linear_issues", "backups",
-      "pull_requests", "health",
+      "pull_requests", "health", "mail",
     )
     SyncStateKind = Types::String.enum("commits", "backfill", "failure")
     Tag = Types::String.constrained(format: SLUG_FORMAT)

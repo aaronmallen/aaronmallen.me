@@ -80,6 +80,7 @@ RSpec.describe "MCP reach", type: :app do
       "mail.operations.create_message" => "a reader sends a message through the public form",
       "mail.operations.label_message" => "sets a thread's tags from the admin; tag_mail_threads covers it",
       "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",
+      "mail.operations.sync_gmail" => "background jobs sync Gmail into the mail tables",
       "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",
       "health.operations.sync_health" => "background jobs sync health days and workouts from Google",
       "media.operations.sweep_photos" => "a background job sweeps photos nothing claimed",
