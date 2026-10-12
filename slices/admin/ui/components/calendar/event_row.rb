@@ -13,14 +13,14 @@ module Admin
           prop :today, Blog::Types::Date
 
           def view_template
-            div(class: "cal-event", style: Tone.style(@tone), data: { calendar_item: "event-#{@event.id}" }) do
+            div(class: "cal-event", style: Tone.style(@tone), data:) do
               span(class: "cal-event-time") { @event.all_day? ? t(".all_day") : clock(@event.starts_at) }
               details(class: "cal-event-body") do
                 head
                 more
               end
               join
-              MoveForm(kind: :event, id: @event.id, title:, date: @day, today: @today) if @event.calendar.writable
+              move
             end
           end
 
@@ -41,6 +41,11 @@ module Admin
           end
 
           def clock(time) = l(Blog::TimeZone.local(time), format: :clock)
+
+          def data
+            { calendar_item: "event-#{@event.id}",
+              menu: path(:admin_calendar_event_menu, id: @event.id, day: @day.iso8601) }
+          end
 
           def delete_form
             Form(
@@ -95,6 +100,10 @@ module Admin
               links
               changes
             end
+          end
+
+          def move
+            MoveForm(kind: :event, id: @event.id, title:, date: @day, today: @today) if @event.calendar.writable
           end
 
           def title = @event.title || t(".untitled")

@@ -2656,6 +2656,15 @@ en:
             one: "%{formatted} visitor"
             other: "%{formatted} visitors"
       calendar:
+        event_menu:
+          confirm_delete: "Click again · Google loses it too"
+          delete: "Delete event"
+          delete_all: "Delete the whole series"
+          delete_this: "Delete this one"
+          edit: "Edit"
+          edit_title: "Edit event"
+          google: "Open in Google Calendar"
+          join: "Join Meet"
         show:
           heading: "Calendar"
       clients:

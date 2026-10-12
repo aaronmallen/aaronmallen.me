@@ -12,9 +12,10 @@ module Admin
           prop :day, Blog::Types::Date
           prop :calendars, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct)), default: Blog::Constants::EMPTY_ARRAY
           prop :event, Blog::Types::Instance(ROM::Struct).optional, default: nil
+          prop :morph, Blog::Types::Bool, default: false
 
           def view_template
-            Form(action: @action, class: "cal-event-form") do
+            Form(action: @action, class: "cal-event-form", data: { morph: (true if @morph) }) do
               input(type: "hidden", name: "day", value: @day.iso8601)
               text(:title, t(".title"), value: @event&.title, required: true)
               calendar unless @event
@@ -50,7 +51,7 @@ module Admin
             Button(type: "submit", small: true, variant: :pri) { @event ? t(".save") : t(".add") }
           end
 
-          def id(name) = "cal-event-#{@event&.id || 'new'}-#{name}"
+          def id(name) = ["cal-event", @event&.id || "new", ("menu" if @morph), name].compact.join("-")
 
           def options
             @calendars.select(&:writable).group_by(&:account).each do |account, calendars|
