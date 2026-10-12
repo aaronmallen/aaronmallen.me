@@ -214,6 +214,7 @@ module Admin
     post "/tasks/rules/:id/delete", to: "task_rules.destroy", as: :delete_task_rule, id: ID
     get "/tasks/:id", to: "tasks.show", as: :task, id: ID
     get "/tasks/:id/edit", to: "tasks.edit", as: :edit_task, id: ID
+    get "/tasks/:id/menu", to: "tasks.menu", as: :task_menu, id: ID
     post "/tasks/:id", to: "tasks.update", as: :update_task, id: ID
     post "/tasks/:id/cancel", to: "tasks.cancel", as: :cancel_task, id: ID
     post "/tasks/:id/comments", to: "tasks.create_comment", as: :create_task_comment, id: ID

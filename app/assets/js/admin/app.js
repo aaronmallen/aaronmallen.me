@@ -4,6 +4,7 @@ import { setupCalendars } from "./calendar.js";
 import { setupCommentAdds } from "./comment_add.js";
 import { setupCommitImports } from "./commits.js";
 import { setupConfirms } from "./confirm.js";
+import { setupContextMenus } from "./context_menu.js";
 import { setupDialogs } from "./dialog.js";
 import { setupEditNotes } from "./edit_note.js";
 import { setupFileDrops } from "./file_drop.js";
@@ -38,6 +39,7 @@ function setup() {
   setupCommentAdds();
   setupCommitImports();
   setupConfirms();
+  setupContextMenus();
   setupDialogs();
   setupEditNotes();
   setupFileDrops();

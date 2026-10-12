@@ -6906,6 +6906,92 @@
   }
 }
 
+@utility ctx {
+  @apply fixed z-80 flex max-h-[calc(100vh-1rem)] w-max max-w-80 min-w-56 flex-col overflow-auto p-1.5 outline-none;
+  @apply rounded-menu border border-line bg-ground-sunk shadow-menu;
+
+  @media (width < 43.75rem) {
+    @apply max-w-[calc(100vw-1rem)];
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  & hr {
+    @apply mx-0.5 my-1 border-0 border-t border-line;
+  }
+}
+
+@utility ctx-head {
+  @apply mb-1 truncate border-b border-line px-2.5 pt-[7px] pb-2 font-mono text-badge text-ink-muted;
+}
+
+@utility ctx-item {
+  @apply flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-[7px] text-left font-mono text-input;
+  @apply text-ink no-underline outline-none;
+
+  @media (width < 43.75rem) {
+    @apply min-h-11;
+  }
+
+  &:focus,
+  &[aria-expanded="true"] {
+    @apply bg-wash;
+  }
+
+  &:disabled {
+    @apply cursor-default opacity-45;
+  }
+
+  & > i:first-child {
+    @apply w-3.5 flex-none text-center text-icon-sm text-ink-muted;
+  }
+
+  &[data-sure] {
+    @apply bg-mk-pink/20 text-mk-pink-text;
+  }
+}
+
+@utility ctx-warn {
+  &,
+  & > i:first-child {
+    @apply text-mk-pink-text;
+  }
+}
+
+@utility ctx-label {
+  @apply min-w-0 flex-1 truncate;
+}
+
+@utility ctx-hint {
+  @apply text-badge whitespace-nowrap text-ink-muted;
+}
+
+@utility ctx-more {
+  @apply text-[9px] text-ink-muted;
+}
+
+@utility ctx-field {
+  @apply flex items-center gap-2 rounded-md py-[3px] pr-1.5 pl-2.5;
+
+  & > i {
+    @apply w-3.5 text-center text-icon-sm text-ink-muted;
+  }
+}
+
+@utility ctx-input {
+  @apply min-w-0 flex-1 rounded-sm border border-line bg-ground px-2 py-[5px] font-mono text-input text-ink outline-none;
+
+  &:focus {
+    @apply border-ink-muted;
+  }
+}
+
+@utility ctx-on {
+  @apply rounded-lg bg-wash/55;
+}
+
 @layer base {
   @media (width < 48rem) {
     :root { --spacing-gutter: 1rem; }

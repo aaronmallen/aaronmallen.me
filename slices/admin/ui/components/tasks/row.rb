@@ -20,7 +20,7 @@ module Admin
           prop :large, Blog::Types::Bool, default: false
 
           def view_template
-            div(class: classes, data: { key_row: true, **order }) do
+            div(class: classes, data: { key_row: true, menu: menu_path, **order }) do
               @bulk ? pick : box
               RecordKey(kind: "task", id: @task.id)
               div(class: "task-body") do
@@ -62,6 +62,8 @@ module Admin
 
             Button(href:, label:, aria:, data:, small: true, icon: "fa-regular fa-pen-to-square")
           end
+
+          def menu_path = path(:admin_task_menu, id: @task.id, filter: tab, origin: @origin)
 
           def order
             return Blog::Constants::EMPTY_HASH unless ordered?

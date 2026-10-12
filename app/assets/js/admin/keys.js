@@ -1,3 +1,4 @@
+import { MENU } from "./context_menu.js";
 import { fresh } from "./fresh.js";
 
 const FIELD = [
@@ -38,7 +39,9 @@ export function setupKeys() {
 }
 
 function press(event) {
-  if (event.defaultPrevented || event.isComposing || MODIFIERS.includes(event.key)) return;
+  if (event.defaultPrevented || event.isComposing || MODIFIERS.includes(event.key) || document.querySelector(MENU)) {
+    return;
+  }
   if (event.ctrlKey || event.metaKey || event.altKey) return chord(event);
 
   const prefix = pending;

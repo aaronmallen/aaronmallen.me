@@ -1,5 +1,6 @@
 import { Idiomorph } from "idiomorph";
 import { ASKING } from "./confirm.js";
+import { MENU } from "./context_menu.js";
 import { setupFetch } from "./fetching.js";
 import { parse } from "./in_place.js";
 
@@ -8,7 +9,7 @@ const MORPHED = "admin:morphed";
 const OPENS = "dialog, details";
 const PARTS = ["main", ".top-bar", "[data-palette]"];
 const WAIT = 1000;
-const HOLD = `dialog:modal, ${ASKING}`;
+const HOLD = `dialog:modal, ${ASKING}, ${MENU}`;
 
 export const MORPHED_PARTS = PARTS.join(", ");
 

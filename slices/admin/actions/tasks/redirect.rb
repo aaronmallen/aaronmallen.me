@@ -21,6 +21,8 @@ module Admin
         def task_tab(request) = Blog::Types::TaskTabParam[request.params[:filter]]
 
         def tasks_path(request, filter: nil, pool: nil)
+          back = back_here(request)
+          return back if back
           return routes.path(:admin_inbox) if task_origin(request) == FROM_INBOX
 
           query = pool ? { pool: } : {}

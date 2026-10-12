@@ -6,6 +6,7 @@ module Admin
       class SeeTask < Action
         SEEN = "inbox_page.toasts.seen"
 
+        include Tasks::Redirect
         include Deps[mark_task_seen: "tasks.operations.mark_task_seen"]
 
         def handle(request, response)
@@ -13,7 +14,7 @@ module Admin
 
           case result
             in Failure(:unsourced) then halt 404
-            else settle(response, result, SEEN, routes.path(:admin_inbox))
+            else settle(response, result, SEEN, back_here(request) || routes.path(:admin_inbox))
           end
         end
       end

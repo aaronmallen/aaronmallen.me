@@ -28,15 +28,19 @@ module Admin
         def act(params) = act_on_tasks.call(params)
 
         def back(request)
+          back_here(request) || list_path(request)
+        end
+
+        def details(request)
+          { **super, list: Helpers::TaskLists::NAMES[request.params[:to]]&.then { i18n.t!(it) } }
+        end
+
+        def list_path(request)
           query = Blog::Types::TrimmedText[request.params[:q]]
           tab = task_tab(request)
           page = landing(request) { build_tasks_page.call(page: it, tab:, query:).failure? }
 
           routes.path(:admin_tasks, filter: tab, **(query.empty? ? {} : { q: query }), **Blog::Structs::Page.query(page))
-        end
-
-        def details(request)
-          { **super, list: Helpers::TaskLists::NAMES[request.params[:to]]&.then { i18n.t!(it) } }
         end
 
         def named(id)

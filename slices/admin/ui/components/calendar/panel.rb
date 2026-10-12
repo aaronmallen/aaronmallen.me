@@ -51,8 +51,9 @@ module Admin
 
           def entry(kind, record, item, movable: record.status == SCHEDULED)
             at = item[:at]
+            data = { calendar_item: "#{kind}-#{record.id}", **item.fetch(:data, Blog::Constants::EMPTY_HASH) }
 
-            ListItem(**item.except(:at), data: { calendar_item: "#{kind}-#{record.id}" }) do |row|
+            ListItem(**item.except(:at, :data), data:) do |row|
               row.meta { p(class: "li-sub") { dated(record, at) } } if at
               MoveForm(kind:, id: record.id, title: item[:title], date:, today: @today) if movable
             end
@@ -131,7 +132,12 @@ module Admin
 
           def status(record) = t(STATUSES.fetch(record.status))
 
-          def task_item(task) = { title: task.title, href: path(:admin_task, id: task.id), sub: status(task) }
+          def task_item(task)
+            {
+              title: task.title, href: path(:admin_task, id: task.id), sub: status(task),
+              data: { menu: path(:admin_task_menu, id: task.id) },
+            }
+          end
         end
       end
     end

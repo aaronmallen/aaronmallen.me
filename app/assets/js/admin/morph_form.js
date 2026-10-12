@@ -1,9 +1,11 @@
+import { MENU } from "./context_menu.js";
 import { parse } from "./in_place.js";
 import { MORPHED_PARTS, morphPage } from "./live.js";
 import { showToast } from "./toast.js";
 
 const FAILED = "[data-morph-failed]";
 const FORM = "form[data-morph]";
+const HOSTS = `${MORPHED_PARTS}, ${MENU}`;
 const OPEN = "[data-key-open]";
 const ROW = "[data-key-row]";
 const TOAST = "[data-toast]";
@@ -17,7 +19,7 @@ export function setupMorphForms() {
   bound = true;
   document.addEventListener("submit", (event) => {
     const form = event.target;
-    if (event.defaultPrevented || !form.matches(FORM) || !form.closest(MORPHED_PARTS)) return;
+    if (event.defaultPrevented || !form.matches(FORM) || !form.closest(HOSTS)) return;
 
     event.preventDefault();
     if (busy.has(form)) return;

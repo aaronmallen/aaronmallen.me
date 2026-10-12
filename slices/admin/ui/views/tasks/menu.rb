@@ -1,0 +1,132 @@
+# frozen_string_literal: true
+
+module Admin
+  module UI
+    module Views
+      module Tasks
+        class Menu < View
+          include Components::Tasks
+
+          EDIT = Components::Tasks::Row::EDIT
+          EXTERNAL = Blog::Types::TaskFilter["external"]
+          ISSUE = "fa-solid fa-arrow-up-right-from-square"
+          TAG = Blog::Types::TaskBulkAction["tag"]
+          TAG_PATTERN = '\s*[A-Za-z0-9]+(-[A-Za-z0-9]+)*\s*'
+          UNTAG = Blog::Types::TaskBulkAction["untag"]
+
+          layout nil
+
+          prop :task, Blog::Types::Instance(ROM::Struct)
+          prop :today, Blog::Types::Date
+          prop :sprints, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :tags, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
+          prop :return_to, Blog::Types::String.optional
+          prop :filter, Blog::Types::String
+          prop :origin, Blog::Types::TaskOrigin
+
+          def view_template
+            ContextMenu(label: "#{key} · #{@task.title}", return_to: @return_to) do |menu|
+              menu.link(t(".open"), href: open_path, icon: "fa-regular fa-pen-to-square", key: EDIT)
+              menu.separator
+              progress(menu)
+              MenuPlan(menu:, task: @task, today: @today, sprints: @sprints) unless closed?
+              records(menu)
+              menu.separator
+              ends(menu)
+            end
+          end
+
+          private
+
+          def act(route, **) = path(route, id: @task.id, **)
+
+          def closed? = @task.closed?
+
+          def copies(menu)
+            menu.sub(t(".copy"), icon: "fa-regular fa-copy") do
+              copied = t("ui.components.record_key.copied.task", key:)
+              menu.copy(t(".copy_number"), text: key, copied:, icon: nil, hint: key)
+              menu.copy(t(".copy_title"), text: @task.title, copied: t(".copied_title"), icon: nil)
+              source { menu.copy(t(".copy_issue"), text: it.url, copied: t(".copied_issue"), icon: nil) }
+            end
+          end
+
+          def ends(menu)
+            menu.post(t(".cancel"), action: act(:admin_cancel_task), icon: "fa-solid fa-ban") unless closed?
+            confirm = t(".confirm_delete")
+            menu.post(t(".delete"), action: act(:admin_delete_task), icon: "fa-regular fa-trash-can", warn: true,
+                                    confirm:)
+          end
+
+          def key = Components::RecordKey.key(@task.id)
+
+          def new_tag(menu)
+            invalid = t("tasks_page.toasts.bulk.invalid.tag_format")
+            fields = { act: TAG, "ids[]": @task.id }
+
+            label = t(".new_tag")
+
+            menu.field(label, action: path(:admin_bulk_tasks), name: "tag", pattern: TAG_PATTERN, invalid:, fields:)
+          end
+
+          def open_path = act(:admin_task, filter: @filter, origin: @origin)
+
+          def progress(menu)
+            if closed?
+              menu.post(t(".reopen"), action: act(:admin_reopen_task), icon: "fa-solid fa-rotate-left")
+            else
+              start_or_pause(menu)
+              menu.post(t(".complete"), action: act(:admin_complete_task), icon: "fa-solid fa-check")
+            end
+          end
+
+          def records(menu)
+            tags(menu)
+            copies(menu)
+            source { menu.link(t(".open_issue"), href: it.url, icon: ISSUE, outbound: true) }
+            seen(menu)
+          end
+
+          def running? = @task.in_progress? && @task.in_sprint?
+
+          def seen(menu)
+            source = @task.source
+            return unless @task.list == EXTERNAL && source && source.seen_at.nil?
+
+            menu.post(t(".mark_seen"), action: act(:admin_inbox_see_task), icon: "fa-solid fa-check-double")
+          end
+
+          def short(date) = l(date, format: :short)
+
+          def source
+            yield @task.source if @task.source
+          end
+
+          def start_or_pause(menu)
+            if running?
+              menu.post(t(".pause"), action: act(:admin_stop_task), icon: "fa-solid fa-pause")
+            else
+              menu.post(t(".start"), action: act(:admin_start_task), icon: "fa-solid fa-play")
+            end
+          end
+
+          def tag_item(menu, name, on)
+            fields = { act: on ? UNTAG : TAG, "ids[]": @task.id, tag: name }
+
+            menu.check("#{Components::Tag::PREFIX}#{name}", on:, action: path(:admin_bulk_tasks), fields:)
+          end
+
+          def tags(menu)
+            names = @task.tags.map(&:name)
+
+            menu.sub(t(".tags"), icon: "fa-solid fa-tag", hint: (names.size.to_s unless names.empty?)) do
+              @tags.each { tag_item(menu, it.name, names.include?(it.name)) }
+              menu.separator unless @tags.empty?
+              new_tag(menu)
+            end
+          end
+        end
+      end
+    end
+  end
+end

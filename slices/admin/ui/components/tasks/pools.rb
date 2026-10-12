@@ -29,6 +29,8 @@ module Admin
 
           def from_today? = @origin == FROM_TODAY
 
+          def menu_path(task) = path(:admin_task_menu, id: task.id, filter: TODAY, origin: @origin)
+
           def meta(task)
             p(class: "task-meta") do
               RecordKey(kind: "task", id: task.id)
@@ -67,7 +69,7 @@ module Admin
           end
 
           def row(task, list)
-            ListItem(title: task.title, hover: true) do |item|
+            ListItem(title: task.title, hover: true, data: { menu: menu_path(task) }) do |item|
               item.meta { meta(task) }
               pull_form(task, list)
             end
