@@ -6,7 +6,7 @@ module Mail
   module Operations
     class SyncGmail < Blog::Operation
       GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
-      PAGE_SIZE = 100
+      PAGE_SIZE = 25
       SCOPE = "https://www.googleapis.com/auth/gmail.modify"
       USER_LABEL = "user"
 
@@ -18,6 +18,8 @@ module Mail
         page.fetch("threads", []).each { store(address, account.id, it.fetch("id")) }
 
         Success(page["nextPageToken"])
+      rescue Google::RateLimited => e
+        Failure([:gmail_rate_limited, e.message])
       rescue Google::Error => e
         Failure([:gmail_failed, e.message])
       end

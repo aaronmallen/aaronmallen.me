@@ -252,6 +252,26 @@ RSpec.describe Mail::Jobs::SyncGmail do
     end
   end
 
+  describe "a run Gmail rate limits" do
+    before do
+      connect
+      stub_gmail
+      run
+      follow("150")
+      stub_gmail(history: %w[t1], history_id: "250", threads: { "t1" => [gmail_message("m1")] })
+      stub_request(:get, %r{/threads/t1\?}).to_return(
+        google_health_json({ error: { code: 403, errors: [{ reason: "userRateLimitExceeded" }] } }).merge(status: 403),
+      )
+      run
+    end
+
+    it("keeps the history it left off at") { expect(account.history_id).to eq("150") }
+
+    it "records the failure and catches up on the next run" do
+      expect(failure).to include(reason: "gmail_failed", message: "Google answered 403", count: 1)
+    end
+  end
+
   it "syncs every account that granted Gmail and leaves the others alone", :aggregate_failures do
     connect
     connect_google(account_id: "health@example.com", token: "ya29.health")

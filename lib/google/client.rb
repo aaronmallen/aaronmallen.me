@@ -5,6 +5,7 @@ require "oauth2"
 module Google
   class Client
     CHALLENGE_METHOD = "S256"
+    FORBIDDEN = 403
     FULL_SCOPES = {
       "https://mail.google.com/" => "https://www.googleapis.com/auth/gmail.",
       "https://www.googleapis.com/auth/calendar" => "https://www.googleapis.com/auth/calendar.",
@@ -15,8 +16,10 @@ module Google
     NOT_SET_UP = "Google sign-in isn't set up"
     PROMPT = "select_account consent"
     PROVIDER = Blog::Types::ServiceProvider["google"]
+    RATE_LIMIT = /"(?:user)?rateLimitExceeded"/i
     RECONNECT = "%s needs a reconnect"
     REVOKE_URL = "https://oauth2.googleapis.com/revoke"
+    TOO_MANY_REQUESTS = 429
     UNAUTHORIZED = 401
     USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 
@@ -101,9 +104,7 @@ module Google
     def fetch(connection, token, verb, url, options, narrow:, renewed: false)
       token.request(verb, url.to_s, options).parsed
     rescue OAuth2::Error => e
-      status = e.response&.status
-      raise NotFound, refusal(e) if status == NOT_FOUND
-      raise Error, refusal(e) if renewed || status != UNAUTHORIZED
+      raise refused(e.response), refusal(e) if renewed || e.response&.status != UNAUTHORIZED
 
       fresh = narrow ? narrowed(connection, narrow, fresh: true) : @tokens.renew(connection, token)
       fetch(connection, fresh, verb, url, options, narrow:, renewed: true)
@@ -121,7 +122,17 @@ module Google
       @tokens.narrowed(connection, connection.scopes.select { covers?(it, prefix) }, fresh:)
     end
 
+    def rate_limited?(response)
+      response&.status == TOO_MANY_REQUESTS || (response&.status == FORBIDDEN && response.body.to_s.match?(RATE_LIMIT))
+    end
+
     def refusal(error) = "Google answered #{error.response&.status || error.code}"
+
+    def refused(response)
+      return NotFound if response&.status == NOT_FOUND
+
+      rate_limited?(response) ? RateLimited : Error
+    end
 
     def request(account, verb, url, narrow: nil, **options)
       return unless configured?
