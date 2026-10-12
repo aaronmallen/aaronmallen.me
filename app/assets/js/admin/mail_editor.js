@@ -1,5 +1,6 @@
 import { fresh } from "./fresh.js";
 
+const DRAFT_WAIT = 900;
 const DROPPED = "script, style, meta, link, title, iframe, object, embed, template";
 const ENTITIES = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" };
 const KEYS = { KeyB: "bold", KeyI: "italic", KeyU: "underline", KeyK: "link", KeyE: "code", Backslash: "removeFormat" };
@@ -180,9 +181,74 @@ function setupEditor(editor) {
   sync();
 }
 
+function setupAttach(form) {
+  const files = form.querySelector("[data-mail-files]");
+  const names = form.querySelector("[data-mail-file-names]");
+  if (!files) return;
+
+  files.addEventListener("change", () => {
+    names.textContent = [...files.files].map((file) => file.name).join(", ");
+  });
+}
+
+function setupDraft(form) {
+  const draft = form.querySelector("[data-mail-draft]");
+  const status = form.querySelector("[data-mail-saved]");
+  if (!draft) return;
+
+  let timer = null;
+  let saving = Promise.resolve();
+  let pending = 0;
+
+  const save = async () => {
+    const body = new FormData(form);
+    body.delete("mail[files][]");
+    if (!["mail[to]", "mail[subject]", "mail[body]"].some((name) => body.get(name)?.trim())) return;
+
+    const response = await fetch(form.dataset.mailDraftUrl, {
+      method: "POST",
+      body,
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) return;
+
+    draft.value = (await response.json()).draft;
+    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    status.textContent = status.dataset.mailSaved.replace("{time}", time);
+  };
+
+  const queue = () => {
+    timer = null;
+    pending += 1;
+    saving = saving
+      .then(save)
+      .catch(() => {})
+      .finally(() => {
+        pending -= 1;
+      });
+  };
+
+  form.addEventListener("input", (event) => {
+    if (event.target.type === "file") return;
+
+    clearTimeout(timer);
+    timer = setTimeout(queue, DRAFT_WAIT);
+  });
+  form.addEventListener("submit", (event) => {
+    clearTimeout(timer);
+    if (pending === 0) return;
+
+    event.preventDefault();
+    saving.then(() => form.requestSubmit(event.submitter));
+  });
+}
+
 function setupForm(form) {
   const from = form.querySelector("[data-mail-from]");
   const reveals = form.querySelector("[data-mail-reveals]");
+
+  setupAttach(form);
+  setupDraft(form);
 
   from?.addEventListener("change", () => {
     for (const signature of form.querySelectorAll("[data-mail-signature]")) {

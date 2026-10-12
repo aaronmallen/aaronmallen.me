@@ -52,6 +52,13 @@ RSpec.describe "Admin mail compose", type: :feature do
     JS
   end
 
+  def stub_drafts
+    draft = google_health_json({ id: "r1", message: { id: "d1", threadId: "t5" } })
+    stub_request(:post, "#{gmail}/drafts").to_return(draft)
+    stub_request(:put, "#{gmail}/drafts/r1").to_return(draft)
+    stub_gmail_thread("t5", [gmail_message("d1", labels: %w[DRAFT])])
+  end
+
   def stub_send
     stub_request(:post, "#{gmail}/messages/send").to_return(google_health_json({ id: "s1", threadId: "t9" }))
     stub_gmail_thread("t9", [gmail_message("s1", labels: %w[SENT])])
@@ -68,6 +75,7 @@ RSpec.describe "Admin mail compose", type: :feature do
   before do
     connect_google(account_id: work.address, scopes: [*Spec::GoogleAccounts::GMAIL_SCOPES,
                                                       "https://www.googleapis.com/auth/gmail.send"])
+    stub_drafts
     sign_in_to_admin
     open_compose
   end
@@ -145,6 +153,19 @@ RSpec.describe "Admin mail compose", type: :feature do
     click_button "cc"
 
     expect(page).to have_field("mail-compose-cc")
+  end
+
+  it "saves a draft to Gmail once I stop typing", :aggregate_failures do
+    address
+
+    expect(page).to have_css(".mail-compose-hint", text: /draft saved \d/)
+    expect(find("#mail-compose input[name='mail[draft]']", visible: :all).value).to eq("r1")
+  end
+
+  it "names the files I attach" do
+    attach_file "mail-compose-files", __FILE__, make_visible: true
+
+    expect(page).to have_css(".mail-attach-names", text: File.basename(__FILE__))
   end
 
   it "sends on Ctrl+Enter" do

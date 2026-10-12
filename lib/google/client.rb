@@ -72,6 +72,8 @@ module Google
 
     def post(url, body, account:) = request(account, :post, url, body: body.to_json, headers: JSON_HEADERS.dup)
 
+    def put(url, body, account:) = request(account, :put, url, body: body.to_json, headers: JSON_HEADERS.dup)
+
     def revoke(credentials)
       oauth.request(:post, REVOKE_URL, body: { token: credentials[:refresh_token] || credentials[:access_token] })
     end
@@ -136,9 +138,7 @@ module Google
       fetch(connection, token, verb, url, options)
     end
 
-    def stored(token)
-      { access_token: token.token, expires_at: token.expires_at, refresh_token: token.refresh_token }
-    end
+    def stored(token) = { access_token: token.token, expires_at: token.expires_at, refresh_token: token.refresh_token }
 
     def token(credentials)
       OAuth2::AccessToken.new(

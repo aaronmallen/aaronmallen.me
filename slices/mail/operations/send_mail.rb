@@ -25,6 +25,21 @@ module Mail
         step deliver(account, thread, fields, archive: Blog::Types::Checkbox[params[:archive]])
       end
 
+      def form(params)
+        html = Blog::Types::OptionalText[params[:html]]
+
+        {
+          from: params[:from], to: addresses(params[:to]), cc: addresses(params[:cc]), bcc: addresses(params[:bcc]),
+          subject: params[:subject], body: html ? Outgoing.clean(html) : Outgoing.from_text(params[:body]),
+          **%i[thread draft].to_h { [it, Blog::Types::OptionalText[params[it]]] },
+        }
+      end
+
+      def mirror(account, gmail_id)
+        json = google.get("#{SyncGmail::GMAIL}/threads/#{gmail_id}", account: account.address, format: "full")
+        gmail_mutations.store_thread(account.id, GmailThread.new(json))
+      end
+
       def senders
         addresses = google.holders(SCOPE)
 
@@ -38,21 +53,17 @@ module Mail
       def deliver(account, thread, fields, archive:)
         same = thread&.mail_account_id == account.id
         message = outgoing(account, fields, in_reply_to: (message_id(account, thread) if same))
-        sent = post(account, message, (thread.gmail_id if same))
+        sent = post(account, message, (thread.gmail_id if same), fields[:draft])
       rescue Google::Error => e
         Failure([:gmail_failed, e.message])
       else
         Success(settle(account, thread, sent.fetch("threadId"), archive:))
       end
 
-      def form(params)
-        html = Blog::Types::OptionalText[params[:html]]
-
-        {
-          from: params[:from], to: addresses(params[:to]), cc: addresses(params[:cc]), bcc: addresses(params[:bcc]),
-          subject: params[:subject], body: html ? Outgoing.clean(html) : Outgoing.from_text(params[:body]),
-          thread: Blog::Types::OptionalText[params[:thread]],
-        }
+      def files(params)
+        Array(params[:files]).select { it.is_a?(::Hash) && it[:tempfile] }.map do |file|
+          { filename: file[:filename].to_s, type: file[:type], data: File.binread(file[:tempfile].path) }
+        end
       end
 
       def message_id(account, thread)
@@ -64,24 +75,24 @@ module Mail
         found.dig("payload", "headers")&.find { it["name"].casecmp?(MESSAGE_ID) }&.fetch("value")
       end
 
-      def mirror(account, gmail_id)
-        json = google.get("#{SyncGmail::GMAIL}/threads/#{gmail_id}", account: account.address, format: "full")
-        gmail_mutations.store_thread(account.id, GmailThread.new(json))
-      end
-
       def outgoing(account, fields, in_reply_to:)
         html = [fields[:body], (account.signature if fields[:signature])].compact.join("<br>")
 
         Outgoing.new(
           from: account.address, to: fields[:to], cc: fields[:cc], bcc: fields[:bcc], subject: fields[:subject],
-          html:, in_reply_to:,
+          html:, in_reply_to:, files: fields[:files],
         )
       end
 
-      def post(account, message, thread_id)
+      def post(account, message, thread_id, draft)
         body = { raw: message.raw, threadId: thread_id }.compact
+        return google.post("#{SyncGmail::GMAIL}/messages/send", body, account: account.address) unless draft
 
-        google.post("#{SyncGmail::GMAIL}/messages/send", body, account: account.address)
+        google.post("#{SyncGmail::GMAIL}/drafts/send", { id: draft, message: body }, account: account.address)
+      rescue Google::NotFound
+        raise unless draft
+
+        post(account, message, thread_id, nil)
       end
 
       def replying(id)
@@ -104,7 +115,11 @@ module Mail
       end
 
       def validate(params)
-        validated(contract.call(form(params))).fmap { it.merge(signature: Blog::Types::Checkbox[params[:signature]]) }
+        fields = form(params)
+
+        extra = { **fields.slice(:draft), signature: Blog::Types::Checkbox[params[:signature]], files: files(params) }
+
+        validated(contract.call(fields)).fmap { it.merge(extra) }
       end
     end
   end

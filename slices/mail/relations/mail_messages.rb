@@ -6,6 +6,7 @@ module Mail
       schema :mail_messages, infer: true do
         associations do
           belongs_to :mail_thread
+          has_many :mail_attachments, view: :in_part_order
         end
       end
 

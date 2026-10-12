@@ -4216,6 +4216,14 @@
   }
 }
 
+@utility mail-file {
+  @apply inline-flex items-center gap-1.5 rounded border border-line px-2 py-1 font-mono text-badge text-ink no-underline hover:bg-wash admin-focus;
+}
+
+@utility mail-files {
+  @apply mt-3 flex flex-wrap gap-2;
+}
+
 @utility mail-message-body {
   @apply mt-2.5 max-w-[68ch] text-[1.15rem] leading-[1.7] text-ink;
 }
@@ -4266,6 +4274,10 @@
 
 @utility mail-compose-foot {
   @apply flex flex-wrap items-center gap-2.5 border-t border-line px-3 py-2 font-mono text-badge text-ink-muted;
+}
+
+@utility mail-attach-names {
+  @apply min-w-0 truncate;
 }
 
 @utility mail-compose-hint {

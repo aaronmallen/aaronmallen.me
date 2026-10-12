@@ -11,6 +11,7 @@ module Admin
         include Deps[
           person_queries: "social.repos.person_queries",
           record_link_queries: "links.repos.record_link_queries",
+          save_draft: "mail.operations.save_draft",
           send_mail: "mail.operations.send_mail",
           thread_queries: "mail.repos.thread_queries",
         ]
@@ -28,15 +29,16 @@ module Admin
 
           response[:list] = list
           response[:threads] = threads
+          show_open(request, response)
           show_compose(response, draft)
           show_sources(response, list[:account])
-          show_open(request, response)
           show_tasks(response)
         end
 
         def show_compose(response, draft)
           response[:senders] = send_mail.senders
-          response[:draft] = draft
+          drafted = save_draft.values(response[:open]) unless draft
+          response[:draft] = drafted ? { values: drafted, errors: Blog::Constants::EMPTY_HASH } : draft
         end
 
         def show_open(request, response)

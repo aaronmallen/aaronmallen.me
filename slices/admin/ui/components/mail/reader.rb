@@ -93,6 +93,7 @@ module Admin
                 Moment(at: message.received_at)
               end
               p(class: "msg-body mail-message-body") { message.body }
+              Attachments(message:)
             end
           end
 

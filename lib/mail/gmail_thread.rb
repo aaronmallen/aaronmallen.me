@@ -22,6 +22,8 @@ module Mail
       @messages = json.fetch("messages", []).map { message(it) }
     end
 
+    def attachments = @json.fetch("messages", []).to_h { [it.fetch("id"), files(it.fetch("payload", {}))] }
+
     def gmail_id = @json.fetch("id")
 
     def label_ids = labels.to_a
@@ -61,6 +63,15 @@ module Mail
       charset = header(part, "Content-Type")&.[](CHARSET, 1) || Encoding::UTF_8.name
 
       utf8(Base64.urlsafe_decode64(part.dig("body", "data")), charset)
+    end
+
+    def files(payload)
+      parts(payload).select { attachment?(it) && !it["partId"].to_s.empty? }.map do |part|
+        {
+          part_id: part["partId"], filename: part["filename"], mime_type: part["mimeType"].to_s,
+          size: part.dig("body", "size").to_i,
+        }
+      end
     end
 
     def header(part, name) = part.fetch("headers", []).find { it["name"].casecmp?(name) }&.fetch("value")

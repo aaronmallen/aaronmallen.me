@@ -10,6 +10,7 @@ module Admin
     MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     OAUTH_SERVICE = /github|google|mastodon/
+    PART = /[\d.]+/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
     SERVICE = /[a-z_]+/
     TAG = %r{[^/]+}
@@ -116,6 +117,8 @@ module Admin
     get "/mail/settings", to: "mail.settings", as: :mail_settings
     post "/mail/settings", to: "mail.update_settings", as: :update_mail_settings
     post "/mail/send", to: "mail.send", as: :send_mail
+    post "/mail/draft", to: "mail.save_draft", as: :save_mail_draft
+    get "/mail/messages/:id/attachments/:part", to: "mail.attachment", as: :mail_attachment, id: ID, part: PART
     post "/mail/:id/change/:act", to: "mail.change", as: :change_mail, id: ID, act: MAIL_CHANGE
     post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
     post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID

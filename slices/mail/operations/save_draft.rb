@@ -1,0 +1,74 @@
+# frozen_string_literal: true
+
+module Mail
+  module Operations
+    class SaveDraft < Blog::Operation
+      HEADERS = %w[to cc bcc subject].freeze
+      DRAFTS = "#{SyncGmail::GMAIL}/drafts".freeze
+      LISTED = 500
+
+      include Deps[
+        google: "google.google.client",
+        gmail_mutations: "repos.gmail_mutations",
+        send_mail: "operations.send_mail",
+      ]
+
+      def call(params)
+        fields = send_mail.form(params)
+        account = step sender(fields[:from])
+        draft = step saved(account, fields)
+
+        send_mail.mirror(account, draft.dig("message", "threadId"))
+        draft.fetch("id")
+      rescue Google::Error => e
+        Failure([:gmail_failed, e.message])
+      end
+
+      def values(thread)
+        address = thread&.draft && gmail_mutations.address(thread.mail_account_id)
+        return unless address
+
+        listed = google.get(DRAFTS, account: address, maxResults: LISTED).fetch("drafts", [])
+        id = listed.find { it.dig("message", "threadId") == thread.gmail_id }&.fetch("id")
+        id && opened(id, google.get("#{DRAFTS}/#{id}", account: address, format: "full").fetch("message"), thread)
+      rescue Google::Error
+        nil
+      end
+
+      private
+
+      def create(account, message) = google.post(DRAFTS, { message: }, account: account.address)
+
+      def opened(id, message, thread)
+        headers = message.dig("payload", "headers").to_h { [it["name"].downcase, it["value"]] }
+        letter = GmailThread.new({ "id" => thread.gmail_id, "messages" => [message] }).messages.first
+
+        {
+          draft: id, from: thread.mail_account_id.to_s, html: letter[:html_body], body: letter[:body],
+          **HEADERS.to_h { [it.to_sym, headers[it]] },
+        }
+      end
+
+      def saved(account, fields)
+        html = fields[:body]
+        outgoing = Outgoing.new(from: account.address, **fields.slice(:to, :cc, :bcc, :subject), html:)
+        message = { raw: outgoing.raw }
+        id = fields[:draft]
+
+        Success(id ? update(account, id, message) : create(account, message))
+      end
+
+      def sender(id)
+        account = send_mail.senders.find { it.id == Blog::Types::IdParam[id] }
+
+        account ? Success(account) : Failure([:invalid, { from: [Blog::Contract::FORMAT] }])
+      end
+
+      def update(account, id, message)
+        google.put("#{DRAFTS}/#{id}", { id:, message: }, account: account.address)
+      rescue Google::NotFound
+        create(account, message)
+      end
+    end
+  end
+end

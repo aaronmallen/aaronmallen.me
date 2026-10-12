@@ -14,7 +14,13 @@ module Mail
 
       def accounts = mail_accounts.where(shown: true).form_last.to_a
 
-      def by_id(id) = mail_threads.with_summary.combine(:mail_messages, :mail_labels, :tags).by_pk(id).one
+      def attachment(message_id, part_id)
+        mail_attachments.where(mail_message_id: message_id, part_id:).combine(mail_message: :mail_thread).one
+      end
+
+      def by_id(id)
+        mail_threads.with_summary.combine(:mail_labels, :tags, mail_messages: :mail_attachments).by_pk(id).one
+      end
 
       def every_account = mail_accounts.form_last.to_a
 

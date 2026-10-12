@@ -48,6 +48,7 @@ module Mail
         transaction do
           id = upsert_thread(account_id, thread.thread(now:), now)
           store_messages(id, thread.messages, now)
+          store_attachments(id, thread.attachments)
           label(id, account_id, thread.label_ids)
         end
       end
@@ -66,6 +67,14 @@ module Mail
         kept = Sequel.function(:coalesce, Sequel[:mail_threads][:marked_spam_at], Sequel[:excluded][:marked_spam_at])
 
         Sequel.case([[{ Sequel[:excluded][:status] => SPAM }, kept]], nil)
+      end
+
+      def store_attachments(thread_id, attachments)
+        ids = mail_messages.where(mail_thread_id: thread_id).dataset.select_map(%i[gmail_id id]).to_h
+        rows = attachments.flat_map { |gmail_id, files| files.map { { **it, mail_message_id: ids.fetch(gmail_id) } } }
+
+        mail_attachments.where(mail_message_id: ids.values).delete
+        mail_attachments.dataset.multi_insert(rows)
       end
 
       def store_messages(id, messages, now)

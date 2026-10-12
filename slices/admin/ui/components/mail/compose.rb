@@ -7,8 +7,10 @@ module Admin
         class Compose < Component
           ID = "mail-compose"
           SCOPE = "mail-compose"
+          TIME = "{time}"
           TITLE_ID = "mail-compose-title"
           TO = :to
+          MULTIPART = "multipart/form-data"
           OPEN = { compose: Blog::Constants::CHECKED }.freeze
           LABELS = { to: ".to", cc: ".cc", bcc: ".bcc" }.freeze
 
@@ -19,7 +21,9 @@ module Admin
           def view_template
             CreateLink(href: path(:admin_mail, **@list, **OPEN), label: t(".compose"), dialog: ID)
             Dialog(id: ID, title_id: TITLE_ID, title: t(".title"), class: "modal mail-compose", data:) do
-              Form(action: path(:admin_send_mail), class: "mail-compose-form", data: { mail_form: "" }) { fields }
+              Form(action: path(:admin_send_mail), enctype: MULTIPART, class: "mail-compose-form", data: form_data) do
+                fields
+              end
             end
           end
 
@@ -47,6 +51,7 @@ module Admin
 
           def fields
             HiddenFields(values: @list)
+            input(type: "hidden", name: "mail[draft]", value: values[:draft], data: { mail_draft: "" })
             head
             Editor(scope: SCOPE, label: t(".body"), values:, errors:)
             Signature(scope: SCOPE, senders: @senders, from:, on: signature?)
@@ -57,10 +62,13 @@ module Admin
           def foot
             div(class: "mail-compose-foot") do
               SendButton()
-              span(class: "mail-compose-hint") { t(".hint") }
+              Attach(scope: SCOPE)
+              span(class: "mail-compose-hint", data: { mail_saved: t(".saved", time: TIME) }) { t(".hint") }
               Button(variant: :gh, small: true, data: { dialog_close: true }) { t(".discard") }
             end
           end
+
+          def form_data = { mail_form: "", mail_draft_url: path(:admin_save_mail_draft) }
 
           def from = Blog::Types::IdParam[values[:from]] || @senders.first&.id
 

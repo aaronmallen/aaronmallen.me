@@ -25,7 +25,10 @@ module Admin
                 Icon("fa-solid fa-reply")
                 plain t(".reply")
               end
-              Form(action: path(:admin_send_mail), class: "mail-reply-form", data: { mail_form: "" }) { fields }
+              Form(
+                action: path(:admin_send_mail), enctype: Compose::MULTIPART, class: "mail-reply-form",
+                data: { mail_form: "" },
+              ) { fields }
             end
           end
 
@@ -47,6 +50,7 @@ module Admin
             div(class: "mail-compose-foot") do
               SendButton()
               Button(type: "submit", variant: :gh, small: true, **ARCHIVE) { t(".send_archive") }
+              Attach(scope: SCOPE)
             end
           end
 

@@ -1036,6 +1036,10 @@ en:
           open: "Open %{link}"
           retargeted: "retargeted %{on}"
       mail:
+        attach:
+          attach: "Attach"
+        attachments:
+          label: "Attachments"
         bulk:
           archive: "Archive"
           confirm_delete_forever: "Delete the ticked threads forever? This cannot be undone."
@@ -1062,6 +1066,7 @@ en:
           from: "from"
           hint: "sends through Gmail"
           no_sender: "No account can send. Grant Gmail send on Connected services."
+          saved: "draft saved %{time}"
           subject: "subject"
           title: "New mail"
           to: "to"

@@ -8,6 +8,8 @@ module Blog
     BAD_REQUEST = 400
     BODY_LIMIT = 1024 * 1024
     FORM_TYPES = ::Rack::Request::FORM_DATA_MEDIA_TYPES
+    MAIL_DRAFT_PATH = "/admin/mail/draft"
+    MAIL_SEND_PATH = "/admin/mail/send"
     MULTIPART = "multipart/form-data"
     PUBLIC = "public"
     SHARE_UPLOAD_LIMIT = 100 * 1024 * 1024
@@ -22,8 +24,9 @@ module Blog
       "/api/v1/photos" => ENCODED_UPLOAD_LIMIT,
       "/mcp" => ENCODED_UPLOAD_LIMIT,
       SHARE_UPLOAD_PATH => SHARE_UPLOAD_LIMIT,
+      MAIL_SEND_PATH => UPLOAD_LIMIT,
     }.freeze
-    UPLOAD_PATHS = [UPLOAD_PATH, SHARE_UPLOAD_PATH].freeze
+    UPLOAD_PATHS = [UPLOAD_PATH, SHARE_UPLOAD_PATH, MAIL_SEND_PATH, MAIL_DRAFT_PATH].freeze
 
     def initialize(app, session_reader)
       @app = app
