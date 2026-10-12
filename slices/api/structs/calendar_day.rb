@@ -2,6 +2,6 @@
 
 module API
   module Structs
-    CalendarDay = Data.define(:date, :sprint, :posts, :social_posts, :journal)
+    CalendarDay = Data.define(:date, :sprint, :posts, :social_posts, :journal, :events)
   end
 end

@@ -3,18 +3,23 @@
 module Admin
   module Operations
     class BuildCalendarPage
+      COLORS = Blog::Types::TagColor.values.freeze
       MONTH_PATTERN = /\A(\d{4})-(\d{2})\z/
       WEEK = 7
 
-      include Deps[calendar_queries: "api.repos.calendar_queries", task_queries: "tasks.repos.task_queries"]
+      include Deps[
+        calendar_queries: "api.repos.calendar_queries", calendar_list: "calendar.repos.calendar_queries",
+        task_queries: "tasks.repos.task_queries",
+      ]
 
       def call(month: nil, day: nil, today: Blog::TimeZone.today)
         picked = Blog::Types::DateParam[day]
         first = first_of(picked || month_param(month) || today)
-        days = calendar_queries.between(from: grid_start(first), to: grid_end(first)).value!
+        days = calendar_queries.between(from: grid_start(first), to: grid_end(first), include_hidden: false).value!
         shown = days.find { it.date == (picked || chosen(first, today)) }
+        calendars = calendar_list.listed
 
-        { month: first, today:, days:, day: shown, tasks: tasks(shown) }
+        { month: first, today:, days:, day: shown, tasks: tasks(shown), calendars:, tones: tones(calendars) }
       end
 
       private
@@ -42,6 +47,8 @@ module Admin
 
         sprint ? task_queries.in_sprint(sprint.id) : Blog::Constants::EMPTY_ARRAY
       end
+
+      def tones(calendars) = calendars.each_with_index.to_h { |calendar, at| [calendar.id, COLORS[at % COLORS.size]] }
     end
   end
 end

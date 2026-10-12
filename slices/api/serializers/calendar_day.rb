@@ -17,12 +17,15 @@ module API
           posts: Helpers::Schema.list(Post.reference),
           social_posts: Helpers::Schema.list(SocialPost.reference),
           journal: { type: "boolean", description: "whether the journal holds an entry for the day" },
+          events: Helpers::Schema.list(CalendarEvent.reference),
         },
       ).freeze
 
       schema_attributes
 
       def date(found) = day(found.date)
+
+      def events(found) = CalendarEvent.new(found.events).serializable_hash
 
       def posts(found) = Post.new(found.posts).serializable_hash
 

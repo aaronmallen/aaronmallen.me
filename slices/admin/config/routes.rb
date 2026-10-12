@@ -25,6 +25,7 @@ module Admin
     post "/attention/dead-jobs/:jid/retry", to: "today.retry_dead_job", as: :retry_dead_job, jid: JID
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar
+    post "/calendar/calendars", to: "calendar.show_calendars", as: :show_calendars
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
     post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID

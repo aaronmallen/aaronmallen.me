@@ -5,6 +5,10 @@ require "oauth2"
 module Google
   class Client
     CHALLENGE_METHOD = "S256"
+    FULL_SCOPES = {
+      "https://mail.google.com/" => "https://www.googleapis.com/auth/gmail.",
+      "https://www.googleapis.com/auth/calendar" => "https://www.googleapis.com/auth/calendar.",
+    }.freeze
     INVALID_GRANT = "invalid_grant"
     JSON_HEADERS = { "Content-Type" => "application/json" }.freeze
     LATENCY = 60
@@ -52,10 +56,12 @@ module Google
       { **named(token), credentials: stored(token), scopes: token.params["scope"].to_s.split }
     end
 
-    def holders(scope)
+    def holders(*scopes)
       return [] unless configured?
 
-      connections.select { |connection| connection.scopes.any? { it.start_with?(scope) } }.map(&:account_id)
+      connections.filter_map do |connection|
+        connection.account_id if scopes.all? { |scope| connection.scopes.any? { covers?(it, scope) } }
+      end
     end
 
     def holding(scope) = holders(scope).first
@@ -79,6 +85,10 @@ module Google
     end
 
     def connections = @connection_queries.for(PROVIDER)
+
+    def covers?(granted, wanted)
+      granted.start_with?(wanted) || (FULL_SCOPES.key?(granted) && wanted.start_with?(FULL_SCOPES[granted]))
+    end
 
     def fetch(connection, token, verb, url, options, renewed: false)
       token.request(verb, url.to_s, options).parsed

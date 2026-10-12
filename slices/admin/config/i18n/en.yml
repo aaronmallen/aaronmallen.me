@@ -32,6 +32,7 @@ en:
       other: "%{count} views"
   calendar_page:
     toasts:
+      calendars: "Calendars saved"
       closed: "A closed task stays where it closed"
       invalid: "Pick a day first"
       moved: "Moved to %{date} at %{time}"
@@ -527,10 +528,19 @@ en:
       calendar:
         cell:
           journal: "journal"
+          more_events: "+%{count} events"
           more_social: "+%{count} social"
           tasks:
             one: "%{count} task"
             other: "%{count} tasks"
+          untitled: "(no title)"
+        event_row:
+          all_day: "all day"
+          google: "Google Calendar"
+          join: "Join %{title}"
+          meet: "Join Meet"
+          untitled: "(no title)"
+          until: "until %{date}"
         month_pager:
           label: "Months"
           next: "Next month, %{month}"
@@ -544,6 +554,7 @@ en:
         panel:
           dated: "%{status} · %{time}"
           empty: "Nothing lands on this day."
+          events: "Calendar"
           journal: "Journal"
           journal_entry: "Journal entry"
           label: "Day"
@@ -558,6 +569,12 @@ en:
           tasks:
             one: "%{count} task"
             other: "%{count} tasks"
+        picker:
+          all: "Show all"
+          label: "Calendars %{shown}/%{total}"
+          read_only: "read-only"
+          save: "Save"
+          work: "Work only"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"
@@ -1856,6 +1873,7 @@ en:
           download_failed: "The download failed"
           dump_failed: "pg_dump failed"
           github_failed: "GitHub didn't answer"
+          google_calendar_failed: "Google Calendar didn't answer"
           google_health_failed: "Google Health didn't answer"
           invalid_database: "The file it sent won't open"
           linear_failed: "Linear didn't answer"
@@ -1878,6 +1896,7 @@ en:
         syncs:
           analytics_rollup: "Analytics rollup"
           backups: "Database backup"
+          calendar: "Google Calendar sync"
           commits: "Commit import"
           countries: "Country lookup"
           country_database: "Country database refresh"

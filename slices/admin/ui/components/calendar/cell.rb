@@ -11,6 +11,7 @@ module Admin
           prop :month, Blog::Types::Date
           prop :picked, Blog::Types::Date
           prop :today, Blog::Types::Date
+          prop :tones, Blog::Types::Hash
 
           def view_template
             li(class: ["cal-day", ("cal-out" unless inside?), ("cal-today" if today?), ("cal-picked" if picked?)]) do
@@ -24,6 +25,22 @@ module Admin
           private
 
           def date = @day.date
+
+          def event_mark(event)
+            span(class: ["cal-mark", "event", ("all-day" if event.all_day?)], style: tone(event)) do
+              unless event.all_day?
+                span(class: "cal-mark-time") { l(Blog::TimeZone.local(event.starts_at), format: :clock) }
+              end
+              span(class: "cal-mark-text") { event.title || t(".untitled") }
+            end
+          end
+
+          def event_marks
+            rest = @day.events.size - SHOWN
+
+            @day.events.first(SHOWN).each { event_mark(it) }
+            span(class: "cal-mark more") { t(".more_events", count: rest) } if rest.positive?
+          end
 
           def heading
             time(class: "cal-date", datetime: date.iso8601) do
@@ -50,6 +67,7 @@ module Admin
 
           def marks
             span(class: "cal-marks") do
+              event_marks
               @day.posts.each { |post| mark(icon("post"), "post") { post.title } }
               social_marks
               sprint_mark
@@ -85,6 +103,8 @@ module Admin
           end
 
           def today? = date == @today
+
+          def tone(event) = Tone.style(@tones.fetch(event.calendar_id))
         end
       end
     end

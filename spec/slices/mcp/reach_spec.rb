@@ -77,6 +77,8 @@ RSpec.describe "MCP reach", type: :app do
       "api.operations.mint_token" => "the owner mints an API token in the admin, which no client should do",
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
       "backups.operations.back_up_database" => "a background job dumps the database each night",
+      "calendar.operations.show_calendars" => "the owner picks the calendars the admin page shows; tools list them all",
+      "calendar.operations.sync_calendar" => "a background job mirrors Google events every 15 minutes",
       "mail.operations.create_message" => "a reader sends a message through the public form",
       "mail.operations.label_message" => "sets a thread's tags from the admin; tag_mail_threads covers it",
       "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",

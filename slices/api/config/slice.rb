@@ -12,6 +12,8 @@ module API
 
     import keys: %w[repos.analytics_rollup_queries repos.post_reader_queries], from: :analytics
 
+    import keys: %w[repos.calendar_queries], from: :calendar
+
     import keys: %w[
       operations.act_on_messages
       operations.mark_message

@@ -2,8 +2,9 @@
 
 RSpec.describe "Admin Google connection", type: :request do
   let(:asked) do
-    %w[openid userinfo.email gmail.modify gmail.send calendar.events googlehealth.sleep.readonly]
-      .map { it == "openid" ? it : "https://www.googleapis.com/auth/#{it}" }
+    names = %w[userinfo.email calendar googlehealth.sleep.readonly].map { "https://www.googleapis.com/auth/#{it}" }
+
+    ["openid", mail_scope, *names]
   end
   let(:sleep_scope) { "https://www.googleapis.com/auth/googlehealth.sleep.readonly" }
   let(:steps_url) { "https://health.googleapis.com/v4/users/me/dataTypes/steps/dataPoints?page_size=1" }
@@ -40,6 +41,8 @@ RSpec.describe "Admin Google connection", type: :request do
   end
 
   def json(body) = { headers: { "Content-Type" => "application/json" }, body: body.to_json }
+
+  def mail_scope = "https://mail.google.com/"
 
   def page = Capybara.string(last_response.body)
 
@@ -155,7 +158,7 @@ RSpec.describe "Admin Google connection", type: :request do
     describe "connecting a second and a third account" do
       before do
         connect_account(account_id: "aaron@example.com")
-        grant("work@example.com", %w[openid https://www.googleapis.com/auth/gmail.modify], access_token: "ya29.work")
+        grant("work@example.com", ["openid", mail_scope], access_token: "ya29.work")
         callback(code: "code", state: start_connect)
         grant("other@example.com", %w[https://www.googleapis.com/auth/calendar.events], access_token: "ya29.other")
         callback(code: "code", state: start_connect)
@@ -165,7 +168,7 @@ RSpec.describe "Admin Google connection", type: :request do
         expect(connections.map(&:account_id)).to contain_exactly(
           "aaron@example.com", "work@example.com", "other@example.com",
         )
-        expect(account("work@example.com").scopes).to eq(%w[openid https://www.googleapis.com/auth/gmail.modify])
+        expect(account("work@example.com").scopes).to eq(["openid", mail_scope])
         expect(account("other@example.com").scopes).to eq(%w[https://www.googleapis.com/auth/calendar.events])
       end
 
@@ -176,7 +179,7 @@ RSpec.describe "Admin Google connection", type: :request do
       it "shows each account's own scopes", :aggregate_failures do
         get "/admin/services", selected: account("work@example.com").id.to_s
 
-        expect(scope_line("Read, label and archive mail")).to have_css(".pill", text: "granted")
+        expect(scope_line("Read, send, label and delete mail")).to have_css(".pill", text: "granted")
         expect(scope_line("Read sleep")).to have_button("Grant")
       end
     end
@@ -187,11 +190,11 @@ RSpec.describe "Admin Google connection", type: :request do
       it "shows Grant, which reconnects that account" do
         get "/admin/services", selected: connection.id.to_s
 
-        expect(scope_line("Send mail as you")).to have_css(reconnect_field, visible: :all)
+        expect(scope_line("Read, send, label and delete mail")).to have_css(reconnect_field, visible: :all)
       end
 
       it "adds the scope to the same account when Google grants it", :aggregate_failures do
-        scopes = [sleep_scope, "https://www.googleapis.com/auth/gmail.send"]
+        scopes = [sleep_scope, mail_scope]
         grant("aaron@example.com", scopes)
 
         expect { callback(code: "code", state: start_connect(connection: connection.id)) }
@@ -220,6 +223,33 @@ RSpec.describe "Admin Google connection", type: :request do
       callback(code: "code", state: "forged")
 
       expect(connection).to be_nil
+    end
+
+    describe "finding the accounts that hold a scope" do
+      def scope(name) = "https://www.googleapis.com/auth/#{name}"
+
+      before do
+        connect_account(account_id: "narrow@example.com", scopes: [scope("gmail.modify"), scope("calendar.events")])
+        connect_account(account_id: "full@example.com", scopes: [mail_scope, scope("calendar")])
+        connect_account(account_id: "health@example.com")
+      end
+
+      it "counts the narrow scope itself and the full scope over it", :aggregate_failures do
+        expect(client.holders(scope("gmail.modify"))).to contain_exactly("narrow@example.com", "full@example.com")
+        expect(client.holders(scope("calendar.events"))).to contain_exactly("narrow@example.com", "full@example.com")
+      end
+
+      it "counts only the full scope for a narrow one the account never granted", :aggregate_failures do
+        expect(client.holders(scope("gmail.send"))).to eq(["full@example.com"])
+        expect(client.holders(scope("calendar.events"), scope("calendar.calendarlist.readonly")))
+          .to eq(["full@example.com"])
+      end
+
+      it "keeps the mail scope apart from calendar and Health", :aggregate_failures do
+        expect(client.holders(scope("calendar.calendarlist.readonly"), scope("gmail.modify")))
+          .to eq(["full@example.com"])
+        expect(client.holders(sleep_scope)).to eq(["health@example.com"])
+      end
     end
 
     describe "reading with an expired access token" do

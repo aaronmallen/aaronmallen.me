@@ -2138,13 +2138,106 @@
     @apply text-mk-sand-text;
   }
 
+  &.event {
+    @apply rounded-icon px-1.5 py-[3px] leading-tight text-ink;
+    background: color-mix(in oklab, var(--tone) 16%, transparent);
+    box-shadow: inset 2px 0 0 var(--tone);
+  }
+
+  &.all-day {
+    background: color-mix(in oklab, var(--tone) 28%, transparent);
+  }
+
   & > i {
     @apply flex-none;
   }
 }
 
+@utility cal-mark-time {
+  @apply flex-none text-(--tone);
+}
+
 @utility cal-mark-text {
   @apply min-w-0 truncate;
+}
+
+@utility cal-event {
+  @apply grid items-start gap-2.5 border-b border-line py-2 last:border-b-0;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+}
+
+@utility cal-event-time {
+  @apply pt-1 font-mono text-badge text-(--tone);
+}
+
+@utility cal-event-body {
+  @apply min-w-0;
+
+  & > summary {
+    @apply cursor-pointer list-none admin-focus;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+}
+
+@utility cal-event-title {
+  @apply flex flex-col gap-0.5 text-li;
+}
+
+@utility cal-event-meta {
+  @apply flex flex-wrap gap-x-3;
+}
+
+@utility cal-event-calendar {
+  @apply inline-flex items-center gap-1.5 text-(--tone);
+
+  &::before {
+    @apply size-2 flex-none rounded-full bg-(--tone);
+    content: "";
+  }
+}
+
+@utility cal-event-more {
+  @apply mt-1.5 flex flex-col gap-1;
+}
+
+@utility cal-event-notes {
+  @apply whitespace-pre-line;
+}
+
+@utility cal-event-links {
+  @apply mt-1 flex flex-wrap gap-1.5;
+}
+
+@utility cal-picker {
+  @apply flex flex-col gap-3;
+}
+
+@utility cal-picker-account {
+  @apply m-0 flex flex-col border-0 p-0;
+}
+
+@utility cal-picker-row {
+  @apply flex min-h-tap cursor-pointer items-center gap-2.5 rounded px-2 font-mono text-badge text-ink hover:bg-ground;
+
+  & input {
+    @apply m-0 size-4;
+    accent-color: var(--tone);
+  }
+}
+
+@utility cal-picker-name {
+  @apply flex-1;
+}
+
+@utility cal-picker-note {
+  @apply text-ink-muted;
+}
+
+@utility cal-picker-foot {
+  @apply flex flex-wrap gap-1.5 border-t border-line pt-3;
 }
 
 @utility cal-panel {

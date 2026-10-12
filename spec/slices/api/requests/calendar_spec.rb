@@ -14,7 +14,7 @@ RSpec.describe "API calendar", type: :request do
   def days(**params) = read(**range, **params).fetch("days")
 
   def empty_day(date)
-    { "date" => date.iso8601, "sprint" => nil, "posts" => [], "social_posts" => [], "journal" => false }
+    { "date" => date.iso8601, "sprint" => nil, "posts" => [], "social_posts" => [], "journal" => false, "events" => [] }
   end
 
   def listed_items
@@ -48,9 +48,10 @@ RSpec.describe "API calendar", type: :request do
       .to eq([[first.iso8601, last.iso8601], (first..last).map(&:iso8601)])
   end
 
-  it "leaves an empty day with no sprint, posts, social posts or journal" do
+  it "leaves an empty day with no sprint, posts, social posts, journal or events" do
     expect(day(first)).to eq(
       "date" => first.iso8601, "sprint" => nil, "posts" => [], "social_posts" => [], "journal" => false,
+      "events" => [],
     )
   end
 
@@ -145,6 +146,64 @@ RSpec.describe "API calendar", type: :request do
     found = read
 
     expect([status, found.fetch("errors").keys]).to eq([422, %w[from to]])
+  end
+
+  describe "Google events" do
+    let(:work) { create(:calendar, account: "work@example.com", name: "Work", writable: false) }
+
+    def described_sync
+      {
+        "title" => "Platform sync",
+        "calendar" => { "id" => work.id, "name" => "Work", "account" => "work@example.com" },
+        "all_day" => false, "starts_on" => (first + 1).iso8601, "ends_on" => (first + 1).iso8601,
+        "starts_at" => at(first + 1, 14).utc.iso8601, "ends_at" => at(first + 1, 15).utc.iso8601,
+        "place" => "Room 4", "meet_url" => "https://meet.google.com/abc", "attendees" => ["Dana"],
+        "notes" => "Agenda", "link" => "https://calendar.google.com/event?eid=1",
+      }
+    end
+
+    def sync_event
+      {
+        google_id: "sync", title: "Platform sync", starts_on: first + 1, ends_on: first + 1,
+        starts_at: at(first + 1, 14), ends_at: at(first + 1, 15), place: "Room 4",
+        meet_url: "https://meet.google.com/abc", attendees: Sequel.pg_array(["Dana"], :text), notes: "Agenda",
+        link: "https://calendar.google.com/event?eid=1",
+      }
+    end
+
+    before do
+      create(:calendar_event, calendar_id: work.id, **sync_event)
+      create(:calendar_event, calendar_id: work.id, title: "On-call", starts_on: first + 1, ends_on: first + 3)
+    end
+
+    it "gives each day its events, all-day ones first" do
+      expect(days.to_h { [it.fetch("date"), it.fetch("events").map { |event| event.fetch("title") }] }).to include(
+        (first + 1).iso8601 => ["On-call", "Platform sync"], (first + 3).iso8601 => ["On-call"],
+        (first + 4).iso8601 => [],
+      )
+    end
+
+    it "describes an event with its calendar, times, place, Meet link, guests, notes and link" do
+      expect(day(first + 1).fetch("events").last.except("id")).to eq(described_sync)
+    end
+
+    it "marks an all-day event and gives its last day" do
+      found = day(first + 1).fetch("events").first
+
+      expect(found.slice("all_day", "starts_at", "ends_at", "ends_on")).to eq(
+        "all_day" => true, "starts_at" => nil, "ends_at" => nil, "ends_on" => (first + 3).iso8601,
+      )
+    end
+
+    it "lists the events of a calendar hidden on the admin page" do
+      Calendar::Slice["repos.calendar_mutations"].show([])
+
+      expect(day(first + 1).fetch("events").size).to eq(2)
+    end
+
+    it "answers the MCP tool with the same events" do
+      expect(mcp_answer("list_calendar", **range)).to eq(read(**range))
+    end
   end
 
   it "answers the MCP tool with the same JSON" do

@@ -5,7 +5,9 @@ module MCP
     class ListCalendar < Base
       description "List each day in a range the way the admin's calendar shows it, oldest first, empty days " \
                   "included: the sprint planned for the day with its task count, the scheduled and published " \
-                  "posts, the scheduled and sent social posts, and whether the journal holds an entry. A post " \
+                  "posts, the scheduled and sent social posts, whether the journal holds an entry, and the events " \
+                  "mirrored from every connected Google calendar with their calendar, times, place, Meet link, " \
+                  "guests and notes; an event shows on each day it covers. A post " \
                   "or social post falls on the #{Blog::TimeZone::NAME} day it goes out; drafts stay out. " \
                   "Give from and to as YYYY-MM-DD; both days count, and the range runs at most " \
                   "#{Blog::Helpers::DayWindow::LONGEST} days. To move something, use schedule_task, update_post or " \

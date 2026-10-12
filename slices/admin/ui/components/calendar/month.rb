@@ -9,6 +9,7 @@ module Admin
           prop :month, Blog::Types::Date
           prop :picked, Blog::Types::Date
           prop :today, Blog::Types::Date
+          prop :tones, Blog::Types::Hash
 
           def view_template
             div(class: "cal-month") do
@@ -18,7 +19,7 @@ module Admin
                 end
               end
               ol(class: "cal-days", aria: { label: l(@month, format: :month) }) do
-                @days.each { Cell(day: it, month: @month, today: @today, picked: @picked) }
+                @days.each { Cell(day: it, month: @month, today: @today, picked: @picked, tones: @tones) }
               end
             end
           end

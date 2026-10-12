@@ -41,6 +41,12 @@ RSpec.describe "The worker's schedule", type: :app do
     )
   end
 
+  it "syncs Google Calendar every fifteen minutes" do
+    expect(schedule.fetch("sync_calendar")).to include(
+      "class" => "Calendar::Jobs::SyncCalendar", "cron" => "*/15 * * * * #{Blog::TimeZone::NAME}",
+    )
+  end
+
   it "syncs Google Health every fifteen minutes" do
     expect(schedule.fetch("sync_health")).to include(
       "class" => "Health::Jobs::SyncHealth", "cron" => "*/15 * * * * #{Blog::TimeZone::NAME}",

@@ -19,11 +19,13 @@ module Admin
           prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
+          prop :tones, Blog::Types::Hash
 
           def view_template
             Card(label: t(".label"), title: l(date, format: :full), **attributes) do
               next Empty { t(".empty") } if empty?
 
+              events
               posts
               social_posts
               sprint
@@ -43,7 +45,7 @@ module Admin
             Stamped(text: t(".dated", status: status(record), time: Stamped::MARK), at:, format: :clock)
           end
 
-          def empty? = !@day.sprint && @day.posts.empty? && @day.social_posts.empty? && !@day.journal
+          def empty? = !@day.sprint && [@day.posts, @day.social_posts, @day.events].all?(&:empty?) && !@day.journal
 
           def entry(kind, record, item, movable: record.status == SCHEDULED)
             at = item[:at]
@@ -52,6 +54,12 @@ module Admin
               row.meta { p(class: "li-sub") { dated(record, at) } } if at
               MoveForm(kind:, id: record.id, title: item[:title], date:, today: @today) if movable
             end
+          end
+
+          def events
+            return if @day.events.empty?
+
+            group(t(".events")) { @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id)) } }
           end
 
           def group(title, &)
