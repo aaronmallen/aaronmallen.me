@@ -9,6 +9,9 @@ module API
   class Endpoint
     FINDS = false
     HEALTH = Blog::Types::OAuthScope["health"]
+    MAIL = Blog::Types::OAuthScope["mail"]
+    MAIL_ROW = "message"
+    MAIL_ROWS = "message rows need the mail scope"
     ROOT = :input
     SCOPED = false
     UNAVAILABLE = false
@@ -52,9 +55,13 @@ module API
 
     def linked(groups) = groups.transform_values { serialized(Serializers::Link, it) }
 
+    def mail?(scopes) = scopes.include?(MAIL)
+
     def not_found(message) = Failure(Structs::Refusal.not_found(message))
 
     def page_of(number) = Helpers::Page.of(number, settings)
+
+    def refuse_mail(field, wanted, scopes) = (invalid(field => [MAIL_ROWS]) if wanted && !mail?(scopes))
 
     def rejected(errors, table)
       complaints = Helpers::Wording.complaints(errors, table)

@@ -2,13 +2,14 @@
 
 module API
   module Serializers
-    class Message < Serializer
+    class MailThread < Serializer
       SCHEMA = Helpers::Schema.object(
         {
           id: Helpers::Schema::INTEGER,
+          account: { type: "string", description: "the name of the account the thread came in on" },
           subject: Helpers::Schema::STRING,
-          body: Helpers::Schema::STRING,
-          reply_to: Helpers::Schema::STRING,
+          body: { type: "string", description: "the first message's body" },
+          reply_to: { type: "string", description: "the first message's reply address" },
           status: { type: "string", enum: Blog::Types::MessageStatus.values },
           tags: Helpers::Schema::TAGS,
           received_at: Helpers::Schema::STAMP,

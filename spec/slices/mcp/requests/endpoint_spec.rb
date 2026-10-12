@@ -68,7 +68,6 @@ RSpec.describe "MCP endpoint", type: :request do
       "list_inbox" => "the inbox",
       "list_journal_entries" => "the journal",
       "list_links" => "record links",
-      "list_messages" => "messages",
       "list_people" => "people",
       "list_posts" => "posts",
       "list_projects" => "projects",
@@ -88,7 +87,6 @@ RSpec.describe "MCP endpoint", type: :request do
       "read_current_sprint" => "sprints",
       "read_decision" => "decisions",
       "read_journal_entry" => "the journal",
-      "read_message" => "messages",
       "read_person" => "people",
       "read_photo" => "photos",
       "read_post" => "posts",
@@ -434,7 +432,7 @@ RSpec.describe "MCP endpoint", type: :request do
       description = result.fetch("tools").find { it.fetch("name") == "search" }.fetch("description")
       readers = Blog::Types::SearchKind.values.to_h { [it, description[/\b#{it}: (read_\w+)/, 1]] }
 
-      expect(readers.values - read_kinds.keys).to be_empty
+      expect(readers.values - [*read_kinds.keys, "read_mail_thread"]).to be_empty
     end
   end
 
@@ -1951,6 +1949,8 @@ RSpec.describe "MCP endpoint", type: :request do
   describe "report" do
     def named_tools = prompt_text.scan(/\b(?:list|read|summarize)_[a-z_]+\b/).uniq
 
+    def scopes = "read mail"
+
     before { fetch_prompt("report", from: "2026-01-01", to: "2026-03-31") }
 
     it "names the range it reports on" do
@@ -1974,7 +1974,7 @@ RSpec.describe "MCP endpoint", type: :request do
     end
 
     it "fills in what the feed leaves out" do
-      expect(named_tools).to include("list_tasks", "list_projects", "read_analytics", "list_messages")
+      expect(named_tools).to include("list_tasks", "list_projects", "read_analytics", "list_mail_threads")
     end
 
     it "asks for the open tasks" do
@@ -2271,7 +2271,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "delete_decision_comment" => { id: 1, comment_id: 2 },
         "delete_decision_option" => { id: 1, option_id: 2 },
         "delete_journal_entry" => { id: 1 },
-        "delete_messages" => { ids: [1] },
+        "delete_mail_threads" => { ids: [1] },
         "delete_person" => { id: 1 },
         "delete_post" => { id: 1 },
         "delete_posts" => { ids: [1] },
@@ -2302,7 +2302,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "list_inbox" => {},
         "list_journal_entries" => { from: "2026-01-01", to: "2026-12-31" },
         "list_links" => { kind: "post", id: 1 },
-        "list_messages" => { from: "2026-01-01", to: "2026-12-31" },
+        "list_mail_threads" => { from: "2026-01-01", to: "2026-12-31" },
         "list_people" => {},
         "list_posts" => {},
         "list_projects" => {},
@@ -2316,9 +2316,9 @@ RSpec.describe "MCP endpoint", type: :request do
         "list_tasks" => {},
         "list_webmentions" => { from: "2026-01-01", to: "2026-12-31" },
         "list_work_entries" => { from: "2026-01-01", to: "2026-12-31" },
-        "mark_message" => { id: 1, status: "read" },
-        "mark_messages_read" => { ids: [1] },
-        "mark_messages_unread" => { ids: [1] },
+        "mark_mail_thread" => { id: 1, status: "read" },
+        "mark_mail_threads_read" => { ids: [1] },
+        "mark_mail_threads_unread" => { ids: [1] },
         "mark_task_seen" => { id: 1 },
         "mark_webmentions_spam" => { ids: [1] },
         "moderate_webmention" => { id: 1, verdict: "spam" },
@@ -2334,7 +2334,7 @@ RSpec.describe "MCP endpoint", type: :request do
         "read_current_sprint" => {},
         "read_decision" => { id: 1 },
         "read_journal_entry" => { id: 1 },
-        "read_message" => { id: 1 },
+        "read_mail_thread" => { id: 1 },
         "read_person" => { id: 1 },
         "read_photo" => { photo: "x" },
         "read_post" => { id: 1 },
@@ -2372,18 +2372,19 @@ RSpec.describe "MCP endpoint", type: :request do
         "snooze_attention" => { kind: "journal" },
         "snooze_inbox" => { messages: [1], snoozed_until: "2026-01-01T09:00" },
         "snooze_inbox_row" => { kind: "message", id: 1, snoozed_until: "2026-01-01T09:00" },
+        "snooze_mail_threads" => { ids: [1], snoozed_until: "2026-01-01T09:00" },
         "start_task" => { id: 1 },
         "suggest_edits" => { target: "post", id: 1, edits: [{ original: "teh", replacement: "the", reason: "typo" }] },
         "summarize_activity" => { from: "2026-01-01", to: "2026-12-31" },
         "sync_issues" => {},
         "tag_decision" => { id: 1, tags: ["queues"] },
-        "tag_messages" => { ids: [1], tag: "ruby" },
+        "tag_mail_threads" => { ids: [1], tag: "ruby" },
         "tag_posts" => { ids: [1], tag: "ruby" },
         "tag_tasks" => { ids: [1], tag: "ruby" },
         "unlink_records" => { kind: "post", id: 1, other_kind: "commit", other_id: 2 },
         "unlink_task" => { id: 1, other_id: 2 },
         "untag_decision" => { id: 1, tag: "queues" },
-        "untag_messages" => { ids: [1], tag: "ruby" },
+        "untag_mail_threads" => { ids: [1], tag: "ruby" },
         "untag_tasks" => { ids: [1], tag: "ruby" },
         "update_journal_entry" => { id: 1 },
         "update_post" => { id: 1 },

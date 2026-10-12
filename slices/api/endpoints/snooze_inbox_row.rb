@@ -4,11 +4,13 @@ module API
   module Endpoints
     class SnoozeInboxRow < Endpoint
       FINDS = true
+      SCOPED = true
 
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          kind: { type: "string", enum: Serializers::InboxRow::KINDS, description: "the row's kind" },
+          kind: { type: "string", enum: Serializers::InboxRow::KINDS,
+                  description: "the row's kind; message needs the mail scope" },
           id: Helpers::Schema::ID.merge(description: "the row's id from list_inbox"),
           snoozed_until: {
             type: "string",
@@ -22,7 +24,13 @@ module API
 
       include Deps[snooze_inbox_row: "operations.snooze_inbox_row"]
 
-      def handle(kind:, id:, snoozed_until:)
+      def handle(kind:, id:, snoozed_until:, scopes:)
+        refuse_mail(:kind, kind == MAIL_ROW, scopes) || snoozed(kind, id, snoozed_until)
+      end
+
+      private
+
+      def snoozed(kind, id, snoozed_until)
         case snooze_inbox_row.call(kind, id, snoozed_until)
           in Success(snooze) then Success(serialized(Serializers::InboxSnooze, snooze))
           in Failure(:invalid) then invalid(snoozed_until: ["snoozed_until is not a time"])

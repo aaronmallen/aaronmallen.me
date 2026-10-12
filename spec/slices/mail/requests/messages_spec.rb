@@ -94,7 +94,7 @@ RSpec.describe "Contact messages", type: :request do
 
     def arrived = message_queries.mail_threads.order(:id).to_a.last
 
-    def mcp_mark(message, status) = mcp_call("mark_message", id: message.id, status:)
+    def mcp_mark(message, status) = mcp_call("mark_mail_thread", id: message.id, status:)
 
     def reap_after(days)
       later = Time.now + (days * 24 * 60 * 60)

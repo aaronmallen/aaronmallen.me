@@ -8,7 +8,7 @@ module Mail
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
-      def by_id(id) = mail_threads.with_letter.combine(:tags).by_pk(id).one
+      def by_id(id) = mail_threads.with_letter.with_account.combine(:tags).by_pk(id).one
 
       def count_from_visitor_since(visitor_hashes, time)
         mail_messages.for_visitor(visitor_hashes).received_since(time).count
@@ -30,7 +30,7 @@ module Mail
         found = in_days(from, to)
         found = found.with_status(status) if status
 
-        page.fill(found.with_letter.combine(:tags).newest_first.paged(page).to_a)
+        page.fill(found.with_letter.with_account.combine(:tags).newest_first.paged(page).to_a)
       end
 
       def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD
@@ -38,6 +38,11 @@ module Mail
       def snoozed = mail_threads.with_status(UNREAD).asleep.with_letter.to_a
 
       def tag_names = mail_thread_tags.join(:tag).dataset.unordered.distinct.order(NAME).select_map(NAME)
+
+      def thread(id)
+        mail_threads.with_letter.with_account.combine(:tags, :mail_messages)
+                    .node(:mail_messages) { it.order(:received_at, :id) }.by_pk(id).one
+      end
 
       def unread = waiting.with_letter.newest_first.to_a
 

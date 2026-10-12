@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe "MCP contact message tools", type: :request do
+RSpec.describe "MCP mail tools", type: :request do
   def at(day, hour, minute = 0) = Blog::TimeZone.local_time(day.year, day.month, day.day, hour, minute)
 
   def message_queries = Mail::Slice["repos.message_queries"]
@@ -9,12 +9,14 @@ RSpec.describe "MCP contact message tools", type: :request do
 
   def untrusted(text) = { "untrusted" => true, "text" => text }
 
-  describe "list_messages" do
+  def week = { from: (today - 6).iso8601, to: today.iso8601 }
+
+  describe "list_mail_threads" do
     def listed(from: today - 6, to: today, **)
-      mcp_answer("list_messages", from: from.iso8601, to: to.iso8601, **).fetch("messages")
+      mcp_answer("list_mail_threads", from: from.iso8601, to: to.iso8601, **).fetch("mail_threads")
     end
 
-    def listed_ids(**) = mcp_answer("list_messages", **).fetch("messages").map { it.fetch("id") }
+    def listed_ids(**) = mcp_answer("list_mail_threads", **).fetch("mail_threads").map { it.fetch("id") }
 
     it "lists the messages in the range, newest first" do
       older = create(:message, received_at: at(today - 3, 9))
@@ -34,10 +36,9 @@ RSpec.describe "MCP contact message tools", type: :request do
     it "says what the admin list shows" do
       message = create(:message, :read, subject: "Hello", reply_to: "someone@example.com", received_at: at(today, 0, 5))
       shown = { "subject" => untrusted("Hello"), "reply_to" => untrusted("someone@example.com"), "status" => "read" }
+      stamps = { "received_at" => at(today, 0, 5).utc.iso8601, "snoozed_until" => nil }
 
-      expect(listed.first).to eq(
-        "id" => message.id, **shown, "tags" => [], "received_at" => at(today, 0, 5).utc.iso8601, "snoozed_until" => nil,
-      )
+      expect(listed.first).to eq("id" => message.id, "account" => "Contact form", **shown, "tags" => [], **stamps)
     end
 
     it "lists each message's tags in name order" do
@@ -64,9 +65,9 @@ RSpec.describe "MCP contact message tools", type: :request do
       older = create(:message, received_at: at(today - 900, 9))
       newer = create(:message, received_at: at(today, 0))
 
-      answer = mcp_answer("list_messages")
+      answer = mcp_answer("list_mail_threads")
 
-      expect([answer.fetch("messages").map { it.fetch("id") }, answer.values_at("from", "to")])
+      expect([answer.fetch("mail_threads").map { it.fetch("id") }, answer.values_at("from", "to")])
         .to eq([[newer.id, older.id], [nil, nil]])
     end
 
@@ -90,7 +91,7 @@ RSpec.describe "MCP contact message tools", type: :request do
       create(:message, :spam, received_at: at(today - 1, 9))
       create(:message, :spam, received_at: at(today - 30, 9))
 
-      expect(mcp_answer("list_messages", from: (today - 6).iso8601, to: today.iso8601, status: "spam").fetch("counts"))
+      expect(mcp_answer("list_mail_threads", **week, status: "spam").fetch("counts"))
         .to eq("unread" => 1, "read" => 0, "spam" => 1)
     end
 
@@ -98,58 +99,71 @@ RSpec.describe "MCP contact message tools", type: :request do
       create(:message, :read, received_at: at(today - 900, 9))
       create(:message, :spam)
 
-      expect(mcp_answer("list_messages").fetch("counts")).to eq("unread" => 0, "read" => 1, "spam" => 1)
+      expect(mcp_answer("list_mail_threads").fetch("counts")).to eq("unread" => 0, "read" => 1, "spam" => 1)
     end
 
     it "refuses a status the admin does not have" do
-      expect(mcp_text("list_messages", from: today.iso8601, to: today.iso8601, status: "archived"))
+      expect(mcp_text("list_mail_threads", from: today.iso8601, to: today.iso8601, status: "archived"))
         .to include("/status")
     end
 
     it "refuses a range that runs backwards" do
-      expect(mcp_text("list_messages", from: today.iso8601, to: (today - 1).iso8601)).to eq("from comes after to")
+      expect(mcp_text("list_mail_threads", from: today.iso8601, to: (today - 1).iso8601)).to eq("from comes after to")
     end
   end
 
-  describe "read_message" do
-    it "reads one message whole" do
-      message = create(:message, subject: "Hi", body: "I liked the post", reply_to: "a@example.com")
+  describe "read_mail_thread" do
+    def gmail(name) = Mail::Slice["relations.mail_accounts"].dataset.insert(provider: "gmail", name:)
 
-      expect(mcp_answer("read_message", id: message.id)).to include(
-        "id" => message.id, "subject" => untrusted("Hi"), "body" => untrusted("I liked the post"),
-        "reply_to" => untrusted("a@example.com"), "status" => "unread",
+    it "reads the thread and its first message" do
+      thread = create(:message, subject: "Hi", body: "I liked the post", reply_to: "a@example.com")
+
+      expect(mcp_answer("read_mail_thread", id: thread.id)).to include(
+        "id" => thread.id, "account" => "Contact form", "subject" => untrusted("Hi"), "status" => "unread",
+        "messages" => [include("body" => untrusted("I liked the post"), "reply_to" => untrusted("a@example.com"))],
       )
     end
 
-    it "keeps the sender's visitor hash back" do
-      message = create(:message)
+    it "reads every message in a thread from another account, oldest first" do
+      thread = create(:message, mail_account_id: gmail("Work"), body: "First", received_at: at(today, 9))
+      create(:mail_message, mail_thread_id: thread.id, body: "Second", visitor_hash: nil, received_at: at(today, 10))
 
-      expect(mcp_answer("read_message", id: message.id).keys)
-        .to contain_exactly("id", "subject", "body", "reply_to", "status", "tags", "received_at", "snoozed_until")
+      answer = mcp_answer("read_mail_thread", id: thread.id)
+
+      expect([answer.fetch("account"), trusted(answer.fetch("messages")).map { it.fetch("body") }])
+        .to eq(["Work", %w[First Second]])
+    end
+
+    it "keeps the sender's visitor hash back" do
+      answer = mcp_answer("read_mail_thread", id: create(:message).id)
+      thread_keys = %w[account id messages received_at snoozed_until status subject tags]
+
+      expect([answer.keys.sort, answer.fetch("messages").first.keys.sort])
+        .to eq([thread_keys, %w[body id received_at reply_to subject]])
     end
 
     it "says which tags it carries" do
-      message = create(:message)
-      Mail::Slice["repos.message_tag_mutations"].add(message.id, "billing")
+      thread = create(:message)
+      Mail::Slice["repos.message_tag_mutations"].add(thread.id, "billing")
 
-      expect(mcp_answer("read_message", id: message.id).fetch("tags")).to eq(%w[billing])
+      expect(mcp_answer("read_mail_thread", id: thread.id).fetch("tags")).to eq(%w[billing])
     end
 
     it "says when a snooze ends" do
-      message = create(:message, snoozed_until: Time.utc(2099, 1, 2, 3))
+      thread = create(:message, snoozed_until: Time.utc(2099, 1, 2, 3))
 
-      expect(mcp_answer("read_message", id: message.id).fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
+      expect(mcp_answer("read_mail_thread", id: thread.id).fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("read_message", id: 999_999)).to eq("no message has the ID 999999")
+      expect(mcp_text("read_mail_thread", id: 999_999)).to eq("no mail thread has the ID 999999")
     end
   end
 
-  describe "mark_message" do
+  describe "mark_mail_thread" do
     it "marks a message read" do
       message = create(:message)
-      mcp_call("mark_message", id: message.id, status: "read")
+      mcp_call("mark_mail_thread", id: message.id, status: "read")
 
       expect(message_queries.by_id(message.id).status).to eq("read")
     end
@@ -157,22 +171,23 @@ RSpec.describe "MCP contact message tools", type: :request do
     it "marks a message spam and says so" do
       message = create(:message, :read)
 
-      expect(mcp_answer("mark_message", id: message.id, status: "spam")).to eq("id" => message.id, "status" => "spam")
+      expect(mcp_answer("mark_mail_thread", id: message.id,
+                                            status: "spam")).to eq("id" => message.id, "status" => "spam")
     end
 
     it "calls an unknown ID an error" do
-      expect(mcp_text("mark_message", id: 999_999, status: "read")).to eq("no message has the ID 999999")
+      expect(mcp_text("mark_mail_thread", id: 999_999, status: "read")).to eq("no mail thread has the ID 999999")
     end
 
     it "refuses a status the admin does not have" do
       message = create(:message)
 
-      expect(mcp_text("mark_message", id: message.id, status: "archived")).to include("/status")
+      expect(mcp_text("mark_mail_thread", id: message.id, status: "archived")).to include("/status")
     end
 
     it "leaves the message alone when it refuses" do
       message = create(:message)
-      mcp_call("mark_message", id: message.id, status: "archived")
+      mcp_call("mark_mail_thread", id: message.id, status: "archived")
 
       expect(message_queries.by_id(message.id).status).to eq("unread")
     end

@@ -11,7 +11,7 @@ RSpec.describe Mail::Jobs::ReapSpamMessages, type: :request do
     allow(Time).to receive(:now).and_return(now)
   end
 
-  def mark(message, status) = mcp_call("mark_message", id: message.id, status:)
+  def mark(message, status) = mcp_call("mark_mail_thread", id: message.id, status:)
 
   def reap = described_class.new.perform
 

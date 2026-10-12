@@ -160,6 +160,12 @@ RSpec.describe "Admin API tokens", type: :request do
       expect(stored.one[:scopes]).to eq(%w[read health])
     end
 
+    it "stores the mail scope when I check it" do
+      mint("Terminal", scopes: checked("read", "mail"))
+
+      expect(stored.one[:scopes]).to eq(%w[read mail])
+    end
+
     it "checks only read on a fresh form" do
       get "/admin/tokens"
 

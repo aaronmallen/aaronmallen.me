@@ -274,6 +274,21 @@ RSpec.describe "OAuth authorization", type: :request do
     end
   end
 
+  describe "when the client asks for mail" do
+    before do
+      sign_in_to_admin
+      authorize(scope: "read mail")
+    end
+
+    it "shows a line for mail" do
+      expect(page).to have_css("li", text: copy(:"scopes.mail"))
+    end
+
+    it "says read leaves mail out" do
+      expect(page).to have_css("li", text: "Read everything the site keeps but your health data and mail")
+    end
+  end
+
   describe "when the client has never held a token" do
     let(:client) { mcp_create(:oauth_client, client_name: "Claude", created_at: Time.new(2026, 9, 3, 15, 4, 0, "UTC")) }
 
@@ -482,9 +497,9 @@ RSpec.describe "OAuth authorization", type: :request do
     end
 
     it "grants every scope a client asks for by name" do
-      approve_authorization(authorize_path(scope: "read suggest write publish delete health"))
+      approve_authorization(authorize_path(scope: "read suggest write publish delete health mail"))
 
-      expect(code[:scopes]).to eq(%w[read suggest write publish delete health])
+      expect(code[:scopes]).to eq(%w[read suggest write publish delete health mail])
     end
 
     it "drops a scope it does not know" do

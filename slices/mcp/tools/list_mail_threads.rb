@@ -2,7 +2,7 @@
 
 module MCP
   module Tools
-    class ListMessages < Base
+    class ListMailThreads < Base
       STATUS = {
         type: "string",
         enum: Blog::Types::MessageStatus.values,
@@ -18,15 +18,15 @@ module MCP
         },
       }.freeze
 
-      description "List the messages people sent through the contact form, newest first: " \
-                  "the ID, subject, reply address, status, tags, when it came in and when a snooze ends. " \
-                  "counts gives how many messages in the range sit in each status. " \
-                  "Read one with read_message for its body. The subject and reply address come marked untrusted. " \
-                  "#{Untrusted::WARNING}. " \
+      description "List mail threads from every account, contact form messages included, newest first: the ID, " \
+                  "the account it came in on, subject, the first message's reply address, status, tags, when it " \
+                  "came in and when a snooze ends. counts gives how many threads in the range sit in each status. " \
+                  "Read one with read_mail_thread for its messages. The subject and reply address come marked " \
+                  "untrusted. #{Untrusted::WARNING}. " \
                   "Give from, to or both as YYYY-MM-DD to keep only those days; both days sit inside the range. " \
-                  "Leave both out to list every message. #{Blog::Helpers::Paging::USAGE}"
+                  "Leave both out to list every thread. #{Blog::Helpers::Paging::USAGE}"
       input_schema(SCHEMA)
-      scope Blog::Types::OAuthScope["read"]
+      scope Blog::Types::OAuthScope["mail"]
 
       class << self
         def call(server_context:, from: nil, to: nil, status: nil, page: 1)
@@ -45,13 +45,15 @@ module MCP
             from: first&.iso8601,
             to: last&.iso8601,
             counts: dep(:message_queries, server_context).count_received_between(from: first, to: last),
-            messages: found.rows.map { summary(it) },
+            mail_threads: found.rows.map { summary(it) },
             **Blog::Helpers::Paging.fields(found),
           )
         end
 
-        def summary(message)
-          Untrusted.present(API::Serializers::Message.new(message).serializable_hash.except("body"), Untrusted::MESSAGE)
+        def summary(thread)
+          serialized = API::Serializers::MailThread.new(thread).serializable_hash.except("body")
+
+          Untrusted.present(serialized, Untrusted::MESSAGE)
         end
       end
     end

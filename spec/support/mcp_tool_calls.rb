@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module MCPToolCalls
-  SCOPES = "read suggest write publish delete"
+  SCOPES = "read suggest write publish delete mail"
 
   def mcp_answer(name, **) = JSON.parse(mcp_text(name, **))
 
@@ -35,9 +35,11 @@ module MCPToolCalls
     @mcp_access_token ||= MCP::Slice["operations.issue_tokens"].call(
       oauth_client_id: Spec::DB::Factories[:mcp].create(:oauth_client).id,
       resource: MCP::Slice["operations.describe_protected_resource"].call(Hanami.app.settings.site_url.chomp("/"))[:resource],
-      scopes: SCOPES.split,
+      scopes: mcp_scopes,
     ).fetch(:access_token)
   end
+
+  def mcp_scopes = SCOPES.split
 end
 
 RSpec.configure do |config|

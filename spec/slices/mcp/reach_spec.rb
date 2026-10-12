@@ -78,7 +78,7 @@ RSpec.describe "MCP reach", type: :app do
       "api.operations.revoke_token" => "the owner revokes an API token in the admin, which no client should do",
       "backups.operations.back_up_database" => "a background job dumps the database each night",
       "mail.operations.create_message" => "a reader sends a message through the public form",
-      "mail.operations.label_message" => "sets a message's tags from the admin; tag_messages covers it",
+      "mail.operations.label_message" => "sets a thread's tags from the admin; tag_mail_threads covers it",
       "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",
       "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",
       "health.operations.sync_health" => "background jobs sync health days and workouts from Google",

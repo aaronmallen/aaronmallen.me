@@ -26,8 +26,8 @@ RSpec.describe "MCP list tool paging", type: :request do
       arguments: -> { range },
       seed: -> { 1.upto(3) { create(:social_post, :posted, posted_at: earlier(it)) } },
     },
-    "list_messages" => {
-      key: "messages",
+    "list_mail_threads" => {
+      key: "mail_threads",
       arguments: -> { range },
       seed: -> { 1.upto(3) { create(:message, received_at: earlier(it)) } },
     },
@@ -108,7 +108,9 @@ RSpec.describe "MCP list tool paging", type: :request do
       create(:message, :spam, received_at: earlier(1))
       kept = [2, 3].map { create(:message, received_at: earlier(it)).id }
 
-      expect([1, 2].flat_map { ids("list_messages", "messages", **range, status: "unread", page: it) }).to eq(kept)
+      pages = [1, 2].flat_map { ids("list_mail_threads", "mail_threads", **range, status: "unread", page: it) }
+
+      expect(pages).to eq(kept)
     end
 
     it "keeps a status while paging webmentions" do

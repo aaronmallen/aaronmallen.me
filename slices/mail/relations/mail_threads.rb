@@ -7,6 +7,7 @@ module Mail
 
       schema :mail_threads, infer: true do
         associations do
+          belongs_to :mail_account
           has_many :mail_messages
           has_many :mail_thread_tags
           has_many :tags, through: :mail_thread_tags, view: :in_name_order
@@ -27,6 +28,12 @@ module Mail
         return none if unmatchable?(name)
 
         where(id: mail_thread_tags.holding_every([name]).dataset)
+      end
+
+      def with_account
+        named = mail_accounts.dataset.unordered.where(id: self[:mail_account_id].qualified).select(:name)
+
+        select_append(ROM::SQL::Attribute[ROM::Types::String].meta(sql_expr: named).as(:account))
       end
 
       def with_letter

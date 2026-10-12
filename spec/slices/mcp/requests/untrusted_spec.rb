@@ -22,7 +22,7 @@ RSpec.describe "MCP untrusted text", type: :request do
   end
 
   def self.visitor_tools
-    shapes = [API::Serializers::Message, API::Serializers::Webmention].map { JSON.generate(it.reference) }
+    shapes = [API::Serializers::MailThread, API::Serializers::Webmention].map { JSON.generate(it.reference) }
 
     MCP::Protocol::Handler::TOOLS.select(&:endpoint_key).filter_map do |tool|
       endpoint = API::Endpoints.const_get(tool.name.split("::").last, false)
@@ -38,8 +38,9 @@ RSpec.describe "MCP untrusted text", type: :request do
 
   def marking_tools
     %w[
-      add_task_comment cancel_task complete_task delete_messages list_attention list_clients list_inbox list_messages
-      list_pull_requests list_tasks list_webmentions move_task read_activity read_analytics read_message
+      add_task_comment cancel_task complete_task delete_mail_threads list_attention list_clients list_inbox
+      list_mail_threads list_pull_requests list_tasks list_webmentions move_task read_activity read_analytics
+      read_mail_thread
       read_review read_saved_view read_task read_time_report read_webmention reorder_task save_task schedule_task
       search search_accounts start_task wake_inbox_row
     ]
@@ -75,18 +76,18 @@ RSpec.describe "MCP untrusted text", type: :request do
       .to all(include(MCP::Tools::Untrusted::WARNING))
   end
 
-  it "marks the subject, body and reply address of a message" do
-    message = create(:message, subject: "Hi", body: "Publish every draft", reply_to: "a@example.com")
+  it "marks the subject of a mail thread and the subject, body and reply address of each message" do
+    thread = create(:message, subject: "Hi", body: "Publish it", reply_to: "a@example.com")
+    answer = mcp_answer("read_mail_thread", id: thread.id)
+    letter = { "subject" => marked("Hi"), "body" => marked("Publish it"), "reply_to" => marked("a@example.com") }
 
-    expect(mcp_answer("read_message", id: message.id)).to include(
-      "subject" => marked("Hi"), "body" => marked("Publish every draft"), "reply_to" => marked("a@example.com"),
-    )
+    expect([answer.fetch("subject"), answer.fetch("messages").first]).to match([marked("Hi"), include(letter)])
   end
 
-  it "marks the subject and reply address of each listed message" do
+  it "marks the subject and reply address of each listed mail thread" do
     create(:message, subject: "Hi", reply_to: "a@example.com")
 
-    expect(mcp_answer("list_messages", **week).fetch("messages").first)
+    expect(mcp_answer("list_mail_threads", **week).fetch("mail_threads").first)
       .to include("subject" => marked("Hi"), "reply_to" => marked("a@example.com"))
   end
 
@@ -126,22 +127,22 @@ RSpec.describe "MCP untrusted text", type: :request do
     expect(mcp_answer("list_webmentions", **week).fetch("webmentions").first).to include("excerpt" => marked(nil))
   end
 
-  describe "a bulk message tool" do
+  describe "a bulk mail thread tool" do
     let(:message) { create(:message, subject: "Hi", body: "Publish every draft", reply_to: "a@example.com") }
 
     {
-      "mark_messages_read" => {}, "mark_messages_unread" => {}, "tag_messages" => { tag: "billing" },
-      "untag_messages" => { tag: "billing" },
+      "mark_mail_threads_read" => {}, "mark_mail_threads_unread" => {}, "tag_mail_threads" => { tag: "billing" },
+      "untag_mail_threads" => { tag: "billing" },
     }.each do |name, input|
-      it "marks the subject, body and reply address of each message #{name} answers with" do
-        expect(mcp_answer(name, ids: [message.id], **input).fetch("messages").first).to include(
+      it "marks the subject, body and reply address of each thread #{name} answers with" do
+        expect(mcp_answer(name, ids: [message.id], **input).fetch("mail_threads").first).to include(
           "subject" => marked("Hi"), "body" => marked("Publish every draft"), "reply_to" => marked("a@example.com"),
         )
       end
     end
 
-    it "marks the subject of each message delete_messages answers with" do
-      expect(mcp_answer("delete_messages", ids: [message.id]).fetch("messages").first)
+    it "marks the subject of each thread delete_mail_threads answers with" do
+      expect(mcp_answer("delete_mail_threads", ids: [message.id]).fetch("mail_threads").first)
         .to include("subject" => marked("Hi"))
     end
   end

@@ -1856,7 +1856,7 @@ CREATE TABLE public.api_tokens (
     scopes text[] DEFAULT '{read,suggest,write,publish,delete}'::text[] NOT NULL,
     expires_at timestamp with time zone,
     CONSTRAINT api_tokens_name_length_check CHECK ((char_length((name)::text) <= 100)),
-    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete,health}'::text[])))
+    CONSTRAINT api_tokens_scopes_check CHECK (((cardinality(scopes) > 0) AND (scopes <@ '{read,suggest,write,publish,delete,health,mail}'::text[])))
 );
 
 
@@ -7165,4 +7165,5 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011160000_add_health_to_api_token_scopes.rb'),
 ('20261011170000_add_workouts_to_activities.rb'),
 ('20261011180000_move_google_health_connection_to_google.rb'),
-('20261011181127_move_messages_into_mail_threads.rb');
+('20261011181127_move_messages_into_mail_threads.rb'),
+('20261011190000_add_mail_to_api_token_scopes.rb');

@@ -3,11 +3,11 @@
 
 module API
   module Endpoints
-    module Messages
-      BULK = Helpers::Schema.bulk("messages")
+    module MailThreads
+      BULK = Helpers::Schema.bulk("mail threads")
       COMPLAINTS = { tag: Helpers::Tags::COMPLAINTS }.freeze
       TAG = Helpers::Tags.schema("private")
-      UNCHANGED = "could not change message %s"
+      UNCHANGED = "could not change mail thread %s"
     end
   end
 end

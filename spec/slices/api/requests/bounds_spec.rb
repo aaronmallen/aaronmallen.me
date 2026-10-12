@@ -95,7 +95,7 @@ RSpec.describe "API page and ID bounds", type: :request do
     %w[
       /api/v1/tasks/bulk/complete
       /api/v1/posts/bulk/delete
-      /api/v1/messages/bulk/read
+      /api/v1/mail/threads/bulk/read
       /api/v1/webmentions/bulk/approve
     ].each do |path|
       describe path do

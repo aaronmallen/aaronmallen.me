@@ -1,20 +1,24 @@
 # frozen_string_literal: true
 
-RSpec.describe "API bulk message actions", type: :request do
+RSpec.describe "API bulk mail thread actions", type: :request do
   def act(name, ids, **fields) = call_api(name, JSON.generate(ids:, **fields))
 
-  def api_token = @api_token ||= API::Slice["operations.mint_token"].call(name: "Terminal").value!.fetch(:value)
+  def api_token = @api_token ||= mint(nil)
 
   def call_api(name, body)
     headers = { "CONTENT_TYPE" => "application/json", "HTTP_ACCEPT" => "application/json" }
     headers["HTTP_AUTHORIZATION"] = "Bearer #{api_token}"
-    post "/api/v1/messages/bulk/#{name}", body, headers
+    post "/api/v1/mail/threads/bulk/#{name}", body, headers
     JSON.parse(last_response.body)
   end
 
   def gone_id = create(:message).id.tap { Mail::Slice["repos.message_mutations"].delete(it) }
 
   def ids(messages) = messages.map(&:id)
+
+  def mint(scopes)
+    API::Slice["operations.mint_token"].call({ name: "Terminal", scopes: }.compact).value!.fetch(:value)
+  end
 
   def refusal(message) = { "error" => "invalid", "message" => message, "errors" => { "ids" => [message] } }
 
@@ -30,9 +34,12 @@ RSpec.describe "API bulk message actions", type: :request do
 
   def tagging = Mail::Slice["repos.message_tag_mutations"]
 
+  def tags_of(answer) = answer.fetch("mail_threads").map { it.fetch("tags") }
+
   def whole(message)
     {
       "id" => message.id,
+      "account" => "Contact form",
       "subject" => message.subject,
       "body" => message.body,
       "reply_to" => message.reply_to,
@@ -46,27 +53,27 @@ RSpec.describe "API bulk message actions", type: :request do
     "read" => %w[unread read],
     "unread" => %w[read unread],
   }.each do |name, (before, after)|
-    describe "POST /api/v1/messages/bulk/#{name}" do
+    describe "POST /api/v1/mail/threads/bulk/#{name}" do
       let!(:picked) { Array.new(2) { create(:message, status: before) } }
       let!(:left) { create(:message, status: before) }
 
       it "marks the messages it names and answers them" do
         answer = act(name, ids(picked))
 
-        expect([answer.fetch("messages").map { it.values_at("id", "status") }, status])
+        expect([answer.fetch("mail_threads").map { it.values_at("id", "status") }, status])
           .to eq([ids(picked).map { [it, after] }, 200])
       end
 
       it "answers each message whole" do
         message = picked.first
 
-        expect(act(name, [message.id]).fetch("messages").first.except("status")).to eq(whole(message))
+        expect(act(name, [message.id]).fetch("mail_threads").first.except("status")).to eq(whole(message))
       end
 
       it "says when a snooze ends" do
         message = create(:message, status: before, snoozed_until: Time.utc(2099, 1, 2, 3))
 
-        expect(act(name, [message.id]).fetch("messages").first.fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
+        expect(act(name, [message.id]).fetch("mail_threads").first.fetch("snoozed_until")).to eq("2099-01-02T03:00:00Z")
       end
 
       it "leaves the rest alone" do
@@ -79,21 +86,21 @@ RSpec.describe "API bulk message actions", type: :request do
         gone = gone_id
 
         expect([act(name, [*ids(picked), gone]), status, picked.map { status_of(it) }])
-          .to eq([refusal("no message has the ID #{gone}"), 422, [before, before]])
+          .to eq([refusal("no mail thread has the ID #{gone}"), 422, [before, before]])
       end
     end
   end
 
-  describe "POST /api/v1/messages/bulk/delete" do
+  describe "POST /api/v1/mail/threads/bulk/delete" do
     let!(:picked) { [create(:message, subject: "One"), create(:message, subject: "Two")] }
     let!(:left) { create(:message) }
 
     it "deletes the messages it names and answers them" do
       answer = act("delete", ids(picked))
 
-      expect([answer, picked.map { status_of(it) }]).to eq(
-        [{ "messages" => picked.map { { "id" => it.id, "subject" => it.subject, "deleted" => true } } }, [nil, nil]],
-      )
+      deleted = picked.map { { "id" => it.id, "subject" => it.subject, "deleted" => true } }
+
+      expect([answer, picked.map { status_of(it) }]).to eq([{ "mail_threads" => deleted }, [nil, nil]])
     end
 
     it "leaves the rest alone" do
@@ -109,13 +116,13 @@ RSpec.describe "API bulk message actions", type: :request do
     end
   end
 
-  describe "POST /api/v1/messages/bulk/tag" do
+  describe "POST /api/v1/mail/threads/bulk/tag" do
     let!(:picked) { [tagged("billing"), tagged] }
 
     it "adds the tag to each message and keeps the ones it had" do
       answer = act("tag", ids(picked), tag: "Urgent")
 
-      expect([answer.fetch("messages").map { it.fetch("tags") }, status]).to eq([[%w[billing urgent], %w[urgent]], 200])
+      expect([tags_of(answer), status]).to eq([[%w[billing urgent], %w[urgent]], 200])
     end
 
     it "tags a message once when it already carries the tag" do
@@ -128,7 +135,7 @@ RSpec.describe "API bulk message actions", type: :request do
       gone = gone_id
 
       expect([act("tag", [*ids(picked), gone], tag: "urgent"), status, picked.map { tag_names(it) }])
-        .to eq([refusal("no message has the ID #{gone}"), 422, [%w[billing], []]])
+        .to eq([refusal("no mail thread has the ID #{gone}"), 422, [%w[billing], []]])
     end
 
     it "refuses a tag that is not lowercase words joined by hyphens" do
@@ -145,13 +152,13 @@ RSpec.describe "API bulk message actions", type: :request do
     end
   end
 
-  describe "POST /api/v1/messages/bulk/untag" do
+  describe "POST /api/v1/mail/threads/bulk/untag" do
     let!(:picked) { [tagged("billing", "urgent"), tagged("billing")] }
 
     it "takes the tag off each message" do
       answer = act("untag", ids(picked), tag: "billing")
 
-      expect([answer.fetch("messages").map { it.fetch("tags") }, status]).to eq([[%w[urgent], []], 200])
+      expect([answer.fetch("mail_threads").map { it.fetch("tags") }, status]).to eq([[%w[urgent], []], 200])
     end
 
     it "untags none when one ID is gone" do
@@ -161,11 +168,53 @@ RSpec.describe "API bulk message actions", type: :request do
     end
   end
 
+  describe "POST /api/v1/mail/threads/bulk/snooze" do
+    let(:ends_at) { Time.now.utc.round + 3600 }
+
+    it "snoozes the threads it names and answers them" do
+      picked = Array.new(2) { create(:message) }
+      answer = act("snooze", ids(picked), snoozed_until: ends_at.iso8601)
+
+      expect([answer.fetch("mail_threads").map { it.values_at("id", "snoozed_until") }, status])
+        .to eq([ids(picked).map { [it, ends_at.iso8601] }, 200])
+    end
+
+    it "snoozes none when one ID is gone and names it" do
+      message = create(:message)
+      gone = gone_id
+
+      expect([act("snooze", [message.id, gone], snoozed_until: ends_at.iso8601), repo.by_id(message.id).snoozed_until])
+        .to eq([refusal("no mail thread has the ID #{gone}"), nil])
+    end
+
+    it "refuses a time in the past" do
+      answer = act("snooze", [create(:message).id], snoozed_until: (Time.now - 60).utc.iso8601)
+
+      expect([answer.fetch("errors"),
+              status]).to eq([{ "snoozed_until" => ["snoozed_until must be in the future"] }, 422])
+    end
+  end
+
+  describe "a token without the mail scope" do
+    def api_token = @api_token ||= mint(%w[read write delete])
+
+    def refusal_for(name, ids)
+      act(name, ids, tag: "billing", snoozed_until: (Time.now + 3600).utc.iso8601).fetch("error").then { [status, it] }
+    end
+
+    it "refuses every mail endpoint" do
+      ids = [create(:message).id]
+
+      expect(%w[read unread tag untag snooze delete].map { refusal_for(it, ids) }.uniq)
+        .to eq([[403, "insufficient_scope"]])
+    end
+  end
+
   describe "the list of IDs" do
     it "acts on a repeated ID once" do
       message = create(:message)
 
-      expect(act("read", [message.id, message.id]).fetch("messages").map { it.fetch("id") }).to eq([message.id])
+      expect(act("read", [message.id, message.id]).fetch("mail_threads").map { it.fetch("id") }).to eq([message.id])
     end
 
     it "refuses an empty list" do
@@ -186,51 +235,51 @@ RSpec.describe "API bulk message actions", type: :request do
   end
 
   describe "the MCP tools" do
-    it "mark read as mark_messages_read does" do
+    it "mark read as mark_mail_threads_read does" do
       message = create(:message)
       endpoint = act("read", [message.id])
       Mail::Slice["repos.message_mutations"].mark(message, "unread")
 
-      expect(trusted(mcp_answer("mark_messages_read", ids: [message.id]))).to eq(endpoint)
+      expect(trusted(mcp_answer("mark_mail_threads_read", ids: [message.id]))).to eq(endpoint)
     end
 
-    it "mark unread as mark_messages_unread does" do
+    it "mark unread as mark_mail_threads_unread does" do
       message = create(:message, :read)
       endpoint = act("unread", [message.id])
       Mail::Slice["repos.message_mutations"].mark(message, "read")
 
-      expect(trusted(mcp_answer("mark_messages_unread", ids: [message.id]))).to eq(endpoint)
+      expect(trusted(mcp_answer("mark_mail_threads_unread", ids: [message.id]))).to eq(endpoint)
     end
 
-    it "delete as delete_messages does" do
+    it "delete as delete_mail_threads does" do
       first = create(:message, subject: "same")
       last = create(:message, subject: "same")
       deleted = act("delete", [first.id])
 
-      expect(trusted(mcp_answer("delete_messages", ids: [last.id])))
-        .to eq("messages" => deleted.fetch("messages").map { it.merge("id" => last.id) })
+      expect(trusted(mcp_answer("delete_mail_threads", ids: [last.id])))
+        .to eq("mail_threads" => deleted.fetch("mail_threads").map { it.merge("id" => last.id) })
     end
 
-    it "tag as tag_messages does" do
+    it "tag as tag_mail_threads does" do
       message = create(:message)
       tagged_answer = act("tag", [message.id], tag: "billing")
 
-      expect(trusted(mcp_answer("tag_messages", ids: [message.id], tag: "billing"))).to eq(tagged_answer)
+      expect(trusted(mcp_answer("tag_mail_threads", ids: [message.id], tag: "billing"))).to eq(tagged_answer)
     end
 
-    it "untag as untag_messages does" do
+    it "untag as untag_mail_threads does" do
       message = tagged("billing", "urgent")
       untagged = act("untag", [message.id], tag: "billing")
       tagging.add(message.id, "billing")
 
-      expect(trusted(mcp_answer("untag_messages", ids: [message.id], tag: "billing"))).to eq(untagged)
+      expect(trusted(mcp_answer("untag_mail_threads", ids: [message.id], tag: "billing"))).to eq(untagged)
     end
 
     it "refuse a gone ID with the message the endpoint gives" do
       gone = gone_id
       refused = act("read", [gone])
 
-      expect(mcp_text("mark_messages_read", ids: [gone])).to eq(refused.fetch("message"))
+      expect(mcp_text("mark_mail_threads_read", ids: [gone])).to eq(refused.fetch("message"))
     end
   end
 end

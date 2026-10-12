@@ -2,7 +2,7 @@
 
 module API
   module Endpoints
-    class MarkMessagesRead < BulkMessageEndpoint
+    class MarkMailThreadsRead < BulkMailThreadEndpoint
       ACT = Blog::Types::MessageBulkAction["read"]
     end
   end

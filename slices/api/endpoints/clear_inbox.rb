@@ -6,13 +6,16 @@ module API
       EMPTY = "name at least one row to clear"
       IDS = Helpers::Schema.list(Helpers::Schema::ID).freeze
       NOUNS = { tasks: "task", messages: "message", webmentions: "webmention" }.freeze
+      SCOPED = true
       UNCHANGED = "could not clear %s %s"
 
       SCHEMA = {
         additionalProperties: false,
         properties: {
           tasks: IDS.merge(description: "the ids of task rows from list_inbox to mark seen"),
-          messages: IDS.merge(description: "the ids of message rows from list_inbox to mark read"),
+          messages: IDS.merge(
+            description: "the ids of message rows from list_inbox to mark read; needs the mail scope",
+          ),
           webmentions: IDS.merge(description: "the ids of webmention rows from list_inbox to mark seen, left pending"),
         },
       }.freeze
@@ -21,7 +24,11 @@ module API
 
       include Deps[clear_inbox: "operations.clear_inbox"]
 
-      def handle(**ids)
+      def handle(scopes:, **ids) = refuse_mail(:messages, ids[:messages]&.any?, scopes) || cleared(ids)
+
+      private
+
+      def cleared(ids)
         case clear_inbox.call(ids)
           in Success(cleared) then Success(cleared.transform_values { it.map(&:id) })
           in Failure[:record, kind, id, reason] then invalid(kind => [refused(NOUNS.fetch(kind), id, reason)])
@@ -29,8 +36,6 @@ module API
           else failed(Helpers::Wording::UNSAVED)
         end
       end
-
-      private
 
       def refused(noun, id, reason)
         reason == :not_found ? Helpers::Wording.missing(noun, id) : format(UNCHANGED, noun, id)

@@ -86,7 +86,8 @@ module API
       endpoints.complete_task endpoints.complete_tasks endpoints.create_journal_entry endpoints.create_person
       endpoints.create_saved_view endpoints.create_social_post endpoints.create_task_rule
       endpoints.delete_decision_comment
-      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_messages endpoints.delete_person
+      endpoints.delete_decision_option endpoints.delete_journal_entry endpoints.delete_mail_threads
+      endpoints.delete_person
       endpoints.delete_posts endpoints.delete_saved_view endpoints.delete_social_post endpoints.delete_task
       endpoints.delete_task_comment
       endpoints.delete_task_rule endpoints.delete_tasks endpoints.delete_work_session endpoints.drop_decision
@@ -96,7 +97,7 @@ module API
       endpoints.list_journal_entries endpoints.list_links endpoints.list_people endpoints.list_saved_views
       endpoints.list_social_posts
       endpoints.list_sprints endpoints.list_task_rules endpoints.list_tasks endpoints.list_webmentions
-      endpoints.mark_messages_read endpoints.mark_messages_unread endpoints.mark_task_seen
+      endpoints.mark_mail_threads_read endpoints.mark_mail_threads_unread endpoints.mark_task_seen
       endpoints.mark_webmentions_spam endpoints.move_task endpoints.move_tasks endpoints.open_decision
       endpoints.pause_task endpoints.plan_sprint endpoints.publish_post endpoints.read_activity endpoints.read_commit
       endpoints.read_current_sprint endpoints.read_decision endpoints.read_health_days endpoints.read_journal_entry
@@ -111,10 +112,11 @@ module API
       endpoints.snooze_attention
       endpoints.snooze_inbox
       endpoints.snooze_inbox_row
+      endpoints.snooze_mail_threads
       endpoints.start_task endpoints.summarize_activity endpoints.sync_issues
       endpoints.tag_decision endpoints.tag_posts endpoints.tag_tasks endpoints.unlink_records endpoints.unlink_task
-      endpoints.tag_messages
-      endpoints.untag_messages
+      endpoints.tag_mail_threads
+      endpoints.untag_mail_threads
       endpoints.untag_decision endpoints.untag_tasks endpoints.update_journal_entry endpoints.update_person
       endpoints.update_post_edit_note endpoints.update_saved_view endpoints.update_social_post
       endpoints.update_task_rule

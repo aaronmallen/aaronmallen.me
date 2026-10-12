@@ -2,9 +2,9 @@
 
 module API
   module Endpoints
-    class TagMessages < BulkMessageEndpoint
+    class TagMailThreads < BulkMailThreadEndpoint
       ACT = Blog::Types::MessageBulkAction["tag"]
-      SCHEMA = Helpers::Schema.widen(Messages::BULK, tag: Messages::TAG).freeze
+      SCHEMA = Helpers::Schema.widen(MailThreads::BULK, tag: MailThreads::TAG).freeze
 
       def handle(ids:, tag:) = acted(ids, tag:)
     end
