@@ -37,6 +37,9 @@ module API
           reply_to: Helpers::Schema.nullable(Helpers::Schema::STRING).merge(
             description: "a message's reply address, or null for another kind",
           ),
+          reason: Helpers::Schema.nullable({ type: "string", enum: Blog::Types::MailWaitReason.values }).merge(
+            description: "the Mail settings rule that put a message here, or null for another kind",
+          ),
         },
       ).freeze
 
@@ -56,6 +59,10 @@ module API
 
       def post_id(row)
         row.record.post_id if row.kind == :webmention
+      end
+
+      def reason(row)
+        row.record.reason if row.kind == :message
       end
 
       def reply_to(row)

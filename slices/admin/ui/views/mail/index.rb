@@ -26,6 +26,7 @@ module Admin
             PageHead(title: t(".heading"), sub:) do
               filter_form
               BulkToggle(form: Bulk::ID)
+              Button(href: path(:admin_mail_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
             end
             div(class: "mail-layout") do
               Folders(list: @list, counts: @counts, labels: shown_labels, chips:)

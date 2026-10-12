@@ -10,8 +10,8 @@ module Mail
 
     export %w[
       operations.act_on_messages operations.create_message operations.delete_message operations.label_message
-      operations.mark_message operations.snooze_messages operations.wake_message repos.message_queries
-      repos.thread_queries
+      operations.mark_message operations.snooze_messages operations.update_mail_settings operations.wake_message
+      repos.message_queries repos.thread_queries
     ]
   end
 end

@@ -8,6 +8,8 @@ module Mail
 
       schema :mail_accounts, infer: true
 
+      def contact_form = where(CONTACT_FORM)
+
       def contact_form_id
         where(CONTACT_FORM).pluck(:id).first || dataset.insert(**CONTACT_FORM, name: CONTACT_FORM_NAME)
       end

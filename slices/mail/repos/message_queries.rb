@@ -3,10 +3,14 @@
 module Mail
   module Repos
     class MessageQueries < Blog::DB::Repo
+      SETTINGS = {
+        contact_form: true, people: true, needs_reply: true, starred: true, important: false, skip_notifications: true,
+      }.freeze
+      SETTINGS_ID = 1
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
-      def by_id(id) = mail_threads.with_letter.with_account.combine(:tags).by_pk(id).one
+      def by_id(id) = mail_threads.with_letter.with_account.with_reason(settings).combine(:tags).by_pk(id).one
 
       def count_from_visitor_since(visitor_hashes, time)
         mail_messages.for_visitor(visitor_hashes).received_since(time).count
@@ -29,16 +33,18 @@ module Mail
 
       def sender_status(reply_to) = spam_senders.by_reply_to(reply_to).exist? ? SPAM : UNREAD
 
-      def snoozed = mail_threads.with_status(UNREAD).asleep.with_letter.to_a
+      def settings = SETTINGS.merge(mail_settings.by_pk(SETTINGS_ID).one.to_h.slice(*SETTINGS.keys))
+
+      def snoozed = waiting.asleep.with_letter.with_account.newest_first.to_a
 
       def thread(id)
         mail_threads.with_letter.with_account.combine(:tags, :mail_messages)
                     .node(:mail_messages) { it.order(:received_at, :id) }.by_pk(id).one
       end
 
-      def unread = waiting.with_letter.newest_first.to_a
+      def unread = waiting.awake.with_letter.with_account.newest_first.to_a
 
-      def unread_count = waiting.count
+      def unread_count = waiting.awake.count
 
       private
 
@@ -48,7 +54,7 @@ module Mail
         last ? found.received_before(last) : found
       end
 
-      def waiting = mail_threads.with_status(UNREAD).awake
+      def waiting = mail_threads.waiting(settings)
     end
   end
 end

@@ -8,7 +8,7 @@ module Mail
     ADDRESS = /\A[^@[:space:]]+@[^@[:space:].]+(?:\.[^@[:space:].]+)+\z/
     CATEGORY = "CATEGORY_"
     CHARSET = /charset="?([^";\s]+)/i
-    FLAGS = { starred: "STARRED", trashed: "TRASH", sent: "SENT", draft: "DRAFT" }.freeze
+    FLAGS = { starred: "STARRED", trashed: "TRASH", sent: "SENT", draft: "DRAFT", important: "IMPORTANT" }.freeze
     FROM = /\A\s*"?(?<name>[^"<]*?)"?\s*<(?<address>[^>]*)>\s*\z/
     HTML = "text/html"
     NO_SUBJECT = "(no subject)"

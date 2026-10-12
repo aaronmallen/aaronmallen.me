@@ -81,7 +81,7 @@ RSpec.describe Mail::Jobs::SyncGmail do
       def stored_thread
         {
           mail_account_id: account.id, subject: "Engines", status: "unread", starred: true, archived: false,
-          trashed: false, sent: false, category: "updates", received_at: sent_at,
+          trashed: false, sent: false, important: false, category: "updates", received_at: sent_at,
         }
       end
 
@@ -132,6 +132,12 @@ RSpec.describe Mail::Jobs::SyncGmail do
         sync_message(labels: %w[SPAM])
 
         expect(thread).to have_attributes(status: "spam", marked_spam_at: be_within(5).of(Time.now))
+      end
+
+      it "marks a thread Gmail calls important" do
+        sync_message(labels: %w[INBOX IMPORTANT])
+
+        expect(thread.important).to be(true)
       end
 
       it "files a draft" do

@@ -8,6 +8,7 @@ module Admin
           AT = "@"
           ENCODED_AT = "%40"
           READ = Blog::Types::MessageStatus["read"]
+          REASONS = Blog::Types::MailWaitReason.values.to_h { [it, ".reasons.#{it}"] }.freeze
           SPAM = Blog::Types::MessageStatus["spam"]
 
           prop :message, Blog::Types::Instance(ROM::Struct)
@@ -39,7 +40,9 @@ module Admin
 
           def meta
             span { Stamped(text: Stamped::MARK, at: @message.received_at) }
+            span { @message.account }
             span { @message.reply_to }
+            span { t(REASONS.fetch(@message.reason)) } if @message.reason
           end
 
           def reply_href = "mailto:#{address}?subject=#{ERB::Util.url_encode(t('.subject', subject: @message.subject))}"

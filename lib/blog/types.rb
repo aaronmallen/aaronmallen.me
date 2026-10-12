@@ -96,6 +96,7 @@ module Blog
     MailProvider = Types::String.enum("contact_form", "gmail")
     MailShow = Types::String.enum("all", "unread")
     MailShowParam = MailShow.fallback(MailShow.values.first)
+    MailWaitReason = Types::String.enum("starred", "contact_form", "people", "needs_reply", "important")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
     MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
     MessageStatus = Types::String.enum("unread", "read", "spam")

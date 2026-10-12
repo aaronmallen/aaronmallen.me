@@ -12,9 +12,11 @@ module Mail
       }.freeze
       FRESH = { THREAD[:status] => UNREAD, THREAD[:trashed] => false }.freeze
 
-      def accounts = mail_accounts.form_last.to_a
+      def accounts = mail_accounts.where(shown: true).form_last.to_a
 
       def by_id(id) = mail_threads.with_summary.combine(:mail_messages, :mail_labels, :tags).by_pk(id).one
+
+      def every_account = mail_accounts.form_last.to_a
 
       def folder_counts(account: nil)
         COUNTED.to_h do |folder, unread|
@@ -26,7 +28,9 @@ module Mail
       def labels
         counts = unread_labels
 
-        label_names.group_by(&:first).transform_values do |pairs|
+        shown = accounts.map(&:id)
+
+        label_names.select { shown.include?(it.first) }.group_by(&:first).transform_values do |pairs|
           pairs.map { |account, name| [name, counts.fetch([account, name], 0)] }
         end
       end
@@ -36,13 +40,13 @@ module Mail
       end
 
       def unread_by_account
-        mail_threads.in_folder(FOLDER["inbox"]).with_status(UNREAD).dataset.unordered
+        mail_threads.shown.in_folder(FOLDER["inbox"]).with_status(UNREAD).dataset.unordered
                     .group_and_count(:mail_account_id).as_hash(:mail_account_id, :count)
       end
 
       private
 
-      def held(found, account) = account ? found.where(mail_account_id: account) : found
+      def held(found, account) = account ? found.shown.where(mail_account_id: account) : found.shown
 
       def label_names
         named = mail_labels.dataset.unordered.select_map(%i[mail_account_id name])

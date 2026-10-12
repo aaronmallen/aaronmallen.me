@@ -3,6 +3,7 @@
 module Mail
   module Repos
     class MessageMutations < Blog::DB::Repo
+      SETTINGS_ID = 1
       SPAM = Blog::Types::MessageStatus["spam"]
       UNREAD = Blog::Types::MessageStatus["unread"]
 
@@ -37,6 +38,14 @@ module Mail
       end
 
       def snooze(id, ends_at) = update(id, snoozed_until: ends_at)
+
+      def update_settings(rules, accounts)
+        transaction do
+          mail_settings.claim(SETTINGS_ID)
+          mail_settings.by_pk(SETTINGS_ID).stamped(:update).call(**rules) unless rules.empty?
+          accounts.each { |id, toggles| mail_accounts.by_pk(id).stamped(:update).call(**toggles) unless toggles.empty? }
+        end
+      end
 
       private
 

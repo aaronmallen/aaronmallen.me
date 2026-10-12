@@ -146,6 +146,7 @@ en:
           other: "Untagged %{count} threads %{tag}"
       deleted: "Thread deleted"
       read: "Marked read"
+      settings_saved: "Mail settings saved"
       spam: "Marked as spam"
       unread: "Moved back to unread"
       woken: "Woken"
@@ -887,6 +888,12 @@ en:
           summary: "%{type} on %{path}"
         message_item:
           read: "Read"
+          reasons:
+            contact_form: "contact form"
+            important: "Gmail: important"
+            needs_reply: "label: needs-reply"
+            people: "from People"
+            starred: "starred"
           reply: "Reply"
           spam: "Spam"
           subject: "Re: %{subject}"
@@ -2666,6 +2673,7 @@ en:
           pick: "Pick a thread to read it."
           placeholder: "Search mail"
           search: "Search mail"
+          settings: "Mail settings"
           show: "Show"
           shows:
             all: "all"
@@ -2677,6 +2685,27 @@ en:
             one: "%{count} Gmail account and the contact form"
             other: "%{count} Gmail accounts and the contact form"
             zero: "the contact form"
+        settings:
+          accounts: "Accounts"
+          back: "Mail"
+          contact_form: "Contact form"
+          heading: "Mail settings"
+          rules:
+            contact_form: "Every new contact form message"
+            important: "Gmail marked it important"
+            needs_reply: "Labeled #needs-reply in Gmail"
+            people: "From someone in People"
+            skip_notifications: "Skip GitHub, Linear and Docs notifications"
+            starred: "Starred in Gmail, read or not"
+          save: "Save"
+          send: "Send as this address"
+          show: "Show this inbox"
+          show_form: "Show in mail"
+          sub: "Pick which accounts show and send, and which threads reach Waiting."
+          waiting: "What reaches Waiting"
+          waiting_hint:
+            one: "%{count} thread waits now."
+            other: "%{count} threads wait now."
       not_found:
         heading: "Page not found"
         message: "Nothing lives at this address. The link may be wrong, or the page may have moved."

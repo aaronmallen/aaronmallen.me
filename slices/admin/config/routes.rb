@@ -112,6 +112,8 @@ module Admin
     post "/markdown/preview/:renderer", to: "markdown.preview", as: :preview_markdown, renderer: MARKDOWN_RENDERER
     get "/mail", to: "mail.index", as: :mail
     post "/mail/bulk", to: "mail.bulk", as: :bulk_mail
+    get "/mail/settings", to: "mail.settings", as: :mail_settings
+    post "/mail/settings", to: "mail.update_settings", as: :update_mail_settings
     post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
     post "/mail/:id/mark/:status", to: "mail.mark", as: :mark_mail, id: ID, status: MESSAGE_STATUS
     post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID

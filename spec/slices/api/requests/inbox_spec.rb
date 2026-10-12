@@ -65,6 +65,10 @@ RSpec.describe "API inbox", type: :request do
         .to eq([[nil, nil, "mention", post_id, nil], [nil, nil, nil, nil, reply_to], [%w[home], source, nil, nil, nil]])
     end
 
+    it "says which Mail rule put a message here, and null for another kind" do
+      expect(rows.map { it.fetch("reason") }).to eq([nil, "contact_form", nil])
+    end
+
     it "lists the rows the Inbox screen shows, in the same order" do
       expect(rows.map { it.fetch("title") }).to eq(screen_titles)
     end
