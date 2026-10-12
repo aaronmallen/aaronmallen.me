@@ -268,6 +268,7 @@ module Admin
     get "/webmentions", to: "webmentions.index", as: :webmentions
     post "/webmentions/bulk", to: "webmentions.bulk", as: :bulk_webmentions
     get "/webmentions/settings", to: "webmentions.settings", as: :webmention_settings
+    get "/webmentions/:id/menu", to: "webmentions.menu", as: :webmention_menu, id: ID
     post "/webmentions/settings", to: "webmentions.update_settings", as: :update_webmention_settings
     post(
       "/webmentions/:id/:verdict",

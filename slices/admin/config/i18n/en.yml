@@ -947,6 +947,8 @@ en:
           save: "Snooze"
           tomorrow: "Tomorrow morning"
           until: "Date and time"
+        snooze_menu:
+          snooze: "Snooze"
         snoozed_list:
           summary:
             one: "%{count} snoozed"
@@ -3176,6 +3178,14 @@ en:
           settings: "Settings"
           shown_count: "%{count} shown on the site"
           spam: "spam"
+        menu:
+          approve: "Approve"
+          copied_source: "Link copied"
+          copy_source: "Copy source link"
+          go_to_post: "Go to post"
+          ignore: "Ignore"
+          open_source: "Open source"
+          spam: "Mark spam"
         settings:
           heading: "Webmentions"
   webmentions_page:

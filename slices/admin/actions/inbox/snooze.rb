@@ -21,7 +21,7 @@ module Admin
 
         private
 
-        def back(_request) = routes.path(:admin_inbox)
+        def back(request) = back_here(request) || routes.path(:admin_inbox)
 
         def done(request, response, key, **)
           toast(response, "#{TOASTS}.#{key}", **)

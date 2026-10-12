@@ -10,6 +10,19 @@ module Admin
           MORNING_HOUR = 8
           MONDAY = 1
 
+          def self.morning(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, MORNING_HOUR)
+
+          def self.quick_picks(now)
+            today = Blog::TimeZone.today(now)
+            later = Time.at(((now.to_i / HOUR) + LATER_HOURS) * HOUR)
+
+            {
+              later_today: (later if Blog::TimeZone.today(later) == today),
+              tomorrow: morning(today + 1),
+              next_week: morning(today + 7 - ((today.wday - MONDAY) % 7)),
+            }.compact
+          end
+
           prop :action, Blog::Types::String
           prop :field_id, Blog::Types::String
 
@@ -35,26 +48,13 @@ module Admin
             end
           end
 
-          def morning(day) = Blog::TimeZone.local_time(day.year, day.month, day.day, MORNING_HOUR)
-
           def pick(label_key, at)
             value = Blog::TimeZone.input_value(at)
 
             Button(type: "submit", name: "pick", value:, formnovalidate: true, small: true) { t(label_key) }
           end
 
-          def picks = div(class: "snooze-picks") { quick_picks.each { |label_key, at| pick(label_key, at) } }
-
-          def quick_picks
-            today = Blog::TimeZone.today(@now)
-            later = Time.at(((@now.to_i / HOUR) + LATER_HOURS) * HOUR)
-
-            {
-              ".later_today" => (later if Blog::TimeZone.today(later) == today),
-              ".tomorrow" => morning(today + 1),
-              ".next_week" => morning(today + 7 - ((today.wday - MONDAY) % 7)),
-            }.compact
-          end
+          def picks = div(class: "snooze-picks") { self.class.quick_picks(@now).each { |key, at| pick(".#{key}", at) } }
         end
       end
     end

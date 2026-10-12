@@ -12,7 +12,7 @@ module Admin
 
           def view_template
             Row(id: "issue-#{@task.id}", kind: :task, title: @task.title,
-                href: path(:admin_task, id: @task.id)) do |row|
+                href: path(:admin_task, id: @task.id), menu:) do |row|
               row.meta { meta }
               actions
             end
@@ -34,6 +34,8 @@ module Admin
 
             Button(href:, data: { task_open_edit: true }, small: true) { t(".edit") }
           end
+
+          def menu = path(:admin_task_menu, id: @task.id, origin: ORIGIN)
 
           def meta
             Moment(at: @task.created_at)

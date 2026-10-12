@@ -17,6 +17,8 @@ module Admin
 
     def auth_session(request) = Auth::Session.for(request)
 
+    def back_here(request) = auth_session(request).admin_return_path(request.params[:return_to])
+
     def end_session(request, response, return_to: nil)
       path = auth_session(request).sign_out(return_to)
       response.delete_cookie(Blog::SessionCookie::KEY, path: Blog::SessionCookie::PATH)

@@ -12,10 +12,12 @@ module Admin
           verdict = Blog::Types::WebmentionModeration[request.params[:verdict]]
 
           result = moderate_webmention.call(record_id(request), verdict, reason: request.params[:reason])
-          settle(response, result, "#{TOASTS}.#{verdict}", routes.path(:admin_webmentions, status: filter(request)))
+          settle(response, result, "#{TOASTS}.#{verdict}", back(request))
         end
 
         private
+
+        def back(request) = back_here(request) || routes.path(:admin_webmentions, status: filter(request))
 
         def filter(request) = Blog::Types::WebmentionStatusParam[request.params[:status]]
       end

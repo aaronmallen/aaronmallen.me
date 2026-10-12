@@ -9,6 +9,7 @@ module Admin
 
           EDIT = Components::Tasks::Row::EDIT
           EXTERNAL = Blog::Types::TaskFilter["external"]
+          FROM_INBOX = Blog::Types::TaskOrigin["inbox"]
           ISSUE = "fa-solid fa-arrow-up-right-from-square"
           TAG = Blog::Types::TaskBulkAction["tag"]
           TAG_PATTERN = '\s*[A-Za-z0-9]+(-[A-Za-z0-9]+)*\s*'
@@ -85,6 +86,7 @@ module Admin
             copies(menu)
             source { menu.link(t(".open_issue"), href: it.url, icon: ISSUE, outbound: true) }
             seen(menu)
+            Components::Inbox::SnoozeMenu(menu:, kind: "task", id: @task.id) if @origin == FROM_INBOX
           end
 
           def running? = @task.in_progress? && @task.in_sprint?

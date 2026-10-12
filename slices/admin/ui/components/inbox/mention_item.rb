@@ -15,7 +15,7 @@ module Admin
           def view_template
             Row(
               id: "webmention-#{@mention.id}", kind: :webmention, title: @mention.author_label,
-              href: @mention.source_url, link: OUTBOUND,
+              href: @mention.source_url, link: OUTBOUND, menu: path(:admin_webmention_menu, id: @mention.id),
             ) do |row|
               row.meta { meta }
               row.body { WebmentionExcerpt(mention: @mention, class: "inbox-row-body") }

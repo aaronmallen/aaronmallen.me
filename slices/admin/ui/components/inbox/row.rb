@@ -10,6 +10,7 @@ module Admin
           prop :title, Blog::Types::String
           prop :href, Blog::Types::String.optional, default: nil
           prop :link, Blog::Types::Hash, default: -> { Blog::Constants::EMPTY_HASH }
+          prop :menu, Blog::Types::String.optional, default: nil
 
           def body(&block)
             @body = block
@@ -24,7 +25,7 @@ module Admin
           def view_template(&)
             acts = capture(&)
 
-            div(id: @id, class: "inbox-row", data: { key_row: true }) do
+            div(id: @id, class: "inbox-row", data: { key_row: true, menu: @menu }) do
               div(class: "inbox-row-main") { render_main }
               div(class: "inbox-row-acts") { raw(safe(acts)) }
             end
