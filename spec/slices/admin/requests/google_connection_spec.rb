@@ -75,7 +75,7 @@ RSpec.describe "Admin Google connection", type: :request do
     it "lists Google as not set up and leaves it out of the picker", :aggregate_failures do
       get "/admin/services"
 
-      expect(page.find(".svc-group", text: "Health")).to have_css(".li", text: /Google.*not set up/)
+      expect(page.find(".svc-group", text: "Personal")).to have_css(".li", text: /Google.*not set up/)
       expect(pickable).not_to include("Google")
     end
 

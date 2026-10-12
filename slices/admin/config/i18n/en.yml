@@ -3158,8 +3158,8 @@ en:
           glance: "At a glance"
           groups:
             code: "Code and sign-in"
-            health: "Health"
             infrastructure: "Infrastructure"
+            personal: "Personal"
             social: "Social"
           heading: "Connected services"
           hint: "Every outside service the site talks to. Services you sign in to keep an encrypted token in the database; the rest read keys from the server environment."

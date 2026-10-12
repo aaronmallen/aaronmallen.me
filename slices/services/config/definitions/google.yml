@@ -1,12 +1,14 @@
 name: Google
 icon: fa-brands fa-google
-group: health
+group: personal
 auth: oauth
 multiple: true
 dashboard: https://myaccount.google.com/connections
 env:
   google: [client_id, client_secret]
 powers:
+  - Gmail in Mail
+  - Google Calendar events on the calendar
   - Sleep, heart rate and workouts beside each day's work
 scopes:
   - id: "openid https://www.googleapis.com/auth/userinfo.email"
