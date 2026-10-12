@@ -5,6 +5,63 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.15] - 2026-10-12
+
+### Added
+
+- Mail under the Inbox group replaces Messages. It lists threads from every Google account and the contact form, by
+  account, folder, label, unread or search, with a folder sidebar on wide screens. The reader folds earlier messages,
+  shows a People card for the sender and lists each message's attachments, which download from Gmail on click. A job
+  syncs Gmail every five minutes, and a new account fills in its whole mailbox, spam and trash included, a page at a
+  time. `read_sync_state` shows each run.
+- Thread actions in the reader, the bulk bar and the inbox now reach Gmail: read, unread, star, archive, spam, label,
+  Move to Inbox, Delete, Restore and Delete forever. A label stays with its own account, and the toast says how many
+  threads it skipped. When Gmail refuses a change, the page says so and changes nothing.
+- Compose and Reply send through Gmail with a rich-text editor, the account's Gmail signature and a file picker for up
+  to 25 MB. Send & archive files the thread as it sends. Compose saves a Gmail draft as you type, the draft shows in
+  Drafts, and opening it brings compose back.
+- A Mail settings page turns each account's inbox and sending on or off, shows or hides the contact form and picks
+  what puts a thread in Waiting: starred, unread contact form mail, mail from People, a needs-reply label or Gmail's
+  important mark. It can leave out GitHub, Linear and Docs notices. Each Waiting row says which rule matched.
+- Make a task, in the reader and on each Waiting row, turns a thread into a task linked to it and archives the thread.
+  The thread then shows its task, and the task page lists the thread among its links.
+- On wide screens a grip on each mail row drags the thread, or every picked thread, onto a folder or label.
+- Google Calendar events show on the calendar page, from 90 days back to a year ahead for every Google account, synced
+  every 15 minutes. The day panel lists each event with its calendar, times, place, guests, notes and Meet link. A
+  picker hides calendars, and Work only shows the work accounts' calendars.
+- The day panel makes, edits and deletes Google events, and a recurring event asks whether to change this one or all
+  of them. A grip drags an event to another day at the same time, and a Move form does the same without a script. A
+  Work account switch on each Google connection in Connected services keeps that account's calendars read-only.
+- A `mail` scope for MCP consent and API tokens, which `read` does not cover. It grants `list_mail_threads`,
+  `read_mail_thread`, `mark_mail_thread`, `mark_mail_threads_read`, `mark_mail_threads_unread`, `tag_mail_threads`,
+  `untag_mail_threads`, `delete_mail_threads` and `snooze_mail_threads`, and the API's `/mail/threads` endpoints.
+  Without it, search, `list_inbox` and the inbox tools leave mail out.
+- `list_calendar` and the API calendar return Google events to any token with `read`.
+- A right-click, the Menu key or Shift+F10 on an admin row opens a menu of everything that row can do, drawn as it
+  stands when the menu opens. Tasks, posts, social posts, projects, people, journal entries, decisions, files, links,
+  tags, inbox rows, webmentions, comments, work sessions, sprints, commits, task rules, tokens, MCP clients, services,
+  Today's attention rows, dead jobs, mail threads and Google events all have one. With rows picked, a right-click on a
+  picked task, post, webmention or mail thread opens a menu for all of them. Deletes ask for a second click.
+- A running task's tracked time counts up on the page without a reload.
+
+### Changed
+
+- Task controls and the row actions on the inbox, posts, calendar, webmentions, links, sessions, comments and sprints
+  lists update the page in place instead of loading a new one, and show the same toast. Filters do the same and
+  replace the address rather than add to history, so Back leaves the screen.
+- Google connections in Connected services hold many accounts, one row each, with Grant on a row that lacks a scope.
+  Each asks for full Gmail and Calendar access, so existing accounts need a Grant. Health keeps syncing from the
+  account that granted it. The settings, environment variables and callback route change from `google_health` to
+  `google`, so production needs `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and the redirect URI
+  `/admin/auth/google/callback`.
+- Contact form messages move into Mail as threads, keeping their ids, so old admin links, API and MCP ids and search
+  hits still work.
+
+### Removed
+
+- The Messages screens and the eight message MCP tools, replaced by Mail and the mail thread tools.
+- The Apply button on filters with scripts off.
+
 ## [26.10.14] - 2026-10-11
 
 ### Fixed
@@ -835,7 +892,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.14...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...HEAD
+[26.10.15]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.14...26.10.15
 [26.10.14]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.13...26.10.14
 [26.10.13]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.12...26.10.13
 [26.10.12]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.11...26.10.12
