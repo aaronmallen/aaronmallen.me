@@ -7,6 +7,7 @@ module Admin
         DONE = {
           Blog::Types::PostBulkAction["delete"] => "posts_page.toasts.bulk.deleted",
           Blog::Types::PostBulkAction["tag"] => "posts_page.toasts.bulk.tagged",
+          Blog::Types::PostBulkAction["untag"] => "posts_page.toasts.bulk.untagged",
         }.freeze
         FAILED = "posts_page.toasts.bulk.failed"
         INVALID = "posts_page.toasts.bulk.invalid"

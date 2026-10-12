@@ -3,14 +3,14 @@
 module Posts
   module Contracts
     class BulkContract < Blog::BulkContract
-      TAG = Blog::Types::PostBulkAction["tag"]
+      TAGGING = [Blog::Types::PostBulkAction["tag"], Blog::Types::PostBulkAction["untag"]].freeze
 
       params do
         required(:act).value(Blog::Types::PostBulkAction)
         optional(:tag).maybe(Blog::Types::Nullable::Tag)
       end
 
-      rule(:act, :tag).validate(tag_for: TAG)
+      rule(:act, :tag).validate(tag_for: TAGGING)
     end
   end
 end

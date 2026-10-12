@@ -8,7 +8,8 @@ module Decisions
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
       operations.delete_decision_option operations.drop_decision operations.edit_decision
       operations.edit_decision_comment operations.edit_decision_option operations.open_decision
-      operations.reopen_decision operations.resolve_decision repos.decision_queries
+      operations.reopen_decision operations.resolve_decision operations.tag_decision operations.untag_decision
+      repos.decision_queries
     ]
   end
 end

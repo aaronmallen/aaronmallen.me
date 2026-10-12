@@ -4,12 +4,14 @@ module Posts
   module Operations
     class ActOnPosts < Blog::Operation
       TAG = Blog::Types::PostBulkAction["tag"]
+      UNTAG = Blog::Types::PostBulkAction["untag"]
 
       include Deps[
         contract: "contracts.bulk_contract",
         delete_post: "operations.delete_post",
         post_mutations: "repos.post_mutations",
         tag_post: "operations.tag_post",
+        untag_post: "operations.untag_post",
       ]
 
       def call(params)
@@ -26,7 +28,13 @@ module Posts
         end
       end
 
-      def single(id, fields) = fields[:act] == TAG ? tag_post.call(id, fields[:tag]) : delete_draft(id)
+      def single(id, fields)
+        case fields[:act]
+          when TAG then tag_post.call(id, fields[:tag])
+          when UNTAG then untag_post.call(id, fields[:tag])
+          else delete_draft(id)
+        end
+      end
 
       def validate(params) = validated(contract.call(every_field(params)))
     end

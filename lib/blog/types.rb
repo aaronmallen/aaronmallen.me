@@ -122,7 +122,7 @@ module Blog
     PhotoOwner = Types::String.enum(
       "post", "journal_entry", "task", "task_comment", "decision_comment", "review_note", "social_post_part",
     )
-    PostBulkAction = Types::String.enum("tag", "delete")
+    PostBulkAction = Types::String.enum("tag", "untag", "delete")
     PostStatus = Types::String.enum("draft", "scheduled", "published")
     PostFilter = Types::String.enum("all", *PostStatus.values)
     PostFilterParam = PostFilter.fallback(PostFilter.values.first)

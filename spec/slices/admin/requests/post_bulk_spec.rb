@@ -267,6 +267,58 @@ RSpec.describe "Admin bulk post actions", type: :request do
       end
     end
 
+    describe "untag on the ticked posts" do
+      let!(:ticked) { [tagged("ruby", "hanami"), tagged("ruby", status: "published", published_at: Time.now - 60)] }
+      let!(:left) { tagged("ruby") }
+
+      before { act("untag", ticked, tag: " Ruby ") }
+
+      it "takes the tag off and keeps the others" do
+        expect(ticked.map { tag_names(it) }).to eq([%w[hanami], []])
+      end
+
+      it "leaves the rest alone" do
+        expect(tag_names(left)).to eq(%w[ruby])
+      end
+
+      it "says how many it untagged" do
+        follow_redirect!
+
+        expect(toast).to eq("Took ruby off 2 posts")
+      end
+    end
+
+    describe "untag on one post" do
+      it "marks it updated, as a tag change in the editor does" do
+        article = tagged("ruby", status: "published", published_at: Time.now - 120, updated_at: Time.now - 60)
+        act("untag", [article], tag: "ruby")
+
+        expect(post_queries.by_id(article.id).updated_at).to be > article.updated_at
+      end
+
+      it "leaves a post without the tag as it was" do
+        article = tagged("hanami", updated_at: Time.now - 60)
+        act("untag", [article], tag: "ruby")
+
+        expect(post_queries.by_id(article.id).updated_at).to eq(article.updated_at)
+      end
+
+      it "names the post when it is gone" do
+        missing = gone_id
+        act("untag", [missing], tag: "ruby")
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · ##{missing} is gone")
+      end
+
+      it "asks for a tag first" do
+        act("untag", [tagged("ruby")], tag: "")
+        follow_redirect!
+
+        expect(toast).to eq("Type a tag first")
+      end
+    end
+
     describe "where it lands" do
       it "goes back to the filter it came from" do
         act("tag", [create(:post)], tag: "ruby", status: "draft")

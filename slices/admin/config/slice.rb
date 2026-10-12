@@ -41,7 +41,8 @@ module Admin
       operations.add_decision_comment operations.add_decision_option operations.delete_decision_comment
       operations.drop_decision operations.edit_decision operations.edit_decision_comment
       operations.edit_decision_option operations.open_decision operations.reopen_decision
-      operations.resolve_decision repos.decision_queries
+      operations.resolve_decision operations.tag_decision operations.untag_decision
+      repos.decision_queries
     ], from: :decisions
 
     import keys: %w[
@@ -51,7 +52,8 @@ module Admin
 
     import keys: %w[
       github.client linear.client operations.delete_journal_entry operations.queue_commit_import
-      operations.save_journal_entry operations.save_review_note operations.update_journal_entry repos.commit_queries
+      operations.save_journal_entry operations.save_review_note operations.tag_journal_entry
+      operations.untag_journal_entry operations.update_journal_entry repos.commit_queries
       repos.journal_entry_queries repos.pull_request_queries repos.review_note_queries repos.sync_state_queries
     ], from: :record
 
@@ -63,7 +65,8 @@ module Admin
 
     import keys: %w[
       operations.add_work_entry operations.archive_project operations.delete_work_entry
-      operations.restore_project operations.save_project repos.project_queries repos.work_entry_queries
+      operations.restore_project operations.save_project operations.tag_project operations.untag_project
+      repos.project_queries repos.work_entry_queries
     ], from: :projects
 
     import keys: %w[

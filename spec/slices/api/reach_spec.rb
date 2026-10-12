@@ -3,6 +3,8 @@
 RSpec.describe "API reach", type: :app do
   def self.exempt
     {
+      "record.operations.tag_journal_entry" => "the admin's journal rows tag it; update_journal_entry sets tags",
+      "record.operations.untag_journal_entry" => "the admin's journal rows untag it; update_journal_entry sets tags",
       "saved_views.operations.rename_saved_view" => "the admin renames a view; PATCH changes it in one step",
       "tasks.operations.credit_agents" => "a background job runs it when an imported commit names an agent",
       "tasks.operations.diff_task_history" => "task repos run it to record what each change did",

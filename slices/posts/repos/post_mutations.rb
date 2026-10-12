@@ -22,6 +22,10 @@ module Posts
 
       def release_follow_up(id) = held_post_follow_ups.by_pk(id).delete
 
+      def remove_tag(id, name)
+        update(id, {}) if post_tags.untag(id, [name], tags).positive?
+      end
+
       def replace_tags(id, names) = post_tags.retag(id, names, tags)
     end
   end

@@ -184,6 +184,9 @@ en:
         tagged:
           one: "Tagged %{count} post %{tag}"
           other: "Tagged %{count} posts %{tag}"
+        untagged:
+          one: "Took %{tag} off %{count} post"
+          other: "Took %{tag} off %{count} posts"
       publish:
         invalid: "Not published · open %{post} to fix it"
         published: "Nothing published · %{post} is not a draft"
@@ -200,6 +203,12 @@ en:
     toasts:
       linked: "Record linked"
       unlinked: "Link removed"
+  record_tags:
+    toasts:
+      blank: "Type a tag first"
+      format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
+      tagged: "Tagged %{tag}"
+      untagged: "Took %{tag} off"
   review_page:
     toasts:
       saved: "Review note saved · private"

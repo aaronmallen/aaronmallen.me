@@ -66,6 +66,8 @@ module Admin
     )
     post "/decisions/:id/reopen", to: "decisions.reopen", as: :reopen_decision, id: ID
     post "/decisions/:id/resolve", to: "decisions.resolve", as: :resolve_decision, id: ID
+    post "/decisions/:id/tags", to: "decisions.tag", as: :tag_decision, id: ID
+    post "/decisions/:id/tags/delete", to: "decisions.untag", as: :untag_decision, id: ID
     get "/events", to: "events.show", as: :events
     get "/files", to: "files.index", as: :files
     post "/files", to: "files.create", as: :create_files
@@ -97,6 +99,8 @@ module Admin
       "/journal/:id/records/:other_kind/:other_id/delete",
       to: "journal.unlink_record", as: :unlink_journal_entry_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
+    post "/journal/:id/tags", to: "journal.tag", as: :tag_journal_entry, id: ID
+    post "/journal/:id/tags/delete", to: "journal.untag", as: :untag_journal_entry, id: ID
     get "/links", to: "links.index", as: :links
     post "/links", to: "links.create", as: :create_link
     get "/links/:id/edit", to: "links.edit", as: :edit_link, id: ID
@@ -149,6 +153,8 @@ module Admin
       to: "projects.unlink_record", as: :unlink_project_record, id: ID, other_kind: RECORD_KIND, other_id: ID,
     )
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
+    post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID
+    post "/projects/:id/tags/delete", to: "projects.untag", as: :untag_project, id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
     post "/projects/work/:id/records", to: "projects.link_work_record", as: :link_work_entry_record, id: ID
