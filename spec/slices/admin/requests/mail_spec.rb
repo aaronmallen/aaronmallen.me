@@ -369,7 +369,7 @@ RSpec.describe "Admin mail", type: :request do
         end
 
         it "links a Gmail thread out to Gmail and keeps spam and delete for the contact form" do
-          expect(acts).to eq(["Mark read", "Snooze", "Gmail"])
+          expect(acts).to eq(["Archive", "Snooze", "Star", "Mark read", "Gmail"])
         end
       end
 
@@ -387,7 +387,7 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, :read)
         get "/admin/mail", thread: thread.id
 
-        expect(acts).to eq(["Mark unread", "Snooze", "Spam", "Delete"])
+        expect(acts).to eq(["Archive", "Snooze", "Star", "Mark unread", "Spam", "Delete"])
       end
 
       it "offers Not spam and Delete forever on spam" do
@@ -401,7 +401,7 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, :read, snoozed_until: Time.now + 3600)
         get "/admin/mail", folder: "snoozed", thread: thread.id
 
-        expect(acts).to eq(["Mark unread", "Wake", "Spam", "Delete"])
+        expect(acts).to eq(["Archive", "Wake", "Star", "Mark unread", "Spam", "Delete"])
       end
 
       it "says a stranger wrote through the contact form" do
@@ -416,7 +416,7 @@ RSpec.describe "Admin mail", type: :request do
       let(:thread) { create(:message) }
 
       it "marks a thread spam and lands back on it", :aggregate_failures do
-        act("/admin/mail/#{thread.id}/mark/spam", folder: "inbox", show: "all")
+        act("/admin/mail/#{thread.id}/change/spam", folder: "inbox", show: "all")
 
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
         expect(status(thread)).to eq("spam")
@@ -443,6 +443,246 @@ RSpec.describe "Admin mail", type: :request do
       end
     end
 
+    describe "writing to Gmail" do
+      let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
+
+      def bulk(name, picked, **) = act("/admin/mail/bulk", act: name, ids: picked.map(&:id), folder: "inbox", **)
+
+      def change(thread, name) = act("/admin/mail/#{thread.id}/change/#{name}", folder: "inbox")
+
+      def changed(gmail_id, verb = "modify", **body)
+        a_request(:post, "#{threads}/#{gmail_id}/#{verb}").with { body.empty? || JSON.parse(it.body) == body }
+      end
+
+      def stored(thread) = repo.by_id(thread.id)
+
+      before do
+        connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+        stub_request(:post, %r{\A#{threads}/}o).to_return(google_health_json({}))
+        stub_request(:post, "#{threads}/refused/modify").to_return(status: 500)
+        stub_request(:delete, %r{\A#{threads}/}o).to_return(status: 204)
+        stub_request(:delete, "#{threads}/refused").to_return(status: 500)
+      end
+
+      it "archives a thread in Gmail and here", :aggregate_failures do
+        thread = gmail(gmail_id: "t1")
+        change(thread, "archive")
+
+        expect(changed("t1", "removeLabelIds" => %w[INBOX])).to have_been_made
+        expect(stored(thread).archived).to be(true)
+      end
+
+      it "stars a thread in Gmail", :aggregate_failures do
+        thread = gmail(gmail_id: "t1")
+        change(thread, "star")
+
+        expect(changed("t1", "addLabelIds" => %w[STARRED])).to have_been_made
+        expect(stored(thread).starred).to be(true)
+      end
+
+      it "unstars a thread in Gmail", :aggregate_failures do
+        thread = gmail(gmail_id: "t1", starred: true)
+        change(thread, "unstar")
+
+        expect(changed("t1", "removeLabelIds" => %w[STARRED])).to have_been_made
+        expect(stored(thread).starred).to be(false)
+      end
+
+      it "marks a thread read in Gmail", :aggregate_failures do
+        thread = gmail(gmail_id: "t1")
+        change(thread, "read")
+
+        expect(changed("t1", "removeLabelIds" => %w[UNREAD])).to have_been_made
+        expect(status(thread)).to eq("read")
+      end
+
+      it "takes a thread out of spam in Gmail when it marks it read", :aggregate_failures do
+        thread = gmail(gmail_id: "t1", status: "spam", marked_spam_at: Time.now, archived: true)
+        change(thread, "read")
+
+        expect(changed("t1", "addLabelIds" => %w[INBOX], "removeLabelIds" => %w[UNREAD SPAM])).to have_been_made
+        expect(stored(thread)).to have_attributes(status: "read", archived: false)
+      end
+
+      it "says Gmail refused and changes nothing here", :aggregate_failures do
+        thread = gmail(gmail_id: "refused")
+        change(thread, "archive")
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · Gmail refused the change")
+        expect(stored(thread).archived).to be(false)
+      end
+
+      it "deletes a Gmail thread forever in Gmail and here", :aggregate_failures do
+        thread = gmail(gmail_id: "t1", trashed: true)
+        act("/admin/mail/#{thread.id}/delete", folder: "trash")
+
+        expect(a_request(:delete, "#{threads}/t1")).to have_been_made.once
+        expect(stored(thread)).to be_nil
+      end
+
+      it "keeps a thread Gmail refuses to delete and says so", :aggregate_failures do
+        thread = gmail(gmail_id: "refused", trashed: true)
+        act("/admin/mail/#{thread.id}/delete", folder: "trash")
+        follow_redirect!
+
+        expect(toast).to eq("Nothing changed · Gmail refused the change")
+        expect(stored(thread)).not_to be_nil
+      end
+
+      it "offers Delete forever on a trashed Gmail thread" do
+        thread = gmail(gmail_id: "t1", trashed: true)
+        get "/admin/mail", folder: "trash", thread: thread.id
+
+        expect(page.find(".mail-acts-far")).to have_button("Delete forever")
+      end
+
+      it "still opens a thread when Gmail refuses to mark it read", :aggregate_failures do
+        thread = gmail(gmail_id: "refused")
+        act("/admin/mail/#{thread.id}/open")
+
+        expect(last_response).to be_redirect
+        expect(status(thread)).to eq("unread")
+      end
+
+      it "changes a contact form thread here only", :aggregate_failures do
+        thread = create(:message)
+        change(thread, "star")
+
+        expect(stored(thread).starred).to be(true)
+        expect(a_request(:post, /gmail/)).not_to have_been_made
+      end
+
+      describe "from the bulk bar" do
+        let(:picked) { [gmail(gmail_id: "t1"), gmail(gmail_id: "t2")] }
+
+        {
+          "archive" => [{ "removeLabelIds" => %w[INBOX] }, { archived: true }, "Archived 2 threads"],
+          "read" => [{ "removeLabelIds" => %w[UNREAD] }, { status: "read" }, "Marked 2 threads read"],
+          "unread" => [{ "addLabelIds" => %w[UNREAD] }, { status: "unread" }, "Moved 2 threads back to unread"],
+        }.each do |name, (body, columns, said)|
+          it "#{name}s every ticked thread in Gmail", :aggregate_failures do
+            bulk(name, picked)
+            follow_redirect!
+
+            expect(picked.map { changed(it.gmail_id, **body) }).to all(have_been_made)
+            expect(picked.map { stored(it) }).to all(have_attributes(columns))
+            expect(toast).to eq(said)
+          end
+        end
+
+        spammed = { "addLabelIds" => %w[SPAM], "removeLabelIds" => %w[INBOX] }
+        {
+          "star" => [{ "addLabelIds" => %w[STARRED] }, { starred: true }, "Starred 2 threads"],
+          "spam" => [spammed, { status: "spam" }, "Moved 2 threads to Spam"],
+        }.each do |to, (body, columns, said)|
+          it "moves every ticked thread to #{to} in Gmail", :aggregate_failures do
+            bulk("move", picked, to:)
+            follow_redirect!
+
+            expect(picked.map { changed(it.gmail_id, **body) }).to all(have_been_made)
+            expect(picked.map { stored(it) }).to all(have_attributes(columns))
+            expect(toast).to eq(said)
+          end
+        end
+
+        it "trashes every ticked thread in Gmail", :aggregate_failures do
+          bulk("trash", picked)
+          follow_redirect!
+
+          expect(%w[t1 t2].map { changed(it, "trash") }).to all(have_been_made)
+          expect(picked.map { stored(it).trashed }).to eq([true, true])
+          expect(toast).to eq("Moved 2 threads to Trash")
+        end
+
+        it "restores a trashed thread to the inbox and wakes it", :aggregate_failures do
+          thread = gmail(gmail_id: "t3", trashed: true, archived: true, snoozed_until: Time.now + 3600)
+          bulk("inbox", [thread])
+
+          expect(changed("t3", "untrash")).to have_been_made
+          expect(changed("t3", "addLabelIds" => %w[INBOX], "removeLabelIds" => %w[SPAM])).to have_been_made
+          expect(stored(thread)).to have_attributes(trashed: false, archived: false, snoozed_until: nil)
+        end
+
+        describe "a label from one account" do
+          let(:form) { create(:message) }
+
+          before do
+            create(:mail_label, mail_account_id: work.id, name: "Receipts", gmail_id: "Label_9")
+            bulk("label", [*picked, form], label: "#{work.id}:Receipts")
+            follow_redirect!
+          end
+
+          it "labels the threads it fits in Gmail and here", :aggregate_failures do
+            expect(picked.map { changed(it.gmail_id, "addLabelIds" => %w[Label_9]) }).to all(have_been_made)
+            expect(picked.map { stored(it).mail_labels.map(&:gmail_id) }).to eq([%w[Label_9], %w[Label_9]])
+          end
+
+          it "skips the threads it doesn't fit and says how many", :aggregate_failures do
+            expect(stored(form).mail_labels).to be_empty
+            expect(toast).to eq("Labeled 2 threads #Receipts · 1 skipped (label is on another account)")
+          end
+        end
+
+        it "says nothing was labeled when the label fits none" do
+          bulk("label", [create(:message)], label: "#{work.id}:Receipts")
+          follow_redirect!
+
+          expect(toast).to eq("#Receipts is on another account · nothing labeled")
+        end
+
+        it "tags a contact form thread with a contact form label" do
+          form = create(:message)
+          bulk("label", [form], label: "#{form.mail_account_id}:billing")
+
+          expect(stored(form).tags.map(&:name)).to eq(%w[billing])
+        end
+
+        it "deletes every ticked thread forever in Gmail and here", :aggregate_failures do
+          bulk("delete", picked)
+          follow_redirect!
+
+          expect(%w[t1 t2].map { a_request(:delete, "#{threads}/#{it}") }).to all(have_been_made.once)
+          expect(picked.map { stored(it) }).to eq([nil, nil])
+          expect(toast).to eq("Deleted 2 threads forever")
+        end
+
+        it "names the thread Gmail refuses to delete and deletes none", :aggregate_failures do
+          refused = gmail(gmail_id: "refused")
+          bulk("delete", [refused, *picked])
+          follow_redirect!
+
+          expect([refused, *picked].map { stored(it) }).not_to include(nil)
+          expect(toast).to eq("Nothing changed · Gmail refused thread ##{refused.id} #{refused.subject}")
+        end
+
+        it "offers Restore and Delete forever in the trash" do
+          picked
+          get "/admin/mail", folder: "trash"
+
+          expect(page.all("form#mail-bulk button[name='act']").map(&:value)).to eq(%w[inbox delete])
+        end
+
+        it "offers each account's labels and the folders to move to", :aggregate_failures do
+          create(:mail_label, mail_account_id: work.id, name: "Receipts")
+          get "/admin/mail"
+
+          expect(page.all("form#mail-bulk select[name='to'] option").map(&:value)).to eq(%w[star spam])
+          expect(page.all("form#mail-bulk select[name='label'] option").map(&:text))
+            .to eq(["#Receipts · aaron@work.example"])
+        end
+      end
+
+      it "snoozes a Gmail thread here only and hides it until it wakes", :aggregate_failures do
+        thread = gmail(gmail_id: "t1", subject: "Later")
+        act("/admin/mail/#{thread.id}/snooze", pick: (Time.now + 86_400).strftime("%Y-%m-%dT%H:%M"))
+        get "/admin/mail", account: work.id
+
+        expect(subjects).not_to include("Later")
+        expect(a_request(:post, /gmail/)).not_to have_been_made
+      end
+    end
+
     describe "select mode" do
       let(:threads) { Array.new(2) { create(:message) } }
 
@@ -453,7 +693,7 @@ RSpec.describe "Admin mail", type: :request do
         get "/admin/mail"
 
         expect(page).to have_css("button[data-bulk-toggle='mail-bulk']", text: "Select", visible: :all)
-        expect(page.all("form#mail-bulk button[name='act']").map(&:value)).to eq(%w[read unread delete])
+        expect(page.all("form#mail-bulk button[name='act']").map(&:value)).to eq(%w[archive read unread move trash])
         expect(page.all(".mail-row input[name='ids[]'][form='mail-bulk']").size).to eq(2)
       end
 
@@ -464,12 +704,12 @@ RSpec.describe "Admin mail", type: :request do
         expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all")
       end
 
-      it "deletes every ticked thread", :aggregate_failures do
+      it "deletes every ticked thread forever", :aggregate_failures do
         bulk("delete")
         follow_redirect!
 
         expect(threads.map { repo.by_id(it.id) }).to eq([nil, nil])
-        expect(toast).to eq("Deleted 2 threads")
+        expect(toast).to eq("Deleted 2 threads forever")
       end
 
       it "names a thread that is gone" do

@@ -4,16 +4,14 @@ module Admin
   module Actions
     module Mail
       class Bulk < BulkAction
-        DONE = {
-          Blog::Types::MessageBulkAction["delete"] => "mail_page.toasts.bulk.deleted",
-          Blog::Types::MessageBulkAction["read"] => "mail_page.toasts.bulk.read",
-          Blog::Types::MessageBulkAction["tag"] => "mail_page.toasts.bulk.tagged",
-          Blog::Types::MessageBulkAction["unread"] => "mail_page.toasts.bulk.unread",
-          Blog::Types::MessageBulkAction["untag"] => "mail_page.toasts.bulk.untagged",
-        }.freeze
+        ACT = Blog::Types::MessageBulkAction
+        DONES = %w[archive delete inbox read spam star tag trash unread untag].freeze
+        DONE = DONES.to_h { [ACT[it], "mail_page.toasts.bulk.#{it}"] }.freeze
         FAILED = "mail_page.toasts.bulk.failed"
         INVALID = "mail_page.toasts.bulk.invalid"
-        REASONS = %i[not_found].freeze
+        LABELED = "mail_page.toasts.bulk.label"
+        REASONS = %i[gmail_failed not_found].freeze
+        SKIPPED = "mail_page.toasts.bulk.label_skipping"
 
         include Deps[
           act_on_messages: "mail.operations.act_on_messages",
@@ -29,6 +27,22 @@ module Admin
           page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
 
           Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page))
+        end
+
+        def done(request, response, records)
+          act = request.params[:act]
+          return labeled(request, response, records) if act == ACT["label"]
+
+          act = request.params[:to] if act == ACT["move"]
+          toast(response, DONE.fetch(act), count: records.size, **details(request))
+        end
+
+        def labeled(request, response, records)
+          count = records.compact.size
+          skipped = records.size - count
+          label = request.params[:label].split(":", 2).last
+
+          toast(response, skipped.positive? && count.positive? ? SKIPPED : LABELED, count:, skipped:, label:)
         end
 
         def named(id)

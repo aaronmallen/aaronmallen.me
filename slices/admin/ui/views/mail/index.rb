@@ -79,7 +79,7 @@ module Admin
           def panes
             div(class: "mail-panes") do
               Card(class: "mail-list") do
-                Bulk(list: @list, page: @threads.number)
+                Bulk(list: @list, page: @threads.number, labels: shown_labels, chips:)
                 @threads.rows.empty? ? empty : rows
               end
               Card(class: "mail-pane") { reader }

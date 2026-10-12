@@ -93,12 +93,16 @@ module Blog
     MailCategory = Types::String.enum("personal", "social", "promotions", "updates", "forums")
     MailFolder = Types::String.enum("inbox", "updates", "starred", "snoozed", "sent", "drafts", "all", "spam", "trash")
     MailFolderParam = MailFolder.fallback(MailFolder.values.first)
+    MailMove = Types::String.enum("inbox", "star", "spam")
     MailProvider = Types::String.enum("contact_form", "gmail")
     MailShow = Types::String.enum("all", "unread")
     MailShowParam = MailShow.fallback(MailShow.values.first)
     MailWaitReason = Types::String.enum("starred", "contact_form", "people", "needs_reply", "important")
     MarkdownRenderer = Types::String.enum("posts", "tasks")
-    MessageBulkAction = Types::String.enum("read", "unread", "tag", "untag", "delete")
+    MessageBulkAction = Types::String.enum(
+      "read", "unread", "tag", "untag", "delete", "archive", "inbox", "star", "unstar", "spam", "trash", "move",
+      "label",
+    )
     MessageStatus = Types::String.enum("unread", "read", "spam")
     NetworkName = Types::String.enum("mastodon", "bluesky")
     OAuthDecision = Types::String.enum("cancel", "approve")
@@ -278,6 +282,7 @@ module Blog
     end
 
     module Nullable
+      MailMove = Types::MailMove.optional.constructor { |value| OptionalText[value] }
       Repo = Types::Repo.optional.constructor { |value| OptionalText[value] }
       Slug = Types::Slug.optional.constructor { |value| OptionalText[value] }
       Tag = Types::String.optional.constructor { |value| OptionalText[value]&.then { Normalizers::Tag[it] } }

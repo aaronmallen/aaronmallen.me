@@ -5,6 +5,7 @@ module Admin
     module Mail
       class Destroy < BulkAction
         DELETED = "mail_page.toasts.deleted"
+        GMAIL_FAILED = "mail_page.toasts.gmail_failed"
 
         include Deps[
           delete_message: "mail.operations.delete_message",
@@ -12,7 +13,14 @@ module Admin
         ]
 
         def handle(request, response)
-          settle(response, delete_message.call(record_id(request)), DELETED, back(request))
+          id = record_id(request)
+
+          case delete_message.call(id)
+            in Failure(:gmail_failed)
+              toast(response, GMAIL_FAILED)
+              response.redirect_to(Helpers::MailList.back(routes, Helpers::MailList.from(request.params), thread: id))
+            in result then settle(response, result, DELETED, back(request))
+          end
         end
 
         private

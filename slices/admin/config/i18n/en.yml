@@ -120,35 +120,63 @@ en:
   mail_page:
     toasts:
       bulk:
-        deleted:
-          one: "Deleted %{count} thread"
-          other: "Deleted %{count} threads"
+        archive:
+          one: "Archived %{count} thread"
+          other: "Archived %{count} threads"
+        delete:
+          one: "Deleted %{count} thread forever"
+          other: "Deleted %{count} threads forever"
         failed:
+          gmail_failed: "Nothing changed · Gmail refused thread %{thread}"
           not_found: "Nothing changed · thread %{thread} is gone"
           other: "Nothing changed · thread %{thread} would not change"
+        inbox:
+          one: "Moved %{count} thread to Inbox"
+          other: "Moved %{count} threads to Inbox"
         invalid:
           blank: "Tick a thread first"
           format: "Nothing changed · pick an action from the bar"
           long: "Tick 100 threads or fewer"
           tag_blank: "Type a tag first"
           tag_format: "Nothing changed · a tag takes lowercase letters, numbers and dashes"
+        label:
+          zero: "#%{label} is on another account · nothing labeled"
+          one: "Labeled %{count} thread #%{label}"
+          other: "Labeled %{count} threads #%{label}"
+        label_skipping:
+          one: "Labeled %{count} thread #%{label} · %{skipped} skipped (label is on another account)"
+          other: "Labeled %{count} threads #%{label} · %{skipped} skipped (label is on another account)"
         read:
           one: "Marked %{count} thread read"
           other: "Marked %{count} threads read"
-        tagged:
+        spam:
+          one: "Moved %{count} thread to Spam"
+          other: "Moved %{count} threads to Spam"
+        star:
+          one: "Starred %{count} thread"
+          other: "Starred %{count} threads"
+        tag:
           one: "Tagged %{count} thread %{tag}"
           other: "Tagged %{count} threads %{tag}"
+        trash:
+          one: "Moved %{count} thread to Trash"
+          other: "Moved %{count} threads to Trash"
         unread:
           one: "Moved %{count} thread back to unread"
           other: "Moved %{count} threads back to unread"
-        untagged:
+        untag:
           one: "Untagged %{count} thread %{tag}"
           other: "Untagged %{count} threads %{tag}"
+      archive: "Archived"
       deleted: "Thread deleted"
+      gmail_failed: "Nothing changed · Gmail refused the change"
+      inbox: "Moved to Inbox"
       read: "Marked read"
       settings_saved: "Mail settings saved"
       spam: "Marked as spam"
+      star: "Starred"
       unread: "Moved back to unread"
+      unstar: "Unstarred"
       woken: "Woken"
   people_page:
     toasts:
@@ -1002,10 +1030,21 @@ en:
           retargeted: "retargeted %{on}"
       mail:
         bulk:
-          confirm_delete: "Delete the ticked threads? This cannot be undone."
-          delete: "Delete"
+          archive: "Archive"
+          confirm_delete_forever: "Delete the ticked threads forever? This cannot be undone."
+          delete_forever: "Delete forever"
           label: "Ticked mail"
+          label_as: "Label"
+          label_pick: "Label to add"
+          move: "Move"
+          move_to: "Move to"
+          moves:
+            inbox: "Inbox"
+            spam: "Spam"
+            star: "Starred"
           read: "Read"
+          restore: "Restore"
+          trash: "Delete"
           unread: "Unread"
         folder_select:
           folders: "Folders"
@@ -1032,11 +1071,15 @@ en:
           earlier:
             one: "%{count} earlier message · %{names}"
             other: "%{count} earlier messages · %{names}"
+          archive: "Archive"
           gmail: "Gmail"
           mark_read: "Mark read"
           mark_unread: "Mark unread"
           not_spam: "Not spam"
+          restore: "Restore"
           spam: "Spam"
+          star: "Star"
+          unstar: "Unstar"
           wake: "Wake"
           you: "you"
         row:

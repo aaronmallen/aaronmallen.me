@@ -11,8 +11,12 @@ module Admin
         def handle(request, response)
           status = request.params[:status]
 
-          result = mark_message.call(record_id(request), status)
-          settle(response, result, "#{TOASTS}.#{status}", routes.path(:admin_inbox))
+          case mark_message.call(record_id(request), status)
+            in Failure(:gmail_failed)
+              toast(response, "#{TOASTS}.gmail_failed")
+              response.redirect_to(routes.path(:admin_inbox))
+            in result then settle(response, result, "#{TOASTS}.#{status}", routes.path(:admin_inbox))
+          end
         end
       end
     end

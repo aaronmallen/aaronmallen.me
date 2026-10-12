@@ -5,6 +5,7 @@ module Admin
     module Components
       module Mail
         class Reader < Component
+          ACT = Blog::Types::MessageBulkAction
           GMAIL = "https://mail.google.com"
           READ = Blog::Types::MessageStatus["read"]
           SPAM = Blog::Types::MessageStatus["spam"]
@@ -24,16 +25,27 @@ module Admin
               Who(person: @person, sender: @thread.sender, form: @form, spam: spam?)
               earlier
               letter(messages.last)
-              div(class: "mail-acts") { spam? ? spam_acts : acts }
+              div(class: "mail-acts") { actions }
             end
           end
 
           private
 
+          def actions = gone? ? gone_acts : acts
+
           def acts
-            @thread.status == UNREAD ? mark(READ, ".mark_read") : mark(UNREAD, ".mark_unread")
+            change(ACT["archive"], ".archive") unless @thread.archived
             snoozed? ? wake : snooze
+            star
+            read
             div(class: "mail-acts-far") { @form ? form_acts : gmail }
+          end
+
+          def change(act, label_key, variant: nil)
+            Form(action: path(:admin_change_mail, id: @thread.id, act:), data: { morph: true }) do
+              HiddenFields(values: @list)
+              Button(type: "submit", variant:, small: true) { t(label_key) }
+            end
           end
 
           def delete(label_key, confirm_key)
@@ -54,13 +66,20 @@ module Admin
           end
 
           def form_acts
-            mark(SPAM, ".spam", variant: :warn)
+            change(SPAM, ".spam", variant: :warn)
             delete(".delete", ".confirm_delete")
           end
 
           def from(message) = mine?(message) ? t(".you") : (message.from_name || message.reply_to)
 
           def gmail = Button(variant: :gh, small: true, href: GMAIL, target: "_blank", rel: "noopener") { t(".gmail") }
+
+          def gone? = spam? || @thread.trashed
+
+          def gone_acts
+            spam? ? change(READ, ".not_spam") : change(ACT["inbox"], ".restore")
+            div(class: "mail-acts-far") { delete(".delete_forever", ".confirm_delete_forever") }
+          end
 
           def labels = [*@thread.mail_labels, *@thread.tags].map(&:name).uniq
 
@@ -71,13 +90,6 @@ module Admin
                 Moment(at: message.received_at)
               end
               p(class: "msg-body mail-message-body") { message.body }
-            end
-          end
-
-          def mark(status, label_key, variant: nil)
-            Form(action: path(:admin_mark_mail, id: @thread.id, status:), data: { morph: true }) do
-              HiddenFields(values: @list)
-              Button(type: "submit", variant:, small: true) { t(label_key) }
             end
           end
 
@@ -94,6 +106,8 @@ module Admin
 
           def mine?(message) = !@own.nil? && @own.casecmp?(message.reply_to.to_s)
 
+          def read = @thread.status == UNREAD ? change(READ, ".mark_read") : change(UNREAD, ".mark_unread")
+
           def snooze
             Inbox::Snooze(kind: "message", id: @thread.id, action: path(:admin_snooze_mail, id: @thread.id)) do
               HiddenFields(values: @list)
@@ -104,10 +118,7 @@ module Admin
 
           def spam? = @thread.status == SPAM
 
-          def spam_acts
-            mark(READ, ".not_spam")
-            div(class: "mail-acts-far") { delete(".delete_forever", ".confirm_delete_forever") if @form }
-          end
+          def star = @thread.starred ? change(ACT["unstar"], ".unstar") : change(ACT["star"], ".star")
 
           def wake
             Form(action: path(:admin_wake_mail, id: @thread.id), data: { morph: true }) do

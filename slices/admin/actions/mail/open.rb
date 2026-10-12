@@ -15,7 +15,7 @@ module Admin
         def handle(request, response)
           id = record_id(request)
           thread = thread_queries.by_id(id) || halt(404)
-          halt 500 if thread.status == UNREAD && mark_message.call(id, READ).failure?
+          read(id) if thread.status == UNREAD
 
           response.redirect_to(back(request, id))
         end
@@ -27,6 +27,13 @@ module Admin
           page = landing(request) { thread_queries.page_listed(it, **Helpers::MailList.query(list)).past_end? }
 
           Helpers::MailList.back(routes, list, **Blog::Structs::Page.query(page), thread: id)
+        end
+
+        def read(id)
+          case mark_message.call(id, READ)
+            in Success(_) | Failure(:gmail_failed) then nil
+            else halt 500
+          end
         end
       end
     end

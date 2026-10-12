@@ -7,7 +7,7 @@ module Admin
     INBOX_VERDICT = Regexp.union(Blog::Types::WebmentionStatus.values - [Blog::Types::WebmentionStatus["pending"]])
     JID = /\h+/
     MARKDOWN_RENDERER = Regexp.union(Blog::Types::MarkdownRenderer.values)
-    MESSAGE_STATUS = Regexp.union(Blog::Types::MessageStatus.values)
+    MAIL_CHANGE = /read|unread|spam|archive|inbox|star|unstar/
     NETWORK = Regexp.union(Blog::Types::NetworkName.values)
     OAUTH_SERVICE = /github|google|mastodon/
     RECORD_KIND = Regexp.union(Blog::Types::RecordKind.values)
@@ -114,8 +114,8 @@ module Admin
     post "/mail/bulk", to: "mail.bulk", as: :bulk_mail
     get "/mail/settings", to: "mail.settings", as: :mail_settings
     post "/mail/settings", to: "mail.update_settings", as: :update_mail_settings
+    post "/mail/:id/change/:act", to: "mail.change", as: :change_mail, id: ID, act: MAIL_CHANGE
     post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
-    post "/mail/:id/mark/:status", to: "mail.mark", as: :mark_mail, id: ID, status: MESSAGE_STATUS
     post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID
     post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
     post "/mail/:id/wake", to: "mail.wake", as: :wake_mail, id: ID

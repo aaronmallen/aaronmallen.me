@@ -15,11 +15,19 @@ module Mail
         mail_accounts.where(address:).one
       end
 
+      def add_label(thread_id, label_id)
+        mail_thread_labels.dataset.insert_conflict.insert(mail_thread_id: thread_id, mail_label_id: label_id)
+      end
+
+      def address(account_id) = mail_accounts.where(id: account_id, provider: GMAIL).pluck(:address).first
+
       def delete_thread(account_id, gmail_id) = mail_threads.where(mail_account_id: account_id, gmail_id:).delete
 
       def follow(account_id, history_id)
         mail_accounts.where(id: account_id).dataset.update(history_id:, updated_at: Time.now)
       end
+
+      def label_named(account_id, name) = mail_labels.where(mail_account_id: account_id, name:).one
 
       def store_labels(account_id, labels, now: Time.now)
         rows = labels.map { { **it, mail_account_id: account_id, created_at: now, updated_at: now } }

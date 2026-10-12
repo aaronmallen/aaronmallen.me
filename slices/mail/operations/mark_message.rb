@@ -3,17 +3,9 @@
 module Mail
   module Operations
     class MarkMessage < Blog::Operation
-      include Deps[message_mutations: "repos.message_mutations", message_queries: "repos.message_queries"]
+      include Deps[change_thread: "operations.change_thread"]
 
-      def call(id, status)
-        message = step find(id)
-
-        message_mutations.mark(message, status)
-      end
-
-      private
-
-      def find(id) = found(message_queries.by_id(id))
+      def call(id, status) = step change_thread.call(id, status)
     end
   end
 end

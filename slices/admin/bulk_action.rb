@@ -7,7 +7,7 @@ module Admin
 
     def handle(request, response)
       case act(request.params.to_h)
-        in Success[*records] then done(request, response, records.size)
+        in Success[*records] then done(request, response, records)
         in Failure[:record, id, reason] then failed(response, id, reason)
         in Failure[:invalid, errors] then toast(response, "#{self.class::INVALID}.#{refused(errors)}")
         else halt 500
@@ -20,8 +20,8 @@ module Admin
 
     def details(request) = { tag: Blog::Types::Nullable::Tag[request.params[:tag]] }
 
-    def done(request, response, count)
-      toast(response, self.class::DONE.fetch(request.params[:act]), count:, **details(request))
+    def done(request, response, records)
+      toast(response, self.class::DONE.fetch(request.params[:act]), count: records.size, **details(request))
     end
 
     def failed(response, id, reason)
