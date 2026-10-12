@@ -515,8 +515,6 @@ en:
           one: "%{count} waiting →"
           other: "%{count} waiting →"
         webmentions: "Webmentions"
-      auto_form:
-        apply: "Apply"
       bulk_bar:
         all: "Select all"
         tag: "Tag"

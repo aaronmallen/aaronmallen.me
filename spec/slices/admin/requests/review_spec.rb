@@ -362,13 +362,12 @@ RSpec.describe "Admin review", :frozen_clock, type: :request do
         expect(page.find(".page-head select[name='by'] option[selected]").text).to eq("codex")
       end
 
-      it "keeps the period in the form and applies it without scripts", :aggregate_failures do
+      it "keeps the period in the form" do
         visit_review(day: "2026-09-16", group: "project")
         form = page.find(".page-head form.review-by")
 
         expect(form.all("input[type='hidden']", visible: :all).to_h { [it[:name], it[:value]] })
           .to eq("day" => "2026-09-16", "group" => "project")
-        expect(form).to have_css("noscript", visible: :all)
       end
 
       it "falls back to anyone on a pick it cannot read" do

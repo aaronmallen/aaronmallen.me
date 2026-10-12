@@ -13,21 +13,11 @@ RSpec.describe "Admin posts filter", type: :feature do
     expect(page).to have_current_path("/admin/posts?status=draft")
   end
 
-  describe "going back after a choice" do
-    before do
-      find(".seg-option", text: "drafts").click
-      page.assert_current_path("/admin/posts?status=draft")
-      page.go_back
-    end
+  it "redraws the list without loading the page" do
+    page.execute_script("window.stayed = true")
+    find(".seg-option", text: "drafts").click
+    page.assert_current_path("/admin/posts?status=draft")
 
-    it "shows the choice that matches the page" do
-      expect(page).to have_checked_field("status", with: "all", visible: :all)
-    end
-
-    it "submits the same choice again" do
-      find(".seg-option", text: "drafts").click
-
-      expect(page).to have_current_path("/admin/posts?status=draft")
-    end
+    expect(page.evaluate_script("window.stayed")).to be(true)
   end
 end

@@ -9,10 +9,7 @@ module Admin
         prop :attributes, Blog::Types::Hash, :**
 
         def view_template
-          Form(method: Blog::UI::Components::Form::GET, **@attributes, data: HOOK) do
-            yield if block_given?
-            noscript { Button(type: "submit", small: true) { t(".apply") } }
-          end
+          Form(method: Blog::UI::Components::Form::GET, **@attributes, data: HOOK) { yield if block_given? }
         end
       end
     end

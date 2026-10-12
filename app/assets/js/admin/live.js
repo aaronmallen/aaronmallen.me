@@ -12,9 +12,13 @@ const HOLD = `dialog:modal, ${ASKING}`;
 
 export const MORPHED_PARTS = PARTS.join(", ");
 
-const untouched = trackEdits();
+const edits = trackEdits();
 let morphs = 0;
 let started = false;
+
+export function forgetEdits(form) {
+  for (const control of form.elements) edits.delete(control);
+}
 
 export function morphPage(next) {
   morphs += 1;
@@ -68,21 +72,17 @@ function keepsOpen(name, node, change) {
 }
 
 function trackEdits() {
-  const edits = new WeakSet();
+  const edited = new WeakSet();
 
-  document.addEventListener("input", (event) => edits.add(event.target), true);
-  document.addEventListener(
-    "reset",
-    (event) => {
-      for (const control of event.target.elements) edits.delete(control);
-    },
-    true,
-  );
+  document.addEventListener("input", (event) => edited.add(event.target), true);
+  document.addEventListener("reset", (event) => forgetEdits(event.target), true);
 
-  return (node) => {
-    const controls = node instanceof HTMLFormElement ? [...node.elements] : [node];
-    return !controls.some((control) => edits.has(control));
-  };
+  return edited;
+}
+
+function untouched(node) {
+  const controls = node instanceof HTMLFormElement ? [...node.elements] : [node];
+  return !controls.some((control) => edits.has(control));
 }
 
 function listen(url, changed) {
