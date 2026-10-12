@@ -3,6 +3,10 @@
 module Calendar
   module Repos
     class CalendarQueries < Blog::DB::Repo
+      def calendar(id) = calendars.by_pk(id).one
+
+      def event(id) = calendar_events.by_pk(id).combine(:calendar).one
+
       def events_between(from:, to:, include_hidden: true)
         found = calendar_events.between(from, to)
         found = found.where(calendar_id: calendars.where(hidden: false).pluck(:id)) unless include_hidden

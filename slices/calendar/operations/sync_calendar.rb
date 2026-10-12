@@ -24,7 +24,7 @@ module Calendar
       def calendar(account, item, from, to)
         {
           google_id: item.fetch("id"), name: item["summaryOverride"] || item.fetch("summary"),
-          writable: WRITERS.include?(item["accessRole"]), events: events(account, item.fetch("id"), from, to),
+          writable: writable?(account, item), events: events(account, item.fetch("id"), from, to),
         }
       end
 
@@ -38,6 +38,7 @@ module Calendar
         {
           title: item["summary"], place: item["location"], meet_url: item["hangoutLink"], notes: item["description"],
           link: item["htmlLink"], attendees: guests(item.fetch("attendees", [])),
+          recurring_id: item["recurringEventId"],
         }
       end
 
@@ -95,6 +96,10 @@ module Calendar
         starts_on = Date.iso8601(start.fetch("date"))
 
         { starts_on:, ends_on: [starts_on, Date.iso8601(finish.fetch("date")) - 1].max, starts_at: nil, ends_at: nil }
+      end
+
+      def writable?(account, item)
+        WRITERS.include?(item["accessRole"]) && !google.work?(account)
       end
     end
   end

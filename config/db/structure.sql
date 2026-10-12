@@ -2080,6 +2080,7 @@ CREATE TABLE public.calendar_events (
     link text,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    recurring_id text,
     CONSTRAINT calendar_events_days_in_order CHECK ((ends_on >= starts_on))
 );
 
@@ -3320,7 +3321,8 @@ CREATE TABLE public.service_connections (
     last_used_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    revoked_at timestamp with time zone
+    revoked_at timestamp with time zone,
+    work boolean DEFAULT false NOT NULL
 );
 
 
@@ -7356,4 +7358,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011193100_add_gmail_to_mail_tables.rb'),
 ('20261011194000_create_calendars.rb'),
 ('20261011194100_add_calendar_to_sync_name.rb'),
-('20261011194200_add_draft_to_mail_threads.rb');
+('20261011194200_add_draft_to_mail_threads.rb'),
+('20261012050000_add_recurring_id_to_calendar_events.rb'),
+('20261012050100_add_work_to_service_connections.rb');

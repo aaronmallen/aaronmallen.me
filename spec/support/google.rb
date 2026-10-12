@@ -10,10 +10,10 @@ module Spec
     LISTS = %w[sleep daily-resting-heart-rate daily-heart-rate-variability exercise].freeze
     ROLLUPS = %w[steps active-zone-minutes].freeze
 
-    def connect_google(account_id: "aaron@example.com", scopes: HEALTH_SCOPES, revoked_at: nil, token: "ya29.token")
+    def connect_google(account_id: "aaron@example.com", scopes: HEALTH_SCOPES, revoked_at: nil, token: "ya29.token", **)
       set_up_google_client
       Services::Slice["repos.connection_mutations"].add(
-        provider: "google", account_id:, label: account_id, revoked_at:, scopes:,
+        provider: "google", account_id:, label: account_id, revoked_at:, scopes:, **,
         credentials: { access_token: token, expires_at: Time.now.to_i + 3600, refresh_token: "1//#{account_id}" },
       )
     end

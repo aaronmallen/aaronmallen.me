@@ -5,7 +5,8 @@ module Admin
     module Components
       module Services
         class Detail < Component
-          GRANTS = %w[google].freeze
+          GOOGLE = "google"
+          GRANTS = [GOOGLE].freeze
 
           prop :row, Blog::Types::Instance(Structs::ServiceRow)
           prop :connectable, Blog::Types::Bool
@@ -15,6 +16,7 @@ module Admin
             status
             powers
             access if definition.oauth? && @row.connection
+            work if definition.id == GOOGLE && @row.connection
             credentials
             jobs
             Actions(row: @row, connectable: @connectable)
@@ -103,6 +105,14 @@ module Admin
           end
 
           def way = line(t(".way")) { Pill { t(by_token? ? ".token" : ".oauth") } }
+
+          def work
+            Form(action: path(:admin_work_service, id: @row.connection.id), data: { autosubmit: "", morph: true }) do
+              Checkbox(switch: true, label: t(".work"), name: "work", checked: @row.connection.work)
+              noscript { Button(type: "submit", small: true) { t(".save") } }
+            end
+            Hint { t(".work_hint") }
+          end
         end
       end
     end

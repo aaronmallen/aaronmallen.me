@@ -36,6 +36,17 @@ module Admin
             time: i18n.l(Blog::TimeZone.local(time), format: :clock),
           }
         end
+
+        def written(request, response, result, key)
+          case result
+            in Success(calendar) then done(request, response, key, calendar: calendar.name)
+            in Failure(:not_found) then halt 404
+            in Failure(:read_only) then done(request, response, :read_only)
+            in Failure[:invalid, _] then done(request, response, :invalid_event)
+            in Failure[:google_failed, _] then done(request, response, :google_failed)
+            else halt 500
+          end
+        end
       end
     end
   end

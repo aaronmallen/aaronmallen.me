@@ -332,6 +332,28 @@ RSpec.describe "Admin Google connection", type: :request do
         expect(toast).to include("Google answered")
       end
 
+      it "shows a Work account switch on each Google account, off at first" do
+        get "/admin/services", selected: connection.id.to_s
+
+        expect(page.find("form[action='/admin/services/#{connection.id}/work'] input[role=switch]")).not_to be_checked
+      end
+
+      it "marks one account a work account from the switch and leaves the others", :aggregate_failures do
+        post "/admin/services/#{account('me').id}/work", _csrf_token: admin_csrf_token, work: "1"
+        follow_redirect!
+
+        expect(toast).to eq("me is a work account")
+        expect(connections.to_h { [it.account_id, it.work] }).to eq("me" => true, "work@example.com" => false)
+        expect(page.find("input[role=switch][name=work]")).to be_checked
+      end
+
+      it "turns the switch back off" do
+        post "/admin/services/#{account('me').id}/work", _csrf_token: admin_csrf_token, work: "1"
+        post "/admin/services/#{account('me').id}/work", _csrf_token: admin_csrf_token, work: "0"
+
+        expect(account("me").work).to be(false)
+      end
+
       it "revokes one account on Google when I disconnect it and leaves the others", :aggregate_failures do
         revoke = stub_request(:post, "https://oauth2.googleapis.com/revoke").with(body: { token: "1//refresh" })
         post "/admin/services/#{account('me').id}/disconnect", _csrf_token: admin_csrf_token

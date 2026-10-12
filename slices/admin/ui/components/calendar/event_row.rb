@@ -9,6 +9,7 @@ module Admin
 
           prop :event, Blog::Types::Instance(ROM::Struct)
           prop :tone, Blog::Types::String
+          prop :day, Blog::Types::Date
 
           def view_template
             div(class: "cal-event", style: Tone.style(@tone), data: { calendar_item: "event-#{@event.id}" }) do
@@ -27,7 +28,28 @@ module Admin
             p(class: "li-sub") { IconLabel(icon: "fa-solid fa-user-group") { @event.attendees.join(", ") } }
           end
 
+          def changes
+            return p(class: "li-sub") { t(".read_only") } unless @event.calendar.writable
+
+            details(class: "cal-event-edit") do
+              summary(class: "bt sm gh") { IconLabel(icon: "fa-regular fa-pen-to-square") { t(".edit") } }
+              EventForm(action: path(:admin_update_calendar_event, id: @event.id), day: @day, event: @event)
+            end
+            delete_form
+          end
+
           def clock(time) = l(Blog::TimeZone.local(time), format: :clock)
+
+          def delete_form
+            Form(
+              action: path(:admin_delete_calendar_event, id: @event.id), class: "cal-event-delete",
+              data: { confirm: t(".confirm_delete", title:) },
+            ) do
+              input(type: "hidden", name: "day", value: @day.iso8601)
+              Scope(label: t(".delete_which")) if @event.recurring_id
+              Button(type: "submit", small: true, variant: :warn, icon: "fa-regular fa-trash-can") { t(".delete") }
+            end
+          end
 
           def head
             summary(class: "cal-event-title") do
@@ -49,6 +71,13 @@ module Admin
             Button(href:, small: true, variant: :gh, icon:, target: "_blank", rel: "noopener") { text }
           end
 
+          def links
+            div(class: "cal-event-links") do
+              link(@event.meet_url, MEET, t(".meet")) if @event.meet_url
+              link(@event.link, "fa-solid fa-arrow-up-right-from-square", t(".google")) if @event.link
+            end
+          end
+
           def meta
             span(class: "cal-event-calendar") { @event.calendar.name }
             span { "#{clock(@event.starts_at)}–#{clock(@event.ends_at)}" } unless @event.all_day?
@@ -61,10 +90,8 @@ module Admin
               p(class: "cal-event-notes") { @event.notes } if @event.notes
               attendees if @event.attendees.any?
               p(class: "li-sub") { @event.calendar.account }
-              div(class: "cal-event-links") do
-                link(@event.meet_url, MEET, t(".meet")) if @event.meet_url
-                link(@event.link, "fa-solid fa-arrow-up-right-from-square", t(".google")) if @event.link
-              end
+              links
+              changes
             end
           end
 

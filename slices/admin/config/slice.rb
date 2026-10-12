@@ -26,7 +26,10 @@ module Admin
       repos.feed_fetch_queries repos.post_reader_queries
     ], from: :analytics
 
-    import keys: %w[operations.show_calendars repos.calendar_queries], from: :calendar
+    import keys: %w[
+      operations.create_event operations.delete_event operations.edit_event operations.show_calendars
+      repos.calendar_queries
+    ], from: :calendar
 
     import keys: %w[
       operations.clear_inbox

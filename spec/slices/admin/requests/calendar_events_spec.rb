@@ -147,10 +147,12 @@ RSpec.describe "Admin calendar events", :frozen_clock, type: :request do
         end
       end
 
-      it "shows only the calendars that take no writes from Work only" do
+      it "shows only the work accounts' calendars from Work only" do
+        connect_google(account_id: "work@example.com", work: true)
+        create(:calendar, account: "me@example.com", name: "Holidays", writable: false)
         show(preset: "work")
 
-        expect(stored).to eq("Aaron" => true, "Work" => false)
+        expect(stored).to eq("Aaron" => true, "Holidays" => true, "Work" => false)
       end
 
       it "shows every calendar again from Show all" do

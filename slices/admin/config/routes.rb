@@ -26,6 +26,9 @@ module Admin
     post "/attention/snooze", to: "today.snooze_attention", as: :snooze_attention
     get "/calendar", to: "calendar.show", as: :calendar
     post "/calendar/calendars", to: "calendar.show_calendars", as: :show_calendars
+    post "/calendar/events", to: "calendar.create_event", as: :create_calendar_event
+    post "/calendar/events/:id", to: "calendar.update_event", as: :update_calendar_event, id: ID
+    post "/calendar/events/:id/delete", to: "calendar.delete_event", as: :delete_calendar_event, id: ID
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
     post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID
@@ -183,6 +186,7 @@ module Admin
     post "/services/:provider/connect", to: "services.connect", as: :connect_service, provider: OAUTH_SERVICE
     post "/services/:id/disconnect", to: "services.disconnect", as: :disconnect_service, id: ID
     post "/services/:id/test", to: "services.test", as: :test_service, id: ID
+    post "/services/:id/work", to: "services.work", as: :work_service, id: ID
     get "/social", to: "social.index", as: :social
     post "/social", to: "social.create", as: :create_social_post
     post "/social/:id", to: "social.update", as: :update_social_post, id: ID

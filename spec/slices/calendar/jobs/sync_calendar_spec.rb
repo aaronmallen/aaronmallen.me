@@ -12,7 +12,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
 
   def calendars = queries.listed
 
-  def connect(account, token) = connect_google(account_id: account, scopes:, token:)
+  def connect(account, token, **) = connect_google(account_id: account, scopes:, token:, **)
 
   def events = queries.events_between(from: today - 1000, to: today + 1000)
 
@@ -63,7 +63,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
         google_id: "coffee_20261011", title: "Standup", starts_on: today, ends_on: today,
         starts_at: local(today, 9), ends_at: local(today, 10), place: "Lakeview",
         meet_url: "https://meet.google.com/abc", attendees: ["Dana", "sam@example.com"], notes: "Bring notes",
-        link: "https://calendar.google.com/event?eid=1",
+        link: "https://calendar.google.com/event?eid=1", recurring_id: nil,
       }
     end
 
@@ -77,7 +77,7 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
 
     before do
       connect("me@example.com", "ya29.me")
-      connect("work@example.com", "ya29.work")
+      connect("work@example.com", "ya29.work", work: true)
       stub_calendars("ya29.me", { id: "me@example.com", summary: "Aaron", accessRole: "owner" })
       stub_calendars(
         "ya29.work",
@@ -95,6 +95,13 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
         .to eq([["me@example.com", "Aaron", true], ["work@example.com", "Day job", false]])
     end
 
+    it "takes no writes on a work account, even where Google grants them" do
+      stub_calendars("ya29.work", { id: "work@example.com", summary: "Work", accessRole: "owner" })
+      run
+
+      expect(calendars.to_h { [it.account, it.writable] }).to eq("me@example.com" => true, "work@example.com" => false)
+    end
+
     it "asks Google for each instance of a recurring event across the window" do
       run
 
@@ -109,6 +116,16 @@ RSpec.describe Calendar::Jobs::SyncCalendar, :frozen_clock do
 
         expect(events.map { it.to_h.except(:id, :calendar_id, :calendar, :created_at, :updated_at) })
           .to eq([stored_coffee])
+      end
+    end
+
+    describe "with an instance of a recurring event" do
+      let(:mine) { [timed("standup_20261011", local(today, 9), local(today, 10), recurringEventId: "standup")] }
+
+      it "keeps the series it belongs to" do
+        run
+
+        expect(events.map(&:recurring_id)).to eq(["standup"])
       end
     end
 

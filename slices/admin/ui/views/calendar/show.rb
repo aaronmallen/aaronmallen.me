@@ -25,7 +25,7 @@ module Admin
               section(class: "card") do
                 Month(month: @month, today: @today, days: @days, picked: @day.date, tones: @tones)
               end
-              Panel(day: @day, tasks: @tasks, today: @today, tones: @tones)
+              Panel(day: @day, calendars: @calendars, tasks: @tasks, today: @today, tones: @tones)
             end
           end
         end

@@ -2211,6 +2211,43 @@
   @apply mt-1 flex flex-wrap gap-1.5;
 }
 
+@utility cal-event-form {
+  @apply mt-2 flex flex-col gap-3;
+}
+
+@utility cal-event-when {
+  @apply grid gap-2;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+}
+
+@utility cal-event-edit {
+  @apply mt-1;
+
+  & > summary {
+    @apply w-fit list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+}
+
+@utility cal-event-delete {
+  @apply mt-1 flex flex-wrap items-center gap-2;
+}
+
+@utility cal-new-event {
+  @apply mb-3;
+
+  & > summary {
+    @apply w-fit list-none;
+
+    &::-webkit-details-marker {
+      @apply hidden;
+    }
+  }
+}
+
 @utility cal-picker {
   @apply flex flex-col gap-3;
 }

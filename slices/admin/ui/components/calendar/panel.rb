@@ -17,12 +17,14 @@ module Admin
           }.freeze
 
           prop :day, Blog::Types::Instance(API::Structs::CalendarDay)
+          prop :calendars, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tasks, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :today, Blog::Types::Date
           prop :tones, Blog::Types::Hash
 
           def view_template
             Card(label: t(".label"), title: l(date, format: :full), **attributes) do
+              new_event
               next Empty { t(".empty") } if empty?
 
               events
@@ -59,7 +61,9 @@ module Admin
           def events
             return if @day.events.empty?
 
-            group(t(".events")) { @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id)) } }
+            group(t(".events")) do
+              @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id), day: date) }
+            end
           end
 
           def group(title, &)
@@ -73,6 +77,15 @@ module Admin
             return unless @day.journal
 
             group(t(".journal")) { ListItem(title: t(".journal_entry"), href: path(:admin_journal, to: date.iso8601)) }
+          end
+
+          def new_event
+            return unless @calendars.any?(&:writable)
+
+            details(class: "cal-new-event") do
+              summary(class: "bt sm") { IconLabel(icon: "fa-regular fa-calendar-plus") { t(".new_event") } }
+              EventForm(action: path(:admin_create_calendar_event), day: date, calendars: @calendars)
+            end
           end
 
           def post_item(post)

@@ -34,11 +34,17 @@ en:
     toasts:
       calendars: "Calendars saved"
       closed: "A closed task stays where it closed"
+      event_added: "Added to %{calendar}"
+      event_deleted: "Deleted from %{calendar}"
+      event_saved: "Saved to %{calendar}"
+      google_failed: "Google didn't take that · try again"
       invalid: "Pick a day first"
+      invalid_event: "An event needs a title and a day, and an end after its start"
       moved: "Moved to %{date} at %{time}"
       moved_task: "Moved to the %{date} sprint"
       not_scheduled: "Only a scheduled post moves"
       past: "A move lands on today or a day after it"
+      read_only: "That calendar is read-only"
   clients_page:
     toasts:
       revoked: "Access revoked · that client has to sign in again"
@@ -234,11 +240,13 @@ en:
       google_failed: "Google didn't answer · nothing was saved"
       mastodon_failed: "That server didn't answer as Mastodon · nothing was saved"
       not_configured: "%{name} sign-in isn't set up, so %{name} can't connect"
+      personal: "%{account} is no longer a work account"
       refused: "That sign-in didn't start here or has expired · nothing was saved"
       revoke_token: "%{name} disconnected · revoke its token on GitHub too"
       single: "GitHub takes one account · disconnect it first"
       taken: "That account is already connected · nothing was saved"
       unanswered: "%{name} isn't answering · %{reason}"
+      work: "%{account} is a work account"
   social:
     networks:
       bluesky: "Bluesky"
@@ -540,11 +548,28 @@ en:
             one: "%{count} task"
             other: "%{count} tasks"
           untitled: "(no title)"
+        event_form:
+          add: "Add event"
+          all_day: "All day"
+          calendar: "Calendar"
+          change: "Change"
+          date: "Date"
+          ends: "End"
+          place: "Where"
+          read_only: "Work calendars are read-only."
+          save: "Save"
+          starts: "Start"
+          title: "Title"
         event_row:
           all_day: "all day"
+          confirm_delete: "Delete %{title} from Google Calendar?"
+          delete: "Delete"
+          delete_which: "Delete"
+          edit: "Edit"
           google: "Google Calendar"
           join: "Join %{title}"
           meet: "Join Meet"
+          read_only: "Read-only here"
           untitled: "(no title)"
           until: "until %{date}"
         month_pager:
@@ -564,6 +589,7 @@ en:
           journal: "Journal"
           journal_entry: "Journal entry"
           label: "Day"
+          new_event: "New event"
           no_tasks: "No tasks in this sprint yet."
           posts: "Posts"
           social_posts: "Social posts"
@@ -581,6 +607,9 @@ en:
           read_only: "read-only"
           save: "Save"
           work: "Work only"
+        scope:
+          all: "All events"
+          this: "This event"
       client_row:
         confirm_revoke: "Revoke access for %{client}? It will have to sign in again."
         connected: "connected %{time}"
@@ -1722,9 +1751,12 @@ en:
           oauth: "OAuth"
           powers: "Powers"
           revoked: "%{name} stopped taking the site's token. Reconnect to pick up where it left off."
+          save: "Save"
           set: "set"
           token: "personal access token"
           way: "Signed in with"
+          work: "Work account"
+          work_hint: "The site reads a work account's calendars and never changes them."
         field_error:
           access_token:
             blank: "Paste a token first."

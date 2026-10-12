@@ -48,6 +48,8 @@ module Google
       )
     end
 
+    def delete(url, account:) = request(account, :delete, url)
+
     def get(url, account:, **params) = request(account, :get, url, params:)
 
     def grant(code:, redirect_uri:, code_verifier:)
@@ -66,11 +68,15 @@ module Google
 
     def holding(scope) = holders(scope).first
 
+    def patch(url, body, account:) = request(account, :patch, url, body: body.to_json, headers: JSON_HEADERS.dup)
+
     def post(url, body, account:) = request(account, :post, url, body: body.to_json, headers: JSON_HEADERS.dup)
 
     def revoke(credentials)
       oauth.request(:post, REVOKE_URL, body: { token: credentials[:refresh_token] || credentials[:access_token] })
     end
+
+    def work?(account) = connections.any? { it.account_id == account && it.work }
 
     private
 

@@ -3,7 +3,9 @@
 module Calendar
   module Relations
     class CalendarEvents < Blog::DB::Relation
-      COLUMNS = %i[title starts_on ends_on starts_at ends_at place meet_url attendees notes link updated_at].freeze
+      COLUMNS = %i[
+        title starts_on ends_on starts_at ends_at place meet_url attendees notes link recurring_id updated_at
+      ].freeze
 
       schema :calendar_events, infer: true do
         associations { belongs_to :calendar }
