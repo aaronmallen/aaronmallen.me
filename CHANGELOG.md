@@ -5,6 +5,17 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 
 ## [Unreleased]
 
+## [26.10.17] - 2026-10-12
+
+### Fixed
+
+- Google Health syncs again from an account that also grants mail or calendar. Google refused any Health read whose
+  token carried those scopes with a 403, so every Health sync and backfill failed. Health now reads with a token
+  that holds only its own scopes.
+- The Gmail backfill fills in older mail. It hit Gmail's per-minute limit partway through its first page and gave up
+  after three tries, so no account got past it. It now takes 25 threads every 30 seconds and waits two minutes when
+  Gmail says to slow down.
+
 ## [26.10.16] - 2026-10-12
 
 ### Changed
@@ -905,7 +916,8 @@ and versions follow [CalVer](https://calver.org) as `YY.M.MICRO`, dated by the U
 - Background jobs that import commits from GitHub, refresh projects and social engagement, roll the sprint over each
   night and roll up analytics.
 
-[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...HEAD
+[Unreleased]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.17...HEAD
+[26.10.17]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.16...26.10.17
 [26.10.16]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.15...26.10.16
 [26.10.15]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.14...26.10.15
 [26.10.14]: https://github.com/aaronmallen/aaronmallen.me/compare/26.10.13...26.10.14
