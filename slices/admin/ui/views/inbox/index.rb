@@ -10,6 +10,7 @@ module Admin
           prop :rows, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :snoozed, Blog::Types::Array.of(Blog::Types::Instance(API::Structs::InboxRow))
           prop :slugs, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::String)
+          prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
           def view_template
             PageHead(title: t(".heading"), sub: t(".sub", count: @rows.size)) { head_actions if @rows.any? }
@@ -31,7 +32,7 @@ module Admin
 
           def row(found)
             case found.kind
-              when :message then MessageItem(message: found.record)
+              when :message then MessageItem(message: found.record, task: @tasks[found.record.id])
               when :webmention then MentionItem(mention: found.record, slug: @slugs.fetch(found.record.post_id))
               else IssueItem(task: found.record)
             end

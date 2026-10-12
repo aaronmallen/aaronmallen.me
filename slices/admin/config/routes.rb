@@ -118,6 +118,7 @@ module Admin
     post "/mail/:id/delete", to: "mail.destroy", as: :delete_mail, id: ID
     post "/mail/:id/open", to: "mail.open", as: :open_mail, id: ID
     post "/mail/:id/snooze", to: "mail.snooze", as: :snooze_mail, id: ID
+    post "/mail/:id/task", to: "mail.make_task", as: :make_mail_task, id: ID
     post "/mail/:id/wake", to: "mail.wake", as: :wake_mail, id: ID
     get "/people", to: "people.index", as: :people
     post "/people", to: "people.create", as: :create_person

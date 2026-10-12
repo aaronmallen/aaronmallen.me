@@ -7,7 +7,7 @@ area: [activity, analytics, contact, db, decisions, lib, links, posts, search, s
 issue: AA-686
 amended: [AA-792, AA-809, AA-824, "#17", "#351", "#302", "#342", "#319", "#305", "#353", "#394", "#706", "#818",
   "#954", "#1013", "#957", "#911", "#1115",
-  "#1118"]
+  "#1118", "#1139"]
 tags: [slices, sql, postgres, views, triggers, tags, exports, guards]
 ---
 
@@ -86,11 +86,12 @@ exports refuses. These reads cross today:
   import the other way would close a cycle.
 - **The `record_links_find_records` trigger**, in `config/db/migrate/20261003000094_create_record_links.rb`, finds
   and locks the row each side of a new link names in `tasks`, `posts`, `social_posts`, `journal_entries`, `commits`,
-  `projects`, `work_entries`, `decisions` or `pull_requests`, which `tasks`, `posts`, `social`, `record`, `projects`
-  and `decisions` own. The same migration hangs a `<table>_drop_record_links` trigger on each of those tables, which
-  deletes the links of a deleted row from `record_links`, a table `links` owns. #818 added `pull_requests` in a new
-  migration. A migration that drops and rebuilds one of the tables loses its trigger. The record on linking any two
-  records (ADR 0093) holds why Postgres keeps these rules.
+  `projects`, `work_entries`, `decisions`, `pull_requests` or `mail_threads`, which `tasks`, `posts`, `social`,
+  `record`, `projects`, `decisions` and `mail` own. The same migration hangs a `<table>_drop_record_links` trigger on
+  each of those tables, which deletes the links of a deleted row from `record_links`, a table `links` owns. #818
+  added `pull_requests` and #1139 added `mail_threads`, each in a new migration. A migration that drops and rebuilds
+  one of the tables loses its trigger. The record on linking any two records (ADR 0093) holds why Postgres keeps these
+  rules.
 - **The `attention_snoozes_drop_record` trigger**, in
   `config/db/migrate/20261003000196_create_attention_snoozes.rb`, hangs on `tasks` and `posts`, which `tasks` and
   `posts` own, and deletes a deleted row's snoozes from `attention_snoozes`, a table `activity` owns. The record on

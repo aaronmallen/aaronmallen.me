@@ -4,8 +4,12 @@ module Admin
   module Actions
     module Mail
       class Index < Action
+        TASK = Blog::Types::RecordKind["task"]
+        THREAD = Blog::Types::RecordKind["mail_thread"]
+
         include Deps[
           person_queries: "social.repos.person_queries",
+          record_link_queries: "links.repos.record_link_queries",
           thread_queries: "mail.repos.thread_queries",
         ]
 
@@ -18,6 +22,7 @@ module Admin
           response[:threads] = threads
           show_sources(response, list[:account])
           show_open(request, response)
+          show_tasks(response)
         end
 
         private
@@ -35,6 +40,11 @@ module Admin
           response[:counts] = thread_queries.folder_counts(account:)
           response[:labels] = thread_queries.labels
           response[:unread] = thread_queries.unread_by_account
+        end
+
+        def show_tasks(response)
+          ids = [*response[:threads].rows.map(&:id), response[:open]&.id].compact.uniq
+          response[:tasks] = record_link_queries.partner_ids(THREAD, ids, TASK)
         end
       end
     end

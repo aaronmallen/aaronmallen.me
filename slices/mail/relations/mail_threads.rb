@@ -31,6 +31,8 @@ module Mail
         kept.where(holding(name))
       end
 
+      def linkable = linkables(title: :subject, day: self.class.site_day(:received_at))
+
       def marked_spam_before(time) = where { marked_spam_at < time }
 
       def matching(text) = containing(text, :subject, tag_names, letters)

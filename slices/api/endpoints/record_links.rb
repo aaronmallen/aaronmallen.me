@@ -5,7 +5,7 @@ module API
   module Endpoints
     module RecordLinks
       ID = Helpers::Schema::ID
-      KIND = { type: "string", enum: Blog::Types::RecordKind.values }.freeze
+      KIND = { type: "string", enum: Serializers::Link::KINDS }.freeze
 
       COMPLAINTS = {
         other_id: {

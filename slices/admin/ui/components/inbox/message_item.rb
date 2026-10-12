@@ -7,11 +7,13 @@ module Admin
         class MessageItem < Component
           AT = "@"
           ENCODED_AT = "%40"
+          FROM_INBOX = Blog::Types::TaskOrigin["inbox"]
           READ = Blog::Types::MessageStatus["read"]
           REASONS = Blog::Types::MailWaitReason.values.to_h { [it, ".reasons.#{it}"] }.freeze
           SPAM = Blog::Types::MessageStatus["spam"]
 
           prop :message, Blog::Types::Instance(ROM::Struct)
+          prop :task, Blog::Types::Integer.optional, default: nil
 
           def view_template
             Row(id: "message-#{@message.id}", kind: :message, title: @message.subject) do |row|
@@ -28,6 +30,7 @@ module Admin
             mark(READ, ".read", :gh)
             mark(SPAM, ".spam", :warn)
             Inbox::Snooze(kind: "message", id: @message.id)
+            Mail::TaskButton(thread: @message, task: @task, list: { origin: FROM_INBOX })
           end
 
           def address = ERB::Util.url_encode(@message.reply_to).gsub(ENCODED_AT, AT)

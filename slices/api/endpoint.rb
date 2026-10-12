@@ -53,7 +53,7 @@ module API
 
     def invalid(errors) = Failure(Structs::Refusal.invalid(errors))
 
-    def linked(groups) = groups.transform_values { serialized(Serializers::Link, it) }
+    def linked(groups) = groups.slice(*Serializers::Link::KINDS).transform_values { serialized(Serializers::Link, it) }
 
     def mail?(scopes) = scopes.include?(MAIL)
 

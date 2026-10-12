@@ -141,7 +141,7 @@ module Blog
     PullRequestState = Types::String.enum("draft", "open", "merged", "closed")
     RangePreset = Types::Integer.enum(7, 30, 90)
     RecordKind = Types::String.enum(*%w[task post social_post journal_entry commit project work_entry decision
-                                        pull_request])
+                                        pull_request mail_thread])
     RedirectUri = Types::String.constructor do |value|
       next Blog::Constants::EMPTY_STRING unless value.is_a?(::String)
 

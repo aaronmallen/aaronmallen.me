@@ -3,6 +3,7 @@
 module Links
   class Slice < Hanami::Slice
     import keys: %w[repos.decision_queries], from: :decisions
+    import keys: %w[repos.thread_queries], from: :mail
     import keys: %w[repos.post_queries], from: :posts
     import keys: %w[repos.project_queries repos.work_entry_queries], from: :projects
     import keys: %w[repos.commit_queries repos.journal_entry_queries repos.pull_request_queries], from: :record

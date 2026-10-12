@@ -264,7 +264,8 @@ CREATE TYPE public.record_kind AS ENUM (
     'project',
     'work_entry',
     'decision',
-    'pull_request'
+    'pull_request',
+    'mail_thread'
 );
 
 
@@ -695,6 +696,7 @@ BEGIN
     WHEN 'work_entry' THEN PERFORM 1 FROM work_entries WHERE id = record_id FOR KEY SHARE;
     WHEN 'decision' THEN PERFORM 1 FROM decisions WHERE id = record_id FOR KEY SHARE;
     WHEN 'pull_request' THEN PERFORM 1 FROM pull_requests WHERE id = record_id FOR KEY SHARE;
+    WHEN 'mail_thread' THEN PERFORM 1 FROM mail_threads WHERE id = record_id FOR KEY SHARE;
   END CASE;
 
   RETURN FOUND;
@@ -6260,6 +6262,13 @@ CREATE TRIGGER mail_thread_tags_notify_admin_change AFTER INSERT OR DELETE OR UP
 
 
 --
+-- Name: mail_threads mail_threads_drop_record_links; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER mail_threads_drop_record_links AFTER DELETE ON public.mail_threads FOR EACH ROW EXECUTE FUNCTION public.record_links_drop_record('mail_thread');
+
+
+--
 -- Name: mail_threads mail_threads_notify_admin_change; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -7396,5 +7405,6 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011194100_add_calendar_to_sync_name.rb'),
 ('20261011194200_add_draft_to_mail_threads.rb'),
 ('20261012010000_add_mail_settings.rb'),
+('20261012040000_add_mail_threads_to_record_links.rb'),
 ('20261012050000_add_recurring_id_to_calendar_events.rb'),
 ('20261012050100_add_work_to_service_connections.rb');

@@ -17,6 +17,7 @@ module Admin
           prop :chip, Blog::Types::Array
           prop :form, Blog::Types::Bool
           prop :own, Blog::Types::String.optional
+          prop :task, Blog::Types::Integer.optional, default: nil
 
           def view_template
             article(id: Helpers::MailList.anchor(@thread.id), class: "mail-reader") do
@@ -36,6 +37,7 @@ module Admin
           def acts
             change(ACT["archive"], ".archive") unless @thread.archived
             snoozed? ? wake : snooze
+            TaskButton(thread: @thread, task: @task, list: @list)
             star
             read
             div(class: "mail-acts-far") { @form ? form_acts : gmail }

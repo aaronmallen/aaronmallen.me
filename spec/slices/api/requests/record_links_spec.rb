@@ -20,7 +20,7 @@ RSpec.describe "API record links", type: :request do
   def link(kind, id, **fields) = call_api(:post, "/#{kind}/#{id}", JSON.generate(fields))
 
   def link_every_pair
-    Blog::Types::RecordKind.values.to_h { [it, linkable_record(it)] }.tap do |records|
+    API::Serializers::Link::KINDS.to_h { [it, linkable_record(it)] }.tap do |records|
       records.keys.combination(2).each do |one, two|
         link(one, records[one].id, other_kind: two, other_id: records[two].id)
       end
@@ -93,6 +93,14 @@ RSpec.describe "API record links", type: :request do
       end
     end
 
+    it "refuses a mail thread, which needs the mail scope" do
+      thread = create(:message)
+
+      expect([link("post", post_record.id, other_kind: "mail_thread", other_id: thread.id).fetch("errors").keys,
+              status])
+        .to eq([%w[other_kind], 422])
+    end
+
     it "answers an unknown record with a 404" do
       expect([link("journal_entry", 999_999, other_kind: "commit", other_id: commit.id).fetch("message"), status])
         .to eq(["no journal entry has the ID 999999", 404])
@@ -127,6 +135,14 @@ RSpec.describe "API record links", type: :request do
       link("decision", decision.id, other_kind: "task", other_id: create(:task, title: "Order the Pi").id)
 
       expect(titles(list("decision", decision.id))).to eq("task" => ["Order the Pi"], "commit" => ["Move the server"])
+    end
+
+    it "leaves a linked mail thread out, since mail needs the mail scope" do
+      task = create(:task, title: "Answer Sam")
+      thread = create(:message)
+      Links::Slice["operations.link_records"].call("task", task.id, { other_kind: "mail_thread", other_id: thread.id })
+
+      expect(list("task", task.id).fetch("links")).to eq({})
     end
 
     it "cuts a long title" do

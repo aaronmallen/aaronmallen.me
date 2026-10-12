@@ -119,6 +119,7 @@ en:
       shortened: "Shortened"
   mail_page:
     toasts:
+      already_tasked: "This thread already has a task"
       bulk:
         archive:
           one: "Archived %{count} thread"
@@ -175,8 +176,11 @@ en:
       settings_saved: "Mail settings saved"
       spam: "Marked as spam"
       star: "Starred"
+      tasked: "Made task #%{id}"
+      tasked_unarchived: "Made task #%{id} · Gmail refused to archive the thread"
       unread: "Moved back to unread"
       unstar: "Unstarred"
+      untitled: "Give the task a title"
       woken: "Woken"
   people_page:
     toasts:
@@ -1088,9 +1092,21 @@ en:
           pick: "Select %{subject}"
           read_key: "Open the highlighted thread and mark it read"
           starred: "Starred"
+          task: "task #%{id}"
           to: " to %{address}"
           unread_mark: "Unread: "
           wakes: "wakes %{date}"
+        task_button:
+          task: "Task #%{id}"
+        task_dialog:
+          archive: "Archive the thread now"
+          cancel: "Cancel"
+          linked: "The task keeps a link back to this thread."
+          list: "List"
+          open: "Make a task"
+          save: "Add task"
+          task_title: "Title"
+          title: "Task from mail"
         who:
           add_person: "Add to People"
           open_person: "Open person"
@@ -1597,6 +1613,7 @@ en:
           commit: "Commits"
           decision: "Decisions"
           journal_entry: "Journal entries"
+          mail_thread: "Mail threads"
           post: "Posts"
           project: "Projects"
           pull_request: "Pull requests"

@@ -13,6 +13,7 @@ module Admin
           prop :page, Blog::Types::Integer
           prop :chip, Blog::Types::Array.optional
           prop :open, Blog::Types::Bool
+          prop :task, Blog::Types::Integer.optional, default: nil
 
           def view_template
             div(id: "thread-#{@thread.id}", class: ["mail-row", ("unread" if unread?), ("snoozed" if snoozed?),
@@ -58,6 +59,7 @@ module Admin
           def meta
             span(class: "mail-row-meta") do
               Account(chip: @chip) if @chip
+              span(class: "mail-task") { t(".task", id: @task) } if @task
               labels.each { |name| span(class: "mail-label") { "##{name}" } }
               span { t(".wakes", date: l(Blog::TimeZone.today(@thread.snoozed_until), format: :medium)) } if snoozed?
               span { t(".archived") } if @thread.archived

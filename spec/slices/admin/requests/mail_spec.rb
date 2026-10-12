@@ -369,7 +369,7 @@ RSpec.describe "Admin mail", type: :request do
         end
 
         it "links a Gmail thread out to Gmail and keeps spam and delete for the contact form" do
-          expect(acts).to eq(["Archive", "Snooze", "Star", "Mark read", "Gmail"])
+          expect(acts).to eq(["Archive", "Snooze", "Make a task", "Star", "Mark read", "Gmail"])
         end
       end
 
@@ -387,7 +387,7 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, :read)
         get "/admin/mail", thread: thread.id
 
-        expect(acts).to eq(["Archive", "Snooze", "Star", "Mark unread", "Spam", "Delete"])
+        expect(acts).to eq(["Archive", "Snooze", "Make a task", "Star", "Mark unread", "Spam", "Delete"])
       end
 
       it "offers Not spam and Delete forever on spam" do
@@ -401,7 +401,7 @@ RSpec.describe "Admin mail", type: :request do
         thread = create(:message, :read, snoozed_until: Time.now + 3600)
         get "/admin/mail", folder: "snoozed", thread: thread.id
 
-        expect(acts).to eq(["Archive", "Wake", "Star", "Mark unread", "Spam", "Delete"])
+        expect(acts).to eq(["Archive", "Wake", "Make a task", "Star", "Mark unread", "Spam", "Delete"])
       end
 
       it "says a stranger wrote through the contact form" do
@@ -680,6 +680,124 @@ RSpec.describe "Admin mail", type: :request do
 
         expect(subjects).not_to include("Later")
         expect(a_request(:post, /gmail/)).not_to have_been_made
+      end
+    end
+
+    describe "Make a task" do
+      let(:thread) { create(:message, subject: "Re: Fwd: Lunch on Friday") }
+
+      def links = Links::Slice["repos.record_link_queries"]
+
+      def make(**fields)
+        act("/admin/mail/#{thread.id}/task", folder: "inbox", task: { title: "Book lunch", **fields })
+      end
+
+      def task_of(thread) = links.partner_ids("mail_thread", [thread.id], "task")[thread.id]
+
+      it "offers a title from the subject without Re: or Fwd:", :aggregate_failures do
+        get "/admin/mail", thread: thread.id
+
+        dialog = page.find("dialog#mail-task-#{thread.id}", visible: :all)
+        expect(dialog.find("input[name='task[title]']", visible: :all).value).to eq("Lunch on Friday")
+        expect(dialog.all("input[name='task[list]']", visible: :all).map(&:value)).to eq(%w[today next someday])
+        expect(dialog).to have_css("input[name='task[archive]'][checked]", visible: :all)
+      end
+
+      it "saves the task on the list it names, linked to the thread", :aggregate_failures do
+        make(list: "someday", archive: "0")
+        task = Tasks::Slice["repos.task_queries"].by_id(task_of(thread))
+
+        expect([task.title, task.list]).to eq(["Book lunch", "someday"])
+        expect(repo.by_id(thread.id).archived).to be(false)
+        expect(last_response.location).to eq("/admin/mail?folder=inbox&show=all&thread=#{thread.id}#read-#{thread.id}")
+      end
+
+      it "archives the thread when asked" do
+        make(list: "next", archive: "1")
+
+        expect(repo.by_id(thread.id).archived).to be(true)
+      end
+
+      it "says so with the task's number" do
+        make(list: "next", archive: "1")
+        follow_redirect!
+
+        expect(toast).to eq("Made task ##{task_of(thread)}")
+      end
+
+      it "refuses a second task for the same thread", :aggregate_failures do
+        make(list: "next")
+        make(list: "next", title: "Again")
+        follow_redirect!
+
+        expect(Tasks::Slice["relations.tasks"].where(title: "Again").count).to eq(0)
+        expect(toast).to eq("This thread already has a task")
+      end
+
+      it "refuses a blank title and makes nothing", :aggregate_failures do
+        make(title: " ")
+        follow_redirect!
+
+        expect([task_of(thread), toast]).to eq([nil, "Give the task a title"])
+      end
+
+      describe "on a Gmail thread" do
+        let(:threads) { "#{Spec::GoogleAccounts::GMAIL}/threads" }
+
+        before do
+          connect_google(account_id: work.address, scopes: Spec::GoogleAccounts::GMAIL_SCOPES)
+          stub_request(:post, %r{\A#{threads}/}o).to_return(google_health_json({}))
+          stub_request(:post, "#{threads}/refused/modify").to_return(status: 500)
+        end
+
+        def make_on(thread) = act("/admin/mail/#{thread.id}/task", task: { title: "Reply", list: "next", archive: "1" })
+
+        it "archives the thread in Gmail too", :aggregate_failures do
+          thread = gmail(gmail_id: "t1")
+          make_on(thread)
+
+          expect(a_request(:post, "#{threads}/t1/modify").with(body: { removeLabelIds: %w[INBOX] }.to_json))
+            .to have_been_made
+          expect(repo.by_id(thread.id).archived).to be(true)
+        end
+
+        it "keeps the task and says so when Gmail refuses to archive", :aggregate_failures do
+          thread = gmail(gmail_id: "refused")
+          make_on(thread)
+          follow_redirect!
+
+          expect(toast).to eq("Made task ##{task_of(thread)} · Gmail refused to archive the thread")
+          expect(repo.by_id(thread.id).archived).to be(false)
+        end
+      end
+
+      it "answers 404 for a thread that is gone" do
+        act("/admin/mail/999999/task", task: { title: "Book lunch" })
+
+        expect(last_response).to be_not_found
+      end
+
+      describe "once the thread has a task" do
+        before do
+          make(list: "next")
+          get "/admin/mail", folder: "all", thread: thread.id
+        end
+
+        it "trades Make a task for a link to the task", :aggregate_failures do
+          expect(acts).not_to include("Make a task")
+          expect(page).to have_link("Task ##{task_of(thread)}", href: "/admin/tasks/#{task_of(thread)}")
+        end
+
+        it "shows the task chip on the thread row" do
+          expect(page).to have_css("#thread-#{thread.id} .mail-task", text: "task ##{task_of(thread)}")
+        end
+
+        it "lists the thread among the task's links" do
+          get "/admin/tasks/#{task_of(thread)}"
+
+          expect(page).to have_link("Re: Fwd: Lunch on Friday",
+                                    href: "/admin/mail?folder=all&thread=#{thread.id}#read-#{thread.id}")
+        end
       end
     end
 

@@ -8,6 +8,7 @@ module Links
         "commit" => :commits,
         "decision" => :decisions,
         "journal_entry" => :journal_entries,
+        "mail_thread" => :mail_threads,
         "post" => :posts,
         "project" => :projects,
         "pull_request" => :pull_requests,
@@ -28,6 +29,7 @@ module Links
         decision: "decisions.repos.decision_queries",
         pull_request: "record.repos.pull_request_queries",
         task: "tasks.repos.task_queries",
+        mail_thread: "mail.repos.thread_queries",
       ]
 
       def counts(kind, ids)
@@ -53,6 +55,15 @@ module Links
       end
 
       def named(kind, ids) = linked(kind, rows(kind, ids:))
+
+      def partner_ids(kind, ids, other_kind)
+        record_links.touching(kind, ids).to_a.filter_map do |link|
+          sides = [[link.left_kind, link.left_id], [link.right_kind, link.right_id]]
+          own, partner = sides.first.first == kind ? sides : sides.reverse
+
+          [own.last, partner.last] if partner.first == other_kind
+        end.to_h
+      end
 
       def partners(kind, id)
         record_links.touching(kind, id).to_a.map do |link|

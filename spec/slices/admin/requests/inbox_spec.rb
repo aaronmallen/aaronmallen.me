@@ -216,6 +216,34 @@ RSpec.describe "Admin inbox", type: :request do
         expect(last_response.status).to eq(403)
         expect(messages.by_id(message.id).status).to eq("unread")
       end
+
+      describe "Make a task" do
+        def task_of(thread) = Links::Slice["repos.record_link_queries"].partner_ids("mail_thread", [thread.id], "task")
+
+        it "offers a dialog that comes back to Waiting", :aggregate_failures do
+          get "/admin/inbox"
+
+          dialog = page.find("dialog#mail-task-#{message.id}", visible: :all)
+          expect(dialog.find("input[name='task[title]']", visible: :all).value).to eq("A question")
+          expect(dialog.find("input[name='origin']", visible: :all).value).to eq("inbox")
+        end
+
+        it "makes the task and lands back on Waiting", :aggregate_failures do
+          act("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
+
+          expect(last_response.location).to eq("/admin/inbox")
+          expect(task_of(message)).to have_key(message.id)
+        end
+
+        it "trades the button for a link once the thread has a task", :aggregate_failures do
+          act("/admin/mail/#{message.id}/task", origin: "inbox", task: { title: "Answer Ada", list: "next" })
+          get "/admin/inbox"
+
+          id = task_of(message).fetch(message.id)
+          expect(page).to have_link("Task ##{id}", href: "/admin/tasks/#{id}")
+          expect(page).to have_no_css("dialog#mail-task-#{message.id}", visible: :all)
+        end
+      end
     end
 
     describe "a webmention" do

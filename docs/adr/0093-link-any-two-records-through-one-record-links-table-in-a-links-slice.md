@@ -5,7 +5,7 @@ status: active
 created: 2026-10-03
 area: [db, admin, api, mcp, posts, projects, record, social, tasks]
 issue: "#317"
-amended: ["#966", "#911"]
+amended: ["#966", "#911", "#1139"]
 tags: [postgres, schema, links, slices, exports, triggers, constraints, enums]
 ---
 
@@ -31,12 +31,13 @@ no foreign key can hold a column whose table depends on the row.
 **A new `links` feature slice owns `record_links`.** The table spans kinds six slices own, so no one of them owns it,
 the way `activity` owns its view (ADR 0052). It exports operations to link and unlink two records, a query that lists
 a record's links, and a search across kinds. `admin` and `api` import them. As #911 records, `mcp` reaches them
-through the `api` endpoints ([ADR 0088][0088]).
+through the `api` endpoints ([ADR 0088][0088]). The `api` leaves `mail_thread` out of the kinds it links and lists
+(#1139), so mail stays behind the `mail` scope ([ADR 0151][0151]) until those endpoints check it.
 
 **Each side is a kind and an id.** A `record_kind` enum (ADR 0015) holds the eight kinds, declared in the order above,
-since the Linked section groups by kind in that order. It now holds nine, with `pull_request` declared last, as #911
-records. A row holds `left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The operation sorts the two
-sides, kind first and then id, so a pair has one spelling.
+since the Linked section groups by kind in that order. It now holds ten: #911 declared `pull_request` ninth, and
+`mail_thread` came last in #1139. A row holds `left_kind`, `left_id`, `right_kind`, `right_id` and `created_at`. The
+operation sorts the two sides, kind first and then id, so a pair has one spelling.
 
 **Postgres holds the rules.**
 
@@ -49,7 +50,7 @@ sides, kind first and then id, so a pair has one spelling.
 - A trigger before insert finds the row each side names in its kind's table, and locks it `FOR KEY SHARE` as a
   foreign key would. A missing row raises with `ERRCODE = 'foreign_key_violation'` and `CONSTRAINT =
   'record_links_record_missing'`.
-- An `AFTER DELETE` trigger on each of the kinds' tables, nine since `pull_request` (#911), runs one function, which
+- An `AFTER DELETE` trigger on each of the kinds' tables, ten since `mail_thread` (#1139), runs one function, which
   takes its kind as the trigger's argument and deletes every link on either side that names the old row. A cascade from
   another table fires it too.
 
@@ -57,7 +58,7 @@ sides, kind first and then id, so a pair has one spelling.
 `task_pair` and `missing`.
 
 **Titles and searches cross through exports** ([ADR 0123][0123]). Each owning slice exports one query per kind, which
-names its records by id and finds them by text, and `links` imports all of them, nine as #911 counts. The list query
+names its records by id and finds them by text, and `links` imports all of them, ten as #1139 counts. The list query
 builds each admin URL from the kind and id through the app's routes helper (ADR 0004), so the pages and the tools share
 one map from kind to route. Since #966 that map is `Blog::Helpers::RecordKinds`, which also holds each kind's icon,
 label key and search kind, and admin search hits read their routes from it too.
@@ -93,7 +94,7 @@ The operation sorts in Ruby by the enum's order, which Postgres compares on. ADR
 drift out of order, but here a twin out of order sends some pairs unsorted, and `record_links_order_check` refuses
 them as a self link.
 
-A search runs one query per kind, nine as #911 counts, and merges them in Ruby, so results rank within a kind, not
+A search runs one query per kind, ten as #1139 counts, and merges them in Ruby, so results rank within a kind, not
 across kinds.
 
 The list query names admin routes from a feature slice. Renaming one breaks the Linked section when it runs, not at
@@ -105,4 +106,5 @@ ADR 0001 counts the feature slices and ADR 0017 lists the mapped names. #319 upd
 
 [0088]: 0088-hold-the-layer-the-api-and-mcp-share-in-the-api-slice-and-call-it-in-process.md
 [0123]: 0123-export-only-read-repos-and-operations-and-keep-write-repos-in-their-slice.md
+[0151]: 0151-gate-mail-behind-a-mail-scope-that-read-does-not-cover.md
 [status]: https://img.shields.io/badge/Active-green?style=for-the-badge

@@ -10,6 +10,7 @@ module Blog
         "commit" => ["fa-code-commit", :admin_commit, "commit"],
         "decision" => ["fa-scale-balanced", :admin_decision, "decision"],
         "journal_entry" => ["fa-feather", :admin_journal, "journal"],
+        "mail_thread" => ["fa-envelope", :admin_mail, "message"],
         "post" => ["fa-file-lines", :admin_edit_post, "post"],
         "project" => ["fa-cube", :admin_edit_project, "project"],
         "pull_request" => ["fa-code-pull-request", :admin_pull_request, "pull_request"],
@@ -18,10 +19,12 @@ module Blog
         "work_entry" => ["fa-briefcase", :admin_projects, "work"],
       }.freeze
       JOURNAL_ENTRY = Types::RecordKind["journal_entry"]
+      MAIL_FOLDER = Types::MailFolder["all"]
+      MAIL_THREAD = Types::RecordKind["mail_thread"]
       SOCIAL_POST = Types::RecordKind["social_post"]
       WORK = Types::ProjectFilter["work"]
       WORK_ENTRY = Types::RecordKind["work_entry"]
-      private_constant :LABELS, :ROWS, :JOURNAL_ENTRY, :SOCIAL_POST, :WORK, :WORK_ENTRY
+      private_constant :LABELS, :ROWS, :JOURNAL_ENTRY, :MAIL_FOLDER, :MAIL_THREAD, :SOCIAL_POST, :WORK, :WORK_ENTRY
 
       ALL = Types::RecordKind.values.to_h do |kind|
         icon, route, search_kind = ROWS.fetch(kind)
@@ -47,6 +50,7 @@ module Blog
         case kind
           when SOCIAL_POST then routes.path(route, edit: id)
           when JOURNAL_ENTRY then journal_day(routes, day)
+          when MAIL_THREAD then "#{routes.path(route, folder: MAIL_FOLDER, thread: id)}#read-#{id}"
           when WORK_ENTRY then routes.path(route, filter: WORK)
           else routes.path(route, id:)
         end

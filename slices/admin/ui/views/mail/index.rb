@@ -19,6 +19,7 @@ module Admin
           prop :list, Blog::Types::Hash
           prop :open, Blog::Types::Instance(ROM::Struct).optional
           prop :person, Blog::Types::Instance(ROM::Struct).optional
+          prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :threads, Blog::Types::Instance(Blog::Structs::Paged)
           prop :unread, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
 
@@ -92,7 +93,7 @@ module Admin
             account = @accounts.find { it.id == @open.mail_account_id }
             Reader(
               thread: @open, person: @person, list: @list, chip: chips.fetch(account.id),
-              form: account.provider == FORM, own: account.address,
+              form: account.provider == FORM, own: account.address, task: @tasks[@open.id],
             )
           end
 
@@ -100,7 +101,10 @@ module Admin
             div(data: { key_list: true }) do
               @threads.rows.each do |thread|
                 chip = chips.fetch(thread.mail_account_id) unless @list[:account]
-                Row(thread:, list: @list, page: @threads.number, chip:, open: thread.id == @open&.id)
+                Row(
+                  thread:, list: @list, page: @threads.number, chip:, open: thread.id == @open&.id,
+                  task: @tasks[thread.id],
+                )
               end
             end
           end

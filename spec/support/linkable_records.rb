@@ -11,6 +11,7 @@ module Spec
       "work_entry" => %i[work_entry role],
       "decision" => %i[decision title],
       "pull_request" => %i[pull_request title],
+      "mail_thread" => %i[message subject],
     }.freeze
 
     def linkable_record(kind, text = Faker::Lorem.sentence)

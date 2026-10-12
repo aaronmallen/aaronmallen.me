@@ -3,9 +3,10 @@
 module API
   module Serializers
     class Link < Serializer
+      KINDS = (Blog::Types::RecordKind.values - [Blog::Types::RecordKind["mail_thread"]]).freeze
       SCHEMA = Helpers::Schema.object(
         {
-          kind: { type: "string", enum: Blog::Types::RecordKind.values },
+          kind: { type: "string", enum: KINDS },
           id: Helpers::Schema::INTEGER,
           title: Helpers::Schema::STRING,
           day: Helpers::Schema.nullable(Helpers::Schema::DAY),
@@ -15,7 +16,7 @@ module API
 
       GROUPS = Helpers::Schema.object(
         {},
-        optional: Blog::Types::RecordKind.values.to_h { [it.to_sym, Helpers::Schema.list(reference)] },
+        optional: KINDS.to_h { [it.to_sym, Helpers::Schema.list(reference)] },
       ).freeze
 
       schema_attributes

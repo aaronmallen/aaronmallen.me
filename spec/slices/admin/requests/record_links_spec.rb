@@ -215,6 +215,7 @@ RSpec.describe "Admin record links", type: :request do
       create(:work_entry, blurb: "Flew a zeppelin")
       create(:decision, problem: "Which zeppelin to buy")
       create(:pull_request, body: "Lands the zeppelin")
+      create(:mail_message, mail_thread_id: create(:message).id, body: "Spotted a zeppelin")
     end
 
     def fields = {}

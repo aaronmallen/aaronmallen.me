@@ -9,7 +9,6 @@ module Admin
           KINDS = {
             **Blog::Helpers::RecordKinds::ALL.values.to_h { [it.search_kind, it.icon] },
             Blog::Types::SearchKind["person"] => "fa-address-book",
-            Blog::Types::SearchKind["message"] => "fa-envelope",
             Blog::Types::SearchKind["webmention"] => "fa-at",
           }.freeze
           KIND_KEYS = KINDS.keys.to_h { [it, ".kinds.#{it}"] }.freeze

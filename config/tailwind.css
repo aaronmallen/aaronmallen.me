@@ -4072,6 +4072,10 @@
   @apply text-mk-orange-text;
 }
 
+@utility mail-task {
+  @apply text-mk-green-text;
+}
+
 @utility mail-row {
   @apply relative flex items-start gap-1.5 border-b border-line py-3 pl-3 last:border-b-0;
 
