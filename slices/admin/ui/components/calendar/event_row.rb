@@ -10,6 +10,7 @@ module Admin
           prop :event, Blog::Types::Instance(ROM::Struct)
           prop :tone, Blog::Types::String
           prop :day, Blog::Types::Date
+          prop :today, Blog::Types::Date
 
           def view_template
             div(class: "cal-event", style: Tone.style(@tone), data: { calendar_item: "event-#{@event.id}" }) do
@@ -19,6 +20,7 @@ module Admin
                 more
               end
               join
+              MoveForm(kind: :event, id: @event.id, title:, date: @day, today: @today) if @event.calendar.writable
             end
           end
 
@@ -53,7 +55,7 @@ module Admin
 
           def head
             summary(class: "cal-event-title") do
-              span { title }
+              span(class: "cal-event-name") { title }
               span(class: "li-sub cal-event-meta") { meta }
             end
           end

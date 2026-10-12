@@ -176,6 +176,85 @@ RSpec.describe "Admin calendar event writes", :frozen_clock, type: :request do
       end
     end
 
+    describe "moving an event" do
+      def ahead = Blog::TimeZone.today + 3
+
+      def move(record, to = target) = send_form("/admin/calendar/events/#{record.id}/move", to: to.iso8601)
+
+      def move_form(title) = row(title).first("form.cal-move", minimum: 0)
+
+      def placed(date, **)
+        times = { starts_at: Time.iso8601(at(date, 9)), ends_at: Time.iso8601(at(date, 9, 30)) }
+
+        event(mine, "Standup", google_id: "abc", starts_on: date, ends_on: date, **times, **)
+      end
+
+      def stored(record) = Calendar::Slice["repos.calendar_queries"].event(record.id)
+
+      def target = ahead + 2
+
+      it "moves it in Google to the same time on the new day", :aggregate_failures do
+        standup = placed(ahead)
+        move(standup)
+
+        expect(a_request(:patch, "#{events_url}/abc").with(body: timed(target, 9, [9, 30]))).to have_been_made
+        expect([stored(standup).starts_at, queued]).to eq([Time.iso8601(at(target, 9)), 1])
+        expect(toast).to eq("Moved to #{target.strftime('%b %-d, %Y')}")
+      end
+
+      it "keeps the days an all-day event covers" do
+        trip = create(:calendar_event, calendar_id: mine.id, google_id: "trip", starts_on: ahead, ends_on: ahead + 2)
+        move(trip, ahead + 7)
+
+        expect(a_request(:patch, "#{events_url}/trip").with(body: whole(ahead + 7, ahead + 10))).to have_been_made
+      end
+
+      it "moves only this instance of a recurring event", :aggregate_failures do
+        move(placed(ahead, google_id: "standup_1", recurring_id: "standup"))
+
+        expect(a_request(:patch, "#{events_url}/standup_1")).to have_been_made
+        expect(a_request(:any, "#{events_url}/standup")).not_to have_been_made
+      end
+
+      it "refuses an event on a work calendar", :aggregate_failures do
+        move(event(work, "Sync", starts_on: ahead, ends_on: ahead))
+
+        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(toast).to eq("That calendar is read-only")
+      end
+
+      it "refuses a day before today", :aggregate_failures do
+        move(placed(ahead), Blog::TimeZone.today - 1)
+
+        expect(a_request(:any, %r{googleapis\.com/calendar})).not_to have_been_made
+        expect(toast).to eq("A move lands on today or a day after it")
+      end
+
+      it "leaves the event where it was when Google refuses it", :aggregate_failures do
+        stub_request(:patch, "#{events_url}/abc").to_return(status: 403, **google_json)
+        standup = placed(ahead)
+        move(standup)
+
+        expect(stored(standup).starts_on).to eq(ahead)
+        expect(toast).to eq("Google didn't take that · try again")
+      end
+
+      it "answers 404 for an event it doesn't know" do
+        send_form("/admin/calendar/events/0/move", to: target.iso8601)
+
+        expect(last_response.status).to eq(404)
+      end
+
+      it "offers a move form only on a writable calendar", :aggregate_failures do
+        standup = placed(ahead)
+        event(work, "Sync", starts_on: ahead, ends_on: ahead)
+        get "/admin/calendar", day: ahead.iso8601
+
+        expect(move_form("Standup")&.[](:action)).to eq("/admin/calendar/events/#{standup.id}/move")
+        expect(move_form("Sync")).to be_nil
+      end
+    end
+
     describe "the day panel" do
       let(:standup) { event(mine, "Standup", recurring_id: "standup") }
 

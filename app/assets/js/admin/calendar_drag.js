@@ -71,7 +71,7 @@ function floating(row, start) {
 
   ghost.className = "cal-ghost";
   ghost.setAttribute("aria-hidden", "true");
-  ghost.textContent = row.querySelector(".li-title")?.textContent ?? "";
+  ghost.textContent = row.querySelector(".li-title, .cal-event-name")?.textContent ?? "";
   ghost.style.left = "0";
   ghost.style.top = "0";
   ghost.style.translate = `${start.clientX + 12}px ${start.clientY + 12}px`;

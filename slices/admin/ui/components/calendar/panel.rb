@@ -63,7 +63,7 @@ module Admin
             return if @day.events.empty?
 
             group(t(".events")) do
-              @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id), day: date) }
+              @day.events.each { EventRow(event: it, tone: @tones.fetch(it.calendar_id), day: date, today: @today) }
             end
           end
 

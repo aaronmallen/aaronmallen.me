@@ -9,7 +9,8 @@ module Calendar
     import keys: %w[google.client], from: :google
 
     export %w[
-      operations.create_event operations.delete_event operations.edit_event operations.show_calendars
+      operations.create_event operations.delete_event operations.edit_event operations.move_event
+      operations.show_calendars
       repos.calendar_queries
     ]
   end

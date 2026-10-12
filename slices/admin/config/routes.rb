@@ -29,6 +29,7 @@ module Admin
     post "/calendar/events", to: "calendar.create_event", as: :create_calendar_event
     post "/calendar/events/:id", to: "calendar.update_event", as: :update_calendar_event, id: ID
     post "/calendar/events/:id/delete", to: "calendar.delete_event", as: :delete_calendar_event, id: ID
+    post "/calendar/events/:id/move", to: "calendar.move_event", as: :move_calendar_event, id: ID
     post "/calendar/posts/:id/move", to: "calendar.move_post", as: :move_calendar_post, id: ID
     post "/calendar/social/:id/move", to: "calendar.move_social_post", as: :move_calendar_social_post, id: ID
     post "/calendar/tasks/:id/move", to: "calendar.move_task", as: :move_calendar_task, id: ID

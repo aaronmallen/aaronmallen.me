@@ -2164,6 +2164,10 @@
 @utility cal-event {
   @apply grid items-start gap-2.5 border-b border-line py-2 last:border-b-0;
   grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+
+  & > .cal-move {
+    grid-column: 2 / -1;
+  }
 }
 
 @utility cal-event-time {

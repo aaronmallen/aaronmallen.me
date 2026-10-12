@@ -41,6 +41,7 @@ en:
       invalid: "Pick a day first"
       invalid_event: "An event needs a title and a day, and an end after its start"
       moved: "Moved to %{date} at %{time}"
+      moved_event: "Moved to %{date}"
       moved_task: "Moved to the %{date} sprint"
       not_scheduled: "Only a scheduled post moves"
       past: "A move lands on today or a day after it"

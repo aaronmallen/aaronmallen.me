@@ -27,7 +27,8 @@ module Admin
     ], from: :analytics
 
     import keys: %w[
-      operations.create_event operations.delete_event operations.edit_event operations.show_calendars
+      operations.create_event operations.delete_event operations.edit_event operations.move_event
+      operations.show_calendars
       repos.calendar_queries
     ], from: :calendar
 

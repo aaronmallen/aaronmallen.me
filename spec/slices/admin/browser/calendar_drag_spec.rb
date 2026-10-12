@@ -23,7 +23,7 @@ RSpec.describe "Admin calendar drag", type: :feature do
     mouse.up
   end
 
-  def grip(title) = panel.find(".li", text: title).find("[data-calendar-grip]")
+  def grip(title) = panel.find(".li, .cal-event", text: title).find("[data-calendar-grip]")
 
   def open_day(date)
     visit "/admin/calendar?day=#{date.iso8601}"
@@ -45,6 +45,8 @@ RSpec.describe "Admin calendar drag", type: :feature do
       { x: from["x"] + ((to["x"] - from["x"]) * step / 6), y: from["y"] + ((to["y"] - from["y"]) * step / 6) }
     end
   end
+
+  def timed(date, hour) = { date: nil, dateTime: at(date, hour).iso8601, timeZone: Blog::TimeZone::NAME }
 
   def touch(type, point)
     page.driver.browser.page.command("Input.dispatchTouchEvent", type:, touchPoints: point ? [point] : [])
@@ -113,6 +115,40 @@ RSpec.describe "Admin calendar drag", type: :feature do
     it "moves to the sprint on the day it lands on", :aggregate_failures do
       expect(cell(target)).to have_css(".cal-mark.sprint")
       expect(sprint_on(task)).to eq(target)
+    end
+  end
+
+  describe "an event on a writable calendar" do
+    let(:calendar) { create(:calendar, account: "me@example.com", google_id: "me@example.com", name: "Aaron") }
+    let(:patched) { "#{Calendar::Operations::SyncCalendar::API}/calendars/me%40example.com/events/abc" }
+
+    before do
+      connect_google(account_id: "me@example.com", scopes: Calendar::Operations::SyncCalendar::SCOPES, token: "ya29.me")
+      stub_request(:patch, patched).to_return(body: "{}", headers: { "Content-Type" => "application/json" })
+      times = { starts_on: day, ends_on: day, starts_at: at(day, 9), ends_at: at(day, 10) }
+      create(:calendar_event, calendar_id: calendar.id, google_id: "abc", title: "Coffee", **times)
+      open_day(day)
+      drag("Coffee", cell(target))
+    end
+
+    it "moves to the day it lands on at the same time", :aggregate_failures do
+      expect(page).to have_css(".toast:not(.toast-failed)", text: "Moved to #{target.strftime('%b %-d, %Y')}")
+      expect(panel).to have_no_text("Coffee")
+      expect(a_request(:patch, patched).with(body: { start: timed(target, 9), end: timed(target, 10) }))
+        .to have_been_made
+    end
+  end
+
+  describe "an event on a work calendar" do
+    before do
+      calendar = create(:calendar, account: "work@example.com", name: "Work", writable: false)
+      create(:calendar_event, calendar_id: calendar.id, title: "Sync", starts_on: day, ends_on: day)
+      open_day(day)
+    end
+
+    it "has no grip", :aggregate_failures do
+      expect(panel).to have_text("Sync")
+      expect(panel).to have_no_css("[data-calendar-grip]", visible: :all)
     end
   end
 

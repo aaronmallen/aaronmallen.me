@@ -81,6 +81,7 @@ RSpec.describe "MCP reach", type: :app do
       "calendar.operations.create_event" => "the owner makes Google events in the admin; agents only read them",
       "calendar.operations.delete_event" => "the owner deletes Google events in the admin; agents only read them",
       "calendar.operations.edit_event" => "the owner edits Google events in the admin; agents only read them",
+      "calendar.operations.move_event" => "the owner drags Google events in the admin; agents only read them",
       "calendar.operations.show_calendars" => "the owner picks the calendars the admin page shows; tools list them all",
       "calendar.operations.sync_calendar" => "a background job mirrors Google events every 15 minutes",
       "decisions.operations.tag_decision" => "the admin's decision rows tag it; the tag_decision tool covers it",

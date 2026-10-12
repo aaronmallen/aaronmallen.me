@@ -5,6 +5,8 @@ module Calendar
     class CalendarMutations < Blog::DB::Repo
       def forget_accounts_but(accounts) = calendars.exclude(account: accounts).delete
 
+      def move_event(id, times) = calendar_events.by_pk(id).update(**times, updated_at: Time.now)
+
       def show(ids) = calendars.update(hidden: Sequel.~(id: ids), updated_at: Time.now)
 
       def store(account, found, from:, to:, now: Time.now)

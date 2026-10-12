@@ -6,6 +6,7 @@ module Admin
       module Calendar
         class MoveForm < Component
           MOVES = {
+            event: :admin_move_calendar_event,
             post: :admin_move_calendar_post,
             social: :admin_move_calendar_social_post,
             task: :admin_move_calendar_task,
