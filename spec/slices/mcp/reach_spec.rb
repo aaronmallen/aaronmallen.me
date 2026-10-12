@@ -88,6 +88,7 @@ RSpec.describe "MCP reach", type: :app do
       "mail.operations.create_message" => "a reader sends a message through the public form",
       "mail.operations.label_message" => "sets a thread's tags from the admin; tag_mail_threads covers it",
       "mail.operations.reap_spam_messages" => "a background job reaps old spam messages",
+      "mail.operations.send_mail" => "the owner sends mail from the admin; spec #1119 gives agents no send tool",
       "mail.operations.sync_gmail" => "background jobs sync Gmail into the mail tables",
       "mail.operations.update_mail_settings" => "the owner picks the accounts and Waiting rules in the admin",
       "health.operations.queue_backfill" => "connecting Google Health in the admin queues the backfill",

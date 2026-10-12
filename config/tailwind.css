@@ -4190,6 +4190,221 @@
   @apply ml-auto flex flex-wrap gap-2;
 }
 
+@utility mail-reply {
+  @apply mt-6;
+
+  &[open] > summary {
+    @apply hidden;
+  }
+}
+
+@utility mail-reply-form {
+  @apply flex flex-col overflow-hidden rounded-xl border border-line bg-ground;
+}
+
+@utility mail-reply-head {
+  @apply flex flex-wrap items-center gap-2.5 border-b border-line px-3 py-2 font-mono text-badge text-ink-muted;
+}
+
+@utility mail-reply-as {
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap min-w-tap items-center;
+  }
+}
+
+@utility mail-reply-to {
+  @apply ml-auto;
+}
+
+@utility mail-compose {
+  & .dialog-body {
+    @apply p-0;
+  }
+}
+
+@utility mail-compose-form {
+  @apply flex flex-col;
+}
+
+@utility mail-compose-foot {
+  @apply flex flex-wrap items-center gap-2.5 border-t border-line px-3 py-2 font-mono text-badge text-ink-muted;
+}
+
+@utility mail-compose-hint {
+  @apply ml-auto;
+}
+
+@utility mail-head {
+  @apply flex flex-col border-b border-line;
+}
+
+@utility mail-head-row {
+  @apply flex flex-wrap items-center gap-3 border-b border-line px-5 py-1.5 last:border-b-0;
+
+  & > label {
+    @apply w-14 shrink-0 font-mono text-badge text-ink-muted;
+
+    @media (width < 43.75rem) {
+      @apply inline-flex min-h-tap items-center;
+    }
+  }
+
+  & > .field-error {
+    @apply basis-full pl-17;
+  }
+}
+
+@utility mail-head-input {
+  @apply min-w-0 flex-1 border-0 bg-transparent py-1.5 text-ink focus:outline-none;
+}
+
+@utility mail-head-subject {
+  @apply font-display text-base font-semibold;
+}
+
+@utility mail-head-none {
+  @apply font-mono text-badge text-mk-pink-text;
+}
+
+@utility mail-head-reveal {
+  @apply flex gap-2 font-mono text-badge;
+
+  & > button {
+    @apply cursor-pointer text-ink-muted underline underline-offset-2 hover:text-ink focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap min-w-tap;
+    }
+  }
+}
+
+@utility mail-editor {
+  @apply flex flex-col;
+
+  & + .field-error {
+    @apply px-5 pb-2;
+  }
+}
+
+@utility mail-editor-tools {
+  @apply flex flex-wrap items-center gap-0.5 border-b border-line px-2 py-1.5;
+
+  & > button {
+    @apply grid size-8 cursor-pointer place-items-center rounded-lg border border-transparent text-xs text-ink-muted;
+    @apply hover:border-line hover:text-ink focus-ring;
+  }
+
+  & > button[aria-pressed="true"] {
+    @apply border-line bg-wash text-ink;
+  }
+
+  @media (width < 43.75rem) {
+    & > button {
+      @apply min-h-tap min-w-tap;
+    }
+  }
+}
+
+@utility mail-editor-sep {
+  @apply mx-1.5 h-4.5 w-px bg-line;
+}
+
+@utility mail-editor-link {
+  @apply flex flex-wrap items-center gap-2 border-b border-line bg-ground-sunk px-3 py-2;
+
+  & > .inp {
+    @apply min-w-40 flex-1;
+  }
+}
+
+@utility mail-editor-text {
+  @apply min-h-44 w-full resize-y bg-transparent px-5 py-4 font-serif text-[1.1rem] leading-[1.6] text-ink;
+  @apply placeholder:text-ink-muted focus:outline-none;
+}
+
+@utility mail-editor-surface {
+  @apply relative max-h-[52vh] min-h-44 overflow-auto px-5 py-4 font-serif text-[1.1rem] leading-[1.6] text-ink;
+  @apply focus:outline-none;
+
+  .mail-compose & {
+    @apply min-h-64;
+  }
+
+  &.empty::before {
+    @apply pointer-events-none absolute text-ink-muted content-[attr(data-placeholder)];
+  }
+
+  & p {
+    @apply mb-[.6em];
+  }
+
+  & ul,
+  & ol {
+    @apply my-[.3em] pl-[1.4em];
+  }
+
+  & ul {
+    @apply list-disc;
+  }
+
+  & ol {
+    @apply list-decimal;
+  }
+
+  & blockquote {
+    @apply my-[.6em] border-l-2 border-line pl-3.5 text-ink-muted;
+  }
+
+  & code {
+    @apply rounded-[5px] bg-wash px-1.25 py-px font-mono text-[.82em];
+  }
+
+  & a {
+    @apply text-accent underline underline-offset-2;
+  }
+}
+
+@utility mail-sig {
+  @apply flex items-start justify-between gap-2.5 px-5 pt-0.5 pb-2.5;
+
+  & > input {
+    @apply sr-only;
+  }
+
+  &:has(> input:not(:checked)) > :is(.mail-sig-text, .mail-sig-off),
+  &:has(> input:checked) > .mail-sig-on {
+    @apply hidden;
+  }
+}
+
+@utility mail-sig-text {
+  @apply flex-1 border-t border-dashed border-line pt-2 font-mono text-[12.5px] leading-normal text-ink-muted;
+}
+
+@utility mail-sig-off {
+  @apply grid size-7 cursor-pointer place-items-center rounded-lg text-ink-muted hover:text-ink;
+
+  @media (width < 43.75rem) {
+    @apply size-tap;
+  }
+
+  :has(> input:focus-visible) > & {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@utility mail-sig-on {
+  @apply cursor-pointer font-mono text-badge text-ink-muted underline underline-offset-2 hover:text-ink;
+
+  @media (width < 43.75rem) {
+    @apply inline-flex min-h-tap items-center;
+  }
+
+  :has(> input:focus-visible) > & {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+}
+
 
 @utility wm-card {
   @apply flex flex-col;

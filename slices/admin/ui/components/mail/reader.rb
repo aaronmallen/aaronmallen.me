@@ -26,6 +26,7 @@ module Admin
               Who(person: @person, sender: @thread.sender, form: @form, spam: spam?)
               earlier
               letter(messages.last)
+              yield
               div(class: "mail-acts") { actions }
             end
           end

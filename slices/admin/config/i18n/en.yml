@@ -173,6 +173,8 @@ en:
       gmail_failed: "Nothing changed · Gmail refused the change"
       inbox: "Moved to Inbox"
       read: "Marked read"
+      sent: "Sent"
+      sent_archived: "Sent and archived"
       settings_saved: "Mail settings saved"
       spam: "Marked as spam"
       star: "Starred"
@@ -1050,6 +1052,52 @@ en:
           restore: "Restore"
           trash: "Delete"
           unread: "Unread"
+        compose:
+          bcc: "bcc"
+          body: "Write your message…"
+          cc: "cc"
+          compose: "Compose"
+          discard: "Discard"
+          from: "from"
+          hint: "sends through Gmail"
+          no_sender: "No account can send. Grant Gmail send on Connected services."
+          subject: "subject"
+          title: "New mail"
+          to: "to"
+        editor:
+          add_link: "Add link"
+          cancel: "Cancel"
+          link_placeholder: "Paste a URL or email"
+          link_url: "Link URL"
+          toolbar: "Formatting"
+          tools:
+            bold: "Bold"
+            code: "Code"
+            insertOrderedList: "Numbered list"
+            insertUnorderedList: "Bulleted list"
+            italic: "Italic"
+            link: "Link"
+            quote: "Quote"
+            removeFormat: "Clear formatting"
+            strikeThrough: "Strikethrough"
+            underline: "Underline"
+        field_error:
+          bcc:
+            format: "Use email addresses split by commas."
+          body:
+            blank: "Write something first."
+          cc:
+            format: "Use email addresses split by commas."
+          from:
+            format: "Pick an account that may send."
+          send:
+            gmail: "Gmail would not send it. Try again."
+          subject:
+            blank: "Add a subject."
+            long: "Keep the subject to 200 characters."
+          to:
+            blank: "Add someone to send to."
+            format: "Use email addresses split by commas."
         folder_select:
           folders: "Folders"
           label: "Folder or label"
@@ -1086,6 +1134,16 @@ en:
           unstar: "Unstar"
           wake: "Wake"
           you: "you"
+        reply:
+          body: "Write a reply…"
+          by_email: "sent from the contact form · the reply goes out by email"
+          cannot_send: "%{account} can’t send · grant it on Connected services"
+          no_sender: "no account can send"
+          reply: "Reply"
+          reply_as: "reply as"
+          send_archive: "Send & archive"
+          subject: "Re: %{subject}"
+          to: "to %{address}"
         row:
           archived: "archived"
           draft: "Draft"
@@ -1096,6 +1154,12 @@ en:
           to: " to %{address}"
           unread_mark: "Unread: "
           wakes: "wakes %{date}"
+        send_button:
+          key: "⌘↵"
+          send: "Send"
+        signature:
+          add: "+ signature"
+          remove: "Remove signature"
         task_button:
           task: "Task #%{id}"
         task_dialog:

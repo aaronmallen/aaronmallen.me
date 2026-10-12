@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "sanitize"
+
 module Mail
   module Operations
     class SyncGmail < Blog::Operation
@@ -63,9 +65,16 @@ module Mail
         gmail_mutations.store_labels(account_id, labels.map { { gmail_id: it.fetch("id"), name: it.fetch("name") } })
       end
 
+      def store_signature(address, account_id)
+        signature = gmail(address, "settings/sendAs/#{address}")["signature"].to_s
+
+        gmail_mutations.sign(account_id, Sanitize.fragment(signature, GmailThread::SANITIZE).strip)
+      end
+
       def sync(address)
         account = gmail_mutations.account(address)
         store_labels(address, account.id)
+        store_signature(address, account.id)
 
         account.history_id ? catch_up(address, account) : start(address, account)
       end

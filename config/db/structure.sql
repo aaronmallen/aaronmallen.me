@@ -2420,7 +2420,8 @@ CREATE TABLE public.mail_accounts (
     address public.email_address,
     history_id text,
     shown boolean DEFAULT true NOT NULL,
-    sends boolean DEFAULT true NOT NULL
+    sends boolean DEFAULT true NOT NULL,
+    signature text
 );
 
 
@@ -7405,6 +7406,7 @@ INSERT INTO schema_migrations (filename) VALUES
 ('20261011194100_add_calendar_to_sync_name.rb'),
 ('20261011194200_add_draft_to_mail_threads.rb'),
 ('20261012010000_add_mail_settings.rb'),
+('20261012030000_add_signature_to_mail_accounts.rb'),
 ('20261012040000_add_mail_threads_to_record_links.rb'),
 ('20261012050000_add_recurring_id_to_calendar_events.rb'),
 ('20261012050100_add_work_to_service_connections.rb');

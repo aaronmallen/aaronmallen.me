@@ -15,10 +15,12 @@ module Admin
 
           prop :accounts, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :counts, Blog::Types::Hash.map(Blog::Types::String, Blog::Types::Integer)
+          prop :draft, Blog::Types::Hash.optional
           prop :labels, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Array)
           prop :list, Blog::Types::Hash
           prop :open, Blog::Types::Instance(ROM::Struct).optional
           prop :person, Blog::Types::Instance(ROM::Struct).optional
+          prop :senders, Blog::Types::Array.of(Blog::Types::Instance(ROM::Struct))
           prop :tasks, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
           prop :threads, Blog::Types::Instance(Blog::Structs::Paged)
           prop :unread, Blog::Types::Hash.map(Blog::Types::Integer, Blog::Types::Integer)
@@ -26,8 +28,7 @@ module Admin
           def view_template
             PageHead(title: t(".heading"), sub:) do
               filter_form
-              BulkToggle(form: Bulk::ID)
-              Button(href: path(:admin_mail_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
+              tools
             end
             div(class: "mail-layout") do
               Folders(list: @list, counts: @counts, labels: shown_labels, chips:)
@@ -91,10 +92,11 @@ module Admin
             return Empty { t(".pick") } unless @open
 
             account = @accounts.find { it.id == @open.mail_account_id }
+            form = account.provider == FORM
             Reader(
-              thread: @open, person: @person, list: @list, chip: chips.fetch(account.id),
-              form: account.provider == FORM, own: account.address, task: @tasks[@open.id],
-            )
+              thread: @open, person: @person, list: @list, chip: chips.fetch(account.id), form:, own: account.address,
+              task: @tasks[@open.id],
+            ) { Reply(thread: @open, senders: @senders, list: @list, form:, account: account.name, draft: @draft) }
           end
 
           def rows
@@ -115,10 +117,7 @@ module Admin
             )
           end
 
-          def shown_labels
-            account = @list[:account]
-            account ? @labels.slice(account) : @labels
-          end
+          def shown_labels = @list[:account] ? @labels.slice(@list[:account]) : @labels
 
           def shows = SHOWS.transform_values { t(it) }
 
@@ -127,6 +126,12 @@ module Admin
             form = @accounts.any? { it.provider == FORM }
 
             t(".sub", count: @unread.values.sum, sources: t(form ? ".with_form" : ".gmail", count: gmail))
+          end
+
+          def tools
+            BulkToggle(form: Bulk::ID)
+            Button(href: path(:admin_mail_settings), variant: :gh, icon: "fa-solid fa-gear") { t(".settings") }
+            Compose(senders: @senders, list: @list, draft: @draft)
           end
         end
       end

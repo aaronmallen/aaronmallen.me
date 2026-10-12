@@ -29,6 +29,10 @@ module Mail
 
       def label_named(account_id, name) = mail_labels.where(mail_account_id: account_id, name:).one
 
+      def sign(account_id, signature)
+        mail_accounts.where(id: account_id).dataset.update(signature: (signature unless signature.empty?))
+      end
+
       def store_labels(account_id, labels, now: Time.now)
         rows = labels.map { { **it, mail_account_id: account_id, created_at: now, updated_at: now } }
 

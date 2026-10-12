@@ -60,6 +60,26 @@ RSpec.describe Mail::Jobs::SyncGmail do
     end
   end
 
+  describe "an account's Gmail signature" do
+    before { connect }
+
+    it "stores it with script stripped" do
+      stub_gmail(signature: "<div>Aaron<script>alert(1)</script></div>")
+      run
+
+      expect(account.signature).to eq("<div>Aaron</div>")
+    end
+
+    it "clears it when Gmail has none" do
+      stub_gmail(signature: "<b>Old</b>")
+      run
+      stub_gmail
+      run
+
+      expect(account.signature).to be_nil
+    end
+  end
+
   describe "an account it has synced before" do
     let(:sent_at) { Time.at(Time.now.to_i) }
 

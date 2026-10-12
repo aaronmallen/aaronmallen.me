@@ -55,9 +55,10 @@ module Spec
       %w[google.client google.google.client].each { replace_component(it, client) }
     end
 
-    def stub_gmail(history: [], history_id: "200", labels: [], profile: "100", threads: {})
+    def stub_gmail(history: [], history_id: "200", labels: [], profile: "100", signature: "", threads: {})
       stub_request(:get, "#{GMAIL}/profile").to_return(google_health_json({ historyId: profile }))
       stub_request(:get, "#{GMAIL}/labels").to_return(google_health_json({ labels: }))
+      stub_request(:get, %r{\A#{GMAIL}/settings/sendAs/}o).to_return(google_health_json({ signature: }))
       pages = { history: [{ messages: history.map { |id| { threadId: id } } }], historyId: history_id }
       stub_request(:get, %r{\A#{GMAIL}/history\?}o).to_return(google_health_json(pages))
       threads.each { |id, messages| stub_gmail_thread(id, messages) }
