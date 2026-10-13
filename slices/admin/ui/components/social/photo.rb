@@ -30,7 +30,7 @@ module Admin
             end
           end
 
-          def src = @key.empty? ? nil : "#{::Media::Types::PATH}#{@key}"
+          def src = @key.empty? ? nil : "#{Blog::Constants::MEDIA_PATH}#{@key}"
 
           def tool(icon, label, **data) = Button(variant: :gh, small: true, icon:, label:, data:)
 

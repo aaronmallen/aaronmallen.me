@@ -9,8 +9,8 @@ module Mail
         required(:reply_to).value(
           Blog::Types::TrimmedText, :filled?, max_size?: Types::MAX_REPLY_TO, format?: EMAIL,
         )
-        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: Types::MAX_SUBJECT)
-        required(:body).value(Blog::Types::Normalized::Lines, :filled?, max_size?: Types::MAX_BODY)
+        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: Blog::Constants::MAIL_SUBJECT_MAX)
+        required(:body).value(Blog::Types::Normalized::Lines, :filled?, max_size?: Blog::Constants::MAIL_BODY_MAX)
       end
 
       rule(:reply_to).validate(:without_controls)

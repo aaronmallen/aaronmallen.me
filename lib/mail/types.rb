@@ -2,8 +2,6 @@
 
 module Mail
   module Types
-    MAX_BODY = 5000
     MAX_REPLY_TO = 254
-    MAX_SUBJECT = 200
   end
 end

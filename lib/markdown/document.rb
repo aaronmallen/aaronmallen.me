@@ -19,7 +19,7 @@ module Markdown
     ].freeze
     LAZY_IMAGE = '<img loading="lazy" decoding="async" '
     LONE_TITLED_IMAGE = %r{<p>(<img [^>]*?) title="([^"]*)" /></p>}
-    MEDIA_IMAGE = /<img (?=[^>]*src="[^"]*#{Media::Types::REFERENCE}")/
+    MEDIA_IMAGE = /<img (?=[^>]*src="[^"]*#{Blog::Constants::MEDIA_REFERENCE}")/
     OPTIONS = { extension: { header_ids: Blog::Constants::EMPTY_STRING }, render: { hardbreaks: false } }.freeze
     PLUGINS = { syntax_highlighter: { theme: Blog::Constants::EMPTY_STRING } }.freeze
     TAG = /<[^>]*>/

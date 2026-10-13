@@ -22,19 +22,19 @@ module MCP
           original: {
             type: "string",
             minLength: 1,
-            maxLength: ::Suggestions::Types::MAX_TEXT,
+            maxLength: Blog::Constants::SUGGESTION_TEXT_MAX,
             description: "the exact text to replace, copied from the body",
           },
           part: { type: "integer", minimum: 1, description: "which social post part, counting from 1" },
           reason: {
             type: "string",
             minLength: 1,
-            maxLength: ::Suggestions::Types::MAX_REASON,
+            maxLength: Blog::Constants::SUGGESTION_REASON_MAX,
             description: "a few words, such as typo or subject-verb agreement",
           },
           replacement: {
             type: "string",
-            maxLength: ::Suggestions::Types::MAX_TEXT,
+            maxLength: Blog::Constants::SUGGESTION_TEXT_MAX,
             description: "the text that takes its place",
           },
         },
@@ -44,7 +44,7 @@ module MCP
       SCHEMA = {
         additionalProperties: false,
         properties: {
-          edits: { type: "array", items: EDIT, maxItems: ::Suggestions::Types::MAX_EDITS },
+          edits: { type: "array", items: EDIT, maxItems: Blog::Constants::SUGGESTION_EDITS_MAX },
           id: API::Helpers::Schema::ID,
           target: { type: "string", enum: [POST, SOCIAL_POST] },
         },

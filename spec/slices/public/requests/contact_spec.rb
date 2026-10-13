@@ -108,8 +108,8 @@ RSpec.describe "Contact", type: :request do
     end
 
     it "caps the subject and the message at the length the contract takes", :aggregate_failures do
-      expect(page).to have_css("#cf-subject[maxlength='#{Mail::Types::MAX_SUBJECT}']")
-      expect(page).to have_css("#cf-message[maxlength='#{Mail::Types::MAX_BODY}']")
+      expect(page).to have_css("#cf-subject[maxlength='#{Blog::Constants::MAIL_SUBJECT_MAX}']")
+      expect(page).to have_css("#cf-message[maxlength='#{Blog::Constants::MAIL_BODY_MAX}']")
     end
 
     describe "the count under the message" do
@@ -796,7 +796,7 @@ RSpec.describe "Contact", type: :request do
   end
 
   describe "a submission longer than the field says it takes" do
-    before { send_message(body: "a" * (Mail::Types::MAX_BODY + 1)) }
+    before { send_message(body: "a" * (Blog::Constants::MAIL_BODY_MAX + 1)) }
 
     it "comes back unprocessable" do
       expect(last_response.status).to eq(422)

@@ -10,7 +10,7 @@ module Mail
         required(:to).filled(:array)
         required(:cc).value(:array)
         required(:bcc).value(:array)
-        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: Types::MAX_SUBJECT)
+        required(:subject).value(Blog::Types::TrimmedText, :filled?, max_size?: Blog::Constants::MAIL_SUBJECT_MAX)
         required(:body).filled(:string)
         optional(:thread).maybe(:integer)
       end

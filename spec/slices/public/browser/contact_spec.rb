@@ -64,7 +64,7 @@ RSpec.describe "Contact form", type: :feature do
   end
 
   describe "the count under the message" do
-    let(:total) { Mail::Types::MAX_BODY }
+    let(:total) { Blog::Constants::MAIL_BODY_MAX }
 
     before { visit "/contact" }
 

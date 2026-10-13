@@ -6,7 +6,7 @@ RSpec.describe "Contact messages", type: :request do
   let(:message_queries) { Mail::Slice["repos.message_queries"] }
   let(:sender) { Analytics::Slice["operations.hash_visitor"].call(address: "127.0.0.1") }
 
-  def crlf_lines = Array.new(Mail::Types::MAX_BODY / 10) { "a" * 9 }.join("\r\n")
+  def crlf_lines = Array.new(Blog::Constants::MAIL_BODY_MAX / 10) { "a" * 9 }.join("\r\n")
 
   def send_message(**changes) = post("/contact", message: stamped(fields.merge(changes)))
 
@@ -28,13 +28,13 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "is stored with a subject at the cap" do
-      send_message(subject: "a" * Mail::Types::MAX_SUBJECT)
+      send_message(subject: "a" * Blog::Constants::MAIL_SUBJECT_MAX)
 
       expect(last_response.status).to eq(302)
     end
 
     it "is stored with a body at the cap" do
-      send_message(body: "a" * Mail::Types::MAX_BODY)
+      send_message(body: "a" * Blog::Constants::MAIL_BODY_MAX)
 
       expect(last_response.status).to eq(302)
     end
@@ -58,7 +58,7 @@ RSpec.describe "Contact messages", type: :request do
     end
 
     it "is refused with a subject over the cap" do
-      send_message(subject: "a" * (Mail::Types::MAX_SUBJECT + 1))
+      send_message(subject: "a" * (Blog::Constants::MAIL_SUBJECT_MAX + 1))
 
       expect(last_response.status).to eq(422)
     end

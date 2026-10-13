@@ -3,7 +3,7 @@
 module Media
   module Structs
     class Photo < Blog::DB::Struct
-      def path = "#{Media::Types::PATH}#{key}"
+      def path = "#{Blog::Constants::MEDIA_PATH}#{key}"
     end
   end
 end
