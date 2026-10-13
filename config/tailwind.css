@@ -4582,6 +4582,115 @@
   }
 }
 
+@utility kb-meta {
+  @apply -mt-2 mb-6 flex flex-wrap items-center gap-x-4.5 gap-y-1.5 font-mono text-badge text-ink-muted;
+
+  & > a,
+  & > span {
+    @apply inline-flex min-h-8 items-center text-ink-muted no-underline;
+  }
+
+  & > a {
+    @apply hover:text-accent-text focus-ring;
+
+    @media (width < 43.75rem) {
+      @apply min-h-tap;
+    }
+  }
+
+  & > .kb-published {
+    @apply text-mk-blue-text;
+  }
+}
+
+@utility kb {
+  @apply grid auto-cols-[minmax(17rem,1fr)] grid-flow-col items-start gap-3 overflow-x-auto pb-2;
+  scroll-snap-type: x proximity;
+}
+
+@utility kcol {
+  --tone: var(--color-ink-muted);
+  @apply flex min-w-0 flex-col gap-2.5 rounded-panel border border-line bg-ground-sunk p-3;
+  scroll-snap-align: start;
+
+  &.k-in_progress {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.k-done {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.k-canceled {
+    --tone: var(--color-mk-pink-text);
+  }
+}
+
+@utility kcol-head {
+  @apply flex min-h-8 items-center gap-2 px-1;
+
+  & > h2 {
+    @apply m-0 font-mono text-badge font-medium tracking-[0.1em] text-ink uppercase;
+  }
+}
+
+@utility kcol-dot {
+  @apply size-2 flex-none rounded-full bg-(--tone);
+
+  :where(.k-backlog, .k-ready) & {
+    @apply bg-transparent;
+    box-shadow: inset 0 0 0 1.5px var(--tone);
+  }
+}
+
+@utility kcol-count {
+  @apply font-mono text-badge text-ink-muted;
+}
+
+@utility kcol-list {
+  @apply flex min-h-14 flex-col gap-2;
+}
+
+@utility kcol-empty {
+  @apply m-0 grid min-h-14 place-items-center rounded-card border border-dashed border-line font-mono text-badge text-ink-muted;
+}
+
+@utility kc {
+  @apply relative flex flex-col gap-1.5 rounded-card border border-line bg-ground px-3 pt-2.5 pb-3;
+
+  &.doing {
+    box-shadow: inset 3px 0 0 var(--color-mk-blue-text);
+  }
+
+  &.done .kc-title {
+    @apply text-ink-muted;
+  }
+
+  .k-canceled & .kc-title {
+    @apply line-through;
+  }
+
+  & .task-meta {
+    @apply m-0;
+  }
+}
+
+@utility kc-h {
+  @apply flex min-h-8 items-center gap-2;
+
+  & > .hov {
+    @apply ml-auto;
+  }
+}
+
+@utility kc-title {
+  @apply font-display font-semibold text-pretty text-ink no-underline hover:text-accent-text focus-ring;
+
+  @media (width < 43.75rem) {
+    @apply flex min-h-tap items-center;
+  }
+}
+
 @utility project-side {
   @apply flex min-w-0 flex-col gap-stack;
 

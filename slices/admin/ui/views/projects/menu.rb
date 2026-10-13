@@ -17,6 +17,7 @@ module Admin
 
           def view_template
             ContextMenu(label: @project.name, return_to: @return_to) do |menu|
+              menu.link(t(".open_board"), href: act(:admin_project), icon: "fa-solid fa-table-columns")
               menu.link(t(".edit"), href: act(:admin_edit_project), icon: "fa-regular fa-pen-to-square")
               opens(menu)
               menu.separator

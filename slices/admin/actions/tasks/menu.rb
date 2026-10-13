@@ -20,10 +20,14 @@ module Admin
 
           response.render(
             view,
-            task:, today:, return_to: back_here(request), **return_to(request),
+            task:, today:, return_to: back_here(request), board: board(request), **return_to(request),
             sprints: sprint_queries.after(today + 1).first(AHEAD), tags: tag_queries.all_in(PRIVATE),
           )
         end
+
+        private
+
+        def board(request) = Blog::Types::IdParam[request.params[:project]]
       end
     end
   end

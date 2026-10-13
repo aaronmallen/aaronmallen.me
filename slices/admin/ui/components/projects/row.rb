@@ -17,7 +17,7 @@ module Admin
             section(class: "card project-card",
                     data: { key_row: true, menu: path(:admin_project_menu, id: @project.id) }) do
               div(class: "project-card-head") do
-                a(class: "project-card-name", href: edit_path, data: { key_open: true }) { @project.name }
+                a(class: "project-card-name", href: board_path, data: { key_open: true }) { @project.name }
                 pills
                 div(class: "project-card-acts hov") { acts }
               end
@@ -38,6 +38,8 @@ module Admin
           def archived_on
             span { t(".archived_on", date: l(@project.archived_on, format: :medium)) }
           end
+
+          def board_path = path(:admin_project, id: @project.id)
 
           def change(route, label_key, icon, variant)
             Form(action: path(route, id: @project.id)) do

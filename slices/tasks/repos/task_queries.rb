@@ -59,6 +59,8 @@ module Tasks
         page.fill(found.open.searched(**by_project(**search)).in_order.paged(page).to_a)
       end
 
+      def on_board(project_id) = with_details.searched(project_ids: [project_id]).in_order.to_a
+
       def open_after(task) = tasks.beside(task).following(task).limit(1).one
 
       def open_before(task) = tasks.beside(task).preceding(task).limit(1).one

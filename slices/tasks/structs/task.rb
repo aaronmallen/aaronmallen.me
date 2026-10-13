@@ -7,6 +7,8 @@ module Tasks
 
       def blocked? = links.any?(&:blocker?)
 
+      def board_column = in_progress? || closed? ? status : stage
+
       def canceled? = status == Blog::Types::TaskStatus["canceled"]
 
       def closed? = Blog::Types::ClosedTaskStatus.valid?(status)

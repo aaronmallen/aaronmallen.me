@@ -176,6 +176,7 @@ module Admin
     get "/projects", to: "projects.index", as: :projects
     post "/projects", to: "projects.create", as: :create_project
     get "/projects/new", to: "projects.new", as: :new_project
+    get "/projects/:id", to: "projects.show", as: :project, id: ID
     get "/projects/:id/edit", to: "projects.edit", as: :edit_project, id: ID
     get "/projects/:id/menu", to: "projects.menu", as: :project_menu, id: ID
     post "/projects/:id", to: "projects.update", as: :update_project, id: ID
@@ -188,6 +189,7 @@ module Admin
     post "/projects/:id/restore", to: "projects.restore", as: :restore_project, id: ID
     post "/projects/:id/tags", to: "projects.tag", as: :tag_project, id: ID
     post "/projects/:id/tags/delete", to: "projects.untag", as: :untag_project, id: ID
+    post "/projects/:id/tasks/:task_id/move", to: "projects.move_task", as: :move_project_task, id: ID, task_id: ID
     post "/projects/work", to: "projects.create_work", as: :create_work_entry
     post "/projects/work/:id/delete", to: "projects.destroy_work", as: :delete_work_entry, id: ID
     post "/projects/work/:id/records", to: "projects.link_work_record", as: :link_work_entry_record, id: ID

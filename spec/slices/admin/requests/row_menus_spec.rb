@@ -162,7 +162,7 @@ RSpec.describe "Admin post, social, project and person row menus", type: :reques
       it_behaves_like "a row menu"
 
       it "holds what a live project takes", :aggregate_failures do
-        expect(items).to eq(["Edit", "Open repo", "Open site", "Tags", "#ruby", "Copy repo", "Archive"])
+        expect(items).to eq(["Open board", "Edit", "Open repo", "Open site", "Tags", "#ruby", "Copy repo", "Archive"])
       end
 
       it "opens and copies the repo", :aggregate_failures do

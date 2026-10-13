@@ -10,8 +10,8 @@ module Admin
           prop :errors, Blog::Types::Hash
 
           def view_template(&)
-            BackLink(href: path(:admin_projects), variant: :gh, small: true, class: "editor-back") do
-              t(".all_projects")
+            BackLink(href: back_path, variant: :gh, small: true, class: "editor-back") do
+              @project ? t(".board", name: @project.name) : t(".all_projects")
             end
 
             StatusForm(project: @project) if @project
@@ -25,6 +25,8 @@ module Admin
           private
 
           def archived? = @project&.archived? || false
+
+          def back_path = @project ? path(:admin_project, id: @project.id) : path(:admin_projects)
 
           def columns
             PublicCopy(values: @values, errors: @errors)

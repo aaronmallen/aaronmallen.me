@@ -193,6 +193,7 @@ RSpec.describe "Admin screens", type: :feature do
       "not found" => "/admin/nothing-here",
       "post editor" => "/admin/posts/#{draft.id}/edit",
       "posts" => "/admin/posts",
+      "project board" => "/admin/projects/#{project.id}",
       "project editor" => "/admin/projects/#{project.id}/edit",
       "projects" => "/admin/projects",
       "review" => "/admin/review",

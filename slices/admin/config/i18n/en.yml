@@ -242,6 +242,7 @@ en:
     toasts:
       archived: "Archived · removed from /projects"
       created: "Project created"
+      moved: "Moved %{key} to %{column}"
       not_started: "Not archived · its start month has not come yet"
       restored: "Restored to /projects"
       role_added: "Role added to /projects"
@@ -1593,6 +1594,7 @@ en:
       projects:
         editor:
           all_projects: "All projects"
+          board: "%{name} board"
           name: "Name"
           name_placeholder: "project-name"
           repo_placeholder: "owner/repo"
@@ -1624,6 +1626,8 @@ en:
           heading: "Kanban board"
           hint: "A public project's card on /projects opens this board."
           publish: "Publish Kanban"
+        board_card:
+          move: "Move to %{column}"
         placement:
           heading: "Placement"
           restore_note: "Restore puts it back on /projects."
@@ -3067,6 +3071,7 @@ en:
           copy_repo: "Copy repo"
           edit: "Edit"
           new_tag: "New tag…"
+          open_board: "Open board"
           open_repo: "Open repo"
           open_site: "Open site"
           restore: "Restore"
@@ -3092,6 +3097,22 @@ en:
           work_title: "Shown under Work on /projects"
         new:
           title: "New project"
+        show:
+          all_projects: "All projects"
+          board: "%{name} board"
+          columns:
+            backlog: "backlog"
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            ready: "ready"
+          counts: "%{open} open · %{total} total"
+          edit: "Edit Project"
+          empty: "No tasks"
+          hint: "Move a card with its arrows or its menu. In progress starts the task in today's sprint; done and canceled close it."
+          no_tagline: "No description yet."
+          private: "board is private"
+          published: "board published"
       pull_requests:
         show:
           back: "Activity"
@@ -3310,6 +3331,7 @@ en:
           save: "Save"
         menu:
           cancel: "Cancel task"
+          column: "Board column"
           complete: "Complete"
           confirm_delete: "Click again to delete"
           copied_issue: "Issue link copied"
