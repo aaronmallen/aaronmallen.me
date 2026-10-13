@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
-require "admin/providers/github_auth_provider"
-
 module GitHubCredentials
-  CLIENT_KEYS = %w[github.client record.github.client].freeze
   OAUTH_APP = { client_id: "client-id", client_secret: "client-secret" }.freeze
 
   def connect_github(**credentials)
     @github_credentials = credentials
-    Admin::Slice.start(:github)
-    Record::Slice.start(:github)
     allow(Hanami.app.settings).to receive(:github).and_return(credentials)
     replace_github_components
   end
@@ -29,12 +24,8 @@ module GitHubCredentials
   private
 
   def replace_github_components
-    settings = Hanami.app["settings"]
-    client = Record::Providers::GitHubProvider.client(Record::Slice["services.repos.connection_queries"],
-                                                      Hanami.app["http"])
-
-    replace_component("github.auth", Admin::Providers::GitHubAuthProvider.auth(settings))
-    CLIENT_KEYS.each { replace_component(it, client) }
+    replace_component("github.auth", GitHub::Providers::ClientProvider.auth(Hanami.app["settings"]))
+    replace_component("github.client", GitHub::Providers::ClientProvider.client(Hanami.app["http"]))
   end
 end
 

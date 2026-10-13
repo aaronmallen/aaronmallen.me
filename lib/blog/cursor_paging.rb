@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-module Record
-  module Paging
+module Blog
+  module CursorPaging
+    Listing = Data.define(:items, :cut_short) { def cut_short? = cut_short }
     MAX_PAGES = 10
 
     private
@@ -19,7 +20,7 @@ module Record
         cursor = page.dig("pageInfo", "endCursor")
       end
 
-      Structs::Listing.new(items: found, cut_short: more?(page))
+      Listing.new(items: found, cut_short: more?(page))
     end
   end
 end

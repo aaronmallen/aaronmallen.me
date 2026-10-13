@@ -3,7 +3,7 @@
 module Tasks
   module Operations
     class QueueIssueSync < Blog::Operation
-      include Deps[github: "record.github.client", linear: "record.linear.client"]
+      include Deps[github: "github.client", linear: "linear.client"]
 
       def call
         sources = step configured

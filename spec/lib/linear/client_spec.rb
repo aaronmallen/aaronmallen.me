@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-RSpec.describe Record::Linear::Client do
-  subject(:client) { Record::Slice["linear.client"] }
+RSpec.describe Linear::Client do
+  subject(:client) { Hanami.app["linear.client"] }
 
   let(:cursor) { Time.utc(2026, 10, 7, 10) }
 
@@ -110,16 +110,16 @@ RSpec.describe Record::Linear::Client do
       end
     end
 
-    it "raises Record::RateLimited when Linear rate limits the history" do
+    it "raises Linear::RateLimited when Linear rate limits the history" do
       stub_linear(LinearGraphQL::HISTORY_QUERY, linear_errors("RATELIMITED"))
 
-      expect { transitions }.to raise_error(Record::RateLimited)
+      expect { transitions }.to raise_error(Linear::RateLimited)
     end
 
-    it "raises Record::Error when Linear answers with errors" do
+    it "raises Linear::Error when Linear answers with errors" do
       stub_linear(LinearGraphQL::HISTORY_QUERY, linear_errors("INTERNAL"))
 
-      expect { transitions }.to raise_error(Record::Error)
+      expect { transitions }.to raise_error(Linear::Error)
     end
   end
 end

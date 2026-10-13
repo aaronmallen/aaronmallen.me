@@ -503,7 +503,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
   end
 
   describe "an issue's relations" do
-    let(:client) { Tasks::Slice["record.github.client"] }
+    let(:client) { Tasks::Slice["github.client"] }
     let(:found) { [] }
 
     def collect(issues) = issues.tap { found.concat(it) }

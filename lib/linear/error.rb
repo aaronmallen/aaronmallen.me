@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-module Record
+module Linear
   class Error < StandardError; end
 end

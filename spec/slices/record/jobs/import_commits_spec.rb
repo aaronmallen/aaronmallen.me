@@ -94,7 +94,7 @@ RSpec.describe Record::Jobs::ImportCommits do
       stub_repos(github_repository(repo), more: true)
       import
 
-      expect(github_request(GitHubGraphQL::REPOS_QUERY)).to have_been_made.times(Record::GitHub::Client::MAX_PAGES)
+      expect(github_request(GitHubGraphQL::REPOS_QUERY)).to have_been_made.times(GitHub::Client::MAX_PAGES)
     end
 
     it "reads an answer GitHub does not send as JSON as no repositories" do

@@ -372,7 +372,7 @@ RSpec.describe Tasks::Jobs::SyncIssues do
     let(:handed) { [] }
 
     before do
-      client = Tasks::Slice["record.linear.client"]
+      client = Tasks::Slice["linear.client"]
       %i[assigned_issues issues].each do |name|
         allow(client).to(receive(name).and_wrap_original { |original, *args| keep(original.call(*args)) })
       end

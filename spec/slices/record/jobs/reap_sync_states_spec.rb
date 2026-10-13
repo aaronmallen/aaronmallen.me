@@ -117,7 +117,7 @@ RSpec.describe Record::Jobs::ReapSyncStates do
     end
 
     it "reaps nothing when the page limit cuts the list short" do
-      pages = Array.new(Record::GitHub::Client::MAX_PAGES) { github_repos_page(github_repository(repo), more: true) }
+      pages = Array.new(GitHub::Client::MAX_PAGES) { github_repos_page(github_repository(repo), more: true) }
       stub_repos_answer(*pages, github_repos_page(github_repository(gone)))
       reap
 

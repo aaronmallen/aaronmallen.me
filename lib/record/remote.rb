@@ -8,9 +8,9 @@ module Record
       return Failure(:not_configured) unless client.configured?
 
       yield
-    rescue Record::RateLimited
+    rescue GitHub::RateLimited, Linear::RateLimited
       Failure(:rate_limited)
-    rescue Record::Error => e
+    rescue GitHub::Error, Linear::Error => e
       Failure([:"#{provider}_failed", e.message])
     end
   end

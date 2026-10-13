@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "admin/providers/github_auth_provider"
 require_relative "admin_session"
 
 module AdminSignIn

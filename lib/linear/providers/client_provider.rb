@@ -1,14 +1,12 @@
 # frozen_string_literal: true
 
-module Record
+module Linear
   module Providers
-    module LinearProvider
+    module ClientProvider
       API_URL = "https://api.linear.app"
 
       class << self
-        def client(connections, http)
-          Linear::Client.new(connections:, transport: ->(key) { Linear::Transport.new(connection: graphql(http, key)) })
-        end
+        def client(http) = Client.new(transport: ->(key) { Transport.new(connection: graphql(http, key)) })
 
         private
 

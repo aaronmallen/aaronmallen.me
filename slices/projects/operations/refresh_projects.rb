@@ -6,7 +6,7 @@ module Projects
       include Record::Remote
 
       include Deps[
-        client: "record.github.client",
+        client: "github.client",
         project_mutations: "repos.project_mutations",
         project_queries: "repos.project_queries",
       ]

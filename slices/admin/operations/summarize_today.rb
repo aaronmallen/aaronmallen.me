@@ -13,7 +13,7 @@ module Admin
       include Deps[
         "operations.summarize_sprint",
         attention_queries: "activity.repos.attention_queries",
-        client: "record.github.client",
+        client: "github.client",
         commit_queries: "record.repos.commit_queries",
         country_queries: "analytics.repos.country_queries",
         event_queries: "analytics.repos.analytics_event_queries",

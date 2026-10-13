@@ -87,7 +87,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
     end
 
     it "lets the record client read it with no restart" do
-      expect(Record::Slice["github.client"]).to be_configured
+      expect(Hanami.app["github.client"]).to be_configured
     end
   end
 
@@ -211,7 +211,7 @@ RSpec.describe "Admin GitHub connection", type: :request do
           .with(headers: { "Authorization" => "Bearer ghp_new" })
           .to_return(headers: { "Content-Type" => "application/json" }, body: { stargazers_count: 3 }.to_json)
 
-        expect(Record::Slice["github.client"].stars("aaronmallen/blog")).to eq(3)
+        expect(Hanami.app["github.client"].stars("aaronmallen/blog")).to eq(3)
       end
     end
 

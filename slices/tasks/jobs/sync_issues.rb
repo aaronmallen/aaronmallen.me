@@ -6,8 +6,8 @@ module Tasks
       SYNCS = { "github" => Blog::Types::SyncName["issues"], "linear" => Blog::Types::SyncName["linear_issues"] }.freeze
 
       include Deps[
-        github: "record.github.client",
-        linear: "record.linear.client",
+        github: "github.client",
+        linear: "linear.client",
         record_sync_outcome: "record.operations.record_sync_outcome",
         sync_issues: "operations.sync_issues",
         task_source_mutations: "repos.task_source_mutations",
