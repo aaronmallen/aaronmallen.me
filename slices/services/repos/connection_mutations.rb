@@ -17,7 +17,7 @@ module Services
 
       private
 
-      def seal(credentials) = Blog::Encryptor.new.seal(JSON.generate(credentials))
+      def seal(credentials) = Services::Encryptor.new.seal(JSON.generate(credentials))
     end
   end
 end

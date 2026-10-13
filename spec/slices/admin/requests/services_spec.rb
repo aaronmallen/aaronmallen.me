@@ -355,7 +355,7 @@ RSpec.describe "Admin connected services", type: :request do
       raw = Services::Slice["relations.service_connections"].by_pk(connection.id).dataset.get(:credentials)
 
       expect(raw).not_to include("lin_api_secret")
-      expect(JSON.parse(Blog::Encryptor.new.open(raw))).to eq("api_key" => "lin_api_secret")
+      expect(JSON.parse(Services::Encryptor.new.open(raw))).to eq("api_key" => "lin_api_secret")
     end
 
     it "reads them back through the lookup" do

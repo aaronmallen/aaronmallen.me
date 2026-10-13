@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Blog::Encryptor do
+RSpec.describe Services::Encryptor do
   subject(:encryptor) { described_class.new }
 
   let(:token) { "gho_ünïcode-token" }

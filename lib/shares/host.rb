@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module Blog
-  class ShareHost
+module Shares
+  class Host
     CACHE_CONTROL = "private, no-store"
 
     def initialize(app, host, shares)

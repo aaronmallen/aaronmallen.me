@@ -7,7 +7,7 @@ module Services
 
       def by_credentials? = credentials[:auth] == CREDENTIALS
 
-      def credentials = JSON.parse(Blog::Encryptor.new.open(self[:credentials]), symbolize_names: true)
+      def credentials = JSON.parse(Services::Encryptor.new.open(self[:credentials]), symbolize_names: true)
     end
   end
 end

@@ -5,7 +5,7 @@ status: active
 created: 2026-10-08
 area: [admin, config, db, lib, record, social, tasks]
 issue: "#791"
-amended: ["#831", "#1121"]
+amended: ["#831", "#1121", "#1180"]
 tags: [services, credentials, encryption, settings, providers, clients, oauth, github, linear, mastodon, bluesky]
 ---
 
@@ -35,9 +35,9 @@ Each service is one definition in code: its name, icon and group, how it signs i
 column is text, and the slice checks it against those definitions. #831 lets a service sign in more than one way:
 GitHub takes OAuth or a personal access token, and a row made from the form marks that in its credentials.
 
-Each row keeps its credentials in one encrypted column. An encryptor in `lib/blog` holds the key, which comes from
-a new `data_key` setting. `Blog::SecretCheck` guards `data_key` with the other secrets, so it cannot repeat
-one of them or a committed value.
+Each row keeps its credentials in one encrypted column. An encryptor holds the key, which comes from a new
+`data_key` setting. #1180 moved it from `lib/blog` to `lib/services`, since only `services` uses it.
+`Blog::SecretCheck` guards `data_key` with the other secrets, so it cannot repeat one of them or a committed value.
 
 Clients look up their credentials on each call, not at boot. A provider still registers its client, as ADR 0009
 says, but the client asks the slice for the account it needs when it calls out.

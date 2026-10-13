@@ -2,7 +2,7 @@
 
 require "openssl"
 
-module Blog
+module Services
   class Encryptor
     BASE64 = "m0"
     CIPHER = "aes-256-gcm"
