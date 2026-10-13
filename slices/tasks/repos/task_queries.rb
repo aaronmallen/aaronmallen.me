@@ -61,6 +61,10 @@ module Tasks
 
       def on_board(project_id) = with_details.searched(project_ids: [project_id]).in_order.to_a
 
+      def on_public_board(project_id)
+        tasks.searched(project_ids: project_id).order(Sequel.desc(:completed_at), :position, :id).to_a
+      end
+
       def open_after(task) = tasks.beside(task).following(task).limit(1).one
 
       def open_before(task) = tasks.beside(task).preceding(task).limit(1).one

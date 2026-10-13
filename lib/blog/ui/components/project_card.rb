@@ -13,6 +13,7 @@ module Blog
         prop :stars, Blog::Types::Integer, default: 0
         prop :release, Blog::Types::String.optional
         prop :url, Blog::Types::String.optional
+        prop :board, Blog::Types::String.optional, default: nil
         prop :past, Blog::Types::Bool, default: false
 
         def view_template
@@ -26,12 +27,21 @@ module Blog
 
         private
 
+        def board_foot
+          span(class: "pu") do
+            plain t(".view_board")
+            Icon("fa-solid fa-table-columns")
+          end
+        end
+
         def card(&)
           classes = ["pc", ("past" if @past)]
-          written?(@url) ? a(class: classes, href: @url, &) : div(class: classes, &)
+          href = @board || @url
+          written?(href) ? a(class: classes, href:, &) : div(class: classes, &)
         end
 
         def foot
+          return board_foot if @board
           return unless written?(@url)
 
           span(class: "pu") do

@@ -246,6 +246,28 @@ en:
           next: "Next"
           pager_label: "More posts"
           previous: "Previous"
+      projects:
+        show:
+          back: "projects"
+          closed:
+            canceled: "canceled"
+            done: "done"
+          columns:
+            backlog: "backlog"
+            canceled: "canceled"
+            done: "done"
+            in_progress: "in progress"
+            ready: "ready"
+          description: "What I am working on in %{name}."
+          empty: "Nothing here."
+          kicker: "Project board"
+          missing:
+            heading: "That board isn't public."
+            lede: "I may have taken it down. The project itself still shows on the projects page."
+            title: "Board not found"
+          number: "#%{number}"
+          stars: "★ %{stars}"
+          title: "%{name} board"
       tags:
         show:
           description: "Posts and projects tagged %{tag}."

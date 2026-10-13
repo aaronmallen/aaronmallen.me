@@ -13,6 +13,7 @@ module Public
     get "#{WRITING}/:slug", to: "posts.show", as: :post
     get "/about", to: "pages.about", as: :about
     get "/projects", to: "pages.projects", as: :projects
+    get "/projects/:slug", to: "projects.show", as: :project
     get "/contact", to: "pages.contact", as: :contact
     get "/privacy", to: "pages.privacy", as: :privacy
     get "/media/:key", to: "media.show", as: :media

@@ -15,6 +15,8 @@ module Public
 
         private
 
+        def board(project) = (path(:project, slug: project.slug) if project.board_published && project.slug)
+
         def card(project)
           ProjectCard(
             name: project.name,
@@ -23,6 +25,7 @@ module Public
             stars: project.stars,
             release: project.release,
             url: project.url,
+            board: board(project),
             past: @past,
           )
         end

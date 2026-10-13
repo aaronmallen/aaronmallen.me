@@ -65,6 +65,29 @@ RSpec.describe "Projects", type: :request do
       expect(page).to have_css(".pc .pu i.fa-arrow-up-right-from-square[aria-hidden='true']")
     end
 
+    it "links a published board to its page and reads view the board", :aggregate_failures do
+      create(:project, name: "Doing It", url: "https://doing.aaronmallen.dev", board_published: true)
+      get "/projects"
+
+      expect(page).to have_link(class: "pc", href: "/projects/doing-it")
+      expect(page).to have_css(".pc .pu", exact_text: "view the board")
+      expect(page).to have_css(".pc .pu i.fa-table-columns[aria-hidden='true']")
+    end
+
+    it "links an archived project's published board to its page" do
+      create(:project, :archived, name: "old", board_published: true)
+      get "/projects"
+
+      expect(page).to have_link(class: "pc past", href: "/projects/old")
+    end
+
+    it "keeps the url link on a project without a published board" do
+      create(:project, url: "https://github.com/aaronmallen/sai", board_published: false)
+      get "/projects"
+
+      expect(page).to have_no_css(".pc .pu", text: "view the board")
+    end
+
     it "leaves the foot off a card with no url" do
       create(:project, url: nil)
       get "/projects"

@@ -740,6 +740,96 @@
   }
 }
 
+@utility board-name {
+  @apply font-mono! font-medium! tracking-[-0.04em]!;
+}
+
+@utility board-links {
+  @apply mt-4.5 flex flex-wrap items-center gap-x-5.5 gap-y-1.5 meta;
+
+  & a {
+    @apply inline-flex min-h-tap items-center gap-2 text-ink no-underline hover:text-accent-text focus-ring;
+  }
+
+  & i {
+    @apply text-ink-muted;
+  }
+}
+
+@utility board {
+  @apply grid snap-x snap-proximity items-start gap-[clamp(10px,1vw,18px)] overflow-x-auto pb-2.5;
+  grid-auto-columns: minmax(260px, 1fr);
+  grid-auto-flow: column;
+}
+
+@utility board-col {
+  --tone: var(--color-ink-muted);
+  @apply min-w-0 snap-start rounded-panel border border-line bg-ground-sunk p-3.5;
+
+  &.in-progress {
+    --tone: var(--color-mk-blue-text);
+  }
+
+  &.done {
+    --tone: var(--color-mk-green-text);
+  }
+
+  &.canceled {
+    --tone: var(--color-mk-pink-text);
+  }
+
+  & h2 {
+    @apply m-0 mb-3 flex items-center gap-2.25 px-1 py-0.5 font-mono text-ps font-medium tracking-[0.1em] text-ink uppercase;
+  }
+
+  & .n {
+    @apply tracking-normal text-ink-muted;
+  }
+
+  & .board-dot {
+    @apply size-2 flex-none rounded-full bg-(--tone);
+  }
+
+  &:is(.backlog, .ready) .board-dot {
+    @apply bg-transparent;
+    box-shadow: inset 0 0 0 1.5px var(--color-ink-muted);
+  }
+
+  & ul {
+    @apply m-0 flex list-none flex-col gap-2 p-0;
+  }
+
+  & li {
+    @apply m-0 flex flex-col gap-1.5 rounded-field border border-line bg-ground px-3.5 py-3;
+  }
+
+  &.in-progress li {
+    box-shadow: inset 3px 0 0 var(--tone);
+  }
+
+  & .board-num,
+  & .board-meta {
+    @apply font-mono text-ps text-ink-muted;
+  }
+
+  & .board-title {
+    @apply font-display text-[1.02rem] leading-[1.3] font-semibold tracking-[-0.01em];
+    text-wrap: pretty;
+  }
+
+  &:is(.done, .canceled) .board-title {
+    @apply text-ink-muted;
+  }
+
+  &.canceled .board-title {
+    @apply line-through;
+  }
+
+  & .board-empty {
+    @apply m-0 grid min-h-14 place-items-center rounded-field border border-dashed border-line font-mono text-ps text-ink-muted;
+  }
+}
+
 @utility kicker {
   @apply mb-4 block font-mono text-kicker uppercase text-mk-orange-text;
 

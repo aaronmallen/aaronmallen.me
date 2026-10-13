@@ -47,6 +47,7 @@ en:
         stars_label:
           one: "%{stars} star"
           other: "%{stars} stars"
+        view_board: "view the board"
       settings_menu:
         admin: "Admin"
         appearance: "Appearance"

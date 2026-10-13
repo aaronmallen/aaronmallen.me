@@ -38,6 +38,8 @@ module Projects
 
       def tracked = exclude(repo: nil)
 
+      def with_board = where(board_published: true)
+
       private
 
       def slug(name) = SLUG.call(name) { nil }

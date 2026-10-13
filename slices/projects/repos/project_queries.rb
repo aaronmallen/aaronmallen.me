@@ -21,6 +21,11 @@ module Projects
 
       def public_archived = with_tags.in_public.archived.by_stars.to_a
 
+      def public_board(slug)
+        id = projects.in_public.with_board.slugged([slug]).first
+        projects.by_pk(id).one if id
+      end
+
       def public_by_tag(tag) = with_tags.in_public.live.tagged(tag).in_order.to_a
 
       def public_grid(limit = nil) = with_tags.in_public.live.by_stars.limit(limit).to_a
