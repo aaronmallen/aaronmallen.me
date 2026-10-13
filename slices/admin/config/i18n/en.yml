@@ -3109,7 +3109,7 @@ en:
           counts: "%{open} open · %{total} total"
           edit: "Edit Project"
           empty: "No tasks"
-          hint: "Move a card with its arrows or its menu. In progress starts the task in today's sprint; done and canceled close it."
+          hint: "Drag a card to another column, or move it with its arrows or its menu. In progress starts the task in today's sprint; done and canceled close it."
           no_tagline: "No description yet."
           private: "board is private"
           published: "board published"

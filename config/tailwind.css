@@ -4746,7 +4746,7 @@
 }
 
 @utility kc {
-  @apply relative flex flex-col gap-1.5 rounded-card border border-line bg-ground px-3 pt-2.5 pb-3;
+  @apply relative flex cursor-grab flex-col gap-1.5 rounded-card border border-line bg-ground px-3 pt-2.5 pb-3 select-none;
 
   &.doing {
     box-shadow: inset 3px 0 0 var(--color-mk-blue-text);
@@ -4763,6 +4763,19 @@
   & .task-meta {
     @apply m-0;
   }
+}
+
+@utility kc-dragging {
+  @apply cursor-grabbing opacity-40;
+}
+
+@utility kc-ghost {
+  @apply pointer-events-none fixed z-50 max-w-65 truncate rounded-card border border-line bg-ground-sunk px-3 py-2 font-display font-semibold text-ink shadow-toast;
+}
+
+@utility kcol-over {
+  border-color: var(--tone);
+  background: color-mix(in oklab, var(--tone) 6%, var(--color-ground-sunk));
 }
 
 @utility kc-h {

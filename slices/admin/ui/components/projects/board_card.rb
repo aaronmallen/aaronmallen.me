@@ -14,9 +14,10 @@ module Admin
           prop :project_id, Blog::Types::Integer
 
           def view_template
-            div(class: classes, data: { key_row: true, menu: menu_path }) do
+            div(class: classes, data: { key_row: true, menu: menu_path, board_card: true }) do
               head
-              a(class: "kc-title", href: path(:admin_task, id: @task.id), data: { task_open: true, key_open: true }) do
+              a(class: "kc-title", href: path(:admin_task, id: @task.id), draggable: "false",
+                data: { task_open: true, key_open: true }) do
                 @task.title
               end
               Tasks::Meta(task: @task)

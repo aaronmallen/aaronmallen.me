@@ -40,7 +40,7 @@ module Admin
           def column(name, tasks)
             label = t(NAMES.fetch(name))
 
-            section(class: ["kcol", "k-#{name}"], aria: { label: }) do
+            section(class: ["kcol", "k-#{name}"], aria: { label: }, data: { board_column: name }) do
               column_head(label, tasks.size)
               div(class: "kcol-list", data: { key_list: true }) do
                 next p(class: "kcol-empty") { t(".empty") } if tasks.empty?

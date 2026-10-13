@@ -4,13 +4,36 @@ RSpec.describe "Admin project board", type: :feature do
   let(:project) { create(:project, name: "blog") }
   let(:task) { create(:task, title: "Write the brief") }
 
+  def box(element)
+    evaluate_script(<<~JS, element)
+      (r => ({ x: r.left + r.width / 2, y: r.top + r.height / 2 }))(arguments[0].getBoundingClientRect())
+    JS
+  end
+
   def card = find(".kc", text: "Write the brief")
+
+  def column(name) = find(".kcol.k-#{name}")
+
+  def drag_to(name)
+    from = box(card)
+    mouse = page.driver.browser.mouse
+
+    mouse.move(x: from["x"], y: from["y"]).down
+    stroke(from, box(column(name))).each { mouse.move(**it) }
+    mouse.up
+  end
 
   def item(label) = find("[data-context-menu] .ctx-item", text: label)
 
   def keep_page = execute_script("window.kept = true")
 
   def kept_page? = evaluate_script("window.kept === true")
+
+  def stroke(from, to)
+    (1..6).map do |step|
+      { x: from["x"] + ((to["x"] - from["x"]) * step / 6), y: from["y"] + ((to["y"] - from["y"]) * step / 6) }
+    end
+  end
 
   before do
     sign_in_to_admin
@@ -35,6 +58,22 @@ RSpec.describe "Admin project board", type: :feature do
 
     expect(page).to have_css(".kcol.k-in_progress .kc", text: "Write the brief")
     expect(kept_page?).to be(true)
+  end
+
+  it "drags a card to another column in place", :aggregate_failures do
+    drag_to("ready")
+
+    expect(page).to have_css(".kcol.k-ready .kc", text: "Write the brief")
+    expect(page).to have_css(".toast", text: "Moved ##{task.id} to ready")
+    expect(Tasks::Slice["repos.task_queries"].by_id(task.id).stage).to eq("ready")
+    expect(kept_page?).to be(true)
+  end
+
+  it "starts a task dragged to in progress", :aggregate_failures do
+    drag_to("in_progress")
+
+    expect(page).to have_css(".kcol.k-in_progress .kc.doing", text: "Write the brief")
+    expect(Tasks::Slice["repos.task_queries"].by_id(task.id).status).to eq("in_progress")
   end
 
   it "opens the task drawer from a card" do

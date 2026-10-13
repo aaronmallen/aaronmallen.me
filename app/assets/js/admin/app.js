@@ -1,4 +1,5 @@
 import { setupAutosubmit } from "./autosubmit.js";
+import { setupBoardDrag } from "./board_drag.js";
 import { setupBulk } from "./bulk.js";
 import { setupCalendars } from "./calendar.js";
 import { setupCommentAdds } from "./comment_add.js";
@@ -36,6 +37,7 @@ import { setupWorkForms } from "./work_form.js";
 function setup() {
   setupAccountPickers();
   setupAutosubmit();
+  setupBoardDrag();
   setupBulk();
   setupCalendars();
   setupCommentAdds();
