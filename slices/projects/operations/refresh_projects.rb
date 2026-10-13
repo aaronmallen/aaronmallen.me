@@ -3,7 +3,7 @@
 module Projects
   module Operations
     class RefreshProjects < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       include Deps[
         client: "github.client",

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Record
+module Issues
   module Remote
     private
 

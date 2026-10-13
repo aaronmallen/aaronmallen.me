@@ -18,6 +18,7 @@ require "blog/version"
 require "bluesky"
 require "github"
 require "google"
+require "issues"
 require "linear"
 require "markdown"
 require "mastodon"
@@ -28,6 +29,7 @@ module Blog
     autoloader.push_dir(root.join("lib/bluesky"), namespace: Bluesky)
     autoloader.push_dir(root.join("lib/github"), namespace: GitHub)
     autoloader.push_dir(root.join("lib/google"), namespace: Google)
+    autoloader.push_dir(root.join("lib/issues"), namespace: Issues)
     autoloader.push_dir(root.join("lib/linear"), namespace: Linear)
     autoloader.push_dir(root.join("lib/markdown"), namespace: Markdown)
     autoloader.push_dir(root.join("lib/mastodon"), namespace: Mastodon)

@@ -3,7 +3,7 @@
 module Record
   module Operations
     class ImportPullRequests < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       OVERLAP = 24 * 60 * 60
 

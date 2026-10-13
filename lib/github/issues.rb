@@ -57,7 +57,6 @@ module GitHub
     CLOSE_REASONS = { "COMPLETED" => COMPLETED, "DUPLICATE" => NOT_PLANNED, "NOT_PLANNED" => NOT_PLANNED }.freeze
     ID_BATCH_SIZE = 100
     RELATIONS = { "blockedBy" => "blocked_by", "blocking" => "blocks", "subIssues" => "parent_of" }.freeze
-    URL = %r{\Ahttps://github\.com/(?<repo>[^/]+/[^/]+)/issues/(?<number>\d+)\z}
 
     def assigned_issues
       return unless configured?
@@ -114,7 +113,7 @@ module GitHub
     def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
 
     def moved_to(url)
-      found = URL.match(url)
+      found = ::Issues::GITHUB_URL.match(url)
 
       found && transport.get("/repos/#{found[:repo]}/issues/#{found[:number]}")&.fetch("html_url", nil)
     end

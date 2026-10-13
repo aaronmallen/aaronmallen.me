@@ -3,7 +3,7 @@
 module Tasks
   module Operations
     class SyncIssues < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       CLOSED = Blog::Types::ClosedTaskSourceState
       EMPTY_ARRAY = Blog::Constants::EMPTY_ARRAY

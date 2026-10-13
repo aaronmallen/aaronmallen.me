@@ -64,7 +64,6 @@ module Linear
       "backlog" => OPEN, "canceled" => NOT_PLANNED, "completed" => COMPLETED, "started" => STARTED,
       "triage" => OPEN, "unstarted" => OPEN,
     }.freeze
-    URL = %r{\Ahttps://linear\.app/(?<workspace>[^/]+)/issue/(?<team>[^/]+)-\d+(?:/|\z)}
 
     def assigned_issues
       return unless configured?
@@ -125,7 +124,7 @@ module Linear
     def labels(node) = node.dig("labels", "nodes").to_a.compact.map { it.fetch("name") }
 
     def origin(url, key)
-      workspace = url[URL, :workspace]
+      workspace = url[::Issues::LINEAR_URL, :workspace]
       team = key[/\A[^-]+(?=-\d+\z)/]
 
       "#{workspace}/#{team}" if workspace && team

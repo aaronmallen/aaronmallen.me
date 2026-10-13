@@ -3,7 +3,7 @@
 module Record
   module Operations
     class ImportCommits < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       STALLED_AFTER = 2 * 60 * 60
       SYNC = Blog::Types::SyncName["commits"]

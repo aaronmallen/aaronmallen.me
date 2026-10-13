@@ -3,7 +3,7 @@
 module Record
   module Operations
     class BackfillRepoCommits < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       GROUNDED = :repository_start
       RESERVE = 1_000

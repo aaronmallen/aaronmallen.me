@@ -3,7 +3,7 @@
 module Record
   module Operations
     class ReapSyncStates < Blog::Operation
-      include Record::Remote
+      include Issues::Remote
 
       SYNCS = [Blog::Types::SyncName["commits"]].freeze
 
